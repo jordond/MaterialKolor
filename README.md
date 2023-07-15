@@ -1,4 +1,5 @@
-# materialKolor
+<img width="500" src="art/materialkolor-logo.png"/>
+<br />
 
 ![Maven Central](https://img.shields.io/maven-central/v/com.materialkolor/material-color)
 [![Kotlin](https://img.shields.io/badge/kotlin-v1.8.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
@@ -14,8 +15,6 @@ A Compose Multiplatform library for creating dynamic Material Design 3 color pal
 color.
 
 Similar to generating a theme from [m3.matierial.io](https://m3.material.io/theme-builder#/custom).
-
-You can view the KDocs at [docs.materialkolor.com](https://docs.materialkolor.com]).
 
 ## Table of Contents
 
