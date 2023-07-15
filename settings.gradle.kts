@@ -29,8 +29,9 @@ gradleEnterprise {
     }
 }
 
-rootProject.name = "StateHolder"
+rootProject.name = "Material Kolor"
 
 include(
     ":material-kolor",
+    ":material-color-utilities",
 )
