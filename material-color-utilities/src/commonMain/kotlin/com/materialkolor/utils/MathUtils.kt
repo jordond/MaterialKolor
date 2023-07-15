@@ -79,12 +79,11 @@ object MathUtils {
      * @return a degree measure between 0 (inclusive) and 360 (exclusive).
      */
     fun sanitizeDegreesInt(degrees: Int): Int {
-        var degrees = degrees
-        degrees = degrees % 360
-        if (degrees < 0) {
-            degrees = degrees + 360
+        var sanitized = degrees % 360
+        if (sanitized < 0) {
+            sanitized = sanitized + 360
         }
-        return degrees
+        return sanitized
     }
 
     /**
@@ -93,12 +92,11 @@ object MathUtils {
      * @return a degree measure between 0.0 (inclusive) and 360.0 (exclusive).
      */
     fun sanitizeDegreesDouble(degrees: Double): Double {
-        var degrees = degrees
-        degrees = degrees % 360.0
-        if (degrees < 0) {
-            degrees = degrees + 360.0
+        var sanitized = degrees % 360.0
+        if (sanitized < 0) {
+            sanitized = sanitized + 360.0
         }
-        return degrees
+        return sanitized
     }
 
     /**

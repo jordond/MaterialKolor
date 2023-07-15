@@ -320,8 +320,7 @@ object HctSolver {
      */
     fun trueDelinearized(rgbComponent: Double): Double {
         val normalized = rgbComponent / 100.0
-        var delinearized = 0.0
-        delinearized = if (normalized <= 0.0031308) {
+        val delinearized: Double = if (normalized <= 0.0031308) {
             normalized * 12.92
         } else {
             1.055 * normalized.pow(1.0 / 2.4) - 0.055
@@ -505,8 +504,8 @@ object HctSolver {
         var right = segment[1]
         for (axis in 0..2) {
             if (left[axis] != right[axis]) {
-                var lPlane = -1
-                var rPlane = 255
+                @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER") var lPlane = -1
+                @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER") var rPlane = 255
                 if (left[axis] < right[axis]) {
                     lPlane = criticalPlaneBelow(trueDelinearized(left[axis]))
                     rPlane = criticalPlaneAbove(trueDelinearized(right[axis]))

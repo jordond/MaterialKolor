@@ -15,7 +15,6 @@
  */
 package com.materialkolor.quantize
 
-import com.materialkolor.quantize.PointProvider
 import com.materialkolor.utils.ColorUtils.argbFromLab
 import com.materialkolor.utils.ColorUtils.labFromArgb
 
@@ -34,8 +33,8 @@ class PointProviderLab : PointProvider {
     }
 
     /** Convert a 3-element array to a color represented in ARGB.  */
-    override fun toInt(lab: DoubleArray?): Int {
-        return argbFromLab(lab!![0], lab[1], lab[2])
+    override fun toInt(point: DoubleArray?): Int {
+        return argbFromLab(point!![0], point[1], point[2])
     }
 
     /**
@@ -47,10 +46,10 @@ class PointProviderLab : PointProvider {
      * This relatively minor optimization is helpful because this method is called at least once
      * for each pixel in an image.
      */
-    override fun distance(one: DoubleArray?, two: DoubleArray?): Double {
-        val dL = one!![0] - two!![0]
-        val dA = one[1] - two[1]
-        val dB = one[2] - two[2]
+    override fun distance(a: DoubleArray?, b: DoubleArray?): Double {
+        val dL = a!![0] - b!![0]
+        val dA = a[1] - b[1]
+        val dB = a[2] - b[2]
         return dL * dL + dA * dA + dB * dB
     }
 }

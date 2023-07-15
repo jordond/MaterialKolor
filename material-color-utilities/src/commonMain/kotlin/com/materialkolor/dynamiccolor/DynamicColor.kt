@@ -470,7 +470,7 @@ class DynamicColor {
         fun fromArgb(name: String, argb: Int): DynamicColor {
             val hct: Hct = Hct.fromInt(argb)
             val palette = TonalPalette.fromInt(argb)
-            return fromPalette(name, { s: DynamicScheme? -> palette }, { s: DynamicScheme? -> hct.getTone() })
+            return fromPalette(name, { palette }, { hct.getTone() })
         }
 
         /**
