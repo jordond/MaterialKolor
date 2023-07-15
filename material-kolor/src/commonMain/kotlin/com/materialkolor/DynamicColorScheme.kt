@@ -16,12 +16,12 @@ import com.materialkolor.scheme.SchemeTonalSpot
 import com.materialkolor.scheme.SchemeVibrant
 
 public fun dynamicColorScheme(
-    keyColor: Color,
+    seedColor: Color,
     isDark: Boolean,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = 0.0,
 ): ColorScheme {
-    val hct = Hct.fromInt(keyColor.toArgb())
+    val hct = Hct.fromInt(seedColor.toArgb())
     val colors = MaterialDynamicColors()
     val scheme = when (style) {
         PaletteStyle.TonalSpot -> SchemeTonalSpot(hct, isDark, contrastLevel)

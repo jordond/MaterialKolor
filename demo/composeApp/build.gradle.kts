@@ -58,6 +58,8 @@ kotlin {
                 implementation(compose.material3)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.components.resources)
+
+                implementation(project(":material-kolor"))
             }
         }
 
@@ -72,6 +74,7 @@ kotlin {
                 implementation(libs.androidx.appcompat)
                 implementation(libs.androidx.activityCompose)
                 implementation(libs.compose.uitooling)
+                implementation(compose.preview)
             }
         }
 
@@ -84,7 +87,7 @@ kotlin {
 
         val jsMain by getting {
             dependencies {
-                implementation(compose.web.core)
+                implementation(compose.html.core)
             }
         }
 

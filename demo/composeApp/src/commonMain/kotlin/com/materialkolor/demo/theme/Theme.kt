@@ -2,18 +2,21 @@ package com.materialkolor.demo.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.lightColorScheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamicColorScheme
 
 private val LightColorScheme = lightColorScheme(
     primary = md_theme_light_primary,
@@ -59,14 +62,16 @@ private val AppTypography = Typography(
 
 @Composable
 internal fun AppTheme(
+    seedColor: Color? = null,
+    paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     useDarkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable() () -> Unit
+    content: @Composable() () -> Unit,
 ) {
-    val colors = if (!useDarkTheme) {
-        LightColorScheme
-    } else {
-        DarkColorScheme
-    }
+    val colors =
+        if (seedColor != null) dynamicColorScheme(seedColor, useDarkTheme, paletteStyle)
+        else {
+            if (!useDarkTheme) LightColorScheme else DarkColorScheme
+        }
 
     MaterialTheme(
         colorScheme = colors,
