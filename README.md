@@ -1,4 +1,4 @@
-<img width="500" src="art/materialkolor-logo.png"/>
+<img width="500px" src="art/materialkolor-logo.png" alt="logo"/>
 <br />
 
 ![Maven Central](https://img.shields.io/maven-central/v/com.materialkolor/material-color)
@@ -12,9 +12,8 @@
 ![badge-desktop](http://img.shields.io/badge/platform-desktop-DB413D.svg?style=flat)
 
 A Compose Multiplatform library for creating dynamic Material Design 3 color palettes from any
-color.
-
-Similar to generating a theme from [m3.matierial.io](https://m3.material.io/theme-builder#/custom).
+color. Similar to generating a theme
+from [m3.matierial.io](https://m3.material.io/theme-builder#/custom).
 
 ## Table of Contents
 
