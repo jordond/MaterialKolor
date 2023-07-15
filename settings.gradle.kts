@@ -29,7 +29,7 @@ gradleEnterprise {
     }
 }
 
-rootProject.name = "Material Kolor"
+rootProject.name = "MaterialKolor"
 
 include(
     ":material-kolor",
