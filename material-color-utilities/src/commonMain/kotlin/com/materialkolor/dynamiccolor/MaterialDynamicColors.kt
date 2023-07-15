@@ -652,7 +652,7 @@ class MaterialDynamicColors {
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
             contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
-            toneDeltaPair = { s ->
+            toneDeltaPair = {
                 ToneDeltaPair(
                     secondaryFixed(), secondaryFixedDim(), 10.0, TonePolarity.LIGHTER, true)
             })
@@ -666,7 +666,7 @@ class MaterialDynamicColors {
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
             contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
-            toneDeltaPair = { s ->
+            toneDeltaPair = {
                 ToneDeltaPair(
                     secondaryFixed(), secondaryFixedDim(), 10.0, TonePolarity.LIGHTER, true)
             })
@@ -676,10 +676,10 @@ class MaterialDynamicColors {
         return DynamicColor(
             name = "on_secondary_fixed",
             palette = { s -> s.secondaryPalette },
-            tone = { s -> 10.0 },
+            tone = { 10.0 },
             isBackground = false,
-            background = { s -> secondaryFixedDim() },
-            secondBackground = { s -> secondaryFixed() },
+            background = { secondaryFixedDim() },
+            secondBackground = { secondaryFixed() },
             contrastCurve = ContrastCurve(4.5, 7.0, 11.0, 21.0),
             toneDeltaPair = null)
     }
@@ -690,8 +690,8 @@ class MaterialDynamicColors {
             palette = { s -> s.secondaryPalette },
             tone = { s -> if (isMonochrome(s)) 25.0 else 30.0 },
             isBackground = false,
-            background = { s -> secondaryFixedDim() },
-            secondBackground = { s -> secondaryFixed() },
+            background = { secondaryFixedDim() },
+            secondBackground = { secondaryFixed() },
             contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 11.0),
             toneDeltaPair = null)
     }
@@ -704,7 +704,7 @@ class MaterialDynamicColors {
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
             contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
-            toneDeltaPair = { s ->
+            toneDeltaPair = {
                 ToneDeltaPair(
                     tertiaryFixed(), tertiaryFixedDim(), 10.0, TonePolarity.LIGHTER, true)
             })
@@ -718,7 +718,7 @@ class MaterialDynamicColors {
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
             contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
-            toneDeltaPair = { s ->
+            toneDeltaPair = {
                 ToneDeltaPair(
                     tertiaryFixed(), tertiaryFixedDim(), 10.0, TonePolarity.LIGHTER, true)
             })
@@ -730,8 +730,8 @@ class MaterialDynamicColors {
             palette = { s -> s.tertiaryPalette },
             tone = { s -> if (isMonochrome(s)) 100.0 else 10.0 },
             isBackground = false,
-            background = { s -> tertiaryFixedDim() },
-            secondBackground = { s -> tertiaryFixed() },
+            background = { tertiaryFixedDim() },
+            secondBackground = { tertiaryFixed() },
             contrastCurve = ContrastCurve(4.5, 7.0, 11.0, 21.0),
             toneDeltaPair = null)
     }
@@ -742,8 +742,8 @@ class MaterialDynamicColors {
             palette = { s -> s.tertiaryPalette },
             tone = { s -> if (isMonochrome(s)) 90.0 else 30.0 },
             isBackground = false,
-            background = { s -> tertiaryFixedDim() },
-            secondBackground = { s -> tertiaryFixed() },
+            background = { tertiaryFixedDim() },
+            secondBackground = { tertiaryFixed() },
             contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 11.0),
             toneDeltaPair = null)
     }

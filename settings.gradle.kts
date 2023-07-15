@@ -35,3 +35,5 @@ include(
     ":material-kolor",
     ":material-color-utilities",
 )
+
+include(":demo:composeApp")
