@@ -1,7 +1,10 @@
 package com.materialkolor.demo.theme
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
@@ -74,7 +77,7 @@ internal fun AppTheme(
         }
 
     MaterialTheme(
-        colorScheme = colors,
+        colorScheme = colors.switch(),
         typography = AppTypography,
         shapes = AppShapes,
         content = {
@@ -82,3 +85,28 @@ internal fun AppTheme(
         }
     )
 }
+
+@Composable
+private fun animateColor(target: Color, durationMillis: Int = 400) = animateColorAsState(
+    targetValue = target,
+    animationSpec = tween(durationMillis = durationMillis),
+).value
+
+@Composable
+fun ColorScheme.switch() = copy(
+    primary = animateColor(primary),
+    primaryContainer = animateColor(primaryContainer),
+    secondary = animateColor(secondary),
+    secondaryContainer = animateColor(secondaryContainer),
+    tertiary = animateColor(tertiary),
+    tertiaryContainer = animateColor(tertiaryContainer),
+    background = animateColor(background),
+    surface = animateColor(surface),
+    error = animateColor(error),
+    onPrimary = animateColor(onPrimary),
+    onSecondary = animateColor(onSecondary),
+    onTertiary = animateColor(onTertiary),
+    onBackground = animateColor(onBackground),
+    onSurface = animateColor(onSurface),
+    onError = animateColor(onError)
+)

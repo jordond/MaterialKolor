@@ -21,6 +21,9 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
@@ -31,8 +34,11 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -47,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.materialkolor.PaletteStyle
 import com.materialkolor.demo.theme.AppTheme
@@ -74,6 +81,22 @@ val SampleColors = listOf(
     Color(0xFF263238),
 )
 
+@Composable
+fun colorSchemePairs() = listOf(
+    "Primary" to (colorScheme.primary to colorScheme.onPrimary),
+    "PrimaryContainer" to (colorScheme.primaryContainer to colorScheme.onPrimaryContainer),
+    "Secondary" to (colorScheme.secondary to colorScheme.onSecondary),
+    "SecondaryContainer" to (colorScheme.secondaryContainer to colorScheme.onSecondaryContainer),
+    "Tertiary" to (colorScheme.tertiary to colorScheme.onTertiary),
+    "TertiaryContainer" to (colorScheme.tertiaryContainer to colorScheme.onTertiaryContainer),
+    "Error" to (colorScheme.error to colorScheme.onError),
+    "ErrorContainer" to (colorScheme.errorContainer to colorScheme.onErrorContainer),
+    "Background" to (colorScheme.background to colorScheme.onBackground),
+    "Surface" to (colorScheme.surface to colorScheme.onSurface),
+    "SurfaceVariant" to (colorScheme.surfaceVariant to colorScheme.onSurfaceVariant),
+)
+
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun App() {
@@ -84,16 +107,18 @@ internal fun App() {
     var darkTheme by remember { mutableStateOf(isDarkTheme) }
 
     AppTheme(seedColor, style, darkTheme) {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
+        Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+            Box(
+                modifier = Modifier.align(Alignment.End)
             ) {
-                Button({ darkTheme = !darkTheme }) {
-                    Text(text = "Toggle Dark/Light")
+                IconButton(
+                    onClick = { darkTheme = !darkTheme },
+                    modifier = Modifier.align(Alignment.TopEnd),
+                ) {
+                    val icon = if (darkTheme) Icons.Filled.LightMode else Icons.Filled.DarkMode
+                    Icon(icon, contentDescription = null)
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             Text(text = "Palette Style")
             FlowRow(
@@ -144,11 +169,22 @@ internal fun App() {
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            Text(text = "Component Preview", style = MaterialTheme.typography.headlineSmall)
+            Text(text = "Preview", style = MaterialTheme.typography.headlineSmall)
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
+                Column {
+                    colorSchemePairs().forEach { (name, colors) ->
+                        val (color, onColor) = colors
+
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            ColorBox(text = name, color = color, modifier = Modifier.weight(1f))
+                            ColorBox(text = "On$name", color = onColor, modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -204,11 +240,34 @@ internal fun App() {
                             Text("Outlined Button")
                         }
 
+                        Button({}) {
+                            Text("Button")
+                        }
+
                         LinearProgressIndicator()
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun ColorBox(
+    text: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    val textColor = if (color.luminance() < 0.5f) Color.White else Color.Black
+    Box(
+        modifier = modifier
+            .background(color)
+    ) {
+        Text(
+            text = text,
+            color = textColor,
+            modifier = Modifier.padding(8.dp),
+        )
     }
 }
 
