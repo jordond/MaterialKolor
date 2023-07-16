@@ -15,6 +15,8 @@ A Compose Multiplatform library for creating dynamic Material Design 3 color pal
 color. Similar to generating a theme
 from [m3.matierial.io](https://m3.material.io/theme-builder#/custom).
 
+<img width="300px" src="art/ios-demo.gif" />
+
 ## Table of Contents
 
 - [Platforms](#platforms)
