@@ -26,9 +26,9 @@ from [m3.matierial.io](https://m3.material.io/theme-builder#/custom).
     - [Single Platform](#single-platform)
     - [Version Catalog](#version-catalog)
 - [Usage](#usage)
-    - [Changes from original source](#changes-from-original-source)
 - [Demo](#demo)
 - [License](#license)
+  - [Changes from original source](#changes-from-original-source)
 
 ## Platforms
 
@@ -50,6 +50,11 @@ code was taken and converted into a Kotlin Multiplatform library.
 
 I also incorporated the Compose ideas from another open source
 library [m3color](https://github.com/Kyant0/m3color).
+
+### Planned Features
+
+- Get seed color from Bitmap
+- Load image from File, Url, etc.
 
 ## Setup
 
