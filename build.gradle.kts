@@ -13,6 +13,15 @@ plugins {
     alias(libs.plugins.binaryCompatibility)
 }
 
+apiValidation {
+    ignoredProjects.addAll(
+        listOf(
+            "material-color-utilities",
+            "composeApp",
+        ),
+    )
+}
+
 tasks.withType<DokkaMultiModuleTask>().configureEach {
     outputDirectory.set(rootDir.resolve("dokka"))
 }
