@@ -19,7 +19,7 @@ package com.materialkolor.scheme
 import com.materialkolor.palettes.CorePalette
 
 /** Represents a Material color scheme, a mapping of color roles to colors.  */
-class Scheme {
+internal class Scheme {
 
     var primary = 0
     var onPrimary = 0

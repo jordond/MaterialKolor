@@ -32,7 +32,7 @@ import kotlin.random.Random
  * This algorithm was designed by M. Emre Celebi, and was found in their 2011 paper, Improving
  * the Performance of K-Means for Color Quantization. https://arxiv.org/abs/1101.0395
  */
-object QuantizerWsmeans {
+internal object QuantizerWsmeans {
 
     private const val MAX_ITERATIONS = 10
     private const val MIN_MOVEMENT_DISTANCE = 3.0

@@ -26,7 +26,7 @@ import com.materialkolor.utils.ColorUtils.redFromArgb
  *
  * The algorithm was described by Xiaolin Wu in Graphic Gems II, published in 1991.
  */
-class QuantizerWu : Quantizer {
+internal class QuantizerWu : Quantizer {
 
     lateinit var weights: IntArray
     lateinit var momentsR: IntArray

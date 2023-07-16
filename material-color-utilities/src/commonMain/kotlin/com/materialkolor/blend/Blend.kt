@@ -25,7 +25,7 @@ import com.materialkolor.utils.MathUtils.sanitizeDegreesDouble
 import kotlin.math.min
 
 /** Functions for blending in HCT and CAM16.  */
-object Blend {
+internal object Blend {
 
     /**
      * Blend the design color's HCT hue towards the key color's HCT hue, in a way that leaves the

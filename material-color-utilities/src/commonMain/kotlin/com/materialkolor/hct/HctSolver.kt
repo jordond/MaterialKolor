@@ -34,7 +34,7 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 /** A class that solves the HCT equation.  */
-object HctSolver {
+internal object HctSolver {
 
     val SCALED_DISCOUNT_FROM_LINRGB = arrayOf(doubleArrayOf(
         0.001200833568784504, 0.002389694492170889, 0.0002795742885861124), doubleArrayOf(

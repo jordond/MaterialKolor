@@ -45,7 +45,7 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(compose.ui)
 
-                implementation(project(":material-color-utilities"))
+                api(project(":material-color-utilities"))
             }
         }
 

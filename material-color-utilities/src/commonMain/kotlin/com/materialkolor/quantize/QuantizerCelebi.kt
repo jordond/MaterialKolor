@@ -25,7 +25,7 @@ package com.materialkolor.quantize
  * This algorithm was designed by M. Emre Celebi, and was found in their 2011 paper, Improving
  * the Performance of K-Means for Color Quantization. https://arxiv.org/abs/1101.0395
  */
-object QuantizerCelebi {
+internal object QuantizerCelebi {
 
     /**
      * Reduce the number of colors needed to represented the input, minimizing the difference between
