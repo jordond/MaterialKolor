@@ -58,8 +58,10 @@ jobs:
     strategy:
       matrix:
         config: [
-          { target: "osx", os: "macos-latest", tasks: "assemble", continueOnError: false },
-          { target: "linux", os: "ubuntu-latest", tasks: "assemble", continueOnError: false }
+          { target: "android", os: "ubuntu-latest", tasks: ":demo:composeApp:assembleRelease", continueOnError: false },
+          { target: "osx-desktop", os: "macos-latest", tasks: ":demo:composeApp:packageDistributionForCurrentOS", continueOnError: false },
+          { target: "windows-desktop", os: "windows-latest", tasks: ":demo:composeApp:packageDistributionForCurrentOS", continueOnError: true },
+          { target: "linux-desktop", os: "ubuntu-latest", tasks: ":demo:composeApp:packageDistributionForCurrentOS", continueOnError: false }
         ]
     runs-on: ${{ matrix.config.os }}
     name: Build ${{ matrix.config.target }}
