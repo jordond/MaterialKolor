@@ -1,10 +1,10 @@
 <img width="500px" src="art/materialkolor-logo.png" alt="logo"/>
 <br />
 
-![Maven Central](https://img.shields.io/maven-central/v/com.materialkolor/material-color)
+![Maven Central](https://img.shields.io/maven-central/v/com.materialkolor/material-kolor)
 [![Kotlin](https://img.shields.io/badge/kotlin-v1.8.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![Build](https://github.com/jordond/materialkolor/actions/workflows/ci.yml/badge.svg)](https://github.com/jordond/materialkolor/actions/workflows/ci.yml)
-[![License](https://img.shields.io/github/license/jordond/materialkolor)](http://www.apache.org/licenses/LICENSE-2.0)
+[![License](https://img.shields.io/github/license/jordond/MaterialKolor)](https://opensource.org/license/mit/)
 
 [![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-v1.4.1-blue)](https://github.com/JetBrains/compose-multiplatform)
 ![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
