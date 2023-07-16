@@ -1,5 +1,7 @@
 # Material Kolor Demo
 
+<img width="700px" src="../art/demo.png" />
+
 ## Before running!
 
 - check your system with [KDoctor](https://github.com/Kotlin/kdoctor)
