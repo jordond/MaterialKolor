@@ -1,0 +1,19 @@
+public final class com/materialkolor/DynamicColorSchemeKt {
+	public static final fun dynamicColorScheme-Iv8Zu3U (JZLcom/materialkolor/PaletteStyle;D)Landroidx/compose/material3/ColorScheme;
+	public static synthetic fun dynamicColorScheme-Iv8Zu3U$default (JZLcom/materialkolor/PaletteStyle;DILjava/lang/Object;)Landroidx/compose/material3/ColorScheme;
+}
+
+public final class com/materialkolor/PaletteStyle : java/lang/Enum {
+	public static final field Content Lcom/materialkolor/PaletteStyle;
+	public static final field Expressive Lcom/materialkolor/PaletteStyle;
+	public static final field Fidelity Lcom/materialkolor/PaletteStyle;
+	public static final field FruitSalad Lcom/materialkolor/PaletteStyle;
+	public static final field Monochrome Lcom/materialkolor/PaletteStyle;
+	public static final field Neutral Lcom/materialkolor/PaletteStyle;
+	public static final field Rainbow Lcom/materialkolor/PaletteStyle;
+	public static final field TonalSpot Lcom/materialkolor/PaletteStyle;
+	public static final field Vibrant Lcom/materialkolor/PaletteStyle;
+	public static fun valueOf (Ljava/lang/String;)Lcom/materialkolor/PaletteStyle;
+	public static fun values ()[Lcom/materialkolor/PaletteStyle;
+}
+
