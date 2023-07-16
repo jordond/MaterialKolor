@@ -51,7 +51,7 @@ import kotlin.math.sqrt
  * For example, white under the traditional assumption of a midday sun white point is accurately
  * measured as a slightly chromatic blue by CAM16. (roughly, hue 203, chroma 3, lightness 100)
  */
-class Cam16
+internal class Cam16
 /**
  * All of the CAM16 dimensions can be calculated from 3 of the dimensions, in the following
  * combinations: - {j or q} and {c, m, or s} and hue - jstar, astar, bstar Prefer using a static

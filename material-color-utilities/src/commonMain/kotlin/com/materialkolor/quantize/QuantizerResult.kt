@@ -16,4 +16,4 @@
 package com.materialkolor.quantize
 
 /** Represents result of a quantizer run  */
-class QuantizerResult internal constructor(val colorToCount: Map<Int, Int>)
+internal class QuantizerResult internal constructor(val colorToCount: Map<Int, Int>)

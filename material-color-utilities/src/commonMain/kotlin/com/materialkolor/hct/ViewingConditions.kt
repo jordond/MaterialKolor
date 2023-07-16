@@ -39,7 +39,7 @@ import kotlin.math.sqrt
  * This class caches intermediate values of the CAM16 conversion process that depend only on
  * viewing conditions, enabling speed ups.
  */
-class ViewingConditions
+internal class ViewingConditions
 /**
  * Parameters are intermediate values of the CAM16 conversion process. Their names are shorthand
  * for technical color science terminology, this class would not benefit from documenting them

@@ -26,7 +26,7 @@ import kotlin.math.round
  * Utility methods for color science constants and color space conversions that aren't HCT or
  * CAM16.
  */
-object ColorUtils {
+internal object ColorUtils {
 
     val SRGB_TO_XYZ = arrayOf(doubleArrayOf(0.41233895, 0.35762064, 0.18051042), doubleArrayOf(0.2126, 0.7152, 0.0722), doubleArrayOf(0.01932141, 0.11916382, 0.95034478))
     val XYZ_TO_SRGB = arrayOf(doubleArrayOf(

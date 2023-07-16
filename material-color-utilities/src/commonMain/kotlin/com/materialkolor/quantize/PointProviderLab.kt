@@ -22,7 +22,7 @@ import com.materialkolor.utils.ColorUtils.labFromArgb
  * Provides conversions needed for K-Means quantization. Converting input to points, and converting
  * the final state of the K-Means algorithm to colors.
  */
-class PointProviderLab : PointProvider {
+internal class PointProviderLab : PointProvider {
 
     /**
      * Convert a color represented in ARGB to a 3-element array of L*a*b* coordinates of the color.

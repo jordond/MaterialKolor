@@ -19,7 +19,7 @@ package com.materialkolor.utils
 import kotlin.math.abs
 
 /** Utility methods for mathematical operations.  */
-object MathUtils {
+internal object MathUtils {
 
     /**
      * The signum function.

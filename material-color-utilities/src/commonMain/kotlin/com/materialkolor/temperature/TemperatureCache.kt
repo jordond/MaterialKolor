@@ -33,7 +33,7 @@ import kotlin.math.round
  * Analogous colors, complementary color, and cache to efficiently, lazily, generate data for
  * calculations when needed.
  */
-class TemperatureCache(private val input: Hct) {
+internal class TemperatureCache(private val input: Hct) {
 
     private var precomputedComplement: Hct? = null
     private var precomputedHctsByTemp: List<Hct>? = null

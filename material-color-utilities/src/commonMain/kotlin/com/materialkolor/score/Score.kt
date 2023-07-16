@@ -30,7 +30,7 @@ import kotlin.math.round
  * Enables use of a high cluster count for image quantization, thus ensuring colors aren't
  * muddied, while curating the high cluster count to a much smaller number of appropriate choices.
  */
-object Score {
+internal object Score {
 
     private const val TARGET_CHROMA = 48.0 // A1 Chroma
     private const val WEIGHT_PROPORTION = 0.7
