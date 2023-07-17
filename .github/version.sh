@@ -20,7 +20,7 @@ if [ -z "$NEW_VERSION" ]; then
     sed -i '' -E "s/\:$SEMVER_REG\"\)/\:$NEW_VERSION\"\)/" "$README_FILE"
 
     # Update version catalog in README.md
-    sed -i '' -E "s/material-kolor = \"$SEMVER_REG\"/material-kolor = \"$NEW_VERSION\"/" "$README_FILE"
+    sed -i '' -E "s/materialKolor = \"$SEMVER_REG\"/materialKolor = \"$NEW_VERSION\"/" "$README_FILE"
   fi
 fi
 

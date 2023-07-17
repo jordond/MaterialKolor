@@ -28,7 +28,7 @@ from [m3.matierial.io](https://m3.material.io/theme-builder#/custom).
 - [Usage](#usage)
 - [Demo](#demo)
 - [License](#license)
-  - [Changes from original source](#changes-from-original-source)
+    - [Changes from original source](#changes-from-original-source)
 
 ## Platforms
 
@@ -69,7 +69,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("com.materialkolor:material-kolor:1.0.1")
+                implementation("com.materialkolor:material-kolor:1.1.0")
             }
         }
     }
@@ -82,7 +82,7 @@ For an Android only project, add the dependency to app level `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.materialkolor:material-kolor:1.0.1")
+    implementation("com.materialkolor:material-kolor:1.1.0")
 }
 ```
 
@@ -90,7 +90,7 @@ dependencies {
 
 ```toml
 [versions]
-materialKolor = "1.0.0"
+materialKolor = "1.1.0"
 
 [libraries]
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
@@ -132,6 +132,33 @@ dynamicColorScheme(
 See [`Theme.kt`](demo/composeApp/src/commonMain/kotlin/com/materialkolor/demo/theme/Theme.kt) from
 the demo
 for a full example.
+
+### DynamicMaterialTheme
+
+A `DynamicMaterialTheme` Composable is also available. It is a wrapper around `MaterialTheme` that
+uses `dynamicColorScheme()` to generate a `ColorScheme` for you.
+
+Example:
+
+```kotlin
+@Composable
+fun MyTheme(
+    seedColor: Color,
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    DynamicMaterialTheme(
+        seedColor = seedColor,
+        isDark = useDarkTheme,
+        content = content
+    )
+}
+```
+
+Also included is a `AnimatedDynamicMaterialTheme` which animates the color scheme changes.
+
+See [`Theme.kt`](demo/composeApp/src/commonMain/kotlin/com/materialkolor/demo/theme/Theme.kt) for an
+example.
 
 ## Demo
 
