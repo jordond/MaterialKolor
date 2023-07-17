@@ -3,6 +3,11 @@ public final class com/materialkolor/DynamicColorSchemeKt {
 	public static synthetic fun dynamicColorScheme-Iv8Zu3U$default (JZLcom/materialkolor/PaletteStyle;DILjava/lang/Object;)Landroidx/compose/material3/ColorScheme;
 }
 
+public final class com/materialkolor/DynamicMaterialThemeKt {
+	public static final fun AnimatedDynamicMaterialTheme-ZPw9REg (JZLcom/materialkolor/PaletteStyle;DLandroidx/compose/animation/core/AnimationSpec;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DynamicMaterialTheme-yWKOrZg (JZLcom/materialkolor/PaletteStyle;DLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+}
+
 public final class com/materialkolor/PaletteStyle : java/lang/Enum {
 	public static final field Content Lcom/materialkolor/PaletteStyle;
 	public static final field Expressive Lcom/materialkolor/PaletteStyle;
