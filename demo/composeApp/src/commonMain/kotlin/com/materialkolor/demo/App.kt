@@ -2,6 +2,7 @@
 
 package com.materialkolor.demo
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -50,7 +51,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
@@ -96,13 +96,12 @@ fun colorSchemePairs() = listOf(
     "SurfaceVariant" to (colorScheme.surfaceVariant to colorScheme.onSurfaceVariant),
 )
 
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun App() {
     val isDarkTheme = isSystemInDarkTheme()
 
-    var seedColor: Color? by remember { mutableStateOf(null) }
+    var seedColor: Color by remember { mutableStateOf(SampleColors[0]) }
     var style by remember { mutableStateOf(PaletteStyle.TonalSpot) }
     var darkTheme by remember { mutableStateOf(isDarkTheme) }
 
@@ -147,7 +146,7 @@ internal fun App() {
                     modifier = Modifier
                         .size(height = 32.dp, width = 80.dp)
                         .clip(MaterialTheme.shapes.small)
-                        .background(seedColor ?: Color.Transparent)
+                        .background(seedColor)
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
@@ -265,13 +264,8 @@ fun ColorBox(
     ) {
         Text(
             text = text,
-            color = textColor,
+            color = animateColorAsState(targetValue = textColor).value,
             modifier = Modifier.padding(8.dp),
         )
     }
 }
-
-private fun Modifier.conditional(
-    condition: Boolean,
-    block: @Composable (Modifier) -> Modifier,
-): Modifier = composed { if (condition) then(block(this)) else this }
