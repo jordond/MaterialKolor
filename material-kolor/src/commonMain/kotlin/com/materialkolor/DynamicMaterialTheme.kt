@@ -8,6 +8,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -32,7 +33,9 @@ public fun DynamicMaterialTheme(
         }
     }
 
-    MaterialTheme(colorScheme = colorScheme, content = content)
+    CompositionLocalProvider(LocalDynamicMaterialThemeSeed provides seedColor) {
+        MaterialTheme(colorScheme = colorScheme, content = content)
+    }
 }
 
 @Composable
@@ -73,5 +76,7 @@ public fun AnimatedDynamicMaterialTheme(
         onError = animateColorAsState(colors.onError, animationSpec).value,
     )
 
-    MaterialTheme(colorScheme = animatedColorScheme, content = content)
+    CompositionLocalProvider(LocalDynamicMaterialThemeSeed provides seedColor) {
+        MaterialTheme(colorScheme = animatedColorScheme, content = content)
+    }
 }
