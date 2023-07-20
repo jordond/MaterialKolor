@@ -136,19 +136,8 @@ internal fun App() {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(text = "Seed Color")
-                Spacer(modifier = Modifier.height(4.dp))
-                Box(
-                    modifier = Modifier
-                        .size(height = 32.dp, width = 80.dp)
-                        .clip(MaterialTheme.shapes.small)
-                        .background(seedColor)
-                )
-            }
+            SeedColorRow()
+
             Spacer(modifier = Modifier.height(10.dp))
             FlowRow(
                 verticalAlignment = Alignment.CenterVertically,
