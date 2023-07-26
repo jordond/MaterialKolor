@@ -2,7 +2,7 @@
 <br />
 
 ![Maven Central](https://img.shields.io/maven-central/v/com.materialkolor/material-kolor)
-[![Kotlin](https://img.shields.io/badge/kotlin-v1.8.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-v1.9.0-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![Build](https://github.com/jordond/materialkolor/actions/workflows/ci.yml/badge.svg)](https://github.com/jordond/materialkolor/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/jordond/MaterialKolor)](https://opensource.org/license/mit/)
 
@@ -69,7 +69,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("com.materialkolor:material-kolor:1.2.0")
+                implementation("com.materialkolor:material-kolor:1.2.1")
             }
         }
     }
@@ -82,7 +82,7 @@ For an Android only project, add the dependency to app level `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.materialkolor:material-kolor:1.2.0")
+    implementation("com.materialkolor:material-kolor:1.2.1")
 }
 ```
 
@@ -90,7 +90,7 @@ dependencies {
 
 ```toml
 [versions]
-materialKolor = "1.2.0"
+materialKolor = "1.2.1"
 
 [libraries]
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
