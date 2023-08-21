@@ -122,7 +122,6 @@ internal fun App() {
             Text(text = "Palette Style")
             FlowRow(
                 modifier = Modifier.fillMaxWidth().wrapContentWidth(),
-                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 PaletteStyle.values().forEach { paletteStyle ->
@@ -140,7 +139,6 @@ internal fun App() {
 
             Spacer(modifier = Modifier.height(10.dp))
             FlowRow(
-                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 SampleColors.forEach { color ->
