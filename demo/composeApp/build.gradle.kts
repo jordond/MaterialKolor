@@ -102,11 +102,11 @@ kotlin {
 
 android {
     namespace = "com.materialkolor.demo"
-    compileSdk = libs.versions.sdk.compile.get().toInt()
+    compileSdk = 34
 
     defaultConfig {
         minSdk = libs.versions.sdk.min.get().toInt()
-        targetSdk = libs.versions.sdk.target.get().toInt()
+        targetSdk = 34
 
         applicationId = "com.materialkolor.demo.android"
         versionCode = 1
