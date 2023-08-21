@@ -17,7 +17,6 @@ package com.materialkolor.dynamiccolor
 
 import com.materialkolor.dislike.DislikeAnalyzer
 import com.materialkolor.hct.Hct
-import com.materialkolor.hct.ViewingConditions
 import com.materialkolor.scheme.DynamicScheme
 import com.materialkolor.scheme.Variant
 import kotlin.math.abs
@@ -29,7 +28,10 @@ import kotlin.math.max
 // annotation; another solution would be to create an android_library rule and supply
 // AndroidManifest with an SDK set higher than 14.
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class MaterialDynamicColors {
+class MaterialDynamicColors(
+    /* See https://github.com/material-foundation/material-color-utilities/commit/c3681e12b72202723657b9ce5cf8dfdf7efb0781 */
+    private val isExtendedFidelity: Boolean = false,
+) {
 
     fun highestSurface(s: DynamicScheme): DynamicColor {
         return if (s.isDark) surfaceBright() else surfaceDim()
@@ -360,7 +362,7 @@ class MaterialDynamicColors {
             palette = { s -> s.primaryPalette },
             tone = { s ->
                 if (isFidelity(s)) {
-                    performAlbers(s.sourceColorHct, s)
+                    s.sourceColorHct.getTone()
                 } else if (isMonochrome(s)) {
                     if (s.isDark) 85.0 else 25.0
                 } else {
@@ -445,13 +447,12 @@ class MaterialDynamicColors {
                 } else if (!isFidelity(s)) {
                     initialTone
                 } else {
-                    var answer = findDesiredChromaByTone(
+                    findDesiredChromaByTone(
                         s.secondaryPalette.hue,
                         s.secondaryPalette.chroma,
                         initialTone,
-                        !s.isDark)
-                    answer = performAlbers(s.secondaryPalette.getHct(answer), s)
-                    answer
+                        !s.isDark
+                    )
                 }
 
             },
@@ -523,8 +524,7 @@ class MaterialDynamicColors {
                 } else if (!isFidelity(s)) {
                     if (s.isDark) 30.0 else 90.0
                 } else {
-                    val albersTone = performAlbers(s.tertiaryPalette.getHct(s.sourceColorHct.getTone()), s)
-                    val proposedHct: Hct = s.tertiaryPalette.getHct(albersTone)
+                    val proposedHct: Hct = s.tertiaryPalette.getHct(s.sourceColorHct.getTone())
                     DislikeAnalyzer.fixIfDisliked(proposedHct).getTone()
                 }
             },
@@ -849,15 +849,16 @@ class MaterialDynamicColors {
         )
     }
 
+    private fun isFidelity(scheme: DynamicScheme): Boolean {
+        if (isExtendedFidelity
+            && scheme.variant != Variant.MONOCHROME
+            && scheme.variant != Variant.NEUTRAL
+        ) return true
+
+        return scheme.variant == Variant.FIDELITY || scheme.variant == Variant.CONTENT;
+    }
+
     companion object {
-
-        private fun viewingConditionsForAlbers(scheme: DynamicScheme): ViewingConditions {
-            return ViewingConditions.defaultWithBackgroundLstar(if (scheme.isDark) 30.0 else 80.0)
-        }
-
-        private fun isFidelity(scheme: DynamicScheme): Boolean {
-            return scheme.variant === Variant.FIDELITY || scheme.variant === Variant.CONTENT
-        }
 
         private fun isMonochrome(scheme: DynamicScheme): Boolean {
             return scheme.variant === Variant.MONOCHROME
@@ -888,17 +889,6 @@ class MaterialDynamicColors {
                 }
             }
             return answer
-        }
-
-        fun performAlbers(prealbers: Hct, scheme: DynamicScheme): Double {
-            val albersd = prealbers.inViewingConditions(viewingConditionsForAlbers(scheme))
-            return if (DynamicColor.tonePrefersLightForeground(prealbers.getTone())
-                && !DynamicColor.toneAllowsLightForeground(albersd.getTone())
-            ) {
-                DynamicColor.enableLightForeground(prealbers.getTone())
-            } else {
-                DynamicColor.enableLightForeground(albersd.getTone())
-            }
         }
     }
 }
