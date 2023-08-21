@@ -29,7 +29,10 @@ import kotlin.math.max
 // annotation; another solution would be to create an android_library rule and supply
 // AndroidManifest with an SDK set higher than 14.
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class MaterialDynamicColors {
+class MaterialDynamicColors(
+    /* See https://github.com/material-foundation/material-color-utilities/commit/c3681e12b72202723657b9ce5cf8dfdf7efb0781 */
+    private val isExtendedFidelity: Boolean = false,
+) {
 
     fun highestSurface(s: DynamicScheme): DynamicColor {
         return if (s.isDark) surfaceBright() else surfaceDim()
@@ -849,14 +852,19 @@ class MaterialDynamicColors {
         )
     }
 
+    private fun isFidelity(scheme: DynamicScheme): Boolean {
+        if (isExtendedFidelity
+            && scheme.variant != Variant.MONOCHROME
+            && scheme.variant != Variant.NEUTRAL
+        ) return true
+
+        return scheme.variant == Variant.FIDELITY || scheme.variant == Variant.CONTENT;
+    }
+
     companion object {
 
         private fun viewingConditionsForAlbers(scheme: DynamicScheme): ViewingConditions {
             return ViewingConditions.defaultWithBackgroundLstar(if (scheme.isDark) 30.0 else 80.0)
-        }
-
-        private fun isFidelity(scheme: DynamicScheme): Boolean {
-            return scheme.variant === Variant.FIDELITY || scheme.variant === Variant.CONTENT
         }
 
         private fun isMonochrome(scheme: DynamicScheme): Boolean {
