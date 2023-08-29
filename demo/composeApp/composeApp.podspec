@@ -35,5 +35,5 @@ Pod::Spec.new do |spec|
             SCRIPT
         }
     ]
-    spec.resources = ['src/commonMain/resources/**']
+    spec.resources = ['build/compose/ios/ComposeApp/compose-resources']
 end

@@ -1,5 +1,3 @@
-@file:Suppress("UNUSED_VARIABLE")
-
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -41,7 +39,6 @@ kotlin {
             baseName = "ComposeApp"
             isStatic = true
         }
-        extraSpecAttributes["resources"] = "['src/commonMain/resources/**']"
     }
 
     sourceSets {
@@ -121,7 +118,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    packagingOptions {
+    packaging {
         resources.excludes.add("META-INF/**")
     }
 }

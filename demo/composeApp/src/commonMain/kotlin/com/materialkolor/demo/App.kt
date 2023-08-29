@@ -124,7 +124,7 @@ internal fun App() {
                 modifier = Modifier.fillMaxWidth().wrapContentWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                PaletteStyle.values().forEach { paletteStyle ->
+                PaletteStyle.entries.forEach { paletteStyle ->
                     FilterChip(
                         label = { Text(text = paletteStyle.name) },
                         selected = style == paletteStyle,
