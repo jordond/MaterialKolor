@@ -21,6 +21,7 @@ from [m3.matierial.io](https://m3.material.io/theme-builder#/custom).
 
 - [Platforms](#platforms)
 - [Inspiration](#inspiration)
+- [Generating from an Image](#generating-from-an-image)
 - [Setup](#setup)
     - [Multiplatform](#multiplatform)
     - [Single Platform](#single-platform)
@@ -51,10 +52,35 @@ code was taken and converted into a Kotlin Multiplatform library.
 I also incorporated the Compose ideas from another open source
 library [m3color](https://github.com/Kyant0/m3color).
 
-### Planned Features
+### Generating from an Image
 
-- Get seed color from Bitmap
-- Load image from File, Url, etc.
+You can now generate a dynamic color scheme by using my
+library [kmPalette](https://github.com/jordond/kmpalette).
+
+You can get the dominant color from an image, or you can also generate a color palette.
+
+Follow the instructions there to set it up, then as an example. You can use it to generate a color
+theme from a remote image:
+
+```kotlin
+@Composable
+fun SampleTheme(
+    imageUrl: Url, // Url("http://example.com/image.jpg")
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit,
+) {
+    val dominantColorState = rememberDominantColorState(loader = NetworkLoader())
+    LaunchedEffect(imageUrl) {
+        dominantColorState.updateFrom(imageUrl)
+    }
+
+    AnimatedDynamicMaterialTheme(
+        seedColor = dominantColorState.color,
+        isDark = useDarkTheme,
+        content = content
+    )
+}
+```
 
 ## Setup
 
