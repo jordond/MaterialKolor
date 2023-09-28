@@ -44,7 +44,7 @@ jobs:
           NEW_VERSION=$(echo "${GITHUB_REF}" | cut -d "/" -f3)
           echo "New version: ${NEW_VERSION}"
           export ORG_GRADLE_PROJECT_VERSION_NAME=${NEW_VERSION}
-          echo "DSC_VERSION=$NEW_VERSION" >> "$GITHUB_ENV"
+          echo "RELEASE_VERSION=$NEW_VERSION" >> "$GITHUB_ENV"
           ./gradlew publishAllPublicationsToMavenCentral --no-configuration-cache --stacktrace
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.OSSRH_USERNAME }}
@@ -52,6 +52,14 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+
+      - name: Update README for ${{ env.RELEASE_VERSION }}
+        run: ./.github/version.sh "${RELEASE_VERSION}"
+
+      - uses: EndBug/add-and-commit@v9
+        with:
+          add: './README.md'
+          message: 'Update README.md with version ${{env.RELEASE_VERSION}}'
 
   documentation:
     name: "Generate Documentation"
