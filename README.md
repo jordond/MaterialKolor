@@ -69,7 +69,8 @@ fun SampleTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    val dominantColorState = rememberDominantColorState(loader = NetworkLoader())
+    val networkLoader = rememberNetworkLoader()
+    val dominantColorState = rememberDominantColorState(loader = networkLoader)
     LaunchedEffect(imageUrl) {
         dominantColorState.updateFrom(imageUrl)
     }
