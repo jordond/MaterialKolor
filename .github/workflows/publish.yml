@@ -56,10 +56,17 @@ jobs:
       - name: Update README for ${{ env.RELEASE_VERSION }}
         run: ./.github/version.sh "${RELEASE_VERSION}"
 
-      - uses: EndBug/add-and-commit@v9
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+
+      - name: Commit changes to README to ${{ env.branch }}
+        uses: EndBug/add-and-commit@v9
         with:
-          add: './README.md'
-          message: 'Update README.md with version ${{env.RELEASE_VERSION}}'
+          add: "./README.md"
+          message: "Update README.md with version ${{ env.RELEASE_VERSION }}"
+          new_branch: ${{ steps.extract_branch.outputs.branch }}
 
   documentation:
     name: "Generate Documentation"
