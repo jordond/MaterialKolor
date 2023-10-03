@@ -15,6 +15,8 @@ A Compose Multiplatform library for creating dynamic Material Design 3 color pal
 color. Similar to generating a theme
 from [m3.matierial.io](https://m3.material.io/theme-builder#/custom).
 
+The KDoc is published at [docs.materialkolor.com](docs.materialkolor.com)
+
 <img width="300px" src="art/ios-demo.gif" />
 
 ## Table of Contents
@@ -38,8 +40,9 @@ This library is written for Compose Multiplatform, and can be used on the follow
 - Android
 - iOS
 - JVM (Desktop)
+- JavaScript (Browser)
 
-A JavaScript (Browser) version is available but untested.
+You can see a demo running at [demo.materialkolor.com](https://demo.materialkolor.com).
 
 ## Inspiration
 
