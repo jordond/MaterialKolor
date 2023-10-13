@@ -56,17 +56,12 @@ jobs:
       - name: Update README for ${{ env.RELEASE_VERSION }}
         run: ./.github/version.sh "${RELEASE_VERSION}"
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-        id: extract_branch
-
-      - name: Commit changes to README to ${{ env.branch }}
+      - name: Commit changes to README
         uses: EndBug/add-and-commit@v9
         with:
           add: "./README.md"
           message: "Update README.md with version ${{ env.RELEASE_VERSION }}"
-          new_branch: ${{ steps.extract_branch.outputs.branch }}
+          new_branch: main
 
   documentation:
     name: "Generate Documentation"
@@ -81,16 +76,6 @@ jobs:
         with:
           java-version: 17
           distribution: adopt
-
-      - name: Cache Gradle
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
 
       - name: Gradle Wrapper Validation
         uses: gradle/wrapper-validation-action@v1
