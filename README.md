@@ -193,11 +193,9 @@ example.
 ## Demo
 
 A demo app is available in the `demo` directory. It is a Compose Multiplatform app that runs on
-Android, iOS and Desktop.
+Android, iOS, Desktop and browser.
 
-**Note:** While the demo does build a Browser version, it doesn't seem to work. However I don't know
-if that is the fault of this library or the Compose Multiplatform library. Therefore I haven't
-marked Javascript as supported.
+Visit [demo.materialkolor.com](https://demo.materialkolor.com)
 
 See the [README](demo/README.md) for more information.
 
