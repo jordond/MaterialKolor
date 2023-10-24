@@ -28,6 +28,6 @@ demo/iosApp/Podfile.lock
 demo/iosApp/Pods/*
 demo/iosApp/iosApp.xcworkspace/*
 demo/iosApp/iosApp.xcodeproj/*
-demo/!iosApp/iosApp.xcodeproj/project.pbxproj
+!demo/iosApp/iosApp.xcodeproj/project.pbxproj
 shared/shared.podspec
 publish.sh
