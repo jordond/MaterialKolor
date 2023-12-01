@@ -7,10 +7,9 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-@OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
 kotlin {
-    targetHierarchy.default()
-    android {
+    applyDefaultHierarchyTemplate()
+    androidTarget() {
         compilations.all {
             kotlinOptions {
                 jvmTarget = "1.8"
@@ -93,31 +92,30 @@ kotlin {
             dependencies {
             }
         }
-
     }
 }
 
 android {
     namespace = "com.materialkolor.demo"
-    compileSdk = 34
+    compileSdk = libs.versions.sdk.compile.get().toInt()
 
     defaultConfig {
         minSdk = libs.versions.sdk.min.get().toInt()
-        targetSdk = 34
+        targetSdk = libs.versions.sdk.target.get().toInt()
 
         applicationId = "com.materialkolor.demo.android"
         versionCode = 1
         versionName = "1.0.0"
     }
+
     sourceSets["main"].apply {
         manifest.srcFile("src/androidMain/AndroidManifest.xml")
-        res.srcDirs("src/androidMain/resources")
-        resources.srcDirs("src/commonMain/resources")
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+
+    kotlin {
+        jvmToolchain(jdkVersion = 11)
     }
+
     packaging {
         resources.excludes.add("META-INF/**")
     }
