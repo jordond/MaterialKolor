@@ -116,7 +116,10 @@ class MaterialDynamicColors(
         return DynamicColor(
             name = "surface_dim",
             palette = { s -> s.neutralPalette },
-            tone = { s -> if (s.isDark) 6.0 else 87.0 },
+            tone = { s ->
+                if (s.isDark) 6.0
+                else ContrastCurve(87.0, 87.0, 80.0, 75.0).get(s.contrastLevel)
+            },
             isBackground = true,
             background = null,
             secondBackground = null,
@@ -129,7 +132,10 @@ class MaterialDynamicColors(
         return DynamicColor(
             name = "surface_bright",
             palette = { s -> s.neutralPalette },
-            tone = { s -> if (s.isDark) 24.0 else 98.0 },
+            tone = { s ->
+                if (s.isDark) ContrastCurve(24.0, 24.0, 29.0, 34.0).get(s.contrastLevel)
+                else 98.0
+            },
             isBackground = true,
             background = null,
             secondBackground = null,
@@ -142,7 +148,10 @@ class MaterialDynamicColors(
         return DynamicColor(
             name = "surface_container_lowest",
             palette = { s -> s.neutralPalette },
-            tone = { s -> if (s.isDark) 4.0 else 100.0 },
+            tone = { s ->
+                if (s.isDark) ContrastCurve(4.0, 4.0, 2.0, 0.0).get(s.contrastLevel)
+                else 100.0
+            },
             isBackground = true,
             background = null,
             secondBackground = null,
@@ -155,7 +164,10 @@ class MaterialDynamicColors(
         return DynamicColor(
             name = "surface_container_low",
             palette = { s -> s.neutralPalette },
-            tone = { s -> if (s.isDark) 10.0 else 96.0 },
+            tone = { s ->
+                if (s.isDark) ContrastCurve(10.0, 10.0, 11.0, 12.0).get(s.contrastLevel)
+                else ContrastCurve(96.0, 96.0, 96.0, 95.0).get(s.contrastLevel)
+            },
             isBackground = true,
             background = null,
             secondBackground = null,
@@ -168,7 +180,10 @@ class MaterialDynamicColors(
         return DynamicColor(
             name = "surface_container",
             palette = { s -> s.neutralPalette },
-            tone = { s -> if (s.isDark) 12.0 else 94.0 },
+            tone = { s ->
+                if (s.isDark) ContrastCurve(12.0, 12.0, 16.0, 20.0).get(s.contrastLevel)
+                else ContrastCurve(94.0, 94.0, 92.0, 90.0).get(s.contrastLevel)
+            },
             isBackground = true,
             background = null,
             secondBackground = null,
@@ -181,7 +196,10 @@ class MaterialDynamicColors(
         return DynamicColor(
             name = "surface_container_high",
             palette = { s -> s.neutralPalette },
-            tone = { s -> if (s.isDark) 17.0 else 92.0 },
+            tone = { s ->
+                if (s.isDark) ContrastCurve(17.0, 17.0, 21.0, 25.0).get(s.contrastLevel)
+                else ContrastCurve(92.0, 92.0, 88.0, 85.0).get(s.contrastLevel)
+            },
             isBackground = true,
             background = null,
             secondBackground = null,
@@ -194,7 +212,10 @@ class MaterialDynamicColors(
         return DynamicColor(
             name = "surface_container_highest",
             palette = { s -> s.neutralPalette },
-            tone = { s -> if (s.isDark) 22.0 else 90.0 },
+            tone = { s ->
+                if (s.isDark) ContrastCurve(22.0, 22.0, 26.0, 30.0).get(s.contrastLevel)
+                else ContrastCurve(90.0, 90.0, 84.0, 80.0).get(s.contrastLevel)
+            },
             isBackground = true,
             background = null,
             secondBackground = null,
@@ -281,7 +302,7 @@ class MaterialDynamicColors(
             tone = { s -> if (s.isDark) 30.0 else 80.0 },
             isBackground = false, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
+            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 4.5),
             toneDeltaPair = null)
     }
 
@@ -334,8 +355,17 @@ class MaterialDynamicColors(
             },
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 11.0),
-            toneDeltaPair = { ToneDeltaPair(primaryContainer(), primary(), 15.0, TonePolarity.NEARER, false) })
+            contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 7.0),
+            toneDeltaPair = {
+                ToneDeltaPair(
+                    roleA = primaryContainer(),
+                    roleB = primary(),
+                    delta = 10.0,
+                    polarity = TonePolarity.NEARER,
+                    stayTogether = false,
+                )
+            }
+        )
     }
 
     fun onPrimary(): DynamicColor {
@@ -371,8 +401,8 @@ class MaterialDynamicColors(
             },
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
-            toneDeltaPair = { ToneDeltaPair(primaryContainer(), primary(), 15.0, TonePolarity.NEARER, false) })
+            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 4.5),
+            toneDeltaPair = { ToneDeltaPair(primaryContainer(), primary(), 10.0, TonePolarity.NEARER, false) })
     }
 
     fun onPrimaryContainer(): DynamicColor {
@@ -403,7 +433,7 @@ class MaterialDynamicColors(
             isBackground = false,
             background = { inverseSurface() },
             secondBackground = null,
-            contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 11.0),
+            contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 7.0),
             toneDeltaPair = null)
     }
 
@@ -414,8 +444,8 @@ class MaterialDynamicColors(
             tone = { s -> if (s.isDark) 80.0 else 40.0 },
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 11.0),
-            toneDeltaPair = { ToneDeltaPair(secondaryContainer(), secondary(), 15.0, TonePolarity.NEARER, false) })
+            contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 7.0),
+            toneDeltaPair = { ToneDeltaPair(secondaryContainer(), secondary(), 10.0, TonePolarity.NEARER, false) })
     }
 
     fun onSecondary(): DynamicColor {
@@ -448,18 +478,26 @@ class MaterialDynamicColors(
                     initialTone
                 } else {
                     findDesiredChromaByTone(
-                        s.secondaryPalette.hue,
-                        s.secondaryPalette.chroma,
-                        initialTone,
-                        !s.isDark
+                        hue = s.secondaryPalette.hue,
+                        chroma = s.secondaryPalette.chroma,
+                        tone = initialTone,
+                        byDecreasingTone = !s.isDark
                     )
                 }
-
             },
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
-            toneDeltaPair = { ToneDeltaPair(secondaryContainer(), secondary(), 15.0, TonePolarity.NEARER, false) })
+            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 4.5),
+            toneDeltaPair = {
+                ToneDeltaPair(
+                    roleA = secondaryContainer(),
+                    roleB = secondary(),
+                    delta = 10.0,
+                    polarity = TonePolarity.NEARER,
+                    stayTogether = false,
+                )
+            }
+        )
     }
 
     fun onSecondaryContainer(): DynamicColor {
@@ -492,8 +530,17 @@ class MaterialDynamicColors(
             },
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 11.0),
-            toneDeltaPair = { ToneDeltaPair(tertiaryContainer(), tertiary(), 15.0, TonePolarity.NEARER, false) })
+            contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 7.0),
+            toneDeltaPair = {
+                ToneDeltaPair(
+                    roleA = tertiaryContainer(),
+                    roleB = tertiary(),
+                    delta = 10.0,
+                    polarity = TonePolarity.NEARER,
+                    stayTogether = false,
+                )
+            }
+        )
     }
 
     fun onTertiary(): DynamicColor {
@@ -530,8 +577,17 @@ class MaterialDynamicColors(
             },
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
-            toneDeltaPair = { ToneDeltaPair(tertiaryContainer(), tertiary(), 15.0, TonePolarity.NEARER, false) })
+            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 4.5),
+            toneDeltaPair = {
+                ToneDeltaPair(
+                    roleA = tertiaryContainer(),
+                    roleB = tertiary(),
+                    delta = 10.0,
+                    polarity = TonePolarity.NEARER,
+                    stayTogether = false,
+                )
+            }
+        )
     }
 
     fun onTertiaryContainer(): DynamicColor {
@@ -559,8 +615,17 @@ class MaterialDynamicColors(
             tone = { s -> if (s.isDark) 80.0 else 40.0 },
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 11.0),
-            toneDeltaPair = { ToneDeltaPair(errorContainer(), error(), 15.0, TonePolarity.NEARER, false) })
+            contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 7.0),
+            toneDeltaPair = {
+                ToneDeltaPair(
+                    roleA = errorContainer(),
+                    roleB = error(),
+                    delta = 10.0,
+                    polarity = TonePolarity.NEARER,
+                    stayTogether = false,
+                )
+            },
+        )
     }
 
     fun onError(): DynamicColor {
@@ -582,8 +647,17 @@ class MaterialDynamicColors(
             tone = { s -> if (s.isDark) 30.0 else 90.0 },
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
-            toneDeltaPair = { ToneDeltaPair(errorContainer(), error(), 15.0, TonePolarity.NEARER, false) })
+            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 4.5),
+            toneDeltaPair = {
+                ToneDeltaPair(
+                    roleA = errorContainer(),
+                    roleB = error(),
+                    delta = 10.0,
+                    polarity = TonePolarity.NEARER,
+                    stayTogether = false,
+                )
+            },
+        )
     }
 
     fun onErrorContainer(): DynamicColor {
@@ -605,7 +679,7 @@ class MaterialDynamicColors(
             tone = { s -> if (isMonochrome(s)) 40.0 else 90.0 },
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
+            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 4.5),
             toneDeltaPair = { ToneDeltaPair(primaryFixed(), primaryFixedDim(), 10.0, TonePolarity.LIGHTER, true) })
     }
 
@@ -616,7 +690,7 @@ class MaterialDynamicColors(
             tone = { s -> if (isMonochrome(s)) 30.0 else 80.0 },
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
+            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 4.5),
             toneDeltaPair = { ToneDeltaPair(primaryFixed(), primaryFixedDim(), 10.0, TonePolarity.LIGHTER, true) })
     }
 
@@ -651,7 +725,7 @@ class MaterialDynamicColors(
             tone = { s -> if (isMonochrome(s)) 80.0 else 90.0 },
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
+            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 4.5),
             toneDeltaPair = {
                 ToneDeltaPair(
                     secondaryFixed(), secondaryFixedDim(), 10.0, TonePolarity.LIGHTER, true)
@@ -665,7 +739,7 @@ class MaterialDynamicColors(
             tone = { s -> if (isMonochrome(s)) 70.0 else 80.0 },
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
+            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 4.5),
             toneDeltaPair = {
                 ToneDeltaPair(
                     secondaryFixed(), secondaryFixedDim(), 10.0, TonePolarity.LIGHTER, true)
@@ -703,7 +777,7 @@ class MaterialDynamicColors(
             tone = { s -> if (isMonochrome(s)) 40.0 else 90.0 },
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
+            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 4.5),
             toneDeltaPair = {
                 ToneDeltaPair(
                     tertiaryFixed(), tertiaryFixedDim(), 10.0, TonePolarity.LIGHTER, true)
@@ -717,11 +791,17 @@ class MaterialDynamicColors(
             tone = { s -> if (isMonochrome(s)) 30.0 else 80.0 },
             isBackground = true, background = { s: DynamicScheme -> highestSurface(s) },
             secondBackground = null,
-            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 7.0),
+            contrastCurve = ContrastCurve(1.0, 1.0, 3.0, 4.5),
             toneDeltaPair = {
                 ToneDeltaPair(
-                    tertiaryFixed(), tertiaryFixedDim(), 10.0, TonePolarity.LIGHTER, true)
-            })
+                    roleA = tertiaryFixed(),
+                    roleB = tertiaryFixedDim(),
+                    delta = 10.0,
+                    polarity = TonePolarity.LIGHTER,
+                    stayTogether = true,
+                )
+            },
+        )
     }
 
     fun onTertiaryFixed(): DynamicColor {
