@@ -240,8 +240,8 @@ class DynamicColor {
             val expansionDir = (if (scheme.isDark) 1 else -1).toDouble()
 
             // 1st round: solve to min, each
-            val nContrast: Double = nearer.contrastCurve!!.getContrast(scheme.contrastLevel)
-            val fContrast: Double = farther.contrastCurve!!.getContrast(scheme.contrastLevel)
+            val nContrast: Double = nearer.contrastCurve!!.get(scheme.contrastLevel)
+            val fContrast: Double = farther.contrastCurve!!.get(scheme.contrastLevel)
 
             // If a color is good enough, it is not adjusted.
             // Initial and adjusted tones for `nearer`
@@ -309,7 +309,7 @@ class DynamicColor {
                 return answer // No adjustment for colors with no background.
             }
             val bgTone: Double = background.apply(scheme).getTone(scheme)
-            val desiredRatio = contrastCurve?.getContrast(scheme.contrastLevel)
+            val desiredRatio = contrastCurve?.get(scheme.contrastLevel)
                 ?: return answer // No adjustment for colors with no contrast curve.
             if (Contrast.ratioOfTones(bgTone, answer) >= desiredRatio) {
                 // Don't "improve" what's good enough.
