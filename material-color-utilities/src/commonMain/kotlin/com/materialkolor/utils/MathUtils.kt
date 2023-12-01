@@ -18,7 +18,9 @@ package com.materialkolor.utils
 
 import kotlin.math.abs
 
-/** Utility methods for mathematical operations.  */
+/**
+ * Utility methods for mathematical operations.
+ */
 internal object MathUtils {
 
     /**
@@ -26,14 +28,10 @@ internal object MathUtils {
      *
      * @return 1 if num > 0, -1 if num < 0, and 0 if num = 0
      */
-    fun signum(num: Double): Int {
-        return if (num < 0) {
-            -1
-        } else if (num == 0.0) {
-            0
-        } else {
-            1
-        }
+    fun signum(num: Double): Int = when {
+        num < 0 -> -1
+        num == 0.0 -> 0
+        else -> 1
     }
 
     /**
@@ -50,13 +48,10 @@ internal object MathUtils {
      *
      * @return input when min <= input <= max, and either min or max otherwise.
      */
-    fun clampInt(min: Int, max: Int, input: Int): Int {
-        if (input < min) {
-            return min
-        } else if (input > max) {
-            return max
-        }
-        return input
+    fun clampInt(min: Int, max: Int, input: Int): Int = when {
+        input < min -> min
+        input > max -> max
+        else -> input
     }
 
     /**
@@ -64,13 +59,10 @@ internal object MathUtils {
      *
      * @return input when min <= input <= max, and either min or max otherwise.
      */
-    fun clampDouble(min: Double, max: Double, input: Double): Double {
-        if (input < min) {
-            return min
-        } else if (input > max) {
-            return max
-        }
-        return input
+    fun clampDouble(min: Double, max: Double, input: Double): Double = when {
+        input < min -> min
+        input > max -> max
+        else -> input
     }
 
     /**
@@ -81,7 +73,7 @@ internal object MathUtils {
     fun sanitizeDegreesInt(degrees: Int): Int {
         var sanitized = degrees % 360
         if (sanitized < 0) {
-            sanitized = sanitized + 360
+            sanitized += 360
         }
         return sanitized
     }
@@ -94,7 +86,7 @@ internal object MathUtils {
     fun sanitizeDegreesDouble(degrees: Double): Double {
         var sanitized = degrees % 360.0
         if (sanitized < 0) {
-            sanitized = sanitized + 360.0
+            sanitized += 360.0
         }
         return sanitized
     }
@@ -102,12 +94,11 @@ internal object MathUtils {
     /**
      * Sign of direction change needed to travel from one angle to another.
      *
-     *
      * For angles that are 180 degrees apart from each other, both directions have the same travel
      * distance, so either direction is shortest. The value 1.0 is returned in this case.
      *
-     * @param from The angle travel starts from, in degrees.
-     * @param to The angle travel ends at, in degrees.
+     * @param[from] The angle travel starts from, in degrees.
+     * @param[to] The angle travel ends at, in degrees.
      * @return -1 if decreasing from leads to the shortest travel distance, 1 if increasing from leads
      * to the shortest travel distance.
      */
@@ -117,10 +108,10 @@ internal object MathUtils {
     }
 
 
-    /** Distance of two points on a circle, represented using degrees.  */
-    fun differenceDegrees(a: Double, b: Double): Double {
-        return 180.0 - abs(abs(a - b) - 180.0)
-    }
+    /**
+     * Distance of two points on a circle, represented using degrees.
+     */
+    fun differenceDegrees(a: Double, b: Double): Double = 180.0 - abs(abs(a - b) - 180.0)
 
     /** Multiplies a 1x3 row vector with a 3x3 matrix.  */
     fun matrixMultiply(row: DoubleArray, matrix: Array<DoubleArray>): DoubleArray {
@@ -130,11 +121,7 @@ internal object MathUtils {
         return doubleArrayOf(a, b, c)
     }
 
-    fun toDegrees(angrad: Double): Double {
-        return angrad * 57.29577951308232
-    }
+    fun toDegrees(angrad: Double): Double = angrad * 57.29577951308232
 
-    fun toRadians(angdeg: Double): Double {
-        return angdeg * 0.017453292519943295
-    }
+    fun toRadians(angdeg: Double): Double = angdeg * 0.017453292519943295
 }

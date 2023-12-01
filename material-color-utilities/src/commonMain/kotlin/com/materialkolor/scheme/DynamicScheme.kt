@@ -69,9 +69,9 @@ open class DynamicScheme(
          * between, apply the rotation at the same index as the first hue in the range, and return the
          * rotated hue.
          *
-         * @param sourceColorHct The color whose hue should be rotated.
-         * @param hues A set of hues.
-         * @param rotations A set of hue rotations.
+         * @param[sourceColorHct] The color whose hue should be rotated.
+         * @param[hues] A set of hues.
+         * @param[rotations] A set of hue rotations.
          * @return Color's hue with a rotation applied.
          */
         fun getRotatedHue(sourceColorHct: Hct, hues: DoubleArray, rotations: DoubleArray): Double {
@@ -87,6 +87,7 @@ open class DynamicScheme(
                     return MathUtils.sanitizeDegreesDouble(sourceHue + rotations[i])
                 }
             }
+
             // If this statement executes, something is wrong, there should have been a rotation
             // found using the arrays.
             return sourceHue

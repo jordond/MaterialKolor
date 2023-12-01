@@ -25,9 +25,7 @@ import kotlin.random.Random
  * several optimizations, including deduping identical pixels and a triangle inequality rule that
  * reduces the number of comparisons needed to identify which cluster a point should be moved to.
  *
- *
  * Wsmeans stands for Weighted Square Means.
- *
  *
  * This algorithm was designed by M. Emre Celebi, and was found in their 2011 paper, Improving
  * the Performance of K-Means for Color Quantization. https://arxiv.org/abs/1101.0395
@@ -41,22 +39,24 @@ internal object QuantizerWsmeans {
      * Reduce the number of colors needed to represented the input, minimizing the difference between
      * the original image and the recolored image.
      *
-     * @param inputPixels Colors in ARGB format.
-     * @param startingClusters Defines the initial state of the quantizer. Passing an empty array is
+     * @param[inputPixels] Colors in ARGB format.
+     * @param[startingClusters] Defines the initial state of the quantizer. Passing an empty array is
      * fine, the implementation will create its own initial state that leads to reproducible
      * results for the same inputs. Passing an array that is the result of Wu quantization leads
      * to higher quality results.
-     * @param maxColors The number of colors to divide the image into. A lower number of colors may be
+     * @param[maxColors] The number of colors to divide the image into. A lower number of colors may be
      * returned.
      * @return Map with keys of colors in ARGB format, values of how many of the input pixels belong
      * to the color.
      */
     fun quantize(
-        inputPixels: IntArray, startingClusters: IntArray, maxColors: Int
+        inputPixels: IntArray,
+        startingClusters: IntArray,
+        maxColors: Int,
     ): Map<Int, Int> {
         // Uses a seeded random number generator to ensure consistent results.
-        val random: Random = Random(0x42688)
-        val pixelToCount: MutableMap<Int, Int> = LinkedHashMap<Int, Int>()
+        val random = Random(0x42688)
+        val pixelToCount: MutableMap<Int, Int> = LinkedHashMap()
         val points = arrayOfNulls<DoubleArray>(inputPixels.size)
         val pixels = IntArray(inputPixels.size)
         val pointProvider: PointProvider = PointProviderLab()
@@ -80,7 +80,7 @@ internal object QuantizerWsmeans {
             counts[i] = count
         }
         var clusterCount: Int = min(maxColors, pointCount)
-        if (startingClusters.size != 0) {
+        if (startingClusters.isNotEmpty()) {
             clusterCount = min(clusterCount, startingClusters.size)
         }
         val clusters = arrayOfNulls<DoubleArray>(clusterCount)
@@ -89,11 +89,7 @@ internal object QuantizerWsmeans {
             clusters[i] = pointProvider.fromInt(startingClusters[i])
             clustersCreated++
         }
-        val additionalClustersNeeded = clusterCount - clustersCreated
-        if (additionalClustersNeeded > 0) {
-            for (i in 0 until additionalClustersNeeded) {
-            }
-        }
+        clusterCount - clustersCreated
         val clusterIndices = IntArray(pointCount)
         for (i in 0 until pointCount) {
             clusterIndices[i] = random.nextInt(clusterCount)
@@ -183,7 +179,7 @@ internal object QuantizerWsmeans {
                 clusters[i]!![2] = c
             }
         }
-        val argbToPopulation: MutableMap<Int, Int> = LinkedHashMap<Int, Int>()
+        val argbToPopulation: MutableMap<Int, Int> = LinkedHashMap()
         for (i in 0 until clusterCount) {
             val count = pixelCountSums[i]
             if (count == 0) {
@@ -198,18 +194,11 @@ internal object QuantizerWsmeans {
         return argbToPopulation
     }
 
-    private class Distance internal constructor() : Comparable<Distance> {
+    private class Distance : Comparable<Distance> {
 
-        var index: Int
-        var distance: Double
+        var index: Int = -1
+        var distance: Double = -1.0
 
-        init {
-            index = -1
-            distance = -1.0
-        }
-
-        override operator fun compareTo(other: Distance): Int {
-            return distance.compareTo(other.distance)
-        }
+        override operator fun compareTo(other: Distance): Int = distance.compareTo(other.distance)
     }
 }

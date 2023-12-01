@@ -35,20 +35,29 @@ import kotlin.math.max
  * grounded equivalent to rotating hue clockwise by 60 degrees. It also maintains constant
  * appearance.
  */
-class SchemeContent(sourceColorHct: Hct, isDark: Boolean, contrastLevel: Double) : DynamicScheme(
-    sourceColorHct,
-    Variant.CONTENT,
-    isDark,
-    contrastLevel,
-    TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), sourceColorHct.getChroma()),
-    TonalPalette.fromHueAndChroma(
-        sourceColorHct.getHue(),
-        max(sourceColorHct.getChroma() - 32.0, sourceColorHct.getChroma() * 0.5)),
-    TonalPalette.fromHct(
-        DislikeAnalyzer.fixIfDisliked(
+class SchemeContent(
+    sourceColorHct: Hct,
+    isDark: Boolean,
+    contrastLevel: Double,
+) : DynamicScheme(
+    sourceColorHct = sourceColorHct,
+    variant = Variant.CONTENT,
+    isDark = isDark,
+    contrastLevel = contrastLevel,
+    primaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), sourceColorHct.getChroma()),
+    secondaryPalette = TonalPalette.fromHueAndChroma(
+        hue = sourceColorHct.getHue(),
+        chroma = max(sourceColorHct.getChroma() - 32.0, sourceColorHct.getChroma() * 0.5),
+    ),
+    tertiaryPalette = TonalPalette.fromHct(
+        hct = DislikeAnalyzer.fixIfDisliked(
             TemperatureCache(sourceColorHct)
-                .getAnalogousColors( /* count= */3,  /* divisions= */6)
-                .get(2))),
-    TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), sourceColorHct.getChroma() / 8.0),
-    TonalPalette.fromHueAndChroma(
-        sourceColorHct.getHue(), sourceColorHct.getChroma() / 8.0 + 4.0))
+                .getAnalogousColors(count = 3, divisions = 6)
+                .get(2),
+        ),
+    ),
+    neutralPalette = TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), sourceColorHct.getChroma() / 8.0),
+    neutralVariantPalette = TonalPalette.fromHueAndChroma(
+        hue = sourceColorHct.getHue(),
+        chroma = sourceColorHct.getChroma() / 8.0 + 4.0),
+)

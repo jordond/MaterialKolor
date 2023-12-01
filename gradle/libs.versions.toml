@@ -17,6 +17,7 @@ espresso-core = "3.5.1"
 binaryCompatibility = "0.13.2"
 dokka = "1.9.10"
 publish = "0.25.3"
+poko = "0.15.1"
 
 [libraries]
 androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
@@ -40,6 +41,7 @@ dependencies = { id = "com.github.ben-manes.versions", version.ref = "versions" 
 binaryCompatibility = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatibility" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 publish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
+poko = { id = "dev.drewhamilton.poko", version.ref = "poko" }
 
 [bundles]
 androidx = ["androidx-core", "androidx-lifecycle", "androidx-appcompat"]

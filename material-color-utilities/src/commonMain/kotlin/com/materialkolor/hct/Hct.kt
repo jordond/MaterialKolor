@@ -33,12 +33,12 @@ import com.materialkolor.utils.ColorUtils.lstarFromY
  * Unlike contrast ratio, measuring contrast in L* is linear, and simple to calculate. A
  * difference of 40 in HCT tone guarantees a contrast ratio >= 3.0, and a difference of 50
  * guarantees a contrast ratio >= 4.5.
- */
-/**
+ *
  * HCT, hue, chroma, and tone. A color system that provides a perceptually accurate color
  * measurement system that can also accurately render what colors will appear as in different
  * lighting environments.
  */
+@Suppress("unused")
 class Hct private constructor(argb: Int) {
 
     private var hue = 0.0
@@ -50,27 +50,16 @@ class Hct private constructor(argb: Int) {
         setInternalState(argb)
     }
 
-    fun getHue(): Double {
-        return hue
-    }
-
-    fun getChroma(): Double {
-        return chroma
-    }
-
-    fun getTone(): Double {
-        return tone
-    }
-
-    fun toInt(): Int {
-        return argb
-    }
+    fun getHue(): Double = hue
+    fun getChroma(): Double = chroma
+    fun getTone(): Double = tone
+    fun toInt(): Int = argb
 
     /**
      * Set the hue of this color. Chroma may decrease because chroma has a different maximum for any
      * given hue and tone.
      *
-     * @param newHue 0 <= newHue < 360; invalid values are corrected.
+     * @param[newHue] 0 <= newHue < 360; invalid values are corrected.
      */
     fun setHue(newHue: Double) {
         setInternalState(HctSolver.solveToInt(newHue, chroma, tone))
@@ -80,7 +69,7 @@ class Hct private constructor(argb: Int) {
      * Set the chroma of this color. Chroma may decrease because chroma has a different maximum for
      * any given hue and tone.
      *
-     * @param newChroma 0 <= newChroma < ?
+     * @param[newChroma] 0 <= newChroma < ?
      */
     fun setChroma(newChroma: Double) {
         setInternalState(HctSolver.solveToInt(hue, newChroma, tone))
@@ -90,7 +79,7 @@ class Hct private constructor(argb: Int) {
      * Set the tone of this color. Chroma may decrease because chroma has a different maximum for any
      * given hue and tone.
      *
-     * @param newTone 0 <= newTone <= 100; invalid valids are corrected.
+     * @param[newTone] 0 <= newTone <= 100; invalid valids are corrected.
      */
     fun setTone(newTone: Double) {
         setInternalState(HctSolver.solveToInt(hue, chroma, newTone))
@@ -141,10 +130,10 @@ class Hct private constructor(argb: Int) {
         /**
          * Create an HCT color from hue, chroma, and tone.
          *
-         * @param hue 0 <= hue < 360; invalid values are corrected.
-         * @param chroma 0 <= chroma < ?; Informally, colorfulness. The color returned may be lower than
+         * @param[hue] 0 <= hue < 360; invalid values are corrected.
+         * @param[chroma] 0 <= chroma < ?; Informally, colorfulness. The color returned may be lower than
          * the requested chroma. Chroma has a different maximum for any given hue and tone.
-         * @param tone 0 <= tone <= 100; invalid values are corrected.
+         * @param[tone] 0 <= tone <= 100; invalid values are corrected.
          * @return HCT representation of a color in default viewing conditions.
          */
         fun from(hue: Double, chroma: Double, tone: Double): Hct {
@@ -155,11 +144,9 @@ class Hct private constructor(argb: Int) {
         /**
          * Create an HCT color from a color.
          *
-         * @param argb ARGB representation of a color.
+         * @param[argb] ARGB representation of a color.
          * @return HCT representation of a color in default viewing conditions
          */
-        fun fromInt(argb: Int): Hct {
-            return Hct(argb)
-        }
+        fun fromInt(argb: Int): Hct = Hct(argb)
     }
 }

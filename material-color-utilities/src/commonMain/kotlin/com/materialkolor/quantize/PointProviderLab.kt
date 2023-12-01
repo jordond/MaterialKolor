@@ -27,7 +27,7 @@ internal class PointProviderLab : PointProvider {
     /**
      * Convert a color represented in ARGB to a 3-element array of L*a*b* coordinates of the color.
      */
-    override fun fromInt(argb: Int): DoubleArray? {
+    override fun fromInt(argb: Int): DoubleArray {
         val lab = labFromArgb(argb)
         return doubleArrayOf(lab[0], lab[1], lab[2])
     }

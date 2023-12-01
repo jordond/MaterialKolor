@@ -23,9 +23,9 @@ import com.materialkolor.utils.ColorUtils.redFromArgb
  * An image quantizer that divides the image's pixels into clusters by recursively cutting an RGB
  * cube, based on the weight of pixels in each area of the cube.
  *
- *
  * The algorithm was described by Xiaolin Wu in Graphic Gems II, published in 1991.
  */
+@Suppress("MemberVisibilityCanBePrivate")
 internal class QuantizerWu : Quantizer {
 
     lateinit var weights: IntArray
@@ -142,11 +142,11 @@ internal class QuantizerWu : Quantizer {
             }
             i++
         }
-        return CreateBoxesResult(maxColorCount, generatedColorCount)
+        return CreateBoxesResult(generatedColorCount)
     }
 
     fun createResult(colorCount: Int): List<Int> {
-        val colors: MutableList<Int> = ArrayList<Int>()
+        val colors: MutableList<Int> = mutableListOf()
         for (i in 0 until colorCount) {
             val cube = cubes[i]
             val weight = volume(cube, weights)
@@ -283,12 +283,14 @@ internal class QuantizerWu : Quantizer {
         BLUE
     }
 
+    // < 0 if cut impossible
     class MaximizeResult internal constructor(
-// < 0 if cut impossible
-        var cutLocation: Int, var maximum: Double,
+        var cutLocation: Int,
+        var maximum: Double,
     )
 
-    class CreateBoxesResult internal constructor(var requestedCount: Int, var resultCount: Int)
+    class CreateBoxesResult internal constructor(var resultCount: Int)
+
     class Box {
 
         var r0 = 0
@@ -309,6 +311,7 @@ internal class QuantizerWu : Quantizer {
         private const val INDEX_BITS = 5
         private const val INDEX_COUNT = 33 // ((1 << INDEX_BITS) + 1)
         private const val TOTAL_SIZE = 35937 // INDEX_COUNT * INDEX_COUNT * INDEX_COUNT
+
         fun getIndex(r: Int, g: Int, b: Int): Int {
             return (r shl INDEX_BITS * 2) + (r shl INDEX_BITS + 1) + r + (g shl INDEX_BITS) + g + b
         }

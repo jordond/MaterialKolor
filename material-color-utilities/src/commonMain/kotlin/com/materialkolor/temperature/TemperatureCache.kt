@@ -29,10 +29,16 @@ import kotlin.math.round
 /**
  * Design utilities using color temperature theory.
  *
- *
  * Analogous colors, complementary color, and cache to efficiently, lazily, generate data for
  * calculations when needed.
+ *
+ * Create a cache that allows calculation of ex. complementary and analogous colors.
+ *
+ * @param[input] Color to find complement/analogous colors of. Any colors will have the same tone,
+ * and chroma as the input color, modulo any restrictions due to the other hues having lower
+ * limits on chroma.
  */
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 internal class TemperatureCache(private val input: Hct) {
 
     private var precomputedComplement: Hct? = null
@@ -41,24 +47,15 @@ internal class TemperatureCache(private val input: Hct) {
     private var precomputedTempsByHct: Map<Hct, Double>? = null
 
     /**
-     * Create a cache that allows calculation of ex. complementary and analogous colors.
+     * A color that complements the input color aesthetically.
      *
-     * @param input Color to find complement/analogous colors of. Any colors will have the same tone,
-     * and chroma as the input color, modulo any restrictions due to the other hues having lower
-     * limits on chroma.
+     * In art, this is usually described as being across the color wheel. History of this shows
+     * intent as a color that is just as cool-warm as the input color is warm-cool.
      */
     val complement: Hct
-        /**
-         * A color that complements the input color aesthetically.
-         *
-         *
-         * In art, this is usually described as being across the color wheel. History of this shows
-         * intent as a color that is just as cool-warm as the input color is warm-cool.
-         */
         get() {
-            if (precomputedComplement != null) {
-                return precomputedComplement!!
-            }
+            if (precomputedComplement != null) return precomputedComplement!!
+
             val coldestHue: Double = coldest.getHue()
             val coldestTemp = tempsByHct!![coldest]!!
             val warmestHue: Double = warmest.getHue()
@@ -93,27 +90,25 @@ internal class TemperatureCache(private val input: Hct) {
             precomputedComplement = answer
             return precomputedComplement!!
         }
+
+    /**
+     * 5 colors that pair well with the input color.
+     *
+     * The colors are equidistant in temperature and adjacent in hue.
+     */
     val analogousColors: List<Any>
-        /**
-         * 5 colors that pair well with the input color.
-         *
-         *
-         * The colors are equidistant in temperature and adjacent in hue.
-         */
         get() = getAnalogousColors(5, 12)
 
     /**
      * A set of colors with differing hues, equidistant in temperature.
      *
-     *
      * In art, this is usually described as a set of 5 colors on a color wheel divided into 12
      * sections. This method allows provision of either of those values.
      *
-     *
      * Behavior is undefined when count or divisions is 0. When divisions < count, colors repeat.
      *
-     * @param count The number of colors to return, includes the input color.
-     * @param divisions The number of divisions on the color wheel.
+     * @param[count] The number of colors to return, includes the input color.
+     * @param[divisions] The number of divisions on the color wheel.
      */
     fun getAnalogousColors(count: Int, divisions: Int): List<Hct> {
         // The starting hue is the hue of the input color.
@@ -173,10 +168,10 @@ internal class TemperatureCache(private val input: Hct) {
         for (i in 1 until ccwCount + 1) {
             var index = 0 - i
             while (index < 0) {
-                index = allColors.size + index
+                index += allColors.size
             }
             if (index >= allColors.size) {
-                index = index % allColors.size
+                index %= allColors.size
             }
             answers.add(0, allColors[index])
         }
@@ -184,10 +179,10 @@ internal class TemperatureCache(private val input: Hct) {
         for (i in 1 until cwCount + 1) {
             var index = i
             while (index < 0) {
-                index = allColors.size + index
+                index += allColors.size
             }
             if (index >= allColors.size) {
-                index = index % allColors.size
+                index %= allColors.size
             }
             answers.add(allColors[index])
         }
@@ -197,7 +192,7 @@ internal class TemperatureCache(private val input: Hct) {
     /**
      * Temperature relative to all colors with the same chroma and tone.
      *
-     * @param hct HCT to find the relative temperature of.
+     * @param[hct] HCT to find the relative temperature of.
      * @return Value on a scale from 0 to 1.
      */
     fun getRelativeTemperature(hct: Hct): Double {
@@ -210,21 +205,22 @@ internal class TemperatureCache(private val input: Hct) {
         } else differenceFromColdest / range
     }
 
+    /**
+     * Coldest color with same chroma and tone as input.
+     */
     private val coldest: Hct
-        /** Coldest color with same chroma and tone as input.  */
         get() = hctsByTemp!![0]
 
+    /**
+     * HCTs for all colors with the same chroma/tone as the input.
+     *
+     *
+     * Sorted by hue, ex. index 0 is hue 0.
+     */
     private val hctsByHue: List<Hct>?
-        /**
-         * HCTs for all colors with the same chroma/tone as the input.
-         *
-         *
-         * Sorted by hue, ex. index 0 is hue 0.
-         */
         get() {
-            if (precomputedHctsByHue != null) {
-                return precomputedHctsByHue
-            }
+            if (precomputedHctsByHue != null) return precomputedHctsByHue
+
             val hcts: MutableList<Hct> = ArrayList()
             var hue = 0.0
             while (hue <= 360.0) {
@@ -235,17 +231,16 @@ internal class TemperatureCache(private val input: Hct) {
             precomputedHctsByHue = listOf(hcts).flatten()
             return precomputedHctsByHue
         }
+
+    /**
+     * HCTs for all colors with the same chroma/tone as the input.
+     *
+     * Sorted from coldest first to warmest last.
+     */
     private val hctsByTemp: List<Hct>?
-        /**
-         * HCTs for all colors with the same chroma/tone as the input.
-         *
-         *
-         * Sorted from coldest first to warmest last.
-         */
         get() {
-            if (precomputedHctsByTemp != null) {
-                return precomputedHctsByTemp
-            }
+            if (precomputedHctsByTemp != null) return precomputedHctsByTemp
+
             val hcts: MutableList<Hct> = hctsByHue?.toMutableList() ?: mutableListOf()
             hcts.add(input)
 
@@ -254,12 +249,14 @@ internal class TemperatureCache(private val input: Hct) {
             precomputedHctsByTemp = hcts
             return precomputedHctsByTemp
         }
+
+    /**
+     * Keys of HCTs in getHctsByTemp, values of raw temperature.
+     */
     private val tempsByHct: Map<Hct, Double>?
-        /** Keys of HCTs in getHctsByTemp, values of raw temperature.  */
         get() {
-            if (precomputedTempsByHct != null) {
-                return precomputedTempsByHct
-            }
+            if (precomputedTempsByHct != null) return precomputedTempsByHct
+
             val allHcts: MutableList<Hct> = hctsByHue?.toMutableList() ?: mutableListOf()
             allHcts.add(input)
             val temperaturesByHct: MutableMap<Hct, Double> = HashMap()
@@ -270,8 +267,10 @@ internal class TemperatureCache(private val input: Hct) {
             return precomputedTempsByHct
         }
 
+    /**
+     * Warmest color with same chroma and tone as input.
+     */
     private val warmest: Hct
-        /** Warmest color with same chroma and tone as input.  */
         get() = hctsByTemp!![hctsByTemp!!.size - 1]
 
     companion object {
@@ -280,11 +279,9 @@ internal class TemperatureCache(private val input: Hct) {
          * Value representing cool-warm factor of a color. Values below 0 are considered cool, above,
          * warm.
          *
-         *
          * Color science has researched emotion and harmony, which art uses to select colors. Warm-cool
          * is the foundation of analogous and complementary colors. See: - Li-Chen Ou's Chapter 19 in
          * Handbook of Color Psychology (2015). - Josef Albers' Interaction of Color chapters 19 and 21.
-         *
          *
          * Implementation of Ou, Woodcock and Wright's algorithm, which uses Lab/LCH color space.
          * Return value has these properties:<br></br>
@@ -302,11 +299,12 @@ internal class TemperatureCache(private val input: Hct) {
                 * cos(MathUtils.toRadians(MathUtils.sanitizeDegreesDouble(hue - 50.0)))))
         }
 
-        /** Determines if an angle is between two other angles, rotating clockwise.  */
+        /**
+         * Determines if an angle is between two other angles, rotating clockwise.
+         */
         private fun isBetween(angle: Double, a: Double, b: Double): Boolean {
-            return if (a < b) {
-                angle in a..b
-            } else a <= angle || angle <= b
+            return if (a < b) angle in a..b
+            else a <= angle || angle <= b
         }
     }
 }
