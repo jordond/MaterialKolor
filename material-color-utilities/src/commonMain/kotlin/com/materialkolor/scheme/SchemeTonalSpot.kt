@@ -21,7 +21,7 @@ import com.materialkolor.utils.MathUtils
 
 /**
  * A calm theme, sedated colors that aren't particularly chromatic.
- * */
+ */
 class SchemeTonalSpot(
     sourceColorHct: Hct,
     isDark: Boolean,

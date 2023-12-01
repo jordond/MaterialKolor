@@ -20,9 +20,12 @@ import com.materialkolor.utils.MathUtils
 import com.materialkolor.palettes.TonalPalette
 
 /**
- * Provides important settings for creating colors dynamically, and 6 color palettes. Requires: 1. A
- * color. (source color) 2. A theme. (Variant) 3. Whether or not its dark mode. 4. Contrast level.
- * (-1 to 1, currently contrast ratio 3.0 and 7.0)
+ * Provides important settings for creating colors dynamically, and 6 color palettes.
+ * Requires:
+ *  1. A color. (source color)
+ *  2. A theme. (Variant)
+ *  3. Whether or not its dark mode.
+ *  4. Contrast level. (-1 to 1, currently contrast ratio 3.0 and 7.0)
  */
 open class DynamicScheme(
     sourceColorHct: Hct,

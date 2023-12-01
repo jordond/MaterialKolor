@@ -21,7 +21,7 @@ import com.materialkolor.utils.MathUtils
 
 /**
  * A playful theme - the source color's hue does not appear in the theme.
- * */
+ */
 class SchemeExpressive(
     sourceColorHct: Hct,
     isDark: Boolean,

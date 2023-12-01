@@ -29,19 +29,15 @@ import com.materialkolor.common.Function as Function1
 /**
  * A color that adjusts itself based on UI state, represented by DynamicScheme.
  *
- *
  * This color automatically adjusts to accommodate a desired contrast level, or other adjustments
  * such as differing in light mode versus dark mode, or what the theme is, or what the color that
  * produced the theme is, etc.
  *
- *
  * Colors without backgrounds do not change tone when contrast changes. Colors with backgrounds
  * become closer to their background as contrast lowers, and further when contrast increases.
  *
- *
  * Prefer the static constructors. They provide a much more simple interface, such as requiring
  * just a hexcode, or just a hexcode and a background.
- *
  *
  * Ultimately, each component necessary for calculating a color, adjusting it for a desired
  * contrast level, and ensuring it has a certain lightness/tone difference from another color, is
