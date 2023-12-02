@@ -9,13 +9,7 @@ plugins {
 
 kotlin {
     applyDefaultHierarchyTemplate()
-    androidTarget() {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "1.8"
-            }
-        }
-    }
+    androidTarget()
 
     jvm("desktop")
 
