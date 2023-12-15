@@ -14,6 +14,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 
+/**
+ * A Material Theme that adapts to the given seed color.
+ *
+ * You can access the current seed color via [LocalDynamicMaterialThemeSeed].
+ *
+ * @see dynamicColorScheme
+ * @see PaletteStyle
+ * @param[seedColor] The seed color to use for generating the color scheme.
+ * @param[useDarkTheme] Whether to use a dark theme or not.
+ * @param[style] The style of the color scheme.
+ * @param[contrastLevel] The contrast level of the color scheme.
+ * @param[content] The Composable content of the theme.
+ */
 @Composable
 public fun DynamicMaterialTheme(
     seedColor: Color,
@@ -38,6 +51,20 @@ public fun DynamicMaterialTheme(
     }
 }
 
+/**
+ * A Material Theme that adapts to the given seed color and animates the color scheme.
+ *
+ * You can access the current seed color via [LocalDynamicMaterialThemeSeed].
+ *
+ * @see dynamicColorScheme
+ * @see PaletteStyle
+ * @param[seedColor] The seed color to use for generating the color scheme.
+ * @param[useDarkTheme] Whether to use a dark theme or not.
+ * @param[style] The style of the color scheme.
+ * @param[contrastLevel] The contrast level of the color scheme.
+ * @param[animationSpec] The animation spec to use for animating the color scheme.
+ * @param[content] The Composable content of the theme.
+ */
 @Composable
 public fun AnimatedDynamicMaterialTheme(
     seedColor: Color,

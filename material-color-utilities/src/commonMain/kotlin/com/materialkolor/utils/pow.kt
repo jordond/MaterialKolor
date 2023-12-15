@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.materialkolor.utils
 
 import kotlin.math.pow

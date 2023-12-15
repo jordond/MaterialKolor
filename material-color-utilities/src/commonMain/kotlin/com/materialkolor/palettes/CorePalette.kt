@@ -59,17 +59,13 @@ class CorePalette private constructor(argb: Int, isContent: Boolean) {
          *
          * @param argb ARGB representation of a color
          */
-        fun of(argb: Int): CorePalette {
-            return CorePalette(argb, false)
-        }
+        fun of(argb: Int): CorePalette = CorePalette(argb, false)
 
         /**
          * Create content key tones from a color.
          *
          * @param argb ARGB representation of a color
          */
-        fun contentOf(argb: Int): CorePalette {
-            return CorePalette(argb, true)
-        }
+        fun contentOf(argb: Int): CorePalette = CorePalette(argb, true)
     }
 }

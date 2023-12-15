@@ -1,7 +1,3 @@
-@file:Suppress("UNUSED_VARIABLE", "OPT_IN_USAGE")
-
-import org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode
-
 plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.compose)
@@ -11,11 +7,11 @@ plugins {
 }
 
 kotlin {
-    explicitApi = ExplicitApiMode.Strict
+    explicitApi()
 
-    targetHierarchy.default()
+    applyDefaultHierarchyTemplate()
 
-    android {
+    androidTarget {
         publishAllLibraryVariants()
     }
 
@@ -71,11 +67,6 @@ android {
         release {
             isMinifyEnabled = false
         }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlin {

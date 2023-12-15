@@ -20,9 +20,12 @@ import com.materialkolor.utils.MathUtils
 import com.materialkolor.palettes.TonalPalette
 
 /**
- * Provides important settings for creating colors dynamically, and 6 color palettes. Requires: 1. A
- * color. (source color) 2. A theme. (Variant) 3. Whether or not its dark mode. 4. Contrast level.
- * (-1 to 1, currently contrast ratio 3.0 and 7.0)
+ * Provides important settings for creating colors dynamically, and 6 color palettes.
+ * Requires:
+ *  1. A color. (source color)
+ *  2. A theme. (Variant)
+ *  3. Whether or not its dark mode.
+ *  4. Contrast level. (-1 to 1, currently contrast ratio 3.0 and 7.0)
  */
 open class DynamicScheme(
     sourceColorHct: Hct,
@@ -69,9 +72,9 @@ open class DynamicScheme(
          * between, apply the rotation at the same index as the first hue in the range, and return the
          * rotated hue.
          *
-         * @param sourceColorHct The color whose hue should be rotated.
-         * @param hues A set of hues.
-         * @param rotations A set of hue rotations.
+         * @param[sourceColorHct] The color whose hue should be rotated.
+         * @param[hues] A set of hues.
+         * @param[rotations] A set of hue rotations.
          * @return Color's hue with a rotation applied.
          */
         fun getRotatedHue(sourceColorHct: Hct, hues: DoubleArray, rotations: DoubleArray): Double {
@@ -87,6 +90,7 @@ open class DynamicScheme(
                     return MathUtils.sanitizeDegreesDouble(sourceHue + rotations[i])
                 }
             }
+
             // If this statement executes, something is wrong, there should have been a rotation
             // found using the arrays.
             return sourceHue

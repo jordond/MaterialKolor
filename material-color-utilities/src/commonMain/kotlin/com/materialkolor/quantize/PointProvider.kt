@@ -15,13 +15,19 @@
  */
 package com.materialkolor.quantize
 
-/** An interface to allow use of different color spaces by quantizers.  */
+/**
+ * An interface to allow use of different color spaces by quantizers.
+ */
 internal interface PointProvider {
 
-    /** The four components in the color space of an sRGB color.  */
+    /**
+     * The four components in the color space of an sRGB color.
+     */
     fun fromInt(argb: Int): DoubleArray?
 
-    /** The ARGB (i.e. hex code) representation of this color.  */
+    /**
+     * The ARGB (i.e. hex code) representation of this color.
+     */
     fun toInt(point: DoubleArray?): Int
 
     /**

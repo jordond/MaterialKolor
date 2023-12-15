@@ -26,10 +26,10 @@ import kotlin.math.round
  * Given a large set of colors, remove colors that are unsuitable for a UI theme, and rank the rest
  * based on suitability.
  *
- *
  * Enables use of a high cluster count for image quantization, thus ensuring colors aren't
  * muddied, while curating the high cluster count to a much smaller number of appropriate choices.
  */
+@Suppress("unused")
 internal object Score {
 
     private const val TARGET_CHROMA = 48.0 // A1 Chroma
@@ -43,11 +43,11 @@ internal object Score {
      * Given a map with keys of colors and values of how often the color appears, rank the colors
      * based on suitability for being used for a UI theme.
      *
-     * @param colorsToPopulation map with keys of colors and values of how often the color appears,
+     * @param[colorsToPopulation] map with keys of colors and values of how often the color appears,
      * usually from a source image.
-     * @param desired max count of colors to be returned in the list.
-     * @param fallbackColorArgb color to be returned if no other options available.
-     * @param filter whether to filter out undesireable combinations.
+     * @param[desired] max count of colors to be returned in the list.
+     * @param[fallbackColorArgb] color to be returned if no other options available.
+     * @param[filter] whether to filter out undesireable combinations.
      * @return Colors sorted by suitability for a UI theme. The most suitable color is the first item,
      * the least suitable is the last. There will always be at least one color returned. If all
      * the input colors were not suitable for a theme, a default fallback color will be provided,
@@ -60,7 +60,6 @@ internal object Score {
         fallbackColorArgb: Int = -0xbd7a0c,
         filter: Boolean = true,
     ): List<Int> {
-
         // Get the HCT color for each Argb value, while finding the per hue count and
         // total count.
         val colorsHct: MutableList<Hct> = mutableListOf()
@@ -99,6 +98,7 @@ internal object Score {
             val score = proportionScore + chromaScore
             scoredHcts.add(ScoredHCT(hct, score))
         }
+
         // Sorted so that colors with higher scores come first.
         scoredHcts.sortWith(ScoredComparator())
 
@@ -140,6 +140,7 @@ internal object Score {
     }
 
     private class ScoredHCT(val hct: Hct, val score: Double)
+
     private class ScoredComparator : Comparator<ScoredHCT> {
 
         override fun compare(a: ScoredHCT, b: ScoredHCT): Int {

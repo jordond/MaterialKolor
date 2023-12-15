@@ -21,7 +21,6 @@ package com.materialkolor.quantize
  * speed by several optimizations, as implemented in Wsmeans, or Weighted Square Means, K-Means with
  * those optimizations.
  *
- *
  * This algorithm was designed by M. Emre Celebi, and was found in their 2011 paper, Improving
  * the Performance of K-Means for Color Quantization. https://arxiv.org/abs/1101.0395
  */
@@ -31,8 +30,8 @@ internal object QuantizerCelebi {
      * Reduce the number of colors needed to represented the input, minimizing the difference between
      * the original image and the recolored image.
      *
-     * @param pixels Colors in ARGB format.
-     * @param maxColors The number of colors to divide the image into. A lower number of colors may be
+     * @param[pixels] Colors in ARGB format.
+     * @param[maxColors] The number of colors to divide the image into. A lower number of colors may be
      * returned.
      * @return Map with keys of colors in ARGB format, and values of number of pixels in the original
      * image that correspond to the color in the quantized image.

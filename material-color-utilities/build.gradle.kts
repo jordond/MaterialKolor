@@ -1,15 +1,14 @@
-@file:Suppress("UNUSED_VARIABLE", "OPT_IN_USAGE")
-
 plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.android.library)
     alias(libs.plugins.publish)
+    alias(libs.plugins.poko)
 }
 
 kotlin {
-    targetHierarchy.default()
+    applyDefaultHierarchyTemplate()
 
-    android {
+    androidTarget {
         publishAllLibraryVariants()
     }
 
@@ -61,11 +60,6 @@ android {
         release {
             isMinifyEnabled = false
         }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlin {
