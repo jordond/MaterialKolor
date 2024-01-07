@@ -9,8 +9,8 @@ plugins {
 
 @OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
 kotlin {
-    targetHierarchy.default()
-    android {
+    applyDefaultHierarchyTemplate()
+    androidTarget {
         compilations.all {
             kotlinOptions {
                 jvmTarget = "1.8"
@@ -93,7 +93,6 @@ kotlin {
             dependencies {
             }
         }
-
     }
 }
 

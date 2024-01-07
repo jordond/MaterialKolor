@@ -1,4 +1,4 @@
-@file:Suppress("UNUSED_VARIABLE", "OPT_IN_USAGE")
+@file:Suppress("OPT_IN_USAGE")
 
 plugins {
     alias(libs.plugins.multiplatform)
@@ -7,15 +7,19 @@ plugins {
 }
 
 kotlin {
-    targetHierarchy.default()
+    applyDefaultHierarchyTemplate()
 
-    android {
+    androidTarget {
         publishAllLibraryVariants()
     }
 
     jvm()
 
     js(IR) {
+        browser()
+    }
+
+    wasmJs {
         browser()
     }
 
