@@ -10,6 +10,7 @@
 ![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
 ![badge-ios](http://img.shields.io/badge/platform-ios-CDCDCD.svg?style=flat)
 ![badge-desktop](http://img.shields.io/badge/platform-desktop-DB413D.svg?style=flat)
+![badge-js-wasm](http://img.shields.io/badge/platform-js%2wasmJs-FDD835.svg?style=flat)
 
 A Compose Multiplatform library for creating dynamic Material Design 3 color palettes from any
 color. Similar to generating a theme
@@ -40,7 +41,7 @@ This library is written for Compose Multiplatform, and can be used on the follow
 - Android
 - iOS
 - JVM (Desktop)
-- JavaScript (Browser)
+- JavaScript/wasm (Browser)
 
 You can see a demo running at [demo.materialkolor.com](https://demo.materialkolor.com).
 
