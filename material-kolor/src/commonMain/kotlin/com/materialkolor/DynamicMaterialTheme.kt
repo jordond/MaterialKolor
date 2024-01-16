@@ -7,6 +7,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
@@ -20,6 +22,8 @@ public fun DynamicMaterialTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = 0.0,
+    shapes: Shapes = MaterialTheme.shapes,
+    typography: Typography = MaterialTheme.typography,
     content: @Composable () -> Unit,
 ) {
     val colorScheme: ColorScheme by remember(seedColor, useDarkTheme, style, contrastLevel) {
@@ -34,7 +38,12 @@ public fun DynamicMaterialTheme(
     }
 
     CompositionLocalProvider(LocalDynamicMaterialThemeSeed provides seedColor) {
-        MaterialTheme(colorScheme = colorScheme, content = content)
+        MaterialTheme(
+            colorScheme = colorScheme,
+            shapes = shapes,
+            typography = typography,
+            content = content,
+        )
     }
 }
 
@@ -45,6 +54,8 @@ public fun AnimatedDynamicMaterialTheme(
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = 0.0,
     animationSpec: AnimationSpec<Color> = spring(stiffness = Spring.StiffnessLow),
+    shapes: Shapes = MaterialTheme.shapes,
+    typography: Typography = MaterialTheme.typography,
     content: @Composable () -> Unit,
 ) {
     val colors: ColorScheme by remember(seedColor, useDarkTheme, style, contrastLevel) {
@@ -77,6 +88,11 @@ public fun AnimatedDynamicMaterialTheme(
     )
 
     CompositionLocalProvider(LocalDynamicMaterialThemeSeed provides seedColor) {
-        MaterialTheme(colorScheme = animatedColorScheme, content = content)
+        MaterialTheme(
+            colorScheme = animatedColorScheme,
+            shapes = shapes,
+            typography = typography,
+            content = content,
+        )
     }
 }
