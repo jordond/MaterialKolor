@@ -67,7 +67,7 @@ jobs:
           distribution: adopt
 
       - name: Cache Konan
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.konan/caches
