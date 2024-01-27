@@ -139,7 +139,7 @@ fun MyTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = dynamicColorScheme(seedColor, useDarkTheme)
+  val colorScheme = rememberDynamicColorScheme(seedColor, useDarkTheme)
 
     MaterialTheme(
         colors = colorScheme.toMaterialColors(),
