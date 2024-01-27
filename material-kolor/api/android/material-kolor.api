@@ -1,6 +1,7 @@
 public final class com/materialkolor/DynamicColorSchemeKt {
 	public static final fun dynamicColorScheme-Iv8Zu3U (JZLcom/materialkolor/PaletteStyle;D)Landroidx/compose/material3/ColorScheme;
 	public static synthetic fun dynamicColorScheme-Iv8Zu3U$default (JZLcom/materialkolor/PaletteStyle;DILjava/lang/Object;)Landroidx/compose/material3/ColorScheme;
+	public static final fun rememberDynamicColorScheme-euL9pac (JZLcom/materialkolor/PaletteStyle;DLandroidx/compose/runtime/Composer;II)Landroidx/compose/material3/ColorScheme;
 }
 
 public final class com/materialkolor/DynamicMaterialThemeKt {

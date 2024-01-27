@@ -1,6 +1,8 @@
 package com.materialkolor
 
 import androidx.compose.material3.ColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.materialkolor.dynamiccolor.MaterialDynamicColors
@@ -14,6 +16,14 @@ import com.materialkolor.scheme.SchemeNeutral
 import com.materialkolor.scheme.SchemeRainbow
 import com.materialkolor.scheme.SchemeTonalSpot
 import com.materialkolor.scheme.SchemeVibrant
+
+@Composable
+public fun rememberDynamicColorScheme(
+    seedColor: Color,
+    isDark: Boolean,
+    style: PaletteStyle = PaletteStyle.TonalSpot,
+    contrastLevel: Double = 0.0,
+): ColorScheme = remember { dynamicColorScheme(seedColor, isDark, style, contrastLevel) }
 
 public fun dynamicColorScheme(
     seedColor: Color,
