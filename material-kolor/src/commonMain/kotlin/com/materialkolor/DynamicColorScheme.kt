@@ -23,7 +23,9 @@ public fun rememberDynamicColorScheme(
     isDark: Boolean,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = 0.0,
-): ColorScheme = remember { dynamicColorScheme(seedColor, isDark, style, contrastLevel) }
+): ColorScheme = remember(seedColor, isDark, style, contrastLevel) {
+    dynamicColorScheme(seedColor, isDark, style, contrastLevel)
+}
 
 public fun dynamicColorScheme(
     seedColor: Color,
