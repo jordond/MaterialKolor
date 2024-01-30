@@ -29,32 +29,25 @@ import kotlin.math.round
  * See Palmer and Schloss, 2010 or Schloss and Palmer's Chapter 21 in Handbook of Color
  * Psychology (2015).
  */
-class DislikeAnalyzer private constructor() {
+object DislikeAnalyzer {
 
-    init {
-        throw UnsupportedOperationException()
+    /**
+     * Returns true if color is disliked.
+     *
+     *
+     * Disliked is defined as a dark yellow-green that is not neutral.
+     */
+    fun isDisliked(hct: Hct): Boolean {
+        val huePasses = round(hct.getHue()) in 90.0..111.0
+        val chromaPasses: Boolean = round(hct.getChroma()) > 16.0
+        val tonePasses: Boolean = round(hct.getTone()) < 65.0
+        return huePasses && chromaPasses && tonePasses
     }
 
-    companion object {
-
-        /**
-         * Returns true if color is disliked.
-         *
-         *
-         * Disliked is defined as a dark yellow-green that is not neutral.
-         */
-        fun isDisliked(hct: Hct): Boolean {
-            val huePasses = round(hct.getHue()) in 90.0..111.0
-            val chromaPasses: Boolean = round(hct.getChroma()) > 16.0
-            val tonePasses: Boolean = round(hct.getTone()) < 65.0
-            return huePasses && chromaPasses && tonePasses
-        }
-
-        /** If color is disliked, lighten it to make it likable.  */
-        fun fixIfDisliked(hct: Hct): Hct {
-            return if (isDisliked(hct)) {
-                Hct.from(hct.getHue(), hct.getChroma(), 70.0)
-            } else hct
-        }
+    /** If color is disliked, lighten it to make it likable.  */
+    fun fixIfDisliked(hct: Hct): Hct {
+        return if (isDisliked(hct)) {
+            Hct.from(hct.getHue(), hct.getChroma(), 70.0)
+        } else hct
     }
 }
