@@ -17,7 +17,6 @@ package com.materialkolor.hct
 
 import com.materialkolor.utils.ColorUtils.whitePointD65
 import com.materialkolor.utils.ColorUtils.yFromLstar
-import com.materialkolor.utils.MathUtils.clampDouble
 import com.materialkolor.utils.MathUtils.lerp
 import kotlin.math.PI
 import kotlin.math.cbrt
@@ -99,7 +98,7 @@ internal class ViewingConditions
             val f = 0.8 + surround / 10.0
             val c = if (f >= 0.9) lerp(0.59, 0.69, (f - 0.9) * 10.0) else lerp(0.525, 0.59, (f - 0.8) * 10.0)
             var d = if (discountingIlluminant) 1.0 else f * (1.0 - 1.0 / 3.6 * exp((-adaptingLuminance - 42.0) / 92.0))
-            d = clampDouble(0.0, 1.0, d)
+            d = d.coerceIn(0.0, 1.0)
             val rgbD = doubleArrayOf(
                 d * (100.0 / rW) + 1.0 - d, d * (100.0 / gW) + 1.0 - d, d * (100.0 / bW) + 1.0 - d
             )

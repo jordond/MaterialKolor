@@ -26,13 +26,21 @@ import kotlin.math.round
  * Utility methods for color science constants and color space conversions that aren't HCT or
  * CAM16.
  */
+@Suppress("MemberVisibilityCanBePrivate")
 internal object ColorUtils {
 
-    val SRGB_TO_XYZ = arrayOf(doubleArrayOf(0.41233895, 0.35762064, 0.18051042), doubleArrayOf(0.2126, 0.7152, 0.0722), doubleArrayOf(0.01932141, 0.11916382, 0.95034478))
-    val XYZ_TO_SRGB = arrayOf(doubleArrayOf(
-        3.2413774792388685, -1.5376652402851851, -0.49885366846268053), doubleArrayOf(
-        -0.9691452513005321, 1.8758853451067872, 0.04156585616912061), doubleArrayOf(
-        0.05562093689691305, -0.20395524564742123, 1.0571799111220335))
+    val SRGB_TO_XYZ = arrayOf(
+        doubleArrayOf(0.41233895, 0.35762064, 0.18051042),
+        doubleArrayOf(0.2126, 0.7152, 0.0722),
+        doubleArrayOf(0.01932141, 0.11916382, 0.95034478),
+    )
+
+    val XYZ_TO_SRGB = arrayOf(
+        doubleArrayOf(3.2413774792388685, -1.5376652402851851, -0.49885366846268053),
+        doubleArrayOf(-0.9691452513005321, 1.8758853451067872, 0.04156585616912061),
+        doubleArrayOf(0.05562093689691305, -0.20395524564742123, 1.0571799111220335),
+    )
+
     val WHITE_POINT_D65 = doubleArrayOf(95.047, 100.0, 108.883)
 
     /** Converts a color from RGB components to ARGB format.  */
@@ -200,11 +208,8 @@ internal object ColorUtils {
      */
     fun linearized(rgbComponent: Int): Double {
         val normalized = rgbComponent / 255.0
-        return if (normalized <= 0.040449936) {
-            normalized / 12.92 * 100.0
-        } else {
-            (normalized + 0.055 / 1.055).pow(2.4) * 100.0
-        }
+        return if (normalized <= 0.040449936) normalized / 12.92 * 100.0
+        else (normalized + 0.055 / 1.055).pow(2.4) * 100.0
     }
 
     /**
@@ -215,12 +220,11 @@ internal object ColorUtils {
      */
     fun delinearized(rgbComponent: Double): Int {
         val normalized = rgbComponent / 100.0
-        val delinearized: Double = if (normalized <= 0.0031308) {
-            normalized * 12.92
-        } else {
-            1.055 * normalized.pow(1.0 / 2.4) - 0.055
-        }
-        return MathUtils.clampInt(0, 255, round(delinearized * 255.0).toInt())
+        val delinearized: Double =
+            if (normalized <= 0.0031308) normalized * 12.92
+            else 1.055 * normalized.pow(1.0 / 2.4) - 0.055
+
+        return round(delinearized * 255.0).coerceIn(0.0, 255.0).toInt()
     }
 
     /**
@@ -228,28 +232,18 @@ internal object ColorUtils {
      *
      * @return The white point
      */
-    fun whitePointD65(): DoubleArray {
-        return WHITE_POINT_D65
-    }
+    fun whitePointD65(): DoubleArray = WHITE_POINT_D65
 
     fun labF(t: Double): Double {
         val e = 216.0 / 24389.0
         val kappa = 24389.0 / 27.0
-        return if (t > e) {
-            t.pow(1.0 / 3.0)
-        } else {
-            (kappa * t + 16) / 116
-        }
+        return if (t > e) t.pow(1.0 / 3.0) else (kappa * t + 16) / 116
     }
 
     fun labInvf(ft: Double): Double {
         val e = 216.0 / 24389.0
         val kappa = 24389.0 / 27.0
         val ft3 = ft * ft * ft
-        return if (ft3 > e) {
-            ft3
-        } else {
-            (116 * ft - 16) / kappa
-        }
+        return if (ft3 > e) ft3 else (116 * ft - 16) / kappa
     }
 }

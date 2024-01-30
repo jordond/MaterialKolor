@@ -19,7 +19,6 @@ import com.materialkolor.contrast.Contrast
 import com.materialkolor.hct.Hct
 import com.materialkolor.palettes.TonalPalette
 import com.materialkolor.scheme.DynamicScheme
-import com.materialkolor.utils.MathUtils
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -182,7 +181,7 @@ class DynamicColor {
             return argb
         }
         val percentage: Double = opacity.invoke(scheme)
-        val alpha = MathUtils.clampInt(0, 255, round(percentage * 255).toInt())
+        val alpha = round(percentage * 255).toInt().coerceIn(0, 255)
         return argb and 0x00ffffff or (alpha shl 24)
     }
 
@@ -255,11 +254,11 @@ class DynamicColor {
             // If constraint is not satisfied, try another round.
             if ((fTone - nTone) * expansionDir < delta) {
                 // 2nd round: expand farther to match delta.
-                fTone = MathUtils.clampDouble(0.0, 100.0, nTone + delta * expansionDir)
+                fTone = (nTone + delta * expansionDir).coerceIn(0.0, 100.0)
                 // If constraint is not satisfied, try another round.
                 if ((fTone - nTone) * expansionDir < delta) {
                     // 3rd round: contract nearer to match delta.
-                    nTone = MathUtils.clampDouble(0.0, 100.0, fTone - delta * expansionDir)
+                    nTone = (fTone - delta * expansionDir).coerceIn(0.0, 100.0)
                 }
             }
 

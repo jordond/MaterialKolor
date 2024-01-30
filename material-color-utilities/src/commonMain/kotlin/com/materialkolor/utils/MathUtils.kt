@@ -26,14 +26,10 @@ internal object MathUtils {
      *
      * @return 1 if num > 0, -1 if num < 0, and 0 if num = 0
      */
-    fun signum(num: Double): Int {
-        return if (num < 0) {
-            -1
-        } else if (num == 0.0) {
-            0
-        } else {
-            1
-        }
+    fun signum(num: Double): Int = when {
+        num < 0 -> -1
+        num == 0.0 -> 0
+        else -> 1
     }
 
     /**
@@ -46,34 +42,6 @@ internal object MathUtils {
     }
 
     /**
-     * Clamps an integer between two integers.
-     *
-     * @return input when min <= input <= max, and either min or max otherwise.
-     */
-    fun clampInt(min: Int, max: Int, input: Int): Int {
-        if (input < min) {
-            return min
-        } else if (input > max) {
-            return max
-        }
-        return input
-    }
-
-    /**
-     * Clamps an integer between two floating-point numbers.
-     *
-     * @return input when min <= input <= max, and either min or max otherwise.
-     */
-    fun clampDouble(min: Double, max: Double, input: Double): Double {
-        if (input < min) {
-            return min
-        } else if (input > max) {
-            return max
-        }
-        return input
-    }
-
-    /**
      * Sanitizes a degree measure as an integer.
      *
      * @return a degree measure between 0 (inclusive) and 360 (exclusive).
@@ -81,7 +49,7 @@ internal object MathUtils {
     fun sanitizeDegreesInt(degrees: Int): Int {
         var sanitized = degrees % 360
         if (sanitized < 0) {
-            sanitized = sanitized + 360
+            sanitized += 360
         }
         return sanitized
     }
@@ -94,7 +62,7 @@ internal object MathUtils {
     fun sanitizeDegreesDouble(degrees: Double): Double {
         var sanitized = degrees % 360.0
         if (sanitized < 0) {
-            sanitized = sanitized + 360.0
+            sanitized += 360.0
         }
         return sanitized
     }
@@ -130,11 +98,7 @@ internal object MathUtils {
         return doubleArrayOf(a, b, c)
     }
 
-    fun toDegrees(angrad: Double): Double {
-        return angrad * 57.29577951308232
-    }
+    fun toDegrees(angrad: Double): Double = angrad * 57.29577951308232
 
-    fun toRadians(angdeg: Double): Double {
-        return angdeg * 0.017453292519943295
-    }
+    fun toRadians(angdeg: Double): Double = angdeg * 0.017453292519943295
 }

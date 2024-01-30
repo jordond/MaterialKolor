@@ -31,6 +31,7 @@ import kotlin.math.max
  * Contrast ratio is calculated using XYZ's Y. When linearized to match human perception, Y
  * becomes HCT's tone and L*a*b*'s' L*.
  */
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 object Contrast {
 
     // The minimum contrast ratio of two colors.
