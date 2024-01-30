@@ -21,17 +21,18 @@ import kotlin.math.round
 
 /**
  * A convenience class for retrieving colors that are constant in hue and chroma, but vary in tone.
+ *
+ * @param[hue] The hue of the Tonal Palette, in HCT. Ranges from 0 to 360.
+ * @param[chroma] The chroma of the Tonal Palette, in HCT. Ranges from 0 to ~130 (for sRGB gamut).
+ * @param[keyColor] The key color is the first tone, starting from T50, that matches the palette's chroma.
  */
 class TonalPalette private constructor(
-    /** The hue of the Tonal Palette, in HCT. Ranges from 0 to 360.  */
     var hue: Double,
-    /** The chroma of the Tonal Palette, in HCT. Ranges from 0 to ~130 (for sRGB gamut).  */
     var chroma: Double,
-    /** The key color is the first tone, starting from T50, that matches the palette's chroma.  */
     var keyColor: Hct,
 ) {
 
-    var cache: MutableMap<Int, Int> = HashMap()
+    private var cache: MutableMap<Int, Int> = HashMap()
 
     /**
      * Create an ARGB color with HCT hue and chroma of this Tones instance, and the provided HCT tone.
@@ -39,20 +40,20 @@ class TonalPalette private constructor(
      * @param tone HCT tone, measured from 0 to 100.
      * @return ARGB representation of a color with that tone.
      */
-    // AndroidJdkLibsChecker is higher priority than ComputeIfAbsentUseValue (b/119581923)
     fun tone(tone: Int): Int {
         var color = cache[tone]
         if (color == null) {
             color = Hct.from(hue, chroma, tone.toDouble()).toInt()
             cache[tone] = color
         }
+
         return color
     }
 
-    /** Given a tone, use hue and chroma of palette to create a color, and return it as HCT.  */
-    fun getHct(tone: Double): Hct {
-        return Hct.from(hue, chroma, tone)
-    }
+    /**
+     * Given a tone, use hue and chroma of palette to create a color, and return it as HCT.
+     */
+    fun getHct(tone: Double): Hct = Hct.from(hue, chroma, tone)
 
     companion object {
 
@@ -122,6 +123,7 @@ class TonalPalette private constructor(
                 }
                 delta += 1.0
             }
+
             return smallestDeltaHct
         }
     }

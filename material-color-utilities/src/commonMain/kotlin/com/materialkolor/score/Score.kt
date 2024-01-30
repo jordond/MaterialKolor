@@ -26,7 +26,6 @@ import kotlin.math.round
  * Given a large set of colors, remove colors that are unsuitable for a UI theme, and rank the rest
  * based on suitability.
  *
- *
  * Enables use of a high cluster count for image quantization, thus ensuring colors aren't
  * muddied, while curating the high cluster count to a much smaller number of appropriate choices.
  */
@@ -53,7 +52,6 @@ internal object Score {
      * the input colors were not suitable for a theme, a default fallback color will be provided,
      * Google Blue.
      */
-    @JvmOverloads
     fun score(
         colorsToPopulation: Map<Int?, Int>,
         desired: Int = 4,
