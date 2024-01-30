@@ -411,7 +411,7 @@ class MaterialDynamicColors(
             palette = { s -> s.primaryPalette },
             tone = { s ->
                 if (isFidelity(s)) {
-                    DynamicColor.foregroundTone(primaryContainer().tone.apply(s), 4.5)
+                    DynamicColor.foregroundTone(primaryContainer().tone(s), 4.5)
                 } else if (isMonochrome(s)) {
                     if (s.isDark) 0.0 else 100.0
                 } else {
@@ -508,7 +508,7 @@ class MaterialDynamicColors(
                 if (!isFidelity(s)) {
                     if (s.isDark) 90.0 else 10.0
                 } else
-                    DynamicColor.foregroundTone(secondaryContainer().tone.apply(s), 4.5)
+                    DynamicColor.foregroundTone(secondaryContainer().tone(s), 4.5)
             },
             isBackground = false,
             background = { secondaryContainer() },
@@ -599,7 +599,7 @@ class MaterialDynamicColors(
                     if (s.isDark) 0.0 else 100.0
                 } else if (!isFidelity(s)) {
                     if (s.isDark) 90.0 else 10.0
-                } else DynamicColor.foregroundTone(tertiaryContainer().tone.apply(s), 4.5)
+                } else DynamicColor.foregroundTone(tertiaryContainer().tone(s), 4.5)
             },
             isBackground = false,
             background = { tertiaryContainer() },
@@ -935,7 +935,7 @@ class MaterialDynamicColors(
             && scheme.variant != Variant.NEUTRAL
         ) return true
 
-        return scheme.variant == Variant.FIDELITY || scheme.variant == Variant.CONTENT;
+        return scheme.variant == Variant.FIDELITY || scheme.variant == Variant.CONTENT
     }
 
     companion object {

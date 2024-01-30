@@ -24,7 +24,6 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.round
-import com.materialkolor.common.Function as Function1
 
 /**
  * A color that adjusts itself based on UI state, represented by DynamicScheme.
@@ -49,23 +48,19 @@ import com.materialkolor.common.Function as Function1
  * flexibility, any desired behavior of a color for any design system, but it usually unnecessary.
  * See the default constructor for more information.
  */
-// Prevent lint for Function.apply not being available on Android before API level 14 (4.0.1).
-// "AndroidJdkLibsChecker" for Function, "NewApi" for Function.apply().
-// A java_library Bazel rule with an Android constraint cannot skip these warnings without this
-// annotation; another solution would be to create an android_library rule and supply
-// AndroidManifest with an SDK set higher than 14.
+@Suppress("MemberVisibilityCanBePrivate", "unused")
 class DynamicColor {
 
     val name: String
-    val palette: Function1<DynamicScheme, TonalPalette>
-    val tone: Function1<DynamicScheme, Double>
+    val palette: (DynamicScheme) -> TonalPalette
+    val tone: (DynamicScheme) -> Double
     val isBackground: Boolean
-    val background: Function1<DynamicScheme, DynamicColor>?
-    val secondBackground: Function1<DynamicScheme, DynamicColor>?
+    val background: ((DynamicScheme) -> DynamicColor)?
+    val secondBackground: ((DynamicScheme) -> DynamicColor)?
     val contrastCurve: ContrastCurve?
-    val toneDeltaPair: Function1<DynamicScheme, ToneDeltaPair>?
-    val opacity: Function1<DynamicScheme, Double>?
-    private val hctCache: HashMap<DynamicScheme, Hct> = HashMap<DynamicScheme, Hct>()
+    val toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair)?
+    val opacity: ((DynamicScheme) -> Double)?
+    private val hctCache: HashMap<DynamicScheme, Hct> = HashMap()
 
     /**
      * A constructor for DynamicColor.
@@ -101,13 +96,13 @@ class DynamicColor {
      */
     constructor(
         name: String,
-        palette: Function1<DynamicScheme, TonalPalette>,
-        tone: Function1<DynamicScheme, Double>,
+        palette: (DynamicScheme) -> TonalPalette,
+        tone: (DynamicScheme) -> Double,
         isBackground: Boolean,
-        background: Function1<DynamicScheme, DynamicColor>?,
-        secondBackground: Function1<DynamicScheme, DynamicColor>?,
+        background: ((DynamicScheme) -> DynamicColor)?,
+        secondBackground: ((DynamicScheme) -> DynamicColor)?,
         contrastCurve: ContrastCurve?,
-        toneDeltaPair: Function1<DynamicScheme, ToneDeltaPair>?,
+        toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair)?,
     ) {
         this.name = name
         this.palette = palette
@@ -117,7 +112,7 @@ class DynamicColor {
         this.secondBackground = secondBackground
         this.contrastCurve = contrastCurve
         this.toneDeltaPair = toneDeltaPair
-        opacity = null
+        this.opacity = null
     }
 
     /**
@@ -155,14 +150,14 @@ class DynamicColor {
      */
     constructor(
         name: String,
-        palette: Function1<DynamicScheme, TonalPalette>,
-        tone: Function1<DynamicScheme, Double>,
+        palette: (DynamicScheme) -> TonalPalette,
+        tone: (DynamicScheme) -> Double,
         isBackground: Boolean,
-        background: Function1<DynamicScheme, DynamicColor>?,
-        secondBackground: Function1<DynamicScheme, DynamicColor>?,
+        background: ((DynamicScheme) -> DynamicColor)?,
+        secondBackground: ((DynamicScheme) -> DynamicColor)?,
         contrastCurve: ContrastCurve?,
-        toneDeltaPair: Function1<DynamicScheme, ToneDeltaPair>?,
-        opacity: Function1<DynamicScheme, Double>?,
+        toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair)?,
+        opacity: ((DynamicScheme) -> Double)?,
     ) {
         this.name = name
         this.palette = palette
@@ -186,7 +181,7 @@ class DynamicColor {
         if (opacity == null) {
             return argb
         }
-        val percentage: Double = opacity.apply(scheme)
+        val percentage: Double = opacity.invoke(scheme)
         val alpha = MathUtils.clampInt(0, 255, round(percentage * 255).toInt())
         return argb and 0x00ffffff or (alpha shl 24)
     }
@@ -198,7 +193,7 @@ class DynamicColor {
      * dark mode or light mode, and what the desired contrast level is.
      */
     fun getHct(scheme: DynamicScheme): Hct {
-        val cachedAnswer = hctCache.get(scheme)
+        val cachedAnswer = hctCache[scheme]
         if (cachedAnswer != null) {
             return cachedAnswer
         }
@@ -209,13 +204,13 @@ class DynamicColor {
         // For example, this enables colors with standard tone of T90, which has limited chroma, to
         // "recover" intended chroma as contrast increases.
         val tone = getTone(scheme)
-        val answer: Hct = palette.apply(scheme).getHct(tone)
+        val answer: Hct = palette(scheme).getHct(tone)
         // NOMUTANTS--trivial test with onerous dependency injection requirement.
         if (hctCache.size > 4) {
             hctCache.clear()
         }
         // NOMUTANTS--trivial test with onerous dependency injection requirement.
-        hctCache.put(scheme, answer)
+        hctCache[scheme] = answer
         return answer
     }
 
@@ -225,13 +220,13 @@ class DynamicColor {
 
         // Case 1: dual foreground, pair of colors with delta constraint.
         return if (toneDeltaPair != null) {
-            val toneDeltaPair: ToneDeltaPair = toneDeltaPair.apply(scheme)
+            val toneDeltaPair: ToneDeltaPair = toneDeltaPair.invoke(scheme)
             val roleA: DynamicColor = toneDeltaPair.roleA
             val roleB: DynamicColor = toneDeltaPair.roleB
             val delta: Double = toneDeltaPair.delta
             val polarity: TonePolarity = toneDeltaPair.polarity
             val stayTogether: Boolean = toneDeltaPair.stayTogether
-            val bg: DynamicColor = background!!.apply(scheme)
+            val bg: DynamicColor = background!!(scheme)
             val bgTone = bg.getTone(scheme)
             val aIsNearer = polarity === TonePolarity.NEARER || polarity === TonePolarity.LIGHTER && !scheme.isDark || polarity === TonePolarity.DARKER && scheme.isDark
             val nearer = if (aIsNearer) roleA else roleB
@@ -245,10 +240,10 @@ class DynamicColor {
 
             // If a color is good enough, it is not adjusted.
             // Initial and adjusted tones for `nearer`
-            val nInitialTone: Double = nearer.tone.apply(scheme)
+            val nInitialTone: Double = nearer.tone(scheme)
             var nTone = if (Contrast.ratioOfTones(bgTone, nInitialTone) >= nContrast) nInitialTone else foregroundTone(bgTone, nContrast)
             // Initial and adjusted tones for `farther`
-            val fInitialTone: Double = farther.tone.apply(scheme)
+            val fInitialTone: Double = farther.tone(scheme)
             var fTone = if (Contrast.ratioOfTones(bgTone, fInitialTone) >= fContrast) fInitialTone else foregroundTone(bgTone, fContrast)
             if (decreasingContrast) {
                 // If decreasing contrast, adjust color to the "bare minimum"
@@ -304,11 +299,11 @@ class DynamicColor {
             if (amNearer) nTone else fTone
         } else {
             // Case 2: No contrast pair; just solve for itself.
-            var answer: Double = tone.apply(scheme)
+            var answer: Double = tone(scheme)
             if (background == null) {
                 return answer // No adjustment for colors with no background.
             }
-            val bgTone: Double = background.apply(scheme).getTone(scheme)
+            val bgTone: Double = background.invoke(scheme).getTone(scheme)
             val desiredRatio = contrastCurve?.get(scheme.contrastLevel)
                 ?: return answer // No adjustment for colors with no contrast curve.
             if (Contrast.ratioOfTones(bgTone, answer) >= desiredRatio) {
@@ -330,8 +325,8 @@ class DynamicColor {
             }
             if (secondBackground != null) {
                 // Case 3: Adjust for dual backgrounds.
-                val bgTone1: Double = background.apply(scheme).getTone(scheme)
-                val bgTone2: Double = secondBackground.apply(scheme).getTone(scheme)
+                val bgTone1: Double = background.invoke(scheme).getTone(scheme)
+                val bgTone2: Double = secondBackground.invoke(scheme).getTone(scheme)
                 val upper: Double = max(bgTone1, bgTone2)
                 val lower: Double = min(bgTone1, bgTone2)
                 if (Contrast.ratioOfTones(upper, answer) >= desiredRatio
@@ -362,7 +357,7 @@ class DynamicColor {
                     return if (lightOption == -1.0) 100.0 else lightOption
                 }
                 if (availables.size == 1) {
-                    return availables.get(0)
+                    return availables[0]
                 }
                 return if (darkOption == -1.0) 0.0 else darkOption
             }
@@ -399,8 +394,8 @@ class DynamicColor {
          */
         fun fromPalette(
             name: String,
-            palette: Function1<DynamicScheme, TonalPalette>,
-            tone: Function1<DynamicScheme, Double>,
+            palette: (DynamicScheme) -> TonalPalette,
+            tone: (DynamicScheme) -> Double,
         ): DynamicColor {
             return DynamicColor(
                 name = name,
@@ -443,19 +438,20 @@ class DynamicColor {
          */
         fun fromPalette(
             name: String,
-            palette: Function1<DynamicScheme, TonalPalette>,
-            tone: Function1<DynamicScheme, Double>,
+            palette: (DynamicScheme) -> TonalPalette,
+            tone: (DynamicScheme) -> Double,
             isBackground: Boolean,
         ): DynamicColor {
             return DynamicColor(
-                name,
-                palette,
-                tone,
-                isBackground,  /* background= */
-                null,  /* secondBackground= */
-                null,  /* contrastCurve= */
-                null,  /* toneDeltaPair= */
-                null)
+                name = name,
+                palette = palette,
+                tone = tone,
+                isBackground = isBackground,
+                background = null,
+                secondBackground = null,
+                contrastCurve = null,
+                toneDeltaPair = null,
+            )
         }
 
         /**
@@ -484,7 +480,7 @@ class DynamicColor {
             val darkerRatio: Double = Contrast.ratioOfTones(darkerTone, bgTone)
             val preferLighter = tonePrefersLightForeground(bgTone)
             return if (preferLighter) {
-                // "Neglible difference" handles an edge case where the initial contrast ratio is high
+                // "Negligible difference" handles an edge case where the initial contrast ratio is high
                 // (ex. 13.0), and the ratio passed to the function is that high ratio, and both the lighter
                 // and darker ratio fails to pass that ratio.
                 //
