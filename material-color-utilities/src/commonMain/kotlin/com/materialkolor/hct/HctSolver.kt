@@ -20,7 +20,7 @@ import com.materialkolor.utils.ColorUtils.argbFromLinrgb
 import com.materialkolor.utils.ColorUtils.argbFromLstar
 import com.materialkolor.utils.ColorUtils.yFromLstar
 import com.materialkolor.utils.MathUtils.matrixMultiply
-import com.materialkolor.utils.MathUtils.sanitizeDegreesDouble
+import com.materialkolor.utils.MathUtils.sanitizeDegrees
 import com.materialkolor.utils.MathUtils.signum
 import kotlin.math.PI
 import kotlin.math.abs
@@ -626,7 +626,7 @@ internal object HctSolver {
      * sufficiently close, and chroma will be maximized.
      */
     fun solveToInt(hueDegrees: Double, chroma: Double, lstar: Double): Int {
-        val hueDegrees1 = sanitizeDegreesDouble(hueDegrees)
+        val hueDegrees1 = sanitizeDegrees(hueDegrees)
         if (chroma < 0.0001 || lstar < 0.0001 || lstar > 99.9999) {
             return argbFromLstar(lstar)
         }

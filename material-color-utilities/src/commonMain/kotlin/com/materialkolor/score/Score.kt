@@ -17,8 +17,7 @@ package com.materialkolor.score
 
 import com.materialkolor.hct.Hct
 import com.materialkolor.utils.MathUtils.differenceDegrees
-import com.materialkolor.utils.MathUtils.sanitizeDegreesInt
-import kotlin.jvm.JvmOverloads
+import com.materialkolor.utils.MathUtils.sanitizeDegrees
 import kotlin.math.floor
 import kotlin.math.round
 
@@ -77,7 +76,7 @@ internal object Score {
         for (hue in 0..359) {
             val proportion = huePopulation[hue] / populationSum
             for (i in hue - 14 until hue + 16) {
-                val neighborHue = sanitizeDegreesInt(i)
+                val neighborHue = sanitizeDegrees(i)
                 hueExcitedProportions[neighborHue] += proportion
             }
         }
@@ -86,7 +85,7 @@ internal object Score {
         // filtering out values that do not have enough chroma or usage.
         val scoredHcts: MutableList<ScoredHCT> = mutableListOf()
         for (hct in colorsHct) {
-            val hue = sanitizeDegreesInt(round(hct.getHue()).toInt())
+            val hue = sanitizeDegrees(round(hct.getHue()).toInt())
             val proportion = hueExcitedProportions[hue]
             if (filter && (hct.getChroma() < CUTOFF_CHROMA || proportion <= CUTOFF_EXCITED_PROPORTION)) {
                 continue

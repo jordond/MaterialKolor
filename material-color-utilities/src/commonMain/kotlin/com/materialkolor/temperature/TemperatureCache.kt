@@ -73,7 +73,7 @@ internal class TemperatureCache(private val input: Hct) {
             // of the input color. This is the complement.
             var hueAddend = 0.0
             while (hueAddend <= 360.0) {
-                val hue = MathUtils.sanitizeDegreesDouble(
+                val hue = MathUtils.sanitizeDegrees(
                     startHue + directionOfRotation * hueAddend)
                 if (!isBetween(hue, startHue, endHue)) {
                     hueAddend += 1.0
@@ -120,7 +120,7 @@ internal class TemperatureCache(private val input: Hct) {
         allColors.add(startHct)
         var absoluteTotalTempDelta = 0.0
         for (i in 0..359) {
-            val hue = MathUtils.sanitizeDegreesInt(startHue + i)
+            val hue = MathUtils.sanitizeDegrees(startHue + i)
             val hct: Hct = hctsByHue!![hue]
             val temp = getRelativeTemperature(hct)
             val tempDelta: Double = abs(temp - lastTemp)
@@ -132,7 +132,7 @@ internal class TemperatureCache(private val input: Hct) {
         var totalTempDelta = 0.0
         lastTemp = getRelativeTemperature(startHct)
         while (allColors.size < divisions) {
-            val hue = MathUtils.sanitizeDegreesInt(startHue + hueAddend)
+            val hue = MathUtils.sanitizeDegrees(startHue + hueAddend)
             val hct: Hct = hctsByHue!![hue]
             val temp = getRelativeTemperature(hct)
             val tempDelta: Double = abs(temp - lastTemp)
@@ -290,12 +290,12 @@ internal class TemperatureCache(private val input: Hct) {
          */
         fun rawTemperature(color: Hct): Double {
             val lab: DoubleArray = ColorUtils.labFromArgb(color.toInt())
-            val hue = MathUtils.sanitizeDegreesDouble(MathUtils.toDegrees(atan2(lab[2], lab[1])))
+            val hue = MathUtils.sanitizeDegrees(MathUtils.toDegrees(atan2(lab[2], lab[1])))
             val chroma: Double = hypot(lab[1], lab[2])
             return (-0.5
                 + (0.02
                 * chroma.pow(1.07)
-                * cos(MathUtils.toRadians(MathUtils.sanitizeDegreesDouble(hue - 50.0)))))
+                * cos(MathUtils.toRadians(MathUtils.sanitizeDegrees(hue - 50.0)))))
         }
 
         /** Determines if an angle is between two other angles, rotating clockwise.  */

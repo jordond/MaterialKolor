@@ -21,7 +21,7 @@ import com.materialkolor.hct.Hct
 import com.materialkolor.utils.ColorUtils.lstarFromArgb
 import com.materialkolor.utils.MathUtils.differenceDegrees
 import com.materialkolor.utils.MathUtils.rotationDirection
-import com.materialkolor.utils.MathUtils.sanitizeDegreesDouble
+import com.materialkolor.utils.MathUtils.sanitizeDegrees
 import kotlin.math.min
 
 /** Functions for blending in HCT and CAM16.  */
@@ -41,7 +41,7 @@ internal object Blend {
         val toHct = Hct.fromInt(sourceColor)
         val differenceDegrees = differenceDegrees(fromHct.getHue(), toHct.getHue())
         val rotationDegrees: Double = min(differenceDegrees * 0.5, 15.0)
-        val outputHue = sanitizeDegreesDouble(fromHct.getHue()
+        val outputHue = sanitizeDegrees(fromHct.getHue()
             + rotationDegrees * rotationDirection(fromHct.getHue(), toHct.getHue()))
         return Hct.from(outputHue, fromHct.getChroma(), fromHct.getTone()).toInt()
     }

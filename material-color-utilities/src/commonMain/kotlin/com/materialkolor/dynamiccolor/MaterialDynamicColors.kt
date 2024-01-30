@@ -33,8 +33,8 @@ class MaterialDynamicColors(
     private val isExtendedFidelity: Boolean = false,
 ) {
 
-    fun highestSurface(s: DynamicScheme): DynamicColor {
-        return if (s.isDark) surfaceBright() else surfaceDim()
+    fun highestSurface(scheme: DynamicScheme): DynamicColor {
+        return if (scheme.isDark) surfaceBright() else surfaceDim()
     }
 
     // Compatibility Keys Colors for Android

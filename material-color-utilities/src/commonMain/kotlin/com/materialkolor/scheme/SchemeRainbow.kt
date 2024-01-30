@@ -16,18 +16,23 @@
 package com.materialkolor.scheme
 
 import com.materialkolor.hct.Hct
-import com.materialkolor.utils.MathUtils
 import com.materialkolor.palettes.TonalPalette
+import com.materialkolor.utils.MathUtils
 
-/** A playful theme - the source color's hue does not appear in the theme.  */
+/**
+ * A playful theme - the source color's hue does not appear in the theme.
+ */
 class SchemeRainbow(sourceColorHct: Hct, isDark: Boolean, contrastLevel: Double) : DynamicScheme(
-    sourceColorHct,
-    Variant.RAINBOW,
-    isDark,
-    contrastLevel,
-    TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 48.0),
-    TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 16.0),
-    TonalPalette.fromHueAndChroma(
-        MathUtils.sanitizeDegreesDouble(sourceColorHct.getHue() + 60.0), 24.0),
-    TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 0.0),
-    TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 0.0))
+    sourceColorHct = sourceColorHct,
+    variant = Variant.RAINBOW,
+    isDark = isDark,
+    contrastLevel = contrastLevel,
+    primaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 48.0),
+    secondaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 16.0),
+    tertiaryPalette = TonalPalette.fromHueAndChroma(
+        hue = MathUtils.sanitizeDegrees(sourceColorHct.getHue() + 60.0),
+        chroma = 24.0,
+    ),
+    neutralPalette = TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 0.0),
+    neutralVariantPalette = TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 0.0),
+)

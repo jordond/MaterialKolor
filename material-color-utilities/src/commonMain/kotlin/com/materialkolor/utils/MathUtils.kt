@@ -46,7 +46,7 @@ internal object MathUtils {
      *
      * @return a degree measure between 0 (inclusive) and 360 (exclusive).
      */
-    fun sanitizeDegreesInt(degrees: Int): Int {
+    fun sanitizeDegrees(degrees: Int): Int {
         var sanitized = degrees % 360
         if (sanitized < 0) {
             sanitized += 360
@@ -59,7 +59,7 @@ internal object MathUtils {
      *
      * @return a degree measure between 0.0 (inclusive) and 360.0 (exclusive).
      */
-    fun sanitizeDegreesDouble(degrees: Double): Double {
+    fun sanitizeDegrees(degrees: Double): Double {
         var sanitized = degrees % 360.0
         if (sanitized < 0) {
             sanitized += 360.0
@@ -80,7 +80,7 @@ internal object MathUtils {
      * to the shortest travel distance.
      */
     fun rotationDirection(from: Double, to: Double): Double {
-        val increasingDifference = sanitizeDegreesDouble(to - from)
+        val increasingDifference = sanitizeDegrees(to - from)
         return if (increasingDifference <= 180.0) 1.0 else -1.0
     }
 
