@@ -37,7 +37,7 @@ jobs:
           distribution: adopt
 
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/wrapper-validation-action@v2
 
       - name: Lint
         uses: gradle/gradle-build-action@v2
