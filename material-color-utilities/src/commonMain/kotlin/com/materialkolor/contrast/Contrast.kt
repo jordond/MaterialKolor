@@ -87,10 +87,8 @@ object Contrast {
      * Contrast ratio is a measure of legibility, its used to compare the lightness of two colors.
      * This method is used commonly in industry due to its use by WCAG.
      *
-     *
      * To compare lightness, the colors are expressed in the XYZ color space, where Y is lightness,
      * also known as relative luminance.
-     *
      *
      * The equation is ratio = lighter Y + 5 / darker Y + 5.
      */
@@ -104,12 +102,10 @@ object Contrast {
      * Contrast ratio of two tones. T in HCT, L* in L*a*b*. Also known as luminance or perpectual
      * luminance.
      *
-     *
      * Contrast ratio is defined using Y in XYZ, relative luminance. However, relative luminance is
      * linear to number of photons, not to perception of lightness. Perceptual luminance, L* in
      * L*a*b*, T in HCT, is. Designers prefer color spaces with perceptual luminance since they're
      * accurate to the eye.
-     *
      *
      * Y and L* are pure functions of each other, so it possible to use perceptually accurate color
      * spaces, and measure contrast, and measure contrast in a much more understandable way: instead
@@ -122,8 +118,8 @@ object Contrast {
     }
 
     /**
-     * Returns T in HCT, L* in L*a*b* >= tone parameter that ensures ratio with input T/L*. Returns -1
-     * if ratio cannot be achieved.
+     * Returns T in HCT, L* in L*a*b* >= tone parameter that ensures ratio with input T/L*.
+     * Returns -1 if ratio cannot be achieved.
      *
      * @param tone Tone return value must contrast with.
      * @param ratio Desired contrast ratio of return value and tone parameter.
@@ -152,7 +148,6 @@ object Contrast {
 
     /**
      * Tone >= tone parameter that ensures ratio. 100 if ratio cannot be achieved.
-     *
      *
      * This method is unsafe because the returned value is guaranteed to be in bounds, but, the in
      * bounds return value may not reach the desired ratio.
@@ -198,7 +193,6 @@ object Contrast {
 
     /**
      * Tone <= tone parameter that ensures ratio. 0 if ratio cannot be achieved.
-     *
      *
      * This method is unsafe because the returned value is guaranteed to be in bounds, but, the in
      * bounds return value may not reach the desired ratio.

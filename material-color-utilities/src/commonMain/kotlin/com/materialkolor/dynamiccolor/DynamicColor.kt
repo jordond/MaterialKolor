@@ -27,19 +27,15 @@ import kotlin.math.round
 /**
  * A color that adjusts itself based on UI state, represented by DynamicScheme.
  *
- *
  * This color automatically adjusts to accommodate a desired contrast level, or other adjustments
  * such as differing in light mode versus dark mode, or what the theme is, or what the color that
  * produced the theme is, etc.
  *
- *
  * Colors without backgrounds do not change tone when contrast changes. Colors with backgrounds
  * become closer to their background as contrast lowers, and further when contrast increases.
  *
- *
  * Prefer the static constructors. They provide a much more simple interface, such as requiring
  * just a hexcode, or just a hexcode and a background.
- *
  *
  * Ultimately, each component necessary for calculating a color, adjusting it for a desired
  * contrast level, and ensuring it has a certain lightness/tone difference from another color, is
@@ -64,16 +60,13 @@ class DynamicColor {
     /**
      * A constructor for DynamicColor.
      *
-     *
      * _Strongly_ prefer using one of the convenience constructors. This class is arguably too
      * flexible to ensure it can support any scenario. Functional arguments allow overriding without
      * risks that come with subclasses.
      *
-     *
      * For example, the default behavior of adjust tone at max contrast to be at a 7.0 ratio with
      * its background is principled and matches accessibility guidance. That does not mean it's the
      * desired approach for _every_ design system, and every color pairing, always, in every case.
-     *
      *
      * For opaque colors (colors with alpha = 100%).
      *
@@ -117,16 +110,13 @@ class DynamicColor {
     /**
      * A constructor for DynamicColor.
      *
-     *
      * _Strongly_ prefer using one of the convenience constructors. This class is arguably too
      * flexible to ensure it can support any scenario. Functional arguments allow overriding without
      * risks that come with subclasses.
      *
-     *
      * For example, the default behavior of adjust tone at max contrast to be at a 7.0 ratio with
      * its background is principled and matches accessibility guidance. That does not mean it's the
      * desired approach for _every_ design system, and every color pairing, always, in every case.
-     *
      *
      * For opaque colors (colors with alpha = 100%).
      *
