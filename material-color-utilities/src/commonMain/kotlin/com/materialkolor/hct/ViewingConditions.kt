@@ -37,14 +37,13 @@ import kotlin.math.sqrt
  *
  * This class caches intermediate values of the CAM16 conversion process that depend only on
  * viewing conditions, enabling speed ups.
- */
-internal class ViewingConditions
-/**
+ *
  * Parameters are intermediate values of the CAM16 conversion process. Their names are shorthand
  * for technical color science terminology, this class would not benefit from documenting them
  * individually. A brief overview is available in the CAM16 specification, and a complete overview
  * requires a color science textbook, such as Fairchild's Color Appearance Models.
- */ private constructor(
+ */
+internal class ViewingConditions private constructor(
     val n: Double,
     val aw: Double,
     val nbb: Double,
@@ -96,28 +95,36 @@ internal class ViewingConditions
             val gW = whitePoint[0] * matrix[1][0] + whitePoint[1] * matrix[1][1] + whitePoint[2] * matrix[1][2]
             val bW = whitePoint[0] * matrix[2][0] + whitePoint[1] * matrix[2][1] + whitePoint[2] * matrix[2][2]
             val f = 0.8 + surround / 10.0
-            val c = if (f >= 0.9) lerp(0.59, 0.69, (f - 0.9) * 10.0) else lerp(0.525, 0.59, (f - 0.8) * 10.0)
-            var d = if (discountingIlluminant) 1.0 else f * (1.0 - 1.0 / 3.6 * exp((-adaptingLuminance - 42.0) / 92.0))
+            val c =
+                if (f >= 0.9) lerp(0.59, 0.69, (f - 0.9) * 10.0)
+                else lerp(0.525, 0.59, (f - 0.8) * 10.0)
+
+            var d =
+                if (discountingIlluminant) 1.0
+                else f * (1.0 - 1.0 / 3.6 * exp((-adaptingLuminance - 42.0) / 92.0))
             d = d.coerceIn(0.0, 1.0)
+
             val rgbD = doubleArrayOf(
-                d * (100.0 / rW) + 1.0 - d, d * (100.0 / gW) + 1.0 - d, d * (100.0 / bW) + 1.0 - d
+                d * (100.0 / rW) + 1.0 - d,
+                d * (100.0 / gW) + 1.0 - d,
+                d * (100.0 / bW) + 1.0 - d,
             )
             val k = 1.0 / (5.0 * adaptingLuminance + 1.0)
             val k4 = k * k * k * k
             val k4F = 1.0 - k4
-            val fl: Double = k4 * adaptingLuminance + 0.1 * k4F * k4F * cbrt(5.0 * adaptingLuminance)
+            val fl = k4 * adaptingLuminance + 0.1 * k4F * k4F * cbrt(5.0 * adaptingLuminance)
             val n = yFromLstar(lstar) / whitePoint[1]
             val z: Double = 1.48 + sqrt(n)
             val nbb: Double = 0.725 / n.pow(0.2)
             val rgbAFactors = doubleArrayOf(
                 (fl * rgbD[0] * rW / 100.0).pow(0.42),
                 (fl * rgbD[1] * gW / 100.0).pow(0.42),
-                (fl * rgbD[2] * bW / 100.0).pow(0.42)
+                (fl * rgbD[2] * bW / 100.0).pow(0.42),
             )
             val rgbA = doubleArrayOf(
                 400.0 * rgbAFactors[0] / (rgbAFactors[0] + 27.13),
                 400.0 * rgbAFactors[1] / (rgbAFactors[1] + 27.13),
-                400.0 * rgbAFactors[2] / (rgbAFactors[2] + 27.13)
+                400.0 * rgbAFactors[2] / (rgbAFactors[2] + 27.13),
             )
             val aw = (2.0 * rgbA[0] + rgbA[1] + 0.05 * rgbA[2]) * nbb
             return ViewingConditions(n, aw, nbb, nbb, c, f, rgbD, fl, fl.pow(0.25), z)
@@ -126,16 +133,14 @@ internal class ViewingConditions
         /**
          * Create sRGB-like viewing conditions with a custom background lstar.
          *
-         *
          * Default viewing conditions have a lstar of 50, midgray.
          */
-        fun defaultWithBackgroundLstar(lstar: Double): ViewingConditions {
-            return make(
-                whitePointD65(),
-                200.0 / PI * yFromLstar(50.0) / 100f,
-                lstar,
-                2.0,
-                false)
-        }
+        fun defaultWithBackgroundLstar(lstar: Double): ViewingConditions = make(
+            whitePoint = whitePointD65(),
+            adaptingLuminance = 200.0 / PI * yFromLstar(50.0) / 100f,
+            backgroundLstar = lstar,
+            surround = 2.0,
+            discountingIlluminant = false,
+        )
     }
 }

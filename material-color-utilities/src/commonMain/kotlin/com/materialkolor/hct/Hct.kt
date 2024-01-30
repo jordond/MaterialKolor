@@ -50,21 +50,13 @@ class Hct private constructor(argb: Int) {
         setInternalState(argb)
     }
 
-    fun getHue(): Double {
-        return hue
-    }
+    fun getHue(): Double = hue
 
-    fun getChroma(): Double {
-        return chroma
-    }
+    fun getChroma(): Double = chroma
 
-    fun getTone(): Double {
-        return tone
-    }
+    fun getTone(): Double = tone
 
-    fun toInt(): Int {
-        return argb
-    }
+    fun toInt(): Int = argb
 
     /**
      * Set the hue of this color. Chroma may decrease because chroma has a different maximum for any
