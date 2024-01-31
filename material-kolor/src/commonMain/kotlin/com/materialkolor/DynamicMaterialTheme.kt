@@ -11,9 +11,6 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 
 /**
@@ -39,16 +36,12 @@ public fun DynamicMaterialTheme(
     typography: Typography = MaterialTheme.typography,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme: ColorScheme by remember(seedColor, useDarkTheme, style, contrastLevel) {
-        derivedStateOf {
-            dynamicColorScheme(
-                seedColor = seedColor,
-                isDark = useDarkTheme,
-                style = style,
-                contrastLevel = contrastLevel,
-            )
-        }
-    }
+    val colorScheme: ColorScheme = rememberDynamicColorScheme(
+        seedColor = seedColor,
+        isDark = useDarkTheme,
+        style = style,
+        contrastLevel = contrastLevel,
+    )
 
     CompositionLocalProvider(LocalDynamicMaterialThemeSeed provides seedColor) {
         MaterialTheme(
@@ -85,16 +78,12 @@ public fun AnimatedDynamicMaterialTheme(
     typography: Typography = MaterialTheme.typography,
     content: @Composable () -> Unit,
 ) {
-    val colors: ColorScheme by remember(seedColor, useDarkTheme, style, contrastLevel) {
-        derivedStateOf {
-            dynamicColorScheme(
-                seedColor = seedColor,
-                isDark = useDarkTheme,
-                style = style,
-                contrastLevel = contrastLevel,
-            )
-        }
-    }
+    val colors: ColorScheme = rememberDynamicColorScheme(
+        seedColor = seedColor,
+        isDark = useDarkTheme,
+        style = style,
+        contrastLevel = contrastLevel,
+    )
 
     val animatedColorScheme = colors.copy(
         primary = animateColorAsState(colors.primary, animationSpec).value,

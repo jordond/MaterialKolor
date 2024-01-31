@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 plugins {
     alias(libs.plugins.multiplatform)
@@ -7,6 +8,7 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+@OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
 kotlin {
     applyDefaultHierarchyTemplate()
     androidTarget {
@@ -19,8 +21,14 @@ kotlin {
 
     jvm("desktop")
 
-    js {
-        browser()
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        moduleName = "composeApp"
+        browser {
+            commonWebpackConfig {
+                outputFileName = "composeApp.js"
+            }
+        }
         binaries.executable()
     }
 
@@ -80,12 +88,6 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.common)
                 implementation(compose.desktop.currentOs)
-            }
-        }
-
-        val jsMain by getting {
-            dependencies {
-                implementation(compose.html.core)
             }
         }
     }
