@@ -1,7 +1,5 @@
 @file:Suppress("OPT_IN_USAGE")
 
-import org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode
-
 plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.compose)
@@ -15,7 +13,7 @@ kotlin {
 
     applyDefaultHierarchyTemplate()
 
-    androidTarget() {
+    androidTarget {
         publishAllLibraryVariants()
     }
 
@@ -36,8 +34,8 @@ kotlin {
         iosX64(),
         iosArm64(),
         iosSimulatorArm64(),
-    ).forEach {
-        it.binaries.framework {
+    ).forEach { target ->
+        target.binaries.framework {
             baseName = "material-kolor"
         }
     }

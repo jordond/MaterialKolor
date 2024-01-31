@@ -7,13 +7,12 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-@OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
 kotlin {
     applyDefaultHierarchyTemplate()
     androidTarget {
         compilations.all {
             kotlinOptions {
-                jvmTarget = "1.8"
+                jvmTarget = "11"
             }
         }
     }
@@ -47,6 +46,7 @@ kotlin {
                 optIn("org.jetbrains.compose.resources.ExperimentalResourceApi")
             }
         }
+
         val commonMain by getting {
             dependencies {
                 implementation(compose.runtime)
@@ -88,11 +88,6 @@ kotlin {
                 implementation(compose.html.core)
             }
         }
-
-        val iosMain by getting {
-            dependencies {
-            }
-        }
     }
 }
 
@@ -108,15 +103,16 @@ android {
         versionCode = 1
         versionName = "1.0.0"
     }
+
     sourceSets["main"].apply {
         manifest.srcFile("src/androidMain/AndroidManifest.xml")
-        res.srcDirs("src/androidMain/resources")
-        resources.srcDirs("src/commonMain/resources")
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
+
     packaging {
         resources.excludes.add("META-INF/**")
     }
