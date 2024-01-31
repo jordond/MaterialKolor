@@ -17,6 +17,14 @@ import com.materialkolor.scheme.SchemeRainbow
 import com.materialkolor.scheme.SchemeTonalSpot
 import com.materialkolor.scheme.SchemeVibrant
 
+/**
+ * Creates and remember a [ColorScheme] based on the given [seedColor] and [isDark] mode.
+ *
+ * @param[seedColor] The color to base the scheme on.
+ * @param[isDark] Whether the scheme should be dark or light.
+ * @param[style] The style of the scheme.
+ * @param[contrastLevel] The contrast level of the scheme.
+ */
 @Composable
 public fun rememberDynamicColorScheme(
     seedColor: Color,
