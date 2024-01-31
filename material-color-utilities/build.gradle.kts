@@ -30,18 +30,13 @@ kotlin {
         iosX64(),
         iosArm64(),
         iosSimulatorArm64()
-    ).forEach {
-        it.binaries.framework {
+    ).forEach { target ->
+        target.binaries.framework {
             baseName = "material-color-utilities"
         }
     }
 
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-            }
-        }
-
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))

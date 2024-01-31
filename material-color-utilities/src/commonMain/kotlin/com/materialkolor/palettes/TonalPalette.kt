@@ -21,17 +21,18 @@ import kotlin.math.round
 
 /**
  * A convenience class for retrieving colors that are constant in hue and chroma, but vary in tone.
+ *
+ * @param[hue] The hue of the Tonal Palette, in HCT. Ranges from 0 to 360.
+ * @param[chroma] The chroma of the Tonal Palette, in HCT. Ranges from 0 to ~130 (for sRGB gamut).
+ * @param[keyColor] The key color is the first tone, starting from T50, that matches the palette's chroma.
  */
 class TonalPalette private constructor(
-    /** The hue of the Tonal Palette, in HCT. Ranges from 0 to 360.  */
     var hue: Double,
-    /** The chroma of the Tonal Palette, in HCT. Ranges from 0 to ~130 (for sRGB gamut).  */
     var chroma: Double,
-    /** The key color is the first tone, starting from T50, that matches the palette's chroma.  */
     var keyColor: Hct,
 ) {
 
-    var cache: MutableMap<Int, Int> = HashMap()
+    private var cache: MutableMap<Int, Int> = HashMap()
 
     /**
      * Create an ARGB color with HCT hue and chroma of this Tones instance, and the provided HCT tone.
@@ -39,20 +40,20 @@ class TonalPalette private constructor(
      * @param tone HCT tone, measured from 0 to 100.
      * @return ARGB representation of a color with that tone.
      */
-    // AndroidJdkLibsChecker is higher priority than ComputeIfAbsentUseValue (b/119581923)
     fun tone(tone: Int): Int {
         var color = cache[tone]
         if (color == null) {
             color = Hct.from(hue, chroma, tone.toDouble()).toInt()
             cache[tone] = color
         }
+
         return color
     }
 
-    /** Given a tone, use hue and chroma of palette to create a color, and return it as HCT.  */
-    fun getHct(tone: Double): Hct {
-        return Hct.from(hue, chroma, tone)
-    }
+    /**
+     * Given a tone, use hue and chroma of palette to create a color, and return it as HCT.
+     */
+    fun getHct(tone: Double): Hct = Hct.from(hue, chroma, tone)
 
     companion object {
 
@@ -73,7 +74,7 @@ class TonalPalette private constructor(
          * @return Tones matching that color's hue and chroma.
          */
         fun fromHct(hct: Hct): TonalPalette {
-            return TonalPalette(hct.getHue(), hct.getChroma(), hct)
+            return TonalPalette(hct.hue, hct.chroma, hct)
         }
 
         /**
@@ -91,7 +92,7 @@ class TonalPalette private constructor(
         private fun createKeyColor(hue: Double, chroma: Double): Hct {
             val startTone = 50.0
             var smallestDeltaHct = Hct.from(hue, chroma, startTone)
-            var smallestDelta: Double = abs(smallestDeltaHct.getChroma() - chroma)
+            var smallestDelta: Double = abs(smallestDeltaHct.chroma - chroma)
             // Starting from T50, check T+/-delta to see if they match the requested
             // chroma.
             //
@@ -105,23 +106,24 @@ class TonalPalette private constructor(
                 // case where requested chroma is 16.51, and the closest chroma is 16.49.
                 // Error is minimized, but when rounded and displayed, requested chroma
                 // is 17, key color's chroma is 16.
-                if (round(chroma) == round(smallestDeltaHct.getChroma())) {
+                if (round(chroma) == round(smallestDeltaHct.chroma)) {
                     return smallestDeltaHct
                 }
                 val hctAdd = Hct.from(hue, chroma, startTone + delta)
-                val hctAddDelta: Double = abs(hctAdd.getChroma() - chroma)
+                val hctAddDelta: Double = abs(hctAdd.chroma - chroma)
                 if (hctAddDelta < smallestDelta) {
                     smallestDelta = hctAddDelta
                     smallestDeltaHct = hctAdd
                 }
                 val hctSubtract = Hct.from(hue, chroma, startTone - delta)
-                val hctSubtractDelta: Double = abs(hctSubtract.getChroma() - chroma)
+                val hctSubtractDelta: Double = abs(hctSubtract.chroma - chroma)
                 if (hctSubtractDelta < smallestDelta) {
                     smallestDelta = hctSubtractDelta
                     smallestDeltaHct = hctSubtract
                 }
                 delta += 1.0
             }
+
             return smallestDeltaHct
         }
     }

@@ -75,16 +75,16 @@ open class DynamicScheme(
          * @return Color's hue with a rotation applied.
          */
         fun getRotatedHue(sourceColorHct: Hct, hues: DoubleArray, rotations: DoubleArray): Double {
-            val sourceHue: Double = sourceColorHct.getHue()
+            val sourceHue: Double = sourceColorHct.hue
             if (rotations.size == 1) {
-                return MathUtils.sanitizeDegreesDouble(sourceHue + rotations[0])
+                return MathUtils.sanitizeDegrees(sourceHue + rotations[0])
             }
             val size = hues.size
             for (i in 0..size - 2) {
                 val thisHue = hues[i]
                 val nextHue = hues[i + 1]
                 if (thisHue < sourceHue && sourceHue < nextHue) {
-                    return MathUtils.sanitizeDegreesDouble(sourceHue + rotations[i])
+                    return MathUtils.sanitizeDegrees(sourceHue + rotations[i])
                 }
             }
             // If this statement executes, something is wrong, there should have been a rotation

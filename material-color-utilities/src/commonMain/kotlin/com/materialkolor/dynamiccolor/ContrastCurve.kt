@@ -22,23 +22,18 @@ import com.materialkolor.utils.MathUtils.lerp
  *
  * Usually represents the contrast requirements for a dynamic color on its background. The four
  * values correspond to values for contrast levels -1.0, 0.0, 0.5, and 1.0 respectively.
- */
-class ContrastCurve
-/**
+ *
  * Creates a `ContrastCurve` object.
  *
  * @param low Value for contrast level -1.0
  * @param normal Value for contrast level 0.0
  * @param medium Value for contrast level 0.5
  * @param high Value for contrast level 1.0
- */(
-    /** Value for contrast level -1.0  */
+ */
+class ContrastCurve(
     private val low: Double,
-    /** Value for contrast level 0.0  */
     private val normal: Double,
-    /** Value for contrast level 0.5  */
     private val medium: Double,
-    /** Value for contrast level 1.0  */
     private val high: Double,
 ) {
 

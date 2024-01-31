@@ -230,7 +230,7 @@ internal fun App() {
                             Text("Button")
                         }
 
-                        // TODO: Broken in Compose 1.6.0-beta01
+                        // TODO: Broken in Compose 1.6
                         // LinearProgressIndicator()
                     }
                 }
