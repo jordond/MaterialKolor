@@ -52,7 +52,7 @@ internal object QuantizerWsmeans {
      * to the color.
      */
     fun quantize(
-        inputPixels: IntArray, startingClusters: IntArray, maxColors: Int
+        inputPixels: IntArray, startingClusters: IntArray, maxColors: Int,
     ): Map<Int, Int> {
         // Uses a seeded random number generator to ensure consistent results.
         val random: Random = Random(0x42688)

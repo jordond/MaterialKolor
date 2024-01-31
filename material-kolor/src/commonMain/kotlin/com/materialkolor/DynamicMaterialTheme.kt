@@ -12,6 +12,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
+import com.materialkolor.dynamiccolor.MaterialDynamicColors
 
 /**
  * A Material Theme that adapts to the given seed color.
@@ -24,6 +25,7 @@ import androidx.compose.ui.graphics.Color
  * @param[useDarkTheme] Whether to use a dark theme or not.
  * @param[style] The style of the color scheme.
  * @param[contrastLevel] The contrast level of the color scheme.
+ * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
  * @param[content] The Composable content of the theme.
  */
 @Composable
@@ -34,6 +36,7 @@ public fun DynamicMaterialTheme(
     contrastLevel: Double = 0.0,
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
+    isExtendedFidelity: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val colorScheme: ColorScheme = rememberDynamicColorScheme(
@@ -41,6 +44,7 @@ public fun DynamicMaterialTheme(
         isDark = useDarkTheme,
         style = style,
         contrastLevel = contrastLevel,
+        isExtendedFidelity = isExtendedFidelity,
     )
 
     CompositionLocalProvider(LocalDynamicMaterialThemeSeed provides seedColor) {
@@ -65,6 +69,7 @@ public fun DynamicMaterialTheme(
  * @param[style] The style of the color scheme.
  * @param[contrastLevel] The contrast level of the color scheme.
  * @param[animationSpec] The animation spec to use for animating the color scheme.
+ * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
  * @param[content] The Composable content of the theme.
  */
 @Composable
@@ -76,6 +81,7 @@ public fun AnimatedDynamicMaterialTheme(
     animationSpec: AnimationSpec<Color> = spring(stiffness = Spring.StiffnessLow),
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
+    isExtendedFidelity: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val colors: ColorScheme = rememberDynamicColorScheme(
@@ -83,6 +89,7 @@ public fun AnimatedDynamicMaterialTheme(
         isDark = useDarkTheme,
         style = style,
         contrastLevel = contrastLevel,
+        isExtendedFidelity = isExtendedFidelity,
     )
 
     val animatedColorScheme = colors.copy(
