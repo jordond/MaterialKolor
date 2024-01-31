@@ -16,8 +16,8 @@
 package com.materialkolor.scheme
 
 import com.materialkolor.hct.Hct
-import com.materialkolor.utils.MathUtils
 import com.materialkolor.palettes.TonalPalette
+import com.materialkolor.utils.MathUtils
 
 /**
  * Provides important settings for creating colors dynamically, and 6 color palettes. Requires: 1. A
@@ -33,7 +33,7 @@ open class DynamicScheme(
     secondaryPalette: TonalPalette,
     tertiaryPalette: TonalPalette,
     neutralPalette: TonalPalette,
-    neutralVariantPalette: TonalPalette
+    neutralVariantPalette: TonalPalette,
 ) {
 
     val sourceColorArgb: Int

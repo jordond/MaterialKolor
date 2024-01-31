@@ -1,12 +1,12 @@
 public final class com/materialkolor/DynamicColorSchemeKt {
-	public static final fun dynamicColorScheme-Iv8Zu3U (JZLcom/materialkolor/PaletteStyle;D)Landroidx/compose/material3/ColorScheme;
-	public static synthetic fun dynamicColorScheme-Iv8Zu3U$default (JZLcom/materialkolor/PaletteStyle;DILjava/lang/Object;)Landroidx/compose/material3/ColorScheme;
-	public static final fun rememberDynamicColorScheme-euL9pac (JZLcom/materialkolor/PaletteStyle;DLandroidx/compose/runtime/Composer;II)Landroidx/compose/material3/ColorScheme;
+	public static final fun dynamicColorScheme-3J-VO9M (JZLcom/materialkolor/PaletteStyle;DZ)Landroidx/compose/material3/ColorScheme;
+	public static synthetic fun dynamicColorScheme-3J-VO9M$default (JZLcom/materialkolor/PaletteStyle;DZILjava/lang/Object;)Landroidx/compose/material3/ColorScheme;
+	public static final fun rememberDynamicColorScheme-yWKOrZg (JZLcom/materialkolor/PaletteStyle;DZLandroidx/compose/runtime/Composer;II)Landroidx/compose/material3/ColorScheme;
 }
 
 public final class com/materialkolor/DynamicMaterialThemeKt {
-	public static final fun AnimatedDynamicMaterialTheme-pzZJ40c (JZLcom/materialkolor/PaletteStyle;DLandroidx/compose/animation/core/AnimationSpec;Landroidx/compose/material3/Shapes;Landroidx/compose/material3/Typography;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
-	public static final fun DynamicMaterialTheme-Pd0R-II (JZLcom/materialkolor/PaletteStyle;DLandroidx/compose/material3/Shapes;Landroidx/compose/material3/Typography;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun AnimatedDynamicMaterialTheme-AnklqjM (JZLcom/materialkolor/PaletteStyle;DLandroidx/compose/animation/core/AnimationSpec;Landroidx/compose/material3/Shapes;Landroidx/compose/material3/Typography;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DynamicMaterialTheme-pzZJ40c (JZLcom/materialkolor/PaletteStyle;DLandroidx/compose/material3/Shapes;Landroidx/compose/material3/Typography;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/materialkolor/LocalDynamicMaterialThemeSeedKt {

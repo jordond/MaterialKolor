@@ -24,6 +24,7 @@ import com.materialkolor.scheme.SchemeVibrant
  * @param[isDark] Whether the scheme should be dark or light.
  * @param[style] The style of the scheme.
  * @param[contrastLevel] The contrast level of the scheme.
+ * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
  */
 @Composable
 public fun rememberDynamicColorScheme(
@@ -31,8 +32,9 @@ public fun rememberDynamicColorScheme(
     isDark: Boolean,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = 0.0,
-): ColorScheme = remember(seedColor, isDark, style, contrastLevel) {
-    dynamicColorScheme(seedColor, isDark, style, contrastLevel)
+    isExtendedFidelity: Boolean = false,
+): ColorScheme = remember(seedColor, isDark, style, contrastLevel, isExtendedFidelity) {
+    dynamicColorScheme(seedColor, isDark, style, contrastLevel, isExtendedFidelity)
 }
 
 /**
@@ -42,15 +44,17 @@ public fun rememberDynamicColorScheme(
  * @param[isDark] Whether the scheme should be dark or light.
  * @param[style] The style of the scheme.
  * @param[contrastLevel] The contrast level of the scheme.
+ * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
  */
 public fun dynamicColorScheme(
     seedColor: Color,
     isDark: Boolean,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = 0.0,
+    isExtendedFidelity: Boolean = false,
 ): ColorScheme {
     val hct = Hct.fromInt(seedColor.toArgb())
-    val colors = MaterialDynamicColors()
+    val colors = MaterialDynamicColors(isExtendedFidelity)
     val scheme = when (style) {
         PaletteStyle.TonalSpot -> SchemeTonalSpot(hct, isDark, contrastLevel)
         PaletteStyle.Neutral -> SchemeNeutral(hct, isDark, contrastLevel)
