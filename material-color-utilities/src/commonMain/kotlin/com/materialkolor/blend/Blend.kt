@@ -25,7 +25,7 @@ import com.materialkolor.utils.MathUtils.sanitizeDegrees
 import kotlin.math.min
 
 /** Functions for blending in HCT and CAM16.  */
-internal object Blend {
+public object Blend {
 
     /**
      * Blend the design color's HCT hue towards the key color's HCT hue, in a way that leaves the
@@ -39,11 +39,24 @@ internal object Blend {
     fun harmonize(designColor: Int, sourceColor: Int): Int {
         val fromHct = Hct.fromInt(designColor)
         val toHct = Hct.fromInt(sourceColor)
-        val differenceDegrees = differenceDegrees(fromHct.hue, toHct.hue)
+        return harmonize(fromHct, toHct).toInt()
+    }
+
+    /**
+     * Blend the design color's HCT hue towards the key color's HCT hue, in a way that leaves the
+     * original color recognizable and recognizably shifted towards the key color.
+     *
+     * @param designColor HCT representation of an arbitrary color.
+     * @param sourceColor HCT representation of the main theme color.
+     * @return The design color with a hue shifted towards the system's color, a slightly
+     * warmer/cooler variant of the design color's hue.
+     */
+    fun harmonize(designColor: Hct, sourceColor: Hct): Hct {
+        val differenceDegrees = differenceDegrees(designColor.hue, sourceColor.hue)
         val rotationDegrees: Double = min(differenceDegrees * 0.5, 15.0)
-        val outputHue = sanitizeDegrees(fromHct.hue
-            + rotationDegrees * rotationDirection(fromHct.hue, toHct.hue))
-        return Hct.from(outputHue, fromHct.chroma, fromHct.tone).toInt()
+        val rotationDirection = rotationDirection(designColor.hue, sourceColor.hue)
+        val outputHue = sanitizeDegrees(designColor.hue + rotationDegrees * rotationDirection)
+        return Hct.from(outputHue, designColor.chroma, designColor.tone)
     }
 
     /**
