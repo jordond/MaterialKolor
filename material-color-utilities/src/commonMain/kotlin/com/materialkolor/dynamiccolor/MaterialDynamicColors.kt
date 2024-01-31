@@ -41,31 +41,31 @@ class MaterialDynamicColors(
     fun primaryPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
         name = "primary_palette_key_color",
         palette = { scheme -> scheme.primaryPalette },
-        tone = { scheme -> scheme.primaryPalette.keyColor.getTone() },
+        tone = { scheme -> scheme.primaryPalette.keyColor.tone },
     )
 
     fun secondaryPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
         name = "secondary_palette_key_color",
         palette = { scheme -> scheme.secondaryPalette },
-        tone = { scheme -> scheme.secondaryPalette.keyColor.getTone() },
+        tone = { scheme -> scheme.secondaryPalette.keyColor.tone },
     )
 
     fun tertiaryPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
         name = "tertiary_palette_key_color",
         palette = { scheme -> scheme.tertiaryPalette },
-        tone = { scheme -> scheme.tertiaryPalette.keyColor.getTone() },
+        tone = { scheme -> scheme.tertiaryPalette.keyColor.tone },
     )
 
     fun neutralPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
         name = "neutral_palette_key_color",
         palette = { scheme -> scheme.neutralPalette },
-        tone = { scheme -> scheme.neutralPalette.keyColor.getTone() },
+        tone = { scheme -> scheme.neutralPalette.keyColor.tone },
     )
 
     fun neutralVariantPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
         name = "neutral_variant_palette_key_color",
         palette = { scheme -> scheme.neutralVariantPalette },
-        tone = { scheme -> scheme.neutralVariantPalette.keyColor.getTone() },
+        tone = { scheme -> scheme.neutralVariantPalette.keyColor.tone },
     )
 
     fun background(): DynamicColor = DynamicColor(
@@ -354,7 +354,7 @@ class MaterialDynamicColors(
         palette = { scheme -> scheme.primaryPalette },
         tone = { scheme ->
             when {
-                isFidelity(scheme) -> scheme.sourceColorHct.getTone()
+                isFidelity(scheme) -> scheme.sourceColorHct.tone
                 isMonochrome(scheme) -> if (scheme.isDark) 85.0 else 25.0
                 else -> if (scheme.isDark) 30.0 else 90.0
             }
@@ -534,8 +534,8 @@ class MaterialDynamicColors(
                 isMonochrome(scheme) -> if (scheme.isDark) 60.0 else 49.0
                 !isFidelity(scheme) -> if (scheme.isDark) 30.0 else 90.0
                 else -> {
-                    val proposedHct = scheme.tertiaryPalette.getHct(scheme.sourceColorHct.getTone())
-                    DislikeAnalyzer.fixIfDisliked(proposedHct).getTone()
+                    val proposedHct = scheme.tertiaryPalette.getHct(scheme.sourceColorHct.tone)
+                    DislikeAnalyzer.fixIfDisliked(proposedHct).tone
                 }
             }
         },
@@ -936,23 +936,23 @@ class MaterialDynamicColors(
         ): Double {
             var answer = tone
             var closestToChroma = Hct.from(hue, chroma, tone)
-            if (closestToChroma.getChroma() < chroma) {
-                var chromaPeak = closestToChroma.getChroma()
-                while (closestToChroma.getChroma() < chroma) {
+            if (closestToChroma.chroma < chroma) {
+                var chromaPeak = closestToChroma.chroma
+                while (closestToChroma.chroma < chroma) {
                     answer += if (byDecreasingTone) -1.0 else 1.0
                     val potentialSolution = Hct.from(hue, chroma, answer)
-                    if (chromaPeak > potentialSolution.getChroma()) {
+                    if (chromaPeak > potentialSolution.chroma) {
                         break
                     }
-                    if (abs(potentialSolution.getChroma() - chroma) < 0.4) {
+                    if (abs(potentialSolution.chroma - chroma) < 0.4) {
                         break
                     }
-                    val potentialDelta: Double = abs(potentialSolution.getChroma() - chroma)
-                    val currentDelta: Double = abs(closestToChroma.getChroma() - chroma)
+                    val potentialDelta: Double = abs(potentialSolution.chroma - chroma)
+                    val currentDelta: Double = abs(closestToChroma.chroma - chroma)
                     if (potentialDelta < currentDelta) {
                         closestToChroma = potentialSolution
                     }
-                    chromaPeak = max(chromaPeak, potentialSolution.getChroma())
+                    chromaPeak = max(chromaPeak, potentialSolution.chroma)
                 }
             }
 
