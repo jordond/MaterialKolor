@@ -113,8 +113,8 @@ object Contrast {
      * color's lightness to in order to reach their desired contrast, instead of guessing & checking
      * with hex codes.
      */
-    fun ratioOfTones(t1: Double, t2: Double): Double {
-        return ratioOfYs(yFromLstar(t1), yFromLstar(t2))
+    fun ratioOfTones(tone1: Double, tone2: Double): Double {
+        return ratioOfYs(yFromLstar(tone1), yFromLstar(tone2))
     }
 
     /**

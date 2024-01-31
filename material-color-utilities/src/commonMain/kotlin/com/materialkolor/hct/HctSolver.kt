@@ -34,23 +34,24 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 /** A class that solves the HCT equation.  */
+@Suppress("unused")
 internal object HctSolver {
 
-    val SCALED_DISCOUNT_FROM_LINRGB = arrayOf(
+    private val SCALED_DISCOUNT_FROM_LINRGB = arrayOf(
         doubleArrayOf(0.001200833568784504, 0.002389694492170889, 0.0002795742885861124),
         doubleArrayOf(0.0005891086651375999, 0.0029785502573438758, 0.0003270666104008398),
         doubleArrayOf(0.00010146692491640572, 0.0005364214359186694, 0.0032979401770712076),
     )
 
-    val LINRGB_FROM_SCALED_DISCOUNT = arrayOf(
+    private val LINRGB_FROM_SCALED_DISCOUNT = arrayOf(
         doubleArrayOf(1373.2198709594231, -1100.4251190754821, -7.278681089101213),
         doubleArrayOf(-271.815969077903, 559.6580465940733, -32.46047482791194),
         doubleArrayOf(1.9622899599665666, -57.173814538844006, 308.7233197812385),
     )
 
-    val Y_FROM_LINRGB = doubleArrayOf(0.2126, 0.7152, 0.0722)
+    private val Y_FROM_LINRGB = doubleArrayOf(0.2126, 0.7152, 0.0722)
 
-    val CRITICAL_PLANES = doubleArrayOf(
+    private val CRITICAL_PLANES = doubleArrayOf(
         0.015176349177441876,
         0.045529047532325624,
         0.07588174588720938,
@@ -314,7 +315,7 @@ internal object HctSolver {
      * @param angle An angle in radians; must not deviate too much from 0.
      * @return A coterminal angle between 0 and 2pi.
      */
-    fun sanitizeRadians(angle: Double): Double = (angle + PI * 8) % (PI * 2)
+    private fun sanitizeRadians(angle: Double): Double = (angle + PI * 8) % (PI * 2)
 
     /**
      * Delinearizes an RGB component, returning a floating-point number.
@@ -322,7 +323,7 @@ internal object HctSolver {
      * @param rgbComponent 0.0 <= rgb_component <= 100.0, represents linear R/G/B channel
      * @return 0.0 <= output <= 255.0, color channel converted to regular RGB space
      */
-    fun trueDelinearized(rgbComponent: Double): Double {
+    private fun trueDelinearized(rgbComponent: Double): Double {
         val normalized = rgbComponent / 100.0
         val delinearized: Double =
             if (normalized <= 0.0031308) normalized * 12.92
@@ -330,7 +331,7 @@ internal object HctSolver {
         return delinearized * 255.0
     }
 
-    fun chromaticAdaptation(component: Double): Double {
+    private fun chromaticAdaptation(component: Double): Double {
         val af: Double = abs(component).pow(0.42)
         return signum(component) * 400.0 * af / (af + 27.13)
     }
@@ -341,7 +342,7 @@ internal object HctSolver {
      * @param linrgb The linear RGB coordinates of a color.
      * @return The hue of the color in CAM16, in radians.
      */
-    fun hueOf(linrgb: DoubleArray?): Double {
+    private fun hueOf(linrgb: DoubleArray?): Double {
         val scaledDiscount = matrixMultiply(linrgb!!, SCALED_DISCOUNT_FROM_LINRGB)
         val rA = chromaticAdaptation(scaledDiscount[0])
         val gA = chromaticAdaptation(scaledDiscount[1])
@@ -353,7 +354,7 @@ internal object HctSolver {
         return atan2(b, a)
     }
 
-    fun areInCyclicOrder(a: Double, b: Double, c: Double): Boolean {
+    private fun areInCyclicOrder(a: Double, b: Double, c: Double): Boolean {
         val deltaAB = sanitizeRadians(b - a)
         val deltaAC = sanitizeRadians(c - a)
         return deltaAB < deltaAC
@@ -367,11 +368,11 @@ internal object HctSolver {
      * @param target The ending number.
      * @return A number t such that lerp(source, target, t) = mid.
      */
-    fun intercept(source: Double, mid: Double, target: Double): Double {
+    private fun intercept(source: Double, mid: Double, target: Double): Double {
         return (mid - source) / (target - source)
     }
 
-    fun lerpPoint(
+    private fun lerpPoint(
         source: DoubleArray,
         t: Double,
         target: DoubleArray,
@@ -391,7 +392,7 @@ internal object HctSolver {
      * @return The intersection point of the segment AB with the plane R=coordinate, G=coordinate, or
      * B=coordinate
      */
-    fun setCoordinate(
+    private fun setCoordinate(
         source: DoubleArray,
         coordinate: Double,
         target: DoubleArray,
@@ -401,7 +402,7 @@ internal object HctSolver {
         return lerpPoint(source, t, target)
     }
 
-    fun isBounded(x: Double): Boolean = x in 0.0..100.0
+    private fun isBounded(x: Double): Boolean = x in 0.0..100.0
 
     /**
      * Returns the nth possible vertex of the polygonal intersection.
@@ -412,32 +413,36 @@ internal object HctSolver {
      * in linear RGB coordinates, if it exists. If this possible vertex lies outside of the cube,
      * [-1.0, -1.0, -1.0] is returned.
      */
-    fun nthVertex(y: Double, n: Int): DoubleArray {
+    private fun nthVertex(y: Double, n: Int): DoubleArray {
         val kR = Y_FROM_LINRGB[0]
         val kG = Y_FROM_LINRGB[1]
         val kB = Y_FROM_LINRGB[2]
         val coordA = if (n % 4 <= 1) 0.0 else 100.0
         val coordB = if (n % 2 == 0) 0.0 else 100.0
-        return if (n < 4) {
-            val r = (y - coordA * kG - coordB * kB) / kR
-            if (isBounded(r)) {
-                doubleArrayOf(r, coordA, coordB)
-            } else {
-                doubleArrayOf(-1.0, -1.0, -1.0)
+        return when {
+            n < 4 -> {
+                val r = (y - coordA * kG - coordB * kB) / kR
+                if (isBounded(r)) {
+                    doubleArrayOf(r, coordA, coordB)
+                } else {
+                    doubleArrayOf(-1.0, -1.0, -1.0)
+                }
             }
-        } else if (n < 8) {
-            val g = (y - coordB * kR - coordA * kB) / kG
-            if (isBounded(g)) {
-                doubleArrayOf(coordB, g, coordA)
-            } else {
-                doubleArrayOf(-1.0, -1.0, -1.0)
+            n < 8 -> {
+                val g = (y - coordB * kR - coordA * kB) / kG
+                if (isBounded(g)) {
+                    doubleArrayOf(coordB, g, coordA)
+                } else {
+                    doubleArrayOf(-1.0, -1.0, -1.0)
+                }
             }
-        } else {
-            val b = (y - coordA * kR - coordB * kG) / kB
-            if (isBounded(b)) {
-                doubleArrayOf(coordA, coordB, b)
-            } else {
-                doubleArrayOf(-1.0, -1.0, -1.0)
+            else -> {
+                val b = (y - coordA * kR - coordB * kG) / kB
+                if (isBounded(b)) {
+                    doubleArrayOf(coordA, coordB, b)
+                } else {
+                    doubleArrayOf(-1.0, -1.0, -1.0)
+                }
             }
         }
     }
@@ -450,7 +455,7 @@ internal object HctSolver {
      * @return A list of two sets of linear RGB coordinates, each corresponding to an endpoint of the
      * segment containing the desired color.
      */
-    fun bisectToSegment(y: Double, targetHue: Double): Array<DoubleArray> {
+    private fun bisectToSegment(y: Double, targetHue: Double): Array<DoubleArray> {
         var left = doubleArrayOf(-1.0, -1.0, -1.0)
         var right = left
         var leftHue = 0.0
@@ -485,16 +490,16 @@ internal object HctSolver {
         return arrayOf(left, right)
     }
 
-    fun midpoint(a: DoubleArray, b: DoubleArray): DoubleArray {
+    private fun midpoint(a: DoubleArray, b: DoubleArray): DoubleArray {
         return doubleArrayOf(
             (a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2)
     }
 
-    fun criticalPlaneBelow(x: Double): Int {
+    private fun criticalPlaneBelow(x: Double): Int {
         return floor(x - 0.5).toInt()
     }
 
-    fun criticalPlaneAbove(x: Double): Int {
+    private fun criticalPlaneAbove(x: Double): Int {
         return ceil(x - 0.5).toInt()
     }
 
@@ -505,15 +510,16 @@ internal object HctSolver {
      * @param targetHue The hue of the color.
      * @return The desired color, in linear RGB coordinates.
      */
-    fun bisectToLimit(y: Double, targetHue: Double): DoubleArray {
+    private fun bisectToLimit(y: Double, targetHue: Double): DoubleArray {
         val segment = bisectToSegment(y, targetHue)
         var left = segment[0]
         var leftHue = hueOf(left)
         var right = segment[1]
+
         for (axis in 0..2) {
             if (left[axis] != right[axis]) {
-                @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER") var lPlane = -1
-                @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER") var rPlane = 255
+                var lPlane: Int
+                var rPlane: Int
                 if (left[axis] < right[axis]) {
                     lPlane = criticalPlaneBelow(trueDelinearized(left[axis]))
                     rPlane = criticalPlaneAbove(trueDelinearized(right[axis]))
@@ -521,6 +527,7 @@ internal object HctSolver {
                     lPlane = criticalPlaneAbove(trueDelinearized(left[axis]))
                     rPlane = criticalPlaneBelow(trueDelinearized(right[axis]))
                 }
+
                 for (i in 0..7) {
                     if (abs(rPlane - lPlane) <= 1) {
                         break
@@ -541,10 +548,11 @@ internal object HctSolver {
                 }
             }
         }
+
         return midpoint(left, right)
     }
 
-    fun inverseChromaticAdaptation(adapted: Double): Double {
+    private fun inverseChromaticAdaptation(adapted: Double): Double {
         val adaptedAbs: Double = abs(adapted)
         val base: Double = max(0.0, 27.13 * adaptedAbs / (400.0 - adaptedAbs))
         return signum(adapted) * base.pow(1.0 / 0.42)
@@ -558,7 +566,7 @@ internal object HctSolver {
      * @param y The desired Y.
      * @return The desired color as a hexadecimal integer, if found; 0 otherwise.
      */
-    fun findResultByJ(hueRadians: Double, chroma: Double, y: Double): Int {
+    private fun findResultByJ(hueRadians: Double, chroma: Double, y: Double): Int {
         // Initial estimate of j.
         var j: Double = sqrt(y) * 11.0
         // ===========================================================
@@ -589,29 +597,35 @@ internal object HctSolver {
             val rCScaled = inverseChromaticAdaptation(rA)
             val gCScaled = inverseChromaticAdaptation(gA)
             val bCScaled = inverseChromaticAdaptation(bA)
-            val linrgb = matrixMultiply(doubleArrayOf(rCScaled, gCScaled, bCScaled), LINRGB_FROM_SCALED_DISCOUNT)
+            val linrgb = matrixMultiply(
+                row = doubleArrayOf(rCScaled, gCScaled, bCScaled),
+                matrix = LINRGB_FROM_SCALED_DISCOUNT,
+            )
+
             // ===========================================================
             // Operations inlined from Cam16 to avoid repeated calculation
             // ===========================================================
             if (linrgb[0] < 0 || linrgb[1] < 0 || linrgb[2] < 0) {
                 return 0
             }
+
             val kR = Y_FROM_LINRGB[0]
             val kG = Y_FROM_LINRGB[1]
             val kB = Y_FROM_LINRGB[2]
+
             val fnj = kR * linrgb[0] + kG * linrgb[1] + kB * linrgb[2]
-            if (fnj <= 0) {
-                return 0
-            }
+            if (fnj <= 0) return 0
+
             if (iterationRound == 4 || abs(fnj - y) < 0.002) {
-                return if (linrgb[0] > 100.01 || linrgb[1] > 100.01 || linrgb[2] > 100.01) {
-                    0
-                } else argbFromLinrgb(linrgb)
+                return if (linrgb[0] > 100.01 || linrgb[1] > 100.01 || linrgb[2] > 100.01) 0
+                else argbFromLinrgb(linrgb)
             }
+
             // Iterates with Newton method,
             // Using 2 * fn(j) / j as the approximation of fn'(j)
             j -= (fnj - y) * j / (2 * fnj)
         }
+
         return 0
     }
 

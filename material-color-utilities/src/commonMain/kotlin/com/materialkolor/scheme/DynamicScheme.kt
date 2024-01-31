@@ -75,7 +75,7 @@ open class DynamicScheme(
          * @return Color's hue with a rotation applied.
          */
         fun getRotatedHue(sourceColorHct: Hct, hues: DoubleArray, rotations: DoubleArray): Double {
-            val sourceHue: Double = sourceColorHct.getHue()
+            val sourceHue: Double = sourceColorHct.hue
             if (rotations.size == 1) {
                 return MathUtils.sanitizeDegrees(sourceHue + rotations[0])
             }

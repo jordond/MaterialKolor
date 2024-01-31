@@ -26,7 +26,7 @@ class SchemeVibrant(sourceColorHct: Hct, isDark: Boolean, contrastLevel: Double)
     variant = Variant.VIBRANT,
     isDark = isDark,
     contrastLevel = contrastLevel,
-    primaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 200.0),
+    primaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 200.0),
     secondaryPalette = TonalPalette.fromHueAndChroma(
         hue = getRotatedHue(sourceColorHct, HUES, SECONDARY_ROTATIONS),
         chroma = 24.0,
@@ -35,8 +35,8 @@ class SchemeVibrant(sourceColorHct: Hct, isDark: Boolean, contrastLevel: Double)
         hue = getRotatedHue(sourceColorHct, HUES, TERTIARY_ROTATIONS),
         chroma = 32.0,
     ),
-    neutralPalette = TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 10.0),
-    neutralVariantPalette = TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 12.0),
+    neutralPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 10.0),
+    neutralVariantPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 12.0),
 ) {
 
     companion object {

@@ -56,11 +56,6 @@ internal object ColorUtils {
         return argbFromRgb(r, g, b)
     }
 
-    /** Returns the alpha component of a color in ARGB format.  */
-    fun alphaFromArgb(argb: Int): Int {
-        return argb shr 24 and 255
-    }
-
     /** Returns the red component of a color in ARGB format.  */
     fun redFromArgb(argb: Int): Int {
         return argb shr 16 and 255
@@ -74,11 +69,6 @@ internal object ColorUtils {
     /** Returns the blue component of a color in ARGB format.  */
     fun blueFromArgb(argb: Int): Int {
         return argb and 255
-    }
-
-    /** Returns whether a color in ARGB format is opaque.  */
-    fun isOpaque(argb: Int): Boolean {
-        return alphaFromArgb(argb) >= 255
     }
 
     /** Converts a color from ARGB to XYZ.  */

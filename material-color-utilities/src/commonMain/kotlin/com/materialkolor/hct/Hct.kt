@@ -21,40 +21,35 @@ import com.materialkolor.utils.ColorUtils.lstarFromY
 /**
  * A color system built using CAM16 hue and chroma, and L* from L*a*b*.
  *
- *
  * Using L* creates a link between the color system, contrast, and thus accessibility. Contrast
  * ratio depends on relative luminance, or Y in the XYZ color space. L*, or perceptual luminance can
  * be calculated from Y.
  *
- *
  * Unlike Y, L* is linear to human perception, allowing trivial creation of accurate color tones.
- *
  *
  * Unlike contrast ratio, measuring contrast in L* is linear, and simple to calculate. A
  * difference of 40 in HCT tone guarantees a contrast ratio >= 3.0, and a difference of 50
  * guarantees a contrast ratio >= 4.5.
- */
-/**
+ *
  * HCT, hue, chroma, and tone. A color system that provides a perceptually accurate color
  * measurement system that can also accurately render what colors will appear as in different
  * lighting environments.
  */
-class Hct private constructor(argb: Int) {
+@Suppress("unused")
+class Hct private constructor(
+    private val argb: Int,
+) {
 
-    private var hue = 0.0
-    private var chroma = 0.0
-    private var tone = 0.0
-    private var argb = 0
+    val hue: Double
+    val chroma: Double
+    val tone: Double
 
     init {
-        setInternalState(argb)
+        val cam16 = Cam16.fromInt(argb)
+        hue = cam16.hue
+        chroma = cam16.chroma
+        tone = lstarFromArgb(argb)
     }
-
-    fun getHue(): Double = hue
-
-    fun getChroma(): Double = chroma
-
-    fun getTone(): Double = tone
 
     fun toInt(): Int = argb
 
@@ -64,8 +59,8 @@ class Hct private constructor(argb: Int) {
      *
      * @param newHue 0 <= newHue < 360; invalid values are corrected.
      */
-    fun setHue(newHue: Double) {
-        setInternalState(HctSolver.solveToInt(newHue, chroma, tone))
+    fun withHue(newHue: Double): Hct {
+        return Hct(HctSolver.solveToInt(newHue, chroma, tone))
     }
 
     /**
@@ -74,8 +69,8 @@ class Hct private constructor(argb: Int) {
      *
      * @param newChroma 0 <= newChroma < ?
      */
-    fun setChroma(newChroma: Double) {
-        setInternalState(HctSolver.solveToInt(hue, newChroma, tone))
+    fun withChroma(newChroma: Double): Hct {
+        return Hct(HctSolver.solveToInt(hue, newChroma, tone))
     }
 
     /**
@@ -84,23 +79,20 @@ class Hct private constructor(argb: Int) {
      *
      * @param newTone 0 <= newTone <= 100; invalid valids are corrected.
      */
-    fun setTone(newTone: Double) {
-        setInternalState(HctSolver.solveToInt(hue, chroma, newTone))
+    fun withTone(newTone: Double): Hct {
+        return Hct(HctSolver.solveToInt(hue, chroma, newTone))
     }
 
     /**
      * Translate a color into different ViewingConditions.
      *
-     *
      * Colors change appearance. They look different with lights on versus off, the same color, as
      * in hex code, on white looks different when on black. This is called color relativity, most
      * famously explicated by Josef Albers in Interaction of Color.
      *
-     *
      * In color science, color appearance models can account for this and calculate the appearance
      * of a color in different settings. HCT is based on CAM16, a color appearance model, and uses it
      * to make these calculations.
-     *
      *
      * See ViewingConditions.make for parameters affecting color appearance.
      */
@@ -111,21 +103,16 @@ class Hct private constructor(argb: Int) {
 
         // 2. Create CAM16 of those XYZ coordinates in default VC.
         val recastInVc: Cam16 = Cam16.fromXyzInViewingConditions(
-            viewedInVc[0], viewedInVc[1], viewedInVc[2], ViewingConditions.DEFAULT)
+            x = viewedInVc[0],
+            y = viewedInVc[1],
+            z = viewedInVc[2],
+            viewingConditions = ViewingConditions.DEFAULT,
+        )
 
         // 3. Create HCT from:
         // - CAM16 using default VC with XYZ coordinates in specified VC.
         // - L* converted from Y in XYZ coordinates in specified VC.
-        return from(
-            recastInVc.hue, recastInVc.chroma, lstarFromY(viewedInVc[1]))
-    }
-
-    private fun setInternalState(argb: Int) {
-        this.argb = argb
-        val cam: Cam16 = Cam16.fromInt(argb)
-        hue = cam.hue
-        chroma = cam.chroma
-        tone = lstarFromArgb(argb)
+        return from(recastInVc.hue, recastInVc.chroma, lstarFromY(viewedInVc[1]))
     }
 
     companion object {
@@ -140,8 +127,7 @@ class Hct private constructor(argb: Int) {
          * @return HCT representation of a color in default viewing conditions.
          */
         fun from(hue: Double, chroma: Double, tone: Double): Hct {
-            val argb: Int = HctSolver.solveToInt(hue, chroma, tone)
-            return Hct(argb)
+            return Hct(HctSolver.solveToInt(hue, chroma, tone))
         }
 
         /**
@@ -150,8 +136,6 @@ class Hct private constructor(argb: Int) {
          * @param argb ARGB representation of a color.
          * @return HCT representation of a color in default viewing conditions
          */
-        fun fromInt(argb: Int): Hct {
-            return Hct(argb)
-        }
+        fun fromInt(argb: Int): Hct = Hct(argb)
     }
 }

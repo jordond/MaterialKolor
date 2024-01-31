@@ -21,14 +21,13 @@ import kotlin.math.round
 /**
  * Check and/or fix universally disliked colors.
  *
- *
  * Color science studies of color preference indicate universal distaste for dark yellow-greens,
  * and also show this is correlated to distate for biological waste and rotting food.
- *
  *
  * See Palmer and Schloss, 2010 or Schloss and Palmer's Chapter 21 in Handbook of Color
  * Psychology (2015).
  */
+@Suppress("MemberVisibilityCanBePrivate")
 object DislikeAnalyzer {
 
     /**

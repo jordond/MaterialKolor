@@ -28,17 +28,17 @@ class SchemeFruitSalad(sourceColorHct: Hct, isDark: Boolean, contrastLevel: Doub
     isDark = isDark,
     contrastLevel = contrastLevel,
     primaryPalette = TonalPalette.fromHueAndChroma(
-        hue = MathUtils.sanitizeDegrees(sourceColorHct.getHue() - 50.0),
+        hue = MathUtils.sanitizeDegrees(sourceColorHct.hue - 50.0),
         chroma = 48.0,
     ),
     secondaryPalette = TonalPalette.fromHueAndChroma(
-        hue = MathUtils.sanitizeDegrees(sourceColorHct.getHue() - 50.0),
+        hue = MathUtils.sanitizeDegrees(sourceColorHct.hue - 50.0),
         chroma = 36.0,
     ),
     tertiaryPalette = TonalPalette.fromHueAndChroma(
-        hue = sourceColorHct.getHue(),
+        hue = sourceColorHct.hue,
         chroma = 36.0,
     ),
-    neutralPalette = TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 10.0),
-    neutralVariantPalette = TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 16.0),
+    neutralPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, 10.0),
+    neutralVariantPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, 16.0),
 )

@@ -42,122 +42,48 @@ import kotlin.math.round
  * provided by a function that takes a DynamicScheme and returns a value. This ensures ultimate
  * flexibility, any desired behavior of a color for any design system, but it usually unnecessary.
  * See the default constructor for more information.
+ *
+ * @constructor _Strongly_ prefer using one of the convenience constructors. This class is arguably too
+ * flexible to ensure it can support any scenario. Functional arguments allow overriding without
+ * risks that come with subclasses.
+ *
+ * For example, the default behavior of adjust tone at max contrast to be at a 7.0 ratio with
+ * its background is principled and matches accessibility guidance. That does not mean it's the
+ * desired approach for _every_ design system, and every color pairing, always, in every case.
+ *
+ * For opaque colors (colors with alpha = 100%).
+ *
+ * @param name The name of the dynamic color.
+ * @param palette Function that provides a TonalPalette given DynamicScheme. A TonalPalette is
+ * defined by a hue and chroma, so this replaces the need to specify hue/chroma. By providing
+ * a tonal palette, when contrast adjustments are made, intended chroma can be preserved.
+ * @param tone Function that provides a tone, given a DynamicScheme.
+ * @param isBackground Whether this dynamic color is a background, with some other color as the
+ * foreground.
+ * @param background The background of the dynamic color (as a function of a `DynamicScheme`), if
+ * it exists.
+ * @param secondBackground A second background of the dynamic color (as a function of a
+ * `DynamicScheme`), if it exists.
+ * @param contrastCurve A `ContrastCurve` object specifying how its contrast against its
+ * background should behave in various contrast levels options.
+ * @param toneDeltaPair A `ToneDeltaPair` object specifying a tone delta constraint between two
+ * colors. One of them must be the color being constructed.
+ * @param opacity A function returning the opacity of a color, as a number between 0 and 1.
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class DynamicColor {
+class DynamicColor(
+    val name: String,
+    val palette: (DynamicScheme) -> TonalPalette,
+    val tone: (DynamicScheme) -> Double,
+    val isBackground: Boolean,
+    val background: ((DynamicScheme) -> DynamicColor)?,
+    val secondBackground: ((DynamicScheme) -> DynamicColor)?,
+    val contrastCurve: ContrastCurve?,
+    val toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair)?,
+    val opacity: ((DynamicScheme) -> Double)? = null,
+) {
 
-    val name: String
-    val palette: (DynamicScheme) -> TonalPalette
-    val tone: (DynamicScheme) -> Double
-    val isBackground: Boolean
-    val background: ((DynamicScheme) -> DynamicColor)?
-    val secondBackground: ((DynamicScheme) -> DynamicColor)?
-    val contrastCurve: ContrastCurve?
-    val toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair)?
-    val opacity: ((DynamicScheme) -> Double)?
     private val hctCache: HashMap<DynamicScheme, Hct> = HashMap()
-
-    /**
-     * A constructor for DynamicColor.
-     *
-     * _Strongly_ prefer using one of the convenience constructors. This class is arguably too
-     * flexible to ensure it can support any scenario. Functional arguments allow overriding without
-     * risks that come with subclasses.
-     *
-     * For example, the default behavior of adjust tone at max contrast to be at a 7.0 ratio with
-     * its background is principled and matches accessibility guidance. That does not mean it's the
-     * desired approach for _every_ design system, and every color pairing, always, in every case.
-     *
-     * For opaque colors (colors with alpha = 100%).
-     *
-     * @param name The name of the dynamic color.
-     * @param palette Function that provides a TonalPalette given DynamicScheme. A TonalPalette is
-     * defined by a hue and chroma, so this replaces the need to specify hue/chroma. By providing
-     * a tonal palette, when contrast adjustments are made, intended chroma can be preserved.
-     * @param tone Function that provides a tone, given a DynamicScheme.
-     * @param isBackground Whether this dynamic color is a background, with some other color as the
-     * foreground.
-     * @param background The background of the dynamic color (as a function of a `DynamicScheme`), if
-     * it exists.
-     * @param secondBackground A second background of the dynamic color (as a function of a
-     * `DynamicScheme`), if it exists.
-     * @param contrastCurve A `ContrastCurve` object specifying how its contrast against its
-     * background should behave in various contrast levels options.
-     * @param toneDeltaPair A `ToneDeltaPair` object specifying a tone delta constraint between two
-     * colors. One of them must be the color being constructed.
-     */
-    constructor(
-        name: String,
-        palette: (DynamicScheme) -> TonalPalette,
-        tone: (DynamicScheme) -> Double,
-        isBackground: Boolean,
-        background: ((DynamicScheme) -> DynamicColor)?,
-        secondBackground: ((DynamicScheme) -> DynamicColor)?,
-        contrastCurve: ContrastCurve?,
-        toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair)?,
-    ) {
-        this.name = name
-        this.palette = palette
-        this.tone = tone
-        this.isBackground = isBackground
-        this.background = background
-        this.secondBackground = secondBackground
-        this.contrastCurve = contrastCurve
-        this.toneDeltaPair = toneDeltaPair
-        this.opacity = null
-    }
-
-    /**
-     * A constructor for DynamicColor.
-     *
-     * _Strongly_ prefer using one of the convenience constructors. This class is arguably too
-     * flexible to ensure it can support any scenario. Functional arguments allow overriding without
-     * risks that come with subclasses.
-     *
-     * For example, the default behavior of adjust tone at max contrast to be at a 7.0 ratio with
-     * its background is principled and matches accessibility guidance. That does not mean it's the
-     * desired approach for _every_ design system, and every color pairing, always, in every case.
-     *
-     * For opaque colors (colors with alpha = 100%).
-     *
-     * @param name The name of the dynamic color.
-     * @param palette Function that provides a TonalPalette given DynamicScheme. A TonalPalette is
-     * defined by a hue and chroma, so this replaces the need to specify hue/chroma. By providing
-     * a tonal palette, when contrast adjustments are made, intended chroma can be preserved.
-     * @param tone Function that provides a tone, given a DynamicScheme.
-     * @param isBackground Whether this dynamic color is a background, with some other color as the
-     * foreground.
-     * @param background The background of the dynamic color (as a function of a `DynamicScheme`), if
-     * it exists.
-     * @param secondBackground A second background of the dynamic color (as a function of a
-     * `DynamicScheme`), if it exists.
-     * @param contrastCurve A `ContrastCurve` object specifying how its contrast against its
-     * background should behave in various contrast levels options.
-     * @param toneDeltaPair A `ToneDeltaPair` object specifying a tone delta constraint between two
-     * colors. One of them must be the color being constructed.
-     * @param opacity A function returning the opacity of a color, as a number between 0 and 1.
-     */
-    constructor(
-        name: String,
-        palette: (DynamicScheme) -> TonalPalette,
-        tone: (DynamicScheme) -> Double,
-        isBackground: Boolean,
-        background: ((DynamicScheme) -> DynamicColor)?,
-        secondBackground: ((DynamicScheme) -> DynamicColor)?,
-        contrastCurve: ContrastCurve?,
-        toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair)?,
-        opacity: ((DynamicScheme) -> Double)?,
-    ) {
-        this.name = name
-        this.palette = palette
-        this.tone = tone
-        this.isBackground = isBackground
-        this.background = background
-        this.secondBackground = secondBackground
-        this.contrastCurve = contrastCurve
-        this.toneDeltaPair = toneDeltaPair
-        this.opacity = opacity
-    }
 
     /**
      * Returns an ARGB integer (i.e. a hex code).
@@ -203,7 +129,9 @@ class DynamicColor {
         return answer
     }
 
-    /** Returns the tone in HCT, ranging from 0 to 100, of the resolved color given scheme.  */
+    /**
+     * Returns the tone in HCT, ranging from 0 to 100, of the resolved color given scheme.
+     */
     fun getTone(scheme: DynamicScheme): Double {
         val decreasingContrast: Boolean = scheme.contrastLevel < 0
 
@@ -306,11 +234,7 @@ class DynamicColor {
             }
             if (isBackground && 50 <= answer && answer < 60) {
                 // Must adjust
-                answer = if (Contrast.ratioOfTones(49.0, bgTone) >= desiredRatio) {
-                    49.0
-                } else {
-                    60.0
-                }
+                answer = (if (Contrast.ratioOfTones(49.0, bgTone) >= desiredRatio) 49.0 else 60.0)
             }
             if (secondBackground != null) {
                 // Case 3: Adjust for dual backgrounds.
@@ -350,6 +274,7 @@ class DynamicColor {
                 }
                 return if (darkOption == -1.0) 0.0 else darkOption
             }
+
             answer
         }
     }
@@ -359,19 +284,15 @@ class DynamicColor {
         /**
          * A convenience constructor for DynamicColor.
          *
-         *
          * _Strongly_ prefer using one of the convenience constructors. This class is arguably too
          * flexible to ensure it can support any scenario. Functional arguments allow overriding without
          * risks that come with subclasses.
-         *
          *
          * For example, the default behavior of adjust tone at max contrast to be at a 7.0 ratio with
          * its background is principled and matches accessibility guidance. That does not mean it's the
          * desired approach for _every_ design system, and every color pairing, always, in every case.
          *
-         *
          * For opaque colors (colors with alpha = 100%).
-         *
          *
          * For colors that are not backgrounds, and do not have backgrounds.
          *
@@ -385,35 +306,29 @@ class DynamicColor {
             name: String,
             palette: (DynamicScheme) -> TonalPalette,
             tone: (DynamicScheme) -> Double,
-        ): DynamicColor {
-            return DynamicColor(
-                name = name,
-                palette = palette,
-                tone = tone,
-                isBackground = false,
-                background = null,
-                secondBackground = null,
-                contrastCurve = null,
-                toneDeltaPair = null,
-            )
-        }
+        ): DynamicColor = DynamicColor(
+            name = name,
+            palette = palette,
+            tone = tone,
+            isBackground = false,
+            background = null,
+            secondBackground = null,
+            contrastCurve = null,
+            toneDeltaPair = null,
+        )
 
         /**
          * A convenience constructor for DynamicColor.
-         *
          *
          * _Strongly_ prefer using one of the convenience constructors. This class is arguably too
          * flexible to ensure it can support any scenario. Functional arguments allow overriding without
          * risks that come with subclasses.
          *
-         *
          * For example, the default behavior of adjust tone at max contrast to be at a 7.0 ratio with
          * its background is principled and matches accessibility guidance. That does not mean it's the
          * desired approach for _every_ design system, and every color pairing, always, in every case.
          *
-         *
          * For opaque colors (colors with alpha = 100%).
-         *
          *
          * For colors that do not have backgrounds.
          *
@@ -430,22 +345,19 @@ class DynamicColor {
             palette: (DynamicScheme) -> TonalPalette,
             tone: (DynamicScheme) -> Double,
             isBackground: Boolean,
-        ): DynamicColor {
-            return DynamicColor(
-                name = name,
-                palette = palette,
-                tone = tone,
-                isBackground = isBackground,
-                background = null,
-                secondBackground = null,
-                contrastCurve = null,
-                toneDeltaPair = null,
-            )
-        }
+        ): DynamicColor = DynamicColor(
+            name = name,
+            palette = palette,
+            tone = tone,
+            isBackground = isBackground,
+            background = null,
+            secondBackground = null,
+            contrastCurve = null,
+            toneDeltaPair = null,
+        )
 
         /**
          * Create a DynamicColor from a hex code.
-         *
          *
          * Result has no background; thus no support for increasing/decreasing contrast for a11y.
          *
@@ -501,21 +413,15 @@ class DynamicColor {
          * People prefer white foregrounds on ~T60-70. Observed over time, and also by Andrew Somers
          * during research for APCA.
          *
-         *
          * T60 used as to create the smallest discontinuity possible when skipping down to T49 in order
          * to ensure light foregrounds.
-         *
          *
          * Since `tertiaryContainer` in dark monochrome scheme requires a tone of 60, it should not be
          * adjusted. Therefore, 60 is excluded here.
          */
-        fun tonePrefersLightForeground(tone: Double): Boolean {
-            return round(tone) < 60
-        }
+        fun tonePrefersLightForeground(tone: Double): Boolean = round(tone) < 60
 
         /** Tones less than ~T50 always permit white at 4.5 contrast.  */
-        fun toneAllowsLightForeground(tone: Double): Boolean {
-            return round(tone) <= 49
-        }
+        fun toneAllowsLightForeground(tone: Double): Boolean = round(tone) <= 49
     }
 }

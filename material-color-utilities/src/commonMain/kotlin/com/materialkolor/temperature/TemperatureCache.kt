@@ -57,17 +57,17 @@ internal class TemperatureCache(private val input: Hct) {
             if (precomputedComplement != null) {
                 return precomputedComplement!!
             }
-            val coldestHue: Double = coldest.getHue()
+            val coldestHue: Double = coldest.hue
             val coldestTemp = tempsByHct!![coldest]!!
-            val warmestHue: Double = warmest.getHue()
+            val warmestHue: Double = warmest.hue
             val warmestTemp = tempsByHct!![warmest]!!
             val range = warmestTemp - coldestTemp
-            val startHueIsColdestToWarmest = isBetween(input.getHue(), coldestHue, warmestHue)
+            val startHueIsColdestToWarmest = isBetween(input.hue, coldestHue, warmestHue)
             val startHue = if (startHueIsColdestToWarmest) warmestHue else coldestHue
             val endHue = if (startHueIsColdestToWarmest) coldestHue else warmestHue
             val directionOfRotation = 1.0
             var smallestError = 1000.0
-            var answer: Hct? = hctsByHue!![round(input.getHue()).toInt()]
+            var answer: Hct? = hctsByHue!![round(input.hue).toInt()]
             val complementRelativeTemp = 1.0 - getRelativeTemperature(input)
             // Find the color in the other section, closest to the inverse percentile
             // of the input color. This is the complement.
@@ -113,7 +113,7 @@ internal class TemperatureCache(private val input: Hct) {
      */
     fun getAnalogousColors(count: Int, divisions: Int): List<Hct> {
         // The starting hue is the hue of the input color.
-        val startHue = round(input.getHue()).toInt()
+        val startHue = round(input.hue).toInt()
         val startHct: Hct = hctsByHue!![startHue]
         var lastTemp = getRelativeTemperature(startHct)
         val allColors: MutableList<Hct> = mutableListOf()
@@ -206,13 +206,14 @@ internal class TemperatureCache(private val input: Hct) {
         } else differenceFromColdest / range
     }
 
-    /** Coldest color with same chroma and tone as input.  */
+    /**
+     * Coldest color with same chroma and tone as input.
+     */
     private val coldest: Hct
         get() = hctsByTemp!![0]
 
     /**
      * HCTs for all colors with the same chroma/tone as the input.
-     *
      *
      * Sorted by hue, ex. index 0 is hue 0.
      */
@@ -224,7 +225,7 @@ internal class TemperatureCache(private val input: Hct) {
             val hcts: MutableList<Hct> = ArrayList()
             var hue = 0.0
             while (hue <= 360.0) {
-                val colorAtHue: Hct = Hct.from(hue, input.getChroma(), input.getTone())
+                val colorAtHue: Hct = Hct.from(hue, input.chroma, input.tone)
                 hcts.add(colorAtHue)
                 hue += 1.0
             }
@@ -234,7 +235,6 @@ internal class TemperatureCache(private val input: Hct) {
 
     /**
      * HCTs for all colors with the same chroma/tone as the input.
-     *
      *
      * Sorted from coldest first to warmest last.
      */
@@ -252,7 +252,9 @@ internal class TemperatureCache(private val input: Hct) {
             return precomputedHctsByTemp
         }
 
-    /** Keys of HCTs in getHctsByTemp, values of raw temperature.  */
+    /**
+     * Keys of HCTs in getHctsByTemp, values of raw temperature.
+     */
     private val tempsByHct: Map<Hct, Double>?
         get() {
             if (precomputedTempsByHct != null) {
@@ -268,7 +270,9 @@ internal class TemperatureCache(private val input: Hct) {
             return precomputedTempsByHct
         }
 
-    /** Warmest color with same chroma and tone as input.  */
+    /**
+     * Warmest color with same chroma and tone as input.
+     */
     private val warmest: Hct
         get() = hctsByTemp!![hctsByTemp!!.size - 1]
 
@@ -298,11 +302,12 @@ internal class TemperatureCache(private val input: Hct) {
                 * cos(MathUtils.toRadians(MathUtils.sanitizeDegrees(hue - 50.0)))))
         }
 
-        /** Determines if an angle is between two other angles, rotating clockwise.  */
+        /**
+         * Determines if an angle is between two other angles, rotating clockwise.
+         */
         private fun isBetween(angle: Double, a: Double, b: Double): Boolean {
-            return if (a < b) {
-                angle in a..b
-            } else a <= angle || angle <= b
+            return if (a < b) angle in a..b
+            else a <= angle || angle <= b
         }
     }
 }

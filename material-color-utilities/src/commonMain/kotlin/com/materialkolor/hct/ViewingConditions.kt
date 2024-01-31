@@ -30,10 +30,8 @@ import kotlin.math.sqrt
  * the color. Color appearance models such as CAM16 also use information about the environment where
  * the color was observed, known as the viewing conditions.
  *
- *
  * For example, white under the traditional assumption of a midday sun white point is accurately
  * measured as a slightly chromatic blue by CAM16. (roughly, hue 203, chroma 3, lightness 100)
- *
  *
  * This class caches intermediate values of the CAM16 conversion process that depend only on
  * viewing conditions, enabling speed ups.
@@ -43,6 +41,7 @@ import kotlin.math.sqrt
  * individually. A brief overview is available in the CAM16 specification, and a complete overview
  * requires a color science textbook, such as Fairchild's Color Appearance Models.
  */
+@Suppress("MemberVisibilityCanBePrivate")
 internal class ViewingConditions private constructor(
     val n: Double,
     val aw: Double,
@@ -133,7 +132,7 @@ internal class ViewingConditions private constructor(
         /**
          * Create sRGB-like viewing conditions with a custom background lstar.
          *
-         * Default viewing conditions have a lstar of 50, midgray.
+         * Default viewing conditions have a lstar of 50, mid-gray.
          */
         fun defaultWithBackgroundLstar(lstar: Double): ViewingConditions = make(
             whitePoint = whitePointD65(),

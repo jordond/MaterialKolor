@@ -74,7 +74,7 @@ class TonalPalette private constructor(
          * @return Tones matching that color's hue and chroma.
          */
         fun fromHct(hct: Hct): TonalPalette {
-            return TonalPalette(hct.getHue(), hct.getChroma(), hct)
+            return TonalPalette(hct.hue, hct.chroma, hct)
         }
 
         /**
@@ -92,7 +92,7 @@ class TonalPalette private constructor(
         private fun createKeyColor(hue: Double, chroma: Double): Hct {
             val startTone = 50.0
             var smallestDeltaHct = Hct.from(hue, chroma, startTone)
-            var smallestDelta: Double = abs(smallestDeltaHct.getChroma() - chroma)
+            var smallestDelta: Double = abs(smallestDeltaHct.chroma - chroma)
             // Starting from T50, check T+/-delta to see if they match the requested
             // chroma.
             //
@@ -106,17 +106,17 @@ class TonalPalette private constructor(
                 // case where requested chroma is 16.51, and the closest chroma is 16.49.
                 // Error is minimized, but when rounded and displayed, requested chroma
                 // is 17, key color's chroma is 16.
-                if (round(chroma) == round(smallestDeltaHct.getChroma())) {
+                if (round(chroma) == round(smallestDeltaHct.chroma)) {
                     return smallestDeltaHct
                 }
                 val hctAdd = Hct.from(hue, chroma, startTone + delta)
-                val hctAddDelta: Double = abs(hctAdd.getChroma() - chroma)
+                val hctAddDelta: Double = abs(hctAdd.chroma - chroma)
                 if (hctAddDelta < smallestDelta) {
                     smallestDelta = hctAddDelta
                     smallestDeltaHct = hctAdd
                 }
                 val hctSubtract = Hct.from(hue, chroma, startTone - delta)
-                val hctSubtractDelta: Double = abs(hctSubtract.getChroma() - chroma)
+                val hctSubtractDelta: Double = abs(hctSubtract.chroma - chroma)
                 if (hctSubtractDelta < smallestDelta) {
                     smallestDelta = hctSubtractDelta
                     smallestDeltaHct = hctSubtract

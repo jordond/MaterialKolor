@@ -32,7 +32,7 @@ class SchemeExpressive(
     isDark = isDark,
     contrastLevel = contrastLevel,
     primaryPalette = TonalPalette.fromHueAndChroma(
-        hue = MathUtils.sanitizeDegrees(sourceColorHct.getHue() + 240.0),
+        hue = MathUtils.sanitizeDegrees(sourceColorHct.hue + 240.0),
         chroma = 40.0,
     ),
     secondaryPalette = TonalPalette.fromHueAndChroma(
@@ -44,11 +44,11 @@ class SchemeExpressive(
         chroma = 32.0,
     ),
     neutralPalette = TonalPalette.fromHueAndChroma(
-        hue = MathUtils.sanitizeDegrees(sourceColorHct.getHue() + 15.0),
+        hue = MathUtils.sanitizeDegrees(sourceColorHct.hue + 15.0),
         chroma = 8.0,
     ),
     neutralVariantPalette = TonalPalette.fromHueAndChroma(
-        hue = MathUtils.sanitizeDegrees(sourceColorHct.getHue() + 15.0),
+        hue = MathUtils.sanitizeDegrees(sourceColorHct.hue + 15.0),
         chroma = 12.0,
     ),
 ) {

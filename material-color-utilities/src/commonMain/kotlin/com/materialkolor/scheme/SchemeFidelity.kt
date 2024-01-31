@@ -37,22 +37,22 @@ class SchemeFidelity(sourceColorHct: Hct, isDark: Boolean, contrastLevel: Double
     isDark = isDark,
     contrastLevel = contrastLevel,
     primaryPalette = TonalPalette.fromHueAndChroma(
-        hue = sourceColorHct.getHue(),
-        chroma = sourceColorHct.getChroma(),
+        hue = sourceColorHct.hue,
+        chroma = sourceColorHct.chroma,
     ),
     secondaryPalette = TonalPalette.fromHueAndChroma(
-        hue = sourceColorHct.getHue(),
-        chroma = max(sourceColorHct.getChroma() - 32.0, sourceColorHct.getChroma() * 0.5),
+        hue = sourceColorHct.hue,
+        chroma = max(sourceColorHct.chroma - 32.0, sourceColorHct.chroma * 0.5),
     ),
     tertiaryPalette = TonalPalette.fromHct(
         hct = DislikeAnalyzer.fixIfDisliked(TemperatureCache(sourceColorHct).complement),
     ),
     neutralPalette = TonalPalette.fromHueAndChroma(
-        hue = sourceColorHct.getHue(),
-        chroma = sourceColorHct.getChroma() / 8.0,
+        hue = sourceColorHct.hue,
+        chroma = sourceColorHct.chroma / 8.0,
     ),
     neutralVariantPalette = TonalPalette.fromHueAndChroma(
-        hue = sourceColorHct.getHue(),
-        chroma = sourceColorHct.getChroma() / 8.0 + 4.0,
+        hue = sourceColorHct.hue,
+        chroma = sourceColorHct.chroma / 8.0 + 4.0,
     ),
 )

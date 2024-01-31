@@ -34,8 +34,8 @@ class CorePalette private constructor(argb: Int, isContent: Boolean) {
 
     init {
         val hct = Hct.fromInt(argb)
-        val hue = hct.getHue()
-        val chroma = hct.getChroma()
+        val hue = hct.hue
+        val chroma = hct.chroma
         if (isContent) {
             a1 = TonalPalette.fromHueAndChroma(hue, chroma)
             a2 = TonalPalette.fromHueAndChroma(hue, chroma / 3.0)
