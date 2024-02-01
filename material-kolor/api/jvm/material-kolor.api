@@ -32,6 +32,11 @@ public final class com/materialkolor/ktx/ColorKt {
 	public static final fun isLight-8_81llA (J)Z
 }
 
+public final class com/materialkolor/ktx/CorePaletteKt {
+	public static final fun contentOf-4WTKRHQ (Lcom/materialkolor/palettes/CorePalette$Companion;J)Lcom/materialkolor/palettes/CorePalette;
+	public static final fun of-4WTKRHQ (Lcom/materialkolor/palettes/CorePalette$Companion;J)Lcom/materialkolor/palettes/CorePalette;
+}
+
 public final class com/materialkolor/ktx/DynamicSchemeKt {
 	public static final fun getSourceColor (Lcom/materialkolor/scheme/DynamicScheme;)J
 	public static final fun toDynamicScheme-Iv8Zu3U (JZLcom/materialkolor/PaletteStyle;D)Lcom/materialkolor/scheme/DynamicScheme;
@@ -51,6 +56,24 @@ public final class com/materialkolor/ktx/HctKt {
 	public static final fun from-4WTKRHQ (Lcom/materialkolor/hct/Hct$Companion;J)Lcom/materialkolor/hct/Hct;
 	public static final fun toColor (Lcom/materialkolor/hct/Hct;)J
 	public static final fun toHct-8_81llA (J)Lcom/materialkolor/hct/Hct;
+}
+
+public final class com/materialkolor/ktx/ImageBitmapKt {
+	public static final fun quantize (Lcom/materialkolor/quantize/QuantizerCelebi;Landroidx/compose/ui/graphics/ImageBitmap;I)Ljava/util/Map;
+	public static final fun rememberThemeColor-3IgeMak (Landroidx/compose/ui/graphics/ImageBitmap;JZLandroidx/compose/runtime/Composer;II)J
+	public static final fun rememberThemeColors-sW7UJKQ (Landroidx/compose/ui/graphics/ImageBitmap;JIZLandroidx/compose/runtime/Composer;II)Ljava/util/List;
+	public static final fun themeColor-bw27NRU (Landroidx/compose/ui/graphics/ImageBitmap;JZ)J
+	public static synthetic fun themeColor-bw27NRU$default (Landroidx/compose/ui/graphics/ImageBitmap;JZILjava/lang/Object;)J
+	public static final fun themeColorOrNull (Landroidx/compose/ui/graphics/ImageBitmap;Z)Landroidx/compose/ui/graphics/Color;
+	public static synthetic fun themeColorOrNull$default (Landroidx/compose/ui/graphics/ImageBitmap;ZILjava/lang/Object;)Landroidx/compose/ui/graphics/Color;
+	public static final fun themeColors-9LQNqLg (Landroidx/compose/ui/graphics/ImageBitmap;IJZ)Ljava/util/List;
+	public static synthetic fun themeColors-9LQNqLg$default (Landroidx/compose/ui/graphics/ImageBitmap;IJZILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class com/materialkolor/ktx/TemperatureKt {
+	public static final fun isCool-8_81llA (J)Z
+	public static final fun isWarm-8_81llA (J)Z
+	public static final fun temperature-4WTKRHQ (Lcom/materialkolor/temperature/TemperatureCache$Companion;J)D
 }
 
 public final class com/materialkolor/ktx/TonalPaletteKt {
