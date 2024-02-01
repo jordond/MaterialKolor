@@ -2,8 +2,6 @@ package com.materialkolor.ktx
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -89,14 +87,14 @@ public fun ImageBitmap.themeColorOrNull(filter: Boolean = true): Color? {
  * @return The most suitable colors for a UI theme.
  */
 @Composable
-public fun calculateThemeColors(
+public fun rememberThemeColors(
     image: ImageBitmap,
     fallback: Color = MaterialTheme.colorScheme.primary,
     maxColors: Int = 4,
     filter: Boolean = true,
-): State<List<Color>> {
+): List<Color> {
     return remember(image, fallback, maxColors, filter) {
-        mutableStateOf(image.themeColors(maxColors, fallback, filter))
+        image.themeColors(maxColors, fallback, filter)
     }
 }
 
@@ -109,12 +107,12 @@ public fun calculateThemeColors(
  * @return The most suitable color for a UI theme.
  */
 @Composable
-public fun calculateThemeColor(
+public fun rememberThemeColor(
     image: ImageBitmap,
     fallback: Color = MaterialTheme.colorScheme.primary,
     filter: Boolean = true,
-): State<Color> {
+): Color {
     return remember(image, fallback, filter) {
-        mutableStateOf(image.themeColor(fallback, filter))
+        image.themeColor(fallback, filter)
     }
 }
