@@ -39,7 +39,7 @@ import kotlin.math.round
  * limits on chroma.
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-internal class TemperatureCache(private val input: Hct) {
+public class TemperatureCache(private val input: Hct) {
 
     private var precomputedComplement: Hct? = null
     private var precomputedHctsByTemp: List<Hct>? = null
@@ -287,10 +287,10 @@ internal class TemperatureCache(private val input: Hct) {
          * Handbook of Color Psychology (2015). - Josef Albers' Interaction of Color chapters 19 and 21.
          *
          * Implementation of Ou, Woodcock and Wright's algorithm, which uses Lab/LCH color space.
-         * Return value has these properties:<br></br>
-         * - Values below 0 are cool, above 0 are warm.<br></br>
-         * - Lower bound: -9.66. Chroma is infinite. Assuming max of Lab chroma 130.<br></br>
-         * - Upper bound: 8.61. Chroma is infinite. Assuming max of Lab chroma 130.
+         * Return value has these properties:
+         *     - Values below 0 are cool, above 0 are warm.<br></br>
+         *     - Lower bound: -9.66. Chroma is infinite. Assuming max of Lab chroma 130.
+         *     - Upper bound: 8.61. Chroma is infinite. Assuming max of Lab chroma 130.
          */
         fun rawTemperature(color: Hct): Double {
             val lab: DoubleArray = ColorUtils.labFromArgb(color.toInt())
