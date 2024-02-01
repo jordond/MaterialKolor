@@ -41,7 +41,7 @@ public fun QuantizerCelebi.quantize(image: ImageBitmap, maxColors: Int): Map<Int
  * the input colors were not suitable for a theme, a default fallback color will be provided,
  * Google Blue.
  */
-public fun ImageBitmap.dominantColors(
+public fun ImageBitmap.themeColors(
     maxColors: Int = 4,
     fallback: Color = Color(-0xbd7a0c),
     filter: Boolean = true,
@@ -58,11 +58,11 @@ public fun ImageBitmap.dominantColors(
  * @param[filter] whether to filter out undesirable combinations.
  * @return The most suitable color for a UI theme.
  */
-public fun ImageBitmap.dominantColor(
+public fun ImageBitmap.themeColor(
     fallback: Color,
     filter: Boolean = true,
 ): Color {
-    return dominantColors(maxColors = 1, fallback, filter).first()
+    return themeColors(maxColors = 1, fallback, filter).first()
 }
 
 /**
@@ -72,7 +72,7 @@ public fun ImageBitmap.dominantColor(
  * @param[filter] whether to filter out undesirable combinations.
  * @return The most suitable color for a UI theme or `null` if no suitable color found.
  */
-public fun ImageBitmap.dominantColorOrNull(filter: Boolean = true): Color? {
+public fun ImageBitmap.themeColorOrNull(filter: Boolean = true): Color? {
     val quantized = QuantizerCelebi.quantize(image = this, maxColors = 1)
     return Score
         .score(quantized, desired = 1, fallbackColorArgb = null, filter)
@@ -89,14 +89,14 @@ public fun ImageBitmap.dominantColorOrNull(filter: Boolean = true): Color? {
  * @return The most suitable colors for a UI theme.
  */
 @Composable
-public fun calculateDominantColors(
+public fun calculateThemeColors(
     image: ImageBitmap,
     fallback: Color = MaterialTheme.colorScheme.primary,
     maxColors: Int = 4,
     filter: Boolean = true,
 ): State<List<Color>> {
     return remember(image, fallback, maxColors, filter) {
-        mutableStateOf(image.dominantColors(maxColors, fallback, filter))
+        mutableStateOf(image.themeColors(maxColors, fallback, filter))
     }
 }
 
@@ -109,12 +109,12 @@ public fun calculateDominantColors(
  * @return The most suitable color for a UI theme.
  */
 @Composable
-public fun calculateDominantColor(
+public fun calculateThemeColor(
     image: ImageBitmap,
     fallback: Color = MaterialTheme.colorScheme.primary,
     filter: Boolean = true,
 ): State<Color> {
     return remember(image, fallback, filter) {
-        mutableStateOf(image.dominantColor(fallback, filter))
+        mutableStateOf(image.themeColor(fallback, filter))
     }
 }
