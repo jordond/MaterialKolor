@@ -17,6 +17,7 @@ espresso-core = "3.5.1"
 binaryCompatibility = "0.14.0"
 dokka = "1.9.10"
 publish = "0.27.0"
+colormath = "3.4.0"
 
 [libraries]
 androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
@@ -24,6 +25,7 @@ androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-k
 androidx-lifecycle-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
 androidx-activityCompose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
+colormath = { module = "com.github.ajalt.colormath:colormath", version.ref = "colormath" }
 compose-uitooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-uitooling" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
