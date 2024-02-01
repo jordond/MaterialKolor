@@ -29,7 +29,7 @@ import kotlin.math.round
  * muddied, while curating the high cluster count to a much smaller number of appropriate choices.
  */
 @Suppress("unused")
-internal object Score {
+object Score {
 
     private const val TARGET_CHROMA = 48.0 // A1 Chroma
     private const val WEIGHT_PROPORTION = 0.7
@@ -53,19 +53,17 @@ internal object Score {
      * Google Blue.
      */
     fun score(
-        colorsToPopulation: Map<Int?, Int>,
+        colorsToPopulation: Map<Int, Int>,
         desired: Int = 4,
-        fallbackColorArgb: Int = -0xbd7a0c,
+        fallbackColorArgb: Int? = -0xbd7a0c,
         filter: Boolean = true,
     ): List<Int> {
-
-        // Get the HCT color for each Argb value, while finding the per hue count and
-        // total count.
+        // Get the HCT color for each Argb value, while finding the per hue count and total count.
         val colorsHct: MutableList<Hct> = mutableListOf()
         val huePopulation = IntArray(360)
         var populationSum = 0.0
         for ((key, value) in colorsToPopulation) {
-            val hct = Hct.fromInt(key!!)
+            val hct = Hct.fromInt(key)
             colorsHct.add(hct)
             val hue: Int = floor(hct.hue).toInt()
             huePopulation[hue] += value
@@ -128,7 +126,7 @@ internal object Score {
             }
         }
         val colors: MutableList<Int> = mutableListOf()
-        if (chosenColors.isEmpty()) {
+        if (chosenColors.isEmpty() && fallbackColorArgb != null) {
             colors.add(fallbackColorArgb)
         }
         for (chosenHct in chosenColors) {
@@ -138,6 +136,7 @@ internal object Score {
     }
 
     private class ScoredHCT(val hct: Hct, val score: Double)
+
     private class ScoredComparator : Comparator<ScoredHCT> {
 
         override fun compare(a: ScoredHCT, b: ScoredHCT): Int {

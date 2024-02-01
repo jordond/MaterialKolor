@@ -284,8 +284,9 @@ internal class QuantizerWu : Quantizer {
     }
 
     class MaximizeResult internal constructor(
-// < 0 if cut impossible
-        var cutLocation: Int, var maximum: Double,
+        // < 0 if cut impossible
+        var cutLocation: Int,
+        var maximum: Double,
     )
 
     class CreateBoxesResult internal constructor(var requestedCount: Int, var resultCount: Int)
