@@ -23,3 +23,13 @@ public fun Hct.Companion.from(color: Color): Hct {
 public fun Hct.toColor(): Color {
     return Color(toInt())
 }
+
+/**
+ * Convert a Compose [Color] to [Hct].
+ *
+ * @receiver The color to convert.
+ * @return The HCT representation of the color.
+ */
+public fun Color.toHct(): Hct {
+    return Hct.from(this)
+}

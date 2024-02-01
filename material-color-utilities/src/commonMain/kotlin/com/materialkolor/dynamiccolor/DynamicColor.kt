@@ -404,9 +404,8 @@ class DynamicColor(
          * supporting it.
          */
         fun enableLightForeground(tone: Double): Double {
-            return if (tonePrefersLightForeground(tone) && !toneAllowsLightForeground(tone)) {
-                49.0
-            } else tone
+            return if (tonePrefersLightForeground(tone) && !toneAllowsLightForeground(tone)) 49.0
+            else tone
         }
 
         /**

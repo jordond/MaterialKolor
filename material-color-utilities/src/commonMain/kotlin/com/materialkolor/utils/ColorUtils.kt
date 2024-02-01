@@ -27,21 +27,21 @@ import kotlin.math.round
  * CAM16.
  */
 @Suppress("MemberVisibilityCanBePrivate")
-internal object ColorUtils {
+public object ColorUtils {
 
-    val SRGB_TO_XYZ = arrayOf(
+    private val SRGB_TO_XYZ = arrayOf(
         doubleArrayOf(0.41233895, 0.35762064, 0.18051042),
         doubleArrayOf(0.2126, 0.7152, 0.0722),
         doubleArrayOf(0.01932141, 0.11916382, 0.95034478),
     )
 
-    val XYZ_TO_SRGB = arrayOf(
+    private val XYZ_TO_SRGB = arrayOf(
         doubleArrayOf(3.2413774792388685, -1.5376652402851851, -0.49885366846268053),
         doubleArrayOf(-0.9691452513005321, 1.8758853451067872, 0.04156585616912061),
         doubleArrayOf(0.05562093689691305, -0.20395524564742123, 1.0571799111220335),
     )
 
-    val WHITE_POINT_D65 = doubleArrayOf(95.047, 100.0, 108.883)
+    private val WHITE_POINT_D65 = doubleArrayOf(95.047, 100.0, 108.883)
 
     /** Converts a color from RGB components to ARGB format.  */
     fun argbFromRgb(red: Int, green: Int, blue: Int): Int {
@@ -235,5 +235,11 @@ internal object ColorUtils {
         val kappa = 24389.0 / 27.0
         val ft3 = ft * ft * ft
         return if (ft3 > e) ft3 else (116 * ft - 16) / kappa
+    }
+
+    public fun calculateLuminance(argb: Int): Double {
+        val xyz = xyzFromArgb(argb)
+        // Luminance is the Y component
+        return xyz[1] / 100
     }
 }

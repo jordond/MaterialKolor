@@ -37,7 +37,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedButton
@@ -57,6 +56,10 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.materialkolor.PaletteStyle
 import com.materialkolor.demo.theme.AppTheme
+import com.materialkolor.ktx.fromColor
+import com.materialkolor.ktx.harmonize
+import com.materialkolor.ktx.matchSaturation
+import com.materialkolor.palettes.TonalPalette
 
 val SampleColors = listOf(
     Color(0xFFD32F2F),
@@ -232,6 +235,80 @@ internal fun App() {
 
                         // TODO: Broken in Compose 1.6
                         // LinearProgressIndicator()
+                    }
+                }
+            }
+
+            Column {
+                Text(text = "Harmonized red palette", style = MaterialTheme.typography.headlineSmall)
+
+                Row {
+                    val harmonizedColor = Color.Red.harmonize(colorScheme.primary)
+                    val harmonizedPalette = TonalPalette.fromColor(harmonizedColor)
+
+                    repeat(10) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color(harmonizedPalette.tone(it * 10)))
+                        )
+                    }
+                }
+            }
+
+            Column {
+                Text(text = "Harmonized SL red palette", style = MaterialTheme.typography.headlineSmall)
+
+                Row {
+                    val harmonizedColor = Color.Red
+                        .matchSaturation(colorScheme.primary)
+                        .harmonize(colorScheme.primary)
+
+                    val harmonizedPalette = TonalPalette.fromColor(harmonizedColor)
+
+                    repeat(10) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color(harmonizedPalette.tone(it * 10)))
+                        )
+                    }
+                }
+            }
+
+            Column {
+                Text(text = "Harmonized blue palette", style = MaterialTheme.typography.headlineSmall)
+
+                Row {
+                    val harmonizedColor = Color.Blue.harmonize(colorScheme.primary)
+                    val harmonizedPalette = TonalPalette.fromColor(harmonizedColor)
+
+                    repeat(10) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color(harmonizedPalette.tone(it * 10)))
+                        )
+                    }
+                }
+            }
+
+            Column {
+                Text(text = "Harmonized SL blue palette", style = MaterialTheme.typography.headlineSmall)
+
+                Row {
+                    val harmonizedColor = Color.Blue
+                        .matchSaturation(colorScheme.primary)
+                        .harmonize(colorScheme.primary)
+
+                    val harmonizedPalette = TonalPalette.fromColor(harmonizedColor)
+
+                    repeat(10) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color(harmonizedPalette.tone(it * 10)))
+                        )
                     }
                 }
             }

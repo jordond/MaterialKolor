@@ -46,6 +46,7 @@ kotlin {
                 implementation(compose.material3)
                 implementation(compose.runtime)
                 implementation(compose.ui)
+                implementation("com.github.ajalt.colormath:colormath:3.4.0")
 
                 api(project(":material-color-utilities"))
             }
