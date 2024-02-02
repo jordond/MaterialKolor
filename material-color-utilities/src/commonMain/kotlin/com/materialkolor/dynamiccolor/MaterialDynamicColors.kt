@@ -29,46 +29,46 @@ import kotlin.math.max
  * see [MaterialColorUtilities](https://github.com/material-foundation/material-color-utilities/commit/c3681e12b72202723657b9ce5cf8dfdf7efb0781)
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class MaterialDynamicColors(
+public class MaterialDynamicColors(
     private val isExtendedFidelity: Boolean = false,
 ) {
 
-    fun highestSurface(scheme: DynamicScheme): DynamicColor {
+    public fun highestSurface(scheme: DynamicScheme): DynamicColor {
         return if (scheme.isDark) surfaceBright() else surfaceDim()
     }
 
     // Compatibility Keys Colors for Android
-    fun primaryPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
+    public fun primaryPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
         name = "primary_palette_key_color",
         palette = { scheme -> scheme.primaryPalette },
         tone = { scheme -> scheme.primaryPalette.keyColor.tone },
     )
 
-    fun secondaryPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
+    public fun secondaryPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
         name = "secondary_palette_key_color",
         palette = { scheme -> scheme.secondaryPalette },
         tone = { scheme -> scheme.secondaryPalette.keyColor.tone },
     )
 
-    fun tertiaryPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
+    public fun tertiaryPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
         name = "tertiary_palette_key_color",
         palette = { scheme -> scheme.tertiaryPalette },
         tone = { scheme -> scheme.tertiaryPalette.keyColor.tone },
     )
 
-    fun neutralPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
+    public fun neutralPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
         name = "neutral_palette_key_color",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme -> scheme.neutralPalette.keyColor.tone },
     )
 
-    fun neutralVariantPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
+    public fun neutralVariantPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
         name = "neutral_variant_palette_key_color",
         palette = { scheme -> scheme.neutralVariantPalette },
         tone = { scheme -> scheme.neutralVariantPalette.keyColor.tone },
     )
 
-    fun background(): DynamicColor = DynamicColor(
+    public fun background(): DynamicColor = DynamicColor(
         name = "background",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme -> if (scheme.isDark) 6.0 else 98.0 },
@@ -79,7 +79,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun onBackground(): DynamicColor = DynamicColor(
+    public fun onBackground(): DynamicColor = DynamicColor(
         name = "on_background",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme -> if (scheme.isDark) 90.0 else 10.0 },
@@ -90,7 +90,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun surface(): DynamicColor = DynamicColor(
+    public fun surface(): DynamicColor = DynamicColor(
         name = "surface",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme -> if (scheme.isDark) 6.0 else 98.0 },
@@ -101,7 +101,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun surfaceDim(): DynamicColor = DynamicColor(
+    public fun surfaceDim(): DynamicColor = DynamicColor(
         name = "surface_dim",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme ->
@@ -115,7 +115,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun surfaceBright(): DynamicColor = DynamicColor(
+    public fun surfaceBright(): DynamicColor = DynamicColor(
         name = "surface_bright",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme ->
@@ -129,7 +129,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun surfaceContainerLowest(): DynamicColor = DynamicColor(
+    public fun surfaceContainerLowest(): DynamicColor = DynamicColor(
         name = "surface_container_lowest",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme ->
@@ -143,7 +143,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun surfaceContainerLow(): DynamicColor = DynamicColor(
+    public fun surfaceContainerLow(): DynamicColor = DynamicColor(
         name = "surface_container_low",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme ->
@@ -157,7 +157,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun surfaceContainer(): DynamicColor = DynamicColor(
+    public fun surfaceContainer(): DynamicColor = DynamicColor(
         name = "surface_container",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme ->
@@ -171,7 +171,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun surfaceContainerHigh(): DynamicColor = DynamicColor(
+    public fun surfaceContainerHigh(): DynamicColor = DynamicColor(
         name = "surface_container_high",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme ->
@@ -185,7 +185,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun surfaceContainerHighest(): DynamicColor = DynamicColor(
+    public fun surfaceContainerHighest(): DynamicColor = DynamicColor(
         name = "surface_container_highest",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme ->
@@ -199,7 +199,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun onSurface(): DynamicColor = DynamicColor(
+    public fun onSurface(): DynamicColor = DynamicColor(
         name = "on_surface",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme -> if (scheme.isDark) 90.0 else 10.0 },
@@ -210,7 +210,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun surfaceVariant(): DynamicColor = DynamicColor(
+    public fun surfaceVariant(): DynamicColor = DynamicColor(
         name = "surface_variant",
         palette = { scheme -> scheme.neutralVariantPalette },
         tone = { scheme -> if (scheme.isDark) 30.0 else 90.0 },
@@ -221,7 +221,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun onSurfaceVariant(): DynamicColor = DynamicColor(
+    public fun onSurfaceVariant(): DynamicColor = DynamicColor(
         name = "on_surface_variant",
         palette = { scheme -> scheme.neutralVariantPalette },
         tone = { scheme -> if (scheme.isDark) 80.0 else 30.0 },
@@ -232,7 +232,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun inverseSurface(): DynamicColor = DynamicColor(
+    public fun inverseSurface(): DynamicColor = DynamicColor(
         name = "inverse_surface",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme -> if (scheme.isDark) 90.0 else 20.0 },
@@ -243,7 +243,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun inverseOnSurface(): DynamicColor = DynamicColor(
+    public fun inverseOnSurface(): DynamicColor = DynamicColor(
         name = "inverse_on_surface",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme -> if (scheme.isDark) 20.0 else 95.0 },
@@ -254,7 +254,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun outline(): DynamicColor = DynamicColor(
+    public fun outline(): DynamicColor = DynamicColor(
         name = "outline",
         palette = { scheme -> scheme.neutralVariantPalette },
         tone = { scheme -> if (scheme.isDark) 60.0 else 50.0 },
@@ -265,7 +265,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun outlineVariant(): DynamicColor = DynamicColor(
+    public fun outlineVariant(): DynamicColor = DynamicColor(
         name = "outline_variant",
         palette = { scheme -> scheme.neutralVariantPalette },
         tone = { scheme -> if (scheme.isDark) 30.0 else 80.0 },
@@ -276,7 +276,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun shadow(): DynamicColor = DynamicColor(
+    public fun shadow(): DynamicColor = DynamicColor(
         name = "shadow",
         palette = { scheme -> scheme.neutralPalette },
         tone = { 0.0 },
@@ -287,7 +287,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun scrim(): DynamicColor = DynamicColor(
+    public fun scrim(): DynamicColor = DynamicColor(
         name = "scrim",
         palette = { scheme -> scheme.neutralPalette },
         tone = { 0.0 },
@@ -298,7 +298,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun surfaceTint(): DynamicColor = DynamicColor(
+    public fun surfaceTint(): DynamicColor = DynamicColor(
         name = "surface_tint",
         palette = { scheme -> scheme.primaryPalette },
         tone = { scheme -> if (scheme.isDark) 80.0 else 40.0 },
@@ -309,7 +309,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun primary(): DynamicColor = DynamicColor(
+    public fun primary(): DynamicColor = DynamicColor(
         name = "primary",
         palette = { scheme -> scheme.primaryPalette },
         tone = { scheme ->
@@ -333,7 +333,7 @@ class MaterialDynamicColors(
         },
     )
 
-    fun onPrimary(): DynamicColor = DynamicColor(
+    public fun onPrimary(): DynamicColor = DynamicColor(
         name = "on_primary",
         palette = { scheme -> scheme.primaryPalette },
         tone = { scheme ->
@@ -349,7 +349,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun primaryContainer(): DynamicColor = DynamicColor(
+    public fun primaryContainer(): DynamicColor = DynamicColor(
         name = "primary_container",
         palette = { scheme -> scheme.primaryPalette },
         tone = { scheme ->
@@ -374,7 +374,7 @@ class MaterialDynamicColors(
         }
     )
 
-    fun onPrimaryContainer(): DynamicColor = DynamicColor(
+    public fun onPrimaryContainer(): DynamicColor = DynamicColor(
         name = "on_primary_container",
         palette = { scheme -> scheme.primaryPalette },
         tone = { scheme ->
@@ -393,7 +393,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun inversePrimary(): DynamicColor = DynamicColor(
+    public fun inversePrimary(): DynamicColor = DynamicColor(
         name = "inverse_primary",
         palette = { scheme -> scheme.primaryPalette },
         tone = { scheme -> if (scheme.isDark) 40.0 else 80.0 },
@@ -404,7 +404,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun secondary(): DynamicColor = DynamicColor(
+    public fun secondary(): DynamicColor = DynamicColor(
         name = "secondary",
         palette = { scheme -> scheme.secondaryPalette },
         tone = { scheme -> if (scheme.isDark) 80.0 else 40.0 },
@@ -423,7 +423,7 @@ class MaterialDynamicColors(
         }
     )
 
-    fun onSecondary(): DynamicColor = DynamicColor(
+    public fun onSecondary(): DynamicColor = DynamicColor(
         name = "on_secondary",
         palette = { scheme -> scheme.secondaryPalette },
         tone = { scheme ->
@@ -439,7 +439,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun secondaryContainer(): DynamicColor = DynamicColor(
+    public fun secondaryContainer(): DynamicColor = DynamicColor(
         name = "secondary_container",
         palette = { scheme -> scheme.secondaryPalette },
         tone = { scheme ->
@@ -470,7 +470,7 @@ class MaterialDynamicColors(
         }
     )
 
-    fun onSecondaryContainer(): DynamicColor = DynamicColor(
+    public fun onSecondaryContainer(): DynamicColor = DynamicColor(
         name = "on_secondary_container",
         palette = { scheme -> scheme.secondaryPalette },
         tone = { scheme ->
@@ -486,7 +486,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun tertiary(): DynamicColor = DynamicColor(
+    public fun tertiary(): DynamicColor = DynamicColor(
         name = "tertiary",
         palette = { scheme -> scheme.tertiaryPalette },
         tone = { scheme ->
@@ -510,7 +510,7 @@ class MaterialDynamicColors(
         }
     )
 
-    fun onTertiary(): DynamicColor = DynamicColor(
+    public fun onTertiary(): DynamicColor = DynamicColor(
         name = "on_tertiary",
         palette = { scheme -> scheme.tertiaryPalette },
         tone = { scheme ->
@@ -526,7 +526,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun tertiaryContainer(): DynamicColor = DynamicColor(
+    public fun tertiaryContainer(): DynamicColor = DynamicColor(
         name = "tertiary_container",
         palette = { scheme -> scheme.tertiaryPalette },
         tone = { scheme ->
@@ -554,7 +554,7 @@ class MaterialDynamicColors(
         }
     )
 
-    fun onTertiaryContainer(): DynamicColor = DynamicColor(
+    public fun onTertiaryContainer(): DynamicColor = DynamicColor(
         name = "on_tertiary_container",
         palette = { scheme -> scheme.tertiaryPalette },
         tone = { scheme ->
@@ -571,7 +571,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun error(): DynamicColor = DynamicColor(
+    public fun error(): DynamicColor = DynamicColor(
         name = "error",
         palette = { scheme -> scheme.errorPalette },
         tone = { scheme -> if (scheme.isDark) 80.0 else 40.0 },
@@ -590,7 +590,7 @@ class MaterialDynamicColors(
         },
     )
 
-    fun onError(): DynamicColor = DynamicColor(
+    public fun onError(): DynamicColor = DynamicColor(
         name = "on_error",
         palette = { scheme -> scheme.errorPalette },
         tone = { scheme -> if (scheme.isDark) 20.0 else 100.0 },
@@ -601,7 +601,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun errorContainer(): DynamicColor = DynamicColor(
+    public fun errorContainer(): DynamicColor = DynamicColor(
         name = "error_container",
         palette = { scheme -> scheme.errorPalette },
         tone = { scheme -> if (scheme.isDark) 30.0 else 90.0 },
@@ -620,7 +620,7 @@ class MaterialDynamicColors(
         },
     )
 
-    fun onErrorContainer(): DynamicColor = DynamicColor(
+    public fun onErrorContainer(): DynamicColor = DynamicColor(
         name = "on_error_container",
         palette = { scheme -> scheme.errorPalette },
         tone = { scheme -> if (scheme.isDark) 90.0 else 10.0 },
@@ -631,7 +631,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun primaryFixed(): DynamicColor = DynamicColor(
+    public fun primaryFixed(): DynamicColor = DynamicColor(
         name = "primary_fixed",
         palette = { scheme -> scheme.primaryPalette },
         tone = { scheme -> if (isMonochrome(scheme)) 40.0 else 90.0 },
@@ -650,7 +650,7 @@ class MaterialDynamicColors(
         }
     )
 
-    fun primaryFixedDim(): DynamicColor = DynamicColor(
+    public fun primaryFixedDim(): DynamicColor = DynamicColor(
         name = "primary_fixed_dim",
         palette = { scheme -> scheme.primaryPalette },
         tone = { scheme -> if (isMonochrome(scheme)) 30.0 else 80.0 },
@@ -669,7 +669,7 @@ class MaterialDynamicColors(
         }
     )
 
-    fun onPrimaryFixed(): DynamicColor = DynamicColor(
+    public fun onPrimaryFixed(): DynamicColor = DynamicColor(
         name = "on_primary_fixed",
         palette = { scheme -> scheme.primaryPalette },
         tone = { scheme -> if (isMonochrome(scheme)) 100.0 else 10.0 },
@@ -680,7 +680,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun onPrimaryFixedVariant(): DynamicColor = DynamicColor(
+    public fun onPrimaryFixedVariant(): DynamicColor = DynamicColor(
         name = "on_primary_fixed_variant",
         palette = { scheme -> scheme.primaryPalette },
         tone = { scheme -> if (isMonochrome(scheme)) 90.0 else 30.0 },
@@ -691,7 +691,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun secondaryFixed(): DynamicColor = DynamicColor(
+    public fun secondaryFixed(): DynamicColor = DynamicColor(
         name = "secondary_fixed",
         palette = { scheme -> scheme.secondaryPalette },
         tone = { scheme -> if (isMonochrome(scheme)) 80.0 else 90.0 },
@@ -710,7 +710,7 @@ class MaterialDynamicColors(
         },
     )
 
-    fun secondaryFixedDim(): DynamicColor = DynamicColor(
+    public fun secondaryFixedDim(): DynamicColor = DynamicColor(
         name = "secondary_fixed_dim",
         palette = { scheme -> scheme.secondaryPalette },
         tone = { scheme -> if (isMonochrome(scheme)) 70.0 else 80.0 },
@@ -729,7 +729,7 @@ class MaterialDynamicColors(
         }
     )
 
-    fun onSecondaryFixed(): DynamicColor = DynamicColor(
+    public fun onSecondaryFixed(): DynamicColor = DynamicColor(
         name = "on_secondary_fixed",
         palette = { scheme -> scheme.secondaryPalette },
         tone = { 10.0 },
@@ -740,7 +740,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun onSecondaryFixedVariant(): DynamicColor = DynamicColor(
+    public fun onSecondaryFixedVariant(): DynamicColor = DynamicColor(
         name = "on_secondary_fixed_variant",
         palette = { scheme -> scheme.secondaryPalette },
         tone = { scheme -> if (isMonochrome(scheme)) 25.0 else 30.0 },
@@ -751,7 +751,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun tertiaryFixed(): DynamicColor = DynamicColor(
+    public fun tertiaryFixed(): DynamicColor = DynamicColor(
         name = "tertiary_fixed",
         palette = { scheme -> scheme.tertiaryPalette },
         tone = { scheme -> if (isMonochrome(scheme)) 40.0 else 90.0 },
@@ -770,7 +770,7 @@ class MaterialDynamicColors(
         },
     )
 
-    fun tertiaryFixedDim(): DynamicColor = DynamicColor(
+    public fun tertiaryFixedDim(): DynamicColor = DynamicColor(
         name = "tertiary_fixed_dim",
         palette = { scheme -> scheme.tertiaryPalette },
         tone = { scheme -> if (isMonochrome(scheme)) 30.0 else 80.0 },
@@ -789,7 +789,7 @@ class MaterialDynamicColors(
         },
     )
 
-    fun onTertiaryFixed(): DynamicColor = DynamicColor(
+    public fun onTertiaryFixed(): DynamicColor = DynamicColor(
         name = "on_tertiary_fixed",
         palette = { scheme -> scheme.tertiaryPalette },
         tone = { scheme -> if (isMonochrome(scheme)) 100.0 else 10.0 },
@@ -800,7 +800,7 @@ class MaterialDynamicColors(
         toneDeltaPair = null,
     )
 
-    fun onTertiaryFixedVariant(): DynamicColor = DynamicColor(
+    public fun onTertiaryFixedVariant(): DynamicColor = DynamicColor(
         name = "on_tertiary_fixed_variant",
         palette = { scheme -> scheme.tertiaryPalette },
         tone = { scheme -> if (isMonochrome(scheme)) 90.0 else 30.0 },
@@ -825,7 +825,7 @@ class MaterialDynamicColors(
      * For example, if the same color is on a white background _and_ black background, there's no
      * way to increase contrast with either without losing contrast with the other.
      */
-    fun controlActivated(): DynamicColor = DynamicColor.fromPalette(
+    public fun controlActivated(): DynamicColor = DynamicColor.fromPalette(
         name = "control_activated",
         palette = { scheme -> scheme.primaryPalette },
         tone = { scheme -> if (scheme.isDark) 30.0 else 90.0 },
@@ -836,7 +836,7 @@ class MaterialDynamicColors(
      * In Material, textColorSecondary points to onSurfaceVariant in the non-disabled state,
      * which is Neutral Variant T30/80 in light/dark.
      */
-    fun controlNormal(): DynamicColor = DynamicColor.fromPalette(
+    public fun controlNormal(): DynamicColor = DynamicColor.fromPalette(
         name = "control_normal",
         palette = { scheme -> scheme.neutralVariantPalette },
         tone = { scheme -> if (scheme.isDark) 80.0 else 30.0 },
@@ -855,7 +855,7 @@ class MaterialDynamicColors(
      * depending on how MDC resolved alpha for the other cases.
      * Returning black in dark mode, white in light mode.
      */
-    fun controlHighlight(): DynamicColor = DynamicColor(
+    public fun controlHighlight(): DynamicColor = DynamicColor(
         name = "control_highlight",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme -> if (scheme.isDark) 100.0 else 0.0 },
@@ -869,7 +869,7 @@ class MaterialDynamicColors(
     /**
      * textColorPrimaryInverse documented, in both M3 & GM3, documented as N10/N90.
      */
-    fun textPrimaryInverse(): DynamicColor = DynamicColor.fromPalette(
+    public fun textPrimaryInverse(): DynamicColor = DynamicColor.fromPalette(
         name = "text_primary_inverse",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme -> if (scheme.isDark) 10.0 else 90.0 },
@@ -879,7 +879,7 @@ class MaterialDynamicColors(
      * textColorSecondaryInverse and textColorTertiaryInverse both documented, in both M3 & GM3, as
      * V30/NV80
      */
-    fun textSecondaryAndTertiaryInverse(): DynamicColor = DynamicColor.fromPalette(
+    public fun textSecondaryAndTertiaryInverse(): DynamicColor = DynamicColor.fromPalette(
         name = "text_secondary_and_tertiary_inverse",
         palette = { scheme -> scheme.neutralVariantPalette },
         tone = { scheme -> if (scheme.isDark) 30.0 else 80.0 },
@@ -888,7 +888,7 @@ class MaterialDynamicColors(
     /**
      * textColorPrimaryInverseDisableOnly documented, in both M3 & GM3, as N10/N90
      */
-    fun textPrimaryInverseDisableOnly(): DynamicColor = DynamicColor.fromPalette(
+    public fun textPrimaryInverseDisableOnly(): DynamicColor = DynamicColor.fromPalette(
         name = "text_primary_inverse_disable_only",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme -> if (scheme.isDark) 10.0 else 90.0 },
@@ -898,7 +898,7 @@ class MaterialDynamicColors(
      * textColorSecondaryInverse and textColorTertiaryInverse in disabled state both documented,
      * in both M3 & GM3, as N10/N90
      */
-    fun textSecondaryAndTertiaryInverseDisabled(): DynamicColor = DynamicColor.fromPalette(
+    public fun textSecondaryAndTertiaryInverseDisabled(): DynamicColor = DynamicColor.fromPalette(
         name = "text_secondary_and_tertiary_inverse_disabled",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme -> if (scheme.isDark) 10.0 else 90.0 },
@@ -907,7 +907,7 @@ class MaterialDynamicColors(
     /**
      * textColorHintInverse documented, in both M3 & GM3, as N10/N90
      */
-    fun textHintInverse(): DynamicColor = DynamicColor.fromPalette(
+    public fun textHintInverse(): DynamicColor = DynamicColor.fromPalette(
         name = "text_hint_inverse",
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme -> if (scheme.isDark) 10.0 else 90.0 },
@@ -922,13 +922,13 @@ class MaterialDynamicColors(
         return scheme.variant == Variant.FIDELITY || scheme.variant == Variant.CONTENT
     }
 
-    companion object {
+    public companion object {
 
         private fun isMonochrome(scheme: DynamicScheme): Boolean {
             return scheme.variant === Variant.MONOCHROME
         }
 
-        fun findDesiredChromaByTone(
+        private fun findDesiredChromaByTone(
             hue: Double,
             chroma: Double,
             tone: Double,

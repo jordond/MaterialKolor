@@ -32,19 +32,19 @@ import kotlin.math.max
  * becomes HCT's tone and L*a*b*'s' L*.
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-object Contrast {
+public object Contrast {
 
     // The minimum contrast ratio of two colors.
     // Contrast ratio equation = lighter + 5 / darker + 5, if lighter == darker, ratio == 1.
-    const val RATIO_MIN = 1.0
+    private const val RATIO_MIN = 1.0
 
     // The maximum contrast ratio of two colors.
     // Contrast ratio equation = lighter + 5 / darker + 5. Lighter and darker scale from 0 to 100.
     // If lighter == 100, darker = 0, ratio == 21.
-    const val RATIO_MAX = 21.0
-    const val RATIO_30 = 3.0
-    const val RATIO_45 = 4.5
-    const val RATIO_70 = 7.0
+    private const val RATIO_MAX = 21.0
+    private const val RATIO_30 = 3.0
+    private const val RATIO_45 = 4.5
+    private const val RATIO_70 = 7.0
 
     // Given a color and a contrast ratio to reach, the luminance of a color that reaches that ratio
     // with the color can be calculated. However, that luminance may not contrast as desired, i.e. the
@@ -92,7 +92,7 @@ object Contrast {
      *
      * The equation is ratio = lighter Y + 5 / darker Y + 5.
      */
-    fun ratioOfYs(y1: Double, y2: Double): Double {
+    public fun ratioOfYs(y1: Double, y2: Double): Double {
         val lighter: Double = max(y1, y2)
         val darker = if (lighter == y2) y1 else y2
         return (lighter + 5.0) / (darker + 5.0)
@@ -113,7 +113,7 @@ object Contrast {
      * color's lightness to in order to reach their desired contrast, instead of guessing & checking
      * with hex codes.
      */
-    fun ratioOfTones(tone1: Double, tone2: Double): Double {
+    public fun ratioOfTones(tone1: Double, tone2: Double): Double {
         return ratioOfYs(yFromLstar(tone1), yFromLstar(tone2))
     }
 
@@ -124,7 +124,7 @@ object Contrast {
      * @param tone Tone return value must contrast with.
      * @param ratio Desired contrast ratio of return value and tone parameter.
      */
-    fun lighter(tone: Double, ratio: Double): Double {
+    public fun lighter(tone: Double, ratio: Double): Double {
         if (tone < 0.0 || tone > 100.0) {
             return -1.0
         }
@@ -155,7 +155,7 @@ object Contrast {
      * @param tone Tone return value must contrast with.
      * @param ratio Desired contrast ratio of return value and tone parameter.
      */
-    fun lighterUnsafe(tone: Double, ratio: Double): Double {
+    public fun lighterUnsafe(tone: Double, ratio: Double): Double {
         val lighterSafe = lighter(tone, ratio)
         return if (lighterSafe < 0.0) 100.0 else lighterSafe
     }
@@ -167,7 +167,7 @@ object Contrast {
      * @param tone Tone return value must contrast with.
      * @param ratio Desired contrast ratio of return value and tone parameter.
      */
-    fun darker(tone: Double, ratio: Double): Double {
+    public fun darker(tone: Double, ratio: Double): Double {
         if (tone < 0.0 || tone > 100.0) {
             return -1.0
         }
@@ -200,7 +200,7 @@ object Contrast {
      * @param tone Tone return value must contrast with.
      * @param ratio Desired contrast ratio of return value and tone parameter.
      */
-    fun darkerUnsafe(tone: Double, ratio: Double): Double {
+    public fun darkerUnsafe(tone: Double, ratio: Double): Double {
         val darkerSafe = darker(tone, ratio)
         return max(0.0, darkerSafe)
     }

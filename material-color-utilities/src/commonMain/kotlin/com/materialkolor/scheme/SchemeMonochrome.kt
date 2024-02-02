@@ -21,7 +21,11 @@ import com.materialkolor.palettes.TonalPalette
 /**
  * A monochrome theme, colors are purely black / white / gray.
  */
-class SchemeMonochrome(sourceColorHct: Hct, isDark: Boolean, contrastLevel: Double) : DynamicScheme(
+public class SchemeMonochrome(
+    sourceColorHct: Hct,
+    isDark: Boolean,
+    contrastLevel: Double,
+) : DynamicScheme(
     sourceColorHct = sourceColorHct,
     variant = Variant.MONOCHROME,
     isDark = isDark,

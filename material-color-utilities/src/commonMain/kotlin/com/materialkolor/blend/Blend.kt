@@ -24,7 +24,10 @@ import com.materialkolor.utils.MathUtils.rotationDirection
 import com.materialkolor.utils.MathUtils.sanitizeDegrees
 import kotlin.math.min
 
-/** Functions for blending in HCT and CAM16.  */
+/**
+ * Functions for blending in HCT and CAM16.
+ */
+@Suppress("MemberVisibilityCanBePrivate")
 public object Blend {
 
     /**
@@ -36,7 +39,7 @@ public object Blend {
      * @return The design color with a hue shifted towards the system's color, a slightly
      * warmer/cooler variant of the design color's hue.
      */
-    fun harmonize(designColor: Int, sourceColor: Int): Int {
+    public fun harmonize(designColor: Int, sourceColor: Int): Int {
         val fromHct = Hct.fromInt(designColor)
         val toHct = Hct.fromInt(sourceColor)
         return harmonize(fromHct, toHct).toInt()
@@ -51,7 +54,7 @@ public object Blend {
      * @return The design color with a hue shifted towards the system's color, a slightly
      * warmer/cooler variant of the design color's hue.
      */
-    fun harmonize(designColor: Hct, sourceColor: Hct): Hct {
+    public fun harmonize(designColor: Hct, sourceColor: Hct): Hct {
         val differenceDegrees = differenceDegrees(designColor.hue, sourceColor.hue)
         val rotationDegrees: Double = min(differenceDegrees * 0.5, 15.0)
         val rotationDirection = rotationDirection(designColor.hue, sourceColor.hue)
@@ -68,7 +71,7 @@ public object Blend {
      * @param amount how much blending to perform; 0.0 >= and <= 1.0
      * @return from, with a hue blended towards to. Chroma and tone are constant.
      */
-    fun hctHue(from: Int, to: Int, amount: Double): Int {
+    public fun hctHue(from: Int, to: Int, amount: Double): Int {
         val ucs = cam16Ucs(from, to, amount)
         val ucsCam = Cam16.fromInt(ucs)
         val fromCam = Cam16.fromInt(from)
@@ -84,7 +87,7 @@ public object Blend {
      * @param amount how much blending to perform; 0.0 >= and <= 1.0
      * @return from, blended towards to. Hue, chroma, and tone will change.
      */
-    fun cam16Ucs(from: Int, to: Int, amount: Double): Int {
+    public fun cam16Ucs(from: Int, to: Int, amount: Double): Int {
         val fromCam = Cam16.fromInt(from)
         val toCam = Cam16.fromInt(to)
         val fromJ = fromCam.jstar

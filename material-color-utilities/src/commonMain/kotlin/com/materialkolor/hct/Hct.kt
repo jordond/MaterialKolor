@@ -36,13 +36,13 @@ import com.materialkolor.utils.ColorUtils.lstarFromY
  * lighting environments.
  */
 @Suppress("unused")
-class Hct private constructor(
+public class Hct private constructor(
     private val argb: Int,
 ) {
 
-    val hue: Double
-    val chroma: Double
-    val tone: Double
+    public val hue: Double
+    public val chroma: Double
+    public val tone: Double
 
     init {
         val cam16 = Cam16.fromInt(argb)
@@ -51,7 +51,7 @@ class Hct private constructor(
         tone = lstarFromArgb(argb)
     }
 
-    fun toInt(): Int = argb
+    public fun toInt(): Int = argb
 
     /**
      * Set the hue of this color. Chroma may decrease because chroma has a different maximum for any
@@ -59,7 +59,7 @@ class Hct private constructor(
      *
      * @param newHue 0 <= newHue < 360; invalid values are corrected.
      */
-    fun withHue(newHue: Double): Hct {
+    public fun withHue(newHue: Double): Hct {
         return Hct(HctSolver.solveToInt(newHue, chroma, tone))
     }
 
@@ -69,7 +69,7 @@ class Hct private constructor(
      *
      * @param newChroma 0 <= newChroma < ?
      */
-    fun withChroma(newChroma: Double): Hct {
+    public fun withChroma(newChroma: Double): Hct {
         return Hct(HctSolver.solveToInt(hue, newChroma, tone))
     }
 
@@ -79,7 +79,7 @@ class Hct private constructor(
      *
      * @param newTone 0 <= newTone <= 100; invalid valids are corrected.
      */
-    fun withTone(newTone: Double): Hct {
+    public fun withTone(newTone: Double): Hct {
         return Hct(HctSolver.solveToInt(hue, chroma, newTone))
     }
 
@@ -115,7 +115,7 @@ class Hct private constructor(
         return from(recastInVc.hue, recastInVc.chroma, lstarFromY(viewedInVc[1]))
     }
 
-    companion object {
+    public companion object {
 
         /**
          * Create an HCT color from hue, chroma, and tone.
@@ -126,7 +126,7 @@ class Hct private constructor(
          * @param tone 0 <= tone <= 100; invalid values are corrected.
          * @return HCT representation of a color in default viewing conditions.
          */
-        fun from(hue: Double, chroma: Double, tone: Double): Hct {
+        public fun from(hue: Double, chroma: Double, tone: Double): Hct {
             return Hct(HctSolver.solveToInt(hue, chroma, tone))
         }
 
@@ -136,6 +136,6 @@ class Hct private constructor(
          * @param argb ARGB representation of a color.
          * @return HCT representation of a color in default viewing conditions
          */
-        fun fromInt(argb: Int): Hct = Hct(argb)
+        public fun fromInt(argb: Int): Hct = Hct(argb)
     }
 }

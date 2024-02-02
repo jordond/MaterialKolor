@@ -4,6 +4,22 @@ import androidx.compose.ui.graphics.Color
 import com.materialkolor.temperature.TemperatureCache
 
 /**
+ * Design utilities using color temperature theory.
+ *
+ * Analogous colors, complementary color, and cache to efficiently, lazily, generate data for
+ * calculations when needed.
+ *
+ * Create a cache that allows calculation of ex. complementary and analogous colors.
+ *
+ * @param[input] Color to find complement/analogous colors of. Any colors will have the same tone,
+ * and chroma as the input color, modulo any restrictions due to the other hues having lower
+ * limits on chroma.
+ */
+public fun TemperatureCache(input: Color): TemperatureCache {
+    return TemperatureCache(input.toHct())
+}
+
+/**
  * Value representing cool-warm factor of a color.
  *
  * Values below 0 are considered cool, above, warm.

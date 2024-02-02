@@ -28,24 +28,24 @@ import kotlin.math.round
  * Psychology (2015).
  */
 @Suppress("MemberVisibilityCanBePrivate")
-object DislikeAnalyzer {
+public object DislikeAnalyzer {
 
     /**
      * Returns true if color is disliked.
      *
      * Disliked is defined as a dark yellow-green that is not neutral.
      */
-    fun isDisliked(hct: Hct): Boolean {
+    public fun isDisliked(hct: Hct): Boolean {
         val huePasses = round(hct.hue) in 90.0..111.0
         val chromaPasses: Boolean = round(hct.chroma) > 16.0
         val tonePasses: Boolean = round(hct.tone) < 65.0
         return huePasses && chromaPasses && tonePasses
     }
 
-    /** If color is disliked, lighten it to make it likable.  */
-    fun fixIfDisliked(hct: Hct): Hct {
-        return if (isDisliked(hct)) {
-            Hct.from(hct.hue, hct.chroma, 70.0)
-        } else hct
+    /**
+     * If color is disliked, lighten it to make it likable.
+     */
+    public fun fixIfDisliked(hct: Hct): Hct {
+        return if (isDisliked(hct)) Hct.from(hct.hue, hct.chroma, 70.0) else hct
     }
 }

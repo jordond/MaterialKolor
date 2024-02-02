@@ -22,7 +22,7 @@ import com.materialkolor.utils.MathUtils
 /**
  * A playful theme - the source color's hue does not appear in the theme.
  */
-class SchemeExpressive(
+public class SchemeExpressive(
     sourceColorHct: Hct,
     isDark: Boolean,
     contrastLevel: Double,
@@ -53,7 +53,7 @@ class SchemeExpressive(
     ),
 ) {
 
-    companion object {
+    private companion object {
 
         // NOMUTANTS--arbitrary increments/decrements, correctly, still passes tests.
         private val HUES = doubleArrayOf(0.0, 21.0, 51.0, 121.0, 151.0, 191.0, 271.0, 321.0, 360.0)

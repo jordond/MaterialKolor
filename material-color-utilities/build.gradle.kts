@@ -7,6 +7,8 @@ plugins {
 }
 
 kotlin {
+    explicitApi()
+
     applyDefaultHierarchyTemplate()
 
     androidTarget {

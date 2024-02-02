@@ -33,9 +33,11 @@ import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-/** A class that solves the HCT equation.  */
+/**
+ * A class that solves the HCT equation.
+ */
 @Suppress("unused")
-internal object HctSolver {
+public object HctSolver {
 
     private val SCALED_DISCOUNT_FROM_LINRGB = arrayOf(
         doubleArrayOf(0.001200833568784504, 0.002389694492170889, 0.0002795742885861124),
@@ -639,7 +641,7 @@ internal object HctSolver {
      * chroma, and L* to the desired values, if possible; otherwise, the hue and L* will be
      * sufficiently close, and chroma will be maximized.
      */
-    fun solveToInt(hueDegrees: Double, chroma: Double, lstar: Double): Int {
+    public fun solveToInt(hueDegrees: Double, chroma: Double, lstar: Double): Int {
         val hueDegrees1 = sanitizeDegrees(hueDegrees)
         if (chroma < 0.0001 || lstar < 0.0001 || lstar > 99.9999) {
             return argbFromLstar(lstar)
@@ -664,7 +666,7 @@ internal object HctSolver {
      * chroma, and L* to the desired values, if possible; otherwise, the hue and L* will be
      * sufficiently close, and chroma will be maximized.
      */
-    fun solveToCam(hueDegrees: Double, chroma: Double, lstar: Double): Cam16 {
+    internal fun solveToCam(hueDegrees: Double, chroma: Double, lstar: Double): Cam16 {
         return Cam16.fromInt(solveToInt(hueDegrees, chroma, lstar))
     }
 }

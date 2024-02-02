@@ -26,10 +26,10 @@ import kotlin.math.round
  * @param[chroma] The chroma of the Tonal Palette, in HCT. Ranges from 0 to ~130 (for sRGB gamut).
  * @param[keyColor] The key color is the first tone, starting from T50, that matches the palette's chroma.
  */
-class TonalPalette private constructor(
-    var hue: Double,
-    var chroma: Double,
-    var keyColor: Hct,
+public class TonalPalette private constructor(
+    public val hue: Double,
+    public val chroma: Double,
+    public val keyColor: Hct,
 ) {
 
     private var cache: MutableMap<Int, Int> = HashMap()
@@ -40,7 +40,7 @@ class TonalPalette private constructor(
      * @param tone HCT tone, measured from 0 to 100.
      * @return ARGB representation of a color with that tone.
      */
-    fun tone(tone: Int): Int {
+    public fun tone(tone: Int): Int {
         var color = cache[tone]
         if (color == null) {
             color = Hct.from(hue, chroma, tone.toDouble()).toInt()
@@ -53,9 +53,9 @@ class TonalPalette private constructor(
     /**
      * Given a tone, use hue and chroma of palette to create a color, and return it as HCT.
      */
-    fun getHct(tone: Double): Hct = Hct.from(hue, chroma, tone)
+    public fun getHct(tone: Double): Hct = Hct.from(hue, chroma, tone)
 
-    companion object {
+    public companion object {
 
         /**
          * Create tones using the HCT hue and chroma from a color.
@@ -63,7 +63,7 @@ class TonalPalette private constructor(
          * @param argb ARGB representation of a color
          * @return Tones matching that color's hue and chroma.
          */
-        fun fromInt(argb: Int): TonalPalette {
+        public fun fromInt(argb: Int): TonalPalette {
             return fromHct(Hct.fromInt(argb))
         }
 
@@ -73,7 +73,7 @@ class TonalPalette private constructor(
          * @param hct HCT representation of a color.
          * @return Tones matching that color's hue and chroma.
          */
-        fun fromHct(hct: Hct): TonalPalette {
+        public fun fromHct(hct: Hct): TonalPalette {
             return TonalPalette(hct.hue, hct.chroma, hct)
         }
 
@@ -84,7 +84,7 @@ class TonalPalette private constructor(
          * @param chroma HCT chroma
          * @return Tones matching hue and chroma.
          */
-        fun fromHueAndChroma(hue: Double, chroma: Double): TonalPalette {
+        public fun fromHueAndChroma(hue: Double, chroma: Double): TonalPalette {
             return TonalPalette(hue, chroma, createKeyColor(hue, chroma))
         }
 

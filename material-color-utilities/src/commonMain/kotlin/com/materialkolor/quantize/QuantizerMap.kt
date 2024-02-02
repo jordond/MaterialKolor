@@ -15,7 +15,9 @@
  */
 package com.materialkolor.quantize
 
-/** Creates a dictionary with keys of colors, and values of count of the color  */
+/**
+ * Creates a dictionary with keys of colors, and values of count of the color
+ */
 internal class QuantizerMap : Quantizer {
 
     private var colorToCount: Map<Int, Int>? = null

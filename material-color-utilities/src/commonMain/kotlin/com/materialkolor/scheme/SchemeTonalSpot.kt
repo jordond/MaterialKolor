@@ -22,7 +22,11 @@ import com.materialkolor.utils.MathUtils
 /**
  * A calm theme, sedated colors that aren't particularly chromatic.
  */
-class SchemeTonalSpot(sourceColorHct: Hct, isDark: Boolean, contrastLevel: Double) : DynamicScheme(
+public class SchemeTonalSpot(
+    sourceColorHct: Hct,
+    isDark: Boolean,
+    contrastLevel: Double,
+) : DynamicScheme(
     sourceColorHct = sourceColorHct,
     variant = Variant.TONAL_SPOT,
     isDark = isDark,

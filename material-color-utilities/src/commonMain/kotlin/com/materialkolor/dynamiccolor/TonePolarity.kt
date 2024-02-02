@@ -24,7 +24,7 @@ package com.materialkolor.dynamiccolor
  *
  * See `ToneDeltaPair` for details.
  */
-enum class TonePolarity {
+public enum class TonePolarity {
     DARKER,
     LIGHTER,
     NEARER,
