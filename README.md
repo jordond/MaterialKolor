@@ -24,12 +24,13 @@ The KDoc is published at [docs.materialkolor.com](docs.materialkolor.com)
 
 - [Platforms](#platforms)
 - [Inspiration](#inspiration)
-- [Generating from an Image](#generating-from-an-image)
 - [Setup](#setup)
-    - [Multiplatform](#multiplatform)
-    - [Single Platform](#single-platform)
-    - [Version Catalog](#version-catalog)
+  - [Multiplatform](#multiplatform)
+  - [Single Platform](#single-platform)
+  - [Version Catalog](#version-catalog)
 - [Usage](#usage)
+- [Generating from an Image](#generating-from-an-image)
+  - [Advanced](#advanced)
 - [Demo](#demo)
 - [License](#license)
     - [Changes from original source](#changes-from-original-source)
@@ -55,37 +56,6 @@ code was taken and converted into a Kotlin Multiplatform library.
 
 I also incorporated the Compose ideas from another open source
 library [m3color](https://github.com/Kyant0/m3color).
-
-### Generating from an Image
-
-You can now generate a dynamic color scheme by using my
-library [kmPalette](https://github.com/jordond/kmpalette).
-
-You can get the dominant color from an image, or you can also generate a color palette.
-
-Follow the instructions there to set it up, then as an example. You can use it to generate a color
-theme from a remote image:
-
-```kotlin
-@Composable
-fun SampleTheme(
-    imageUrl: Url, // Url("http://example.com/image.jpg")
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit,
-) {
-    val networkLoader = rememberNetworkLoader()
-    val dominantColorState = rememberDominantColorState(loader = networkLoader)
-    LaunchedEffect(imageUrl) {
-        dominantColorState.updateFrom(imageUrl)
-    }
-
-    AnimatedDynamicMaterialTheme(
-        seedColor = dominantColorState.color,
-        isDark = useDarkTheme,
-        content = content
-    )
-}
-```
 
 ## Setup
 
@@ -190,6 +160,69 @@ Also included is a `AnimatedDynamicMaterialTheme` which animates the color schem
 
 See [`Theme.kt`](demo/composeApp/src/commonMain/kotlin/com/materialkolor/demo/theme/Theme.kt) for an
 example.
+
+## Generating from an Image
+
+You can calculate a seed color, or colors that are suitable for UI theming from an image. This is
+useful for generating a color scheme from a user's profile picture, or a background image.
+
+To do so you can call `ImageBitmap.themeColors()`, `ImageBitmap.themeColor()` or the `@Composable`
+function `rememberThemeColors()` or `rememberThemeColor()`:
+
+```kotlin
+fun calculateSeedColor(bitmap: ImageBitmap): Color {
+  val suitableColors = bitmap.themeColors(fallback = Color.Blue)
+  return suitableColors.first()
+}
+```
+
+See [`ImageBitmap.kt`](material-kolor/src/commonMain/kotlin/com/materialkolor/ktx/ImageBitmap.kt)
+for more information.
+
+Or in Compose land:
+
+```kotlin
+@Composable
+fun DynamicTheme(image: ImageBitmap, content: @Composable () -> Unit) {
+  val seedColor = rememberThemeColor(image, fallback = MaterialTheme.colorScheme.primary)
+
+  AnimatedDynamicMaterialTheme(
+    seedColor = seedColor,
+    content = content
+  )
+}
+```
+
+### Advanced
+
+For a more advanced use-case you can use my other
+library [kmPalette](https://github.com/jordond/kmpalette).
+
+You can get the dominant color from an image, or you can also generate a color palette.
+
+Follow the instructions there to set it up, then as an example. You can use it to generate a color
+theme from a remote image:
+
+```kotlin
+@Composable
+fun SampleTheme(
+  imageUrl: Url, // Url("http://example.com/image.jpg")
+  useDarkTheme: Boolean = isSystemInDarkTheme(),
+  content: @Composable () -> Unit,
+) {
+  val networkLoader = rememberNetworkLoader()
+  val dominantColorState = rememberDominantColorState(loader = networkLoader)
+  LaunchedEffect(imageUrl) {
+    dominantColorState.updateFrom(imageUrl)
+  }
+
+  AnimatedDynamicMaterialTheme(
+    seedColor = dominantColorState.color,
+    isDark = useDarkTheme,
+    content = content
+  )
+}
+```
 
 ## Demo
 
