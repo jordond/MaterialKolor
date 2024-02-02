@@ -1,5 +1,6 @@
 package com.materialkolor.ktx
 
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.materialkolor.hct.Hct
@@ -20,6 +21,7 @@ public fun Hct.Companion.from(color: Color): Hct {
  * @receiver The HCT to convert.
  * @return The Compose [Color] representation of the HCT.
  */
+@Stable
 public fun Hct.toColor(): Color {
     return Color(toInt())
 }
@@ -30,6 +32,7 @@ public fun Hct.toColor(): Color {
  * @receiver The list of HCT to convert.
  * @return The list of Compose [Color] representation of the HCT.
  */
+@Stable
 public fun List<Hct>.toColors(): List<Color> {
     return map { it.toColor() }
 }

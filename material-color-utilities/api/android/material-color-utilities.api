@@ -9,9 +9,13 @@ public final class com/materialkolor/blend/Blend {
 public final class com/materialkolor/contrast/Contrast {
 	public static final field INSTANCE Lcom/materialkolor/contrast/Contrast;
 	public final fun darker (DD)D
+	public final fun darker (DF)F
 	public final fun darkerUnsafe (DD)D
+	public final fun darkerUnsafe (DF)F
 	public final fun lighter (DD)D
+	public final fun lighter (DF)F
 	public final fun lighterUnsafe (DD)D
+	public final fun lighterUnsafe (DF)F
 	public final fun ratioOfTones (DD)D
 	public final fun ratioOfYs (DD)D
 }
@@ -24,13 +28,17 @@ public final class com/materialkolor/dislike/DislikeAnalyzer {
 
 public final class com/materialkolor/dynamiccolor/ContrastCurve {
 	public fun <init> (DDDD)V
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun get (D)D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/materialkolor/dynamiccolor/DynamicColor {
 	public static final field Companion Lcom/materialkolor/dynamiccolor/DynamicColor$Companion;
 	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/materialkolor/dynamiccolor/ContrastCurve;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/materialkolor/dynamiccolor/ContrastCurve;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getArgb (Lcom/materialkolor/scheme/DynamicScheme;)I
 	public final fun getBackground ()Lkotlin/jvm/functions/Function1;
 	public final fun getContrastCurve ()Lcom/materialkolor/dynamiccolor/ContrastCurve;
@@ -42,7 +50,9 @@ public final class com/materialkolor/dynamiccolor/DynamicColor {
 	public final fun getTone ()Lkotlin/jvm/functions/Function1;
 	public final fun getTone (Lcom/materialkolor/scheme/DynamicScheme;)D
 	public final fun getToneDeltaPair ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
 	public final fun isBackground ()Z
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/materialkolor/dynamiccolor/DynamicColor$Companion {
@@ -64,8 +74,10 @@ public final class com/materialkolor/dynamiccolor/MaterialDynamicColors {
 	public final fun controlActivated ()Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public final fun controlHighlight ()Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public final fun controlNormal ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun error ()Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public final fun errorContainer ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun hashCode ()I
 	public final fun highestSurface (Lcom/materialkolor/scheme/DynamicScheme;)Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public final fun inverseOnSurface ()Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public final fun inversePrimary ()Lcom/materialkolor/dynamiccolor/DynamicColor;
@@ -123,6 +135,7 @@ public final class com/materialkolor/dynamiccolor/MaterialDynamicColors {
 	public final fun textPrimaryInverseDisableOnly ()Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public final fun textSecondaryAndTertiaryInverse ()Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public final fun textSecondaryAndTertiaryInverseDisabled ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/materialkolor/dynamiccolor/MaterialDynamicColors$Companion {
@@ -130,11 +143,14 @@ public final class com/materialkolor/dynamiccolor/MaterialDynamicColors$Companio
 
 public final class com/materialkolor/dynamiccolor/ToneDeltaPair {
 	public fun <init> (Lcom/materialkolor/dynamiccolor/DynamicColor;Lcom/materialkolor/dynamiccolor/DynamicColor;DLcom/materialkolor/dynamiccolor/TonePolarity;Z)V
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDelta ()D
 	public final fun getPolarity ()Lcom/materialkolor/dynamiccolor/TonePolarity;
 	public final fun getRoleA ()Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public final fun getRoleB ()Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public final fun getStayTogether ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/materialkolor/dynamiccolor/TonePolarity : java/lang/Enum {
@@ -150,10 +166,13 @@ public final class com/materialkolor/dynamiccolor/TonePolarity : java/lang/Enum 
 public final class com/materialkolor/hct/Hct {
 	public static final field Companion Lcom/materialkolor/hct/Hct$Companion;
 	public synthetic fun <init> (ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getChroma ()D
 	public final fun getHue ()D
 	public final fun getTone ()D
+	public fun hashCode ()I
 	public final fun toInt ()I
+	public fun toString ()Ljava/lang/String;
 	public final fun withChroma (D)Lcom/materialkolor/hct/Hct;
 	public final fun withHue (D)Lcom/materialkolor/hct/Hct;
 	public final fun withTone (D)Lcom/materialkolor/hct/Hct;
@@ -178,12 +197,6 @@ public final class com/materialkolor/palettes/CorePalette {
 	public final fun getError ()Lcom/materialkolor/palettes/TonalPalette;
 	public final fun getN1 ()Lcom/materialkolor/palettes/TonalPalette;
 	public final fun getN2 ()Lcom/materialkolor/palettes/TonalPalette;
-	public final fun setA1 (Lcom/materialkolor/palettes/TonalPalette;)V
-	public final fun setA2 (Lcom/materialkolor/palettes/TonalPalette;)V
-	public final fun setA3 (Lcom/materialkolor/palettes/TonalPalette;)V
-	public final fun setError (Lcom/materialkolor/palettes/TonalPalette;)V
-	public final fun setN1 (Lcom/materialkolor/palettes/TonalPalette;)V
-	public final fun setN2 (Lcom/materialkolor/palettes/TonalPalette;)V
 }
 
 public final class com/materialkolor/palettes/CorePalette$Companion {
@@ -194,10 +207,13 @@ public final class com/materialkolor/palettes/CorePalette$Companion {
 public final class com/materialkolor/palettes/TonalPalette {
 	public static final field Companion Lcom/materialkolor/palettes/TonalPalette$Companion;
 	public synthetic fun <init> (DDLcom/materialkolor/hct/Hct;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getChroma ()D
 	public final fun getHct (D)Lcom/materialkolor/hct/Hct;
 	public final fun getHue ()D
 	public final fun getKeyColor ()Lcom/materialkolor/hct/Hct;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public final fun tone (I)I
 }
 
@@ -292,10 +308,13 @@ public final class com/materialkolor/score/Score {
 public final class com/materialkolor/temperature/TemperatureCache {
 	public static final field Companion Lcom/materialkolor/temperature/TemperatureCache$Companion;
 	public fun <init> (Lcom/materialkolor/hct/Hct;)V
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAnalogousColors ()Ljava/util/List;
 	public final fun getAnalogousColors (II)Ljava/util/List;
 	public final fun getComplement ()Lcom/materialkolor/hct/Hct;
 	public final fun getRelativeTemperature (Lcom/materialkolor/hct/Hct;)D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/materialkolor/temperature/TemperatureCache$Companion {

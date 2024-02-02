@@ -1,6 +1,7 @@
 package com.materialkolor.ktx
 
 import androidx.compose.material3.ColorScheme
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.blend.Blend
 import com.materialkolor.hct.Hct
@@ -16,6 +17,7 @@ import com.materialkolor.hct.Hct
  * @param[toColor] [Color] to blend towards.
  * @param[matchSaturation] Whether to match the saturation of the [fromColor] to the [toColor].
  */
+@Stable
 public fun Blend.harmonize(
     fromColor: Color,
     toColor: Color,
@@ -42,6 +44,7 @@ public fun Blend.harmonize(
  * @param[matchSaturation] Whether to match the saturation of the [fromColor] to the [toColor].
  * @return [Color] blended color.
  */
+@Stable
 public fun Color.harmonize(other: Color, matchSaturation: Boolean = false): Color {
     return Blend.harmonize(fromColor = this, other, matchSaturation)
 }
@@ -55,6 +58,7 @@ public fun Color.harmonize(other: Color, matchSaturation: Boolean = false): Colo
  * @param[color] [Color] to harmonize with the primary color.
  * @return [Color] harmonized color
  */
+@Stable
 public fun ColorScheme.harmonizeWithPrimary(color: Color, matchSaturation: Boolean = false): Color {
     return Blend.harmonize(color, primary, matchSaturation)
 }

@@ -18,6 +18,7 @@ package com.materialkolor.temperature
 import com.materialkolor.hct.Hct
 import com.materialkolor.utils.ColorUtils
 import com.materialkolor.utils.MathUtils
+import dev.drewhamilton.poko.Poko
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -39,6 +40,7 @@ import kotlin.math.round
  * limits on chroma.
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
+@Poko
 public class TemperatureCache(private val input: Hct) {
 
     private var precomputedComplement: Hct? = null

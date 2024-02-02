@@ -19,6 +19,7 @@ import com.materialkolor.dislike.DislikeAnalyzer
 import com.materialkolor.hct.Hct
 import com.materialkolor.scheme.DynamicScheme
 import com.materialkolor.scheme.Variant
+import dev.drewhamilton.poko.Poko
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -29,6 +30,7 @@ import kotlin.math.max
  * see [MaterialColorUtilities](https://github.com/material-foundation/material-color-utilities/commit/c3681e12b72202723657b9ce5cf8dfdf7efb0781)
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
+@Poko
 public class MaterialDynamicColors(
     private val isExtendedFidelity: Boolean = false,
 ) {

@@ -17,6 +17,7 @@ package com.materialkolor.hct
 
 import com.materialkolor.utils.ColorUtils.lstarFromArgb
 import com.materialkolor.utils.ColorUtils.lstarFromY
+import dev.drewhamilton.poko.Poko
 
 /**
  * A color system built using CAM16 hue and chroma, and L* from L*a*b*.
@@ -36,6 +37,7 @@ import com.materialkolor.utils.ColorUtils.lstarFromY
  * lighting environments.
  */
 @Suppress("unused")
+@Poko
 public class Hct private constructor(
     private val argb: Int,
 ) {

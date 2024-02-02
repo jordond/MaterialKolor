@@ -1,5 +1,6 @@
 package com.materialkolor.ktx
 
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.temperature.TemperatureCache
 
@@ -44,6 +45,7 @@ public fun TemperatureCache.Companion.temperature(color: Color): Double {
 /**
  * Determine a given color is warm.
  */
+@Stable
 public fun Color.isWarm(): Boolean {
     return TemperatureCache.temperature(this) > 0
 }
@@ -51,6 +53,7 @@ public fun Color.isWarm(): Boolean {
 /**
  * Determine a given color is cool.
  */
+@Stable
 public fun Color.isCool(): Boolean {
     return TemperatureCache.temperature(this) < 0
 }
