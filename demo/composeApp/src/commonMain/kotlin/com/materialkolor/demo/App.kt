@@ -53,12 +53,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.materialkolor.PaletteStyle
 import com.materialkolor.demo.theme.AppTheme
+import com.materialkolor.ktx.darken
 import com.materialkolor.ktx.fromColor
 import com.materialkolor.ktx.harmonize
+import com.materialkolor.ktx.lighten
 import com.materialkolor.palettes.TonalPalette
+import kotlin.math.round
 
 val SampleColors = listOf(
     Color(0xFFD32F2F),
@@ -313,6 +317,63 @@ internal fun App() {
                     }
                 }
             }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                var color by remember(seedColor) { mutableStateOf(seedColor) }
+
+                Button(onClick = { color = color.lighten(1.1f) }) {
+                    Text("Lighten")
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Box(
+                    modifier = Modifier
+                        .size(height = 32.dp, width = 80.dp)
+                        .clip(MaterialTheme.shapes.small)
+                        .background(color)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = color.toArgb().toString(16))
+                Spacer(modifier = Modifier.height(4.dp))
+                Button(onClick = { color = color.darken(1.1f) }) {
+                    Text("Darken")
+                }
+            }
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                repeat(10) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        val ratio = 1.1f + it / 10f
+                        val darker by remember(seedColor) { mutableStateOf(seedColor.darken(ratio)) }
+                        val lighter by remember(seedColor) { mutableStateOf(seedColor.lighten(ratio)) }
+
+                        Text(text = "Darken ${ratio.roundToTwoDecimalPlaces()}")
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(height = 32.dp, width = 80.dp)
+                                .clip(MaterialTheme.shapes.small)
+                                .background(darker)
+                        )
+
+                        Text(text = "Lighten ${ratio.roundToTwoDecimalPlaces()}")
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(height = 32.dp, width = 80.dp)
+                                .clip(MaterialTheme.shapes.small)
+                                .background(lighter)
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -334,4 +395,8 @@ fun ColorBox(
             modifier = Modifier.padding(8.dp),
         )
     }
+}
+
+private fun Float.roundToTwoDecimalPlaces(): Float {
+    return round(this * 100) / 100
 }
