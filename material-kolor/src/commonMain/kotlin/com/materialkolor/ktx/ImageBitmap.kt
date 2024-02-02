@@ -2,6 +2,7 @@ package com.materialkolor.ktx
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -39,6 +40,7 @@ public fun QuantizerCelebi.quantize(image: ImageBitmap, maxColors: Int): Map<Int
  * the input colors were not suitable for a theme, a default fallback color will be provided,
  * Google Blue.
  */
+@Stable
 public fun ImageBitmap.themeColors(
     maxColors: Int = 4,
     fallback: Color = Color(-0xbd7a0c),
@@ -56,6 +58,7 @@ public fun ImageBitmap.themeColors(
  * @param[filter] whether to filter out undesirable combinations.
  * @return The most suitable color for a UI theme.
  */
+@Stable
 public fun ImageBitmap.themeColor(
     fallback: Color,
     filter: Boolean = true,
@@ -70,6 +73,7 @@ public fun ImageBitmap.themeColor(
  * @param[filter] whether to filter out undesirable combinations.
  * @return The most suitable color for a UI theme or `null` if no suitable color found.
  */
+@Stable
 public fun ImageBitmap.themeColorOrNull(filter: Boolean = true): Color? {
     val quantized = QuantizerCelebi.quantize(image = this, maxColors = 1)
     return Score
@@ -86,6 +90,7 @@ public fun ImageBitmap.themeColorOrNull(filter: Boolean = true): Color? {
  * @param[filter] whether to filter out undesirable combinations.
  * @return The most suitable colors for a UI theme.
  */
+@Stable
 @Composable
 public fun rememberThemeColors(
     image: ImageBitmap,
@@ -106,6 +111,7 @@ public fun rememberThemeColors(
  * @param[filter] whether to filter out undesirable combinations.
  * @return The most suitable color for a UI theme.
  */
+@Stable
 @Composable
 public fun rememberThemeColor(
     image: ImageBitmap,
