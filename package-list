@@ -3,3 +3,4 @@ $dokka.linkExtension:html
 
 module:material-kolor
 com.materialkolor
+com.materialkolor.ktx
