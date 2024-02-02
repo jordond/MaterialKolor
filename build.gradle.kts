@@ -16,7 +16,6 @@ plugins {
 apiValidation {
     ignoredProjects.addAll(
         listOf(
-            "material-color-utilities",
             "composeApp",
         ),
     )
