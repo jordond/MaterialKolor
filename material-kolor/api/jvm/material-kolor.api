@@ -29,7 +29,13 @@ public final class com/materialkolor/PaletteStyle : java/lang/Enum {
 }
 
 public final class com/materialkolor/ktx/ColorKt {
+	public static final fun darken-DxMtmZc (JF)J
+	public static synthetic fun darken-DxMtmZc$default (JFILjava/lang/Object;)J
+	public static final fun fixIfDisliked-8_81llA (J)J
+	public static final fun isDisliked-8_81llA (J)Z
 	public static final fun isLight-8_81llA (J)Z
+	public static final fun lighten-DxMtmZc (JF)J
+	public static synthetic fun lighten-DxMtmZc$default (JFILjava/lang/Object;)J
 }
 
 public final class com/materialkolor/ktx/CorePaletteKt {
@@ -55,7 +61,9 @@ public final class com/materialkolor/ktx/HarmonizeKt {
 public final class com/materialkolor/ktx/HctKt {
 	public static final fun from-4WTKRHQ (Lcom/materialkolor/hct/Hct$Companion;J)Lcom/materialkolor/hct/Hct;
 	public static final fun toColor (Lcom/materialkolor/hct/Hct;)J
+	public static final fun toColors (Ljava/util/List;)Ljava/util/List;
 	public static final fun toHct-8_81llA (J)Lcom/materialkolor/hct/Hct;
+	public static final fun toHcts (Ljava/util/List;)Ljava/util/List;
 }
 
 public final class com/materialkolor/ktx/ImageBitmapKt {
