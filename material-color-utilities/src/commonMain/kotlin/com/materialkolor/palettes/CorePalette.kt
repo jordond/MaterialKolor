@@ -22,15 +22,19 @@ import kotlin.math.min
 /**
  * An intermediate concept between the key color for a UI theme, and a full color scheme. 5 sets of
  * tones are generated, all except one use the same hue as the key color, and all vary in chroma.
+ *
+ * @constructor Create a new CorePalette
+ * @param[argb] ARGB representation of a color
+ * @param[isContent] Whether the color is used as a content color
  */
 public class CorePalette private constructor(argb: Int, isContent: Boolean) {
 
-    public var a1: TonalPalette
-    public var a2: TonalPalette
-    public var a3: TonalPalette
-    public var n1: TonalPalette
-    public var n2: TonalPalette
-    public var error: TonalPalette
+    public val a1: TonalPalette
+    public val a2: TonalPalette
+    public val a3: TonalPalette
+    public val n1: TonalPalette
+    public val n2: TonalPalette
+    public val error: TonalPalette
 
     init {
         val hct = Hct.fromInt(argb)

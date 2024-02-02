@@ -34,6 +34,9 @@ public object DislikeAnalyzer {
      * Returns true if color is disliked.
      *
      * Disliked is defined as a dark yellow-green that is not neutral.
+     *
+     * @param[hct] Hct color to check
+     * @return true if color is disliked
      */
     public fun isDisliked(hct: Hct): Boolean {
         val huePasses = round(hct.hue) in 90.0..111.0
@@ -44,6 +47,9 @@ public object DislikeAnalyzer {
 
     /**
      * If color is disliked, lighten it to make it likable.
+     *
+     * @param[hct] Hct color to check
+     * @return Lightened Hct color that is not disliked
      */
     public fun fixIfDisliked(hct: Hct): Hct {
         return if (isDisliked(hct)) Hct.from(hct.hue, hct.chroma, 70.0) else hct

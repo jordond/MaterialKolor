@@ -91,6 +91,10 @@ public object Contrast {
      * also known as relative luminance.
      *
      * The equation is ratio = lighter Y + 5 / darker Y + 5.
+     *
+     * @param[y1] Y in XYZ, relative luminance.
+     * @param[y2] Y in XYZ, relative luminance.
+     * @return Contrast ratio of two colors.
      */
     public fun ratioOfYs(y1: Double, y2: Double): Double {
         val lighter: Double = max(y1, y2)
@@ -99,7 +103,7 @@ public object Contrast {
     }
 
     /**
-     * Contrast ratio of two tones. T in HCT, L* in L*a*b*. Also known as luminance or perpectual
+     * Contrast ratio of two tones. T in HCT, L* in L*a*b*. Also known as luminance or perpetual
      * luminance.
      *
      * Contrast ratio is defined using Y in XYZ, relative luminance. However, relative luminance is
@@ -112,6 +116,10 @@ public object Contrast {
      * of a ratio, a linear difference. This allows a designer to determine what they need to adjust a
      * color's lightness to in order to reach their desired contrast, instead of guessing & checking
      * with hex codes.
+     *
+     * @param[tone1] T in HCT, L* in L*a*b*.
+     * @param[tone2] T in HCT, L* in L*a*b*.
+     * @return Contrast ratio of two tones. T in HCT, L* in L*a*b*.
      */
     public fun ratioOfTones(tone1: Double, tone2: Double): Double {
         return ratioOfYs(yFromLstar(tone1), yFromLstar(tone2))
@@ -121,8 +129,9 @@ public object Contrast {
      * Returns T in HCT, L* in L*a*b* >= tone parameter that ensures ratio with input T/L*.
      * Returns -1 if ratio cannot be achieved.
      *
-     * @param tone Tone return value must contrast with.
-     * @param ratio Desired contrast ratio of return value and tone parameter.
+     * @param[tone] Tone return value must contrast with.
+     * @param[ratio] Desired contrast ratio of return value and tone parameter.
+     * @return T in HCT, L* in L*a*b* >= tone parameter that ensures ratio with input T/L*.
      */
     public fun lighter(tone: Double, ratio: Double): Double {
         if (tone < 0.0 || tone > 100.0) {
@@ -147,13 +156,25 @@ public object Contrast {
     }
 
     /**
+     * Returns T in HCT, L* in L*a*b* >= tone parameter that ensures ratio with input T/L*.
+     * Returns -1 if ratio cannot be achieved.
+     *
+     * @param[tone] Tone return value must contrast with.
+     * @param[ratio] Desired contrast ratio of return value and tone parameter.
+     * @return T in HCT, L* in L*a*b* >= tone parameter that ensures ratio with input T/L*.
+     */
+    public fun lighter(tone: Double, ratio: Float): Float {
+        return lighter(tone, ratio.toDouble()).toFloat()
+    }
+
+    /**
      * Tone >= tone parameter that ensures ratio. 100 if ratio cannot be achieved.
      *
      * This method is unsafe because the returned value is guaranteed to be in bounds, but, the in
      * bounds return value may not reach the desired ratio.
      *
-     * @param tone Tone return value must contrast with.
-     * @param ratio Desired contrast ratio of return value and tone parameter.
+     * @param[tone] Tone return value must contrast with.
+     * @param[ratio] Desired contrast ratio of return value and tone parameter.
      */
     public fun lighterUnsafe(tone: Double, ratio: Double): Double {
         val lighterSafe = lighter(tone, ratio)
@@ -161,11 +182,25 @@ public object Contrast {
     }
 
     /**
+     * Tone >= tone parameter that ensures ratio. 100 if ratio cannot be achieved.
+     *
+     * This method is unsafe because the returned value is guaranteed to be in bounds, but, the in
+     * bounds return value may not reach the desired ratio.
+     *
+     * @param[tone] Tone return value must contrast with.
+     * @param[ratio] Desired contrast ratio of return value and tone parameter.
+     */
+    public fun lighterUnsafe(tone: Double, ratio: Float): Float {
+        return lighterUnsafe(tone, ratio.toDouble()).toFloat()
+    }
+
+    /**
      * Returns T in HCT, L* in L*a*b* <= tone parameter that ensures ratio with input T/L*. Returns -1
      * if ratio cannot be achieved.
      *
-     * @param tone Tone return value must contrast with.
-     * @param ratio Desired contrast ratio of return value and tone parameter.
+     * @param[tone] Tone return value must contrast with.
+     * @param[ratio] Desired contrast ratio of return value and tone parameter.
+     * @return T in HCT, L* in L*a*b* <= tone parameter that ensures ratio with input T/L*.
      */
     public fun darker(tone: Double, ratio: Double): Double {
         if (tone < 0.0 || tone > 100.0) {
@@ -192,16 +227,41 @@ public object Contrast {
     }
 
     /**
+     * Returns T in HCT, L* in L*a*b* <= tone parameter that ensures ratio with input T/L*. Returns -1
+     * if ratio cannot be achieved.
+     *
+     * @param[tone] Tone return value must contrast with.
+     * @param[ratio] Desired contrast ratio of return value and tone parameter.
+     * @return T in HCT, L* in L*a*b* <= tone parameter that ensures ratio with input T/L*.
+     */
+    public fun darker(tone: Double, ratio: Float): Float {
+        return darker(tone, ratio.toDouble()).toFloat()
+    }
+
+    /**
      * Tone <= tone parameter that ensures ratio. 0 if ratio cannot be achieved.
      *
      * This method is unsafe because the returned value is guaranteed to be in bounds, but, the in
      * bounds return value may not reach the desired ratio.
      *
-     * @param tone Tone return value must contrast with.
-     * @param ratio Desired contrast ratio of return value and tone parameter.
+     * @param[tone] Tone return value must contrast with.
+     * @param[ratio] Desired contrast ratio of return value and tone parameter.
      */
     public fun darkerUnsafe(tone: Double, ratio: Double): Double {
         val darkerSafe = darker(tone, ratio)
         return max(0.0, darkerSafe)
+    }
+
+    /**
+     * Tone <= tone parameter that ensures ratio. 0 if ratio cannot be achieved.
+     *
+     * This method is unsafe because the returned value is guaranteed to be in bounds, but, the in
+     * bounds return value may not reach the desired ratio.
+     *
+     * @param[tone] Tone return value must contrast with.
+     * @param[ratio] Desired contrast ratio of return value and tone parameter.
+     */
+    public fun darkerUnsafe(tone: Double, ratio: Float): Float {
+        return darkerUnsafe(tone, ratio.toDouble()).toFloat()
     }
 }
