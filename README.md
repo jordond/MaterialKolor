@@ -29,6 +29,10 @@ The KDoc is published at [docs.materialkolor.com](docs.materialkolor.com)
   - [Single Platform](#single-platform)
   - [Version Catalog](#version-catalog)
 - [Usage](#usage)
+- [Extensions](#extensions)
+  - [Harmonize Colors](#harmonize-colors)
+  - [Lighten and Darken](#lighten-and-darken)
+  - [Color Temperature](#color-temperature)
 - [Generating from an Image](#generating-from-an-image)
   - [Advanced](#advanced)
 - [Demo](#demo)
@@ -160,6 +164,55 @@ Also included is a `AnimatedDynamicMaterialTheme` which animates the color schem
 
 See [`Theme.kt`](demo/composeApp/src/commonMain/kotlin/com/materialkolor/demo/theme/Theme.kt) for an
 example.
+
+## Extensions
+
+Included in the library are some extensions for working with colors. You can check out
+the [/ktx](material-kolor/src/commonMain/kotlin/com/materialkolor/ktx) package for more information.
+
+But here are a couple useful examples:
+
+### Harmonize Colors
+
+If you want to harmonize a color with another you can use the `Color.harmonize()` function. You can
+read more about color harmonization on
+the [Material 3 Documentation](https://m3.material.io/styles/color/advanced/adjust-existing-colors#1cc12e43-237b-45b9-8fe0-9a3549c1f61e).
+
+Example:
+
+```kotlin
+val newColor = MaterialTheme.colorScheme.primary.harmonize(Color.Blue)
+```
+
+There is an additional function specifically for harmonizing with the primary color:
+
+```kotlin
+val newColor = Color.Blue.harmonizeWithPrimary()
+```
+
+**Note:** `Color.harmonize()` has an optional parameter `matchSaturation` which when set to `true`
+will adjust the saturation from the other color.
+
+### Lighten and Darken
+
+You can lighten or darken a color using the `Color.lighten()` and `Color.darken()` functions.
+
+For example:
+
+```kotlin
+val newColor = MaterialTheme.colorScheme.primary.lighten(0.2f)
+```
+
+Check out the demo app for a full example.
+
+### Color Temperature
+
+You can determine if a `Color` is warm or cold using the following:
+
+```kotlin
+val isWarm = MaterialTheme.colorScheme.primary.isWarm()
+val isCold = MaterialTheme.colorScheme.primary.isCold()
+```
 
 ## Generating from an Image
 
