@@ -15,6 +15,8 @@
  */
 package com.materialkolor.dynamiccolor
 
+import dev.drewhamilton.poko.Poko
+
 /**
  * Documents a constraint between two DynamicColors, in which their tones must have a certain
  * distance from each other.
@@ -42,6 +44,7 @@ package com.materialkolor.dynamiccolor
  * @param stayTogether Whether these two roles should stay on the same side of the "awkward zone"
  * (T50-59). This is necessary for certain cases where one role has two backgrounds.
  */
+@Poko
 public class ToneDeltaPair(
     public val roleA: DynamicColor,
     public val roleB: DynamicColor,

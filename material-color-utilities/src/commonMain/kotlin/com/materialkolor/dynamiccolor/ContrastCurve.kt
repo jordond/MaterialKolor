@@ -16,6 +16,7 @@
 package com.materialkolor.dynamiccolor
 
 import com.materialkolor.utils.MathUtils.lerp
+import dev.drewhamilton.poko.Poko
 
 /**
  * A class containing a value that changes with the contrast level.
@@ -30,6 +31,7 @@ import com.materialkolor.utils.MathUtils.lerp
  * @param medium Value for contrast level 0.5
  * @param high Value for contrast level 1.0
  */
+@Poko
 public class ContrastCurve(
     private val low: Double,
     private val normal: Double,

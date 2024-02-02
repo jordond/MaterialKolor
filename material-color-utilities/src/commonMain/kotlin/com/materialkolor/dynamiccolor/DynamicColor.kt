@@ -19,6 +19,7 @@ import com.materialkolor.contrast.Contrast
 import com.materialkolor.hct.Hct
 import com.materialkolor.palettes.TonalPalette
 import com.materialkolor.scheme.DynamicScheme
+import dev.drewhamilton.poko.Poko
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -71,6 +72,7 @@ import kotlin.math.round
  * @param opacity A function returning the opacity of a color, as a number between 0 and 1.
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
+@Poko
 public class DynamicColor(
     public val name: String,
     public val palette: (DynamicScheme) -> TonalPalette,

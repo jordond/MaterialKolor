@@ -16,6 +16,7 @@
 package com.materialkolor.palettes
 
 import com.materialkolor.hct.Hct
+import dev.drewhamilton.poko.Poko
 import kotlin.math.abs
 import kotlin.math.round
 
@@ -26,6 +27,7 @@ import kotlin.math.round
  * @param[chroma] The chroma of the Tonal Palette, in HCT. Ranges from 0 to ~130 (for sRGB gamut).
  * @param[keyColor] The key color is the first tone, starting from T50, that matches the palette's chroma.
  */
+@Poko
 public class TonalPalette private constructor(
     public val hue: Double,
     public val chroma: Double,
