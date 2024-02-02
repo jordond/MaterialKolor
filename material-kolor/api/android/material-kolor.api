@@ -28,3 +28,32 @@ public final class com/materialkolor/PaletteStyle : java/lang/Enum {
 	public static fun values ()[Lcom/materialkolor/PaletteStyle;
 }
 
+public final class com/materialkolor/ktx/ColorKt {
+	public static final fun isLight-8_81llA (J)Z
+}
+
+public final class com/materialkolor/ktx/DynamicSchemeKt {
+	public static final fun getSourceColor (Lcom/materialkolor/scheme/DynamicScheme;)J
+	public static final fun toDynamicScheme-Iv8Zu3U (JZLcom/materialkolor/PaletteStyle;D)Lcom/materialkolor/scheme/DynamicScheme;
+	public static synthetic fun toDynamicScheme-Iv8Zu3U$default (JZLcom/materialkolor/PaletteStyle;DILjava/lang/Object;)Lcom/materialkolor/scheme/DynamicScheme;
+}
+
+public final class com/materialkolor/ktx/HarmonizeKt {
+	public static final fun harmonize-IbeAmgk (Lcom/materialkolor/blend/Blend;JJZ)J
+	public static synthetic fun harmonize-IbeAmgk$default (Lcom/materialkolor/blend/Blend;JJZILjava/lang/Object;)J
+	public static final fun harmonize-jxsXWHM (JJZ)J
+	public static synthetic fun harmonize-jxsXWHM$default (JJZILjava/lang/Object;)J
+	public static final fun harmonizeWithPrimary-bw27NRU (Landroidx/compose/material3/ColorScheme;JZ)J
+	public static synthetic fun harmonizeWithPrimary-bw27NRU$default (Landroidx/compose/material3/ColorScheme;JZILjava/lang/Object;)J
+}
+
+public final class com/materialkolor/ktx/HctKt {
+	public static final fun from-4WTKRHQ (Lcom/materialkolor/hct/Hct$Companion;J)Lcom/materialkolor/hct/Hct;
+	public static final fun toColor (Lcom/materialkolor/hct/Hct;)J
+	public static final fun toHct-8_81llA (J)Lcom/materialkolor/hct/Hct;
+}
+
+public final class com/materialkolor/ktx/TonalPaletteKt {
+	public static final fun fromColor-4WTKRHQ (Lcom/materialkolor/palettes/TonalPalette$Companion;J)Lcom/materialkolor/palettes/TonalPalette;
+}
+

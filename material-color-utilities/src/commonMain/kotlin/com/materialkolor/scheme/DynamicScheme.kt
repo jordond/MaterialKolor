@@ -25,42 +25,19 @@ import com.materialkolor.utils.MathUtils
  * (-1 to 1, currently contrast ratio 3.0 and 7.0)
  */
 open class DynamicScheme(
-    sourceColorHct: Hct,
-    variant: Variant,
-    isDark: Boolean,
-    contrastLevel: Double,
-    primaryPalette: TonalPalette,
-    secondaryPalette: TonalPalette,
-    tertiaryPalette: TonalPalette,
-    neutralPalette: TonalPalette,
-    neutralVariantPalette: TonalPalette,
+    val sourceColorHct: Hct,
+    val variant: Variant,
+    val isDark: Boolean,
+    val contrastLevel: Double,
+    val primaryPalette: TonalPalette,
+    val secondaryPalette: TonalPalette,
+    val tertiaryPalette: TonalPalette,
+    val neutralPalette: TonalPalette,
+    val neutralVariantPalette: TonalPalette,
 ) {
 
-    val sourceColorArgb: Int
-    val sourceColorHct: Hct
-    val variant: Variant
-    val isDark: Boolean
-    val contrastLevel: Double
-    val primaryPalette: TonalPalette
-    val secondaryPalette: TonalPalette
-    val tertiaryPalette: TonalPalette
-    val neutralPalette: TonalPalette
-    val neutralVariantPalette: TonalPalette
-    val errorPalette: TonalPalette
-
-    init {
-        sourceColorArgb = sourceColorHct.toInt()
-        this.sourceColorHct = sourceColorHct
-        this.variant = variant
-        this.isDark = isDark
-        this.contrastLevel = contrastLevel
-        this.primaryPalette = primaryPalette
-        this.secondaryPalette = secondaryPalette
-        this.tertiaryPalette = tertiaryPalette
-        this.neutralPalette = neutralPalette
-        this.neutralVariantPalette = neutralVariantPalette
-        errorPalette = TonalPalette.fromHueAndChroma(25.0, 84.0)
-    }
+    val sourceColorArgb: Int = sourceColorHct.toInt()
+    val errorPalette: TonalPalette = TonalPalette.fromHueAndChroma(hue = 25.0, chroma = 84.0)
 
     companion object {
 

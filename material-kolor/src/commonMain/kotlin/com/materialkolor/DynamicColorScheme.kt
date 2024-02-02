@@ -4,18 +4,8 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import com.materialkolor.dynamiccolor.MaterialDynamicColors
-import com.materialkolor.hct.Hct
-import com.materialkolor.scheme.SchemeContent
-import com.materialkolor.scheme.SchemeExpressive
-import com.materialkolor.scheme.SchemeFidelity
-import com.materialkolor.scheme.SchemeFruitSalad
-import com.materialkolor.scheme.SchemeMonochrome
-import com.materialkolor.scheme.SchemeNeutral
-import com.materialkolor.scheme.SchemeRainbow
-import com.materialkolor.scheme.SchemeTonalSpot
-import com.materialkolor.scheme.SchemeVibrant
+import com.materialkolor.ktx.toDynamicScheme
 
 /**
  * Creates and remember a [ColorScheme] based on the given [seedColor] and [isDark] mode.
@@ -53,19 +43,8 @@ public fun dynamicColorScheme(
     contrastLevel: Double = 0.0,
     isExtendedFidelity: Boolean = false,
 ): ColorScheme {
-    val hct = Hct.fromInt(seedColor.toArgb())
+    val scheme = seedColor.toDynamicScheme(isDark, style, contrastLevel)
     val colors = MaterialDynamicColors(isExtendedFidelity)
-    val scheme = when (style) {
-        PaletteStyle.TonalSpot -> SchemeTonalSpot(hct, isDark, contrastLevel)
-        PaletteStyle.Neutral -> SchemeNeutral(hct, isDark, contrastLevel)
-        PaletteStyle.Vibrant -> SchemeVibrant(hct, isDark, contrastLevel)
-        PaletteStyle.Expressive -> SchemeExpressive(hct, isDark, contrastLevel)
-        PaletteStyle.Rainbow -> SchemeRainbow(hct, isDark, contrastLevel)
-        PaletteStyle.FruitSalad -> SchemeFruitSalad(hct, isDark, contrastLevel)
-        PaletteStyle.Monochrome -> SchemeMonochrome(hct, isDark, contrastLevel)
-        PaletteStyle.Fidelity -> SchemeFidelity(hct, isDark, contrastLevel)
-        PaletteStyle.Content -> SchemeContent(hct, isDark, contrastLevel)
-    }
 
     return ColorScheme(
         background = Color(colors.background().getArgb(scheme)),
