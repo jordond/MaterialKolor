@@ -100,7 +100,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("com.materialkolor:material-kolor:1.4.0-alpha04")
+                implementation("com.materialkolor:material-kolor:1.4.0-alpha05")
             }
         }
     }
@@ -113,7 +113,7 @@ For an Android only project, add the dependency to app level `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.materialkolor:material-kolor:1.4.0-alpha04")
+    implementation("com.materialkolor:material-kolor:1.4.0-alpha05")
 }
 ```
 
@@ -121,7 +121,7 @@ dependencies {
 
 ```toml
 [versions]
-materialKolor = "1.4.0-alpha03"
+materialKolor = "1.4.0-alpha05"
 
 [libraries]
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
