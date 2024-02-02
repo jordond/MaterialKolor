@@ -42,10 +42,10 @@ package com.materialkolor.dynamiccolor
  * @param stayTogether Whether these two roles should stay on the same side of the "awkward zone"
  * (T50-59). This is necessary for certain cases where one role has two backgrounds.
  */
-class ToneDeltaPair(
-    val roleA: DynamicColor,
-    val roleB: DynamicColor,
-    val delta: Double,
-    val polarity: TonePolarity,
-    val stayTogether: Boolean,
+public class ToneDeltaPair(
+    public val roleA: DynamicColor,
+    public val roleB: DynamicColor,
+    public val delta: Double,
+    public val polarity: TonePolarity,
+    public val stayTogether: Boolean,
 )

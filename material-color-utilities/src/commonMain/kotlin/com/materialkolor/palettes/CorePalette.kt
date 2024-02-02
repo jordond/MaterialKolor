@@ -23,14 +23,14 @@ import kotlin.math.min
  * An intermediate concept between the key color for a UI theme, and a full color scheme. 5 sets of
  * tones are generated, all except one use the same hue as the key color, and all vary in chroma.
  */
-class CorePalette private constructor(argb: Int, isContent: Boolean) {
+public class CorePalette private constructor(argb: Int, isContent: Boolean) {
 
-    var a1: TonalPalette
-    var a2: TonalPalette
-    var a3: TonalPalette
-    var n1: TonalPalette
-    var n2: TonalPalette
-    var error: TonalPalette
+    public var a1: TonalPalette
+    public var a2: TonalPalette
+    public var a3: TonalPalette
+    public var n1: TonalPalette
+    public var n2: TonalPalette
+    public var error: TonalPalette
 
     init {
         val hct = Hct.fromInt(argb)
@@ -52,20 +52,20 @@ class CorePalette private constructor(argb: Int, isContent: Boolean) {
         error = TonalPalette.fromHueAndChroma(hue = 25.0, chroma = 84.0)
     }
 
-    companion object {
+    public companion object {
 
         /**
          * Create key tones from a color.
          *
          * @param argb ARGB representation of a color
          */
-        fun of(argb: Int): CorePalette = CorePalette(argb = argb, isContent = false)
+        public fun of(argb: Int): CorePalette = CorePalette(argb = argb, isContent = false)
 
         /**
          * Create content key tones from a color.
          *
          * @param argb ARGB representation of a color
          */
-        fun contentOf(argb: Int): CorePalette = CorePalette(argb = argb, isContent = true)
+        public fun contentOf(argb: Int): CorePalette = CorePalette(argb = argb, isContent = true)
     }
 }

@@ -31,7 +31,11 @@ import kotlin.math.max
  * Tertiary Container is the complement to the source color, using TemperatureCache. It also
  * maintains constant appearance.
  */
-class SchemeFidelity(sourceColorHct: Hct, isDark: Boolean, contrastLevel: Double) : DynamicScheme(
+public class SchemeFidelity(
+    sourceColorHct: Hct,
+    isDark: Boolean,
+    contrastLevel: Double,
+) : DynamicScheme(
     sourceColorHct = sourceColorHct,
     variant = Variant.FIDELITY,
     isDark = isDark,

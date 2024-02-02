@@ -71,6 +71,7 @@ public final class com/materialkolor/ktx/ImageBitmapKt {
 }
 
 public final class com/materialkolor/ktx/TemperatureKt {
+	public static final fun TemperatureCache-8_81llA (J)Lcom/materialkolor/temperature/TemperatureCache;
 	public static final fun isCool-8_81llA (J)Z
 	public static final fun isWarm-8_81llA (J)Z
 	public static final fun temperature-4WTKRHQ (Lcom/materialkolor/temperature/TemperatureCache$Companion;J)D

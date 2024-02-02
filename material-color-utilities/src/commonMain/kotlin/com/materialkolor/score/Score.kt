@@ -29,7 +29,7 @@ import kotlin.math.round
  * muddied, while curating the high cluster count to a much smaller number of appropriate choices.
  */
 @Suppress("unused")
-object Score {
+public object Score {
 
     private const val TARGET_CHROMA = 48.0 // A1 Chroma
     private const val WEIGHT_PROPORTION = 0.7
@@ -52,7 +52,7 @@ object Score {
      * the input colors were not suitable for a theme, a default fallback color will be provided,
      * Google Blue.
      */
-    fun score(
+    public fun score(
         colorsToPopulation: Map<Int, Int>,
         desired: Int = 4,
         fallbackColorArgb: Int? = -0xbd7a0c,

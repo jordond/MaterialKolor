@@ -21,7 +21,11 @@ import com.materialkolor.palettes.TonalPalette
 /**
  * A loud theme, colorfulness is maximum for Primary palette, increased for others.
  */
-class SchemeVibrant(sourceColorHct: Hct, isDark: Boolean, contrastLevel: Double) : DynamicScheme(
+public class SchemeVibrant(
+    sourceColorHct: Hct,
+    isDark: Boolean,
+    contrastLevel: Double,
+) : DynamicScheme(
     sourceColorHct = sourceColorHct,
     variant = Variant.VIBRANT,
     isDark = isDark,
@@ -39,7 +43,7 @@ class SchemeVibrant(sourceColorHct: Hct, isDark: Boolean, contrastLevel: Double)
     neutralVariantPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 12.0),
 ) {
 
-    companion object {
+    private companion object {
 
         private val HUES =
             doubleArrayOf(0.0, 41.0, 61.0, 101.0, 131.0, 181.0, 251.0, 301.0, 360.0)

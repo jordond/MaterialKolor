@@ -58,7 +58,6 @@ import com.materialkolor.PaletteStyle
 import com.materialkolor.demo.theme.AppTheme
 import com.materialkolor.ktx.fromColor
 import com.materialkolor.ktx.harmonize
-import com.materialkolor.ktx.matchSaturation
 import com.materialkolor.palettes.TonalPalette
 
 val SampleColors = listOf(
@@ -109,7 +108,12 @@ internal fun App() {
     var darkTheme by remember { mutableStateOf(isDarkTheme) }
 
     AppTheme(seedColor, style, darkTheme) {
-        Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+                .verticalScroll(rememberScrollState()),
+        ) {
             Box(
                 modifier = Modifier.align(Alignment.End)
             ) {
@@ -160,7 +164,7 @@ internal fun App() {
 
             Text(text = "Preview", style = MaterialTheme.typography.headlineSmall)
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
+                modifier = Modifier,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Column {
@@ -207,7 +211,6 @@ internal fun App() {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.weight(1f),
                     ) {
                         ExtendedFloatingActionButton({}) {
                             Text("Extended FAB")
@@ -261,8 +264,7 @@ internal fun App() {
 
                 Row {
                     val harmonizedColor = Color.Red
-                        .matchSaturation(colorScheme.primary)
-                        .harmonize(colorScheme.primary)
+                        .harmonize(colorScheme.primary, matchSaturation = true)
 
                     val harmonizedPalette = TonalPalette.fromColor(harmonizedColor)
 
@@ -298,8 +300,7 @@ internal fun App() {
 
                 Row {
                     val harmonizedColor = Color.Blue
-                        .matchSaturation(colorScheme.primary)
-                        .harmonize(colorScheme.primary)
+                        .harmonize(colorScheme.primary, matchSaturation = true)
 
                     val harmonizedPalette = TonalPalette.fromColor(harmonizedColor)
 

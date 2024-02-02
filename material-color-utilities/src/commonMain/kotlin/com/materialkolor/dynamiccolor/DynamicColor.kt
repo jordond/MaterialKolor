@@ -71,16 +71,16 @@ import kotlin.math.round
  * @param opacity A function returning the opacity of a color, as a number between 0 and 1.
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class DynamicColor(
-    val name: String,
-    val palette: (DynamicScheme) -> TonalPalette,
-    val tone: (DynamicScheme) -> Double,
-    val isBackground: Boolean,
-    val background: ((DynamicScheme) -> DynamicColor)?,
-    val secondBackground: ((DynamicScheme) -> DynamicColor)?,
-    val contrastCurve: ContrastCurve?,
-    val toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair)?,
-    val opacity: ((DynamicScheme) -> Double)? = null,
+public class DynamicColor(
+    public val name: String,
+    public val palette: (DynamicScheme) -> TonalPalette,
+    public val tone: (DynamicScheme) -> Double,
+    public val isBackground: Boolean,
+    public val background: ((DynamicScheme) -> DynamicColor)?,
+    public val secondBackground: ((DynamicScheme) -> DynamicColor)?,
+    public val contrastCurve: ContrastCurve?,
+    public val toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair)?,
+    public val opacity: ((DynamicScheme) -> Double)? = null,
 ) {
 
     private val hctCache: HashMap<DynamicScheme, Hct> = HashMap()
@@ -91,7 +91,7 @@ class DynamicColor(
      * @param scheme Defines the conditions of the user interface, for example, whether or not it is
      * dark mode or light mode, and what the desired contrast level is.
      */
-    fun getArgb(scheme: DynamicScheme): Int {
+    public fun getArgb(scheme: DynamicScheme): Int {
         val argb: Int = getHct(scheme).toInt()
         if (opacity == null) {
             return argb
@@ -107,7 +107,7 @@ class DynamicColor(
      * @param scheme Defines the conditions of the user interface, for example, whether or not it is
      * dark mode or light mode, and what the desired contrast level is.
      */
-    fun getHct(scheme: DynamicScheme): Hct {
+    public fun getHct(scheme: DynamicScheme): Hct {
         val cachedAnswer = hctCache[scheme]
         if (cachedAnswer != null) {
             return cachedAnswer
@@ -132,7 +132,7 @@ class DynamicColor(
     /**
      * Returns the tone in HCT, ranging from 0 to 100, of the resolved color given scheme.
      */
-    fun getTone(scheme: DynamicScheme): Double {
+    public fun getTone(scheme: DynamicScheme): Double {
         val decreasingContrast: Boolean = scheme.contrastLevel < 0
 
         // Case 1: dual foreground, pair of colors with delta constraint.
@@ -279,7 +279,7 @@ class DynamicColor(
         }
     }
 
-    companion object {
+    public companion object {
 
         /**
          * A convenience constructor for DynamicColor.
@@ -302,7 +302,7 @@ class DynamicColor(
          * a tonal palette, when contrast adjustments are made, intended chroma can be preserved.
          * @param tone Function that provides a tone, given a DynamicScheme.
          */
-        fun fromPalette(
+        public fun fromPalette(
             name: String,
             palette: (DynamicScheme) -> TonalPalette,
             tone: (DynamicScheme) -> Double,
@@ -340,7 +340,7 @@ class DynamicColor(
          * @param isBackground Whether this dynamic color is a background, with some other color as the
          * foreground.
          */
-        fun fromPalette(
+        public fun fromPalette(
             name: String,
             palette: (DynamicScheme) -> TonalPalette,
             tone: (DynamicScheme) -> Double,
@@ -364,7 +364,7 @@ class DynamicColor(
          * @param name The name of the dynamic color.
          * @param argb The source color from which to extract the hue and chroma.
          */
-        fun fromArgb(name: String, argb: Int): DynamicColor {
+        public fun fromArgb(name: String, argb: Int): DynamicColor {
             val hct: Hct = Hct.fromInt(argb)
             val palette = TonalPalette.fromInt(argb)
             return fromPalette(name, { palette }, { hct.tone })
@@ -374,7 +374,7 @@ class DynamicColor(
          * Given a background tone, find a foreground tone, while ensuring they reach a contrast ratio
          * that is as close to ratio as possible.
          */
-        fun foregroundTone(bgTone: Double, ratio: Double): Double {
+        public fun foregroundTone(bgTone: Double, ratio: Double): Double {
             val lighterTone: Double = Contrast.lighterUnsafe(bgTone, ratio)
             val darkerTone: Double = Contrast.darkerUnsafe(bgTone, ratio)
             val lighterRatio: Double = Contrast.ratioOfTones(lighterTone, bgTone)
@@ -403,7 +403,7 @@ class DynamicColor(
          * Adjust a tone down such that white has 4.5 contrast, if the tone is reasonably close to
          * supporting it.
          */
-        fun enableLightForeground(tone: Double): Double {
+        public fun enableLightForeground(tone: Double): Double {
             return if (tonePrefersLightForeground(tone) && !toneAllowsLightForeground(tone)) 49.0
             else tone
         }
@@ -418,9 +418,9 @@ class DynamicColor(
          * Since `tertiaryContainer` in dark monochrome scheme requires a tone of 60, it should not be
          * adjusted. Therefore, 60 is excluded here.
          */
-        fun tonePrefersLightForeground(tone: Double): Boolean = round(tone) < 60
+        public fun tonePrefersLightForeground(tone: Double): Boolean = round(tone) < 60
 
         /** Tones less than ~T50 always permit white at 4.5 contrast.  */
-        fun toneAllowsLightForeground(tone: Double): Boolean = round(tone) <= 49
+        public fun toneAllowsLightForeground(tone: Double): Boolean = round(tone) <= 49
     }
 }

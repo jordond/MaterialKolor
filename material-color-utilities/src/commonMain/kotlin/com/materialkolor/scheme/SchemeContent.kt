@@ -33,7 +33,7 @@ import kotlin.math.max
  * grounded equivalent to rotating hue clockwise by 60 degrees. It also maintains constant
  * appearance.
  */
-class SchemeContent(
+public class SchemeContent(
     sourceColorHct: Hct,
     isDark: Boolean,
     contrastLevel: Double,

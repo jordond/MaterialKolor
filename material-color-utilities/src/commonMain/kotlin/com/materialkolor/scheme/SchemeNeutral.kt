@@ -21,7 +21,11 @@ import com.materialkolor.palettes.TonalPalette
 /**
  * A theme that's slightly more chromatic than monochrome, which is purely black / white / gray.
  */
-class SchemeNeutral(sourceColorHct: Hct, isDark: Boolean, contrastLevel: Double) : DynamicScheme(
+public class SchemeNeutral(
+    sourceColorHct: Hct,
+    isDark: Boolean,
+    contrastLevel: Double,
+) : DynamicScheme(
     sourceColorHct = sourceColorHct,
     variant = Variant.NEUTRAL,
     isDark = isDark,

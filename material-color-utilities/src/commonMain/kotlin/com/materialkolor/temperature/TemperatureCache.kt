@@ -52,7 +52,7 @@ public class TemperatureCache(private val input: Hct) {
      * In art, this is usually described as being across the color wheel. History of this shows
      * intent as a color that is just as cool-warm as the input color is warm-cool.
      */
-    val complement: Hct
+    public val complement: Hct
         get() {
             if (precomputedComplement != null) {
                 return precomputedComplement!!
@@ -97,7 +97,7 @@ public class TemperatureCache(private val input: Hct) {
      *
      * The colors are equidistant in temperature and adjacent in hue.
      */
-    val analogousColors: List<Hct>
+    public val analogousColors: List<Hct>
         get() = getAnalogousColors(5, 12)
 
     /**
@@ -111,7 +111,7 @@ public class TemperatureCache(private val input: Hct) {
      * @param count The number of colors to return, includes the input color.
      * @param divisions The number of divisions on the color wheel.
      */
-    fun getAnalogousColors(count: Int, divisions: Int): List<Hct> {
+    public fun getAnalogousColors(count: Int, divisions: Int): List<Hct> {
         // The starting hue is the hue of the input color.
         val startHue = round(input.hue).toInt()
         val startHct: Hct = hctsByHue!![startHue]
@@ -196,7 +196,7 @@ public class TemperatureCache(private val input: Hct) {
      * @param hct HCT to find the relative temperature of.
      * @return Value on a scale from 0 to 1.
      */
-    fun getRelativeTemperature(hct: Hct): Double {
+    public fun getRelativeTemperature(hct: Hct): Double {
         val range = tempsByHct!![warmest]!! - tempsByHct!![coldest]!!
         val differenceFromColdest = tempsByHct!![hct]!! - tempsByHct!![coldest]!!
         // Handle when there's no difference in temperature between warmest and
@@ -276,7 +276,7 @@ public class TemperatureCache(private val input: Hct) {
     private val warmest: Hct
         get() = hctsByTemp!![hctsByTemp!!.size - 1]
 
-    companion object {
+    public companion object {
 
         /**
          * Value representing cool-warm factor of a color. Values below 0 are considered cool, above,
@@ -292,7 +292,7 @@ public class TemperatureCache(private val input: Hct) {
          *     - Lower bound: -9.66. Chroma is infinite. Assuming max of Lab chroma 130.
          *     - Upper bound: 8.61. Chroma is infinite. Assuming max of Lab chroma 130.
          */
-        fun rawTemperature(color: Hct): Double {
+        public fun rawTemperature(color: Hct): Double {
             val lab: DoubleArray = ColorUtils.labFromArgb(color.toInt())
             val hue = MathUtils.sanitizeDegrees(MathUtils.toDegrees(atan2(lab[2], lab[1])))
             val chroma: Double = hypot(lab[1], lab[2])

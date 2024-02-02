@@ -30,7 +30,7 @@ import com.materialkolor.utils.MathUtils.lerp
  * @param medium Value for contrast level 0.5
  * @param high Value for contrast level 1.0
  */
-class ContrastCurve(
+public class ContrastCurve(
     private val low: Double,
     private val normal: Double,
     private val medium: Double,
@@ -44,7 +44,7 @@ class ContrastCurve(
      * is the highest.
      * @return The value. For contrast ratios, a number between 1.0 and 21.0.
      */
-    fun get(contrastLevel: Double): Double = when {
+    public fun get(contrastLevel: Double): Double = when {
         contrastLevel <= -1.0 -> low
         contrastLevel < 0.0 -> lerp(low, normal, (contrastLevel - -1) / 1)
         contrastLevel < 0.5 -> lerp(normal, medium, (contrastLevel - 0) / 0.5)

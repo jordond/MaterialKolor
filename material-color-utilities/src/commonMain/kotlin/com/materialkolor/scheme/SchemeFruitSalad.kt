@@ -22,7 +22,11 @@ import com.materialkolor.utils.MathUtils
 /**
  * A playful theme - the source color's hue does not appear in the theme.
  */
-class SchemeFruitSalad(sourceColorHct: Hct, isDark: Boolean, contrastLevel: Double) : DynamicScheme(
+public class SchemeFruitSalad(
+    sourceColorHct: Hct,
+    isDark: Boolean,
+    contrastLevel: Double,
+) : DynamicScheme(
     sourceColorHct = sourceColorHct,
     variant = Variant.FRUIT_SALAD,
     isDark = isDark,
