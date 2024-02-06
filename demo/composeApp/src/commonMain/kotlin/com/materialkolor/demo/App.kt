@@ -58,7 +58,7 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.PaletteStyle
 import com.materialkolor.demo.theme.AppTheme
 import com.materialkolor.ktx.darken
-import com.materialkolor.ktx.fromColor
+import com.materialkolor.ktx.from
 import com.materialkolor.ktx.harmonize
 import com.materialkolor.ktx.lighten
 import com.materialkolor.palettes.TonalPalette
@@ -251,7 +251,7 @@ internal fun App() {
 
                 Row {
                     val harmonizedColor = Color.Red.harmonize(colorScheme.primary)
-                    val harmonizedPalette = TonalPalette.fromColor(harmonizedColor)
+                    val harmonizedPalette = TonalPalette.from(harmonizedColor)
 
                     repeat(10) {
                         Box(
@@ -270,7 +270,7 @@ internal fun App() {
                     val harmonizedColor = Color.Red
                         .harmonize(colorScheme.primary, matchSaturation = true)
 
-                    val harmonizedPalette = TonalPalette.fromColor(harmonizedColor)
+                    val harmonizedPalette = TonalPalette.from(harmonizedColor)
 
                     repeat(10) {
                         Box(
@@ -287,7 +287,7 @@ internal fun App() {
 
                 Row {
                     val harmonizedColor = Color.Blue.harmonize(colorScheme.primary)
-                    val harmonizedPalette = TonalPalette.fromColor(harmonizedColor)
+                    val harmonizedPalette = TonalPalette.from(harmonizedColor)
 
                     repeat(10) {
                         Box(
@@ -306,7 +306,7 @@ internal fun App() {
                     val harmonizedColor = Color.Blue
                         .harmonize(colorScheme.primary, matchSaturation = true)
 
-                    val harmonizedPalette = TonalPalette.fromColor(harmonizedColor)
+                    val harmonizedPalette = TonalPalette.from(harmonizedColor)
 
                     repeat(10) {
                         Box(

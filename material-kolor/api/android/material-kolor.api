@@ -28,7 +28,17 @@ public final class com/materialkolor/PaletteStyle : java/lang/Enum {
 	public static fun values ()[Lcom/materialkolor/PaletteStyle;
 }
 
+public final class com/materialkolor/ktx/BlendKt {
+	public static final fun blend-IbeAmgk (Lcom/materialkolor/blend/Blend;JJF)J
+	public static final fun blend-jxsXWHM (JJF)J
+	public static synthetic fun blend-jxsXWHM$default (JJFILjava/lang/Object;)J
+	public static final fun blendHue-IbeAmgk (Lcom/materialkolor/blend/Blend;JJF)J
+	public static final fun blendHue-jxsXWHM (JJF)J
+	public static synthetic fun blendHue-jxsXWHM$default (JJFILjava/lang/Object;)J
+}
+
 public final class com/materialkolor/ktx/ColorKt {
+	public static final fun contrastRatio--OWjLjI (JJ)D
 	public static final fun darken-DxMtmZc (JF)J
 	public static synthetic fun darken-DxMtmZc$default (JFILjava/lang/Object;)J
 	public static final fun fixIfDisliked-8_81llA (J)J
@@ -36,10 +46,12 @@ public final class com/materialkolor/ktx/ColorKt {
 	public static final fun isLight-8_81llA (J)Z
 	public static final fun lighten-DxMtmZc (JF)J
 	public static synthetic fun lighten-DxMtmZc$default (JFILjava/lang/Object;)J
+	public static final fun tonalContrastRatio--OWjLjI (JJ)D
 }
 
 public final class com/materialkolor/ktx/CorePaletteKt {
 	public static final fun contentOf-4WTKRHQ (Lcom/materialkolor/palettes/CorePalette$Companion;J)Lcom/materialkolor/palettes/CorePalette;
+	public static final fun from-4WTKRHQ (Lcom/materialkolor/palettes/CorePalette$Companion;J)Lcom/materialkolor/palettes/CorePalette;
 	public static final fun of-4WTKRHQ (Lcom/materialkolor/palettes/CorePalette$Companion;J)Lcom/materialkolor/palettes/CorePalette;
 }
 
@@ -86,6 +98,8 @@ public final class com/materialkolor/ktx/TemperatureKt {
 }
 
 public final class com/materialkolor/ktx/TonalPaletteKt {
-	public static final fun fromColor-4WTKRHQ (Lcom/materialkolor/palettes/TonalPalette$Companion;J)Lcom/materialkolor/palettes/TonalPalette;
+	public static final fun from (Lcom/materialkolor/palettes/TonalPalette$Companion;I)Lcom/materialkolor/palettes/TonalPalette;
+	public static final fun from (Lcom/materialkolor/palettes/TonalPalette$Companion;Lcom/materialkolor/hct/Hct;)Lcom/materialkolor/palettes/TonalPalette;
+	public static final fun from-4WTKRHQ (Lcom/materialkolor/palettes/TonalPalette$Companion;J)Lcom/materialkolor/palettes/TonalPalette;
 }
 

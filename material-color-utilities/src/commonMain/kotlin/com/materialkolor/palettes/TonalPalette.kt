@@ -39,7 +39,7 @@ public class TonalPalette private constructor(
     /**
      * Create an ARGB color with HCT hue and chroma of this Tones instance, and the provided HCT tone.
      *
-     * @param tone HCT tone, measured from 0 to 100.
+     * @param[tone] HCT tone, measured from 0 to 100.
      * @return ARGB representation of a color with that tone.
      */
     public fun tone(tone: Int): Int {
@@ -54,6 +54,9 @@ public class TonalPalette private constructor(
 
     /**
      * Given a tone, use hue and chroma of palette to create a color, and return it as HCT.
+     *
+     * @param[tone] HCT tone, measured from 0 to 100.
+     * @return HCT representation of a color with that tone.
      */
     public fun getHct(tone: Double): Hct = Hct.from(hue, chroma, tone)
 
@@ -62,7 +65,7 @@ public class TonalPalette private constructor(
         /**
          * Create tones using the HCT hue and chroma from a color.
          *
-         * @param argb ARGB representation of a color
+         * @param[argb] ARGB representation of a color
          * @return Tones matching that color's hue and chroma.
          */
         public fun fromInt(argb: Int): TonalPalette {
@@ -72,7 +75,7 @@ public class TonalPalette private constructor(
         /**
          * Create tones using a HCT color.
          *
-         * @param hct HCT representation of a color.
+         * @param[hct] HCT representation of a color.
          * @return Tones matching that color's hue and chroma.
          */
         public fun fromHct(hct: Hct): TonalPalette {
@@ -82,15 +85,21 @@ public class TonalPalette private constructor(
         /**
          * Create tones from a defined HCT hue and chroma.
          *
-         * @param hue HCT hue
-         * @param chroma HCT chroma
+         * @param[hue] HCT hue
+         * @param[chroma] HCT chroma
          * @return Tones matching hue and chroma.
          */
         public fun fromHueAndChroma(hue: Double, chroma: Double): TonalPalette {
             return TonalPalette(hue, chroma, createKeyColor(hue, chroma))
         }
 
-        /** The key color is the first tone, starting from T50, matching the given hue and chroma.  */
+        /**
+         * The key color is the first tone, starting from T50, matching the given hue and chroma.
+         *
+         * @param[hue] H in HCT
+         * @param[chroma] C in HCT
+         * @return HCT representation of the key color.
+         */
         private fun createKeyColor(hue: Double, chroma: Double): Hct {
             val startTone = 50.0
             var smallestDeltaHct = Hct.from(hue, chroma, startTone)
