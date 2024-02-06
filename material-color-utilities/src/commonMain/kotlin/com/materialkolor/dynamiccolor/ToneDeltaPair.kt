@@ -36,12 +36,12 @@ import dev.drewhamilton.poko.Poko
  * ToneDeltaPair(A, B, 10, 'nearer', stayTogether) states that A should be 10 lighter than B in
  * light mode, and 10 darker than B in dark mode.
  *
- * @param roleA The first role in a pair.
- * @param roleB The second role in a pair.
- * @param delta Required difference between tones. Absolute value, negative values have undefined
+ * @param[roleA] The first role in a pair.
+ * @param[roleB] The second role in a pair.
+ * @param[delta] Required difference between tones. Absolute value, negative values have undefined
  * behavior.
- * @param polarity The relative relation between tones of roleA and roleB, as described above.
- * @param stayTogether Whether these two roles should stay on the same side of the "awkward zone"
+ * @param[polarity] The relative relation between tones of roleA and roleB, as described above.
+ * @param[stayTogether] Whether these two roles should stay on the same side of the "awkward zone"
  * (T50-59). This is necessary for certain cases where one role has two backgrounds.
  */
 @Poko

@@ -41,7 +41,7 @@ public fun Blend.harmonize(
  *
  * @receiver[Color] to blend from.
  * @param[other] [Color] to blend towards.
- * @param[matchSaturation] Whether to match the saturation of the [fromColor] to the [toColor].
+ * @param[matchSaturation] Whether to match the saturation of the [from] to the [toColor].
  * @return [Color] blended color.
  */
 @Stable
