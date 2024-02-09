@@ -26,6 +26,8 @@ import com.materialkolor.dynamiccolor.MaterialDynamicColors
  * @param[style] The style of the color scheme.
  * @param[contrastLevel] The contrast level of the color scheme.
  * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
+ * @param[animate] Whether to animate the color scheme or not.
+ * @param[animationSpec] The animation spec to use for animating the color scheme.
  * @param[content] The Composable content of the theme.
  */
 @Composable
@@ -37,15 +39,39 @@ public fun DynamicMaterialTheme(
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
     isExtendedFidelity: Boolean = false,
+    animate: Boolean = false,
+    animationSpec: AnimationSpec<Color> = spring(stiffness = Spring.StiffnessLow),
     content: @Composable () -> Unit,
 ) {
-    val colorScheme: ColorScheme = rememberDynamicColorScheme(
+    val dynamicColorScheme: ColorScheme = rememberDynamicColorScheme(
         seedColor = seedColor,
         isDark = useDarkTheme,
         style = style,
         contrastLevel = contrastLevel,
         isExtendedFidelity = isExtendedFidelity,
     )
+
+    val colorScheme =
+        if (!animate) dynamicColorScheme
+        else {
+            dynamicColorScheme.copy(
+                primary = dynamicColorScheme.primary.animate(animationSpec),
+                primaryContainer = dynamicColorScheme.primaryContainer.animate(animationSpec),
+                secondary = dynamicColorScheme.secondary.animate(animationSpec),
+                secondaryContainer = dynamicColorScheme.secondaryContainer.animate(animationSpec),
+                tertiary = dynamicColorScheme.tertiary.animate(animationSpec),
+                tertiaryContainer = dynamicColorScheme.tertiaryContainer.animate(animationSpec),
+                background = dynamicColorScheme.background.animate(animationSpec),
+                surface = dynamicColorScheme.surface.animate(animationSpec),
+                error = dynamicColorScheme.error.animate(animationSpec),
+                onPrimary = dynamicColorScheme.onPrimary.animate(animationSpec),
+                onSecondary = dynamicColorScheme.onSecondary.animate(animationSpec),
+                onTertiary = dynamicColorScheme.onTertiary.animate(animationSpec),
+                onBackground = dynamicColorScheme.onBackground.animate(animationSpec),
+                onSurface = dynamicColorScheme.onSurface.animate(animationSpec),
+                onError = dynamicColorScheme.onError.animate(animationSpec),
+            )
+        }
 
     CompositionLocalProvider(LocalDynamicMaterialThemeSeed provides seedColor) {
         MaterialTheme(
@@ -72,6 +98,10 @@ public fun DynamicMaterialTheme(
  * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
  * @param[content] The Composable content of the theme.
  */
+@Deprecated(
+    level = DeprecationLevel.WARNING,
+    message = "Use DynamicMaterialTheme with animate = true instead."
+)
 @Composable
 public fun AnimatedDynamicMaterialTheme(
     seedColor: Color,
@@ -84,38 +114,21 @@ public fun AnimatedDynamicMaterialTheme(
     isExtendedFidelity: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val colors: ColorScheme = rememberDynamicColorScheme(
+    DynamicMaterialTheme(
         seedColor = seedColor,
-        isDark = useDarkTheme,
+        useDarkTheme = useDarkTheme,
         style = style,
         contrastLevel = contrastLevel,
+        shapes = shapes,
+        typography = typography,
         isExtendedFidelity = isExtendedFidelity,
+        animate = true,
+        animationSpec = animationSpec,
+        content = content,
     )
+}
 
-    val animatedColorScheme = colors.copy(
-        primary = animateColorAsState(colors.primary, animationSpec).value,
-        primaryContainer = animateColorAsState(colors.primaryContainer, animationSpec).value,
-        secondary = animateColorAsState(colors.secondary, animationSpec).value,
-        secondaryContainer = animateColorAsState(colors.secondaryContainer, animationSpec).value,
-        tertiary = animateColorAsState(colors.tertiary, animationSpec).value,
-        tertiaryContainer = animateColorAsState(colors.tertiaryContainer, animationSpec).value,
-        background = animateColorAsState(colors.background, animationSpec).value,
-        surface = animateColorAsState(colors.surface, animationSpec).value,
-        error = animateColorAsState(colors.error, animationSpec).value,
-        onPrimary = animateColorAsState(colors.onPrimary, animationSpec).value,
-        onSecondary = animateColorAsState(colors.onSecondary, animationSpec).value,
-        onTertiary = animateColorAsState(colors.onTertiary, animationSpec).value,
-        onBackground = animateColorAsState(colors.onBackground, animationSpec).value,
-        onSurface = animateColorAsState(colors.onSurface, animationSpec).value,
-        onError = animateColorAsState(colors.onError, animationSpec).value,
-    )
-
-    CompositionLocalProvider(LocalDynamicMaterialThemeSeed provides seedColor) {
-        MaterialTheme(
-            colorScheme = animatedColorScheme,
-            shapes = shapes,
-            typography = typography,
-            content = content,
-        )
-    }
+@Composable
+private fun Color.animate(animationSpec: AnimationSpec<Color>): Color {
+    return animateColorAsState(this, animationSpec).value
 }
