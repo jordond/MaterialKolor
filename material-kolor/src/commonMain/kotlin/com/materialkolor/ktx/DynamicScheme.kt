@@ -1,6 +1,7 @@
 package com.materialkolor.ktx
 
 import androidx.compose.ui.graphics.Color
+import com.materialkolor.Contrast
 import com.materialkolor.PaletteStyle
 import com.materialkolor.scheme.DynamicScheme
 import com.materialkolor.scheme.SchemeContent
@@ -30,7 +31,7 @@ public val DynamicScheme.sourceColor: Color
 public fun Color.toDynamicScheme(
     isDark: Boolean,
     style: PaletteStyle,
-    contrastLevel: Double = 0.0,
+    contrastLevel: Double = Contrast.Default.value,
 ): DynamicScheme {
     val hct = toHct()
     return when (style) {

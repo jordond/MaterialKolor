@@ -40,7 +40,7 @@ public fun dynamicColorScheme(
     seedColor: Color,
     isDark: Boolean,
     style: PaletteStyle = PaletteStyle.TonalSpot,
-    contrastLevel: Double = 0.0,
+    contrastLevel: Double = Contrast.Default.value,
     isExtendedFidelity: Boolean = false,
 ): ColorScheme {
     val scheme = seedColor.toDynamicScheme(isDark, style, contrastLevel)
