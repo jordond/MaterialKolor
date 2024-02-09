@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.dynamiccolor.MaterialDynamicColors
+import com.materialkolor.ktx.getColor
 import com.materialkolor.ktx.toDynamicScheme
 
 /**
@@ -47,34 +48,34 @@ public fun dynamicColorScheme(
     val colors = MaterialDynamicColors(isExtendedFidelity)
 
     return ColorScheme(
-        background = Color(colors.background().getArgb(scheme)),
-        error = Color(colors.error().getArgb(scheme)),
-        errorContainer = Color(colors.errorContainer().getArgb(scheme)),
-        inverseOnSurface = Color(colors.inverseOnSurface().getArgb(scheme)),
-        inversePrimary = Color(colors.inversePrimary().getArgb(scheme)),
-        inverseSurface = Color(colors.inverseSurface().getArgb(scheme)),
-        onBackground = Color(colors.onBackground().getArgb(scheme)),
-        onError = Color(colors.onError().getArgb(scheme)),
-        onErrorContainer = Color(colors.onErrorContainer().getArgb(scheme)),
-        onPrimary = Color(colors.onPrimary().getArgb(scheme)),
-        onPrimaryContainer = Color(colors.onPrimaryContainer().getArgb(scheme)),
-        onSecondary = Color(colors.onSecondary().getArgb(scheme)),
-        onSecondaryContainer = Color(colors.onSecondaryContainer().getArgb(scheme)),
-        onSurface = Color(colors.onSurface().getArgb(scheme)),
-        onSurfaceVariant = Color(colors.onSurfaceVariant().getArgb(scheme)),
-        onTertiary = Color(colors.onTertiary().getArgb(scheme)),
-        onTertiaryContainer = Color(colors.onTertiaryContainer().getArgb(scheme)),
-        outline = Color(colors.outline().getArgb(scheme)),
-        outlineVariant = Color(colors.outlineVariant().getArgb(scheme)),
-        primary = Color(colors.primary().getArgb(scheme)),
-        primaryContainer = Color(colors.primaryContainer().getArgb(scheme)),
-        scrim = Color(colors.scrim().getArgb(scheme)),
-        secondary = Color(colors.secondary().getArgb(scheme)),
-        secondaryContainer = Color(colors.secondaryContainer().getArgb(scheme)),
-        surface = Color(colors.surface().getArgb(scheme)),
-        surfaceTint = Color(colors.surfaceTint().getArgb(scheme)),
-        surfaceVariant = Color(colors.surfaceVariant().getArgb(scheme)),
-        tertiary = Color(colors.tertiary().getArgb(scheme)),
-        tertiaryContainer = Color(colors.tertiaryContainer().getArgb(scheme))
+        background = colors.background().getColor(scheme),
+        error = colors.error().getColor(scheme),
+        errorContainer = colors.errorContainer().getColor(scheme),
+        inverseOnSurface = colors.inverseOnSurface().getColor(scheme),
+        inversePrimary = colors.inversePrimary().getColor(scheme),
+        inverseSurface = colors.inverseSurface().getColor(scheme),
+        onBackground = colors.onBackground().getColor(scheme),
+        onError = colors.onError().getColor(scheme),
+        onErrorContainer = colors.onErrorContainer().getColor(scheme),
+        onPrimary = colors.onPrimary().getColor(scheme),
+        onPrimaryContainer = colors.onPrimaryContainer().getColor(scheme),
+        onSecondary = colors.onSecondary().getColor(scheme),
+        onSecondaryContainer = colors.onSecondaryContainer().getColor(scheme),
+        onSurface = colors.onSurface().getColor(scheme),
+        onSurfaceVariant = colors.onSurfaceVariant().getColor(scheme),
+        onTertiary = colors.onTertiary().getColor(scheme),
+        onTertiaryContainer = colors.onTertiaryContainer().getColor(scheme),
+        outline = colors.outline().getColor(scheme),
+        outlineVariant = colors.outlineVariant().getColor(scheme),
+        primary = colors.primary().getColor(scheme),
+        primaryContainer = colors.primaryContainer().getColor(scheme),
+        scrim = colors.scrim().getColor(scheme),
+        secondary = colors.secondary().getColor(scheme),
+        secondaryContainer = colors.secondaryContainer().getColor(scheme),
+        surface = colors.surface().getColor(scheme),
+        surfaceTint = colors.surfaceTint().getColor(scheme),
+        surfaceVariant = colors.surfaceVariant().getColor(scheme),
+        tertiary = colors.tertiary().getColor(scheme),
+        tertiaryContainer = colors.tertiaryContainer().getColor(scheme),
     )
 }
