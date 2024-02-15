@@ -28,12 +28,12 @@ import com.materialkolor.utils.ColorUtils.redFromArgb
  */
 internal class QuantizerWu : Quantizer {
 
-    lateinit var weights: IntArray
-    lateinit var momentsR: IntArray
-    lateinit var momentsG: IntArray
-    lateinit var momentsB: IntArray
-    lateinit var moments: DoubleArray
-    lateinit var cubes: Array<Box?>
+    private lateinit var weights: IntArray
+    private lateinit var momentsR: IntArray
+    private lateinit var momentsG: IntArray
+    private lateinit var momentsB: IntArray
+    private lateinit var moments: DoubleArray
+    private lateinit var cubes: Array<Box?>
 
     override fun quantize(pixels: IntArray?, maxColors: Int): QuantizerResult {
         val mapResult = QuantizerMap().quantize(pixels, maxColors)
@@ -48,7 +48,7 @@ internal class QuantizerWu : Quantizer {
         return QuantizerResult(resultMap)
     }
 
-    fun constructHistogram(pixels: Map<Int, Int>) {
+    private fun constructHistogram(pixels: Map<Int, Int>) {
         weights = IntArray(TOTAL_SIZE)
         momentsR = IntArray(TOTAL_SIZE)
         momentsG = IntArray(TOTAL_SIZE)
@@ -71,7 +71,7 @@ internal class QuantizerWu : Quantizer {
         }
     }
 
-    fun createMoments() {
+    private fun createMoments() {
         for (r in 1 until INDEX_COUNT) {
             val area = IntArray(INDEX_COUNT)
             val areaR = IntArray(INDEX_COUNT)
@@ -107,7 +107,7 @@ internal class QuantizerWu : Quantizer {
         }
     }
 
-    fun createBoxes(maxColorCount: Int): CreateBoxesResult {
+    private fun createBoxes(maxColorCount: Int): CreateBoxesResult {
         cubes = arrayOfNulls(maxColorCount)
         for (i in 0 until maxColorCount) {
             cubes[i] = Box()
@@ -142,11 +142,11 @@ internal class QuantizerWu : Quantizer {
             }
             i++
         }
-        return CreateBoxesResult(maxColorCount, generatedColorCount)
+        return CreateBoxesResult(generatedColorCount)
     }
 
-    fun createResult(colorCount: Int): List<Int> {
-        val colors: MutableList<Int> = ArrayList<Int>()
+    private fun createResult(colorCount: Int): List<Int> {
+        val colors: MutableList<Int> = ArrayList()
         for (i in 0 until colorCount) {
             val cube = cubes[i]
             val weight = volume(cube, weights)
@@ -161,7 +161,7 @@ internal class QuantizerWu : Quantizer {
         return colors
     }
 
-    fun variance(cube: Box?): Double {
+    private fun variance(cube: Box?): Double {
         val dr = volume(cube, momentsR)
         val dg = volume(cube, momentsG)
         val db = volume(cube, momentsB)
@@ -178,7 +178,7 @@ internal class QuantizerWu : Quantizer {
         return xx - hypotenuse / volume.toDouble()
     }
 
-    fun cut(one: Box?, two: Box?): Boolean {
+    private fun cut(one: Box?, two: Box?): Boolean {
         val wholeR = volume(one, momentsR)
         val wholeG = volume(one, momentsG)
         val wholeB = volume(one, momentsB)
@@ -228,7 +228,7 @@ internal class QuantizerWu : Quantizer {
         return true
     }
 
-    fun maximize(
+    private fun maximize(
         cube: Box?,
         direction: Direction,
         first: Int,
@@ -284,11 +284,13 @@ internal class QuantizerWu : Quantizer {
     }
 
     class MaximizeResult internal constructor(
-// < 0 if cut impossible
-        var cutLocation: Int, var maximum: Double,
+        // < 0 if cut impossible
+        var cutLocation: Int,
+        var maximum: Double,
     )
 
-    class CreateBoxesResult internal constructor(var requestedCount: Int, var resultCount: Int)
+    class CreateBoxesResult internal constructor(var resultCount: Int)
+
     class Box {
 
         var r0 = 0

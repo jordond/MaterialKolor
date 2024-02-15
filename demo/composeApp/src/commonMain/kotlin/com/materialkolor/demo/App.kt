@@ -37,7 +37,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedButton
@@ -54,9 +53,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.materialkolor.PaletteStyle
 import com.materialkolor.demo.theme.AppTheme
+import com.materialkolor.ktx.darken
+import com.materialkolor.ktx.from
+import com.materialkolor.ktx.harmonize
+import com.materialkolor.ktx.lighten
+import com.materialkolor.palettes.TonalPalette
+import kotlin.math.round
 
 val SampleColors = listOf(
     Color(0xFFD32F2F),
@@ -106,7 +112,12 @@ internal fun App() {
     var darkTheme by remember { mutableStateOf(isDarkTheme) }
 
     AppTheme(seedColor, style, darkTheme) {
-        Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+                .verticalScroll(rememberScrollState()),
+        ) {
             Box(
                 modifier = Modifier.align(Alignment.End)
             ) {
@@ -157,7 +168,7 @@ internal fun App() {
 
             Text(text = "Preview", style = MaterialTheme.typography.headlineSmall)
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
+                modifier = Modifier,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Column {
@@ -204,7 +215,6 @@ internal fun App() {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.weight(1f),
                     ) {
                         ExtendedFloatingActionButton({}) {
                             Text("Extended FAB")
@@ -230,7 +240,137 @@ internal fun App() {
                             Text("Button")
                         }
 
-                        LinearProgressIndicator()
+                        // TODO: Broken in Compose 1.6
+                        // LinearProgressIndicator()
+                    }
+                }
+            }
+
+            Column {
+                Text(text = "Harmonized red palette", style = MaterialTheme.typography.headlineSmall)
+
+                Row {
+                    val harmonizedColor = Color.Red.harmonize(colorScheme.primary)
+                    val harmonizedPalette = TonalPalette.from(harmonizedColor)
+
+                    repeat(10) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color(harmonizedPalette.tone(it * 10)))
+                        )
+                    }
+                }
+            }
+
+            Column {
+                Text(text = "Harmonized SL red palette", style = MaterialTheme.typography.headlineSmall)
+
+                Row {
+                    val harmonizedColor = Color.Red
+                        .harmonize(colorScheme.primary, matchSaturation = true)
+
+                    val harmonizedPalette = TonalPalette.from(harmonizedColor)
+
+                    repeat(10) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color(harmonizedPalette.tone(it * 10)))
+                        )
+                    }
+                }
+            }
+
+            Column {
+                Text(text = "Harmonized blue palette", style = MaterialTheme.typography.headlineSmall)
+
+                Row {
+                    val harmonizedColor = Color.Blue.harmonize(colorScheme.primary)
+                    val harmonizedPalette = TonalPalette.from(harmonizedColor)
+
+                    repeat(10) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color(harmonizedPalette.tone(it * 10)))
+                        )
+                    }
+                }
+            }
+
+            Column {
+                Text(text = "Harmonized SL blue palette", style = MaterialTheme.typography.headlineSmall)
+
+                Row {
+                    val harmonizedColor = Color.Blue
+                        .harmonize(colorScheme.primary, matchSaturation = true)
+
+                    val harmonizedPalette = TonalPalette.from(harmonizedColor)
+
+                    repeat(10) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color(harmonizedPalette.tone(it * 10)))
+                        )
+                    }
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                var color by remember(seedColor) { mutableStateOf(seedColor) }
+
+                Button(onClick = { color = color.lighten(1.1f) }) {
+                    Text("Lighten")
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Box(
+                    modifier = Modifier
+                        .size(height = 32.dp, width = 80.dp)
+                        .clip(MaterialTheme.shapes.small)
+                        .background(color)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = color.toArgb().toString(16))
+                Spacer(modifier = Modifier.height(4.dp))
+                Button(onClick = { color = color.darken(1.1f) }) {
+                    Text("Darken")
+                }
+            }
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                repeat(10) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        val ratio = 1.1f + it / 10f
+                        val darker by remember(seedColor) { mutableStateOf(seedColor.darken(ratio)) }
+                        val lighter by remember(seedColor) { mutableStateOf(seedColor.lighten(ratio)) }
+
+                        Text(text = "Darken ${ratio.roundToTwoDecimalPlaces()}")
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(height = 32.dp, width = 80.dp)
+                                .clip(MaterialTheme.shapes.small)
+                                .background(darker)
+                        )
+
+                        Text(text = "Lighten ${ratio.roundToTwoDecimalPlaces()}")
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(height = 32.dp, width = 80.dp)
+                                .clip(MaterialTheme.shapes.small)
+                                .background(lighter)
+                        )
                     }
                 }
             }
@@ -255,4 +395,8 @@ fun ColorBox(
             modifier = Modifier.padding(8.dp),
         )
     }
+}
+
+private fun Float.roundToTwoDecimalPlaces(): Float {
+    return round(this * 100) / 100
 }

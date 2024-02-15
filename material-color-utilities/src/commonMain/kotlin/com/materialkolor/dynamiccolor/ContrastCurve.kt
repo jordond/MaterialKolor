@@ -16,29 +16,26 @@
 package com.materialkolor.dynamiccolor
 
 import com.materialkolor.utils.MathUtils.lerp
+import dev.drewhamilton.poko.Poko
 
 /**
  * A class containing a value that changes with the contrast level.
  *
  * Usually represents the contrast requirements for a dynamic color on its background. The four
  * values correspond to values for contrast levels -1.0, 0.0, 0.5, and 1.0 respectively.
- */
-class ContrastCurve
-/**
+ *
  * Creates a `ContrastCurve` object.
  *
  * @param low Value for contrast level -1.0
  * @param normal Value for contrast level 0.0
  * @param medium Value for contrast level 0.5
  * @param high Value for contrast level 1.0
- */(
-    /** Value for contrast level -1.0  */
+ */
+@Poko
+public class ContrastCurve(
     private val low: Double,
-    /** Value for contrast level 0.0  */
     private val normal: Double,
-    /** Value for contrast level 0.5  */
     private val medium: Double,
-    /** Value for contrast level 1.0  */
     private val high: Double,
 ) {
 
@@ -49,7 +46,7 @@ class ContrastCurve
      * is the highest.
      * @return The value. For contrast ratios, a number between 1.0 and 21.0.
      */
-    fun get(contrastLevel: Double): Double = when {
+    public fun get(contrastLevel: Double): Double = when {
         contrastLevel <= -1.0 -> low
         contrastLevel < 0.0 -> lerp(low, normal, (contrastLevel - -1) / 1)
         contrastLevel < 0.5 -> lerp(normal, medium, (contrastLevel - 0) / 0.5)

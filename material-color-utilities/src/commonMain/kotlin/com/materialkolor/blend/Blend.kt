@@ -21,11 +21,14 @@ import com.materialkolor.hct.Hct
 import com.materialkolor.utils.ColorUtils.lstarFromArgb
 import com.materialkolor.utils.MathUtils.differenceDegrees
 import com.materialkolor.utils.MathUtils.rotationDirection
-import com.materialkolor.utils.MathUtils.sanitizeDegreesDouble
+import com.materialkolor.utils.MathUtils.sanitizeDegrees
 import kotlin.math.min
 
-/** Functions for blending in HCT and CAM16.  */
-internal object Blend {
+/**
+ * Functions for blending in HCT and CAM16.
+ */
+@Suppress("MemberVisibilityCanBePrivate")
+public object Blend {
 
     /**
      * Blend the design color's HCT hue towards the key color's HCT hue, in a way that leaves the
@@ -36,14 +39,27 @@ internal object Blend {
      * @return The design color with a hue shifted towards the system's color, a slightly
      * warmer/cooler variant of the design color's hue.
      */
-    fun harmonize(designColor: Int, sourceColor: Int): Int {
+    public fun harmonize(designColor: Int, sourceColor: Int): Int {
         val fromHct = Hct.fromInt(designColor)
         val toHct = Hct.fromInt(sourceColor)
-        val differenceDegrees = differenceDegrees(fromHct.getHue(), toHct.getHue())
+        return harmonize(fromHct, toHct).toInt()
+    }
+
+    /**
+     * Blend the design color's HCT hue towards the key color's HCT hue, in a way that leaves the
+     * original color recognizable and recognizably shifted towards the key color.
+     *
+     * @param designColor HCT representation of an arbitrary color.
+     * @param sourceColor HCT representation of the main theme color.
+     * @return The design color with a hue shifted towards the system's color, a slightly
+     * warmer/cooler variant of the design color's hue.
+     */
+    public fun harmonize(designColor: Hct, sourceColor: Hct): Hct {
+        val differenceDegrees = differenceDegrees(designColor.hue, sourceColor.hue)
         val rotationDegrees: Double = min(differenceDegrees * 0.5, 15.0)
-        val outputHue = sanitizeDegreesDouble(fromHct.getHue()
-            + rotationDegrees * rotationDirection(fromHct.getHue(), toHct.getHue()))
-        return Hct.from(outputHue, fromHct.getChroma(), fromHct.getTone()).toInt()
+        val rotationDirection = rotationDirection(designColor.hue, sourceColor.hue)
+        val outputHue = sanitizeDegrees(designColor.hue + rotationDegrees * rotationDirection)
+        return Hct.from(outputHue, designColor.chroma, designColor.tone)
     }
 
     /**
@@ -55,7 +71,7 @@ internal object Blend {
      * @param amount how much blending to perform; 0.0 >= and <= 1.0
      * @return from, with a hue blended towards to. Chroma and tone are constant.
      */
-    fun hctHue(from: Int, to: Int, amount: Double): Int {
+    public fun hctHue(from: Int, to: Int, amount: Double): Int {
         val ucs = cam16Ucs(from, to, amount)
         val ucsCam = Cam16.fromInt(ucs)
         val fromCam = Cam16.fromInt(from)
@@ -71,7 +87,7 @@ internal object Blend {
      * @param amount how much blending to perform; 0.0 >= and <= 1.0
      * @return from, blended towards to. Hue, chroma, and tone will change.
      */
-    fun cam16Ucs(from: Int, to: Int, amount: Double): Int {
+    public fun cam16Ucs(from: Int, to: Int, amount: Double): Int {
         val fromCam = Cam16.fromInt(from)
         val toCam = Cam16.fromInt(to)
         val fromJ = fromCam.jstar

@@ -3,10 +3,13 @@
 plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.android.library)
+    alias(libs.plugins.poko)
     alias(libs.plugins.publish)
 }
 
 kotlin {
+    explicitApi()
+
     applyDefaultHierarchyTemplate()
 
     androidTarget {
@@ -30,18 +33,13 @@ kotlin {
         iosX64(),
         iosArm64(),
         iosSimulatorArm64()
-    ).forEach {
-        it.binaries.framework {
+    ).forEach { target ->
+        target.binaries.framework {
             baseName = "material-color-utilities"
         }
     }
 
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-            }
-        }
-
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))

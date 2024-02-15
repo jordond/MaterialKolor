@@ -16,53 +16,30 @@
 package com.materialkolor.scheme
 
 import com.materialkolor.hct.Hct
-import com.materialkolor.utils.MathUtils
 import com.materialkolor.palettes.TonalPalette
+import com.materialkolor.utils.MathUtils
 
 /**
  * Provides important settings for creating colors dynamically, and 6 color palettes. Requires: 1. A
  * color. (source color) 2. A theme. (Variant) 3. Whether or not its dark mode. 4. Contrast level.
  * (-1 to 1, currently contrast ratio 3.0 and 7.0)
  */
-open class DynamicScheme(
-    sourceColorHct: Hct,
-    variant: Variant,
-    isDark: Boolean,
-    contrastLevel: Double,
-    primaryPalette: TonalPalette,
-    secondaryPalette: TonalPalette,
-    tertiaryPalette: TonalPalette,
-    neutralPalette: TonalPalette,
-    neutralVariantPalette: TonalPalette
+public open class DynamicScheme(
+    public val sourceColorHct: Hct,
+    public val variant: Variant,
+    public val isDark: Boolean,
+    public val contrastLevel: Double,
+    public val primaryPalette: TonalPalette,
+    public val secondaryPalette: TonalPalette,
+    public val tertiaryPalette: TonalPalette,
+    public val neutralPalette: TonalPalette,
+    public val neutralVariantPalette: TonalPalette,
 ) {
 
-    val sourceColorArgb: Int
-    val sourceColorHct: Hct
-    val variant: Variant
-    val isDark: Boolean
-    val contrastLevel: Double
-    val primaryPalette: TonalPalette
-    val secondaryPalette: TonalPalette
-    val tertiaryPalette: TonalPalette
-    val neutralPalette: TonalPalette
-    val neutralVariantPalette: TonalPalette
-    val errorPalette: TonalPalette
+    public val sourceColorArgb: Int = sourceColorHct.toInt()
+    public val errorPalette: TonalPalette = TonalPalette.fromHueAndChroma(hue = 25.0, chroma = 84.0)
 
-    init {
-        sourceColorArgb = sourceColorHct.toInt()
-        this.sourceColorHct = sourceColorHct
-        this.variant = variant
-        this.isDark = isDark
-        this.contrastLevel = contrastLevel
-        this.primaryPalette = primaryPalette
-        this.secondaryPalette = secondaryPalette
-        this.tertiaryPalette = tertiaryPalette
-        this.neutralPalette = neutralPalette
-        this.neutralVariantPalette = neutralVariantPalette
-        errorPalette = TonalPalette.fromHueAndChroma(25.0, 84.0)
-    }
-
-    companion object {
+    public companion object {
 
         /**
          * Given a set of hues and set of hue rotations, locate which hues the source color's hue is
@@ -74,19 +51,25 @@ open class DynamicScheme(
          * @param rotations A set of hue rotations.
          * @return Color's hue with a rotation applied.
          */
-        fun getRotatedHue(sourceColorHct: Hct, hues: DoubleArray, rotations: DoubleArray): Double {
-            val sourceHue: Double = sourceColorHct.getHue()
+        public fun getRotatedHue(
+            sourceColorHct: Hct,
+            hues: DoubleArray,
+            rotations: DoubleArray,
+        ): Double {
+            val sourceHue: Double = sourceColorHct.hue
             if (rotations.size == 1) {
-                return MathUtils.sanitizeDegreesDouble(sourceHue + rotations[0])
+                return MathUtils.sanitizeDegrees(sourceHue + rotations[0])
             }
+
             val size = hues.size
             for (i in 0..size - 2) {
                 val thisHue = hues[i]
                 val nextHue = hues[i + 1]
                 if (thisHue < sourceHue && sourceHue < nextHue) {
-                    return MathUtils.sanitizeDegreesDouble(sourceHue + rotations[i])
+                    return MathUtils.sanitizeDegrees(sourceHue + rotations[i])
                 }
             }
+
             // If this statement executes, something is wrong, there should have been a rotation
             // found using the arrays.
             return sourceHue

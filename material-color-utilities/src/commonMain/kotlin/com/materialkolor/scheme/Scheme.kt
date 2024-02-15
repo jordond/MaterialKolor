@@ -81,7 +81,7 @@ internal class Scheme {
         scrim: Int,
         inverseSurface: Int,
         inverseOnSurface: Int,
-        inversePrimary: Int
+        inversePrimary: Int,
     ) : super() {
         this.primary = primary
         this.onPrimary = onPrimary

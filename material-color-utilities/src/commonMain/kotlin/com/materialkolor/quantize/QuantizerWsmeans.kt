@@ -52,11 +52,11 @@ internal object QuantizerWsmeans {
      * to the color.
      */
     fun quantize(
-        inputPixels: IntArray, startingClusters: IntArray, maxColors: Int
+        inputPixels: IntArray, startingClusters: IntArray, maxColors: Int,
     ): Map<Int, Int> {
         // Uses a seeded random number generator to ensure consistent results.
-        val random: Random = Random(0x42688)
-        val pixelToCount: MutableMap<Int, Int> = LinkedHashMap<Int, Int>()
+        val random = Random(0x42688)
+        val pixelToCount: MutableMap<Int, Int> = LinkedHashMap()
         val points = arrayOfNulls<DoubleArray>(inputPixels.size)
         val pixels = IntArray(inputPixels.size)
         val pointProvider: PointProvider = PointProviderLab()
@@ -80,19 +80,12 @@ internal object QuantizerWsmeans {
             counts[i] = count
         }
         var clusterCount: Int = min(maxColors, pointCount)
-        if (startingClusters.size != 0) {
+        if (startingClusters.isNotEmpty()) {
             clusterCount = min(clusterCount, startingClusters.size)
         }
         val clusters = arrayOfNulls<DoubleArray>(clusterCount)
-        var clustersCreated = 0
         for (i in startingClusters.indices) {
             clusters[i] = pointProvider.fromInt(startingClusters[i])
-            clustersCreated++
-        }
-        val additionalClustersNeeded = clusterCount - clustersCreated
-        if (additionalClustersNeeded > 0) {
-            for (i in 0 until additionalClustersNeeded) {
-            }
         }
         val clusterIndices = IntArray(pointCount)
         for (i in 0 until pointCount) {
@@ -115,7 +108,7 @@ internal object QuantizerWsmeans {
         for (iteration in 0 until MAX_ITERATIONS) {
             for (i in 0 until clusterCount) {
                 for (j in i + 1 until clusterCount) {
-                    val distance = pointProvider.distance(clusters[i], clusters[j])
+                    val distance = pointProvider.distance(clusters[i]!!, clusters[j]!!)
                     distanceToIndexMatrix[j][i]!!.distance = distance
                     distanceToIndexMatrix[j][i]!!.index = i
                     distanceToIndexMatrix[i][j]!!.distance = distance
@@ -129,24 +122,25 @@ internal object QuantizerWsmeans {
             }
             var pointsMoved = 0
             for (i in 0 until pointCount) {
-                val point = points[i]
+                val point = points[i]!!
                 val previousClusterIndex = clusterIndices[i]
-                val previousCluster = clusters[previousClusterIndex]
+                val previousCluster = clusters[previousClusterIndex]!!
                 val previousDistance = pointProvider.distance(point, previousCluster)
                 var minimumDistance = previousDistance
                 var newClusterIndex = -1
                 for (j in 0 until clusterCount) {
-                    if (distanceToIndexMatrix[previousClusterIndex][j]!!.distance >= 4 * previousDistance) {
+                    val previous = distanceToIndexMatrix[previousClusterIndex][j] ?: continue
+                    if (previous.distance >= 4 * previousDistance) {
                         continue
                     }
-                    val distance = pointProvider.distance(point, clusters[j])
+                    val distance = pointProvider.distance(point, clusters[j]!!)
                     if (distance < minimumDistance) {
                         minimumDistance = distance
                         newClusterIndex = j
                     }
                 }
                 if (newClusterIndex != -1) {
-                    val distanceChange: Double = abs(sqrt(minimumDistance) - sqrt(previousDistance))
+                    val distanceChange = abs(sqrt(minimumDistance) - sqrt(previousDistance))
                     if (distanceChange > MIN_MOVEMENT_DISTANCE) {
                         pointsMoved++
                         clusterIndices[i] = newClusterIndex
@@ -183,14 +177,14 @@ internal object QuantizerWsmeans {
                 clusters[i]!![2] = c
             }
         }
-        val argbToPopulation: MutableMap<Int, Int> = LinkedHashMap<Int, Int>()
+        val argbToPopulation: MutableMap<Int, Int> = LinkedHashMap()
         for (i in 0 until clusterCount) {
             val count = pixelCountSums[i]
             if (count == 0) {
                 continue
             }
-            val possibleNewCluster = pointProvider.toInt(clusters[i])
-            if (argbToPopulation.containsKey(possibleNewCluster)) {
+            val possibleNewCluster = clusters[i]?.let { pointProvider.toInt(it) }
+            if (possibleNewCluster == null || argbToPopulation.containsKey(possibleNewCluster)) {
                 continue
             }
             argbToPopulation[possibleNewCluster] = count
@@ -198,15 +192,10 @@ internal object QuantizerWsmeans {
         return argbToPopulation
     }
 
-    private class Distance internal constructor() : Comparable<Distance> {
+    private class Distance : Comparable<Distance> {
 
-        var index: Int
-        var distance: Double
-
-        init {
-            index = -1
-            distance = -1.0
-        }
+        var index: Int = -1
+        var distance: Double = -1.0
 
         override operator fun compareTo(other: Distance): Int {
             return distance.compareTo(other.distance)

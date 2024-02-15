@@ -5,7 +5,7 @@ sdk-min = "21"
 agp = "8.2.2"
 kotlin = "1.9.22"
 versions = "0.51.0"
-compose-multiplatform = "1.5.12"
+compose-multiplatform = "1.6.0-rc01"
 androidx-core-ktx = "1.12.0"
 androidx-appcompat = "1.6.1"
 androidx-lifecycle = "2.7.0"
@@ -17,6 +17,8 @@ espresso-core = "3.5.1"
 binaryCompatibility = "0.14.0"
 dokka = "1.9.10"
 publish = "0.27.0"
+colormath = "3.4.0"
+poko = "0.15.2"
 
 [libraries]
 androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
@@ -24,6 +26,7 @@ androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-k
 androidx-lifecycle-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
 androidx-activityCompose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
+colormath = { module = "com.github.ajalt.colormath:colormath", version.ref = "colormath" }
 compose-uitooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-uitooling" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
@@ -40,6 +43,7 @@ dependencies = { id = "com.github.ben-manes.versions", version.ref = "versions" 
 binaryCompatibility = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatibility" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 publish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
+poko = { id = "dev.drewhamilton.poko", version.ref = "poko" }
 
 [bundles]
 androidx = ["androidx-core", "androidx-lifecycle", "androidx-appcompat"]

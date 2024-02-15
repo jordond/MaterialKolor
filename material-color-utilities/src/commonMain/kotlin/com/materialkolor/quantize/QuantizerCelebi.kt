@@ -25,7 +25,7 @@ package com.materialkolor.quantize
  * This algorithm was designed by M. Emre Celebi, and was found in their 2011 paper, Improving
  * the Performance of K-Means for Color Quantization. https://arxiv.org/abs/1101.0395
  */
-internal object QuantizerCelebi {
+public object QuantizerCelebi {
 
     /**
      * Reduce the number of colors needed to represented the input, minimizing the difference between
@@ -37,7 +37,7 @@ internal object QuantizerCelebi {
      * @return Map with keys of colors in ARGB format, and values of number of pixels in the original
      * image that correspond to the color in the quantized image.
      */
-    fun quantize(pixels: IntArray, maxColors: Int): Map<Int, Int> {
+    public fun quantize(pixels: IntArray, maxColors: Int): Map<Int, Int> {
         val wu = QuantizerWu()
         val wuResult: QuantizerResult = wu.quantize(pixels, maxColors)
         val wuClustersAsObjects: Set<Int> = wuResult.colorToCount.keys

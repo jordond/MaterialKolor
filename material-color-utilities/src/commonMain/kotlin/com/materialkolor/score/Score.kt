@@ -17,8 +17,7 @@ package com.materialkolor.score
 
 import com.materialkolor.hct.Hct
 import com.materialkolor.utils.MathUtils.differenceDegrees
-import com.materialkolor.utils.MathUtils.sanitizeDegreesInt
-import kotlin.jvm.JvmOverloads
+import com.materialkolor.utils.MathUtils.sanitizeDegrees
 import kotlin.math.floor
 import kotlin.math.round
 
@@ -26,11 +25,11 @@ import kotlin.math.round
  * Given a large set of colors, remove colors that are unsuitable for a UI theme, and rank the rest
  * based on suitability.
  *
- *
  * Enables use of a high cluster count for image quantization, thus ensuring colors aren't
  * muddied, while curating the high cluster count to a much smaller number of appropriate choices.
  */
-internal object Score {
+@Suppress("unused")
+public object Score {
 
     private const val TARGET_CHROMA = 48.0 // A1 Chroma
     private const val WEIGHT_PROPORTION = 0.7
@@ -47,29 +46,26 @@ internal object Score {
      * usually from a source image.
      * @param desired max count of colors to be returned in the list.
      * @param fallbackColorArgb color to be returned if no other options available.
-     * @param filter whether to filter out undesireable combinations.
+     * @param filter whether to filter out undesirable combinations.
      * @return Colors sorted by suitability for a UI theme. The most suitable color is the first item,
      * the least suitable is the last. There will always be at least one color returned. If all
      * the input colors were not suitable for a theme, a default fallback color will be provided,
      * Google Blue.
      */
-    @JvmOverloads
-    fun score(
-        colorsToPopulation: Map<Int?, Int>,
+    public fun score(
+        colorsToPopulation: Map<Int, Int>,
         desired: Int = 4,
-        fallbackColorArgb: Int = -0xbd7a0c,
+        fallbackColorArgb: Int? = -0xbd7a0c,
         filter: Boolean = true,
     ): List<Int> {
-
-        // Get the HCT color for each Argb value, while finding the per hue count and
-        // total count.
+        // Get the HCT color for each Argb value, while finding the per hue count and total count.
         val colorsHct: MutableList<Hct> = mutableListOf()
         val huePopulation = IntArray(360)
         var populationSum = 0.0
         for ((key, value) in colorsToPopulation) {
-            val hct = Hct.fromInt(key!!)
+            val hct = Hct.fromInt(key)
             colorsHct.add(hct)
-            val hue: Int = floor(hct.getHue()).toInt()
+            val hue: Int = floor(hct.hue).toInt()
             huePopulation[hue] += value
             populationSum += value.toDouble()
         }
@@ -79,7 +75,7 @@ internal object Score {
         for (hue in 0..359) {
             val proportion = huePopulation[hue] / populationSum
             for (i in hue - 14 until hue + 16) {
-                val neighborHue = sanitizeDegreesInt(i)
+                val neighborHue = sanitizeDegrees(i)
                 hueExcitedProportions[neighborHue] += proportion
             }
         }
@@ -88,14 +84,14 @@ internal object Score {
         // filtering out values that do not have enough chroma or usage.
         val scoredHcts: MutableList<ScoredHCT> = mutableListOf()
         for (hct in colorsHct) {
-            val hue = sanitizeDegreesInt(round(hct.getHue()).toInt())
+            val hue = sanitizeDegrees(round(hct.hue).toInt())
             val proportion = hueExcitedProportions[hue]
-            if (filter && (hct.getChroma() < CUTOFF_CHROMA || proportion <= CUTOFF_EXCITED_PROPORTION)) {
+            if (filter && (hct.chroma < CUTOFF_CHROMA || proportion <= CUTOFF_EXCITED_PROPORTION)) {
                 continue
             }
             val proportionScore = proportion * 100.0 * WEIGHT_PROPORTION
-            val chromaWeight = if (hct.getChroma() < TARGET_CHROMA) WEIGHT_CHROMA_BELOW else WEIGHT_CHROMA_ABOVE
-            val chromaScore = (hct.getChroma() - TARGET_CHROMA) * chromaWeight
+            val chromaWeight = if (hct.chroma < TARGET_CHROMA) WEIGHT_CHROMA_BELOW else WEIGHT_CHROMA_ABOVE
+            val chromaScore = (hct.chroma - TARGET_CHROMA) * chromaWeight
             val score = proportionScore + chromaScore
             scoredHcts.add(ScoredHCT(hct, score))
         }
@@ -113,7 +109,7 @@ internal object Score {
                 val hct = entry.hct
                 var hasDuplicateHue = false
                 for (chosenHct in chosenColors) {
-                    if (differenceDegrees(hct.getHue(), chosenHct.getHue()) < differenceDegrees) {
+                    if (differenceDegrees(hct.hue, chosenHct.hue) < differenceDegrees) {
                         hasDuplicateHue = true
                         break
                     }
@@ -130,7 +126,7 @@ internal object Score {
             }
         }
         val colors: MutableList<Int> = mutableListOf()
-        if (chosenColors.isEmpty()) {
+        if (chosenColors.isEmpty() && fallbackColorArgb != null) {
             colors.add(fallbackColorArgb)
         }
         for (chosenHct in chosenColors) {
@@ -140,6 +136,7 @@ internal object Score {
     }
 
     private class ScoredHCT(val hct: Hct, val score: Double)
+
     private class ScoredComparator : Comparator<ScoredHCT> {
 
         override fun compare(a: ScoredHCT, b: ScoredHCT): Int {
