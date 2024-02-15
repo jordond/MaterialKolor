@@ -64,7 +64,7 @@ public fun Color.tonalContrastRatio(other: Color): Double {
  * @param[threshold] The threshold to compare the contrast ratio against.
  * @return `true` if the contrast ratio is greater than or equal to the threshold, `false` otherwise.
  */
-public fun Color.checkContrastRatio(
+public fun Color.hasEnoughContrast(
     other: Color,
     threshold: ContrastThreshold = ContrastThreshold.WCAG_AA_NORMAL_TEXT,
 ): Boolean = contrastRatio(other) >= threshold
