@@ -1,6 +1,18 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
 
+module:material-color-utilities
+com.materialkolor.blend
+com.materialkolor.contrast
+com.materialkolor.dislike
+com.materialkolor.dynamiccolor
+com.materialkolor.hct
+com.materialkolor.palettes
+com.materialkolor.quantize
+com.materialkolor.scheme
+com.materialkolor.score
+com.materialkolor.temperature
+com.materialkolor.utils
 module:material-kolor
 com.materialkolor
 com.materialkolor.ktx
