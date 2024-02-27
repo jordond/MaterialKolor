@@ -16,7 +16,7 @@ A Compose Multiplatform library for creating dynamic Material Design 3 color pal
 color. Similar to generating a theme
 from [m3.matierial.io](https://m3.material.io/theme-builder#/custom).
 
-The KDoc is published at [docs.materialkolor.com](docs.materialkolor.com)
+The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com)
 
 <img width="300px" src="art/ios-demo.gif" />
 
