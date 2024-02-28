@@ -1,3 +1,14 @@
+public final class com/materialkolor/Contrast : java/lang/Enum {
+	public static final field Default Lcom/materialkolor/Contrast;
+	public static final field High Lcom/materialkolor/Contrast;
+	public static final field Medium Lcom/materialkolor/Contrast;
+	public static final field Reduced Lcom/materialkolor/Contrast;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getValue ()D
+	public static fun valueOf (Ljava/lang/String;)Lcom/materialkolor/Contrast;
+	public static fun values ()[Lcom/materialkolor/Contrast;
+}
+
 public final class com/materialkolor/DynamicColorSchemeKt {
 	public static final fun dynamicColorScheme-3J-VO9M (JZLcom/materialkolor/PaletteStyle;DZ)Landroidx/compose/material3/ColorScheme;
 	public static synthetic fun dynamicColorScheme-3J-VO9M$default (JZLcom/materialkolor/PaletteStyle;DZILjava/lang/Object;)Landroidx/compose/material3/ColorScheme;
@@ -6,7 +17,7 @@ public final class com/materialkolor/DynamicColorSchemeKt {
 
 public final class com/materialkolor/DynamicMaterialThemeKt {
 	public static final fun AnimatedDynamicMaterialTheme-AnklqjM (JZLcom/materialkolor/PaletteStyle;DLandroidx/compose/animation/core/AnimationSpec;Landroidx/compose/material3/Shapes;Landroidx/compose/material3/Typography;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
-	public static final fun DynamicMaterialTheme-pzZJ40c (JZLcom/materialkolor/PaletteStyle;DLandroidx/compose/material3/Shapes;Landroidx/compose/material3/Typography;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DynamicMaterialTheme-PSU77Us (JZLcom/materialkolor/PaletteStyle;DLandroidx/compose/material3/Shapes;Landroidx/compose/material3/Typography;ZZLandroidx/compose/animation/core/AnimationSpec;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/materialkolor/LocalDynamicMaterialThemeSeedKt {
@@ -38,7 +49,6 @@ public final class com/materialkolor/ktx/BlendKt {
 }
 
 public final class com/materialkolor/ktx/ColorKt {
-	public static final fun contrastRatio--OWjLjI (JJ)D
 	public static final fun darken-DxMtmZc (JF)J
 	public static synthetic fun darken-DxMtmZc$default (JFILjava/lang/Object;)J
 	public static final fun fixIfDisliked-8_81llA (J)J
@@ -46,13 +56,35 @@ public final class com/materialkolor/ktx/ColorKt {
 	public static final fun isLight-8_81llA (J)Z
 	public static final fun lighten-DxMtmZc (JF)J
 	public static synthetic fun lighten-DxMtmZc$default (JFILjava/lang/Object;)J
+}
+
+public final class com/materialkolor/ktx/ContrastKt {
+	public static final fun contrastRatio--OWjLjI (JJ)D
+	public static final fun hasEnoughContrast-jxsXWHM (JJLcom/materialkolor/ktx/ContrastThreshold;)Z
+	public static synthetic fun hasEnoughContrast-jxsXWHM$default (JJLcom/materialkolor/ktx/ContrastThreshold;ILjava/lang/Object;)Z
 	public static final fun tonalContrastRatio--OWjLjI (JJ)D
+}
+
+public final class com/materialkolor/ktx/ContrastThreshold : java/lang/Enum {
+	public static final field WCAG_AAA_LARGE_TEXT Lcom/materialkolor/ktx/ContrastThreshold;
+	public static final field WCAG_AAA_NORMAL_TEXT Lcom/materialkolor/ktx/ContrastThreshold;
+	public static final field WCAG_AA_LARGE_TEXT Lcom/materialkolor/ktx/ContrastThreshold;
+	public static final field WCAG_AA_NORMAL_TEXT Lcom/materialkolor/ktx/ContrastThreshold;
+	public final fun compareTo (D)I
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getThreshold ()D
+	public static fun valueOf (Ljava/lang/String;)Lcom/materialkolor/ktx/ContrastThreshold;
+	public static fun values ()[Lcom/materialkolor/ktx/ContrastThreshold;
 }
 
 public final class com/materialkolor/ktx/CorePaletteKt {
 	public static final fun contentOf-4WTKRHQ (Lcom/materialkolor/palettes/CorePalette$Companion;J)Lcom/materialkolor/palettes/CorePalette;
 	public static final fun from-4WTKRHQ (Lcom/materialkolor/palettes/CorePalette$Companion;J)Lcom/materialkolor/palettes/CorePalette;
 	public static final fun of-4WTKRHQ (Lcom/materialkolor/palettes/CorePalette$Companion;J)Lcom/materialkolor/palettes/CorePalette;
+}
+
+public final class com/materialkolor/ktx/DynamicColorKt {
+	public static final fun getColor (Lcom/materialkolor/dynamiccolor/DynamicColor;Lcom/materialkolor/scheme/DynamicScheme;)J
 }
 
 public final class com/materialkolor/ktx/DynamicSchemeKt {
