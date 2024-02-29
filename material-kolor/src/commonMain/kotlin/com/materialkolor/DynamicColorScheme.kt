@@ -77,7 +77,7 @@ public fun dynamicColorScheme(
         surfaceBright = colors.surfaceBright().getColor(scheme),
         surfaceDim = colors.surfaceDim().getColor(scheme),
         surfaceContainer = colors.surfaceContainer().getColor(scheme),
-        surfaceContainerHigh = colors.surfaceContainer().getColor(scheme),
+        surfaceContainerHigh = colors.surfaceContainerHigh().getColor(scheme),
         surfaceContainerHighest = colors.surfaceContainerHighest().getColor(scheme),
         surfaceContainerLow = colors.surfaceContainerLow().getColor(scheme),
         surfaceContainerLowest = colors.surfaceContainerLowest().getColor(scheme),
