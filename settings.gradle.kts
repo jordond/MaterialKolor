@@ -35,6 +35,7 @@ rootProject.name = "MaterialKolor"
 include(
     ":material-kolor",
     ":material-color-utilities",
+    ":mcu-upstream",
 )
 
 include(":demo:composeApp")
