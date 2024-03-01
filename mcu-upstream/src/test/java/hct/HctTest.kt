@@ -5,7 +5,7 @@ import com.materialkolor.hct.ViewingConditions
 import io.kotest.matchers.doubles.shouldBeExactly
 import io.kotest.matchers.ints.shouldBeExactly
 import org.junit.jupiter.api.Test
-import utils.shouldBeEqualColor
+import utils.shouldBeExactly
 
 class HctTest {
 
@@ -13,14 +13,14 @@ class HctTest {
     fun from() {
         val expected = hct.Hct.from(180.0, 50.0, 50.0)
         val actual = Hct.from(180.0, 50.0, 50.0)
-        expected shouldBeEqualColor actual
+        expected shouldBeExactly actual
     }
 
     @Test
     fun fromInt() {
         val expected = hct.Hct.fromInt(0x00FF00)
         val actual = Hct.fromInt(0x00FF00)
-        expected shouldBeEqualColor actual
+        expected shouldBeExactly actual
     }
 
     @Test
@@ -51,7 +51,7 @@ class HctTest {
         val actualViewingConditions = ViewingConditions.defaultWithBackgroundLstar(50.0)
         val actual = actualHct1.inViewingConditions(actualViewingConditions)
 
-        expected shouldBeEqualColor actual
+        expected shouldBeExactly actual
     }
 
     companion object {

@@ -4,7 +4,7 @@ import com.materialkolor.dislike.DislikeAnalyzer
 import com.materialkolor.hct.Hct
 import io.kotest.matchers.equals.shouldBeEqual
 import org.junit.jupiter.api.Test;
-import utils.shouldBeEqualColor
+import utils.shouldBeExactly
 
 class DislikeAnalyzerTest {
 
@@ -40,7 +40,7 @@ class DislikeAnalyzerTest {
         val actualHct = Hct.fromInt(0xB44C43)
         val actual = DislikeAnalyzer.fixIfDisliked(actualHct)
 
-        expected shouldBeEqualColor actual
+        expected shouldBeExactly actual
     }
 
     @Test
@@ -51,6 +51,6 @@ class DislikeAnalyzerTest {
         val actualHct = Hct.fromInt(0x9D9101)
         val actual = DislikeAnalyzer.fixIfDisliked(actualHct)
 
-        expected shouldBeEqualColor actual
+        expected shouldBeExactly actual
     }
 }

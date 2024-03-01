@@ -6,7 +6,7 @@ import com.materialkolor.utils.ColorUtils
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.doubles.shouldBeExactly
-import utils.shouldBeEqualColor
+import utils.shouldBeExactly
 import kotlin.test.Test
 
 class ContrastTest {
@@ -36,8 +36,8 @@ class ContrastTest {
         val actualSecondHct = Hct.fromInt(COLOR2)
         val actual = Contrast.ratioOfTones(actualFirstHct.tone, actualSecondHct.tone)
 
-        expectedFirstHct shouldBeEqualColor actualFirstHct
-        expectedSecondHct shouldBeEqualColor actualSecondHct
+        expectedFirstHct shouldBeExactly actualFirstHct
+        expectedSecondHct shouldBeExactly actualSecondHct
         expected shouldBeExactly actual
     }
 

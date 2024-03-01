@@ -6,7 +6,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.doubles.shouldBeExactly
 import io.kotest.matchers.ints.shouldBeExactly
 import org.junit.jupiter.api.Test
-import utils.shouldBeEqualColor
+import utils.shouldBeExactly
 
 class Cam16Test {
 
@@ -84,14 +84,14 @@ class Cam16Test {
     fun fromInt() {
         val expected = hct.Cam16.fromInt(COLOR1)
         val actual = Cam16.fromInt(COLOR1)
-        expected shouldBeEqualColor actual
+        expected shouldBeExactly actual
     }
 
     @Test
     fun fromIntInViewingConditions() {
         val expected = hct.Cam16.fromIntInViewingConditions(COLOR1, hct.ViewingConditions.DEFAULT)
         val actual = Cam16.fromIntInViewingConditions(COLOR1, ViewingConditions.DEFAULT)
-        expected shouldBeEqualColor actual
+        expected shouldBeExactly actual
     }
 
     @Test
@@ -100,21 +100,21 @@ class Cam16Test {
             .fromXyzInViewingConditions(1.0, 2.0, 3.0, hct.ViewingConditions.DEFAULT)
         val actual = Cam16
             .fromXyzInViewingConditions(1.0, 2.0, 3.0, ViewingConditions.DEFAULT)
-        expected shouldBeEqualColor actual
+        expected shouldBeExactly actual
     }
 
     @Test
     fun fromJch() {
         val expected = hct.Cam16.fromJch(1.0, 2.0, 3.0)
         val actual = Cam16.fromJch(1.0, 2.0, 3.0)
-        expected shouldBeEqualColor actual
+        expected shouldBeExactly actual
     }
 
     @Test
     fun fromUcs() {
         val expected = hct.Cam16.fromUcs(1.0, 2.0, 3.0)
         val actual = Cam16.fromUcs(1.0, 2.0, 3.0)
-        expected shouldBeEqualColor actual
+        expected shouldBeExactly actual
     }
 
     @Test
@@ -123,7 +123,7 @@ class Cam16Test {
             .Cam16.fromUcsInViewingConditions(1.0, 2.0, 3.0, hct.ViewingConditions.DEFAULT)
         val actual = Cam16
             .fromUcsInViewingConditions(1.0, 2.0, 3.0, ViewingConditions.DEFAULT)
-        expected shouldBeEqualColor actual
+        expected shouldBeExactly actual
     }
 
     @Test
