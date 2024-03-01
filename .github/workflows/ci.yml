@@ -29,6 +29,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: setup-java
         uses: actions/setup-java@v4
@@ -48,6 +50,11 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           arguments: lint --scan
+
+      - name: Upstream Tests
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          arguments: :mcu-upstream:test --scan
 
   build:
     strategy:
