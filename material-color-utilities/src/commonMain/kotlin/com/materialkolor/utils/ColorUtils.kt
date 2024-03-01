@@ -241,7 +241,7 @@ public object ColorUtils {
     public fun linearized(rgbComponent: Int): Double {
         val normalized = rgbComponent / 255.0
         return if (normalized <= 0.040449936) normalized / 12.92 * 100.0
-        else (normalized + 0.055 / 1.055).pow(2.4) * 100.0
+        else ((normalized + 0.055) / 1.055).pow(2.4) * 100.0
     }
 
     /**
