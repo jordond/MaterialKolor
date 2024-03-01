@@ -42,43 +42,43 @@ import kotlin.math.sqrt
  * requires a color science textbook, such as Fairchild's Color Appearance Models.
  */
 @Suppress("MemberVisibilityCanBePrivate")
-internal class ViewingConditions private constructor(
-    val n: Double,
-    val aw: Double,
-    val nbb: Double,
-    val ncb: Double,
-    val c: Double,
-    val nc: Double,
-    val rgbD: DoubleArray,
-    val fl: Double,
-    val flRoot: Double,
-    val z: Double,
+public class ViewingConditions private constructor(
+    public val n: Double,
+    public val aw: Double,
+    public val nbb: Double,
+    public val ncb: Double,
+    public val c: Double,
+    public val nc: Double,
+    public val rgbD: DoubleArray,
+    public val fl: Double,
+    public val flRoot: Double,
+    public val z: Double,
 ) {
 
-    companion object {
+    public companion object {
 
         /** sRGB-like viewing conditions.  */
-        val DEFAULT = defaultWithBackgroundLstar(50.0)
+        public val DEFAULT: ViewingConditions = defaultWithBackgroundLstar(50.0)
 
         /**
          * Create ViewingConditions from a simple, physically relevant, set of parameters.
          *
-         * @param whitePoint White point, measured in the XYZ color space. default = D65, or sunny day
+         * @param[whitePoint] White point, measured in the XYZ color space. default = D65, or sunny day
          * afternoon
-         * @param adaptingLuminance The luminance of the adapting field. Informally, how bright it is in
+         * @param[adaptingLuminance] The luminance of the adapting field. Informally, how bright it is in
          * the room where the color is viewed. Can be calculated from lux by multiplying lux by
          * 0.0586. default = 11.72, or 200 lux.
-         * @param backgroundLstar The lightness of the area surrounding the color. measured by L* in
+         * @param[backgroundLstar] The lightness of the area surrounding the color. measured by L* in
          * L*a*b*. default = 50.0
-         * @param surround A general description of the lighting surrounding the color. 0 is pitch dark,
+         * @param[surround] A general description of the lighting surrounding the color. 0 is pitch dark,
          * like watching a movie in a theater. 1.0 is a dimly light room, like watching TV at home at
          * night. 2.0 means there is no difference between the lighting on the color and around it.
          * default = 2.0
-         * @param discountingIlluminant Whether the eye accounts for the tint of the ambient lighting,
+         * @param[discountingIlluminant] Whether the eye accounts for the tint of the ambient lighting,
          * such as knowing an apple is still red in green light. default = false, the eye does not
          * perform this process on self-luminous objects like displays.
          */
-        fun make(
+        public fun make(
             whitePoint: DoubleArray,
             adaptingLuminance: Double,
             backgroundLstar: Double,
@@ -133,8 +133,10 @@ internal class ViewingConditions private constructor(
          * Create sRGB-like viewing conditions with a custom background lstar.
          *
          * Default viewing conditions have a lstar of 50, mid-gray.
+         *
+         * @param[lstar] The lightness of the area surrounding the color. measured by L* in L*a*b*.
          */
-        fun defaultWithBackgroundLstar(lstar: Double): ViewingConditions = make(
+        public fun defaultWithBackgroundLstar(lstar: Double): ViewingConditions = make(
             whitePoint = whitePointD65(),
             adaptingLuminance = 200.0 / PI * yFromLstar(50.0) / 100f,
             backgroundLstar = lstar,
