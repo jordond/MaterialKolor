@@ -1,7 +1,6 @@
 plugins {
     id("java-library")
-    id("kotlin")
-    id("org.jetbrains.kotlin.jvm")
+    alias(libs.plugins.kotlin.jvm)
 }
 
 java {
@@ -10,7 +9,7 @@ java {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(libs.versions.jvmTarget.get().toInt())
 }
 
 dependencies {

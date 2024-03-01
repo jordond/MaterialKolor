@@ -2,6 +2,7 @@
 sdk-target = "33"
 sdk-compile = "33"
 sdk-min = "21"
+jvmTarget = "17"
 agp = "8.3.0"
 kotlin = "1.9.22"
 versions = "0.51.0"
@@ -35,6 +36,7 @@ errorProneAnnotations = { module = "com.google.errorprone:error_prone_annotation
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 
 [plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 cocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
