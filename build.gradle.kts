@@ -18,6 +18,7 @@ apiValidation {
     ignoredProjects.addAll(
         listOf(
             "composeApp",
+            "mcu-upstream",
         ),
     )
 }
