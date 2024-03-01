@@ -14,12 +14,12 @@ kotlin {
 }
 
 dependencies {
-    implementation("androidx.annotation:annotation:1.7.1")
-    implementation("com.google.errorprone:error_prone_annotations:2.25.0")
+    implementation(libs.androidx.annotation)
+    implementation(libs.errorProneAnnotations)
+
     testImplementation(kotlin("test"))
-    testImplementation("io.kotest:kotest-assertions-core:5.8.0")
-//    testImplementation("io.kotest:kotest-assertions-collections:5.8.0")
     testImplementation(project(":material-color-utilities"))
+    testImplementation(libs.kotest.assertions)
 }
 
 tasks.test {
