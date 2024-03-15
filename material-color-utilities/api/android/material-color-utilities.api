@@ -163,6 +163,33 @@ public final class com/materialkolor/dynamiccolor/TonePolarity : java/lang/Enum 
 	public static fun values ()[Lcom/materialkolor/dynamiccolor/TonePolarity;
 }
 
+public final class com/materialkolor/hct/Cam16 {
+	public static final field Companion Lcom/materialkolor/hct/Cam16$Companion;
+	public synthetic fun <init> (DDDDDDDDDLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun distance (Lcom/materialkolor/hct/Cam16;)D
+	public final fun getAstar ()D
+	public final fun getBstar ()D
+	public final fun getChroma ()D
+	public final fun getHue ()D
+	public final fun getJ ()D
+	public final fun getJstar ()D
+	public final fun getM ()D
+	public final fun getQ ()D
+	public final fun getS ()D
+	public final fun toInt ()I
+	public final fun viewed (Lcom/materialkolor/hct/ViewingConditions;)I
+	public final fun xyzInViewingConditions (Lcom/materialkolor/hct/ViewingConditions;[D)[D
+}
+
+public final class com/materialkolor/hct/Cam16$Companion {
+	public final fun fromInt (I)Lcom/materialkolor/hct/Cam16;
+	public final fun fromIntInViewingConditions (ILcom/materialkolor/hct/ViewingConditions;)Lcom/materialkolor/hct/Cam16;
+	public final fun fromJch (DDD)Lcom/materialkolor/hct/Cam16;
+	public final fun fromUcs (DDD)Lcom/materialkolor/hct/Cam16;
+	public final fun fromUcsInViewingConditions (DDDLcom/materialkolor/hct/ViewingConditions;)Lcom/materialkolor/hct/Cam16;
+	public final fun fromXyzInViewingConditions (DDDLcom/materialkolor/hct/ViewingConditions;)Lcom/materialkolor/hct/Cam16;
+}
+
 public final class com/materialkolor/hct/Hct {
 	public static final field Companion Lcom/materialkolor/hct/Hct$Companion;
 	public synthetic fun <init> (ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -171,6 +198,7 @@ public final class com/materialkolor/hct/Hct {
 	public final fun getHue ()D
 	public final fun getTone ()D
 	public fun hashCode ()I
+	public final fun inViewingConditions (Lcom/materialkolor/hct/ViewingConditions;)Lcom/materialkolor/hct/Hct;
 	public final fun toInt ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun withChroma (D)Lcom/materialkolor/hct/Hct;
@@ -185,7 +213,29 @@ public final class com/materialkolor/hct/Hct$Companion {
 
 public final class com/materialkolor/hct/HctSolver {
 	public static final field INSTANCE Lcom/materialkolor/hct/HctSolver;
+	public final fun solveToCam (DDD)Lcom/materialkolor/hct/Cam16;
 	public final fun solveToInt (DDD)I
+}
+
+public final class com/materialkolor/hct/ViewingConditions {
+	public static final field Companion Lcom/materialkolor/hct/ViewingConditions$Companion;
+	public synthetic fun <init> (DDDDDD[DDDDLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getAw ()D
+	public final fun getC ()D
+	public final fun getFl ()D
+	public final fun getFlRoot ()D
+	public final fun getN ()D
+	public final fun getNbb ()D
+	public final fun getNc ()D
+	public final fun getNcb ()D
+	public final fun getRgbD ()[D
+	public final fun getZ ()D
+}
+
+public final class com/materialkolor/hct/ViewingConditions$Companion {
+	public final fun defaultWithBackgroundLstar (D)Lcom/materialkolor/hct/ViewingConditions;
+	public final fun getDEFAULT ()Lcom/materialkolor/hct/ViewingConditions;
+	public final fun make ([DDDDZ)Lcom/materialkolor/hct/ViewingConditions;
 }
 
 public final class com/materialkolor/palettes/CorePalette {
