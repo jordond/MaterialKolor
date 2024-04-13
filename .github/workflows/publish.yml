@@ -37,7 +37,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v2
+        uses: gradle/wrapper-validation-action@v3
 
       - name: Deploy to Sonatype
         run: |
@@ -78,7 +78,7 @@ jobs:
           distribution: adopt
 
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v2
+        uses: gradle/wrapper-validation-action@v3
 
       - name: Generate documentation
         uses: gradle/actions/setup-gradle@v3
