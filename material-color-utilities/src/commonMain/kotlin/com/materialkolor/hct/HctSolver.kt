@@ -666,7 +666,7 @@ public object HctSolver {
      * chroma, and L* to the desired values, if possible; otherwise, the hue and L* will be
      * sufficiently close, and chroma will be maximized.
      */
-    internal fun solveToCam(hueDegrees: Double, chroma: Double, lstar: Double): Cam16 {
+    public fun solveToCam(hueDegrees: Double, chroma: Double, lstar: Double): Cam16 {
         return Cam16.fromInt(solveToInt(hueDegrees, chroma, lstar))
     }
 }

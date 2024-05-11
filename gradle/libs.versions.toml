@@ -2,10 +2,12 @@
 sdk-target = "33"
 sdk-compile = "33"
 sdk-min = "21"
+jvmTarget = "17"
 agp = "8.4.0"
 kotlin = "1.9.23"
 versions = "0.51.0"
 compose-multiplatform = "1.6.2"
+androidx-annotation = "1.7.1"
 androidx-core-ktx = "1.13.1"
 androidx-appcompat = "1.6.1"
 androidx-lifecycle = "2.7.0"
@@ -19,20 +21,22 @@ dokka = "1.9.20"
 publish = "0.28.0"
 colormath = "3.5.0"
 poko = "0.15.2"
+errorProneAnnotations = "2.25.0"
+kotest = "5.9.0"
 
 [libraries]
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
 androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
-androidx-lifecycle-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
 androidx-activityCompose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 colormath = { module = "com.github.ajalt.colormath:colormath", version.ref = "colormath" }
 compose-uitooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-uitooling" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+errorProneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorProneAnnotations" }
+kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 
 [plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 cocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
