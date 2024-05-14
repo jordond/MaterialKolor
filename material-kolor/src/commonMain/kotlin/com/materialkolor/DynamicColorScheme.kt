@@ -22,10 +22,25 @@ public fun rememberDynamicColorScheme(
     seedColor: Color,
     isDark: Boolean,
     style: PaletteStyle = PaletteStyle.TonalSpot,
-    contrastLevel: Double = 0.0,
+    contrastLevel: Double = Contrast.Default.value,
     isExtendedFidelity: Boolean = false,
-): ColorScheme = remember(seedColor, isDark, style, contrastLevel, isExtendedFidelity) {
-    dynamicColorScheme(seedColor, isDark, style, contrastLevel, isExtendedFidelity)
+    modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
+): ColorScheme = remember(
+    seedColor,
+    isDark,
+    style,
+    contrastLevel,
+    isExtendedFidelity,
+    modifyColorScheme,
+) {
+    dynamicColorScheme(
+        seedColor = seedColor,
+        isDark = isDark,
+        style = style,
+        contrastLevel = contrastLevel,
+        isExtendedFidelity = isExtendedFidelity,
+        modifyColorScheme = modifyColorScheme,
+    )
 }
 
 /**
@@ -43,6 +58,7 @@ public fun dynamicColorScheme(
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
     isExtendedFidelity: Boolean = false,
+    modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
 ): ColorScheme {
     val scheme = seedColor.toDynamicScheme(isDark, style, contrastLevel)
     val colors = MaterialDynamicColors(isExtendedFidelity)
@@ -84,5 +100,5 @@ public fun dynamicColorScheme(
         surfaceVariant = colors.surfaceVariant().getColor(scheme),
         tertiary = colors.tertiary().getColor(scheme),
         tertiaryContainer = colors.tertiaryContainer().getColor(scheme),
-    )
+    ).let { modifyColorScheme?.invoke(it) ?: it }
 }

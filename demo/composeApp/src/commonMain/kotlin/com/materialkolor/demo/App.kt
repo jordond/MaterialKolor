@@ -62,6 +62,7 @@ import com.materialkolor.ktx.from
 import com.materialkolor.ktx.harmonize
 import com.materialkolor.ktx.lighten
 import com.materialkolor.palettes.TonalPalette
+import com.materialkolor.rememberDynamicMaterialThemeState
 import kotlin.math.round
 
 val SampleColors = listOf(
@@ -106,12 +107,9 @@ fun colorSchemePairs() = listOf(
 @Composable
 internal fun App() {
     val isDarkTheme = isSystemInDarkTheme()
+    val state = rememberDynamicMaterialThemeState(SampleColors[0], isDarkTheme)
 
-    var seedColor: Color by remember { mutableStateOf(SampleColors[0]) }
-    var style by remember { mutableStateOf(PaletteStyle.TonalSpot) }
-    var darkTheme by remember { mutableStateOf(isDarkTheme) }
-
-    AppTheme(seedColor, style, darkTheme) {
+    AppTheme(state) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -122,10 +120,10 @@ internal fun App() {
                 modifier = Modifier.align(Alignment.End)
             ) {
                 IconButton(
-                    onClick = { darkTheme = !darkTheme },
+                    onClick = { state.isDark = !state.isDark },
                     modifier = Modifier.align(Alignment.TopEnd),
                 ) {
-                    val icon = if (darkTheme) Icons.Filled.LightMode else Icons.Filled.DarkMode
+                    val icon = if (state.isDark) Icons.Filled.LightMode else Icons.Filled.DarkMode
                     Icon(icon, contentDescription = null)
                 }
             }
@@ -138,8 +136,8 @@ internal fun App() {
                 PaletteStyle.entries.forEach { paletteStyle ->
                     FilterChip(
                         label = { Text(text = paletteStyle.name) },
-                        selected = style == paletteStyle,
-                        onClick = { style = paletteStyle },
+                        selected = state.style == paletteStyle,
+                        onClick = { state.style = paletteStyle },
                     )
                 }
             }
@@ -159,7 +157,7 @@ internal fun App() {
                             .size(32.dp)
                             .clip(RoundedCornerShape(100.dp))
                             .background(color)
-                            .clickable { seedColor = color }
+                            .clickable { state.seedColor = color }
                     )
                 }
             }
@@ -322,7 +320,7 @@ internal fun App() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                var color by remember(seedColor) { mutableStateOf(seedColor) }
+                var color by remember(state.seedColor) { mutableStateOf(state.seedColor) }
 
                 Button(onClick = { color = color.lighten(1.1f) }) {
                     Text("Lighten")
@@ -351,8 +349,12 @@ internal fun App() {
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         val ratio = 1.1f + it / 10f
-                        val darker by remember(seedColor) { mutableStateOf(seedColor.darken(ratio)) }
-                        val lighter by remember(seedColor) { mutableStateOf(seedColor.lighten(ratio)) }
+                        val darker by remember(state.seedColor) {
+                            mutableStateOf(state.seedColor.darken(ratio))
+                        }
+                        val lighter by remember(state.seedColor) {
+                            mutableStateOf(state.seedColor.lighten(ratio))
+                        }
 
                         Text(text = "Darken ${ratio.roundToTwoDecimalPlaces()}")
                         Spacer(modifier = Modifier.height(4.dp))
