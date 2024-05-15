@@ -31,6 +31,12 @@ public fun rememberDynamicMaterialThemeState(
     modifyColorScheme: (DynamicMaterialThemeState.(ColorScheme) -> ColorScheme)? = null,
 ): DynamicMaterialThemeState {
     return rememberSaveable(
+        seedColor,
+        isDark,
+        style,
+        contrastLevel,
+        extendedFidelity,
+        modifyColorScheme,
         saver = DynamicMaterialThemeState.Saver(modifyColorScheme),
     ) {
         DynamicMaterialThemeState(
