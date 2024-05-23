@@ -31,3 +31,4 @@ demo/iosApp/iosApp.xcodeproj/*
 !demo/iosApp/iosApp.xcodeproj/project.pbxproj
 shared/shared.podspec
 publish.sh
+.kotlin
