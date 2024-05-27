@@ -9,6 +9,7 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 
 /**
  * Creates a [DynamicMaterialThemeState] that can be remembered across compositions.
@@ -132,7 +133,7 @@ public class DynamicMaterialThemeState internal constructor(
         ) = listSaver(
             save = { state ->
                 listOf(
-                    state.seedColor.value.toLong(),
+                    state.seedColor.toArgb(),
                     state.isDark,
                     state.style.name,
                     state.contrastLevel,
@@ -141,7 +142,7 @@ public class DynamicMaterialThemeState internal constructor(
             },
             restore = { state ->
                 DynamicMaterialThemeState(
-                    initialSeedColor = Color(state[0] as Long),
+                    initialSeedColor = Color(state[0] as Int),
                     initialIsDark = state[1] as Boolean,
                     initialStyle = PaletteStyle.valueOf(state[2] as String),
                     initialContrastLevel = state[3] as Double,
