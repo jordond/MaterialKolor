@@ -26,15 +26,8 @@ jobs:
           java-version: 17
           distribution: adopt
 
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Gradle Wrapper Validation
         uses: gradle/wrapper-validation-action@v3
@@ -77,13 +70,14 @@ jobs:
           java-version: 17
           distribution: adopt
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
       - name: Gradle Wrapper Validation
         uses: gradle/wrapper-validation-action@v3
 
       - name: Generate documentation
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: dokkaHtmlMultiModule
+        run: ./gradlew dokkaHtmlMultiModule
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
