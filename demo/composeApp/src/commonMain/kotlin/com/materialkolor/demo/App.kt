@@ -47,6 +47,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -107,7 +108,13 @@ fun colorSchemePairs() = listOf(
 @Composable
 internal fun App() {
     val isDarkTheme = isSystemInDarkTheme()
-    val state = rememberDynamicMaterialThemeState(SampleColors[0], isDarkTheme)
+    var seedColor by rememberSaveable { mutableStateOf(SampleColors[0].toArgb()) }
+    var style by rememberSaveable { (mutableStateOf(PaletteStyle.TonalSpot.name)) }
+    val state = rememberDynamicMaterialThemeState(
+        seedColor = Color(seedColor),
+        isDark = isDarkTheme,
+        style = PaletteStyle.valueOf(style),
+    )
 
     AppTheme(state) {
         Column(
@@ -137,7 +144,7 @@ internal fun App() {
                     FilterChip(
                         label = { Text(text = paletteStyle.name) },
                         selected = state.style == paletteStyle,
-                        onClick = { state.style = paletteStyle },
+                        onClick = { style = paletteStyle.name },
                     )
                 }
             }
@@ -157,7 +164,7 @@ internal fun App() {
                             .size(32.dp)
                             .clip(RoundedCornerShape(100.dp))
                             .background(color)
-                            .clickable { state.seedColor = color }
+                            .clickable { seedColor = color.toArgb() }
                     )
                 }
             }

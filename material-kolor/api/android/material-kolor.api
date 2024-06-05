@@ -23,7 +23,6 @@ public final class com/materialkolor/DynamicMaterialThemeKt {
 
 public final class com/materialkolor/DynamicMaterialThemeState {
 	public static final field $stable I
-	public static final field Companion Lcom/materialkolor/DynamicMaterialThemeState$Companion;
 	public final fun getColorScheme (Landroidx/compose/runtime/Composer;I)Landroidx/compose/material3/ColorScheme;
 	public final fun getContrastLevel ()D
 	public final fun getModifyColorScheme ()Lkotlin/jvm/functions/Function2;
@@ -36,9 +35,6 @@ public final class com/materialkolor/DynamicMaterialThemeState {
 	public final fun setExtendedFidelity (Z)V
 	public final fun setSeedColor-8_81llA (J)V
 	public final fun setStyle (Lcom/materialkolor/PaletteStyle;)V
-}
-
-public final class com/materialkolor/DynamicMaterialThemeState$Companion {
 }
 
 public final class com/materialkolor/DynamicMaterialThemeStateKt {
