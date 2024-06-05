@@ -18,7 +18,6 @@ package com.materialkolor.palettes
 import com.materialkolor.hct.Hct
 import dev.drewhamilton.poko.Poko
 import kotlin.math.abs
-import kotlin.math.round
 
 /**
  * A convenience class for retrieving colors that are constant in hue and chroma, but vary in tone.
@@ -60,6 +59,79 @@ public class TonalPalette private constructor(
      */
     public fun getHct(tone: Double): Hct = Hct.from(hue, chroma, tone)
 
+    /**
+     * Key color is a color that represents the hue and chroma of a tonal palette.
+     */
+    private class KeyColor(private val hue: Double, private val requestedChroma: Double) {
+
+        /**
+         * Cache that maps tone to max chroma to avoid duplicated HCT calculation.
+         */
+        private val chromaCache: HashMap<Int, Double> = HashMap()
+
+        /**
+         * Creates a key color from a [hue] and a [chroma]. The key color is the first tone,
+         * starting from T50, matching the given hue and chroma.
+         *
+         * @return Key color [Hct]
+         */
+        fun create(): Hct {
+            // Pivot around T50 because T50 has the most chroma available, on
+            // average. Thus it is most likely to have a direct answer.
+            val pivotTone = 50
+            val toneStepSize = 1
+
+            // Epsilon to accept values slightly higher than the requested chroma.
+            val epsilon = 0.01
+
+            // Binary search to find the tone that can provide a chroma that is closest
+            // to the requested chroma.
+            var lowerTone = 0
+            var upperTone = 100
+            while (lowerTone < upperTone) {
+                val midTone = (lowerTone + upperTone) / 2
+                val isAscending = maxChroma(midTone) < maxChroma(midTone + toneStepSize)
+                val sufficientChroma = maxChroma(midTone) >= requestedChroma - epsilon
+
+                if (sufficientChroma) {
+                    // Either range [lowerTone, midTone] or [midTone, upperTone] has
+                    // the answer, so search in the range that is closer the pivot tone.
+                    if (abs((lowerTone - pivotTone)) < abs((upperTone - pivotTone))) {
+                        upperTone = midTone
+                    } else {
+                        if (lowerTone == midTone) {
+                            return Hct.from(this.hue, this.requestedChroma, lowerTone.toDouble())
+                        }
+                        lowerTone = midTone
+                    }
+                } else {
+                    // As there is no sufficient chroma in the midTone, follow the direction to
+                    // the chroma peak.
+                    if (isAscending) {
+                        lowerTone = midTone + toneStepSize
+                    } else {
+                        // Keep midTone for potential chroma peak.
+                        upperTone = midTone
+                    }
+                }
+            }
+
+            return Hct.from(this.hue, this.requestedChroma, lowerTone.toDouble())
+        }
+
+        // Find the maximum chroma for a given tone
+        private fun maxChroma(tone: Int): Double {
+            return chromaCache.getOrPut(tone) {
+                Hct.from(hue, MAX_CHROMA_VALUE, tone.toDouble()).chroma
+            }
+        }
+
+        companion object {
+
+            private const val MAX_CHROMA_VALUE = 200.0
+        }
+    }
+
     public companion object {
 
         /**
@@ -90,52 +162,8 @@ public class TonalPalette private constructor(
          * @return Tones matching hue and chroma.
          */
         public fun fromHueAndChroma(hue: Double, chroma: Double): TonalPalette {
-            return TonalPalette(hue, chroma, createKeyColor(hue, chroma))
-        }
-
-        /**
-         * The key color is the first tone, starting from T50, matching the given hue and chroma.
-         *
-         * @param[hue] H in HCT
-         * @param[chroma] C in HCT
-         * @return HCT representation of the key color.
-         */
-        private fun createKeyColor(hue: Double, chroma: Double): Hct {
-            val startTone = 50.0
-            var smallestDeltaHct = Hct.from(hue, chroma, startTone)
-            var smallestDelta: Double = abs(smallestDeltaHct.chroma - chroma)
-            // Starting from T50, check T+/-delta to see if they match the requested
-            // chroma.
-            //
-            // Starts from T50 because T50 has the most chroma available, on
-            // average. Thus it is most likely to have a direct answer and minimize
-            // iteration.
-            var delta = 1.0
-            while (delta < 50.0) {
-
-                // Termination condition rounding instead of minimizing delta to avoid
-                // case where requested chroma is 16.51, and the closest chroma is 16.49.
-                // Error is minimized, but when rounded and displayed, requested chroma
-                // is 17, key color's chroma is 16.
-                if (round(chroma) == round(smallestDeltaHct.chroma)) {
-                    return smallestDeltaHct
-                }
-                val hctAdd = Hct.from(hue, chroma, startTone + delta)
-                val hctAddDelta: Double = abs(hctAdd.chroma - chroma)
-                if (hctAddDelta < smallestDelta) {
-                    smallestDelta = hctAddDelta
-                    smallestDeltaHct = hctAdd
-                }
-                val hctSubtract = Hct.from(hue, chroma, startTone - delta)
-                val hctSubtractDelta: Double = abs(hctSubtract.chroma - chroma)
-                if (hctSubtractDelta < smallestDelta) {
-                    smallestDelta = hctSubtractDelta
-                    smallestDeltaHct = hctSubtract
-                }
-                delta += 1.0
-            }
-
-            return smallestDeltaHct
+            val keyColor = KeyColor(hue, chroma).create()
+            return TonalPalette(hue, chroma, keyColor)
         }
     }
 }
