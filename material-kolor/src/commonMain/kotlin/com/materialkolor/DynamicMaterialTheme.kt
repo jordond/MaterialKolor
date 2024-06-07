@@ -157,7 +157,7 @@ public fun DynamicMaterialTheme(
 @Deprecated(
     level = DeprecationLevel.WARNING,
     message = "Use DynamicMaterialTheme with animate = true instead.",
-    replaceWith = ReplaceWith("DynamicMaterialTheme"),
+    replaceWith = ReplaceWith("DynamicMaterialTheme(animate = true)"),
 )
 @Composable
 public fun AnimatedDynamicMaterialTheme(
