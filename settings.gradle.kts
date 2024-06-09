@@ -28,7 +28,7 @@ develocity {
     }
 }
 
-rootProject.name = "MaterialKolor"
+rootProject.name = "Material-Kolor"
 
 include(
     ":material-kolor",
