@@ -22,6 +22,7 @@ import com.materialkolor.dynamiccolor.MaterialDynamicColors
  * @see PaletteStyle
  * @param[seedColor] The seed color to use for generating the color scheme.
  * @param[useDarkTheme] Whether to use a dark theme or not.
+ * @param[withAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
  * @param[style] The style of the color scheme.
  * @param[contrastLevel] The contrast level of the color scheme.
  * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
@@ -33,6 +34,7 @@ import com.materialkolor.dynamiccolor.MaterialDynamicColors
 public fun DynamicMaterialTheme(
     seedColor: Color,
     useDarkTheme: Boolean = isSystemInDarkTheme(),
+    withAmoled: Boolean = false,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
     shapes: Shapes = MaterialTheme.shapes,
@@ -45,6 +47,7 @@ public fun DynamicMaterialTheme(
     val state = rememberDynamicMaterialThemeState(
         seedColor = seedColor,
         isDark = useDarkTheme,
+        isAmoled = withAmoled,
         style = style,
         contrastLevel = contrastLevel,
         extendedFidelity = isExtendedFidelity,
@@ -144,6 +147,7 @@ public fun DynamicMaterialTheme(
  * @see PaletteStyle
  * @param[seedColor] The seed color to use for generating the color scheme.
  * @param[useDarkTheme] Whether to use a dark theme or not.
+ * @param[withAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
  * @param[style] The style of the color scheme.
  * @param[contrastLevel] The contrast level of the color scheme.
  * @param[animationSpec] The animation spec to use for animating the color scheme.
@@ -152,12 +156,14 @@ public fun DynamicMaterialTheme(
  */
 @Deprecated(
     level = DeprecationLevel.WARNING,
-    message = "Use DynamicMaterialTheme with animate = true instead."
+    message = "Use DynamicMaterialTheme with animate = true instead.",
+    replaceWith = ReplaceWith("DynamicMaterialTheme(animate = true)"),
 )
 @Composable
 public fun AnimatedDynamicMaterialTheme(
     seedColor: Color,
     useDarkTheme: Boolean = isSystemInDarkTheme(),
+    withAmoled: Boolean = false,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
     animationSpec: AnimationSpec<Color> = spring(stiffness = Spring.StiffnessLow),
@@ -169,6 +175,7 @@ public fun AnimatedDynamicMaterialTheme(
     DynamicMaterialTheme(
         seedColor = seedColor,
         useDarkTheme = useDarkTheme,
+        withAmoled = withAmoled,
         style = style,
         contrastLevel = contrastLevel,
         shapes = shapes,

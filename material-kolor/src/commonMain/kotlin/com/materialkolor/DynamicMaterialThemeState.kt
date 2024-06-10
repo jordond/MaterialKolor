@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
  *
  * @param seedColor The initial seed color to generate the color scheme.
  * @param isDark The initial dark mode state.
+ * @param isAmoled The initial Amoled state.
  * @param style The initial palette style.
  * @param contrastLevel The initial contrast level.
  * @param extendedFidelity The initial extended fidelity state.
@@ -24,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 public fun rememberDynamicMaterialThemeState(
     seedColor: Color,
     isDark: Boolean,
+    isAmoled: Boolean = false,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
     extendedFidelity: Boolean = false,
@@ -32,6 +34,7 @@ public fun rememberDynamicMaterialThemeState(
     return remember(
         seedColor,
         isDark,
+        isAmoled,
         style,
         contrastLevel,
         extendedFidelity,
@@ -40,6 +43,7 @@ public fun rememberDynamicMaterialThemeState(
         DynamicMaterialThemeState(
             initialSeedColor = seedColor,
             initialIsDark = isDark,
+            initialIsAmoled = isAmoled,
             initialStyle = style,
             initialContrastLevel = contrastLevel,
             initialExtendedFidelity = extendedFidelity,
@@ -55,6 +59,7 @@ public fun rememberDynamicMaterialThemeState(
  *
  * @param initialSeedColor The initial seed color to generate the color scheme.
  * @param initialIsDark The initial dark mode state.
+ * @param initialIsAmoled The initial Amoled state.
  * @param initialStyle The initial palette style.
  * @param initialContrastLevel The initial contrast level.
  * @param initialExtendedFidelity The initial extended fidelity state.
@@ -65,6 +70,7 @@ public fun rememberDynamicMaterialThemeState(
 public class DynamicMaterialThemeState internal constructor(
     initialSeedColor: Color,
     initialIsDark: Boolean,
+    initialIsAmoled: Boolean,
     initialStyle: PaletteStyle,
     initialContrastLevel: Double,
     initialExtendedFidelity: Boolean,
@@ -84,6 +90,13 @@ public class DynamicMaterialThemeState internal constructor(
      * @see dynamicColorScheme
      */
     public var isDark: Boolean by mutableStateOf(initialIsDark)
+
+    /**
+     * The dark mode with Amoled state.
+     *
+     * @see dynamicColorScheme
+     */
+    public var isAmoled: Boolean by mutableStateOf(initialIsAmoled)
 
     /**
      * The palette style.
@@ -115,6 +128,7 @@ public class DynamicMaterialThemeState internal constructor(
         get() = rememberDynamicColorScheme(
             seedColor = seedColor,
             isDark = isDark,
+            isAmoled = isAmoled,
             style = style,
             contrastLevel = contrastLevel,
             isExtendedFidelity = isExtendedFidelity,

@@ -23,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.Button
@@ -52,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
@@ -108,11 +110,13 @@ fun colorSchemePairs() = listOf(
 @Composable
 internal fun App() {
     val isDarkTheme = isSystemInDarkTheme()
+    val isAmoled by rememberSaveable { mutableStateOf(false) }
     var seedColor by rememberSaveable { mutableStateOf(SampleColors[0].toArgb()) }
     var style by rememberSaveable { (mutableStateOf(PaletteStyle.TonalSpot.name)) }
     val state = rememberDynamicMaterialThemeState(
         seedColor = Color(seedColor),
         isDark = isDarkTheme,
+        isAmoled = isAmoled,
         style = PaletteStyle.valueOf(style),
     )
 
@@ -123,15 +127,32 @@ internal fun App() {
                 .padding(8.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
-            Box(
-                modifier = Modifier.align(Alignment.End)
+            Row(
+                modifier = Modifier
+                    .align(Alignment.End)
             ) {
-                IconButton(
-                    onClick = { state.isDark = !state.isDark },
-                    modifier = Modifier.align(Alignment.TopEnd),
-                ) {
-                    val icon = if (state.isDark) Icons.Filled.LightMode else Icons.Filled.DarkMode
-                    Icon(icon, contentDescription = null)
+                if (state.isDark) {
+                    Box {
+                        IconButton(onClick = { state.isAmoled = !state.isAmoled }) {
+                            val mirror = if (state.isAmoled) {
+                                Modifier.scale(scaleX = -1f, scaleY = 1f)
+                            } else {
+                                Modifier
+                            }
+                            Icon(
+                                Icons.Filled.Contrast,
+                                contentDescription = null,
+                                modifier = mirror,
+                            )
+                        }
+                    }
+                }
+
+                Box {
+                    IconButton(onClick = { state.isDark = !state.isDark }) {
+                        val icon = if (state.isDark) Icons.Filled.LightMode else Icons.Filled.DarkMode
+                        Icon(icon, contentDescription = null)
+                    }
                 }
             }
 
