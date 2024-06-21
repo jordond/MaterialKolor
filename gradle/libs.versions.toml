@@ -16,7 +16,7 @@ androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
 binaryCompatibility = "0.14.0"
 dokka = "1.9.20"
-publish = "0.28.0"
+publish = "0.29.0"
 colormath = "3.5.0"
 poko = "0.16.0"
 
