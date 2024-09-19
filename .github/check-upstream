@@ -1,0 +1,131 @@
+#!/bin/bash
+
+# Explode on errors 💥
+set -euo pipefail
+
+CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+ROOT="$(cd "$CWD"/.. >/dev/null 2>&1 && pwd)"
+
+UPSTREAM_REPO="https://github.com/material-foundation/material-color-utilities"
+SUBMODULE_PATH="mcu-upstream/src/main"
+
+# Default to showing output
+show_output=true
+
+# Check for --no-output flag to disable output to console
+if [[ "$*" == *--no-output* ]]; then
+    show_output=false
+fi
+
+# Default to generating markdown
+generate_markdown=true
+
+# Check for --no-markdown flag to disable markdown generation
+if [[ "$*" == *--no-markdown* ]]; then
+    generate_markdown=false
+fi
+
+# Check if both generate_markdown and show_output are false
+if [ "$generate_markdown" = false ] && [ "$show_output" = false ]; then
+    echo "Error: At least one of --no-markdown or --no-output must be omitted." >&2
+    echo ""
+    usage
+    exit 1
+fi
+
+
+usage() {
+    echo "Usage: $0 [--no-output] [--no-markdown]"
+    echo "  --no-output: Do not output to console"
+    echo "  --no-markdown: Do not generate markdown files"
+}
+
+# Function to generate markdown file for a commit and optionally output to console
+generate() {
+    local commit=$1
+    local short_sha=$(git rev-parse --short $commit)
+    local date=$(git show -s --format=%cI $commit)
+    local full_message=$(git log -1 --pretty=%B $commit)
+    local title=$(echo "$full_message" | head -n 1)
+    local body=$(echo "$full_message" | tail -n +2)
+    local files_changed=$(git diff-tree --no-commit-id --name-only -r $commit | grep "^java/" | tr '\n' ' ')
+
+    if $generate_markdown; then
+        # Create .upstream-changes directory if it doesn't exist
+        mkdir -p "$ROOT/.upstream-changes"
+
+        # Create markdown file
+        local md_file="$ROOT/.upstream-changes/${short_sha}.md"
+        
+        echo "---" > "$md_file"
+        echo "title: $title" >> "$md_file"
+        echo "labels: upstream" >> "$md_file"
+        echo "---" >> "$md_file"
+        echo "" >> "$md_file"
+
+        echo "## Info" >> "$md_file"
+        echo "" >> "$md_file"
+        echo "This commit was authored at $date. You can view the commit [here]($UPSTREAM_REPO/commit/$commit)." >> "$md_file"
+        echo "" >> "$md_file"
+
+        echo "### Commit message" >> "$md_file"
+        echo "$full_message" >> "$md_file"
+        echo "" >> "$md_file"
+
+        echo "### Changed files" >> "$md_file"
+        echo "" >> "$md_file"
+        echo '```' >> "$md_file"
+        for file in $files_changed; do
+            if [ -n "$file" ]; then
+                echo "$file" >> "$md_file"
+            fi
+        done
+        echo '```' >> "$md_file"
+
+        echo "Generated markdown file for commit $short_sha"
+    fi
+
+    # Output to console if not disabled
+    if $show_output; then
+        echo "----------------------------------------"
+        echo "Commit: $short_sha"
+        echo "Date: $date"
+        echo "Title: $title"
+        echo "Body:"
+        echo "$body"
+        echo "Files changed:"
+        for file in $files_changed; do
+            if [ -n "$file" ]; then
+                echo "--> $file"
+            fi
+        done
+        echo
+    fi
+}
+echo "Checking submodule: $SUBMODULE_PATH"
+
+# Enter the submodle directory
+cd "$SUBMODULE_PATH"
+
+# Get the current commit hash
+current_commit=$(git rev-parse --short HEAD)
+echo "Current commit: $current_commit"
+
+# Get the remote branch name (use origin/HEAD if no branch is checked out)
+remote_branch=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo "origin/HEAD")
+echo "Remote branch: $remote_branch"
+
+# Get all commits between current and remote
+commits=$(git rev-list $current_commit..$remote_branch)
+
+if [ -z "$commits" ]; then
+    echo "No new commits found."
+else
+    echo "New commits found:"
+    for commit in $commits; do
+        # Check if the commit changed files in the java/ folder
+        if git diff-tree --no-commit-id --name-only -r $commit | grep -q "^java/"; then
+            generate $commit
+        fi
+    done
+fi

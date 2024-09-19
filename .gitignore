@@ -32,3 +32,4 @@ demo/iosApp/iosApp.xcodeproj/*
 shared/shared.podspec
 publish.sh
 .kotlin
+.upstream-changes
