@@ -34,10 +34,10 @@ public open class DynamicScheme(
     public val tertiaryPalette: TonalPalette,
     public val neutralPalette: TonalPalette,
     public val neutralVariantPalette: TonalPalette,
+    public val errorPalette: TonalPalette = TonalPalette.fromHueAndChroma(hue = 25.0, chroma = 84.0),
 ) {
 
     public val sourceColorArgb: Int = sourceColorHct.toInt()
-    public val errorPalette: TonalPalette = TonalPalette.fromHueAndChroma(hue = 25.0, chroma = 84.0)
 
     public companion object {
 
