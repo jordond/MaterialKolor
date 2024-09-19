@@ -1,9 +1,9 @@
 package palettes
 
-import com.materialkolor.palettes.TonalPalette
 import com.materialkolor.hct.Hct
+import com.materialkolor.palettes.TonalPalette
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class TonalPaletteTest {
 

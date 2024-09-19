@@ -2,8 +2,7 @@ package palettes
 
 import com.materialkolor.palettes.CorePalette
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
-import utils.shouldBeExactly
+import kotlin.test.Test
 
 class CorePaletteTest {
 

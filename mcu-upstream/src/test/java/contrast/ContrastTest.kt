@@ -26,7 +26,7 @@ class ContrastTest {
 
         expectedFirstXyz shouldContainExactly actualFirstXyz
         expectedSecondXyz shouldContainExactly actualSecondXyz
-        expected shouldBeExactly  actual
+        expected shouldBeExactly actual
     }
 
     @Test
