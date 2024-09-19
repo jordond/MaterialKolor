@@ -6,51 +6,38 @@ set -euo pipefail
 CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 ROOT="$(cd "$CWD"/.. >/dev/null 2>&1 && pwd)"
 
-# REPO="jordond/MaterialKolor"
 REPO="jordond/TEST"
 UPSTREAM_REPO="https://github.com/material-foundation/material-color-utilities"
 SUBMODULE_PATH="mcu-upstream/src/main"
 
 usage() {
-    echo "Usage: $0 <github-token> [--no-output] [--no-issue]"
+    echo "Usage: $0 [--token <github-token>] [--no-output]"
+    echo "  --token: GitHub token for creating issues"
     echo "  --no-output: Do not output to console"
-    echo "  --no-issue: Do not create GitHub issues"
 }
-
-# Check if the first argument is provided (GitHub token)
-if [[ $# -eq 0 ]]; then
-    echo "Error: GitHub token is required as the first argument."
-    echo ""
-    usage
-    exit 1
-fi
-
-GITHUB_TOKEN=$1
-shift
 
 # Default to showing output
 show_output=true
+github_token=""
 
-# Check for --no-output flag to disable output to console
-if [[ "$*" == *--no-output* ]]; then
-    show_output=false
-fi
-
-# Default to creating issues
-should_create_issue=true
-
-# Check for --no-issue flag to disable creating issues
-if [[ "$*" == *--no-issue* ]]; then
-    should_create_issue=false
-fi
-
-# Validate GitHub token
-if [[ -z "${GITHUB_TOKEN}" ]]; then
-    echo "Error: Invalid GitHub token provided."
-    echo ""
-    usage
-    exit 1
-fi
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --token)
+            github_token="$2"
+            shift 2
+            ;;
+        --no-output)
+            show_output=false
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            usage
+            exit 1
+            ;;
+    esac
+done
 
 # Function to create a GitHub issue for a commit
 create_github_issue() {
@@ -79,7 +66,7 @@ create_github_issue() {
         echo
     fi
 
-    if $should_create_issue; then
+    if [[ -n "$github_token" ]]; then
         # Prepare issue title and body
         local issue_title="[Upstream] $title"
         local issue_body="## Info
@@ -96,8 +83,10 @@ $files_changed
 "
 
         # Create GitHub issue
+        echo "Creating issue for commit $short_sha"
+        echo ""
         response=$(curl -s -X POST \
-            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Authorization: token $github_token" \
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/$REPO/issues" \
             -d "{
