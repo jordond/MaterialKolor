@@ -385,13 +385,13 @@ public class MaterialDynamicColors(
                     DynamicColor.foregroundTone(primaryContainer().tone(scheme), 4.5)
                 }
                 isMonochrome(scheme) -> if (scheme.isDark) 0.0 else 100.0
-                else -> if (scheme.isDark) 90.0 else 10.0
+                else -> if (scheme.isDark) 90.0 else 30.0
             }
         },
         isBackground = false,
         background = { primaryContainer() },
         secondBackground = null,
-        contrastCurve = ContrastCurve(4.5, 7.0, 11.0, 21.0),
+        contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 11.0),
         toneDeltaPair = null,
     )
 
@@ -477,14 +477,15 @@ public class MaterialDynamicColors(
         palette = { scheme -> scheme.secondaryPalette },
         tone = { scheme ->
             when {
-                !isFidelity(scheme) -> if (scheme.isDark) 90.0 else 10.0
+                isMonochrome(scheme) -> if (scheme.isDark) 90.0 else 10.0
+                !isFidelity(scheme) -> if (scheme.isDark) 90.0 else 30.0
                 else -> DynamicColor.foregroundTone(secondaryContainer().tone(scheme), 4.5)
             }
         },
         isBackground = false,
         background = { secondaryContainer() },
         secondBackground = null,
-        contrastCurve = ContrastCurve(4.5, 7.0, 11.0, 21.0),
+        contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 11.0),
         toneDeltaPair = null,
     )
 
@@ -562,14 +563,14 @@ public class MaterialDynamicColors(
         tone = { scheme ->
             when {
                 isMonochrome(scheme) -> if (scheme.isDark) 0.0 else 100.0
-                !isFidelity(scheme) -> if (scheme.isDark) 90.0 else 10.0
+                !isFidelity(scheme) -> if (scheme.isDark) 90.0 else 30.0
                 else -> DynamicColor.foregroundTone(tertiaryContainer().tone(scheme), 4.5)
             }
         },
         isBackground = false,
         background = { tertiaryContainer() },
         secondBackground = null,
-        contrastCurve = ContrastCurve(4.5, 7.0, 11.0, 21.0),
+        contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 11.0),
         toneDeltaPair = null,
     )
 
@@ -625,11 +626,16 @@ public class MaterialDynamicColors(
     public fun onErrorContainer(): DynamicColor = DynamicColor(
         name = "on_error_container",
         palette = { scheme -> scheme.errorPalette },
-        tone = { scheme -> if (scheme.isDark) 90.0 else 10.0 },
+        tone = { scheme ->
+            when {
+                isMonochrome(scheme) -> if (scheme.isDark) 90.0 else 10.0
+                else -> if (scheme.isDark) 90.0 else 10.0
+            }
+        },
         isBackground = false,
         background = { errorContainer() },
         secondBackground = null,
-        contrastCurve = ContrastCurve(4.5, 7.0, 11.0, 21.0),
+        contrastCurve = ContrastCurve(3.0, 4.5, 7.0, 11.0),
         toneDeltaPair = null,
     )
 
