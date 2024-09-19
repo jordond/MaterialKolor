@@ -12,14 +12,9 @@ jobs:
   check:
     name: "Check upstream for changes"
     runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.filelist.outputs.file_names }}
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
 
       - name: Check for upstream changes
         run: ./.github/check-upstream
-
-      - name: Create issues from files
-        run: ./.github/create-issues

@@ -6,8 +6,27 @@ set -euo pipefail
 CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 ROOT="$(cd "$CWD"/.. >/dev/null 2>&1 && pwd)"
 
+# REPO="jordond/MaterialKolor"
+REPO="jordond/TEST"
 UPSTREAM_REPO="https://github.com/material-foundation/material-color-utilities"
 SUBMODULE_PATH="mcu-upstream/src/main"
+
+usage() {
+    echo "Usage: $0 <github-token> [--no-output] [--no-issue]"
+    echo "  --no-output: Do not output to console"
+    echo "  --no-issue: Do not create GitHub issues"
+}
+
+# Check if the first argument is provided (GitHub token)
+if [[ $# -eq 0 ]]; then
+    echo "Error: GitHub token is required as the first argument."
+    echo ""
+    usage
+    exit 1
+fi
+
+GITHUB_TOKEN=$1
+shift
 
 # Default to showing output
 show_output=true
@@ -17,31 +36,24 @@ if [[ "$*" == *--no-output* ]]; then
     show_output=false
 fi
 
-# Default to generating markdown
-generate_markdown=true
+# Default to creating issues
+should_create_issue=true
 
-# Check for --no-markdown flag to disable markdown generation
-if [[ "$*" == *--no-markdown* ]]; then
-    generate_markdown=false
+# Check for --no-issue flag to disable creating issues
+if [[ "$*" == *--no-issue* ]]; then
+    should_create_issue=false
 fi
 
-# Check if both generate_markdown and show_output are false
-if [ "$generate_markdown" = false ] && [ "$show_output" = false ]; then
-    echo "Error: At least one of --no-markdown or --no-output must be omitted." >&2
+# Validate GitHub token
+if [[ -z "${GITHUB_TOKEN}" ]]; then
+    echo "Error: Invalid GitHub token provided."
     echo ""
     usage
     exit 1
 fi
 
-
-usage() {
-    echo "Usage: $0 [--no-output] [--no-markdown]"
-    echo "  --no-output: Do not output to console"
-    echo "  --no-markdown: Do not generate markdown files"
-}
-
-# Function to generate markdown file for a commit and optionally output to console
-generate() {
+# Function to create a GitHub issue for a commit
+create_github_issue() {
     local commit=$1
     local short_sha=$(git rev-parse --short $commit)
     local date=$(git show -s --format=%cI $commit)
@@ -49,41 +61,6 @@ generate() {
     local title=$(echo "$full_message" | head -n 1)
     local body=$(echo "$full_message" | tail -n +2)
     local files_changed=$(git diff-tree --no-commit-id --name-only -r $commit | grep "^java/" | tr '\n' ' ')
-
-    if $generate_markdown; then
-        # Create .upstream-changes directory if it doesn't exist
-        mkdir -p "$ROOT/.upstream-changes"
-
-        # Create markdown file
-        local md_file="$ROOT/.upstream-changes/${short_sha}.md"
-        
-        echo "---" > "$md_file"
-        echo "title: $title" >> "$md_file"
-        echo "labels: upstream" >> "$md_file"
-        echo "---" >> "$md_file"
-        echo "" >> "$md_file"
-
-        echo "## Info" >> "$md_file"
-        echo "" >> "$md_file"
-        echo "This commit was authored at $date. You can view the commit [here]($UPSTREAM_REPO/commit/$commit)." >> "$md_file"
-        echo "" >> "$md_file"
-
-        echo "### Commit message" >> "$md_file"
-        echo "$full_message" >> "$md_file"
-        echo "" >> "$md_file"
-
-        echo "### Changed files" >> "$md_file"
-        echo "" >> "$md_file"
-        echo '```' >> "$md_file"
-        for file in $files_changed; do
-            if [ -n "$file" ]; then
-                echo "$file" >> "$md_file"
-            fi
-        done
-        echo '```' >> "$md_file"
-
-        echo "Generated markdown file for commit $short_sha"
-    fi
 
     # Output to console if not disabled
     if $show_output; then
@@ -101,10 +78,48 @@ generate() {
         done
         echo
     fi
+
+    if $should_create_issue; then
+        # Prepare issue title and body
+        local issue_title="[Upstream] $title"
+        local issue_body="## Info
+
+This commit was authored at $date. You can view the commit [here]($UPSTREAM_REPO/commit/$commit).
+
+### Commit message
+$full_message
+
+### Changed files
+\`\`\`
+$files_changed
+\`\`\`
+"
+
+        # Create GitHub issue
+        response=$(curl -s -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$REPO/issues" \
+            -d "{
+                \"title\": \"$issue_title\",
+                \"body\": $(echo "$issue_body" | jq -R -s .),
+                \"labels\": [\"upstream\"]
+            }")
+
+        issue_number=$(echo "$response" | jq -r '.number')
+        if [ "$issue_number" != "null" ]; then
+            echo "Created issue #$issue_number for commit $short_sha"
+        else
+            echo "Failed to create issue for commit $short_sha"
+            echo "API response: $response"
+            exit 1
+        fi
+    fi
 }
+
 echo "Checking submodule: $SUBMODULE_PATH"
 
-# Enter the submodle directory
+# Enter the submodule directory
 cd "$SUBMODULE_PATH"
 
 # Get the current commit hash
@@ -125,7 +140,7 @@ else
     for commit in $commits; do
         # Check if the commit changed files in the java/ folder
         if git diff-tree --no-commit-id --name-only -r $commit | grep -q "^java/"; then
-            generate $commit
+            create_github_issue $commit
         fi
     done
 fi
