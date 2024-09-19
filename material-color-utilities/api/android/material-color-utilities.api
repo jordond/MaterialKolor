@@ -230,7 +230,8 @@ public final class com/materialkolor/quantize/QuantizerCelebi {
 
 public class com/materialkolor/scheme/DynamicScheme {
 	public static final field Companion Lcom/materialkolor/scheme/DynamicScheme$Companion;
-	public fun <init> (Lcom/materialkolor/hct/Hct;Lcom/materialkolor/scheme/Variant;ZDLcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;)V
+	public fun <init> (Lcom/materialkolor/hct/Hct;Lcom/materialkolor/scheme/Variant;ZDLcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;)V
+	public synthetic fun <init> (Lcom/materialkolor/hct/Hct;Lcom/materialkolor/scheme/Variant;ZDLcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getContrastLevel ()D
 	public final fun getErrorPalette ()Lcom/materialkolor/palettes/TonalPalette;
 	public final fun getNeutralPalette ()Lcom/materialkolor/palettes/TonalPalette;
