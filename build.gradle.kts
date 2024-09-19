@@ -2,6 +2,7 @@ import org.jetbrains.dokka.gradle.AbstractDokkaTask
 import org.jetbrains.dokka.gradle.DokkaMultiModuleTask
 
 plugins {
+    alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.multiplatform) apply false
     alias(libs.plugins.cocoapods) apply false
     alias(libs.plugins.compose) apply false
@@ -19,6 +20,7 @@ apiValidation {
     ignoredProjects.addAll(
         listOf(
             "composeApp",
+            "mcu-upstream",
         ),
     )
 }
