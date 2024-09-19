@@ -6,7 +6,7 @@ set -euo pipefail
 CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 ROOT="$(cd "$CWD"/.. >/dev/null 2>&1 && pwd)"
 
-REPO="jordond/TEST"
+REPO="jordond/MaterialKolor"
 UPSTREAM_REPO="https://github.com/material-foundation/material-color-utilities"
 SUBMODULE_PATH="mcu-upstream/src/main"
 
@@ -68,7 +68,7 @@ create_github_issue() {
 
     if [[ -n "$github_token" ]]; then
         # Prepare issue title and body
-        local issue_title="[Upstream] $title"
+        local issue_title="[Upstream:$short_sha] $title"
         local issue_body="## Info
 
 This commit was authored at $date. You can view the commit [here]($UPSTREAM_REPO/commit/$commit).
@@ -82,26 +82,34 @@ $files_changed
 \`\`\`
 "
 
-        # Create GitHub issue
-        echo "Creating issue for commit $short_sha"
-        echo ""
-        response=$(curl -s -X POST \
-            -H "Authorization: token $github_token" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/$REPO/issues" \
-            -d "{
-                \"title\": \"$issue_title\",
-                \"body\": $(echo "$issue_body" | jq -R -s .),
-                \"labels\": [\"upstream\"]
-            }")
+        # Check if an issue with the same title already exists
+        existing_issue=$(curl -s -H "Authorization: token $github_token" \
+            "https://api.github.com/repos/$REPO/issues?state=all&labels=upstream" | \
+            jq -r ".[] | select(.title == \"$issue_title\") | .number")
 
-        issue_number=$(echo "$response" | jq -r '.number')
-        if [ "$issue_number" != "null" ]; then
-            echo "Created issue #$issue_number for commit $short_sha"
+        if [ -n "$existing_issue" ]; then
+            echo "Issue already exists for commit $short_sha (Issue #$existing_issue)"
         else
-            echo "Failed to create issue for commit $short_sha"
-            echo "API response: $response"
-            exit 1
+            # Create GitHub issue
+            echo "Creating issue for commit $short_sha"
+            response=$(curl -s -X POST \
+                -H "Authorization: token $github_token" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/$REPO/issues" \
+                -d "{
+                    \"title\": \"$issue_title\",
+                    \"body\": $(echo "$issue_body" | jq -R -s .),
+                    \"labels\": [\"upstream\"]
+                }")
+
+            issue_number=$(echo "$response" | jq -r '.number')
+            if [ "$issue_number" != "null" ]; then
+                echo "Created issue #$issue_number for commit $short_sha"
+            else
+                echo "Failed to create issue for commit $short_sha"
+                echo "API response: $response"
+                exit 1
+            fi
         fi
     fi
 }
