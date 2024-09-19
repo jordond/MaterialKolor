@@ -1,0 +1,20 @@
+name: Upstream changes
+
+on:
+  # Run at 3AM every monday
+  schedule:
+    - cron: "0 3 * * 1"
+
+  # Can manually be run via the Github Actions interface
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: "Check upstream for changes"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Check for upstream changes
+        run: ./.github/check-upstream

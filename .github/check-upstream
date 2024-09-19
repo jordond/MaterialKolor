@@ -1,0 +1,143 @@
+#!/bin/bash
+
+# Explode on errors 💥
+set -euo pipefail
+
+CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+ROOT="$(cd "$CWD"/.. >/dev/null 2>&1 && pwd)"
+
+REPO="jordond/MaterialKolor"
+UPSTREAM_REPO="https://github.com/material-foundation/material-color-utilities"
+SUBMODULE_PATH="mcu-upstream/src/main"
+
+usage() {
+    echo "Usage: $0 [--token <github-token>] [--no-output]"
+    echo "  --token: GitHub token for creating issues"
+    echo "  --no-output: Do not output to console"
+}
+
+# Default to showing output
+show_output=true
+github_token=""
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --token)
+            github_token="$2"
+            shift 2
+            ;;
+        --no-output)
+            show_output=false
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+# Function to create a GitHub issue for a commit
+create_github_issue() {
+    local commit=$1
+    local short_sha=$(git rev-parse --short $commit)
+    local date=$(git show -s --format=%cI $commit)
+    local full_message=$(git log -1 --pretty=%B $commit)
+    local title=$(echo "$full_message" | head -n 1)
+    local body=$(echo "$full_message" | tail -n +2)
+    local files_changed=$(git diff-tree --no-commit-id --name-only -r $commit | grep "^java/" | tr '\n' ' ')
+
+    # Output to console if not disabled
+    if $show_output; then
+        echo "----------------------------------------"
+        echo "Commit: $short_sha"
+        echo "Date: $date"
+        echo "Title: $title"
+        echo "Body:"
+        echo "$body"
+        echo "Files changed:"
+        for file in $files_changed; do
+            if [ -n "$file" ]; then
+                echo "--> $file"
+            fi
+        done
+        echo
+    fi
+
+    if [[ -n "$github_token" ]]; then
+        # Prepare issue title and body
+        local issue_title="[Upstream:$short_sha] $title"
+        local issue_body="## Info
+
+This commit was authored at $date. You can view the commit [here]($UPSTREAM_REPO/commit/$commit).
+
+### Commit message
+$full_message
+
+### Changed files
+\`\`\`
+$files_changed
+\`\`\`
+"
+
+        # Check if an issue with the same title already exists
+        existing_issue=$(curl -s -H "Authorization: token $github_token" \
+            "https://api.github.com/repos/$REPO/issues?state=all&labels=upstream" | \
+            jq -r ".[] | select(.title == \"$issue_title\") | .number")
+
+        if [ -n "$existing_issue" ]; then
+            echo "Issue already exists for commit $short_sha (Issue #$existing_issue)"
+        else
+            # Create GitHub issue
+            echo "Creating issue for commit $short_sha"
+            response=$(curl -s -X POST \
+                -H "Authorization: token $github_token" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/$REPO/issues" \
+                -d "{
+                    \"title\": \"$issue_title\",
+                    \"body\": $(echo "$issue_body" | jq -R -s .),
+                    \"labels\": [\"upstream\"]
+                }")
+
+            issue_number=$(echo "$response" | jq -r '.number')
+            if [ "$issue_number" != "null" ]; then
+                echo "Created issue #$issue_number for commit $short_sha"
+            else
+                echo "Failed to create issue for commit $short_sha"
+                echo "API response: $response"
+                exit 1
+            fi
+        fi
+    fi
+}
+
+echo "Checking submodule: $SUBMODULE_PATH"
+
+# Enter the submodule directory
+cd "$SUBMODULE_PATH"
+
+# Get the current commit hash
+current_commit=$(git rev-parse --short HEAD)
+echo "Current commit: $current_commit"
+
+# Get the remote branch name (use origin/HEAD if no branch is checked out)
+remote_branch=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo "origin/HEAD")
+echo "Remote branch: $remote_branch"
+
+# Get all commits between current and remote
+commits=$(git rev-list $current_commit..$remote_branch)
+
+if [ -z "$commits" ]; then
+    echo "No new commits found."
+else
+    echo "New commits found:"
+    for commit in $commits; do
+        # Check if the commit changed files in the java/ folder
+        if git diff-tree --no-commit-id --name-only -r $commit | grep -q "^java/"; then
+            create_github_issue $commit
+        fi
+    done
+fi
