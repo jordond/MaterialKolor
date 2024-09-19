@@ -10,14 +10,37 @@ public final class com/materialkolor/Contrast : java/lang/Enum {
 }
 
 public final class com/materialkolor/DynamicColorSchemeKt {
-	public static final fun dynamicColorScheme-3J-VO9M (JZLcom/materialkolor/PaletteStyle;DZ)Landroidx/compose/material3/ColorScheme;
-	public static synthetic fun dynamicColorScheme-3J-VO9M$default (JZLcom/materialkolor/PaletteStyle;DZILjava/lang/Object;)Landroidx/compose/material3/ColorScheme;
-	public static final fun rememberDynamicColorScheme-yWKOrZg (JZLcom/materialkolor/PaletteStyle;DZLandroidx/compose/runtime/Composer;II)Landroidx/compose/material3/ColorScheme;
+	public static final fun dynamicColorScheme-euL9pac (JZZLcom/materialkolor/PaletteStyle;DZLkotlin/jvm/functions/Function1;)Landroidx/compose/material3/ColorScheme;
+	public static synthetic fun dynamicColorScheme-euL9pac$default (JZZLcom/materialkolor/PaletteStyle;DZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Landroidx/compose/material3/ColorScheme;
+	public static final fun rememberDynamicColorScheme-Pd0R-II (JZZLcom/materialkolor/PaletteStyle;DZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Landroidx/compose/material3/ColorScheme;
 }
 
 public final class com/materialkolor/DynamicMaterialThemeKt {
-	public static final fun AnimatedDynamicMaterialTheme-AnklqjM (JZLcom/materialkolor/PaletteStyle;DLandroidx/compose/animation/core/AnimationSpec;Landroidx/compose/material3/Shapes;Landroidx/compose/material3/Typography;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
-	public static final fun DynamicMaterialTheme-PSU77Us (JZLcom/materialkolor/PaletteStyle;DLandroidx/compose/material3/Shapes;Landroidx/compose/material3/Typography;ZZLandroidx/compose/animation/core/AnimationSpec;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun AnimatedDynamicMaterialTheme-PSU77Us (JZZLcom/materialkolor/PaletteStyle;DLandroidx/compose/animation/core/AnimationSpec;Landroidx/compose/material3/Shapes;Landroidx/compose/material3/Typography;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DynamicMaterialTheme (Lcom/materialkolor/DynamicMaterialThemeState;Landroidx/compose/material3/Shapes;Landroidx/compose/material3/Typography;ZLandroidx/compose/animation/core/AnimationSpec;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DynamicMaterialTheme-ehQzFsw (JZZLcom/materialkolor/PaletteStyle;DLandroidx/compose/material3/Shapes;Landroidx/compose/material3/Typography;ZZLandroidx/compose/animation/core/AnimationSpec;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;III)V
+}
+
+public final class com/materialkolor/DynamicMaterialThemeState {
+	public static final field $stable I
+	public final fun getColorScheme (Landroidx/compose/runtime/Composer;I)Landroidx/compose/material3/ColorScheme;
+	public final fun getContrastLevel ()D
+	public final fun getModifyColorScheme ()Lkotlin/jvm/functions/Function2;
+	public final fun getSeedColor-0d7_KjU ()J
+	public final fun getStyle ()Lcom/materialkolor/PaletteStyle;
+	public final fun isAmoled ()Z
+	public final fun isDark ()Z
+	public final fun isExtendedFidelity ()Z
+	public final fun setAmoled (Z)V
+	public final fun setContrastLevel (D)V
+	public final fun setDark (Z)V
+	public final fun setExtendedFidelity (Z)V
+	public final fun setSeedColor-8_81llA (J)V
+	public final fun setStyle (Lcom/materialkolor/PaletteStyle;)V
+}
+
+public final class com/materialkolor/DynamicMaterialThemeStateKt {
+	public static final fun rememberDynamicMaterialThemeState-Pd0R-II (JZZLcom/materialkolor/PaletteStyle;DZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)Lcom/materialkolor/DynamicMaterialThemeState;
 }
 
 public final class com/materialkolor/LocalDynamicMaterialThemeSeedKt {

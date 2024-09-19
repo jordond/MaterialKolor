@@ -23,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.Button
@@ -47,10 +48,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
@@ -62,6 +65,7 @@ import com.materialkolor.ktx.from
 import com.materialkolor.ktx.harmonize
 import com.materialkolor.ktx.lighten
 import com.materialkolor.palettes.TonalPalette
+import com.materialkolor.rememberDynamicMaterialThemeState
 import kotlin.math.round
 
 val SampleColors = listOf(
@@ -106,27 +110,49 @@ fun colorSchemePairs() = listOf(
 @Composable
 internal fun App() {
     val isDarkTheme = isSystemInDarkTheme()
+    val isAmoled by rememberSaveable { mutableStateOf(false) }
+    var seedColor by rememberSaveable { mutableStateOf(SampleColors[0].toArgb()) }
+    var style by rememberSaveable { (mutableStateOf(PaletteStyle.TonalSpot.name)) }
+    val state = rememberDynamicMaterialThemeState(
+        seedColor = Color(seedColor),
+        isDark = isDarkTheme,
+        isAmoled = isAmoled,
+        style = PaletteStyle.valueOf(style),
+    )
 
-    var seedColor: Color by remember { mutableStateOf(SampleColors[0]) }
-    var style by remember { mutableStateOf(PaletteStyle.TonalSpot) }
-    var darkTheme by remember { mutableStateOf(isDarkTheme) }
-
-    AppTheme(seedColor, style, darkTheme) {
+    AppTheme(state) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(8.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
-            Box(
-                modifier = Modifier.align(Alignment.End)
+            Row(
+                modifier = Modifier
+                    .align(Alignment.End)
             ) {
-                IconButton(
-                    onClick = { darkTheme = !darkTheme },
-                    modifier = Modifier.align(Alignment.TopEnd),
-                ) {
-                    val icon = if (darkTheme) Icons.Filled.LightMode else Icons.Filled.DarkMode
-                    Icon(icon, contentDescription = null)
+                if (state.isDark) {
+                    Box {
+                        IconButton(onClick = { state.isAmoled = !state.isAmoled }) {
+                            val mirror = if (state.isAmoled) {
+                                Modifier.scale(scaleX = -1f, scaleY = 1f)
+                            } else {
+                                Modifier
+                            }
+                            Icon(
+                                Icons.Filled.Contrast,
+                                contentDescription = null,
+                                modifier = mirror,
+                            )
+                        }
+                    }
+                }
+
+                Box {
+                    IconButton(onClick = { state.isDark = !state.isDark }) {
+                        val icon = if (state.isDark) Icons.Filled.LightMode else Icons.Filled.DarkMode
+                        Icon(icon, contentDescription = null)
+                    }
                 }
             }
 
@@ -138,8 +164,8 @@ internal fun App() {
                 PaletteStyle.entries.forEach { paletteStyle ->
                     FilterChip(
                         label = { Text(text = paletteStyle.name) },
-                        selected = style == paletteStyle,
-                        onClick = { style = paletteStyle },
+                        selected = state.style == paletteStyle,
+                        onClick = { style = paletteStyle.name },
                     )
                 }
             }
@@ -159,7 +185,7 @@ internal fun App() {
                             .size(32.dp)
                             .clip(RoundedCornerShape(100.dp))
                             .background(color)
-                            .clickable { seedColor = color }
+                            .clickable { seedColor = color.toArgb() }
                     )
                 }
             }
@@ -322,7 +348,7 @@ internal fun App() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                var color by remember(seedColor) { mutableStateOf(seedColor) }
+                var color by remember(state.seedColor) { mutableStateOf(state.seedColor) }
 
                 Button(onClick = { color = color.lighten(1.1f) }) {
                     Text("Lighten")
@@ -351,8 +377,12 @@ internal fun App() {
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         val ratio = 1.1f + it / 10f
-                        val darker by remember(seedColor) { mutableStateOf(seedColor.darken(ratio)) }
-                        val lighter by remember(seedColor) { mutableStateOf(seedColor.lighten(ratio)) }
+                        val darker by remember(state.seedColor) {
+                            mutableStateOf(state.seedColor.darken(ratio))
+                        }
+                        val lighter by remember(state.seedColor) {
+                            mutableStateOf(state.seedColor.lighten(ratio))
+                        }
 
                         Text(text = "Darken ${ratio.roundToTwoDecimalPlaces()}")
                         Spacer(modifier = Modifier.height(4.dp))
