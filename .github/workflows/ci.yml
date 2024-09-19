@@ -51,9 +51,7 @@ jobs:
         run: ./gradlew lint --scan
 
       - name: Upstream Tests
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: :mcu-upstream:test --scan
+        run: ./gradlew :mcu-upstream:test --scan
 
   build:
     strategy:

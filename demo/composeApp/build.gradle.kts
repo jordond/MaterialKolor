@@ -1,5 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
     alias(libs.plugins.multiplatform)
@@ -9,16 +9,9 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-@OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
 kotlin {
     applyDefaultHierarchyTemplate()
-    androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "11"
-            }
-        }
-    }
+    androidTarget()
 
     jvm("desktop")
 
@@ -63,7 +56,6 @@ kotlin {
                 implementation(compose.material)
                 implementation(compose.material3)
                 implementation(compose.materialIconsExtended)
-                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.components.resources)
 
                 implementation(project(":material-kolor"))
