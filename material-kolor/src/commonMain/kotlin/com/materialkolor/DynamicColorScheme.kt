@@ -7,7 +7,6 @@ import androidx.compose.ui.graphics.Color
 import com.materialkolor.dynamiccolor.MaterialDynamicColors
 import com.materialkolor.ktx.DynamicScheme
 import com.materialkolor.ktx.getColor
-import com.materialkolor.ktx.toColor
 import com.materialkolor.ktx.toDynamicScheme
 import com.materialkolor.scheme.DynamicScheme
 
@@ -73,6 +72,91 @@ public fun dynamicColorScheme(
     return createScheme(scheme, isDark, isAmoled, isExtendedFidelity, modifyColorScheme)
 }
 
+/**
+ * Create and remember a custom [ColorScheme] based on the provided colors.
+ *
+ * If a color is not provided, then the color palette will be generated from the [style] and [seedColor].
+ *
+ * @param[seedColor] The color to base the scheme on.
+ * @param[isDark] Whether the scheme should be dark or light.
+ * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
+ * @param[primary] The primary color of the scheme.
+ * @param[secondary] The secondary color of the scheme.
+ * @param[tertiary] The tertiary color of the scheme.
+ * @param[neutral] The neutral color of the scheme.
+ * @param[neutralVariant] The neutral variant color of the scheme.
+ * @param[error] The error color of the scheme.
+ * @param[style] The style of the scheme.
+ * @param[contrastLevel] The contrast level of the scheme.
+ * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
+ * @param[modifyColorScheme] A lambda to modify the created [ColorScheme].
+ */
+@Composable
+public fun rememberDynamicColorScheme(
+    seedColor: Color,
+    isDark: Boolean,
+    isAmoled: Boolean,
+    primary: Color? = null,
+    secondary: Color? = null,
+    tertiary: Color? = null,
+    neutral: Color? = null,
+    neutralVariant: Color? = null,
+    error: Color? = null,
+    style: PaletteStyle = PaletteStyle.TonalSpot,
+    contrastLevel: Double = Contrast.Default.value,
+    isExtendedFidelity: Boolean = false,
+    modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
+): ColorScheme = remember(
+    seedColor,
+    isDark,
+    isAmoled,
+    primary,
+    secondary,
+    tertiary,
+    neutral,
+    neutralVariant,
+    error,
+    style,
+    contrastLevel,
+    isExtendedFidelity,
+    modifyColorScheme,
+) {
+    dynamicColorScheme(
+        seedColor = seedColor,
+        isDark = isDark,
+        isAmoled = isAmoled,
+        primary = primary,
+        secondary = secondary,
+        tertiary = tertiary,
+        neutral = neutral,
+        neutralVariant = neutralVariant,
+        error = error,
+        style = style,
+        contrastLevel = contrastLevel,
+        isExtendedFidelity = isExtendedFidelity,
+        modifyColorScheme = modifyColorScheme,
+    )
+}
+
+/**
+ * Create a custom [ColorScheme] based on the provided colors.
+ *
+ * If a color is not provided, then the color palette will be generated from the [style] and [seedColor].
+ *
+ * @param[seedColor] The color to base the scheme on.
+ * @param[isDark] Whether the scheme should be dark or light.
+ * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
+ * @param[primary] The primary color of the scheme.
+ * @param[secondary] The secondary color of the scheme.
+ * @param[tertiary] The tertiary color of the scheme.
+ * @param[neutral] The neutral color of the scheme.
+ * @param[neutralVariant] The neutral variant color of the scheme.
+ * @param[error] The error color of the scheme.
+ * @param[style] The style of the scheme.
+ * @param[contrastLevel] The contrast level of the scheme.
+ * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
+ * @param[modifyColorScheme] A lambda to modify the created [ColorScheme].
+ */
 public fun dynamicColorScheme(
     seedColor: Color,
     isDark: Boolean,
@@ -82,7 +166,7 @@ public fun dynamicColorScheme(
     tertiary: Color? = null,
     neutral: Color? = null,
     neutralVariant: Color? = null,
-    error: Color = DynamicScheme.defaultErrorPalette.keyColor.toColor(),
+    error: Color? = null,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
     isExtendedFidelity: Boolean = false,
@@ -104,6 +188,86 @@ public fun dynamicColorScheme(
     return createScheme(scheme, isDark, isAmoled, isExtendedFidelity, modifyColorScheme)
 }
 
+/**
+ * Create and remember a custom [ColorScheme] based on the provided colors. Uses [primary] as the seed color.
+ *
+ * If a color is not provided, then the color palette will be generated from the [style] and [primary].
+ *
+ * @param[primary] The color to base the scheme on, and primary color of the scheme.
+ * @param[isDark] Whether the scheme should be dark or light.
+ * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
+ * @param[secondary] The secondary color of the scheme.
+ * @param[tertiary] The tertiary color of the scheme.
+ * @param[neutral] The neutral color of the scheme.
+ * @param[neutralVariant] The neutral variant color of the scheme.
+ * @param[error] The error color of the scheme.
+ * @param[style] The style of the scheme.
+ * @param[contrastLevel] The contrast level of the scheme.
+ * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
+ * @param[modifyColorScheme] A lambda to modify the created [ColorScheme].
+ */
+@Composable
+public fun rememberDynamicColorScheme(
+    primary: Color,
+    isDark: Boolean,
+    isAmoled: Boolean,
+    secondary: Color? = null,
+    tertiary: Color? = null,
+    neutral: Color? = null,
+    neutralVariant: Color? = null,
+    error: Color? = null,
+    style: PaletteStyle = PaletteStyle.TonalSpot,
+    contrastLevel: Double = Contrast.Default.value,
+    isExtendedFidelity: Boolean = false,
+    modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
+): ColorScheme = remember(
+    primary,
+    isDark,
+    isAmoled,
+    secondary,
+    tertiary,
+    neutral,
+    neutralVariant,
+    error,
+    style,
+    contrastLevel,
+    isExtendedFidelity,
+    modifyColorScheme,
+) {
+    dynamicColorScheme(
+        primary = primary,
+        isDark = isDark,
+        isAmoled = isAmoled,
+        secondary = secondary,
+        tertiary = tertiary,
+        neutral = neutral,
+        neutralVariant = neutralVariant,
+        error = error,
+        style = style,
+        contrastLevel = contrastLevel,
+        isExtendedFidelity = isExtendedFidelity,
+        modifyColorScheme = modifyColorScheme,
+    )
+}
+
+/**
+ * Create a custom [ColorScheme] based on the provided colors. Uses [primary] as the seed color.
+ *
+ * If a color is not provided, then the color palette will be generated from the [style] and [primary].
+ *
+ * @param[primary] The color to base the scheme on, and primary color of the scheme.
+ * @param[isDark] Whether the scheme should be dark or light.
+ * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
+ * @param[secondary] The secondary color of the scheme.
+ * @param[tertiary] The tertiary color of the scheme.
+ * @param[neutral] The neutral color of the scheme.
+ * @param[neutralVariant] The neutral variant color of the scheme.
+ * @param[error] The error color of the scheme.
+ * @param[style] The style of the scheme.
+ * @param[contrastLevel] The contrast level of the scheme.
+ * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
+ * @param[modifyColorScheme] A lambda to modify the created [ColorScheme].
+ */
 public fun dynamicColorScheme(
     primary: Color,
     isDark: Boolean,
@@ -112,7 +276,7 @@ public fun dynamicColorScheme(
     tertiary: Color? = null,
     neutral: Color? = null,
     neutralVariant: Color? = null,
-    error: Color = DynamicScheme.defaultErrorPalette.keyColor.toColor(),
+    error: Color? = null,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
     isExtendedFidelity: Boolean = false,
@@ -133,6 +297,9 @@ public fun dynamicColorScheme(
     modifyColorScheme = modifyColorScheme,
 )
 
+/**
+ * Create the actual [ColorScheme] based on the given [DynamicScheme].
+ */
 internal fun createScheme(
     scheme: DynamicScheme,
     isDark: Boolean,

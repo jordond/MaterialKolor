@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 import com.materialkolor.Contrast
 import com.materialkolor.PaletteStyle
 import com.materialkolor.internal.asVariant
-import com.materialkolor.palettes.TonalPalette
 import com.materialkolor.scheme.DynamicScheme
 import com.materialkolor.scheme.SchemeContent
 import com.materialkolor.scheme.SchemeExpressive
@@ -49,6 +48,22 @@ public fun Color.toDynamicScheme(
     }
 }
 
+/**
+ * Generate a [DynamicScheme] based on the given [Color] with the provided [style].
+ *
+ * Customise the scheme by providing the primary, secondary, tertiary, neutral, neutralVariant, and error colors.
+ *
+ * @param[sourceColor] The source color to generate the scheme from.
+ * @param[style] The style of the scheme, see [PaletteStyle].
+ * @param[isDark] Whether the scheme should be dark or light.
+ * @param[contrastLevel] The contrast level of the scheme.
+ * @param[primary] The primary color of the scheme.
+ * @param[secondary] The secondary color of the scheme.
+ * @param[tertiary] The tertiary color of the scheme.
+ * @param[neutral] The neutral color of the scheme.
+ * @param[neutralVariant] The neutral variant color of the scheme.
+ * @param[error] The error color of the scheme.
+ */
 public fun DynamicScheme(
     sourceColor: Color,
     style: PaletteStyle,
@@ -59,7 +74,7 @@ public fun DynamicScheme(
     tertiary: Color? = null,
     neutral: Color? = null,
     neutralVariant: Color? = null,
-    error: Color = DynamicScheme.defaultErrorPalette.keyColor.toColor(),
+    error: Color? = null,
 ): DynamicScheme {
     val defaults = sourceColor.toDynamicScheme(isDark, style, contrastLevel)
 
@@ -73,6 +88,6 @@ public fun DynamicScheme(
         tertiaryPalette = tertiary?.toTonalPalette() ?: defaults.tertiaryPalette,
         neutralPalette = neutral?.toTonalPalette() ?: defaults.neutralPalette,
         neutralVariantPalette = neutralVariant?.toTonalPalette() ?: defaults.neutralVariantPalette,
-        errorPalette = error.toTonalPalette(),
+        errorPalette = error?.toTonalPalette() ?: defaults.errorPalette,
     )
 }
