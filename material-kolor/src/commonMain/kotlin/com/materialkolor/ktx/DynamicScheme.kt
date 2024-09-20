@@ -3,6 +3,8 @@ package com.materialkolor.ktx
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.Contrast
 import com.materialkolor.PaletteStyle
+import com.materialkolor.internal.asVariant
+import com.materialkolor.palettes.TonalPalette
 import com.materialkolor.scheme.DynamicScheme
 import com.materialkolor.scheme.SchemeContent
 import com.materialkolor.scheme.SchemeExpressive
@@ -45,4 +47,32 @@ public fun Color.toDynamicScheme(
         PaletteStyle.Fidelity -> SchemeFidelity(hct, isDark, contrastLevel)
         PaletteStyle.Content -> SchemeContent(hct, isDark, contrastLevel)
     }
+}
+
+public fun DynamicScheme(
+    sourceColor: Color,
+    style: PaletteStyle,
+    isDark: Boolean,
+    contrastLevel: Double,
+    primary: Color? = null,
+    secondary: Color? = null,
+    tertiary: Color? = null,
+    neutral: Color? = null,
+    neutralVariant: Color? = null,
+    error: Color = DynamicScheme.defaultErrorPalette.keyColor.toColor(),
+): DynamicScheme {
+    val defaults = sourceColor.toDynamicScheme(isDark, style, contrastLevel)
+
+    return DynamicScheme(
+        sourceColorHct = sourceColor.toHct(),
+        variant = style.asVariant,
+        isDark = isDark,
+        contrastLevel = contrastLevel,
+        primaryPalette = primary?.toTonalPalette() ?: defaults.primaryPalette,
+        secondaryPalette = secondary?.toTonalPalette() ?: defaults.secondaryPalette,
+        tertiaryPalette = tertiary?.toTonalPalette() ?: defaults.tertiaryPalette,
+        neutralPalette = neutral?.toTonalPalette() ?: defaults.neutralPalette,
+        neutralVariantPalette = neutralVariant?.toTonalPalette() ?: defaults.neutralVariantPalette,
+        errorPalette = error.toTonalPalette(),
+    )
 }

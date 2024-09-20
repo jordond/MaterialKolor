@@ -5,8 +5,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.dynamiccolor.MaterialDynamicColors
+import com.materialkolor.ktx.DynamicScheme
 import com.materialkolor.ktx.getColor
+import com.materialkolor.ktx.toColor
 import com.materialkolor.ktx.toDynamicScheme
+import com.materialkolor.scheme.DynamicScheme
 
 /**
  * Creates and remember a [ColorScheme] based on the given [seedColor] and [isDark] mode.
@@ -67,8 +70,77 @@ public fun dynamicColorScheme(
     modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
 ): ColorScheme {
     val scheme = seedColor.toDynamicScheme(isDark, style, contrastLevel)
-    val colors = MaterialDynamicColors(isExtendedFidelity)
+    return createScheme(scheme, isDark, isAmoled, isExtendedFidelity, modifyColorScheme)
+}
 
+public fun dynamicColorScheme(
+    seedColor: Color,
+    isDark: Boolean,
+    isAmoled: Boolean,
+    primary: Color? = null,
+    secondary: Color? = null,
+    tertiary: Color? = null,
+    neutral: Color? = null,
+    neutralVariant: Color? = null,
+    error: Color = DynamicScheme.defaultErrorPalette.keyColor.toColor(),
+    style: PaletteStyle = PaletteStyle.TonalSpot,
+    contrastLevel: Double = Contrast.Default.value,
+    isExtendedFidelity: Boolean = false,
+    modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
+): ColorScheme {
+    val scheme = DynamicScheme(
+        sourceColor = seedColor,
+        isDark = isDark,
+        primary = primary,
+        secondary = secondary,
+        tertiary = tertiary,
+        neutral = neutral,
+        neutralVariant = neutralVariant,
+        error = error,
+        style = style,
+        contrastLevel = contrastLevel,
+    )
+
+    return createScheme(scheme, isDark, isAmoled, isExtendedFidelity, modifyColorScheme)
+}
+
+public fun dynamicColorScheme(
+    primary: Color,
+    isDark: Boolean,
+    isAmoled: Boolean,
+    secondary: Color? = null,
+    tertiary: Color? = null,
+    neutral: Color? = null,
+    neutralVariant: Color? = null,
+    error: Color = DynamicScheme.defaultErrorPalette.keyColor.toColor(),
+    style: PaletteStyle = PaletteStyle.TonalSpot,
+    contrastLevel: Double = Contrast.Default.value,
+    isExtendedFidelity: Boolean = false,
+    modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
+): ColorScheme = dynamicColorScheme(
+    seedColor = primary,
+    isDark = isDark,
+    isAmoled = isAmoled,
+    primary = primary,
+    secondary = secondary,
+    tertiary = tertiary,
+    neutral = neutral,
+    neutralVariant = neutralVariant,
+    error = error,
+    style = style,
+    contrastLevel = contrastLevel,
+    isExtendedFidelity = isExtendedFidelity,
+    modifyColorScheme = modifyColorScheme,
+)
+
+internal fun createScheme(
+    scheme: DynamicScheme,
+    isDark: Boolean,
+    isAmoled: Boolean,
+    isExtendedFidelity: Boolean = false,
+    modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
+): ColorScheme {
+    val colors = MaterialDynamicColors(isExtendedFidelity)
     return ColorScheme(
         background = if (isDark && isAmoled) Color.Black else colors.background().getColor(scheme),
         error = colors.error().getColor(scheme),

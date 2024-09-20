@@ -8,6 +8,7 @@ import com.materialkolor.contrast.Contrast
 import com.materialkolor.dislike.DislikeAnalyzer
 import com.materialkolor.internal.toColormathColor
 import com.materialkolor.internal.toComposeColor
+import com.materialkolor.palettes.TonalPalette
 import com.materialkolor.utils.ColorUtils
 
 /**
@@ -85,4 +86,15 @@ internal fun Color.matchSaturation(other: Color): Color {
     val hsl = toColormathColor().toHSL()
     val otherHsl = other.toColormathColor().toHSL()
     return HSL(hsl.h, otherHsl.s, otherHsl.l).toComposeColor()
+}
+
+/**
+ * Convert the color to a [TonalPalette].
+ *
+ * @receiver[Color] to convert.
+ * @return [TonalPalette] representation of the color.
+ */
+@Stable
+internal fun Color.toTonalPalette(): TonalPalette {
+    return TonalPalette.from(this)
 }
