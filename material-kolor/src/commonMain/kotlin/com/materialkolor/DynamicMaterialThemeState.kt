@@ -21,6 +21,13 @@ import androidx.compose.ui.graphics.Color
  * @param[modifyColorScheme] Use this callback to modify the color scheme once it has been generated.
  * Note that if you modify a color in the scheme, the on* color might not have enough contrast.
  */
+@Deprecated(
+    message = "Use the other rememberDynamicMaterialThemeState function that allows for custom colors.",
+    replaceWith = ReplaceWith(
+        "rememberDynamicMaterialThemeState(seedColor, isDark, isAmoled, style, contrastLevel, extendedFidelity, modifyColorScheme)",
+        "com.materialkolor.rememberDynamicMaterialThemeState",
+    ),
+)
 @Composable
 public fun rememberDynamicMaterialThemeState(
     seedColor: Color,

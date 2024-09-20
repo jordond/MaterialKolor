@@ -20,6 +20,10 @@ import com.materialkolor.scheme.DynamicScheme
  * @param[contrastLevel] The contrast level of the scheme.
  * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
  */
+@Deprecated(
+    message = "Use rememberDynamicColorScheme that allows custom colors instead.",
+    replaceWith = ReplaceWith("rememberDynamicColorScheme(seedColor, isDark, isAmoled, primary, secondary, tertiary, neutral, neutralVariant, error, style, contrastLevel, isExtendedFidelity, modifyColorScheme)"),
+)
 @Composable
 public fun rememberDynamicColorScheme(
     seedColor: Color,
@@ -59,6 +63,10 @@ public fun rememberDynamicColorScheme(
  * @param[contrastLevel] The contrast level of the scheme.
  * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
  */
+@Deprecated(
+    message = "Use rememberDynamicColorScheme that allows custom colors instead.",
+    replaceWith = ReplaceWith("rememberDynamicColorScheme(seedColor, isDark, isAmoled, primary, secondary, tertiary, neutral, neutralVariant, error, style, contrastLevel, isExtendedFidelity, modifyColorScheme)"),
+)
 public fun dynamicColorScheme(
     seedColor: Color,
     isDark: Boolean,
