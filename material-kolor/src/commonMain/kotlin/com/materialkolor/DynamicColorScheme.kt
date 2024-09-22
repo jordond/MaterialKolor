@@ -45,6 +45,7 @@ public fun rememberDynamicColorScheme(
     dynamicColorScheme(
         seedColor = seedColor,
         isDark = isDark,
+        primary = null,
         isAmoled = isAmoled,
         style = style,
         contrastLevel = contrastLevel,

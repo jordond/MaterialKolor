@@ -353,6 +353,7 @@ public class DynamicMaterialThemeState internal constructor(
                     seedColor = seedColor,
                     isDark = isDark,
                     isAmoled = isAmoled,
+                    primary = null,
                     style = style,
                     contrastLevel = contrastLevel,
                     isExtendedFidelity = isExtendedFidelity,
