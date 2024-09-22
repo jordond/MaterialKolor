@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 import com.materialkolor.dynamiccolor.MaterialDynamicColors
 import com.materialkolor.ktx.getColor
 import com.materialkolor.scheme.DynamicScheme
-import dev.drewhamilton.poko.Poko
 
 /**
  * A class that provides various color functions based on the given dynamic scheme.
@@ -13,7 +12,6 @@ import dev.drewhamilton.poko.Poko
  * @property isAmoled A flag indicating whether the device is AMOLED.
  * @param isExtendedFidelity A flag indicating whether extended fidelity is enabled.
  */
-@Poko
 public class MaterialKolors(
     private val scheme: DynamicScheme,
     private val isAmoled: Boolean = false,

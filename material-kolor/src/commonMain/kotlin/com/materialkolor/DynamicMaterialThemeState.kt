@@ -10,7 +10,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.ktx.rememberDynamicScheme
 import com.materialkolor.scheme.DynamicScheme
-import dev.drewhamilton.poko.Poko
 
 /**
  * Creates a [DynamicMaterialThemeState] that can be remembered across compositions.
@@ -216,7 +215,6 @@ public fun rememberDynamicMaterialThemeState(
  * Note that if you modify a color in the scheme, the on* color might not have enough contrast.
  */
 @Suppress("MemberVisibilityCanBePrivate")
-@Poko
 @Stable
 public class DynamicMaterialThemeState internal constructor(
     initialSeedColor: Color,

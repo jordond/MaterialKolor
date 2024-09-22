@@ -116,6 +116,7 @@ internal fun App() {
     val state = rememberDynamicMaterialThemeState(
         seedColor = Color(seedColor),
         isDark = isDarkTheme,
+        primary = null,
         isAmoled = isAmoled,
         style = PaletteStyle.valueOf(style),
     )
