@@ -8,6 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import com.materialkolor.ktx.rememberDynamicScheme
+import com.materialkolor.scheme.DynamicScheme
+import dev.drewhamilton.poko.Poko
 
 /**
  * Creates a [DynamicMaterialThemeState] that can be remembered across compositions.
@@ -213,6 +216,7 @@ public fun rememberDynamicMaterialThemeState(
  * Note that if you modify a color in the scheme, the on* color might not have enough contrast.
  */
 @Suppress("MemberVisibilityCanBePrivate")
+@Poko
 @Stable
 public class DynamicMaterialThemeState internal constructor(
     initialSeedColor: Color,
@@ -308,6 +312,56 @@ public class DynamicMaterialThemeState internal constructor(
     private val isCustomScheme: Boolean
         get() = listOf(primary, secondary, tertiary, neutral, neutralVariant, error)
             .any { it != null }
+
+    public val dynamicScheme: DynamicScheme
+        @Composable
+        get() {
+            val primary = this.primary
+            return when {
+                primary != null -> rememberDynamicScheme(
+                    seedColor = primary,
+                    isDark = isDark,
+                    primary = primary,
+                    secondary = secondary,
+                    tertiary = tertiary,
+                    neutral = neutral,
+                    neutralVariant = neutralVariant,
+                    error = error,
+                    style = style,
+                    contrastLevel = contrastLevel,
+                )
+                isCustomScheme -> rememberDynamicScheme(
+                    seedColor = seedColor,
+                    isDark = isDark,
+                    primary = primary,
+                    secondary = secondary,
+                    tertiary = tertiary,
+                    neutral = neutral,
+                    neutralVariant = neutralVariant,
+                    error = error,
+                    style = style,
+                    contrastLevel = contrastLevel,
+                )
+                else -> rememberDynamicScheme(
+                    seedColor = seedColor,
+                    isDark = isDark,
+                    style = style,
+                    contrastLevel = contrastLevel,
+                )
+            }
+        }
+
+    /**
+     * A [MaterialKolors] class that holds the generated colors based on the current state.
+     */
+    public val colors: MaterialKolors
+        @Composable
+        get() {
+            val scheme = dynamicScheme
+            return remember(scheme) {
+                MaterialKolors(scheme, isAmoled, isExtendedFidelity)
+            }
+        }
 
     /**
      * The generated color scheme based on the current state.

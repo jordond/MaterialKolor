@@ -1,5 +1,7 @@
 package com.materialkolor.ktx
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.Contrast
 import com.materialkolor.PaletteStyle
@@ -49,37 +51,91 @@ public fun Color.toDynamicScheme(
 }
 
 /**
- * Generate a [DynamicScheme] based on the given [Color] with the provided [style].
+ * Create and remember a [DynamicScheme] based on the provided colors.
  *
- * Customise the scheme by providing the primary, secondary, tertiary, neutral, neutralVariant, and error colors.
+ * If a color is not provided, then the color palette will be generated from the [style] and [seedColor].
  *
- * @param[sourceColor] The source color to generate the scheme from.
- * @param[style] The style of the scheme, see [PaletteStyle].
+ * @param[seedColor] The color to base the scheme on.
  * @param[isDark] Whether the scheme should be dark or light.
- * @param[contrastLevel] The contrast level of the scheme.
  * @param[primary] The primary color of the scheme.
  * @param[secondary] The secondary color of the scheme.
  * @param[tertiary] The tertiary color of the scheme.
  * @param[neutral] The neutral color of the scheme.
  * @param[neutralVariant] The neutral variant color of the scheme.
  * @param[error] The error color of the scheme.
+ * @param[style] The style of the scheme.
+ * @param[contrastLevel] The contrast level of the scheme.
  */
-public fun DynamicScheme(
-    sourceColor: Color,
-    style: PaletteStyle,
+@Composable
+public fun rememberDynamicScheme(
+    seedColor: Color,
     isDark: Boolean,
-    contrastLevel: Double,
     primary: Color? = null,
     secondary: Color? = null,
     tertiary: Color? = null,
     neutral: Color? = null,
     neutralVariant: Color? = null,
     error: Color? = null,
+    style: PaletteStyle = PaletteStyle.TonalSpot,
+    contrastLevel: Double = Contrast.Default.value,
+): DynamicScheme = remember(
+    seedColor,
+    isDark,
+    primary,
+    secondary,
+    tertiary,
+    neutral,
+    neutralVariant,
+    error,
+    style,
+    contrastLevel,
+) {
+    DynamicScheme(
+        seedColor = seedColor,
+        isDark = isDark,
+        primary = primary,
+        secondary = secondary,
+        tertiary = tertiary,
+        neutral = neutral,
+        neutralVariant = neutralVariant,
+        error = error,
+        style = style,
+        contrastLevel = contrastLevel,
+    )
+}
+
+/**
+ * Create a [DynamicScheme] based on the provided colors.
+ *
+ * If a color is not provided, then the color palette will be generated from the [style] and [seedColor].
+ *
+ * @param[seedColor] The color to base the scheme on.
+ * @param[isDark] Whether the scheme should be dark or light.
+ * @param[primary] The primary color of the scheme.
+ * @param[secondary] The secondary color of the scheme.
+ * @param[tertiary] The tertiary color of the scheme.
+ * @param[neutral] The neutral color of the scheme.
+ * @param[neutralVariant] The neutral variant color of the scheme.
+ * @param[error] The error color of the scheme.
+ * @param[style] The style of the scheme.
+ * @param[contrastLevel] The contrast level of the scheme.
+ */
+public fun DynamicScheme(
+    seedColor: Color,
+    isDark: Boolean,
+    primary: Color? = null,
+    secondary: Color? = null,
+    tertiary: Color? = null,
+    neutral: Color? = null,
+    neutralVariant: Color? = null,
+    error: Color? = null,
+    style: PaletteStyle = PaletteStyle.TonalSpot,
+    contrastLevel: Double = Contrast.Default.value,
 ): DynamicScheme {
-    val defaults = sourceColor.toDynamicScheme(isDark, style, contrastLevel)
+    val defaults = seedColor.toDynamicScheme(isDark, style, contrastLevel)
 
     return DynamicScheme(
-        sourceColorHct = sourceColor.toHct(),
+        sourceColorHct = seedColor.toHct(),
         variant = style.asVariant,
         isDark = isDark,
         contrastLevel = contrastLevel,
