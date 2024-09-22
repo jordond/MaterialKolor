@@ -77,6 +77,7 @@ public final class com/materialkolor/dynamiccolor/MaterialDynamicColors {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun error ()Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public final fun errorContainer ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public final fun errorPaletteKeyColor ()Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public fun hashCode ()I
 	public final fun highestSurface (Lcom/materialkolor/scheme/DynamicScheme;)Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public final fun inverseOnSurface ()Lcom/materialkolor/dynamiccolor/DynamicColor;

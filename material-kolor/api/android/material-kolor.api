@@ -34,7 +34,6 @@ public final class com/materialkolor/DynamicMaterialThemeKt {
 public final class com/materialkolor/DynamicMaterialThemeState {
 	public static final field $stable I
 	public synthetic fun <init> (JZZLcom/materialkolor/PaletteStyle;DZLandroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun equals (Ljava/lang/Object;)Z
 	public final fun getColorScheme (Landroidx/compose/runtime/Composer;I)Landroidx/compose/material3/ColorScheme;
 	public final fun getColors (Landroidx/compose/runtime/Composer;I)Lcom/materialkolor/MaterialKolors;
 	public final fun getContrastLevel ()D
@@ -48,7 +47,6 @@ public final class com/materialkolor/DynamicMaterialThemeState {
 	public final fun getSeedColor-0d7_KjU ()J
 	public final fun getStyle ()Lcom/materialkolor/PaletteStyle;
 	public final fun getTertiary-QN2ZGVo ()Landroidx/compose/ui/graphics/Color;
-	public fun hashCode ()I
 	public final fun isAmoled ()Z
 	public final fun isDark ()Z
 	public final fun isExtendedFidelity ()Z
@@ -64,7 +62,6 @@ public final class com/materialkolor/DynamicMaterialThemeState {
 	public final fun setSeedColor-8_81llA (J)V
 	public final fun setStyle (Lcom/materialkolor/PaletteStyle;)V
 	public final fun setTertiary-Y2TPw74 (Landroidx/compose/ui/graphics/Color;)V
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/materialkolor/DynamicMaterialThemeStateKt {
@@ -85,10 +82,9 @@ public final class com/materialkolor/MaterialKolors {
 	public final fun controlActivated-0d7_KjU ()J
 	public final fun controlHighlight-0d7_KjU ()J
 	public final fun controlNormal-0d7_KjU ()J
-	public fun equals (Ljava/lang/Object;)Z
 	public final fun error-0d7_KjU ()J
 	public final fun errorContainer-0d7_KjU ()J
-	public fun hashCode ()I
+	public final fun errorPaletteKeyColor-0d7_KjU ()J
 	public final fun highestSurface-vNxB06k (Lcom/materialkolor/scheme/DynamicScheme;)J
 	public final fun inverseOnSurface-0d7_KjU ()J
 	public final fun inversePrimary-0d7_KjU ()J
@@ -146,7 +142,6 @@ public final class com/materialkolor/MaterialKolors {
 	public final fun textPrimaryInverseDisableOnly-0d7_KjU ()J
 	public final fun textSecondaryAndTertiaryInverse-0d7_KjU ()J
 	public final fun textSecondaryAndTertiaryInverseDisabled-0d7_KjU ()J
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/materialkolor/PaletteStyle : java/lang/Enum {
