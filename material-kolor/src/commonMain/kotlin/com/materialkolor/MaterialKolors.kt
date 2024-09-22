@@ -54,6 +54,13 @@ public class MaterialKolors(
     public fun tertiaryPaletteKeyColor(): Color = colors.tertiaryPaletteKeyColor().getColor(scheme)
 
     /**
+     * Returns the error palette key color.
+     *
+     * @see MaterialDynamicColors.errorPaletteKeyColor
+     */
+    public fun errorPaletteKeyColor(): Color = colors.errorPaletteKeyColor().getColor(scheme)
+
+    /**
      * Returns the neutral palette key color.
      *
      * @see MaterialDynamicColors.neutralPaletteKeyColor

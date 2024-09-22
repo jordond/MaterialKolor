@@ -58,6 +58,12 @@ public class MaterialDynamicColors(
         tone = { scheme -> scheme.tertiaryPalette.keyColor.tone },
     )
 
+    public fun errorPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
+        name = "error_palette_key_color",
+        palette = { scheme -> scheme.errorPalette },
+        tone = { scheme -> scheme.errorPalette.keyColor.tone },
+    )
+
     public fun neutralPaletteKeyColor(): DynamicColor = DynamicColor.fromPalette(
         name = "neutral_palette_key_color",
         palette = { scheme -> scheme.neutralPalette },
