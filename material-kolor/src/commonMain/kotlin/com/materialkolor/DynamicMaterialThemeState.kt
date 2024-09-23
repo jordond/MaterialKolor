@@ -350,18 +350,6 @@ public class DynamicMaterialThemeState internal constructor(
         }
 
     /**
-     * A [MaterialKolors] class that holds the generated colors based on the current state.
-     */
-    public val colors: MaterialKolors
-        @Composable
-        get() {
-            val scheme = dynamicScheme
-            return remember(scheme) {
-                MaterialKolors(scheme, isAmoled, isExtendedFidelity)
-            }
-        }
-
-    /**
      * The generated color scheme based on the current state.
      */
     public val colorScheme: ColorScheme
