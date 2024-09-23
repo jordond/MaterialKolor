@@ -35,7 +35,6 @@ public final class com/materialkolor/DynamicMaterialThemeState {
 	public static final field $stable I
 	public synthetic fun <init> (JZZLcom/materialkolor/PaletteStyle;DZLandroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getColorScheme (Landroidx/compose/runtime/Composer;I)Landroidx/compose/material3/ColorScheme;
-	public final fun getColors (Landroidx/compose/runtime/Composer;I)Lcom/materialkolor/MaterialKolors;
 	public final fun getContrastLevel ()D
 	public final fun getDynamicScheme (Landroidx/compose/runtime/Composer;I)Lcom/materialkolor/scheme/DynamicScheme;
 	public final fun getError-QN2ZGVo ()Landroidx/compose/ui/graphics/Color;
@@ -245,6 +244,11 @@ public final class com/materialkolor/ktx/ImageBitmapKt {
 	public static synthetic fun themeColors-XO-JAsU$default (Landroidx/compose/ui/graphics/ImageBitmap;IJZIILjava/lang/Object;)Ljava/util/List;
 }
 
+public final class com/materialkolor/ktx/MaterialDynamicColorsKt {
+	public static final fun getColors (Lcom/materialkolor/DynamicMaterialThemeState;Landroidx/compose/runtime/Composer;I)Lcom/materialkolor/MaterialKolors;
+	public static final fun getM3Colors (Lcom/materialkolor/DynamicMaterialThemeState;Landroidx/compose/runtime/Composer;I)Lcom/materialkolor/dynamiccolor/MaterialDynamicColors;
+}
+
 public final class com/materialkolor/ktx/TemperatureKt {
 	public static final fun TemperatureCache-8_81llA (J)Lcom/materialkolor/temperature/TemperatureCache;
 	public static final fun isCool-8_81llA (J)Z
@@ -256,5 +260,6 @@ public final class com/materialkolor/ktx/TonalPaletteKt {
 	public static final fun from (Lcom/materialkolor/palettes/TonalPalette$Companion;I)Lcom/materialkolor/palettes/TonalPalette;
 	public static final fun from (Lcom/materialkolor/palettes/TonalPalette$Companion;Lcom/materialkolor/hct/Hct;)Lcom/materialkolor/palettes/TonalPalette;
 	public static final fun from-4WTKRHQ (Lcom/materialkolor/palettes/TonalPalette$Companion;J)Lcom/materialkolor/palettes/TonalPalette;
+	public static final fun toneColor (Lcom/materialkolor/palettes/TonalPalette;I)J
 }
 
