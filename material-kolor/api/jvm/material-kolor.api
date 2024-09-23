@@ -175,6 +175,8 @@ public final class com/materialkolor/ktx/ColorKt {
 	public static final fun isLight-8_81llA (J)Z
 	public static final fun lighten-DxMtmZc (JF)J
 	public static synthetic fun lighten-DxMtmZc$default (JFILjava/lang/Object;)J
+	public static final fun toHex-Iv8Zu3U (JZLjava/lang/String;Z)Ljava/lang/String;
+	public static synthetic fun toHex-Iv8Zu3U$default (JZLjava/lang/String;ZILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class com/materialkolor/ktx/ContrastKt {

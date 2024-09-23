@@ -10,6 +10,7 @@ import com.materialkolor.internal.toColormathColor
 import com.materialkolor.internal.toComposeColor
 import com.materialkolor.palettes.TonalPalette
 import com.materialkolor.utils.ColorUtils
+import kotlin.math.roundToInt
 
 /**
  * Check if the color is light.
@@ -72,6 +73,42 @@ public fun Color.isDisliked(): Boolean {
 @Stable
 public fun Color.fixIfDisliked(): Color {
     return DislikeAnalyzer.fixIfDisliked(toHct()).toColor()
+}
+
+/**
+ * Convert the color to a hex string.
+ *
+ * @receiver[Color] to convert.
+ * @param[includePrefix] whether to include the '#' [prefix].
+ * @return [String] hex representation of the color.
+ */
+public fun Color.toHex(
+    includePrefix: Boolean = true,
+    prefix: String = "#",
+    alwaysIncludeAlpha: Boolean = false,
+): String {
+    val alpha = (alpha * 255).roundToInt()
+    val red = (red * 255).roundToInt()
+    val green = (green * 255).roundToInt()
+    val blue = (blue * 255).roundToInt()
+
+    return buildString {
+        if (includePrefix) append(prefix)
+        if (alwaysIncludeAlpha || alpha < 255) append(alpha.format())
+        append(red.format())
+        append(green.format())
+        append(blue.format())
+    }.uppercase()
+}
+
+/**
+ * Format the integer as a hex string.
+ *
+ * @receiver[Int] to format.
+ * @return [String] hex representation of the integer.
+ */
+internal fun Int.format(): String {
+    return toString(16).padStart(2, '0')
 }
 
 /**
