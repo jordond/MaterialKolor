@@ -13,29 +13,28 @@
 ![badge-js](http://img.shields.io/badge/platform-js%2Fwasm-FDD835.svg?style=flat)
 
 A Compose Multiplatform library for creating dynamic Material Design 3 color palettes from any
-color. Similar to generating a theme
-from [m3.matierial.io](https://m3.material.io/theme-builder#/custom).
+color.
+
+Check out [MaterialKolor Builder](https://materialkolor.com) to see MaterialKolor in action and
+generate your own color schemes. It can export to MaterialKolor code, or plain Material 3 code.
 
 The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com)
-
-<img width="300px" src="art/ios-demo.gif" />
 
 ## Table of Contents
 
 - [Platforms](#platforms)
 - [Inspiration](#inspiration)
 - [Setup](#setup)
-  - [Multiplatform](#multiplatform)
-  - [Single Platform](#single-platform)
-  - [Version Catalog](#version-catalog)
+    - [Multiplatform](#multiplatform)
+    - [Single Platform](#single-platform)
+    - [Version Catalog](#version-catalog)
 - [Usage](#usage)
 - [Extensions](#extensions)
-  - [Harmonize Colors](#harmonize-colors)
-  - [Lighten and Darken](#lighten-and-darken)
-  - [Color Temperature](#color-temperature)
+    - [Harmonize Colors](#harmonize-colors)
+    - [Lighten and Darken](#lighten-and-darken)
+    - [Color Temperature](#color-temperature)
 - [Generating from an Image](#generating-from-an-image)
-  - [Advanced](#advanced)
-- [Demo](#demo)
+    - [Advanced](#advanced)
 - [License](#license)
     - [Changes from original source](#changes-from-original-source)
 
@@ -48,7 +47,7 @@ This library is written for Compose Multiplatform, and can be used on the follow
 - JVM (Desktop)
 - JavaScript/wasm (Browser)
 
-You can see a demo running at [demo.materialkolor.com](https://demo.materialkolor.com).
+You can see it in action by using [MaterialKolor Builder](https://materialkolor.com).
 
 ## Inspiration
 
@@ -134,14 +133,11 @@ dynamicColorScheme(
 )
 ```
 
-See [`Theme.kt`](demo/composeApp/src/commonMain/kotlin/com/materialkolor/demo/theme/Theme.kt) from
-the demo
-for a full example.
-
 ### DynamicMaterialTheme
 
 A `DynamicMaterialTheme` Composable is also available. It is a wrapper around `MaterialTheme` that
-uses `dynamicColorScheme()` to generate a `ColorScheme` for you.
+uses `dynamicColorScheme()` to generate a `ColorScheme` for you. You can animate the color scheme by
+passing in `animate = true`.
 
 Example:
 
@@ -155,15 +151,11 @@ fun MyTheme(
     DynamicMaterialTheme(
         seedColor = seedColor,
         isDark = useDarkTheme,
+        animate = true,
         content = content
     )
 }
 ```
-
-Also included is a `AnimatedDynamicMaterialTheme` which animates the color scheme changes.
-
-See [`Theme.kt`](demo/composeApp/src/commonMain/kotlin/com/materialkolor/demo/theme/Theme.kt) for an
-example.
 
 ## Extensions
 
@@ -224,8 +216,8 @@ function `rememberThemeColors()` or `rememberThemeColor()`:
 
 ```kotlin
 fun calculateSeedColor(bitmap: ImageBitmap): Color {
-  val suitableColors = bitmap.themeColors(fallback = Color.Blue)
-  return suitableColors.first()
+    val suitableColors = bitmap.themeColors(fallback = Color.Blue)
+    return suitableColors.first()
 }
 ```
 
@@ -237,12 +229,12 @@ Or in Compose land:
 ```kotlin
 @Composable
 fun DynamicTheme(image: ImageBitmap, content: @Composable () -> Unit) {
-  val seedColor = rememberThemeColor(image, fallback = MaterialTheme.colorScheme.primary)
+    val seedColor = rememberThemeColor(image, fallback = MaterialTheme.colorScheme.primary)
 
-  AnimatedDynamicMaterialTheme(
-    seedColor = seedColor,
-    content = content
-  )
+    AnimatedDynamicMaterialTheme(
+        seedColor = seedColor,
+        content = content
+    )
 }
 ```
 
@@ -259,32 +251,23 @@ theme from a remote image:
 ```kotlin
 @Composable
 fun SampleTheme(
-  imageUrl: Url, // Url("http://example.com/image.jpg")
-  useDarkTheme: Boolean = isSystemInDarkTheme(),
-  content: @Composable () -> Unit,
+    imageUrl: Url, // Url("http://example.com/image.jpg")
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit,
 ) {
-  val networkLoader = rememberNetworkLoader()
-  val dominantColorState = rememberDominantColorState(loader = networkLoader)
-  LaunchedEffect(imageUrl) {
-    dominantColorState.updateFrom(imageUrl)
-  }
+    val networkLoader = rememberNetworkLoader()
+    val dominantColorState = rememberDominantColorState(loader = networkLoader)
+    LaunchedEffect(imageUrl) {
+        dominantColorState.updateFrom(imageUrl)
+    }
 
-  AnimatedDynamicMaterialTheme(
-    seedColor = dominantColorState.color,
-    isDark = useDarkTheme,
-    content = content
-  )
+    AnimatedDynamicMaterialTheme(
+        seedColor = dominantColorState.color,
+        isDark = useDarkTheme,
+        content = content
+    )
 }
 ```
-
-## Demo
-
-A demo app is available in the `demo` directory. It is a Compose Multiplatform app that runs on
-Android, iOS, Desktop and browser.
-
-Visit [demo.materialkolor.com](https://demo.materialkolor.com)
-
-See the [README](demo/README.md) for more information.
 
 ## License
 

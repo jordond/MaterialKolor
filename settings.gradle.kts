@@ -22,18 +22,19 @@ plugins {
 
 develocity {
     buildScan {
+        termsOfUseUrl.set("https://gradle.com/help/legal-terms-of-use")
+        termsOfUseAgree.set("yes")
+
         publishing.onlyIf { context ->
             context.buildResult.failures.isNotEmpty() && !System.getenv("CI").isNullOrEmpty()
         }
     }
 }
 
-rootProject.name = "Material-Kolor"
+rootProject.name = "MaterialKolor"
 
 include(
     ":material-kolor",
     ":material-color-utilities",
     ":mcu-upstream",
 )
-
-include(":demo:composeApp")

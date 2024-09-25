@@ -54,17 +54,8 @@ jobs:
         run: ./gradlew :mcu-upstream:test --scan
 
   build:
-    strategy:
-      matrix:
-        config: [
-          { target: "android", os: "ubuntu-latest", tasks: ":demo:composeApp:assembleRelease", continueOnError: false },
-          { target: "osx-desktop", os: "macos-latest", tasks: ":demo:composeApp:packageDistributionForCurrentOS", continueOnError: false },
-          { target: "windows-desktop", os: "windows-latest", tasks: ":demo:composeApp:packageDistributionForCurrentOS", continueOnError: true },
-          { target: "linux-desktop", os: "ubuntu-latest", tasks: ":demo:composeApp:packageDistributionForCurrentOS", continueOnError: false }
-        ]
-    runs-on: ${{ matrix.config.os }}
-    name: Build ${{ matrix.config.target }}
-    needs: verify
+    name: "Build"
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -75,20 +66,11 @@ jobs:
           java-version: 17
           distribution: adopt
 
-      - name: Cache Konan
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.konan/caches
-            ~/.konan/dependencies
-            ~/.konan/kotlin-native-prebuilt-macos-*
-          key: ${{ runner.os }}-konan-${{ hashFiles('**/gradle/libs.versions.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-konan-
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build ${{ matrix.config.target }} targets
-        continue-on-error: ${{ matrix.config.continueOnError }}
-        run: ./gradlew ${{ matrix.config.tasks }} --scan
+      - name: Gradle Wrapper Validation
+        uses: gradle/wrapper-validation-action@v3
+
+      - name: Build
+        run: ./gradlew build --scan
