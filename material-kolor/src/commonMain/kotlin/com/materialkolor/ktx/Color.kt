@@ -8,7 +8,9 @@ import com.materialkolor.contrast.Contrast
 import com.materialkolor.dislike.DislikeAnalyzer
 import com.materialkolor.internal.toColormathColor
 import com.materialkolor.internal.toComposeColor
+import com.materialkolor.palettes.TonalPalette
 import com.materialkolor.utils.ColorUtils
+import kotlin.math.roundToInt
 
 /**
  * Check if the color is light.
@@ -74,6 +76,42 @@ public fun Color.fixIfDisliked(): Color {
 }
 
 /**
+ * Convert the color to a hex string.
+ *
+ * @receiver[Color] to convert.
+ * @param[includePrefix] whether to include the '#' [prefix].
+ * @return [String] hex representation of the color.
+ */
+public fun Color.toHex(
+    includePrefix: Boolean = true,
+    prefix: String = "#",
+    alwaysIncludeAlpha: Boolean = false,
+): String {
+    val alpha = (alpha * 255).roundToInt()
+    val red = (red * 255).roundToInt()
+    val green = (green * 255).roundToInt()
+    val blue = (blue * 255).roundToInt()
+
+    return buildString {
+        if (includePrefix) append(prefix)
+        if (alwaysIncludeAlpha || alpha < 255) append(alpha.format())
+        append(red.format())
+        append(green.format())
+        append(blue.format())
+    }.uppercase()
+}
+
+/**
+ * Format the integer as a hex string.
+ *
+ * @receiver[Int] to format.
+ * @return [String] hex representation of the integer.
+ */
+internal fun Int.format(): String {
+    return toString(16).padStart(2, '0')
+}
+
+/**
  * Create a [Color] with the same hue as this color, but with the saturation and lightness of [other].
  *
  * @receiver[Color] to match hue.
@@ -85,4 +123,15 @@ internal fun Color.matchSaturation(other: Color): Color {
     val hsl = toColormathColor().toHSL()
     val otherHsl = other.toColormathColor().toHSL()
     return HSL(hsl.h, otherHsl.s, otherHsl.l).toComposeColor()
+}
+
+/**
+ * Convert the color to a [TonalPalette].
+ *
+ * @receiver[Color] to convert.
+ * @return [TonalPalette] representation of the color.
+ */
+@Stable
+internal fun Color.toTonalPalette(): TonalPalette {
+    return TonalPalette.from(this)
 }

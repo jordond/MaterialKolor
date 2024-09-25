@@ -34,3 +34,12 @@ public fun TonalPalette.Companion.from(argb: Int): TonalPalette {
 public fun TonalPalette.Companion.from(hct: Hct): TonalPalette {
     return fromHct(hct)
 }
+
+/**
+ * Get a tonal [Color] from the [TonalPalette] with the given [tone].
+ *
+ * @param[tone] HCT tone, measured from 0 to 100.
+ */
+public fun TonalPalette.toneColor(tone: Int): Color {
+    return Color(tone(tone))
+}
