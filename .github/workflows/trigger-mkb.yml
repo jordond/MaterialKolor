@@ -1,0 +1,32 @@
+name: Trigger MKB Preview
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  trigger-upstream-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Get commit hash
+        id: get_commit_hash
+        run: echo "commit_hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Trigger upstream preview workflow
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.UPSTREAM_REPO_TOKEN }}
+          repository: jordond/MaterialKolorBuilder
+          event-type: trigger-upstream-preview
+          client-payload: |
+            {
+              "commit_hash": "${{ steps.get_commit_hash.outputs.commit_hash }}",
+              "pr_number": "${{ github.event.pull_request.number || '' }}"
+            }

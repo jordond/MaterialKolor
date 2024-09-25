@@ -30,7 +30,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v3
+        uses: gradle/actions/wrapper-validation@v3
 
       - name: Deploy to Sonatype
         run: |
@@ -74,7 +74,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v3
+        uses: gradle/actions/wrapper-validation@v3
 
       - name: Generate documentation
         run: ./gradlew dokkaHtmlMultiModule
