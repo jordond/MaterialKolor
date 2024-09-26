@@ -22,7 +22,7 @@ jobs:
       - name: Trigger upstream preview workflow
         uses: peter-evans/repository-dispatch@v2
         with:
-          token: ${{ secrets.UPSTREAM_REPO_TOKEN }}
+          token: ${{ secrets.MATERIALKOLOR_BUILDER_TRIGGER_TOKEN }}
           repository: jordond/MaterialKolorBuilder
           event-type: trigger-upstream-preview
           client-payload: |
