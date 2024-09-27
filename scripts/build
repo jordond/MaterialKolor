@@ -1,0 +1,148 @@
+#!/bin/bash
+
+# Explode on errors 💥
+set -euo pipefail
+
+CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+ROOT="$(cd "$CWD"/.. >/dev/null 2>&1 && pwd)"
+BUILD_DIR="$ROOT/dist"
+
+VERSION_FILE="$ROOT/gradle/libs.versions.toml"
+
+# Function to display usage
+usage() {
+    echo "Usage: $0 <android|web|desktop> <version> [--code <number>]"
+}
+
+gradle() {
+    "$ROOT/gradlew" "$@" --scan
+}
+
+# Check for minimum required arguments
+if [ $# -lt 2 ]; then
+    echo "Error: Missing arguments"
+    usage
+    exit 1
+fi
+
+# Parse arguments
+platform=$1
+version=$2
+shift 2
+
+# Initialize variables for optional flags
+code_value=""
+
+# Parse optional arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --code)
+            if [[ $2 =~ ^[0-9]+$ ]]; then
+                code_value=$2
+                shift
+            else
+                echo "Error: --code requires a numeric value"
+                usage
+                exit 1
+            fi
+            ;;
+        *)
+            echo "Unknown option: $1"
+            usage
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+# Update app-version
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' "s/^app-version = .*/app-version = \"$version\"/" "$VERSION_FILE"
+else
+    sed -i "s/^app-version = .*/app-version = \"$version\"/" "$VERSION_FILE"
+fi
+
+# Update app-code
+if [ -z "$code_value" ]; then
+    # Increment current app-code if no code is provided
+    current_code=$(grep "^app-code" "$VERSION_FILE" | cut -d'"' -f2)
+    code_value=$((current_code + 1))
+fi
+    
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' "s/^app-code = .*/app-code = \"$code_value\"/" "$VERSION_FILE"
+else
+    sed -i "s/^app-code = .*/app-code = \"$code_value\"/" "$VERSION_FILE"
+fi
+
+echo "Updated version to $version and code to $(grep "^app-code" "$VERSION_FILE" | cut -d'"' -f2) in $code_value"
+echo "Building $platform version $version ($code_value)"
+
+mkdir -p "$BUILD_DIR"
+
+# Main build logic
+case $platform in
+    android)
+        # Check if the keystore already exists
+        if [ ! -f "$ROOT/keystore.key" ]; then
+            # Check for the KEYSTORE_BASE64 environment variable
+            if [ -z "$KEYSTORE_BASE64" ]; then
+                echo "Error: KEYSTORE_BASE64 environment variable is not set."
+                exit 1
+            fi
+
+            # Decode the keystore from BASE64
+            echo "$KEYSTORE_BASE64" | base64 -d > "$ROOT/keystore.key"
+            echo "Keystore created from KEYSTORE_BASE64 environment variable."
+        fi
+
+        gradle assembleRelease bundleRelease
+
+        cp "$ROOT/app/build/outputs/bundle/release/app-release.aab" "$BUILD_DIR/mkb-android-$version-$code_value.aab"
+        cp "$ROOT/app/build/outputs/apk/release/app-release.apk" "$BUILD_DIR/mkb-android-$version-$code_value.apk"
+
+        echo "Android bundle and APK built and saved to $BUILD_DIR"
+        ;;
+    web)
+        gradle wasmJsBrowserDistribution
+        zip -r "$BUILD_DIR/mkb-web-$version-$code_value.zip" "$ROOT/app/build/dist/wasmJs/productionExecutable"
+        echo "Web app built and zipped to $BUILD_DIR/mkb-web-$version-$code_value.zip"
+        ;;
+    desktop)
+        current_platform=$(uname -s)        
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            type="dmg"
+        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            type="deb"
+        elif [[ "$OSTYPE" == "msys"* || "$OSTYPE" == "win32"* ]]; then
+            type="msi"
+        else
+            echo "Unsupported platform: $OSTYPE"
+            exit 1
+        fi
+
+        output_folder="app/build/compose/binaries/main-release/$type"
+
+        echo "Building for current platform: $current_platform"
+        gradle packageReleaseDistributionForCurrentOS
+
+        # Find and copy the output file with the correct extension to the build directory
+        find "$output_folder" -name "*.$type" -exec cp {} "$BUILD_DIR/mkb-desktop-$version-$code_value.$type" \;
+        
+        # Check if the file was successfully copied
+        if [ -f "$BUILD_DIR/mkb-desktop-$version-$code_value.$type" ]; then
+            echo "Desktop app built and saved to $BUILD_DIR/mkb-desktop-$version-$code_value.$type"
+        else
+            echo "Error: Failed to copy the desktop app file"
+            exit 1
+        fi
+        ;;
+    *)
+        echo "Invalid platform: $platform"
+        usage
+        exit 1
+        ;;
+esac
+
+echo "Build completed successfully."
+ls -la "$BUILD_DIR"

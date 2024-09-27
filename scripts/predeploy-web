@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# Explode on errors 💥
+set -euo pipefail
+
+CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+ROOT="$(cd "$CWD"/.. >/dev/null 2>&1 && pwd)"
+
+PUBLIC_DIR="$ROOT/public"
+ASSETS_DIR="$ROOT/assets/web"
+
+# Function to display usage information
+usage() {
+    echo "Usage: $0 [OPTIONS]"
+    echo "Prepare files for web deployment."
+    echo
+    echo "Options:"
+    echo "  -h, --help    Display this help message and exit"
+    echo "  -p, --print   Print files being copied"
+}
+
+# Initialize print_files flag
+print_files=false
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        --print|-p)
+            print_files=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+# Clean public dir, silently ignore errors
+rm -rf "$PUBLIC_DIR" || true
+mkdir -p "$PUBLIC_DIR"
+
+# Check if build dir exists and is not empty
+BUILD_DIR="$ROOT/app/build/dist/wasmJs/productionExecutable"
+if [ ! -d "$BUILD_DIR" ] || [ -z "$(ls -A "$BUILD_DIR")" ]; then
+    echo "Error: $BUILD_DIR does not exist or is empty."
+    echo "Please ensure you have built the project before deploying."
+    echo "Run './gradlew wasmJsBrowserDistribution' to build the project."
+    exit 1
+fi
+
+# Function to copy files with optional printing
+copy_files() {
+    local src="$1"
+    local dest="$2"
+    if [ "$print_files" = true ]; then
+        cp -Rv "$src"/* "$dest"
+    else
+        cp -R "$src"/* "$dest"
+    fi
+}
+
+echo "Preparing files for web deployment..."
+
+# Copy build to web dir
+echo "Copying $BUILD_DIR to $PUBLIC_DIR..."
+copy_files "$BUILD_DIR" "$PUBLIC_DIR"
+
+# Copy web assets as well
+echo "Copying $ASSETS_DIR to $PUBLIC_DIR..."
+copy_files "$ASSETS_DIR" "$PUBLIC_DIR"
+
+echo "Can now deploy to Firebase using 'firebase deploy --only hosting'"
