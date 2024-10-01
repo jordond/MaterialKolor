@@ -5,7 +5,6 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Share
@@ -62,11 +61,10 @@ fun HomeScreenScaffold(
         topBar = {
             AppTopBar(
                 settings = options.settings,
+                toggleDarkMode = dispatcher.relay(ToggleDarkMode),
+                toggleAboutDialog = { aboutDialogVisible = true },
                 showBackButton = screen == HomeScreens.Export,
                 onBack = dispatcher.relay(HomeAction.Nav(HomeScreens.Preview)),
-                toggleDarkMode = dispatcher.relay(ToggleDarkMode),
-                onReset = dispatcher.relay(HomeAction.Reset),
-                toggleAboutDialog = { aboutDialogVisible = true },
             )
         },
         bottomBar = {

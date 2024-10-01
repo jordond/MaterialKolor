@@ -14,7 +14,17 @@ data class Settings(
     val isAmoled: Boolean = SettingsDefaults.isAmoled,
     val isExtendedFidelity: Boolean = SettingsDefaults.isExtendedFidelity,
     val isModified: Boolean = false,
-)
+) {
+
+    companion object {
+
+        val Default = Settings(
+            colors = ColorSettings(ColorSettings.colors.last()),
+            isDarkMode = false,
+            selectedImage = null,
+        )
+    }
+}
 
 object SettingsDefaults {
     val contrast = Contrast.Default

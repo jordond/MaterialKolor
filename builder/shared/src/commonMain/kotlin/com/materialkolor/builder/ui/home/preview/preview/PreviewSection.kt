@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.materialkolor.Contrast
 import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.builder.ui.home.preview.device.DeviceSection
 import com.materialkolor.builder.ui.home.preview.gallery.GallerySection

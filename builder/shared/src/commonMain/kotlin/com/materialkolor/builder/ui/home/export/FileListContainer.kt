@@ -117,7 +117,7 @@ fun FileListContainer(
                                     fontFamily = JetBrainsMono,
                                     fontWeight = FontWeight.Light,
                                 ),
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxSize(),
                             )
 
                             Spacer(modifier = Modifier.height(64.dp))

@@ -123,7 +123,7 @@ private fun OptionSwitch(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
-                        modifier = Modifier.fillMaxSize(0.8f)
+                        modifier = Modifier.fillMaxSize(0.8f),
                     )
                 }
             },

@@ -7,10 +7,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.materialkolor.builder.core.DI
 import com.materialkolor.builder.ui.home.HomeScreen
 import com.materialkolor.builder.ui.ktx.windowSizeClass
 import com.materialkolor.builder.ui.theme.AppTheme
@@ -21,13 +19,12 @@ val LocalWindowSizeClass = compositionLocalOf<WindowSizeClass> { error("Not init
 @Composable
 @Preview
 fun App(destination: String? = null) {
-    val darkModeProvider = remember { DI.darkModeProvider }
     val isDarkMode = isSystemInDarkTheme()
-    LaunchedEffect(Unit) {
-        darkModeProvider.initialize(isDarkMode)
+    val model = viewModel { AppModel(isDarkMode = isDarkMode) }
+    LaunchedEffect(isDarkMode) {
+        model.updateDarkMode(isDarkMode)
     }
 
-    val model = viewModel { AppModel() }
     val state by model.state.collectAsStateWithLifecycle()
 
     AppTheme(

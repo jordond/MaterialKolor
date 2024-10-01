@@ -18,7 +18,9 @@ object DI {
 
     val clipboard: Clipboard = DefaultClipboard()
 
-    val darkModeProvider: DarkModeProvider = DefaultDarkModeProvider()
+    val darkModeProvider: DarkModeProvider by lazy {
+        DefaultDarkModeProvider()
+    }
 
     val settingsStore: SettingsStore by lazy {
         provideSettingsStore()

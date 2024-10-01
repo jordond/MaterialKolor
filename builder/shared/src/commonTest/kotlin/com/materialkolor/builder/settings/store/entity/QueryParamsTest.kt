@@ -7,7 +7,6 @@ import com.materialkolor.PaletteStyle
 import com.materialkolor.builder.settings.model.KeyColor
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue

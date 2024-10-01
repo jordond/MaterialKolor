@@ -25,7 +25,6 @@ import com.materialkolor.builder.ui.ktx.widthIsCompact
 fun AppTopBar(
     settings: Settings,
     toggleDarkMode: () -> Unit,
-    onReset: () -> Unit,
     toggleAboutDialog: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     showBackButton: Boolean = false,
@@ -70,7 +69,6 @@ fun AppTopBar(
             TopBarActions(
                 settings = settings,
                 onToggleDarkMode = toggleDarkMode,
-                onReset = onReset,
                 onAboutClicked = { toggleAboutDialog(true) },
             )
         },

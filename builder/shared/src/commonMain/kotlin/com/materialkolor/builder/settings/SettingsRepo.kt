@@ -8,9 +8,11 @@ import com.materialkolor.builder.settings.store.SettingsStore
 import com.materialkolor.builder.settings.store.entity.toEntity
 import com.materialkolor.builder.settings.store.entity.toQueryParams
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 const val DESTINATION_QUERY_PARAM = "destination"
 
@@ -37,7 +39,7 @@ class DefaultSettingsRepo(
 
     override val settings = store.get().stateIn(
         scope = scope,
-        started = SharingStarted.Lazily,
+        started = SharingStarted.WhileSubscribed(5000),
         initialValue = SettingsStore.defaults(darkModeProvider.isDarkMode.value),
     )
 
@@ -53,7 +55,9 @@ class DefaultSettingsRepo(
         }
 
         logger.d { "Updated settings: $value" }
-        store.store(value)
+        withContext(Dispatchers.Default) {
+            store.store(value)
+        }
     }
 
     override suspend fun updateImage(image: SeedImage) {
