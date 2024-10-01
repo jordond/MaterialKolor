@@ -1,5 +1,5 @@
-import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.INT
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
@@ -70,6 +70,7 @@ kotlin {
                 optIn("androidx.compose.material3.ExperimentalMaterial3Api")
                 optIn("androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi")
                 optIn("androidx.compose.foundation.layout.ExperimentalLayoutApi")
+                optIn("androidx.compose.foundation.ExperimentalFoundationApi")
                 optIn("org.jetbrains.compose.resources.ExperimentalResourceApi")
             }
         }
@@ -101,11 +102,13 @@ kotlin {
             implementation(libs.stateHolder)
             implementation(libs.stateHolder.compose)
             implementation(libs.materialKolor)
+            implementation(libs.materialKolor.utilities)
             implementation(libs.compose.colorpicker)
             implementation(libs.calf.filePicker)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.viewmodel.compose)
             implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.highlights)
         }
 
         commonTest.dependencies {
@@ -135,6 +138,7 @@ kotlin {
 
         wasmJsMain.dependencies {
             implementation(libs.kstore.storage)
+            implementation(npm("jszip", "3.10.1"))
         }
 
         val nonBrowserMain by creating {

@@ -14,22 +14,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.materialkolor.builder.core.rememberDebounceDispatcher
+import com.materialkolor.builder.ui.home.HomeAction.CancelExport
+import com.materialkolor.builder.ui.home.HomeAction.ColorPicker
 import com.materialkolor.builder.ui.home.HomeAction.CopyColor
 import com.materialkolor.builder.ui.home.HomeAction.Export
+import com.materialkolor.builder.ui.home.HomeAction.Nav
 import com.materialkolor.builder.ui.home.HomeAction.RandomColor
 import com.materialkolor.builder.ui.home.HomeAction.Reset
 import com.materialkolor.builder.ui.home.HomeAction.SelectImage
 import com.materialkolor.builder.ui.home.HomeAction.Share
 import com.materialkolor.builder.ui.home.HomeAction.ToggleDarkMode
+import com.materialkolor.builder.ui.home.HomeAction.ToggleExportMode
 import com.materialkolor.builder.ui.home.HomeAction.UpdateContrast
+import com.materialkolor.builder.ui.home.HomeAction.UpdateExportOptions
 import com.materialkolor.builder.ui.home.HomeAction.UpdatePaletteStyle
-import com.materialkolor.builder.ui.home.page.HomeSection
-import com.materialkolor.builder.ui.home.page.gallery.NavigationDrawerContent
+import com.materialkolor.builder.ui.home.preview.PreviewSection
+import com.materialkolor.builder.ui.home.preview.gallery.NavigationDrawerContent
 import com.materialkolor.builder.ui.ktx.HandleEvents
 import com.materialkolor.builder.ui.ktx.launch
 import com.mohamedrejeb.calf.picker.FilePickerFileType
@@ -70,8 +77,10 @@ fun HomeScreen(destination: String? = null) {
         }
     }
 
+    var screen by remember { mutableStateOf(HomeScreens.Preview) }
+
     val initialSection = remember {
-        destination?.let { runCatching { HomeSection.valueOf(it) }.getOrNull() }
+        destination?.let { runCatching { PreviewSection.valueOf(it) }.getOrNull() }
     }
 
     CompositionLocalProvider(
@@ -87,11 +96,13 @@ fun HomeScreen(destination: String? = null) {
             },
         ) {
             HomeScreenScaffold(
-                settings = state.settings,
+                options = state.exportOptions,
                 colorPickerState = state.colorPickerState,
                 snackbarState = snackbar,
                 initialSection = initialSection,
                 processingImage = state.processingImage,
+                exporting = state.exporting,
+                screen = screen,
                 dispatcher = rememberDebounceDispatcher { action ->
                     when (action) {
                         is UpdateContrast -> model.updateContrast(action.contrast)
@@ -104,9 +115,13 @@ fun HomeScreen(destination: String? = null) {
                         is RandomColor -> model.randomColor()
                         is Reset -> model.reset()
                         is CopyColor -> model.copyColorToClipboard(action.name, action.color)
-                        is HomeAction.ColorPicker -> model.handleColorPickerAction(action)
-                        is Export -> {} // TODO: Implement export
+                        is ColorPicker -> model.handleColorPickerAction(action)
+                        is Nav -> screen = action.screen
                         is Share -> model.share(action.section)
+                        is ToggleExportMode -> model.toggleExportMode()
+                        is UpdateExportOptions -> model.updateExportOptions(action.options)
+                        is Export -> model.export()
+                        is CancelExport -> model.cancelExport()
                     }
                 },
             )

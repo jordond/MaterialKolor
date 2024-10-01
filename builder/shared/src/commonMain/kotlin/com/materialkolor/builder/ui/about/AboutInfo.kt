@@ -21,13 +21,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.materialkolor.builder.ui.LocalWindowSizeClass
 
 @Composable
 fun AboutInfo(
     visible: Boolean,
     onDismiss: () -> Unit,
-    windowSizeClass: WindowSizeClass,
     modifier: Modifier = Modifier,
+    windowSizeClass: WindowSizeClass = LocalWindowSizeClass.current,
 ) {
     if (!visible) return
 

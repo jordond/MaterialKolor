@@ -17,7 +17,7 @@ data class ColorSettings(
 
     fun update(keyColor: KeyColor, color: Color): ColorSettings = when (keyColor) {
         KeyColor.Seed -> copy(seed = color)
-        KeyColor.Primary -> copy(primary = color)
+        KeyColor.Primary -> copy(primary = color, seed = color)
         KeyColor.Secondary -> copy(secondary = color)
         KeyColor.Tertiary -> copy(tertiary = color)
         KeyColor.Error -> copy(error = color)

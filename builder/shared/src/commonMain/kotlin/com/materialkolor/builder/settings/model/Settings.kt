@@ -9,8 +9,16 @@ data class Settings(
     val colors: ColorSettings,
     val isDarkMode: Boolean,
     val selectedImage: SeedImage?,
-    val contrast: Contrast = Contrast.Default,
-    val style: PaletteStyle = PaletteStyle.TonalSpot,
-    val isExtendedFidelity: Boolean = false,
+    val contrast: Contrast = SettingsDefaults.contrast,
+    val style: PaletteStyle = SettingsDefaults.style,
+    val isAmoled: Boolean = SettingsDefaults.isAmoled,
+    val isExtendedFidelity: Boolean = SettingsDefaults.isExtendedFidelity,
     val isModified: Boolean = false,
 )
+
+object SettingsDefaults {
+    val contrast = Contrast.Default
+    val style = PaletteStyle.TonalSpot
+    val isAmoled = false
+    val isExtendedFidelity = false
+}

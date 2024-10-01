@@ -7,6 +7,8 @@ import com.materialkolor.PaletteStyle
 import com.materialkolor.builder.settings.model.KeyColor
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -35,9 +37,9 @@ class QueryParamsTest {
             color_primary=FF00FF00&
             color_secondary=FF0000FF&
             dark_mode=true&
-            contrast=1.0&
-            selected_preset_id=preset1&
             style=Expressive&
+            selected_preset_id=preset1&
+            contrast=1.0&
             extended_fidelity=true
             """.trimIndent().replace("\n", "")
 
@@ -83,8 +85,8 @@ class QueryParamsTest {
         val queryParams = settingsEntity.toQueryParams()
 
         assertEquals(
-            expected = "contrast=0.0&style=TonalSpot&extended_fidelity=false",
-            actual = queryParams.removePrefix("?"),
+            expected = "?dark_mode=false",
+            actual = queryParams,
         )
     }
 
@@ -183,8 +185,9 @@ class QueryParamsTest {
         val queryParams = settingsEntity.toQueryParams()
         val reconstructed = queryParams.toSettingsEntity()
 
+        // Dark mode is always added
+        assertNotNull(reconstructed.isDarkMode)
         assertNull(reconstructed.colors[KeyColor.Seed])
-        assertNull(reconstructed.isDarkMode)
         assertNull(reconstructed.selectedPresetId)
     }
 

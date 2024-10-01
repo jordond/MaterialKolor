@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 
-val DESTINATION_QUERY_PARAM = "destination"
+const val DESTINATION_QUERY_PARAM = "destination"
 
 interface SettingsRepo {
     val settings: StateFlow<Settings>

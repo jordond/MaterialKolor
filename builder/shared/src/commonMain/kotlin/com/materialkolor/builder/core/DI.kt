@@ -1,5 +1,7 @@
 package com.materialkolor.builder.core
 
+import com.materialkolor.builder.export.DefaultExportRepo
+import com.materialkolor.builder.export.ExportRepo
 import com.materialkolor.builder.settings.DarkModeProvider
 import com.materialkolor.builder.settings.DefaultDarkModeProvider
 import com.materialkolor.builder.settings.DefaultSettingsRepo
@@ -25,6 +27,8 @@ object DI {
     val settingsRepo: SettingsRepo by lazy {
         DefaultSettingsRepo(darkModeProvider, settingsStore, defaultScope)
     }
+
+    val exportRepo: ExportRepo = DefaultExportRepo()
 }
 
 expect fun DI.provideSettingsStore(): SettingsStore
