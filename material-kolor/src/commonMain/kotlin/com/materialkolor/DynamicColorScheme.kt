@@ -6,79 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.dynamiccolor.MaterialDynamicColors
 import com.materialkolor.ktx.DynamicScheme
-import com.materialkolor.ktx.toDynamicScheme
 import com.materialkolor.scheme.DynamicScheme
-
-/**
- * Creates and remember a [ColorScheme] based on the given [seedColor] and [isDark] mode.
- *
- * @param[seedColor] The color to base the scheme on.
- * @param[isDark] Whether the scheme should be dark or light.
- * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
- * @param[style] The style of the scheme.
- * @param[contrastLevel] The contrast level of the scheme.
- * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
- */
-@Deprecated(
-    message = "Use rememberDynamicColorScheme that allows custom colors instead.",
-    replaceWith = ReplaceWith("rememberDynamicColorScheme(seedColor, isDark, isAmoled, primary, secondary, tertiary, neutral, neutralVariant, error, style, contrastLevel, isExtendedFidelity, modifyColorScheme)"),
-)
-@Composable
-public fun rememberDynamicColorScheme(
-    seedColor: Color,
-    isDark: Boolean,
-    isAmoled: Boolean = false,
-    style: PaletteStyle = PaletteStyle.TonalSpot,
-    contrastLevel: Double = Contrast.Default.value,
-    isExtendedFidelity: Boolean = false,
-    modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
-): ColorScheme = remember(
-    seedColor,
-    isDark,
-    isAmoled,
-    style,
-    contrastLevel,
-    isExtendedFidelity,
-    modifyColorScheme,
-) {
-    dynamicColorScheme(
-        seedColor = seedColor,
-        isDark = isDark,
-        primary = null,
-        isAmoled = isAmoled,
-        style = style,
-        contrastLevel = contrastLevel,
-        isExtendedFidelity = isExtendedFidelity,
-        modifyColorScheme = modifyColorScheme,
-    )
-}
-
-/**
- * Creates a [ColorScheme] based on the given [seedColor] and [isDark] mode.
- *
- * @param[seedColor] The color to base the scheme on.
- * @param[isDark] Whether the scheme should be dark or light.
- * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
- * @param[style] The style of the scheme.
- * @param[contrastLevel] The contrast level of the scheme.
- * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
- */
-@Deprecated(
-    message = "Use rememberDynamicColorScheme that allows custom colors instead.",
-    replaceWith = ReplaceWith("rememberDynamicColorScheme(seedColor, isDark, isAmoled, primary, secondary, tertiary, neutral, neutralVariant, error, style, contrastLevel, isExtendedFidelity, modifyColorScheme)"),
-)
-public fun dynamicColorScheme(
-    seedColor: Color,
-    isDark: Boolean,
-    isAmoled: Boolean,
-    style: PaletteStyle = PaletteStyle.TonalSpot,
-    contrastLevel: Double = Contrast.Default.value,
-    isExtendedFidelity: Boolean = false,
-    modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
-): ColorScheme {
-    val scheme = seedColor.toDynamicScheme(isDark, style, contrastLevel)
-    return scheme.toColorScheme(isAmoled, isExtendedFidelity, modifyColorScheme)
-}
 
 /**
  * Create and remember a custom [ColorScheme] based on the provided colors.
