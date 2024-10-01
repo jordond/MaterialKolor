@@ -12,56 +12,6 @@ import com.materialkolor.ktx.rememberDynamicScheme
 import com.materialkolor.scheme.DynamicScheme
 
 /**
- * Creates a [DynamicMaterialThemeState] that can be remembered across compositions.
- *
- * @param[seedColor] The initial seed color to generate the color scheme.
- * @param[isDark] The initial dark mode state.
- * @param[isAmoled] The initial Amoled state.
- * @param[style] The initial palette style.
- * @param[contrastLevel] The initial contrast level.
- * @param[extendedFidelity] The initial extended fidelity state.
- * @param[modifyColorScheme] Use this callback to modify the color scheme once it has been generated.
- * Note that if you modify a color in the scheme, the on* color might not have enough contrast.
- */
-@Deprecated(
-    message = "Use the other rememberDynamicMaterialThemeState function that allows for custom colors.",
-    replaceWith = ReplaceWith(
-        "rememberDynamicMaterialThemeState(seedColor, isDark, isAmoled, style, contrastLevel, extendedFidelity, modifyColorScheme)",
-        "com.materialkolor.rememberDynamicMaterialThemeState",
-    ),
-)
-@Composable
-public fun rememberDynamicMaterialThemeState(
-    seedColor: Color,
-    isDark: Boolean,
-    isAmoled: Boolean = false,
-    style: PaletteStyle = PaletteStyle.TonalSpot,
-    contrastLevel: Double = Contrast.Default.value,
-    extendedFidelity: Boolean = false,
-    modifyColorScheme: (DynamicMaterialThemeState.(ColorScheme) -> ColorScheme)? = null,
-): DynamicMaterialThemeState {
-    return remember(
-        seedColor,
-        isDark,
-        isAmoled,
-        style,
-        contrastLevel,
-        extendedFidelity,
-        modifyColorScheme,
-    ) {
-        DynamicMaterialThemeState(
-            initialSeedColor = seedColor,
-            initialIsDark = isDark,
-            initialIsAmoled = isAmoled,
-            initialStyle = style,
-            initialContrastLevel = contrastLevel,
-            initialExtendedFidelity = extendedFidelity,
-            modifyColorScheme = modifyColorScheme,
-        )
-    }
-}
-
-/**
  * Creates a [DynamicMaterialThemeState] that can be remembered across compositions using custom colors.
  *
  * @param[seedColor] The initial seed color to generate the color scheme.
