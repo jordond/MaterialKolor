@@ -1,6 +1,11 @@
 name: Publish
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish'
+        required: true
+        type: string
   release:
     types: [ prereleased, released ]
 
@@ -34,7 +39,11 @@ jobs:
 
       - name: Deploy to Sonatype
         run: |
-          NEW_VERSION=$(echo "${GITHUB_REF}" | cut -d "/" -f3)
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            NEW_VERSION="${{ github.event.inputs.version }}"
+          else
+            NEW_VERSION=$(echo "${GITHUB_REF}" | cut -d "/" -f3)
+          fi
           echo "New version: ${NEW_VERSION}"
           export ORG_GRADLE_PROJECT_VERSION_NAME=${NEW_VERSION}
           echo "RELEASE_VERSION=$NEW_VERSION" >> "$GITHUB_ENV"
