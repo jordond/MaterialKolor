@@ -10,6 +10,7 @@ on:
 
 jobs:
   trigger-upstream-preview:
+    name: Trigger MKB Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
