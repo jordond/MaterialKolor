@@ -37,14 +37,13 @@ code_value=""
 while [[ $# -gt 0 ]]; do
     case $1 in
         --code)
-            if [[ $2 =~ ^[0-9]+$ ]]; then
-                code_value=$2
-                shift
-            else
+            if [ -z "$2" ] || [[ ! $2 =~ ^[0-9]+$ ]]; then
                 echo "Error: --code requires a numeric value"
                 usage
                 exit 1
             fi
+            code_value=$2
+            shift
             ;;
         *)
             echo "Unknown option: $1"
