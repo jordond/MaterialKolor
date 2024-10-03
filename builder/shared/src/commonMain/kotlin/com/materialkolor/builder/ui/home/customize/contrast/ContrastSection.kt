@@ -1,4 +1,4 @@
-package com.materialkolor.builder.ui.home.preview.customize.contrast
+package com.materialkolor.builder.ui.home.customize.contrast
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

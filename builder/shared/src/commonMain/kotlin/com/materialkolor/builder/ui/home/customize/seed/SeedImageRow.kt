@@ -1,4 +1,4 @@
-package com.materialkolor.builder.ui.home.preview.customize.seed
+package com.materialkolor.builder.ui.home.customize.seed
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image

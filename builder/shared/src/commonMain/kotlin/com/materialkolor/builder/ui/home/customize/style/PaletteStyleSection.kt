@@ -1,4 +1,4 @@
-package com.materialkolor.builder.ui.home.preview.customize.style
+package com.materialkolor.builder.ui.home.customize.style
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

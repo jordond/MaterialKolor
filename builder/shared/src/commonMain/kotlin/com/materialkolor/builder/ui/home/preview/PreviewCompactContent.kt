@@ -22,7 +22,7 @@ import com.materialkolor.builder.ui.home.HomeAction.RandomColor
 import com.materialkolor.builder.ui.home.HomeAction.SelectImage
 import com.materialkolor.builder.ui.home.HomeAction.UpdateContrast
 import com.materialkolor.builder.ui.home.HomeAction.UpdatePaletteStyle
-import com.materialkolor.builder.ui.home.preview.customize.CustomizeSection
+import com.materialkolor.builder.ui.home.customize.CustomizeSection
 import com.materialkolor.builder.ui.home.preview.device.DeviceSection
 import com.materialkolor.builder.ui.home.preview.gallery.GallerySection
 import com.materialkolor.builder.ui.home.preview.palette.PaletteSection

@@ -1,4 +1,4 @@
-package com.materialkolor.builder.ui.home.preview.customize.seed
+package com.materialkolor.builder.ui.home.customize.seed
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

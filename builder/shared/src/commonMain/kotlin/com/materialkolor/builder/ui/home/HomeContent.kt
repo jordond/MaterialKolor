@@ -23,7 +23,7 @@ import com.materialkolor.builder.ui.home.components.ContrastSelector
 import com.materialkolor.builder.ui.home.export.ExportScreenContent
 import com.materialkolor.builder.ui.home.preview.PreviewScreenContent
 import com.materialkolor.builder.ui.home.preview.PreviewSection
-import com.materialkolor.builder.ui.home.preview.customize.CustomizeSection
+import com.materialkolor.builder.ui.home.customize.CustomizeSection
 import com.materialkolor.builder.ui.ktx.widthIsExpanded
 import com.materialkolor.builder.ui.ktx.windowSizeClass
 

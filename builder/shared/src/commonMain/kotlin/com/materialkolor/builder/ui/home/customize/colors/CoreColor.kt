@@ -1,4 +1,4 @@
-package com.materialkolor.builder.ui.home.preview.customize.colors
+package com.materialkolor.builder.ui.home.customize.colors
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable

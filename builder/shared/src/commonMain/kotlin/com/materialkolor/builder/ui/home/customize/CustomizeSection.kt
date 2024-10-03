@@ -1,4 +1,4 @@
-package com.materialkolor.builder.ui.home.preview.customize
+package com.materialkolor.builder.ui.home.customize
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
@@ -22,10 +22,10 @@ import com.materialkolor.builder.settings.model.KeyColor
 import com.materialkolor.builder.settings.model.SeedImage
 import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.builder.ui.LocalWindowSizeClass
-import com.materialkolor.builder.ui.home.preview.customize.colors.CoreColorsSection
-import com.materialkolor.builder.ui.home.preview.customize.contrast.ContrastSection
-import com.materialkolor.builder.ui.home.preview.customize.seed.SeedColorSection
-import com.materialkolor.builder.ui.home.preview.customize.style.PaletteStyleSection
+import com.materialkolor.builder.ui.home.customize.colors.CoreColorsSection
+import com.materialkolor.builder.ui.home.customize.contrast.ContrastSection
+import com.materialkolor.builder.ui.home.customize.seed.SeedColorSection
+import com.materialkolor.builder.ui.home.customize.style.PaletteStyleSection
 import com.materialkolor.builder.ui.ktx.widthIsExpanded
 import kotlinx.collections.immutable.PersistentList
 
