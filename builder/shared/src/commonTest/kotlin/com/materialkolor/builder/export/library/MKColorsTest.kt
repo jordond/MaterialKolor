@@ -49,7 +49,7 @@ class MKColorsTest {
 
         val result = mkColorsKt("com.example", colorSettings)
 
-        assertTrue(result.contains("val Seed = Color(0xFF000000)"))
+        assertTrue(result.contains("val SeedColor = Color(0xFF000000)"))
         assertFalse(result.contains("val Primary = "))
     }
 
@@ -164,7 +164,7 @@ class MKColorsTest {
             
             import androidx.compose.ui.graphics.Color
             
-            val Seed = Color(0xFF000000)
+            val SeedColor = Color(0xFF000000)
         """.trimIndent()
 
         assertEquals(expectedOutput, result)

@@ -8,7 +8,7 @@ fun mkColorsKt(
     colors: ColorSettings,
 ): String {
     val colorList = listOfNotNull(
-        if (colors.primary == null) colors.seed.variable("Seed")
+        if (colors.primary == null) colors.seed.variable("SeedColor")
         else colors.primary.variable("Primary"),
         colors.secondary.variable("Secondary"),
         colors.tertiary.variable("Tertiary"),

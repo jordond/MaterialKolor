@@ -114,7 +114,7 @@ fun MyTheme(
         contrastLevel = 1.0,
         isAmoled = true,
         extendedFidelity = true,
-        seed = Seed,
+        seedColor = SeedColor,
     )
     
     DynamicMaterialTheme(

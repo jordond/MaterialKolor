@@ -20,7 +20,7 @@ fun mkThemeKt(
         contrast,
         settings.isAmoled.parameter("isAmoled"),
         settings.isExtendedFidelity.parameter("extendedFidelity"),
-        if (settings.colors.primary == null) settings.colors.seed.parameter("Seed")
+        if (settings.colors.primary == null) settings.colors.seed.parameter("SeedColor")
         else settings.colors.primary.parameter("Primary"),
         settings.colors.secondary.parameter("Secondary"),
         settings.colors.tertiary.parameter("Tertiary"),
