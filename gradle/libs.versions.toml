@@ -11,7 +11,7 @@ dokka = "1.9.20"
 publish = "0.30.0"
 colormath = "3.6.0"
 poko = "0.17.2"
-errorProneAnnotations = "2.35.1"
+errorProneAnnotations = "2.36.0"
 kotest = "5.9.1"
 
 [libraries]
