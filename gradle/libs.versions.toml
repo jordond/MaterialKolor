@@ -2,7 +2,7 @@
 sdk-compile = "33"
 sdk-min = "21"
 jvmTarget = "17"
-agp = "8.7.3"
+agp = "8.8.0"
 kotlin = "2.1.0"
 compose-multiplatform = "1.7.1"
 androidx-annotation = "1.9.1"
