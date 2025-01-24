@@ -10,7 +10,7 @@ binaryCompatibility = "0.17.0"
 dokka = "2.0.0"
 publish = "0.30.0"
 colormath = "3.6.1"
-poko = "0.18.1"
+poko = "0.18.2"
 errorProneAnnotations = "2.36.0"
 kotest = "5.9.1"
 
