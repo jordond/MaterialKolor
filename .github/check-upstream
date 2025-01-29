@@ -23,19 +23,19 @@ github_token=""
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --token)
-            github_token="$2"
-            shift 2
-            ;;
-        --no-output)
-            show_output=false
-            shift
-            ;;
-        *)
-            echo "Unknown option: $1"
-            usage
-            exit 1
-            ;;
+    --token)
+        github_token="$2"
+        shift 2
+        ;;
+    --no-output)
+        show_output=false
+        shift
+        ;;
+    *)
+        echo "Unknown option: $1"
+        usage
+        exit 1
+        ;;
     esac
 done
 
@@ -81,10 +81,25 @@ $full_message
 $files_changed
 \`\`\`
 "
-
         # Check if an issue with the same title already exists
-        existing_issue=$(curl -s -H "Authorization: token $github_token" \
-            "https://api.github.com/repos/$REPO/issues?state=all&labels=upstream" | \
+        echo "Checking for existing issues..."
+        api_response=$(curl -s -H "Authorization: token $github_token" \
+            "https://api.github.com/repos/$REPO/issues?state=all&labels=upstream")
+
+        if [ $? -ne 0 ]; then
+            echo "Error: Failed to fetch issues from GitHub API"
+            echo "Response: $api_response"
+            return 1
+        fi
+
+        # Validate JSON response
+        if ! echo "$api_response" | jq empty 2>/dev/null; then
+            echo "Error: Invalid JSON response from GitHub API"
+            echo "Response: $api_response"
+            return 1
+        fi
+
+        existing_issue=$(echo "$api_response" |
             jq -r ".[] | select(.title == \"$issue_title\") | .number")
 
         if [ -n "$existing_issue" ]; then
@@ -102,13 +117,20 @@ $files_changed
                     \"labels\": [\"upstream\"]
                 }")
 
+            # Validate creation response
+            if ! echo "$response" | jq empty 2>/dev/null; then
+                echo "Error: Invalid JSON response when creating issue"
+                echo "Response: $response"
+                return 1
+            fi
+
             issue_number=$(echo "$response" | jq -r '.number')
             if [ "$issue_number" != "null" ]; then
                 echo "Created issue #$issue_number for commit $short_sha"
             else
                 echo "Failed to create issue for commit $short_sha"
                 echo "API response: $response"
-                exit 1
+                return 1
             fi
         fi
     fi
@@ -119,25 +141,44 @@ echo "Checking submodule: $SUBMODULE_PATH"
 # Enter the submodule directory
 cd "$SUBMODULE_PATH"
 
-# Get the current commit hash
-current_commit=$(git rev-parse --short HEAD)
-echo "Current commit: $current_commit"
+# Fetch the latest changes from remote
+echo "Fetching latest changes from remote..."
+git fetch origin
 
-# Get the remote branch name (use origin/HEAD if no branch is checked out)
-remote_branch=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo "origin/HEAD")
-echo "Remote branch: $remote_branch"
+# Get the current commit hash
+current_commit=$(git rev-parse HEAD)
+echo "Current commit: $(git rev-parse --short $current_commit)"
+
+# Get the latest commit from origin/main (or origin/master)
+remote_commit=$(git rev-parse origin/main 2>/dev/null || git rev-parse origin/master)
+echo "Remote commit: $(git rev-parse --short $remote_commit)"
 
 # Get all commits between current and remote
-commits=$(git rev-list $current_commit..$remote_branch)
+echo "Checking for new commits..."
+commits=$(git log --reverse --pretty=format:"%H" $current_commit..$remote_commit)
 
 if [ -z "$commits" ]; then
     echo "No new commits found."
 else
-    echo "New commits found:"
-    for commit in $commits; do
+    commit_count=$(echo "$commits" | wc -l)
+    echo "Found $commit_count new commit(s)"
+
+    java_commits=0
+    echo "$commits" | while read commit; do
+        short_sha=$(git rev-parse --short "$commit")
+        commit_msg=$(git log -1 --pretty=format:"%s" "$commit")
+        echo "Analyzing commit $short_sha: $commit_msg"
+
         # Check if the commit changed files in the java/ folder
         if git diff-tree --no-commit-id --name-only -r $commit | grep -q "^java/"; then
+            echo "--> Contains Java changes, creating issue..."
             create_github_issue $commit
+            java_commits=$((java_commits + 1))
+        else
+            changed_files=$(git diff-tree --no-commit-id --name-only -r $commit | tr '\n' ' ')
+            echo "--> No Java changes, skipping. Changed files: $changed_files"
         fi
     done
+
+    echo "Summary: Processed $commit_count commits, $java_commits had Java changes"
 fi
