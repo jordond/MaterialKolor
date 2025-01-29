@@ -143,7 +143,7 @@ cd "$SUBMODULE_PATH"
 
 # Fetch the latest changes from remote
 echo "Fetching latest changes from remote..."
-git fetch origin
+git fetch origin --prune --unshallow || git fetch origin
 
 # Get the current commit hash
 current_commit=$(git rev-parse HEAD)
@@ -155,7 +155,8 @@ echo "Remote commit: $(git rev-parse --short $remote_commit)"
 
 # Get all commits between current and remote
 echo "Checking for new commits..."
-commits=$(git log --reverse --pretty=format:"%H" $current_commit..$remote_commit)
+echo "Running: git log --reverse --pretty=format:'%H' ${current_commit}..${remote_commit}"
+commits=$(git log --reverse --pretty=format:"%H" ${current_commit}..${remote_commit})
 
 if [ -z "$commits" ]; then
     echo "No new commits found."
@@ -170,13 +171,17 @@ else
         echo "Analyzing commit $short_sha: $commit_msg"
 
         # Check if the commit changed files in the java/ folder
-        if git diff-tree --no-commit-id --name-only -r $commit | grep -q "^java/"; then
+        echo "Checking for Java changes in commit $short_sha..."
+        changed_files=$(git diff-tree --no-commit-id --name-only -r $commit)
+        echo "Changed files in commit:"
+        echo "$changed_files"
+
+        if echo "$changed_files" | grep -q "^java/"; then
             echo "--> Contains Java changes, creating issue..."
             create_github_issue $commit
             java_commits=$((java_commits + 1))
         else
-            changed_files=$(git diff-tree --no-commit-id --name-only -r $commit | tr '\n' ' ')
-            echo "--> No Java changes, skipping. Changed files: $changed_files"
+            echo "--> No Java changes, skipping. Changed files: $(echo "$changed_files" | tr '\n' ' ')"
         fi
     done
 
