@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Check for upstream changes
         run: ./.github/check-upstream --token ${{ secrets.GITHUB_TOKEN }}
