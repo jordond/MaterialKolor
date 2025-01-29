@@ -8,6 +8,9 @@ on:
   # Can manually be run via the Github Actions interface
   workflow_dispatch:
 
+permissions:
+  issues: write
+
 jobs:
   check:
     name: "Check upstream for changes"
