@@ -1,6 +1,11 @@
 package com.materialkolor.ktx
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.spring
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.github.ajalt.colormath.model.HSL
@@ -11,6 +16,8 @@ import com.materialkolor.internal.toComposeColor
 import com.materialkolor.palettes.TonalPalette
 import com.materialkolor.utils.ColorUtils
 import kotlin.math.roundToInt
+
+internal val defaultColorSpring = spring<Color>()
 
 /**
  * Check if the color is light.
@@ -100,6 +107,22 @@ public fun Color.toHex(
         append(blue.format())
     }.uppercase()
 }
+
+/**
+ * Animate the color over time, allowing for a smooth transition between different color states.
+ *
+ * @receiver The [Color] to animate.
+ * @param animationSpec The [AnimationSpec] to use for the animation.
+ * @param label A label to identify the animation.
+ * @param finishedListener A callback to invoke when the animation finishes.
+ * @return A [State] object representing the animated color.
+ */
+@Composable
+public fun Color.animate(
+    animationSpec: AnimationSpec<Color> = defaultColorSpring,
+    label: String = "ColorAnimation",
+    finishedListener: ((Color) -> Unit)? = null
+): State<Color> = animateColorAsState(this, animationSpec)
 
 /**
  * Format the integer as a hex string.
