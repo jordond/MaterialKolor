@@ -70,6 +70,7 @@ public final class com/materialkolor/dynamiccolor/MaterialDynamicColors {
 	public fun <init> ()V
 	public fun <init> (Z)V
 	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun allDynamicColors ()Ljava/util/List;
 	public final fun background ()Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public final fun controlActivated ()Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public final fun controlHighlight ()Lcom/materialkolor/dynamiccolor/DynamicColor;

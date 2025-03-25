@@ -22,6 +22,8 @@ import com.materialkolor.scheme.Variant
 import dev.drewhamilton.poko.Poko
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.reflect.KFunction0
+import kotlin.reflect.KFunction1
 
 /**
  * Named colors, otherwise known as tokens, or roles, in the Material Design system.
@@ -390,6 +392,7 @@ public class MaterialDynamicColors(
                 isFidelity(scheme) -> {
                     DynamicColor.foregroundTone(primaryContainer().tone(scheme), 4.5)
                 }
+
                 isMonochrome(scheme) -> if (scheme.isDark) 0.0 else 100.0
                 else -> if (scheme.isDark) 90.0 else 30.0
             }
@@ -926,6 +929,72 @@ public class MaterialDynamicColors(
         palette = { scheme -> scheme.neutralPalette },
         tone = { scheme -> if (scheme.isDark) 10.0 else 90.0 },
     )
+
+    public fun allDynamicColors(): List<KFunction0<DynamicColor>> =
+        listOf(
+            this::primaryPaletteKeyColor,
+            this::secondaryPaletteKeyColor,
+            this::tertiaryPaletteKeyColor,
+            this::neutralPaletteKeyColor,
+            this::neutralVariantPaletteKeyColor,
+            this::background,
+            this::onBackground,
+            this::surface,
+            this::surfaceDim,
+            this::surfaceBright,
+            this::surfaceContainerLowest,
+            this::surfaceContainerLow,
+            this::surfaceContainer,
+            this::surfaceContainerHigh,
+            this::surfaceContainerHighest,
+            this::onSurface,
+            this::surfaceVariant,
+            this::onSurfaceVariant,
+            this::inverseSurface,
+            this::inverseOnSurface,
+            this::outline,
+            this::outlineVariant,
+            this::shadow,
+            this::scrim,
+            this::surfaceTint,
+            this::primary,
+            this::onPrimary,
+            this::primaryContainer,
+            this::onPrimaryContainer,
+            this::inversePrimary,
+            this::secondary,
+            this::onSecondary,
+            this::secondaryContainer,
+            this::onSecondaryContainer,
+            this::tertiary,
+            this::onTertiary,
+            this::tertiaryContainer,
+            this::onTertiaryContainer,
+            this::error,
+            this::onError,
+            this::errorContainer,
+            this::onErrorContainer,
+            this::primaryFixed,
+            this::primaryFixedDim,
+            this::onPrimaryFixed,
+            this::onPrimaryFixedVariant,
+            this::secondaryFixed,
+            this::secondaryFixedDim,
+            this::onSecondaryFixed,
+            this::onSecondaryFixedVariant,
+            this::tertiaryFixed,
+            this::tertiaryFixedDim,
+            this::onTertiaryFixed,
+            this::onTertiaryFixedVariant,
+            this::controlActivated,
+            this::controlNormal,
+            this::controlHighlight,
+            this::textPrimaryInverse,
+            this::textSecondaryAndTertiaryInverse,
+            this::textPrimaryInverseDisableOnly,
+            this::textSecondaryAndTertiaryInverseDisabled,
+            this::textHintInverse,
+        )
 
     private fun isFidelity(scheme: DynamicScheme): Boolean {
         if (isExtendedFidelity
