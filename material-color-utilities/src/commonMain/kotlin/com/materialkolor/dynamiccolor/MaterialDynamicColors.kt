@@ -22,6 +22,7 @@ import com.materialkolor.scheme.Variant
 import dev.drewhamilton.poko.Poko
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.reflect.KFunction1
 
 /**
  * Named colors, otherwise known as tokens, or roles, in the Material Design system.
@@ -390,6 +391,7 @@ public class MaterialDynamicColors(
                 isFidelity(scheme) -> {
                     DynamicColor.foregroundTone(primaryContainer().tone(scheme), 4.5)
                 }
+
                 isMonochrome(scheme) -> if (scheme.isDark) 0.0 else 100.0
                 else -> if (scheme.isDark) 90.0 else 30.0
             }
@@ -972,5 +974,71 @@ public class MaterialDynamicColors(
 
             return answer
         }
+
+        public fun allDynamicColors(): List<KFunction1<MaterialDynamicColors, DynamicColor>> =
+            listOf(
+                MaterialDynamicColors::primaryPaletteKeyColor,
+                MaterialDynamicColors::secondaryPaletteKeyColor,
+                MaterialDynamicColors::tertiaryPaletteKeyColor,
+                MaterialDynamicColors::neutralPaletteKeyColor,
+                MaterialDynamicColors::neutralVariantPaletteKeyColor,
+                MaterialDynamicColors::background,
+                MaterialDynamicColors::onBackground,
+                MaterialDynamicColors::surface,
+                MaterialDynamicColors::surfaceDim,
+                MaterialDynamicColors::surfaceBright,
+                MaterialDynamicColors::surfaceContainerLowest,
+                MaterialDynamicColors::surfaceContainerLow,
+                MaterialDynamicColors::surfaceContainer,
+                MaterialDynamicColors::surfaceContainerHigh,
+                MaterialDynamicColors::surfaceContainerHighest,
+                MaterialDynamicColors::onSurface,
+                MaterialDynamicColors::surfaceVariant,
+                MaterialDynamicColors::onSurfaceVariant,
+                MaterialDynamicColors::inverseSurface,
+                MaterialDynamicColors::inverseOnSurface,
+                MaterialDynamicColors::outline,
+                MaterialDynamicColors::outlineVariant,
+                MaterialDynamicColors::shadow,
+                MaterialDynamicColors::scrim,
+                MaterialDynamicColors::surfaceTint,
+                MaterialDynamicColors::primary,
+                MaterialDynamicColors::onPrimary,
+                MaterialDynamicColors::primaryContainer,
+                MaterialDynamicColors::onPrimaryContainer,
+                MaterialDynamicColors::inversePrimary,
+                MaterialDynamicColors::secondary,
+                MaterialDynamicColors::onSecondary,
+                MaterialDynamicColors::secondaryContainer,
+                MaterialDynamicColors::onSecondaryContainer,
+                MaterialDynamicColors::tertiary,
+                MaterialDynamicColors::onTertiary,
+                MaterialDynamicColors::tertiaryContainer,
+                MaterialDynamicColors::onTertiaryContainer,
+                MaterialDynamicColors::error,
+                MaterialDynamicColors::onError,
+                MaterialDynamicColors::errorContainer,
+                MaterialDynamicColors::onErrorContainer,
+                MaterialDynamicColors::primaryFixed,
+                MaterialDynamicColors::primaryFixedDim,
+                MaterialDynamicColors::onPrimaryFixed,
+                MaterialDynamicColors::onPrimaryFixedVariant,
+                MaterialDynamicColors::secondaryFixed,
+                MaterialDynamicColors::secondaryFixedDim,
+                MaterialDynamicColors::onSecondaryFixed,
+                MaterialDynamicColors::onSecondaryFixedVariant,
+                MaterialDynamicColors::tertiaryFixed,
+                MaterialDynamicColors::tertiaryFixedDim,
+                MaterialDynamicColors::onTertiaryFixed,
+                MaterialDynamicColors::onTertiaryFixedVariant,
+                MaterialDynamicColors::controlActivated,
+                MaterialDynamicColors::controlNormal,
+                MaterialDynamicColors::controlHighlight,
+                MaterialDynamicColors::textPrimaryInverse,
+                MaterialDynamicColors::textSecondaryAndTertiaryInverse,
+                MaterialDynamicColors::textPrimaryInverseDisableOnly,
+                MaterialDynamicColors::textSecondaryAndTertiaryInverseDisabled,
+                MaterialDynamicColors::textHintInverse,
+            )
     }
 }
