@@ -115,7 +115,7 @@ fun MyTheme(
     val colorScheme = rememberDynamicColorScheme(seedColor, useDarkTheme)
 
     MaterialTheme(
-        colors = colorScheme.toMaterialColors(),
+        colors = colorScheme,
         content = content
     )
 }
