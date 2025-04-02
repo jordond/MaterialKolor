@@ -19,10 +19,12 @@ package com.materialkolor.quantize
  * Creates a dictionary with keys of colors, and values of count of the color
  */
 internal class QuantizerMap : Quantizer {
-
     private var colorToCount: Map<Int, Int>? = null
 
-    override fun quantize(pixels: IntArray?, maxColors: Int): QuantizerResult {
+    override fun quantize(
+        pixels: IntArray?,
+        maxColors: Int,
+    ): QuantizerResult {
         val pixelByCount: MutableMap<Int, Int> = LinkedHashMap()
         for (pixel in pixels!!) {
             val currentPixelCount = pixelByCount[pixel]

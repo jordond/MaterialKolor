@@ -84,7 +84,6 @@ public class DynamicColor(
     public val toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair)?,
     public val opacity: ((DynamicScheme) -> Double)? = null,
 ) {
-
     private val hctCache: HashMap<DynamicScheme, Hct> = HashMap()
 
     /**
@@ -147,7 +146,12 @@ public class DynamicColor(
             val stayTogether: Boolean = toneDeltaPair.stayTogether
             val bg: DynamicColor = background!!(scheme)
             val bgTone = bg.getTone(scheme)
-            val aIsNearer = polarity === TonePolarity.NEARER || polarity === TonePolarity.LIGHTER && !scheme.isDark || polarity === TonePolarity.DARKER && scheme.isDark
+            val aIsNearer =
+                polarity === TonePolarity.NEARER ||
+                    polarity === TonePolarity.LIGHTER &&
+                    !scheme.isDark ||
+                    polarity === TonePolarity.DARKER &&
+                    scheme.isDark
             val nearer = if (aIsNearer) roleA else roleB
             val farther = if (aIsNearer) roleB else roleA
             val amNearer = name == nearer.name
@@ -160,10 +164,22 @@ public class DynamicColor(
             // If a color is good enough, it is not adjusted.
             // Initial and adjusted tones for `nearer`
             val nInitialTone: Double = nearer.tone(scheme)
-            var nTone = if (Contrast.ratioOfTones(bgTone, nInitialTone) >= nContrast) nInitialTone else foregroundTone(bgTone, nContrast)
+            var nTone = if (Contrast.ratioOfTones(bgTone, nInitialTone) >=
+                nContrast
+            ) {
+                nInitialTone
+            } else {
+                foregroundTone(bgTone, nContrast)
+            }
             // Initial and adjusted tones for `farther`
             val fInitialTone: Double = farther.tone(scheme)
-            var fTone = if (Contrast.ratioOfTones(bgTone, fInitialTone) >= fContrast) fInitialTone else foregroundTone(bgTone, fContrast)
+            var fTone = if (Contrast.ratioOfTones(bgTone, fInitialTone) >=
+                fContrast
+            ) {
+                fInitialTone
+            } else {
+                foregroundTone(bgTone, fContrast)
+            }
             if (decreasingContrast) {
                 // If decreasing contrast, adjust color to the "bare minimum"
                 // that satisfies contrast.
@@ -244,8 +260,8 @@ public class DynamicColor(
                 val bgTone2: Double = secondBackground.invoke(scheme).getTone(scheme)
                 val upper: Double = max(bgTone1, bgTone2)
                 val lower: Double = min(bgTone1, bgTone2)
-                if (Contrast.ratioOfTones(upper, answer) >= desiredRatio
-                    && Contrast.ratioOfTones(lower, answer) >= desiredRatio
+                if (Contrast.ratioOfTones(upper, answer) >= desiredRatio &&
+                    Contrast.ratioOfTones(lower, answer) >= desiredRatio
                 ) {
                     return answer
                 }
@@ -266,8 +282,10 @@ public class DynamicColor(
                 if (darkOption != -1.0) {
                     availables.add(darkOption)
                 }
-                val prefersLight = (tonePrefersLightForeground(bgTone1)
-                    || tonePrefersLightForeground(bgTone2))
+                val prefersLight = (
+                    tonePrefersLightForeground(bgTone1) ||
+                        tonePrefersLightForeground(bgTone2)
+                )
                 if (prefersLight) {
                     return if (lightOption == -1.0) 100.0 else lightOption
                 }
@@ -282,7 +300,6 @@ public class DynamicColor(
     }
 
     public companion object {
-
         /**
          * A convenience constructor for DynamicColor.
          *
@@ -308,16 +325,17 @@ public class DynamicColor(
             name: String,
             palette: (DynamicScheme) -> TonalPalette,
             tone: (DynamicScheme) -> Double,
-        ): DynamicColor = DynamicColor(
-            name = name,
-            palette = palette,
-            tone = tone,
-            isBackground = false,
-            background = null,
-            secondBackground = null,
-            contrastCurve = null,
-            toneDeltaPair = null,
-        )
+        ): DynamicColor =
+            DynamicColor(
+                name = name,
+                palette = palette,
+                tone = tone,
+                isBackground = false,
+                background = null,
+                secondBackground = null,
+                contrastCurve = null,
+                toneDeltaPair = null,
+            )
 
         /**
          * A convenience constructor for DynamicColor.
@@ -347,16 +365,17 @@ public class DynamicColor(
             palette: (DynamicScheme) -> TonalPalette,
             tone: (DynamicScheme) -> Double,
             isBackground: Boolean,
-        ): DynamicColor = DynamicColor(
-            name = name,
-            palette = palette,
-            tone = tone,
-            isBackground = isBackground,
-            background = null,
-            secondBackground = null,
-            contrastCurve = null,
-            toneDeltaPair = null,
-        )
+        ): DynamicColor =
+            DynamicColor(
+                name = name,
+                palette = palette,
+                tone = tone,
+                isBackground = isBackground,
+                background = null,
+                secondBackground = null,
+                contrastCurve = null,
+                toneDeltaPair = null,
+            )
 
         /**
          * Create a DynamicColor from a hex code.
@@ -366,7 +385,10 @@ public class DynamicColor(
          * @param name The name of the dynamic color.
          * @param argb The source color from which to extract the hue and chroma.
          */
-        public fun fromArgb(name: String, argb: Int): DynamicColor {
+        public fun fromArgb(
+            name: String,
+            argb: Int,
+        ): DynamicColor {
             val hct: Hct = Hct.fromInt(argb)
             val palette = TonalPalette.fromInt(argb)
             return fromPalette(name, { palette }, { hct.tone })
@@ -376,7 +398,10 @@ public class DynamicColor(
          * Given a background tone, find a foreground tone, while ensuring they reach a contrast ratio
          * that is as close to ratio as possible.
          */
-        public fun foregroundTone(bgTone: Double, ratio: Double): Double {
+        public fun foregroundTone(
+            bgTone: Double,
+            ratio: Double,
+        ): Double {
             val lighterTone: Double = Contrast.lighterUnsafe(bgTone, ratio)
             val darkerTone: Double = Contrast.darkerUnsafe(bgTone, ratio)
             val lighterRatio: Double = Contrast.ratioOfTones(lighterTone, bgTone)
@@ -390,7 +415,8 @@ public class DynamicColor(
                 // This was observed with Tonal Spot's On Primary Container turning black momentarily between
                 // high and max contrast in light mode. PC's standard tone was T90, OPC's was T10, it was
                 // light mode, and the contrast level was 0.6568521221032331.
-                val negligibleDifference = abs(lighterRatio - darkerRatio) < 0.1 && lighterRatio < ratio && darkerRatio < ratio
+                val negligibleDifference =
+                    abs(lighterRatio - darkerRatio) < 0.1 && lighterRatio < ratio && darkerRatio < ratio
                 if (lighterRatio >= ratio || lighterRatio >= darkerRatio || negligibleDifference) {
                     lighterTone
                 } else {
@@ -405,10 +431,12 @@ public class DynamicColor(
          * Adjust a tone down such that white has 4.5 contrast, if the tone is reasonably close to
          * supporting it.
          */
-        public fun enableLightForeground(tone: Double): Double {
-            return if (tonePrefersLightForeground(tone) && !toneAllowsLightForeground(tone)) 49.0
-            else tone
-        }
+        public fun enableLightForeground(tone: Double): Double =
+            if (tonePrefersLightForeground(tone) && !toneAllowsLightForeground(tone)) {
+                49.0
+            } else {
+                tone
+            }
 
         /**
          * People prefer white foregrounds on ~T60-70. Observed over time, and also by Andrew Somers

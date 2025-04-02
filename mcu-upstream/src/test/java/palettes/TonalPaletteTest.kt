@@ -6,7 +6,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class TonalPaletteTest {
-
     @Test
     fun fromInt() {
         val color = 0xFF0000 // Red
@@ -61,13 +60,19 @@ class TonalPaletteTest {
         }
     }
 
-    private fun assertPalettesEqual(expected: palettes.TonalPalette, actual: TonalPalette) {
+    private fun assertPalettesEqual(
+        expected: palettes.TonalPalette,
+        actual: TonalPalette,
+    ) {
         expected.hue shouldBe actual.hue
         expected.chroma shouldBe actual.chroma
         assertHctEqual(expected.keyColor, actual.keyColor)
     }
 
-    private fun assertHctEqual(expected: hct.Hct, actual: Hct) {
+    private fun assertHctEqual(
+        expected: hct.Hct,
+        actual: Hct,
+    ) {
         expected.hue shouldBe actual.hue
         expected.chroma shouldBe actual.chroma
         expected.tone shouldBe actual.tone

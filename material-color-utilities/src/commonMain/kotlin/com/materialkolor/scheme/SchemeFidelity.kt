@@ -36,27 +36,27 @@ public class SchemeFidelity(
     isDark: Boolean,
     contrastLevel: Double,
 ) : DynamicScheme(
-    sourceColorHct = sourceColorHct,
-    variant = Variant.FIDELITY,
-    isDark = isDark,
-    contrastLevel = contrastLevel,
-    primaryPalette = TonalPalette.fromHueAndChroma(
-        hue = sourceColorHct.hue,
-        chroma = sourceColorHct.chroma,
-    ),
-    secondaryPalette = TonalPalette.fromHueAndChroma(
-        hue = sourceColorHct.hue,
-        chroma = max(sourceColorHct.chroma - 32.0, sourceColorHct.chroma * 0.5),
-    ),
-    tertiaryPalette = TonalPalette.fromHct(
-        hct = DislikeAnalyzer.fixIfDisliked(TemperatureCache(sourceColorHct).complement),
-    ),
-    neutralPalette = TonalPalette.fromHueAndChroma(
-        hue = sourceColorHct.hue,
-        chroma = sourceColorHct.chroma / 8.0,
-    ),
-    neutralVariantPalette = TonalPalette.fromHueAndChroma(
-        hue = sourceColorHct.hue,
-        chroma = sourceColorHct.chroma / 8.0 + 4.0,
-    ),
-)
+        sourceColorHct = sourceColorHct,
+        variant = Variant.FIDELITY,
+        isDark = isDark,
+        contrastLevel = contrastLevel,
+        primaryPalette = TonalPalette.fromHueAndChroma(
+            hue = sourceColorHct.hue,
+            chroma = sourceColorHct.chroma,
+        ),
+        secondaryPalette = TonalPalette.fromHueAndChroma(
+            hue = sourceColorHct.hue,
+            chroma = max(sourceColorHct.chroma - 32.0, sourceColorHct.chroma * 0.5),
+        ),
+        tertiaryPalette = TonalPalette.fromHct(
+            hct = DislikeAnalyzer.fixIfDisliked(TemperatureCache(sourceColorHct).complement),
+        ),
+        neutralPalette = TonalPalette.fromHueAndChroma(
+            hue = sourceColorHct.hue,
+            chroma = sourceColorHct.chroma / 8.0,
+        ),
+        neutralVariantPalette = TonalPalette.fromHueAndChroma(
+            hue = sourceColorHct.hue,
+            chroma = sourceColorHct.chroma / 8.0 + 4.0,
+        ),
+    )

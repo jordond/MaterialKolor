@@ -25,7 +25,10 @@ private const val DEFAULT_DESIRED_COLORS = 4
  * returned.
  * @return A map of colors to their frequency in the image.
  */
-public fun QuantizerCelebi.quantize(image: ImageBitmap, maxColors: Int): Map<Int, Int> {
+public fun QuantizerCelebi.quantize(
+    image: ImageBitmap,
+    maxColors: Int,
+): Map<Int, Int> {
     val pixels = IntArray(image.width * image.height)
     image.readPixels(
         buffer = pixels,
@@ -57,12 +60,13 @@ public fun ImageBitmap.themeColors(
     desired: Int = DEFAULT_DESIRED_COLORS,
 ): List<Color> {
     val quantized = QuantizerCelebi.quantize(image = this, maxColors)
-    return Score.score(
-        colorsToPopulation = quantized,
-        desired = desired,
-        fallbackColorArgb = fallback.toArgb(),
-        filter = filter,
-    ).map { Color(it) }
+    return Score
+        .score(
+            colorsToPopulation = quantized,
+            desired = desired,
+            fallbackColorArgb = fallback.toArgb(),
+            filter = filter,
+        ).map { Color(it) }
 }
 
 /**
@@ -79,9 +83,7 @@ public fun ImageBitmap.themeColor(
     fallback: Color,
     filter: Boolean = true,
     maxColors: Int = DEFAULT_QUANTIZE_MAX_COLORS,
-): Color {
-    return themeColors(maxColors = maxColors, fallback, filter).first()
-}
+): Color = themeColors(maxColors = maxColors, fallback, filter).first()
 
 /**
  * Determine the most suitable color in a [ImageBitmap] for a UI theme or `null`
@@ -97,12 +99,14 @@ public fun ImageBitmap.themeColorOrNull(
     maxColors: Int = DEFAULT_QUANTIZE_MAX_COLORS,
 ): Color? {
     val quantized = QuantizerCelebi.quantize(image = this, maxColors = maxColors)
-    return Score.score(
-        colorsToPopulation = quantized,
-        desired = 1,
-        fallbackColorArgb = null,
-        filter = filter,
-    ).firstOrNull()?.let { colorInt -> Color(colorInt) }
+    return Score
+        .score(
+            colorsToPopulation = quantized,
+            desired = 1,
+            fallbackColorArgb = null,
+            filter = filter,
+        ).firstOrNull()
+        ?.let { colorInt -> Color(colorInt) }
 }
 
 /**

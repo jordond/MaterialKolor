@@ -6,7 +6,6 @@ import io.kotest.matchers.doubles.shouldBeExactly
 import kotlin.test.Test
 
 class DynamicSchemeTest {
-
     @Test
     fun testGetRotatedHue() {
         val sourceColor = Hct.from(180.0, 50.0, 50.0)

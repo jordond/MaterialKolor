@@ -11,9 +11,7 @@ import com.materialkolor.palettes.TonalPalette
  * @param[color] The color to generate the [TonalPalette] from.
  * @return The generated [TonalPalette].
  */
-public fun TonalPalette.Companion.from(color: Color): TonalPalette {
-    return from(color.toArgb())
-}
+public fun TonalPalette.Companion.from(color: Color): TonalPalette = from(color.toArgb())
 
 /**
  * Generates a [TonalPalette] from the given [argb] color int.
@@ -21,9 +19,7 @@ public fun TonalPalette.Companion.from(color: Color): TonalPalette {
  * @param[argb] The ARGB representation of a color to generate the [TonalPalette] from.
  * @return The generated [TonalPalette].
  */
-public fun TonalPalette.Companion.from(argb: Int): TonalPalette {
-    return fromInt(argb)
-}
+public fun TonalPalette.Companion.from(argb: Int): TonalPalette = fromInt(argb)
 
 /**
  * Generates a [TonalPalette] from the given [Hct].
@@ -31,15 +27,11 @@ public fun TonalPalette.Companion.from(argb: Int): TonalPalette {
  * @param[hct] The color to generate the [TonalPalette] from.
  * @return The generated [TonalPalette].
  */
-public fun TonalPalette.Companion.from(hct: Hct): TonalPalette {
-    return fromHct(hct)
-}
+public fun TonalPalette.Companion.from(hct: Hct): TonalPalette = fromHct(hct)
 
 /**
  * Get a tonal [Color] from the [TonalPalette] with the given [tone].
  *
  * @param[tone] HCT tone, measured from 0 to 100.
  */
-public fun TonalPalette.toneColor(tone: Int): Color {
-    return Color(tone(tone))
-}
+public fun TonalPalette.toneColor(tone: Int): Color = Color(tone(tone))

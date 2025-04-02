@@ -1,13 +1,12 @@
-package dislike;
+package dislike
 
 import com.materialkolor.dislike.DislikeAnalyzer
 import com.materialkolor.hct.Hct
 import io.kotest.matchers.equals.shouldBeEqual
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test
 import utils.shouldBeExactly
 
 class DislikeAnalyzerTest {
-
     @Test
     fun isDislikedFalse() {
         val expectedHct = hct.Hct.fromInt(0xB44C43)

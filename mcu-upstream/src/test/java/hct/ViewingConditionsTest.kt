@@ -1,4 +1,4 @@
-package hct;
+package hct
 
 import com.materialkolor.hct.ViewingConditions
 import io.kotest.matchers.doubles.shouldBeExactly
@@ -6,7 +6,6 @@ import utils.shouldBeExactly
 import kotlin.test.Test
 
 class ViewingConditionsTest {
-
     @Test
     fun testMake() {
         val whitePoint = doubleArrayOf(0.95047, 1.0, 1.08883)
@@ -16,10 +15,18 @@ class ViewingConditionsTest {
         val discountingIlluminant = false
 
         val expected = hct.ViewingConditions.make(
-            whitePoint, adaptingLuminance, backgroundLstar, surround, discountingIlluminant
+            whitePoint,
+            adaptingLuminance,
+            backgroundLstar,
+            surround,
+            discountingIlluminant,
         )
         val actual = ViewingConditions.make(
-            whitePoint, adaptingLuminance, backgroundLstar, surround, discountingIlluminant
+            whitePoint,
+            adaptingLuminance,
+            backgroundLstar,
+            surround,
+            discountingIlluminant,
         )
 
         expected shouldBeEqualTo actual
@@ -34,10 +41,18 @@ class ViewingConditionsTest {
         val discountingIlluminant = true
 
         val expected = hct.ViewingConditions.make(
-            whitePoint, adaptingLuminance, backgroundLstar, surround, discountingIlluminant
+            whitePoint,
+            adaptingLuminance,
+            backgroundLstar,
+            surround,
+            discountingIlluminant,
         )
         val actual = ViewingConditions.make(
-            whitePoint, adaptingLuminance, backgroundLstar, surround, discountingIlluminant
+            whitePoint,
+            adaptingLuminance,
+            backgroundLstar,
+            surround,
+            discountingIlluminant,
         )
 
         expected shouldBeEqualTo actual
@@ -52,10 +67,18 @@ class ViewingConditionsTest {
         val discountingIlluminant = false
 
         val expected = hct.ViewingConditions.make(
-            whitePoint, adaptingLuminance, backgroundLstar, surround, discountingIlluminant
+            whitePoint,
+            adaptingLuminance,
+            backgroundLstar,
+            surround,
+            discountingIlluminant,
         )
         val actual = ViewingConditions.make(
-            whitePoint, adaptingLuminance, backgroundLstar, surround, discountingIlluminant
+            whitePoint,
+            adaptingLuminance,
+            backgroundLstar,
+            surround,
+            discountingIlluminant,
         )
 
         expected shouldBeEqualTo actual

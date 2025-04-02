@@ -26,7 +26,6 @@ package com.materialkolor.quantize
  * the Performance of K-Means for Color Quantization. https://arxiv.org/abs/1101.0395
  */
 public object QuantizerCelebi {
-
     /**
      * Reduce the number of colors needed to represented the input, minimizing the difference between
      * the original image and the recolored image.
@@ -37,7 +36,10 @@ public object QuantizerCelebi {
      * @return Map with keys of colors in ARGB format, and values of number of pixels in the original
      * image that correspond to the color in the quantized image.
      */
-    public fun quantize(pixels: IntArray, maxColors: Int): Map<Int, Int> {
+    public fun quantize(
+        pixels: IntArray,
+        maxColors: Int,
+    ): Map<Int, Int> {
         val wu = QuantizerWu()
         val wuResult: QuantizerResult = wu.quantize(pixels, maxColors)
         val wuClustersAsObjects: Set<Int> = wuResult.colorToCount.keys

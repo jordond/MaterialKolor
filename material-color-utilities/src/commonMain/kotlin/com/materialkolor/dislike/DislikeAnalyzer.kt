@@ -29,7 +29,6 @@ import kotlin.math.round
  */
 @Suppress("MemberVisibilityCanBePrivate")
 public object DislikeAnalyzer {
-
     /**
      * Returns true if color is disliked.
      *
@@ -51,7 +50,6 @@ public object DislikeAnalyzer {
      * @param[hct] Hct color to check
      * @return Lightened Hct color that is not disliked
      */
-    public fun fixIfDisliked(hct: Hct): Hct {
-        return if (isDisliked(hct)) Hct.from(hct.hue, hct.chroma, 70.0) else hct
-    }
+    public fun fixIfDisliked(hct: Hct): Hct =
+        if (isDisliked(hct)) Hct.from(hct.hue, hct.chroma, 70.0) else hct
 }

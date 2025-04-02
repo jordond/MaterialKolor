@@ -7,7 +7,6 @@ import com.materialkolor.temperature.TemperatureCache as KotlinTemperatureCache
 import temperature.TemperatureCache as JavaTemperatureCache
 
 class TemperatureCacheTest {
-
     @Test
     fun testRawTemperature() {
         val testColors = listOf(0xff0000ff, 0xffff0000, 0xff00ff00, 0xffffffff, 0xff000000)

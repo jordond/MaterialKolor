@@ -33,7 +33,6 @@ import kotlin.random.Random
  * the Performance of K-Means for Color Quantization. https://arxiv.org/abs/1101.0395
  */
 internal object QuantizerWsmeans {
-
     private const val MAX_ITERATIONS = 10
     private const val MIN_MOVEMENT_DISTANCE = 3.0
 
@@ -52,7 +51,9 @@ internal object QuantizerWsmeans {
      * to the color.
      */
     fun quantize(
-        inputPixels: IntArray, startingClusters: IntArray, maxColors: Int,
+        inputPixels: IntArray,
+        startingClusters: IntArray,
+        maxColors: Int,
     ): Map<Int, Int> {
         // Uses a seeded random number generator to ensure consistent results.
         val random = Random(0x42688)
@@ -193,12 +194,9 @@ internal object QuantizerWsmeans {
     }
 
     private class Distance : Comparable<Distance> {
-
         var index: Int = -1
         var distance: Double = -1.0
 
-        override operator fun compareTo(other: Distance): Int {
-            return distance.compareTo(other.distance)
-        }
+        override operator fun compareTo(other: Distance): Int = distance.compareTo(other.distance)
     }
 }

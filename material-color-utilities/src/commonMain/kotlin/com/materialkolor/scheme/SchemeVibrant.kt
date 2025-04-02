@@ -26,25 +26,23 @@ public class SchemeVibrant(
     isDark: Boolean,
     contrastLevel: Double,
 ) : DynamicScheme(
-    sourceColorHct = sourceColorHct,
-    variant = Variant.VIBRANT,
-    isDark = isDark,
-    contrastLevel = contrastLevel,
-    primaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 200.0),
-    secondaryPalette = TonalPalette.fromHueAndChroma(
-        hue = getRotatedHue(sourceColorHct, HUES, SECONDARY_ROTATIONS),
-        chroma = 24.0,
-    ),
-    tertiaryPalette = TonalPalette.fromHueAndChroma(
-        hue = getRotatedHue(sourceColorHct, HUES, TERTIARY_ROTATIONS),
-        chroma = 32.0,
-    ),
-    neutralPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 10.0),
-    neutralVariantPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 12.0),
-) {
-
+        sourceColorHct = sourceColorHct,
+        variant = Variant.VIBRANT,
+        isDark = isDark,
+        contrastLevel = contrastLevel,
+        primaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 200.0),
+        secondaryPalette = TonalPalette.fromHueAndChroma(
+            hue = getRotatedHue(sourceColorHct, HUES, SECONDARY_ROTATIONS),
+            chroma = 24.0,
+        ),
+        tertiaryPalette = TonalPalette.fromHueAndChroma(
+            hue = getRotatedHue(sourceColorHct, HUES, TERTIARY_ROTATIONS),
+            chroma = 32.0,
+        ),
+        neutralPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 10.0),
+        neutralVariantPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 12.0),
+    ) {
     private companion object {
-
         private val HUES =
             doubleArrayOf(0.0, 41.0, 61.0, 101.0, 131.0, 181.0, 251.0, 301.0, 360.0)
 

@@ -1,4 +1,3 @@
-import org.jetbrains.dokka.gradle.AbstractDokkaTask
 import org.jetbrains.dokka.gradle.DokkaMultiModuleTask
 
 plugins {
@@ -11,6 +10,7 @@ plugins {
     alias(libs.plugins.poko) apply false
     alias(libs.plugins.dokka)
     alias(libs.plugins.binaryCompatibility)
+    alias(libs.plugins.spotless)
 }
 
 apiValidation {
@@ -23,14 +23,20 @@ tasks.withType<DokkaMultiModuleTask>().configureEach {
     outputDirectory.set(rootDir.resolve("dokka"))
 }
 
-allprojects {
-    // Workaround for https://github.com/Kotlin/dokka/issues/2977.
-    // We disable the C Interop IDE metadata task when generating documentation using Dokka.
-    tasks.withType<AbstractDokkaTask> {
-        @Suppress("UNCHECKED_CAST")
-        val taskClass = Class.forName("org.jetbrains.kotlin.gradle.targets.native.internal.CInteropMetadataDependencyTransformationTask") as Class<Task>
-        parent?.subprojects?.forEach {
-            dependsOn(it.tasks.withType(taskClass))
+subprojects {
+    apply {
+        plugin(rootProject.libs.plugins.spotless.get().pluginId)
+    }
+
+    configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+        kotlin {
+            ktlint(libs.versions.ktlint.get())
+            target("**/*.kt")
+            targetExclude(
+                "${layout.buildDirectory}/**/*.kt",
+            )
+            toggleOffOn()
+            endWithNewline()
         }
     }
 }

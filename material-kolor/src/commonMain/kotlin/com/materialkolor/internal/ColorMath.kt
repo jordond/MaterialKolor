@@ -14,8 +14,8 @@ import com.github.ajalt.colormath.model.XYZColorSpaces
  * ColorMath's Compose extensions don't currently support JS/WASM, so I've copied it here.
  * [See](https://github.com/ajalt/colormath/blob/master/extensions/colormath-ext-jetpack-compose/src/commonMain/kotlin/com/github/ajalt/colormath/extensions/android/composecolor/ComposeColorExtensions.kt).
  */
-internal fun Color.toColormathColor(): com.github.ajalt.colormath.Color {
-    return when (colorSpace) {
+internal fun Color.toColormathColor(): com.github.ajalt.colormath.Color =
+    when (colorSpace) {
         ColorSpaces.Srgb -> SRGB(red, green, blue, alpha)
         ColorSpaces.Aces -> RGBColorSpaces.ACES(red, green, blue, alpha)
         ColorSpaces.Acescg -> RGBColorSpaces.ACEScg(red, green, blue, alpha)
@@ -30,7 +30,6 @@ internal fun Color.toColormathColor(): com.github.ajalt.colormath.Color {
         ColorSpaces.ProPhotoRgb -> RGBColorSpaces.ROMM_RGB(red, green, blue, alpha)
         else -> convert(ColorSpaces.Srgb).let { SRGB(it.red, it.green, it.blue, it.alpha) }
     }
-}
 
 /**
  * Convert this color to a Jetpack Compose [Color][androidx.compose.ui.graphics.Color] instance.

@@ -1,4 +1,4 @@
-package hct;
+package hct
 
 import com.materialkolor.hct.Cam16
 import com.materialkolor.hct.ViewingConditions
@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import utils.shouldBeExactly
 
 class Cam16Test {
-
     @Test
     fun distance() {
         val expected = expectedCam1.distance(expectedCam2)
@@ -120,7 +119,8 @@ class Cam16Test {
     @Test
     fun fromUcsInViewingConditions() {
         val expected = hct
-            .Cam16.fromUcsInViewingConditions(1.0, 2.0, 3.0, hct.ViewingConditions.DEFAULT)
+            .Cam16
+            .fromUcsInViewingConditions(1.0, 2.0, 3.0, hct.ViewingConditions.DEFAULT)
         val actual = Cam16
             .fromUcsInViewingConditions(1.0, 2.0, 3.0, ViewingConditions.DEFAULT)
         expected shouldBeExactly actual
@@ -157,7 +157,6 @@ class Cam16Test {
     }
 
     companion object {
-
         private const val COLOR1 = 0xFFA420
         private const val COLOR2 = 0xC7B446
 

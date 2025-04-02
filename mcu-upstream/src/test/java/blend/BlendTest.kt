@@ -5,7 +5,6 @@ import io.kotest.matchers.ints.shouldBeExactly
 import kotlin.test.Test
 
 class BlendTest {
-
     @Test
     fun harmonize() {
         val expected = blend.Blend.harmonize(COLOR1, COLOR2)
@@ -31,7 +30,6 @@ class BlendTest {
     }
 
     companion object {
-
         private const val COLOR1 = 0x1E2460
         private const val COLOR2 = 0x9E9764
     }

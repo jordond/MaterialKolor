@@ -80,7 +80,6 @@ public class Cam16 private constructor(
     public val astar: Double,
     public val bstar: Double,
 ) {
-
     // Avoid allocations during conversion by pre-allocating an array.
     private val tempArray = doubleArrayOf(0.0, 0.0, 0.0)
 
@@ -101,9 +100,7 @@ public class Cam16 private constructor(
      * ARGB representation of the color. Assumes the color was viewed in default viewing conditions,
      * which are near-identical to the default viewing conditions for sRGB.
      */
-    public fun toInt(): Int {
-        return viewed(ViewingConditions.DEFAULT)
-    }
+    public fun toInt(): Int = viewed(ViewingConditions.DEFAULT)
 
     /**
      * ARGB representation of the color, in defined viewing conditions.
@@ -122,11 +119,15 @@ public class Cam16 private constructor(
     ): DoubleArray {
         val alpha = if (chroma == 0.0 || j == 0.0) 0.0 else chroma / sqrt(j / 100.0)
         val t: Double = pow(
-            alpha / pow(1.64 - pow(0.29, viewingConditions.n), 0.73), 1.0 / 0.9)
+            alpha / pow(1.64 - pow(0.29, viewingConditions.n), 0.73),
+            1.0 / 0.9,
+        )
         val hRad: Double = toRadians(hue)
         val eHue: Double = 0.25 * (cos(hRad + 2.0) + 3.8)
-        val ac: Double = (viewingConditions.aw
-            * pow(j / 100.0, 1.0 / viewingConditions.c / viewingConditions.z))
+        val ac: Double = (
+            viewingConditions.aw
+                * pow(j / 100.0, 1.0 / viewingConditions.c / viewingConditions.z)
+        )
         val p1: Double = eHue * (50000.0 / 13.0) * viewingConditions.nc * viewingConditions.ncb
         val p2: Double = ac / viewingConditions.nbb
         val hSin: Double = sin(hRad)
@@ -161,7 +162,6 @@ public class Cam16 private constructor(
     }
 
     public companion object {
-
         // Transforms XYZ color space coordinates to 'cone'/'RGB' responses in CAM16.
         internal val XYZ_TO_CAM16RGB = arrayOf(
             doubleArrayOf(0.401288, 0.650173, -0.051461),
@@ -181,8 +181,7 @@ public class Cam16 private constructor(
          *
          * @param argb ARGB representation of a color.
          */
-        public fun fromInt(argb: Int): Cam16 =
-            fromIntInViewingConditions(argb, ViewingConditions.DEFAULT)
+        public fun fromInt(argb: Int): Cam16 = fromIntInViewingConditions(argb, ViewingConditions.DEFAULT)
 
         /**
          * Create a CAM16 color from a color in defined viewing conditions.
@@ -194,7 +193,10 @@ public class Cam16 private constructor(
          * @param argb ARGB representation of a color.
          * @param viewingConditions Information about the environment where the color was observed.
          */
-        public fun fromIntInViewingConditions(argb: Int, viewingConditions: ViewingConditions): Cam16 {
+        public fun fromIntInViewingConditions(
+            argb: Int,
+            viewingConditions: ViewingConditions,
+        ): Cam16 {
             // Transform ARGB int to XYZ
             val red = argb and 0x00ff0000 shr 16
             val green = argb and 0x0000ff00 shr 8
@@ -257,14 +259,21 @@ public class Cam16 private constructor(
             val ac: Double = p2 * viewingConditions.nbb
 
             // CAM16 lightness and brightness
-            val j: Double = (100.0
-                * pow(
-                ac / viewingConditions.aw,
-                viewingConditions.c * viewingConditions.z))
-            val q: Double = ((4.0
-                / viewingConditions.c) * sqrt(j / 100.0)
-                * (viewingConditions.aw + 4.0)
-                * viewingConditions.flRoot)
+            val j: Double = (
+                100.0 *
+                    pow(
+                        ac / viewingConditions.aw,
+                        viewingConditions.c * viewingConditions.z,
+                    )
+            )
+            val q: Double = (
+                (
+                    4.0 /
+                        viewingConditions.c
+                ) * sqrt(j / 100.0) *
+                    (viewingConditions.aw + 4.0) *
+                    viewingConditions.flRoot
+            )
 
             // CAM16 chroma, colorfulness, and saturation.
             val huePrime = if (hue < 20.14) hue + 360 else hue
@@ -291,9 +300,11 @@ public class Cam16 private constructor(
          * @param c CAM16 chroma
          * @param h CAM16 hue
          */
-        public fun fromJch(j: Double, c: Double, h: Double): Cam16 {
-            return fromJchInViewingConditions(j, c, h, ViewingConditions.DEFAULT)
-        }
+        public fun fromJch(
+            j: Double,
+            c: Double,
+            h: Double,
+        ): Cam16 = fromJchInViewingConditions(j, c, h, ViewingConditions.DEFAULT)
 
         /**
          * @param j CAM16 lightness
@@ -307,10 +318,14 @@ public class Cam16 private constructor(
             h: Double,
             viewingConditions: ViewingConditions,
         ): Cam16 {
-            val q: Double = ((4.0
-                / viewingConditions.c) * sqrt(j / 100.0)
-                * (viewingConditions.aw + 4.0)
-                * viewingConditions.flRoot)
+            val q: Double = (
+                (
+                    4.0 /
+                        viewingConditions.c
+                ) * sqrt(j / 100.0) *
+                    (viewingConditions.aw + 4.0) *
+                    viewingConditions.flRoot
+            )
             val m: Double = c * viewingConditions.flRoot
             val alpha: Double = c / sqrt(j / 100.0)
             val s: Double = 50.0 * sqrt(alpha * viewingConditions.c / (viewingConditions.aw + 4.0))
@@ -331,9 +346,11 @@ public class Cam16 private constructor(
          * @param bstar CAM16-UCS b dimension. Like a* in L*a*b*, it is a Cartesian coordinate on the X
          * axis.
          */
-        public fun fromUcs(jstar: Double, astar: Double, bstar: Double): Cam16 {
-            return fromUcsInViewingConditions(jstar, astar, bstar, ViewingConditions.DEFAULT)
-        }
+        public fun fromUcs(
+            jstar: Double,
+            astar: Double,
+            bstar: Double,
+        ): Cam16 = fromUcsInViewingConditions(jstar, astar, bstar, ViewingConditions.DEFAULT)
 
         /**
          * Create a CAM16 color from CAM16-UCS coordinates in defined viewing conditions.

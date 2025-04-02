@@ -16,6 +16,8 @@
 package com.materialkolor.quantize
 
 internal interface Quantizer {
-
-    fun quantize(pixels: IntArray?, maxColors: Int): QuantizerResult?
+    fun quantize(
+        pixels: IntArray?,
+        maxColors: Int,
+    ): QuantizerResult?
 }

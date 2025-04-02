@@ -30,7 +30,6 @@ import kotlin.math.round
  */
 @Suppress("unused")
 public object Score {
-
     private const val TARGET_CHROMA = 48.0 // A1 Chroma
     private const val WEIGHT_PROPORTION = 0.7
     private const val WEIGHT_CHROMA_ABOVE = 0.3
@@ -135,12 +134,15 @@ public object Score {
         return colors
     }
 
-    private class ScoredHCT(val hct: Hct, val score: Double)
+    private class ScoredHCT(
+        val hct: Hct,
+        val score: Double,
+    )
 
     private class ScoredComparator : Comparator<ScoredHCT> {
-
-        override fun compare(a: ScoredHCT, b: ScoredHCT): Int {
-            return compareValues(b.score, a.score)
-        }
+        override fun compare(
+            a: ScoredHCT,
+            b: ScoredHCT,
+        ): Int = compareValues(b.score, a.score)
     }
 }

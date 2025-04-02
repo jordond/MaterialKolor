@@ -168,8 +168,11 @@ public fun DynamicMaterialTheme(
 ) {
     val colorScheme = state.colorScheme
     val scheme =
-        if (!animate) colorScheme
-        else animateColorScheme(colorScheme = colorScheme, animationSpec = animationSpec)
+        if (!animate) {
+            colorScheme
+        } else {
+            animateColorScheme(colorScheme = colorScheme, animationSpec = animationSpec)
+        }
 
     CompositionLocalProvider(LocalDynamicMaterialThemeSeed provides state.seedColor) {
         MaterialTheme(

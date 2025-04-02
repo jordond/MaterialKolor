@@ -7,7 +7,6 @@ import utils.shouldMatch
 import kotlin.test.Test
 
 class SchemeContentTest {
-
     private val expectedHct = hct.Hct.from(180.0, 50.0, 50.0)
     private val actualHct = Hct.from(180.0, 50.0, 50.0)
 

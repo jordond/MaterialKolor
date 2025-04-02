@@ -44,8 +44,8 @@ public fun rememberDynamicMaterialThemeState(
     contrastLevel: Double = Contrast.Default.value,
     extendedFidelity: Boolean = false,
     modifyColorScheme: (DynamicMaterialThemeState.(ColorScheme) -> ColorScheme)? = null,
-): DynamicMaterialThemeState {
-    return remember(
+): DynamicMaterialThemeState =
+    remember(
         seedColor,
         isDark,
         isAmoled,
@@ -76,7 +76,6 @@ public fun rememberDynamicMaterialThemeState(
             modifyColorScheme = modifyColorScheme,
         )
     }
-}
 
 /**
  * Creates a [DynamicMaterialThemeState] that can be remembered across compositions using custom colors.
@@ -111,8 +110,8 @@ public fun rememberDynamicMaterialThemeState(
     contrastLevel: Double = Contrast.Default.value,
     extendedFidelity: Boolean = false,
     modifyColorScheme: (DynamicMaterialThemeState.(ColorScheme) -> ColorScheme)? = null,
-): DynamicMaterialThemeState {
-    return remember(
+): DynamicMaterialThemeState =
+    remember(
         primary,
         isDark,
         isAmoled,
@@ -142,7 +141,6 @@ public fun rememberDynamicMaterialThemeState(
             modifyColorScheme = modifyColorScheme,
         )
     }
-}
 
 /**
  * State object that holds the current values for a dynamic material theme.
@@ -181,7 +179,6 @@ public class DynamicMaterialThemeState internal constructor(
     initialError: Color? = null,
     public val modifyColorScheme: (DynamicMaterialThemeState.(ColorScheme) -> ColorScheme)?,
 ) {
-
     /**
      * The seed color to generate the color scheme from.
      *

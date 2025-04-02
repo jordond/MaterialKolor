@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class CorePaletteTest {
-
     @Test
     fun of() {
         val expectedPalette = palettes.CorePalette.of(COLOR)
@@ -30,7 +29,10 @@ class CorePaletteTest {
         assertPalettesEqual(expectedPalette, actualPalette)
     }
 
-    private fun assertPalettesEqual(expected: palettes.CorePalette, actual: CorePalette) {
+    private fun assertPalettesEqual(
+        expected: palettes.CorePalette,
+        actual: CorePalette,
+    ) {
         expected.a1 shouldBeExactly actual.a1
         expected.a2 shouldBeExactly actual.a2
         expected.a3 shouldBeExactly actual.a3

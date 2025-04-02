@@ -10,6 +10,4 @@ import com.materialkolor.scheme.DynamicScheme
  * @param[scheme] Defines the conditions of the user interface, for example, whether or not it is
  * dark mode or light mode, and what the desired contrast level is.
  */
-public fun DynamicColor.getColor(scheme: DynamicScheme): Color {
-    return Color(getArgb(scheme))
-}
+public fun DynamicColor.getColor(scheme: DynamicScheme): Color = Color(getArgb(scheme))

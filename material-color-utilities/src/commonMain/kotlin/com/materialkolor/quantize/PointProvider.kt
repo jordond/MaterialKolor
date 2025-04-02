@@ -19,7 +19,6 @@ package com.materialkolor.quantize
  * An interface to allow use of different color spaces by quantizers.
  */
 internal interface PointProvider {
-
     /**
      * The four components in the color space of an sRGB color.
      *
@@ -44,5 +43,8 @@ internal interface PointProvider {
      * @param[b] The second color.
      * @return The squared distance between the two colors.
      */
-    fun distance(a: DoubleArray, b: DoubleArray): Double
+    fun distance(
+        a: DoubleArray,
+        b: DoubleArray,
+    ): Double
 }

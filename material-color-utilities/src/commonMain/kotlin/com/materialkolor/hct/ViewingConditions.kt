@@ -54,9 +54,7 @@ public class ViewingConditions private constructor(
     public val flRoot: Double,
     public val z: Double,
 ) {
-
     public companion object {
-
         /** sRGB-like viewing conditions.  */
         public val DEFAULT: ViewingConditions = defaultWithBackgroundLstar(50.0)
 
@@ -90,17 +88,26 @@ public class ViewingConditions private constructor(
             val lstar = max(0.1, backgroundLstar)
             // Transform white point XYZ to 'cone'/'rgb' responses
             val matrix = Cam16.XYZ_TO_CAM16RGB
-            val rW = whitePoint[0] * matrix[0][0] + whitePoint[1] * matrix[0][1] + whitePoint[2] * matrix[0][2]
-            val gW = whitePoint[0] * matrix[1][0] + whitePoint[1] * matrix[1][1] + whitePoint[2] * matrix[1][2]
-            val bW = whitePoint[0] * matrix[2][0] + whitePoint[1] * matrix[2][1] + whitePoint[2] * matrix[2][2]
+            val rW =
+                whitePoint[0] * matrix[0][0] + whitePoint[1] * matrix[0][1] + whitePoint[2] * matrix[0][2]
+            val gW =
+                whitePoint[0] * matrix[1][0] + whitePoint[1] * matrix[1][1] + whitePoint[2] * matrix[1][2]
+            val bW =
+                whitePoint[0] * matrix[2][0] + whitePoint[1] * matrix[2][1] + whitePoint[2] * matrix[2][2]
             val f = 0.8 + surround / 10.0
             val c =
-                if (f >= 0.9) lerp(0.59, 0.69, (f - 0.9) * 10.0)
-                else lerp(0.525, 0.59, (f - 0.8) * 10.0)
+                if (f >= 0.9) {
+                    lerp(0.59, 0.69, (f - 0.9) * 10.0)
+                } else {
+                    lerp(0.525, 0.59, (f - 0.8) * 10.0)
+                }
 
             var d =
-                if (discountingIlluminant) 1.0
-                else f * (1.0 - 1.0 / 3.6 * exp((-adaptingLuminance - 42.0) / 92.0))
+                if (discountingIlluminant) {
+                    1.0
+                } else {
+                    f * (1.0 - 1.0 / 3.6 * exp((-adaptingLuminance - 42.0) / 92.0))
+                }
             d = d.coerceIn(0.0, 1.0)
 
             val rgbD = doubleArrayOf(
@@ -136,12 +143,13 @@ public class ViewingConditions private constructor(
          *
          * @param[lstar] The lightness of the area surrounding the color. measured by L* in L*a*b*.
          */
-        public fun defaultWithBackgroundLstar(lstar: Double): ViewingConditions = make(
-            whitePoint = whitePointD65(),
-            adaptingLuminance = 200.0 / PI * yFromLstar(50.0) / 100f,
-            backgroundLstar = lstar,
-            surround = 2.0,
-            discountingIlluminant = false,
-        )
+        public fun defaultWithBackgroundLstar(lstar: Double): ViewingConditions =
+            make(
+                whitePoint = whitePointD65(),
+                adaptingLuminance = 200.0 / PI * yFromLstar(50.0) / 100f,
+                backgroundLstar = lstar,
+                surround = 2.0,
+                discountingIlluminant = false,
+            )
     }
 }

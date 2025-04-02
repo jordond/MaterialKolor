@@ -17,7 +17,6 @@ public class MaterialKolors(
     private val isAmoled: Boolean = false,
     isExtendedFidelity: Boolean = false,
 ) {
-
     private val colors = MaterialDynamicColors(isExtendedFidelity)
 
     /**
@@ -26,8 +25,7 @@ public class MaterialKolors(
      * @param scheme The dynamic scheme used to generate the color.
      * @see MaterialDynamicColors.highestSurface
      */
-    public fun highestSurface(scheme: DynamicScheme): Color =
-        colors.highestSurface(scheme).getColor(scheme)
+    public fun highestSurface(scheme: DynamicScheme): Color = colors.highestSurface(scheme).getColor(scheme)
 
     /**
      * Returns the primary palette key color.
@@ -41,8 +39,7 @@ public class MaterialKolors(
      *
      * @see MaterialDynamicColors.secondaryPaletteKeyColor
      */
-    public fun secondaryPaletteKeyColor(): Color =
-        colors.secondaryPaletteKeyColor().getColor(scheme)
+    public fun secondaryPaletteKeyColor(): Color = colors.secondaryPaletteKeyColor().getColor(scheme)
 
     /**
      * Returns the tertiary palette key color.
@@ -79,8 +76,11 @@ public class MaterialKolors(
      * @see MaterialDynamicColors.background
      */
     public fun background(): Color =
-        if (isAmoled && scheme.isDark) Color.Black
-        else colors.background().getColor(scheme)
+        if (isAmoled && scheme.isDark) {
+            Color.Black
+        } else {
+            colors.background().getColor(scheme)
+        }
 
     /**
      * Returns the on-background color.
@@ -88,8 +88,11 @@ public class MaterialKolors(
      * @see MaterialDynamicColors.onBackground
      */
     public fun onBackground(): Color =
-        if (isAmoled && scheme.isDark) Color.White
-        else colors.onBackground().getColor(scheme)
+        if (isAmoled && scheme.isDark) {
+            Color.White
+        } else {
+            colors.onBackground().getColor(scheme)
+        }
 
     /**
      * Returns the surface color.
@@ -97,8 +100,11 @@ public class MaterialKolors(
      * @see MaterialDynamicColors.surface
      */
     public fun surface(): Color =
-        if (isAmoled && scheme.isDark) Color.Black
-        else colors.surface().getColor(scheme)
+        if (isAmoled && scheme.isDark) {
+            Color.Black
+        } else {
+            colors.surface().getColor(scheme)
+        }
 
     /**
      * Returns the surface dim color.
@@ -155,8 +161,11 @@ public class MaterialKolors(
      * @see MaterialDynamicColors.onSurface
      */
     public fun onSurface(): Color =
-        if (isAmoled && scheme.isDark) Color.White
-        else colors.onSurface().getColor(scheme)
+        if (isAmoled && scheme.isDark) {
+            Color.White
+        } else {
+            colors.onSurface().getColor(scheme)
+        }
 
     /**
      * Returns the surface variant color.

@@ -24,8 +24,11 @@ public fun Blend.harmonize(
     matchSaturation: Boolean = false,
 ): Color {
     val from =
-        if (matchSaturation) fromColor.matchSaturation(toColor)
-        else fromColor
+        if (matchSaturation) {
+            fromColor.matchSaturation(toColor)
+        } else {
+            fromColor
+        }
 
     val fromHct = Hct.from(from)
     val toHct = Hct.from(toColor)
@@ -45,9 +48,10 @@ public fun Blend.harmonize(
  * @return [Color] blended color.
  */
 @Stable
-public fun Color.harmonize(other: Color, matchSaturation: Boolean = false): Color {
-    return Blend.harmonize(fromColor = this, other, matchSaturation)
-}
+public fun Color.harmonize(
+    other: Color,
+    matchSaturation: Boolean = false,
+): Color = Blend.harmonize(fromColor = this, other, matchSaturation)
 
 /**
  * Returns the [Color] of the given [color] harmonized with the [ColorScheme.primary].
@@ -59,6 +63,7 @@ public fun Color.harmonize(other: Color, matchSaturation: Boolean = false): Colo
  * @return [Color] harmonized color
  */
 @Stable
-public fun ColorScheme.harmonizeWithPrimary(color: Color, matchSaturation: Boolean = false): Color {
-    return Blend.harmonize(color, primary, matchSaturation)
-}
+public fun ColorScheme.harmonizeWithPrimary(
+    color: Color,
+    matchSaturation: Boolean = false,
+): Color = Blend.harmonize(color, primary, matchSaturation)
