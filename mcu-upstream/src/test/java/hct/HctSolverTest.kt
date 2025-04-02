@@ -1,4 +1,4 @@
-package hct;
+package hct
 
 import com.materialkolor.hct.HctSolver
 import com.materialkolor.utils.ColorUtils
@@ -7,7 +7,6 @@ import utils.shouldBeExactly
 import kotlin.test.Test
 
 class HctSolverTest {
-
     @Test
     fun solveToInt() {
         val expectedLstar = utils.ColorUtils.lstarFromArgb(0xC7B446)

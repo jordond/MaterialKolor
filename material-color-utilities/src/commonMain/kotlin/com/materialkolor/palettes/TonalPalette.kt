@@ -32,7 +32,6 @@ public class TonalPalette private constructor(
     public val chroma: Double,
     public val keyColor: Hct,
 ) {
-
     private var cache: MutableMap<Int, Int> = HashMap()
 
     /**
@@ -62,8 +61,10 @@ public class TonalPalette private constructor(
     /**
      * Key color is a color that represents the hue and chroma of a tonal palette.
      */
-    private class KeyColor(private val hue: Double, private val requestedChroma: Double) {
-
+    private class KeyColor(
+        private val hue: Double,
+        private val requestedChroma: Double,
+    ) {
         /**
          * Cache that maps tone to max chroma to avoid duplicated HCT calculation.
          */
@@ -120,29 +121,24 @@ public class TonalPalette private constructor(
         }
 
         // Find the maximum chroma for a given tone
-        private fun maxChroma(tone: Int): Double {
-            return chromaCache.getOrPut(tone) {
+        private fun maxChroma(tone: Int): Double =
+            chromaCache.getOrPut(tone) {
                 Hct.from(hue, MAX_CHROMA_VALUE, tone.toDouble()).chroma
             }
-        }
 
         companion object {
-
             private const val MAX_CHROMA_VALUE = 200.0
         }
     }
 
     public companion object {
-
         /**
          * Create tones using the HCT hue and chroma from a color.
          *
          * @param[argb] ARGB representation of a color
          * @return Tones matching that color's hue and chroma.
          */
-        public fun fromInt(argb: Int): TonalPalette {
-            return fromHct(Hct.fromInt(argb))
-        }
+        public fun fromInt(argb: Int): TonalPalette = fromHct(Hct.fromInt(argb))
 
         /**
          * Create tones using a HCT color.
@@ -150,9 +146,7 @@ public class TonalPalette private constructor(
          * @param[hct] HCT representation of a color.
          * @return Tones matching that color's hue and chroma.
          */
-        public fun fromHct(hct: Hct): TonalPalette {
-            return TonalPalette(hct.hue, hct.chroma, hct)
-        }
+        public fun fromHct(hct: Hct): TonalPalette = TonalPalette(hct.hue, hct.chroma, hct)
 
         /**
          * Create tones from a defined HCT hue and chroma.
@@ -161,7 +155,10 @@ public class TonalPalette private constructor(
          * @param[chroma] HCT chroma
          * @return Tones matching hue and chroma.
          */
-        public fun fromHueAndChroma(hue: Double, chroma: Double): TonalPalette {
+        public fun fromHueAndChroma(
+            hue: Double,
+            chroma: Double,
+        ): TonalPalette {
             val keyColor = KeyColor(hue, chroma).create()
             return TonalPalette(hue, chroma, keyColor)
         }

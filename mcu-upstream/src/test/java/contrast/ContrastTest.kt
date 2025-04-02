@@ -13,7 +13,6 @@ import kotlin.math.roundToInt
 import kotlin.test.Test
 
 class ContrastTest {
-
     @Test
     fun ratioOfYs() {
         val expectedFirstXyz = utils.ColorUtils.xyzFromArgb(COLOR1).toList()
@@ -217,7 +216,6 @@ class ContrastTest {
     }
 
     companion object {
-
         private const val COLOR1 = 0x6C7059
         private const val COLOR2 = 0xB44C43
     }

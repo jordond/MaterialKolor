@@ -42,37 +42,38 @@ public fun rememberDynamicColorScheme(
     contrastLevel: Double = Contrast.Default.value,
     isExtendedFidelity: Boolean = false,
     modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
-): ColorScheme = remember(
-    seedColor,
-    isDark,
-    isAmoled,
-    primary,
-    secondary,
-    tertiary,
-    neutral,
-    neutralVariant,
-    error,
-    style,
-    contrastLevel,
-    isExtendedFidelity,
-    modifyColorScheme,
-) {
-    dynamicColorScheme(
-        seedColor = seedColor,
-        isDark = isDark,
-        isAmoled = isAmoled,
-        primary = primary,
-        secondary = secondary,
-        tertiary = tertiary,
-        neutral = neutral,
-        neutralVariant = neutralVariant,
-        error = error,
-        style = style,
-        contrastLevel = contrastLevel,
-        isExtendedFidelity = isExtendedFidelity,
-        modifyColorScheme = modifyColorScheme,
-    )
-}
+): ColorScheme =
+    remember(
+        seedColor,
+        isDark,
+        isAmoled,
+        primary,
+        secondary,
+        tertiary,
+        neutral,
+        neutralVariant,
+        error,
+        style,
+        contrastLevel,
+        isExtendedFidelity,
+        modifyColorScheme,
+    ) {
+        dynamicColorScheme(
+            seedColor = seedColor,
+            isDark = isDark,
+            isAmoled = isAmoled,
+            primary = primary,
+            secondary = secondary,
+            tertiary = tertiary,
+            neutral = neutral,
+            neutralVariant = neutralVariant,
+            error = error,
+            style = style,
+            contrastLevel = contrastLevel,
+            isExtendedFidelity = isExtendedFidelity,
+            modifyColorScheme = modifyColorScheme,
+        )
+    }
 
 /**
  * Create a custom [ColorScheme] based on the provided colors.
@@ -156,35 +157,36 @@ public fun rememberDynamicColorScheme(
     contrastLevel: Double = Contrast.Default.value,
     isExtendedFidelity: Boolean = false,
     modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
-): ColorScheme = remember(
-    primary,
-    isDark,
-    isAmoled,
-    secondary,
-    tertiary,
-    neutral,
-    neutralVariant,
-    error,
-    style,
-    contrastLevel,
-    isExtendedFidelity,
-    modifyColorScheme,
-) {
-    dynamicColorScheme(
-        primary = primary,
-        isDark = isDark,
-        isAmoled = isAmoled,
-        secondary = secondary,
-        tertiary = tertiary,
-        neutral = neutral,
-        neutralVariant = neutralVariant,
-        error = error,
-        style = style,
-        contrastLevel = contrastLevel,
-        isExtendedFidelity = isExtendedFidelity,
-        modifyColorScheme = modifyColorScheme,
-    )
-}
+): ColorScheme =
+    remember(
+        primary,
+        isDark,
+        isAmoled,
+        secondary,
+        tertiary,
+        neutral,
+        neutralVariant,
+        error,
+        style,
+        contrastLevel,
+        isExtendedFidelity,
+        modifyColorScheme,
+    ) {
+        dynamicColorScheme(
+            primary = primary,
+            isDark = isDark,
+            isAmoled = isAmoled,
+            secondary = secondary,
+            tertiary = tertiary,
+            neutral = neutral,
+            neutralVariant = neutralVariant,
+            error = error,
+            style = style,
+            contrastLevel = contrastLevel,
+            isExtendedFidelity = isExtendedFidelity,
+            modifyColorScheme = modifyColorScheme,
+        )
+    }
 
 /**
  * Create a custom [ColorScheme] based on the provided colors. Uses [primary] as the seed color.
@@ -217,21 +219,22 @@ public fun dynamicColorScheme(
     contrastLevel: Double = Contrast.Default.value,
     isExtendedFidelity: Boolean = false,
     modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
-): ColorScheme = dynamicColorScheme(
-    seedColor = primary,
-    isDark = isDark,
-    isAmoled = isAmoled,
-    primary = primary,
-    secondary = secondary,
-    tertiary = tertiary,
-    neutral = neutral,
-    neutralVariant = neutralVariant,
-    error = error,
-    style = style,
-    contrastLevel = contrastLevel,
-    isExtendedFidelity = isExtendedFidelity,
-    modifyColorScheme = modifyColorScheme,
-)
+): ColorScheme =
+    dynamicColorScheme(
+        seedColor = primary,
+        isDark = isDark,
+        isAmoled = isAmoled,
+        primary = primary,
+        secondary = secondary,
+        tertiary = tertiary,
+        neutral = neutral,
+        neutralVariant = neutralVariant,
+        error = error,
+        style = style,
+        contrastLevel = contrastLevel,
+        isExtendedFidelity = isExtendedFidelity,
+        modifyColorScheme = modifyColorScheme,
+    )
 
 /**
  * Create the actual [ColorScheme] based on the given [DynamicScheme].

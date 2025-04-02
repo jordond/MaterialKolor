@@ -16,9 +16,7 @@ import com.materialkolor.temperature.TemperatureCache
  * and chroma as the input color, modulo any restrictions due to the other hues having lower
  * limits on chroma.
  */
-public fun TemperatureCache(input: Color): TemperatureCache {
-    return TemperatureCache(input.toHct())
-}
+public fun TemperatureCache(input: Color): TemperatureCache = TemperatureCache(input.toHct())
 
 /**
  * Value representing cool-warm factor of a color.
@@ -38,22 +36,16 @@ public fun TemperatureCache(input: Color): TemperatureCache {
  * @param[color] The color to calculate the cool-warm factor of.
  * @return below 0 is cool, above 0 is warm.
  */
-public fun TemperatureCache.Companion.temperature(color: Color): Double {
-    return rawTemperature(color.toHct())
-}
+public fun TemperatureCache.Companion.temperature(color: Color): Double = rawTemperature(color.toHct())
 
 /**
  * Determine a given color is warm.
  */
 @Stable
-public fun Color.isWarm(): Boolean {
-    return TemperatureCache.temperature(this) > 0
-}
+public fun Color.isWarm(): Boolean = TemperatureCache.temperature(this) > 0
 
 /**
  * Determine a given color is cool.
  */
 @Stable
-public fun Color.isCool(): Boolean {
-    return TemperatureCache.temperature(this) < 0
-}
+public fun Color.isCool(): Boolean = TemperatureCache.temperature(this) < 0

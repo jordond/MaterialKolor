@@ -27,8 +27,10 @@ import kotlin.math.min
  * @param[argb] ARGB representation of a color
  * @param[isContent] Whether the color is used as a content color
  */
-public class CorePalette private constructor(argb: Int, isContent: Boolean) {
-
+public class CorePalette private constructor(
+    argb: Int,
+    isContent: Boolean,
+) {
     public val a1: TonalPalette
     public val a2: TonalPalette
     public val a3: TonalPalette
@@ -57,7 +59,6 @@ public class CorePalette private constructor(argb: Int, isContent: Boolean) {
     }
 
     public companion object {
-
         /**
          * Create key tones from a color.
          *

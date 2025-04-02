@@ -41,8 +41,9 @@ import kotlin.math.round
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 @Poko
-public class TemperatureCache(private val input: Hct) {
-
+public class TemperatureCache(
+    private val input: Hct,
+) {
     private var precomputedComplement: Hct? = null
     private var precomputedHctsByTemp: List<Hct>? = null
     private var precomputedHctsByHue: List<Hct>? = null
@@ -76,7 +77,8 @@ public class TemperatureCache(private val input: Hct) {
             var hueAddend = 0.0
             while (hueAddend <= 360.0) {
                 val hue = MathUtils.sanitizeDegrees(
-                    startHue + directionOfRotation * hueAddend)
+                    startHue + directionOfRotation * hueAddend,
+                )
                 if (!isBetween(hue, startHue, endHue)) {
                     hueAddend += 1.0
                     continue
@@ -113,7 +115,10 @@ public class TemperatureCache(private val input: Hct) {
      * @param count The number of colors to return, includes the input color.
      * @param divisions The number of divisions on the color wheel.
      */
-    public fun getAnalogousColors(count: Int, divisions: Int): List<Hct> {
+    public fun getAnalogousColors(
+        count: Int,
+        divisions: Int,
+    ): List<Hct> {
         // The starting hue is the hue of the input color.
         val startHue = round(input.hue).toInt()
         val startHct: Hct = hctsByHue!![startHue]
@@ -205,7 +210,9 @@ public class TemperatureCache(private val input: Hct) {
         // coldest: for example, at T100, only one color is available, white.
         return if (range == 0.0) {
             0.5
-        } else differenceFromColdest / range
+        } else {
+            differenceFromColdest / range
+        }
     }
 
     /**
@@ -279,7 +286,6 @@ public class TemperatureCache(private val input: Hct) {
         get() = hctsByTemp!![hctsByTemp!!.size - 1]
 
     public companion object {
-
         /**
          * Value representing cool-warm factor of a color. Values below 0 are considered cool, above,
          * warm.
@@ -298,18 +304,28 @@ public class TemperatureCache(private val input: Hct) {
             val lab: DoubleArray = ColorUtils.labFromArgb(color.toInt())
             val hue = MathUtils.sanitizeDegrees(MathUtils.toDegrees(atan2(lab[2], lab[1])))
             val chroma: Double = hypot(lab[1], lab[2])
-            return (-0.5
-                + (0.02
-                * chroma.pow(1.07)
-                * cos(MathUtils.toRadians(MathUtils.sanitizeDegrees(hue - 50.0)))))
+            return (
+                -0.5 +
+                    (
+                        0.02 *
+                            chroma.pow(1.07) *
+                            cos(MathUtils.toRadians(MathUtils.sanitizeDegrees(hue - 50.0)))
+                    )
+            )
         }
 
         /**
          * Determines if an angle is between two other angles, rotating clockwise.
          */
-        private fun isBetween(angle: Double, a: Double, b: Double): Boolean {
-            return if (a < b) angle in a..b
-            else a <= angle || angle <= b
-        }
+        private fun isBetween(
+            angle: Double,
+            a: Double,
+            b: Double,
+        ): Boolean =
+            if (a < b) {
+                angle in a..b
+            } else {
+                a <= angle || angle <= b
+            }
     }
 }

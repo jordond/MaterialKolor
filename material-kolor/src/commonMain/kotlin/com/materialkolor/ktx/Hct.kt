@@ -11,9 +11,7 @@ import com.materialkolor.hct.Hct
  * @param[color] The color to convert.
  * @return The HCT representation of the color.
  */
-public fun Hct.Companion.from(color: Color): Hct {
-    return fromInt(color.toArgb())
-}
+public fun Hct.Companion.from(color: Color): Hct = fromInt(color.toArgb())
 
 /**
  * Convert HCT to a Compose [Color].
@@ -22,9 +20,7 @@ public fun Hct.Companion.from(color: Color): Hct {
  * @return The Compose [Color] representation of the HCT.
  */
 @Stable
-public fun Hct.toColor(): Color {
-    return Color(toInt())
-}
+public fun Hct.toColor(): Color = Color(toInt())
 
 /**
  * Convert a list of HCT to a list of Compose [Color].
@@ -33,9 +29,7 @@ public fun Hct.toColor(): Color {
  * @return The list of Compose [Color] representation of the HCT.
  */
 @Stable
-public fun List<Hct>.toColors(): List<Color> {
-    return map { it.toColor() }
-}
+public fun List<Hct>.toColors(): List<Color> = map { it.toColor() }
 
 /**
  * Convert a Compose [Color] to [Hct].
@@ -43,9 +37,7 @@ public fun List<Hct>.toColors(): List<Color> {
  * @receiver The color to convert.
  * @return The HCT representation of the color.
  */
-public fun Color.toHct(): Hct {
-    return Hct.from(this)
-}
+public fun Color.toHct(): Hct = Hct.from(this)
 
 /**
  * Convert a list of Compose [Color] to a list of HCT.
@@ -53,6 +45,4 @@ public fun Color.toHct(): Hct {
  * @receiver The list of colors to convert.
  * @return The list of HCT representation of the colors.
  */
-public fun List<Color>.toHcts(): List<Hct> {
-    return map { it.toHct() }
-}
+public fun List<Color>.toHcts(): List<Hct> = map { it.toHct() }

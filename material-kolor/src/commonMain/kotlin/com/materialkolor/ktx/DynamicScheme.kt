@@ -78,31 +78,32 @@ public fun rememberDynamicScheme(
     error: Color? = null,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
-): DynamicScheme = remember(
-    seedColor,
-    isDark,
-    primary,
-    secondary,
-    tertiary,
-    neutral,
-    neutralVariant,
-    error,
-    style,
-    contrastLevel,
-) {
-    DynamicScheme(
-        seedColor = seedColor,
-        isDark = isDark,
-        primary = primary,
-        secondary = secondary,
-        tertiary = tertiary,
-        neutral = neutral,
-        neutralVariant = neutralVariant,
-        error = error,
-        style = style,
-        contrastLevel = contrastLevel,
-    )
-}
+): DynamicScheme =
+    remember(
+        seedColor,
+        isDark,
+        primary,
+        secondary,
+        tertiary,
+        neutral,
+        neutralVariant,
+        error,
+        style,
+        contrastLevel,
+    ) {
+        DynamicScheme(
+            seedColor = seedColor,
+            isDark = isDark,
+            primary = primary,
+            secondary = secondary,
+            tertiary = tertiary,
+            neutral = neutral,
+            neutralVariant = neutralVariant,
+            error = error,
+            style = style,
+            contrastLevel = contrastLevel,
+        )
+    }
 
 /**
  * Create a [DynamicScheme] based on the provided colors.

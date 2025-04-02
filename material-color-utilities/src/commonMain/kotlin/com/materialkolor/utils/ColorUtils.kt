@@ -27,7 +27,6 @@ import kotlin.math.round
  */
 @Suppress("MemberVisibilityCanBePrivate")
 public object ColorUtils {
-
     private val SRGB_TO_XYZ = arrayOf(
         doubleArrayOf(0.41233895, 0.35762064, 0.18051042),
         doubleArrayOf(0.2126, 0.7152, 0.0722),
@@ -50,9 +49,11 @@ public object ColorUtils {
      * @param[blue] the blue component, in the range [0, 255]
      * @return the ARGB representation of the color
      */
-    public fun argbFromRgb(red: Int, green: Int, blue: Int): Int {
-        return 255 shl 24 or (red and 255 shl 16) or (green and 255 shl 8) or (blue and 255)
-    }
+    public fun argbFromRgb(
+        red: Int,
+        green: Int,
+        blue: Int,
+    ): Int = 255 shl 24 or (red and 255 shl 16) or (green and 255 shl 8) or (blue and 255)
 
     /**
      * Converts a color from linear RGB components to ARGB format.
@@ -73,9 +74,7 @@ public object ColorUtils {
      * @param[argb] the ARGB representation of a color
      * @return the red component of the color
      */
-    public fun redFromArgb(argb: Int): Int {
-        return argb shr 16 and 255
-    }
+    public fun redFromArgb(argb: Int): Int = argb shr 16 and 255
 
     /**
      * Returns the green component of a color in ARGB format.
@@ -83,9 +82,7 @@ public object ColorUtils {
      * @param[argb] the ARGB representation of a color
      * @return the green component of the color
      */
-    public fun greenFromArgb(argb: Int): Int {
-        return argb shr 8 and 255
-    }
+    public fun greenFromArgb(argb: Int): Int = argb shr 8 and 255
 
     /**
      * Returns the blue component of a color in ARGB format.
@@ -93,9 +90,7 @@ public object ColorUtils {
      * @param[argb] the ARGB representation of a color
      * @return the blue component of the color
      */
-    public fun blueFromArgb(argb: Int): Int {
-        return argb and 255
-    }
+    public fun blueFromArgb(argb: Int): Int = argb and 255
 
     /**
      * Converts a color from ARGB to XYZ.
@@ -105,7 +100,11 @@ public object ColorUtils {
      * @param[z] the Z component of the color
      * @return the ARGB representation of the color
      */
-    public fun argbFromXyz(x: Double, y: Double, z: Double): Int {
+    public fun argbFromXyz(
+        x: Double,
+        y: Double,
+        z: Double,
+    ): Int {
         val matrix = XYZ_TO_SRGB
         val linearR = matrix[0][0] * x + matrix[0][1] * y + matrix[0][2] * z
         val linearG = matrix[1][0] * x + matrix[1][1] * y + matrix[1][2] * z
@@ -137,7 +136,11 @@ public object ColorUtils {
      * @param[b] the b* component of the color
      * @return the ARGB representation of the color
      */
-    public fun argbFromLab(l: Double, a: Double, b: Double): Int {
+    public fun argbFromLab(
+        l: Double,
+        a: Double,
+        b: Double,
+    ): Int {
         val whitePoint = WHITE_POINT_D65
         val fy = (l + 16.0) / 116.0
         val fx = a / 500.0 + fy
@@ -213,9 +216,7 @@ public object ColorUtils {
      * @param[lstar] L* in L*a*b*
      * @return Y in XYZ
      */
-    public fun yFromLstar(lstar: Double): Double {
-        return 100.0 * labInvf((lstar + 16.0) / 116.0)
-    }
+    public fun yFromLstar(lstar: Double): Double = 100.0 * labInvf((lstar + 16.0) / 116.0)
 
     /**
      * Converts a Y value to an L* value.
@@ -228,9 +229,7 @@ public object ColorUtils {
      * @param[y] Y in XYZ
      * @return L* in L*a*b*
      */
-    public fun lstarFromY(y: Double): Double {
-        return labF(y / 100.0) * 116.0 - 16.0
-    }
+    public fun lstarFromY(y: Double): Double = labF(y / 100.0) * 116.0 - 16.0
 
     /**
      * Linearizes an RGB component.
@@ -240,8 +239,11 @@ public object ColorUtils {
      */
     public fun linearized(rgbComponent: Int): Double {
         val normalized = rgbComponent / 255.0
-        return if (normalized <= 0.040449936) normalized / 12.92 * 100.0
-        else ((normalized + 0.055) / 1.055).pow(2.4) * 100.0
+        return if (normalized <= 0.040449936) {
+            normalized / 12.92 * 100.0
+        } else {
+            ((normalized + 0.055) / 1.055).pow(2.4) * 100.0
+        }
     }
 
     /**
@@ -253,8 +255,11 @@ public object ColorUtils {
     public fun delinearized(rgbComponent: Double): Int {
         val normalized = rgbComponent / 100.0
         val delinearized: Double =
-            if (normalized <= 0.0031308) normalized * 12.92
-            else 1.055 * normalized.pow(1.0 / 2.4) - 0.055
+            if (normalized <= 0.0031308) {
+                normalized * 12.92
+            } else {
+                1.055 * normalized.pow(1.0 / 2.4) - 0.055
+            }
 
         return round(delinearized * 255.0).coerceIn(0.0, 255.0).toInt()
     }

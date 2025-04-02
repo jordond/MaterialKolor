@@ -38,29 +38,29 @@ public class SchemeContent(
     isDark: Boolean,
     contrastLevel: Double,
 ) : DynamicScheme(
-    sourceColorHct = sourceColorHct,
-    variant = Variant.CONTENT,
-    isDark = isDark,
-    contrastLevel = contrastLevel,
-    primaryPalette = TonalPalette.fromHueAndChroma(
-        hue = sourceColorHct.hue,
-        chroma = sourceColorHct.chroma,
-    ),
-    secondaryPalette = TonalPalette.fromHueAndChroma(
-        hue = sourceColorHct.hue,
-        chroma = max(sourceColorHct.chroma - 32.0, sourceColorHct.chroma * 0.5),
-    ),
-    tertiaryPalette = TonalPalette.fromHct(
-        hct = DislikeAnalyzer.fixIfDisliked(
-            hct = TemperatureCache(sourceColorHct).getAnalogousColors(count = 3, divisions = 6)[2],
+        sourceColorHct = sourceColorHct,
+        variant = Variant.CONTENT,
+        isDark = isDark,
+        contrastLevel = contrastLevel,
+        primaryPalette = TonalPalette.fromHueAndChroma(
+            hue = sourceColorHct.hue,
+            chroma = sourceColorHct.chroma,
         ),
-    ),
-    neutralPalette = TonalPalette.fromHueAndChroma(
-        hue = sourceColorHct.hue,
-        chroma = sourceColorHct.chroma / 8.0,
-    ),
-    neutralVariantPalette = TonalPalette.fromHueAndChroma(
-        hue = sourceColorHct.hue,
-        chroma = sourceColorHct.chroma / 8.0 + 4.0,
-    ),
-)
+        secondaryPalette = TonalPalette.fromHueAndChroma(
+            hue = sourceColorHct.hue,
+            chroma = max(sourceColorHct.chroma - 32.0, sourceColorHct.chroma * 0.5),
+        ),
+        tertiaryPalette = TonalPalette.fromHct(
+            hct = DislikeAnalyzer.fixIfDisliked(
+                hct = TemperatureCache(sourceColorHct).getAnalogousColors(count = 3, divisions = 6)[2],
+            ),
+        ),
+        neutralPalette = TonalPalette.fromHueAndChroma(
+            hue = sourceColorHct.hue,
+            chroma = sourceColorHct.chroma / 8.0,
+        ),
+        neutralVariantPalette = TonalPalette.fromHueAndChroma(
+            hue = sourceColorHct.hue,
+            chroma = sourceColorHct.chroma / 8.0 + 4.0,
+        ),
+    )

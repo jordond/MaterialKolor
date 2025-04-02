@@ -19,7 +19,6 @@ package com.materialkolor.scheme
  * Themes for Dynamic Color.
  */
 public enum class Variant {
-
     /**
      * A monochrome theme, colors are purely black / white / gray.
      */
