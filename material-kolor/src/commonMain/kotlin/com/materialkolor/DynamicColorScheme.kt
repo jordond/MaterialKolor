@@ -31,7 +31,7 @@ import com.materialkolor.scheme.DynamicScheme
 public fun rememberDynamicColorScheme(
     seedColor: Color,
     isDark: Boolean,
-    isAmoled: Boolean,
+    isAmoled: Boolean = false,
     primary: Color? = null,
     secondary: Color? = null,
     tertiary: Color? = null,
@@ -96,7 +96,7 @@ public fun rememberDynamicColorScheme(
 public fun dynamicColorScheme(
     seedColor: Color,
     isDark: Boolean,
-    isAmoled: Boolean,
+    isAmoled: Boolean = false,
     primary: Color? = null,
     secondary: Color? = null,
     tertiary: Color? = null,
@@ -146,7 +146,7 @@ public fun dynamicColorScheme(
 public fun rememberDynamicColorScheme(
     primary: Color,
     isDark: Boolean,
-    isAmoled: Boolean,
+    isAmoled: Boolean = false,
     secondary: Color? = null,
     tertiary: Color? = null,
     neutral: Color? = null,
@@ -207,7 +207,7 @@ public fun rememberDynamicColorScheme(
 public fun dynamicColorScheme(
     primary: Color,
     isDark: Boolean,
-    isAmoled: Boolean,
+    isAmoled: Boolean = false,
     secondary: Color? = null,
     tertiary: Color? = null,
     neutral: Color? = null,
@@ -237,7 +237,7 @@ public fun dynamicColorScheme(
  * Create the actual [ColorScheme] based on the given [DynamicScheme].
  */
 public fun DynamicScheme.toColorScheme(
-    isAmoled: Boolean,
+    isAmoled: Boolean = false,
     isExtendedFidelity: Boolean = false,
     modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
 ): ColorScheme {
