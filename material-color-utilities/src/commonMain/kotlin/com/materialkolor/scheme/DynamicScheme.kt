@@ -36,11 +36,9 @@ public open class DynamicScheme(
     public val neutralVariantPalette: TonalPalette,
     public val errorPalette: TonalPalette = TonalPalette.fromHueAndChroma(hue = 25.0, chroma = 84.0),
 ) {
-
     public val sourceColorArgb: Int = sourceColorHct.toInt()
 
     public companion object {
-
         /**
          * Given a set of hues and set of hue rotations, locate which hues the source color's hue is
          * between, apply the rotation at the same index as the first hue in the range, and return the

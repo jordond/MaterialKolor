@@ -26,9 +26,8 @@ internal val defaultColorSpring = spring<Color>()
  * @return [Boolean] true if the color is light, false otherwise.
  */
 @Stable
-public fun Color.isLight(): Boolean {
-    return this != Color.Transparent && ColorUtils.calculateLuminance(toArgb()) > 0.5;
-}
+public fun Color.isLight(): Boolean =
+    this != Color.Transparent && ColorUtils.calculateLuminance(toArgb()) > 0.5
 
 /**
  * Lighten the color by the given ratio.
@@ -67,9 +66,7 @@ public fun Color.darken(ratio: Float = 1.1f): Color {
  * @return true if color is disliked
  */
 @Stable
-public fun Color.isDisliked(): Boolean {
-    return DislikeAnalyzer.isDisliked(toHct())
-}
+public fun Color.isDisliked(): Boolean = DislikeAnalyzer.isDisliked(toHct())
 
 /**
  * If color is disliked, lighten it to make it likable.
@@ -78,9 +75,7 @@ public fun Color.isDisliked(): Boolean {
  * @return Lightened [Color] that is not disliked
  */
 @Stable
-public fun Color.fixIfDisliked(): Color {
-    return DislikeAnalyzer.fixIfDisliked(toHct()).toColor()
-}
+public fun Color.fixIfDisliked(): Color = DislikeAnalyzer.fixIfDisliked(toHct()).toColor()
 
 /**
  * Convert the color to a hex string.
@@ -121,7 +116,7 @@ public fun Color.toHex(
 public fun Color.animate(
     animationSpec: AnimationSpec<Color> = defaultColorSpring,
     label: String = "ColorAnimation",
-    finishedListener: ((Color) -> Unit)? = null
+    finishedListener: ((Color) -> Unit)? = null,
 ): State<Color> = animateColorAsState(this, animationSpec)
 
 /**
@@ -130,9 +125,7 @@ public fun Color.animate(
  * @receiver[Int] to format.
  * @return [String] hex representation of the integer.
  */
-internal fun Int.format(): String {
-    return toString(16).padStart(2, '0')
-}
+internal fun Int.format(): String = toString(16).padStart(2, '0')
 
 /**
  * Create a [Color] with the same hue as this color, but with the saturation and lightness of [other].
@@ -155,6 +148,4 @@ internal fun Color.matchSaturation(other: Color): Color {
  * @return [TonalPalette] representation of the color.
  */
 @Stable
-internal fun Color.toTonalPalette(): TonalPalette {
-    return TonalPalette.from(this)
-}
+internal fun Color.toTonalPalette(): TonalPalette = TonalPalette.from(this)

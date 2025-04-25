@@ -27,7 +27,6 @@ import com.materialkolor.utils.ColorUtils.redFromArgb
  * The algorithm was described by Xiaolin Wu in Graphic Gems II, published in 1991.
  */
 internal class QuantizerWu : Quantizer {
-
     private lateinit var weights: IntArray
     private lateinit var momentsR: IntArray
     private lateinit var momentsG: IntArray
@@ -35,7 +34,10 @@ internal class QuantizerWu : Quantizer {
     private lateinit var moments: DoubleArray
     private lateinit var cubes: Array<Box?>
 
-    override fun quantize(pixels: IntArray?, maxColors: Int): QuantizerResult {
+    override fun quantize(
+        pixels: IntArray?,
+        maxColors: Int,
+    ): QuantizerResult {
         val mapResult = QuantizerMap().quantize(pixels, maxColors)
         constructHistogram(mapResult.colorToCount)
         createMoments()
@@ -165,20 +167,30 @@ internal class QuantizerWu : Quantizer {
         val dr = volume(cube, momentsR)
         val dg = volume(cube, momentsG)
         val db = volume(cube, momentsB)
-        val xx = ((((moments[getIndex(cube!!.r1, cube.g1, cube.b1)]
-            - moments[getIndex(cube.r1, cube.g1, cube.b0)]
-            - moments[getIndex(cube.r1, cube.g0, cube.b1)])
-            + moments[getIndex(cube.r1, cube.g0, cube.b0)]
-            - moments[getIndex(cube.r0, cube.g1, cube.b1)]
-            ) + moments[getIndex(cube.r0, cube.g1, cube.b0)]
-            + moments[getIndex(cube.r0, cube.g0, cube.b1)])
-            - moments[getIndex(cube.r0, cube.g0, cube.b0)])
+        val xx = (
+            (
+                (
+                    (
+                        moments[getIndex(cube!!.r1, cube.g1, cube.b1)] -
+                            moments[getIndex(cube.r1, cube.g1, cube.b0)] -
+                            moments[getIndex(cube.r1, cube.g0, cube.b1)]
+                    ) +
+                        moments[getIndex(cube.r1, cube.g0, cube.b0)] -
+                        moments[getIndex(cube.r0, cube.g1, cube.b1)]
+                ) + moments[getIndex(cube.r0, cube.g1, cube.b0)] +
+                    moments[getIndex(cube.r0, cube.g0, cube.b1)]
+            ) -
+                moments[getIndex(cube.r0, cube.g0, cube.b0)]
+        )
         val hypotenuse = dr * dr + dg * dg + db * db
         val volume = volume(cube, weights)
         return xx - hypotenuse / volume.toDouble()
     }
 
-    private fun cut(one: Box?, two: Box?): Boolean {
+    private fun cut(
+        one: Box?,
+        two: Box?,
+    ): Boolean {
         val wholeR = volume(one, momentsR)
         val wholeG = volume(one, momentsG)
         val wholeB = volume(one, momentsB)
@@ -280,7 +292,7 @@ internal class QuantizerWu : Quantizer {
     enum class Direction {
         RED,
         GREEN,
-        BLUE
+        BLUE,
     }
 
     class MaximizeResult internal constructor(
@@ -289,10 +301,11 @@ internal class QuantizerWu : Quantizer {
         var maximum: Double,
     )
 
-    class CreateBoxesResult internal constructor(var resultCount: Int)
+    class CreateBoxesResult internal constructor(
+        var resultCount: Int,
+    )
 
     class Box {
-
         var r0 = 0
         var r1 = 0
         var g0 = 0
@@ -303,7 +316,6 @@ internal class QuantizerWu : Quantizer {
     }
 
     companion object {
-
         // A histogram of all the input colors is constructed. It has the shape of a
         // cube. The cube would be too large if it contained all 16 million colors:
         // historical best practice is to use 5 bits  of the 8 in each channel,
@@ -311,53 +323,96 @@ internal class QuantizerWu : Quantizer {
         private const val INDEX_BITS = 5
         private const val INDEX_COUNT = 33 // ((1 << INDEX_BITS) + 1)
         private const val TOTAL_SIZE = 35937 // INDEX_COUNT * INDEX_COUNT * INDEX_COUNT
-        fun getIndex(r: Int, g: Int, b: Int): Int {
-            return (r shl INDEX_BITS * 2) + (r shl INDEX_BITS + 1) + r + (g shl INDEX_BITS) + g + b
-        }
 
-        fun volume(cube: Box?, moment: IntArray): Int {
-            return ((((moment[getIndex(cube!!.r1, cube.g1, cube.b1)]
-                - moment[getIndex(cube.r1, cube.g1, cube.b0)]
-                - moment[getIndex(cube.r1, cube.g0, cube.b1)])
-                + moment[getIndex(cube.r1, cube.g0, cube.b0)]
-                - moment[getIndex(cube.r0, cube.g1, cube.b1)]
-                ) + moment[getIndex(cube.r0, cube.g1, cube.b0)]
-                + moment[getIndex(cube.r0, cube.g0, cube.b1)])
-                - moment[getIndex(cube.r0, cube.g0, cube.b0)])
-        }
+        fun getIndex(
+            r: Int,
+            g: Int,
+            b: Int,
+        ): Int = (r shl INDEX_BITS * 2) + (r shl INDEX_BITS + 1) + r + (g shl INDEX_BITS) + g + b
 
-        fun bottom(cube: Box?, direction: Direction, moment: IntArray): Int {
-            return when (direction) {
-                Direction.RED -> ((-moment[getIndex(cube!!.r0, cube.g1, cube.b1)]
-                    + moment[getIndex(cube.r0, cube.g1, cube.b0)]
-                    + moment[getIndex(cube.r0, cube.g0, cube.b1)])
-                    - moment[getIndex(cube.r0, cube.g0, cube.b0)])
-                Direction.GREEN -> ((-moment[getIndex(cube!!.r1, cube.g0, cube.b1)]
-                    + moment[getIndex(cube.r1, cube.g0, cube.b0)]
-                    + moment[getIndex(cube.r0, cube.g0, cube.b1)])
-                    - moment[getIndex(cube.r0, cube.g0, cube.b0)])
-                Direction.BLUE -> ((-moment[getIndex(cube!!.r1, cube.g1, cube.b0)]
-                    + moment[getIndex(cube.r1, cube.g0, cube.b0)]
-                    + moment[getIndex(cube.r0, cube.g1, cube.b0)])
-                    - moment[getIndex(cube.r0, cube.g0, cube.b0)])
+        fun volume(
+            cube: Box?,
+            moment: IntArray,
+        ): Int =
+            (
+                (
+                    (
+                        (
+                            moment[getIndex(cube!!.r1, cube.g1, cube.b1)] -
+                                moment[getIndex(cube.r1, cube.g1, cube.b0)] -
+                                moment[getIndex(cube.r1, cube.g0, cube.b1)]
+                        ) +
+                            moment[getIndex(cube.r1, cube.g0, cube.b0)] -
+                            moment[getIndex(cube.r0, cube.g1, cube.b1)]
+                    ) + moment[getIndex(cube.r0, cube.g1, cube.b0)] +
+                        moment[getIndex(cube.r0, cube.g0, cube.b1)]
+                ) -
+                    moment[getIndex(cube.r0, cube.g0, cube.b0)]
+            )
+
+        fun bottom(
+            cube: Box?,
+            direction: Direction,
+            moment: IntArray,
+        ): Int =
+            when (direction) {
+                Direction.RED -> (
+                    (
+                        -moment[getIndex(cube!!.r0, cube.g1, cube.b1)] +
+                            moment[getIndex(cube.r0, cube.g1, cube.b0)] +
+                            moment[getIndex(cube.r0, cube.g0, cube.b1)]
+                    ) -
+                        moment[getIndex(cube.r0, cube.g0, cube.b0)]
+                )
+                Direction.GREEN -> (
+                    (
+                        -moment[getIndex(cube!!.r1, cube.g0, cube.b1)] +
+                            moment[getIndex(cube.r1, cube.g0, cube.b0)] +
+                            moment[getIndex(cube.r0, cube.g0, cube.b1)]
+                    ) -
+                        moment[getIndex(cube.r0, cube.g0, cube.b0)]
+                )
+                Direction.BLUE -> (
+                    (
+                        -moment[getIndex(cube!!.r1, cube.g1, cube.b0)] +
+                            moment[getIndex(cube.r1, cube.g0, cube.b0)] +
+                            moment[getIndex(cube.r0, cube.g1, cube.b0)]
+                    ) -
+                        moment[getIndex(cube.r0, cube.g0, cube.b0)]
+                )
             }
-        }
 
-        fun top(cube: Box?, direction: Direction, position: Int, moment: IntArray): Int {
-            return when (direction) {
-                Direction.RED -> ((moment[getIndex(position, cube!!.g1, cube.b1)]
-                    - moment[getIndex(position, cube.g1, cube.b0)]
-                    - moment[getIndex(position, cube.g0, cube.b1)])
-                    + moment[getIndex(position, cube.g0, cube.b0)])
-                Direction.GREEN -> ((moment[getIndex(cube!!.r1, position, cube.b1)]
-                    - moment[getIndex(cube.r1, position, cube.b0)]
-                    - moment[getIndex(cube.r0, position, cube.b1)])
-                    + moment[getIndex(cube.r0, position, cube.b0)])
-                Direction.BLUE -> ((moment[getIndex(cube!!.r1, cube.g1, position)]
-                    - moment[getIndex(cube.r1, cube.g0, position)]
-                    - moment[getIndex(cube.r0, cube.g1, position)])
-                    + moment[getIndex(cube.r0, cube.g0, position)])
+        fun top(
+            cube: Box?,
+            direction: Direction,
+            position: Int,
+            moment: IntArray,
+        ): Int =
+            when (direction) {
+                Direction.RED -> (
+                    (
+                        moment[getIndex(position, cube!!.g1, cube.b1)] -
+                            moment[getIndex(position, cube.g1, cube.b0)] -
+                            moment[getIndex(position, cube.g0, cube.b1)]
+                    ) +
+                        moment[getIndex(position, cube.g0, cube.b0)]
+                )
+                Direction.GREEN -> (
+                    (
+                        moment[getIndex(cube!!.r1, position, cube.b1)] -
+                            moment[getIndex(cube.r1, position, cube.b0)] -
+                            moment[getIndex(cube.r0, position, cube.b1)]
+                    ) +
+                        moment[getIndex(cube.r0, position, cube.b0)]
+                )
+                Direction.BLUE -> (
+                    (
+                        moment[getIndex(cube!!.r1, cube.g1, position)] -
+                            moment[getIndex(cube.r1, cube.g0, position)] -
+                            moment[getIndex(cube.r0, cube.g1, position)]
+                    ) +
+                        moment[getIndex(cube.r0, cube.g0, position)]
+                )
             }
-        }
     }
 }

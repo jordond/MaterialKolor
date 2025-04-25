@@ -12,7 +12,11 @@ import com.materialkolor.blend.Blend
  * @param[amount] how much blending to perform; 0.0 >= and <= 1.0.
  * @return [from], blended towards [to]. Hue, chroma, and tone will change.
  */
-public fun Blend.blend(from: Color, to: Color, amount: Float): Color {
+public fun Blend.blend(
+    from: Color,
+    to: Color,
+    amount: Float,
+): Color {
     val blended = cam16Ucs(from.toArgb(), to.toArgb(), amount.toDouble())
     return Color(blended)
 }
@@ -39,7 +43,11 @@ public fun Color.blend(
  * @param[amount] how much blending to perform; 0.0 >= and <= 1.0.
  * @return [from], with a hue blended towards [to]. Chroma and tone are constant.
  */
-public fun Blend.blendHue(from: Color, to: Color, amount: Float): Color {
+public fun Blend.blendHue(
+    from: Color,
+    to: Color,
+    amount: Float,
+): Color {
     val blended = hctHue(from.toArgb(), to.toArgb(), amount.toDouble())
     return Color(blended)
 }

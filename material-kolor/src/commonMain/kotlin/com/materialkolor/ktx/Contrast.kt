@@ -74,15 +74,16 @@ public fun Color.hasEnoughContrast(
  *
  * Learn more about WCAG [here](https://www.w3.org/WAI/standards-guidelines/wcag).
  */
-public enum class ContrastThreshold(public val threshold: Double) {
+public enum class ContrastThreshold(
+    public val threshold: Double,
+) {
     WCAG_AA_NORMAL_TEXT(4.5),
     WCAG_AA_LARGE_TEXT(3.0),
     WCAG_AAA_NORMAL_TEXT(7.0),
-    WCAG_AAA_LARGE_TEXT(4.5);
+    WCAG_AAA_LARGE_TEXT(4.5),
+    ;
 
     public operator fun compareTo(value: Double): Int = threshold.compareTo(value)
 }
 
-private operator fun Double.compareTo(threshold: ContrastThreshold): Int {
-    return compareTo(threshold.threshold)
-}
+private operator fun Double.compareTo(threshold: ContrastThreshold): Int = compareTo(threshold.threshold)

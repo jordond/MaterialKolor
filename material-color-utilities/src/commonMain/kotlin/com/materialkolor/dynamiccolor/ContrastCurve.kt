@@ -38,7 +38,6 @@ public class ContrastCurve(
     private val medium: Double,
     private val high: Double,
 ) {
-
     /**
      * Returns the value at a given contrast level.
      *
@@ -46,11 +45,12 @@ public class ContrastCurve(
      * is the highest.
      * @return The value. For contrast ratios, a number between 1.0 and 21.0.
      */
-    public fun get(contrastLevel: Double): Double = when {
-        contrastLevel <= -1.0 -> low
-        contrastLevel < 0.0 -> lerp(low, normal, (contrastLevel - -1) / 1)
-        contrastLevel < 0.5 -> lerp(normal, medium, (contrastLevel - 0) / 0.5)
-        contrastLevel < 1.0 -> lerp(medium, high, (contrastLevel - 0.5) / 0.5)
-        else -> high
-    }
+    public fun get(contrastLevel: Double): Double =
+        when {
+            contrastLevel <= -1.0 -> low
+            contrastLevel < 0.0 -> lerp(low, normal, (contrastLevel - -1) / 1)
+            contrastLevel < 0.5 -> lerp(normal, medium, (contrastLevel - 0) / 0.5)
+            contrastLevel < 1.0 -> lerp(medium, high, (contrastLevel - 0.5) / 0.5)
+            else -> high
+        }
 }

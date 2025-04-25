@@ -41,7 +41,6 @@ import dev.drewhamilton.poko.Poko
 public class Hct private constructor(
     private val argb: Int,
 ) {
-
     public val hue: Double
     public val chroma: Double
     public val tone: Double
@@ -61,9 +60,7 @@ public class Hct private constructor(
      *
      * @param newHue 0 <= newHue < 360; invalid values are corrected.
      */
-    public fun withHue(newHue: Double): Hct {
-        return Hct(HctSolver.solveToInt(newHue, chroma, tone))
-    }
+    public fun withHue(newHue: Double): Hct = Hct(HctSolver.solveToInt(newHue, chroma, tone))
 
     /**
      * Set the chroma of this color. Chroma may decrease because chroma has a different maximum for
@@ -71,9 +68,7 @@ public class Hct private constructor(
      *
      * @param newChroma 0 <= newChroma < ?
      */
-    public fun withChroma(newChroma: Double): Hct {
-        return Hct(HctSolver.solveToInt(hue, newChroma, tone))
-    }
+    public fun withChroma(newChroma: Double): Hct = Hct(HctSolver.solveToInt(hue, newChroma, tone))
 
     /**
      * Set the tone of this color. Chroma may decrease because chroma has a different maximum for any
@@ -81,9 +76,7 @@ public class Hct private constructor(
      *
      * @param newTone 0 <= newTone <= 100; invalid valids are corrected.
      */
-    public fun withTone(newTone: Double): Hct {
-        return Hct(HctSolver.solveToInt(hue, chroma, newTone))
-    }
+    public fun withTone(newTone: Double): Hct = Hct(HctSolver.solveToInt(hue, chroma, newTone))
 
     /**
      * Translate a color into different ViewingConditions.
@@ -118,7 +111,6 @@ public class Hct private constructor(
     }
 
     public companion object {
-
         /**
          * Create an HCT color from hue, chroma, and tone.
          *
@@ -128,9 +120,11 @@ public class Hct private constructor(
          * @param tone 0 <= tone <= 100; invalid values are corrected.
          * @return HCT representation of a color in default viewing conditions.
          */
-        public fun from(hue: Double, chroma: Double, tone: Double): Hct {
-            return Hct(HctSolver.solveToInt(hue, chroma, tone))
-        }
+        public fun from(
+            hue: Double,
+            chroma: Double,
+            tone: Double,
+        ): Hct = Hct(HctSolver.solveToInt(hue, chroma, tone))
 
         /**
          * Create an HCT color from a color.

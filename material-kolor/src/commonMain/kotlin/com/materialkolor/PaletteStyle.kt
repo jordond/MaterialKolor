@@ -8,7 +8,6 @@ import com.materialkolor.scheme.Variant
  * Mapped to [Variant] in the Material Design guidelines.
  */
 public enum class PaletteStyle {
-
     /**
      * A calm theme, sedated colors that aren't particularly chromatic.
      */

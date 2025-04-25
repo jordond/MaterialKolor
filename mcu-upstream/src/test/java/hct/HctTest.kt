@@ -1,4 +1,4 @@
-package hct;
+package hct
 
 import com.materialkolor.hct.Hct
 import com.materialkolor.hct.ViewingConditions
@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import utils.shouldBeExactly
 
 class HctTest {
-
     @Test
     fun from() {
         val expected = hct.Hct.from(180.0, 50.0, 50.0)
@@ -55,7 +54,6 @@ class HctTest {
     }
 
     companion object {
-
         private const val COLOR1 = 0xFFA420
         private const val COLOR2 = 0xC7B446
 

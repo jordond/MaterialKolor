@@ -13,6 +13,8 @@ colormath = "3.6.1"
 poko = "0.18.6"
 errorProneAnnotations = "2.38.0"
 kotest = "5.9.1"
+ktlint = "1.5.0"
+spotless = "7.0.2"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
@@ -31,3 +33,4 @@ binaryCompatibility = { id = "org.jetbrains.kotlinx.binary-compatibility-validat
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 publish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
 poko = { id = "dev.drewhamilton.poko", version.ref = "poko" }
+spotless = {id = "com.diffplug.spotless", version.ref = "spotless"}

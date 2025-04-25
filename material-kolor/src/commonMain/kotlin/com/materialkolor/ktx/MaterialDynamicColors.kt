@@ -15,7 +15,6 @@ public val DynamicMaterialThemeState.m3Colors: MaterialDynamicColors
         MaterialDynamicColors()
     }
 
-
 /**
  * A [MaterialKolors] class that holds the generated colors based on the current state.
  */
