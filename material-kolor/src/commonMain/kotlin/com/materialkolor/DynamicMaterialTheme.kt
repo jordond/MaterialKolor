@@ -1,6 +1,6 @@
 package com.materialkolor
 
-import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
@@ -52,7 +52,7 @@ public fun DynamicMaterialTheme(
     typography: Typography = MaterialTheme.typography,
     isExtendedFidelity: Boolean = false,
     animate: Boolean = false,
-    animationSpec: AnimationSpec<Color> = defaultColorSpring,
+    animationSpec: FiniteAnimationSpec<Color> = defaultColorSpring,
     content: @Composable () -> Unit,
 ) {
     val state = rememberDynamicMaterialThemeState(
@@ -118,7 +118,7 @@ public fun DynamicMaterialTheme(
     typography: Typography = MaterialTheme.typography,
     isExtendedFidelity: Boolean = false,
     animate: Boolean = false,
-    animationSpec: AnimationSpec<Color> = defaultColorSpring,
+    animationSpec: FiniteAnimationSpec<Color> = defaultColorSpring,
     content: @Composable () -> Unit,
 ) {
     val state = rememberDynamicMaterialThemeState(
@@ -163,7 +163,7 @@ public fun DynamicMaterialTheme(
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
     animate: Boolean = false,
-    animationSpec: AnimationSpec<Color> = defaultColorSpring,
+    animationSpec: FiniteAnimationSpec<Color> = defaultColorSpring,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = state.colorScheme
