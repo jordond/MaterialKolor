@@ -25,11 +25,11 @@ public object ColorSpecs {
     private val SPEC_2025: ColorSpec = ColorSpec2025()
 
     @JvmOverloads
-    public fun get(specVersion: ColorSpec.SpecVersion? = ColorSpec.SpecVersion.SPEC_2021): ColorSpec {
-        return get(specVersion, false)
-    }
+    public fun get(specVersion: ColorSpec.SpecVersion? = ColorSpec.SpecVersion.SPEC_2021): ColorSpec =
+        get(specVersion, false)
 
-    public fun get(specVersion: ColorSpec.SpecVersion?, isExtendedFidelity: Boolean): ColorSpec {
-        return if (specVersion === ColorSpec.SpecVersion.SPEC_2025) SPEC_2025 else SPEC_2021
-    }
+    public fun get(
+        specVersion: ColorSpec.SpecVersion?,
+        isExtendedFidelity: Boolean,
+    ): ColorSpec = if (specVersion === ColorSpec.SpecVersion.SPEC_2025) SPEC_2025 else SPEC_2021
 }

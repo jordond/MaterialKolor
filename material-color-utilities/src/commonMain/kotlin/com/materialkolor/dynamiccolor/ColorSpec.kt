@@ -14,7 +14,8 @@ public interface ColorSpec {
      */
     public enum class SpecVersion {
         SPEC_2021,
-        SPEC_2025;
+        SPEC_2025,
+        ;
 
         public companion object {
             public val Default: SpecVersion = SPEC_2021
@@ -181,9 +182,15 @@ public interface ColorSpec {
 
     // Color value calculations
 
-    public fun getHct(scheme: DynamicScheme, color: DynamicColor): Hct
+    public fun getHct(
+        scheme: DynamicScheme,
+        color: DynamicColor,
+    ): Hct
 
-    public fun getTone(scheme: DynamicScheme, color: DynamicColor): Double
+    public fun getTone(
+        scheme: DynamicScheme,
+        color: DynamicColor,
+    ): Double
 
     // Scheme Palettes
 
@@ -192,7 +199,7 @@ public interface ColorSpec {
         sourceColorHct: Hct,
         isDark: Boolean,
         platform: DynamicScheme.Platform,
-        contrastLevel: Double
+        contrastLevel: Double,
     ): TonalPalette
 
     public fun getSecondaryPalette(
@@ -200,7 +207,7 @@ public interface ColorSpec {
         sourceColorHct: Hct,
         isDark: Boolean,
         platform: DynamicScheme.Platform,
-        contrastLevel: Double
+        contrastLevel: Double,
     ): TonalPalette
 
     public fun getTertiaryPalette(
@@ -208,7 +215,7 @@ public interface ColorSpec {
         sourceColorHct: Hct,
         isDark: Boolean,
         platform: DynamicScheme.Platform,
-        contrastLevel: Double
+        contrastLevel: Double,
     ): TonalPalette
 
     public fun getNeutralPalette(
@@ -216,7 +223,7 @@ public interface ColorSpec {
         sourceColorHct: Hct,
         isDark: Boolean,
         platform: DynamicScheme.Platform,
-        contrastLevel: Double
+        contrastLevel: Double,
     ): TonalPalette
 
     public fun getNeutralVariantPalette(
@@ -224,7 +231,7 @@ public interface ColorSpec {
         sourceColorHct: Hct,
         isDark: Boolean,
         platform: DynamicScheme.Platform,
-        contrastLevel: Double
+        contrastLevel: Double,
     ): TonalPalette
 
     public fun getErrorPalette(
@@ -232,6 +239,6 @@ public interface ColorSpec {
         sourceColorHct: Hct,
         isDark: Boolean,
         platform: DynamicScheme.Platform,
-        contrastLevel: Double
+        contrastLevel: Double,
     ): TonalPalette?
 }

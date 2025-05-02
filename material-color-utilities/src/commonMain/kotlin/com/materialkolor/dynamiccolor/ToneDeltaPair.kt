@@ -53,7 +53,7 @@ public class ToneDeltaPair(
     public val delta: Double,
     public val polarity: TonePolarity,
     public val stayTogether: Boolean = true,
-    public val deltaConstraint: DeltaConstraint = DeltaConstraint.EXACT
+    public val deltaConstraint: DeltaConstraint = DeltaConstraint.EXACT,
 ) {
     /**
      * Describes how to fulfill a tone delta pair constraint.
@@ -61,6 +61,6 @@ public class ToneDeltaPair(
     public enum class DeltaConstraint {
         EXACT,
         NEARER,
-        FARTHER
+        FARTHER,
     }
 }

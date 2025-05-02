@@ -29,26 +29,26 @@ public class SchemeTonalSpot(
     specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
     platform: Platform = Platform.Default,
 ) : DynamicScheme(
-    sourceColorHct = sourceColorHct,
-    variant = Variant.TONAL_SPOT,
-    isDark = isDark,
-    contrastLevel = contrastLevel,
-    primaryPalette = ColorSpecs
-        .get(specVersion)
-        .getPrimaryPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
-    secondaryPalette = ColorSpecs
-        .get(specVersion)
-        .getSecondaryPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
-    tertiaryPalette = ColorSpecs
-        .get(specVersion)
-        .getTertiaryPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
-    neutralPalette = ColorSpecs
-        .get(specVersion)
-        .getNeutralPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
-    neutralVariantPalette = ColorSpecs
-        .get(specVersion)
-        .getNeutralVariantPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
-    errorPalette = ColorSpecs
-        .get(specVersion)
-        .getErrorPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
-)
+        sourceColorHct = sourceColorHct,
+        variant = Variant.TONAL_SPOT,
+        isDark = isDark,
+        contrastLevel = contrastLevel,
+        primaryPalette = ColorSpecs
+            .get(specVersion)
+            .getPrimaryPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
+        secondaryPalette = ColorSpecs
+            .get(specVersion)
+            .getSecondaryPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
+        tertiaryPalette = ColorSpecs
+            .get(specVersion)
+            .getTertiaryPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
+        neutralPalette = ColorSpecs
+            .get(specVersion)
+            .getNeutralPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
+        neutralVariantPalette = ColorSpecs
+            .get(specVersion)
+            .getNeutralVariantPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
+        errorPalette = ColorSpecs
+            .get(specVersion)
+            .getErrorPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
+    )

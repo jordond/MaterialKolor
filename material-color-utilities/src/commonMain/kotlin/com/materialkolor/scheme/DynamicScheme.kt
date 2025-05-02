@@ -82,7 +82,7 @@ public open class DynamicScheme(
         tertiaryPalette: TonalPalette,
         neutralPalette: TonalPalette,
         neutralVariantPalette: TonalPalette,
-        errorPalette: TonalPalette?
+        errorPalette: TonalPalette?,
     ) : this(
         sourceColorHct = sourceColorHct,
         variant = variant,
@@ -95,7 +95,7 @@ public open class DynamicScheme(
         tertiaryPalette = tertiaryPalette,
         neutralPalette = neutralPalette,
         neutralVariantPalette = neutralVariantPalette,
-        errorPalette = errorPalette ?: TonalPalette.fromHueAndChroma(hue = 25.0, chroma = 84.0)
+        errorPalette = errorPalette ?: TonalPalette.fromHueAndChroma(hue = 25.0, chroma = 84.0),
     )
 
     private val materialColors: MaterialDynamicColors = MaterialDynamicColors()
@@ -297,20 +297,24 @@ public open class DynamicScheme(
          * Returns a new DynamicScheme instance with the same properties as the given scheme, but with
          * the given dark mode setting.
          */
-        public fun from(other: DynamicScheme, isDark: Boolean): DynamicScheme = DynamicScheme(
-            sourceColorHct = other.sourceColorHct,
-            variant = other.variant,
-            isDark = isDark,
-            contrastLevel = other.contrastLevel,
-            primaryPalette = other.primaryPalette,
-            secondaryPalette = other.secondaryPalette,
-            tertiaryPalette = other.tertiaryPalette,
-            neutralPalette = other.neutralPalette,
-            neutralVariantPalette = other.neutralVariantPalette,
-            platform = other.platform,
-            specVersion = other.specVersion,
-            errorPalette = other.errorPalette,
-        )
+        public fun from(
+            other: DynamicScheme,
+            isDark: Boolean,
+        ): DynamicScheme =
+            DynamicScheme(
+                sourceColorHct = other.sourceColorHct,
+                variant = other.variant,
+                isDark = isDark,
+                contrastLevel = other.contrastLevel,
+                primaryPalette = other.primaryPalette,
+                secondaryPalette = other.secondaryPalette,
+                tertiaryPalette = other.tertiaryPalette,
+                neutralPalette = other.neutralPalette,
+                neutralVariantPalette = other.neutralVariantPalette,
+                platform = other.platform,
+                specVersion = other.specVersion,
+                errorPalette = other.errorPalette,
+            )
 
         /**
          * Returns a new hue based on a piecewise function and input color hue.
@@ -341,7 +345,7 @@ public open class DynamicScheme(
         public fun getPiecewiseValue(
             sourceColorHct: Hct,
             hueBreakpoints: DoubleArray,
-            hues: DoubleArray
+            hues: DoubleArray,
         ): Double {
             val size = min(hueBreakpoints.size - 1, hues.size)
             val sourceHue: Double = sourceColorHct.hue
@@ -385,7 +389,7 @@ public open class DynamicScheme(
         public fun getRotatedHue(
             sourceColorHct: Hct,
             hueBreakpoints: DoubleArray,
-            rotations: DoubleArray
+            rotations: DoubleArray,
         ): Double {
             var rotation: Double = getPiecewiseValue(sourceColorHct, hueBreakpoints, rotations)
             if (min(hueBreakpoints.size - 1, rotations.size) <= 0) {

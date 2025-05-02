@@ -34,28 +34,62 @@ public class SchemeFidelity(
     isDark: Boolean,
     contrastLevel: Double,
 ) : DynamicScheme(
-    sourceColorHct = sourceColorHct,
-    variant = Variant.FIDELITY,
-    isDark = isDark,
-    contrastLevel = contrastLevel,
-    primaryPalette = ColorSpecs
-        .get(ColorSpec.SpecVersion.SPEC_2021)
-        .getPrimaryPalette(Variant.FIDELITY, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
-    secondaryPalette = ColorSpecs
-        .get(ColorSpec.SpecVersion.SPEC_2021)
-        .getSecondaryPalette(Variant.FIDELITY, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
-    tertiaryPalette = ColorSpecs
-        .get(ColorSpec.SpecVersion.SPEC_2021)
-        .getTertiaryPalette(Variant.FIDELITY, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
-    neutralPalette = ColorSpecs
-        .get(ColorSpec.SpecVersion.SPEC_2021)
-        .getNeutralPalette(Variant.FIDELITY, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
-    neutralVariantPalette = ColorSpecs
-        .get(ColorSpec.SpecVersion.SPEC_2021)
-        .getNeutralVariantPalette(Variant.FIDELITY, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
-    errorPalette = ColorSpecs
-        .get(ColorSpec.SpecVersion.SPEC_2021)
-        .getErrorPalette(
-            Variant.FIDELITY, sourceColorHct, isDark, Platform.PHONE, contrastLevel,
-        ),
-)
+        sourceColorHct = sourceColorHct,
+        variant = Variant.FIDELITY,
+        isDark = isDark,
+        contrastLevel = contrastLevel,
+        primaryPalette = ColorSpecs
+            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .getPrimaryPalette(
+                variant = Variant.FIDELITY,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = Platform.PHONE,
+                contrastLevel = contrastLevel,
+            ),
+        secondaryPalette = ColorSpecs
+            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .getSecondaryPalette(
+                variant = Variant.FIDELITY,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = Platform.PHONE,
+                contrastLevel = contrastLevel,
+            ),
+        tertiaryPalette = ColorSpecs
+            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .getTertiaryPalette(
+                variant = Variant.FIDELITY,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = Platform.PHONE,
+                contrastLevel = contrastLevel,
+            ),
+        neutralPalette = ColorSpecs
+            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .getNeutralPalette(
+                variant = Variant.FIDELITY,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = Platform.PHONE,
+                contrastLevel = contrastLevel,
+            ),
+        neutralVariantPalette = ColorSpecs
+            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .getNeutralVariantPalette(
+                variant = Variant.FIDELITY,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = Platform.PHONE,
+                contrastLevel = contrastLevel,
+            ),
+        errorPalette = ColorSpecs
+            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .getErrorPalette(
+                variant = Variant.FIDELITY,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = Platform.PHONE,
+                contrastLevel = contrastLevel,
+            ),
+    )

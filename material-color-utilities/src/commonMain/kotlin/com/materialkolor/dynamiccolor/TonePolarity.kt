@@ -35,5 +35,5 @@ public enum class TonePolarity {
     NEARER,
 
     @Deprecated(message = "Use DeltaConstraint instead.")
-    FARTHER;
+    FARTHER,
 }

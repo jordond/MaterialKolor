@@ -44,6 +44,7 @@ public class MaterialDynamicColors(
     public fun neutralPaletteKeyColor(): DynamicColor = colorSpec.neutralPaletteKeyColor()
 
     public fun neutralVariantPaletteKeyColor(): DynamicColor = colorSpec.neutralVariantPaletteKeyColor()
+
     public fun background(): DynamicColor = colorSpec.background()
 
     public fun onBackground(): DynamicColor = colorSpec.onBackground()

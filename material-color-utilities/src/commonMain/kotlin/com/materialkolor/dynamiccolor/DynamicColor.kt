@@ -132,12 +132,11 @@ public class DynamicColor(
     /**
      * Returns the tone in HCT, ranging from 0 to 100, of the resolved color given scheme.
      */
-    public fun getTone(scheme: DynamicScheme): Double {
-        return ColorSpecs.get(scheme.specVersion).getTone(scheme, this)
-    }
+    public fun getTone(scheme: DynamicScheme): Double =
+        ColorSpecs.get(scheme.specVersion).getTone(scheme, this)
 
-    public fun toBuilder(): Builder {
-        return Builder()
+    public fun toBuilder(): Builder =
+        Builder()
             .setName(this.name)
             .setPalette(this.palette)
             .setTone(this.tone)
@@ -148,7 +147,6 @@ public class DynamicColor(
             .setContrastCurve(this.contrastCurve)
             .setToneDeltaPair(this.toneDeltaPair)
             .setOpacity(this.opacity)
-    }
 
     public companion object {
         /**
@@ -328,33 +326,38 @@ public class DynamicColor(
             private var toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair?)? = null
             private var opacity: ((DynamicScheme) -> Double?)? = null
 
-            public fun setName(name: String): Builder = apply {
-                this.name = name
-            }
+            public fun setName(name: String): Builder =
+                apply {
+                    this.name = name
+                }
 
-            public fun setPalette(palette: (DynamicScheme) -> TonalPalette): Builder = apply {
-                this.palette = palette
-            }
+            public fun setPalette(palette: (DynamicScheme) -> TonalPalette): Builder =
+                apply {
+                    this.palette = palette
+                }
 
-            public fun setTone(tone: (DynamicScheme) -> Double): Builder = apply {
-                this.tone = tone
-            }
+            public fun setTone(tone: (DynamicScheme) -> Double): Builder =
+                apply {
+                    this.tone = tone
+                }
 
-            public fun setIsBackground(isBackground: Boolean): Builder = apply {
-                this.isBackground = isBackground
-            }
+            public fun setIsBackground(isBackground: Boolean): Builder =
+                apply {
+                    this.isBackground = isBackground
+                }
 
-            public fun setChromaMultiplier(chromaMultiplier: ((DynamicScheme) -> Double?)?): Builder = apply {
-                this.chromaMultiplier = chromaMultiplier
-            }
+            public fun setChromaMultiplier(chromaMultiplier: ((DynamicScheme) -> Double?)?): Builder =
+                apply {
+                    this.chromaMultiplier = chromaMultiplier
+                }
 
-            public fun setBackground(background: ((DynamicScheme) -> DynamicColor?)?): Builder = apply {
-                this.background = background
-            }
+            public fun setBackground(background: ((DynamicScheme) -> DynamicColor?)?): Builder =
+                apply {
+                    this.background = background
+                }
 
-            public fun setSecondBackground(
-                secondBackground: ((DynamicScheme) -> DynamicColor?)?
-            ): Builder = apply { this.secondBackground = secondBackground }
+            public fun setSecondBackground(secondBackground: ((DynamicScheme) -> DynamicColor?)?): Builder =
+                apply { this.secondBackground = secondBackground }
 
             public fun setContrastCurve(contrastCurve: ((DynamicScheme) -> ContrastCurve?)?): Builder =
                 apply {
@@ -366,13 +369,14 @@ public class DynamicColor(
                     this.toneDeltaPair = toneDeltaPair
                 }
 
-            public fun setOpacity(opacity: ((DynamicScheme) -> Double?)?): Builder = apply {
-                this.opacity = opacity
-            }
+            public fun setOpacity(opacity: ((DynamicScheme) -> Double?)?): Builder =
+                apply {
+                    this.opacity = opacity
+                }
 
             public fun extendSpecVersion(
                 specVersion: ColorSpec.SpecVersion,
-                extendedColor: DynamicColor
+                extendedColor: DynamicColor,
             ): Builder {
                 validateExtendedColor(specVersion, extendedColor)
 
@@ -383,38 +387,49 @@ public class DynamicColor(
                         val palette =
                             if (s.specVersion == specVersion) extendedColor.palette else this.palette
                         palette?.invoke(s) ?: extendedColor.palette(s)
-                    }
-                    .setTone { s: DynamicScheme ->
+                    }.setTone { s: DynamicScheme ->
                         val tone = if (s.specVersion == specVersion) extendedColor.tone else this.tone
                         tone?.invoke(s) ?: extendedColor.tone(s)
-                    }
-                    .setChromaMultiplier { s: DynamicScheme ->
-                        val chromaMultiplier = if (s.specVersion == specVersion)
-                            extendedColor.chromaMultiplier else this.chromaMultiplier
+                    }.setChromaMultiplier { s: DynamicScheme ->
+                        val chromaMultiplier = if (s.specVersion == specVersion) {
+                            extendedColor.chromaMultiplier
+                        } else {
+                            this.chromaMultiplier
+                        }
                         if (chromaMultiplier != null) chromaMultiplier(s) else 1.0
-                    }
-                    .setBackground { s: DynamicScheme ->
+                    }.setBackground { s: DynamicScheme ->
                         val background =
                             if (s.specVersion == specVersion) extendedColor.background else this.background
                         background?.invoke(s)
-                    }
-                    .setSecondBackground { s: DynamicScheme ->
+                    }.setSecondBackground { s: DynamicScheme ->
                         val secondBackground =
-                            if (s.specVersion == specVersion) extendedColor.secondBackground
-                            else this.secondBackground
+                            if (s.specVersion == specVersion) {
+                                extendedColor.secondBackground
+                            } else {
+                                this.secondBackground
+                            }
                         secondBackground?.invoke(s)
-                    }
-                    .setContrastCurve { s: DynamicScheme ->
+                    }.setContrastCurve { s: DynamicScheme ->
                         val contrastCurve =
-                            if (s.specVersion == specVersion) extendedColor.contrastCurve else this.contrastCurve
+                            if (s.specVersion ==
+                                specVersion
+                            ) {
+                                extendedColor.contrastCurve
+                            } else {
+                                this.contrastCurve
+                            }
                         contrastCurve?.invoke(s)
-                    }
-                    .setToneDeltaPair { s: DynamicScheme ->
+                    }.setToneDeltaPair { s: DynamicScheme ->
                         val toneDeltaPair =
-                            if (s.specVersion == specVersion) extendedColor.toneDeltaPair else this.toneDeltaPair
+                            if (s.specVersion ==
+                                specVersion
+                            ) {
+                                extendedColor.toneDeltaPair
+                            } else {
+                                this.toneDeltaPair
+                            }
                         toneDeltaPair?.invoke(s)
-                    }
-                    .setOpacity { s: DynamicScheme ->
+                    }.setOpacity { s: DynamicScheme ->
                         val opacity =
                             if (s.specVersion == specVersion) extendedColor.opacity else this.opacity
                         opacity?.invoke(s)
@@ -422,9 +437,15 @@ public class DynamicColor(
             }
 
             public fun build(): DynamicColor {
-                require(!(background == null && secondBackground != null)) { "Color $name has secondBackground defined, but background is not defined." }
-                require(!(background == null && contrastCurve != null)) { "Color $name has contrastCurve defined, but background is not defined." }
-                require(!(background != null && contrastCurve == null)) { "Color $name has background defined, but contrastCurve is not defined." }
+                require(!(background == null && secondBackground != null)) {
+                    "Color $name has secondBackground defined, but background is not defined."
+                }
+                require(!(background == null && contrastCurve != null)) {
+                    "Color $name has contrastCurve defined, but background is not defined."
+                }
+                require(!(background != null && contrastCurve == null)) {
+                    "Color $name has background defined, but contrastCurve is not defined."
+                }
 
                 val tone = this.tone ?: getInitialToneFromBackground(this.background)
                 return DynamicColor(
@@ -443,29 +464,33 @@ public class DynamicColor(
 
             private fun validateExtendedColor(
                 specVersion: ColorSpec.SpecVersion?,
-                extendedColor: DynamicColor
+                extendedColor: DynamicColor,
             ) {
                 require(this.name == extendedColor.name) {
-                    ("Attempting to extend color "
-                        + this.name
-                        + " with color "
-                        + extendedColor.name
-                        + " of different name for spec version "
-                        + specVersion
-                        + ".")
+                    (
+                        "Attempting to extend color " +
+                            this.name +
+                            " with color " +
+                            extendedColor.name +
+                            " of different name for spec version " +
+                            specVersion +
+                            "."
+                    )
                 }
                 require(this.isBackground == extendedColor.isBackground) {
-                    ("Attempting to extend color "
-                        + this.name
-                        + " as a "
-                        + (if (this.isBackground) "background" else "foreground")
-                        + " with color "
-                        + extendedColor.name
-                        + " as a "
-                        + (if (extendedColor.isBackground) "background" else "foreground")
-                        + " for spec version "
-                        + specVersion
-                        + ".")
+                    (
+                        "Attempting to extend color " +
+                            this.name +
+                            " as a " +
+                            (if (this.isBackground) "background" else "foreground") +
+                            " with color " +
+                            extendedColor.name +
+                            " as a " +
+                            (if (extendedColor.isBackground) "background" else "foreground") +
+                            " for spec version " +
+                            specVersion +
+                            "."
+                    )
                 }
             }
         }
