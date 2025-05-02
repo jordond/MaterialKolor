@@ -16,20 +16,13 @@
 package com.materialkolor.dynamiccolor
 
 import com.materialkolor.scheme.DynamicScheme
-import dev.drewhamilton.poko.Poko
 import kotlin.reflect.KFunction
 
 /**
  * Named colors, otherwise known as tokens, or roles, in the Material Design system.
- *
- * @param[isExtendedFidelity] Whether to use the extended fidelity color set.
- * see [MaterialColorUtilities](https://github.com/material-foundation/material-color-utilities/commit/c3681e12b72202723657b9ce5cf8dfdf7efb0781)
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-@Poko
-public class MaterialDynamicColors(
-    private val isExtendedFidelity: Boolean = false,
-) {
+public class MaterialDynamicColors {
     public fun highestSurface(scheme: DynamicScheme): DynamicColor = colorSpec.highestSurface(scheme)
 
     // Compatibility Keys Colors for Android

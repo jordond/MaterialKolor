@@ -25,7 +25,6 @@ import com.materialkolor.scheme.DynamicScheme
  * @param[error] A custom color to modify the error color in the generated color scheme.
  * @param[style] The initial palette style.
  * @param[contrastLevel] The initial contrast level.
- * @param[extendedFidelity] The initial extended fidelity state.
  * @param[modifyColorScheme] Use this callback to modify the color scheme once it has been generated.
  * Note that if you modify a color in the scheme, the on* color might not have enough contrast.
  */
@@ -42,7 +41,6 @@ public fun rememberDynamicMaterialThemeState(
     error: Color? = null,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
-    extendedFidelity: Boolean = false,
     modifyColorScheme: (DynamicMaterialThemeState.(ColorScheme) -> ColorScheme)? = null,
 ): DynamicMaterialThemeState =
     remember(
@@ -57,7 +55,6 @@ public fun rememberDynamicMaterialThemeState(
         error,
         style,
         contrastLevel,
-        extendedFidelity,
         modifyColorScheme,
     ) {
         DynamicMaterialThemeState(
@@ -66,7 +63,6 @@ public fun rememberDynamicMaterialThemeState(
             initialIsAmoled = isAmoled,
             initialStyle = style,
             initialContrastLevel = contrastLevel,
-            initialExtendedFidelity = extendedFidelity,
             initialPrimary = primary,
             initialSecondary = secondary,
             initialTertiary = tertiary,
@@ -92,7 +88,6 @@ public fun rememberDynamicMaterialThemeState(
  * @param[error] A custom color to modify the error color in the generated color scheme.
  * @param[style] The initial palette style.
  * @param[contrastLevel] The initial contrast level.
- * @param[extendedFidelity] The initial extended fidelity state.
  * @param[modifyColorScheme] Use this callback to modify the color scheme once it has been generated.
  * Note that if you modify a color in the scheme, the on* color might not have enough contrast.
  */
@@ -108,7 +103,6 @@ public fun rememberDynamicMaterialThemeState(
     error: Color? = null,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
-    extendedFidelity: Boolean = false,
     modifyColorScheme: (DynamicMaterialThemeState.(ColorScheme) -> ColorScheme)? = null,
 ): DynamicMaterialThemeState =
     remember(
@@ -122,7 +116,6 @@ public fun rememberDynamicMaterialThemeState(
         error,
         style,
         contrastLevel,
-        extendedFidelity,
         modifyColorScheme,
     ) {
         DynamicMaterialThemeState(
@@ -131,7 +124,6 @@ public fun rememberDynamicMaterialThemeState(
             initialIsAmoled = isAmoled,
             initialStyle = style,
             initialContrastLevel = contrastLevel,
-            initialExtendedFidelity = extendedFidelity,
             initialPrimary = primary,
             initialSecondary = secondary,
             initialTertiary = tertiary,
@@ -152,7 +144,6 @@ public fun rememberDynamicMaterialThemeState(
  * @param[initialIsAmoled] The initial Amoled state.
  * @param[initialStyle] The initial palette style.
  * @param[initialContrastLevel] The initial contrast level.
- * @param[initialExtendedFidelity] The initial extended fidelity state.
  * @param[initialPrimary] A custom color to modify the primary color in the generated color scheme.
  * @param[initialSecondary] A custom color to modify the secondary color in the generated color scheme.
  * @param[initialTertiary] A custom color to modify the tertiary color in the generated color scheme.
@@ -170,7 +161,6 @@ public class DynamicMaterialThemeState internal constructor(
     initialIsAmoled: Boolean,
     initialStyle: PaletteStyle,
     initialContrastLevel: Double,
-    initialExtendedFidelity: Boolean,
     initialPrimary: Color? = null,
     initialSecondary: Color? = null,
     initialTertiary: Color? = null,
@@ -214,13 +204,6 @@ public class DynamicMaterialThemeState internal constructor(
      * @see dynamicColorScheme
      */
     public var contrastLevel: Double by mutableStateOf(initialContrastLevel)
-
-    /**
-     * The extended fidelity state.
-     *
-     * @see dynamicColorScheme
-     */
-    public var isExtendedFidelity: Boolean by mutableStateOf(initialExtendedFidelity)
 
     /**
      * A custom color to modify the primary color in the generated color scheme.
@@ -318,7 +301,6 @@ public class DynamicMaterialThemeState internal constructor(
                     error = error,
                     style = style,
                     contrastLevel = contrastLevel,
-                    isExtendedFidelity = isExtendedFidelity,
                     modifyColorScheme = callback,
                 )
                 isCustomScheme -> rememberDynamicColorScheme(
@@ -333,7 +315,6 @@ public class DynamicMaterialThemeState internal constructor(
                     error = error,
                     style = style,
                     contrastLevel = contrastLevel,
-                    isExtendedFidelity = isExtendedFidelity,
                     modifyColorScheme = callback,
                 )
                 else -> rememberDynamicColorScheme(
@@ -343,7 +324,6 @@ public class DynamicMaterialThemeState internal constructor(
                     primary = null,
                     style = style,
                     contrastLevel = contrastLevel,
-                    isExtendedFidelity = isExtendedFidelity,
                     modifyColorScheme = callback,
                 )
             }

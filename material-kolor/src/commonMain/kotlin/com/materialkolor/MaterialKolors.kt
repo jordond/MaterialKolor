@@ -10,14 +10,12 @@ import com.materialkolor.scheme.DynamicScheme
  *
  * @property scheme The dynamic scheme used to generate colors.
  * @property isAmoled A flag indicating whether the device is AMOLED.
- * @param isExtendedFidelity A flag indicating whether extended fidelity is enabled.
  */
 public class MaterialKolors(
     private val scheme: DynamicScheme,
     private val isAmoled: Boolean = false,
-    isExtendedFidelity: Boolean = false,
 ) {
-    private val colors = MaterialDynamicColors(isExtendedFidelity)
+    private val colors = MaterialDynamicColors()
 
     /**
      * Returns the highest surface color based on the given scheme.

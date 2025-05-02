@@ -8,7 +8,6 @@ import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
-import com.materialkolor.dynamiccolor.MaterialDynamicColors
 import com.materialkolor.ktx.animateColorScheme
 import com.materialkolor.ktx.defaultColorSpring
 
@@ -21,7 +20,7 @@ import com.materialkolor.ktx.defaultColorSpring
  * @see PaletteStyle
  * @param[seedColor] The seed color to use for generating the color scheme.
  * @param[useDarkTheme] Whether to use a dark theme or not.
- * @param[withAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
+ * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
  * @param[primary] The custom primary color of the color scheme.
  * @param[secondary] The custom secondary color of the color scheme.
  * @param[tertiary] The custom tertiary color of the color scheme.
@@ -30,7 +29,6 @@ import com.materialkolor.ktx.defaultColorSpring
  * @param[error] The custom error color of the color scheme.
  * @param[style] The style of the color scheme.
  * @param[contrastLevel] The contrast level of the color scheme.
- * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
  * @param[animate] Whether to animate the color scheme or not.
  * @param[animationSpec] The animation spec to use for animating the color scheme.
  * @param[content] The Composable content of the theme.
@@ -39,7 +37,7 @@ import com.materialkolor.ktx.defaultColorSpring
 public fun DynamicMaterialTheme(
     seedColor: Color,
     useDarkTheme: Boolean = isSystemInDarkTheme(),
-    withAmoled: Boolean = false,
+    isAmoled: Boolean = false,
     primary: Color? = null,
     secondary: Color? = null,
     tertiary: Color? = null,
@@ -50,7 +48,6 @@ public fun DynamicMaterialTheme(
     contrastLevel: Double = Contrast.Default.value,
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
-    isExtendedFidelity: Boolean = false,
     animate: Boolean = false,
     animationSpec: FiniteAnimationSpec<Color> = defaultColorSpring,
     content: @Composable () -> Unit,
@@ -58,7 +55,7 @@ public fun DynamicMaterialTheme(
     val state = rememberDynamicMaterialThemeState(
         seedColor = seedColor,
         isDark = useDarkTheme,
-        isAmoled = withAmoled,
+        isAmoled = isAmoled,
         primary = primary,
         secondary = secondary,
         tertiary = tertiary,
@@ -67,7 +64,6 @@ public fun DynamicMaterialTheme(
         error = error,
         style = style,
         contrastLevel = contrastLevel,
-        extendedFidelity = isExtendedFidelity,
     )
 
     DynamicMaterialTheme(
@@ -89,7 +85,7 @@ public fun DynamicMaterialTheme(
  * @see PaletteStyle
  * @param[primary] The primary color of the color scheme.
  * @param[useDarkTheme] Whether to use a dark theme or not.
- * @param[withAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
+ * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
  * @param[secondary] The custom secondary color of the color scheme.
  * @param[tertiary] The custom tertiary color of the color scheme.
  * @param[neutral] The custom neutral color of the color scheme.
@@ -97,7 +93,6 @@ public fun DynamicMaterialTheme(
  * @param[error] The custom error color of the color scheme.
  * @param[style] The style of the color scheme.
  * @param[contrastLevel] The contrast level of the color scheme.
- * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
  * @param[animate] Whether to animate the color scheme or not.
  * @param[animationSpec] The animation spec to use for animating the color scheme.
  * @param[content] The Composable content of the theme.
@@ -106,7 +101,7 @@ public fun DynamicMaterialTheme(
 public fun DynamicMaterialTheme(
     primary: Color,
     useDarkTheme: Boolean = isSystemInDarkTheme(),
-    withAmoled: Boolean = false,
+    isAmoled: Boolean = false,
     secondary: Color? = null,
     tertiary: Color? = null,
     neutral: Color? = null,
@@ -116,7 +111,6 @@ public fun DynamicMaterialTheme(
     contrastLevel: Double = Contrast.Default.value,
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
-    isExtendedFidelity: Boolean = false,
     animate: Boolean = false,
     animationSpec: FiniteAnimationSpec<Color> = defaultColorSpring,
     content: @Composable () -> Unit,
@@ -124,7 +118,7 @@ public fun DynamicMaterialTheme(
     val state = rememberDynamicMaterialThemeState(
         primary = primary,
         isDark = useDarkTheme,
-        isAmoled = withAmoled,
+        isAmoled = isAmoled,
         secondary = secondary,
         tertiary = tertiary,
         neutral = neutral,
@@ -132,7 +126,6 @@ public fun DynamicMaterialTheme(
         error = error,
         style = style,
         contrastLevel = contrastLevel,
-        extendedFidelity = isExtendedFidelity,
     )
 
     DynamicMaterialTheme(
