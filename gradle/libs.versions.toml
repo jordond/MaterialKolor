@@ -1,5 +1,5 @@
 [versions]
-sdk-compile = "33"
+sdk-compile = "35"
 sdk-min = "21"
 jvmTarget = "17"
 agp = "8.9.2"

@@ -32,9 +32,10 @@ import dev.drewhamilton.poko.Poko
  * For instance, ToneDeltaPair(A, B, 15, 'darker', stayTogether) states that A's tone should be
  * at least 15 darker than B's.
  *
- * 'nearer' and 'farther' describes closeness to the surface roles. For instance,
- * ToneDeltaPair(A, B, 10, 'nearer', stayTogether) states that A should be 10 lighter than B in
- * light mode, and 10 darker than B in dark mode.
+ * 'relative_darker' and 'relative_lighter' describes the tone adjustment relative to the
+ * surface color trend (white in light mode; black in dark mode). For instance, ToneDeltaPair(A,
+ * B, 10, 'relative_lighter', 'farther') states that A should be at least 10 lighter than B in
+ * light mode, and at least 10 darker than B in dark mode.
  *
  * @param[roleA] The first role in a pair.
  * @param[roleB] The second role in a pair.
@@ -43,6 +44,7 @@ import dev.drewhamilton.poko.Poko
  * @param[polarity] The relative relation between tones of roleA and roleB, as described above.
  * @param[stayTogether] Whether these two roles should stay on the same side of the "awkward zone"
  * (T50-59). This is necessary for certain cases where one role has two backgrounds.
+ * @param[deltaConstraint] How to fulfill a tone delta pair constraint.
  */
 @Poko
 public class ToneDeltaPair(
@@ -50,5 +52,15 @@ public class ToneDeltaPair(
     public val roleB: DynamicColor,
     public val delta: Double,
     public val polarity: TonePolarity,
-    public val stayTogether: Boolean,
-)
+    public val stayTogether: Boolean = true,
+    public val deltaConstraint: DeltaConstraint = DeltaConstraint.EXACT
+) {
+    /**
+     * Describes how to fulfill a tone delta pair constraint.
+     */
+    public enum class DeltaConstraint {
+        EXACT,
+        NEARER,
+        FARTHER
+    }
+}

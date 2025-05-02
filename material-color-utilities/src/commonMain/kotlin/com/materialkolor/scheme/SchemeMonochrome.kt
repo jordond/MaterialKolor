@@ -15,8 +15,9 @@
  */
 package com.materialkolor.scheme
 
+import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.dynamiccolor.ColorSpecs
 import com.materialkolor.hct.Hct
-import com.materialkolor.palettes.TonalPalette
 
 /**
  * A monochrome theme, colors are purely black / white / gray.
@@ -26,13 +27,26 @@ public class SchemeMonochrome(
     isDark: Boolean,
     contrastLevel: Double,
 ) : DynamicScheme(
-        sourceColorHct = sourceColorHct,
-        variant = Variant.MONOCHROME,
-        isDark = isDark,
-        contrastLevel = contrastLevel,
-        primaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 0.0),
-        secondaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 0.0),
-        tertiaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 0.0),
-        neutralPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 0.0),
-        neutralVariantPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 0.0),
-    )
+    sourceColorHct = sourceColorHct,
+    variant = Variant.MONOCHROME,
+    isDark = isDark,
+    contrastLevel = contrastLevel,
+    primaryPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getPrimaryPalette(Variant.MONOCHROME, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    secondaryPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getSecondaryPalette(Variant.MONOCHROME, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    tertiaryPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getTertiaryPalette(Variant.MONOCHROME, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    neutralPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getNeutralPalette(Variant.MONOCHROME, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    neutralVariantPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getNeutralVariantPalette(Variant.MONOCHROME, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    errorPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getErrorPalette(Variant.MONOCHROME, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+)

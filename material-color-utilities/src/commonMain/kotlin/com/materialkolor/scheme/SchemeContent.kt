@@ -15,11 +15,9 @@
  */
 package com.materialkolor.scheme
 
-import com.materialkolor.dislike.DislikeAnalyzer
+import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.dynamiccolor.ColorSpecs
 import com.materialkolor.hct.Hct
-import com.materialkolor.palettes.TonalPalette
-import com.materialkolor.temperature.TemperatureCache
-import kotlin.math.max
 
 /**
  * A scheme that places the source color in Scheme.primaryContainer.
@@ -38,29 +36,62 @@ public class SchemeContent(
     isDark: Boolean,
     contrastLevel: Double,
 ) : DynamicScheme(
-        sourceColorHct = sourceColorHct,
-        variant = Variant.CONTENT,
-        isDark = isDark,
-        contrastLevel = contrastLevel,
-        primaryPalette = TonalPalette.fromHueAndChroma(
-            hue = sourceColorHct.hue,
-            chroma = sourceColorHct.chroma,
+    sourceColorHct = sourceColorHct,
+    variant = Variant.CONTENT,
+    isDark = isDark,
+    contrastLevel = contrastLevel,
+    primaryPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getPrimaryPalette(
+            variant = Variant.CONTENT,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = Platform.PHONE,
+            contrastLevel = contrastLevel,
         ),
-        secondaryPalette = TonalPalette.fromHueAndChroma(
-            hue = sourceColorHct.hue,
-            chroma = max(sourceColorHct.chroma - 32.0, sourceColorHct.chroma * 0.5),
+    secondaryPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getSecondaryPalette(
+            variant = Variant.CONTENT,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = Platform.PHONE,
+            contrastLevel = contrastLevel,
         ),
-        tertiaryPalette = TonalPalette.fromHct(
-            hct = DislikeAnalyzer.fixIfDisliked(
-                hct = TemperatureCache(sourceColorHct).getAnalogousColors(count = 3, divisions = 6)[2],
-            ),
+    tertiaryPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getTertiaryPalette(
+            variant = Variant.CONTENT,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = Platform.PHONE,
+            contrastLevel = contrastLevel,
         ),
-        neutralPalette = TonalPalette.fromHueAndChroma(
-            hue = sourceColorHct.hue,
-            chroma = sourceColorHct.chroma / 8.0,
+    neutralPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getNeutralPalette(
+            variant = Variant.CONTENT,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = Platform.PHONE,
+            contrastLevel = contrastLevel,
         ),
-        neutralVariantPalette = TonalPalette.fromHueAndChroma(
-            hue = sourceColorHct.hue,
-            chroma = sourceColorHct.chroma / 8.0 + 4.0,
+    neutralVariantPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getNeutralVariantPalette(
+            variant = Variant.CONTENT,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = Platform.PHONE,
+            contrastLevel = contrastLevel,
         ),
-    )
+    errorPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getErrorPalette(
+            variant = Variant.CONTENT,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = Platform.PHONE,
+            contrastLevel = contrastLevel,
+        ),
+)

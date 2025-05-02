@@ -15,9 +15,9 @@
  */
 package com.materialkolor.scheme
 
+import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.dynamiccolor.ColorSpecs
 import com.materialkolor.hct.Hct
-import com.materialkolor.palettes.TonalPalette
-import com.materialkolor.utils.MathUtils
 
 /**
  * A playful theme - the source color's hue does not appear in the theme.
@@ -27,22 +27,26 @@ public class SchemeFruitSalad(
     isDark: Boolean,
     contrastLevel: Double,
 ) : DynamicScheme(
-        sourceColorHct = sourceColorHct,
-        variant = Variant.FRUIT_SALAD,
-        isDark = isDark,
-        contrastLevel = contrastLevel,
-        primaryPalette = TonalPalette.fromHueAndChroma(
-            hue = MathUtils.sanitizeDegrees(sourceColorHct.hue - 50.0),
-            chroma = 48.0,
-        ),
-        secondaryPalette = TonalPalette.fromHueAndChroma(
-            hue = MathUtils.sanitizeDegrees(sourceColorHct.hue - 50.0),
-            chroma = 36.0,
-        ),
-        tertiaryPalette = TonalPalette.fromHueAndChroma(
-            hue = sourceColorHct.hue,
-            chroma = 36.0,
-        ),
-        neutralPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, 10.0),
-        neutralVariantPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, 16.0),
-    )
+    sourceColorHct = sourceColorHct,
+    variant = Variant.FRUIT_SALAD,
+    isDark = isDark,
+    contrastLevel = contrastLevel,
+    primaryPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getPrimaryPalette(Variant.FRUIT_SALAD, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    secondaryPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getSecondaryPalette(Variant.FRUIT_SALAD, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    tertiaryPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getTertiaryPalette(Variant.FRUIT_SALAD, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    neutralPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getNeutralPalette(Variant.FRUIT_SALAD, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    neutralVariantPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getNeutralVariantPalette(Variant.FRUIT_SALAD, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    errorPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getErrorPalette(Variant.FRUIT_SALAD, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+)

@@ -15,11 +15,9 @@
  */
 package com.materialkolor.scheme
 
-import com.materialkolor.dislike.DislikeAnalyzer
+import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.dynamiccolor.ColorSpecs
 import com.materialkolor.hct.Hct
-import com.materialkolor.palettes.TonalPalette
-import com.materialkolor.temperature.TemperatureCache
-import kotlin.math.max
 
 /**
  * A scheme that places the source color in Scheme.primaryContainer.
@@ -36,27 +34,28 @@ public class SchemeFidelity(
     isDark: Boolean,
     contrastLevel: Double,
 ) : DynamicScheme(
-        sourceColorHct = sourceColorHct,
-        variant = Variant.FIDELITY,
-        isDark = isDark,
-        contrastLevel = contrastLevel,
-        primaryPalette = TonalPalette.fromHueAndChroma(
-            hue = sourceColorHct.hue,
-            chroma = sourceColorHct.chroma,
+    sourceColorHct = sourceColorHct,
+    variant = Variant.FIDELITY,
+    isDark = isDark,
+    contrastLevel = contrastLevel,
+    primaryPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getPrimaryPalette(Variant.FIDELITY, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    secondaryPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getSecondaryPalette(Variant.FIDELITY, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    tertiaryPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getTertiaryPalette(Variant.FIDELITY, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    neutralPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getNeutralPalette(Variant.FIDELITY, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    neutralVariantPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getNeutralVariantPalette(Variant.FIDELITY, sourceColorHct, isDark, Platform.PHONE, contrastLevel),
+    errorPalette = ColorSpecs
+        .get(ColorSpec.SpecVersion.SPEC_2021)
+        .getErrorPalette(
+            Variant.FIDELITY, sourceColorHct, isDark, Platform.PHONE, contrastLevel,
         ),
-        secondaryPalette = TonalPalette.fromHueAndChroma(
-            hue = sourceColorHct.hue,
-            chroma = max(sourceColorHct.chroma - 32.0, sourceColorHct.chroma * 0.5),
-        ),
-        tertiaryPalette = TonalPalette.fromHct(
-            hct = DislikeAnalyzer.fixIfDisliked(TemperatureCache(sourceColorHct).complement),
-        ),
-        neutralPalette = TonalPalette.fromHueAndChroma(
-            hue = sourceColorHct.hue,
-            chroma = sourceColorHct.chroma / 8.0,
-        ),
-        neutralVariantPalette = TonalPalette.fromHueAndChroma(
-            hue = sourceColorHct.hue,
-            chroma = sourceColorHct.chroma / 8.0 + 4.0,
-        ),
-    )
+)
