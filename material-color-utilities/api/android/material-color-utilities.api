@@ -272,14 +272,6 @@ public final class com/materialkolor/dynamiccolor/ColorSpec2025 : com/materialko
 public final class com/materialkolor/dynamiccolor/ColorSpec2025$Companion {
 }
 
-public final class com/materialkolor/dynamiccolor/ColorSpecs {
-	public static final field INSTANCE Lcom/materialkolor/dynamiccolor/ColorSpecs;
-	public final fun get ()Lcom/materialkolor/dynamiccolor/ColorSpec;
-	public final fun get (Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;)Lcom/materialkolor/dynamiccolor/ColorSpec;
-	public final fun get (Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Z)Lcom/materialkolor/dynamiccolor/ColorSpec;
-	public static synthetic fun get$default (Lcom/materialkolor/dynamiccolor/ColorSpecs;Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;ILjava/lang/Object;)Lcom/materialkolor/dynamiccolor/ColorSpec;
-}
-
 public final class com/materialkolor/dynamiccolor/ContrastCurve {
 	public fun <init> (DDDD)V
 	public fun equals (Ljava/lang/Object;)Z

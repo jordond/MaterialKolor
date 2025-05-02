@@ -15,21 +15,14 @@
  */
 package com.materialkolor.dynamiccolor
 
-import kotlin.jvm.JvmOverloads
-
 /**
  * A utility class to get the correct color spec for a given spec version.
  */
-public object ColorSpecs {
+internal object ColorSpecs {
     private val SPEC_2021: ColorSpec = ColorSpec2021()
     private val SPEC_2025: ColorSpec = ColorSpec2025()
 
-    @JvmOverloads
-    public fun get(specVersion: ColorSpec.SpecVersion? = ColorSpec.SpecVersion.SPEC_2021): ColorSpec =
-        get(specVersion, false)
-
-    public fun get(
+    fun get(
         specVersion: ColorSpec.SpecVersion?,
-        isExtendedFidelity: Boolean,
     ): ColorSpec = if (specVersion === ColorSpec.SpecVersion.SPEC_2025) SPEC_2025 else SPEC_2021
 }

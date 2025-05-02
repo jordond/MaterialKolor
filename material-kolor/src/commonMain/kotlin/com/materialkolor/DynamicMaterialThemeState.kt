@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.rememberDynamicScheme
 import com.materialkolor.scheme.DynamicScheme
 
@@ -25,6 +26,8 @@ import com.materialkolor.scheme.DynamicScheme
  * @param[error] A custom color to modify the error color in the generated color scheme.
  * @param[style] The initial palette style.
  * @param[contrastLevel] The initial contrast level.
+ * @param[specVersion] The initial spec version.
+ * @param[platform] The initial platform.
  * @param[modifyColorScheme] Use this callback to modify the color scheme once it has been generated.
  * Note that if you modify a color in the scheme, the on* color might not have enough contrast.
  */
@@ -41,6 +44,8 @@ public fun rememberDynamicMaterialThemeState(
     error: Color? = null,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
     modifyColorScheme: (DynamicMaterialThemeState.(ColorScheme) -> ColorScheme)? = null,
 ): DynamicMaterialThemeState =
     remember(
@@ -55,6 +60,8 @@ public fun rememberDynamicMaterialThemeState(
         error,
         style,
         contrastLevel,
+        specVersion,
+        platform,
         modifyColorScheme,
     ) {
         DynamicMaterialThemeState(
@@ -63,6 +70,8 @@ public fun rememberDynamicMaterialThemeState(
             initialIsAmoled = isAmoled,
             initialStyle = style,
             initialContrastLevel = contrastLevel,
+            initialSpecVersion = specVersion,
+            initialPlatform = platform,
             initialPrimary = primary,
             initialSecondary = secondary,
             initialTertiary = tertiary,
@@ -88,6 +97,8 @@ public fun rememberDynamicMaterialThemeState(
  * @param[error] A custom color to modify the error color in the generated color scheme.
  * @param[style] The initial palette style.
  * @param[contrastLevel] The initial contrast level.
+ * @param[specVersion] The initial spec version.
+ * @param[platform] The initial platform.
  * @param[modifyColorScheme] Use this callback to modify the color scheme once it has been generated.
  * Note that if you modify a color in the scheme, the on* color might not have enough contrast.
  */
@@ -103,6 +114,8 @@ public fun rememberDynamicMaterialThemeState(
     error: Color? = null,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
     modifyColorScheme: (DynamicMaterialThemeState.(ColorScheme) -> ColorScheme)? = null,
 ): DynamicMaterialThemeState =
     remember(
@@ -116,6 +129,8 @@ public fun rememberDynamicMaterialThemeState(
         error,
         style,
         contrastLevel,
+        specVersion,
+        platform,
         modifyColorScheme,
     ) {
         DynamicMaterialThemeState(
@@ -124,6 +139,8 @@ public fun rememberDynamicMaterialThemeState(
             initialIsAmoled = isAmoled,
             initialStyle = style,
             initialContrastLevel = contrastLevel,
+            initialSpecVersion = specVersion,
+            initialPlatform = platform,
             initialPrimary = primary,
             initialSecondary = secondary,
             initialTertiary = tertiary,
@@ -144,6 +161,8 @@ public fun rememberDynamicMaterialThemeState(
  * @param[initialIsAmoled] The initial Amoled state.
  * @param[initialStyle] The initial palette style.
  * @param[initialContrastLevel] The initial contrast level.
+ * @param[initialSpecVersion] The initial spec version.
+ * @param[initialPlatform] The initial platform.
  * @param[initialPrimary] A custom color to modify the primary color in the generated color scheme.
  * @param[initialSecondary] A custom color to modify the secondary color in the generated color scheme.
  * @param[initialTertiary] A custom color to modify the tertiary color in the generated color scheme.
@@ -161,6 +180,8 @@ public class DynamicMaterialThemeState internal constructor(
     initialIsAmoled: Boolean,
     initialStyle: PaletteStyle,
     initialContrastLevel: Double,
+    initialSpecVersion: ColorSpec.SpecVersion,
+    initialPlatform: DynamicScheme.Platform,
     initialPrimary: Color? = null,
     initialSecondary: Color? = null,
     initialTertiary: Color? = null,
@@ -204,6 +225,20 @@ public class DynamicMaterialThemeState internal constructor(
      * @see dynamicColorScheme
      */
     public var contrastLevel: Double by mutableStateOf(initialContrastLevel)
+
+    /**
+     * The spec version.
+     *
+     * @see dynamicColorScheme
+     */
+    public var specVersion: ColorSpec.SpecVersion by mutableStateOf(initialSpecVersion)
+
+    /**
+     * The platform.
+     *
+     * @see dynamicColorScheme
+     */
+    public var platform: DynamicScheme.Platform by mutableStateOf(initialPlatform)
 
     /**
      * A custom color to modify the primary color in the generated color scheme.
@@ -257,6 +292,8 @@ public class DynamicMaterialThemeState internal constructor(
                     error = error,
                     style = style,
                     contrastLevel = contrastLevel,
+                    specVersion = specVersion,
+                    platform = platform,
                 )
                 isCustomScheme -> rememberDynamicScheme(
                     seedColor = seedColor,
@@ -269,12 +306,16 @@ public class DynamicMaterialThemeState internal constructor(
                     error = error,
                     style = style,
                     contrastLevel = contrastLevel,
+                    specVersion = specVersion,
+                    platform = platform,
                 )
                 else -> rememberDynamicScheme(
                     seedColor = seedColor,
                     isDark = isDark,
                     style = style,
                     contrastLevel = contrastLevel,
+                    specVersion = specVersion,
+                    platform = platform,
                 )
             }
         }
@@ -301,6 +342,8 @@ public class DynamicMaterialThemeState internal constructor(
                     error = error,
                     style = style,
                     contrastLevel = contrastLevel,
+                    specVersion = specVersion,
+                    platform = platform,
                     modifyColorScheme = callback,
                 )
                 isCustomScheme -> rememberDynamicColorScheme(
@@ -315,6 +358,8 @@ public class DynamicMaterialThemeState internal constructor(
                     error = error,
                     style = style,
                     contrastLevel = contrastLevel,
+                    specVersion = specVersion,
+                    platform = platform,
                     modifyColorScheme = callback,
                 )
                 else -> rememberDynamicColorScheme(
@@ -324,6 +369,8 @@ public class DynamicMaterialThemeState internal constructor(
                     primary = null,
                     style = style,
                     contrastLevel = contrastLevel,
+                    specVersion = specVersion,
+                    platform = platform,
                     modifyColorScheme = callback,
                 )
             }

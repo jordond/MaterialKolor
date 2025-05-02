@@ -8,8 +8,10 @@ import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.animateColorScheme
 import com.materialkolor.ktx.defaultColorSpring
+import com.materialkolor.scheme.DynamicScheme
 
 /**
  * A Material Theme that adapts to the given seed color and the provided custom colors.
@@ -29,6 +31,10 @@ import com.materialkolor.ktx.defaultColorSpring
  * @param[error] The custom error color of the color scheme.
  * @param[style] The style of the color scheme.
  * @param[contrastLevel] The contrast level of the color scheme.
+ * @param[specVersion] The spec version of the color scheme.
+ * @param[platform] The platform of the color scheme.
+ * @param[shapes] The shapes of the theme.
+ * @param[typography] The typography of the theme.
  * @param[animate] Whether to animate the color scheme or not.
  * @param[animationSpec] The animation spec to use for animating the color scheme.
  * @param[content] The Composable content of the theme.
@@ -46,6 +52,8 @@ public fun DynamicMaterialTheme(
     error: Color? = null,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
     animate: Boolean = false,
@@ -64,6 +72,8 @@ public fun DynamicMaterialTheme(
         error = error,
         style = style,
         contrastLevel = contrastLevel,
+        specVersion = specVersion,
+        platform = platform,
     )
 
     DynamicMaterialTheme(
@@ -93,6 +103,10 @@ public fun DynamicMaterialTheme(
  * @param[error] The custom error color of the color scheme.
  * @param[style] The style of the color scheme.
  * @param[contrastLevel] The contrast level of the color scheme.
+ * @param[specVersion] The spec version of the color scheme.
+ * @param[platform] The platform of the color scheme.
+ * @param[shapes] The shapes of the theme.
+ * @param[typography] The typography of the theme.
  * @param[animate] Whether to animate the color scheme or not.
  * @param[animationSpec] The animation spec to use for animating the color scheme.
  * @param[content] The Composable content of the theme.
@@ -109,6 +123,8 @@ public fun DynamicMaterialTheme(
     error: Color? = null,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
     animate: Boolean = false,
@@ -126,6 +142,8 @@ public fun DynamicMaterialTheme(
         error = error,
         style = style,
         contrastLevel = contrastLevel,
+        specVersion = specVersion,
+        platform = platform,
     )
 
     DynamicMaterialTheme(

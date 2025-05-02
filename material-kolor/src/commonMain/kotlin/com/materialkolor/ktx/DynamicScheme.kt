@@ -5,6 +5,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.Contrast
 import com.materialkolor.PaletteStyle
+import com.materialkolor.PaletteStyle.Content
+import com.materialkolor.PaletteStyle.Expressive
+import com.materialkolor.PaletteStyle.Fidelity
+import com.materialkolor.PaletteStyle.FruitSalad
+import com.materialkolor.PaletteStyle.Monochrome
+import com.materialkolor.PaletteStyle.Neutral
+import com.materialkolor.PaletteStyle.Rainbow
+import com.materialkolor.PaletteStyle.TonalSpot
+import com.materialkolor.PaletteStyle.Vibrant
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.internal.asVariant
 import com.materialkolor.scheme.DynamicScheme
 import com.materialkolor.scheme.SchemeContent
@@ -29,24 +39,28 @@ public val DynamicScheme.sourceColor: Color
  * @param[isDark] Whether the scheme should be dark or light.
  * @param[style] The style of the scheme, see [PaletteStyle].
  * @param[contrastLevel] The contrast level of the scheme.
+ * @param[specVersion] The version of the spec to use.
+ * @param[platform] The platform to use.
  * @return The generated [DynamicScheme].
  */
 public fun Color.toDynamicScheme(
     isDark: Boolean,
     style: PaletteStyle,
     contrastLevel: Double = Contrast.Default.value,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
 ): DynamicScheme {
     val hct = toHct()
     return when (style) {
-        PaletteStyle.TonalSpot -> SchemeTonalSpot(hct, isDark, contrastLevel)
-        PaletteStyle.Neutral -> SchemeNeutral(hct, isDark, contrastLevel)
-        PaletteStyle.Vibrant -> SchemeVibrant(hct, isDark, contrastLevel)
-        PaletteStyle.Expressive -> SchemeExpressive(hct, isDark, contrastLevel)
-        PaletteStyle.Rainbow -> SchemeRainbow(hct, isDark, contrastLevel)
-        PaletteStyle.FruitSalad -> SchemeFruitSalad(hct, isDark, contrastLevel)
-        PaletteStyle.Monochrome -> SchemeMonochrome(hct, isDark, contrastLevel)
-        PaletteStyle.Fidelity -> SchemeFidelity(hct, isDark, contrastLevel)
-        PaletteStyle.Content -> SchemeContent(hct, isDark, contrastLevel)
+        TonalSpot -> SchemeTonalSpot(hct, isDark, contrastLevel, specVersion, platform)
+        Neutral -> SchemeNeutral(hct, isDark, contrastLevel, specVersion, platform)
+        Vibrant -> SchemeVibrant(hct, isDark, contrastLevel, specVersion, platform)
+        Expressive -> SchemeExpressive(hct, isDark, contrastLevel, specVersion, platform)
+        Rainbow -> SchemeRainbow(hct, isDark, contrastLevel)
+        FruitSalad -> SchemeFruitSalad(hct, isDark, contrastLevel)
+        Monochrome -> SchemeMonochrome(hct, isDark, contrastLevel)
+        Fidelity -> SchemeFidelity(hct, isDark, contrastLevel)
+        Content -> SchemeContent(hct, isDark, contrastLevel)
     }
 }
 
@@ -65,6 +79,8 @@ public fun Color.toDynamicScheme(
  * @param[error] The error color of the scheme.
  * @param[style] The style of the scheme.
  * @param[contrastLevel] The contrast level of the scheme.
+ * @param[specVersion] The version of the color specification to use.
+ * @param[platform] The platform to use for the scheme.
  */
 @Composable
 public fun rememberDynamicScheme(
@@ -76,8 +92,10 @@ public fun rememberDynamicScheme(
     neutral: Color? = null,
     neutralVariant: Color? = null,
     error: Color? = null,
-    style: PaletteStyle = PaletteStyle.TonalSpot,
+    style: PaletteStyle = TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
 ): DynamicScheme =
     remember(
         seedColor,
@@ -90,6 +108,8 @@ public fun rememberDynamicScheme(
         error,
         style,
         contrastLevel,
+        specVersion,
+        platform,
     ) {
         DynamicScheme(
             seedColor = seedColor,
@@ -102,6 +122,8 @@ public fun rememberDynamicScheme(
             error = error,
             style = style,
             contrastLevel = contrastLevel,
+            specVersion = specVersion,
+            platform = platform,
         )
     }
 
@@ -120,6 +142,8 @@ public fun rememberDynamicScheme(
  * @param[error] The error color of the scheme.
  * @param[style] The style of the scheme.
  * @param[contrastLevel] The contrast level of the scheme.
+ * @param[specVersion] The version of the color specification to use.
+ * @param[platform] The platform to use for the scheme.
  */
 public fun DynamicScheme(
     seedColor: Color,
@@ -130,10 +154,12 @@ public fun DynamicScheme(
     neutral: Color? = null,
     neutralVariant: Color? = null,
     error: Color? = null,
-    style: PaletteStyle = PaletteStyle.TonalSpot,
+    style: PaletteStyle = TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
 ): DynamicScheme {
-    val defaults = seedColor.toDynamicScheme(isDark, style, contrastLevel)
+    val defaults = seedColor.toDynamicScheme(isDark, style, contrastLevel, specVersion, platform)
 
     return DynamicScheme(
         sourceColorHct = seedColor.toHct(),
@@ -146,5 +172,7 @@ public fun DynamicScheme(
         neutralPalette = neutral?.toTonalPalette() ?: defaults.neutralPalette,
         neutralVariantPalette = neutralVariant?.toTonalPalette() ?: defaults.neutralVariantPalette,
         errorPalette = error?.toTonalPalette() ?: defaults.errorPalette,
+        specVersion = specVersion,
+        platform = platform,
     )
 }
