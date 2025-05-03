@@ -6,7 +6,7 @@
 [![Build](https://github.com/jordond/materialkolor/actions/workflows/ci.yml/badge.svg)](https://github.com/jordond/materialkolor/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/jordond/MaterialKolor)](https://opensource.org/license/mit/)
 
-[![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.6.1-blue)](https://github.com/JetBrains/compose-multiplatform)
+[![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.8.0-rc01-blue)](https://github.com/JetBrains/compose-multiplatform)
 ![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
 ![badge-ios](http://img.shields.io/badge/platform-ios-CDCDCD.svg?style=flat)
 ![badge-desktop](http://img.shields.io/badge/platform-desktop-DB413D.svg?style=flat)
@@ -73,7 +73,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("com.materialkolor:material-kolor:3.0.0-alpha01")
+                implementation("com.materialkolor:material-kolor:3.0.0-alpha03")
             }
         }
     }
@@ -86,7 +86,7 @@ For an Android only project, add the dependency to app level `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.materialkolor:material-kolor:3.0.0-alpha01")
+    implementation("com.materialkolor:material-kolor:3.0.0-alpha03")
 }
 ```
 
@@ -94,7 +94,7 @@ dependencies {
 
 ```toml
 [versions]
-materialKolor = "3.0.0-alpha01"
+materialKolor = "3.0.0-alpha03"
 
 [libraries]
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
