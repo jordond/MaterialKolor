@@ -89,7 +89,13 @@ public object Score {
                 continue
             }
             val proportionScore = proportion * 100.0 * WEIGHT_PROPORTION
-            val chromaWeight = if (hct.chroma < TARGET_CHROMA) WEIGHT_CHROMA_BELOW else WEIGHT_CHROMA_ABOVE
+            val chromaWeight = if (hct.chroma <
+                TARGET_CHROMA
+            ) {
+                WEIGHT_CHROMA_BELOW
+            } else {
+                WEIGHT_CHROMA_ABOVE
+            }
             val chromaScore = (hct.chroma - TARGET_CHROMA) * chromaWeight
             val score = proportionScore + chromaScore
             scoredHcts.add(ScoredHCT(hct, score))

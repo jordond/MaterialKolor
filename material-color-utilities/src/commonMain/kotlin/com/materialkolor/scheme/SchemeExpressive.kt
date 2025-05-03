@@ -38,16 +38,34 @@ public class SchemeExpressive(
             .getPrimaryPalette(Variant.EXPRESSIVE, sourceColorHct, isDark, platform, contrastLevel),
         secondaryPalette = ColorSpecs
             .get(specVersion)
-            .getSecondaryPalette(Variant.EXPRESSIVE, sourceColorHct, isDark, platform, contrastLevel),
+            .getSecondaryPalette(
+                Variant.EXPRESSIVE,
+                sourceColorHct,
+                isDark,
+                platform,
+                contrastLevel,
+            ),
         tertiaryPalette = ColorSpecs
             .get(specVersion)
-            .getTertiaryPalette(Variant.EXPRESSIVE, sourceColorHct, isDark, platform, contrastLevel),
+            .getTertiaryPalette(
+                Variant.EXPRESSIVE,
+                sourceColorHct,
+                isDark,
+                platform,
+                contrastLevel,
+            ),
         neutralPalette = ColorSpecs
             .get(specVersion)
             .getNeutralPalette(Variant.EXPRESSIVE, sourceColorHct, isDark, platform, contrastLevel),
         neutralVariantPalette = ColorSpecs
             .get(specVersion)
-            .getNeutralVariantPalette(Variant.EXPRESSIVE, sourceColorHct, isDark, platform, contrastLevel),
+            .getNeutralVariantPalette(
+                Variant.EXPRESSIVE,
+                sourceColorHct,
+                isDark,
+                platform,
+                contrastLevel,
+            ),
         errorPalette = ColorSpecs
             .get(specVersion)
             .getErrorPalette(Variant.EXPRESSIVE, sourceColorHct, isDark, platform, contrastLevel),

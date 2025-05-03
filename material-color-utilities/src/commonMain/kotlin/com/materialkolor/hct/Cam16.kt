@@ -181,7 +181,8 @@ public class Cam16 private constructor(
          *
          * @param argb ARGB representation of a color.
          */
-        public fun fromInt(argb: Int): Cam16 = fromIntInViewingConditions(argb, ViewingConditions.DEFAULT)
+        public fun fromInt(argb: Int): Cam16 =
+            fromIntInViewingConditions(argb, ViewingConditions.DEFAULT)
 
         /**
          * Create a CAM16 color from a color in defined viewing conditions.

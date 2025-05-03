@@ -729,8 +729,13 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .Builder()
                 .setName("on_primary")
                 .setPalette { s -> s.primaryPalette }
-                .setBackground { s -> if (s.platform === Platform.PHONE) primary() else primaryDim() }
-                .setContrastCurve { s ->
+                .setBackground { s ->
+                    if (s.platform === Platform.PHONE) {
+                        primary()
+                    } else {
+                        primaryDim()
+                    }
+                }.setContrastCurve { s ->
                     if (s.platform === Platform.PHONE) {
                         getContrastCurve(6.0)
                     } else {
@@ -2013,7 +2018,16 @@ public class ColorSpec2025 : ColorSpec2021() {
             Variant.NEUTRAL -> TonalPalette.fromHueAndChroma(
                 hue = DynamicScheme.getRotatedHue(
                     sourceColorHct = sourceColorHct,
-                    hueBreakpoints = doubleArrayOf(0.0, 38.0, 105.0, 161.0, 204.0, 278.0, 333.0, 360.0),
+                    hueBreakpoints = doubleArrayOf(
+                        0.0,
+                        38.0,
+                        105.0,
+                        161.0,
+                        204.0,
+                        278.0,
+                        333.0,
+                        360.0,
+                    ),
                     rotations = doubleArrayOf(-32.0, 26.0, 10.0, -39.0, 24.0, -15.0, -32.0),
                 ),
                 chroma = if (platform === Platform.PHONE) 20.0 else 36.0,

@@ -47,7 +47,13 @@ public class SchemeNeutral(
             .getNeutralPalette(Variant.NEUTRAL, sourceColorHct, isDark, platform, contrastLevel),
         neutralVariantPalette = ColorSpecs
             .get(specVersion)
-            .getNeutralVariantPalette(Variant.NEUTRAL, sourceColorHct, isDark, platform, contrastLevel),
+            .getNeutralVariantPalette(
+                Variant.NEUTRAL,
+                sourceColorHct,
+                isDark,
+                platform,
+                contrastLevel,
+            ),
         errorPalette = ColorSpecs
             .get(specVersion)
             .getErrorPalette(Variant.NEUTRAL, sourceColorHct, isDark, platform, contrastLevel),

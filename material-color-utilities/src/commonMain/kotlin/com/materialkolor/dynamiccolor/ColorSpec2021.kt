@@ -1017,7 +1017,9 @@ public open class ColorSpec2021 : ColorSpec {
             var fTone: Double = farther.tone(scheme)
 
             // 1st round: solve to min, each
-            if (color.background != null && nearer.contrastCurve != null && farther.contrastCurve != null) {
+            if (color.background != null && nearer.contrastCurve != null &&
+                farther.contrastCurve != null
+            ) {
                 val bg: DynamicColor? = color.background(scheme)
                 val nContrastCurve: ContrastCurve? = nearer.contrastCurve(scheme)
                 val fContrastCurve: ContrastCurve? = farther.contrastCurve(scheme)
@@ -1257,7 +1259,9 @@ public open class ColorSpec2021 : ColorSpec {
         when (variant) {
             Variant.CONTENT -> TonalPalette.fromHct(
                 DislikeAnalyzer.fixIfDisliked(
-                    TemperatureCache(sourceColorHct).getAnalogousColors(count = 3, divisions = 6)[2],
+                    TemperatureCache(
+                        sourceColorHct,
+                    ).getAnalogousColors(count = 3, divisions = 6)[2],
                 ),
             )
             Variant.FIDELITY -> TonalPalette.fromHct(
@@ -1276,8 +1280,28 @@ public open class ColorSpec2021 : ColorSpec {
             Variant.EXPRESSIVE -> TonalPalette.fromHueAndChroma(
                 hue = DynamicScheme.getRotatedHue(
                     sourceColorHct = sourceColorHct,
-                    hueBreakpoints = doubleArrayOf(0.0, 21.0, 51.0, 121.0, 151.0, 191.0, 271.0, 321.0, 360.0),
-                    rotations = doubleArrayOf(120.0, 120.0, 20.0, 45.0, 20.0, 15.0, 20.0, 120.0, 120.0),
+                    hueBreakpoints = doubleArrayOf(
+                        0.0,
+                        21.0,
+                        51.0,
+                        121.0,
+                        151.0,
+                        191.0,
+                        271.0,
+                        321.0,
+                        360.0,
+                    ),
+                    rotations = doubleArrayOf(
+                        120.0,
+                        120.0,
+                        20.0,
+                        45.0,
+                        20.0,
+                        15.0,
+                        20.0,
+                        120.0,
+                        120.0,
+                    ),
                 ),
                 chroma = 32.0,
             )
@@ -1285,7 +1309,17 @@ public open class ColorSpec2021 : ColorSpec {
             Variant.VIBRANT -> TonalPalette.fromHueAndChroma(
                 hue = DynamicScheme.getRotatedHue(
                     sourceColorHct = sourceColorHct,
-                    hueBreakpoints = doubleArrayOf(0.0, 41.0, 61.0, 101.0, 131.0, 181.0, 251.0, 301.0, 360.0),
+                    hueBreakpoints = doubleArrayOf(
+                        0.0,
+                        41.0,
+                        61.0,
+                        101.0,
+                        131.0,
+                        181.0,
+                        251.0,
+                        301.0,
+                        360.0,
+                    ),
                     rotations = doubleArrayOf(35.0, 30.0, 20.0, 25.0, 30.0, 35.0, 30.0, 25.0, 25.0),
                 ),
                 chroma = 32.0,
@@ -1365,7 +1399,8 @@ public open class ColorSpec2021 : ColorSpec {
         }
 
     public companion object {
-        private fun isMonochrome(scheme: DynamicScheme): Boolean = scheme.variant == Variant.MONOCHROME
+        private fun isMonochrome(scheme: DynamicScheme): Boolean =
+            scheme.variant == Variant.MONOCHROME
 
         private fun findDesiredChromaByTone(
             hue: Double,

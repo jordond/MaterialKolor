@@ -55,7 +55,10 @@ public open class DynamicScheme(
     public val neutralVariantPalette: TonalPalette,
     public val platform: Platform = Platform.PHONE,
     public val specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.SPEC_2021,
-    public val errorPalette: TonalPalette = TonalPalette.fromHueAndChroma(hue = 25.0, chroma = 84.0),
+    public val errorPalette: TonalPalette = TonalPalette.fromHueAndChroma(
+        hue = 25.0,
+        chroma = 84.0,
+    ),
 ) {
     /**
      * The platform on which this scheme is intended to be used.

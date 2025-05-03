@@ -265,7 +265,9 @@ public class DynamicColor(
                 // high and max contrast in light mode. PC's standard tone was T90, OPC's was T10, it was
                 // light mode, and the contrast level was 0.6568521221032331.
                 val negligibleDifference =
-                    abs(lighterRatio - darkerRatio) < 0.1 && lighterRatio < ratio && darkerRatio < ratio
+                    abs(lighterRatio - darkerRatio) < 0.1 &&
+                        lighterRatio < ratio &&
+                        darkerRatio < ratio
                 if (lighterRatio >= ratio || lighterRatio >= darkerRatio || negligibleDifference) {
                     lighterTone
                 } else {
@@ -346,7 +348,9 @@ public class DynamicColor(
                     this.isBackground = isBackground
                 }
 
-            public fun setChromaMultiplier(chromaMultiplier: ((DynamicScheme) -> Double?)?): Builder =
+            public fun setChromaMultiplier(
+                chromaMultiplier: ((DynamicScheme) -> Double?)?,
+            ): Builder =
                 apply {
                     this.chromaMultiplier = chromaMultiplier
                 }
@@ -356,15 +360,20 @@ public class DynamicColor(
                     this.background = background
                 }
 
-            public fun setSecondBackground(secondBackground: ((DynamicScheme) -> DynamicColor?)?): Builder =
-                apply { this.secondBackground = secondBackground }
+            public fun setSecondBackground(
+                secondBackground: ((DynamicScheme) -> DynamicColor?)?,
+            ): Builder = apply { this.secondBackground = secondBackground }
 
-            public fun setContrastCurve(contrastCurve: ((DynamicScheme) -> ContrastCurve?)?): Builder =
+            public fun setContrastCurve(
+                contrastCurve: ((DynamicScheme) -> ContrastCurve?)?,
+            ): Builder =
                 apply {
                     this.contrastCurve = contrastCurve
                 }
 
-            public fun setToneDeltaPair(toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair?)?): Builder =
+            public fun setToneDeltaPair(
+                toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair?)?,
+            ): Builder =
                 apply {
                     this.toneDeltaPair = toneDeltaPair
                 }
@@ -385,10 +394,22 @@ public class DynamicColor(
                     .setIsBackground(this.isBackground)
                     .setPalette { s: DynamicScheme ->
                         val palette =
-                            if (s.specVersion == specVersion) extendedColor.palette else this.palette
+                            if (s.specVersion ==
+                                specVersion
+                            ) {
+                                extendedColor.palette
+                            } else {
+                                this.palette
+                            }
                         palette?.invoke(s) ?: extendedColor.palette(s)
                     }.setTone { s: DynamicScheme ->
-                        val tone = if (s.specVersion == specVersion) extendedColor.tone else this.tone
+                        val tone = if (s.specVersion ==
+                            specVersion
+                        ) {
+                            extendedColor.tone
+                        } else {
+                            this.tone
+                        }
                         tone?.invoke(s) ?: extendedColor.tone(s)
                     }.setChromaMultiplier { s: DynamicScheme ->
                         val chromaMultiplier = if (s.specVersion == specVersion) {
@@ -399,7 +420,13 @@ public class DynamicColor(
                         if (chromaMultiplier != null) chromaMultiplier(s) else 1.0
                     }.setBackground { s: DynamicScheme ->
                         val background =
-                            if (s.specVersion == specVersion) extendedColor.background else this.background
+                            if (s.specVersion ==
+                                specVersion
+                            ) {
+                                extendedColor.background
+                            } else {
+                                this.background
+                            }
                         background?.invoke(s)
                     }.setSecondBackground { s: DynamicScheme ->
                         val secondBackground =
@@ -431,7 +458,13 @@ public class DynamicColor(
                         toneDeltaPair?.invoke(s)
                     }.setOpacity { s: DynamicScheme ->
                         val opacity =
-                            if (s.specVersion == specVersion) extendedColor.opacity else this.opacity
+                            if (s.specVersion ==
+                                specVersion
+                            ) {
+                                extendedColor.opacity
+                            } else {
+                                this.opacity
+                            }
                         opacity?.invoke(s)
                     }
             }
