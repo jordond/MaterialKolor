@@ -29,13 +29,14 @@ class MKThemeTest {
             style = PaletteStyle.TonalSpot,
             selectedImage = null,
             isAmoled = false,
+            packageName = "foo.bar.biz.buzz"
         )
 
-        val result = mkThemeKt("com.example", "MyTheme", settings, animate = true)
+        val result = mkThemeKt("MyTheme", settings, animate = true)
 
         val expected = """
 ${header(settings)}
-package com.example
+package foo.bar.biz.buzz
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
@@ -45,11 +46,11 @@ import com.materialkolor.rememberDynamicMaterialThemeState
 
 @Composable
 fun MyTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    isDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
     val dynamicThemeState = rememberDynamicMaterialThemeState(
-        isDark = darkTheme,
+        isDark = isDarkTheme,
         style = PaletteStyle.TonalSpot,
         primary = Primary,
         secondary = Secondary,
@@ -89,11 +90,11 @@ fun MyTheme(
             isAmoled = true,
         )
 
-        val result = mkThemeKt("com.example", "MyTheme", settings, animate = false)
+        val result = mkThemeKt("MyTheme", settings, animate = false)
 
         val expected = """
 ${header(settings)}
-package com.example
+package com.example.app
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
@@ -103,11 +104,11 @@ import com.materialkolor.rememberDynamicMaterialThemeState
 
 @Composable
 fun MyTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    isDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
     val dynamicThemeState = rememberDynamicMaterialThemeState(
-        isDark = darkTheme,
+        isDark = isDarkTheme,
         style = PaletteStyle.Vibrant,
         contrastLevel = 1.0,
         isAmoled = true,
@@ -144,11 +145,11 @@ fun MyTheme(
             isAmoled = false,
         )
 
-        val result = mkThemeKt("com.example", "MyTheme", settings, animate = true)
+        val result = mkThemeKt("MyTheme", settings, animate = true)
 
         val expected = """
 ${header(settings)}
-package com.example
+package com.example.app
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
@@ -158,11 +159,11 @@ import com.materialkolor.rememberDynamicMaterialThemeState
 
 @Composable
 fun MyTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    isDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
     val dynamicThemeState = rememberDynamicMaterialThemeState(
-        isDark = darkTheme,
+        isDark = isDarkTheme,
         style = PaletteStyle.Expressive,
         contrastLevel = 0.5,
         primary = Primary,

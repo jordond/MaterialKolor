@@ -22,6 +22,7 @@ class StandardColorsTest {
             ),
             isDarkMode = false,
             selectedImage = null,
+            packageName = "foo.bar.biz.buzz"
         )
 
         compare(settings)
@@ -55,9 +56,9 @@ class StandardColorsTest {
         val darkScheme = createScheme(isDark = true, settings = settings)
         val dark = { s: MaterialDynamicColors.() -> DynamicColor -> map.s().getColor(darkScheme).h() }
 
-        val actual = standardColorsKt("com.example", settings)
+        val actual = standardColorsKt(settings)
         val expected = """
-         package com.example
+         package ${settings.packageName}
 
          import androidx.compose.ui.graphics.Color
 

@@ -19,11 +19,12 @@ import com.materialkolor.builder.ui.home.HomeAction.RandomColor
 import com.materialkolor.builder.ui.home.HomeAction.SelectImage
 import com.materialkolor.builder.ui.home.HomeAction.UpdateContrast
 import com.materialkolor.builder.ui.home.HomeAction.UpdatePaletteStyle
+import com.materialkolor.builder.ui.home.HomeAction.UpdateSpecVersion
 import com.materialkolor.builder.ui.home.components.ContrastSelector
+import com.materialkolor.builder.ui.home.customize.CustomizeSection
 import com.materialkolor.builder.ui.home.export.ExportScreenContent
 import com.materialkolor.builder.ui.home.preview.PreviewScreenContent
 import com.materialkolor.builder.ui.home.preview.PreviewSection
-import com.materialkolor.builder.ui.home.customize.CustomizeSection
 import com.materialkolor.builder.ui.ktx.widthIsExpanded
 import com.materialkolor.builder.ui.ktx.windowSizeClass
 
@@ -52,6 +53,7 @@ fun HomeContent(
                     openColorPicker = dispatcher.rememberRelayOf(::OpenColorPicker),
                     onUpdatePaletteStyle = dispatcher.rememberRelayOf(::UpdatePaletteStyle),
                     onUpdateContrast = dispatcher.rememberRelayOf(::UpdateContrast),
+                    updateSpecVersion = dispatcher.rememberRelayOf(::UpdateSpecVersion),
                     processingImage = processingImage,
                     windowSizeClass = windowSizeClass,
                 )

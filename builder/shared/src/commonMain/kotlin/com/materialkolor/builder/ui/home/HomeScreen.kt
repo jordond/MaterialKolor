@@ -35,6 +35,7 @@ import com.materialkolor.builder.ui.home.HomeAction.ToggleExportMode
 import com.materialkolor.builder.ui.home.HomeAction.UpdateContrast
 import com.materialkolor.builder.ui.home.HomeAction.UpdateExportOptions
 import com.materialkolor.builder.ui.home.HomeAction.UpdatePaletteStyle
+import com.materialkolor.builder.ui.home.HomeAction.UpdateSpecVersion
 import com.materialkolor.builder.ui.home.preview.PreviewSection
 import com.materialkolor.builder.ui.home.preview.gallery.NavigationDrawerContent
 import com.materialkolor.builder.ui.ktx.HandleEvents
@@ -122,6 +123,7 @@ fun HomeScreen(destination: String? = null) {
                         is UpdateExportOptions -> model.updateExportOptions(action.options)
                         is Export -> model.export()
                         is CancelExport -> model.cancelExport()
+                        is UpdateSpecVersion -> model.updateSpecVersion(action.version)
                     }
                 },
             )

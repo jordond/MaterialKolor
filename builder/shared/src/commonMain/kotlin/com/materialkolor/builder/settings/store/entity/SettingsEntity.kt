@@ -10,6 +10,7 @@ import com.materialkolor.builder.settings.model.KeyColor
 import com.materialkolor.builder.settings.model.SeedImage
 import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.builder.settings.model.SettingsDefaults
+import com.materialkolor.dynamiccolor.ColorSpec
 
 data class SettingsEntity(
     val colors: Map<KeyColor, Int?>,
@@ -18,6 +19,8 @@ data class SettingsEntity(
     val selectedPresetId: String? = null,
     val style: PaletteStyle = SettingsDefaults.style,
     val isAmoled: Boolean = SettingsDefaults.isAmoled,
+    val specVersion: ColorSpec.SpecVersion = SettingsDefaults.specVersion,
+    val packageName: String? = null,
 )
 
 fun Settings.toEntity(): SettingsEntity {
@@ -29,6 +32,8 @@ fun Settings.toEntity(): SettingsEntity {
         selectedPresetId = presetId,
         style = style,
         isAmoled = isAmoled,
+        specVersion = specVersion,
+        packageName = packageName,
     )
 }
 
@@ -44,6 +49,8 @@ fun SettingsEntity.toModel(isDarkModeFallback: Boolean): Settings {
         selectedImage = preset,
         style = style,
         isAmoled = isAmoled,
+        specVersion = specVersion,
+        packageName = packageName ?: SettingsDefaults.packageName,
     )
 }
 

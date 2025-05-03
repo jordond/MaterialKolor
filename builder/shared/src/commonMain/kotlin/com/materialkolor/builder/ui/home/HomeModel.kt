@@ -20,6 +20,7 @@ import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.builder.ui.components.ColorPickerState
 import com.materialkolor.builder.ui.home.preview.PreviewSection
 import com.materialkolor.builder.ui.ktx.UiStateViewModel
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.themeColorOrNull
 import com.materialkolor.ktx.toHex
 import com.mohamedrejeb.calf.io.KmpFile
@@ -55,6 +56,10 @@ class HomeModel(
 
     fun updateContrast(contrast: Contrast) {
         updateSettings { it.copy(contrast = contrast) }
+    }
+
+    fun updateSpecVersion(version: ColorSpec.SpecVersion) {
+        updateSettings { it.copy(specVersion = version) }
     }
 
     fun updatePaletteStyle(style: PaletteStyle) {

@@ -42,6 +42,7 @@ fun createThemeState(
         isDark = isDark,
         style = settings.style,
         contrastLevel = settings.contrast.value,
+        specVersion = settings.specVersion,
     )
 }
 

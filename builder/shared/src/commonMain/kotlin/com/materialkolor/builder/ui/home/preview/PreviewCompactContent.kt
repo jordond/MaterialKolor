@@ -22,6 +22,7 @@ import com.materialkolor.builder.ui.home.HomeAction.RandomColor
 import com.materialkolor.builder.ui.home.HomeAction.SelectImage
 import com.materialkolor.builder.ui.home.HomeAction.UpdateContrast
 import com.materialkolor.builder.ui.home.HomeAction.UpdatePaletteStyle
+import com.materialkolor.builder.ui.home.HomeAction.UpdateSpecVersion
 import com.materialkolor.builder.ui.home.customize.CustomizeSection
 import com.materialkolor.builder.ui.home.preview.device.DeviceSection
 import com.materialkolor.builder.ui.home.preview.gallery.GallerySection
@@ -48,16 +49,19 @@ fun PreviewCompactContent(
                     openColorPicker = dispatcher.rememberRelayOf(::OpenColorPicker),
                     onUpdatePaletteStyle = dispatcher.rememberRelayOf(::UpdatePaletteStyle),
                     onUpdateContrast = dispatcher.rememberRelayOf(::UpdateContrast),
+                    updateSpecVersion = dispatcher.rememberRelayOf(::UpdateSpecVersion),
                     processingImage = processingImage,
                     windowSizeClass = windowSizeClass,
                     modifier = modifier,
                 )
             }
+
             PreviewSection.Preview -> {
                 WrappedContent {
                     DeviceSection()
                 }
             }
+
             PreviewSection.Components -> {
                 val isCompact = windowSizeClass.widthIsCompact()
                 WrappedContent {
@@ -68,6 +72,7 @@ fun PreviewCompactContent(
                     )
                 }
             }
+
             PreviewSection.Themes -> {
                 WrappedContent {
                     ThemeSection(

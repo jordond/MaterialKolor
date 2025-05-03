@@ -16,7 +16,6 @@ data class ExportOptions(
     val settings: Settings,
     val multiplatform: Boolean = DEFAULT_MULTIPLATFORM,
     val themeName: String = DEFAULT_THEME_NAME,
-    val packageName: String = DEFAULT_PACKAGE_NAME,
     val useVersionCatalog: Boolean = DEFAULT_USE_VERSION_CATALOG,
     val animate: Boolean = DEFAULT_ANIMATE,
 ) {
@@ -36,7 +35,6 @@ data class ExportOptions(
     companion object {
 
         const val DEFAULT_THEME_NAME = "AppTheme"
-        const val DEFAULT_PACKAGE_NAME = "com.example"
         const val DEFAULT_MULTIPLATFORM = true
         const val DEFAULT_USE_VERSION_CATALOG = true
         const val DEFAULT_ANIMATE = true

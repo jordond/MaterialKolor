@@ -7,6 +7,7 @@ import com.materialkolor.builder.export.model.ExportOptions
 import com.materialkolor.builder.settings.model.KeyColor
 import com.materialkolor.builder.settings.model.SeedImage
 import com.materialkolor.builder.ui.home.preview.PreviewSection
+import com.materialkolor.dynamiccolor.ColorSpec
 
 sealed interface HomeAction {
     sealed interface ColorPicker : HomeAction
@@ -15,6 +16,7 @@ sealed interface HomeAction {
     data object Reset : HomeAction
     data class UpdateContrast(val contrast: Contrast) : HomeAction
     data class UpdatePaletteStyle(val style: PaletteStyle) : HomeAction
+    data class UpdateSpecVersion(val version: ColorSpec.SpecVersion) : HomeAction
     data class SelectImage(val image: SeedImage.Resource?) : HomeAction
     data class CopyColor(val name: String, val color: Color) : HomeAction
     data object RandomColor : HomeAction

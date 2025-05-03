@@ -6,9 +6,9 @@ import androidx.compose.ui.text.intl.Locale
 import com.materialkolor.Contrast
 import com.materialkolor.builder.export.model.header
 import com.materialkolor.builder.settings.model.Settings
+import com.materialkolor.dynamiccolor.ColorSpec
 
 fun mkThemeKt(
-    packageName: String,
     themeName: String,
     settings: Settings,
     animate: Boolean,
@@ -16,9 +16,19 @@ fun mkThemeKt(
     val contrast = if (settings.contrast == Contrast.Default) null
     else "contrastLevel = ${settings.contrast.value}"
 
+    val imports = listOfNotNull(
+        "import androidx.compose.foundation.isSystemInDarkTheme",
+        "import androidx.compose.runtime.Composable",
+        "import com.materialkolor.DynamicMaterialTheme",
+        "import com.materialkolor.PaletteStyle",
+        if (settings.specVersion.include) "import com.materialkolor.dynamiccolor.ColorSpec" else null,
+        "import com.materialkolor.rememberDynamicMaterialThemeState",
+    ).joinToString("\n")
+
     val params = listOfNotNull(
         contrast,
         settings.isAmoled.parameter("isAmoled"),
+        settings.specVersion.parameter(),
         if (settings.colors.primary == null) settings.colors.seed.parameter("SeedColor")
         else settings.colors.primary.parameter("Primary"),
         settings.colors.secondary.parameter("Secondary"),
@@ -30,21 +40,17 @@ fun mkThemeKt(
 
     return """
 ${header(settings)}
-package $packageName
+package ${settings.packageName}
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.Composable
-import com.materialkolor.DynamicMaterialTheme
-import com.materialkolor.PaletteStyle
-import com.materialkolor.rememberDynamicMaterialThemeState
+$imports
 
 @Composable
 fun $themeName(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    isDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
     val dynamicThemeState = rememberDynamicMaterialThemeState(
-        isDark = darkTheme,
+        isDark = isDarkTheme,
         style = PaletteStyle.${settings.style},
         $params,
     )
@@ -59,6 +65,14 @@ fun $themeName(
 }
 
 private fun Boolean.parameter(name: String) = if (this) "$name = true" else null
+
+private val ColorSpec.SpecVersion.include
+    get() = this != ColorSpec.SpecVersion.SPEC_2021
+
+private fun ColorSpec.SpecVersion.parameter(): String? {
+    return if (!include) null
+    else "specVersion = ColorSpec.SpecVersion.${this.name}"
+}
 
 private fun Color?.parameter(name: String): String? {
     if (this == null) return null

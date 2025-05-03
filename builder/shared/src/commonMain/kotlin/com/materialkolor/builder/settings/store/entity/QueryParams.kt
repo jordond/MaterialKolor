@@ -7,6 +7,7 @@ import com.materialkolor.PaletteStyle
 import com.materialkolor.builder.ktx.parseHexToColor
 import com.materialkolor.builder.settings.model.KeyColor
 import com.materialkolor.builder.settings.model.SettingsDefaults
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.toHex
 import io.ktor.http.decodeURLQueryComponent
 import io.ktor.http.encodeURLQueryComponent
@@ -15,7 +16,9 @@ private const val KEY_DARK_MODE = "dark_mode"
 private const val KEY_IS_AMOLED = "is_amoled"
 private const val KEY_CONTRAST = "contrast"
 private const val KEY_SELECTED_PRESET_ID = "selected_preset_id"
+private const val KEY_COLOR_SPEC = "color_spec"
 private const val KEY_STYLE = "style"
+private const val KEY_PACKAGE_NAME = "package_name"
 private val KeyColor.KEY
     get() = "color_${name.lowercase()}"
 
@@ -41,7 +44,10 @@ fun SettingsEntity.toQueryParams(): String {
         selectedPresetId.param(KEY_SELECTED_PRESET_ID),
         contrast.param(KEY_CONTRAST, SettingsDefaults.contrast.value),
         isAmoled.param(KEY_IS_AMOLED, SettingsDefaults.isAmoled),
-    ).joinToString(SEPARATOR)
+        specVersion.param(KEY_COLOR_SPEC, SettingsDefaults.specVersion),
+        packageName.param(KEY_PACKAGE_NAME),
+
+        ).joinToString(SEPARATOR)
 
     return "?$params"
 }
@@ -58,6 +64,8 @@ fun String.toSettingsEntity(): SettingsEntity {
         contrast = params[KEY_CONTRAST]?.toDoubleOrNull() ?: Contrast.Default.value,
         selectedPresetId = params[KEY_SELECTED_PRESET_ID]?.takeIf { it.isNotBlank() },
         style = params[KEY_STYLE]?.safeToPaletteStyle() ?: PaletteStyle.TonalSpot,
+        specVersion = parseSpecVersion(params[KEY_COLOR_SPEC]),
+        packageName = params[KEY_PACKAGE_NAME],
     )
 }
 
@@ -67,6 +75,11 @@ fun String.splitQueryParams(): Map<String, String> {
             val (key, value) = param.split("=")
             key to value.decodeURLQueryComponent()
         }
+}
+
+private fun parseSpecVersion(string: String?): ColorSpec.SpecVersion {
+    if (string == null) return ColorSpec.SpecVersion.Default
+    return runCatching { ColorSpec.SpecVersion.valueOf(string) }.getOrDefault(ColorSpec.SpecVersion.Default)
 }
 
 private inline fun <reified T> T?.param(key: String, default: T? = null): String? {

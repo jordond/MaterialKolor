@@ -20,6 +20,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +51,16 @@ fun ExportOptionsCard(
                 text = "Options",
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 8.dp),
+            )
+
+            TextField(
+                value = options.settings.packageName,
+                onValueChange = { value ->
+                    updateOptions(options.copy(settings = options.settings.copy(packageName = value)))
+                },
+                label = { Text("Package Name") },
+                isError = options.settings.packageName.isBlank(),
+                singleLine = true,
             )
 
             SingleChoiceSegmentedButtonRow(

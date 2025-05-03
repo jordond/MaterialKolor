@@ -25,8 +25,10 @@ import com.materialkolor.builder.ui.LocalWindowSizeClass
 import com.materialkolor.builder.ui.home.customize.colors.CoreColorsSection
 import com.materialkolor.builder.ui.home.customize.contrast.ContrastSection
 import com.materialkolor.builder.ui.home.customize.seed.SeedColorSection
+import com.materialkolor.builder.ui.home.customize.spec.ColorSpecSection
 import com.materialkolor.builder.ui.home.customize.style.PaletteStyleSection
 import com.materialkolor.builder.ui.ktx.widthIsExpanded
+import com.materialkolor.dynamiccolor.ColorSpec
 import kotlinx.collections.immutable.PersistentList
 
 @Composable
@@ -38,6 +40,7 @@ fun CustomizeSection(
     onRandomColor: () -> Unit,
     onUpdatePaletteStyle: (PaletteStyle) -> Unit,
     onUpdateContrast: (Contrast) -> Unit,
+    updateSpecVersion: (ColorSpec.SpecVersion) -> Unit,
     scrollState: ScrollState = rememberScrollState(),
     imagePresets: PersistentList<SeedImage.Resource> = ImagePresets.all,
     windowSizeClass: WindowSizeClass = LocalWindowSizeClass.current,
@@ -63,6 +66,11 @@ fun CustomizeSection(
             onRandomColor = onRandomColor,
             imagePresets = imagePresets,
             processingImage = processingImage,
+        )
+
+        ColorSpecSection(
+            selected = settings.specVersion,
+            onSelected = updateSpecVersion,
         )
 
         PaletteStyleSection(

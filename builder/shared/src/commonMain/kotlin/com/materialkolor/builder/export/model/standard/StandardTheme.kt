@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 """.trimIndent()
 
 fun standardThemeKt(
-    packageName: String,
     themeName: String,
     multiplatform: Boolean,
     settings: Settings,
@@ -40,7 +39,7 @@ fun standardThemeKt(
 
     return """
 ${header(settings)}
-package $packageName
+package ${settings.packageName}
 
 ${if (multiplatform) multiplatformImports else androidImports}
 
@@ -77,7 +76,7 @@ private fun multiplatformTheme(themeName: String, lightSchemeName: String, darkS
 private fun androidTheme(themeName: String, lightSchemeName: String, darkSchemeName: String) = """
     @Composable
     fun $themeName(
-        darkTheme: Boolean = isSystemInDarkTheme(),
+        isDarkTheme: Boolean = isSystemInDarkTheme(),
         // Dynamic color is available on Android 12+
         dynamicColor: Boolean = true,
         content: @Composable() () -> Unit,
@@ -85,9 +84,9 @@ private fun androidTheme(themeName: String, lightSchemeName: String, darkSchemeN
         val colorScheme = when {
             dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
                 val context = LocalContext.current
-                if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+                if (isDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             }
-            darkTheme -> $darkSchemeName
+            isDarkTheme -> $darkSchemeName
             else -> $lightSchemeName
         }
     

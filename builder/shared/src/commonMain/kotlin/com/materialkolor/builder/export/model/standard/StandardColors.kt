@@ -14,7 +14,6 @@ import com.materialkolor.ktx.getColor
 import com.materialkolor.scheme.DynamicScheme
 
 fun standardColorsKt(
-    packageName: String,
     settings: Settings,
 ): String {
     val map = MaterialDynamicColors().colorList()
@@ -22,7 +21,7 @@ fun standardColorsKt(
     val dark = createScheme(isDark = true, settings = settings)
 
     return """
-package $packageName
+package ${settings.packageName}
 
 import androidx.compose.ui.graphics.Color
 

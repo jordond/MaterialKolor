@@ -20,10 +20,10 @@ class StandardThemeTest {
             ),
             isDarkMode = false,
             selectedImage = null,
+            packageName = "foo.bar.biz.buzz"
         )
 
         val result = standardThemeKt(
-            packageName = "com.example",
             themeName = "AppTheme",
             multiplatform = true,
             settings = settings,
@@ -31,7 +31,7 @@ class StandardThemeTest {
 
         val expected = """
 ${header(settings)}
-package com.example
+package foo.bar.biz.buzz
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -146,7 +146,6 @@ fun AppTheme(
         )
 
         val result = standardThemeKt(
-            packageName = "com.example",
             themeName = "AppTheme",
             multiplatform = false,
             settings = settings,
@@ -154,7 +153,7 @@ fun AppTheme(
 
         val expected = """
 ${header(settings)}
-package com.example
+package com.example.app
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -244,7 +243,7 @@ private val darkColorScheme = darkColorScheme(
 
 @Composable
 fun AppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    isDarkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable() () -> Unit,
@@ -252,9 +251,9 @@ fun AppTheme(
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (isDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> darkColorScheme
+        isDarkTheme -> darkColorScheme
         else -> lightColorScheme
     }
 
@@ -280,7 +279,6 @@ fun AppTheme(
         )
 
         val result = standardThemeKt(
-            packageName = "com.example",
             themeName = "AppTheme",
             multiplatform = false,
             settings = settings,
@@ -379,7 +377,6 @@ fun AppTheme(
         )
 
         val result = standardThemeKt(
-            packageName = "com.example",
             themeName = "AppTheme",
             multiplatform = true,
             settings = settings,
@@ -484,7 +481,6 @@ fun AppTheme(
         )
 
         val result = standardThemeKt(
-            packageName = "com.example",
             themeName = "AppTheme",
             multiplatform = false,
             settings = settings,

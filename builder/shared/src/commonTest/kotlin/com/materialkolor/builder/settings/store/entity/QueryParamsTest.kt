@@ -37,8 +37,7 @@ class QueryParamsTest {
             dark_mode=true&
             style=Expressive&
             selected_preset_id=preset1&
-            contrast=1.0&
-            extended_fidelity=true
+            contrast=1.0
             """.trimIndent().replace("\n", "")
 
         assertEquals(expected, queryParams)
@@ -54,7 +53,6 @@ class QueryParamsTest {
             contrast=1.0&
             selected_preset_id=preset1
             &style=Expressive
-            &extended_fidelity=true
             """.trimIndent().replace("\n", "")
 
         val settingsEntity = queryParams.toSettingsEntity()
