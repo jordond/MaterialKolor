@@ -39,20 +39,20 @@ public class SchemeTonalSpot(
         secondaryPalette = ColorSpecs
             .get(specVersion)
             .getSecondaryPalette(
-                Variant.TONAL_SPOT,
-                sourceColorHct,
-                isDark,
-                platform,
-                contrastLevel,
+                variant = Variant.TONAL_SPOT,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
             ),
         tertiaryPalette = ColorSpecs
             .get(specVersion)
             .getTertiaryPalette(
-                Variant.TONAL_SPOT,
-                sourceColorHct,
-                isDark,
-                platform,
-                contrastLevel,
+                variant = Variant.TONAL_SPOT,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
             ),
         neutralPalette = ColorSpecs
             .get(specVersion)
@@ -60,11 +60,11 @@ public class SchemeTonalSpot(
         neutralVariantPalette = ColorSpecs
             .get(specVersion)
             .getNeutralVariantPalette(
-                Variant.TONAL_SPOT,
-                sourceColorHct,
-                isDark,
-                platform,
-                contrastLevel,
+                variant = Variant.TONAL_SPOT,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
             ),
         errorPalette = ColorSpecs
             .get(specVersion)

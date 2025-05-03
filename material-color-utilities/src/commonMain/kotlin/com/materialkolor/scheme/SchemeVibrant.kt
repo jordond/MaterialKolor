@@ -48,11 +48,11 @@ public class SchemeVibrant(
         neutralVariantPalette = ColorSpecs
             .get(specVersion)
             .getNeutralVariantPalette(
-                Variant.VIBRANT,
-                sourceColorHct,
-                isDark,
-                platform,
-                contrastLevel,
+                variant = Variant.VIBRANT,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
             ),
         errorPalette = ColorSpecs
             .get(specVersion)
