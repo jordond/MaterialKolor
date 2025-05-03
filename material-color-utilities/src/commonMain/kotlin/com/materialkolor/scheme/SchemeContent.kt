@@ -42,6 +42,8 @@ public class SchemeContent(
         variant = Variant.CONTENT,
         isDark = isDark,
         contrastLevel = contrastLevel,
+        specVersion = specVersion,
+        platform = platform,
         primaryPalette = ColorSpecs
             .get(specVersion)
             .getPrimaryPalette(

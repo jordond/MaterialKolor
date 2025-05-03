@@ -33,6 +33,8 @@ public class SchemeMonochrome(
         variant = Variant.MONOCHROME,
         isDark = isDark,
         contrastLevel = contrastLevel,
+        specVersion = specVersion,
+        platform = platform,
         primaryPalette = ColorSpecs
             .get(specVersion)
             .getPrimaryPalette(

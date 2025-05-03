@@ -33,6 +33,8 @@ public class SchemeRainbow(
         variant = Variant.RAINBOW,
         isDark = isDark,
         contrastLevel = contrastLevel,
+        specVersion = specVersion,
+        platform = platform,
         primaryPalette = ColorSpecs
             .get(specVersion)
             .getPrimaryPalette(

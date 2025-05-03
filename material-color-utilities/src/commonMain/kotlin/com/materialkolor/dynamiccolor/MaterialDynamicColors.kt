@@ -23,8 +23,7 @@ import kotlin.reflect.KFunction0
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 public class MaterialDynamicColors {
-    public fun highestSurface(scheme: DynamicScheme): DynamicColor =
-        colorSpec.highestSurface(scheme)
+    public fun highestSurface(scheme: DynamicScheme): DynamicColor = colorSpec.highestSurface(scheme)
 
     // Compatibility Keys Colors for Android
     public fun primaryPaletteKeyColor(): DynamicColor = colorSpec.primaryPaletteKeyColor()
@@ -37,8 +36,7 @@ public class MaterialDynamicColors {
 
     public fun neutralPaletteKeyColor(): DynamicColor = colorSpec.neutralPaletteKeyColor()
 
-    public fun neutralVariantPaletteKeyColor(): DynamicColor =
-        colorSpec.neutralVariantPaletteKeyColor()
+    public fun neutralVariantPaletteKeyColor(): DynamicColor = colorSpec.neutralVariantPaletteKeyColor()
 
     public fun background(): DynamicColor = colorSpec.background()
 
@@ -185,14 +183,12 @@ public class MaterialDynamicColors {
      * textColorSecondaryInverse and textColorTertiaryInverse both documented, in both M3 & GM3, as
      * V30/NV80
      */
-    public fun textSecondaryAndTertiaryInverse(): DynamicColor =
-        colorSpec.textSecondaryAndTertiaryInverse()
+    public fun textSecondaryAndTertiaryInverse(): DynamicColor = colorSpec.textSecondaryAndTertiaryInverse()
 
     /**
      * textColorPrimaryInverseDisableOnly documented, in both M3 & GM3, as N10/N90
      */
-    public fun textPrimaryInverseDisableOnly(): DynamicColor =
-        colorSpec.textPrimaryInverseDisableOnly()
+    public fun textPrimaryInverseDisableOnly(): DynamicColor = colorSpec.textPrimaryInverseDisableOnly()
 
     /**
      * textColorSecondaryInverse and textColorTertiaryInverse in disabled state both documented,

@@ -27,7 +27,8 @@ class DynamicSchemeTest {
     @Test
     fun testOnColors() {
         val mkSourceColor = Hct.from(131.0, 70.0, 62.0)
-        val mkScheme = SchemeTonalSpot(mkSourceColor, true, 1.0, ColorSpec.SpecVersion.SPEC_2025)
+        val mkScheme =
+            SchemeTonalSpot(mkSourceColor, true, 1.0, ColorSpec.SpecVersion.SPEC_2025, DynamicScheme.Platform.PHONE)
 
         val mcuSourceColor = hct.Hct.from(131.0, 70.0, 62.0)
         val mcuScheme = scheme.SchemeTonalSpot(
@@ -56,7 +57,7 @@ class DynamicSchemeTest {
 
     private fun testAllColors(specVersion: ColorSpec.SpecVersion) {
         val mkSourceColor = Hct.from(131.0, 70.0, 62.0)
-        val mkScheme = SchemeTonalSpot(mkSourceColor, true, 1.0, specVersion)
+        val mkScheme = SchemeTonalSpot(mkSourceColor, true, 1.0, specVersion, DynamicScheme.Platform.PHONE)
 
         val mcuSourceColor = hct.Hct.from(131.0, 70.0, 62.0)
         val mcuScheme = scheme.SchemeTonalSpot(
@@ -77,7 +78,8 @@ class DynamicSchemeTest {
                 "${color.name} -> #${color.getArgb(mkScheme).toHexString()}"
             }
 
-        val mcuColors = dynamiccolor.MaterialDynamicColors()
+        val mcuColors = dynamiccolor
+            .MaterialDynamicColors()
             .allInOrder()
             .map {
                 val color = it()
@@ -88,69 +90,70 @@ class DynamicSchemeTest {
         incorrect shouldBeEqual ""
     }
 
-    private fun dynamiccolor.MaterialDynamicColors.allInOrder() = listOf(
-        ::primaryPaletteKeyColor,
-        ::secondaryPaletteKeyColor,
-        ::tertiaryPaletteKeyColor,
-        ::errorPaletteKeyColor,
-        ::neutralPaletteKeyColor,
-        ::neutralVariantPaletteKeyColor,
-        ::background,
-        ::onBackground,
-        ::surface,
-        ::surfaceDim,
-        ::surfaceBright,
-        ::surfaceContainerLowest,
-        ::surfaceContainerLow,
-        ::surfaceContainer,
-        ::surfaceContainerHigh,
-        ::surfaceContainerHighest,
-        ::onSurface,
-        ::surfaceVariant,
-        ::onSurfaceVariant,
-        ::inverseSurface,
-        ::inverseOnSurface,
-        ::outline,
-        ::outlineVariant,
-        ::shadow,
-        ::scrim,
-        ::surfaceTint,
-        ::primary,
-        ::onPrimary,
-        ::primaryContainer,
-        ::onPrimaryContainer,
-        ::inversePrimary,
-        ::secondary,
-        ::onSecondary,
-        ::secondaryContainer,
-        ::onSecondaryContainer,
-        ::tertiary,
-        ::onTertiary,
-        ::tertiaryContainer,
-        ::onTertiaryContainer,
-        ::error,
-        ::onError,
-        ::errorContainer,
-        ::onErrorContainer,
-        ::primaryFixed,
-        ::primaryFixedDim,
-        ::onPrimaryFixed,
-        ::onPrimaryFixedVariant,
-        ::secondaryFixed,
-        ::secondaryFixedDim,
-        ::onSecondaryFixed,
-        ::onSecondaryFixedVariant,
-        ::tertiaryFixed,
-        ::tertiaryFixedDim,
-        ::onTertiaryFixed,
-        ::onTertiaryFixedVariant,
-        ::controlActivated,
-        ::controlNormal,
-        ::controlHighlight,
-        ::textPrimaryInverse,
-        ::textSecondaryAndTertiaryInverse,
-        ::textPrimaryInverseDisableOnly,
-        ::textSecondaryAndTertiaryInverseDisabled,
-        ::textHintInverse,
-    )
+    private fun dynamiccolor.MaterialDynamicColors.allInOrder() =
+        listOf(
+            ::primaryPaletteKeyColor,
+            ::secondaryPaletteKeyColor,
+            ::tertiaryPaletteKeyColor,
+            ::errorPaletteKeyColor,
+            ::neutralPaletteKeyColor,
+            ::neutralVariantPaletteKeyColor,
+            ::background,
+            ::onBackground,
+            ::surface,
+            ::surfaceDim,
+            ::surfaceBright,
+            ::surfaceContainerLowest,
+            ::surfaceContainerLow,
+            ::surfaceContainer,
+            ::surfaceContainerHigh,
+            ::surfaceContainerHighest,
+            ::onSurface,
+            ::surfaceVariant,
+            ::onSurfaceVariant,
+            ::inverseSurface,
+            ::inverseOnSurface,
+            ::outline,
+            ::outlineVariant,
+            ::shadow,
+            ::scrim,
+            ::surfaceTint,
+            ::primary,
+            ::onPrimary,
+            ::primaryContainer,
+            ::onPrimaryContainer,
+            ::inversePrimary,
+            ::secondary,
+            ::onSecondary,
+            ::secondaryContainer,
+            ::onSecondaryContainer,
+            ::tertiary,
+            ::onTertiary,
+            ::tertiaryContainer,
+            ::onTertiaryContainer,
+            ::error,
+            ::onError,
+            ::errorContainer,
+            ::onErrorContainer,
+            ::primaryFixed,
+            ::primaryFixedDim,
+            ::onPrimaryFixed,
+            ::onPrimaryFixedVariant,
+            ::secondaryFixed,
+            ::secondaryFixedDim,
+            ::onSecondaryFixed,
+            ::onSecondaryFixedVariant,
+            ::tertiaryFixed,
+            ::tertiaryFixedDim,
+            ::onTertiaryFixed,
+            ::onTertiaryFixedVariant,
+            ::controlActivated,
+            ::controlNormal,
+            ::controlHighlight,
+            ::textPrimaryInverse,
+            ::textSecondaryAndTertiaryInverse,
+            ::textPrimaryInverseDisableOnly,
+            ::textSecondaryAndTertiaryInverseDisabled,
+            ::textHintInverse,
+        )
 }

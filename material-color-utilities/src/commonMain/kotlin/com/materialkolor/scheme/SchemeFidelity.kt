@@ -40,6 +40,8 @@ public class SchemeFidelity(
         variant = Variant.FIDELITY,
         isDark = isDark,
         contrastLevel = contrastLevel,
+        specVersion = specVersion,
+        platform = platform,
         primaryPalette = ColorSpecs
             .get(specVersion)
             .getPrimaryPalette(

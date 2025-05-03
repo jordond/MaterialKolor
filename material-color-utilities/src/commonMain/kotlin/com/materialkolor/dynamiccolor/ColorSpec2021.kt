@@ -964,8 +964,7 @@ public open class ColorSpec2021 : ColorSpec {
 
     // Other
 
-    override fun highestSurface(s: DynamicScheme): DynamicColor =
-        if (s.isDark) surfaceBright() else surfaceDim()
+    override fun highestSurface(s: DynamicScheme): DynamicColor = if (s.isDark) surfaceBright() else surfaceDim()
 
     private fun isFidelity(scheme: DynamicScheme): Boolean =
         scheme.variant == Variant.FIDELITY || scheme.variant == Variant.CONTENT
@@ -1017,7 +1016,8 @@ public open class ColorSpec2021 : ColorSpec {
             var fTone: Double = farther.tone(scheme)
 
             // 1st round: solve to min, each
-            if (color.background != null && nearer.contrastCurve != null &&
+            if (color.background != null &&
+                nearer.contrastCurve != null &&
                 farther.contrastCurve != null
             ) {
                 val bg: DynamicColor? = color.background(scheme)
@@ -1400,8 +1400,7 @@ public open class ColorSpec2021 : ColorSpec {
         }
 
     public companion object {
-        private fun isMonochrome(scheme: DynamicScheme): Boolean =
-            scheme.variant == Variant.MONOCHROME
+        private fun isMonochrome(scheme: DynamicScheme): Boolean = scheme.variant == Variant.MONOCHROME
 
         private fun findDesiredChromaByTone(
             hue: Double,
