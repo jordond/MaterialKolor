@@ -73,7 +73,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("com.materialkolor:material-kolor:3.0.0-alpha03")
+                implementation("com.materialkolor:material-kolor:3.0.0-alpha04")
             }
         }
     }
@@ -86,7 +86,7 @@ For an Android only project, add the dependency to app level `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.materialkolor:material-kolor:3.0.0-alpha03")
+    implementation("com.materialkolor:material-kolor:3.0.0-alpha04")
 }
 ```
 
@@ -94,10 +94,25 @@ dependencies {
 
 ```toml
 [versions]
-materialKolor = "3.0.0-alpha03"
+materialKolor = "3.0.0-alpha04"
 
 [libraries]
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
+```
+
+### Without compose
+
+If you don't use Compose and don't need any of the extension functions provided by `material-kolor`,
+you can use the `material-color-utilities` artifact instead.
+It is a Kotlin Multiplatform port of
+Google's [Material Color Utilities](https://github.com/material-foundation/material-color-utilities).
+
+```toml
+[versions]
+materialKolor = "3.0.0-alpha04"
+
+[libraries]
+materialKolor-utilities = { module = "com.materialkolor:material-color-utilities", version.ref = "materialKolor" }
 ```
 
 ## Usage
@@ -109,14 +124,14 @@ seed color:
 @Composable
 fun MyTheme(
     seedColor: Color,
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    isDark: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = rememberDynamicColorScheme(seedColor, useDarkTheme)
+    val colorScheme = rememberDynamicColorScheme(seedColor = seedColor, isDark = isDark)
 
     MaterialTheme(
         colors = colorScheme,
-        content = content
+        content = content,
     )
 }
 ```
@@ -128,7 +143,7 @@ customize the generated palette:
 ```kotlin
 dynamicColorScheme(
     seedColor = seedColor,
-    isDark = useDarkTheme,
+    isDark = isDark,
     style = PaletteStyle.Vibrant,
 )
 ```
@@ -145,14 +160,14 @@ Example:
 @Composable
 fun MyTheme(
     seedColor: Color,
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    isDark: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     DynamicMaterialTheme(
         seedColor = seedColor,
-        isDark = useDarkTheme,
+        isDark = isDark,
         animate = true,
-        content = content
+        content = content,
     )
 }
 ```
@@ -238,36 +253,8 @@ fun DynamicTheme(image: ImageBitmap, content: @Composable () -> Unit) {
 }
 ```
 
-### Advanced
-
-For a more advanced use-case you can use my other
-library [kmPalette](https://github.com/jordond/kmpalette).
-
-You can get the dominant color from an image, or you can also generate a color palette.
-
-Follow the instructions there to set it up, then as an example. You can use it to generate a color
-theme from a remote image:
-
-```kotlin
-@Composable
-fun SampleTheme(
-    imageUrl: Url, // Url("http://example.com/image.jpg")
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit,
-) {
-    val networkLoader = rememberNetworkLoader()
-    val dominantColorState = rememberDominantColorState(loader = networkLoader)
-    LaunchedEffect(imageUrl) {
-        dominantColorState.updateFrom(imageUrl)
-    }
-
-    AnimatedDynamicMaterialTheme(
-        seedColor = dominantColorState.color,
-        isDark = useDarkTheme,
-        content = content
-    )
-}
-```
+**Note:** This approach can be pretty slow, so I wouldn't really recommend using it in your UI
+unless you are eagerly loading the colors.
 
 ## License
 
