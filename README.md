@@ -124,10 +124,10 @@ seed color:
 @Composable
 fun MyTheme(
     seedColor: Color,
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    isDark: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = rememberDynamicColorScheme(seedColor = seedColor, isDark = useDarkTheme)
+    val colorScheme = rememberDynamicColorScheme(seedColor = seedColor, isDark = isDark)
 
     MaterialTheme(
         colors = colorScheme,
@@ -143,7 +143,7 @@ customize the generated palette:
 ```kotlin
 dynamicColorScheme(
     seedColor = seedColor,
-    isDark = useDarkTheme,
+    isDark = isDark,
     style = PaletteStyle.Vibrant,
 )
 ```
@@ -160,12 +160,12 @@ Example:
 @Composable
 fun MyTheme(
     seedColor: Color,
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    isDark: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     DynamicMaterialTheme(
         seedColor = seedColor,
-        isDark = useDarkTheme,
+        isDark = isDark,
         animate = true,
         content = content,
     )
