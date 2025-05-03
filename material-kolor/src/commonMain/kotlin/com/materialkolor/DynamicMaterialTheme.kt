@@ -21,7 +21,7 @@ import com.materialkolor.scheme.DynamicScheme
  * @see dynamicColorScheme
  * @see PaletteStyle
  * @param[seedColor] The seed color to use for generating the color scheme.
- * @param[useDarkTheme] Whether to use a dark theme or not.
+ * @param[isDark] Whether to use a dark theme or not.
  * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
  * @param[primary] The custom primary color of the color scheme.
  * @param[secondary] The custom secondary color of the color scheme.
@@ -42,7 +42,7 @@ import com.materialkolor.scheme.DynamicScheme
 @Composable
 public fun DynamicMaterialTheme(
     seedColor: Color,
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    isDark: Boolean = isSystemInDarkTheme(),
     isAmoled: Boolean = false,
     primary: Color? = null,
     secondary: Color? = null,
@@ -62,7 +62,7 @@ public fun DynamicMaterialTheme(
 ) {
     val state = rememberDynamicMaterialThemeState(
         seedColor = seedColor,
-        isDark = useDarkTheme,
+        isDark = isDark,
         isAmoled = isAmoled,
         primary = primary,
         secondary = secondary,
@@ -94,7 +94,7 @@ public fun DynamicMaterialTheme(
  * @see dynamicColorScheme
  * @see PaletteStyle
  * @param[primary] The primary color of the color scheme.
- * @param[useDarkTheme] Whether to use a dark theme or not.
+ * @param[isDark] Whether to use a dark theme or not.
  * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
  * @param[secondary] The custom secondary color of the color scheme.
  * @param[tertiary] The custom tertiary color of the color scheme.
@@ -114,7 +114,7 @@ public fun DynamicMaterialTheme(
 @Composable
 public fun DynamicMaterialTheme(
     primary: Color,
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    isDark: Boolean = isSystemInDarkTheme(),
     isAmoled: Boolean = false,
     secondary: Color? = null,
     tertiary: Color? = null,
@@ -133,7 +133,7 @@ public fun DynamicMaterialTheme(
 ) {
     val state = rememberDynamicMaterialThemeState(
         primary = primary,
-        isDark = useDarkTheme,
+        isDark = isDark,
         isAmoled = isAmoled,
         secondary = secondary,
         tertiary = tertiary,
