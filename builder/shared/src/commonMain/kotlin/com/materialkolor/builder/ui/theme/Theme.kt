@@ -41,7 +41,6 @@ fun createThemeState(
         error = settings.colors.error,
         isDark = isDark,
         style = settings.style,
-        extendedFidelity = settings.isExtendedFidelity,
         contrastLevel = settings.contrast.value,
     )
 }

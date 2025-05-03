@@ -17,7 +17,7 @@ fun standardColorsKt(
     packageName: String,
     settings: Settings,
 ): String {
-    val map = MaterialDynamicColors(settings.isExtendedFidelity).colorList()
+    val map = MaterialDynamicColors().colorList()
     val light = createScheme(isDark = false, settings = settings)
     val dark = createScheme(isDark = true, settings = settings)
 
@@ -50,7 +50,7 @@ fun darkVariableNamePairs(settings: Settings): Map<String, String> {
 }
 
 private fun variableNamePairs(settings: Settings, isDark: Boolean): Map<String, String> {
-    val list = MaterialDynamicColors(settings.isExtendedFidelity).colorList()
+    val list = MaterialDynamicColors().colorList()
     val scheme = createScheme(isDark = isDark, settings = settings)
     return list.variableNamePair(scheme).map { entry ->
         entry.value.name.snakeToCamelCase().decapitalize(Locale("EN")) to entry.key

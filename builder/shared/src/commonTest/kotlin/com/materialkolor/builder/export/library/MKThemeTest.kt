@@ -27,7 +27,6 @@ class MKThemeTest {
             isDarkMode = false,
             contrast = Contrast.Default,
             style = PaletteStyle.TonalSpot,
-            isExtendedFidelity = false,
             selectedImage = null,
             isAmoled = false,
         )
@@ -86,7 +85,6 @@ fun MyTheme(
             isDarkMode = true,
             contrast = Contrast.High,
             style = PaletteStyle.Vibrant,
-            isExtendedFidelity = true,
             selectedImage = null,
             isAmoled = true,
         )
@@ -113,7 +111,6 @@ fun MyTheme(
         style = PaletteStyle.Vibrant,
         contrastLevel = 1.0,
         isAmoled = true,
-        extendedFidelity = true,
         seedColor = SeedColor,
     )
     
@@ -143,7 +140,6 @@ fun MyTheme(
             isDarkMode = false,
             contrast = Contrast.Medium,
             style = PaletteStyle.Expressive,
-            isExtendedFidelity = false,
             selectedImage = null,
             isAmoled = false,
         )

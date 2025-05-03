@@ -25,7 +25,6 @@ class QueryParamsTest {
             contrast = Contrast.High.value,
             selectedPresetId = "preset1",
             style = PaletteStyle.Expressive,
-            isExtendedFidelity = true,
         )
 
         val queryParams = settingsEntity.toQueryParams()
@@ -67,7 +66,6 @@ class QueryParamsTest {
         assertEquals(Contrast.High.value, settingsEntity.contrast)
         assertEquals("preset1", settingsEntity.selectedPresetId)
         assertEquals(PaletteStyle.Expressive, settingsEntity.style)
-        assertEquals(true, settingsEntity.isExtendedFidelity)
     }
 
     @Test
@@ -78,7 +76,6 @@ class QueryParamsTest {
             contrast = Contrast.Default.value,
             selectedPresetId = null,
             style = PaletteStyle.TonalSpot,
-            isExtendedFidelity = false,
         )
 
         val queryParams = settingsEntity.toQueryParams()
@@ -100,7 +97,6 @@ class QueryParamsTest {
         assertEquals(0.5, settingsEntity.contrast)
         assertEquals(null, settingsEntity.selectedPresetId)
         assertEquals(PaletteStyle.Neutral, settingsEntity.style)
-        assertEquals(false, settingsEntity.isExtendedFidelity)
     }
 
     @Test
@@ -119,7 +115,6 @@ class QueryParamsTest {
             contrast = Contrast.Default.value,
             selectedPresetId = "test",
             style = PaletteStyle.TonalSpot,
-            isExtendedFidelity = false,
         )
 
         val queryParams = settingsEntity.toQueryParams()
@@ -140,7 +135,6 @@ class QueryParamsTest {
                 contrast = Contrast.Default.value,
                 selectedPresetId = null,
                 style = style,
-                isExtendedFidelity = false,
             )
 
             val queryParams = settingsEntity.toQueryParams()
@@ -160,7 +154,6 @@ class QueryParamsTest {
                 contrast = contrast,
                 selectedPresetId = null,
                 style = PaletteStyle.TonalSpot,
-                isExtendedFidelity = false,
             )
 
             val queryParams = settingsEntity.toQueryParams()
@@ -178,7 +171,6 @@ class QueryParamsTest {
             contrast = Contrast.Default.value,
             selectedPresetId = null,
             style = PaletteStyle.TonalSpot,
-            isExtendedFidelity = false,
         )
 
         val queryParams = settingsEntity.toQueryParams()
@@ -192,8 +184,7 @@ class QueryParamsTest {
 
     @Test
     fun testEmptyStringValues() {
-        val queryParams = "color_seed=&dark_mode=&contrast=&selected_preset_id=&" +
-            "style=&extended_fidelity="
+        val queryParams = "color_seed=&dark_mode=&contrast=&selected_preset_id=&style="
         val settingsEntity = queryParams.toSettingsEntity()
 
         assertEquals(emptyMap(), settingsEntity.colors)
@@ -201,7 +192,6 @@ class QueryParamsTest {
         assertEquals(Contrast.Default.value, settingsEntity.contrast)
         assertNull(settingsEntity.selectedPresetId)
         assertEquals(PaletteStyle.TonalSpot, settingsEntity.style)
-        assertEquals(false, settingsEntity.isExtendedFidelity)
     }
 
     @Test

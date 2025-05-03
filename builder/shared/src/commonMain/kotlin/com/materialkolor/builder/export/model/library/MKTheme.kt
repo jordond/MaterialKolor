@@ -19,7 +19,6 @@ fun mkThemeKt(
     val params = listOfNotNull(
         contrast,
         settings.isAmoled.parameter("isAmoled"),
-        settings.isExtendedFidelity.parameter("extendedFidelity"),
         if (settings.colors.primary == null) settings.colors.seed.parameter("SeedColor")
         else settings.colors.primary.parameter("Primary"),
         settings.colors.secondary.parameter("Secondary"),

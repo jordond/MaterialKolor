@@ -16,7 +16,6 @@ private const val KEY_IS_AMOLED = "is_amoled"
 private const val KEY_CONTRAST = "contrast"
 private const val KEY_SELECTED_PRESET_ID = "selected_preset_id"
 private const val KEY_STYLE = "style"
-private const val KEY_EXTENDED_FIDELITY = "extended_fidelity"
 private val KeyColor.KEY
     get() = "color_${name.lowercase()}"
 
@@ -41,7 +40,6 @@ fun SettingsEntity.toQueryParams(): String {
         style.param(KEY_STYLE, SettingsDefaults.style),
         selectedPresetId.param(KEY_SELECTED_PRESET_ID),
         contrast.param(KEY_CONTRAST, SettingsDefaults.contrast.value),
-        isExtendedFidelity.param(KEY_EXTENDED_FIDELITY, SettingsDefaults.isExtendedFidelity),
         isAmoled.param(KEY_IS_AMOLED, SettingsDefaults.isAmoled),
     ).joinToString(SEPARATOR)
 
@@ -60,7 +58,6 @@ fun String.toSettingsEntity(): SettingsEntity {
         contrast = params[KEY_CONTRAST]?.toDoubleOrNull() ?: Contrast.Default.value,
         selectedPresetId = params[KEY_SELECTED_PRESET_ID]?.takeIf { it.isNotBlank() },
         style = params[KEY_STYLE]?.safeToPaletteStyle() ?: PaletteStyle.TonalSpot,
-        isExtendedFidelity = params[KEY_EXTENDED_FIDELITY]?.toBooleanStrictOrNull() ?: false,
     )
 }
 
@@ -80,7 +77,7 @@ private inline fun <reified T> T?.param(key: String, default: T? = null): String
 private fun String.safeToPaletteStyle(): PaletteStyle? {
     return try {
         enumValueOf<PaletteStyle>(this)
-    } catch (cause: Throwable) {
+    } catch (_: Throwable) {
         null
     }
 }

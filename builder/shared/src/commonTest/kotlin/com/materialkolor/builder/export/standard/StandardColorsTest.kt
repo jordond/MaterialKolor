@@ -28,20 +28,6 @@ class StandardColorsTest {
     }
 
     @Test
-    fun testStandardExtendedFidelityColors() {
-        val settings = Settings(
-            colors = ColorSettings(
-                seed = Color(0xFF0000FF),
-            ),
-            isDarkMode = false,
-            selectedImage = null,
-            isExtendedFidelity = true,
-        )
-
-        compare(settings)
-    }
-
-    @Test
     fun testStandardFullColors() {
         val settings = Settings(
             colors = ColorSettings(
@@ -60,8 +46,9 @@ class StandardColorsTest {
         compare(settings)
     }
 
+    @Suppress("VisibleForTests")
     private fun compare(settings: Settings) {
-        val map = MaterialDynamicColors(settings.isExtendedFidelity)
+        val map = MaterialDynamicColors()
         val lightScheme = createScheme(isDark = false, settings = settings)
         val light = { s: MaterialDynamicColors.() -> DynamicColor -> map.s().getColor(lightScheme).h() }
 

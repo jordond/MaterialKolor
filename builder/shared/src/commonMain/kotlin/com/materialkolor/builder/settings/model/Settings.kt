@@ -12,7 +12,6 @@ data class Settings(
     val contrast: Contrast = SettingsDefaults.contrast,
     val style: PaletteStyle = SettingsDefaults.style,
     val isAmoled: Boolean = SettingsDefaults.isAmoled,
-    val isExtendedFidelity: Boolean = SettingsDefaults.isExtendedFidelity,
     val isModified: Boolean = false,
 ) {
 
@@ -30,5 +29,4 @@ object SettingsDefaults {
     val contrast = Contrast.Default
     val style = PaletteStyle.TonalSpot
     val isAmoled = false
-    val isExtendedFidelity = false
 }

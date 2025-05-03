@@ -17,7 +17,6 @@ data class SettingsEntity(
     val contrast: Double = SettingsDefaults.contrast.value,
     val selectedPresetId: String? = null,
     val style: PaletteStyle = SettingsDefaults.style,
-    val isExtendedFidelity: Boolean = SettingsDefaults.isExtendedFidelity,
     val isAmoled: Boolean = SettingsDefaults.isAmoled,
 )
 
@@ -29,7 +28,6 @@ fun Settings.toEntity(): SettingsEntity {
         isDarkMode = isDarkMode,
         selectedPresetId = presetId,
         style = style,
-        isExtendedFidelity = isExtendedFidelity,
         isAmoled = isAmoled,
     )
 }
@@ -45,7 +43,6 @@ fun SettingsEntity.toModel(isDarkModeFallback: Boolean): Settings {
         contrast = contrast.parseContrast(),
         selectedImage = preset,
         style = style,
-        isExtendedFidelity = isExtendedFidelity,
         isAmoled = isAmoled,
     )
 }
