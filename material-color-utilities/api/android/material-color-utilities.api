@@ -662,7 +662,8 @@ public final class com/materialkolor/scheme/DynamicScheme$Platform$Companion {
 }
 
 public final class com/materialkolor/scheme/SchemeContent : com/materialkolor/scheme/DynamicScheme {
-	public fun <init> (Lcom/materialkolor/hct/Hct;ZD)V
+	public fun <init> (Lcom/materialkolor/hct/Hct;ZDLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/scheme/DynamicScheme$Platform;)V
+	public synthetic fun <init> (Lcom/materialkolor/hct/Hct;ZDLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/scheme/DynamicScheme$Platform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/materialkolor/scheme/SchemeExpressive : com/materialkolor/scheme/DynamicScheme {
@@ -671,15 +672,18 @@ public final class com/materialkolor/scheme/SchemeExpressive : com/materialkolor
 }
 
 public final class com/materialkolor/scheme/SchemeFidelity : com/materialkolor/scheme/DynamicScheme {
-	public fun <init> (Lcom/materialkolor/hct/Hct;ZD)V
+	public fun <init> (Lcom/materialkolor/hct/Hct;ZDLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/scheme/DynamicScheme$Platform;)V
+	public synthetic fun <init> (Lcom/materialkolor/hct/Hct;ZDLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/scheme/DynamicScheme$Platform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/materialkolor/scheme/SchemeFruitSalad : com/materialkolor/scheme/DynamicScheme {
-	public fun <init> (Lcom/materialkolor/hct/Hct;ZD)V
+	public fun <init> (Lcom/materialkolor/hct/Hct;ZDLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/scheme/DynamicScheme$Platform;)V
+	public synthetic fun <init> (Lcom/materialkolor/hct/Hct;ZDLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/scheme/DynamicScheme$Platform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/materialkolor/scheme/SchemeMonochrome : com/materialkolor/scheme/DynamicScheme {
-	public fun <init> (Lcom/materialkolor/hct/Hct;ZD)V
+	public fun <init> (Lcom/materialkolor/hct/Hct;ZDLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/scheme/DynamicScheme$Platform;)V
+	public synthetic fun <init> (Lcom/materialkolor/hct/Hct;ZDLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/scheme/DynamicScheme$Platform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/materialkolor/scheme/SchemeNeutral : com/materialkolor/scheme/DynamicScheme {
@@ -688,7 +692,8 @@ public final class com/materialkolor/scheme/SchemeNeutral : com/materialkolor/sc
 }
 
 public final class com/materialkolor/scheme/SchemeRainbow : com/materialkolor/scheme/DynamicScheme {
-	public fun <init> (Lcom/materialkolor/hct/Hct;ZD)V
+	public fun <init> (Lcom/materialkolor/hct/Hct;ZDLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/scheme/DynamicScheme$Platform;)V
+	public synthetic fun <init> (Lcom/materialkolor/hct/Hct;ZDLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/scheme/DynamicScheme$Platform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/materialkolor/scheme/SchemeTonalSpot : com/materialkolor/scheme/DynamicScheme {
