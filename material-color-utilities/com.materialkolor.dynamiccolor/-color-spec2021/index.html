@@ -1,0 +1,1301 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>ColorSpec2021</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+    <div class="root">
+    <nav class="navigation theme-dark" id="navigation-wrapper">
+<a class="library-name--link" href="../../../index.html">
+                    MaterialKolor
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <div class="filter-section filter-section_loading" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":material-color-utilities:dokkaHtmlPartial/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox">
+                    <div class="dropdown--header"><span>Platform filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close platform filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filter=":material-color-utilities:dokkaHtmlPartial/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </div>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                    <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox">
+                        <div class="dropdown--header">
+                            <span>
+                                    MaterialKolor
+                            </span>
+                            <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                                <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                            </button>
+                        </div>
+                        <div class="sidebar--inner" id="sideMenu"></div>
+                    </ul>
+                    <div class="dropdown--overlay"></div>
+                </div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="material-color-utilities::com.materialkolor.dynamiccolor/ColorSpec2021///PointingToDeclaration//-1931273703">
+  <div class="breadcrumbs"><a href="../../index.html">material-color-utilities</a><span class="delimiter">/</span><a href="../index.html">com.materialkolor.dynamiccolor</a><span class="delimiter">/</span><span class="current">ColorSpec2021</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Color</span><wbr><span><span>Spec2021</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">ColorSpec2021</a> : <a href="../-color-spec/index.html">ColorSpec</a></div><p class="paragraph"><a href="../-color-spec/index.html">ColorSpec</a> implementation for the 2021 spec.</p><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-color-spec2025/index.html">ColorSpec2025</a></div></span></div><div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="1652830442%2FConstructors%2F-1931273703" anchor-label="ColorSpec2021" id="1652830442%2FConstructors%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-color-spec2021.html"><span>Color</span><wbr><span><span>Spec2021</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1652830442%2FConstructors%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="2015103340%2FClasslikes%2F-1931273703" anchor-label="Companion" id="2015103340%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2015103340%2FClasslikes%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-1257187609%2FFunctions%2F-1931273703" anchor-label="background" id="-1257187609%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="background.html"><span><span>background</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1257187609%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="background.html"><span class="token function">background</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2025764895%2FFunctions%2F-1931273703" anchor-label="controlActivated" id="-2025764895%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="control-activated.html"><span>control</span><wbr><span><span>Activated</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2025764895%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="control-activated.html"><span class="token function">controlActivated</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div><div class="brief "><p class="paragraph">colorControlActivated documented as colorAccent in M3 &amp; GM3. colorAccent documented as colorSecondary in M3 and colorPrimary in GM3. Android used Material's Container as Primary/Secondary/Tertiary at launch. Therefore, this is a duplicated version of Primary Container.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-109217186%2FFunctions%2F-1931273703" anchor-label="controlHighlight" id="-109217186%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="control-highlight.html"><span>control</span><wbr><span><span>Highlight</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-109217186%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="control-highlight.html"><span class="token function">controlHighlight</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div><div class="brief "><p class="paragraph">colorControlHighlight documented, in both M3 &amp; GM3: Light mode: #1f000000 dark mode: #33ffffff. These are black and white with some alpha. 1F hex = 31 decimal; 31 / 255 = 12% alpha. 33 hex = 51 decimal; 51 / 255 = 20% alpha. DynamicColors do not support alpha currently, and <i>may</i> not need it for this use case, depending on how MDC resolved alpha for the other cases. Returning black in dark mode, white in light mode.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-363352063%2FFunctions%2F-1931273703" anchor-label="controlNormal" id="-363352063%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="control-normal.html"><span>control</span><wbr><span><span>Normal</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-363352063%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="control-normal.html"><span class="token function">controlNormal</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div><div class="brief "><p class="paragraph">colorControlNormal documented as textColorSecondary in M3 &amp; GM3. In Material, textColorSecondary points to onSurfaceVariant in the non-disabled state, which is Neutral Variant T30/80 in light/dark.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2048937187%2FFunctions%2F-1931273703" anchor-label="error" id="-2048937187%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="error.html"><span><span>error</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2048937187%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="error.html"><span class="token function">error</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-623807716%2FFunctions%2F-1931273703" anchor-label="errorContainer" id="-623807716%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="error-container.html"><span>error</span><wbr><span><span>Container</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-623807716%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="error-container.html"><span class="token function">errorContainer</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1424289547%2FFunctions%2F-1931273703" anchor-label="errorDim" id="-1424289547%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="error-dim.html"><span>error</span><wbr><span><span>Dim</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1424289547%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="error-dim.html"><span class="token function">errorDim</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1038516606%2FFunctions%2F-1931273703" anchor-label="errorPaletteKeyColor" id="1038516606%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="error-palette-key-color.html"><span>error</span><wbr><span>Palette</span><wbr><span>Key</span><wbr><span><span>Color</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1038516606%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="error-palette-key-color.html"><span class="token function">errorPaletteKeyColor</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2136839742%2FFunctions%2F-1931273703" anchor-label="getErrorPalette" id="2136839742%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-error-palette.html"><span>get</span><wbr><span>Error</span><wbr><span><span>Palette</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2136839742%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-error-palette.html"><span class="token function">getErrorPalette</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">variant<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-variant/index.html">Variant</a><span class="token punctuation">, </span></span><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-671040020%2FFunctions%2F-1931273703" anchor-label="getHct" id="-671040020%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-hct.html"><span>get</span><wbr><span><span>Hct</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-671040020%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-hct.html"><span class="token function">getHct</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">scheme<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-dynamic-scheme/index.html">DynamicScheme</a><span class="token punctuation">, </span></span><span class="parameter ">color<span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.materialkolor.hct/-hct/index.html">Hct</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1687553567%2FFunctions%2F-1931273703" anchor-label="getNeutralPalette" id="1687553567%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-neutral-palette.html"><span>get</span><wbr><span>Neutral</span><wbr><span><span>Palette</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1687553567%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-neutral-palette.html"><span class="token function">getNeutralPalette</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">variant<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-variant/index.html">Variant</a><span class="token punctuation">, </span></span><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1465363564%2FFunctions%2F-1931273703" anchor-label="getNeutralVariantPalette" id="1465363564%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-neutral-variant-palette.html"><span>get</span><wbr><span>Neutral</span><wbr><span>Variant</span><wbr><span><span>Palette</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1465363564%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-neutral-variant-palette.html"><span class="token function">getNeutralVariantPalette</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">variant<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-variant/index.html">Variant</a><span class="token punctuation">, </span></span><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2103724420%2FFunctions%2F-1931273703" anchor-label="getPrimaryPalette" id="2103724420%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-primary-palette.html"><span>get</span><wbr><span>Primary</span><wbr><span><span>Palette</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2103724420%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-primary-palette.html"><span class="token function">getPrimaryPalette</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">variant<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-variant/index.html">Variant</a><span class="token punctuation">, </span></span><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-674546094%2FFunctions%2F-1931273703" anchor-label="getSecondaryPalette" id="-674546094%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-secondary-palette.html"><span>get</span><wbr><span>Secondary</span><wbr><span><span>Palette</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-674546094%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-secondary-palette.html"><span class="token function">getSecondaryPalette</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">variant<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-variant/index.html">Variant</a><span class="token punctuation">, </span></span><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1118273496%2FFunctions%2F-1931273703" anchor-label="getTertiaryPalette" id="1118273496%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-tertiary-palette.html"><span>get</span><wbr><span>Tertiary</span><wbr><span><span>Palette</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1118273496%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-tertiary-palette.html"><span class="token function">getTertiaryPalette</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">variant<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-variant/index.html">Variant</a><span class="token punctuation">, </span></span><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1310215081%2FFunctions%2F-1931273703" anchor-label="getTone" id="-1310215081%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-tone.html"><span>get</span><wbr><span><span>Tone</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1310215081%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-tone.html"><span class="token function">getTone</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">scheme<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-dynamic-scheme/index.html">DynamicScheme</a><span class="token punctuation">, </span></span><span class="parameter ">color<span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-926382630%2FFunctions%2F-1931273703" anchor-label="highestSurface" id="-926382630%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="highest-surface.html"><span>highest</span><wbr><span><span>Surface</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-926382630%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="highest-surface.html"><span class="token function">highestSurface</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">s<span class="token operator">: </span><a href="../../com.materialkolor.scheme/-dynamic-scheme/index.html">DynamicScheme</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1184371817%2FFunctions%2F-1931273703" anchor-label="inverseOnSurface" id="-1184371817%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="inverse-on-surface.html"><span>inverse</span><wbr><span>On</span><wbr><span><span>Surface</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1184371817%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="inverse-on-surface.html"><span class="token function">inverseOnSurface</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="265750499%2FFunctions%2F-1931273703" anchor-label="inversePrimary" id="265750499%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="inverse-primary.html"><span>inverse</span><wbr><span><span>Primary</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="265750499%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="inverse-primary.html"><span class="token function">inversePrimary</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1263169432%2FFunctions%2F-1931273703" anchor-label="inverseSurface" id="1263169432%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="inverse-surface.html"><span>inverse</span><wbr><span><span>Surface</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1263169432%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="inverse-surface.html"><span class="token function">inverseSurface</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-171140035%2FFunctions%2F-1931273703" anchor-label="neutralPaletteKeyColor" id="-171140035%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="neutral-palette-key-color.html"><span>neutral</span><wbr><span>Palette</span><wbr><span>Key</span><wbr><span><span>Color</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-171140035%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="neutral-palette-key-color.html"><span class="token function">neutralPaletteKeyColor</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-511753212%2FFunctions%2F-1931273703" anchor-label="neutralVariantPaletteKeyColor" id="-511753212%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="neutral-variant-palette-key-color.html"><span>neutral</span><wbr><span>Variant</span><wbr><span>Palette</span><wbr><span>Key</span><wbr><span><span>Color</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-511753212%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="neutral-variant-palette-key-color.html"><span class="token function">neutralVariantPaletteKeyColor</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="873203336%2FFunctions%2F-1931273703" anchor-label="onBackground" id="873203336%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-background.html"><span>on</span><wbr><span><span>Background</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="873203336%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-background.html"><span class="token function">onBackground</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1394900260%2FFunctions%2F-1931273703" anchor-label="onError" id="-1394900260%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-error.html"><span>on</span><wbr><span><span>Error</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1394900260%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-error.html"><span class="token function">onError</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="58321469%2FFunctions%2F-1931273703" anchor-label="onErrorContainer" id="58321469%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-error-container.html"><span>on</span><wbr><span>Error</span><wbr><span><span>Container</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="58321469%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-error-container.html"><span class="token function">onErrorContainer</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-458135966%2FFunctions%2F-1931273703" anchor-label="onPrimary" id="-458135966%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-primary.html"><span>on</span><wbr><span><span>Primary</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-458135966%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-primary.html"><span class="token function">onPrimary</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-922444425%2FFunctions%2F-1931273703" anchor-label="onPrimaryContainer" id="-922444425%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-primary-container.html"><span>on</span><wbr><span>Primary</span><wbr><span><span>Container</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-922444425%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-primary-container.html"><span class="token function">onPrimaryContainer</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1026420580%2FFunctions%2F-1931273703" anchor-label="onPrimaryFixed" id="1026420580%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-primary-fixed.html"><span>on</span><wbr><span>Primary</span><wbr><span><span>Fixed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1026420580%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-primary-fixed.html"><span class="token function">onPrimaryFixed</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1755291279%2FFunctions%2F-1931273703" anchor-label="onPrimaryFixedVariant" id="-1755291279%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-primary-fixed-variant.html"><span>on</span><wbr><span>Primary</span><wbr><span>Fixed</span><wbr><span><span>Variant</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1755291279%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-primary-fixed-variant.html"><span class="token function">onPrimaryFixedVariant</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2047175024%2FFunctions%2F-1931273703" anchor-label="onSecondary" id="2047175024%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-secondary.html"><span>on</span><wbr><span><span>Secondary</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2047175024%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-secondary.html"><span class="token function">onSecondary</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="713566761%2FFunctions%2F-1931273703" anchor-label="onSecondaryContainer" id="713566761%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-secondary-container.html"><span>on</span><wbr><span>Secondary</span><wbr><span><span>Container</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="713566761%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-secondary-container.html"><span class="token function">onSecondaryContainer</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="315073814%2FFunctions%2F-1931273703" anchor-label="onSecondaryFixed" id="315073814%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-secondary-fixed.html"><span>on</span><wbr><span>Secondary</span><wbr><span><span>Fixed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="315073814%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-secondary-fixed.html"><span class="token function">onSecondaryFixed</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1660043135%2FFunctions%2F-1931273703" anchor-label="onSecondaryFixedVariant" id="1660043135%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-secondary-fixed-variant.html"><span>on</span><wbr><span>Secondary</span><wbr><span>Fixed</span><wbr><span><span>Variant</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1660043135%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-secondary-fixed-variant.html"><span class="token function">onSecondaryFixedVariant</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="539282967%2FFunctions%2F-1931273703" anchor-label="onSurface" id="539282967%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-surface.html"><span>on</span><wbr><span><span>Surface</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="539282967%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-surface.html"><span class="token function">onSurface</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2063999838%2FFunctions%2F-1931273703" anchor-label="onSurfaceVariant" id="2063999838%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-surface-variant.html"><span>on</span><wbr><span>Surface</span><wbr><span><span>Variant</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2063999838%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-surface-variant.html"><span class="token function">onSurfaceVariant</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1557651932%2FFunctions%2F-1931273703" anchor-label="onTertiary" id="-1557651932%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-tertiary.html"><span>on</span><wbr><span><span>Tertiary</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1557651932%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-tertiary.html"><span class="token function">onTertiary</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1898741771%2FFunctions%2F-1931273703" anchor-label="onTertiaryContainer" id="-1898741771%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-tertiary-container.html"><span>on</span><wbr><span>Tertiary</span><wbr><span><span>Container</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1898741771%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-tertiary-container.html"><span class="token function">onTertiaryContainer</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1436696350%2FFunctions%2F-1931273703" anchor-label="onTertiaryFixed" id="-1436696350%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-tertiary-fixed.html"><span>on</span><wbr><span>Tertiary</span><wbr><span><span>Fixed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1436696350%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-tertiary-fixed.html"><span class="token function">onTertiaryFixed</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1110997453%2FFunctions%2F-1931273703" anchor-label="onTertiaryFixedVariant" id="-1110997453%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-tertiary-fixed-variant.html"><span>on</span><wbr><span>Tertiary</span><wbr><span>Fixed</span><wbr><span><span>Variant</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1110997453%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-tertiary-fixed-variant.html"><span class="token function">onTertiaryFixedVariant</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1638295517%2FFunctions%2F-1931273703" anchor-label="outline" id="-1638295517%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="outline.html"><span><span>outline</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1638295517%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="outline.html"><span class="token function">outline</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-431475758%2FFunctions%2F-1931273703" anchor-label="outlineVariant" id="-431475758%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="outline-variant.html"><span>outline</span><wbr><span><span>Variant</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-431475758%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="outline-variant.html"><span class="token function">outlineVariant</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1922397597%2FFunctions%2F-1931273703" anchor-label="primary" id="-1922397597%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="primary.html"><span><span>primary</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1922397597%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="primary.html"><span class="token function">primary</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="681405078%2FFunctions%2F-1931273703" anchor-label="primaryContainer" id="681405078%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="primary-container.html"><span>primary</span><wbr><span><span>Container</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="681405078%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="primary-container.html"><span class="token function">primaryContainer</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1630317551%2FFunctions%2F-1931273703" anchor-label="primaryDim" id="1630317551%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="primary-dim.html"><span>primary</span><wbr><span><span>Dim</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1630317551%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="primary-dim.html"><span class="token function">primaryDim</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1874844669%2FFunctions%2F-1931273703" anchor-label="primaryFixed" id="-1874844669%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="primary-fixed.html"><span>primary</span><wbr><span><span>Fixed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1874844669%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="primary-fixed.html"><span class="token function">primaryFixed</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="940387919%2FFunctions%2F-1931273703" anchor-label="primaryFixedDim" id="940387919%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="primary-fixed-dim.html"><span>primary</span><wbr><span>Fixed</span><wbr><span><span>Dim</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="940387919%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="primary-fixed-dim.html"><span class="token function">primaryFixedDim</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="542471544%2FFunctions%2F-1931273703" anchor-label="primaryPaletteKeyColor" id="542471544%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="primary-palette-key-color.html"><span>primary</span><wbr><span>Palette</span><wbr><span>Key</span><wbr><span><span>Color</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="542471544%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="primary-palette-key-color.html"><span class="token function">primaryPaletteKeyColor</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1031950817%2FFunctions%2F-1931273703" anchor-label="scrim" id="-1031950817%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="scrim.html"><span><span>scrim</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1031950817%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="scrim.html"><span class="token function">scrim</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-653946575%2FFunctions%2F-1931273703" anchor-label="secondary" id="-653946575%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="secondary.html"><span><span>secondary</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-653946575%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="secondary.html"><span class="token function">secondary</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="119679880%2FFunctions%2F-1931273703" anchor-label="secondaryContainer" id="119679880%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="secondary-container.html"><span>secondary</span><wbr><span><span>Container</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="119679880%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="secondary-container.html"><span class="token function">secondaryContainer</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1362523551%2FFunctions%2F-1931273703" anchor-label="secondaryDim" id="-1362523551%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="secondary-dim.html"><span>secondary</span><wbr><span><span>Dim</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1362523551%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="secondary-dim.html"><span class="token function">secondaryDim</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-367055371%2FFunctions%2F-1931273703" anchor-label="secondaryFixed" id="-367055371%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="secondary-fixed.html"><span>secondary</span><wbr><span><span>Fixed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-367055371%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="secondary-fixed.html"><span class="token function">secondaryFixed</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1571584227%2FFunctions%2F-1931273703" anchor-label="secondaryFixedDim" id="-1571584227%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="secondary-fixed-dim.html"><span>secondary</span><wbr><span>Fixed</span><wbr><span><span>Dim</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1571584227%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="secondary-fixed-dim.html"><span class="token function">secondaryFixedDim</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1175570198%2FFunctions%2F-1931273703" anchor-label="secondaryPaletteKeyColor" id="-1175570198%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="secondary-palette-key-color.html"><span>secondary</span><wbr><span>Palette</span><wbr><span>Key</span><wbr><span><span>Color</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1175570198%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="secondary-palette-key-color.html"><span class="token function">secondaryPaletteKeyColor</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-174673099%2FFunctions%2F-1931273703" anchor-label="shadow" id="-174673099%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="shadow.html"><span><span>shadow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-174673099%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="shadow.html"><span class="token function">shadow</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-924978664%2FFunctions%2F-1931273703" anchor-label="surface" id="-924978664%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="surface.html"><span><span>surface</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-924978664%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="surface.html"><span class="token function">surface</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2039367682%2FFunctions%2F-1931273703" anchor-label="surfaceBright" id="-2039367682%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="surface-bright.html"><span>surface</span><wbr><span><span>Bright</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2039367682%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="surface-bright.html"><span class="token function">surfaceBright</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1660608129%2FFunctions%2F-1931273703" anchor-label="surfaceContainer" id="1660608129%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="surface-container.html"><span>surface</span><wbr><span><span>Container</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1660608129%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="surface-container.html"><span class="token function">surfaceContainer</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1984714497%2FFunctions%2F-1931273703" anchor-label="surfaceContainerHigh" id="-1984714497%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="surface-container-high.html"><span>surface</span><wbr><span>Container</span><wbr><span><span>High</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1984714497%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="surface-container-high.html"><span class="token function">surfaceContainerHigh</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2000394357%2FFunctions%2F-1931273703" anchor-label="surfaceContainerHighest" id="2000394357%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="surface-container-highest.html"><span>surface</span><wbr><span>Container</span><wbr><span><span>Highest</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2000394357%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="surface-container-highest.html"><span class="token function">surfaceContainerHighest</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-121284155%2FFunctions%2F-1931273703" anchor-label="surfaceContainerLow" id="-121284155%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="surface-container-low.html"><span>surface</span><wbr><span>Container</span><wbr><span><span>Low</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-121284155%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="surface-container-low.html"><span class="token function">surfaceContainerLow</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1293555217%2FFunctions%2F-1931273703" anchor-label="surfaceContainerLowest" id="-1293555217%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="surface-container-lowest.html"><span>surface</span><wbr><span>Container</span><wbr><span><span>Lowest</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1293555217%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="surface-container-lowest.html"><span class="token function">surfaceContainerLowest</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1140970470%2FFunctions%2F-1931273703" anchor-label="surfaceDim" id="-1140970470%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="surface-dim.html"><span>surface</span><wbr><span><span>Dim</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1140970470%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="surface-dim.html"><span class="token function">surfaceDim</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-246732323%2FFunctions%2F-1931273703" anchor-label="surfaceTint" id="-246732323%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="surface-tint.html"><span>surface</span><wbr><span><span>Tint</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-246732323%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="surface-tint.html"><span class="token function">surfaceTint</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1381870653%2FFunctions%2F-1931273703" anchor-label="surfaceVariant" id="1381870653%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="surface-variant.html"><span>surface</span><wbr><span><span>Variant</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1381870653%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="surface-variant.html"><span class="token function">surfaceVariant</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="294877763%2FFunctions%2F-1931273703" anchor-label="tertiary" id="294877763%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="tertiary.html"><span><span>tertiary</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="294877763%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="tertiary.html"><span class="token function">tertiary</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="575952566%2FFunctions%2F-1931273703" anchor-label="tertiaryContainer" id="575952566%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="tertiary-container.html"><span>tertiary</span><wbr><span><span>Container</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="575952566%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="tertiary-container.html"><span class="token function">tertiaryContainer</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-116445169%2FFunctions%2F-1931273703" anchor-label="tertiaryDim" id="-116445169%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="tertiary-dim.html"><span>tertiary</span><wbr><span><span>Dim</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-116445169%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="tertiary-dim.html"><span class="token function">tertiaryDim</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1181605853%2FFunctions%2F-1931273703" anchor-label="tertiaryFixed" id="-1181605853%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="tertiary-fixed.html"><span>tertiary</span><wbr><span><span>Fixed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1181605853%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="tertiary-fixed.html"><span class="token function">tertiaryFixed</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1279771089%2FFunctions%2F-1931273703" anchor-label="tertiaryFixedDim" id="-1279771089%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="tertiary-fixed-dim.html"><span>tertiary</span><wbr><span>Fixed</span><wbr><span><span>Dim</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1279771089%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="tertiary-fixed-dim.html"><span class="token function">tertiaryFixedDim</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1425197464%2FFunctions%2F-1931273703" anchor-label="tertiaryPaletteKeyColor" id="1425197464%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="tertiary-palette-key-color.html"><span>tertiary</span><wbr><span>Palette</span><wbr><span>Key</span><wbr><span><span>Color</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1425197464%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="tertiary-palette-key-color.html"><span class="token function">tertiaryPaletteKeyColor</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1930973801%2FFunctions%2F-1931273703" anchor-label="textHintInverse" id="1930973801%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="text-hint-inverse.html"><span>text</span><wbr><span>Hint</span><wbr><span><span>Inverse</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1930973801%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="text-hint-inverse.html"><span class="token function">textHintInverse</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div><div class="brief "><p class="paragraph">textColorHintInverse documented, in both M3 &amp; GM3, as N10/N90</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-828525734%2FFunctions%2F-1931273703" anchor-label="textPrimaryInverse" id="-828525734%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="text-primary-inverse.html"><span>text</span><wbr><span>Primary</span><wbr><span><span>Inverse</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-828525734%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="text-primary-inverse.html"><span class="token function">textPrimaryInverse</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div><div class="brief "><p class="paragraph">textColorPrimaryInverse documented, in both M3 &amp; GM3, documented as N10/N90.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="836387820%2FFunctions%2F-1931273703" anchor-label="textPrimaryInverseDisableOnly" id="836387820%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="text-primary-inverse-disable-only.html"><span>text</span><wbr><span>Primary</span><wbr><span>Inverse</span><wbr><span>Disable</span><wbr><span><span>Only</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="836387820%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="text-primary-inverse-disable-only.html"><span class="token function">textPrimaryInverseDisableOnly</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div><div class="brief "><p class="paragraph">textColorPrimaryInverseDisableOnly documented, in both M3 &amp; GM3, as N10/N90</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-364128489%2FFunctions%2F-1931273703" anchor-label="textSecondaryAndTertiaryInverse" id="-364128489%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="text-secondary-and-tertiary-inverse.html"><span>text</span><wbr><span>Secondary</span><wbr><span>And</span><wbr><span>Tertiary</span><wbr><span><span>Inverse</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-364128489%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="text-secondary-and-tertiary-inverse.html"><span class="token function">textSecondaryAndTertiaryInverse</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div><div class="brief "><p class="paragraph">textColorSecondaryInverse and textColorTertiaryInverse both documented, in both M3 &amp; GM3, as NV30/NV80</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1506564613%2FFunctions%2F-1931273703" anchor-label="textSecondaryAndTertiaryInverseDisabled" id="-1506564613%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="text-secondary-and-tertiary-inverse-disabled.html"><span>text</span><wbr><span>Secondary</span><wbr><span>And</span><wbr><span>Tertiary</span><wbr><span>Inverse</span><wbr><span><span>Disabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1506564613%2FFunctions%2F-1931273703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="text-secondary-and-tertiary-inverse-disabled.html"><span class="token function">textSecondaryAndTertiaryInverseDisabled</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-dynamic-color/index.html">DynamicColor</a></div><div class="brief "><p class="paragraph">textColorSecondaryInverse and textColorTertiaryInverse in disabled state both documented, in both M3 &amp; GM3, as N10/N90</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+        <span>© 2025 Copyright</span>
+        <span class="pull-right">
+            <span>Generated by </span>
+            <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                <span>dokka</span>
+            </a>
+        </span>
+    </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
