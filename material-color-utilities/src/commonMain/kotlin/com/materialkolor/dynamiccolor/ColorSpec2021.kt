@@ -1123,13 +1123,14 @@ public open class ColorSpec2021 : ColorSpec {
                 }
             }
 
-            if (color.secondBackground == null) {
+            val secondBackground = color.secondBackground?.invoke(scheme)?.getTone(scheme)
+            if (secondBackground == null) {
                 return answer
             }
 
             // Case 3: Adjust for dual backgrounds.
             val bgTone1 = color.background(scheme)?.getTone(scheme) ?: 0.0
-            val bgTone2 = color.secondBackground(scheme)?.getTone(scheme) ?: 0.0
+            val bgTone2 = secondBackground
 
             val upper: Double = max(bgTone1, bgTone2)
             val lower: Double = min(bgTone1, bgTone2)
