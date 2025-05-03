@@ -4,7 +4,7 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import com.materialkolor.dynamiccolor.MaterialDynamicColors
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.DynamicScheme
 import com.materialkolor.scheme.DynamicScheme
 
@@ -24,7 +24,8 @@ import com.materialkolor.scheme.DynamicScheme
  * @param[error] The error color of the scheme.
  * @param[style] The style of the scheme.
  * @param[contrastLevel] The contrast level of the scheme.
- * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
+ * @param[specVersion] The version of the color scheme.
+ * @param[platform] The platform of the color scheme.
  * @param[modifyColorScheme] A lambda to modify the created [ColorScheme].
  */
 @Composable
@@ -40,7 +41,8 @@ public fun rememberDynamicColorScheme(
     error: Color? = null,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
-    isExtendedFidelity: Boolean = false,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
     modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
 ): ColorScheme =
     remember(
@@ -55,7 +57,8 @@ public fun rememberDynamicColorScheme(
         error,
         style,
         contrastLevel,
-        isExtendedFidelity,
+        specVersion,
+        platform,
         modifyColorScheme,
     ) {
         dynamicColorScheme(
@@ -70,7 +73,6 @@ public fun rememberDynamicColorScheme(
             error = error,
             style = style,
             contrastLevel = contrastLevel,
-            isExtendedFidelity = isExtendedFidelity,
             modifyColorScheme = modifyColorScheme,
         )
     }
@@ -91,7 +93,8 @@ public fun rememberDynamicColorScheme(
  * @param[error] The error color of the scheme.
  * @param[style] The style of the scheme.
  * @param[contrastLevel] The contrast level of the scheme.
- * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
+ * @param[specVersion] The version of the color scheme.
+ * @param[platform] The platform of the color scheme.
  * @param[modifyColorScheme] A lambda to modify the created [ColorScheme].
  */
 public fun dynamicColorScheme(
@@ -106,7 +109,8 @@ public fun dynamicColorScheme(
     error: Color? = null,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
-    isExtendedFidelity: Boolean = false,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
     modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
 ): ColorScheme {
     val scheme = DynamicScheme(
@@ -120,9 +124,11 @@ public fun dynamicColorScheme(
         error = error,
         style = style,
         contrastLevel = contrastLevel,
+        specVersion = specVersion,
+        platform = platform,
     )
 
-    return scheme.toColorScheme(isAmoled, isExtendedFidelity, modifyColorScheme)
+    return scheme.toColorScheme(isAmoled, modifyColorScheme)
 }
 
 /**
@@ -140,7 +146,8 @@ public fun dynamicColorScheme(
  * @param[error] The error color of the scheme.
  * @param[style] The style of the scheme.
  * @param[contrastLevel] The contrast level of the scheme.
- * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
+ * @param[specVersion] The version of the color scheme.
+ * @param[platform] The platform of the color scheme.
  * @param[modifyColorScheme] A lambda to modify the created [ColorScheme].
  */
 @Composable
@@ -155,7 +162,8 @@ public fun rememberDynamicColorScheme(
     error: Color? = null,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
-    isExtendedFidelity: Boolean = false,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
     modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
 ): ColorScheme =
     remember(
@@ -169,8 +177,9 @@ public fun rememberDynamicColorScheme(
         error,
         style,
         contrastLevel,
-        isExtendedFidelity,
         modifyColorScheme,
+        specVersion,
+        platform,
     ) {
         dynamicColorScheme(
             primary = primary,
@@ -183,7 +192,8 @@ public fun rememberDynamicColorScheme(
             error = error,
             style = style,
             contrastLevel = contrastLevel,
-            isExtendedFidelity = isExtendedFidelity,
+            specVersion = specVersion,
+            platform = platform,
             modifyColorScheme = modifyColorScheme,
         )
     }
@@ -203,7 +213,8 @@ public fun rememberDynamicColorScheme(
  * @param[error] The error color of the scheme.
  * @param[style] The style of the scheme.
  * @param[contrastLevel] The contrast level of the scheme.
- * @param[isExtendedFidelity] Whether to use the extended fidelity color set. See [MaterialDynamicColors].
+ * @param[specVersion] The version of the color scheme.
+ * @param[platform] The platform of the color scheme.
  * @param[modifyColorScheme] A lambda to modify the created [ColorScheme].
  */
 public fun dynamicColorScheme(
@@ -217,7 +228,8 @@ public fun dynamicColorScheme(
     error: Color? = null,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = Contrast.Default.value,
-    isExtendedFidelity: Boolean = false,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
     modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
 ): ColorScheme =
     dynamicColorScheme(
@@ -232,7 +244,8 @@ public fun dynamicColorScheme(
         error = error,
         style = style,
         contrastLevel = contrastLevel,
-        isExtendedFidelity = isExtendedFidelity,
+        specVersion = specVersion,
+        platform = platform,
         modifyColorScheme = modifyColorScheme,
     )
 
@@ -241,10 +254,9 @@ public fun dynamicColorScheme(
  */
 public fun DynamicScheme.toColorScheme(
     isAmoled: Boolean = false,
-    isExtendedFidelity: Boolean = false,
     modifyColorScheme: ((ColorScheme) -> ColorScheme)? = null,
 ): ColorScheme {
-    val colors = MaterialKolors(scheme = this, isAmoled, isExtendedFidelity)
+    val colors = MaterialKolors(scheme = this, isAmoled)
     return ColorScheme(
         background = colors.background(),
         error = colors.error(),

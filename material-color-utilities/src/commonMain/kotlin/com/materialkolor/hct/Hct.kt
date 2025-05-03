@@ -110,6 +110,12 @@ public class Hct private constructor(
         return from(recastInVc.hue, recastInVc.chroma, lstarFromY(viewedInVc[1]))
     }
 
+    public fun isBlue(): Boolean = hue >= 250 && hue < 270
+
+    public fun isYellow(): Boolean = hue >= 105 && hue < 125
+
+    public fun isCyan(): Boolean = hue >= 170 && hue < 207
+
     public companion object {
         /**
          * Create an HCT color from hue, chroma, and tone.

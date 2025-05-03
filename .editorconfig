@@ -2,7 +2,7 @@
 indent_size = 4
 indent_style = space
 insert_final_newline = true
-max_line_length = 110
+max_line_length = 120
 ktlint_code_style = ktlint_official
 ktlint_standard_wrapping = enabled
 ktlint_standard_multiline-expression-wrapping = disabled

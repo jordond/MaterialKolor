@@ -14,7 +14,12 @@ class TemperatureCacheTest {
         for (color in testColors) {
             val kotlinResult = KotlinTemperatureCache.rawTemperature(Hct.fromInt(color.toInt()))
             val javaResult = JavaTemperatureCache.rawTemperature(hct.Hct.fromInt(color.toInt()))
-            assertEquals(kotlinResult, javaResult, 0.001, "Raw temperature mismatch for color $color")
+            assertEquals(
+                kotlinResult,
+                javaResult,
+                0.001,
+                "Raw temperature mismatch for color $color",
+            )
         }
     }
 

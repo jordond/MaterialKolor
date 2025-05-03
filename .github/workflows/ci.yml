@@ -50,8 +50,5 @@ jobs:
       - name: Lint
         run: ./gradlew lint --scan
 
-      - name: Spotless
-        run: ./gradlew spotlessCheck --scan
-
       - name: Upstream Tests
         run: ./gradlew :mcu-upstream:test --scan

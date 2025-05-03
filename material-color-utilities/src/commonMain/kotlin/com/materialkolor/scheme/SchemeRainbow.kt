@@ -15,9 +15,9 @@
  */
 package com.materialkolor.scheme
 
+import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.dynamiccolor.ColorSpecs
 import com.materialkolor.hct.Hct
-import com.materialkolor.palettes.TonalPalette
-import com.materialkolor.utils.MathUtils
 
 /**
  * A playful theme - the source color's hue does not appear in the theme.
@@ -31,12 +31,58 @@ public class SchemeRainbow(
         variant = Variant.RAINBOW,
         isDark = isDark,
         contrastLevel = contrastLevel,
-        primaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 48.0),
-        secondaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 16.0),
-        tertiaryPalette = TonalPalette.fromHueAndChroma(
-            hue = MathUtils.sanitizeDegrees(sourceColorHct.hue + 60.0),
-            chroma = 24.0,
-        ),
-        neutralPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 0.0),
-        neutralVariantPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 0.0),
+        primaryPalette = ColorSpecs
+            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .getPrimaryPalette(
+                Variant.RAINBOW,
+                sourceColorHct,
+                isDark,
+                Platform.PHONE,
+                contrastLevel,
+            ),
+        secondaryPalette = ColorSpecs
+            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .getSecondaryPalette(
+                Variant.RAINBOW,
+                sourceColorHct,
+                isDark,
+                Platform.PHONE,
+                contrastLevel,
+            ),
+        tertiaryPalette = ColorSpecs
+            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .getTertiaryPalette(
+                Variant.RAINBOW,
+                sourceColorHct,
+                isDark,
+                Platform.PHONE,
+                contrastLevel,
+            ),
+        neutralPalette = ColorSpecs
+            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .getNeutralPalette(
+                Variant.RAINBOW,
+                sourceColorHct,
+                isDark,
+                Platform.PHONE,
+                contrastLevel,
+            ),
+        neutralVariantPalette = ColorSpecs
+            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .getNeutralVariantPalette(
+                Variant.RAINBOW,
+                sourceColorHct,
+                isDark,
+                Platform.PHONE,
+                contrastLevel,
+            ),
+        errorPalette = ColorSpecs
+            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .getErrorPalette(
+                Variant.RAINBOW,
+                sourceColorHct,
+                isDark,
+                Platform.PHONE,
+                contrastLevel,
+            ),
     )

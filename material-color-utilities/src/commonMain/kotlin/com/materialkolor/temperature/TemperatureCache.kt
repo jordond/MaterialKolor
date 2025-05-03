@@ -255,7 +255,8 @@ public class TemperatureCache(
             val hcts: MutableList<Hct> = hctsByHue?.toMutableList() ?: mutableListOf()
             hcts.add(input)
 
-            val temperaturesComparator: Comparator<Hct> = compareBy { arg: Hct -> tempsByHct!![arg] }
+            val temperaturesComparator: Comparator<Hct> =
+                compareBy { arg: Hct -> tempsByHct!![arg] }
             hcts.sortWith(temperaturesComparator)
             precomputedHctsByTemp = hcts
             return precomputedHctsByTemp
