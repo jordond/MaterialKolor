@@ -29,62 +29,62 @@ public class SchemeMonochrome(
     specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
     platform: Platform = Platform.Default,
 ) : DynamicScheme(
-    sourceColorHct = sourceColorHct,
-    variant = Variant.MONOCHROME,
-    isDark = isDark,
-    contrastLevel = contrastLevel,
-    primaryPalette = ColorSpecs
-        .get(specVersion)
-        .getPrimaryPalette(
-            variant = Variant.MONOCHROME,
-            sourceColorHct = sourceColorHct,
-            isDark = isDark,
-            platform = platform,
-            contrastLevel = contrastLevel,
-        ),
-    secondaryPalette = ColorSpecs
-        .get(specVersion)
-        .getSecondaryPalette(
-            variant = Variant.MONOCHROME,
-            sourceColorHct = sourceColorHct,
-            isDark = isDark,
-            platform = platform,
-            contrastLevel = contrastLevel,
-        ),
-    tertiaryPalette = ColorSpecs
-        .get(specVersion)
-        .getTertiaryPalette(
-            variant = Variant.MONOCHROME,
-            sourceColorHct = sourceColorHct,
-            isDark = isDark,
-            platform = platform,
-            contrastLevel = contrastLevel,
-        ),
-    neutralPalette = ColorSpecs
-        .get(specVersion)
-        .getNeutralPalette(
-            variant = Variant.MONOCHROME,
-            sourceColorHct = sourceColorHct,
-            isDark = isDark,
-            platform = platform,
-            contrastLevel = contrastLevel,
-        ),
-    neutralVariantPalette = ColorSpecs
-        .get(specVersion)
-        .getNeutralVariantPalette(
-            variant = Variant.MONOCHROME,
-            sourceColorHct = sourceColorHct,
-            isDark = isDark,
-            platform = platform,
-            contrastLevel = contrastLevel,
-        ),
-    errorPalette = ColorSpecs
-        .get(specVersion)
-        .getErrorPalette(
-            variant = Variant.MONOCHROME,
-            sourceColorHct = sourceColorHct,
-            isDark = isDark,
-            platform = platform,
-            contrastLevel = contrastLevel,
-        ),
-)
+        sourceColorHct = sourceColorHct,
+        variant = Variant.MONOCHROME,
+        isDark = isDark,
+        contrastLevel = contrastLevel,
+        primaryPalette = ColorSpecs
+            .get(specVersion)
+            .getPrimaryPalette(
+                variant = Variant.MONOCHROME,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
+            ),
+        secondaryPalette = ColorSpecs
+            .get(specVersion)
+            .getSecondaryPalette(
+                variant = Variant.MONOCHROME,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
+            ),
+        tertiaryPalette = ColorSpecs
+            .get(specVersion)
+            .getTertiaryPalette(
+                variant = Variant.MONOCHROME,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
+            ),
+        neutralPalette = ColorSpecs
+            .get(specVersion)
+            .getNeutralPalette(
+                variant = Variant.MONOCHROME,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
+            ),
+        neutralVariantPalette = ColorSpecs
+            .get(specVersion)
+            .getNeutralVariantPalette(
+                variant = Variant.MONOCHROME,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
+            ),
+        errorPalette = ColorSpecs
+            .get(specVersion)
+            .getErrorPalette(
+                variant = Variant.MONOCHROME,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
+            ),
+    )

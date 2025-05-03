@@ -36,62 +36,62 @@ public class SchemeFidelity(
     specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
     platform: Platform = Platform.Default,
 ) : DynamicScheme(
-    sourceColorHct = sourceColorHct,
-    variant = Variant.FIDELITY,
-    isDark = isDark,
-    contrastLevel = contrastLevel,
-    primaryPalette = ColorSpecs
-        .get(specVersion)
-        .getPrimaryPalette(
-            variant = Variant.FIDELITY,
-            sourceColorHct = sourceColorHct,
-            isDark = isDark,
-            platform = platform,
-            contrastLevel = contrastLevel,
-        ),
-    secondaryPalette = ColorSpecs
-        .get(specVersion)
-        .getSecondaryPalette(
-            variant = Variant.FIDELITY,
-            sourceColorHct = sourceColorHct,
-            isDark = isDark,
-            platform = platform,
-            contrastLevel = contrastLevel,
-        ),
-    tertiaryPalette = ColorSpecs
-        .get(specVersion)
-        .getTertiaryPalette(
-            variant = Variant.FIDELITY,
-            sourceColorHct = sourceColorHct,
-            isDark = isDark,
-            platform = platform,
-            contrastLevel = contrastLevel,
-        ),
-    neutralPalette = ColorSpecs
-        .get(specVersion)
-        .getNeutralPalette(
-            variant = Variant.FIDELITY,
-            sourceColorHct = sourceColorHct,
-            isDark = isDark,
-            platform = platform,
-            contrastLevel = contrastLevel,
-        ),
-    neutralVariantPalette = ColorSpecs
-        .get(specVersion)
-        .getNeutralVariantPalette(
-            variant = Variant.FIDELITY,
-            sourceColorHct = sourceColorHct,
-            isDark = isDark,
-            platform = platform,
-            contrastLevel = contrastLevel,
-        ),
-    errorPalette = ColorSpecs
-        .get(specVersion)
-        .getErrorPalette(
-            variant = Variant.FIDELITY,
-            sourceColorHct = sourceColorHct,
-            isDark = isDark,
-            platform = platform,
-            contrastLevel = contrastLevel,
-        ),
-)
+        sourceColorHct = sourceColorHct,
+        variant = Variant.FIDELITY,
+        isDark = isDark,
+        contrastLevel = contrastLevel,
+        primaryPalette = ColorSpecs
+            .get(specVersion)
+            .getPrimaryPalette(
+                variant = Variant.FIDELITY,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
+            ),
+        secondaryPalette = ColorSpecs
+            .get(specVersion)
+            .getSecondaryPalette(
+                variant = Variant.FIDELITY,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
+            ),
+        tertiaryPalette = ColorSpecs
+            .get(specVersion)
+            .getTertiaryPalette(
+                variant = Variant.FIDELITY,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
+            ),
+        neutralPalette = ColorSpecs
+            .get(specVersion)
+            .getNeutralPalette(
+                variant = Variant.FIDELITY,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
+            ),
+        neutralVariantPalette = ColorSpecs
+            .get(specVersion)
+            .getNeutralVariantPalette(
+                variant = Variant.FIDELITY,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
+            ),
+        errorPalette = ColorSpecs
+            .get(specVersion)
+            .getErrorPalette(
+                variant = Variant.FIDELITY,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
+            ),
+    )

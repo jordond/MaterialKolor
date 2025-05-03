@@ -29,32 +29,32 @@ public class SchemeVibrant(
     specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
     platform: Platform = Platform.Default,
 ) : DynamicScheme(
-    sourceColorHct = sourceColorHct,
-    variant = Variant.VIBRANT,
-    isDark = isDark,
-    contrastLevel = contrastLevel,
-    primaryPalette = ColorSpecs
-        .get(specVersion)
-        .getPrimaryPalette(Variant.VIBRANT, sourceColorHct, isDark, platform, contrastLevel),
-    secondaryPalette = ColorSpecs
-        .get(specVersion)
-        .getSecondaryPalette(Variant.VIBRANT, sourceColorHct, isDark, platform, contrastLevel),
-    tertiaryPalette = ColorSpecs
-        .get(specVersion)
-        .getTertiaryPalette(Variant.VIBRANT, sourceColorHct, isDark, platform, contrastLevel),
-    neutralPalette = ColorSpecs
-        .get(specVersion)
-        .getNeutralPalette(Variant.VIBRANT, sourceColorHct, isDark, platform, contrastLevel),
-    neutralVariantPalette = ColorSpecs
-        .get(specVersion)
-        .getNeutralVariantPalette(
-            variant = Variant.VIBRANT,
-            sourceColorHct = sourceColorHct,
-            isDark = isDark,
-            platform = platform,
-            contrastLevel = contrastLevel,
-        ),
-    errorPalette = ColorSpecs
-        .get(specVersion)
-        .getErrorPalette(Variant.VIBRANT, sourceColorHct, isDark, platform, contrastLevel),
-)
+        sourceColorHct = sourceColorHct,
+        variant = Variant.VIBRANT,
+        isDark = isDark,
+        contrastLevel = contrastLevel,
+        primaryPalette = ColorSpecs
+            .get(specVersion)
+            .getPrimaryPalette(Variant.VIBRANT, sourceColorHct, isDark, platform, contrastLevel),
+        secondaryPalette = ColorSpecs
+            .get(specVersion)
+            .getSecondaryPalette(Variant.VIBRANT, sourceColorHct, isDark, platform, contrastLevel),
+        tertiaryPalette = ColorSpecs
+            .get(specVersion)
+            .getTertiaryPalette(Variant.VIBRANT, sourceColorHct, isDark, platform, contrastLevel),
+        neutralPalette = ColorSpecs
+            .get(specVersion)
+            .getNeutralPalette(Variant.VIBRANT, sourceColorHct, isDark, platform, contrastLevel),
+        neutralVariantPalette = ColorSpecs
+            .get(specVersion)
+            .getNeutralVariantPalette(
+                variant = Variant.VIBRANT,
+                sourceColorHct = sourceColorHct,
+                isDark = isDark,
+                platform = platform,
+                contrastLevel = contrastLevel,
+            ),
+        errorPalette = ColorSpecs
+            .get(specVersion)
+            .getErrorPalette(Variant.VIBRANT, sourceColorHct, isDark, platform, contrastLevel),
+    )
