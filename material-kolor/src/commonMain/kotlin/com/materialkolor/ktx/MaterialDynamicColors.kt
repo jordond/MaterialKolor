@@ -11,7 +11,7 @@ import com.materialkolor.dynamiccolor.MaterialDynamicColors
  */
 public val DynamicMaterialThemeState.m3Colors: MaterialDynamicColors
     @Composable
-    get() = remember(isExtendedFidelity, dynamicScheme) {
+    get() = remember(dynamicScheme) {
         MaterialDynamicColors()
     }
 
@@ -23,6 +23,6 @@ public val DynamicMaterialThemeState.colors: MaterialKolors
     get() {
         val scheme = dynamicScheme
         return remember(scheme) {
-            MaterialKolors(scheme, isAmoled, isExtendedFidelity)
+            MaterialKolors(scheme, isAmoled)
         }
     }

@@ -151,7 +151,10 @@ class Cam16Test {
     fun xyzInViewingConditions() {
         val expectedArray = doubleArrayOf(1.0, 2.0, 3.0)
         val actualArray = expectedArray.copyOf()
-        val expected = expectedCam1.xyzInViewingConditions(hct.ViewingConditions.DEFAULT, expectedArray)
+        val expected = expectedCam1.xyzInViewingConditions(
+            hct.ViewingConditions.DEFAULT,
+            expectedArray,
+        )
         val actual = actualCam1.xyzInViewingConditions(ViewingConditions.DEFAULT, actualArray)
         expected.toList() shouldContainExactly actual.toList()
     }

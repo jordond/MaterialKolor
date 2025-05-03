@@ -156,7 +156,8 @@ internal class QuantizerWu : Quantizer {
                 val r = volume(cube, momentsR) / weight
                 val g = volume(cube, momentsG) / weight
                 val b = volume(cube, momentsB) / weight
-                val color = 255 shl 24 or (r and 0x0ff shl 16) or (g and 0x0ff shl 8) or (b and 0x0ff)
+                val color =
+                    255 shl 24 or (r and 0x0ff shl 16) or (g and 0x0ff shl 8) or (b and 0x0ff)
                 colors.add(color)
             }
         }
@@ -195,9 +196,12 @@ internal class QuantizerWu : Quantizer {
         val wholeG = volume(one, momentsG)
         val wholeB = volume(one, momentsB)
         val wholeW = volume(one, weights)
-        val maxRResult = maximize(one, Direction.RED, one!!.r0 + 1, one.r1, wholeR, wholeG, wholeB, wholeW)
-        val maxGResult = maximize(one, Direction.GREEN, one.g0 + 1, one.g1, wholeR, wholeG, wholeB, wholeW)
-        val maxBResult = maximize(one, Direction.BLUE, one.b0 + 1, one.b1, wholeR, wholeG, wholeB, wholeW)
+        val maxRResult =
+            maximize(one, Direction.RED, one!!.r0 + 1, one.r1, wholeR, wholeG, wholeB, wholeW)
+        val maxGResult =
+            maximize(one, Direction.GREEN, one.g0 + 1, one.g1, wholeR, wholeG, wholeB, wholeW)
+        val maxBResult =
+            maximize(one, Direction.BLUE, one.b0 + 1, one.b1, wholeR, wholeG, wholeB, wholeW)
         val cutDirection: Direction
         val maxR = maxRResult.maximum
         val maxG = maxGResult.maximum

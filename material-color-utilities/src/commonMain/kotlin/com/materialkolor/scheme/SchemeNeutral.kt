@@ -15,8 +15,9 @@
  */
 package com.materialkolor.scheme
 
+import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.dynamiccolor.ColorSpecs
 import com.materialkolor.hct.Hct
-import com.materialkolor.palettes.TonalPalette
 
 /**
  * A theme that's slightly more chromatic than monochrome, which is purely black / white / gray.
@@ -25,14 +26,35 @@ public class SchemeNeutral(
     sourceColorHct: Hct,
     isDark: Boolean,
     contrastLevel: Double,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: Platform = Platform.Default,
 ) : DynamicScheme(
         sourceColorHct = sourceColorHct,
         variant = Variant.NEUTRAL,
         isDark = isDark,
         contrastLevel = contrastLevel,
-        primaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 12.0),
-        secondaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 8.0),
-        tertiaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 16.0),
-        neutralPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 2.0),
-        neutralVariantPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 2.0),
+        primaryPalette = ColorSpecs
+            .get(specVersion)
+            .getPrimaryPalette(Variant.NEUTRAL, sourceColorHct, isDark, platform, contrastLevel),
+        secondaryPalette = ColorSpecs
+            .get(specVersion)
+            .getSecondaryPalette(Variant.NEUTRAL, sourceColorHct, isDark, platform, contrastLevel),
+        tertiaryPalette = ColorSpecs
+            .get(specVersion)
+            .getTertiaryPalette(Variant.NEUTRAL, sourceColorHct, isDark, platform, contrastLevel),
+        neutralPalette = ColorSpecs
+            .get(specVersion)
+            .getNeutralPalette(Variant.NEUTRAL, sourceColorHct, isDark, platform, contrastLevel),
+        neutralVariantPalette = ColorSpecs
+            .get(specVersion)
+            .getNeutralVariantPalette(
+                Variant.NEUTRAL,
+                sourceColorHct,
+                isDark,
+                platform,
+                contrastLevel,
+            ),
+        errorPalette = ColorSpecs
+            .get(specVersion)
+            .getErrorPalette(Variant.NEUTRAL, sourceColorHct, isDark, platform, contrastLevel),
     )

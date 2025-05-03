@@ -15,9 +15,9 @@
  */
 package com.materialkolor.scheme
 
+import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.dynamiccolor.ColorSpecs
 import com.materialkolor.hct.Hct
-import com.materialkolor.palettes.TonalPalette
-import com.materialkolor.utils.MathUtils
 
 /**
  * A calm theme, sedated colors that aren't particularly chromatic.
@@ -26,17 +26,47 @@ public class SchemeTonalSpot(
     sourceColorHct: Hct,
     isDark: Boolean,
     contrastLevel: Double,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: Platform = Platform.Default,
 ) : DynamicScheme(
         sourceColorHct = sourceColorHct,
         variant = Variant.TONAL_SPOT,
         isDark = isDark,
         contrastLevel = contrastLevel,
-        primaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 36.0),
-        secondaryPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 16.0),
-        tertiaryPalette = TonalPalette.fromHueAndChroma(
-            hue = MathUtils.sanitizeDegrees(sourceColorHct.hue + 60.0),
-            chroma = 24.0,
-        ),
-        neutralPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 6.0),
-        neutralVariantPalette = TonalPalette.fromHueAndChroma(sourceColorHct.hue, chroma = 8.0),
+        primaryPalette = ColorSpecs
+            .get(specVersion)
+            .getPrimaryPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
+        secondaryPalette = ColorSpecs
+            .get(specVersion)
+            .getSecondaryPalette(
+                Variant.TONAL_SPOT,
+                sourceColorHct,
+                isDark,
+                platform,
+                contrastLevel,
+            ),
+        tertiaryPalette = ColorSpecs
+            .get(specVersion)
+            .getTertiaryPalette(
+                Variant.TONAL_SPOT,
+                sourceColorHct,
+                isDark,
+                platform,
+                contrastLevel,
+            ),
+        neutralPalette = ColorSpecs
+            .get(specVersion)
+            .getNeutralPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
+        neutralVariantPalette = ColorSpecs
+            .get(specVersion)
+            .getNeutralVariantPalette(
+                Variant.TONAL_SPOT,
+                sourceColorHct,
+                isDark,
+                platform,
+                contrastLevel,
+            ),
+        errorPalette = ColorSpecs
+            .get(specVersion)
+            .getErrorPalette(Variant.TONAL_SPOT, sourceColorHct, isDark, platform, contrastLevel),
     )

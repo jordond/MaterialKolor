@@ -30,7 +30,7 @@ subprojects {
 
     configure<com.diffplug.gradle.spotless.SpotlessExtension> {
         kotlin {
-            ktlint(libs.versions.ktlint.get())
+            ktlint(libs.versions.ktlint.get()).setEditorConfigPath("${project.rootDir}/.editorconfig")
             target("**/*.kt")
             targetExclude(
                 "${layout.buildDirectory}/**/*.kt",

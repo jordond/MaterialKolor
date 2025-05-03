@@ -10,14 +10,12 @@ import com.materialkolor.scheme.DynamicScheme
  *
  * @property scheme The dynamic scheme used to generate colors.
  * @property isAmoled A flag indicating whether the device is AMOLED.
- * @param isExtendedFidelity A flag indicating whether extended fidelity is enabled.
  */
 public class MaterialKolors(
     private val scheme: DynamicScheme,
     private val isAmoled: Boolean = false,
-    isExtendedFidelity: Boolean = false,
 ) {
-    private val colors = MaterialDynamicColors(isExtendedFidelity)
+    private val colors = MaterialDynamicColors()
 
     /**
      * Returns the highest surface color based on the given scheme.
@@ -25,7 +23,8 @@ public class MaterialKolors(
      * @param scheme The dynamic scheme used to generate the color.
      * @see MaterialDynamicColors.highestSurface
      */
-    public fun highestSurface(scheme: DynamicScheme): Color = colors.highestSurface(scheme).getColor(scheme)
+    public fun highestSurface(scheme: DynamicScheme): Color =
+        colors.highestSurface(scheme).getColor(scheme)
 
     /**
      * Returns the primary palette key color.
@@ -39,7 +38,8 @@ public class MaterialKolors(
      *
      * @see MaterialDynamicColors.secondaryPaletteKeyColor
      */
-    public fun secondaryPaletteKeyColor(): Color = colors.secondaryPaletteKeyColor().getColor(scheme)
+    public fun secondaryPaletteKeyColor(): Color =
+        colors.secondaryPaletteKeyColor().getColor(scheme)
 
     /**
      * Returns the tertiary palette key color.

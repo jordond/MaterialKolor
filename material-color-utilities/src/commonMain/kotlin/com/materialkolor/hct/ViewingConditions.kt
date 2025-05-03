@@ -89,11 +89,14 @@ public class ViewingConditions private constructor(
             // Transform white point XYZ to 'cone'/'rgb' responses
             val matrix = Cam16.XYZ_TO_CAM16RGB
             val rW =
-                whitePoint[0] * matrix[0][0] + whitePoint[1] * matrix[0][1] + whitePoint[2] * matrix[0][2]
+                whitePoint[0] * matrix[0][0] + whitePoint[1] * matrix[0][1] +
+                    whitePoint[2] * matrix[0][2]
             val gW =
-                whitePoint[0] * matrix[1][0] + whitePoint[1] * matrix[1][1] + whitePoint[2] * matrix[1][2]
+                whitePoint[0] * matrix[1][0] + whitePoint[1] * matrix[1][1] +
+                    whitePoint[2] * matrix[1][2]
             val bW =
-                whitePoint[0] * matrix[2][0] + whitePoint[1] * matrix[2][1] + whitePoint[2] * matrix[2][2]
+                whitePoint[0] * matrix[2][0] + whitePoint[1] * matrix[2][1] +
+                    whitePoint[2] * matrix[2][2]
             val f = 0.8 + surround / 10.0
             val c =
                 if (f >= 0.9) {
