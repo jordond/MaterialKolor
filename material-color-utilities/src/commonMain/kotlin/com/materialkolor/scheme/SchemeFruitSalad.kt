@@ -33,6 +33,8 @@ public class SchemeFruitSalad(
         variant = Variant.FRUIT_SALAD,
         isDark = isDark,
         contrastLevel = contrastLevel,
+        specVersion = specVersion,
+        platform = platform,
         primaryPalette = ColorSpecs
             .get(specVersion)
             .getPrimaryPalette(
