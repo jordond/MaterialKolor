@@ -26,63 +26,65 @@ public class SchemeRainbow(
     sourceColorHct: Hct,
     isDark: Boolean,
     contrastLevel: Double,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: Platform = Platform.Default,
 ) : DynamicScheme(
-        sourceColorHct = sourceColorHct,
-        variant = Variant.RAINBOW,
-        isDark = isDark,
-        contrastLevel = contrastLevel,
-        primaryPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
-            .getPrimaryPalette(
-                Variant.RAINBOW,
-                sourceColorHct,
-                isDark,
-                Platform.PHONE,
-                contrastLevel,
-            ),
-        secondaryPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
-            .getSecondaryPalette(
-                Variant.RAINBOW,
-                sourceColorHct,
-                isDark,
-                Platform.PHONE,
-                contrastLevel,
-            ),
-        tertiaryPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
-            .getTertiaryPalette(
-                Variant.RAINBOW,
-                sourceColorHct,
-                isDark,
-                Platform.PHONE,
-                contrastLevel,
-            ),
-        neutralPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
-            .getNeutralPalette(
-                Variant.RAINBOW,
-                sourceColorHct,
-                isDark,
-                Platform.PHONE,
-                contrastLevel,
-            ),
-        neutralVariantPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
-            .getNeutralVariantPalette(
-                Variant.RAINBOW,
-                sourceColorHct,
-                isDark,
-                Platform.PHONE,
-                contrastLevel,
-            ),
-        errorPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
-            .getErrorPalette(
-                Variant.RAINBOW,
-                sourceColorHct,
-                isDark,
-                Platform.PHONE,
-                contrastLevel,
-            ),
-    )
+    sourceColorHct = sourceColorHct,
+    variant = Variant.RAINBOW,
+    isDark = isDark,
+    contrastLevel = contrastLevel,
+    primaryPalette = ColorSpecs
+        .get(specVersion)
+        .getPrimaryPalette(
+            variant = Variant.RAINBOW,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = platform,
+            contrastLevel = contrastLevel,
+        ),
+    secondaryPalette = ColorSpecs
+        .get(specVersion)
+        .getSecondaryPalette(
+            variant = Variant.RAINBOW,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = platform,
+            contrastLevel = contrastLevel,
+        ),
+    tertiaryPalette = ColorSpecs
+        .get(specVersion)
+        .getTertiaryPalette(
+            variant = Variant.RAINBOW,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = platform,
+            contrastLevel = contrastLevel,
+        ),
+    neutralPalette = ColorSpecs
+        .get(specVersion)
+        .getNeutralPalette(
+            variant = Variant.RAINBOW,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = platform,
+            contrastLevel = contrastLevel,
+        ),
+    neutralVariantPalette = ColorSpecs
+        .get(specVersion)
+        .getNeutralVariantPalette(
+            variant = Variant.RAINBOW,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = platform,
+            contrastLevel = contrastLevel,
+        ),
+    errorPalette = ColorSpecs
+        .get(specVersion)
+        .getErrorPalette(
+            variant = Variant.RAINBOW,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = platform,
+            contrastLevel = contrastLevel,
+        ),
+)

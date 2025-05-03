@@ -56,11 +56,11 @@ public fun Color.toDynamicScheme(
         Neutral -> SchemeNeutral(hct, isDark, contrastLevel, specVersion, platform)
         Vibrant -> SchemeVibrant(hct, isDark, contrastLevel, specVersion, platform)
         Expressive -> SchemeExpressive(hct, isDark, contrastLevel, specVersion, platform)
-        Rainbow -> SchemeRainbow(hct, isDark, contrastLevel)
-        FruitSalad -> SchemeFruitSalad(hct, isDark, contrastLevel)
-        Monochrome -> SchemeMonochrome(hct, isDark, contrastLevel)
-        Fidelity -> SchemeFidelity(hct, isDark, contrastLevel)
-        Content -> SchemeContent(hct, isDark, contrastLevel)
+        Rainbow -> SchemeRainbow(hct, isDark, contrastLevel, specVersion, platform)
+        FruitSalad -> SchemeFruitSalad(hct, isDark, contrastLevel, specVersion, platform)
+        Monochrome -> SchemeMonochrome(hct, isDark, contrastLevel, specVersion, platform)
+        Fidelity -> SchemeFidelity(hct, isDark, contrastLevel, specVersion, platform)
+        Content -> SchemeContent(hct, isDark, contrastLevel, specVersion, platform)
     }
 }
 

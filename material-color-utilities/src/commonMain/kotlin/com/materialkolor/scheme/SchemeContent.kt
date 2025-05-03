@@ -35,63 +35,65 @@ public class SchemeContent(
     sourceColorHct: Hct,
     isDark: Boolean,
     contrastLevel: Double,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: Platform = Platform.Default,
 ) : DynamicScheme(
-        sourceColorHct = sourceColorHct,
-        variant = Variant.CONTENT,
-        isDark = isDark,
-        contrastLevel = contrastLevel,
-        primaryPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
-            .getPrimaryPalette(
-                variant = Variant.CONTENT,
-                sourceColorHct = sourceColorHct,
-                isDark = isDark,
-                platform = Platform.PHONE,
-                contrastLevel = contrastLevel,
-            ),
-        secondaryPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
-            .getSecondaryPalette(
-                variant = Variant.CONTENT,
-                sourceColorHct = sourceColorHct,
-                isDark = isDark,
-                platform = Platform.PHONE,
-                contrastLevel = contrastLevel,
-            ),
-        tertiaryPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
-            .getTertiaryPalette(
-                variant = Variant.CONTENT,
-                sourceColorHct = sourceColorHct,
-                isDark = isDark,
-                platform = Platform.PHONE,
-                contrastLevel = contrastLevel,
-            ),
-        neutralPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
-            .getNeutralPalette(
-                variant = Variant.CONTENT,
-                sourceColorHct = sourceColorHct,
-                isDark = isDark,
-                platform = Platform.PHONE,
-                contrastLevel = contrastLevel,
-            ),
-        neutralVariantPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
-            .getNeutralVariantPalette(
-                variant = Variant.CONTENT,
-                sourceColorHct = sourceColorHct,
-                isDark = isDark,
-                platform = Platform.PHONE,
-                contrastLevel = contrastLevel,
-            ),
-        errorPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
-            .getErrorPalette(
-                variant = Variant.CONTENT,
-                sourceColorHct = sourceColorHct,
-                isDark = isDark,
-                platform = Platform.PHONE,
-                contrastLevel = contrastLevel,
-            ),
-    )
+    sourceColorHct = sourceColorHct,
+    variant = Variant.CONTENT,
+    isDark = isDark,
+    contrastLevel = contrastLevel,
+    primaryPalette = ColorSpecs
+        .get(specVersion)
+        .getPrimaryPalette(
+            variant = Variant.CONTENT,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = platform,
+            contrastLevel = contrastLevel,
+        ),
+    secondaryPalette = ColorSpecs
+        .get(specVersion)
+        .getSecondaryPalette(
+            variant = Variant.CONTENT,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = platform,
+            contrastLevel = contrastLevel,
+        ),
+    tertiaryPalette = ColorSpecs
+        .get(specVersion)
+        .getTertiaryPalette(
+            variant = Variant.CONTENT,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = platform,
+            contrastLevel = contrastLevel,
+        ),
+    neutralPalette = ColorSpecs
+        .get(specVersion)
+        .getNeutralPalette(
+            variant = Variant.CONTENT,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = platform,
+            contrastLevel = contrastLevel,
+        ),
+    neutralVariantPalette = ColorSpecs
+        .get(specVersion)
+        .getNeutralVariantPalette(
+            variant = Variant.CONTENT,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = platform,
+            contrastLevel = contrastLevel,
+        ),
+    errorPalette = ColorSpecs
+        .get(specVersion)
+        .getErrorPalette(
+            variant = Variant.CONTENT,
+            sourceColorHct = sourceColorHct,
+            isDark = isDark,
+            platform = platform,
+            contrastLevel = contrastLevel,
+        ),
+)
