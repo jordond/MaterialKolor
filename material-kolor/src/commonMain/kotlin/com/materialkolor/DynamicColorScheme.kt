@@ -72,6 +72,8 @@ public fun rememberDynamicColorScheme(
             neutralVariant = neutralVariant,
             error = error,
             style = style,
+            specVersion = specVersion,
+            platform = platform,
             contrastLevel = contrastLevel,
             modifyColorScheme = modifyColorScheme,
         )

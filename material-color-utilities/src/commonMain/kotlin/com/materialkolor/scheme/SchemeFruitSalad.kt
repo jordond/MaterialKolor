@@ -26,63 +26,67 @@ public class SchemeFruitSalad(
     sourceColorHct: Hct,
     isDark: Boolean,
     contrastLevel: Double,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: Platform = Platform.Default,
 ) : DynamicScheme(
         sourceColorHct = sourceColorHct,
         variant = Variant.FRUIT_SALAD,
         isDark = isDark,
         contrastLevel = contrastLevel,
+        specVersion = specVersion,
+        platform = platform,
         primaryPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .get(specVersion)
             .getPrimaryPalette(
                 variant = Variant.FRUIT_SALAD,
                 sourceColorHct = sourceColorHct,
                 isDark = isDark,
-                platform = Platform.PHONE,
+                platform = platform,
                 contrastLevel = contrastLevel,
             ),
         secondaryPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .get(specVersion)
             .getSecondaryPalette(
                 variant = Variant.FRUIT_SALAD,
                 sourceColorHct = sourceColorHct,
                 isDark = isDark,
-                platform = Platform.PHONE,
+                platform = platform,
                 contrastLevel = contrastLevel,
             ),
         tertiaryPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .get(specVersion)
             .getTertiaryPalette(
                 variant = Variant.FRUIT_SALAD,
                 sourceColorHct = sourceColorHct,
                 isDark = isDark,
-                platform = Platform.PHONE,
+                platform = platform,
                 contrastLevel = contrastLevel,
             ),
         neutralPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .get(specVersion)
             .getNeutralPalette(
                 variant = Variant.FRUIT_SALAD,
                 sourceColorHct = sourceColorHct,
                 isDark = isDark,
-                platform = Platform.PHONE,
+                platform = platform,
                 contrastLevel = contrastLevel,
             ),
         neutralVariantPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .get(specVersion)
             .getNeutralVariantPalette(
                 variant = Variant.FRUIT_SALAD,
                 sourceColorHct = sourceColorHct,
                 isDark = isDark,
-                platform = Platform.PHONE,
+                platform = platform,
                 contrastLevel = contrastLevel,
             ),
         errorPalette = ColorSpecs
-            .get(ColorSpec.SpecVersion.SPEC_2021)
+            .get(specVersion)
             .getErrorPalette(
                 variant = Variant.FRUIT_SALAD,
                 sourceColorHct = sourceColorHct,
                 isDark = isDark,
-                platform = Platform.PHONE,
+                platform = platform,
                 contrastLevel = contrastLevel,
             ),
     )

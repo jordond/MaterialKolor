@@ -16,15 +16,14 @@
 package com.materialkolor.dynamiccolor
 
 import com.materialkolor.scheme.DynamicScheme
-import kotlin.reflect.KFunction
+import kotlin.reflect.KFunction0
 
 /**
  * Named colors, otherwise known as tokens, or roles, in the Material Design system.
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 public class MaterialDynamicColors {
-    public fun highestSurface(scheme: DynamicScheme): DynamicColor =
-        colorSpec.highestSurface(scheme)
+    public fun highestSurface(scheme: DynamicScheme): DynamicColor = colorSpec.highestSurface(scheme)
 
     // Compatibility Keys Colors for Android
     public fun primaryPaletteKeyColor(): DynamicColor = colorSpec.primaryPaletteKeyColor()
@@ -37,8 +36,7 @@ public class MaterialDynamicColors {
 
     public fun neutralPaletteKeyColor(): DynamicColor = colorSpec.neutralPaletteKeyColor()
 
-    public fun neutralVariantPaletteKeyColor(): DynamicColor =
-        colorSpec.neutralVariantPaletteKeyColor()
+    public fun neutralVariantPaletteKeyColor(): DynamicColor = colorSpec.neutralVariantPaletteKeyColor()
 
     public fun background(): DynamicColor = colorSpec.background()
 
@@ -185,14 +183,12 @@ public class MaterialDynamicColors {
      * textColorSecondaryInverse and textColorTertiaryInverse both documented, in both M3 & GM3, as
      * V30/NV80
      */
-    public fun textSecondaryAndTertiaryInverse(): DynamicColor =
-        colorSpec.textSecondaryAndTertiaryInverse()
+    public fun textSecondaryAndTertiaryInverse(): DynamicColor = colorSpec.textSecondaryAndTertiaryInverse()
 
     /**
      * textColorPrimaryInverseDisableOnly documented, in both M3 & GM3, as N10/N90
      */
-    public fun textPrimaryInverseDisableOnly(): DynamicColor =
-        colorSpec.textPrimaryInverseDisableOnly()
+    public fun textPrimaryInverseDisableOnly(): DynamicColor = colorSpec.textPrimaryInverseDisableOnly()
 
     /**
      * textColorSecondaryInverse and textColorTertiaryInverse in disabled state both documented,
@@ -206,72 +202,71 @@ public class MaterialDynamicColors {
      */
     public fun textHintInverse(): DynamicColor = colorSpec.textHintInverse()
 
-    public fun allDynamicColors(): List<KFunction<DynamicColor>> =
+    public fun allDynamicColors(): List<KFunction0<DynamicColor>> =
         listOf(
-            this::highestSurface,
-            this::primaryPaletteKeyColor,
-            this::secondaryPaletteKeyColor,
-            this::tertiaryPaletteKeyColor,
-            this::errorPaletteKeyColor,
-            this::neutralPaletteKeyColor,
-            this::neutralVariantPaletteKeyColor,
-            this::background,
-            this::onBackground,
-            this::surface,
-            this::surfaceDim,
-            this::surfaceBright,
-            this::surfaceContainerLowest,
-            this::surfaceContainerLow,
-            this::surfaceContainer,
-            this::surfaceContainerHigh,
-            this::surfaceContainerHighest,
-            this::onSurface,
-            this::surfaceVariant,
-            this::onSurfaceVariant,
-            this::inverseSurface,
-            this::inverseOnSurface,
-            this::outline,
-            this::outlineVariant,
-            this::shadow,
-            this::scrim,
-            this::surfaceTint,
-            this::primary,
-            this::onPrimary,
-            this::primaryContainer,
-            this::onPrimaryContainer,
-            this::inversePrimary,
-            this::secondary,
-            this::onSecondary,
-            this::secondaryContainer,
-            this::onSecondaryContainer,
-            this::tertiary,
-            this::onTertiary,
-            this::tertiaryContainer,
-            this::onTertiaryContainer,
-            this::error,
-            this::onError,
-            this::errorContainer,
-            this::onErrorContainer,
-            this::primaryFixed,
-            this::primaryFixedDim,
-            this::onPrimaryFixed,
-            this::onPrimaryFixedVariant,
-            this::secondaryFixed,
-            this::secondaryFixedDim,
-            this::onSecondaryFixed,
-            this::onSecondaryFixedVariant,
-            this::tertiaryFixed,
-            this::tertiaryFixedDim,
-            this::onTertiaryFixed,
-            this::onTertiaryFixedVariant,
-            this::controlActivated,
-            this::controlNormal,
-            this::controlHighlight,
-            this::textPrimaryInverse,
-            this::textSecondaryAndTertiaryInverse,
-            this::textPrimaryInverseDisableOnly,
-            this::textSecondaryAndTertiaryInverseDisabled,
-            this::textHintInverse,
+            ::primaryPaletteKeyColor,
+            ::secondaryPaletteKeyColor,
+            ::tertiaryPaletteKeyColor,
+            ::errorPaletteKeyColor,
+            ::neutralPaletteKeyColor,
+            ::neutralVariantPaletteKeyColor,
+            ::background,
+            ::onBackground,
+            ::surface,
+            ::surfaceDim,
+            ::surfaceBright,
+            ::surfaceContainerLowest,
+            ::surfaceContainerLow,
+            ::surfaceContainer,
+            ::surfaceContainerHigh,
+            ::surfaceContainerHighest,
+            ::onSurface,
+            ::surfaceVariant,
+            ::onSurfaceVariant,
+            ::inverseSurface,
+            ::inverseOnSurface,
+            ::outline,
+            ::outlineVariant,
+            ::shadow,
+            ::scrim,
+            ::surfaceTint,
+            ::primary,
+            ::onPrimary,
+            ::primaryContainer,
+            ::onPrimaryContainer,
+            ::inversePrimary,
+            ::secondary,
+            ::onSecondary,
+            ::secondaryContainer,
+            ::onSecondaryContainer,
+            ::tertiary,
+            ::onTertiary,
+            ::tertiaryContainer,
+            ::onTertiaryContainer,
+            ::error,
+            ::onError,
+            ::errorContainer,
+            ::onErrorContainer,
+            ::primaryFixed,
+            ::primaryFixedDim,
+            ::onPrimaryFixed,
+            ::onPrimaryFixedVariant,
+            ::secondaryFixed,
+            ::secondaryFixedDim,
+            ::onSecondaryFixed,
+            ::onSecondaryFixedVariant,
+            ::tertiaryFixed,
+            ::tertiaryFixedDim,
+            ::onTertiaryFixed,
+            ::onTertiaryFixedVariant,
+            ::controlActivated,
+            ::controlNormal,
+            ::controlHighlight,
+            ::textPrimaryInverse,
+            ::textSecondaryAndTertiaryInverse,
+            ::textPrimaryInverseDisableOnly,
+            ::textSecondaryAndTertiaryInverseDisabled,
+            ::textHintInverse,
         )
 
     public companion object {

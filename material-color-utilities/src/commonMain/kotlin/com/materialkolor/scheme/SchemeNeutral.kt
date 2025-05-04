@@ -33,6 +33,8 @@ public class SchemeNeutral(
         variant = Variant.NEUTRAL,
         isDark = isDark,
         contrastLevel = contrastLevel,
+        specVersion = specVersion,
+        platform = platform,
         primaryPalette = ColorSpecs
             .get(specVersion)
             .getPrimaryPalette(Variant.NEUTRAL, sourceColorHct, isDark, platform, contrastLevel),
