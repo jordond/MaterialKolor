@@ -3,7 +3,7 @@ name: Upstream changes
 on:
   # Run at 3AM every monday
   schedule:
-    - cron: "0 3 * * 1"
+    - cron: "0 3 * * *"
 
   # Can manually be run via the Github Actions interface
   workflow_dispatch:
