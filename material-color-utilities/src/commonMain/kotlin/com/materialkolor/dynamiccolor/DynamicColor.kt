@@ -132,8 +132,7 @@ public class DynamicColor(
     /**
      * Returns the tone in HCT, ranging from 0 to 100, of the resolved color given scheme.
      */
-    public fun getTone(scheme: DynamicScheme): Double =
-        ColorSpecs.get(scheme.specVersion).getTone(scheme, this)
+    public fun getTone(scheme: DynamicScheme): Double = ColorSpecs.get(scheme.specVersion).getTone(scheme, this)
 
     public fun toBuilder(): Builder =
         Builder()
@@ -348,9 +347,7 @@ public class DynamicColor(
                     this.isBackground = isBackground
                 }
 
-            public fun setChromaMultiplier(
-                chromaMultiplier: ((DynamicScheme) -> Double?)?,
-            ): Builder =
+            public fun setChromaMultiplier(chromaMultiplier: ((DynamicScheme) -> Double?)?): Builder =
                 apply {
                     this.chromaMultiplier = chromaMultiplier
                 }
@@ -360,20 +357,15 @@ public class DynamicColor(
                     this.background = background
                 }
 
-            public fun setSecondBackground(
-                secondBackground: ((DynamicScheme) -> DynamicColor?)?,
-            ): Builder = apply { this.secondBackground = secondBackground }
+            public fun setSecondBackground(secondBackground: ((DynamicScheme) -> DynamicColor?)?): Builder =
+                apply { this.secondBackground = secondBackground }
 
-            public fun setContrastCurve(
-                contrastCurve: ((DynamicScheme) -> ContrastCurve?)?,
-            ): Builder =
+            public fun setContrastCurve(contrastCurve: ((DynamicScheme) -> ContrastCurve?)?): Builder =
                 apply {
                     this.contrastCurve = contrastCurve
                 }
 
-            public fun setToneDeltaPair(
-                toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair?)?,
-            ): Builder =
+            public fun setToneDeltaPair(toneDeltaPair: ((DynamicScheme) -> ToneDeltaPair?)?): Builder =
                 apply {
                     this.toneDeltaPair = toneDeltaPair
                 }

@@ -41,9 +41,7 @@ class CorePaletteTest {
         expected.error shouldBeExactly actual.error
     }
 
-    private infix fun TonalPalette.shouldBeExactly(
-        actual: com.materialkolor.palettes.TonalPalette,
-    ) {
+    private infix fun TonalPalette.shouldBeExactly(actual: com.materialkolor.palettes.TonalPalette) {
         this.hue shouldBe actual.hue
         this.chroma shouldBe actual.chroma
         for (tone in 0..100 step 10) {

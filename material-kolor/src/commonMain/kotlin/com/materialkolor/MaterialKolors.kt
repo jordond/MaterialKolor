@@ -23,8 +23,7 @@ public class MaterialKolors(
      * @param scheme The dynamic scheme used to generate the color.
      * @see MaterialDynamicColors.highestSurface
      */
-    public fun highestSurface(scheme: DynamicScheme): Color =
-        colors.highestSurface(scheme).getColor(scheme)
+    public fun highestSurface(scheme: DynamicScheme): Color = colors.highestSurface(scheme).getColor(scheme)
 
     /**
      * Returns the primary palette key color.
@@ -38,8 +37,7 @@ public class MaterialKolors(
      *
      * @see MaterialDynamicColors.secondaryPaletteKeyColor
      */
-    public fun secondaryPaletteKeyColor(): Color =
-        colors.secondaryPaletteKeyColor().getColor(scheme)
+    public fun secondaryPaletteKeyColor(): Color = colors.secondaryPaletteKeyColor().getColor(scheme)
 
     /**
      * Returns the tertiary palette key color.
@@ -67,8 +65,7 @@ public class MaterialKolors(
      *
      * @see MaterialDynamicColors.neutralVariantPaletteKeyColor
      */
-    public fun neutralVariantPaletteKeyColor(): Color =
-        colors.neutralVariantPaletteKeyColor().getColor(scheme)
+    public fun neutralVariantPaletteKeyColor(): Color = colors.neutralVariantPaletteKeyColor().getColor(scheme)
 
     /**
      * Returns the background color.
@@ -466,16 +463,14 @@ public class MaterialKolors(
      *
      * @see MaterialDynamicColors.textSecondaryAndTertiaryInverse
      */
-    public fun textSecondaryAndTertiaryInverse(): Color =
-        colors.textSecondaryAndTertiaryInverse().getColor(scheme)
+    public fun textSecondaryAndTertiaryInverse(): Color = colors.textSecondaryAndTertiaryInverse().getColor(scheme)
 
     /**
      * Returns the text primary inverse disable only color.
      *
      * @see MaterialDynamicColors.textPrimaryInverseDisableOnly
      */
-    public fun textPrimaryInverseDisableOnly(): Color =
-        colors.textPrimaryInverseDisableOnly().getColor(scheme)
+    public fun textPrimaryInverseDisableOnly(): Color = colors.textPrimaryInverseDisableOnly().getColor(scheme)
 
     /**
      * Returns the text secondary and tertiary inverse disabled color.
