@@ -488,6 +488,9 @@ public final class com/materialkolor/hct/Hct {
 public final class com/materialkolor/hct/Hct$Companion {
 	public final fun from (DDD)Lcom/materialkolor/hct/Hct;
 	public final fun fromInt (I)Lcom/materialkolor/hct/Hct;
+	public final fun isBlue (D)Z
+	public final fun isCyan (D)Z
+	public final fun isYellow (D)Z
 }
 
 public final class com/materialkolor/hct/HctSolver {
