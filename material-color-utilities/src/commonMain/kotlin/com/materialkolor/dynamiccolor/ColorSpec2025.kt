@@ -1759,9 +1759,8 @@ public class ColorSpec2025 : ColorSpec2021() {
         val palette: TonalPalette = color.palette(scheme)
         val tone = getTone(scheme, color)
         val hue: Double = palette.hue
-        val chromaMultiplier =
-            if (color.chromaMultiplier == null) 1 else color.chromaMultiplier(scheme)
-        val chroma: Double = palette.chroma * (chromaMultiplier?.toDouble() ?: 1.0)
+        val chromaMultiplier = color.chromaMultiplier?.invoke(scheme) ?: 1
+        val chroma: Double = palette.chroma * chromaMultiplier.toDouble()
 
         return Hct.from(hue, chroma, tone)
     }
@@ -1770,8 +1769,7 @@ public class ColorSpec2025 : ColorSpec2021() {
         scheme: DynamicScheme,
         color: DynamicColor,
     ): Double {
-        val toneDeltaPair: ToneDeltaPair? =
-            if (color.toneDeltaPair == null) null else color.toneDeltaPair(scheme)
+        val toneDeltaPair: ToneDeltaPair? = color.toneDeltaPair?.invoke(scheme)
 
         // Case 0: tone delta pair.
         if (toneDeltaPair != null) {

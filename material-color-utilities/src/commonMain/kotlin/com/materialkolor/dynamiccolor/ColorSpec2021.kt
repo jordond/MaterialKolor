@@ -982,7 +982,7 @@ public open class ColorSpec2021 : ColorSpec {
         // For example, this enables colors with standard tone of T90, which has limited chroma, to
         // "recover" intended chroma as contrast increases.
         val tone = getTone(scheme, color)
-        return color.palette.invoke(scheme).getHct(tone)
+        return color.palette(scheme).getHct(tone)
     }
 
     override fun getTone(
