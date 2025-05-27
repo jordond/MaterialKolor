@@ -36,8 +36,7 @@ public fun TemperatureCache(input: Color): TemperatureCache = TemperatureCache(i
  * @param[color] The color to calculate the cool-warm factor of.
  * @return below 0 is cool, above 0 is warm.
  */
-public fun TemperatureCache.Companion.temperature(color: Color): Double =
-    rawTemperature(color.toHct())
+public fun TemperatureCache.Companion.temperature(color: Color): Double = rawTemperature(color.toHct())
 
 /**
  * Determine a given color is warm.

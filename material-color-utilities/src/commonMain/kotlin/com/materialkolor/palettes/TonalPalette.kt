@@ -18,6 +18,7 @@ package com.materialkolor.palettes
 import com.materialkolor.hct.Hct
 import dev.drewhamilton.poko.Poko
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * A convenience class for retrieving colors that are constant in hue and chroma, but vary in tone.
@@ -42,11 +43,15 @@ public class TonalPalette private constructor(
      */
     public fun tone(tone: Int): Int {
         var color = cache[tone]
-        if (color == null) {
-            color = Hct.from(hue, chroma, tone.toDouble()).toInt()
-            cache[tone] = color
+        if (color != null) return color
+
+        color = if (tone == 99 && Hct.isYellow(this.hue)) {
+            averageArgb(this.tone(98), this.tone(100))
+        } else {
+            Hct.from(this.hue, this.chroma, tone.toDouble()).toInt()
         }
 
+        cache.put(tone, color)
         return color
     }
 
@@ -161,6 +166,23 @@ public class TonalPalette private constructor(
         ): TonalPalette {
             val keyColor = KeyColor(hue, chroma).create()
             return TonalPalette(hue, chroma, keyColor)
+        }
+
+        private fun averageArgb(
+            argb1: Int,
+            argb2: Int,
+        ): Int {
+            val red1 = (argb1 ushr 16) and 0xff
+            val green1 = (argb1 ushr 8) and 0xff
+            val blue1 = argb1 and 0xff
+            val red2 = (argb2 ushr 16) and 0xff
+            val green2 = (argb2 ushr 8) and 0xff
+            val blue2 = argb2 and 0xff
+            val red: Int = ((red1 + red2) / 2f).roundToInt()
+            val green: Int = ((green1 + green2) / 2f).roundToInt()
+            val blue: Int = ((blue1 + blue2) / 2f).roundToInt()
+
+            return (255 shl 24 or ((red and 255) shl 16) or ((green and 255) shl 8) or (blue and 255)) ushr 0
         }
     }
 }

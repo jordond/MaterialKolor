@@ -110,11 +110,11 @@ public class Hct private constructor(
         return from(recastInVc.hue, recastInVc.chroma, lstarFromY(viewedInVc[1]))
     }
 
-    public fun isBlue(): Boolean = hue >= 250 && hue < 270
+    public fun isBlue(): Boolean = isBlue(hue)
 
-    public fun isYellow(): Boolean = hue >= 105 && hue < 125
+    public fun isYellow(): Boolean = isYellow(hue)
 
-    public fun isCyan(): Boolean = hue >= 170 && hue < 207
+    public fun isCyan(): Boolean = isCyan(hue)
 
     public companion object {
         /**
@@ -139,5 +139,11 @@ public class Hct private constructor(
          * @return HCT representation of a color in default viewing conditions
          */
         public fun fromInt(argb: Int): Hct = Hct(argb)
+
+        public fun isBlue(hue: Double): Boolean = hue >= 250 && hue < 270
+
+        public fun isYellow(hue: Double): Boolean = hue >= 105 && hue < 125
+
+        public fun isCyan(hue: Double): Boolean = hue >= 170 && hue < 207
     }
 }

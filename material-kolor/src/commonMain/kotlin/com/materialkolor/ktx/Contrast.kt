@@ -86,5 +86,4 @@ public enum class ContrastThreshold(
     public operator fun compareTo(value: Double): Int = threshold.compareTo(value)
 }
 
-private operator fun Double.compareTo(threshold: ContrastThreshold): Int =
-    compareTo(threshold.threshold)
+private operator fun Double.compareTo(threshold: ContrastThreshold): Int = compareTo(threshold.threshold)

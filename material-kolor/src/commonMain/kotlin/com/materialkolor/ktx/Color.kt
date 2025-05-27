@@ -26,8 +26,7 @@ internal val defaultColorSpring = spring<Color>()
  * @return [Boolean] true if the color is light, false otherwise.
  */
 @Stable
-public fun Color.isLight(): Boolean =
-    this != Color.Transparent && ColorUtils.calculateLuminance(toArgb()) > 0.5
+public fun Color.isLight(): Boolean = this != Color.Transparent && ColorUtils.calculateLuminance(toArgb()) > 0.5
 
 /**
  * Lighten the color by the given ratio.
