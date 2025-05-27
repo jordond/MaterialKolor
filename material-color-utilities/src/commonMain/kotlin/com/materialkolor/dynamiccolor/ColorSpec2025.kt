@@ -423,8 +423,7 @@ public class ColorSpec2025 : ColorSpec2021() {
                             }
                         }(s)
                     }
-                }
-                .setChromaMultiplier { s ->
+                }.setChromaMultiplier { s ->
                     if (s.platform === Platform.PHONE) {
                         when {
                             s.variant === Variant.NEUTRAL -> 2.2
@@ -432,25 +431,24 @@ public class ColorSpec2025 : ColorSpec2021() {
                             s.variant === Variant.EXPRESSIVE -> {
                                 if (s.neutralPalette.keyColor.isYellow()) {
                                     if (s.isDark) 3.0 else 2.3
-                                } else 1.6
+                                } else {
+                                    1.6
+                                }
                             }
                             else -> 1.0
                         }
                     } else {
                         1.0
                     }
-                }
-                .setBackground { s ->
+                }.setBackground { s ->
                     if (s.platform === Platform.PHONE) {
                         return@setBackground if (s.isDark) surfaceBright() else surfaceDim()
                     } else {
                         return@setBackground surfaceContainerHigh()
                     }
-                }
-                .setContrastCurve { s ->
+                }.setContrastCurve { s ->
                     getContrastCurve(if (s.isDark) 11.0 else 9.0)
-                }
-                .build()
+                }.build()
         return super
             .onSurface()
             .toBuilder()
@@ -2293,7 +2291,7 @@ public class ColorSpec2025 : ColorSpec2021() {
             palette: TonalPalette,
             lowerBound: Double,
             upperBound: Double,
-            chromaMultiplier: Double = 1.0
+            chromaMultiplier: Double = 1.0,
         ): Double {
             val answer =
                 findBestToneForChroma(palette.hue, palette.chroma * chromaMultiplier, 100.0, true)
