@@ -382,6 +382,24 @@ public class ColorSpec2025 : ColorSpec2021() {
             .extendSpecVersion(ColorSpec.SpecVersion.SPEC_2025, color2025)
             .build()
     }
+    /*
+    .setTone(
+        (s) -> {
+          if (s.variant == Variant.VIBRANT) {
+            return tMaxC(s.neutralPalette, 0, 100, 1.1);
+          } else {
+            return DynamicColor.getInitialToneFromBackground(
+                    (scheme) -> {
+                      if (scheme.platform == PHONE) {
+                        return scheme.isDark ? surfaceBright() : surfaceDim();
+                      } else {
+                        return surfaceContainerHigh();
+                      }
+                    })
+                .apply(s);
+          }
+        })
+     */
 
     public override fun onSurface(): DynamicColor {
         val color2025 =
@@ -389,32 +407,49 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .Builder()
                 .setName("on_surface")
                 .setPalette { s -> s.neutralPalette }
+                .setTone { s ->
+                    if (s.variant == Variant.VIBRANT) {
+                        tMaxC(s.neutralPalette, 0.0, 100.0, 1.1)
+                    } else {
+                        DynamicColor.getInitialToneFromBackground { scheme ->
+                            if (scheme.platform == Platform.PHONE) {
+                                if (scheme.isDark) {
+                                    surfaceBright()
+                                } else {
+                                    surfaceDim()
+                                }
+                            } else {
+                                surfaceContainerHigh()
+                            }
+                        }(s)
+                    }
+                }
                 .setChromaMultiplier { s ->
                     if (s.platform === Platform.PHONE) {
-                        if (s.variant === Variant.NEUTRAL) {
-                            return@setChromaMultiplier 2.2
-                        } else if (s.variant === Variant.TONAL_SPOT) {
-                            return@setChromaMultiplier 1.7
-                        } else if (s.variant === Variant.EXPRESSIVE) {
-                            return@setChromaMultiplier if (s.neutralPalette.keyColor
-                                    .isYellow()
-                            ) {
-                                2.3
-                            } else {
-                                1.6
+                        when {
+                            s.variant === Variant.NEUTRAL -> 2.2
+                            s.variant === Variant.TONAL_SPOT -> 1.7
+                            s.variant === Variant.EXPRESSIVE -> {
+                                if (s.neutralPalette.keyColor.isYellow()) {
+                                    if (s.isDark) 3.0 else 2.3
+                                } else 1.6
                             }
-                        } else if (s.variant === Variant.VIBRANT) {
-                            return@setChromaMultiplier 1.29
+                            else -> 1.0
                         }
+                    } else {
+                        1.0
                     }
-                    1.0
-                }.setBackground { s ->
+                }
+                .setBackground { s ->
                     if (s.platform === Platform.PHONE) {
                         return@setBackground if (s.isDark) surfaceBright() else surfaceDim()
                     } else {
                         return@setBackground surfaceContainerHigh()
                     }
-                }.setContrastCurve { s -> getContrastCurve(9.0) }
+                }
+                .setContrastCurve { s ->
+                    getContrastCurve(if (s.isDark) 11.0 else 9.0)
+                }
                 .build()
         return super
             .onSurface()
@@ -442,23 +477,21 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .setPalette { s -> s.neutralPalette }
                 .setChromaMultiplier { s ->
                     if (s.platform === Platform.PHONE) {
-                        if (s.variant === Variant.NEUTRAL) {
-                            return@setChromaMultiplier 2.2
-                        } else if (s.variant === Variant.TONAL_SPOT) {
-                            return@setChromaMultiplier 1.7
-                        } else if (s.variant === Variant.EXPRESSIVE) {
-                            return@setChromaMultiplier if (s.neutralPalette.keyColor
-                                    .isYellow()
-                            ) {
-                                2.3
-                            } else {
-                                1.6
+                        when {
+                            s.variant === Variant.NEUTRAL -> 2.2
+                            s.variant === Variant.TONAL_SPOT -> 1.7
+                            s.variant === Variant.EXPRESSIVE -> {
+                                if (s.neutralPalette.keyColor.isYellow()) {
+                                    if (s.isDark) 3.0 else 2.3
+                                } else {
+                                    1.6
+                                }
                             }
-                        } else if (s.variant === Variant.VIBRANT) {
-                            return@setChromaMultiplier 1.29
+                            else -> 1.0
                         }
+                    } else {
+                        1.0
                     }
-                    1.0
                 }.setBackground { s ->
                     if (s.platform === Platform.PHONE) {
                         return@setBackground if (s.isDark) surfaceBright() else surfaceDim()
@@ -521,23 +554,21 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .setPalette { s -> s.neutralPalette }
                 .setChromaMultiplier { s ->
                     if (s.platform === Platform.PHONE) {
-                        if (s.variant === Variant.NEUTRAL) {
-                            return@setChromaMultiplier 2.2
-                        } else if (s.variant === Variant.TONAL_SPOT) {
-                            return@setChromaMultiplier 1.7
-                        } else if (s.variant === Variant.EXPRESSIVE) {
-                            return@setChromaMultiplier if (s.neutralPalette.keyColor
-                                    .isYellow()
-                            ) {
-                                2.3
-                            } else {
-                                1.6
+                        when {
+                            s.variant === Variant.NEUTRAL -> 2.2
+                            s.variant === Variant.TONAL_SPOT -> 1.7
+                            s.variant === Variant.EXPRESSIVE -> {
+                                if (s.neutralPalette.keyColor.isYellow()) {
+                                    if (s.isDark) 3.0 else 2.3
+                                } else {
+                                    1.6
+                                }
                             }
-                        } else if (s.variant === Variant.VIBRANT) {
-                            return@setChromaMultiplier 1.29
+                            else -> 1.0
                         }
+                    } else {
+                        1.0
                     }
-                    1.0
                 }.setBackground { s ->
                     if (s.platform === Platform.PHONE) {
                         return@setBackground if (s.isDark) surfaceBright() else surfaceDim()
@@ -568,23 +599,22 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .setPalette { s -> s.neutralPalette }
                 .setChromaMultiplier { s ->
                     if (s.platform === Platform.PHONE) {
-                        if (s.variant === Variant.NEUTRAL) {
-                            return@setChromaMultiplier 2.2
-                        } else if (s.variant === Variant.TONAL_SPOT) {
-                            return@setChromaMultiplier 1.7
-                        } else if (s.variant === Variant.EXPRESSIVE) {
-                            return@setChromaMultiplier if (s.neutralPalette.keyColor
-                                    .isYellow()
-                            ) {
-                                2.3
-                            } else {
-                                1.6
+                        when {
+                            s.variant === Variant.NEUTRAL -> 2.2
+                            s.variant === Variant.TONAL_SPOT -> 1.7
+                            s.variant === Variant.EXPRESSIVE -> {
+                                if (s.neutralPalette.keyColor.isYellow()) {
+                                    if (s.isDark) 3.0 else 2.3
+                                } else {
+                                    1.6
+                                }
                             }
-                        } else if (s.variant === Variant.VIBRANT) {
-                            return@setChromaMultiplier 1.29
+                            s.variant === Variant.VIBRANT -> 1.29
+                            else -> 1.0
                         }
+                    } else {
+                        1.0
                     }
-                    1.0
                 }.setBackground { s ->
                     if (s.platform === Platform.PHONE) {
                         return@setBackground if (s.isDark) surfaceBright() else surfaceDim()
@@ -2263,8 +2293,11 @@ public class ColorSpec2025 : ColorSpec2021() {
             palette: TonalPalette,
             lowerBound: Double,
             upperBound: Double,
+            chromaMultiplier: Double = 1.0
         ): Double {
-            val answer = findBestToneForChroma(palette.hue, palette.chroma, 100.0, true)
+            val answer =
+                findBestToneForChroma(palette.hue, palette.chroma * chromaMultiplier, 100.0, true)
+
             return answer.coerceIn(lowerBound, upperBound)
         }
 
@@ -2305,12 +2338,11 @@ public class ColorSpec2025 : ColorSpec2021() {
             platform: Platform,
         ): Double {
             val neutralHue = getExpressiveNeutralHue(sourceColorHct)
-            val neutralHueIsYellow = neutralHue >= 105 && neutralHue < 125
 
             val value =
                 if (platform === Platform.PHONE) {
                     if (isDark) {
-                        if (neutralHueIsYellow) 6 else 14
+                        if (Hct.isYellow(neutralHue)) 6 else 14
                     } else {
                         18
                     }
@@ -2332,8 +2364,7 @@ public class ColorSpec2025 : ColorSpec2021() {
             platform: Platform,
         ): Double {
             val neutralHue = getVibrantNeutralHue(sourceColorHct)
-            val neutralHueIsBlue = neutralHue >= 250 && neutralHue < 270
-            val value = if (platform === Platform.PHONE) 28 else (if (neutralHueIsBlue) 28 else 20)
+            val value = if (platform === Platform.PHONE) 28 else (if (Hct.isBlue(neutralHue)) 28 else 20)
             return value.toDouble()
         }
     }
