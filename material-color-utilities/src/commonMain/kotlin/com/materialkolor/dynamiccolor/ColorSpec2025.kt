@@ -382,24 +382,6 @@ public class ColorSpec2025 : ColorSpec2021() {
             .extendSpecVersion(ColorSpec.SpecVersion.SPEC_2025, color2025)
             .build()
     }
-    /*
-    .setTone(
-        (s) -> {
-          if (s.variant == Variant.VIBRANT) {
-            return tMaxC(s.neutralPalette, 0, 100, 1.1);
-          } else {
-            return DynamicColor.getInitialToneFromBackground(
-                    (scheme) -> {
-                      if (scheme.platform == PHONE) {
-                        return scheme.isDark ? surfaceBright() : surfaceDim();
-                      } else {
-                        return surfaceContainerHigh();
-                      }
-                    })
-                .apply(s);
-          }
-        })
-     */
 
     public override fun onSurface(): DynamicColor {
         val color2025 =
