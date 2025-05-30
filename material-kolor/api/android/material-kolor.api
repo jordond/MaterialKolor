@@ -177,7 +177,6 @@ public final class com/materialkolor/ktx/ColorKt {
 }
 
 public final class com/materialkolor/ktx/ColorSchemeKt {
-	public static final fun animateColorScheme (Landroidx/compose/material3/ColorScheme;Landroidx/compose/animation/core/FiniteAnimationSpec;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)Landroidx/compose/material3/ColorScheme;
 	public static final fun animateColorScheme (Landroidx/compose/material3/ColorScheme;Lkotlin/jvm/functions/Function3;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)Landroidx/compose/material3/ColorScheme;
 }
 

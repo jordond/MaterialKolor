@@ -23,24 +23,6 @@ import androidx.compose.ui.graphics.Color
 @Composable
 public fun animateColorScheme(
     colorScheme: ColorScheme,
-    animationSpec: FiniteAnimationSpec<Color> = defaultColorSpring,
-    label: String = "ColorSchemeAnimation",
-): ColorScheme = animateColorScheme(colorScheme, { animationSpec }, label)
-
-/**
- * Creates an animated version of a [ColorScheme] where all colors smoothly animate when changed.
- *
- * This composable function creates a new [ColorScheme] where each color property will animate from
- * its previous value to its new value whenever the input [colorScheme] changes.
- *
- * @param colorScheme The source color scheme to animate from/to.
- * @param animationSpec The animation specification to control how each color animates.
- * @param label A debugging label used to identify this animation.
- * @return A new [ColorScheme] instance with animated color properties.
- */
-@Composable
-public fun animateColorScheme(
-    colorScheme: ColorScheme,
     animationSpec: @Composable Transition.Segment<ColorScheme>.() -> FiniteAnimationSpec<Color> =
         { defaultColorSpring },
     label: String = "ColorSchemeAnimation",

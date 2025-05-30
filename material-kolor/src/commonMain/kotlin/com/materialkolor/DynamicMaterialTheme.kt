@@ -182,7 +182,7 @@ public fun DynamicMaterialTheme(
         if (!animate) {
             colorScheme
         } else {
-            animateColorScheme(colorScheme = colorScheme, animationSpec = animationSpec)
+            animateColorScheme(colorScheme = colorScheme, animationSpec = { animationSpec })
         }
 
     CompositionLocalProvider(LocalDynamicMaterialThemeSeed provides state.seedColor) {
