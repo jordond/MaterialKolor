@@ -29,9 +29,9 @@ fun standardThemeKt(
     multiplatform: Boolean,
     settings: Settings,
 ): String {
-    val lightColors = lightVariableNamePairs(settings)
+    val lightColors = variableNamePairs(settings, isDark = false, includeMisc = false)
     val lightSchemeName = settings.contrast.schemeName(isDark = false)
-    val darkColors = darkVariableNamePairs(settings)
+    val darkColors = variableNamePairs(settings, isDark = true, includeMisc = false)
     val darkSchemeName = settings.contrast.schemeName(isDark = true)
     val themeComposable =
         if (multiplatform) multiplatformTheme(themeName, lightSchemeName, darkSchemeName)

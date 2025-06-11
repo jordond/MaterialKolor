@@ -16,6 +16,7 @@ data class Settings(
     val isModified: Boolean = false,
     val specVersion: ColorSpec.SpecVersion = SettingsDefaults.specVersion,
     val packageName: String = SettingsDefaults.packageName,
+    val includeMiscColors: Boolean = SettingsDefaults.includeMiscColors,
 ) {
 
     companion object {
@@ -34,4 +35,5 @@ object SettingsDefaults {
     const val isAmoled = false
     val specVersion = ColorSpec.SpecVersion.Default
     const val packageName = "com.example.app"
+    const val includeMiscColors = false
 }

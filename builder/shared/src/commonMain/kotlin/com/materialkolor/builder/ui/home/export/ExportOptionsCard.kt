@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -86,6 +87,16 @@ fun ExportOptionsCard(
                 onValueChange = { updateOptions(options.copy(multiplatform = it)) },
             )
 
+            AnimatedVisibility(visible = options.type == ExportType.Standard) {
+                OptionSwitch(
+                    text = "Include misc colors",
+                    value = options.settings.includeMiscColors,
+                    onValueChange = { value ->
+                        updateOptions(options.copy(settings = options.settings.copy(includeMiscColors = value)))
+                    },
+                )
+            }
+
             AnimatedVisibility(visible = options.type == ExportType.MaterialKolor) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -126,6 +137,7 @@ private fun OptionSwitch(
     ) {
         Text(text = text)
 
+        val tint = LocalContentColor.current
         Switch(
             checked = value,
             onCheckedChange = { onValueChange(it) },
@@ -134,6 +146,7 @@ private fun OptionSwitch(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
+                        tint = tint,
                         modifier = Modifier.fillMaxSize(0.8f),
                     )
                 }

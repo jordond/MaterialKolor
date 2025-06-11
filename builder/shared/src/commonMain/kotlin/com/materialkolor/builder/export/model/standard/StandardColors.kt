@@ -16,10 +16,17 @@ import com.materialkolor.scheme.DynamicScheme
 fun standardColorsKt(
     settings: Settings,
 ): String {
-    val map = MaterialDynamicColors().colorList()
+    val materialDynamicColors = MaterialDynamicColors()
+    val map = materialDynamicColors.colorList(settings.includeMiscColors)
     val light = createScheme(isDark = false, settings = settings)
     val dark = createScheme(isDark = true, settings = settings)
 
+    val schemeIndependent = if (!settings.includeMiscColors) ""
+    else {
+        materialDynamicColors
+            .schemeIndependentColors()
+            .toColorVariables(settings.contrast, light, includeScheme = false) // scheme doesn't matter here
+    }
     return """
 package ${settings.packageName}
 
@@ -27,31 +34,20 @@ import androidx.compose.ui.graphics.Color
 
 ${settings.colors.seed.variable("Seed")}
 
-${map.toColorVariables(scheme = light)}
-${map.toColorVariables(scheme = dark)}
+${map.toColorVariables(settings.contrast, scheme = light)}
+${map.toColorVariables(settings.contrast, scheme = dark)}
+$schemeIndependent
 """.trimIndent().dropLastWhile { it == '\n' }
 }
 
-/**
- * Return a list of color names:
- *
- * Example:
- * ```
- * "primary" to "PrimaryLight"
- * ```
- */
-fun lightVariableNamePairs(settings: Settings): Map<String, String> {
-    return variableNamePairs(settings, isDark = false)
-}
-
-fun darkVariableNamePairs(settings: Settings): Map<String, String> {
-    return variableNamePairs(settings, isDark = true)
-}
-
-private fun variableNamePairs(settings: Settings, isDark: Boolean): Map<String, String> {
-    val list = MaterialDynamicColors().colorList()
+fun variableNamePairs(
+    settings: Settings,
+    isDark: Boolean,
+    includeMisc: Boolean = settings.includeMiscColors
+): Map<String, String> {
+    val list = MaterialDynamicColors().colorList(includeMisc)
     val scheme = createScheme(isDark = isDark, settings = settings)
-    return list.variableNamePair(scheme).map { entry ->
+    return list.variableNamePair(settings.contrast, scheme).map { entry ->
         entry.value.name.snakeToCamelCase().decapitalize(Locale("EN")) to entry.key
     }.toMap()
 }
@@ -71,59 +67,104 @@ internal fun createScheme(
     neutralVariant = settings.colors.neutralVariant,
     style = settings.style,
     contrastLevel = settings.contrast.value,
+    specVersion = settings.specVersion,
 )
 
-private fun MaterialDynamicColors.colorList(): List<DynamicColor> = listOf(
-    primary(),
-    onPrimary(),
-    primaryContainer(),
-    onPrimaryContainer(),
-    secondary(),
-    onSecondary(),
-    secondaryContainer(),
-    onSecondaryContainer(),
-    tertiary(),
-    onTertiary(),
-    tertiaryContainer(),
-    onTertiaryContainer(),
-    error(),
-    onError(),
-    errorContainer(),
-    onErrorContainer(),
-    background(),
-    onBackground(),
-    surface(),
-    onSurface(),
-    surfaceVariant(),
-    onSurfaceVariant(),
-    outline(),
-    outlineVariant(),
-    scrim(),
-    inverseSurface(),
-    inverseOnSurface(),
-    inversePrimary(),
-    surfaceDim(),
-    surfaceBright(),
-    surfaceContainerLowest(),
-    surfaceContainerLow(),
-    surfaceContainer(),
-    surfaceContainerHigh(),
-    surfaceContainerHighest(),
+private fun MaterialDynamicColors.colorList(includeMisc: Boolean): List<DynamicColor> {
+    val main = listOf(
+        primary(),
+        onPrimary(),
+        primaryContainer(),
+        onPrimaryContainer(),
+        inversePrimary(),
+        secondary(),
+        onSecondary(),
+        secondaryContainer(),
+        onSecondaryContainer(),
+        tertiary(),
+        onTertiary(),
+        tertiaryContainer(),
+        onTertiaryContainer(),
+        background(),
+        onBackground(),
+        surface(),
+        onSurface(),
+        surfaceVariant(),
+        onSurfaceVariant(),
+        surfaceTint(),
+        inverseSurface(),
+        inverseOnSurface(),
+        error(),
+        onError(),
+        errorContainer(),
+        onErrorContainer(),
+        outline(),
+        outlineVariant(),
+        scrim(),
+        surfaceBright(),
+        surfaceContainer(),
+        surfaceContainerHigh(),
+        surfaceContainerHighest(),
+        surfaceContainerLow(),
+        surfaceContainerLowest(),
+        surfaceDim(),
+    )
+
+    return if (includeMisc) main + miscColors() else main
+}
+
+private fun MaterialDynamicColors.schemeIndependentColors(): List<DynamicColor> = listOf(
+    primaryFixed(),
+    primaryFixedDim(),
+    onPrimaryFixed(),
+    onPrimaryFixedVariant(),
+    secondaryFixed(),
+    secondaryFixedDim(),
+    onSecondaryFixed(),
+    onSecondaryFixedVariant(),
+    tertiaryFixed(),
+    tertiaryFixedDim(),
+    onTertiaryFixed(),
+    onTertiaryFixedVariant(),
+    primaryPaletteKeyColor(),
+    secondaryPaletteKeyColor(),
+    tertiaryPaletteKeyColor(),
+    neutralPaletteKeyColor(),
+    neutralVariantPaletteKeyColor(),
+    errorPaletteKeyColor(),
+)
+
+private fun MaterialDynamicColors.miscColors(): List<DynamicColor> = listOf(
+    shadow(),
+    controlActivated(),
+    controlNormal(),
+    controlHighlight(),
+    textPrimaryInverse(),
+    textSecondaryAndTertiaryInverse(),
+    textPrimaryInverseDisableOnly(),
+    textSecondaryAndTertiaryInverseDisabled(),
+    textHintInverse(),
 )
 
 private fun List<DynamicColor>.variableNamePair(
+    contrast: Contrast,
     scheme: DynamicScheme,
+    includeScheme: Boolean = true
 ): Map<String, DynamicColor> {
-    val contrast = scheme.contrastSuffix()
-    val mode = if (scheme.isDark) "Dark" else "Light"
+    val contrast = contrast.suffix()
+    val mode = if (!includeScheme) "" else {
+        if (scheme.isDark) "Dark" else "Light"
+    }
     val suffix = "$mode$contrast"
     return associateBy { color -> "${color.name.snakeToCamelCase()}$suffix" }
 }
 
 private fun List<DynamicColor>.toColorVariables(
+    contrast: Contrast,
     scheme: DynamicScheme,
+    includeScheme: Boolean = true
 ): String {
-    val values = variableNamePair(scheme)
+    val values = variableNamePair(contrast, scheme, includeScheme)
     return buildString {
         values.forEach { (name, color) ->
             appendLine(color.getColor(scheme).variable(name))
@@ -131,10 +172,9 @@ private fun List<DynamicColor>.toColorVariables(
     }
 }
 
-private fun DynamicScheme.contrastSuffix(): String = when (contrastLevel) {
-    Contrast.Reduced.value -> "ReducedContrast"
-    Contrast.Default.value -> ""
-    Contrast.Medium.value -> "MediumContrast"
-    Contrast.High.value -> "HighContrast"
-    else -> ""
+private fun Contrast.suffix(): String = when (this) {
+    Contrast.Reduced -> "ReducedContrast"
+    Contrast.Default -> ""
+    Contrast.Medium -> "MediumContrast"
+    Contrast.High -> "HighContrast"
 }
