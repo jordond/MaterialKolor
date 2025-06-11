@@ -19,6 +19,8 @@ private const val KEY_SELECTED_PRESET_ID = "selected_preset_id"
 private const val KEY_COLOR_SPEC = "color_spec"
 private const val KEY_STYLE = "style"
 private const val KEY_PACKAGE_NAME = "package_name"
+private const val KEY_INCLUDE_MISC_COLORS = "misc"
+private const val KEY_USE_MATERIAL_EXPRESSIVE = "expressive"
 private val KeyColor.KEY
     get() = "color_${name.lowercase()}"
 
@@ -46,8 +48,9 @@ fun SettingsEntity.toQueryParams(): String {
         isAmoled.param(KEY_IS_AMOLED, SettingsDefaults.isAmoled),
         specVersion.param(KEY_COLOR_SPEC, SettingsDefaults.specVersion),
         packageName.param(KEY_PACKAGE_NAME),
-
-        ).joinToString(SEPARATOR)
+        includeMiscColors.param(KEY_INCLUDE_MISC_COLORS, SettingsDefaults.includeMiscColors),
+        useMaterialExpressive.param(KEY_USE_MATERIAL_EXPRESSIVE, SettingsDefaults.useMaterialExpressive),
+    ).joinToString(SEPARATOR)
 
     return "?$params"
 }
@@ -66,6 +69,8 @@ fun String.toSettingsEntity(): SettingsEntity {
         style = params[KEY_STYLE]?.safeToPaletteStyle() ?: PaletteStyle.TonalSpot,
         specVersion = parseSpecVersion(params[KEY_COLOR_SPEC]),
         packageName = params[KEY_PACKAGE_NAME],
+        includeMiscColors = params[KEY_INCLUDE_MISC_COLORS]?.toBooleanStrictOrNull() ?: SettingsDefaults.includeMiscColors,
+        useMaterialExpressive = params[KEY_USE_MATERIAL_EXPRESSIVE]?.toBooleanStrictOrNull() ?: SettingsDefaults.useMaterialExpressive,
     )
 }
 

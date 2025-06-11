@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
@@ -22,6 +23,7 @@ import com.materialkolor.builder.settings.model.KeyColor
 import com.materialkolor.builder.settings.model.SeedImage
 import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.builder.ui.LocalWindowSizeClass
+import com.materialkolor.builder.ui.home.components.OptionSwitch
 import com.materialkolor.builder.ui.home.customize.colors.CoreColorsSection
 import com.materialkolor.builder.ui.home.customize.contrast.ContrastSection
 import com.materialkolor.builder.ui.home.customize.seed.SeedColorSection
@@ -41,6 +43,7 @@ fun CustomizeSection(
     onUpdatePaletteStyle: (PaletteStyle) -> Unit,
     onUpdateContrast: (Contrast) -> Unit,
     updateSpecVersion: (ColorSpec.SpecVersion) -> Unit,
+    toggleMaterialExpressive: () -> Unit,
     scrollState: ScrollState = rememberScrollState(),
     imagePresets: PersistentList<SeedImage.Resource> = ImagePresets.all,
     windowSizeClass: WindowSizeClass = LocalWindowSizeClass.current,
@@ -58,6 +61,27 @@ fun CustomizeSection(
         Text(
             text = "Generate your own Material 3 color scheme, to use with Jetpack Compose, or Compose Multiplatform.",
         )
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = "Material 3 Expressive",
+                style = MaterialTheme.typography.titleLarge,
+            )
+
+            Text(
+                text = "MaterialKolor will soon support the new expressive color system. For now you can " +
+                    "preview it by enabling it below. It is also recommended to set the spec version to " +
+                    "2025, and the variant to expressive.",
+            )
+
+            OptionSwitch(
+                text = "Preview Expressive Color System",
+                value = settings.useMaterialExpressive,
+                onValueChange = { toggleMaterialExpressive() },
+            )
+        }
 
         SeedColorSection(
             settings = settings,

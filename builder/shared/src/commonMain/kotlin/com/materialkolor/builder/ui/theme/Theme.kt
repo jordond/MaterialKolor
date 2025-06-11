@@ -1,5 +1,11 @@
 package com.materialkolor.builder.ui.theme
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -8,11 +14,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import com.materialkolor.DynamicMaterialTheme
 import com.materialkolor.DynamicMaterialThemeState
+import com.materialkolor.LocalDynamicMaterialThemeSeed
 import com.materialkolor.MaterialKolors
 import com.materialkolor.builder.core.UrlLauncher
 import com.materialkolor.builder.settings.model.Settings
+import com.materialkolor.ktx.animateColorScheme
 import com.materialkolor.ktx.colors
 import com.materialkolor.rememberDynamicMaterialThemeState
 
@@ -46,11 +53,11 @@ fun createThemeState(
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun AppTheme(
     settings: Settings,
     urlLauncher: UrlLauncher,
-    animate: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val isDarkState = remember(settings.isDarkMode) { mutableStateOf(settings.isDarkMode) }
@@ -61,15 +68,35 @@ internal fun AppTheme(
         LocalThemeIsDark provides isDarkState,
         LocalUrlLauncher provides urlLauncher,
     ) {
-        DynamicMaterialTheme(
-            state = dynamicThemeState,
-            animate = animate,
-            typography = AppTypography,
-        ) {
-            SystemAppearance(isDarkState.value)
+        val colorScheme = dynamicThemeState.colorScheme
+        val scheme = animateColorScheme(colorScheme = colorScheme)
 
-            CompositionLocalProvider(LocalColors provides dynamicThemeState.colors) {
-                Surface(content = content)
+        CompositionLocalProvider(LocalDynamicMaterialThemeSeed provides dynamicThemeState.seedColor) {
+            Crossfade(settings.useMaterialExpressive) { useExpressive ->
+                if (useExpressive) {
+                    MaterialExpressiveTheme(
+                        colorScheme = scheme,
+                        motionScheme = MotionScheme.expressive(),
+                        typography = typography,
+                    ) {
+                        SystemAppearance(isDarkState.value)
+
+                        CompositionLocalProvider(LocalColors provides dynamicThemeState.colors) {
+                            Surface(content = content)
+                        }
+                    }
+                } else {
+                    MaterialTheme(
+                        colorScheme = scheme,
+                        typography = typography,
+                    ) {
+                        SystemAppearance(isDarkState.value)
+
+                        CompositionLocalProvider(LocalColors provides dynamicThemeState.colors) {
+                            Surface(content = content)
+                        }
+                    }
+                }
             }
         }
     }

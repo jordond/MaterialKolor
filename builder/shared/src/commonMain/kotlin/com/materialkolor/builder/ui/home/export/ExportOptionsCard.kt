@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.export.model.ExportOptions
 import com.materialkolor.builder.export.model.ExportType
+import com.materialkolor.builder.ui.home.components.OptionSwitch
 import com.materialkolor.builder.ui.ktx.clickableWithoutRipple
 
 @Composable
@@ -115,42 +116,5 @@ fun ExportOptionsCard(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun OptionSwitch(
-    text: String,
-    value: Boolean,
-    onValueChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .semantics { contentDescription = "Toggle $text" }
-            .fillMaxWidth()
-            .clickableWithoutRipple {
-                onValueChange(!value)
-            },
-    ) {
-        Text(text = text)
-
-        val tint = LocalContentColor.current
-        Switch(
-            checked = value,
-            onCheckedChange = { onValueChange(it) },
-            thumbContent = {
-                if (value) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                        tint = tint,
-                        modifier = Modifier.fillMaxSize(0.8f),
-                    )
-                }
-            },
-        )
     }
 }

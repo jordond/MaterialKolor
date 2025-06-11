@@ -17,6 +17,7 @@ data class Settings(
     val specVersion: ColorSpec.SpecVersion = SettingsDefaults.specVersion,
     val packageName: String = SettingsDefaults.packageName,
     val includeMiscColors: Boolean = SettingsDefaults.includeMiscColors,
+    val useMaterialExpressive: Boolean = SettingsDefaults.useMaterialExpressive,
 ) {
 
     companion object {
@@ -36,4 +37,5 @@ object SettingsDefaults {
     val specVersion = ColorSpec.SpecVersion.Default
     const val packageName = "com.example.app"
     const val includeMiscColors = false
+    const val useMaterialExpressive = false
 }

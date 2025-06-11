@@ -22,6 +22,7 @@ data class SettingsEntity(
     val specVersion: ColorSpec.SpecVersion = SettingsDefaults.specVersion,
     val packageName: String? = null,
     val includeMiscColors: Boolean = SettingsDefaults.includeMiscColors,
+    val useMaterialExpressive: Boolean = SettingsDefaults.useMaterialExpressive,
 )
 
 fun Settings.toEntity(): SettingsEntity {
@@ -36,6 +37,7 @@ fun Settings.toEntity(): SettingsEntity {
         specVersion = specVersion,
         packageName = packageName,
         includeMiscColors = includeMiscColors,
+        useMaterialExpressive = useMaterialExpressive,
     )
 }
 
@@ -54,6 +56,7 @@ fun SettingsEntity.toModel(isDarkModeFallback: Boolean): Settings {
         specVersion = specVersion,
         packageName = packageName ?: SettingsDefaults.packageName,
         includeMiscColors = includeMiscColors,
+        useMaterialExpressive = useMaterialExpressive,
     )
 }
 

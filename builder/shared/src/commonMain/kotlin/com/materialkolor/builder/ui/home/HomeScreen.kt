@@ -113,6 +113,7 @@ fun HomeScreen(destination: String? = null) {
                             else model.selectImagePreset(action.image)
                         }
                         is ToggleDarkMode -> model.toggleDarkMode()
+                        is HomeAction.ToggleExpressive -> model.toggleExpressive()
                         is RandomColor -> model.randomColor()
                         is Reset -> model.reset()
                         is CopyColor -> model.copyColorToClipboard(action.name, action.color)

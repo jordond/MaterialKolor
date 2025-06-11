@@ -52,6 +52,7 @@ fun PreviewCompactContent(
                     updateSpecVersion = dispatcher.rememberRelayOf(::UpdateSpecVersion),
                     processingImage = processingImage,
                     windowSizeClass = windowSizeClass,
+                    toggleMaterialExpressive = {},
                     modifier = modifier,
                 )
             }
