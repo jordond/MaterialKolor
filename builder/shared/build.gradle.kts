@@ -18,9 +18,9 @@ buildkonfig {
     packageName = libs.versions.app.name.get()
 
     defaultConfigs {
-        buildConfigField(STRING, "VERSION_NAME", libs.versions.app.version.get())
-        buildConfigField(INT, "VERSION_CODE", libs.versions.app.code.get())
-        buildConfigField(STRING, "MATERIAL_KOLOR_VERSION", libs.versions.materialKolor.get())
+        buildConfigField(STRING, "VERSION_NAME", libs.versions.app.version.get(), const = true)
+        buildConfigField(INT, "VERSION_CODE", libs.versions.app.code.get(), const = true)
+        buildConfigField(STRING, "MATERIAL_KOLOR_VERSION", libs.versions.materialKolor.get(), const = true)
     }
 }
 
