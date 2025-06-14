@@ -646,7 +646,8 @@ public class com/materialkolor/scheme/DynamicScheme {
 }
 
 public final class com/materialkolor/scheme/DynamicScheme$Companion {
-	public final fun from (Lcom/materialkolor/scheme/DynamicScheme;Z)Lcom/materialkolor/scheme/DynamicScheme;
+	public final fun from (Lcom/materialkolor/scheme/DynamicScheme;ZD)Lcom/materialkolor/scheme/DynamicScheme;
+	public static synthetic fun from$default (Lcom/materialkolor/scheme/DynamicScheme$Companion;Lcom/materialkolor/scheme/DynamicScheme;ZDILjava/lang/Object;)Lcom/materialkolor/scheme/DynamicScheme;
 	public final fun getPiecewiseValue (Lcom/materialkolor/hct/Hct;[D[D)D
 	public final fun getRotatedHue (Lcom/materialkolor/hct/Hct;[D[D)D
 }

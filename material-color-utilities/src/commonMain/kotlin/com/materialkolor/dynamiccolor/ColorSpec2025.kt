@@ -1493,10 +1493,18 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .setName("primary_fixed")
                 .setPalette { s -> s.primaryPalette }
                 .setTone { s ->
-                    val tempS = DynamicScheme.from(s, false)
+                    val tempS = DynamicScheme.from(s, false, 0.0)
                     primaryContainer().getTone(tempS)
                 }.setIsBackground(true)
-                .build()
+                .setBackground { s ->
+                    if (s.platform === Platform.PHONE) {
+                        if (s.isDark) surfaceBright() else surfaceDim()
+                    } else {
+                        null
+                    }
+                }.setContrastCurve { s ->
+                    if (s.platform == Platform.PHONE && s.contrastLevel > 0) getContrastCurve(1.5) else null
+                }.build()
         return super
             .primaryFixed()
             .toBuilder()
@@ -1569,10 +1577,18 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .setName("secondary_fixed")
                 .setPalette { s -> s.secondaryPalette }
                 .setTone { s ->
-                    val tempS: DynamicScheme = DynamicScheme.from(s, isDark = false)
+                    val tempS: DynamicScheme = DynamicScheme.from(s, isDark = false, 0.0)
                     secondaryContainer().getTone(tempS)
                 }.setIsBackground(true)
-                .build()
+                .setBackground { s ->
+                    if (s.platform == Platform.PHONE) {
+                        if (s.isDark) surfaceBright() else surfaceDim()
+                    } else {
+                        null
+                    }
+                }.setContrastCurve { s ->
+                    if (s.platform == Platform.PHONE && s.contrastLevel > 0) getContrastCurve(1.5) else null
+                }.build()
         return super
             .secondaryFixed()
             .toBuilder()
@@ -1645,10 +1661,18 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .setName("tertiary_fixed")
                 .setPalette { s -> s.tertiaryPalette }
                 .setTone { s ->
-                    val tempS = DynamicScheme.from(s, isDark = false)
+                    val tempS = DynamicScheme.from(s, isDark = false, 0.0)
                     tertiaryContainer().getTone(tempS)
                 }.setIsBackground(true)
-                .build()
+                .setBackground { s ->
+                    if (s.platform == Platform.PHONE) {
+                        if (s.isDark) surfaceBright() else surfaceDim()
+                    } else {
+                        null
+                    }
+                }.setContrastCurve { s ->
+                    if (s.platform == Platform.PHONE && s.contrastLevel > 0) getContrastCurve(1.5) else null
+                }.build()
         return super
             .tertiaryFixed()
             .toBuilder()
