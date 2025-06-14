@@ -303,12 +303,13 @@ public open class DynamicScheme(
         public fun from(
             other: DynamicScheme,
             isDark: Boolean,
+            contrastLevel: Double = other.contrastLevel,
         ): DynamicScheme =
             DynamicScheme(
                 sourceColorHct = other.sourceColorHct,
                 variant = other.variant,
                 isDark = isDark,
-                contrastLevel = other.contrastLevel,
+                contrastLevel = contrastLevel,
                 primaryPalette = other.primaryPalette,
                 secondaryPalette = other.secondaryPalette,
                 tertiaryPalette = other.tertiaryPalette,
