@@ -29,14 +29,16 @@ The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com
     - [Single Platform](#single-platform)
     - [Version Catalog](#version-catalog)
 - [Usage](#usage)
+  - [Updated Colors](#updated-colors)
+  - [DynamicMaterialTheme](#dynamicmaterialtheme)
+  - [DynamicMaterialExpressiveTheme](#dynamicmaterialexpressivetheme)
 - [Extensions](#extensions)
     - [Harmonize Colors](#harmonize-colors)
     - [Lighten and Darken](#lighten-and-darken)
     - [Color Temperature](#color-temperature)
 - [Generating from an Image](#generating-from-an-image)
-    - [Advanced](#advanced)
 - [License](#license)
-    - [Changes from original source](#changes-from-original-source)
+  - [Changes from original source](#changes-from-original-source)
 
 ## Platforms
 
@@ -73,7 +75,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("com.materialkolor:material-kolor:3.0.0-alpha04")
+              implementation("com.materialkolor:material-kolor:3.0.0-beta07")
             }
         }
     }
@@ -86,7 +88,7 @@ For an Android only project, add the dependency to app level `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.materialkolor:material-kolor:3.0.0-alpha04")
+  implementation("com.materialkolor:material-kolor:3.0.0-beta07")
 }
 ```
 
@@ -94,7 +96,7 @@ dependencies {
 
 ```toml
 [versions]
-materialKolor = "3.0.0-alpha04"
+materialKolor = "3.0.0-beta07"
 
 [libraries]
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
@@ -109,7 +111,7 @@ Google's [Material Color Utilities](https://github.com/material-foundation/mater
 
 ```toml
 [versions]
-materialKolor = "3.0.0-alpha04"
+materialKolor = "3.0.0-beta07"
 
 [libraries]
 materialKolor-utilities = { module = "com.materialkolor:material-color-utilities", version.ref = "materialKolor" }
@@ -144,7 +146,22 @@ customize the generated palette:
 dynamicColorScheme(
     seedColor = seedColor,
     isDark = isDark,
-    style = PaletteStyle.Vibrant,
+  style = PaletteStyle.Expressive,
+)
+```
+
+### Updated Colors
+
+With the release of Material3 Expressive, Google has added a new color spec used when generating
+colors. By default MaterialKolor uses the `SPEC_2021` version. If you want to try out the new colors
+you will need to use `ColorSpec.SpecVersion.SPEC_2025`:
+
+```kotlin
+val scheme = rememberDynamicColorScheme(
+  seedColor = seedColor,
+  isDark = isDark,
+  specVersion = ColorSpec.SpecVersion.SPEC_2025,
+  style = PaletteStyle.Expressive, // Optional but recommended if you are using `MaterialExpressiveTheme`
 )
 ```
 
@@ -171,6 +188,36 @@ fun MyTheme(
     )
 }
 ```
+
+### DynamicMaterialExpressiveTheme
+
+For more vibrant and playful themes, use `DynamicMaterialExpressiveTheme`. This composable is
+designed
+for the Material 3 Expressive design system and defaults to using `PaletteStyle.Expressive` and
+`ColorSpec.SpecVersion.SPEC_2025` for optimal color generation.
+
+**Important:** Make sure to use `SPEC_2025` and `PaletteStyle.Expressive` for the best results:
+
+```kotlin
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun MyExpressiveTheme(
+  seedColor: Color,
+  isDark: Boolean = isSystemInDarkTheme(),
+  content: @Composable () -> Unit
+) {
+  DynamicMaterialExpressiveTheme(
+    seedColor = seedColor,
+    motionScheme = MotionScheme.expressive(),
+    isDark = isDark,
+    animate = true,
+    content = content,
+  )
+}
+```
+
+The Expressive theme generates vibrant color schemes where the source color's hue may not directly
+appear in the final theme, creating more dynamic and playful color palettes.
 
 ## Extensions
 
@@ -246,7 +293,7 @@ Or in Compose land:
 fun DynamicTheme(image: ImageBitmap, content: @Composable () -> Unit) {
     val seedColor = rememberThemeColor(image, fallback = MaterialTheme.colorScheme.primary)
 
-    AnimatedDynamicMaterialTheme(
+  DynamicMaterialTheme(
         seedColor = seedColor,
         content = content
     )
