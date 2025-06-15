@@ -209,6 +209,66 @@ public fun animateColorScheme(
         targetValueByState = { it.scrim },
         transitionSpec = animationSpec,
     )
+    val primaryFixed by transition.animateColor(
+        label = "color_primaryFixed",
+        targetValueByState = { it.primaryFixed },
+        transitionSpec = animationSpec,
+    )
+    val primaryFixedDim by transition.animateColor(
+        label = "color_primaryFixedDim",
+        targetValueByState = { it.primaryFixedDim },
+        transitionSpec = animationSpec,
+    )
+    val onPrimaryFixed by transition.animateColor(
+        label = "color_onPrimaryFixed",
+        targetValueByState = { it.onPrimaryFixed },
+        transitionSpec = animationSpec,
+    )
+    val onPrimaryFixedVariant by transition.animateColor(
+        label = "color_onPrimaryFixedVariant",
+        targetValueByState = { it.onPrimaryFixedVariant },
+        transitionSpec = animationSpec,
+    )
+    val secondaryFixed by transition.animateColor(
+        label = "color_secondaryFixed",
+        targetValueByState = { it.secondaryFixed },
+        transitionSpec = animationSpec,
+    )
+    val secondaryFixedDim by transition.animateColor(
+        label = "color_secondaryFixedDim",
+        targetValueByState = { it.secondaryFixedDim },
+        transitionSpec = animationSpec,
+    )
+    val onSecondaryFixed by transition.animateColor(
+        label = "color_onSecondaryFixed",
+        targetValueByState = { it.onSecondaryFixed },
+        transitionSpec = animationSpec,
+    )
+    val onSecondaryFixedVariant by transition.animateColor(
+        label = "color_onSecondaryFixedVariant",
+        targetValueByState = { it.onSecondaryFixedVariant },
+        transitionSpec = animationSpec,
+    )
+    val tertiaryFixed by transition.animateColor(
+        label = "color_tertiaryFixed",
+        targetValueByState = { it.tertiaryFixed },
+        transitionSpec = animationSpec,
+    )
+    val tertiaryFixedDim by transition.animateColor(
+        label = "color_tertiaryFixedDim",
+        targetValueByState = { it.tertiaryFixedDim },
+        transitionSpec = animationSpec,
+    )
+    val onTertiaryFixed by transition.animateColor(
+        label = "color_onTertiaryFixed",
+        targetValueByState = { it.onTertiaryFixed },
+        transitionSpec = animationSpec,
+    )
+    val onTertiaryFixedVariant by transition.animateColor(
+        label = "color_onTertiaryFixedVariant",
+        targetValueByState = { it.onTertiaryFixedVariant },
+        transitionSpec = animationSpec,
+    )
     return colorScheme.copy(
         primary = primary,
         onPrimary = onPrimary,
@@ -246,5 +306,17 @@ public fun animateColorScheme(
         surfaceContainerHighest = surfaceContainerHighest,
         surfaceContainerLow = surfaceContainerLow,
         surfaceContainerLowest = surfaceContainerLowest,
+        primaryFixed = primaryFixed,
+        primaryFixedDim = primaryFixedDim,
+        onPrimaryFixed = onPrimaryFixed,
+        onPrimaryFixedVariant = onPrimaryFixedVariant,
+        secondaryFixed = secondaryFixed,
+        secondaryFixedDim = secondaryFixedDim,
+        onSecondaryFixed = onSecondaryFixed,
+        onSecondaryFixedVariant = onSecondaryFixedVariant,
+        tertiaryFixed = tertiaryFixed,
+        tertiaryFixedDim = tertiaryFixedDim,
+        onTertiaryFixed = onTertiaryFixed,
+        onTertiaryFixedVariant = onTertiaryFixedVariant,
     )
 }

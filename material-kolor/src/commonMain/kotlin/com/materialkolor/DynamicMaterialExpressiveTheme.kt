@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Shapes
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -197,6 +198,7 @@ public fun DynamicMaterialExpressiveTheme(
     animationSpec: FiniteAnimationSpec<Color> = defaultColorSpring,
     content: @Composable () -> Unit,
 ) {
+    Surface {  }
     val colorScheme = state.colorScheme
     val scheme =
         if (!animate) {
