@@ -296,5 +296,17 @@ public fun DynamicScheme.toColorScheme(
         surfaceVariant = colors.surfaceVariant(),
         tertiary = colors.tertiary(),
         tertiaryContainer = colors.tertiaryContainer(),
+        primaryFixed = colors.primaryFixed(),
+        primaryFixedDim = colors.primaryFixedDim(),
+        onPrimaryFixed = colors.onPrimaryFixed(),
+        onPrimaryFixedVariant = colors.onPrimaryFixedVariant(),
+        secondaryFixed = colors.secondaryFixed(),
+        secondaryFixedDim = colors.secondaryFixedDim(),
+        onSecondaryFixed = colors.onSecondaryFixed(),
+        onSecondaryFixedVariant = colors.onSecondaryFixedVariant(),
+        tertiaryFixed = colors.tertiaryFixed(),
+        tertiaryFixedDim = colors.tertiaryFixedDim(),
+        onTertiaryFixed = colors.onTertiaryFixed(),
+        onTertiaryFixedVariant = colors.onTertiaryFixedVariant(),
     ).let { modifyColorScheme?.invoke(it) ?: it }
 }
