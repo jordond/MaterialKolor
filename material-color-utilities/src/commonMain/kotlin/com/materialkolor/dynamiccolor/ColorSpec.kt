@@ -18,7 +18,7 @@ public interface ColorSpec {
         ;
 
         public companion object {
-            public val Default: SpecVersion = SPEC_2025
+            public val Default: SpecVersion = SPEC_2021
         }
     }
 
