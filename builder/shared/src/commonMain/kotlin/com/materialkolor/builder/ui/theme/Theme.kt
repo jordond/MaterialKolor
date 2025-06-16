@@ -1,11 +1,6 @@
 package com.materialkolor.builder.ui.theme
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialExpressiveTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -14,8 +9,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.materialkolor.DynamicMaterialExpressiveTheme
 import com.materialkolor.DynamicMaterialThemeState
-import com.materialkolor.LocalDynamicMaterialThemeSeed
 import com.materialkolor.MaterialKolors
 import com.materialkolor.builder.core.UrlLauncher
 import com.materialkolor.builder.settings.model.Settings
@@ -71,32 +66,11 @@ internal fun AppTheme(
         val colorScheme = dynamicThemeState.colorScheme
         val scheme = animateColorScheme(colorScheme = colorScheme)
 
-        CompositionLocalProvider(LocalDynamicMaterialThemeSeed provides dynamicThemeState.seedColor) {
-            Crossfade(settings.useMaterialExpressive) { useExpressive ->
-                if (useExpressive) {
-                    MaterialExpressiveTheme(
-                        colorScheme = scheme,
-                        motionScheme = MotionScheme.expressive(),
-                        typography = typography,
-                    ) {
-                        SystemAppearance(isDarkState.value)
+        DynamicMaterialExpressiveTheme(dynamicThemeState) {
+            SystemAppearance(isDarkState.value)
 
-                        CompositionLocalProvider(LocalColors provides dynamicThemeState.colors) {
-                            Surface(content = content)
-                        }
-                    }
-                } else {
-                    MaterialTheme(
-                        colorScheme = scheme,
-                        typography = typography,
-                    ) {
-                        SystemAppearance(isDarkState.value)
-
-                        CompositionLocalProvider(LocalColors provides dynamicThemeState.colors) {
-                            Surface(content = content)
-                        }
-                    }
-                }
+            CompositionLocalProvider(LocalColors provides dynamicThemeState.colors) {
+                Surface(content = content)
             }
         }
     }

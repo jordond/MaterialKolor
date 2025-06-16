@@ -696,4 +696,51 @@ fun AppTheme(
 
         assertContains(result, colors)
     }
+
+    @Test
+    fun testStandardExpressiveMultiplatformTheme() {
+        val settings = Settings(
+            colors = ColorSettings(
+                seed = Color(0xFF0000FF),
+            ),
+            isDarkMode = false,
+            selectedImage = null,
+            packageName = "foo.bar.biz.buzz",
+            useMaterialExpressive = true,
+        )
+
+        val result = standardThemeKt(
+            themeName = "AppTheme",
+            multiplatform = true,
+            settings = settings,
+        )
+
+        assertContains(result, "import androidx.compose.material3.MaterialExpressiveTheme")
+        assertContains(result, "import androidx.compose.material3.MotionScheme")
+        assertContains(result, "MaterialExpressiveTheme(")
+        assertContains(result, "motionScheme = MotionScheme.expressive(),")
+    }
+
+    @Test
+    fun testStandardExpressiveAndroidTheme() {
+        val settings = Settings(
+            colors = ColorSettings(
+                seed = Color(0xFF0000FF),
+            ),
+            isDarkMode = false,
+            selectedImage = null,
+            useMaterialExpressive = true,
+        )
+
+        val result = standardThemeKt(
+            themeName = "AppTheme",
+            multiplatform = false,
+            settings = settings,
+        )
+
+        assertContains(result, "import androidx.compose.material3.MaterialExpressiveTheme")
+        assertContains(result, "import androidx.compose.material3.MotionScheme")
+        assertContains(result, "MaterialExpressiveTheme(")
+        assertContains(result, "motionScheme = MotionScheme.expressive(),")
+    }
 }

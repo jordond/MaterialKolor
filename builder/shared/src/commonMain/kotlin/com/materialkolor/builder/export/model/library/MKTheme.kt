@@ -18,10 +18,12 @@ fun mkThemeKt(
 
     val imports = listOfNotNull(
         "import androidx.compose.foundation.isSystemInDarkTheme",
+        if (settings.useMaterialExpressive) "import androidx.compose.material3.MotionScheme" else null,
         "import androidx.compose.runtime.Composable",
-        "import com.materialkolor.DynamicMaterialTheme",
-        "import com.materialkolor.PaletteStyle",
+        if (settings.useMaterialExpressive) "import com.materialkolor.DynamicMaterialExpressiveTheme"
+        else "import com.materialkolor.DynamicMaterialTheme",
         if (settings.specVersion.include) "import com.materialkolor.dynamiccolor.ColorSpec" else null,
+        "import com.materialkolor.PaletteStyle",
         "import com.materialkolor.rememberDynamicMaterialThemeState",
     ).joinToString("\n")
 
@@ -37,6 +39,21 @@ fun mkThemeKt(
         settings.colors.neutral.parameter("Neutral"),
         settings.colors.neutralVariant.parameter("NeutralVariant"),
     ).joinToString(",\n        ")
+
+    val themeComposable = if (settings.useMaterialExpressive) """
+    |    DynamicMaterialExpressiveTheme(
+    |        state = dynamicThemeState,
+    |        motionScheme = MotionScheme.expressive(),
+    |        animate = $animate,
+    |        content = content,
+    |    )
+    """.trimMargin() else """
+    |    DynamicMaterialTheme(
+    |        state = dynamicThemeState,
+    |        animate = $animate,
+    |        content = content,
+    |    )
+    """.trimMargin()
 
     return """
 ${header(settings)}
@@ -55,11 +72,7 @@ fun $themeName(
         $params,
     )
     
-    DynamicMaterialTheme(
-        state = dynamicThemeState,
-        animate = $animate,
-        content = content,
-    )
+$themeComposable
 }
 """.trimIndent()
 }

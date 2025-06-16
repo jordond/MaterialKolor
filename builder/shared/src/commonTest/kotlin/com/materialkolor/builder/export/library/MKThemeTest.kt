@@ -181,4 +181,116 @@ fun MyTheme(
 
         assertEquals(expected, result)
     }
+
+    @Test
+    fun testMkThemeKtWithMaterialExpressive() {
+        val settings = Settings(
+            colors = ColorSettings(
+                seed = Color(0xFF0000FF),
+            ),
+            isDarkMode = false,
+            selectedImage = null,
+            packageName = "foo.bar.biz.buzz",
+            useMaterialExpressive = true,
+        )
+
+        val result = mkThemeKt("AppTheme", settings, animate = true)
+
+        val expected = """
+${header(settings)}
+package foo.bar.biz.buzz
+
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MotionScheme
+import androidx.compose.runtime.Composable
+import com.materialkolor.DynamicMaterialExpressiveTheme
+import com.materialkolor.PaletteStyle
+import com.materialkolor.rememberDynamicMaterialThemeState
+
+@Composable
+fun AppTheme(
+    isDarkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit,
+) {
+    val dynamicThemeState = rememberDynamicMaterialThemeState(
+        isDark = isDarkTheme,
+        style = PaletteStyle.TonalSpot,
+        seedColor = SeedColor,
+    )
+    
+    DynamicMaterialExpressiveTheme(
+        state = dynamicThemeState,
+        motionScheme = MotionScheme.expressive(),
+        animate = true,
+        content = content,
+    )
+}
+""".trimIndent()
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun testMkThemeKtWithMaterialExpressiveAndAllColors() {
+        val settings = Settings(
+            colors = ColorSettings(
+                seed = Color(0xFF000000),
+                primary = Color(0xFF111111),
+                secondary = Color(0xFF222222),
+                tertiary = Color(0xFF333333),
+                error = Color(0xFF444444),
+                neutral = Color(0xFF555555),
+                neutralVariant = Color(0xFF666666),
+            ),
+            isDarkMode = false,
+            contrast = Contrast.High,
+            style = PaletteStyle.Vibrant,
+            selectedImage = null,
+            isAmoled = true,
+            packageName = "test.expressive.app",
+            useMaterialExpressive = true,
+        )
+
+        val result = mkThemeKt("ExpressiveTheme", settings, animate = false)
+
+        val expected = """
+${header(settings)}
+package test.expressive.app
+
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MotionScheme
+import androidx.compose.runtime.Composable
+import com.materialkolor.DynamicMaterialExpressiveTheme
+import com.materialkolor.PaletteStyle
+import com.materialkolor.rememberDynamicMaterialThemeState
+
+@Composable
+fun ExpressiveTheme(
+    isDarkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit,
+) {
+    val dynamicThemeState = rememberDynamicMaterialThemeState(
+        isDark = isDarkTheme,
+        style = PaletteStyle.Vibrant,
+        contrastLevel = 1.0,
+        isAmoled = true,
+        primary = Primary,
+        secondary = Secondary,
+        tertiary = Tertiary,
+        error = Error,
+        neutral = Neutral,
+        neutralVariant = NeutralVariant,
+    )
+    
+    DynamicMaterialExpressiveTheme(
+        state = dynamicThemeState,
+        motionScheme = MotionScheme.expressive(),
+        animate = false,
+        content = content,
+    )
+}
+""".trimIndent()
+
+        assertEquals(expected, result)
+    }
 }

@@ -5,33 +5,21 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.export.model.ExportOptions
 import com.materialkolor.builder.export.model.ExportType
 import com.materialkolor.builder.ui.home.components.OptionSwitch
-import com.materialkolor.builder.ui.ktx.clickableWithoutRipple
 
 @Composable
 fun ExportOptionsCard(
@@ -86,6 +74,16 @@ fun ExportOptionsCard(
                 text = "Multiplatform",
                 value = options.multiplatform,
                 onValueChange = { updateOptions(options.copy(multiplatform = it)) },
+            )
+
+            OptionSwitch(
+                text = "Material Expressive",
+                value = options.settings.useMaterialExpressive,
+                onValueChange = { value ->
+                    updateOptions(
+                        options.copy(settings = options.settings.copy(useMaterialExpressive = value)),
+                    )
+                },
             )
 
             AnimatedVisibility(visible = options.type == ExportType.Standard) {
