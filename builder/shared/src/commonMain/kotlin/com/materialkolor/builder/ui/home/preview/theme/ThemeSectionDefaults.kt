@@ -5,9 +5,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.materialkolor.builder.ui.home.model.FixedThemeGroup
 import com.materialkolor.builder.ui.home.model.Theme
 import com.materialkolor.builder.ui.home.model.ThemePair
 import com.materialkolor.ktx.isLight
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 
 object ThemeSectionDefaults {
@@ -46,6 +48,13 @@ object ThemeSectionDefaults {
         Theme.Colors.InverseSurface,
         Theme.Colors.InverseOnSurface,
     )
+
+    val FixedColors: PersistentList<FixedThemeGroup> =
+        persistentListOf(
+            Theme.Groups.PrimaryFixed,
+            Theme.Groups.SecondaryFixed,
+            Theme.Groups.TertiaryFixed,
+        )
 
     @Composable
     fun Color.inverse(): Color {

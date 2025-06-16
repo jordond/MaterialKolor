@@ -21,12 +21,11 @@ fun standardColorsKt(
     val light = createScheme(isDark = false, settings = settings)
     val dark = createScheme(isDark = true, settings = settings)
 
-    val schemeIndependent = if (!settings.includeMiscColors) ""
-    else {
+    val schemeIndependent =
         materialDynamicColors
-            .schemeIndependentColors()
+            .schemeIndependentColors(settings.includeMiscColors)
             .toColorVariables(settings.contrast, light, includeScheme = false) // scheme doesn't matter here
-    }
+
     return """
 package ${settings.packageName}
 
@@ -43,11 +42,12 @@ $schemeIndependent
 fun variableNamePairs(
     settings: Settings,
     isDark: Boolean,
-    includeMisc: Boolean = settings.includeMiscColors
 ): Map<String, String> {
-    val list = MaterialDynamicColors().colorList(includeMisc)
+    val colors = MaterialDynamicColors()
+    val independentColors = colors.schemeIndependentColors(false)
+    val list = colors.colorList(false) + independentColors
     val scheme = createScheme(isDark = isDark, settings = settings)
-    return list.variableNamePair(settings.contrast, scheme).map { entry ->
+    return list.variableNamePair(settings.contrast, scheme, independentColors).map { entry ->
         entry.value.name.snakeToCamelCase().decapitalize(Locale("EN")) to entry.key
     }.toMap()
 }
@@ -113,7 +113,7 @@ private fun MaterialDynamicColors.colorList(includeMisc: Boolean): List<DynamicC
     return if (includeMisc) main + miscColors() else main
 }
 
-private fun MaterialDynamicColors.schemeIndependentColors(): List<DynamicColor> = listOf(
+private fun MaterialDynamicColors.schemeIndependentColors(includeMisc: Boolean) = listOfNotNull(
     primaryFixed(),
     primaryFixedDim(),
     onPrimaryFixed(),
@@ -126,12 +126,12 @@ private fun MaterialDynamicColors.schemeIndependentColors(): List<DynamicColor> 
     tertiaryFixedDim(),
     onTertiaryFixed(),
     onTertiaryFixedVariant(),
-    primaryPaletteKeyColor(),
-    secondaryPaletteKeyColor(),
-    tertiaryPaletteKeyColor(),
-    neutralPaletteKeyColor(),
-    neutralVariantPaletteKeyColor(),
-    errorPaletteKeyColor(),
+    if (includeMisc) primaryPaletteKeyColor() else null,
+    if (includeMisc) secondaryPaletteKeyColor() else null,
+    if (includeMisc) tertiaryPaletteKeyColor() else null,
+    if (includeMisc) neutralPaletteKeyColor() else null,
+    if (includeMisc) neutralVariantPaletteKeyColor() else null,
+    if (includeMisc) errorPaletteKeyColor() else null,
 )
 
 private fun MaterialDynamicColors.miscColors(): List<DynamicColor> = listOf(
@@ -149,6 +149,7 @@ private fun MaterialDynamicColors.miscColors(): List<DynamicColor> = listOf(
 private fun List<DynamicColor>.variableNamePair(
     contrast: Contrast,
     scheme: DynamicScheme,
+    independentColors: List<DynamicColor>,
     includeScheme: Boolean = true
 ): Map<String, DynamicColor> {
     val contrast = contrast.suffix()
@@ -156,15 +157,22 @@ private fun List<DynamicColor>.variableNamePair(
         if (scheme.isDark) "Dark" else "Light"
     }
     val suffix = "$mode$contrast"
-    return associateBy { color -> "${color.name.snakeToCamelCase()}$suffix" }
+    return associateBy { color ->
+        if (independentColors.contains(color)) {
+            "${color.name.snakeToCamelCase()}$contrast"
+        } else {
+            "${color.name.snakeToCamelCase()}$suffix"
+        }
+    }
 }
 
 private fun List<DynamicColor>.toColorVariables(
     contrast: Contrast,
     scheme: DynamicScheme,
-    includeScheme: Boolean = true
+    includeScheme: Boolean = true,
+    schemeIndependentColors: List<DynamicColor> = MaterialDynamicColors().schemeIndependentColors(false)
 ): String {
-    val values = variableNamePair(contrast, scheme, includeScheme)
+    val values = variableNamePair(contrast, scheme, schemeIndependentColors, includeScheme)
     return buildString {
         values.forEach { (name, color) ->
             appendLine(color.getColor(scheme).variable(name))

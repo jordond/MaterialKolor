@@ -47,6 +47,14 @@ fun ThemeSection(
     ) {
         LightTheme(settings, onClick = onCopyColor)
         DarkTheme(settings, onClick = onCopyColor)
+
+        DynamicMaterialTheme(
+            state = createThemeState(settings, isDark = false),
+            animate = true,
+            typography = AppTypography,
+        ) {
+            FixedColorsSection(onClick = onCopyColor)
+        }
     }
 }
 

@@ -18,3 +18,9 @@ data class ThemePair(
     val color: ThemeColor,
     val onColor: ThemeColor,
 )
+
+data class FixedThemeGroup(
+    val main: ThemePair,
+    val onVariant: ThemeColor,
+    val dim: ThemeColor,
+)

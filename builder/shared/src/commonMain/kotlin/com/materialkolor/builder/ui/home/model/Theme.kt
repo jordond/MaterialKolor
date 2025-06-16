@@ -200,6 +200,78 @@ object Theme {
             swatchNumber = "N-0",
             color = c { MaterialTheme.colorScheme.scrim },
         )
+
+        val PrimaryFixed = ThemeColor(
+            title = "Primary Fixed",
+            swatchNumber = "",
+            color = c { MaterialTheme.colorScheme.primaryFixed },
+        )
+
+        val PrimaryFixedDim = ThemeColor(
+            title = "Primary Fixed Dim",
+            swatchNumber = "",
+            color = c { MaterialTheme.colorScheme.primaryFixedDim },
+        )
+
+        val OnPrimaryFixed = ThemeColor(
+            title = "On Primary Fixed",
+            swatchNumber = "",
+            color = c { MaterialTheme.colorScheme.onPrimaryFixed },
+        )
+
+        val OnPrimaryFixedVariant = ThemeColor(
+            title = "On Primary Fixed Variant",
+            swatchNumber = "",
+            color = c { MaterialTheme.colorScheme.onPrimaryFixedVariant },
+        )
+
+        val SecondaryFixed = ThemeColor(
+            title = "Secondary Fixed",
+            swatchNumber = "",
+            color = c { MaterialTheme.colorScheme.secondaryFixed },
+        )
+
+        val SecondaryFixedDim = ThemeColor(
+            title = "Secondary Fixed Dim",
+            swatchNumber = "",
+            color = c { MaterialTheme.colorScheme.secondaryFixedDim },
+        )
+
+        val OnSecondaryFixed = ThemeColor(
+            title = "On Secondary Fixed",
+            swatchNumber = "",
+            color = c { MaterialTheme.colorScheme.onSecondaryFixed },
+        )
+
+        val OnSecondaryFixedVariant = ThemeColor(
+            title = "On Secondary Fixed Variant",
+            swatchNumber = "",
+            color = c { MaterialTheme.colorScheme.onSecondaryFixedVariant },
+        )
+
+        val TertiaryFixed = ThemeColor(
+            title = "Tertiary Fixed",
+            swatchNumber = "",
+            color = c { MaterialTheme.colorScheme.tertiaryFixed },
+        )
+
+        val TertiaryFixedDim = ThemeColor(
+            title = "Tertiary Fixed Dim",
+            swatchNumber = "",
+            color = c { MaterialTheme.colorScheme.tertiaryFixedDim },
+        )
+
+        val OnTertiaryFixed = ThemeColor(
+            title = "On Tertiary Fixed",
+            swatchNumber = "",
+            color = c { MaterialTheme.colorScheme.onTertiaryFixed },
+        )
+
+        val OnTertiaryFixedVariant = ThemeColor(
+            title = "On Tertiary Fixed Variant",
+            swatchNumber = "",
+            color = c { MaterialTheme.colorScheme.onTertiaryFixedVariant },
+        )
     }
 
     object Groups {
@@ -221,6 +293,24 @@ object Theme {
         val Error = ThemeGroup(
             main = ThemePair(Colors.Error, Colors.OnError),
             container = ThemePair(Colors.ErrorContainer, Colors.OnErrorContainer),
+        )
+
+        val PrimaryFixed = FixedThemeGroup(
+            main = ThemePair(Colors.PrimaryFixed, Colors.OnPrimaryFixed),
+            onVariant = Colors.OnPrimaryFixedVariant,
+            dim = Colors.PrimaryFixedDim,
+        )
+
+        val SecondaryFixed = FixedThemeGroup(
+            main = ThemePair(Colors.SecondaryFixed, Colors.OnSecondaryFixed),
+            onVariant = Colors.OnSecondaryFixedVariant,
+            dim = Colors.SecondaryFixedDim,
+        )
+
+        val TertiaryFixed = FixedThemeGroup(
+            main = ThemePair(Colors.TertiaryFixed, Colors.OnTertiaryFixed),
+            onVariant = Colors.OnTertiaryFixedVariant,
+            dim = Colors.TertiaryFixedDim,
         )
     }
 }
