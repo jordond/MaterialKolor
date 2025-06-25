@@ -1,3 +1,9 @@
+public final class com/materialkolor/ComposableSingletons$DynamicMaterialExpressiveThemeKt {
+	public static final field INSTANCE Lcom/materialkolor/ComposableSingletons$DynamicMaterialExpressiveThemeKt;
+	public fun <init> ()V
+	public final fun getLambda$-1565540363$material_kolor ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/materialkolor/Contrast : java/lang/Enum {
 	public static final field Default Lcom/materialkolor/Contrast;
 	public static final field High Lcom/materialkolor/Contrast;
