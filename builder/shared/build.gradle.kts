@@ -82,11 +82,11 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material3)
             implementation(compose.materialIconsExtended)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(libs.material3)
             implementation(libs.material3.adaptive)
             implementation(libs.material3.adaptive.layout)
             implementation(libs.material3.adaptive.navigation)
