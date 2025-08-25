@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.multiplatform)
@@ -16,9 +17,16 @@ kotlin {
 
     androidTarget {
         publishLibraryVariants("release", "debug")
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
     }
 
-    jvm()
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
+    }
 
     js(IR) {
         browser()
@@ -43,23 +51,21 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(compose.runtime)
-                implementation(compose.ui)
-                implementation(libs.compose.material3)
-                implementation(libs.colormath)
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            implementation(compose.ui)
+            implementation(libs.compose.material3)
+            implementation(libs.colormath)
 
-                api(project(":material-color-utilities"))
-            }
+            api(project(":material-color-utilities"))
         }
 
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-            }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
         }
     }
+
+    jvmToolchain(libs.versions.jvmTarget.get().toInt())
 }
 
 android {
@@ -76,14 +82,5 @@ android {
         release {
             isMinifyEnabled = false
         }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlin {
-        jvmToolchain(libs.versions.jvmTarget.get().toInt())
     }
 }
