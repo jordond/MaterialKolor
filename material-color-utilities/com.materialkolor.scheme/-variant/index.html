@@ -1,22 +1,22 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>Variant</title>
-<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
 <script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
@@ -24,19 +24,17 @@
 <link href="../../../styles/main.css" rel="Stylesheet">
 <link href="../../../styles/prism.css" rel="Stylesheet">
 <link href="../../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
 <link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
-<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../../scripts/main.js" defer></script>
 <script type="text/javascript" src="../../../scripts/prism.js" async></script>
-<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script>
-<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
 <body>
-    <div class="root">
-    <nav class="navigation theme-dark" id="navigation-wrapper">
-<a class="library-name--link" href="../../../index.html">
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
                     MaterialKolor
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
@@ -44,19 +42,19 @@
         <div class="library-version" id="library-version">
         </div>
         <div class="navigation-controls">
-        <div class="filter-section filter-section_loading" id="filter-section">
-                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":material-color-utilities:dokkaHtmlPartial/commonMain">common</button>
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":material-color-utilities/commonMain">common</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
-                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox">
-                    <div class="dropdown--header"><span>Platform filter</span>
-                        <button class="button" data-role="dropdown-toggle" aria-label="Close platform filter">
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
                             <i class="ui-kit-icon ui-kit-icon_cross"></i>
                         </button>
                     </div>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filter=":material-color-utilities:dokkaHtmlPartial/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":material-color-utilities/commonMain" data-filter=":material-color-utilities/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
                             </label>
@@ -64,174 +62,176 @@
                 </ul>
                 <div class="dropdown--overlay"></div>
             </div>
-        </div>
+        </ul>
             <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
             </button>
             <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
                 API
             </div>
         </div>
-    </nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
-                    <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox">
-                        <div class="dropdown--header">
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
                             <span>
                                     MaterialKolor
                             </span>
-                            <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
-                                <i class="ui-kit-icon ui-kit-icon_cross"></i>
-                            </button>
-                        </div>
-                        <div class="sidebar--inner" id="sideMenu"></div>
-                    </ul>
-                    <div class="dropdown--overlay"></div>
-                </div>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div id="main">
-<div class="main-content" data-page-type="classlike" id="content" pageids="material-color-utilities::com.materialkolor.scheme/Variant///PointingToDeclaration//-1931273703">
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="material-color-utilities::com.materialkolor.scheme/Variant///PointingToDeclaration//-840714299">
   <div class="breadcrumbs"><a href="../../index.html">material-color-utilities</a><span class="delimiter">/</span><a href="../index.html">com.materialkolor.scheme</a><span class="delimiter">/</span><span class="current">Variant</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Variant</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="index.html">Variant</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="index.html">Variant</a><span class="token operator">&gt; </span></div><p class="paragraph">Themes for Dynamic Color.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="index.html">Variant</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="index.html">Variant</a><span class="token operator">&gt; </span></div><p class="paragraph">Themes for Dynamic Color.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="ENTRY">Entries</button></div>
     <div class="tabs-section-body">
       <div data-togglable="ENTRY">
-        <h2 class="">Entries</h2>
-        <div class="table"><a data-name="1368576141%2FClasslikes%2F-1931273703" anchor-label="MONOCHROME" id="1368576141%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="ENTRY" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+        <h2 class="tableheader">Entries</h2>
+        <div class="table"><a data-name="1368576141%2FClasslikes%2F-840714299" anchor-label="MONOCHROME" id="1368576141%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-m-o-n-o-c-h-r-o-m-e/index.html">MONOCHROME</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1368576141%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1368576141%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><a href="-m-o-n-o-c-h-r-o-m-e/index.html">MONOCHROME</a></div></div><div class="brief "><p class="paragraph">A monochrome theme, colors are purely black / white / gray.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><div class="block"><a href="-m-o-n-o-c-h-r-o-m-e/index.html">MONOCHROME</a></div></div><div class="brief "><p class="paragraph">A monochrome theme, colors are purely black / white / gray.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="383377887%2FClasslikes%2F-1931273703" anchor-label="NEUTRAL" id="383377887%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="ENTRY" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="383377887%2FClasslikes%2F-840714299" anchor-label="NEUTRAL" id="383377887%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-n-e-u-t-r-a-l/index.html">NEUTRAL</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="383377887%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="383377887%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><a href="-n-e-u-t-r-a-l/index.html">NEUTRAL</a></div></div><div class="brief "><p class="paragraph">A theme that's slightly more chromatic than monochrome, which is purely black / white / gray.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><div class="block"><a href="-n-e-u-t-r-a-l/index.html">NEUTRAL</a></div></div><div class="brief "><p class="paragraph">A theme that's slightly more chromatic than monochrome, which is purely black / white / gray.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="2077982451%2FClasslikes%2F-1931273703" anchor-label="TONAL_SPOT" id="2077982451%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="ENTRY" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="2077982451%2FClasslikes%2F-840714299" anchor-label="TONAL_SPOT" id="2077982451%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-t-o-n-a-l_-s-p-o-t/index.html">TONAL_SPOT</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2077982451%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2077982451%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><a href="-t-o-n-a-l_-s-p-o-t/index.html">TONAL_SPOT</a></div></div><div class="brief "><p class="paragraph">A calm theme, sedated colors that aren't particularly chromatic.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><div class="block"><a href="-t-o-n-a-l_-s-p-o-t/index.html">TONAL_SPOT</a></div></div><div class="brief "><p class="paragraph">A calm theme, sedated colors that aren't particularly chromatic.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="845480988%2FClasslikes%2F-1931273703" anchor-label="VIBRANT" id="845480988%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="ENTRY" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="845480988%2FClasslikes%2F-840714299" anchor-label="VIBRANT" id="845480988%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-v-i-b-r-a-n-t/index.html">VIBRANT</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="845480988%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="845480988%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><a href="-v-i-b-r-a-n-t/index.html">VIBRANT</a></div></div><div class="brief "><p class="paragraph">A loud theme, colorfulness is maximum for Primary palette, increased for others.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><div class="block"><a href="-v-i-b-r-a-n-t/index.html">VIBRANT</a></div></div><div class="brief "><p class="paragraph">A loud theme, colorfulness is maximum for Primary palette, increased for others.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1532611688%2FClasslikes%2F-1931273703" anchor-label="EXPRESSIVE" id="-1532611688%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="ENTRY" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="-1532611688%2FClasslikes%2F-840714299" anchor-label="EXPRESSIVE" id="-1532611688%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-e-x-p-r-e-s-s-i-v-e/index.html">EXPRESSIVE</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1532611688%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1532611688%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><a href="-e-x-p-r-e-s-s-i-v-e/index.html">EXPRESSIVE</a></div></div><div class="brief "><p class="paragraph">A playful theme - the source color's hue does not appear in the theme.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><div class="block"><a href="-e-x-p-r-e-s-s-i-v-e/index.html">EXPRESSIVE</a></div></div><div class="brief "><p class="paragraph">A playful theme - the source color's hue does not appear in the theme.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-973283850%2FClasslikes%2F-1931273703" anchor-label="FIDELITY" id="-973283850%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="ENTRY" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="-973283850%2FClasslikes%2F-840714299" anchor-label="FIDELITY" id="-973283850%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-f-i-d-e-l-i-t-y/index.html">FIDELITY</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-973283850%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-973283850%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><a href="-f-i-d-e-l-i-t-y/index.html">FIDELITY</a></div></div><div class="brief "><p class="paragraph">A scheme that places the source color in Scheme.primaryContainer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><div class="block"><a href="-f-i-d-e-l-i-t-y/index.html">FIDELITY</a></div></div><div class="brief "><p class="paragraph">A scheme that places the source color in Scheme.primaryContainer.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1936204527%2FClasslikes%2F-1931273703" anchor-label="CONTENT" id="-1936204527%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="ENTRY" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="-1936204527%2FClasslikes%2F-840714299" anchor-label="CONTENT" id="-1936204527%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-c-o-n-t-e-n-t/index.html">CONTENT</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1936204527%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1936204527%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><a href="-c-o-n-t-e-n-t/index.html">CONTENT</a></div></div><div class="brief "><p class="paragraph">A scheme that places the source color in Scheme.primaryContainer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><div class="block"><a href="-c-o-n-t-e-n-t/index.html">CONTENT</a></div></div><div class="brief "><p class="paragraph">A scheme that places the source color in Scheme.primaryContainer.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="730176910%2FClasslikes%2F-1931273703" anchor-label="RAINBOW" id="730176910%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="ENTRY" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="730176910%2FClasslikes%2F-840714299" anchor-label="RAINBOW" id="730176910%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-r-a-i-n-b-o-w/index.html">RAINBOW</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="730176910%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="730176910%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><a href="-r-a-i-n-b-o-w/index.html">RAINBOW</a></div></div><div class="brief "><p class="paragraph">A playful theme - the source color's hue does not appear in the theme.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><div class="block"><a href="-r-a-i-n-b-o-w/index.html">RAINBOW</a></div></div><div class="brief "><p class="paragraph">A playful theme - the source color's hue does not appear in the theme.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1549139534%2FClasslikes%2F-1931273703" anchor-label="FRUIT_SALAD" id="1549139534%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="ENTRY" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="1549139534%2FClasslikes%2F-840714299" anchor-label="FRUIT_SALAD" id="1549139534%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-f-r-u-i-t_-s-a-l-a-d/index.html">FRUIT_SALAD</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1549139534%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1549139534%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><a href="-f-r-u-i-t_-s-a-l-a-d/index.html">FRUIT_SALAD</a></div></div><div class="brief "><p class="paragraph">A playful theme - the source color's hue does not appear in the theme.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><div class="block"><a href="-f-r-u-i-t_-s-a-l-a-d/index.html">FRUIT_SALAD</a></div></div><div class="brief "><p class="paragraph">A playful theme - the source color's hue does not appear in the theme.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -239,48 +239,48 @@
         </div>
       </div>
       <div data-togglable="PROPERTY">
-        <h2 class="">Properties</h2>
-        <div class="table"><a data-name="-1004993590%2FProperties%2F-1931273703" anchor-label="entries" id="-1004993590%2FProperties%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-1004993590%2FProperties%2F-840714299" anchor-label="entries" id="-1004993590%2FProperties%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="entries.html"><span><span>entries</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1004993590%2FProperties%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1004993590%2FProperties%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="entries.html">entries</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.enums/-enum-entries/index.html">EnumEntries</a><span class="token operator">&lt;</span><a href="index.html">Variant</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns a representation of an immutable list of all enum entries, in the order they're declared.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="entries.html">entries</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.enums/-enum-entries/index.html">EnumEntries</a><span class="token operator">&lt;</span><a href="index.html">Variant</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns a representation of an immutable list of all enum entries, in the order they're declared.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-372974862%2FProperties%2F-1931273703" anchor-label="name" id="-372974862%2FProperties%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="-372974862%2FProperties%2F-840714299" anchor-label="name" id="-372974862%2FProperties%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-f-r-u-i-t_-s-a-l-a-d/index.html#-372974862%2FProperties%2F-1931273703"><span><span>name</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-372974862%2FProperties%2F-1931273703"></span>
+                  <div><a href="-f-r-u-i-t_-s-a-l-a-d/index.html#-372974862%2FProperties%2F-840714299"><span><span>name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-372974862%2FProperties%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-f-r-u-i-t_-s-a-l-a-d/index.html#-372974862%2FProperties%2F-1931273703">name</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="-f-r-u-i-t_-s-a-l-a-d/index.html#-372974862%2FProperties%2F-840714299">name</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-739389684%2FProperties%2F-1931273703" anchor-label="ordinal" id="-739389684%2FProperties%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="-739389684%2FProperties%2F-840714299" anchor-label="ordinal" id="-739389684%2FProperties%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-f-r-u-i-t_-s-a-l-a-d/index.html#-739389684%2FProperties%2F-1931273703"><span><span>ordinal</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-739389684%2FProperties%2F-1931273703"></span>
+                  <div><a href="-f-r-u-i-t_-s-a-l-a-d/index.html#-739389684%2FProperties%2F-840714299"><span><span>ordinal</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-739389684%2FProperties%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-f-r-u-i-t_-s-a-l-a-d/index.html#-739389684%2FProperties%2F-1931273703">ordinal</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="-f-r-u-i-t_-s-a-l-a-d/index.html#-739389684%2FProperties%2F-840714299">ordinal</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -288,33 +288,33 @@
         </div>
       </div>
       <div data-togglable="FUNCTION">
-        <h2 class="">Functions</h2>
-        <div class="table"><a data-name="1018221074%2FFunctions%2F-1931273703" anchor-label="valueOf" id="1018221074%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="1018221074%2FFunctions%2F-840714299" anchor-label="valueOf" id="1018221074%2FFunctions%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="value-of.html"><span>value</span><wbr><span><span>Of</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1018221074%2FFunctions%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1018221074%2FFunctions%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="value-of.html"><span class="token function">valueOf</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">Variant</a></div><div class="brief "><p class="paragraph">Returns the enum constant of this type with the specified name. The string must match exactly an identifier used to declare an enum constant in this type. (Extraneous whitespace characters are not permitted.)</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="value-of.html"><span class="token function">valueOf</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">Variant</a></div><div class="brief "><p class="paragraph">Returns the enum constant of this type with the specified name. The string must match exactly an identifier used to declare an enum constant in this type. (Extraneous whitespace characters are not permitted.)</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1554237086%2FFunctions%2F-1931273703" anchor-label="values" id="1554237086%2FFunctions%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="1554237086%2FFunctions%2F-840714299" anchor-label="values" id="1554237086%2FFunctions%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="values.html"><span><span>values</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1554237086%2FFunctions%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1554237086%2FFunctions%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="values.html"><span class="token function">values</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="index.html">Variant</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns an array containing the constants of this enum type, in the order they're declared.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="values.html"><span class="token function">values</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="index.html">Variant</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns an array containing the constants of this enum type, in the order they're declared.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -325,17 +325,21 @@
   </div>
 </div>
     <div class="footer">
-        <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
-        <span>© 2025 Copyright</span>
-        <span class="pull-right">
-            <span>Generated by </span>
-            <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
-                <span>dokka</span>
-            </a>
-        </span>
-    </div>
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2025 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

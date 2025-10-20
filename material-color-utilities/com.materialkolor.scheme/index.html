@@ -1,22 +1,22 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>com.materialkolor.scheme</title>
-<link href="../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+<link href="../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
 <script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async></script>
@@ -24,19 +24,17 @@
 <link href="../../styles/main.css" rel="Stylesheet">
 <link href="../../styles/prism.css" rel="Stylesheet">
 <link href="../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../styles/font-jb-sans-auto.css" rel="Stylesheet">
 <link href="../../ui-kit/ui-kit.min.css" rel="Stylesheet">
-<script type="text/javascript" src="../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../scripts/main.js" defer></script>
 <script type="text/javascript" src="../../scripts/prism.js" async></script>
-<script type="text/javascript" src="../../ui-kit/ui-kit.min.js" defer></script>
-<script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<script type="text/javascript" src="../../ui-kit/ui-kit.min.js" defer></script></head>
 <body>
-    <div class="root">
-    <nav class="navigation theme-dark" id="navigation-wrapper">
-<a class="library-name--link" href="../../index.html">
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../index.html" tabindex="1">
                     MaterialKolor
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
@@ -44,19 +42,19 @@
         <div class="library-version" id="library-version">
         </div>
         <div class="navigation-controls">
-        <div class="filter-section filter-section_loading" id="filter-section">
-                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":material-color-utilities:dokkaHtmlPartial/commonMain">common</button>
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":material-color-utilities/commonMain">common</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
-                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox">
-                    <div class="dropdown--header"><span>Platform filter</span>
-                        <button class="button" data-role="dropdown-toggle" aria-label="Close platform filter">
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
                             <i class="ui-kit-icon ui-kit-icon_cross"></i>
                         </button>
                     </div>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filter=":material-color-utilities:dokkaHtmlPartial/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":material-color-utilities/commonMain" data-filter=":material-color-utilities/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
                             </label>
@@ -64,33 +62,35 @@
                 </ul>
                 <div class="dropdown--overlay"></div>
             </div>
-        </div>
+        </ul>
             <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
             </button>
             <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
                 API
             </div>
         </div>
-    </nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
-                    <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox">
-                        <div class="dropdown--header">
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
                             <span>
                                     MaterialKolor
                             </span>
-                            <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
-                                <i class="ui-kit-icon ui-kit-icon_cross"></i>
-                            </button>
-                        </div>
-                        <div class="sidebar--inner" id="sideMenu"></div>
-                    </ul>
-                    <div class="dropdown--overlay"></div>
-                </div>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div id="main">
-<div class="main-content" data-page-type="package" id="content" pageids="material-color-utilities::com.materialkolor.scheme////PointingToDeclaration//-1931273703">
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="material-color-utilities::com.materialkolor.scheme////PointingToDeclaration//-840714299">
   <div class="breadcrumbs"><a href="../index.html">material-color-utilities</a><span class="delimiter">/</span><span class="current">com.materialkolor.scheme</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
@@ -99,18 +99,18 @@
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button></div>
     <div class="tabs-section-body">
       <div data-togglable="TYPE">
-        <h2 class="">Types</h2>
-        <div class="table"><a data-name="66217728%2FClasslikes%2F-1931273703" anchor-label="DynamicScheme" id="66217728%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="66217728%2FClasslikes%2F-840714299" anchor-label="DynamicScheme" id="66217728%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-dynamic-scheme/index.html"><span>Dynamic</span><wbr><span><span>Scheme</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="66217728%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="66217728%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-dynamic-scheme/index.html">DynamicScheme</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>variant<span class="token operator">: </span><a href="-variant/index.html">Variant</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>primaryPalette<span class="token operator">: </span><a href="../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>secondaryPalette<span class="token operator">: </span><a href="../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>tertiaryPalette<span class="token operator">: </span><a href="../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>neutralPalette<span class="token operator">: </span><a href="../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>neutralVariantPalette<span class="token operator">: </span><a href="../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.PHONE<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.SPEC_2021<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>errorPalette<span class="token operator">: </span><a href="../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a><span class="token operator"> = </span>TonalPalette.fromHueAndChroma(
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-dynamic-scheme/index.html">DynamicScheme</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>variant<span class="token operator">: </span><a href="-variant/index.html">Variant</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>primaryPalette<span class="token operator">: </span><a href="../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>secondaryPalette<span class="token operator">: </span><a href="../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>tertiaryPalette<span class="token operator">: </span><a href="../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>neutralPalette<span class="token operator">: </span><a href="../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>neutralVariantPalette<span class="token operator">: </span><a href="../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.PHONE<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.SPEC_2021<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>errorPalette<span class="token operator">: </span><a href="../com.materialkolor.palettes/-tonal-palette/index.html">TonalPalette</a><span class="token operator"> = </span>TonalPalette.fromHueAndChroma(
         hue = 25.0,
         chroma = 84.0,
     )</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Provides important settings for creating colors dynamically, and 6 color palettes. Requires: 1. A color. (source color) 2. A theme. (Variant) 3. Whether or not its dark mode. 4. Contrast level. (-1 to 1, currently contrast ratio 3.0 and 7.0)</p></div></div></div>
@@ -118,152 +118,152 @@
               </div>
             </div>
           </div>
-<a data-name="-2121591632%2FClasslikes%2F-1931273703" anchor-label="SchemeContent" id="-2121591632%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="-2121591632%2FClasslikes%2F-840714299" anchor-label="SchemeContent" id="-2121591632%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-scheme-content/index.html"><span>Scheme</span><wbr><span><span>Content</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2121591632%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2121591632%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-content/index.html">SchemeContent</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A scheme that places the source color in Scheme.primaryContainer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-content/index.html">SchemeContent</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A scheme that places the source color in Scheme.primaryContainer.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="971501553%2FClasslikes%2F-1931273703" anchor-label="SchemeExpressive" id="971501553%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="971501553%2FClasslikes%2F-840714299" anchor-label="SchemeExpressive" id="971501553%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-scheme-expressive/index.html"><span>Scheme</span><wbr><span><span>Expressive</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="971501553%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="971501553%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-expressive/index.html">SchemeExpressive</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A playful theme - the source color's hue does not appear in the theme.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-expressive/index.html">SchemeExpressive</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A playful theme - the source color's hue does not appear in the theme.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1872519213%2FClasslikes%2F-1931273703" anchor-label="SchemeFidelity" id="-1872519213%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="-1872519213%2FClasslikes%2F-840714299" anchor-label="SchemeFidelity" id="-1872519213%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-scheme-fidelity/index.html"><span>Scheme</span><wbr><span><span>Fidelity</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1872519213%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1872519213%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-fidelity/index.html">SchemeFidelity</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A scheme that places the source color in Scheme.primaryContainer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-fidelity/index.html">SchemeFidelity</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A scheme that places the source color in Scheme.primaryContainer.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="921312812%2FClasslikes%2F-1931273703" anchor-label="SchemeFruitSalad" id="921312812%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="921312812%2FClasslikes%2F-840714299" anchor-label="SchemeFruitSalad" id="921312812%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-scheme-fruit-salad/index.html"><span>Scheme</span><wbr><span>Fruit</span><wbr><span><span>Salad</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="921312812%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="921312812%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-fruit-salad/index.html">SchemeFruitSalad</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A playful theme - the source color's hue does not appear in the theme.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-fruit-salad/index.html">SchemeFruitSalad</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A playful theme - the source color's hue does not appear in the theme.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-53505572%2FClasslikes%2F-1931273703" anchor-label="SchemeMonochrome" id="-53505572%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="-53505572%2FClasslikes%2F-840714299" anchor-label="SchemeMonochrome" id="-53505572%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-scheme-monochrome/index.html"><span>Scheme</span><wbr><span><span>Monochrome</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-53505572%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-53505572%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-monochrome/index.html">SchemeMonochrome</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A monochrome theme, colors are purely black / white / gray.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-monochrome/index.html">SchemeMonochrome</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A monochrome theme, colors are purely black / white / gray.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-772563166%2FClasslikes%2F-1931273703" anchor-label="SchemeNeutral" id="-772563166%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="-772563166%2FClasslikes%2F-840714299" anchor-label="SchemeNeutral" id="-772563166%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-scheme-neutral/index.html"><span>Scheme</span><wbr><span><span>Neutral</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-772563166%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-772563166%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-neutral/index.html">SchemeNeutral</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A theme that's slightly more chromatic than monochrome, which is purely black / white / gray.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-neutral/index.html">SchemeNeutral</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A theme that's slightly more chromatic than monochrome, which is purely black / white / gray.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-925950445%2FClasslikes%2F-1931273703" anchor-label="SchemeRainbow" id="-925950445%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="-925950445%2FClasslikes%2F-840714299" anchor-label="SchemeRainbow" id="-925950445%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-scheme-rainbow/index.html"><span>Scheme</span><wbr><span><span>Rainbow</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-925950445%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-925950445%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-rainbow/index.html">SchemeRainbow</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A playful theme - the source color's hue does not appear in the theme.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-rainbow/index.html">SchemeRainbow</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A playful theme - the source color's hue does not appear in the theme.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="886178345%2FClasslikes%2F-1931273703" anchor-label="SchemeTonalSpot" id="886178345%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="886178345%2FClasslikes%2F-840714299" anchor-label="SchemeTonalSpot" id="886178345%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-scheme-tonal-spot/index.html"><span>Scheme</span><wbr><span>Tonal</span><wbr><span><span>Spot</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="886178345%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="886178345%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-tonal-spot/index.html">SchemeTonalSpot</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A calm theme, sedated colors that aren't particularly chromatic.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-tonal-spot/index.html">SchemeTonalSpot</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A calm theme, sedated colors that aren't particularly chromatic.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="28257989%2FClasslikes%2F-1931273703" anchor-label="SchemeVibrant" id="28257989%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="28257989%2FClasslikes%2F-840714299" anchor-label="SchemeVibrant" id="28257989%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-scheme-vibrant/index.html"><span>Scheme</span><wbr><span><span>Vibrant</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="28257989%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="28257989%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-vibrant/index.html">SchemeVibrant</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A loud theme, colorfulness is maximum for Primary palette, increased for others.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-scheme-vibrant/index.html">SchemeVibrant</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceColorHct<span class="token operator">: </span><a href="../com.materialkolor.hct/-hct/index.html">Hct</a><span class="token punctuation">, </span></span><span class="parameter ">isDark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">contrastLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">specVersion<span class="token operator">: </span><a href="../com.materialkolor.dynamiccolor/-color-spec/-spec-version/index.html">ColorSpec.SpecVersion</a><span class="token operator"> = </span>ColorSpec.SpecVersion.Default<span class="token punctuation">, </span></span><span class="parameter ">platform<span class="token operator">: </span><a href="-dynamic-scheme/-platform/index.html">DynamicScheme.Platform</a><span class="token operator"> = </span>Platform.Default</span></span><span class="token punctuation">)</span> : <a href="-dynamic-scheme/index.html">DynamicScheme</a></div><div class="brief "><p class="paragraph">A loud theme, colorfulness is maximum for Primary palette, increased for others.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="68928159%2FClasslikes%2F-1931273703" anchor-label="Variant" id="68928159%2FClasslikes%2F-1931273703" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":material-color-utilities:dokkaHtmlPartial/commonMain" data-filterable-set=":material-color-utilities:dokkaHtmlPartial/commonMain">
+<a data-name="68928159%2FClasslikes%2F-840714299" anchor-label="Variant" id="68928159%2FClasslikes%2F-840714299" data-filterable-set=":material-color-utilities/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":material-color-utilities/commonMain" data-filterable-set=":material-color-utilities/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-variant/index.html"><span><span>Variant</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="68928159%2FClasslikes%2F-1931273703"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="68928159%2FClasslikes%2F-840714299"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-variant/index.html">Variant</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-variant/index.html">Variant</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Themes for Dynamic Color.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":material-color-utilities/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-variant/index.html">Variant</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-variant/index.html">Variant</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Themes for Dynamic Color.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -274,17 +274,21 @@
   </div>
 </div>
     <div class="footer">
-        <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
-        <span>© 2025 Copyright</span>
-        <span class="pull-right">
-            <span>Generated by </span>
-            <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
-                <span>dokka</span>
-            </a>
-        </span>
-    </div>
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2025 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
