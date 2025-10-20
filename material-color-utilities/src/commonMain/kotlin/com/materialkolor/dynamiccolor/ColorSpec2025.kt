@@ -42,7 +42,9 @@ public class ColorSpec2025 : ColorSpec2021() {
 
     public override fun onBackground(): DynamicColor {
         // Remapped to onSurface for 2025 spec.
-        val color2025 = onSurface().toBuilder().setName("on_background").build()
+        val color2025 = onSurface().toBuilder().setName("on_background")
+            .setTone { s -> if (s.platform == Platform.WATCH) 100.0 else onSurface().getTone(s) }
+            .build()
         return super
             .onBackground()
             .toBuilder()
