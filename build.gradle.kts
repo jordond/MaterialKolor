@@ -1,5 +1,3 @@
-import org.jetbrains.dokka.gradle.DokkaMultiModuleTask
-
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.multiplatform) apply false
@@ -19,8 +17,15 @@ apiValidation {
     )
 }
 
-tasks.withType<DokkaMultiModuleTask>().configureEach {
-    outputDirectory.set(rootDir.resolve("dokka"))
+dokka {
+    dokkaPublications.html {
+        outputDirectory.set(rootDir.resolve("dokka"))
+    }
+}
+
+dependencies {
+    dokka(project(":material-color-utilities"))
+    dokka(project(":material-kolor"))
 }
 
 subprojects {
