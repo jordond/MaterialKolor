@@ -4,8 +4,7 @@ sdk-min = "21"
 jvmTarget = "17"
 agp = "8.13.0"
 kotlin = "2.2.20"
-compose-material3 = "1.10.0-alpha02"
-compose-multiplatform = "1.10.0-alpha02"
+compose-multiplatform = "1.9.1"
 androidx-annotation = "1.9.1"
 binaryCompatibility = "0.18.1"
 dokka = "2.0.0"
@@ -20,7 +19,6 @@ spotless = "8.0.0"
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
 colormath = { module = "com.github.ajalt.colormath:colormath", version.ref = "colormath" }
-compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
 errorProneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorProneAnnotations" }
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 

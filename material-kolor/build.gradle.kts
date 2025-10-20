@@ -52,9 +52,9 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(compose.material3)
             implementation(compose.runtime)
             implementation(compose.ui)
-            implementation(libs.compose.material3)
             implementation(libs.colormath)
 
             api(project(":material-color-utilities"))
