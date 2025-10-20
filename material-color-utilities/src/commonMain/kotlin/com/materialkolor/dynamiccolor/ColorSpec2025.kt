@@ -480,11 +480,9 @@ public class ColorSpec2025 : ColorSpec2021() {
                     }
                 }.setContrastCurve { s ->
                     if (s.platform === Platform.PHONE) {
-                        getContrastCurve(4.5)
+                        if (s.isDark) getContrastCurve(6.0) else getContrastCurve(4.5)
                     } else {
-                        getContrastCurve(
-                            7.0,
-                        )
+                        getContrastCurve(7.0)
                     }
                 }.build()
         return super
