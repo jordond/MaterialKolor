@@ -1,5 +1,7 @@
 @file:Suppress("OPT_IN_USAGE")
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.android.library)
@@ -15,9 +17,16 @@ kotlin {
 
     androidTarget {
         publishLibraryVariants("release", "debug")
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
     }
 
-    jvm()
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
+    }
 
     js(IR) {
         browser()
@@ -41,12 +50,12 @@ kotlin {
     }
 
     sourceSets {
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-            }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
         }
     }
+
+    jvmToolchain(libs.versions.jvmTarget.get().toInt())
 }
 
 android {
@@ -63,14 +72,5 @@ android {
         release {
             isMinifyEnabled = false
         }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlin {
-        jvmToolchain(libs.versions.jvmTarget.get().toInt())
     }
 }

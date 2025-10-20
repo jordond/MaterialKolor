@@ -4,6 +4,7 @@ plugins {
 }
 
 java {
+    // MCU requires Java 14 at the minimum.
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
