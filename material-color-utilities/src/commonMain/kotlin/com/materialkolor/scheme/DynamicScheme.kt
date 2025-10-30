@@ -54,12 +54,14 @@ public open class DynamicScheme(
     public val neutralPalette: TonalPalette,
     public val neutralVariantPalette: TonalPalette,
     public val platform: Platform = Platform.PHONE,
-    public val specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.SPEC_2021,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.SPEC_2021,
     public val errorPalette: TonalPalette = TonalPalette.fromHueAndChroma(
         hue = 25.0,
         chroma = 84.0,
     ),
 ) {
+    public val specVersion: ColorSpec.SpecVersion = maybeFallbackSpecVersion(specVersion, variant)
+
     /**
      * The platform on which this scheme is intended to be used.
      */
@@ -402,6 +404,27 @@ public open class DynamicScheme(
             }
 
             return MathUtils.sanitizeDegrees(sourceColorHct.hue + rotation)
+        }
+
+        /**
+         * Returns the spec version to use for the given variant. If the variant is not supported by the
+         * given spec version, the fallback spec version is returned.
+         */
+        private fun maybeFallbackSpecVersion(
+            specVersion: ColorSpec.SpecVersion,
+            variant: Variant
+        ): ColorSpec.SpecVersion {
+            return when (variant) {
+                Variant.EXPRESSIVE,
+                Variant.VIBRANT,
+                Variant.TONAL_SPOT,
+                Variant.NEUTRAL -> specVersion
+                Variant.MONOCHROME,
+                Variant.FIDELITY,
+                Variant.CONTENT,
+                Variant.RAINBOW,
+                Variant.FRUIT_SALAD -> ColorSpec.SpecVersion.SPEC_2021
+            }
         }
     }
 }
