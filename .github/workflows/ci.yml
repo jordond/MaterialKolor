@@ -42,9 +42,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v3
-
       - name: Binary Compatibility Validation
         run: ./gradlew apiCheck --scan
 
