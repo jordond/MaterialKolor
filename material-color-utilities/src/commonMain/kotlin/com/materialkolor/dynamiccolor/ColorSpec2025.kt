@@ -431,7 +431,8 @@ public class ColorSpec2025 : ColorSpec2021() {
                         return@setBackground surfaceContainerHigh()
                     }
                 }.setContrastCurve { s ->
-                    getContrastCurve(if (s.isDark) 11.0 else 9.0)
+                    if (s.isDark && s.platform == Platform.PHONE) getContrastCurve(11.0)
+                    else getContrastCurve(9.0)
                 }.build()
         return super
             .onSurface()
