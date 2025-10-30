@@ -34,9 +34,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Gradle Wrapper Validation
-        uses: gradle/actions/wrapper-validation@v5
-
       - name: Deploy to Sonatype
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
