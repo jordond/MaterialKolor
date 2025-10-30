@@ -13,6 +13,18 @@ kotlin {
     jvmToolchain(libs.versions.jvmTarget.get().toInt())
 }
 
+sourceSets {
+    main {
+        java {
+            setSrcDirs(listOf("src/main/java"))
+        }
+        kotlin {
+            // Exclude Kotlin sources from the upstream submodule
+            setSrcDirs(emptyList<String>())
+        }
+    }
+}
+
 dependencies {
     implementation(libs.androidx.annotation)
     implementation(libs.errorProneAnnotations)
