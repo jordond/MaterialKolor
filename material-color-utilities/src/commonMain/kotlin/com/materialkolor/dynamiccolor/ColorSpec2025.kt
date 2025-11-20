@@ -431,7 +431,8 @@ public class ColorSpec2025 : ColorSpec2021() {
                         return@setBackground surfaceContainerHigh()
                     }
                 }.setContrastCurve { s ->
-                    getContrastCurve(if (s.isDark) 11.0 else 9.0)
+                    if (s.isDark && s.platform == Platform.PHONE) getContrastCurve(11.0)
+                    else getContrastCurve(9.0)
                 }.build()
         return super
             .onSurface()
@@ -516,8 +517,8 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .Builder()
                 .setName("inverse_on_surface")
                 .setPalette { s -> s.neutralPalette }
-                .setBackground { s -> inverseSurface() }
-                .setContrastCurve { s -> getContrastCurve(7.0) }
+                .setBackground { inverseSurface() }
+                .setContrastCurve { getContrastCurve(7.0) }
                 .build()
         return super
             .inverseOnSurface()
@@ -653,25 +654,31 @@ public class ColorSpec2025 : ColorSpec2021() {
                             return@setTone tMaxC(s.primaryPalette, 0.0, 90.0)
                         }
                     } else if (s.variant === Variant.EXPRESSIVE) {
-                        return@setTone tMaxC(
-                            s.primaryPalette,
-                            0.0,
-                            (
-                                if (s.primaryPalette.keyColor.isYellow()) {
-                                    25
-                                } else if (s.primaryPalette.keyColor.isCyan()) {
-                                    88
-                                } else {
-                                    98
-                                }
-                            ).toDouble(),
-                        )
+                        if (s.platform === Platform.PHONE) {
+                            return@setTone tMaxC(
+                                palette = s.primaryPalette,
+                                lowerBound = 0.0,
+                                upperBound = (
+                                    when {
+                                        s.primaryPalette.keyColor.isYellow() -> 25
+                                        s.primaryPalette.keyColor.isCyan() -> 88
+                                        else -> 98
+                                    }
+                                    ).toDouble(),
+                            )
+                        } else {
+                            return@setTone tMaxC(s.primaryPalette)
+                        }
                     } else { // VIBRANT
-                        return@setTone tMaxC(
-                            s.primaryPalette,
-                            0.0,
-                            (if (s.primaryPalette.keyColor.isCyan()) 88 else 98).toDouble(),
-                        )
+                        if (s.platform === Platform.PHONE) {
+                            return@setTone tMaxC(
+                                s.primaryPalette,
+                                0.0,
+                                (if (s.primaryPalette.keyColor.isCyan()) 88 else 98).toDouble(),
+                            )
+                        } else {
+                            return@setTone tMaxC(s.primaryPalette)
+                        }
                     }
                 }.setIsBackground(true)
                 .setBackground { s ->
@@ -721,9 +728,9 @@ public class ColorSpec2025 : ColorSpec2021() {
                     else -> tMaxC(s.primaryPalette)
                 }
             }.setIsBackground(true)
-            .setBackground { s -> surfaceContainerHigh() }
-            .setContrastCurve { s -> getContrastCurve(4.5) }
-            .setToneDeltaPair { s ->
+            .setBackground { surfaceContainerHigh() }
+            .setContrastCurve { getContrastCurve(4.5) }
+            .setToneDeltaPair {
                 ToneDeltaPair(
                     roleA = primaryDim(),
                     roleB = primary(),
@@ -802,9 +809,7 @@ public class ColorSpec2025 : ColorSpec2021() {
                                 s.primaryPalette,
                                 66.0,
                                 (
-                                    if (s.primaryPalette.keyColor
-                                            .isCyan()
-                                    ) {
+                                    if (s.primaryPalette.keyColor.isCyan()) {
                                         88
                                     } else {
                                         93
@@ -852,7 +857,7 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .Builder()
                 .setName("on_primary_container")
                 .setPalette { s -> s.primaryPalette }
-                .setBackground { s -> primaryContainer() }
+                .setBackground { primaryContainer() }
                 .setContrastCurve { s ->
                     if (s.platform === Platform.PHONE) {
                         getContrastCurve(6.0)
@@ -874,7 +879,7 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .setName("inverse_primary")
                 .setPalette { s -> s.primaryPalette }
                 .setTone { s -> tMaxC(s.primaryPalette) }
-                .setBackground { s -> inverseSurface() }
+                .setBackground { inverseSurface() }
                 .setContrastCurve { s ->
                     if (s.platform === Platform.PHONE) {
                         getContrastCurve(6.0)
@@ -980,9 +985,9 @@ public class ColorSpec2025 : ColorSpec2021() {
                     tMaxC(s.secondaryPalette, 0.0, 90.0)
                 }
             }.setIsBackground(true)
-            .setBackground { s -> surfaceContainerHigh() }
-            .setContrastCurve { s -> getContrastCurve(4.5) }
-            .setToneDeltaPair { s ->
+            .setBackground { surfaceContainerHigh() }
+            .setContrastCurve { getContrastCurve(4.5) }
+            .setToneDeltaPair {
                 ToneDeltaPair(
                     roleA = secondaryDim(),
                     roleB = secondary(),
@@ -1076,7 +1081,7 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .Builder()
                 .setName("on_secondary_container")
                 .setPalette { s -> s.secondaryPalette }
-                .setBackground { s -> secondaryContainer() }
+                .setBackground { secondaryContainer() }
                 .setContrastCurve { s ->
                     if (s.platform === Platform.PHONE) {
                         getContrastCurve(6.0)
@@ -1173,9 +1178,9 @@ public class ColorSpec2025 : ColorSpec2021() {
                     tMaxC(s.tertiaryPalette)
                 }
             }.setIsBackground(true)
-            .setBackground { s -> surfaceContainerHigh() }
-            .setContrastCurve { s -> getContrastCurve(4.5) }
-            .setToneDeltaPair { s ->
+            .setBackground { surfaceContainerHigh() }
+            .setContrastCurve { getContrastCurve(4.5) }
+            .setToneDeltaPair {
                 ToneDeltaPair(
                     roleA = tertiaryDim(),
                     roleB = tertiary(),
@@ -1300,7 +1305,7 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .Builder()
                 .setName("on_tertiary_container")
                 .setPalette { s -> s.tertiaryPalette }
-                .setBackground { s -> tertiaryContainer() }
+                .setBackground { tertiaryContainer() }
                 .setContrastCurve { s ->
                     if (s.platform === Platform.PHONE) {
                         getContrastCurve(6.0)
@@ -1377,9 +1382,9 @@ public class ColorSpec2025 : ColorSpec2021() {
             .setPalette { s -> s.errorPalette }
             .setTone { s -> tMinC(s.errorPalette) }
             .setIsBackground(true)
-            .setBackground { s -> surfaceContainerHigh() }
-            .setContrastCurve { s -> getContrastCurve(4.5) }
-            .setToneDeltaPair { s ->
+            .setBackground { surfaceContainerHigh() }
+            .setContrastCurve { getContrastCurve(4.5) }
+            .setToneDeltaPair {
                 ToneDeltaPair(
                     roleA = errorDim(),
                     roleB = error(),
@@ -1469,7 +1474,7 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .Builder()
                 .setName("on_error_container")
                 .setPalette { s -> s.errorPalette }
-                .setBackground { s -> errorContainer() }
+                .setBackground { errorContainer() }
                 .setContrastCurve { s ->
                     if (s.platform === Platform.PHONE) {
                         getContrastCurve(4.5)
@@ -1520,7 +1525,7 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .setPalette { s -> s.primaryPalette }
                 .setTone { s -> primaryFixed().getTone(s) }
                 .setIsBackground(true)
-                .setToneDeltaPair { s ->
+                .setToneDeltaPair {
                     ToneDeltaPair(
                         roleA = primaryFixedDim(),
                         roleB = primaryFixed(),
@@ -1542,8 +1547,8 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .Builder()
                 .setName("on_primary_fixed")
                 .setPalette { s -> s.primaryPalette }
-                .setBackground { s -> primaryFixedDim() }
-                .setContrastCurve { s -> getContrastCurve(7.0) }
+                .setBackground { primaryFixedDim() }
+                .setContrastCurve { getContrastCurve(7.0) }
                 .build()
         return super
             .onPrimaryFixed()
@@ -1558,8 +1563,8 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .Builder()
                 .setName("on_primary_fixed_variant")
                 .setPalette { s -> s.primaryPalette }
-                .setBackground { s -> primaryFixedDim() }
-                .setContrastCurve { s -> getContrastCurve(4.5) }
+                .setBackground { primaryFixedDim() }
+                .setContrastCurve { getContrastCurve(4.5) }
                 .build()
         return super
             .onPrimaryFixedVariant()
@@ -1604,7 +1609,7 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .setPalette { s -> s.secondaryPalette }
                 .setTone { s -> secondaryFixed().getTone(s) }
                 .setIsBackground(true)
-                .setToneDeltaPair { s ->
+                .setToneDeltaPair {
                     ToneDeltaPair(
                         roleA = secondaryFixedDim(),
                         roleB = secondaryFixed(),
@@ -1626,8 +1631,8 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .Builder()
                 .setName("on_secondary_fixed")
                 .setPalette { s -> s.secondaryPalette }
-                .setBackground { s -> secondaryFixedDim() }
-                .setContrastCurve { s -> getContrastCurve(7.0) }
+                .setBackground { secondaryFixedDim() }
+                .setContrastCurve { getContrastCurve(7.0) }
                 .build()
         return super
             .onSecondaryFixed()
@@ -1642,8 +1647,8 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .Builder()
                 .setName("on_secondary_fixed_variant")
                 .setPalette { s -> s.secondaryPalette }
-                .setBackground { s -> secondaryFixedDim() }
-                .setContrastCurve { s -> getContrastCurve(4.5) }
+                .setBackground { secondaryFixedDim() }
+                .setContrastCurve { getContrastCurve(4.5) }
                 .build()
         return super
             .onSecondaryFixedVariant()
@@ -1688,7 +1693,7 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .setPalette { s -> s.tertiaryPalette }
                 .setTone { s -> tertiaryFixed().getTone(s) }
                 .setIsBackground(true)
-                .setToneDeltaPair { s ->
+                .setToneDeltaPair {
                     ToneDeltaPair(
                         roleA = tertiaryFixedDim(),
                         roleB = tertiaryFixed(),
@@ -1710,8 +1715,8 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .Builder()
                 .setName("on_tertiary_fixed")
                 .setPalette { s -> s.tertiaryPalette }
-                .setBackground { s -> tertiaryFixedDim() }
-                .setContrastCurve { s -> getContrastCurve(7.0) }
+                .setBackground { tertiaryFixedDim() }
+                .setContrastCurve { getContrastCurve(7.0) }
                 .build()
         return super
             .onTertiaryFixed()
@@ -1726,8 +1731,8 @@ public class ColorSpec2025 : ColorSpec2021() {
                 .Builder()
                 .setName("on_tertiary_fixed_variant")
                 .setPalette { s -> s.tertiaryPalette }
-                .setBackground { s -> tertiaryFixedDim() }
-                .setContrastCurve { s -> getContrastCurve(4.5) }
+                .setBackground { tertiaryFixedDim() }
+                .setContrastCurve { getContrastCurve(4.5) }
                 .build()
         return super
             .onTertiaryFixedVariant()
@@ -1895,14 +1900,10 @@ public class ColorSpec2025 : ColorSpec2021() {
                 }
             }
 
-            val secondBackground = color.secondBackground?.invoke(scheme)?.getTone(scheme)
-            if (secondBackground == null) {
-                return answer
-            }
+            val bgTone2 = color.secondBackground?.invoke(scheme)?.getTone(scheme) ?: return answer
 
             // Case 2: Adjust for dual backgrounds.
             val bgTone1 = bgTone
-            val bgTone2 = secondBackground
             val upper: Double = max(bgTone1, bgTone2)
             val lower: Double = min(bgTone1, bgTone2)
 
@@ -2199,7 +2200,7 @@ public class ColorSpec2025 : ColorSpec2021() {
                 val expressiveNeutralHue = getExpressiveNeutralHue(sourceColorHct)
                 val expressiveNeutralChroma =
                     getExpressiveNeutralChroma(sourceColorHct, isDark, platform)
-                val d = if (expressiveNeutralHue >= 105 && expressiveNeutralHue < 125) 1.6 else 2.3
+                val d = if (expressiveNeutralHue in 105.0..<125.0) 1.6 else 2.3
                 TonalPalette.fromHueAndChroma(
                     hue = expressiveNeutralHue,
                     chroma = expressiveNeutralChroma * d,
@@ -2276,7 +2277,7 @@ public class ColorSpec2025 : ColorSpec2021() {
             var answer = tone
             var bestCandidate: Hct = Hct.from(hue, chroma, answer)
             while (bestCandidate.chroma < chroma) {
-                if (tone < 0 || tone > 100) {
+                if (tone !in 0.0..100.0) {
                     break
                 }
                 tone += if (byDecreasingTone) -1.0 else 1.0
@@ -2316,7 +2317,7 @@ public class ColorSpec2025 : ColorSpec2021() {
 
         private fun getContrastCurve(defaultContrast: Double): ContrastCurve =
             when (defaultContrast) {
-                1.5 -> ContrastCurve(1.5, 1.5, 3.0, 4.5)
+                1.5 -> ContrastCurve(1.5, 1.5, 3.0, 5.5)
                 3.0 -> ContrastCurve(3.0, 3.0, 4.5, 7.0)
                 4.5 -> ContrastCurve(4.5, 4.5, 7.0, 11.0)
                 6.0 -> ContrastCurve(6.0, 6.0, 7.0, 11.0)

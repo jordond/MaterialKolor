@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -42,9 +42,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v3
-
       - name: Binary Compatibility Validation
         run: ./gradlew apiCheck --scan
 
@@ -53,3 +50,6 @@ jobs:
 
       - name: Upstream Tests
         run: ./gradlew :mcu-upstream:test --scan
+
+      - name: Material Kolor Tests
+        run: ./gradlew :material-kolor:jvmTest --scan

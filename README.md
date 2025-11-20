@@ -6,7 +6,7 @@
 [![Build](https://github.com/jordond/materialkolor/actions/workflows/ci.yml/badge.svg)](https://github.com/jordond/materialkolor/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/jordond/MaterialKolor)](https://opensource.org/license/mit/)
 
-[![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.9.0--alpha03-blue)](https://github.com/JetBrains/compose-multiplatform)
+[![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.9.1-blue)](https://github.com/JetBrains/compose-multiplatform)
 ![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
 ![badge-ios](http://img.shields.io/badge/platform-ios-CDCDCD.svg?style=flat)
 ![badge-desktop](http://img.shields.io/badge/platform-desktop-DB413D.svg?style=flat)
@@ -75,7 +75,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-              implementation("com.materialkolor:material-kolor:3.0.0")
+              implementation("com.materialkolor:material-kolor:4.0.0")
             }
         }
     }
@@ -88,7 +88,7 @@ For an Android only project, add the dependency to app level `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-  implementation("com.materialkolor:material-kolor:3.0.0")
+  implementation("com.materialkolor:material-kolor:4.0.0")
 }
 ```
 
@@ -96,7 +96,7 @@ dependencies {
 
 ```toml
 [versions]
-materialKolor = "3.0.0"
+materialKolor = "4.0.0"
 
 [libraries]
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
@@ -111,7 +111,7 @@ Google's [Material Color Utilities](https://github.com/material-foundation/mater
 
 ```toml
 [versions]
-materialKolor = "3.0.0"
+materialKolor = "4.0.0"
 
 [libraries]
 materialKolor-utilities = { module = "com.materialkolor:material-color-utilities", version.ref = "materialKolor" }
@@ -191,33 +191,14 @@ fun MyTheme(
 
 ### DynamicMaterialExpressiveTheme
 
-For more vibrant and playful themes, use `DynamicMaterialExpressiveTheme`. This composable is
-designed
-for the Material 3 Expressive design system and defaults to using `PaletteStyle.Expressive` and
-`ColorSpec.SpecVersion.SPEC_2025` for optimal color generation.
+Support for Material Expressive was removed in MaterialKolor `4.0.0` because Compose Multiplatform
+`1.9`
+uses a version of Material 3 that no longer supports Material Expressive.
 
-**Important:** Make sure to use `SPEC_2025` and `PaletteStyle.Expressive` for the best results:
+If you still want to use Material Expressive, you can use the MaterialKolor [
+`5.0.0` preview version](https://github.com/jordond/MaterialKolor/releases/tag/5.0.0-alpha01).
 
-```kotlin
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun MyExpressiveTheme(
-  seedColor: Color,
-  isDark: Boolean = isSystemInDarkTheme(),
-  content: @Composable () -> Unit
-) {
-  DynamicMaterialExpressiveTheme(
-    seedColor = seedColor,
-    motionScheme = MotionScheme.expressive(),
-    isDark = isDark,
-    animate = true,
-    content = content,
-  )
-}
-```
-
-The Expressive theme generates vibrant color schemes where the source color's hue may not directly
-appear in the final theme, creating more dynamic and playful color palettes.
+You can view the README for `5.0.0` [here](https://github.com/jordond/MaterialKolor/blob/d79d0884312e0aa56253898c145e2b2affbdd7fb/README.md)
 
 ## Extensions
 
