@@ -17,6 +17,7 @@ package com.materialkolor.hct
 
 import com.materialkolor.utils.ColorUtils.argbFromXyz
 import com.materialkolor.utils.ColorUtils.linearized
+import com.materialkolor.utils.MathUtils
 import com.materialkolor.utils.MathUtils.signum
 import com.materialkolor.utils.MathUtils.toDegrees
 import com.materialkolor.utils.MathUtils.toRadians
@@ -247,11 +248,7 @@ public class Cam16 private constructor(
             // hue
             val atan2: Double = atan2(b, a)
             val atanDegrees: Double = toDegrees(atan2)
-            val hue = when {
-                atanDegrees < 0 -> atanDegrees + 360.0
-                atanDegrees >= 360 -> atanDegrees - 360.0
-                else -> atanDegrees
-            }
+            val hue = MathUtils.sanitizeDegrees(atanDegrees)
 
             val hueRadians: Double = toRadians(hue)
 
