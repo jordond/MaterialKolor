@@ -2317,7 +2317,7 @@ public class ColorSpec2025 : ColorSpec2021() {
 
         private fun getContrastCurve(defaultContrast: Double): ContrastCurve =
             when (defaultContrast) {
-                1.5 -> ContrastCurve(1.5, 1.5, 3.0, 4.5)
+                1.5 -> ContrastCurve(1.5, 1.5, 3.0, 5.5)
                 3.0 -> ContrastCurve(3.0, 3.0, 4.5, 7.0)
                 4.5 -> ContrastCurve(4.5, 4.5, 7.0, 11.0)
                 6.0 -> ContrastCurve(6.0, 6.0, 7.0, 11.0)
