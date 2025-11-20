@@ -52,9 +52,9 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.material3)
-            implementation(compose.runtime)
-            implementation(compose.ui)
+            implementation(libs.compose.material3)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.ui)
             implementation(libs.colormath)
 
             api(project(":material-color-utilities"))
@@ -62,8 +62,7 @@ kotlin {
 
         commonTest.dependencies {
             implementation(kotlin("test"))
-            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-            implementation(compose.uiTest)
+            implementation(libs.compose.ui.test)
         }
 
         jvmTest.dependencies {
