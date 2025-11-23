@@ -26,6 +26,7 @@ fun CoreColorsSection(
         Text(
             text = "Core colors",
             style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.primary,
         )
 
         Text(

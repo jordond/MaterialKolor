@@ -39,6 +39,7 @@ fun SeedColorSection(
         Text(
             text = "Seed color",
             style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.primary,
         )
 
         Text(

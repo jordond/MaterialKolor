@@ -12,6 +12,8 @@ import com.materialkolor.builder.core.shareToClipboard
 import com.materialkolor.builder.core.shareUrl
 import com.materialkolor.builder.export.ExportRepo
 import com.materialkolor.builder.export.model.ExportOptions
+import com.materialkolor.builder.ktx.ExpressivePaletteStyles
+import com.materialkolor.builder.ktx.isExpressive
 import com.materialkolor.builder.settings.SettingsRepo
 import com.materialkolor.builder.settings.model.ColorSettings
 import com.materialkolor.builder.settings.model.ImagePresets
@@ -59,7 +61,6 @@ class HomeModel(
     }
 
     private var previousSpec: ColorSpec.SpecVersion? = null
-    private var previousStyle: PaletteStyle? = null
 
     fun toggleDarkMode() {
         updateSettings { it.copy(isDarkMode = !it.isDarkMode) }
@@ -71,11 +72,12 @@ class HomeModel(
 
     fun updateSpecVersion(version: ColorSpec.SpecVersion) {
         previousSpec = null
-        updateSettings { it.copy(specVersion = version) }
+        updateSettings { state ->
+            state.copy(specVersion = version, style = determineStyle(version, state.style))
+        }
     }
 
     fun updatePaletteStyle(style: PaletteStyle) {
-        previousStyle = null
         updateSettings { it.copy(style = style) }
     }
 
@@ -84,15 +86,13 @@ class HomeModel(
             val enabled = !settings.useMaterialExpressive
             val specVersion =
                 if (enabled) ColorSpec.SpecVersion.SPEC_2025 else previousSpec ?: settings.specVersion
-            val style = if (enabled) PaletteStyle.Expressive else previousStyle ?: settings.style
 
             previousSpec = if (enabled) settings.specVersion else null
-            previousStyle = if (enabled) settings.style else null
 
             settings.copy(
                 useMaterialExpressive = enabled,
                 specVersion = specVersion,
-                style = style,
+                style = determineStyle(specVersion, settings.style),
             )
         }
     }
@@ -245,6 +245,15 @@ class HomeModel(
             val pickerState = state.colorPickerState?.copy(loading = value)
             state.copy(processingImage = value, colorPickerState = pickerState)
         }
+    }
+
+    private fun determineStyle(
+        version: ColorSpec.SpecVersion,
+        style: PaletteStyle,
+    ): PaletteStyle = if (version != ColorSpec.SpecVersion.SPEC_2025 || style.isExpressive) {
+        style
+    } else {
+        ExpressivePaletteStyles.first()
     }
 
     data class State(

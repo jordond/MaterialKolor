@@ -23,6 +23,7 @@ import com.materialkolor.builder.settings.model.KeyColor
 import com.materialkolor.builder.settings.model.SeedImage
 import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.builder.ui.LocalWindowSizeClass
+import com.materialkolor.builder.ui.home.components.ExpressiveIcon
 import com.materialkolor.builder.ui.home.components.OptionSwitch
 import com.materialkolor.builder.ui.home.customize.colors.CoreColorsSection
 import com.materialkolor.builder.ui.home.customize.contrast.ContrastSection
@@ -68,18 +69,26 @@ fun CustomizeSection(
             Text(
                 text = "Material 3 Expressive",
                 style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
             )
 
             Text(
-                text = "MaterialKolor will soon support the new expressive color system. For now you can " +
-                    "preview it by enabling it below. It is also recommended to set the spec version to " +
-                    "2025, and the variant to expressive.",
+                text = "Material 3 Expressive is a design system update that introduces the 2025 Color " +
+                    "Spec with richer, more vibrant colors."
+            )
+
+            Text(
+                text = "Note: Compose Multiplatform currently only supports Material Expressive in a " +
+                    "pre-release version. A pre-release version of MaterialKolor is required.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             OptionSwitch(
                 text = "Preview Expressive Color System",
                 value = settings.useMaterialExpressive,
                 onValueChange = { toggleMaterialExpressive() },
+                leadingContent = { ExpressiveIcon() },
             )
         }
 
@@ -99,6 +108,7 @@ fun CustomizeSection(
 
         PaletteStyleSection(
             selected = settings.style,
+            colorSpec = settings.specVersion,
             onUpdate = onUpdatePaletteStyle,
         )
 
