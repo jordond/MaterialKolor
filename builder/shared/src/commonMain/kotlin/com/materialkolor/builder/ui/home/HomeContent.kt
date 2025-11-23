@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.core.Dispatcher
 import com.materialkolor.builder.export.model.ExportOptions
 import com.materialkolor.builder.ui.components.SideSheet
 import com.materialkolor.builder.ui.components.SideSheetPosition
@@ -27,11 +26,15 @@ import com.materialkolor.builder.ui.home.preview.PreviewScreenContent
 import com.materialkolor.builder.ui.home.preview.PreviewSection
 import com.materialkolor.builder.ui.ktx.widthIsExpanded
 import com.materialkolor.builder.ui.ktx.windowSizeClass
+import dev.stateholder.dispatcher.Dispatcher
+import dev.stateholder.dispatcher.rememberRelay
+import dev.stateholder.dispatcher.rememberRelayOf
 
 @Composable
 fun HomeContent(
     screen: HomeScreens,
     options: ExportOptions,
+    materialKolorVersion: String,
     selectedSection: PreviewSection,
     updateSelectedSection: (PreviewSection) -> Unit,
     processingImage: Boolean,
@@ -67,6 +70,7 @@ fun HomeContent(
                     Content(
                         screen = targetState,
                         options = options,
+                        materialKolorVersion = materialKolorVersion,
                         selectedSection = selectedSection,
                         updateSelectedSection = updateSelectedSection,
                         processingImage = processingImage,
@@ -89,6 +93,7 @@ fun HomeContent(
         Content(
             screen = screen,
             options = options,
+            materialKolorVersion = materialKolorVersion,
             selectedSection = selectedSection,
             updateSelectedSection = updateSelectedSection,
             processingImage = processingImage,
@@ -102,6 +107,7 @@ fun HomeContent(
 fun Content(
     screen: HomeScreens,
     options: ExportOptions,
+    materialKolorVersion: String,
     selectedSection: PreviewSection,
     updateSelectedSection: (PreviewSection) -> Unit,
     processingImage: Boolean,
@@ -120,6 +126,7 @@ fun Content(
     } else {
         ExportScreenContent(
             options = options,
+            materialKolorVersion = materialKolorVersion,
             dispatcher = dispatcher,
             windowSizeClass = windowSizeClass,
         )

@@ -7,12 +7,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.materialkolor.builder.ui.home.HomeScreen
 import com.materialkolor.builder.ui.ktx.windowSizeClass
 import com.materialkolor.builder.ui.theme.AppTheme
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 val LocalWindowSizeClass = compositionLocalOf<WindowSizeClass> { error("Not initialized") }
 

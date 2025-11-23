@@ -1,29 +1,30 @@
 package com.materialkolor.builder.export.model.library
 
-import com.materialkolor.builder.BuildKonfig
+private fun mkLib(version: String) = "com.materialkolor:material-kolor:$version"
 
-private val mkVersion = BuildKonfig.MATERIAL_KOLOR_VERSION
-private val mkLib = "com.materialkolor:material-kolor:$mkVersion"
-
-fun libsVersionsToml(): String = """
+fun libsVersionsToml(version: String): String = """
     [versions]
-    materialKolor = "$mkVersion"
-    
+    materialKolor = "$version"
+
     [libraries]
-    materialKolor = "$mkLib"
+    materialKolor = "${mkLib(version)}"
 """.trimIndent()
 
-fun buildImplementation(useVersionCatalog: Boolean): String = if (useVersionCatalog) {
+fun buildImplementation(
+    version: String,
+    useVersionCatalog: Boolean,
+): String = if (useVersionCatalog) {
     "implementation(libs.materialKolor)"
 } else {
-    "implementation(\"$mkLib\")"
+    "implementation(\"${mkLib(version)}\")"
 }
 
 fun gradleKts(
+    version: String,
     isMultiplatform: Boolean,
     useVersionCatalog: Boolean,
 ): String {
-    val lib = buildImplementation(useVersionCatalog)
+    val lib = buildImplementation(version, useVersionCatalog)
     return if (isMultiplatform) {
         """
         kotlin {

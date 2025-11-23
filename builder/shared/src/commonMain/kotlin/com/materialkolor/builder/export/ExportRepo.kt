@@ -8,22 +8,23 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
 interface ExportRepo {
-    suspend fun export(options: ExportOptions): Boolean
+    suspend fun export(options: ExportOptions, materialKolorVersion: String): Boolean
 }
 
 class DefaultExportRepo : ExportRepo {
 
-    override suspend fun export(options: ExportOptions): Boolean {
+    override suspend fun export(options: ExportOptions, materialKolorVersion: String): Boolean {
         if (!exportSupported) {
             Logger.e { "Export is not supported" }
             return false
         }
 
         try {
+            val files = options.createFiles(materialKolorVersion)
             Logger.d { "Exporting ${options.type.displayName} theme" }
-            Logger.d { "Files to export: ${options.files.joinToString { it.name }}" }
+            Logger.d { "Files to export: ${files.joinToString { it.name }}" }
             withContext(Dispatchers.Default) {
-                exportFiles(options.files)
+                exportFiles(files)
             }
             return true
         } catch (cause: Exception) {

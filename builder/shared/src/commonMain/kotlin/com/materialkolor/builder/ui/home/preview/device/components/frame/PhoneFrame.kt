@@ -26,7 +26,7 @@ import com.materialkolor.builder.ui.home.preview.device.components.frame.status.
 import com.materialkolor.builder.ui.home.preview.device.components.frame.status.IPhoneStatusBar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 
 object PhotoFrameScope

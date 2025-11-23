@@ -17,24 +17,24 @@ class MKGradleTest {
         val expected = """
             [versions]
             materialKolor = "$mkVersion"
-            
+
             [libraries]
             materialKolor = "$mkLib"
         """.trimIndent()
 
-        assertEquals(expected, libsVersionsToml())
+        assertEquals(expected, libsVersionsToml(mkVersion))
     }
 
     @Test
     fun testBuildImplementationWithVersionCatalog() {
         val expected = "implementation(libs.materialKolor)"
-        assertEquals(expected, buildImplementation(useVersionCatalog = true))
+        assertEquals(expected, buildImplementation(version = mkVersion, useVersionCatalog = true))
     }
 
     @Test
     fun testBuildImplementationWithoutVersionCatalog() {
         val expected = "implementation(\"$mkLib\")"
-        assertEquals(expected, buildImplementation(useVersionCatalog = false))
+        assertEquals(expected, buildImplementation(version = mkVersion, useVersionCatalog = false))
     }
 
     @Test
@@ -49,7 +49,10 @@ class MKGradleTest {
             }
         """.trimIndent()
 
-        assertEquals(expected, gradleKts(isMultiplatform = true, useVersionCatalog = true))
+        assertEquals(
+            expected,
+            gradleKts(version = mkVersion, isMultiplatform = true, useVersionCatalog = true),
+        )
     }
 
     @Test
@@ -60,7 +63,10 @@ class MKGradleTest {
             }
         """.trimIndent()
 
-        assertEquals(expected, gradleKts(isMultiplatform = false, useVersionCatalog = true))
+        assertEquals(
+            expected,
+            gradleKts(version = mkVersion, isMultiplatform = false, useVersionCatalog = true),
+        )
     }
 
     @Test
@@ -75,7 +81,10 @@ class MKGradleTest {
             }
         """.trimIndent()
 
-        assertEquals(expected, gradleKts(isMultiplatform = true, useVersionCatalog = false))
+        assertEquals(
+            expected,
+            gradleKts(version = mkVersion, isMultiplatform = true, useVersionCatalog = false),
+        )
     }
 
     @Test
@@ -86,6 +95,9 @@ class MKGradleTest {
             }
         """.trimIndent()
 
-        assertEquals(expected, gradleKts(isMultiplatform = false, useVersionCatalog = false))
+        assertEquals(
+            expected,
+            gradleKts(version = mkVersion, isMultiplatform = false, useVersionCatalog = false),
+        )
     }
 }

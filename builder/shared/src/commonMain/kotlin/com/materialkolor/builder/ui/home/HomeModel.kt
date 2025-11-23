@@ -19,11 +19,11 @@ import com.materialkolor.builder.settings.model.SeedImage
 import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.builder.ui.components.ColorPickerState
 import com.materialkolor.builder.ui.home.preview.PreviewSection
-import com.materialkolor.builder.ui.ktx.UiStateViewModel
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.themeColorOrNull
 import com.materialkolor.ktx.toHex
 import com.mohamedrejeb.calf.io.KmpFile
+import dev.stateholder.extensions.viewmodel.UiStateViewModel
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
@@ -37,16 +37,24 @@ class HomeModel(
     private val settingsRepo: SettingsRepo = DI.settingsRepo,
     private val exportRepo: ExportRepo = DI.exportRepo,
     private val clipboard: Clipboard = DI.clipboard,
+    private val versionService: com.materialkolor.builder.version.MaterialKolorVersionService = DI.versionService,
     private val random: Random = Random.Default,
 ) : UiStateViewModel<HomeModel.State, HomeModel.Event>(
-    State(ExportOptions.default(settingsRepo.settings.value)),
+    State(
+        exportOptions = ExportOptions.default(settingsRepo.settings.value),
+        materialKolorVersion = versionService.getVersion(settingsRepo.settings.value.useMaterialExpressive),
+    ),
 ) {
 
     private var exportJob: Job? = null
 
     init {
-        settingsRepo.settings.collectToState { state, value ->
-            state.copy(exportOptions = state.exportOptions.copy(settings = value))
+        settingsRepo.settings.mergeState { state, value ->
+            val newVersion = versionService.getVersion(value.useMaterialExpressive)
+            state.copy(
+                exportOptions = state.exportOptions.copy(settings = value),
+                materialKolorVersion = newVersion,
+            )
         }
     }
 
@@ -195,7 +203,13 @@ class HomeModel(
     }
 
     fun updateExportOptions(options: ExportOptions) {
-        updateState { it.copy(exportOptions = options) }
+        updateState { state ->
+            val newVersion = versionService.getVersion(options.settings.useMaterialExpressive)
+            state.copy(
+                exportOptions = options,
+                materialKolorVersion = newVersion,
+            )
+        }
     }
 
     fun export() {
@@ -204,7 +218,8 @@ class HomeModel(
         updateState { it.copy(exporting = true) }
 
         exportJob = viewModelScope.launch {
-            val result = exportRepo.export(state.value.exportOptions)
+            val currentState = state.value
+            val result = exportRepo.export(currentState.exportOptions, currentState.materialKolorVersion)
             updateState { it.copy(exporting = false) }
             if (!result) {
                 emit(Event.ShowSnackbar("Failed to export theme..."))
@@ -234,6 +249,7 @@ class HomeModel(
 
     data class State(
         val exportOptions: ExportOptions,
+        val materialKolorVersion: String,
         val imagePresets: PersistentList<SeedImage> = ImagePresets.all.toPersistentList(),
         val processingImage: Boolean = false,
         val colorPickerState: ColorPickerState? = null,

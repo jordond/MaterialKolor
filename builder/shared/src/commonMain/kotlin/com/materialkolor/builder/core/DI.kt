@@ -7,6 +7,11 @@ import com.materialkolor.builder.settings.DefaultDarkModeProvider
 import com.materialkolor.builder.settings.DefaultSettingsRepo
 import com.materialkolor.builder.settings.SettingsRepo
 import com.materialkolor.builder.settings.store.SettingsStore
+import com.materialkolor.builder.version.DefaultMaterialKolorVersionService
+import com.materialkolor.builder.version.DefaultVersionCache
+import com.materialkolor.builder.version.MaterialKolorVersionService
+import com.materialkolor.builder.version.VersionCache
+import com.materialkolor.builder.version.createVersionCacheStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
@@ -31,6 +36,14 @@ object DI {
     }
 
     val exportRepo: ExportRepo = DefaultExportRepo()
+
+    val versionCache: VersionCache by lazy {
+        DefaultVersionCache(createVersionCacheStore())
+    }
+
+    val versionService: MaterialKolorVersionService by lazy {
+        DefaultMaterialKolorVersionService(versionCache)
+    }
 }
 
 expect fun DI.provideSettingsStore(): SettingsStore

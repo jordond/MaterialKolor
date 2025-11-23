@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.core.Dispatcher
 import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.builder.ui.home.HomeAction
 import com.materialkolor.builder.ui.home.HomeAction.CopyColor
@@ -29,6 +28,9 @@ import com.materialkolor.builder.ui.home.preview.gallery.GallerySection
 import com.materialkolor.builder.ui.home.preview.palette.PaletteSection
 import com.materialkolor.builder.ui.home.preview.theme.ThemeSection
 import com.materialkolor.builder.ui.ktx.widthIsCompact
+import dev.stateholder.dispatcher.Dispatcher
+import dev.stateholder.dispatcher.rememberRelay
+import dev.stateholder.dispatcher.rememberRelayOf
 
 @Composable
 fun PreviewCompactContent(

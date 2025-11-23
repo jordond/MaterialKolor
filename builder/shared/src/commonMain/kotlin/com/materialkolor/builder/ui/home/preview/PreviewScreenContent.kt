@@ -6,11 +6,11 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.materialkolor.builder.core.Dispatcher
 import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.builder.ui.LocalWindowSizeClass
 import com.materialkolor.builder.ui.home.HomeAction
 import com.materialkolor.builder.ui.home.components.HomeNavRail
+import dev.stateholder.dispatcher.Dispatcher
 
 @Composable
 fun PreviewScreenContent(

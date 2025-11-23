@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.materialkolor.builder.ui.home.preview.device.components.frame.PhotoFrameScope
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 @Suppress("UnusedReceiverParameter")
 @Composable

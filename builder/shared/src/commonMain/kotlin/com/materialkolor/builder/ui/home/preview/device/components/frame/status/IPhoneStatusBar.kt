@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.materialkolor.builder.ui.home.preview.device.components.frame.PhotoFrameScope
 import com.materialkolor.builder.ui.ktx.clickableWithoutRipple
 import com.materialkolor.builder.ui.theme.icons.BatteryFullAlt
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 @Suppress("UnusedReceiverParameter")
 @Composable

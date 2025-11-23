@@ -20,8 +20,8 @@ data class ExportOptions(
     val animate: Boolean = DEFAULT_ANIMATE,
 ) {
 
-    val files: PersistentList<ExportFile> = when (type) {
-        ExportType.MaterialKolor -> createMaterialKolorFiles()
+    fun createFiles(materialKolorVersion: String): PersistentList<ExportFile> = when (type) {
+        ExportType.MaterialKolor -> createMaterialKolorFiles(materialKolorVersion)
         ExportType.Standard -> createStandardFiles()
     }.toPersistentList()
 
@@ -39,6 +39,9 @@ data class ExportOptions(
         const val DEFAULT_USE_VERSION_CATALOG = true
         const val DEFAULT_ANIMATE = true
 
-        fun default(settings: Settings) = ExportOptions(ExportType.MaterialKolor, settings)
+        fun default(settings: Settings) = ExportOptions(
+            type = ExportType.MaterialKolor,
+            settings = settings,
+        )
     }
 }

@@ -103,8 +103,8 @@ case $platform in
         echo "Android bundle and APK built and saved to $BUILD_DIR"
         ;;
     web)
-        gradle wasmJsBrowserDistribution
-        zip -r "$BUILD_DIR/mkb-web-$version-$code_value.zip" "$ROOT/app/build/dist/wasmJs/productionExecutable"
+        gradle composeCompatibilityBrowserDistribution
+        zip -r "$BUILD_DIR/mkb-web-$version-$code_value.zip" "$ROOT/app/build/dist/composeWebCompatibility/productionExecutable"
         echo "Web app built and zipped to $BUILD_DIR/mkb-web-$version-$code_value.zip"
         ;;
     desktop)
