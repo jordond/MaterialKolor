@@ -13,26 +13,27 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFloatingActionButton
-import androidx.compose.material3.MultiChoiceSegmentedButtonRow
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -52,8 +53,8 @@ private const val buttonUrl = "https://developer.android.com/jetpack/compose/com
 private const val fabUrl = "https://developer.android.com/jetpack/compose/components/fab"
 private const val iconButtonUrl =
     "https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#IconButton(kotlin.Function0,androidx.compose.ui.Modifier,kotlin.Boolean,androidx.compose.material3.IconButtonColors,androidx.compose.foundation.interaction.MutableInteractionSource,kotlin.Function0)"
-private const val segmentedButtonUrl =
-    "https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#(androidx.compose.material3.MultiChoiceSegmentedButtonRowScope).SegmentedButton(kotlin.Boolean,kotlin.Function1,androidx.compose.ui.graphics.Shape,androidx.compose.ui.Modifier,kotlin.Boolean,androidx.compose.material3.SegmentedButtonColors,androidx.compose.foundation.BorderStroke,androidx.compose.foundation.interaction.MutableInteractionSource,kotlin.Function0,kotlin.Function0)"
+private const val connectedButtonUrl =
+    "https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#ButtonGroup(kotlin.Function1,androidx.compose.ui.Modifier,kotlin.Float,androidx.compose.foundation.layout.Arrangement.Horizontal,kotlin.Function1)"
 
 @Composable
 fun ActionGallery(
@@ -82,8 +83,8 @@ fun ActionGallery(
             IconButtons(minWidth, width, itemPadding)
         }
 
-        GalleryContainerChild(title = "Segmented buttons", infoUrl = segmentedButtonUrl) {
-            SegmentedButtons(minWidth, width, itemPadding)
+        GalleryContainerChild(title = "Connected buttons", infoUrl = connectedButtonUrl) {
+            ConnectedButtons(minWidth, width, itemPadding)
         }
     }
 }
@@ -321,8 +322,9 @@ private fun IconButtons(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun SegmentedButtons(
+private fun ConnectedButtons(
     minWidth: Dp,
     width: Dp,
     itemPadding: Dp,
@@ -339,16 +341,21 @@ private fun SegmentedButtons(
         ) {
             var selectedIndex by remember { mutableIntStateOf(0) }
             val options = remember { persistentListOf("Day", "Month", "Week") }
-            SingleChoiceSegmentedButtonRow {
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+            ) {
                 options.forEachIndexed { index, label ->
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = options.size,
-                        ),
-                        onClick = { selectedIndex = index },
-                        selected = index == selectedIndex,
-                        label = { Text(label) },
+                    ToggleButton(
+                        checked = index == selectedIndex,
+                        onCheckedChange = { selectedIndex = index },
+                        content = { Text(label) },
+                        shapes =
+                            when (index) {
+                                0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                            },
                     )
                 }
             }
@@ -363,22 +370,12 @@ private fun SegmentedButtons(
                 )
             }
 
-            MultiChoiceSegmentedButtonRow {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+            ) {
                 options2.forEachIndexed { index, label ->
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = options.size,
-                        ),
-                        icon = {
-                            SegmentedButtonDefaults.Icon(active = index in checkedList) {
-                                Icon(
-                                    imageVector = icons[index],
-                                    contentDescription = null,
-                                    modifier = Modifier.size(SegmentedButtonDefaults.IconSize),
-                                )
-                            }
-                        },
+                    ToggleButton(
+                        checked = index in checkedList,
                         onCheckedChange = {
                             if (index in checkedList) {
                                 checkedList.remove(index)
@@ -386,9 +383,20 @@ private fun SegmentedButtons(
                                 checkedList.add(index)
                             }
                         },
-                        checked = index in checkedList,
-                        label = { Text(label) },
-                    )
+                        shapes =
+                            when (index) {
+                                0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                options2.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                            },
+                    ) {
+                        Icon(
+                            imageVector = if (index in checkedList) Icons.Filled.Check else icons[index],
+                            contentDescription = null,
+                        )
+                        Spacer(Modifier.size(ToggleButtonDefaults.IconSpacing))
+                        Text(label)
+                    }
                 }
             }
         }
