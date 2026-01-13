@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.androidLibrary
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -5,7 +6,7 @@ plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.multiplatform.android.library)
     alias(libs.plugins.dokka)
     alias(libs.plugins.publish)
 }
@@ -15,8 +16,12 @@ kotlin {
 
     applyDefaultHierarchyTemplate()
 
-    androidTarget {
-        publishLibraryVariants("release", "debug")
+    @Suppress("UnstableApiUsage")
+    androidLibrary {
+        compileSdk = libs.versions.sdk.compile.get().toInt()
+        minSdk = libs.versions.sdk.min.get().toInt()
+        namespace = "com.materialkolor"
+
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -71,21 +76,4 @@ kotlin {
     }
 
     jvmToolchain(libs.versions.jvmTarget.get().toInt())
-}
-
-android {
-    compileSdk = libs.versions.sdk.compile.get().toInt()
-    namespace = "com.materialkolor"
-
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-
-    defaultConfig {
-        minSdk = libs.versions.sdk.min.get().toInt()
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
 }
