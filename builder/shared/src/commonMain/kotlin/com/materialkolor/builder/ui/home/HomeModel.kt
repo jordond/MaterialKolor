@@ -21,11 +21,14 @@ import com.materialkolor.builder.settings.model.SeedImage
 import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.builder.ui.components.ColorPickerState
 import com.materialkolor.builder.ui.home.preview.PreviewSection
+import com.materialkolor.builder.version.MaterialKolorVersionService
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.themeColorOrNull
 import com.materialkolor.ktx.toHex
 import com.mohamedrejeb.calf.io.KmpFile
 import dev.stateholder.extensions.viewmodel.UiStateViewModel
+import dev.stateholder.provider.ComposedStateProvider
+import dev.stateholder.provider.composedStateProvider
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
@@ -39,26 +42,12 @@ class HomeModel(
     private val settingsRepo: SettingsRepo = DI.settingsRepo,
     private val exportRepo: ExportRepo = DI.exportRepo,
     private val clipboard: Clipboard = DI.clipboard,
-    private val versionService: com.materialkolor.builder.version.MaterialKolorVersionService = DI.versionService,
+    private val versionService: MaterialKolorVersionService = DI.versionService,
     private val random: Random = Random.Default,
-) : UiStateViewModel<HomeModel.State, HomeModel.Event>(
-    State(
-        exportOptions = ExportOptions.default(settingsRepo.settings.value),
-        materialKolorVersion = versionService.getVersion(settingsRepo.settings.value.useMaterialExpressive),
-    ),
-) {
+    provider: State.Provider = State.Provider(),
+) : UiStateViewModel<HomeModel.State, HomeModel.Event>(provider) {
 
     private var exportJob: Job? = null
-
-    init {
-        settingsRepo.settings.mergeState { state, value ->
-            val newVersion = versionService.getVersion(value.useMaterialExpressive)
-            state.copy(
-                exportOptions = state.exportOptions.copy(settings = value),
-                materialKolorVersion = newVersion,
-            )
-        }
-    }
 
     private var previousSpec: ColorSpec.SpecVersion? = null
 
@@ -263,7 +252,26 @@ class HomeModel(
         val processingImage: Boolean = false,
         val colorPickerState: ColorPickerState? = null,
         val exporting: Boolean = false,
-    )
+    ) {
+        class Provider(
+            settingsRepo: SettingsRepo = DI.settingsRepo,
+            versionService: MaterialKolorVersionService = DI.versionService,
+        ) : ComposedStateProvider<State> by composedStateProvider(
+            initialState = State(
+                exportOptions = ExportOptions.default(settingsRepo.settings.value),
+                materialKolorVersion = versionService.getVersion(settingsRepo.settings.value.useMaterialExpressive),
+            ),
+            composer = {
+                settingsRepo.settings into { value ->
+                    val newVersion = versionService.getVersion(value.useMaterialExpressive)
+                    copy(
+                        exportOptions = exportOptions.copy(settings = value),
+                        materialKolorVersion = newVersion,
+                    )
+                }
+            },
+        )
+    }
 
     sealed interface Event {
         data class ShowSnackbar(val message: String) : Event
