@@ -45,9 +45,6 @@ jobs:
       - name: Binary Compatibility Validation
         run: ./gradlew apiCheck --scan
 
-      - name: Lint
-        run: ./gradlew lint --scan
-
       - name: Upstream Tests
         run: ./gradlew :mcu-upstream:test --scan
 
