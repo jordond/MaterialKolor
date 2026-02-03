@@ -191,14 +191,32 @@ fun MyTheme(
 
 ### DynamicMaterialExpressiveTheme
 
-Support for Material Expressive was removed in MaterialKolor `4.0.0` because Compose Multiplatform
-`1.9`
-uses a version of Material 3 that no longer supports Material Expressive.
+For more vibrant and playful themes, use `DynamicMaterialExpressiveTheme`. This composable is
+designed for the Material 3 Expressive design system and defaults to using `PaletteStyle.Expressive`
+and `ColorSpec.SpecVersion.SPEC_2025` for optimal color generation.
 
-If you still want to use Material Expressive, you can use the MaterialKolor [
-`5.0.0` preview version](https://github.com/jordond/MaterialKolor/releases/tag/5.0.0-alpha01).
+**Important:** Make sure to use `SPEC_2025` and `PaletteStyle.Expressive` for the best results:
 
-You can view the README for `5.0.0` [here](https://github.com/jordond/MaterialKolor/blob/d79d0884312e0aa56253898c145e2b2affbdd7fb/README.md)
+```kotlin
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun MyExpressiveTheme(
+  seedColor: Color,
+  isDark: Boolean = isSystemInDarkTheme(),
+  content: @Composable () -> Unit
+) {
+  DynamicMaterialExpressiveTheme(
+    seedColor = seedColor,
+    motionScheme = MotionScheme.expressive(),
+    isDark = isDark,
+    animate = true,
+    content = content,
+  )
+}
+```
+
+The Expressive theme generates vibrant color schemes where the source color's hue may not directly
+appear in the final theme, creating more dynamic and playful color palettes.
 
 ## Extensions
 
