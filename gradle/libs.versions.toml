@@ -10,13 +10,13 @@ compose-material3 = "1.11.0-alpha01"
 androidx-annotation = "1.9.1"
 binaryCompatibility = "0.18.1"
 dokka = "2.1.0"
-publish = "0.35.0"
+publish = "0.36.0"
 colormath = "3.6.1"
 poko = "0.21.1"
 errorProneAnnotations = "2.46.0"
-kotest = "6.0.7"
+kotest = "6.1.2"
 ktlint = "1.5.0"
-spotless = "8.1.0"
+spotless = "8.2.1"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
