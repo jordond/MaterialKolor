@@ -56,7 +56,7 @@ jobs:
         run: ./.github/version.sh "${RELEASE_VERSION}"
 
       - name: Commit changes to README
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v10
         with:
           add: "./README.md"
           message: "Update README.md with version ${{ env.RELEASE_VERSION }}"
