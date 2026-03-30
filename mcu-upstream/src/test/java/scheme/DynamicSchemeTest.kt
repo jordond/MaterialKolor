@@ -67,6 +67,7 @@ class DynamicSchemeTest {
             when (specVersion) {
                 ColorSpec.SpecVersion.SPEC_2021 -> dynamiccolor.ColorSpec.SpecVersion.SPEC_2021
                 ColorSpec.SpecVersion.SPEC_2025 -> dynamiccolor.ColorSpec.SpecVersion.SPEC_2025
+                else -> return // SPEC_2026 not yet available in upstream submodule
             },
             dynamiccolor.DynamicScheme.Platform.PHONE,
         )
