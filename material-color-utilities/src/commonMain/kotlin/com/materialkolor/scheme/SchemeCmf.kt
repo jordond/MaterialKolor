@@ -20,7 +20,8 @@ import com.materialkolor.hct.Hct
 import com.materialkolor.palettes.TonalPalette
 
 /**
- * A Dynamic Color theme with 2 source colors.
+ * A Dynamic Color theme based on the CMF (Color, Material, Finish) design discipline, supporting
+ * 2 source colors.
  */
 public class SchemeCmf(
     sourceColorHctList: List<Hct>,

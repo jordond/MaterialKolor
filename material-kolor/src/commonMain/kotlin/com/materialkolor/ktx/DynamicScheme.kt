@@ -63,7 +63,13 @@ public fun Color.toDynamicScheme(
         Monochrome -> SchemeMonochrome(hct, isDark, contrastLevel, specVersion, platform)
         Fidelity -> SchemeFidelity(hct, isDark, contrastLevel, specVersion, platform)
         Content -> SchemeContent(hct, isDark, contrastLevel, specVersion, platform)
-        Cmf -> SchemeCmf(hct, isDark, contrastLevel, specVersion, platform)
+        is Cmf -> {
+            val sourceColorHctList = buildList {
+                add(hct)
+                style.tertiarySourceColor?.let { add(it.toHct()) }
+            }
+            SchemeCmf(sourceColorHctList, isDark, contrastLevel, specVersion, platform)
+        }
     }
 }
 
