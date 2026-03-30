@@ -68,4 +68,13 @@ public enum class PaletteStyle {
      * appearance.
      */
     Content,
+
+    /**
+     * A Dynamic Color theme with 2 source colors.
+     *
+     * Supports an optional second source color for the tertiary palette. When used through this
+     * API with a single seed color, the tertiary palette falls back to the primary source color.
+     * For dual source color support, use [com.materialkolor.scheme.SchemeCmf] directly.
+     */
+    Cmf,
 }
