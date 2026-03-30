@@ -15,6 +15,7 @@ public interface ColorSpec {
     public enum class SpecVersion {
         SPEC_2021,
         SPEC_2025,
+        SPEC_2026,
         ;
 
         public companion object {

@@ -79,4 +79,9 @@ public enum class Variant {
      * A playful theme - the source color's hue does not appear in the theme.
      */
     FRUIT_SALAD,
+
+    /**
+     * A Dynamic Color theme with 2 source colors.
+     */
+    CMF,
 }
