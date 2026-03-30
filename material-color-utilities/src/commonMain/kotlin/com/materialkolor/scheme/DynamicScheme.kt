@@ -28,7 +28,7 @@ import kotlin.math.min
  * color. (source color) 2. A theme. (Variant) 3. Whether or not its dark mode. 4. Contrast level.
  * (-1 to 1, currently contrast ratio 3.0 and 7.0)
  *
- * @property sourceColorHct The source color HCT.
+ * @property sourceColorHctList The source colors in HCT format.
  * @property variant The theme.
  * @property isDark Whether or not the theme is in dark mode.
  * @property platform The platform on which this scheme is intended to be used.
@@ -44,7 +44,7 @@ import kotlin.math.min
  * @constructor Creates a DynamicScheme.
  */
 public open class DynamicScheme(
-    public val sourceColorHct: Hct,
+    public val sourceColorHctList: List<Hct>,
     public val variant: Variant,
     public val isDark: Boolean,
     public val contrastLevel: Double,
@@ -60,7 +60,14 @@ public open class DynamicScheme(
         chroma = 84.0,
     ),
 ) {
+    init {
+        require(sourceColorHctList.isNotEmpty()) { "sourceColorHctList cannot be empty" }
+    }
+
     public val specVersion: ColorSpec.SpecVersion = maybeFallbackSpecVersion(specVersion, variant)
+
+    /** The source color of the scheme in HCT format. */
+    public val sourceColorHct: Hct = sourceColorHctList.first()
 
     /**
      * The platform on which this scheme is intended to be used.
@@ -74,6 +81,37 @@ public open class DynamicScheme(
             public val Default: Platform = PHONE
         }
     }
+
+    /**
+     * Secondary constructor accepting a single source color.
+     */
+    public constructor(
+        sourceColorHct: Hct,
+        variant: Variant,
+        isDark: Boolean,
+        contrastLevel: Double,
+        primaryPalette: TonalPalette,
+        secondaryPalette: TonalPalette,
+        tertiaryPalette: TonalPalette,
+        neutralPalette: TonalPalette,
+        neutralVariantPalette: TonalPalette,
+        platform: Platform = Platform.PHONE,
+        specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.SPEC_2021,
+        errorPalette: TonalPalette = TonalPalette.fromHueAndChroma(hue = 25.0, chroma = 84.0),
+    ) : this(
+        sourceColorHctList = listOf(sourceColorHct),
+        variant = variant,
+        isDark = isDark,
+        contrastLevel = contrastLevel,
+        platform = platform,
+        specVersion = specVersion,
+        primaryPalette = primaryPalette,
+        secondaryPalette = secondaryPalette,
+        tertiaryPalette = tertiaryPalette,
+        neutralPalette = neutralPalette,
+        neutralVariantPalette = neutralVariantPalette,
+        errorPalette = errorPalette,
+    )
 
     public constructor(
         sourceColorHct: Hct,
@@ -89,7 +127,7 @@ public open class DynamicScheme(
         neutralVariantPalette: TonalPalette,
         errorPalette: TonalPalette?,
     ) : this(
-        sourceColorHct = sourceColorHct,
+        sourceColorHctList = listOf(sourceColorHct),
         variant = variant,
         isDark = isDark,
         contrastLevel = contrastLevel,
@@ -308,7 +346,7 @@ public open class DynamicScheme(
             contrastLevel: Double = other.contrastLevel,
         ): DynamicScheme =
             DynamicScheme(
-                sourceColorHct = other.sourceColorHct,
+                sourceColorHctList = other.sourceColorHctList,
                 variant = other.variant,
                 isDark = isDark,
                 contrastLevel = contrastLevel,
@@ -414,17 +452,21 @@ public open class DynamicScheme(
             specVersion: ColorSpec.SpecVersion,
             variant: Variant
         ): ColorSpec.SpecVersion {
-            return when (variant) {
-                Variant.EXPRESSIVE,
-                Variant.VIBRANT,
-                Variant.TONAL_SPOT,
-                Variant.NEUTRAL -> specVersion
-                Variant.MONOCHROME,
-                Variant.FIDELITY,
-                Variant.CONTENT,
-                Variant.RAINBOW,
-                Variant.FRUIT_SALAD -> ColorSpec.SpecVersion.SPEC_2021
+            if (variant == Variant.CMF) {
+                return specVersion
             }
+            if (variant == Variant.EXPRESSIVE ||
+                variant == Variant.VIBRANT ||
+                variant == Variant.TONAL_SPOT ||
+                variant == Variant.NEUTRAL
+            ) {
+                return if (specVersion == ColorSpec.SpecVersion.SPEC_2026) {
+                    ColorSpec.SpecVersion.SPEC_2025
+                } else {
+                    specVersion
+                }
+            }
+            return ColorSpec.SpecVersion.SPEC_2021
         }
     }
 }
