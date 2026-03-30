@@ -140,6 +140,7 @@ public final class com/materialkolor/MaterialKolors {
 }
 
 public final class com/materialkolor/PaletteStyle : java/lang/Enum {
+	public static final field Cmf Lcom/materialkolor/PaletteStyle;
 	public static final field Content Lcom/materialkolor/PaletteStyle;
 	public static final field Expressive Lcom/materialkolor/PaletteStyle;
 	public static final field Fidelity Lcom/materialkolor/PaletteStyle;
