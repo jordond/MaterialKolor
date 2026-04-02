@@ -14,4 +14,5 @@ internal val PaletteStyle.asVariant: Variant
         PaletteStyle.Monochrome -> Variant.MONOCHROME
         PaletteStyle.Fidelity -> Variant.FIDELITY
         PaletteStyle.Content -> Variant.CONTENT
+        is PaletteStyle.Cmf -> Variant.CMF
     }

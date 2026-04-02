@@ -67,6 +67,7 @@ class DynamicSchemeTest {
             when (specVersion) {
                 ColorSpec.SpecVersion.SPEC_2021 -> dynamiccolor.ColorSpec.SpecVersion.SPEC_2021
                 ColorSpec.SpecVersion.SPEC_2025 -> dynamiccolor.ColorSpec.SpecVersion.SPEC_2025
+                ColorSpec.SpecVersion.SPEC_2026 -> dynamiccolor.ColorSpec.SpecVersion.SPEC_2026
             },
             dynamiccolor.DynamicScheme.Platform.PHONE,
         )

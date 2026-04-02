@@ -21,7 +21,12 @@ package com.materialkolor.dynamiccolor
 internal object ColorSpecs {
     private val SPEC_2021: ColorSpec = ColorSpec2021()
     private val SPEC_2025: ColorSpec = ColorSpec2025()
+    private val SPEC_2026: ColorSpec = ColorSpec2026()
 
-    fun get(specVersion: ColorSpec.SpecVersion?): ColorSpec =
-        if (specVersion === ColorSpec.SpecVersion.SPEC_2025) SPEC_2025 else SPEC_2021
+    fun get(specVersion: ColorSpec.SpecVersion? = null): ColorSpec =
+        when (specVersion) {
+            ColorSpec.SpecVersion.SPEC_2025 -> SPEC_2025
+            ColorSpec.SpecVersion.SPEC_2026 -> SPEC_2026
+            else -> SPEC_2021
+        }
 }

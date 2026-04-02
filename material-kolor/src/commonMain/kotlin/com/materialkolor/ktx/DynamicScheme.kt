@@ -5,6 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.Contrast
 import com.materialkolor.PaletteStyle
+import com.materialkolor.PaletteStyle.Cmf
 import com.materialkolor.PaletteStyle.Content
 import com.materialkolor.PaletteStyle.Expressive
 import com.materialkolor.PaletteStyle.Fidelity
@@ -17,6 +18,7 @@ import com.materialkolor.PaletteStyle.Vibrant
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.internal.asVariant
 import com.materialkolor.scheme.DynamicScheme
+import com.materialkolor.scheme.SchemeCmf
 import com.materialkolor.scheme.SchemeContent
 import com.materialkolor.scheme.SchemeExpressive
 import com.materialkolor.scheme.SchemeFidelity
@@ -61,6 +63,13 @@ public fun Color.toDynamicScheme(
         Monochrome -> SchemeMonochrome(hct, isDark, contrastLevel, specVersion, platform)
         Fidelity -> SchemeFidelity(hct, isDark, contrastLevel, specVersion, platform)
         Content -> SchemeContent(hct, isDark, contrastLevel, specVersion, platform)
+        is Cmf -> {
+            val sourceColorHctList = buildList {
+                add(hct)
+                style.tertiarySourceColor?.let { add(it.toHct()) }
+            }
+            SchemeCmf(sourceColorHctList, isDark, contrastLevel, specVersion, platform)
+        }
     }
 }
 
