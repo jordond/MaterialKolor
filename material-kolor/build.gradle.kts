@@ -22,6 +22,10 @@ kotlin {
         minSdk = libs.versions.sdk.min.get().toInt()
         namespace = "com.materialkolor"
 
+        defaultConfig {
+            consumerProguardFiles("consumer-rules.pro")
+        }
+
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
