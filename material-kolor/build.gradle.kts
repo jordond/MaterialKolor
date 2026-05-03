@@ -22,8 +22,9 @@ kotlin {
         minSdk = libs.versions.sdk.min.get().toInt()
         namespace = "com.materialkolor"
 
-        defaultConfig {
-            consumerProguardFiles("consumer-rules.pro")
+        optimization {
+            consumerKeepRules.publish = true
+            consumerKeepRules.file("consumer-rules.pro")
         }
 
         compilerOptions {
