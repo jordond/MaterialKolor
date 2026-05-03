@@ -64,11 +64,12 @@ public fun Color.toDynamicScheme(
         Fidelity -> SchemeFidelity(hct, isDark, contrastLevel, specVersion, platform)
         Content -> SchemeContent(hct, isDark, contrastLevel, specVersion, platform)
         is Cmf -> {
+            val cmfSpecVersion = specVersion.coerceCmf()
             val sourceColorHctList = buildList {
                 add(hct)
                 style.tertiarySourceColor?.let { add(it.toHct()) }
             }
-            SchemeCmf(sourceColorHctList, isDark, contrastLevel, specVersion, platform)
+            SchemeCmf(sourceColorHctList, isDark, contrastLevel, cmfSpecVersion, platform)
         }
     }
 }
@@ -171,7 +172,7 @@ public fun DynamicScheme(
     val defaults = seedColor.toDynamicScheme(isDark, style, contrastLevel, specVersion, platform)
 
     return DynamicScheme(
-        sourceColorHct = seedColor.toHct(),
+        sourceColorHctList = defaults.sourceColorHctList,
         variant = style.asVariant,
         isDark = isDark,
         contrastLevel = contrastLevel,
@@ -181,7 +182,10 @@ public fun DynamicScheme(
         neutralPalette = neutral?.toTonalPalette() ?: defaults.neutralPalette,
         neutralVariantPalette = neutralVariant?.toTonalPalette() ?: defaults.neutralVariantPalette,
         errorPalette = error?.toTonalPalette() ?: defaults.errorPalette,
-        specVersion = specVersion,
+        specVersion = defaults.specVersion,
         platform = platform,
     )
 }
+
+// SchemeCmf requires SPEC_2026.
+private fun ColorSpec.SpecVersion.coerceCmf(): ColorSpec.SpecVersion = ColorSpec.SpecVersion.SPEC_2026
