@@ -79,7 +79,9 @@ public sealed interface PaletteStyle {
      * Supports an optional second source color for the tertiary palette via [tertiarySourceColor].
      * When [tertiarySourceColor] is `null`, the tertiary palette falls back to the primary source color.
      *
-     * Requires [com.materialkolor.dynamiccolor.ColorSpec.SpecVersion.SPEC_2026].
+     * Requires [com.materialkolor.dynamiccolor.ColorSpec.SpecVersion.SPEC_2026]. Any other
+     * `specVersion` passed to APIs that accept this style (e.g. [com.materialkolor.ktx.toDynamicScheme])
+     * is ignored and forced to `SPEC_2026`.
      *
      * @param[tertiarySourceColor] An optional secondary source color used for the tertiary palette.
      */

@@ -22,6 +22,9 @@ import com.materialkolor.palettes.TonalPalette
 /**
  * A Dynamic Color theme based on the CMF (Color, Material, Finish) design discipline, supporting
  * 2 source colors.
+ *
+ * Only the 2026 spec is supported. Constructing with any other [ColorSpec.SpecVersion]
+ * throws [IllegalArgumentException].
  */
 public class SchemeCmf(
     sourceColorHctList: List<Hct>,

@@ -38,10 +38,13 @@ public val DynamicScheme.sourceColor: Color
 /**
  * Generate a [DynamicScheme] based on the given [Color].
  *
+ * Note: when [style] is [PaletteStyle.Cmf], [specVersion] is ignored and forced to
+ * [ColorSpec.SpecVersion.SPEC_2026]. CMF is defined only for the 2026 spec.
+ *
  * @param[isDark] Whether the scheme should be dark or light.
  * @param[style] The style of the scheme, see [PaletteStyle].
  * @param[contrastLevel] The contrast level of the scheme.
- * @param[specVersion] The version of the spec to use.
+ * @param[specVersion] The version of the spec to use. Ignored when [style] is [PaletteStyle.Cmf].
  * @param[platform] The platform to use.
  * @return The generated [DynamicScheme].
  */
