@@ -1202,6 +1202,7 @@ public open class ColorSpec2021 : ColorSpec {
                 chroma = 40.0,
             )
             Variant.VIBRANT -> TonalPalette.fromHueAndChroma(sourceColorHct.hue, 200.0)
+            else -> throw IllegalArgumentException("$variant variant is not supported in current spec.")
         }
 
     public override fun getSecondaryPalette(
@@ -1247,6 +1248,7 @@ public open class ColorSpec2021 : ColorSpec {
                 ),
                 24.0,
             )
+            else -> throw IllegalArgumentException("$variant variant is not supported in current spec.")
         }
     }
 
@@ -1325,6 +1327,7 @@ public open class ColorSpec2021 : ColorSpec {
                 ),
                 chroma = 32.0,
             )
+            else -> throw IllegalArgumentException("$variant variant is not supported in current spec.")
         }
 
     public override fun getNeutralPalette(
@@ -1349,6 +1352,7 @@ public open class ColorSpec2021 : ColorSpec {
                 chroma = 8.0,
             )
             Variant.VIBRANT -> TonalPalette.fromHueAndChroma(sourceColorHct.hue, 10.0)
+            else -> throw IllegalArgumentException("$variant variant is not supported in current spec.")
         }
 
     public override fun getNeutralVariantPalette(
@@ -1377,6 +1381,7 @@ public open class ColorSpec2021 : ColorSpec {
                 chroma = 12.0,
             )
             Variant.VIBRANT -> TonalPalette.fromHueAndChroma(sourceColorHct.hue, 12.0)
+            else -> throw IllegalArgumentException("$variant variant is not supported in current spec.")
         }
 
     public override fun getErrorPalette(
@@ -1397,6 +1402,7 @@ public open class ColorSpec2021 : ColorSpec {
             Variant.EXPRESSIVE,
             Variant.VIBRANT,
             -> null
+            else -> throw IllegalArgumentException("$variant variant is not supported in current spec.")
         }
 
     public companion object {

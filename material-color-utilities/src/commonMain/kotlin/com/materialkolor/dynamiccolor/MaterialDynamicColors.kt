@@ -270,6 +270,6 @@ public class MaterialDynamicColors {
         )
 
     public companion object {
-        private val colorSpec = ColorSpec2025()
+        private val colorSpec = ColorSpec2026()
     }
 }

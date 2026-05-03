@@ -28,7 +28,7 @@ import kotlin.math.min
 /**
  * [ColorSpec] implementation for the 2025 spec.
  */
-public class ColorSpec2025 : ColorSpec2021() {
+public open class ColorSpec2025 : ColorSpec2021() {
     // Surfaces [S]
     public override fun background(): DynamicColor {
         // Remapped to surface for 2025 spec.

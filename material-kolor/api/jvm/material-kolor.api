@@ -139,19 +139,89 @@ public final class com/materialkolor/MaterialKolors {
 	public final fun textSecondaryAndTertiaryInverseDisabled-0d7_KjU ()J
 }
 
-public final class com/materialkolor/PaletteStyle : java/lang/Enum {
-	public static final field Content Lcom/materialkolor/PaletteStyle;
-	public static final field Expressive Lcom/materialkolor/PaletteStyle;
-	public static final field Fidelity Lcom/materialkolor/PaletteStyle;
-	public static final field FruitSalad Lcom/materialkolor/PaletteStyle;
-	public static final field Monochrome Lcom/materialkolor/PaletteStyle;
-	public static final field Neutral Lcom/materialkolor/PaletteStyle;
-	public static final field Rainbow Lcom/materialkolor/PaletteStyle;
-	public static final field TonalSpot Lcom/materialkolor/PaletteStyle;
-	public static final field Vibrant Lcom/materialkolor/PaletteStyle;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/materialkolor/PaletteStyle;
-	public static fun values ()[Lcom/materialkolor/PaletteStyle;
+public abstract interface class com/materialkolor/PaletteStyle {
+}
+
+public final class com/materialkolor/PaletteStyle$Cmf : com/materialkolor/PaletteStyle {
+	public static final field $stable I
+	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTertiarySourceColor-QN2ZGVo ()Landroidx/compose/ui/graphics/Color;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/materialkolor/PaletteStyle$Content : com/materialkolor/PaletteStyle {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$Content;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/materialkolor/PaletteStyle$Expressive : com/materialkolor/PaletteStyle {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$Expressive;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/materialkolor/PaletteStyle$Fidelity : com/materialkolor/PaletteStyle {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$Fidelity;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/materialkolor/PaletteStyle$FruitSalad : com/materialkolor/PaletteStyle {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$FruitSalad;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/materialkolor/PaletteStyle$Monochrome : com/materialkolor/PaletteStyle {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$Monochrome;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/materialkolor/PaletteStyle$Neutral : com/materialkolor/PaletteStyle {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$Neutral;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/materialkolor/PaletteStyle$Rainbow : com/materialkolor/PaletteStyle {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$Rainbow;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/materialkolor/PaletteStyle$TonalSpot : com/materialkolor/PaletteStyle {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$TonalSpot;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/materialkolor/PaletteStyle$Vibrant : com/materialkolor/PaletteStyle {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$Vibrant;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/materialkolor/ktx/BlendKt {

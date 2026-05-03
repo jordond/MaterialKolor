@@ -23,6 +23,9 @@ The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com
 ## Table of Contents
 
 - [Platforms](#platforms)
+- [Migration](#migration)
+  - [From 4.x to 6.x](#from-4x-to-6x)
+  - [About 5.0.0-alphaXX](#about-500-alphaxx)
 - [Inspiration](#inspiration)
 - [Setup](#setup)
     - [Multiplatform](#multiplatform)
@@ -30,6 +33,7 @@ The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com
     - [Version Catalog](#version-catalog)
 - [Usage](#usage)
   - [Updated Colors](#updated-colors)
+  - [CMF Style](#cmf-style)
   - [DynamicMaterialTheme](#dynamicmaterialtheme)
   - [DynamicMaterialExpressiveTheme](#dynamicmaterialexpressivetheme)
 - [Extensions](#extensions)
@@ -39,6 +43,42 @@ The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com
 - [Generating from an Image](#generating-from-an-image)
 - [License](#license)
   - [Changes from original source](#changes-from-original-source)
+
+## Migration
+
+### From 4.x to 6.x
+
+**`PaletteStyle` is now a sealed interface** instead of an enum class. Existing code referencing
+`PaletteStyle.TonalSpot`, `PaletteStyle.Expressive`, etc. will continue to work without changes.
+The only difference is that `PaletteStyle.entries` and `PaletteStyle.values()` are no longer
+available.
+
+The new `PaletteStyle.Cmf` is a class (instead of a data object) that accepts an optional
+`tertiarySourceColor` parameter. See [CMF Style](#cmf-style) for more details.
+
+**New color spec version:** `SPEC_2026` has been added. The `Cmf` style requires it.
+
+**`DynamicScheme` now accepts `sourceColorHctList`:** The `DynamicScheme` constructor now takes
+a list of source colors (`sourceColorHctList`) for multi-source color schemes. The single-source
+constructors still work.
+
+**Material Expressive:** This `6.x` stable release does not include Material Expressive. The
+previous `5.0.0-alphaXX` preview line with Material Expressive support has been renumbered to
+`7.x` preview to keep stable and preview tracks separate. See [About 5.0.0-alphaXX](#about-500-alphaxx).
+
+### About 5.0.0-alphaXX
+
+The `5.0.0-alpha01` through `5.0.0-alpha07` artifacts on Maven Central were a preview line
+containing Material Expressive support, which depended on an unstable Compose Multiplatform
+release. That preview line has been abandoned in favor of two separate tracks:
+
+- **Stable (`6.x`)**: the artifacts you are reading about now. SPEC_2026, CMF, sealed
+  `PaletteStyle`. No Material Expressive. Stable Compose Multiplatform.
+- **Preview (`7.x-alphaXX`)**: everything in `6.x` plus Material Expressive. Tracks an
+  unstable Compose Multiplatform release.
+
+If you were on `5.0.0-alphaXX` for Material Expressive, migrate to `7.0.0-alpha01` (or later).
+If you were on `5.0.0-alphaXX` for any other reason, migrate to `6.0.0`.
 
 ## Platforms
 
@@ -152,18 +192,49 @@ dynamicColorScheme(
 
 ### Updated Colors
 
-With the release of Material3 Expressive, Google has added a new color spec used when generating
-colors. By default MaterialKolor uses the `SPEC_2021` version. If you want to try out the new colors
-you will need to use `ColorSpec.SpecVersion.SPEC_2025`:
+By default MaterialKolor uses `SPEC_2021` for color generation. There are two newer versions
+available:
+
+- `SPEC_2025` - Colors from Material3 Expressive.
+- `SPEC_2026` - Latest spec, needed for the [CMF style](#cmf-style).
 
 ```kotlin
 val scheme = rememberDynamicColorScheme(
   seedColor = seedColor,
   isDark = isDark,
-  specVersion = ColorSpec.SpecVersion.SPEC_2025,
-  style = PaletteStyle.Expressive, // Optional but recommended if you are using `MaterialExpressiveTheme`
+  specVersion = ColorSpec.SpecVersion.SPEC_2026,
 )
 ```
+
+### CMF Style
+
+CMF (Color, Material, Finish) is a palette style that takes two source colors. You can pass a
+second color for the tertiary palette, or leave it out and the tertiary will be derived from
+the seed:
+
+```kotlin
+// Single source
+DynamicMaterialTheme(
+    seedColor = seedColor,
+    isDark = isDark,
+    style = PaletteStyle.Cmf(),
+    specVersion = ColorSpec.SpecVersion.SPEC_2026,
+    content = content,
+)
+
+// With a custom tertiary source color
+DynamicMaterialTheme(
+    seedColor = seedColor,
+    isDark = isDark,
+    style = PaletteStyle.Cmf(tertiarySourceColor = Color.Blue),
+    specVersion = ColorSpec.SpecVersion.SPEC_2026,
+    content = content,
+)
+```
+
+**Note:** CMF requires `SPEC_2026`. For more control you can use
+[`SchemeCmf`](material-color-utilities/src/commonMain/kotlin/com/materialkolor/scheme/SchemeCmf.kt)
+directly.
 
 ### DynamicMaterialTheme
 
@@ -192,13 +263,13 @@ fun MyTheme(
 ### DynamicMaterialExpressiveTheme
 
 Support for Material Expressive was removed in MaterialKolor `4.0.0` because Compose Multiplatform
-`1.9`
-uses a version of Material 3 that no longer supports Material Expressive.
+`1.9` uses a version of Material 3 that no longer supports Material Expressive.
 
-If you still want to use Material Expressive, you can use the MaterialKolor [
-`5.0.0` preview version](https://github.com/jordond/MaterialKolor/releases/tag/5.0.0-alpha01).
+Material Expressive support is available on the preview track as `7.0.0-alphaXX`. The old
+`5.0.0-alphaXX` preview line has been renumbered to `7.x` so the stable `6.x` track and the
+Expressive preview track stay separate. See [About 5.0.0-alphaXX](#about-500-alphaxx).
 
-You can view the README for `5.0.0` [here](https://github.com/jordond/MaterialKolor/blob/d79d0884312e0aa56253898c145e2b2affbdd7fb/README.md)
+You can view the README for the Expressive preview [here](https://github.com/jordond/MaterialKolor/blob/d79d0884312e0aa56253898c145e2b2affbdd7fb/README.md).
 
 ## Extensions
 

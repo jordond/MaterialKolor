@@ -109,6 +109,7 @@ public final class com/materialkolor/dynamiccolor/ColorSpec$SpecVersion : java/l
 	public static final field Companion Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion$Companion;
 	public static final field SPEC_2021 Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;
 	public static final field SPEC_2025 Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;
+	public static final field SPEC_2026 Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;
 	public static fun values ()[Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;
@@ -202,7 +203,7 @@ public class com/materialkolor/dynamiccolor/ColorSpec2021 : com/materialkolor/dy
 public final class com/materialkolor/dynamiccolor/ColorSpec2021$Companion {
 }
 
-public final class com/materialkolor/dynamiccolor/ColorSpec2025 : com/materialkolor/dynamiccolor/ColorSpec2021 {
+public class com/materialkolor/dynamiccolor/ColorSpec2025 : com/materialkolor/dynamiccolor/ColorSpec2021 {
 	public static final field Companion Lcom/materialkolor/dynamiccolor/ColorSpec2025$Companion;
 	public fun <init> ()V
 	public fun background ()Lcom/materialkolor/dynamiccolor/DynamicColor;
@@ -272,6 +273,56 @@ public final class com/materialkolor/dynamiccolor/ColorSpec2025 : com/materialko
 public final class com/materialkolor/dynamiccolor/ColorSpec2025$Companion {
 }
 
+public class com/materialkolor/dynamiccolor/ColorSpec2026 : com/materialkolor/dynamiccolor/ColorSpec2025 {
+	public fun <init> ()V
+	public fun error ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun errorContainer ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun errorDim ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun inverseOnSurface ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun inverseSurface ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onError ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onErrorContainer ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onPrimary ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onPrimaryContainer ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onPrimaryFixed ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onPrimaryFixedVariant ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onSecondary ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onSecondaryContainer ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onSecondaryFixed ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onSecondaryFixedVariant ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onSurface ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onSurfaceVariant ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onTertiary ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onTertiaryContainer ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onTertiaryFixed ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun onTertiaryFixedVariant ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun outline ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun outlineVariant ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun primary ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun primaryContainer ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun primaryDim ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun primaryFixed ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun primaryFixedDim ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun secondary ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun secondaryContainer ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun secondaryDim ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun secondaryFixed ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun secondaryFixedDim ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun surface ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun surfaceBright ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun surfaceContainer ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun surfaceContainerHigh ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun surfaceContainerHighest ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun surfaceContainerLow ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun surfaceContainerLowest ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun surfaceDim ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun tertiary ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun tertiaryContainer ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun tertiaryDim ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun tertiaryFixed ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+	public fun tertiaryFixedDim ()Lcom/materialkolor/dynamiccolor/DynamicColor;
+}
+
 public final class com/materialkolor/dynamiccolor/ContrastCurve {
 	public fun <init> (DDDD)V
 	public fun equals (Ljava/lang/Object;)Z
@@ -329,6 +380,10 @@ public final class com/materialkolor/dynamiccolor/DynamicColor$Companion$Builder
 	public final fun setSecondBackground (Lkotlin/jvm/functions/Function1;)Lcom/materialkolor/dynamiccolor/DynamicColor$Companion$Builder;
 	public final fun setTone (Lkotlin/jvm/functions/Function1;)Lcom/materialkolor/dynamiccolor/DynamicColor$Companion$Builder;
 	public final fun setToneDeltaPair (Lkotlin/jvm/functions/Function1;)Lcom/materialkolor/dynamiccolor/DynamicColor$Companion$Builder;
+}
+
+public final class com/materialkolor/dynamiccolor/DynamicColorKt {
+	public static final fun extendSpecVersion (Lcom/materialkolor/dynamiccolor/DynamicColor;Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/dynamiccolor/DynamicColor;)Lcom/materialkolor/dynamiccolor/DynamicColor;
 }
 
 public final class com/materialkolor/dynamiccolor/MaterialDynamicColors {
@@ -566,6 +621,8 @@ public class com/materialkolor/scheme/DynamicScheme {
 	public synthetic fun <init> (Lcom/materialkolor/hct/Hct;Lcom/materialkolor/scheme/Variant;ZDLcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/scheme/DynamicScheme$Platform;Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/palettes/TonalPalette;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lcom/materialkolor/hct/Hct;Lcom/materialkolor/scheme/Variant;ZDLcom/materialkolor/scheme/DynamicScheme$Platform;Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;)V
 	public synthetic fun <init> (Lcom/materialkolor/hct/Hct;Lcom/materialkolor/scheme/Variant;ZDLcom/materialkolor/scheme/DynamicScheme$Platform;Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Lcom/materialkolor/scheme/Variant;ZDLcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/scheme/DynamicScheme$Platform;Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/palettes/TonalPalette;)V
+	public synthetic fun <init> (Ljava/util/List;Lcom/materialkolor/scheme/Variant;ZDLcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/palettes/TonalPalette;Lcom/materialkolor/scheme/DynamicScheme$Platform;Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/palettes/TonalPalette;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getArgb (Lcom/materialkolor/dynamiccolor/DynamicColor;)I
 	public final fun getBackground ()I
 	public final fun getContrastLevel ()D
@@ -619,6 +676,7 @@ public class com/materialkolor/scheme/DynamicScheme {
 	public final fun getShadow ()I
 	public final fun getSourceColorArgb ()I
 	public final fun getSourceColorHct ()Lcom/materialkolor/hct/Hct;
+	public final fun getSourceColorHctList ()Ljava/util/List;
 	public final fun getSpecVersion ()Lcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;
 	public final fun getSurface ()I
 	public final fun getSurfaceBright ()I
@@ -663,6 +721,13 @@ public final class com/materialkolor/scheme/DynamicScheme$Platform : java/lang/E
 
 public final class com/materialkolor/scheme/DynamicScheme$Platform$Companion {
 	public final fun getDefault ()Lcom/materialkolor/scheme/DynamicScheme$Platform;
+}
+
+public final class com/materialkolor/scheme/SchemeCmf : com/materialkolor/scheme/DynamicScheme {
+	public fun <init> (Lcom/materialkolor/hct/Hct;ZDLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/scheme/DynamicScheme$Platform;)V
+	public synthetic fun <init> (Lcom/materialkolor/hct/Hct;ZDLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/scheme/DynamicScheme$Platform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;ZDLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/scheme/DynamicScheme$Platform;)V
+	public synthetic fun <init> (Ljava/util/List;ZDLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/scheme/DynamicScheme$Platform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/materialkolor/scheme/SchemeContent : com/materialkolor/scheme/DynamicScheme {
@@ -711,6 +776,7 @@ public final class com/materialkolor/scheme/SchemeVibrant : com/materialkolor/sc
 }
 
 public final class com/materialkolor/scheme/Variant : java/lang/Enum {
+	public static final field CMF Lcom/materialkolor/scheme/Variant;
 	public static final field CONTENT Lcom/materialkolor/scheme/Variant;
 	public static final field EXPRESSIVE Lcom/materialkolor/scheme/Variant;
 	public static final field FIDELITY Lcom/materialkolor/scheme/Variant;
