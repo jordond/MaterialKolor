@@ -61,7 +61,12 @@ public class TonalPalette private constructor(
      * @param[tone] HCT tone, measured from 0 to 100.
      * @return HCT representation of a color with that tone.
      */
-    public fun getHct(tone: Double): Hct = Hct.from(hue, chroma, tone)
+    public fun getHct(tone: Double): Hct {
+        if (tone == 99.0 && Hct.isYellow(hue)) {
+            return Hct.fromInt(tone(99))
+        }
+        return Hct.from(hue, chroma, tone)
+    }
 
     /**
      * Key color is a color that represents the hue and chroma of a tonal palette.

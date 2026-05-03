@@ -60,6 +60,35 @@ class TonalPaletteTest {
         }
     }
 
+    // Regression: ports upstream fix 1a34bd2 from material-color-utilities.
+    // Yellow hues at T99 must route getHct through Hct.fromInt(tone(99)) so the averaged
+    // ARGB from tone(Int) drives the HCT result instead of a direct Hct.from(hue,chroma,99).
+    @Test
+    fun getHct_yellowTone99_matchesAveragedTone() {
+        val yellowHues = listOf(105.0, 110.0, 115.0, 120.0, 124.0)
+        for (hue in yellowHues) {
+            val palette = TonalPalette.fromHueAndChroma(hue, 50.0)
+            val expected = Hct.fromInt(palette.tone(99))
+            val actual = palette.getHct(99.0)
+            actual.hue shouldBe expected.hue
+            actual.chroma shouldBe expected.chroma
+            actual.tone shouldBe expected.tone
+        }
+    }
+
+    @Test
+    fun getHct_nonYellowTone99_unaffected() {
+        val nonYellowHues = listOf(0.0, 60.0, 104.999, 125.0, 240.0, 300.0)
+        for (hue in nonYellowHues) {
+            val palette = TonalPalette.fromHueAndChroma(hue, 50.0)
+            val direct = Hct.from(hue, palette.chroma, 99.0)
+            val viaPalette = palette.getHct(99.0)
+            viaPalette.hue shouldBe direct.hue
+            viaPalette.chroma shouldBe direct.chroma
+            viaPalette.tone shouldBe direct.tone
+        }
+    }
+
     private fun assertPalettesEqual(
         expected: palettes.TonalPalette,
         actual: TonalPalette,
