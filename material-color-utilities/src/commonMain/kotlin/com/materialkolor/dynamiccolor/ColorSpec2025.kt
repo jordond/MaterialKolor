@@ -1787,11 +1787,15 @@ public class ColorSpec2025 : ColorSpec2021() {
         // "recover" intended chroma as contrast increases.
         val palette: TonalPalette = color.palette(scheme)
         val tone = getTone(scheme, color)
-        val hue: Double = palette.hue
-        val chromaMultiplier = color.chromaMultiplier?.invoke(scheme) ?: 1
-        val chroma: Double = palette.chroma * chromaMultiplier.toDouble()
-
-        return Hct.from(hue, chroma, tone)
+        val chromaMultiplier = color.chromaMultiplier?.invoke(scheme) ?: 1.0
+        if (chromaMultiplier == 1.0) {
+            return palette.getHct(tone)
+        }
+        val chroma = palette.chroma * chromaMultiplier
+        if (tone == 99.0 && Hct.isYellow(palette.hue)) {
+            return TonalPalette.fromHueAndChroma(palette.hue, chroma).getHct(tone)
+        }
+        return Hct.from(palette.hue, chroma, tone)
     }
 
     public override fun getTone(
