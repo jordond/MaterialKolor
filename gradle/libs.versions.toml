@@ -1,6 +1,6 @@
 [versions]
 runtime = "1.10.0"
-sdk-compile = "36"
+sdk-compile = "37"
 sdk-min = "21"
 jvmTarget = "17"
 agp = "9.2.1"
@@ -15,7 +15,7 @@ colormath = "3.6.1"
 poko = "0.23.1"
 errorProneAnnotations = "2.50.0"
 kotest = "6.2.2"
-ktlint = "1.5.0"
+ktlint = "1.8.0"
 spotless = "8.8.0"
 
 [libraries]

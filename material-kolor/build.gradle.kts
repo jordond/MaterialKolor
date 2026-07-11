@@ -37,7 +37,7 @@ kotlin {
         }
     }
 
-    js(IR) {
+    js {
         browser()
     }
 
@@ -46,11 +46,9 @@ kotlin {
         browser()
     }
 
-    macosX64()
     macosArm64()
 
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64(),
     ).forEach { target ->
