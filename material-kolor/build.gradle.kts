@@ -1,4 +1,3 @@
-import com.android.build.api.dsl.androidLibrary
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -17,7 +16,7 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
     @Suppress("UnstableApiUsage")
-    androidLibrary {
+    android {
         compileSdk = libs.versions.sdk.compile.get().toInt()
         minSdk = libs.versions.sdk.min.get().toInt()
         namespace = "com.materialkolor"
