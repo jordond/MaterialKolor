@@ -23,6 +23,7 @@ androidx-annotation = { module = "androidx.annotation:annotation", version.ref =
 colormath = { module = "com.github.ajalt.colormath:colormath", version.ref = "colormath" }
 errorProneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorProneAnnotations" }
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
 compose-ui-test = { module = "org.jetbrains.compose.ui:ui-test", version.ref = "compose-multiplatform" }
