@@ -32,7 +32,7 @@ kotlin {
         }
     }
 
-    js(IR) {
+    js {
         browser()
     }
 
@@ -40,7 +40,6 @@ kotlin {
         browser()
     }
 
-    macosX64()
     macosArm64()
 
     listOf(
