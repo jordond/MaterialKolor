@@ -43,5 +43,5 @@ android {
 }
 
 dependencies {
-    implementation(project(":app"))
+    implementation(project(":builder:shared"))
 }

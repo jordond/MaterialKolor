@@ -16,6 +16,9 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
 }
 
+val useLocalMaterialKolor =
+    providers.gradleProperty("materialkolor.useLocal").orNull?.toBoolean() ?: true
+
 buildkonfig {
     packageName = libs.versions.app.name.get()
 
@@ -98,8 +101,13 @@ kotlin {
             implementation(libs.stateHolder.dispatcher)
             implementation(libs.stateHolder.dispatcher.compose)
             implementation(libs.stateHolder.viewModel)
-            implementation(libs.materialKolor)
-            implementation(libs.materialKolor.utilities)
+            if (useLocalMaterialKolor) {
+                implementation(project(":material-kolor"))
+                implementation(project(":material-color-utilities"))
+            } else {
+                implementation(libs.materialKolor)
+                implementation(libs.materialKolor.utilities)
+            }
             implementation(libs.compose.colorpicker)
             implementation(libs.calf.filePicker)
             implementation(libs.androidx.lifecycle.viewmodel)
@@ -163,6 +171,10 @@ kotlin {
             iosMain.get().dependsOn(this)
         }
     }
+}
+
+compose.resources {
+    packageOfResClass = "materialkolorbuilder.app.generated.resources"
 }
 
 compose.desktop {
