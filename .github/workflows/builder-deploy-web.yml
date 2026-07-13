@@ -1,0 +1,65 @@
+name: Deploy Builder Web App to Staging
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'builder/**'
+      - 'material-kolor/**'
+      - 'material-color-utilities/**'
+      - 'gradle/**'
+
+concurrency:
+  group: builder-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup-java
+        uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: adopt
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build web app
+        run: ./gradlew :builder:shared:composeCompatibilityBrowserDistribution
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-app
+          path: builder/shared/build/dist/composeWebCompatibility/productionExecutable
+
+  deploy:
+    name: "Deploy to Staging"
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: web-app
+          path: builder/shared/build/dist/composeWebCompatibility/productionExecutable
+
+      - name: Deploy to staging
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MATERIALKOLOR }}
+          channelId: staging
+          projectId: materialkolor
