@@ -95,16 +95,16 @@ case $platform in
             echo "Keystore created from KEYSTORE_BASE64 environment variable."
         fi
 
-        gradle assembleRelease bundleRelease
+        gradle :builder:android:assembleRelease :builder:android:bundleRelease
 
-        cp "$ROOT/app/build/outputs/bundle/release/app-release.aab" "$BUILD_DIR/mkb-android-$version-$code_value.aab"
-        cp "$ROOT/app/build/outputs/apk/release/app-release.apk" "$BUILD_DIR/mkb-android-$version-$code_value.apk"
+        cp "$ROOT/builder/android/build/outputs/bundle/release/android-release.aab" "$BUILD_DIR/mkb-android-$version-$code_value.aab"
+        cp "$ROOT/builder/android/build/outputs/apk/release/android-release.apk" "$BUILD_DIR/mkb-android-$version-$code_value.apk"
 
         echo "Android bundle and APK built and saved to $BUILD_DIR"
         ;;
     web)
-        gradle composeCompatibilityBrowserDistribution
-        zip -r "$BUILD_DIR/mkb-web-$version-$code_value.zip" "$ROOT/app/build/dist/composeWebCompatibility/productionExecutable"
+        gradle :builder:shared:composeCompatibilityBrowserDistribution
+        zip -r "$BUILD_DIR/mkb-web-$version-$code_value.zip" "$ROOT/builder/shared/build/dist/composeWebCompatibility/productionExecutable"
         echo "Web app built and zipped to $BUILD_DIR/mkb-web-$version-$code_value.zip"
         ;;
     desktop)
@@ -120,10 +120,10 @@ case $platform in
             exit 1
         fi
 
-        output_folder="app/build/compose/binaries/main-release/$type"
+        output_folder="builder/shared/build/compose/binaries/main-release/$type"
 
         echo "Building for current platform: $current_platform"
-        gradle packageReleaseDistributionForCurrentOS
+        gradle :builder:shared:packageReleaseDistributionForCurrentOS
 
         # Find and copy the output file with the correct extension to the build directory
         find "$output_folder" -name "*.$type" -exec cp {} "$BUILD_DIR/mkb-desktop-$version-$code_value.$type" \;
