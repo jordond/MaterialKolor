@@ -14,7 +14,7 @@ actual external class JSZip actual constructor() {
 }
 
 internal actual suspend fun JSZip.createBlob(): Blob {
-    return generateAsync(createParams()).await()
+    return generateAsync(createParams()).await() as Blob
 }
 
 private fun createParams(): JsAny = js("({ type: 'blob' })")
