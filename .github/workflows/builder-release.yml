@@ -116,24 +116,12 @@ jobs:
 
       - name: Extract web build
         run: |
-          mkdir -p builder/shared/build/dist/composeWebCompatibility/productionExecutable
-          echo "Source directory contents:"
-          ls -la ./dist/
-          echo "Extracting web zip file..."
-          cd ./dist/
-          unzip -q mkb-web-*.zip
-          echo "Contents after extraction:"
-          find . -type f \( -name "*.html" -o -name "*.js" -o -name "*.wasm" \) | head -10
-          echo "Moving extracted files to build directory..."
-          if [ -d "builder/shared/build/dist/composeWebCompatibility/productionExecutable" ]; then
-            cp -rv builder/shared/build/dist/composeWebCompatibility/productionExecutable/* ../builder/shared/build/dist/composeWebCompatibility/productionExecutable/
-          else
-            echo "Direct web files found, copying them..."
-            cp -rv * ../builder/shared/build/dist/composeWebCompatibility/productionExecutable/ 2>/dev/null || true
-          fi
-          cd ..
+          DEST=builder/shared/build/dist/composeWebCompatibility/productionExecutable
+          mkdir -p "$DEST"
+          # scripts/build zips the dist contents flat, so unzip straight into DEST.
+          unzip -q ./dist/mkb-web-*.zip -d "$DEST"
           echo "Destination directory contents:"
-          ls -la builder/shared/build/dist/composeWebCompatibility/productionExecutable/
+          ls -la "$DEST"
 
       - name: Deploy to production
         uses: FirebaseExtended/action-hosting-deploy@v0

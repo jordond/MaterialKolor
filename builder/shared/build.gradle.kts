@@ -41,7 +41,6 @@ kotlin {
         binaries.executable()
     }
 
-    @Suppress("UnstableApiUsage")
     android {
         namespace = libs.versions.app.name.get()
         compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -80,7 +79,7 @@ kotlin {
             implementation(libs.compose.resources)
             implementation(libs.compose.runtime)
             implementation(libs.compose.ui)
-            implementation(libs.material3)
+            implementation(libs.compose.material3)
             implementation(libs.material3.adaptive)
             implementation(libs.material3.adaptive.layout)
             implementation(libs.material3.adaptive.navigation)
@@ -101,6 +100,7 @@ kotlin {
             implementation(libs.stateHolder.dispatcher)
             implementation(libs.stateHolder.dispatcher.compose)
             implementation(libs.stateHolder.viewModel)
+
             if (useLocalMaterialKolor) {
                 implementation(project(":material-kolor"))
                 implementation(project(":material-color-utilities"))
@@ -108,6 +108,7 @@ kotlin {
                 implementation(libs.materialKolor)
                 implementation(libs.materialKolor.utilities)
             }
+
             implementation(libs.compose.colorpicker)
             implementation(libs.calf.filePicker)
             implementation(libs.androidx.lifecycle.viewmodel)

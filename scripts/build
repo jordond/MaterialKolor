@@ -104,7 +104,9 @@ case $platform in
         ;;
     web)
         gradle :builder:shared:composeCompatibilityBrowserDistribution
-        zip -r "$BUILD_DIR/mkb-web-$version-$code_value.zip" "$ROOT/builder/shared/build/dist/composeWebCompatibility/productionExecutable"
+        # zip the dist *contents* (cd in first) so paths inside the archive are flat —
+        # zipping the absolute path stores home/runner/... and breaks the deploy extract.
+        (cd "$ROOT/builder/shared/build/dist/composeWebCompatibility/productionExecutable" && zip -r "$BUILD_DIR/mkb-web-$version-$code_value.zip" .)
         echo "Web app built and zipped to $BUILD_DIR/mkb-web-$version-$code_value.zip"
         ;;
     desktop)

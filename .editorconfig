@@ -26,3 +26,10 @@ ij_kotlin_spaces_around_assignment_operators = true
 # These options can keep to use single name import
 ij_kotlin_name_count_to_use_star_import = 2147483647
 ij_kotlin_name_count_to_use_star_import_for_members = 2147483647
+
+# Builder uses top-level backing vals, const naming, and a main.kt entrypoint
+# that ktlint can't autofix — scope those rules off for builder sources only.
+[builder/**/*.{kt,kts}]
+ktlint_standard_backing-property-naming = disabled
+ktlint_standard_property-naming = disabled
+ktlint_standard_filename = disabled

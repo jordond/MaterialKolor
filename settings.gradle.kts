@@ -17,7 +17,7 @@ dependencyResolutionManagement {
 }
 
 plugins {
-    id("com.gradle.develocity") version "4.4.0"
+    id("com.gradle.develocity") version "4.5.0"
     id("org.gradle.toolchains.foojay-resolver-convention").version("1.0.0")
 }
 
