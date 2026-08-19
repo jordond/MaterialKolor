@@ -14,7 +14,7 @@ publish = "0.37.0"
 colormath = "3.6.1"
 poko = "0.23.1"
 errorProneAnnotations = "2.50.0"
-kotest = "6.2.2"
+kotest = "6.2.4"
 ktlint = "1.8.0"
 spotless = "8.8.0"
 
