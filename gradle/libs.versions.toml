@@ -16,7 +16,7 @@ poko = "0.23.1"
 errorProneAnnotations = "2.50.0"
 kotest = "6.2.4"
 ktlint = "1.8.0"
-spotless = "8.8.0"
+spotless = "8.10.0"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
