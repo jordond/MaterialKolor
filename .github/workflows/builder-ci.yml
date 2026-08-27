@@ -50,7 +50,7 @@ jobs:
         run: ./gradlew :builder:shared:lint --scan
 
       - name: Tests
-        run: ./gradlew :builder:shared:test --scan
+        run: ./gradlew :builder:shared:jvmTest :builder:shared:testAndroidHostTest --scan
 
   build:
     name: "Build"
