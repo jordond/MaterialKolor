@@ -59,13 +59,19 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.compose.material3)
+            implementation(libs.compose.material3.get().toString()) {
+                exclude(group = "androidx.compose.material3")
+            }
             implementation(libs.compose.foundation)
             implementation(libs.compose.runtime)
             implementation(libs.compose.ui)
             implementation(libs.colormath)
 
             api(project(":material-color-utilities"))
+        }
+
+        androidMain.dependencies {
+            compileOnly(libs.androidx.compose.material3)
         }
 
         commonTest.dependencies {
