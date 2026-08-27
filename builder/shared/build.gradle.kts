@@ -43,8 +43,8 @@ kotlin {
 
     android {
         namespace = libs.versions.app.name.get()
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        compileSdk = libs.versions.sdk.compile.get().toInt()
+        minSdk = libs.versions.sdk.min.app.get().toInt()
 
         withHostTest {}
 

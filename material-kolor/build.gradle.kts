@@ -18,7 +18,7 @@ kotlin {
     @Suppress("UnstableApiUsage")
     android {
         compileSdk = libs.versions.sdk.compile.get().toInt()
-        minSdk = libs.versions.sdk.min.get().toInt()
+        minSdk = libs.versions.sdk.min.library.get().toInt()
         namespace = "com.materialkolor"
 
         optimization {

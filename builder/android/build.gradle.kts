@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace = "${libs.versions.app.name.get()}.app"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk = libs.versions.sdk.compile.get().toInt()
 
     defaultConfig {
         applicationId = libs.versions.app.name.get()
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
+        minSdk = libs.versions.sdk.min.app.get().toInt()
+        targetSdk = libs.versions.sdk.compile.get().toInt()
         versionCode = libs.versions.app.code.get().toInt()
         versionName = libs.versions.app.version.get()
     }
