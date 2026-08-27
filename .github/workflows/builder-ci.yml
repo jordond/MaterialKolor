@@ -1,0 +1,102 @@
+name: Builder CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'builder/**'
+      - 'material-kolor/**'
+      - 'material-color-utilities/**'
+      - 'gradle/**'
+  pull_request:
+    branches:
+      - main
+    types: [ opened, synchronize, reopened, ready_for_review ]
+    paths:
+      - 'builder/**'
+      - 'material-kolor/**'
+      - 'material-color-utilities/**'
+      - 'gradle/**'
+
+concurrency:
+  group: builder-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  verify:
+    name: "Verify"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: setup-java
+        uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Lint
+        run: ./gradlew :builder:shared:lint --scan
+
+      - name: Tests
+        run: ./gradlew :builder:shared:jvmTest :builder:shared:testAndroidHostTest --scan
+
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: setup-java
+        uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build web app
+        run: ./gradlew :builder:shared:composeCompatibilityBrowserDistribution
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-app
+          path: builder/shared/build/dist/composeWebCompatibility/productionExecutable
+
+  deploy-preview:
+    name: "Deploy Preview"
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    needs:
+      - verify
+      - build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: web-app
+          path: builder/shared/build/dist/composeWebCompatibility/productionExecutable
+
+      - name: Deploy to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MATERIALKOLOR }}
+          projectId: materialkolor

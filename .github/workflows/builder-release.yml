@@ -1,0 +1,132 @@
+name: Builder Release
+
+on:
+  push:
+    tags:
+      - 'builder/**'
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: "Version (e.g. 1.0.4)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    name: "Derive version"
+    runs-on: ubuntu-latest
+    outputs:
+      version_name: ${{ steps.derive.outputs.version_name }}
+    env:
+      INPUT_VERSION_NAME: ${{ github.event.inputs.version_name }}
+    steps:
+      - name: Derive version
+        id: derive
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            version_name="$INPUT_VERSION_NAME"
+          else
+            version_name="${GITHUB_REF_NAME#builder/}"
+          fi
+          echo "version_name=${version_name}" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: version
+    strategy:
+      matrix:
+        target: [android, web]
+    name: "Build ${{ matrix.target }}"
+    runs-on: ubuntu-latest
+    env:
+      VERSION_NAME: ${{ needs.version.outputs.version_name }}
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEYSTORE_KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
+      KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build for ${{ matrix.target }}
+        run: ./scripts/build "${{ matrix.target }}" "$VERSION_NAME"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.target }}
+          path: dist
+          if-no-files-found: error
+
+  build-desktop:
+    needs: version
+    strategy:
+      matrix:
+        os: [ubuntu, macos]
+    name: "Build desktop-${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}-latest
+    env:
+      VERSION_NAME: ${{ needs.version.outputs.version_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build for ${{ matrix.os }}
+        run: ./scripts/build desktop "$VERSION_NAME"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: desktop-${{ matrix.os }}
+          path: dist
+          if-no-files-found: error
+
+  deploy:
+    name: "Deploy to Production"
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download web build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: web
+          path: ./dist
+
+      - name: Extract web build
+        run: |
+          DEST=builder/shared/build/dist/composeWebCompatibility/productionExecutable
+          mkdir -p "$DEST"
+          # scripts/build zips the dist contents flat, so unzip straight into DEST.
+          unzip -q ./dist/mkb-web-*.zip -d "$DEST"
+          echo "Destination directory contents:"
+          ls -la "$DEST"
+
+      - name: Deploy to production
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MATERIALKOLOR }}
+          channelId: live
+          projectId: materialkolor

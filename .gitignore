@@ -32,3 +32,17 @@ demo/iosApp/iosApp.xcodeproj/*
 shared/shared.podspec
 publish.sh
 .kotlin
+
+# Builder
+.firebase
+dist/
+public/
+*.aab
+*.apk
+*.msi
+*.deb
+*.dmg
+*.log
+keystore.key
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj

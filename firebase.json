@@ -1,0 +1,26 @@
+{
+  "hosting": {
+    "predeploy": "./scripts/predeploy-web",
+    "public": "public",
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "appAssociation": "AUTO",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/link/**",
+        "dynamicLinks": true
+      }
+    ]
+  },
+  "emulators": {
+    "hosting": {
+      "port": 8888,
+      "host": "0.0.0.0"
+    }
+  }
+}

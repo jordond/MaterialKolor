@@ -1,10 +1,41 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base"
-  ],
+  "extends": ["config:recommended"],
   "labels": ["dependencies"],
-  "ignoreDeps": [
-    "org.jetbrains.kotlin.android"
+  "ignoreDeps": ["org.jetbrains.kotlin.android"],
+  "packageRules": [
+    {
+      "groupName": "Kotlin & Compose",
+      "matchPackageNames": [
+        "org.jetbrains.compose{/,}**",
+        "org.jetbrains.kotlin{/,}**",
+        "org.jetbrains.kotlinx:binary-compatibility-validator{/,}**",
+        "com.android.tools.build:gradle{/,}**",
+        "com.android{/,}**"
+      ]
+    },
+    {
+      "groupName": "Builder dependencies",
+      "matchPackageNames": [
+        "io.ktor{/,}**",
+        "io.github.xxfast{/,}**",
+        "co.touchlab:kermit{/,}**",
+        "dev.jordond.stateholder{/,}**",
+        "com.mohamedrejeb.calf{/,}**",
+        "dev.snipme:highlights{/,}**",
+        "br.com.devsrsouza.compose.icons{/,}**",
+        "com.github.skydoves:colorpicker-compose{/,}**",
+        "com.codingfeline.buildkonfig{/,}**",
+        "org.jetbrains.compose.hot-reload{/,}**",
+        "org.jetbrains.compose.material3.adaptive{/,}**",
+        "org.jetbrains.androidx.lifecycle{/,}**",
+        "androidx.activity{/,}**",
+        "androidx.core{/,}**",
+        "org.jetbrains.kotlinx:kotlinx-datetime{/,}**",
+        "org.jetbrains.kotlinx:kotlinx-collections-immutable{/,}**",
+        "org.jetbrains.kotlinx:kotlinx-browser{/,}**",
+        "org.jetbrains.kotlinx:kotlinx-coroutines-guava{/,}**"
+      ]
+    }
   ]
 }

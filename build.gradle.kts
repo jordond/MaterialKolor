@@ -9,11 +9,17 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.binaryCompatibility)
     alias(libs.plugins.spotless)
+
+    // Builder
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.buildKonfig) apply false
+    alias(libs.plugins.compose.hot.reload) apply false
+    alias(libs.plugins.kotlinx.serialization) apply false
 }
 
 apiValidation {
     ignoredProjects.addAll(
-        listOf("mcu-upstream"),
+        listOf("mcu-upstream", "shared", "android"),
     )
 }
 
