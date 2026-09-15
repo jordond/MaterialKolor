@@ -16,7 +16,7 @@ jobs:
       - name: setup-java
         uses: actions/setup-java@v6
         with:
-          java-version: 17
+          java-version: 25.0.4+101.0.LTS
           distribution: temurin
 
       - name: Setup Gradle
