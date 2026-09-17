@@ -9,7 +9,7 @@ app-version = "1.0.3"
 app-code = "103"
 ############################
 agp = "9.4.0"
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 compose-multiplatform = "1.12.0"
 compose-material3 = "1.12.0-SNAPSHOT+v-mazunin-enable-lifecycle-and-nav3-for-1-12-0-alpha02"
 androidx-annotation = "1.10.0"
