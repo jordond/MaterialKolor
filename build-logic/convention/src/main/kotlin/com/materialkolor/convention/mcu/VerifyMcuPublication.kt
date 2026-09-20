@@ -236,23 +236,9 @@ abstract class VerifyMcuPublication : DefaultTask() {
 
         /**
          * Coordinates expected in the repository, as published artifact names.
-         *
-         * material-kolor declares no iosX64 target, so no material-kolor-iosx64 coordinate is ever
-         * published and asking for one would fail the gate on an artifact that cannot exist. The
-         * artifact-only consumer compiles against the JVM coordinates, so iosX64 coverage for
-         * material-color-utilities comes from this check and from the Apple lane's compile and link
-         * tasks rather than from the consumer build.
          */
-        fun coordinates(): List<String> {
-            val coordinates = mutableListOf<String>()
-            for (module in mcuLibraryModules) {
-                for (suffix in SHARED_TARGET_SUFFIXES) {
-                    coordinates.add(module + suffix)
-                }
-            }
-
-            coordinates.add("material-color-utilities-iosx64")
-            return coordinates
+        fun coordinates(): List<String> = mcuLibraryModules.flatMap { module ->
+            SHARED_TARGET_SUFFIXES.map { suffix -> "$module$suffix" }
         }
 
         fun currentArtifacts(directory: Path, artifact: String, version: String): List<Path> {
