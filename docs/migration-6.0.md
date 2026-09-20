@@ -1,9 +1,7 @@
 # Migrating to the upstream Kotlin engine in 6.0
 
 This is an intentional source and binary API migration on `next`. Artifact coordinates remain
-unchanged. The low-level engine now comes from pinned upstream Kotlin, including the 2026 color
-specification and CMF scheme. Compose theme, conversion, remember, image and animation conveniences
-remain in their existing modules.
+unchanged. The low-level engine now comes from pinned upstream Kotlin.
 
 ## Package and role changes
 
@@ -55,12 +53,12 @@ its own primary, secondary, tertiary, neutral, neutral-variant or error palette.
 
 The general defaults remain `ColorSpec.SpecVersion.SPEC_2021` and `DynamicScheme.Platform.PHONE`. A
 requested specification may fall back according to the upstream variant support rules. Read
-`scheme.specVersion` when the effective specification matters; do not assume the requested value was
+`scheme.specVersion` when the effective specification matters, do not assume the requested value was
 honored. In this pin, expressive, vibrant, tonal-spot and neutral fall back from 2026 to 2025, while
 other non-CMF variants use 2021.
 
 `SchemeCmf` is available directly through the low-level API, accepts one or two source colors and
-requires `SPEC_2026`. It has its own 2026 default; this does not change the general default. A
+requires `SPEC_2026`. It has its own 2026 default, this does not change the general default. A
 second source supplies the tertiary hue/chroma, while a one-source scheme follows upstream's
 single-source behavior. Empty lists are unsupported. There is no new high-level multi-seed or
 `PaletteStyle` abstraction in this migration.
@@ -81,17 +79,17 @@ val backgroundRole = customRole.copy(isBackground = true)
 
 The Java-era `DynamicColor.Builder` is retired. `fromPalette` conveniences remain thin factories.
 Use `constraint`, the upstream spelling, for tone-delta constraints. `TonePolarity` is now nested
-under `ToneDeltaPair`; update its import to
+under `ToneDeltaPair`, update its import to
 `com.materialkolor.dynamiccolor.ToneDeltaPair.TonePolarity`. Spec extensions apply to the selected
 spec and later specs (`>=`).
 
 Data-class equality includes constructor values. Function-valued constructor arguments use their
-ordinary function equality; separately created but behaviorally identical lambdas do not become
+ordinary function equality, separately created but behaviorally identical lambdas do not become
 equal. Private calculation caches are not part of equality or hashing.
 
 ## Nullable contrast results
 
-`Contrast.lighter` and `Contrast.darker` return `Double?`; Float overloads return `Float?`. An
+`Contrast.lighter` and `Contrast.darker` return `Double?`, Float overloads return `Float?`. An
 unattainable contrast request returns `null`. Replace checks for a negative failure sentinel with
 explicit nullable handling:
 
@@ -100,7 +98,7 @@ val adjustedTone = Contrast.lighter(originalTone, desiredRatio) ?: originalTone
 ```
 
 Compose `Color.lighten` and `Color.darken` keep their fallback to the original color when no
-solution exists. Existing unsafe contrast helpers retain their documented clamping behavior; use
+solution exists. Existing unsafe contrast helpers retain their documented clamping behavior, use
 them only when that behavior is intended.
 
 ## Retired CorePalette factories
@@ -125,9 +123,8 @@ does not preserve behavior.
 - Custom color overrides, theme state, AMOLED rules, Compose conversion/remember helpers, image
   fallbacks and animation behavior remain supported.
 
-The checked-in public API baselines and [local-delta inventory](upstream-api-inventory.md) document
-the exact public API. This release does not promise binary compatibility with 5.x; recompile
-downstream code after updating imports, constructors and nullable results.
+This release does not promise binary compatibility with 5.x, recompile downstream code after
+updating imports, constructors and nullable results.
 
 ## Image quantization can produce different colors
 
@@ -137,13 +134,13 @@ can therefore choose different initial clusters and produce different palette po
 selected seed colors. This is an intentional upstream-conformance correction, not nondeterminism.
 
 Review image-derived golden outputs separately from unrelated API migration. Use independently
-established upstream expected values; do not regenerate expectations because the adapted
+established upstream expected values, do not regenerate expectations because the adapted
 implementation disagrees. Empty/transparent image fallbacks and population/tie ordering remain
 explicit test cases.
 
 For an RNG regression case, the 96-pixel fixture in the common conformance tests gives first cluster
 `0xff495e42` with population 12 in the old port and `0xff486048` with population 13 in upstream. The
-direct ordered fixture records all eight clusters and the score result; both references
+direct ordered fixture records all eight clusters and the score result, both references
 independently establish its values.
 
 Scheme diagnostic text uses a locale-independent one-decimal contrast formatter. It is not a general
@@ -155,5 +152,5 @@ the source, transformation and verification contracts.
 Pinned upstream Kotlin rejects `TonalPalette.fromHueAndChroma(Double.NaN, 0.0)` with
 `IllegalArgumentException`. The old port and raw Java accepted it because their integer conversion
 handled NaN differently. Keep palette inputs finite. The generated implementation preserves this
-upstream behavior; value equality for constructible palettes and NaN/signed-zero semantics in
+upstream behavior, value equality for constructible palettes and NaN/signed-zero semantics in
 `ContrastCurve` are separately tested.

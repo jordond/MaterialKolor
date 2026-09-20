@@ -1,10 +1,5 @@
 # Maintaining the upstream Kotlin engine
 
-MaterialKolor compiles adapted upstream Kotlin from the pinned submodule. Public artifact
-coordinates remain `com.materialkolor:material-color-utilities` and
-`com.materialkolor:material-kolor`. See [the 6.0 migration guide](migration-6.0.md) for intentional
-API changes.
-
 ## Source and toolchain pins
 
 Initialize the exact recorded submodule revision before building:
@@ -14,12 +9,6 @@ git submodule update --init --recursive
 ./gradlew verifyMcuUpstream
 ./gradlew :material-color-utilities:generateMcuSources --configuration-cache
 ```
-
-`verifyMcuUpstream` checks the staged Gitlink, submodule HEAD, clean working tree, Kotlin inventory,
-source hashes and license hash against the lock. It runs even when generation is up-to-date or
-restored from the build cache. Resolve any discrepancy it reports; do not bypass validation or edit
-the generated output. While updating a pin, stage the reviewed Gitlink before asking the verifier to
-accept it.
 
 ## What the adapter may change
 
@@ -156,30 +145,21 @@ rm -rf material-color-utilities/build/generated/mcu
 python3 -B -m unittest discover -s .github/tests -v
 ```
 
-| Gate                                          | What it proves                                                                                                                                                                                                                                                                    |
-|-----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `verifyMcuUpstream`                           | The submodule checkout, Kotlin inventory, source hashes and license hash are the identity recorded in `gradle/mcu-upstream.lock.json`.                                                                                                                                            |
-| `:mcu-source-transformer:test`                | Rules select the shapes they claim to, edits do not overlap, untouched text survives, and an unsupported shape fails with its file, location and rule identity.                                                                                                                   |
-| `:mcu-source-transformer:testAlternateParser` | The same corpus transforms under a second PSI runtime, so a parser change cannot alter the output or drop `createForProduction` unnoticed.                                                                                                                                        |
-| Determinism check                             | Regeneration from the same inputs is byte-identical. Compare the file inventory, a digest of the generated tree, and `build/reports/mcu-sources.tsv` against the previous run.                                                                                                    |
-| `checkKotlinAbi`                              | The public surface still matches the reviewed dumps in `material-color-utilities/api/` and `material-kolor/api/`, without regenerating them. It covers the JVM and Android class surfaces and, through each module's `.klib.api`, the native, `js` and `wasmJs` surfaces.         |
-| `spotlessCheck`                               | Handwritten code is formatted. Generated and raw upstream code is excluded from formatting.                                                                                                                                                                                       |
-| `verifyMcuJvm`                                | The generated implementation produces the same ARGB as both the exact-revision Java reference and the namespace-only Kotlin reference, and the characterization tests that protect MaterialKolor conveniences still pass.                                                         |
-| `verifyMcuWeb`                                | The common fixtures pass in Node and in a headless browser for both `js` and `wasmJs`, including the Compose consumers on their Skiko runtime.                                                                                                                                    |
-| `verifyMcuAndroid`                            | Both modules assemble their Android variants, their host tests pass, and lint analysis runs.                                                                                                                                                                                      |
-| `verifyMcuApple`                              | The common fixtures pass on macOS and the iOS simulator, and the iOS device and simulator frameworks compile and link.                                                                                                                                                            |
-| `verifyMcuPublication`                        | Artifacts, metadata, source archives and documentation build into a temporary repository under `build/`, and an artifact-only consumer compiles against them.                                                                                                                     |
-| Builder against the local engine              | A real consumer resolves `project(":material-kolor")` and `project(":material-color-utilities")` instead of published coordinates, and still compiles and tests.                                                                                                                  |
-| `.github/tests`                               | The upstream monitor classifies commits correctly against disposable Git repositories, with no network access and no external issue or comment creation.                                                                                                                          |
-
-Run the platform gates on suitable hosts. A task skipped because the host lacks an SDK, browser or
-simulator is an unresolved gate, not conformance evidence. `checkKotlinAbi` is the one exception: on
-a host that cannot compile a target it infers that target's declarations from the committed dump
-instead of dropping them, so a Linux host still compares the full Apple surface. Regenerate with
-`updateKotlinAbi` on macOS, where every target is buildable. A dump written on Linux carries the old
-Apple entries forward unchanged, so a new declaration would be recorded as absent there. Final ARGB
-values are compared exactly. Intermediate floating-point tolerances belong in explicit tests with
-their rationale; do not widen final-color assertions to hide differences.
+| Gate                                          | What it proves                                                                                                                                                                                                                                                            |
+|-----------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `verifyMcuUpstream`                           | The submodule checkout, Kotlin inventory, source hashes and license hash are the identity recorded in `gradle/mcu-upstream.lock.json`.                                                                                                                                    |
+| `:mcu-source-transformer:test`                | Rules select the shapes they claim to, edits do not overlap, untouched text survives, and an unsupported shape fails with its file, location and rule identity.                                                                                                           |
+| `:mcu-source-transformer:testAlternateParser` | The same corpus transforms under a second PSI runtime, so a parser change cannot alter the output or drop `createForProduction` unnoticed.                                                                                                                                |
+| Determinism check                             | Regeneration from the same inputs is byte-identical. Compare the file inventory, a digest of the generated tree, and `build/reports/mcu-sources.tsv` against the previous run.                                                                                            |
+| `checkKotlinAbi`                              | The public surface still matches the reviewed dumps in `material-color-utilities/api/` and `material-kolor/api/`, without regenerating them. It covers the JVM and Android class surfaces and, through each module's `.klib.api`, the native, `js` and `wasmJs` surfaces. |
+| `spotlessCheck`                               | Handwritten code is formatted. Generated and raw upstream code is excluded from formatting.                                                                                                                                                                               |
+| `verifyMcuJvm`                                | The generated implementation produces the same ARGB as both the exact-revision Java reference and the namespace-only Kotlin reference, and the characterization tests that protect MaterialKolor conveniences still pass.                                                 |
+| `verifyMcuWeb`                                | The common fixtures pass in Node and in a headless browser for both `js` and `wasmJs`, including the Compose consumers on their Skiko runtime.                                                                                                                            |
+| `verifyMcuAndroid`                            | Both modules assemble their Android variants, their host tests pass, and lint analysis runs.                                                                                                                                                                              |
+| `verifyMcuApple`                              | The common fixtures pass on macOS and the iOS simulator, and the iOS device and simulator frameworks compile and link.                                                                                                                                                    |
+| `verifyMcuPublication`                        | Artifacts, metadata, source archives and documentation build into a temporary repository under `build/`, and an artifact-only consumer compiles against them.                                                                                                             |
+| Builder against the local engine              | A real consumer resolves `project(":material-kolor")` and `project(":material-color-utilities")` instead of published coordinates, and still compiles and tests.                                                                                                          |
+| `.github/tests`                               | The upstream monitor classifies commits correctly against disposable Git repositories, with no network access and no external issue or comment creation.                                                                                                                  |
 
 The publication gate must not publish to Maven Central or deploy documentation. Source archives
 include the generated Kotlin, handwritten helpers and upstream license material exactly once.
@@ -188,7 +168,7 @@ metadata.
 
 `dokkaGenerate` reports one unresolved KDoc link, `[DynamicScheme]` in `palettes/CorePalettes.kt`.
 That file is generated output and the reference is inherited from the upstream Javadoc. Leave the
-warning alone; do not patch generated sources for it.
+warning alone, do not patch generated sources for it.
 
 Lifecycle tests use disposable fixture checkouts for dirty/missing sources, cache restoration, stale
 output, configuration-cache reuse, relocation and offline behavior. Do not mutate the production
@@ -197,9 +177,8 @@ reviewed API baselines or golden fixtures.
 
 ## Reviewing an upstream update
 
-Work on a branch based on `next`. Keep the previous generated tree/report available before changing
-the pin so both raw and adapted diffs can be reviewed. Fetching upstream is an explicit maintenance
-action:
+Keep the previous generated tree/report available before changing the pin so both raw and adapted
+diffs can be reviewed. Fetching upstream is an explicit maintenance action:
 
 ```sh
 ./gradlew :material-color-utilities:generateMcuSources
@@ -234,7 +213,7 @@ git diff --no-index build/mcu-update/previous material-color-utilities/build/gen
 diff -u build/mcu-update/previous-report.tsv material-color-utilities/build/reports/mcu-sources.tsv
 ```
 
-The diff commands exit 1 when there are differences; review them before continuing. Run every
+The diff commands exit 1 when there are differences, review them before continuing. Run every
 applicable gate above, including local Builder consumers. Review API differences before invoking
 `updateKotlinAbi`; subsequent `checkKotlinAbi` must pass without updating expectations. Independent
 golden fixtures need independently established expected values and an explained change, not
@@ -263,9 +242,8 @@ the command that produced the file. Regenerate from the repository root, then fo
 ```
 
 Never hand-edit fixture data, and never include a fixture change in a commit that also changes
-transformer rules or algorithm behavior unless that commit explains the fixture diff; an unreviewed
-regeneration hides the difference the fixture exists to catch. When only the pin moved, the diff is
-the header plus reviewed ARGB changes.
+transformer rules or algorithm behavior unless that commit explains the fixture diff. When only the
+pin moved, the diff is the header plus reviewed ARGB changes.
 
 ### Upgrading the PSI parser
 
@@ -279,7 +257,8 @@ different compiler used to build the tool.
 #### Parser API succession
 
 `PsiSession` in
-`tools/mcu-source-transformer/src/main/kotlin/com/materialkolor/transformer/psi/PsiSession.kt` opts into
+`tools/mcu-source-transformer/src/main/kotlin/com/materialkolor/transformer/psi/PsiSession.kt` opts
+into
 `org.jetbrains.kotlin.K1Deprecation` and builds its parser with
 `KotlinCoreEnvironment.createForProduction`, an entry point JetBrains is removing along with the K1
 frontend. The pinned `mcu-psi` runtime (currently `2.4.20`) still ships that environment, so the
@@ -294,22 +273,12 @@ candidate pin drops `createForProduction`, that task fails before the pin is ado
 
 ## CI and the upstream monitor
 
-Library CI covers pushes to `main`, `preview` and `next`, and pull requests to `main` and `next`.
-Linux runs JVM, web and Android verification; macOS runs Apple and local-publication verification.
-Builder CI covers `main` and `next` with `materialkolor.useLocal=true`, including changes to tools,
-`build-logic`, upstream input and the lock/version catalog. Preview deployment remains restricted to
-same-repository pull requests targeting `main`. Staging/production deployment triggers and
-destinations remain separate from `next` verification.
-
-Every workflow checkout that can build local library code initializes submodules recursively,
-including documentation, release and Builder workflows.
-
 `.github/check-upstream` reports Java, Kotlin and license/notice changes. It classifies each
 reported commit: `upstream-source` for ordinary source changes, and `kotlin-build-scaffold` when the
 commit touches build or publishing scaffolding under upstream's `kotlin/` tree, which may indicate
 that upstream is starting its own Kotlin Multiplatform publication (see
 [material-color-utilities#76](https://github.com/material-foundation/material-color-utilities/pull/76)).
-Scaffold findings carry that note and a matching issue label. Without a token it prints findings;
+Scaffold findings carry that note and a matching issue label. Without a token it prints findings,
 with a token the scheduled workflow can create deduplicated upstream issues. Its tests use
 disposable Git repositories plus stubbed `git fetch` and `curl`; they create no external issues or
 comments. Run those tests, not the scheduled workflow, when validating monitor changes.
