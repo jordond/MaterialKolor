@@ -2,7 +2,7 @@ package com.materialkolor.ktx
 
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.dynamiccolor.DynamicColor
-import com.materialkolor.scheme.DynamicScheme
+import com.materialkolor.dynamiccolor.DynamicScheme
 
 /**
  * Returns an [Color] that represents the color of this [DynamicColor] in the given [scheme].

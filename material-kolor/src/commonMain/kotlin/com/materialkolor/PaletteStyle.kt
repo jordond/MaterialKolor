@@ -1,6 +1,6 @@
 package com.materialkolor
 
-import com.materialkolor.scheme.Variant
+import com.materialkolor.dynamiccolor.Variant
 
 /**
  * The style of the palette to generate.

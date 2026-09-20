@@ -1,7 +1,7 @@
 package com.materialkolor.internal
 
 import com.materialkolor.PaletteStyle
-import com.materialkolor.scheme.Variant
+import com.materialkolor.dynamiccolor.Variant
 
 internal val PaletteStyle.asVariant: Variant
     get() = when (this) {

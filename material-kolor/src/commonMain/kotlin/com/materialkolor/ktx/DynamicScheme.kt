@@ -15,8 +15,8 @@ import com.materialkolor.PaletteStyle.Rainbow
 import com.materialkolor.PaletteStyle.TonalSpot
 import com.materialkolor.PaletteStyle.Vibrant
 import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.internal.asVariant
-import com.materialkolor.scheme.DynamicScheme
 import com.materialkolor.scheme.SchemeContent
 import com.materialkolor.scheme.SchemeExpressive
 import com.materialkolor.scheme.SchemeFidelity

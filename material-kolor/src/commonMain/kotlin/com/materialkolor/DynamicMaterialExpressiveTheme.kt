@@ -12,9 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.ktx.animateColorScheme
 import com.materialkolor.ktx.defaultColorSpring
-import com.materialkolor.scheme.DynamicScheme
 
 /**
  * A wrapper around [MaterialExpressiveTheme] that adapts to the given [DynamicMaterialThemeState.seedColor].
