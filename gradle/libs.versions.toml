@@ -10,11 +10,11 @@ app-code = "103"
 ############################
 agp = "9.4.0"
 kotlin = "2.4.20"
+mcu-psi = "2.4.20"
 compose-multiplatform = "1.12.0"
 compose-material3 = "1.12.0-SNAPSHOT+v-mazunin-enable-lifecycle-and-nav3-for-1-12-0-alpha02"
 androidx-annotation = "1.10.0"
 androidx-material3 = "1.5.0-alpha28"
-binaryCompatibility = "0.18.2"
 dokka = "2.2.0"
 publish = "0.37.0"
 colormath = "3.7.0"
@@ -34,6 +34,7 @@ compose-hot-reload = "1.2.0"
 kotlinx-coroutines = "1.11.0"
 kotlinx-datetime = "0.8.0-0.6.x-compat"
 kotlinx-collections = "0.5.2"
+kotlinx-serialization = "1.9.0"
 kotlinxBrowser = "0.5.0"
 kstore = "1.1.0"
 kermit = "2.2.0"
@@ -48,6 +49,11 @@ colorpicker = "1.3.0"
 buildKonfig = "0.23.0"
 
 [libraries]
+gradlePlugin-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+gradlePlugin-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "publish" }
+gradlePlugin-spotless = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+mcu-psi = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "mcu-psi" }
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "androidx-material3" }
 colormath = { module = "com.github.ajalt.colormath:colormath", version.ref = "colormath" }
@@ -79,6 +85,7 @@ kotlinx-coroutines-guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 ktor-http = { module = "io.ktor:ktor-http", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
@@ -102,6 +109,14 @@ stateHolder-dispatcher-compose = { module = "dev.jordond.stateholder:dispatcher-
 composeIcons-fontAwesome = { module = "br.com.devsrsouza.compose.icons:font-awesome", version.ref = "composeIcons" }
 compose-colorpicker = { module = "com.github.skydoves:colorpicker-compose", version.ref = "colorpicker" }
 
+[bundles]
+logic-plugins = [
+    "gradlePlugin-android",
+    "gradlePlugin-kotlin",
+    "gradlePlugin-publish",
+    "gradlePlugin-spotless",
+]
+
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -109,7 +124,6 @@ compose = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" 
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 multiplatform-android-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-binaryCompatibility = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatibility" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 publish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
 poko = { id = "dev.drewhamilton.poko", version.ref = "poko" }
