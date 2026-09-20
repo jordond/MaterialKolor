@@ -4,13 +4,22 @@ import com.materialkolor.contrast.Contrast
 import com.materialkolor.hct.Hct
 import com.materialkolor.utils.ColorUtils
 import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.doubles.shouldBeExactly
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import utils.shouldBeExactly
 import kotlin.math.roundToInt
 import kotlin.test.Test
+import kotlin.test.assertNotNull
+
+/**
+ * Asserts that a Java safe-contrast result matches its upstream Kotlin counterpart.
+ *
+ * Java reports a failed search as `-1` while upstream Kotlin reports `null`.
+ */
+private infix fun Double.shouldMatchKotlin(actual: Double?) {
+    takeUnless { it < 0.0 } shouldBe actual
+}
 
 class ContrastTest {
     @Test
@@ -49,8 +58,7 @@ class ContrastTest {
         val expected = contrast.Contrast.lighter(expectedHct.tone, 1.0)
         val actualHct = Hct.fromInt(COLOR1)
         val actual = Contrast.lighter(actualHct.tone, 1.0)
-        listOf(expected, actual) shouldNotContain -1
-        expected shouldBeExactly actual
+        expected shouldMatchKotlin actual
     }
 
     @Test
@@ -59,7 +67,7 @@ class ContrastTest {
         val expected = contrast.Contrast.lighter(expectedHct.tone, 1.0)
         val actualHct = Hct.fromInt(COLOR1)
         val actual = Contrast.lighter(actualHct.tone, 1.0f)
-        expected.roundToInt() shouldBe actual.roundToInt()
+        expected.roundToInt() shouldBe assertNotNull(actual).roundToInt()
     }
 
     @Test
@@ -96,7 +104,7 @@ class ContrastTest {
         val ratio = 1.0
         val expected = contrast.Contrast.lighter(tone, ratio)
         val actual = Contrast.lighter(tone, ratio)
-        expected shouldBeExactly actual
+        expected shouldMatchKotlin actual
     }
 
     @Test
@@ -105,7 +113,7 @@ class ContrastTest {
         val ratio = 1.0
         val expected = contrast.Contrast.lighter(tone, ratio)
         val actual = Contrast.lighter(tone, ratio)
-        expected shouldBeExactly actual
+        expected shouldMatchKotlin actual
     }
 
     @Test
@@ -114,7 +122,7 @@ class ContrastTest {
         val ratio = 100.0
         val expected = contrast.Contrast.lighter(tone, ratio)
         val actual = Contrast.lighter(tone, ratio)
-        expected shouldBeExactly actual
+        expected shouldMatchKotlin actual
     }
 
     @Test
@@ -123,7 +131,7 @@ class ContrastTest {
         val ratio = 21.0
         val expected = contrast.Contrast.lighter(tone, ratio)
         val actual = Contrast.lighter(tone, ratio)
-        expected shouldBeExactly actual
+        expected shouldMatchKotlin actual
     }
 
     @Test
@@ -132,7 +140,7 @@ class ContrastTest {
         val ratio = 1.0
         val expected = contrast.Contrast.lighter(tone, ratio)
         val actual = Contrast.lighter(tone, ratio)
-        expected shouldBeExactly actual
+        expected shouldMatchKotlin actual
     }
 
     @Test
@@ -143,8 +151,7 @@ class ContrastTest {
         val actualHct = Hct.fromInt(COLOR1)
         val actual = Contrast.darker(actualHct.tone, 1.0)
 
-        listOf(expected, actual) shouldNotContain -1
-        expected shouldBeExactly actual
+        expected shouldMatchKotlin actual
     }
 
     @Test
@@ -176,7 +183,7 @@ class ContrastTest {
         val ratio = 1.0
         val expected = contrast.Contrast.darker(tone, ratio)
         val actual = Contrast.darker(tone, ratio)
-        expected shouldBeExactly actual
+        expected shouldMatchKotlin actual
     }
 
     @Test
@@ -185,7 +192,7 @@ class ContrastTest {
         val ratio = 1.0
         val expected = contrast.Contrast.darker(tone, ratio)
         val actual = Contrast.darker(tone, ratio)
-        expected shouldBeExactly actual
+        expected shouldMatchKotlin actual
     }
 
     @Test
@@ -194,7 +201,7 @@ class ContrastTest {
         val ratio = 100.0
         val expected = contrast.Contrast.darker(tone, ratio)
         val actual = Contrast.darker(tone, ratio)
-        expected shouldBeExactly actual
+        expected shouldMatchKotlin actual
     }
 
     @Test
@@ -203,7 +210,7 @@ class ContrastTest {
         val expected = contrast.Contrast.darker(expectedHct.tone, 1.0)
         val actualHct = Hct.fromInt(COLOR1)
         val actual = Contrast.darker(actualHct.tone, 1.0f)
-        expected.roundToInt() shouldBe actual.roundToInt()
+        expected.roundToInt() shouldBe assertNotNull(actual).roundToInt()
     }
 
     @Test

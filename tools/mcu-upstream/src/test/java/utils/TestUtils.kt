@@ -1,9 +1,9 @@
 package utils
 
+import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.hct.Cam16
 import com.materialkolor.hct.Hct
 import com.materialkolor.palettes.TonalPalette
-import com.materialkolor.scheme.DynamicScheme
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.doubles.shouldBeExactly
 import io.kotest.matchers.equals.shouldBeEqual
