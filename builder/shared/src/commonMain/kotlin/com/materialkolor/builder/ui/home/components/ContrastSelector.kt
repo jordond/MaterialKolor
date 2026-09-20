@@ -67,13 +67,19 @@ private fun ContrastButton(
     modifier: Modifier = Modifier,
 ) {
     val containerColor by animateColorAsState(
-        if (isSelected) MaterialTheme.colorScheme.tertiary
-        else MaterialTheme.colorScheme.tertiaryContainer,
+        if (isSelected) {
+            MaterialTheme.colorScheme.tertiary
+        } else {
+            MaterialTheme.colorScheme.tertiaryContainer
+        },
     )
 
     val contentColor by animateColorAsState(
-        if (isSelected) MaterialTheme.colorScheme.onTertiary
-        else MaterialTheme.colorScheme.onTertiaryContainer,
+        if (isSelected) {
+            MaterialTheme.colorScheme.onTertiary
+        } else {
+            MaterialTheme.colorScheme.onTertiaryContainer
+        },
     )
 
     Box(
@@ -94,21 +100,23 @@ private fun ContrastButton(
 }
 
 @Composable
-private fun Contrast.icon(): ImageVector = remember(this) {
-    when (this) {
-        Contrast.Default -> Icons.Outlined.BrightnessLow
-        Contrast.Medium -> Icons.Outlined.BrightnessMedium
-        Contrast.High -> Icons.Outlined.BrightnessHigh
-        Contrast.Reduced -> Icons.Default.KeyboardArrowDown
+private fun Contrast.icon(): ImageVector =
+    remember(this) {
+        when (this) {
+            Contrast.Default -> Icons.Outlined.BrightnessLow
+            Contrast.Medium -> Icons.Outlined.BrightnessMedium
+            Contrast.High -> Icons.Outlined.BrightnessHigh
+            Contrast.Reduced -> Icons.Default.KeyboardArrowDown
+        }
     }
-}
 
 @Composable
-private fun Contrast.name(): String = remember(this) {
-    when (this) {
-        Contrast.Default -> "Standard"
-        Contrast.Medium -> "Medium"
-        Contrast.High -> "High"
-        Contrast.Reduced -> "Reduced"
+private fun Contrast.name(): String =
+    remember(this) {
+        when (this) {
+            Contrast.Default -> "Standard"
+            Contrast.Medium -> "Medium"
+            Contrast.High -> "High"
+            Contrast.Reduced -> "Reduced"
+        }
     }
-}

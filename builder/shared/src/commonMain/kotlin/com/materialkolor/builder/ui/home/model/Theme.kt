@@ -7,7 +7,6 @@ import com.materialkolor.DynamicMaterialThemeState
 import com.materialkolor.builder.ui.theme.LocalDynamicThemeState
 
 object Theme {
-
     object Colors {
         val Primary = ThemeColor(
             title = "Primary",
@@ -315,11 +314,8 @@ object Theme {
     }
 }
 
-private fun c(
-    selector: @Composable DynamicMaterialThemeState.() -> Color,
-): @Composable () -> Color {
-    return {
+private fun c(selector: @Composable DynamicMaterialThemeState.() -> Color): @Composable () -> Color =
+    {
         val colors = LocalDynamicThemeState.current
         colors.selector()
     }
-}

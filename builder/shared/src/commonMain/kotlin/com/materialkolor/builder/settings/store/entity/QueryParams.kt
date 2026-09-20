@@ -34,8 +34,7 @@ fun SettingsEntity.toQueryParams(): String {
                 ?.toHex(
                     includePrefix = false,
                     alwaysIncludeAlpha = true,
-                )
-                .param(key.KEY)
+                ).param(key.KEY)
         }
 
     val colorParams = if (colors.isEmpty()) null else colors.joinToString(SEPARATOR)
@@ -69,33 +68,37 @@ fun String.toSettingsEntity(): SettingsEntity {
         style = params[KEY_STYLE]?.safeToPaletteStyle() ?: PaletteStyle.TonalSpot,
         specVersion = parseSpecVersion(params[KEY_COLOR_SPEC]),
         packageName = params[KEY_PACKAGE_NAME],
-        includeMiscColors = params[KEY_INCLUDE_MISC_COLORS]?.toBooleanStrictOrNull() ?: SettingsDefaults.includeMiscColors,
-        useMaterialExpressive = params[KEY_USE_MATERIAL_EXPRESSIVE]?.toBooleanStrictOrNull() ?: SettingsDefaults.useMaterialExpressive,
+        includeMiscColors =
+            params[KEY_INCLUDE_MISC_COLORS]?.toBooleanStrictOrNull() ?: SettingsDefaults.includeMiscColors,
+        useMaterialExpressive =
+            params[KEY_USE_MATERIAL_EXPRESSIVE]?.toBooleanStrictOrNull() ?: SettingsDefaults.useMaterialExpressive,
     )
 }
 
-fun String.splitQueryParams(): Map<String, String> {
-    return replaceFirst("?", "").split(SEPARATOR)
+fun String.splitQueryParams(): Map<String, String> =
+    replaceFirst("?", "")
+        .split(SEPARATOR)
         .associate { param ->
             val (key, value) = param.split("=")
             key to value.decodeURLQueryComponent()
         }
-}
 
 private fun parseSpecVersion(string: String?): ColorSpec.SpecVersion {
     if (string == null) return ColorSpec.SpecVersion.Default
     return runCatching { ColorSpec.SpecVersion.valueOf(string) }.getOrDefault(ColorSpec.SpecVersion.Default)
 }
 
-private inline fun <reified T> T?.param(key: String, default: T? = null): String? {
+private inline fun <reified T> T?.param(
+    key: String,
+    default: T? = null,
+): String? {
     if (this == null || this == default) return null
     return "$key=${this.toString().encodeURLQueryComponent()}"
 }
 
-private fun String.safeToPaletteStyle(): PaletteStyle? {
-    return try {
+private fun String.safeToPaletteStyle(): PaletteStyle? =
+    try {
         enumValueOf<PaletteStyle>(this)
     } catch (_: Throwable) {
         null
     }
-}

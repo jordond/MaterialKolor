@@ -17,7 +17,6 @@ class AppModel(
     val urlLauncher: UrlLauncher = DI.urlLauncher,
     isDarkMode: Boolean,
 ) : StateViewModel<AppModel.State>(State(isDarkMode)) {
-
     init {
         settingsRepo.settings.mergeState { state, value ->
             state.copy(settings = value)

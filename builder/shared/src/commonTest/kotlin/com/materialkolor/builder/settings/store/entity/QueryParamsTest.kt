@@ -12,7 +12,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class QueryParamsTest {
-
     @Test
     fun testSettingsEntityToQueryParams() {
         val settingsEntity = SettingsEntity(
@@ -29,7 +28,8 @@ class QueryParamsTest {
 
         val queryParams = settingsEntity.toQueryParams()
 
-        val expected = """
+        val expected =
+            """
             ?
             color_seed=FFFF0000&
             color_primary=FF00FF00&
@@ -45,7 +45,8 @@ class QueryParamsTest {
 
     @Test
     fun testStringToSettingsEntity() {
-        val queryParams = """
+        val queryParams =
+            """
             color_seed=FFFF0000&
             color_primary=FF00FF00&
             color_secondary=FF0000FF&

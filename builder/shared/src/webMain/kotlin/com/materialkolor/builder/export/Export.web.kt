@@ -13,7 +13,11 @@ import kotlin.js.JsAny
 import kotlin.js.Promise
 
 expect class JSZip() {
-    fun file(name: String, data: String)
+    fun file(
+        name: String,
+        data: String,
+    )
+
     fun generateAsync(options: JsAny): Promise<JsAny>
 }
 
@@ -25,7 +29,10 @@ actual suspend fun exportFiles(list: List<ExportFile>) {
 
 internal expect suspend fun JSZip.createBlob(): Blob
 
-private fun offerFileForDownload(blob: Blob, filename: String) {
+private fun offerFileForDownload(
+    blob: Blob,
+    filename: String,
+) {
     val url = URL.createObjectURL(blob)
     val a = document.createElement("a") as HTMLAnchorElement
     a.href = url

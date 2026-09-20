@@ -9,7 +9,11 @@ import kotlin.js.Promise
 @JsModule("jszip")
 @JsNonModule
 actual external class JSZip actual constructor() {
-    actual fun file(name: String, data: String)
+    actual fun file(
+        name: String,
+        data: String,
+    )
+
     actual fun generateAsync(options: dynamic): Promise<dynamic>
 }
 

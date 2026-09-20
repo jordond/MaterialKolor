@@ -9,7 +9,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class MKColorsTest {
-
     @Test
     fun testMkColorsKtWithAllColors() {
         val colorSettings = ColorSettings(
@@ -107,15 +106,16 @@ class MKColorsTest {
 
         val result = mkColorsKt("com.example", colorSettings)
 
-        val expectedOutput = """
-        package com.example
-        
-        import androidx.compose.ui.graphics.Color
-        
-        val Primary = Color(0xFF111111)
-        val Secondary = Color(0xFF222222)
-        val Neutral = Color(0xFF555555)
-        """.trimIndent()
+        val expectedOutput =
+            """
+            package com.example
+            
+            import androidx.compose.ui.graphics.Color
+            
+            val Primary = Color(0xFF111111)
+            val Secondary = Color(0xFF222222)
+            val Neutral = Color(0xFF555555)
+            """.trimIndent()
 
         assertEquals(expectedOutput, result)
     }
@@ -134,13 +134,14 @@ class MKColorsTest {
 
         val result = mkColorsKt("com.example", colorSettings)
 
-        val expectedOutput = """
+        val expectedOutput =
+            """
             package com.example
             
             import androidx.compose.ui.graphics.Color
             
             val Primary = Color(0xFF111111)
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(expectedOutput, result)
     }
@@ -159,13 +160,14 @@ class MKColorsTest {
 
         val result = mkColorsKt("com.example", colorSettings)
 
-        val expectedOutput = """
+        val expectedOutput =
+            """
             package com.example
             
             import androidx.compose.ui.graphics.Color
             
             val SeedColor = Color(0xFF000000)
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(expectedOutput, result)
     }

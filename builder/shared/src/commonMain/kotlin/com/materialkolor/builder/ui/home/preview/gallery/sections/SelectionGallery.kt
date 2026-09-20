@@ -557,7 +557,6 @@ private fun RadioButtonsDemo(
                 .width(width)
                 .padding(itemPadding),
         ) {
-
             radioOptions.forEachIndexed { ix, text ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -569,8 +568,7 @@ private fun RadioButtonsDemo(
                             selected = (text == selectedOption),
                             onClick = { onOptionSelected(text) },
                             role = Role.RadioButton,
-                        )
-                        .padding(horizontal = 16.dp),
+                        ).padding(horizontal = 16.dp),
                 ) {
                     RadioButton(
                         enabled = ix < 2,
@@ -585,7 +583,6 @@ private fun RadioButtonsDemo(
                     )
                 }
             }
-
         }
     }
 }
@@ -667,8 +664,9 @@ private fun ChipsDemo(
                 onClick = { filterChipSelected = !filterChipSelected },
                 label = { Text("Filter") },
                 selected = filterChipSelected,
-                leadingIcon = if (!filterChipSelected) null
-                else {
+                leadingIcon = if (!filterChipSelected) {
+                    null
+                } else {
                     {
                         Icon(
                             imageVector = Icons.Filled.Done,
@@ -728,7 +726,6 @@ private fun CheckboxesDemo(
                 .width(width)
                 .padding(itemPadding),
         ) {
-
             val state1 = remember { mutableStateOf(true) }
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -750,7 +747,8 @@ private fun CheckboxesDemo(
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .height(56.dp)
                     .clickable { state2.value = state2.value.nextState() }
                     .padding(itemPadding),
@@ -799,10 +797,9 @@ private fun CheckboxesDemo(
     }
 }
 
-private fun ToggleableState.nextState(): ToggleableState {
-    return when (this) {
+private fun ToggleableState.nextState(): ToggleableState =
+    when (this) {
         ToggleableState.Indeterminate -> ToggleableState.Off
         ToggleableState.On -> ToggleableState.Indeterminate
         ToggleableState.Off -> ToggleableState.On
     }
-}

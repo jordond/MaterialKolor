@@ -329,7 +329,6 @@ private fun ConnectedButtons(
     width: Dp,
     itemPadding: Dp,
 ) {
-
     OutlinedCard {
         Column(
             verticalArrangement = Arrangement.Center,

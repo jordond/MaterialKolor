@@ -83,8 +83,11 @@ fun HomeScreenScaffold(
                 Crossfade(windowSizeClass.widthIsExpanded()) { isExpanded ->
                     if (isExpanded) {
                         val action =
-                            if (screen == HomeScreens.Export) HomeAction.Export
-                            else HomeAction.Nav(HomeScreens.Export)
+                            if (screen == HomeScreens.Export) {
+                                HomeAction.Export
+                            } else {
+                                HomeAction.Nav(HomeScreens.Export)
+                            }
 
                         ExtendedFloatingActionButton(
                             onClick = dispatcher.rememberRelay(action),

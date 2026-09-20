@@ -28,13 +28,28 @@ import kotlinx.collections.immutable.persistentListOf
 private val keyColors = (KeyColor.entries - KeyColor.Seed)
 
 private val steps = persistentListOf(
-    100, 99, 98, 95, 90, 80, 70, 60, 50, 40, 35, 30, 25, 20, 15, 10, 5, 0,
+    100,
+    99,
+    98,
+    95,
+    90,
+    80,
+    70,
+    60,
+    50,
+    40,
+    35,
+    30,
+    25,
+    20,
+    15,
+    10,
+    5,
+    0,
 )
 
 @Composable
-fun PaletteSection(
-    modifier: Modifier = Modifier,
-) {
+fun PaletteSection(modifier: Modifier = Modifier) {
     val state = LocalDynamicThemeState.current
 
     Column(
@@ -77,19 +92,35 @@ fun PaletteSection(
 }
 
 @Composable
-private fun DynamicMaterialThemeState.tone(palette: KeyColor, tone: Int): Color {
+private fun DynamicMaterialThemeState.tone(
+    palette: KeyColor,
+    tone: Int,
+): Color {
     val colors = m3Colors
     val scheme = dynamicScheme
     return remember(this, palette, tone) {
         when (palette) {
-            KeyColor.Primary -> colors.primary().palette(scheme).toneColor(tone)
-            KeyColor.Secondary -> colors.secondary().palette(scheme).toneColor(tone)
-            KeyColor.Tertiary -> colors.tertiary().palette(scheme).toneColor(tone)
-            KeyColor.Neutral -> colors.neutralPaletteKeyColor().palette(scheme).toneColor(tone)
-            KeyColor.NeutralVariant ->
-                colors.neutralVariantPaletteKeyColor().palette(scheme).toneColor(tone)
-            KeyColor.Error -> colors.error().palette(scheme).toneColor(tone)
-            else -> Color.Unspecified
+            KeyColor.Primary -> {
+                colors.primary.palette(scheme).toneColor(tone)
+            }
+            KeyColor.Secondary -> {
+                colors.secondary.palette(scheme).toneColor(tone)
+            }
+            KeyColor.Tertiary -> {
+                colors.tertiary.palette(scheme).toneColor(tone)
+            }
+            KeyColor.Neutral -> {
+                colors.neutralPaletteKeyColor.palette(scheme).toneColor(tone)
+            }
+            KeyColor.NeutralVariant -> {
+                colors.neutralVariantPaletteKeyColor.palette(scheme).toneColor(tone)
+            }
+            KeyColor.Error -> {
+                colors.error.palette(scheme).toneColor(tone)
+            }
+            else -> {
+                Color.Unspecified
+            }
         }
     }
 }

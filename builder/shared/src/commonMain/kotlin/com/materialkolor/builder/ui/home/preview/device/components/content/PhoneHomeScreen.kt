@@ -94,9 +94,7 @@ private val Options = persistentListOf(
 )
 
 @Composable
-fun PhoneHomeScreen(
-    modifier: Modifier = Modifier,
-) {
+fun PhoneHomeScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -166,9 +164,7 @@ private fun DailyTip(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun List(
-    modifier: Modifier = Modifier,
-) {
+private fun List(modifier: Modifier = Modifier) {
     var options by remember { mutableStateOf(Options) }
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -216,8 +212,11 @@ private fun ListItem(
                     .hasEnoughContrast(colorScheme.secondaryContainer)
 
                 val titleColor =
-                    if (hasEnoughContrast) colorScheme.primary
-                    else colorScheme.onSecondaryContainer
+                    if (hasEnoughContrast) {
+                        colorScheme.primary
+                    } else {
+                        colorScheme.onSecondaryContainer
+                    }
 
                 Text(
                     text = details.room,
@@ -246,8 +245,7 @@ private fun ListItem(
                                         update(option.copy(selected = it))
                                     },
                                     role = Role.Checkbox,
-                                )
-                                .fillMaxWidth()
+                                ).fillMaxWidth()
                                 .padding(horizontal = 16.dp)
                                 .weight(1f),
                         ) {

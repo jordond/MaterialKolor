@@ -185,7 +185,9 @@ private fun ThemeSection(
                             SingleLineColorBox(
                                 themeColor = Theme.Colors.Scrim,
                                 onClick = onClick,
-                                textColor = Theme.Colors.Scrim.color().inverse(),
+                                textColor = Theme.Colors.Scrim
+                                    .color()
+                                    .inverse(),
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }

@@ -69,7 +69,7 @@ fun SideSheet(
     containerColor: Color = MaterialTheme.colorScheme.surface,
     contentContainerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
     sheetContent: @Composable () -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
@@ -108,8 +108,9 @@ fun SideSheet(
         }
 
         val contentWidth = remember(maxWidthPx, sheetWidthPx, state.offset) {
-            if (displayOverContent) null
-            else {
+            if (displayOverContent) {
+                null
+            } else {
                 val visibleSheetWidth = sheetWidthPx + state.offset
                 val contentWidthPx = maxWidthPx - visibleSheetWidth
                 (contentWidthPx / density.density).dp
@@ -149,13 +150,11 @@ fun SideSheet(
                             SideSheetPosition.Start -> Alignment.CenterStart
                             SideSheetPosition.End -> Alignment.CenterEnd
                         },
-                    )
-                    .width(sheetWidth)
+                    ).width(sheetWidth)
                     .clipToBounds()
                     .conditional(isFloating) {
                         Modifier.padding(vertical = 32.dp)
-                    }
-                    .offset {
+                    }.offset {
                         IntOffset(
                             y = 0,
                             x = when (position) {
@@ -163,14 +162,12 @@ fun SideSheet(
                                 SideSheetPosition.End -> -state.offset.roundToInt()
                             },
                         )
-                    }
-                    .anchoredDraggable(
+                    }.anchoredDraggable(
                         state = state,
                         orientation = Orientation.Horizontal,
                         reverseDirection = position == SideSheetPosition.End,
                         enabled = true,
-                    )
-                    .clip(position.sheetShape(sheetCornerRadius)),
+                    ).clip(position.sheetShape(sheetCornerRadius)),
             ) {
                 val panel = @Composable {
                     ExpandCollapsePanel(
@@ -202,16 +199,15 @@ fun SideSheet(
     }
 }
 
-private fun SideSheetPosition.sheetShape(radius: Dp): RoundedCornerShape {
-    return when (this) {
+private fun SideSheetPosition.sheetShape(radius: Dp): RoundedCornerShape =
+    when (this) {
         SideSheetPosition.Start -> RoundedCornerShape(topEnd = radius, bottomEnd = radius)
         SideSheetPosition.End -> RoundedCornerShape(topStart = radius, bottomStart = radius)
     }
-}
 
 private enum class DragValue {
     Expanded,
-    Collapsed
+    Collapsed,
 }
 
 private val DragValue.opposite: DragValue
@@ -250,7 +246,6 @@ private fun ExpandCollapsePanel(
 }
 
 object AnchoredDraggableDefaults {
-
     /** The default spec for snapping, a tween spec */
     val SnapAnimationSpec: AnimationSpec<Float> = tween()
 
@@ -267,4 +262,3 @@ object AnchoredDraggableDefaults {
     /** The default spec for decaying, an exponential decay */
     val DecayAnimationSpec: DecayAnimationSpec<Float> = exponentialDecay()
 }
-

@@ -53,7 +53,6 @@ fun PaletteStyleSection(
                     } else {
                         {
                             ExpressiveIcon(Modifier.size(FilterChipDefaults.IconSize))
-
                         }
                     },
                 )
@@ -91,31 +90,51 @@ private fun PaletteStyle.rememberIsEnabled(specVersion: ColorSpec.SpecVersion): 
     }
 
 @Composable
-private fun PaletteStyle.name() = remember(this) {
-    when (this) {
-        PaletteStyle.TonalSpot -> "Tonal Spot"
-        PaletteStyle.Neutral -> "Neutral"
-        PaletteStyle.Vibrant -> "Vibrant"
-        PaletteStyle.Expressive -> "Expressive"
-        PaletteStyle.Rainbow -> "Rainbow"
-        PaletteStyle.FruitSalad -> "Fruit Salad"
-        PaletteStyle.Monochrome -> "Monochrome"
-        PaletteStyle.Fidelity -> "Fidelity"
-        PaletteStyle.Content -> "Content"
+private fun PaletteStyle.name() =
+    remember(this) {
+        when (this) {
+            PaletteStyle.TonalSpot -> "Tonal Spot"
+            PaletteStyle.Neutral -> "Neutral"
+            PaletteStyle.Vibrant -> "Vibrant"
+            PaletteStyle.Expressive -> "Expressive"
+            PaletteStyle.Rainbow -> "Rainbow"
+            PaletteStyle.FruitSalad -> "Fruit Salad"
+            PaletteStyle.Monochrome -> "Monochrome"
+            PaletteStyle.Fidelity -> "Fidelity"
+            PaletteStyle.Content -> "Content"
+        }
     }
-}
 
 @Composable
-private fun PaletteStyle.description() = remember(this) {
-    when (this) {
-        PaletteStyle.TonalSpot -> "A calm theme, sedated colors that aren't particularly chromatic."
-        PaletteStyle.Neutral -> "A theme that's slightly more chromatic than monochrome, which is purely black / white / gray."
-        PaletteStyle.Vibrant -> "A loud theme, colorfulness is maximum for Primary palette, increased for others."
-        PaletteStyle.Expressive -> "A playful theme - the source color's hue does not appear in the theme."
-        PaletteStyle.Rainbow -> "A playful theme - the source color's hue does not appear in the theme."
-        PaletteStyle.FruitSalad -> "A playful theme - the source color's hue does not appear in the theme."
-        PaletteStyle.Monochrome -> "A monochrome theme, colors are purely black / white / gray."
-        PaletteStyle.Fidelity -> "A scheme that places the source color in Scheme.primaryContainer."
-        PaletteStyle.Content -> "Primary Container is the source color, adjusted for color relativity"
+private fun PaletteStyle.description() =
+    remember(this) {
+        when (this) {
+            PaletteStyle.TonalSpot -> {
+                "A calm theme, sedated colors that aren't particularly chromatic."
+            }
+            PaletteStyle.Neutral -> {
+                "A theme that's slightly more chromatic than monochrome, which is purely black / white / gray."
+            }
+            PaletteStyle.Vibrant -> {
+                "A loud theme, colorfulness is maximum for Primary palette, increased for others."
+            }
+            PaletteStyle.Expressive -> {
+                "A playful theme - the source color's hue does not appear in the theme."
+            }
+            PaletteStyle.Rainbow -> {
+                "A playful theme - the source color's hue does not appear in the theme."
+            }
+            PaletteStyle.FruitSalad -> {
+                "A playful theme - the source color's hue does not appear in the theme."
+            }
+            PaletteStyle.Monochrome -> {
+                "A monochrome theme, colors are purely black / white / gray."
+            }
+            PaletteStyle.Fidelity -> {
+                "A scheme that places the source color in Scheme.primaryContainer."
+            }
+            PaletteStyle.Content -> {
+                "Primary Container is the source color, adjusted for color relativity"
+            }
+        }
     }
-}

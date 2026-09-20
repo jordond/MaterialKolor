@@ -137,7 +137,10 @@ fun NumberedList(items: List<String>) {
 }
 
 @Composable
-fun AnnotatedString.Builder.appendLink(text: String, url: UrlLink) {
+fun AnnotatedString.Builder.appendLink(
+    text: String,
+    url: UrlLink,
+) {
     val startIndex = this.length
     append(text)
     addStyle(
@@ -158,17 +161,17 @@ fun AnnotatedString.Builder.appendLink(text: String, url: UrlLink) {
 }
 
 @Composable
-fun ClickableTextWithLinks(
-    text: AnnotatedString,
-) {
+fun ClickableTextWithLinks(text: AnnotatedString) {
     val urlLauncher = LocalUrlLauncher.current
     @Suppress("DEPRECATION")
     ClickableText(
         text = text,
         style = MaterialTheme.typography.bodyMedium,
         onClick = { offset ->
-            text.getStringAnnotations(tag = "URL", start = offset, end = offset)
-                .firstOrNull()?.let { annotation ->
+            text
+                .getStringAnnotations(tag = "URL", start = offset, end = offset)
+                .firstOrNull()
+                ?.let { annotation ->
                     urlLauncher.launch(annotation.item)
                 }
         },

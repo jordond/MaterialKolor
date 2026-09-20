@@ -7,11 +7,11 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
 
 @Composable
-fun rememberFormattedTime(time: Long): String {
-    return remember(time) {
-        val date = Instant.fromEpochMilliseconds(time)
+fun rememberFormattedTime(time: Long): String =
+    remember(time) {
+        val date = Instant
+            .fromEpochMilliseconds(time)
             .toLocalDateTime(TimeZone.currentSystemDefault())
 
         "${date.hour}:${date.minute.toString().padStart(2, '0')}"
     }
-}

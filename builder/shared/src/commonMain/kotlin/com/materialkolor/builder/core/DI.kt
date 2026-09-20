@@ -16,7 +16,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
 object DI {
-
     val defaultScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     val urlLauncher: UrlLauncher = DefaultUrlLauncher()

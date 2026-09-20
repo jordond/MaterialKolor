@@ -13,7 +13,6 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 
 object ThemeSectionDefaults {
-
     val SectionDivider = 16.dp
     val InnerDivider = 6.dp
     val BoxPadding = 12.dp
@@ -57,7 +56,5 @@ object ThemeSectionDefaults {
         )
 
     @Composable
-    fun Color.inverse(): Color {
-        return if (isLight()) Color.Black else Color.White
-    }
+    fun Color.inverse(): Color = if (isLight()) Color.Black else Color.White
 }

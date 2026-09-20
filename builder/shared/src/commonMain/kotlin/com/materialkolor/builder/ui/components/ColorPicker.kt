@@ -210,8 +210,11 @@ fun ColorPickerDialog(
                             }
 
                             val enabled =
-                                if (hasEdited) userHex.isValidHex()
-                                else selectedHex.isValidHex()
+                                if (hasEdited) {
+                                    userHex.isValidHex()
+                                } else {
+                                    selectedHex.isValidHex()
+                                }
 
                             FilledIconButton(
                                 enabled = enabled,
@@ -229,7 +232,6 @@ fun ColorPickerDialog(
                             }
                         }
                     }
-
 
                     ColorPicker(
                         state = state,
@@ -252,8 +254,11 @@ fun ColorPickerDialog(
                         onClick = toggleMode,
                     ) {
                         val icon =
-                            if (state.mode == ColorPickerMode.HSV) Icons.Outlined.Image
-                            else Icons.Outlined.Colorize
+                            if (state.mode == ColorPickerMode.HSV) {
+                                Icons.Outlined.Image
+                            } else {
+                                Icons.Outlined.Colorize
+                            }
 
                         val text = if (state.mode == ColorPickerMode.HSV) "Image" else "Color"
                         Icon(imageVector = icon, contentDescription = "Toggle Mode")

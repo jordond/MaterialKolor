@@ -11,7 +11,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MKThemeTest {
-
     @Test
     fun testMkThemeKtWithAllColors() {
         val settings = Settings(
@@ -29,12 +28,13 @@ class MKThemeTest {
             style = PaletteStyle.TonalSpot,
             selectedImage = null,
             isAmoled = false,
-            packageName = "foo.bar.biz.buzz"
+            packageName = "foo.bar.biz.buzz",
         )
 
         val result = mkThemeKt("MyTheme", settings, animate = true)
 
-        val expected = """
+        val expected =
+            """
 ${header(settings)}
 package foo.bar.biz.buzz
 
@@ -66,7 +66,7 @@ fun MyTheme(
         content = content,
     )
 }
-""".trimIndent()
+            """.trimIndent()
 
         assertEquals(expected, result)
     }
@@ -92,7 +92,8 @@ fun MyTheme(
 
         val result = mkThemeKt("MyTheme", settings, animate = false)
 
-        val expected = """
+        val expected =
+            """
 ${header(settings)}
 package com.example.app
 
@@ -121,7 +122,7 @@ fun MyTheme(
         content = content,
     )
 }
-""".trimIndent()
+            """.trimIndent()
 
         assertEquals(expected, result)
     }
@@ -147,7 +148,8 @@ fun MyTheme(
 
         val result = mkThemeKt("MyTheme", settings, animate = true)
 
-        val expected = """
+        val expected =
+            """
 ${header(settings)}
 package com.example.app
 
@@ -177,7 +179,7 @@ fun MyTheme(
         content = content,
     )
 }
-""".trimIndent()
+            """.trimIndent()
 
         assertEquals(expected, result)
     }
@@ -196,7 +198,8 @@ fun MyTheme(
 
         val result = mkThemeKt("AppTheme", settings, animate = true)
 
-        val expected = """
+        val expected =
+            """
 ${header(settings)}
 package foo.bar.biz.buzz
 
@@ -225,7 +228,7 @@ fun AppTheme(
         content = content,
     )
 }
-""".trimIndent()
+            """.trimIndent()
 
         assertEquals(expected, result)
     }
@@ -253,7 +256,8 @@ fun AppTheme(
 
         val result = mkThemeKt("ExpressiveTheme", settings, animate = false)
 
-        val expected = """
+        val expected =
+            """
 ${header(settings)}
 package test.expressive.app
 
@@ -289,7 +293,7 @@ fun ExpressiveTheme(
         content = content,
     )
 }
-""".trimIndent()
+            """.trimIndent()
 
         assertEquals(expected, result)
     }

@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 interface SettingsStore {
-
     fun get(): Flow<Settings>
 
     suspend fun store(settings: Settings)
@@ -22,7 +21,6 @@ interface SettingsStore {
     fun clear()
 
     companion object {
-
         fun defaults(isDarkMode: Boolean): Settings {
             val image = ImagePresets.all.first()
             return Settings(
@@ -38,7 +36,6 @@ class DefaultSettingsStore(
     private val darkModeProvider: DarkModeProvider = DI.darkModeProvider,
     scope: CoroutineScope = DI.defaultScope,
 ) : SettingsStore {
-
     private val _settings = MutableStateFlow<Settings?>(null)
 
     init {
@@ -51,9 +48,7 @@ class DefaultSettingsStore(
         }
     }
 
-    override fun get(): Flow<Settings> {
-        return _settings.mapNotNull { it }
-    }
+    override fun get(): Flow<Settings> = _settings.mapNotNull { it }
 
     override suspend fun store(settings: Settings) {
         _settings.update { settings }

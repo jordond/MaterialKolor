@@ -74,7 +74,7 @@ fun CustomizeSection(
 
             Text(
                 text = "Material 3 Expressive is a design system update that introduces the 2025 Color " +
-                    "Spec with richer, more vibrant colors."
+                    "Spec with richer, more vibrant colors.",
             )
 
             Text(

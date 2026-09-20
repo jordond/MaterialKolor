@@ -16,19 +16,16 @@ data class CachedVersions(
         return age > CACHE_DURATION_MS
     }
 
-    fun toVersions(): MaterialKolorVersions {
-        return MaterialKolorVersions(stable = stable, prerelease = prerelease)
-    }
+    fun toVersions(): MaterialKolorVersions = MaterialKolorVersions(stable = stable, prerelease = prerelease)
 
     companion object {
         private val CACHE_DURATION_MS = 1.days.inWholeMilliseconds
 
-        fun from(versions: MaterialKolorVersions): CachedVersions {
-            return CachedVersions(
+        fun from(versions: MaterialKolorVersions): CachedVersions =
+            CachedVersions(
                 stable = versions.stable,
                 prerelease = versions.prerelease,
                 cachedAt = Clock.System.now().toEpochMilliseconds(),
             )
-        }
     }
 }

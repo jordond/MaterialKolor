@@ -69,8 +69,11 @@ fun PreviewSectionContainer(
             )
 
             val icon =
-                if (expanded) Icons.Default.Visibility
-                else Icons.Default.VisibilityOff
+                if (expanded) {
+                    Icons.Default.Visibility
+                } else {
+                    Icons.Default.VisibilityOff
+                }
 
             val text = if (expanded) "Collapse $title" else "Expand $title"
             Icon(imageVector = icon, contentDescription = text)

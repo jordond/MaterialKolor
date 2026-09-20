@@ -104,12 +104,21 @@ private fun RowScope.ImageBox(
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     val scale by animateFloatAsState(
-        targetValue = if (isSelected) 1f else if (isHovered) 0.9f else 0.8f,
+        targetValue = if (isSelected) {
+            1f
+        } else if (isHovered) {
+            0.9f
+        } else {
+            0.8f
+        },
     )
 
     val shape =
-        if (isSelected) MaterialTheme.shapes.small
-        else MaterialTheme.shapes.medium
+        if (isSelected) {
+            MaterialTheme.shapes.small
+        } else {
+            MaterialTheme.shapes.medium
+        }
 
     Box(
         contentAlignment = Alignment.Center,
@@ -121,8 +130,7 @@ private fun RowScope.ImageBox(
             .clip(shape)
             .conditional(showBorder) {
                 Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape)
-            }
-            .clickable(onClick = onSelectImage),
+            }.clickable(onClick = onSelectImage),
     ) {
         content()
 

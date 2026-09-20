@@ -7,7 +7,10 @@ import android.os.Bundle
 class ActivityCallbackListener(
     private val update: (Activity?) -> Unit,
 ) : Application.ActivityLifecycleCallbacks {
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+    override fun onActivityCreated(
+        activity: Activity,
+        savedInstanceState: Bundle?,
+    ) {
         update(activity)
     }
 
@@ -23,7 +26,10 @@ class ActivityCallbackListener(
     override fun onActivityStopped(activity: Activity) {
     }
 
-    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
+    override fun onActivitySaveInstanceState(
+        activity: Activity,
+        outState: Bundle,
+    ) {
     }
 
     override fun onActivityDestroyed(activity: Activity) {

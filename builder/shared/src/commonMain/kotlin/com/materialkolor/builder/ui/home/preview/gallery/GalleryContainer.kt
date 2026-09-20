@@ -72,8 +72,11 @@ fun GalleryContainer(
             )
 
             val icon =
-                if (expanded) Icons.Outlined.KeyboardArrowUp
-                else Icons.Outlined.KeyboardArrowDown
+                if (expanded) {
+                    Icons.Outlined.KeyboardArrowUp
+                } else {
+                    Icons.Outlined.KeyboardArrowDown
+                }
 
             val text = if (expanded) "Collapse" else "Expand"
 

@@ -46,7 +46,6 @@ class HomeModel(
     private val random: Random = Random.Default,
     provider: State.Provider = State.Provider(),
 ) : UiStateViewModel<HomeModel.State, HomeModel.Event>(provider) {
-
     private var exportJob: Job? = null
 
     private var previousSpec: ColorSpec.SpecVersion? = null
@@ -88,7 +87,9 @@ class HomeModel(
 
     fun handleColorPickerAction(action: HomeAction.ColorPicker) {
         when (action) {
-            is HomeAction.CloseColorPicker -> updateState { it.copy(colorPickerState = null) }
+            is HomeAction.CloseColorPicker -> {
+                updateState { it.copy(colorPickerState = null) }
+            }
             is HomeAction.OpenColorPicker -> {
                 val state = ColorPickerState(action.key, action.initial)
                 updateState { it.copy(colorPickerState = state) }
@@ -97,9 +98,11 @@ class HomeModel(
                 imageLoading(true)
                 emit(Event.PickImage)
             }
-            is HomeAction.TogglePickerMode -> updateState { state ->
-                val pickerState = state.colorPickerState?.toggleMode() ?: return@updateState state
-                state.copy(colorPickerState = pickerState)
+            is HomeAction.TogglePickerMode -> {
+                updateState { state ->
+                    val pickerState = state.colorPickerState?.toggleMode() ?: return@updateState state
+                    state.copy(colorPickerState = pickerState)
+                }
             }
             is HomeAction.UpdateColor -> {
                 val key = state.value.colorPickerState?.keyColor ?: return
@@ -117,7 +120,10 @@ class HomeModel(
         }
     }
 
-    fun copyColorToClipboard(name: String, color: Color) {
+    fun copyColorToClipboard(
+        name: String,
+        color: Color,
+    ) {
         val hex = color.toHex()
         val text = "Copied $name color: $hex to clipboard"
         if (clipboard.copy(hex)) {
@@ -239,11 +245,12 @@ class HomeModel(
     private fun determineStyle(
         version: ColorSpec.SpecVersion,
         style: PaletteStyle,
-    ): PaletteStyle = if (version != ColorSpec.SpecVersion.SPEC_2025 || style.isExpressive) {
-        style
-    } else {
-        ExpressivePaletteStyles.first()
-    }
+    ): PaletteStyle =
+        if (version != ColorSpec.SpecVersion.SPEC_2025 || style.isExpressive) {
+            style
+        } else {
+            ExpressivePaletteStyles.first()
+        }
 
     data class State(
         val exportOptions: ExportOptions,
@@ -257,24 +264,27 @@ class HomeModel(
             settingsRepo: SettingsRepo = DI.settingsRepo,
             versionService: MaterialKolorVersionService = DI.versionService,
         ) : ComposedStateProvider<State> by composedStateProvider(
-            initialState = State(
-                exportOptions = ExportOptions.default(settingsRepo.settings.value),
-                materialKolorVersion = versionService.getVersion(settingsRepo.settings.value.useMaterialExpressive),
-            ),
-            composer = {
-                settingsRepo.settings into { value ->
-                    val newVersion = versionService.getVersion(value.useMaterialExpressive)
-                    copy(
-                        exportOptions = exportOptions.copy(settings = value),
-                        materialKolorVersion = newVersion,
-                    )
-                }
-            },
-        )
+                initialState = State(
+                    exportOptions = ExportOptions.default(settingsRepo.settings.value),
+                    materialKolorVersion = versionService.getVersion(settingsRepo.settings.value.useMaterialExpressive),
+                ),
+                composer = {
+                    settingsRepo.settings into { value ->
+                        val newVersion = versionService.getVersion(value.useMaterialExpressive)
+                        copy(
+                            exportOptions = exportOptions.copy(settings = value),
+                            materialKolorVersion = newVersion,
+                        )
+                    }
+                },
+            )
     }
 
     sealed interface Event {
-        data class ShowSnackbar(val message: String) : Event
+        data class ShowSnackbar(
+            val message: String,
+        ) : Event
+
         data object PickImage : Event
     }
 }

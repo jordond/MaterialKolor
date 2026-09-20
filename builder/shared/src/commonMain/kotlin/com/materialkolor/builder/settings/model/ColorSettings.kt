@@ -14,19 +14,21 @@ data class ColorSettings(
     val neutral: Color? = null,
     val neutralVariant: Color? = null,
 ) {
-
-    fun update(keyColor: KeyColor, color: Color): ColorSettings = when (keyColor) {
-        KeyColor.Seed -> copy(seed = color)
-        KeyColor.Primary -> copy(primary = color, seed = color)
-        KeyColor.Secondary -> copy(secondary = color)
-        KeyColor.Tertiary -> copy(tertiary = color)
-        KeyColor.Error -> copy(error = color)
-        KeyColor.Neutral -> copy(neutral = color)
-        KeyColor.NeutralVariant -> copy(neutralVariant = color)
-    }
+    fun update(
+        keyColor: KeyColor,
+        color: Color,
+    ): ColorSettings =
+        when (keyColor) {
+            KeyColor.Seed -> copy(seed = color)
+            KeyColor.Primary -> copy(primary = color, seed = color)
+            KeyColor.Secondary -> copy(secondary = color)
+            KeyColor.Tertiary -> copy(tertiary = color)
+            KeyColor.Error -> copy(error = color)
+            KeyColor.Neutral -> copy(neutral = color)
+            KeyColor.NeutralVariant -> copy(neutralVariant = color)
+        }
 
     companion object {
-
         val colors = _colors
     }
 }

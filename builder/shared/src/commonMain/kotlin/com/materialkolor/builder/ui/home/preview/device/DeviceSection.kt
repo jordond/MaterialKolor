@@ -12,9 +12,7 @@ import com.materialkolor.builder.ui.home.preview.device.components.frame.Android
 import com.materialkolor.builder.ui.home.preview.device.components.frame.IosPhoneFrame
 
 @Composable
-fun DeviceSection(
-    modifier: Modifier = Modifier,
-) {
+fun DeviceSection(modifier: Modifier = Modifier) {
     FlowRow(
         verticalArrangement = Arrangement.spacedBy(32.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,

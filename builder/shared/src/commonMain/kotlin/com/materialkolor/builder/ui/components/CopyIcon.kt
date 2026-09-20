@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 @Composable
 fun CopyIcon(
     visble: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     AnimatedVisibility(
         visible = visble,

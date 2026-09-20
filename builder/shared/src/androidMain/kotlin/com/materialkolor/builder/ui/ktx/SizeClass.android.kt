@@ -6,6 +6,4 @@ import androidx.compose.runtime.Composable
 import com.materialkolor.builder.MainApp
 
 @Composable
-actual fun windowSizeClass(): WindowSizeClass {
-    return calculateWindowSizeClass(MainApp.activity())
-}
+actual fun windowSizeClass(): WindowSizeClass = calculateWindowSizeClass(MainApp.activity())

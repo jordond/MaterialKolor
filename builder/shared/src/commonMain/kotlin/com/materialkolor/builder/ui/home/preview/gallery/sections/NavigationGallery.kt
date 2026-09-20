@@ -107,14 +107,19 @@ fun NavigationGallery(
 
                 GalleryContainerChild(
                     title = "Navigation bar",
-                    infoUrl = "https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#navigationbar",
+                    infoUrl = "https://developer.android.com/reference/kotlin/androidx/compose/" +
+                        "material3/package-summary#navigationbar",
                 ) {
                     GalleryNavigationBar(minWidth, width, boxPadding)
                 }
 
                 GalleryContainerChild(
                     title = "Tabs",
-                    infoUrl = "https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#Tab(kotlin.Boolean,kotlin.Function0,androidx.compose.ui.Modifier,kotlin.Boolean,kotlin.Function0,kotlin.Function0,androidx.compose.ui.graphics.Color,androidx.compose.ui.graphics.Color,androidx.compose.foundation.interaction.MutableInteractionSource)",
+                    infoUrl = "https://developer.android.com/reference/kotlin/androidx/compose/" +
+                        "material3/package-summary#Tab(kotlin.Boolean,kotlin.Function0," +
+                        "androidx.compose.ui.Modifier,kotlin.Boolean,kotlin.Function0,kotlin.Function0," +
+                        "androidx.compose.ui.graphics.Color,androidx.compose.ui.graphics.Color," +
+                        "androidx.compose.foundation.interaction.MutableInteractionSource)",
                 ) {
                     GalleryTabs(minWidth, width, boxPadding)
                 }
@@ -129,7 +134,8 @@ fun NavigationGallery(
 
             GalleryContainerChild(
                 title = "Navigation rail",
-                infoUrl = "https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#navigationrail",
+                infoUrl = "https://developer.android.com/reference/kotlin/androidx/compose/" +
+                    "material3/package-summary#navigationrail",
             ) {
                 GalleryNavigationRail(minWidth, width, boxPadding)
             }
@@ -321,7 +327,13 @@ private fun GalleryNavigationRail(
                         onClick = { selected = 1 },
                         icon = {
                             Icon(
-                                imageVector = if (selected == 1) Icons.AutoMirrored.Filled.Send else Icons.AutoMirrored.Outlined.Send,
+                                imageVector = if (selected ==
+                                    1
+                                ) {
+                                    Icons.AutoMirrored.Filled.Send
+                                } else {
+                                    Icons.AutoMirrored.Outlined.Send
+                                },
                                 contentDescription = null,
                             )
                         },
@@ -332,7 +344,13 @@ private fun GalleryNavigationRail(
                         onClick = { selected = 2 },
                         icon = {
                             Icon(
-                                imageVector = if (selected == 2) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                imageVector = if (selected ==
+                                    2
+                                ) {
+                                    Icons.Default.Favorite
+                                } else {
+                                    Icons.Default.FavoriteBorder
+                                },
                                 contentDescription = null,
                             )
                         },

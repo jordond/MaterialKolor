@@ -13,15 +13,21 @@ fun mkThemeKt(
     settings: Settings,
     animate: Boolean,
 ): String {
-    val contrast = if (settings.contrast == Contrast.Default) null
-    else "contrastLevel = ${settings.contrast.value}"
+    val contrast = if (settings.contrast == Contrast.Default) {
+        null
+    } else {
+        "contrastLevel = ${settings.contrast.value}"
+    }
 
     val imports = listOfNotNull(
         "import androidx.compose.foundation.isSystemInDarkTheme",
         if (settings.useMaterialExpressive) "import androidx.compose.material3.MotionScheme" else null,
         "import androidx.compose.runtime.Composable",
-        if (settings.useMaterialExpressive) "import com.materialkolor.DynamicMaterialExpressiveTheme"
-        else "import com.materialkolor.DynamicMaterialTheme",
+        if (settings.useMaterialExpressive) {
+            "import com.materialkolor.DynamicMaterialExpressiveTheme"
+        } else {
+            "import com.materialkolor.DynamicMaterialTheme"
+        },
         if (settings.specVersion.include) "import com.materialkolor.dynamiccolor.ColorSpec" else null,
         "import com.materialkolor.PaletteStyle",
         "import com.materialkolor.rememberDynamicMaterialThemeState",
@@ -31,8 +37,11 @@ fun mkThemeKt(
         contrast,
         settings.isAmoled.parameter("isAmoled"),
         settings.specVersion.parameter(),
-        if (settings.colors.primary == null) settings.colors.seed.parameter("SeedColor")
-        else settings.colors.primary.parameter("Primary"),
+        if (settings.colors.primary == null) {
+            settings.colors.seed.parameter("SeedColor")
+        } else {
+            settings.colors.primary.parameter("Primary")
+        },
         settings.colors.secondary.parameter("Secondary"),
         settings.colors.tertiary.parameter("Tertiary"),
         settings.colors.error.parameter("Error"),
@@ -40,20 +49,24 @@ fun mkThemeKt(
         settings.colors.neutralVariant.parameter("NeutralVariant"),
     ).joinToString(",\n        ")
 
-    val themeComposable = if (settings.useMaterialExpressive) """
+    val themeComposable = if (settings.useMaterialExpressive) {
+        """
     |    DynamicMaterialExpressiveTheme(
     |        state = dynamicThemeState,
     |        motionScheme = MotionScheme.expressive(),
     |        animate = $animate,
     |        content = content,
     |    )
-    """.trimMargin() else """
+        """.trimMargin()
+    } else {
+        """
     |    DynamicMaterialTheme(
     |        state = dynamicThemeState,
     |        animate = $animate,
     |        content = content,
     |    )
-    """.trimMargin()
+        """.trimMargin()
+    }
 
     return """
 ${header(settings)}
@@ -74,7 +87,7 @@ fun $themeName(
     
 $themeComposable
 }
-""".trimIndent()
+        """.trimIndent()
 }
 
 private fun Boolean.parameter(name: String) = if (this) "$name = true" else null
@@ -82,10 +95,12 @@ private fun Boolean.parameter(name: String) = if (this) "$name = true" else null
 private val ColorSpec.SpecVersion.include
     get() = this != ColorSpec.SpecVersion.SPEC_2021
 
-private fun ColorSpec.SpecVersion.parameter(): String? {
-    return if (!include) null
-    else "specVersion = ColorSpec.SpecVersion.${this.name}"
-}
+private fun ColorSpec.SpecVersion.parameter(): String? =
+    if (!include) {
+        null
+    } else {
+        "specVersion = ColorSpec.SpecVersion.${this.name}"
+    }
 
 private fun Color?.parameter(name: String): String? {
     if (this == null) return null

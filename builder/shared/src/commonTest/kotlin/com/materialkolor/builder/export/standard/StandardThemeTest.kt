@@ -11,7 +11,6 @@ import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 class StandardThemeTest {
-
     @Test
     fun testStandardMultiplatformTheme() {
         val settings = Settings(
@@ -20,7 +19,7 @@ class StandardThemeTest {
             ),
             isDarkMode = false,
             selectedImage = null,
-            packageName = "foo.bar.biz.buzz"
+            packageName = "foo.bar.biz.buzz",
         )
 
         val result = standardThemeKt(
@@ -29,7 +28,8 @@ class StandardThemeTest {
             settings = settings,
         )
 
-        val expected = """
+        val expected =
+            """
 ${header(settings)}
 package foo.bar.biz.buzz
 
@@ -156,7 +156,7 @@ fun AppTheme(
         content = content,
     )
 }
-""".trimIndent()
+            """.trimIndent()
 
         assertEquals(expected, result)
     }
@@ -177,7 +177,8 @@ fun AppTheme(
             settings = settings,
         )
 
-        val expected = """
+        val expected =
+            """
 ${header(settings)}
 package com.example.app
 
@@ -314,7 +315,7 @@ fun AppTheme(
         content = content,
     )
 }
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(expected, result)
     }
@@ -336,7 +337,8 @@ fun AppTheme(
             settings = settings,
         )
 
-        val colors = """
+        val colors =
+            """
             private val reducedContrastLightColorScheme = lightColorScheme(
                 primary = PrimaryLightReducedContrast,
                 onPrimary = OnPrimaryLightReducedContrast,
@@ -438,7 +440,7 @@ fun AppTheme(
                 onTertiaryFixed = OnTertiaryFixedReducedContrast,
                 onTertiaryFixedVariant = OnTertiaryFixedVariantReducedContrast,
             )
-        """.trimIndent()
+            """.trimIndent()
 
         assertContains(result, colors)
     }
@@ -460,7 +462,8 @@ fun AppTheme(
             settings = settings,
         )
 
-        val colors = """
+        val colors =
+            """
             private val mediumContrastLightColorScheme = lightColorScheme(
                 primary = PrimaryLightMediumContrast,
                 onPrimary = OnPrimaryLightMediumContrast,
@@ -562,7 +565,7 @@ fun AppTheme(
                 onTertiaryFixed = OnTertiaryFixedMediumContrast,
                 onTertiaryFixedVariant = OnTertiaryFixedVariantMediumContrast,
             )
-        """.trimIndent()
+            """.trimIndent()
 
         assertContains(result, colors)
 
@@ -590,7 +593,8 @@ fun AppTheme(
             settings = settings,
         )
 
-        val colors = """
+        val colors =
+            """
             private val highContrastLightColorScheme = lightColorScheme(
                 primary = PrimaryLightHighContrast,
                 onPrimary = OnPrimaryLightHighContrast,
@@ -692,7 +696,7 @@ fun AppTheme(
                 onTertiaryFixed = OnTertiaryFixedHighContrast,
                 onTertiaryFixedVariant = OnTertiaryFixedVariantHighContrast,
             )
-        """.trimIndent()
+            """.trimIndent()
 
         assertContains(result, colors)
     }

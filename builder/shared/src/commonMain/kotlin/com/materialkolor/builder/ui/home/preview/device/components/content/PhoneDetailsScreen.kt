@@ -91,9 +91,7 @@ private val care = persistentListOf(
 )
 
 @Composable
-fun PhoneDetailsScreen(
-    modifier: Modifier = Modifier,
-) {
+fun PhoneDetailsScreen(modifier: Modifier = Modifier) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier

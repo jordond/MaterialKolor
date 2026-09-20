@@ -58,13 +58,11 @@ fun PreviewCompactContent(
                     modifier = modifier,
                 )
             }
-
             PreviewSection.Preview -> {
                 WrappedContent {
                     DeviceSection()
                 }
             }
-
             PreviewSection.Components -> {
                 val isCompact = windowSizeClass.widthIsCompact()
                 WrappedContent {
@@ -75,7 +73,6 @@ fun PreviewCompactContent(
                     )
                 }
             }
-
             PreviewSection.Themes -> {
                 WrappedContent {
                     ThemeSection(
@@ -85,7 +82,6 @@ fun PreviewCompactContent(
                     )
 
                     PaletteSection(modifier = Modifier.padding(bottom = 16.dp))
-
                 }
             }
         }

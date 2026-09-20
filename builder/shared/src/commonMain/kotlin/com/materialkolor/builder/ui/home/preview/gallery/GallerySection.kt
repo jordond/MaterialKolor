@@ -139,11 +139,13 @@ private fun Title(
             .clip(MaterialTheme.shapes.medium)
             .clickable(
                 onClick = {
-                    if (anyExpanded && !allExpanded) toggleAll(true)
-                    else toggleAll(!anyExpanded)
+                    if (anyExpanded && !allExpanded) {
+                        toggleAll(true)
+                    } else {
+                        toggleAll(!anyExpanded)
+                    }
                 },
-            )
-            .padding(16.dp),
+            ).padding(16.dp),
     ) {
         Text(
             text = "Component Gallery",
@@ -153,8 +155,11 @@ private fun Title(
         )
 
         val icon =
-            if (anyExpanded) Icons.Default.Visibility
-            else Icons.Default.VisibilityOff
+            if (anyExpanded) {
+                Icons.Default.Visibility
+            } else {
+                Icons.Default.VisibilityOff
+            }
 
         val text = if (anyExpanded) "Collapse all" else "Expand all"
         Icon(imageVector = icon, contentDescription = text)

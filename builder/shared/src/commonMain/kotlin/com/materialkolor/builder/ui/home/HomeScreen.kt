@@ -107,25 +107,58 @@ fun HomeScreen(destination: String? = null) {
                 screen = screen,
                 dispatcher = rememberDebounceDispatcher { action ->
                     when (action) {
-                        is UpdateContrast -> model.updateContrast(action.contrast)
-                        is UpdatePaletteStyle -> model.updatePaletteStyle(action.style)
-                        is SelectImage -> {
-                            if (action.image == null) pickerLauncher.launch()
-                            else model.selectImagePreset(action.image)
+                        is UpdateContrast -> {
+                            model.updateContrast(action.contrast)
                         }
-                        is ToggleDarkMode -> model.toggleDarkMode()
-                        is HomeAction.ToggleExpressive -> model.toggleExpressive()
-                        is RandomColor -> model.randomColor()
-                        is Reset -> model.reset()
-                        is CopyColor -> model.copyColorToClipboard(action.name, action.color)
-                        is ColorPicker -> model.handleColorPickerAction(action)
-                        is Nav -> screen = action.screen
-                        is Share -> model.share(action.section)
-                        is ToggleExportMode -> model.toggleExportMode()
-                        is UpdateExportOptions -> model.updateExportOptions(action.options)
-                        is Export -> model.export()
-                        is CancelExport -> model.cancelExport()
-                        is UpdateSpecVersion -> model.updateSpecVersion(action.version)
+                        is UpdatePaletteStyle -> {
+                            model.updatePaletteStyle(action.style)
+                        }
+                        is SelectImage -> {
+                            if (action.image == null) {
+                                pickerLauncher.launch()
+                            } else {
+                                model.selectImagePreset(action.image)
+                            }
+                        }
+                        is ToggleDarkMode -> {
+                            model.toggleDarkMode()
+                        }
+                        is HomeAction.ToggleExpressive -> {
+                            model.toggleExpressive()
+                        }
+                        is RandomColor -> {
+                            model.randomColor()
+                        }
+                        is Reset -> {
+                            model.reset()
+                        }
+                        is CopyColor -> {
+                            model.copyColorToClipboard(action.name, action.color)
+                        }
+                        is ColorPicker -> {
+                            model.handleColorPickerAction(action)
+                        }
+                        is Nav -> {
+                            screen = action.screen
+                        }
+                        is Share -> {
+                            model.share(action.section)
+                        }
+                        is ToggleExportMode -> {
+                            model.toggleExportMode()
+                        }
+                        is UpdateExportOptions -> {
+                            model.updateExportOptions(action.options)
+                        }
+                        is Export -> {
+                            model.export()
+                        }
+                        is CancelExport -> {
+                            model.cancelExport()
+                        }
+                        is UpdateSpecVersion -> {
+                            model.updateSpecVersion(action.version)
+                        }
                     }
                 },
             )

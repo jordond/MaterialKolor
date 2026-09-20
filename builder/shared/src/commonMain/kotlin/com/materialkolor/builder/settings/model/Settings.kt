@@ -19,9 +19,7 @@ data class Settings(
     val includeMiscColors: Boolean = SettingsDefaults.includeMiscColors,
     val useMaterialExpressive: Boolean = SettingsDefaults.useMaterialExpressive,
 ) {
-
     companion object {
-
         val Default = Settings(
             colors = ColorSettings(ColorSettings.colors.last()),
             isDarkMode = false,

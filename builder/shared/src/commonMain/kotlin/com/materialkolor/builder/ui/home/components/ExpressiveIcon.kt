@@ -7,9 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun ExpressiveIcon(
-    modifier: Modifier = Modifier,
-) {
+fun ExpressiveIcon(modifier: Modifier = Modifier) {
     Icon(
         imageVector = Icons.Default.AutoAwesome,
         contentDescription = "Supports 2025 spec",
