@@ -4,11 +4,10 @@ on:
   # Run at 3AM every monday
   schedule:
     - cron: "0 3 * * *"
-
-  # Can manually be run via the Github Actions interface
   workflow_dispatch:
 
 permissions:
+  contents: read
   issues: write
 
 jobs:
@@ -19,7 +18,9 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v7
         with:
-          submodules: true
+          submodules: recursive
 
       - name: Check for upstream changes
-        run: ./.github/check-upstream --token ${{ secrets.GITHUB_TOKEN }}
+        run: ./.github/check-upstream --token "$UPSTREAM_GITHUB_TOKEN"
+        env:
+          UPSTREAM_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

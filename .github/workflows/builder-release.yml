@@ -10,6 +10,13 @@ on:
         description: "Version (e.g. 1.0.4)"
         required: true
 
+env:
+  # Build the Builder against the engine in this checkout, the same as `-Pmaterialkolor.useLocal=true`
+  # elsewhere. These jobs go through `scripts/build` rather than calling Gradle themselves, so the
+  # property rides along here; spelling it as an ORG_GRADLE_PROJECT_ variable would need a name with
+  # a dot in it, which is not a portable shell identifier.
+  GRADLE_OPTS: -Dorg.gradle.project.materialkolor.useLocal=true
+
 permissions:
   contents: read
 
@@ -48,6 +55,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       - name: Setup Java
         uses: actions/setup-java@v6
@@ -80,6 +89,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       - name: Setup Java
         uses: actions/setup-java@v6
@@ -107,6 +118,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       - name: Download web build artifacts
         uses: actions/download-artifact@v8
