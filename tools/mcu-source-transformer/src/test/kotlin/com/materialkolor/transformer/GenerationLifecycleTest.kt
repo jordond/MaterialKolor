@@ -195,22 +195,31 @@ class GenerationLifecycleTest {
         private val taskClasspath = snapshotClasspath("mcu.taskClasspath", "task-classpath")
 
         /** Copies a snapshot classpath under [root] and renders it as a Groovy file list. */
-        private fun relocate(classpath: List<File>, root: File, into: String): String = classpath
-            .mapIndexed { index, source ->
-                val relocated = root.resolve("$into/$index/${source.name}")
-                if (source.exists()) source.copyRecursively(relocated)
-                quote(relocated.absolutePath)
-            }.joinToString(", ")
+        private fun relocate(
+            classpath: List<File>,
+            root: File,
+            into: String,
+        ): String =
+            classpath
+                .mapIndexed { index, source ->
+                    val relocated = root.resolve("$into/$index/${source.name}")
+                    if (source.exists()) source.copyRecursively(relocated)
+                    quote(relocated.absolutePath)
+                }.joinToString(", ")
 
-        private fun snapshotClasspath(property: String, into: String): List<File> = requiredProperty(property)
-            .split(File.pathSeparator)
-            .mapIndexed { index, path ->
-                val source = File(path)
-                val snapshot = directory.resolve("$into/$index/${source.name}")
-                // Keep inputs stable even when another build recompiles the tool in this checkout.
-                if (source.exists()) source.copyRecursively(snapshot)
-                snapshot
-            }
+        private fun snapshotClasspath(
+            property: String,
+            into: String,
+        ): List<File> =
+            requiredProperty(property)
+                .split(File.pathSeparator)
+                .mapIndexed { index, path ->
+                    val source = File(path)
+                    val snapshot = directory.resolve("$into/$index/${source.name}")
+                    // Keep inputs stable even when another build recompiles the tool in this checkout.
+                    if (source.exists()) source.copyRecursively(snapshot)
+                    snapshot
+                }
 
         init {
             check(taskClasspath.any { it.name == "convention.jar" && it.isFile }) {
