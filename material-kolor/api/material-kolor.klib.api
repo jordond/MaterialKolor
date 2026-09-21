@@ -41,8 +41,6 @@ sealed interface com.materialkolor/PaletteStyle { // com.materialkolor/PaletteSt
     open val name // com.materialkolor/PaletteStyle.name|{}name[0]
         open fun <get-name>(): kotlin/String // com.materialkolor/PaletteStyle.name.<get-name>|<get-name>(){}[0]
 
-    open fun toStorageString(): kotlin/String // com.materialkolor/PaletteStyle.toStorageString|toStorageString(){}[0]
-
     final class Cmf : com.materialkolor/PaletteStyle { // com.materialkolor/PaletteStyle.Cmf|null[0]
         constructor <init>(androidx.compose.ui.graphics/Color? = ...) // com.materialkolor/PaletteStyle.Cmf.<init>|<init>(androidx.compose.ui.graphics.Color?){}[0]
 
@@ -51,7 +49,6 @@ sealed interface com.materialkolor/PaletteStyle { // com.materialkolor/PaletteSt
 
         final fun equals(kotlin/Any?): kotlin/Boolean // com.materialkolor/PaletteStyle.Cmf.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.materialkolor/PaletteStyle.Cmf.hashCode|hashCode(){}[0]
-        final fun toStorageString(): kotlin/String // com.materialkolor/PaletteStyle.Cmf.toStorageString|toStorageString(){}[0]
         final fun toString(): kotlin/String // com.materialkolor/PaletteStyle.Cmf.toString|toString(){}[0]
     }
 
@@ -60,7 +57,8 @@ sealed interface com.materialkolor/PaletteStyle { // com.materialkolor/PaletteSt
             final fun <get-KnownStyles>(): kotlin.collections/List<com.materialkolor/PaletteStyle> // com.materialkolor/PaletteStyle.Companion.KnownStyles.<get-KnownStyles>|<get-KnownStyles>(){}[0]
 
         final fun fromName(kotlin/String): com.materialkolor/PaletteStyle? // com.materialkolor/PaletteStyle.Companion.fromName|fromName(kotlin.String){}[0]
-        final fun fromStorageString(kotlin/String): com.materialkolor/PaletteStyle? // com.materialkolor/PaletteStyle.Companion.fromStorageString|fromStorageString(kotlin.String){}[0]
+        final fun parse(kotlin/String): com.materialkolor/PaletteStyle // com.materialkolor/PaletteStyle.Companion.parse|parse(kotlin.String){}[0]
+        final fun parseOrNull(kotlin/String): com.materialkolor/PaletteStyle? // com.materialkolor/PaletteStyle.Companion.parseOrNull|parseOrNull(kotlin.String){}[0]
         final fun serializer(): kotlinx.serialization/KSerializer<com.materialkolor/PaletteStyle> // com.materialkolor/PaletteStyle.Companion.serializer|serializer(){}[0]
         final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // com.materialkolor/PaletteStyle.Companion.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]
     }
