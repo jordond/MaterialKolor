@@ -28,12 +28,12 @@ public object PaletteStyleSerializer : KSerializer<PaletteStyle> {
         encoder: Encoder,
         value: PaletteStyle,
     ) {
-        encoder.encodeString(value.toStorageString())
+        encoder.encodeString(value.toString())
     }
 
     override fun deserialize(decoder: Decoder): PaletteStyle {
         val value = decoder.decodeString()
-        return PaletteStyle.fromStorageString(value)
+        return PaletteStyle.parseOrNull(value)
             ?: throw SerializationException("Unknown PaletteStyle \"$value\"")
     }
 }

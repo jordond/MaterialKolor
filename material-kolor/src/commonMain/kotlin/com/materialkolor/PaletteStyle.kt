@@ -11,12 +11,21 @@ import kotlinx.serialization.Serializable
  * The style of the palette to generate.
  *
  * Mapped to [Variant] in the Material Design guidelines.
+ *
+ * `toString()` is a stable round trip format you can put in a URL, a preference or a database
+ * column, the way `Duration` and `Uuid` do it. `parse(style.toString())`
+ * gives back an equal style for every style, and [parseOrNull] answers null instead of throwing
+ * when the text came from somewhere else.
+ *
+ * Every style except [Cmf] writes its [name]. A [Cmf] with no tertiary seed color writes `"Cmf"`,
+ * and one that carries a seed writes `Cmf:AARRGGBB`, eight uppercase hex digits read through
+ * `toArgb`, so a wide gamut seed collapses to its sRGB eight bit form and comes back in sRGB.
  */
 @Serializable(with = PaletteStyleSerializer::class)
 public sealed interface PaletteStyle {
     /**
      * Stable identifier for the style, matching the entry names the old enum had. [Cmf] is always
-     * `"Cmf"` no matter which seed it carries, so use [toStorageString] when the seed must survive.
+     * `"Cmf"` no matter which seed it carries, so use `toString()` when the seed must survive.
      */
     public val name: String
         get() = when (this) {
@@ -31,15 +40,6 @@ public sealed interface PaletteStyle {
             is TonalSpot -> "TonalSpot"
             is Vibrant -> "Vibrant"
         }
-
-    /**
-     * The style written as a single string you can put in a URL, a preference or a database column.
-     *
-     * Every style except [Cmf] writes its [name]. A [Cmf] with no tertiary seed color does the same,
-     * and one that carries a seed writes `Cmf:AARRGGBB`, eight uppercase hex digits of the seed.
-     * Feed the result back to [fromStorageString] to get an equal style, seed included.
-     */
-    public fun toStorageString(): String = name
 
     /**
      * A calm theme, sedated colors that aren't particularly chromatic.
@@ -128,9 +128,9 @@ public sealed interface PaletteStyle {
          * `"Cmf"` on its own when there is no [tertiarySeedColor], otherwise `Cmf:AARRGGBB`.
          *
          * The seed is written through `toArgb`, so a wide gamut color collapses to its sRGB
-         * eight bit form and comes back out of [fromStorageString] in sRGB.
+         * eight bit form and comes back out of [parse] in sRGB.
          */
-        override fun toStorageString(): String {
+        override fun toString(): String {
             val seed = tertiarySeedColor ?: return name
             val argb = (seed.toArgb().toLong() and 0xFFFFFFFFL).toString(16).uppercase().padStart(8, '0')
             return "$name:$argb"
@@ -169,19 +169,31 @@ public sealed interface PaletteStyle {
          * name belongs to no style. The match is case sensitive.
          *
          * `"Cmf"` gives back a [Cmf] with no tertiary seed color, since a name alone cannot carry
-         * one. Use [fromStorageString] when the seed has to survive the trip.
+         * one. Use [parse] when the seed has to survive the trip.
          */
         public fun fromName(name: String): PaletteStyle? = KnownStyles.firstOrNull { style -> style.name == name }
 
         /**
-         * Read back a style written by [toStorageString], or null when [value] is not one we wrote.
+         * Read back a style written by `toString()`, or throw when [value] is not one we wrote.
          *
-         * `fromStorageString(style.toStorageString()) == style` holds for every style, including a
-         * [Cmf] that carries a tertiary seed color. Accepted forms are the plain style names,
-         * `"Cmf"`, and `"Cmf:"` followed by exactly eight hex digits in either case. Anything else,
-         * a short seed included, is null.
+         * `parse(style.toString()) == style` holds for every style, including a [Cmf] that carries
+         * a tertiary seed color. Accepted forms are the plain style names, `"Cmf"`, and `"Cmf:"`
+         * followed by exactly eight hex digits in either case.
+         *
+         * @throws[IllegalArgumentException] when [value] is not a style we wrote.
          */
-        public fun fromStorageString(value: String): PaletteStyle? {
+        public fun parse(value: String): PaletteStyle =
+            parseOrNull(value) ?: throw IllegalArgumentException("Unknown PaletteStyle \"$value\"")
+
+        /**
+         * Read back a style written by `toString()`, or null when [value] is not one we wrote.
+         *
+         * The lenient twin of [parse], for text that arrives from a URL, a stored preference or a
+         * user. The plain style names match case sensitively, while the eight hex digits of a
+         * seeded [Cmf] read in either case. Anything else, a short seed or a signed one included,
+         * is null.
+         */
+        public fun parseOrNull(value: String): PaletteStyle? {
             if (!value.startsWith(CMF_SEED_PREFIX)) return fromName(value)
 
             val hex = value.removePrefix(CMF_SEED_PREFIX)
