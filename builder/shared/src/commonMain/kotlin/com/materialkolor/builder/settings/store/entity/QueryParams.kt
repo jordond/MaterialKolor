@@ -4,7 +4,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.materialkolor.Contrast
 import com.materialkolor.PaletteStyle
+import com.materialkolor.builder.ktx.paletteStyleOfStorageName
 import com.materialkolor.builder.ktx.parseHexToColor
+import com.materialkolor.builder.ktx.storageName
 import com.materialkolor.builder.settings.model.KeyColor
 import com.materialkolor.builder.settings.model.SettingsDefaults
 import com.materialkolor.dynamiccolor.ColorSpec
@@ -41,7 +43,7 @@ fun SettingsEntity.toQueryParams(): String {
     val params = listOfNotNull(
         colorParams,
         "${KEY_DARK_MODE}=${isDarkMode ?: false}",
-        style.param(KEY_STYLE, SettingsDefaults.style),
+        style.storageName.param(KEY_STYLE, SettingsDefaults.style.storageName),
         selectedPresetId.param(KEY_SELECTED_PRESET_ID),
         contrast.param(KEY_CONTRAST, SettingsDefaults.contrast.value),
         isAmoled.param(KEY_IS_AMOLED, SettingsDefaults.isAmoled),
@@ -96,9 +98,4 @@ private inline fun <reified T> T?.param(
     return "$key=${this.toString().encodeURLQueryComponent()}"
 }
 
-private fun String.safeToPaletteStyle(): PaletteStyle? =
-    try {
-        enumValueOf<PaletteStyle>(this)
-    } catch (_: Throwable) {
-        null
-    }
+private fun String.safeToPaletteStyle(): PaletteStyle? = paletteStyleOfStorageName(this)

@@ -127,7 +127,7 @@ class QueryParamsTest {
 
     @Test
     fun testAllPaletteStyleValues() {
-        for (style in PaletteStyle.entries) {
+        for (style in PaletteStyle.KnownStyles) {
             val settingsEntity = SettingsEntity(
                 colors = mapOf(KeyColor.Seed to 0xFF000000.toInt()),
                 isDarkMode = false,
