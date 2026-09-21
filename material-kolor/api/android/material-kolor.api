@@ -147,6 +147,8 @@ public final class com/materialkolor/MaterialKolors {
 
 public abstract interface class com/materialkolor/PaletteStyle {
 	public static final field Companion Lcom/materialkolor/PaletteStyle$Companion;
+	public fun getName ()Ljava/lang/String;
+	public fun toStorageString ()Ljava/lang/String;
 }
 
 public final class com/materialkolor/PaletteStyle$Cmf : com/materialkolor/PaletteStyle {
@@ -155,28 +157,42 @@ public final class com/materialkolor/PaletteStyle$Cmf : com/materialkolor/Palett
 	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
 	public final fun getTertiarySeedColor-QN2ZGVo ()Landroidx/compose/ui/graphics/Color;
 	public fun hashCode ()I
+	public fun toStorageString ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/materialkolor/PaletteStyle$Companion {
+	public final fun fromName (Ljava/lang/String;)Lcom/materialkolor/PaletteStyle;
+	public final fun fromStorageString (Ljava/lang/String;)Lcom/materialkolor/PaletteStyle;
 	public final fun getKnownStyles ()Ljava/util/List;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/materialkolor/PaletteStyle$Content : com/materialkolor/PaletteStyle {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$Content;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
+	public fun toStorageString ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/materialkolor/PaletteStyle$DefaultImpls {
+	public static fun getName (Lcom/materialkolor/PaletteStyle;)Ljava/lang/String;
+	public static fun toStorageString (Lcom/materialkolor/PaletteStyle;)Ljava/lang/String;
 }
 
 public final class com/materialkolor/PaletteStyle$Expressive : com/materialkolor/PaletteStyle {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$Expressive;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
+	public fun toStorageString ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -184,7 +200,9 @@ public final class com/materialkolor/PaletteStyle$Fidelity : com/materialkolor/P
 	public static final field $stable I
 	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$Fidelity;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
+	public fun toStorageString ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -192,7 +210,9 @@ public final class com/materialkolor/PaletteStyle$FruitSalad : com/materialkolor
 	public static final field $stable I
 	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$FruitSalad;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
+	public fun toStorageString ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -200,7 +220,9 @@ public final class com/materialkolor/PaletteStyle$Monochrome : com/materialkolor
 	public static final field $stable I
 	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$Monochrome;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
+	public fun toStorageString ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -208,7 +230,9 @@ public final class com/materialkolor/PaletteStyle$Neutral : com/materialkolor/Pa
 	public static final field $stable I
 	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$Neutral;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
+	public fun toStorageString ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -216,7 +240,9 @@ public final class com/materialkolor/PaletteStyle$Rainbow : com/materialkolor/Pa
 	public static final field $stable I
 	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$Rainbow;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
+	public fun toStorageString ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -224,7 +250,9 @@ public final class com/materialkolor/PaletteStyle$TonalSpot : com/materialkolor/
 	public static final field $stable I
 	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$TonalSpot;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
+	public fun toStorageString ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -232,7 +260,9 @@ public final class com/materialkolor/PaletteStyle$Vibrant : com/materialkolor/Pa
 	public static final field $stable I
 	public static final field INSTANCE Lcom/materialkolor/PaletteStyle$Vibrant;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
+	public fun toStorageString ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -351,5 +381,15 @@ public final class com/materialkolor/ktx/TonalPaletteKt {
 	public static final fun from (Lcom/materialkolor/palettes/TonalPalette$Companion;Lcom/materialkolor/hct/Hct;)Lcom/materialkolor/palettes/TonalPalette;
 	public static final fun from-4WTKRHQ (Lcom/materialkolor/palettes/TonalPalette$Companion;J)Lcom/materialkolor/palettes/TonalPalette;
 	public static final fun toneColor (Lcom/materialkolor/palettes/TonalPalette;I)J
+}
+
+public final class com/materialkolor/serialization/PaletteStyleSerializer : kotlinx/serialization/KSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/materialkolor/serialization/PaletteStyleSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/materialkolor/PaletteStyle;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/materialkolor/PaletteStyle;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 }
 
