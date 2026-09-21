@@ -60,8 +60,53 @@ other non-CMF variants use 2021.
 `SchemeCmf` is available directly through the low-level API, accepts one or two source colors and
 requires `SPEC_2026`. It has its own 2026 default, this does not change the general default. A
 second source supplies the tertiary hue/chroma, while a one-source scheme follows upstream's
-single-source behavior. Empty lists are unsupported. There is no new high-level multi-seed or
-`PaletteStyle` abstraction in this migration.
+single-source behavior. Empty lists are unsupported. The high-level entry point for CMF is
+`PaletteStyle.Cmf`, described below.
+
+## PaletteStyle is a sealed interface
+
+`PaletteStyle` is no longer an enum. It is a sealed interface and the nine existing styles are
+`data object`s that implement it. `PaletteStyle.TonalSpot` and its siblings still work as values, as
+arguments and as `when` branches, so most call sites need no change.
+
+The generated enum members are gone. A style has no `name` and no `ordinal`, and the type has no
+`entries`, no `values()`, no `valueOf` and no `enumValueOf`. Use `PaletteStyle.KnownStyles` to list
+the styles for a menu, a picker or a test. It holds the nine objects plus a default
+`PaletteStyle.Cmf()`.
+
+Persist a style with a string mapping of your own instead of through `name`:
+
+```kotlin
+// Before
+val stored = style.name
+val restored = PaletteStyle.valueOf(stored)
+
+// After
+fun key(style: PaletteStyle): String = when (style) {
+    PaletteStyle.TonalSpot -> "tonal_spot"
+    is PaletteStyle.Cmf -> "cmf"
+    // one branch per remaining style
+}
+
+val stored = key(style)
+val restored = PaletteStyle.KnownStyles.first { key(it) == stored }
+```
+
+A `Cmf` that carries a tertiary source color does not round-trip through a key alone, store that
+color next to the key and rebuild the style from both.
+
+`PaletteStyle.Cmf(tertiarySourceColor: Color? = null)` is the new high-level entry point for the
+2026 spec's CMF variant. An optional tertiary seed becomes the second entry of the scheme's
+`sourceColorHctList` and seeds the tertiary palette. Leave it `null` and the tertiary palette is
+derived from the single source color, the way the other styles behave.
+
+`Cmf` always produces a `SPEC_2026` scheme, so the `specVersion` argument of `toDynamicScheme` and
+of the theme helpers is ignored for it. As with the fallback rules above, read
+`DynamicScheme.specVersion` when the effective specification matters.
+
+An exhaustive `when` over `PaletteStyle` now needs an `is PaletteStyle.Cmf` branch. `Cmf` is a class
+rather than an object, so that branch is a type check, and the compiler reports the missing branch
+when you recompile.
 
 ## Constructors replace the nested Builder
 
