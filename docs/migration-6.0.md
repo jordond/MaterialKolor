@@ -95,10 +95,10 @@ val restored = PaletteStyle.KnownStyles.first { key(it) == stored }
 A `Cmf` that carries a tertiary source color does not round-trip through a key alone, store that
 color next to the key and rebuild the style from both.
 
-`PaletteStyle.Cmf(tertiarySourceColor: Color? = null)` is the new high-level entry point for the
-2026 spec's CMF variant. An optional tertiary seed becomes the second entry of the scheme's
-`sourceColorHctList` and seeds the tertiary palette. Leave it `null` and the tertiary palette is
-derived from the single source color, the way the other styles behave.
+`PaletteStyle.Cmf(tertiarySourceColor: Color? = null)` builds the 2026 spec's CMF variant. A
+tertiary source color becomes the second entry of the scheme's `sourceColorHctList` and seeds the
+tertiary palette. Leave it `null` and the tertiary palette is derived from the single source color,
+the way the other styles behave.
 
 `Cmf` always produces a `SPEC_2026` scheme, so the `specVersion` argument of `toDynamicScheme` and
 of the theme helpers is ignored for it. As with the fallback rules above, read

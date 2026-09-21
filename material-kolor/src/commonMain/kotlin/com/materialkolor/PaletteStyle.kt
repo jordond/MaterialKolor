@@ -72,8 +72,8 @@ public sealed interface PaletteStyle {
     public data object Content : PaletteStyle
 
     /**
-     * A theme built on the 2026 spec's CMF (Color, Material, Finish) design discipline, which can
-     * take a second seed color.
+     * A theme using the 2026 spec's CMF (Color, Material, Finish) variant, which can take a second
+     * seed color.
      *
      * Pass [tertiarySourceColor] to seed the tertiary palette from a color of its own. Leave it
      * `null` and the tertiary palette is derived from the primary source color, the way the other
