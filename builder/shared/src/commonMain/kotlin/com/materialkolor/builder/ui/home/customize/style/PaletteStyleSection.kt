@@ -27,7 +27,10 @@ fun PaletteStyleSection(
     onUpdate: (PaletteStyle) -> Unit,
     modifier: Modifier = Modifier,
     colorSpec: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
-    styles: PersistentList<PaletteStyle> = PaletteStyle.KnownStyles.toPersistentList(),
+    // The CMF chip stays hidden until the Builder gets a tertiary seed picker and a 2026 spec option
+    styles: PersistentList<PaletteStyle> = PaletteStyle.KnownStyles
+        .filterNot { it is PaletteStyle.Cmf }
+        .toPersistentList(),
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
