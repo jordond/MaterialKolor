@@ -1,14 +1,11 @@
 #!/bin/bash
-
-# Explode on errors 💥
 set -euo pipefail
 
 CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 ROOT="$(cd "$CWD"/.. >/dev/null 2>&1 && pwd)"
-
 REPO="jordond/MaterialKolor"
 UPSTREAM_REPO="https://github.com/material-foundation/material-color-utilities"
-SUBMODULE_PATH="mcu-upstream/src/main"
+SUBMODULE_PATH="$ROOT/tools/mcu-upstream/src/main"
 
 usage() {
     echo "Usage: $0 [--token <github-token>] [--no-output]"
@@ -16,14 +13,15 @@ usage() {
     echo "  --no-output: Do not output to console"
 }
 
-# Default to showing output
 show_output=true
 github_token=""
-
-# Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
     --token)
+        if [[ $# -lt 2 || -z "$2" ]]; then
+            usage >&2
+            exit 1
+        fi
         github_token="$2"
         shift 2
         ;;
@@ -32,44 +30,68 @@ while [[ $# -gt 0 ]]; do
         shift
         ;;
     *)
-        echo "Unknown option: $1"
-        usage
+        echo "Unknown option: $1" >&2
+        usage >&2
         exit 1
         ;;
     esac
 done
 
-# Function to create a GitHub issue for a commit
-create_github_issue() {
-    local commit=$1
-    local short_sha=$(git rev-parse --short $commit)
-    local date=$(git show -s --format=%cI $commit)
-    local full_message=$(git log -1 --pretty=%B $commit)
-    local title=$(echo "$full_message" | head -n 1)
-    local body=$(echo "$full_message" | tail -n +2)
-    local files_changed=$(git diff-tree --no-commit-id --name-only -r $commit | grep "^java/" | tr '\n' ' ')
+log() {
+    if "$show_output"; then
+        printf '%s\n' "$@"
+    fi
+}
 
-    # Output to console if not disabled
-    if $show_output; then
-        echo "----------------------------------------"
-        echo "Commit: $short_sha"
-        echo "Date: $date"
-        echo "Title: $title"
-        echo "Body:"
-        echo "$body"
-        echo "Files changed:"
-        for file in $files_changed; do
-            if [ -n "$file" ]; then
-                echo "--> $file"
-            fi
-        done
-        echo
+# Java remains the parity reference; Kotlin is the production input. License
+# changes outside those trees must also be reviewed before updating the pin.
+relevant_files() {
+    grep -Ei '^(java|kotlin)/|(^|/)(licen[cs]es?|notices?|copying)(([._-][^/]*)?$|/)' || [[ $? == 1 ]]
+}
+
+# Build and publishing scaffolding under upstream's kotlin/ tree gets its own category: it is the
+# first visible sign that upstream is preparing first-party Kotlin Multiplatform artifacts, which
+# would change what this project needs to port rather than merely what it needs to re-adapt.
+kotlin_scaffold_files() {
+    grep -Ei '^kotlin/([^/]+/)*(build\.gradle(\.kts)?|settings\.gradle(\.kts)?|pom\.xml|gradle\.properties|[^/]+\.toml)$' || [[ $? == 1 ]]
+}
+
+SOURCE_CATEGORY="upstream-source"
+SCAFFOLD_CATEGORY="kotlin-build-scaffold"
+SCAFFOLD_NOTE="Build or publishing scaffolding changed under upstream's \`kotlin/\` tree, so \
+first-party Kotlin Multiplatform publication may be starting. Review whether this project should \
+keep adapting upstream sources. Reference: $UPSTREAM_REPO/pull/76."
+
+report_commit() {
+    local commit="$1" files_changed="$2" category="$3"
+    local short_sha date full_message title issue_title issue_body api_response existing_issue payload response
+    local labels scaffold_section issue_number
+    short_sha=$(git rev-parse --short "$commit")
+    date=$(git show -s --format=%cI "$commit")
+    full_message=$(git log -1 --pretty=%B "$commit")
+    title=$(git log -1 --pretty=%s "$commit")
+    log "----------------------------------------" "Commit: $short_sha" "Date: $date" \
+        "Title: $title" "Category: $category" "Commit message:" "$full_message" \
+        "Changed files:" "$files_changed"
+
+    labels=$(jq -nc '["upstream"]')
+    scaffold_section=""
+    if [[ "$category" == "$SCAFFOLD_CATEGORY" ]]; then
+        log "Note: $SCAFFOLD_NOTE"
+        labels=$(jq -nc --arg category "$SCAFFOLD_CATEGORY" '["upstream", $category]')
+        scaffold_section="
+### $SCAFFOLD_CATEGORY
+
+$SCAFFOLD_NOTE
+"
     fi
 
-    if [[ -n "$github_token" ]]; then
-        # Prepare issue title and body
-        local issue_title="[Upstream:$short_sha] $title"
-        local issue_body="## Info
+    if [[ -z "$github_token" ]]; then
+        return
+    fi
+
+    issue_title="[Upstream:$short_sha] $title"
+    issue_body="## Info
 
 This commit was authored at $date. You can view the commit [here]($UPSTREAM_REPO/commit/$commit).
 
@@ -80,110 +102,84 @@ $full_message
 \`\`\`
 $files_changed
 \`\`\`
-"
-        # Check if an issue with the same title already exists
-        echo "Checking for existing issues..."
-        api_response=$(curl -s -H "Authorization: token $github_token" \
-            "https://api.github.com/repos/$REPO/issues?state=all&labels=upstream")
-
-        if [ $? -ne 0 ]; then
-            echo "Error: Failed to fetch issues from GitHub API"
-            echo "Response: $api_response"
-            return 1
-        fi
-
-        # Validate JSON response
-        if ! echo "$api_response" | jq empty 2>/dev/null; then
-            echo "Error: Invalid JSON response from GitHub API"
-            echo "Response: $api_response"
-            return 1
-        fi
-
-        existing_issue=$(echo "$api_response" |
-            jq -r ".[] | select(.title == \"$issue_title\") | .number")
-
-        if [ -n "$existing_issue" ]; then
-            echo "Issue already exists for commit $short_sha (Issue #$existing_issue)"
-        else
-            # Create GitHub issue
-            echo "Creating issue for commit $short_sha"
-            response=$(curl -s -X POST \
-                -H "Authorization: token $github_token" \
-                -H "Accept: application/vnd.github.v3+json" \
-                "https://api.github.com/repos/$REPO/issues" \
-                -d "{
-                    \"title\": \"$issue_title\",
-                    \"body\": $(echo "$issue_body" | jq -R -s .),
-                    \"labels\": [\"upstream\"]
-                }")
-
-            # Validate creation response
-            if ! echo "$response" | jq empty 2>/dev/null; then
-                echo "Error: Invalid JSON response when creating issue"
-                echo "Response: $response"
-                return 1
-            fi
-
-            issue_number=$(echo "$response" | jq -r '.number')
-            if [ "$issue_number" != "null" ]; then
-                echo "Created issue #$issue_number for commit $short_sha"
-            else
-                echo "Failed to create issue for commit $short_sha"
-                echo "API response: $response"
-                return 1
-            fi
-        fi
+$scaffold_section"
+    log "Checking for existing issues..."
+    api_response=$(curl --fail-with-body --silent --show-error \
+        -H "Authorization: token $github_token" \
+        "https://api.github.com/repos/$REPO/issues?state=all&labels=upstream&per_page=100")
+    existing_issue=$(jq -r --arg title "$issue_title" \
+        '.[] | select(.title == $title) | .number' <<< "$api_response")
+    if [[ -n "$existing_issue" ]]; then
+        log "Issue already exists for commit $short_sha (Issue #$existing_issue)"
+        return
     fi
+
+    payload=$(jq -n --arg title "$issue_title" --arg body "$issue_body" --argjson labels "$labels" \
+        '{title: $title, body: $body, labels: $labels}')
+    log "Creating issue for commit $short_sha"
+    # One commit that cannot be filed must not cost the run every later commit, so the failure is
+    # reported here and the loop moves on instead of tripping `set -e`.
+    if ! response=$(curl --fail-with-body --silent --show-error -X POST \
+        -H "Authorization: token $github_token" \
+        -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/repos/$REPO/issues" -d "$payload"); then
+        echo "Could not create an issue for commit $short_sha; continuing with the next commit." >&2
+        return
+    fi
+    if ! issue_number=$(jq -er '.number' <<< "$response"); then
+        echo "Issue creation for commit $short_sha returned no issue number; continuing." >&2
+        return
+    fi
+    log "Created issue #$issue_number for commit $short_sha"
 }
 
-echo "Checking submodule: $SUBMODULE_PATH"
-
-# Enter the submodule directory
+log "Checking submodule: $SUBMODULE_PATH"
+# Without this guard an uninitialised submodule directory lets `cd` succeed and
+# every later git command resolves against the parent repository instead, so the
+# monitor would report "no relevant changes" forever.
+if [[ ! -e "$SUBMODULE_PATH/.git" ]]; then
+    echo "Error: submodule not initialised at $SUBMODULE_PATH" >&2
+    echo "Run: git submodule update --init --recursive" >&2
+    exit 1
+fi
 cd "$SUBMODULE_PATH"
-
-# Fetch the latest changes from remote
-echo "Fetching latest changes from remote..."
-git fetch origin --prune --unshallow || git fetch origin
-
-# Get the current commit hash
-current_commit=$(git rev-parse HEAD)
-echo "Current commit: $(git rev-parse --short $current_commit)"
-
-# Get the latest commit from origin/main (or origin/master)
-remote_commit=$(git rev-parse origin/main 2>/dev/null || git rev-parse origin/master)
-echo "Remote commit: $(git rev-parse --short $remote_commit)"
-
-# Get all commits between current and remote
-echo "Checking for new commits..."
-echo "Running: git log --reverse --pretty=format:'%H' ${current_commit}..${remote_commit}"
-commits=$(git log --reverse --pretty=format:"%H" ${current_commit}..${remote_commit})
-
-if [ -z "$commits" ]; then
-    echo "No new commits found."
+log "Fetching latest changes from remote..."
+if [[ $(git rev-parse --is-shallow-repository) == true ]]; then
+    git fetch --quiet origin --prune --unshallow
 else
-    commit_count=$(echo "$commits" | wc -l)
-    echo "Found $commit_count new commit(s)"
+    git fetch --quiet origin --prune
+fi
 
-    java_commits=0
-    echo "$commits" | while read commit; do
-        short_sha=$(git rev-parse --short "$commit")
-        commit_msg=$(git log -1 --pretty=format:"%s" "$commit")
-        echo "Analyzing commit $short_sha: $commit_msg"
+current_commit=$(git rev-parse HEAD)
+remote_commit=$(git rev-parse --verify origin/main 2>/dev/null || git rev-parse --verify origin/master)
+log "Current commit: $(git rev-parse --short "$current_commit")" \
+    "Remote commit: $(git rev-parse --short "$remote_commit")"
+commits=$(git log --reverse --pretty=format:"%H" "${current_commit}..${remote_commit}")
+if [[ -z "$commits" ]]; then
+    log "No new commits found."
+    exit 0
+fi
 
-        # Check if the commit changed files in the java/ folder
-        echo "Checking for Java changes in commit $short_sha..."
-        changed_files=$(git diff-tree --no-commit-id --name-only -r $commit)
-        echo "Changed files in commit:"
-        echo "$changed_files"
-
-        if echo "$changed_files" | grep -q "^java/"; then
-            echo "--> Contains Java changes, creating issue..."
-            create_github_issue $commit
-            java_commits=$((java_commits + 1))
-        else
-            echo "--> No Java changes, skipping. Changed files: $(echo "$changed_files" | tr '\n' ' ')"
+commit_count=0
+relevant_commits=0
+scaffold_commits=0
+while IFS= read -r commit; do
+    commit_count=$((commit_count + 1))
+    changed_files=$(git diff-tree --root --first-parent -m --no-commit-id --name-only -r "$commit")
+    files_to_review=$(relevant_files <<< "$changed_files")
+    if [[ -n "$files_to_review" ]]; then
+        relevant_commits=$((relevant_commits + 1))
+        category="$SOURCE_CATEGORY"
+        if [[ -n $(kotlin_scaffold_files <<< "$changed_files") ]]; then
+            category="$SCAFFOLD_CATEGORY"
+            scaffold_commits=$((scaffold_commits + 1))
         fi
-    done
-
-    echo "Summary: Processed $commit_count commits, $java_commits had Java changes"
+        report_commit "$commit" "$files_to_review" "$category"
+    else
+        log "Skipping $(git rev-parse --short "$commit"): no Java, Kotlin, or license changes."
+    fi
+done <<< "$commits"
+log "Summary: Processed $commit_count commits, $relevant_commits had Java, Kotlin, or license changes"
+if ((scaffold_commits > 0)); then
+    log "Summary: $scaffold_commits of those changed kotlin/ build scaffolding ($SCAFFOLD_CATEGORY)"
 fi

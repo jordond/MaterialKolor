@@ -7,13 +7,20 @@ import com.materialkolor.builder.settings.model.ColorSettings
 import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.dynamiccolor.DynamicColor
 import com.materialkolor.dynamiccolor.MaterialDynamicColors
+import com.materialkolor.ktx.controlActivated
+import com.materialkolor.ktx.controlHighlight
+import com.materialkolor.ktx.controlNormal
 import com.materialkolor.ktx.getColor
+import com.materialkolor.ktx.textHintInverse
+import com.materialkolor.ktx.textPrimaryInverse
+import com.materialkolor.ktx.textPrimaryInverseDisableOnly
+import com.materialkolor.ktx.textSecondaryAndTertiaryInverse
+import com.materialkolor.ktx.textSecondaryAndTertiaryInverseDisabled
 import com.materialkolor.ktx.toHex
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class StandardColorsTest {
-
     @Test
     fun testStandardColors() {
         val settings = Settings(
@@ -60,124 +67,125 @@ class StandardColorsTest {
 
         val actual = standardColorsKt(settings)
 
-        val expected = """
-         package ${settings.packageName}
+        val expected =
+            """
+            package ${settings.packageName}
 
-         import androidx.compose.ui.graphics.Color
+            import androidx.compose.ui.graphics.Color
 
-         val Seed = ${settings.colors.seed.h()}
+            val Seed = ${settings.colors.seed.h()}
 
-         val PrimaryLight = ${light { primary() }}
-         val OnPrimaryLight = ${light { onPrimary() }}
-         val PrimaryContainerLight = ${light { primaryContainer() }}
-         val OnPrimaryContainerLight = ${light { onPrimaryContainer() }}
-         val InversePrimaryLight = ${light { inversePrimary() }}
-         val SecondaryLight = ${light { secondary() }}
-         val OnSecondaryLight = ${light { onSecondary() }}
-         val SecondaryContainerLight = ${light { secondaryContainer() }}
-         val OnSecondaryContainerLight = ${light { onSecondaryContainer() }}
-         val TertiaryLight = ${light { tertiary() }}
-         val OnTertiaryLight = ${light { onTertiary() }}
-         val TertiaryContainerLight = ${light { tertiaryContainer() }}
-         val OnTertiaryContainerLight = ${light { onTertiaryContainer() }}
-         val BackgroundLight = ${light { background() }}
-         val OnBackgroundLight = ${light { onBackground() }}
-         val SurfaceLight = ${light { surface() }}
-         val OnSurfaceLight = ${light { onSurface() }}
-         val SurfaceVariantLight = ${light { surfaceVariant() }}
-         val OnSurfaceVariantLight = ${light { onSurfaceVariant() }}
-         val SurfaceTintLight = ${light { surfaceTint() }}
-         val InverseSurfaceLight = ${light { inverseSurface() }}
-         val InverseOnSurfaceLight = ${light { inverseOnSurface() }}
-         val ErrorLight = ${light { error() }}
-         val OnErrorLight = ${light { onError() }}
-         val ErrorContainerLight = ${light { errorContainer() }}
-         val OnErrorContainerLight = ${light { onErrorContainer() }}
-         val OutlineLight = ${light { outline() }}
-         val OutlineVariantLight = ${light { outlineVariant() }}
-         val ScrimLight = ${light { scrim() }}
-         val SurfaceBrightLight = ${light { surfaceBright() }}
-         val SurfaceContainerLight = ${light { surfaceContainer() }}
-         val SurfaceContainerHighLight = ${light { surfaceContainerHigh() }}
-         val SurfaceContainerHighestLight = ${light { surfaceContainerHighest() }}
-         val SurfaceContainerLowLight = ${light { surfaceContainerLow() }}
-         val SurfaceContainerLowestLight = ${light { surfaceContainerLowest() }}
-         val SurfaceDimLight = ${light { surfaceDim() }}
-         val ShadowLight = ${light { shadow() }}
-         val ControlActivatedLight = ${light { controlActivated() }}
-         val ControlNormalLight = ${light { controlNormal() }}
-         val ControlHighlightLight = ${light { controlHighlight() }}
-         val TextPrimaryInverseLight = ${light { textPrimaryInverse() }}
-         val TextSecondaryAndTertiaryInverseLight = ${light { textSecondaryAndTertiaryInverse() }}
-         val TextPrimaryInverseDisableOnlyLight = ${light { textPrimaryInverseDisableOnly() }}
-         val TextSecondaryAndTertiaryInverseDisabledLight = ${light { textSecondaryAndTertiaryInverseDisabled() }}
-         val TextHintInverseLight = ${light { textHintInverse() }}
+            val PrimaryLight = ${light { primary }}
+            val OnPrimaryLight = ${light { onPrimary }}
+            val PrimaryContainerLight = ${light { primaryContainer }}
+            val OnPrimaryContainerLight = ${light { onPrimaryContainer }}
+            val InversePrimaryLight = ${light { inversePrimary }}
+            val SecondaryLight = ${light { secondary }}
+            val OnSecondaryLight = ${light { onSecondary }}
+            val SecondaryContainerLight = ${light { secondaryContainer }}
+            val OnSecondaryContainerLight = ${light { onSecondaryContainer }}
+            val TertiaryLight = ${light { tertiary }}
+            val OnTertiaryLight = ${light { onTertiary }}
+            val TertiaryContainerLight = ${light { tertiaryContainer }}
+            val OnTertiaryContainerLight = ${light { onTertiaryContainer }}
+            val BackgroundLight = ${light { background }}
+            val OnBackgroundLight = ${light { onBackground }}
+            val SurfaceLight = ${light { surface }}
+            val OnSurfaceLight = ${light { onSurface }}
+            val SurfaceVariantLight = ${light { surfaceVariant }}
+            val OnSurfaceVariantLight = ${light { onSurfaceVariant }}
+            val SurfaceTintLight = ${light { surfaceTint }}
+            val InverseSurfaceLight = ${light { inverseSurface }}
+            val InverseOnSurfaceLight = ${light { inverseOnSurface }}
+            val ErrorLight = ${light { error }}
+            val OnErrorLight = ${light { onError }}
+            val ErrorContainerLight = ${light { errorContainer }}
+            val OnErrorContainerLight = ${light { onErrorContainer }}
+            val OutlineLight = ${light { outline }}
+            val OutlineVariantLight = ${light { outlineVariant }}
+            val ScrimLight = ${light { scrim }}
+            val SurfaceBrightLight = ${light { surfaceBright }}
+            val SurfaceContainerLight = ${light { surfaceContainer }}
+            val SurfaceContainerHighLight = ${light { surfaceContainerHigh }}
+            val SurfaceContainerHighestLight = ${light { surfaceContainerHighest }}
+            val SurfaceContainerLowLight = ${light { surfaceContainerLow }}
+            val SurfaceContainerLowestLight = ${light { surfaceContainerLowest }}
+            val SurfaceDimLight = ${light { surfaceDim }}
+            val ShadowLight = ${light { shadow }}
+            val ControlActivatedLight = ${light { controlActivated }}
+            val ControlNormalLight = ${light { controlNormal }}
+            val ControlHighlightLight = ${light { controlHighlight }}
+            val TextPrimaryInverseLight = ${light { textPrimaryInverse }}
+            val TextSecondaryAndTertiaryInverseLight = ${light { textSecondaryAndTertiaryInverse }}
+            val TextPrimaryInverseDisableOnlyLight = ${light { textPrimaryInverseDisableOnly }}
+            val TextSecondaryAndTertiaryInverseDisabledLight = ${light { textSecondaryAndTertiaryInverseDisabled }}
+            val TextHintInverseLight = ${light { textHintInverse }}
 
-         val PrimaryDark = ${dark { primary() }}
-         val OnPrimaryDark = ${dark { onPrimary() }}
-         val PrimaryContainerDark = ${dark { primaryContainer() }}
-         val OnPrimaryContainerDark = ${dark { onPrimaryContainer() }}
-         val InversePrimaryDark = ${dark { inversePrimary() }}
-         val SecondaryDark = ${dark { secondary() }}
-         val OnSecondaryDark = ${dark { onSecondary() }}
-         val SecondaryContainerDark = ${dark { secondaryContainer() }}
-         val OnSecondaryContainerDark = ${dark { onSecondaryContainer() }}
-         val TertiaryDark = ${dark { tertiary() }}
-         val OnTertiaryDark = ${dark { onTertiary() }}
-         val TertiaryContainerDark = ${dark { tertiaryContainer() }}
-         val OnTertiaryContainerDark = ${dark { onTertiaryContainer() }}
-         val BackgroundDark = ${dark { background() }}
-         val OnBackgroundDark = ${dark { onBackground() }}
-         val SurfaceDark = ${dark { surface() }}
-         val OnSurfaceDark = ${dark { onSurface() }}
-         val SurfaceVariantDark = ${dark { surfaceVariant() }}
-         val OnSurfaceVariantDark = ${dark { onSurfaceVariant() }}
-         val SurfaceTintDark = ${dark { surfaceTint() }}
-         val InverseSurfaceDark = ${dark { inverseSurface() }}
-         val InverseOnSurfaceDark = ${dark { inverseOnSurface() }}
-         val ErrorDark = ${dark { error() }}
-         val OnErrorDark = ${dark { onError() }}
-         val ErrorContainerDark = ${dark { errorContainer() }}
-         val OnErrorContainerDark = ${dark { onErrorContainer() }}
-         val OutlineDark = ${dark { outline() }}
-         val OutlineVariantDark = ${dark { outlineVariant() }}
-         val ScrimDark = ${dark { scrim() }}
-         val SurfaceBrightDark = ${dark { surfaceBright() }}
-         val SurfaceContainerDark = ${dark { surfaceContainer() }}
-         val SurfaceContainerHighDark = ${dark { surfaceContainerHigh() }}
-         val SurfaceContainerHighestDark = ${dark { surfaceContainerHighest() }}
-         val SurfaceContainerLowDark = ${dark { surfaceContainerLow() }}
-         val SurfaceContainerLowestDark = ${dark { surfaceContainerLowest() }}
-         val SurfaceDimDark = ${dark { surfaceDim() }}
-         val ShadowDark = ${dark { shadow() }}
-         val ControlActivatedDark = ${dark { controlActivated() }}
-         val ControlNormalDark = ${dark { controlNormal() }}
-         val ControlHighlightDark = ${dark { controlHighlight() }}
-         val TextPrimaryInverseDark = ${dark { textPrimaryInverse() }}
-         val TextSecondaryAndTertiaryInverseDark = ${dark { textSecondaryAndTertiaryInverse() }}
-         val TextPrimaryInverseDisableOnlyDark = ${dark { textPrimaryInverseDisableOnly() }}
-         val TextSecondaryAndTertiaryInverseDisabledDark = ${dark { textSecondaryAndTertiaryInverseDisabled() }}
-         val TextHintInverseDark = ${dark { textHintInverse() }}
-         
-         val PrimaryFixed = ${dark { primaryFixed() }}
-         val PrimaryFixedDim = ${dark { primaryFixedDim() }}
-         val OnPrimaryFixed = ${dark { onPrimaryFixed() }}
-         val OnPrimaryFixedVariant = ${dark { onPrimaryFixedVariant() }}
-         val SecondaryFixed = ${dark { secondaryFixed() }}
-         val SecondaryFixedDim = ${dark { secondaryFixedDim() }}
-         val OnSecondaryFixed = ${dark { onSecondaryFixed() }}
-         val OnSecondaryFixedVariant = ${dark { onSecondaryFixedVariant() }}
-         val TertiaryFixed = ${dark { tertiaryFixed() }}
-         val TertiaryFixedDim = ${dark { tertiaryFixedDim() }}
-         val OnTertiaryFixed = ${dark { onTertiaryFixed() }}
-         val OnTertiaryFixedVariant = ${dark { onTertiaryFixedVariant() }}
-         val PrimaryPaletteKeyColor = ${dark { primaryPaletteKeyColor() }}
-         val SecondaryPaletteKeyColor = ${dark { secondaryPaletteKeyColor() }}
-         val TertiaryPaletteKeyColor = ${dark { tertiaryPaletteKeyColor() }}
-         val NeutralPaletteKeyColor = ${dark { neutralPaletteKeyColor() }}
-         val NeutralVariantPaletteKeyColor = ${dark { neutralVariantPaletteKeyColor() }}
-         val ErrorPaletteKeyColor = ${dark { errorPaletteKeyColor() }}
-     """.trimIndent()
+            val PrimaryDark = ${dark { primary }}
+            val OnPrimaryDark = ${dark { onPrimary }}
+            val PrimaryContainerDark = ${dark { primaryContainer }}
+            val OnPrimaryContainerDark = ${dark { onPrimaryContainer }}
+            val InversePrimaryDark = ${dark { inversePrimary }}
+            val SecondaryDark = ${dark { secondary }}
+            val OnSecondaryDark = ${dark { onSecondary }}
+            val SecondaryContainerDark = ${dark { secondaryContainer }}
+            val OnSecondaryContainerDark = ${dark { onSecondaryContainer }}
+            val TertiaryDark = ${dark { tertiary }}
+            val OnTertiaryDark = ${dark { onTertiary }}
+            val TertiaryContainerDark = ${dark { tertiaryContainer }}
+            val OnTertiaryContainerDark = ${dark { onTertiaryContainer }}
+            val BackgroundDark = ${dark { background }}
+            val OnBackgroundDark = ${dark { onBackground }}
+            val SurfaceDark = ${dark { surface }}
+            val OnSurfaceDark = ${dark { onSurface }}
+            val SurfaceVariantDark = ${dark { surfaceVariant }}
+            val OnSurfaceVariantDark = ${dark { onSurfaceVariant }}
+            val SurfaceTintDark = ${dark { surfaceTint }}
+            val InverseSurfaceDark = ${dark { inverseSurface }}
+            val InverseOnSurfaceDark = ${dark { inverseOnSurface }}
+            val ErrorDark = ${dark { error }}
+            val OnErrorDark = ${dark { onError }}
+            val ErrorContainerDark = ${dark { errorContainer }}
+            val OnErrorContainerDark = ${dark { onErrorContainer }}
+            val OutlineDark = ${dark { outline }}
+            val OutlineVariantDark = ${dark { outlineVariant }}
+            val ScrimDark = ${dark { scrim }}
+            val SurfaceBrightDark = ${dark { surfaceBright }}
+            val SurfaceContainerDark = ${dark { surfaceContainer }}
+            val SurfaceContainerHighDark = ${dark { surfaceContainerHigh }}
+            val SurfaceContainerHighestDark = ${dark { surfaceContainerHighest }}
+            val SurfaceContainerLowDark = ${dark { surfaceContainerLow }}
+            val SurfaceContainerLowestDark = ${dark { surfaceContainerLowest }}
+            val SurfaceDimDark = ${dark { surfaceDim }}
+            val ShadowDark = ${dark { shadow }}
+            val ControlActivatedDark = ${dark { controlActivated }}
+            val ControlNormalDark = ${dark { controlNormal }}
+            val ControlHighlightDark = ${dark { controlHighlight }}
+            val TextPrimaryInverseDark = ${dark { textPrimaryInverse }}
+            val TextSecondaryAndTertiaryInverseDark = ${dark { textSecondaryAndTertiaryInverse }}
+            val TextPrimaryInverseDisableOnlyDark = ${dark { textPrimaryInverseDisableOnly }}
+            val TextSecondaryAndTertiaryInverseDisabledDark = ${dark { textSecondaryAndTertiaryInverseDisabled }}
+            val TextHintInverseDark = ${dark { textHintInverse }}
+
+            val PrimaryFixed = ${dark { primaryFixed }}
+            val PrimaryFixedDim = ${dark { primaryFixedDim }}
+            val OnPrimaryFixed = ${dark { onPrimaryFixed }}
+            val OnPrimaryFixedVariant = ${dark { onPrimaryFixedVariant }}
+            val SecondaryFixed = ${dark { secondaryFixed }}
+            val SecondaryFixedDim = ${dark { secondaryFixedDim }}
+            val OnSecondaryFixed = ${dark { onSecondaryFixed }}
+            val OnSecondaryFixedVariant = ${dark { onSecondaryFixedVariant }}
+            val TertiaryFixed = ${dark { tertiaryFixed }}
+            val TertiaryFixedDim = ${dark { tertiaryFixedDim }}
+            val OnTertiaryFixed = ${dark { onTertiaryFixed }}
+            val OnTertiaryFixedVariant = ${dark { onTertiaryFixedVariant }}
+            val PrimaryPaletteKeyColor = ${dark { primaryPaletteKeyColor }}
+            val SecondaryPaletteKeyColor = ${dark { secondaryPaletteKeyColor }}
+            val TertiaryPaletteKeyColor = ${dark { tertiaryPaletteKeyColor }}
+            val NeutralPaletteKeyColor = ${dark { neutralPaletteKeyColor }}
+            val NeutralVariantPaletteKeyColor = ${dark { neutralVariantPaletteKeyColor }}
+            val ErrorPaletteKeyColor = ${dark { errorPaletteKeyColor }}
+            """.trimIndent()
         assertEquals(expected, actual)
     }
 

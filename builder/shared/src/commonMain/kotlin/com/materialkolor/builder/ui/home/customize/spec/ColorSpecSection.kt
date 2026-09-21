@@ -41,11 +41,12 @@ fun ColorSpecSection(
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            ColorSpec.SpecVersion.entries.forEach { version ->
+            listOf(ColorSpec.SpecVersion.SPEC_2021, ColorSpec.SpecVersion.SPEC_2025).forEach { version ->
                 val name = remember(version) { version.name() }
                 val trailingIcon =
-                    if (version != ColorSpec.SpecVersion.SPEC_2025) null
-                    else {
+                    if (version != ColorSpec.SpecVersion.SPEC_2025) {
+                        null
+                    } else {
                         @Composable {
                             ExpressiveIcon(Modifier.size(FilterChipDefaults.IconSize))
                         }
@@ -62,7 +63,9 @@ fun ColorSpecSection(
     }
 }
 
-private fun ColorSpec.SpecVersion.name(): String = when (this) {
-    ColorSpec.SpecVersion.SPEC_2021 -> "2021"
-    ColorSpec.SpecVersion.SPEC_2025 -> "2025"
-}
+private fun ColorSpec.SpecVersion.name(): String =
+    when (this) {
+        ColorSpec.SpecVersion.SPEC_2021 -> "2021"
+        ColorSpec.SpecVersion.SPEC_2025 -> "2025"
+        ColorSpec.SpecVersion.SPEC_2026 -> "2026"
+    }

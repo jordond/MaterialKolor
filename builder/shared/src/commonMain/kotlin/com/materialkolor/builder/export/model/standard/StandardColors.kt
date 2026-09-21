@@ -8,14 +8,20 @@ import com.materialkolor.builder.export.variable
 import com.materialkolor.builder.ktx.snakeToCamelCase
 import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.dynamiccolor.DynamicColor
+import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.dynamiccolor.MaterialDynamicColors
 import com.materialkolor.ktx.DynamicScheme
+import com.materialkolor.ktx.controlActivated
+import com.materialkolor.ktx.controlHighlight
+import com.materialkolor.ktx.controlNormal
 import com.materialkolor.ktx.getColor
-import com.materialkolor.scheme.DynamicScheme
+import com.materialkolor.ktx.textHintInverse
+import com.materialkolor.ktx.textPrimaryInverse
+import com.materialkolor.ktx.textPrimaryInverseDisableOnly
+import com.materialkolor.ktx.textSecondaryAndTertiaryInverse
+import com.materialkolor.ktx.textSecondaryAndTertiaryInverseDisabled
 
-fun standardColorsKt(
-    settings: Settings,
-): String {
+fun standardColorsKt(settings: Settings): String {
     val materialDynamicColors = MaterialDynamicColors()
     val map = materialDynamicColors.colorList(settings.includeMiscColors)
     val light = createScheme(isDark = false, settings = settings)
@@ -36,7 +42,9 @@ ${settings.colors.seed.variable("Seed")}
 ${map.toColorVariables(settings.contrast, scheme = light)}
 ${map.toColorVariables(settings.contrast, scheme = dark)}
 $schemeIndependent
-""".trimIndent().dropLastWhile { it == '\n' }
+        """.trimIndent().dropLastWhile {
+        it == '\n'
+    }
 }
 
 fun variableNamePairs(
@@ -47,9 +55,13 @@ fun variableNamePairs(
     val independentColors = colors.schemeIndependentColors(false)
     val list = colors.colorList(false) + independentColors
     val scheme = createScheme(isDark = isDark, settings = settings)
-    return list.variableNamePair(settings.contrast, scheme, independentColors).map { entry ->
-        entry.value.name.snakeToCamelCase().decapitalize(Locale("EN")) to entry.key
-    }.toMap()
+    return list
+        .variableNamePair(settings.contrast, scheme, independentColors)
+        .map { entry ->
+            entry.value.name
+                .snakeToCamelCase()
+                .decapitalize(Locale("EN")) to entry.key
+        }.toMap()
 }
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -72,93 +84,97 @@ internal fun createScheme(
 
 private fun MaterialDynamicColors.colorList(includeMisc: Boolean): List<DynamicColor> {
     val main = listOf(
-        primary(),
-        onPrimary(),
-        primaryContainer(),
-        onPrimaryContainer(),
-        inversePrimary(),
-        secondary(),
-        onSecondary(),
-        secondaryContainer(),
-        onSecondaryContainer(),
-        tertiary(),
-        onTertiary(),
-        tertiaryContainer(),
-        onTertiaryContainer(),
-        background(),
-        onBackground(),
-        surface(),
-        onSurface(),
-        surfaceVariant(),
-        onSurfaceVariant(),
-        surfaceTint(),
-        inverseSurface(),
-        inverseOnSurface(),
-        error(),
-        onError(),
-        errorContainer(),
-        onErrorContainer(),
-        outline(),
-        outlineVariant(),
-        scrim(),
-        surfaceBright(),
-        surfaceContainer(),
-        surfaceContainerHigh(),
-        surfaceContainerHighest(),
-        surfaceContainerLow(),
-        surfaceContainerLowest(),
-        surfaceDim(),
+        primary,
+        onPrimary,
+        primaryContainer,
+        onPrimaryContainer,
+        inversePrimary,
+        secondary,
+        onSecondary,
+        secondaryContainer,
+        onSecondaryContainer,
+        tertiary,
+        onTertiary,
+        tertiaryContainer,
+        onTertiaryContainer,
+        background,
+        onBackground,
+        surface,
+        onSurface,
+        surfaceVariant,
+        onSurfaceVariant,
+        surfaceTint,
+        inverseSurface,
+        inverseOnSurface,
+        error,
+        onError,
+        errorContainer,
+        onErrorContainer,
+        outline,
+        outlineVariant,
+        scrim,
+        surfaceBright,
+        surfaceContainer,
+        surfaceContainerHigh,
+        surfaceContainerHighest,
+        surfaceContainerLow,
+        surfaceContainerLowest,
+        surfaceDim,
     )
 
     return if (includeMisc) main + miscColors() else main
 }
 
-private fun MaterialDynamicColors.schemeIndependentColors(includeMisc: Boolean) = listOfNotNull(
-    primaryFixed(),
-    primaryFixedDim(),
-    onPrimaryFixed(),
-    onPrimaryFixedVariant(),
-    secondaryFixed(),
-    secondaryFixedDim(),
-    onSecondaryFixed(),
-    onSecondaryFixedVariant(),
-    tertiaryFixed(),
-    tertiaryFixedDim(),
-    onTertiaryFixed(),
-    onTertiaryFixedVariant(),
-    if (includeMisc) primaryPaletteKeyColor() else null,
-    if (includeMisc) secondaryPaletteKeyColor() else null,
-    if (includeMisc) tertiaryPaletteKeyColor() else null,
-    if (includeMisc) neutralPaletteKeyColor() else null,
-    if (includeMisc) neutralVariantPaletteKeyColor() else null,
-    if (includeMisc) errorPaletteKeyColor() else null,
-)
+private fun MaterialDynamicColors.schemeIndependentColors(includeMisc: Boolean) =
+    listOfNotNull(
+        primaryFixed,
+        primaryFixedDim,
+        onPrimaryFixed,
+        onPrimaryFixedVariant,
+        secondaryFixed,
+        secondaryFixedDim,
+        onSecondaryFixed,
+        onSecondaryFixedVariant,
+        tertiaryFixed,
+        tertiaryFixedDim,
+        onTertiaryFixed,
+        onTertiaryFixedVariant,
+        if (includeMisc) primaryPaletteKeyColor else null,
+        if (includeMisc) secondaryPaletteKeyColor else null,
+        if (includeMisc) tertiaryPaletteKeyColor else null,
+        if (includeMisc) neutralPaletteKeyColor else null,
+        if (includeMisc) neutralVariantPaletteKeyColor else null,
+        if (includeMisc) errorPaletteKeyColor else null,
+    )
 
-private fun MaterialDynamicColors.miscColors(): List<DynamicColor> = listOf(
-    shadow(),
-    controlActivated(),
-    controlNormal(),
-    controlHighlight(),
-    textPrimaryInverse(),
-    textSecondaryAndTertiaryInverse(),
-    textPrimaryInverseDisableOnly(),
-    textSecondaryAndTertiaryInverseDisabled(),
-    textHintInverse(),
-)
+private fun MaterialDynamicColors.miscColors(): List<DynamicColor> =
+    listOf(
+        shadow,
+        controlActivated,
+        controlNormal,
+        controlHighlight,
+        textPrimaryInverse,
+        textSecondaryAndTertiaryInverse,
+        textPrimaryInverseDisableOnly,
+        textSecondaryAndTertiaryInverseDisabled,
+        textHintInverse,
+    )
 
 private fun List<DynamicColor>.variableNamePair(
     contrast: Contrast,
     scheme: DynamicScheme,
     independentColors: List<DynamicColor>,
-    includeScheme: Boolean = true
+    includeScheme: Boolean = true,
 ): Map<String, DynamicColor> {
     val contrast = contrast.suffix()
-    val mode = if (!includeScheme) "" else {
+    val mode = if (!includeScheme) {
+        ""
+    } else {
         if (scheme.isDark) "Dark" else "Light"
     }
     val suffix = "$mode$contrast"
     return associateBy { color ->
-        if (independentColors.contains(color)) {
+        if (independentColors.any { it.name == color.name }) {
             "${color.name.snakeToCamelCase()}$contrast"
         } else {
             "${color.name.snakeToCamelCase()}$suffix"
@@ -170,7 +186,7 @@ private fun List<DynamicColor>.toColorVariables(
     contrast: Contrast,
     scheme: DynamicScheme,
     includeScheme: Boolean = true,
-    schemeIndependentColors: List<DynamicColor> = MaterialDynamicColors().schemeIndependentColors(false)
+    schemeIndependentColors: List<DynamicColor> = MaterialDynamicColors().schemeIndependentColors(false),
 ): String {
     val values = variableNamePair(contrast, scheme, schemeIndependentColors, includeScheme)
     return buildString {
@@ -180,9 +196,10 @@ private fun List<DynamicColor>.toColorVariables(
     }
 }
 
-private fun Contrast.suffix(): String = when (this) {
-    Contrast.Reduced -> "ReducedContrast"
-    Contrast.Default -> ""
-    Contrast.Medium -> "MediumContrast"
-    Contrast.High -> "HighContrast"
-}
+private fun Contrast.suffix(): String =
+    when (this) {
+        Contrast.Reduced -> "ReducedContrast"
+        Contrast.Default -> ""
+        Contrast.Medium -> "MediumContrast"
+        Contrast.High -> "HighContrast"
+    }

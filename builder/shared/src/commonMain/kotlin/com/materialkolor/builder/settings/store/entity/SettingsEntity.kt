@@ -60,15 +60,16 @@ fun SettingsEntity.toModel(isDarkModeFallback: Boolean): Settings {
     )
 }
 
-private fun ColorSettings.toEntity(): Map<KeyColor, Int?> = listOfNotNull(
-    KeyColor.Seed to seed.toArgb(),
-    primary?.let { KeyColor.Primary to it.toArgb() },
-    secondary?.let { KeyColor.Secondary to it.toArgb() },
-    tertiary?.let { KeyColor.Tertiary to it.toArgb() },
-    error?.let { KeyColor.Error to it.toArgb() },
-    neutral?.let { KeyColor.Neutral to it.toArgb() },
-    neutralVariant?.let { KeyColor.NeutralVariant to it.toArgb() },
-).toMap()
+private fun ColorSettings.toEntity(): Map<KeyColor, Int?> =
+    listOfNotNull(
+        KeyColor.Seed to seed.toArgb(),
+        primary?.let { KeyColor.Primary to it.toArgb() },
+        secondary?.let { KeyColor.Secondary to it.toArgb() },
+        tertiary?.let { KeyColor.Tertiary to it.toArgb() },
+        error?.let { KeyColor.Error to it.toArgb() },
+        neutral?.let { KeyColor.Neutral to it.toArgb() },
+        neutralVariant?.let { KeyColor.NeutralVariant to it.toArgb() },
+    ).toMap()
 
 private fun Map<KeyColor, Int?>.toModel(): ColorSettings {
     val seed = get(KeyColor.Seed)?.let { Color(it) } ?: ColorSettings.colors.first()
@@ -83,10 +84,11 @@ private fun Map<KeyColor, Int?>.toModel(): ColorSettings {
     )
 }
 
-private fun Double.parseContrast(): Contrast = when (this) {
-    Contrast.Default.value -> Contrast.Default
-    Contrast.Medium.value -> Contrast.Medium
-    Contrast.High.value -> Contrast.High
-    Contrast.Reduced.value -> Contrast.Reduced
-    else -> Contrast.Default
-}
+private fun Double.parseContrast(): Contrast =
+    when (this) {
+        Contrast.Default.value -> Contrast.Default
+        Contrast.Medium.value -> Contrast.Medium
+        Contrast.High.value -> Contrast.High
+        Contrast.Reduced.value -> Contrast.Reduced
+        else -> Contrast.Default
+    }

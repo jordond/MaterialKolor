@@ -1,60 +1,31 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.multiplatform)
+    id("materialkolor.library")
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.multiplatform.android.library)
-    alias(libs.plugins.dokka)
-    alias(libs.plugins.publish)
 }
 
 kotlin {
     explicitApi()
 
-    applyDefaultHierarchyTemplate()
-
     @Suppress("UnstableApiUsage")
     android {
-        compileSdk = libs.versions.sdk.compile.get().toInt()
-        minSdk = libs.versions.sdk.min.library.get().toInt()
         namespace = "com.materialkolor"
 
         optimization {
             consumerKeepRules.publish = true
             consumerKeepRules.file("consumer-rules.pro")
         }
-
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
-    }
-
-    jvm {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
     }
 
     js {
-        browser()
+        binaries.executable()
     }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        browser()
-    }
-
-    macosArm64()
-
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64(),
-    ).forEach { target ->
-        target.binaries.framework {
-            baseName = "material-kolor"
-        }
+        binaries.executable()
     }
 
     sourceSets {
@@ -74,15 +45,13 @@ kotlin {
             compileOnly(libs.androidx.compose.material3)
         }
 
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-            implementation(libs.compose.ui.test)
+        getByName("androidHostTest").dependencies {
+            implementation(libs.androidx.compose.material3)
         }
 
         jvmTest.dependencies {
+            implementation(libs.compose.ui.test)
             implementation(compose.desktop.currentOs)
         }
     }
-
-    jvmToolchain(libs.versions.jvmTarget.get().toInt())
 }

@@ -14,14 +14,15 @@ enum class KeyColor {
 }
 
 @Composable
-fun KeyColor.name() = remember(this) {
-    when (this) {
-        KeyColor.Seed -> "Seed"
-        KeyColor.Primary -> "Primary"
-        KeyColor.Secondary -> "Secondary"
-        KeyColor.Tertiary -> "Tertiary"
-        KeyColor.Error -> "Error"
-        KeyColor.Neutral -> "Neutral"
-        KeyColor.NeutralVariant -> "Neutral Variant"
+fun KeyColor.name() =
+    remember(this) {
+        when (this) {
+            KeyColor.Seed -> "Seed"
+            KeyColor.Primary -> "Primary"
+            KeyColor.Secondary -> "Secondary"
+            KeyColor.Tertiary -> "Tertiary"
+            KeyColor.Error -> "Error"
+            KeyColor.Neutral -> "Neutral"
+            KeyColor.NeutralVariant -> "Neutral Variant"
+        }
     }
-}

@@ -6,7 +6,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class HexKtTest {
-
     @Test
     fun testValidHexColors() {
         assertEquals(Color(0xFFFF0000), "#FF0000".parseHexToColor())

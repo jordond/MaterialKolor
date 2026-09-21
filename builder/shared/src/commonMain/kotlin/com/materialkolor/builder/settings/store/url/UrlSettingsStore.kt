@@ -23,7 +23,6 @@ class UrlSettingsStore(
     private val darkModeProvider: DarkModeProvider = DI.darkModeProvider,
     scope: CoroutineScope = DI.defaultScope,
 ) : SettingsStore {
-
     private val store = MutableStateFlow<String?>(null)
 
     init {
@@ -59,10 +58,11 @@ class UrlSettingsStore(
         }
     }
 
-    override fun get(): Flow<Settings> = store.mapNotNull { params ->
-        val entity = params?.toSettingsEntity() ?: return@mapNotNull null
-        entity.toModel(darkModeProvider.isDarkMode.value)
-    }
+    override fun get(): Flow<Settings> =
+        store.mapNotNull { params ->
+            val entity = params?.toSettingsEntity() ?: return@mapNotNull null
+            entity.toModel(darkModeProvider.isDarkMode.value)
+        }
 
     override suspend fun store(settings: Settings) {
         val entity = settings.toEntity()

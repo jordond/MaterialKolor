@@ -6,7 +6,9 @@ import com.materialkolor.builder.settings.model.Settings
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 
-enum class ExportType(val displayName: String) {
+enum class ExportType(
+    val displayName: String,
+) {
     MaterialKolor("Material Kolor"),
     Standard("Standard"),
 }
@@ -19,29 +21,30 @@ data class ExportOptions(
     val useVersionCatalog: Boolean = DEFAULT_USE_VERSION_CATALOG,
     val animate: Boolean = DEFAULT_ANIMATE,
 ) {
+    fun createFiles(materialKolorVersion: String): PersistentList<ExportFile> =
+        when (type) {
+            ExportType.MaterialKolor -> createMaterialKolorFiles(materialKolorVersion)
+            ExportType.Standard -> createStandardFiles()
+        }.toPersistentList()
 
-    fun createFiles(materialKolorVersion: String): PersistentList<ExportFile> = when (type) {
-        ExportType.MaterialKolor -> createMaterialKolorFiles(materialKolorVersion)
-        ExportType.Standard -> createStandardFiles()
-    }.toPersistentList()
-
-    fun toggleType(): ExportOptions = copy(
-        type = when (type) {
-            ExportType.MaterialKolor -> ExportType.Standard
-            ExportType.Standard -> ExportType.MaterialKolor
-        },
-    )
+    fun toggleType(): ExportOptions =
+        copy(
+            type = when (type) {
+                ExportType.MaterialKolor -> ExportType.Standard
+                ExportType.Standard -> ExportType.MaterialKolor
+            },
+        )
 
     companion object {
-
         const val DEFAULT_THEME_NAME = "AppTheme"
         const val DEFAULT_MULTIPLATFORM = true
         const val DEFAULT_USE_VERSION_CATALOG = true
         const val DEFAULT_ANIMATE = true
 
-        fun default(settings: Settings) = ExportOptions(
-            type = ExportType.MaterialKolor,
-            settings = settings,
-        )
+        fun default(settings: Settings) =
+            ExportOptions(
+                type = ExportType.MaterialKolor,
+                settings = settings,
+            )
     }
 }

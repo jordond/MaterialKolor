@@ -15,7 +15,6 @@ data class PhoneFramePadding(
 )
 
 object PhoneFrameDefaults {
-
     val height = 800.dp
     val aspectRatio = 9f / 19.5f
     val androidAspectRatio = 9f / 18.5f

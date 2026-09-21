@@ -1,5 +1,4 @@
 package com.materialkolor.builder.version
 
-internal actual fun getVersionCacheDirectory(): String {
-    return System.getProperty("user.home") + "/.cache/materialkolor-builder"
-}
+internal actual fun getVersionCacheDirectory(): String =
+    System.getProperty("user.home") + "/.cache/materialkolor-builder"

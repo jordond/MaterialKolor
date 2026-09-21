@@ -29,7 +29,8 @@ fun CodeTextView(
         buildAnnotatedString {
             append(highlights.getCode())
 
-            highlights.getHighlights()
+            highlights
+                .getHighlights()
                 .filterIsInstance<ColorHighlight>()
                 .forEach { highlight ->
                     addStyle(
@@ -39,7 +40,8 @@ fun CodeTextView(
                     )
                 }
 
-            highlights.getHighlights()
+            highlights
+                .getHighlights()
                 .filterIsInstance<BoldHighlight>()
                 .forEach { highlight ->
                     addStyle(

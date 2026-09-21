@@ -62,7 +62,9 @@ fun CommunicationGallery(
     ) {
         GalleryContainerChild(
             title = "Badges",
-            infoUrl = "https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#Badge(androidx.compose.ui.Modifier,androidx.compose.ui.graphics.Color,androidx.compose.ui.graphics.Color,kotlin.Function1)",
+            infoUrl = "https://developer.android.com/reference/kotlin/androidx/compose/material3/" +
+                "package-summary#Badge(androidx.compose.ui.Modifier," +
+                "androidx.compose.ui.graphics.Color,androidx.compose.ui.graphics.Color,kotlin.Function1)",
         ) {
             Badges(minWidth, width, boxPadding)
         }
@@ -125,7 +127,13 @@ private fun Badges(
                             },
                         ) {
                             Icon(
-                                imageVector = if (selected == 1) Icons.Default.ChatBubble else Icons.Default.ChatBubbleOutline,
+                                imageVector = if (selected ==
+                                    1
+                                ) {
+                                    Icons.Default.ChatBubble
+                                } else {
+                                    Icons.Default.ChatBubbleOutline
+                                },
                                 contentDescription = null,
                             )
                         }

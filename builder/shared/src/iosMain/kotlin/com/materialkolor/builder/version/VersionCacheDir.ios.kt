@@ -6,10 +6,9 @@ import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSUserDomainMask
 
 @OptIn(ExperimentalForeignApi::class)
-internal actual fun getVersionCacheDirectory(): String {
-    return NSSearchPathForDirectoriesInDomains(
+internal actual fun getVersionCacheDirectory(): String =
+    NSSearchPathForDirectoriesInDomains(
         NSCachesDirectory,
         NSUserDomainMask,
         true,
     ).first() as String
-}

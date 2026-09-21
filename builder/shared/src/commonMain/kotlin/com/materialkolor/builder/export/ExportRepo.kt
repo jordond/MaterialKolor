@@ -8,12 +8,17 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
 interface ExportRepo {
-    suspend fun export(options: ExportOptions, materialKolorVersion: String): Boolean
+    suspend fun export(
+        options: ExportOptions,
+        materialKolorVersion: String,
+    ): Boolean
 }
 
 class DefaultExportRepo : ExportRepo {
-
-    override suspend fun export(options: ExportOptions, materialKolorVersion: String): Boolean {
+    override suspend fun export(
+        options: ExportOptions,
+        materialKolorVersion: String,
+    ): Boolean {
         if (!exportSupported) {
             Logger.e { "Export is not supported" }
             return false

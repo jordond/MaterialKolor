@@ -90,9 +90,7 @@ fun PhotoFrameScope.IPhoneStatusBar(
 }
 
 @Composable
-fun DynamicIsland(
-    modifier: Modifier = Modifier,
-) {
+fun DynamicIsland(modifier: Modifier = Modifier) {
     var expanded by remember { mutableStateOf(false) }
     val width by animateDpAsState(
         targetValue = if (expanded) 175.dp else 125.dp,

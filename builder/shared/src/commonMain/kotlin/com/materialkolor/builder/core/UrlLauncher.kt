@@ -3,14 +3,12 @@ package com.materialkolor.builder.core
 import co.touchlab.kermit.Logger
 
 interface UrlLauncher {
-
     fun launch(url: String)
 
     fun launch(url: UrlLink) = launch(url.value)
 }
 
 class DefaultUrlLauncher : UrlLauncher {
-
     private val logger = Logger.withTag("LinkLauncher")
 
     override fun launch(url: String) {

@@ -9,12 +9,14 @@ import kotlin.js.Promise
 
 @JsModule("jszip")
 actual external class JSZip actual constructor() {
-    actual fun file(name: String, data: String)
+    actual fun file(
+        name: String,
+        data: String,
+    )
+
     actual fun generateAsync(options: JsAny): Promise<JsAny>
 }
 
-internal actual suspend fun JSZip.createBlob(): Blob {
-    return generateAsync(createParams()).await() as Blob
-}
+internal actual suspend fun JSZip.createBlob(): Blob = generateAsync(createParams()).await() as Blob
 
 private fun createParams(): JsAny = js("({ type: 'blob' })")

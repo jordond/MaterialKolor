@@ -10,6 +10,12 @@ on:
       - 'material-kolor/**'
       - 'material-color-utilities/**'
       - 'gradle/**'
+      - 'build-logic/**'
+      - 'tools/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/builder-deploy-web.yml'
 
 concurrency:
   group: builder-deploy-${{ github.ref }}
@@ -22,6 +28,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       - name: Setup-java
         uses: actions/setup-java@v6
@@ -33,7 +41,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Build web app
-        run: ./gradlew :builder:shared:composeCompatibilityBrowserDistribution
+        run: ./gradlew -Pmaterialkolor.useLocal=true :builder:shared:composeCompatibilityBrowserDistribution
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
@@ -49,6 +57,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       - name: Download build artifacts
         uses: actions/download-artifact@v8

@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.ktx.DynamicScheme
-import com.materialkolor.scheme.DynamicScheme
 
 /**
  * Create and remember a custom [ColorScheme] based on the provided colors.

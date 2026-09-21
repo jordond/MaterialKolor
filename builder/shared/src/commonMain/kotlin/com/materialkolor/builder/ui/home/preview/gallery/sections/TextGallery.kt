@@ -45,7 +45,8 @@ fun TextGallery(
     ) {
         GalleryContainerChild(
             title = "Text fields",
-            infoUrl = "https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#textfield",
+            infoUrl = "https://developer.android.com/reference/kotlin/androidx/compose/" +
+                "material3/package-summary#textfield",
         ) {
             TextFields(minWidth, width, itemPadding)
         }

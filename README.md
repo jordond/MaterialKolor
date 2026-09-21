@@ -66,6 +66,8 @@ library [m3color](https://github.com/Kyant0/m3color).
 
 You can add this library to your project using Gradle.
 
+Upgrading from 5.x? The [6.0 migration guide](docs/migration-6.0.md) covers the intentional API changes.
+
 ### Multiplatform
 
 To add to a multiplatform project, add the dependency to the common source-set:

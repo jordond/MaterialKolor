@@ -9,8 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.ktx.rememberDynamicScheme
-import com.materialkolor.scheme.DynamicScheme
 
 /**
  * Creates a [DynamicMaterialThemeState] that can be remembered across compositions using custom colors.

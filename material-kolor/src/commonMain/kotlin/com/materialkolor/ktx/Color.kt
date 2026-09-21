@@ -38,7 +38,7 @@ public fun Color.isLight(): Boolean = this != Color.Transparent && ColorUtils.ca
 @Stable
 public fun Color.lighten(ratio: Float = 1.0f): Color {
     val hct = toHct()
-    val tone = Contrast.lighter(hct.tone, ratio.toDouble()).takeIf { it > -1 }
+    val tone = Contrast.lighter(hct.tone, ratio.toDouble())
     return if (tone == null) this else hct.withTone(tone).toColor()
 }
 
@@ -52,7 +52,7 @@ public fun Color.lighten(ratio: Float = 1.0f): Color {
 @Stable
 public fun Color.darken(ratio: Float = 1.1f): Color {
     val hct = toHct()
-    val tone = Contrast.darker(hct.tone, ratio.toDouble()).takeIf { it > -1 }
+    val tone = Contrast.darker(hct.tone, ratio.toDouble())
     return if (tone == null) this else hct.withTone(tone).toColor()
 }
 

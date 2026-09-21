@@ -27,8 +27,11 @@ fun TopBarActions(
 
     IconButton(onClick = onToggleDarkMode) {
         val icon =
-            if (settings.isDarkMode) Icons.Outlined.LightMode
-            else Icons.Outlined.DarkMode
+            if (settings.isDarkMode) {
+                Icons.Outlined.LightMode
+            } else {
+                Icons.Outlined.DarkMode
+            }
 
         Icon(
             imageVector = icon,

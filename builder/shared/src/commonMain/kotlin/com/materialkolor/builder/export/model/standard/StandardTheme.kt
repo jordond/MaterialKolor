@@ -4,29 +4,37 @@ import com.materialkolor.Contrast
 import com.materialkolor.builder.export.model.header
 import com.materialkolor.builder.settings.model.Settings
 
-private fun androidImports(expressive: Boolean) = listOfNotNull(
-    "import android.os.Build",
-    "import androidx.compose.foundation.isSystemInDarkTheme",
-    if (expressive) "import androidx.compose.material3.MaterialExpressiveTheme"
-    else "import androidx.compose.material3.MaterialTheme",
-    if (expressive) "import androidx.compose.material3.MotionScheme" else null,
-    "import androidx.compose.material3.darkColorScheme",
-    "import androidx.compose.material3.lightColorScheme",
-    "import androidx.compose.material3.dynamicDarkColorScheme",
-    "import androidx.compose.material3.dynamicLightColorScheme",
-    "import androidx.compose.runtime.Composable",
-    "import androidx.compose.ui.platform.LocalContext",
-).joinToString("\n")
+private fun androidImports(expressive: Boolean) =
+    listOfNotNull(
+        "import android.os.Build",
+        "import androidx.compose.foundation.isSystemInDarkTheme",
+        if (expressive) {
+            "import androidx.compose.material3.MaterialExpressiveTheme"
+        } else {
+            "import androidx.compose.material3.MaterialTheme"
+        },
+        if (expressive) "import androidx.compose.material3.MotionScheme" else null,
+        "import androidx.compose.material3.darkColorScheme",
+        "import androidx.compose.material3.lightColorScheme",
+        "import androidx.compose.material3.dynamicDarkColorScheme",
+        "import androidx.compose.material3.dynamicLightColorScheme",
+        "import androidx.compose.runtime.Composable",
+        "import androidx.compose.ui.platform.LocalContext",
+    ).joinToString("\n")
 
-private fun multiplatformImports(expressive: Boolean) = listOfNotNull(
-    "import androidx.compose.foundation.isSystemInDarkTheme",
-    if (expressive) "import androidx.compose.material3.MaterialExpressiveTheme"
-    else "import androidx.compose.material3.MaterialTheme",
-    if (expressive) "import androidx.compose.material3.MotionScheme" else null,
-    "import androidx.compose.material3.darkColorScheme",
-    "import androidx.compose.material3.lightColorScheme",
-    "import androidx.compose.runtime.Composable",
-).joinToString("\n")
+private fun multiplatformImports(expressive: Boolean) =
+    listOfNotNull(
+        "import androidx.compose.foundation.isSystemInDarkTheme",
+        if (expressive) {
+            "import androidx.compose.material3.MaterialExpressiveTheme"
+        } else {
+            "import androidx.compose.material3.MaterialTheme"
+        },
+        if (expressive) "import androidx.compose.material3.MotionScheme" else null,
+        "import androidx.compose.material3.darkColorScheme",
+        "import androidx.compose.material3.lightColorScheme",
+        "import androidx.compose.runtime.Composable",
+    ).joinToString("\n")
 
 fun standardThemeKt(
     themeName: String,
@@ -44,25 +52,34 @@ fun standardThemeKt(
         |        motionScheme = MotionScheme.expressive(),
         |        content = content,
         |    )
-    """.trimMargin()
+        """.trimMargin()
     } else {
         """
         |    MaterialTheme(
         |        colorScheme = colorScheme,
         |        content = content,
         |    )
-    """.trimMargin()
+        """.trimMargin()
     }
 
     val themeComposable =
-        if (multiplatform) multiplatformTheme(themeName, lightSchemeName, darkSchemeName, baseThemeComposable)
-        else androidTheme(themeName, lightSchemeName, darkSchemeName, baseThemeComposable)
+        if (multiplatform) {
+            multiplatformTheme(themeName, lightSchemeName, darkSchemeName, baseThemeComposable)
+        } else {
+            androidTheme(themeName, lightSchemeName, darkSchemeName, baseThemeComposable)
+        }
 
     return """
 ${header(settings)}
 package ${settings.packageName}
 
-${if (multiplatform) multiplatformImports(settings.useMaterialExpressive) else androidImports(settings.useMaterialExpressive)}
+${if (multiplatform) {
+        multiplatformImports(
+            settings.useMaterialExpressive,
+        )
+    } else {
+        androidImports(settings.useMaterialExpressive)
+    }}
 
 private val $lightSchemeName = lightColorScheme(
 ${lightColors.toParamList()},
@@ -73,14 +90,14 @@ ${darkColors.toParamList()},
 )
 
 $themeComposable
-""".trimIndent()
+        """.trimIndent()
 }
 
 private fun multiplatformTheme(
     themeName: String,
     lightSchemeName: String,
     darkSchemeName: String,
-    baseThemeComposable: String
+    baseThemeComposable: String,
 ) = """
 @Composable
 fun $themeName(
@@ -94,13 +111,13 @@ fun $themeName(
 
 $baseThemeComposable
 }
-""".trimIndent()
+    """.trimIndent()
 
 private fun androidTheme(
     themeName: String,
     lightSchemeName: String,
     darkSchemeName: String,
-    baseThemeComposable: String
+    baseThemeComposable: String,
 ) = """
 @Composable
 fun $themeName(
@@ -120,7 +137,7 @@ fun $themeName(
 
 $baseThemeComposable
 }
-""".trimIndent()
+    """.trimIndent()
 
 private fun Contrast.schemeName(isDark: Boolean): String {
     val mode = if (isDark) "Dark" else "Light"
@@ -132,8 +149,7 @@ private fun Contrast.schemeName(isDark: Boolean): String {
     }
 }
 
-private fun Map<String, String>.toParamList(): String {
-    return toList().joinToString(",\n") { (name, variable) ->
+private fun Map<String, String>.toParamList(): String =
+    toList().joinToString(",\n") { (name, variable) ->
         "    $name = $variable"
     }
-}

@@ -6,12 +6,14 @@ on:
     branches:
       - main
       - preview
+      - next
     paths-ignore:
       - '**.md'
       - 'builder/**'
   pull_request:
     branches:
       - main
+      - next
     types: [ opened, synchronize, reopened, ready_for_review ]
     paths-ignore:
       - 'art/**'
@@ -23,19 +25,73 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  verify:
-    name: "Verify"
+  changes:
+    name: "Detect engine changes"
     runs-on: ubuntu-latest
+    outputs:
+      engine: ${{ steps.filter.outputs.engine }}
+    steps:
+      - name: Checkout
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect engine and build machinery changes
+        id: filter
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" != 'pull_request' ]; then
+            echo "Event is '$EVENT_NAME': running the full matrix."
+            echo 'engine=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Paths that can affect the generated engine, the PSI source
+          # transformer, the Apple targets, the upstream monitor, or the
+          # publication and artifact-only consumer verification. `tools/`
+          # covers the pinned upstream checkout and the transformer alike.
+          engine_paths='^(material-color-utilities/|material-kolor/|tools/|build-logic/|gradle/|kotlin-js-store/|settings\.gradle\.kts$|build\.gradle\.kts$|gradle\.properties$|gradlew(\.bat)?$|\.github/workflows/ci\.yml$|\.github/check-upstream$|\.github/tests/)'
+
+          changed="$(git diff --name-only "$BASE_SHA...HEAD")"
+          echo 'Files changed in this pull request:'
+          echo "$changed"
+
+          if grep -qE "$engine_paths" <<< "$changed"; then
+            echo 'Engine or build machinery touched: running the Apple and publication lane.'
+            echo 'engine=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'No engine or build machinery changes: skipping the Apple and publication lane.'
+            echo 'engine=false' >> "$GITHUB_OUTPUT"
+          fi
+
+  verify-linux:
+    name: "Verify ${{ matrix.platform }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: JVM
+            task: verifyMcuJvm
+          - platform: Web
+            task: verifyMcuWeb
+          - platform: Android
+            task: verifyMcuAndroid
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
           submodules: recursive
 
-      - name: setup-java
+      - name: Setup Java
         uses: actions/setup-java@v6
         with:
           java-version: 25
@@ -44,11 +100,39 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      - name: Binary Compatibility Validation
-        run: ./gradlew apiCheck --scan
+      - name: Check upstream monitor with local fixtures
+        if: matrix.platform == 'JVM'
+        run: python3 -B -m unittest discover -s .github/tests -v
 
-      - name: Upstream Tests
-        run: ./gradlew :mcu-upstream:test --scan
+      - name: Check API and handwritten source formatting
+        if: matrix.platform == 'JVM'
+        run: ./gradlew checkKotlinAbi spotlessCheck :mcu-source-transformer:test :mcu-source-transformer:testAlternateParser --scan
 
-      - name: Material Kolor Tests
-        run: ./gradlew :material-kolor:jvmTest --scan
+      - name: Verify ${{ matrix.platform }}
+        run: ./gradlew verifyMcuUpstream ${{ matrix.task }} --scan
+
+  verify-apple:
+    name: "Verify Apple and publication"
+    runs-on: macos-latest
+    needs: changes
+    if: needs.changes.outputs.engine == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          java-version: 25
+          distribution: temurin
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Verify Apple targets
+        run: ./gradlew verifyMcuUpstream verifyMcuApple --scan
+
+      - name: Verify local publication and documentation
+        run: ./gradlew verifyMcuPublication --scan

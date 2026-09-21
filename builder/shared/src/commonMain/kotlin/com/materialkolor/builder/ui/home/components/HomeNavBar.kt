@@ -70,21 +70,24 @@ fun HomeNavRail(
 }
 
 @Composable
-private fun PreviewSection.icon(): ImageVector = remember(this) {
-    when (this) {
-        PreviewSection.Customize -> Icons.Default.Tune
-        PreviewSection.Themes -> Icons.Default.Contrast
-        PreviewSection.Preview -> Icons.Default.Smartphone
-        PreviewSection.Components -> Icons.Default.Preview
+private fun PreviewSection.icon(): ImageVector =
+    remember(this) {
+        when (this) {
+            PreviewSection.Customize -> Icons.Default.Tune
+            PreviewSection.Themes -> Icons.Default.Contrast
+            PreviewSection.Preview -> Icons.Default.Smartphone
+            PreviewSection.Components -> Icons.Default.Preview
+        }
     }
-}
 
 @Composable
-private fun PreviewSection.name(): String = remember(this) {
-    when (this) {
-        PreviewSection.Customize,
-        PreviewSection.Themes,
-        PreviewSection.Preview -> this.name
-        PreviewSection.Components -> "Gallery"
+private fun PreviewSection.name(): String =
+    remember(this) {
+        when (this) {
+            PreviewSection.Customize,
+            PreviewSection.Themes,
+            PreviewSection.Preview,
+            -> this.name
+            PreviewSection.Components -> "Gallery"
+        }
     }
-}

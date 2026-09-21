@@ -104,7 +104,6 @@ fun FileListContainer(
                         .padding(horizontal = 16.dp)
                         .padding(top = 16.dp),
                 ) {
-
                     SelectionContainer {
                         Column(
                             modifier = Modifier
@@ -153,8 +152,11 @@ private fun Tab(
     modifier: Modifier = Modifier,
 ) {
     val backgroundColor =
-        if (isSelected) MaterialTheme.colorScheme.surface
-        else MaterialTheme.colorScheme.surfaceVariant
+        if (isSelected) {
+            MaterialTheme.colorScheme.surface
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant
+        }
 
     val shape = RoundedCornerShape(
         topStart = 8.dp,

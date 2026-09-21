@@ -8,19 +8,19 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MKGradleTest {
-
     private val mkVersion = BuildKonfig.MATERIAL_KOLOR_VERSION
     private val mkLib = "com.materialkolor:material-kolor:$mkVersion"
 
     @Test
     fun testLibsVersionsToml() {
-        val expected = """
+        val expected =
+            """
             [versions]
             materialKolor = "$mkVersion"
 
             [libraries]
             materialKolor = "$mkLib"
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(expected, libsVersionsToml(mkVersion))
     }
@@ -39,7 +39,8 @@ class MKGradleTest {
 
     @Test
     fun testGradleKtsMultiplatformWithVersionCatalog() {
-        val expected = """
+        val expected =
+            """
             kotlin {
                 sourceSets {
                     commonMain.dependencies {
@@ -47,7 +48,7 @@ class MKGradleTest {
                     }
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(
             expected,
@@ -57,11 +58,12 @@ class MKGradleTest {
 
     @Test
     fun testGradleKtsAndroidOnlyWithVersionCatalog() {
-        val expected = """
+        val expected =
+            """
             dependencies {
                 implementation(libs.materialKolor)
             }
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(
             expected,
@@ -71,7 +73,8 @@ class MKGradleTest {
 
     @Test
     fun testGradleKtsMultiplatformWithoutVersionCatalog() {
-        val expected = """
+        val expected =
+            """
             kotlin {
                 sourceSets {
                     commonMain.dependencies {
@@ -79,7 +82,7 @@ class MKGradleTest {
                     }
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(
             expected,
@@ -89,11 +92,12 @@ class MKGradleTest {
 
     @Test
     fun testGradleKtsAndroidOnlyWithoutVersionCatalog() {
-        val expected = """
+        val expected =
+            """
             dependencies {
                 implementation("$mkLib")
             }
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(
             expected,

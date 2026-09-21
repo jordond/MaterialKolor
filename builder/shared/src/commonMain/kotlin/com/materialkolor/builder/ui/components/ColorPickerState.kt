@@ -13,10 +13,10 @@ data class ColorPickerState(
     val image: ImageBitmap? = null,
     val loading: Boolean = false,
 ) {
-
-    fun toggleMode(): ColorPickerState = copy(
-        mode = if (mode == ColorPickerMode.HSV) ColorPickerMode.Image else ColorPickerMode.HSV,
-    )
+    fun toggleMode(): ColorPickerState =
+        copy(
+            mode = if (mode == ColorPickerMode.HSV) ColorPickerMode.Image else ColorPickerMode.HSV,
+        )
 }
 
 enum class ColorPickerMode {

@@ -24,7 +24,6 @@ interface MaterialKolorVersionService {
 class DefaultMaterialKolorVersionService(
     private val cache: VersionCache = DI.versionCache,
 ) : MaterialKolorVersionService {
-
     private val _versions = MutableStateFlow(fallbackVersions())
     override val versions: StateFlow<MaterialKolorVersions> = _versions.asStateFlow()
 
@@ -83,12 +82,11 @@ class DefaultMaterialKolorVersionService(
         }
     }
 
-    private fun fallbackVersions(): MaterialKolorVersions {
-        return MaterialKolorVersions(
+    private fun fallbackVersions(): MaterialKolorVersions =
+        MaterialKolorVersions(
             stable = BuildKonfig.MATERIAL_KOLOR_VERSION,
             prerelease = null,
         )
-    }
 
     companion object {
         private const val GITHUB_RELEASES_URL =

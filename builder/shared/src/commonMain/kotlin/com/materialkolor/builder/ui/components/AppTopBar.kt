@@ -54,8 +54,11 @@ fun AppTopBar(
                     tint = MaterialTheme.colorScheme.primary,
                 )
 
-                val text = if (windowSizeClass.widthIsCompact()) "MKB"
-                else "MaterialKolor Builder"
+                val text = if (windowSizeClass.widthIsCompact()) {
+                    "MKB"
+                } else {
+                    "MaterialKolor Builder"
+                }
 
                 Text(
                     text = text,

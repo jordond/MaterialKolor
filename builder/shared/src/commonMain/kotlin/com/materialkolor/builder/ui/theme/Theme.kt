@@ -32,8 +32,8 @@ internal val LocalColors = compositionLocalOf<MaterialKolors> { error("Not initi
 fun createThemeState(
     settings: Settings,
     isDark: Boolean = settings.isDarkMode,
-): DynamicMaterialThemeState {
-    return rememberDynamicMaterialThemeState(
+): DynamicMaterialThemeState =
+    rememberDynamicMaterialThemeState(
         seedColor = settings.colors.seed,
         primary = settings.colors.primary,
         secondary = settings.colors.secondary,
@@ -46,7 +46,6 @@ fun createThemeState(
         contrastLevel = settings.contrast.value,
         specVersion = settings.specVersion,
     )
-}
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

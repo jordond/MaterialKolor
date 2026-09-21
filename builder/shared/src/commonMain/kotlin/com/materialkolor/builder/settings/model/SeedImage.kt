@@ -31,7 +31,10 @@ sealed class SeedImage {
     }
 
     @Immutable
-    data class Custom(val image: ImageBitmap, override val color: Color) : SeedImage() {
+    data class Custom(
+        val image: ImageBitmap,
+        override val color: Color,
+    ) : SeedImage() {
         override val id: String = "custom"
     }
 }

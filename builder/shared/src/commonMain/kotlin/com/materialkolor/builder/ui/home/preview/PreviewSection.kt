@@ -7,10 +7,10 @@ enum class PreviewSection {
     Customize,
     Preview,
     Components,
-    Themes;
+    Themes,
+    ;
 
     companion object {
-
         val All: PersistentList<PreviewSection> = entries.toPersistentList()
     }
 }

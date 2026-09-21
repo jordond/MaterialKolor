@@ -5,16 +5,17 @@ import io.github.xxfast.kstore.KStore
 
 interface VersionCache {
     suspend fun get(): CachedVersions?
+
     suspend fun set(versions: CachedVersions)
+
     suspend fun clear()
 }
 
 class DefaultVersionCache(
     private val store: KStore<CachedVersions>,
 ) : VersionCache {
-
-    override suspend fun get(): CachedVersions? {
-        return try {
+    override suspend fun get(): CachedVersions? =
+        try {
             val cached = store.get()
             if (cached != null && cached.isExpired()) {
                 Logger.d { "Version cache expired, clearing" }
@@ -27,7 +28,6 @@ class DefaultVersionCache(
             Logger.w(e) { "Failed to read version cache" }
             null
         }
-    }
 
     override suspend fun set(versions: CachedVersions) {
         try {

@@ -18,12 +18,8 @@ class MainApp : Application() {
 
         private var currentActivity: Activity? = null
 
-        fun context(): Context {
-            return instance?.applicationContext ?: error("MainApp is not initialized")
-        }
+        fun context(): Context = instance?.applicationContext ?: error("MainApp is not initialized")
 
-        fun activity(): Activity {
-            return currentActivity ?: error("Activity is not initialized")
-        }
+        fun activity(): Activity = currentActivity ?: error("Activity is not initialized")
     }
 }

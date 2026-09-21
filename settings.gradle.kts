@@ -5,6 +5,8 @@ pluginManagement {
         google()
         mavenCentral()
     }
+
+    includeBuild("build-logic")
 }
 
 dependencyResolutionManagement {
@@ -41,3 +43,7 @@ include(
     ":builder:shared",
     ":builder:android",
 )
+
+include(":mcu-source-transformer")
+project(":mcu-source-transformer").projectDir = file("tools/mcu-source-transformer")
+project(":mcu-upstream").projectDir = file("tools/mcu-upstream")
