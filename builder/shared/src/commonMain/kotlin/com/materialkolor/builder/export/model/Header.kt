@@ -10,6 +10,7 @@ fun header(settings: Settings) =
     """
 // Generated using MaterialKolor Builder version ${BuildKonfig.VERSION_NAME} (${BuildKonfig.VERSION_CODE})
 // ${settings.url()}
+
     """.trimIndent()
 
 private fun Settings.url(): String = "$baseUrl/${toEntity().toQueryParams()}"
