@@ -42,19 +42,18 @@ public fun QuantizerCelebi.quantize(
  * Rank the colors in a [ImageBitmap] by their suitability for being used for a UI theme.
  *
  * @receiver the [ImageBitmap] to extract colors from.
- * @param[maxColors] The number of colors to divide the image into.
  * @param[fallback] color to be returned if no other options available.
+ * @param[maxColors] The number of colors to divide the image into.
  * @param[filter] whether to filter out undesirable combinations.
  * @param[desired] The number of colors to return.
  * @return Colors sorted by suitability for a UI theme. The most suitable color is the first item,
- * the least suitable is the last. There will always be at least one color returned. If all
- * the input colors were not suitable for a theme, a default fallback color will be provided,
- * Google Blue.
+ * the least suitable is the last. There will always be at least one color returned. If none of
+ * the input colors suit a theme, the list holds only [fallback].
  */
 @Stable
 public fun ImageBitmap.themeColors(
+    fallback: Color,
     maxColors: Int = DEFAULT_QUANTIZE_MAX_COLORS,
-    fallback: Color = Color(-0xbd7a0c),
     filter: Boolean = true,
     desired: Int = DEFAULT_DESIRED_COLORS,
 ): List<Color> {
@@ -82,7 +81,7 @@ public fun ImageBitmap.themeColor(
     fallback: Color,
     filter: Boolean = true,
     maxColors: Int = DEFAULT_QUANTIZE_MAX_COLORS,
-): Color = themeColors(maxColors = maxColors, fallback, filter).first()
+): Color = themeColors(fallback, maxColors, filter).first()
 
 /**
  * Determine the most suitable color in a [ImageBitmap] for a UI theme or `null`
@@ -122,14 +121,14 @@ public fun ImageBitmap.themeColorOrNull(
 @Composable
 public fun rememberThemeColors(
     image: ImageBitmap,
-    fallback: Color = Color(-0xbd7a0c),
+    fallback: Color,
     maxColors: Int = DEFAULT_QUANTIZE_MAX_COLORS,
     filter: Boolean = true,
     desired: Int = DEFAULT_DESIRED_COLORS,
 ): List<Color> {
     var themeColors by remember { mutableStateOf(listOf(fallback)) }
     LaunchedEffect(image, fallback, filter, maxColors) {
-        themeColors = image.themeColors(maxColors, fallback, filter, desired)
+        themeColors = image.themeColors(fallback, maxColors, filter, desired)
     }
 
     return themeColors

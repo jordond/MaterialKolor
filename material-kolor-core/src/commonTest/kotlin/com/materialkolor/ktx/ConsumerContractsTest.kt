@@ -70,7 +70,6 @@ class ConsumerContractsTest {
         assertEquals(listOf(fallback), image.themeColors(fallback = fallback))
         assertEquals(fallback, image.themeColor(fallback = fallback))
         assertNull(image.themeColorOrNull())
-        assertEquals(listOf(Color(0xff4285f4)), image.themeColors())
         assertEquals(Color.Black, image.themeColorOrNull(filter = false))
     }
 

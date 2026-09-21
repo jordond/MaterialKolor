@@ -109,21 +109,23 @@ theme state.
 
 ### Image helper fallbacks
 
-`rememberThemeColors` and `rememberThemeColor` stayed in core, so they lost their
-`MaterialTheme.colorScheme.primary` default. They now take the same `fallback` shape as their
-non-composable twins: `rememberThemeColors` defaults to Google Blue, and `rememberThemeColor`
-requires the argument.
+`fallback` is required on `ImageBitmap.themeColors`, `ImageBitmap.themeColor`, `rememberThemeColors`
+and `rememberThemeColor`. The composable pair stayed in core, so the
+`MaterialTheme.colorScheme.primary` default is gone. `themeColors` no longer defaults to Google
+Blue, and `fallback` is now its first parameter.
 
 ```kotlin
 // Before
 val seed = rememberThemeColor(image = bitmap)
+val colors = bitmap.themeColors()
 
 // After
 val seed = rememberThemeColor(image = bitmap, fallback = MaterialTheme.colorScheme.primary)
+val colors = bitmap.themeColors(fallback = MaterialTheme.colorScheme.primary)
 ```
 
-Passing the primary role explicitly keeps the old behavior. `ImageBitmap.themeColors`,
-`themeColor` and `themeColorOrNull` are unchanged.
+Passing the primary role explicitly keeps the old composable behavior. `themeColorOrNull` is
+unchanged for callers that want no fallback.
 
 ## Package and role changes
 
