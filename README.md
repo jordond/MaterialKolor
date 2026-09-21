@@ -88,8 +88,7 @@ kotlin {
 `material-kolor-core` as an `api` dependency, so `PaletteStyle`, `MaterialKolors` and the `ktx`
 helpers come with it.
 
-If you theme something other than Material3, depend on the core artifact on its own and Compose
-Material3 never enters your graph:
+If you theme something other than Material3, depend on the core artifact on its own.
 
 ```kotlin
 implementation("com.materialkolor:material-kolor-core:5.0.1")
