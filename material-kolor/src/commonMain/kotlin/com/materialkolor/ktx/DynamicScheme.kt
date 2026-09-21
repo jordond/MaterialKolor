@@ -73,8 +73,9 @@ public fun Color.toDynamicScheme(
 }
 
 /**
- * Build the [SchemeCmf] for this style, seeding the tertiary palette from
- * [PaletteStyle.Cmf.tertiarySourceColor] when one was given.
+ * Build the [SchemeCmf] for this style, adding [PaletteStyle.Cmf.tertiarySeedColor] as the second
+ * seed when one was given. The engine uses that second seed for the tertiary palette and the error
+ * hue only, so every other palette still comes from the primary seed.
  *
  * CMF only exists in the 2026 spec, so the spec version is pinned rather than passed in.
  */
@@ -84,7 +85,7 @@ private fun Cmf.toSchemeCmf(
     contrastLevel: Double,
     platform: DynamicScheme.Platform,
 ): SchemeCmf {
-    val sourceColorHctList = listOfNotNull(seedHct, tertiarySourceColor?.toHct())
+    val sourceColorHctList = listOfNotNull(seedHct, tertiarySeedColor?.toHct())
     return SchemeCmf(
         sourceColorHctList,
         isDark,

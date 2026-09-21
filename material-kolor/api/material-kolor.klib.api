@@ -41,8 +41,8 @@ sealed interface com.materialkolor/PaletteStyle { // com.materialkolor/PaletteSt
     final class Cmf : com.materialkolor/PaletteStyle { // com.materialkolor/PaletteStyle.Cmf|null[0]
         constructor <init>(androidx.compose.ui.graphics/Color? = ...) // com.materialkolor/PaletteStyle.Cmf.<init>|<init>(androidx.compose.ui.graphics.Color?){}[0]
 
-        final val tertiarySourceColor // com.materialkolor/PaletteStyle.Cmf.tertiarySourceColor|{}tertiarySourceColor[0]
-            final fun <get-tertiarySourceColor>(): androidx.compose.ui.graphics/Color? // com.materialkolor/PaletteStyle.Cmf.tertiarySourceColor.<get-tertiarySourceColor>|<get-tertiarySourceColor>(){}[0]
+        final val tertiarySeedColor // com.materialkolor/PaletteStyle.Cmf.tertiarySeedColor|{}tertiarySeedColor[0]
+            final fun <get-tertiarySeedColor>(): androidx.compose.ui.graphics/Color? // com.materialkolor/PaletteStyle.Cmf.tertiarySeedColor.<get-tertiarySeedColor>|<get-tertiarySeedColor>(){}[0]
 
         final fun equals(kotlin/Any?): kotlin/Boolean // com.materialkolor/PaletteStyle.Cmf.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.materialkolor/PaletteStyle.Cmf.hashCode|hashCode(){}[0]

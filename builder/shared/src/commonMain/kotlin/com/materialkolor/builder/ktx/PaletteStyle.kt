@@ -35,7 +35,7 @@ internal val PaletteStyle.storageName: String
 /**
  * Find the style a [storageName] belongs to, or null when the name is not one we know.
  *
- * A stored `Cmf` comes back as `PaletteStyle.Cmf()` with no tertiary source color, since the
+ * A stored `Cmf` comes back as `PaletteStyle.Cmf()` with no tertiary seed color, since the
  * builder has no way to pick one yet.
  */
 internal fun paletteStyleOfStorageName(name: String): PaletteStyle? =

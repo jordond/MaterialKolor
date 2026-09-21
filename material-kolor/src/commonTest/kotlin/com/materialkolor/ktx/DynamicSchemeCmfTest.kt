@@ -38,7 +38,7 @@ class DynamicSchemeCmfTest {
     fun cmfStyle_singleSource_listHasOneEntry() {
         val scheme = red.toDynamicScheme(
             isDark = false,
-            style = PaletteStyle.Cmf(tertiarySourceColor = null),
+            style = PaletteStyle.Cmf(tertiarySeedColor = null),
         )
         assertEquals(1, scheme.sourceColorHctList.size)
     }
@@ -47,7 +47,7 @@ class DynamicSchemeCmfTest {
     fun cmfStyle_dualSource_listHasTwoEntries() {
         val scheme = red.toDynamicScheme(
             isDark = false,
-            style = PaletteStyle.Cmf(tertiarySourceColor = blue),
+            style = PaletteStyle.Cmf(tertiarySeedColor = blue),
         )
         assertEquals(2, scheme.sourceColorHctList.size)
     }
@@ -60,7 +60,7 @@ class DynamicSchemeCmfTest {
         )
         val dualSource = red.toDynamicScheme(
             isDark = false,
-            style = PaletteStyle.Cmf(tertiarySourceColor = blue),
+            style = PaletteStyle.Cmf(tertiarySeedColor = blue),
         )
         assertNotEquals(
             singleSource.tertiaryPalette.tone(50),

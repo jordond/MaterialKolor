@@ -97,7 +97,7 @@ private fun Boolean.parameter(name: String) = if (this) "$name = true" else null
 /** How a style is written out in the code we generate. */
 private val PaletteStyle.sourceCode: String
     get() = when (this) {
-        // Cmf carries a tertiary source color, so it is a constructor call rather than an object.
+        // Cmf carries a tertiary seed color, so it is a constructor call rather than an object.
         is PaletteStyle.Cmf -> "PaletteStyle.Cmf()"
         else -> "PaletteStyle.$storageName"
     }

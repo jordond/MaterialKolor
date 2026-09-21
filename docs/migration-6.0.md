@@ -92,13 +92,14 @@ val stored = key(style)
 val restored = PaletteStyle.KnownStyles.first { key(it) == stored }
 ```
 
-A `Cmf` that carries a tertiary source color does not round-trip through a key alone, store that
+A `Cmf` that carries a tertiary seed color does not round-trip through a key alone, store that
 color next to the key and rebuild the style from both.
 
-`PaletteStyle.Cmf(tertiarySourceColor: Color? = null)` builds the 2026 spec's CMF variant. A
-tertiary source color becomes the second entry of the scheme's `sourceColorHctList` and seeds the
-tertiary palette. Leave it `null` and the tertiary palette is derived from the single source color,
-the way the other styles behave.
+`PaletteStyle.Cmf(tertiarySeedColor: Color? = null)` builds the 2026 spec's CMF variant. A
+tertiary seed color becomes the second entry of the scheme's `sourceColorHctList`, and the engine
+uses it for the tertiary palette's hue and chroma, the tertiary container tone, and the error hue
+only. Every other palette still comes from the primary seed. Leave it `null`, or pass the primary
+seed again, and the tertiary palette falls back to the primary seed at reduced chroma.
 
 `Cmf` always produces a `SPEC_2026` scheme, so the `specVersion` argument of `toDynamicScheme` and
 of the theme helpers is ignored for it. As with the fallback rules above, read
