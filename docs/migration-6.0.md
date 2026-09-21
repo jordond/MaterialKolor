@@ -82,13 +82,18 @@ val stored = style.name
 val restored = PaletteStyle.valueOf(stored)
 
 // After
-val stored = style.toStorageString()
-val restored = PaletteStyle.fromStorageString(stored)
+val stored = style.toString()
+val restored = PaletteStyle.parse(stored)
 ```
 
 `fromName` returns null for a name no style answers to, and `"Cmf"` gives back a `Cmf` with no
-tertiary seed color. Use `toStorageString` and `fromStorageString` when that seed has to survive.
-They round-trip every style, a seeded `Cmf` included, by writing it as `Cmf:AARRGGBB`.
+tertiary seed color. `toString()` is the documented persistence format, the way `Duration` and
+`Uuid` write theirs, so reach for it when the seed has to survive. It round-trips every style, a
+seeded `Cmf` included, by writing it as `Cmf:AARRGGBB`.
+
+`PaletteStyle.parse` reads that format back and throws `IllegalArgumentException` on anything we
+did not write, while `PaletteStyle.parseOrNull` answers null instead, which suits a URL or a stored
+preference you do not control.
 
 `PaletteStyle` is also `@Serializable`, with a serializer that writes the same single string, so
 `Json` and the other kotlinx formats read and write a style without you applying the serialization
