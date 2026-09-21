@@ -164,6 +164,7 @@ public final class com/materialkolor/PaletteStyle$Cmf : com/materialkolor/Palett
 
 public final class com/materialkolor/PaletteStyle$Companion {
 	public final fun fromName (Ljava/lang/String;)Lcom/materialkolor/PaletteStyle;
+	public final fun fromNameOrNull (Ljava/lang/String;)Lcom/materialkolor/PaletteStyle;
 	public final fun getKnownStyles ()Ljava/util/List;
 	public final fun parse (Ljava/lang/String;)Lcom/materialkolor/PaletteStyle;
 	public final fun parseOrNull (Ljava/lang/String;)Lcom/materialkolor/PaletteStyle;

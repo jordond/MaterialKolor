@@ -56,7 +56,8 @@ sealed interface com.materialkolor/PaletteStyle { // com.materialkolor/PaletteSt
         final val KnownStyles // com.materialkolor/PaletteStyle.Companion.KnownStyles|{}KnownStyles[0]
             final fun <get-KnownStyles>(): kotlin.collections/List<com.materialkolor/PaletteStyle> // com.materialkolor/PaletteStyle.Companion.KnownStyles.<get-KnownStyles>|<get-KnownStyles>(){}[0]
 
-        final fun fromName(kotlin/String): com.materialkolor/PaletteStyle? // com.materialkolor/PaletteStyle.Companion.fromName|fromName(kotlin.String){}[0]
+        final fun fromName(kotlin/String): com.materialkolor/PaletteStyle // com.materialkolor/PaletteStyle.Companion.fromName|fromName(kotlin.String){}[0]
+        final fun fromNameOrNull(kotlin/String): com.materialkolor/PaletteStyle? // com.materialkolor/PaletteStyle.Companion.fromNameOrNull|fromNameOrNull(kotlin.String){}[0]
         final fun parse(kotlin/String): com.materialkolor/PaletteStyle // com.materialkolor/PaletteStyle.Companion.parse|parse(kotlin.String){}[0]
         final fun parseOrNull(kotlin/String): com.materialkolor/PaletteStyle? // com.materialkolor/PaletteStyle.Companion.parseOrNull|parseOrNull(kotlin.String){}[0]
         final fun serializer(): kotlinx.serialization/KSerializer<com.materialkolor/PaletteStyle> // com.materialkolor/PaletteStyle.Companion.serializer|serializer(){}[0]

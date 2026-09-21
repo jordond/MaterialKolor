@@ -2,6 +2,8 @@ package com.materialkolor
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.materialkolor.PaletteStyle.Companion.parse
+import com.materialkolor.PaletteStyle.Companion.parseOrNull
 import com.materialkolor.dynamiccolor.Variant
 import com.materialkolor.serialization.PaletteStyleSerializer
 import dev.drewhamilton.poko.Poko
@@ -165,13 +167,22 @@ public sealed interface PaletteStyle {
         }
 
         /**
-         * Find the style called [name], using the entry names the old enum had, or null when the
-         * name belongs to no style. The match is case sensitive.
+         * Find the style called [name]. The match is case-sensitive.
+         *
+         * `"Cmf"` gives back a [Cmf] with no tertiary seed color, since a name alone cannot carry
+         * one. Use [parse] when the seed has to survive the trip.
+         *
+         * @throws NoSuchElementException if there is no style with the given [name].
+         */
+        public fun fromName(name: String): PaletteStyle = KnownStyles.first { style -> style.name == name }
+
+        /**
+         * Find the style called [name], or null when the name belongs to no style. The match is case-sensitive.
          *
          * `"Cmf"` gives back a [Cmf] with no tertiary seed color, since a name alone cannot carry
          * one. Use [parse] when the seed has to survive the trip.
          */
-        public fun fromName(name: String): PaletteStyle? = KnownStyles.firstOrNull { style -> style.name == name }
+        public fun fromNameOrNull(name: String): PaletteStyle? = KnownStyles.firstOrNull { style -> style.name == name }
 
         /**
          * Read back a style written by `toString()`, or throw when [value] is not one we wrote.
