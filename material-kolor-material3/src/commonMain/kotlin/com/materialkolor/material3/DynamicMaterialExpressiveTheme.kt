@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.Contrast
+import com.materialkolor.InternalMaterialKolorApi
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.dynamiccolor.DynamicScheme
@@ -47,6 +48,7 @@ import com.materialkolor.material3.ktx.animateColorScheme
  * @param[content] The Composable content of the theme.
  */
 @ExperimentalMaterial3ExpressiveApi
+@OptIn(InternalMaterialKolorApi::class)
 @Composable
 public fun DynamicMaterialExpressiveTheme(
     seedColor: Color,
@@ -124,6 +126,7 @@ public fun DynamicMaterialExpressiveTheme(
  * @param[content] The Composable content of the theme.
  */
 @ExperimentalMaterial3ExpressiveApi
+@OptIn(InternalMaterialKolorApi::class)
 @Composable
 public fun DynamicMaterialExpressiveTheme(
     primary: Color,
@@ -189,6 +192,7 @@ public fun DynamicMaterialExpressiveTheme(
  * @param[content] The Composable content of the theme.
  */
 @ExperimentalMaterial3ExpressiveApi
+@OptIn(InternalMaterialKolorApi::class)
 @Composable
 public fun DynamicMaterialExpressiveTheme(
     state: DynamicMaterialThemeState,

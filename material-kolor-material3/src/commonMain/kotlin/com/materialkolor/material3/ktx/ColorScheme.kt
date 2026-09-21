@@ -8,6 +8,7 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import com.materialkolor.InternalMaterialKolorApi
 import com.materialkolor.ktx.defaultColorSpring
 
 /**
@@ -21,6 +22,7 @@ import com.materialkolor.ktx.defaultColorSpring
  * @param label A debugging label used to identify this animation.
  * @return A new [ColorScheme] instance with animated color properties.
  */
+@OptIn(InternalMaterialKolorApi::class)
 @Composable
 public fun animateColorScheme(
     colorScheme: ColorScheme,

@@ -2,6 +2,7 @@
 
 import com.materialkolor.convention.mcu.GenerateMcuSources
 import com.materialkolor.convention.mcu.VerifyMcuParserAgreement
+import org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode
 
 plugins {
     id("materialkolor.library")
@@ -63,6 +64,9 @@ tasks.register<VerifyMcuParserAgreement>("verifyMcuParserAgreement") {
 }
 
 kotlin {
+    // The generated sources keep upstream's implicit visibility.
+    explicitApi = ExplicitApiMode.Disabled
+
     android {
         namespace = "com.materialkolor.colorutilities"
     }

@@ -21,7 +21,6 @@ import kotlin.math.roundToInt
 
 /**
  * The spring every MaterialKolor color animation falls back to when the caller passes no spec.
- * Shared with the adapter modules so they animate the same way as [Color.animate].
  */
 @InternalMaterialKolorApi
 public val defaultColorSpring: FiniteAnimationSpec<Color> = spring()
@@ -118,12 +117,13 @@ public fun Color.toHex(
  * @param finishedListener A callback to invoke when the animation finishes.
  * @return A [State] object representing the animated color.
  */
+@OptIn(InternalMaterialKolorApi::class)
 @Composable
 public fun Color.animate(
     animationSpec: AnimationSpec<Color> = defaultColorSpring,
     label: String = "ColorAnimation",
     finishedListener: ((Color) -> Unit)? = null,
-): State<Color> = animateColorAsState(this, animationSpec)
+): State<Color> = animateColorAsState(this, animationSpec, label, finishedListener)
 
 /**
  * Format the integer as a hex string.

@@ -1,47 +1,17 @@
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-
 plugins {
-    id("materialkolor.library")
-    alias(libs.plugins.compose)
-    alias(libs.plugins.compose.compiler)
+    id("materialkolor.library.compose")
 }
 
 kotlin {
-    explicitApi()
-
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "com.materialkolor.material3"
-
-        optimization {
-            consumerKeepRules.publish = true
-            consumerKeepRules.file("consumer-rules.pro")
-        }
-    }
-
-    js {
-        binaries.executable()
-    }
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        binaries.executable()
     }
 
     sourceSets {
-        all {
-            languageSettings {
-                optIn("com.materialkolor.InternalMaterialKolorApi")
-            }
-        }
-
         commonMain.dependencies {
             implementation(libs.compose.material3.get().toString()) {
                 exclude(group = "androidx.compose.material3")
             }
-            implementation(libs.compose.foundation)
-            implementation(libs.compose.runtime)
-            implementation(libs.compose.ui)
 
             api(project(":material-kolor-core"))
         }
@@ -50,7 +20,7 @@ kotlin {
             compileOnly(libs.androidx.compose.material3)
         }
 
-        getByName("androidHostTest").dependencies {
+        androidHostTest.dependencies {
             implementation(libs.androidx.compose.material3)
         }
 
