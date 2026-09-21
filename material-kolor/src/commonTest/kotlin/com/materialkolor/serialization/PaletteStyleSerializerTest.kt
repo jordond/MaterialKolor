@@ -32,7 +32,7 @@ class PaletteStyleSerializerTest {
     @Test
     fun anUnknownStyleFails() {
         assertFailsWith<SerializationException> {
-            Json.decodeFromString<PaletteStyle>("\"nope\"")
+            Json.decodeFromString<PaletteStyle>("\"boom\"")
         }
     }
 }
