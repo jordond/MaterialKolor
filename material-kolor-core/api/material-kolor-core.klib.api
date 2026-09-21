@@ -6,6 +6,10 @@
 // - Show declarations: true
 
 // Library unique name: <MaterialKolor:material-kolor-core>
+open annotation class com.materialkolor/InternalMaterialKolorApi : kotlin/Annotation { // com.materialkolor/InternalMaterialKolorApi|null[0]
+    constructor <init>() // com.materialkolor/InternalMaterialKolorApi.<init>|<init>(){}[0]
+}
+
 final enum class com.materialkolor.ktx/ContrastThreshold : kotlin/Enum<com.materialkolor.ktx/ContrastThreshold> { // com.materialkolor.ktx/ContrastThreshold|null[0]
     enum entry WCAG_AAA_LARGE_TEXT // com.materialkolor.ktx/ContrastThreshold.WCAG_AAA_LARGE_TEXT|null[0]
     enum entry WCAG_AAA_NORMAL_TEXT // com.materialkolor.ktx/ContrastThreshold.WCAG_AAA_NORMAL_TEXT|null[0]
@@ -202,6 +206,8 @@ final val com.materialkolor.ktx/controlHighlight // com.materialkolor.ktx/contro
     final fun (com.materialkolor.dynamiccolor/MaterialDynamicColors).<get-controlHighlight>(): com.materialkolor.dynamiccolor/DynamicColor // com.materialkolor.ktx/controlHighlight.<get-controlHighlight>|<get-controlHighlight>@com.materialkolor.dynamiccolor.MaterialDynamicColors(){}[0]
 final val com.materialkolor.ktx/controlNormal // com.materialkolor.ktx/controlNormal|@com.materialkolor.dynamiccolor.MaterialDynamicColors{}controlNormal[0]
     final fun (com.materialkolor.dynamiccolor/MaterialDynamicColors).<get-controlNormal>(): com.materialkolor.dynamiccolor/DynamicColor // com.materialkolor.ktx/controlNormal.<get-controlNormal>|<get-controlNormal>@com.materialkolor.dynamiccolor.MaterialDynamicColors(){}[0]
+final val com.materialkolor.ktx/defaultColorSpring // com.materialkolor.ktx/defaultColorSpring|{}defaultColorSpring[0]
+    final fun <get-defaultColorSpring>(): androidx.compose.animation.core/FiniteAnimationSpec<androidx.compose.ui.graphics/Color> // com.materialkolor.ktx/defaultColorSpring.<get-defaultColorSpring>|<get-defaultColorSpring>(){}[0]
 final val com.materialkolor.ktx/sourceColor // com.materialkolor.ktx/sourceColor|@com.materialkolor.dynamiccolor.DynamicScheme{}sourceColor[0]
     final fun (com.materialkolor.dynamiccolor/DynamicScheme).<get-sourceColor>(): androidx.compose.ui.graphics/Color // com.materialkolor.ktx/sourceColor.<get-sourceColor>|<get-sourceColor>@com.materialkolor.dynamiccolor.DynamicScheme(){}[0]
 final val com.materialkolor.ktx/textHintInverse // com.materialkolor.ktx/textHintInverse|@com.materialkolor.dynamiccolor.MaterialDynamicColors{}textHintInverse[0]

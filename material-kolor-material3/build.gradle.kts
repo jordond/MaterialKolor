@@ -29,6 +29,12 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings {
+                optIn("com.materialkolor.InternalMaterialKolorApi")
+            }
+        }
+
         commonMain.dependencies {
             implementation(libs.compose.material3.get().toString()) {
                 exclude(group = "androidx.compose.material3")

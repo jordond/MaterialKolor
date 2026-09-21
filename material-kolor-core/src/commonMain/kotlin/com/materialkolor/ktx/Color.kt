@@ -2,6 +2,7 @@ package com.materialkolor.ktx
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.spring
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -9,6 +10,7 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.github.ajalt.colormath.model.HSL
+import com.materialkolor.InternalMaterialKolorApi
 import com.materialkolor.contrast.Contrast
 import com.materialkolor.dislike.DislikeAnalyzer
 import com.materialkolor.internal.toColormathColor
@@ -17,7 +19,12 @@ import com.materialkolor.palettes.TonalPalette
 import com.materialkolor.utils.ColorUtils
 import kotlin.math.roundToInt
 
-internal val defaultColorSpring = spring<Color>()
+/**
+ * The spring every MaterialKolor color animation falls back to when the caller passes no spec.
+ * Shared with the adapter modules so they animate the same way as [Color.animate].
+ */
+@InternalMaterialKolorApi
+public val defaultColorSpring: FiniteAnimationSpec<Color> = spring()
 
 /**
  * Check if the color is light.

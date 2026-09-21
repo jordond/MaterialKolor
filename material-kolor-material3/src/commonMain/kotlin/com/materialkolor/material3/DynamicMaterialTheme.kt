@@ -12,8 +12,8 @@ import com.materialkolor.Contrast
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.dynamiccolor.DynamicScheme
+import com.materialkolor.ktx.defaultColorSpring
 import com.materialkolor.material3.ktx.animateColorScheme
-import com.materialkolor.material3.ktx.defaultColorSpring
 
 /**
  * A Material Theme that adapts to the given seed color and the provided custom colors.

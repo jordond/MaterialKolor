@@ -31,6 +31,12 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings {
+                optIn("com.materialkolor.InternalMaterialKolorApi")
+            }
+        }
+
         commonMain.dependencies {
             implementation(libs.compose.foundation)
             implementation(libs.compose.runtime)

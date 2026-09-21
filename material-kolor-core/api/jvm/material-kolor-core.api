@@ -9,6 +9,9 @@ public final class com/materialkolor/Contrast : java/lang/Enum {
 	public static fun values ()[Lcom/materialkolor/Contrast;
 }
 
+public abstract interface annotation class com/materialkolor/InternalMaterialKolorApi : java/lang/annotation/Annotation {
+}
+
 public final class com/materialkolor/MaterialKolors {
 	public static final field $stable I
 	public fun <init> (Lcom/materialkolor/dynamiccolor/DynamicScheme;Z)V
@@ -204,6 +207,7 @@ public final class com/materialkolor/ktx/ColorKt {
 	public static final fun darken-DxMtmZc (JF)J
 	public static synthetic fun darken-DxMtmZc$default (JFILjava/lang/Object;)J
 	public static final fun fixIfDisliked-8_81llA (J)J
+	public static final fun getDefaultColorSpring ()Landroidx/compose/animation/core/FiniteAnimationSpec;
 	public static final fun isDisliked-8_81llA (J)Z
 	public static final fun isLight-8_81llA (J)Z
 	public static final fun lighten-DxMtmZc (JF)J
