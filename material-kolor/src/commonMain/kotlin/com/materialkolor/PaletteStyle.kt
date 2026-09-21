@@ -1,6 +1,7 @@
 package com.materialkolor
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.materialkolor.dynamiccolor.Variant
 import dev.drewhamilton.poko.Poko
 
@@ -10,6 +11,33 @@ import dev.drewhamilton.poko.Poko
  * Mapped to [Variant] in the Material Design guidelines.
  */
 public sealed interface PaletteStyle {
+    /**
+     * Stable identifier for the style, matching the entry names the old enum had. [Cmf] is always
+     * `"Cmf"` no matter which seed it carries, so use [toStorageString] when the seed must survive.
+     */
+    public val name: String
+        get() = when (this) {
+            is Cmf -> "Cmf"
+            is Content -> "Content"
+            is Expressive -> "Expressive"
+            is Fidelity -> "Fidelity"
+            is FruitSalad -> "FruitSalad"
+            is Monochrome -> "Monochrome"
+            is Neutral -> "Neutral"
+            is Rainbow -> "Rainbow"
+            is TonalSpot -> "TonalSpot"
+            is Vibrant -> "Vibrant"
+        }
+
+    /**
+     * The style written as a single string you can put in a URL, a preference or a database column.
+     *
+     * Every style except [Cmf] writes its [name]. A [Cmf] with no tertiary seed color does the same,
+     * and one that carries a seed writes `Cmf:AARRGGBB`, eight uppercase hex digits of the seed.
+     * Feed the result back to [fromStorageString] to get an equal style, seed included.
+     */
+    public fun toStorageString(): String = name
+
     /**
      * A calm theme, sedated colors that aren't particularly chromatic.
      */
@@ -92,7 +120,19 @@ public sealed interface PaletteStyle {
     @Poko
     public class Cmf(
         public val tertiarySeedColor: Color? = null,
-    ) : PaletteStyle
+    ) : PaletteStyle {
+        /**
+         * `"Cmf"` on its own when there is no [tertiarySeedColor], otherwise `Cmf:AARRGGBB`.
+         *
+         * The seed is written through `toArgb`, so a wide gamut color collapses to its sRGB
+         * eight bit form and comes back out of [fromStorageString] in sRGB.
+         */
+        override fun toStorageString(): String {
+            val seed = tertiarySeedColor ?: return name
+            val argb = (seed.toArgb().toLong() and 0xFFFFFFFFL).toString(16).uppercase().padStart(8, '0')
+            return "$name:$argb"
+        }
+    }
 
     public companion object {
         /**
@@ -114,5 +154,35 @@ public sealed interface PaletteStyle {
             Content,
             Cmf(),
         )
+
+        /**
+         * Find the style called [name], using the entry names the old enum had, or null when the
+         * name belongs to no style. The match is case sensitive.
+         *
+         * `"Cmf"` gives back a [Cmf] with no tertiary seed color, since a name alone cannot carry
+         * one. Use [fromStorageString] when the seed has to survive the trip.
+         */
+        public fun fromName(name: String): PaletteStyle? = KnownStyles.firstOrNull { style -> style.name == name }
+
+        /**
+         * Read back a style written by [toStorageString], or null when [value] is not one we wrote.
+         *
+         * `fromStorageString(style.toStorageString()) == style` holds for every style, including a
+         * [Cmf] that carries a tertiary seed color. Accepted forms are the plain style names,
+         * `"Cmf"`, and `"Cmf:"` followed by exactly eight hex digits in either case. Anything else,
+         * a short seed included, is null.
+         */
+        public fun fromStorageString(value: String): PaletteStyle? {
+            if (!value.startsWith(CMF_SEED_PREFIX)) return fromName(value)
+
+            val hex = value.removePrefix(CMF_SEED_PREFIX)
+            if (hex.length != SEED_HEX_LENGTH) return null
+            val argb = hex.toLongOrNull(radix = 16)?.toInt() ?: return null
+            return Cmf(Color(argb))
+        }
+
+        private const val CMF_SEED_PREFIX = "Cmf:"
+
+        private const val SEED_HEX_LENGTH = 8
     }
 }
