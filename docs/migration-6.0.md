@@ -69,12 +69,12 @@ single-source behavior. Empty lists are unsupported. The high-level entry point 
 `data object`s that implement it. `PaletteStyle.TonalSpot` and its siblings still work as values, as
 arguments and as `when` branches, so most call sites need no change.
 
-The generated enum members are gone. A style has no `name` and no `ordinal`, and the type has no
-`entries`, no `values()`, no `valueOf` and no `enumValueOf`. Use `PaletteStyle.KnownStyles` to list
-the styles for a menu, a picker or a test. It holds the nine objects plus a default
-`PaletteStyle.Cmf()`.
+The generated enum members are gone. A style has no `ordinal`, and the type has no `entries`, no
+`values()`, no `valueOf` and no `enumValueOf`. Use `PaletteStyle.KnownStyles` to list the styles for
+a menu, a picker or a test. It holds the nine objects plus a default `PaletteStyle.Cmf()`.
 
-Persist a style with a string mapping of your own instead of through `name`:
+`name` stays, and `PaletteStyle.fromName` replaces `valueOf`. The names are the old entry names, so
+values you have already written keep reading:
 
 ```kotlin
 // Before
@@ -82,18 +82,18 @@ val stored = style.name
 val restored = PaletteStyle.valueOf(stored)
 
 // After
-fun key(style: PaletteStyle): String = when (style) {
-    PaletteStyle.TonalSpot -> "tonal_spot"
-    is PaletteStyle.Cmf -> "cmf"
-    // one branch per remaining style
-}
-
-val stored = key(style)
-val restored = PaletteStyle.KnownStyles.first { key(it) == stored }
+val stored = style.toStorageString()
+val restored = PaletteStyle.fromStorageString(stored)
 ```
 
-A `Cmf` that carries a tertiary seed color does not round-trip through a key alone, store that
-color next to the key and rebuild the style from both.
+`fromName` returns null for a name no style answers to, and `"Cmf"` gives back a `Cmf` with no
+tertiary seed color. Use `toStorageString` and `fromStorageString` when that seed has to survive.
+They round-trip every style, a seeded `Cmf` included, by writing it as `Cmf:AARRGGBB`.
+
+`PaletteStyle` is also `@Serializable`, with a serializer that writes the same single string, so
+`Json` and the other kotlinx formats read and write a style without you applying the serialization
+plugin or registering anything. That makes `kotlinx-serialization-core` a transitive dependency of
+`material-kolor`.
 
 `PaletteStyle.Cmf(tertiarySeedColor: Color? = null)` builds the 2026 spec's CMF variant. A
 tertiary seed color becomes the second entry of the scheme's `sourceColorHctList`, and the engine
