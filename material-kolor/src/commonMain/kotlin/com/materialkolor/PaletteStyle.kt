@@ -3,13 +3,16 @@ package com.materialkolor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.materialkolor.dynamiccolor.Variant
+import com.materialkolor.serialization.PaletteStyleSerializer
 import dev.drewhamilton.poko.Poko
+import kotlinx.serialization.Serializable
 
 /**
  * The style of the palette to generate.
  *
  * Mapped to [Variant] in the Material Design guidelines.
  */
+@Serializable(with = PaletteStyleSerializer::class)
 public sealed interface PaletteStyle {
     /**
      * Stable identifier for the style, matching the entry names the old enum had. [Cmf] is always
@@ -141,19 +144,25 @@ public sealed interface PaletteStyle {
          * [PaletteStyle] is a sealed interface rather than an enum, so it has no `entries`. [Cmf]
          * carries a color, so this list holds one with no tertiary seed color. Build your own
          * [Cmf] when you want to seed the tertiary palette.
+         *
+         * The list is built on first use. [PaletteStyle] carries default implementations, so a
+         * platform may load the interface while it is still building one of the objects, and an
+         * eager list would capture that half built object.
          */
-        public val KnownStyles: List<PaletteStyle> = listOf(
-            TonalSpot,
-            Neutral,
-            Vibrant,
-            Expressive,
-            Rainbow,
-            FruitSalad,
-            Monochrome,
-            Fidelity,
-            Content,
-            Cmf(),
-        )
+        public val KnownStyles: List<PaletteStyle> by lazy {
+            listOf(
+                TonalSpot,
+                Neutral,
+                Vibrant,
+                Expressive,
+                Rainbow,
+                FruitSalad,
+                Monochrome,
+                Fidelity,
+                Content,
+                Cmf(),
+            )
+        }
 
         /**
          * Find the style called [name], using the entry names the old enum had, or null when the
