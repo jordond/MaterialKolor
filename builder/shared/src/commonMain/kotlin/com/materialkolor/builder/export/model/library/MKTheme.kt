@@ -6,7 +6,6 @@ import androidx.compose.ui.text.intl.Locale
 import com.materialkolor.Contrast
 import com.materialkolor.PaletteStyle
 import com.materialkolor.builder.export.model.header
-import com.materialkolor.builder.ktx.storageName
 import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.dynamiccolor.ColorSpec
 
@@ -99,7 +98,7 @@ private val PaletteStyle.sourceCode: String
     get() = when (this) {
         // Cmf carries a tertiary seed color, so it is a constructor call rather than an object.
         is PaletteStyle.Cmf -> "PaletteStyle.Cmf()"
-        else -> "PaletteStyle.$storageName"
+        else -> "PaletteStyle.$name"
     }
 
 private val ColorSpec.SpecVersion.include

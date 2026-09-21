@@ -144,6 +144,24 @@ class QueryParamsTest {
     }
 
     @Test
+    fun testCmfStyleKeepsItsTertiarySeedColor() {
+        val style = PaletteStyle.Cmf(Color(0xFF7D5260))
+        val settingsEntity = SettingsEntity(
+            colors = mapOf(KeyColor.Seed to 0xFF000000.toInt()),
+            isDarkMode = false,
+            contrast = Contrast.Default.value,
+            selectedPresetId = null,
+            style = style,
+        )
+
+        val queryParams = settingsEntity.toQueryParams()
+        val reconstructed = queryParams.toSettingsEntity()
+
+        assertTrue(queryParams.contains("style=Cmf:FF7D5260"))
+        assertEquals(style, reconstructed.style)
+    }
+
+    @Test
     fun testContrastEdgeCases() {
         val contrastValues = listOf(0.0, 0.5, 1.0, -1.0, 2.0)
         for (contrast in contrastValues) {
