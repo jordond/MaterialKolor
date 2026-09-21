@@ -205,7 +205,8 @@ public sealed interface PaletteStyle {
          * is null.
          */
         public fun parseOrNull(value: String): PaletteStyle? =
-            CMF_SEED_REGEX.matchEntire(value)
+            CMF_SEED_REGEX
+                .matchEntire(value)
                 ?.let { match -> Cmf(Color(match.groupValues[1].toUInt(radix = 16).toInt())) }
                 ?: fromNameOrNull(value)
 

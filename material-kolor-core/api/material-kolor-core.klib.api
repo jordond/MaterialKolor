@@ -5,7 +5,7 @@
 // - Show manifest properties: true
 // - Show declarations: true
 
-// Library unique name: <MaterialKolor:material-kolor>
+// Library unique name: <MaterialKolor:material-kolor-core>
 final enum class com.materialkolor.ktx/ContrastThreshold : kotlin/Enum<com.materialkolor.ktx/ContrastThreshold> { // com.materialkolor.ktx/ContrastThreshold|null[0]
     enum entry WCAG_AAA_LARGE_TEXT // com.materialkolor.ktx/ContrastThreshold.WCAG_AAA_LARGE_TEXT|null[0]
     enum entry WCAG_AAA_NORMAL_TEXT // com.materialkolor.ktx/ContrastThreshold.WCAG_AAA_NORMAL_TEXT|null[0]

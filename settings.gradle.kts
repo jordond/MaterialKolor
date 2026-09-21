@@ -37,7 +37,7 @@ develocity {
 rootProject.name = "MaterialKolor"
 
 include(
-    ":material-kolor",
+    ":material-kolor-core",
     ":material-color-utilities",
     ":mcu-upstream",
     ":builder:shared",
