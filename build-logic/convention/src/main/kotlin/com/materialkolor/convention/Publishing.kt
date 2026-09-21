@@ -10,6 +10,14 @@ import org.gradle.kotlin.dsl.withType
 internal fun Project.configureMcuPublishing() {
     // Ship the notices once in each artifact, including source-only publications.
     tasks.withType<AbstractArchiveTask>().configureEach {
+        // The Compose multiplatform-resources zip is not an artifact a consumer reads notices from,
+        // it is unpacked into the resources of whatever depends on it. A notice added here reaches
+        // the next module in the chain as an ordinary resource and collides with the copy that
+        // module adds for itself, which is what a library module depending on another one hits.
+        if (name.endsWith("ZipMultiplatformResourcesForPublication")) {
+            return@configureEach
+        }
+
         from(rootProject.layout.projectDirectory.file("LICENSE")) {
             into("META-INF")
             rename { "LICENSE-MaterialKolor" }
