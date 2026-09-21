@@ -37,22 +37,76 @@ final enum class com.materialkolor/Contrast : kotlin/Enum<com.materialkolor/Cont
     final fun values(): kotlin/Array<com.materialkolor/Contrast> // com.materialkolor/Contrast.values|values#static(){}[0]
 }
 
-final enum class com.materialkolor/PaletteStyle : kotlin/Enum<com.materialkolor/PaletteStyle> { // com.materialkolor/PaletteStyle|null[0]
-    enum entry Content // com.materialkolor/PaletteStyle.Content|null[0]
-    enum entry Expressive // com.materialkolor/PaletteStyle.Expressive|null[0]
-    enum entry Fidelity // com.materialkolor/PaletteStyle.Fidelity|null[0]
-    enum entry FruitSalad // com.materialkolor/PaletteStyle.FruitSalad|null[0]
-    enum entry Monochrome // com.materialkolor/PaletteStyle.Monochrome|null[0]
-    enum entry Neutral // com.materialkolor/PaletteStyle.Neutral|null[0]
-    enum entry Rainbow // com.materialkolor/PaletteStyle.Rainbow|null[0]
-    enum entry TonalSpot // com.materialkolor/PaletteStyle.TonalSpot|null[0]
-    enum entry Vibrant // com.materialkolor/PaletteStyle.Vibrant|null[0]
+sealed interface com.materialkolor/PaletteStyle { // com.materialkolor/PaletteStyle|null[0]
+    final class Cmf : com.materialkolor/PaletteStyle { // com.materialkolor/PaletteStyle.Cmf|null[0]
+        constructor <init>(androidx.compose.ui.graphics/Color? = ...) // com.materialkolor/PaletteStyle.Cmf.<init>|<init>(androidx.compose.ui.graphics.Color?){}[0]
 
-    final val entries // com.materialkolor/PaletteStyle.entries|#static{}entries[0]
-        final fun <get-entries>(): kotlin.enums/EnumEntries<com.materialkolor/PaletteStyle> // com.materialkolor/PaletteStyle.entries.<get-entries>|<get-entries>#static(){}[0]
+        final val tertiarySourceColor // com.materialkolor/PaletteStyle.Cmf.tertiarySourceColor|{}tertiarySourceColor[0]
+            final fun <get-tertiarySourceColor>(): androidx.compose.ui.graphics/Color? // com.materialkolor/PaletteStyle.Cmf.tertiarySourceColor.<get-tertiarySourceColor>|<get-tertiarySourceColor>(){}[0]
 
-    final fun valueOf(kotlin/String): com.materialkolor/PaletteStyle // com.materialkolor/PaletteStyle.valueOf|valueOf#static(kotlin.String){}[0]
-    final fun values(): kotlin/Array<com.materialkolor/PaletteStyle> // com.materialkolor/PaletteStyle.values|values#static(){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.materialkolor/PaletteStyle.Cmf.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.materialkolor/PaletteStyle.Cmf.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.materialkolor/PaletteStyle.Cmf.toString|toString(){}[0]
+    }
+
+    final object Companion { // com.materialkolor/PaletteStyle.Companion|null[0]
+        final val KnownStyles // com.materialkolor/PaletteStyle.Companion.KnownStyles|{}KnownStyles[0]
+            final fun <get-KnownStyles>(): kotlin.collections/List<com.materialkolor/PaletteStyle> // com.materialkolor/PaletteStyle.Companion.KnownStyles.<get-KnownStyles>|<get-KnownStyles>(){}[0]
+    }
+
+    final object Content : com.materialkolor/PaletteStyle { // com.materialkolor/PaletteStyle.Content|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.materialkolor/PaletteStyle.Content.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.materialkolor/PaletteStyle.Content.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.materialkolor/PaletteStyle.Content.toString|toString(){}[0]
+    }
+
+    final object Expressive : com.materialkolor/PaletteStyle { // com.materialkolor/PaletteStyle.Expressive|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.materialkolor/PaletteStyle.Expressive.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.materialkolor/PaletteStyle.Expressive.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.materialkolor/PaletteStyle.Expressive.toString|toString(){}[0]
+    }
+
+    final object Fidelity : com.materialkolor/PaletteStyle { // com.materialkolor/PaletteStyle.Fidelity|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.materialkolor/PaletteStyle.Fidelity.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.materialkolor/PaletteStyle.Fidelity.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.materialkolor/PaletteStyle.Fidelity.toString|toString(){}[0]
+    }
+
+    final object FruitSalad : com.materialkolor/PaletteStyle { // com.materialkolor/PaletteStyle.FruitSalad|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.materialkolor/PaletteStyle.FruitSalad.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.materialkolor/PaletteStyle.FruitSalad.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.materialkolor/PaletteStyle.FruitSalad.toString|toString(){}[0]
+    }
+
+    final object Monochrome : com.materialkolor/PaletteStyle { // com.materialkolor/PaletteStyle.Monochrome|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.materialkolor/PaletteStyle.Monochrome.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.materialkolor/PaletteStyle.Monochrome.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.materialkolor/PaletteStyle.Monochrome.toString|toString(){}[0]
+    }
+
+    final object Neutral : com.materialkolor/PaletteStyle { // com.materialkolor/PaletteStyle.Neutral|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.materialkolor/PaletteStyle.Neutral.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.materialkolor/PaletteStyle.Neutral.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.materialkolor/PaletteStyle.Neutral.toString|toString(){}[0]
+    }
+
+    final object Rainbow : com.materialkolor/PaletteStyle { // com.materialkolor/PaletteStyle.Rainbow|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.materialkolor/PaletteStyle.Rainbow.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.materialkolor/PaletteStyle.Rainbow.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.materialkolor/PaletteStyle.Rainbow.toString|toString(){}[0]
+    }
+
+    final object TonalSpot : com.materialkolor/PaletteStyle { // com.materialkolor/PaletteStyle.TonalSpot|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.materialkolor/PaletteStyle.TonalSpot.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.materialkolor/PaletteStyle.TonalSpot.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.materialkolor/PaletteStyle.TonalSpot.toString|toString(){}[0]
+    }
+
+    final object Vibrant : com.materialkolor/PaletteStyle { // com.materialkolor/PaletteStyle.Vibrant|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.materialkolor/PaletteStyle.Vibrant.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.materialkolor/PaletteStyle.Vibrant.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.materialkolor/PaletteStyle.Vibrant.toString|toString(){}[0]
+    }
 }
 
 final class com.materialkolor/DynamicMaterialThemeState { // com.materialkolor/DynamicMaterialThemeState|null[0]
@@ -199,6 +253,16 @@ final val com.materialkolor/LocalDynamicMaterialThemeSeed // com.materialkolor/L
     final fun <get-LocalDynamicMaterialThemeSeed>(): androidx.compose.runtime/ProvidableCompositionLocal<androidx.compose.ui.graphics/Color> // com.materialkolor/LocalDynamicMaterialThemeSeed.<get-LocalDynamicMaterialThemeSeed>|<get-LocalDynamicMaterialThemeSeed>(){}[0]
 final val com.materialkolor/com_materialkolor_DynamicMaterialThemeState$stableprop // com.materialkolor/com_materialkolor_DynamicMaterialThemeState$stableprop|#static{}com_materialkolor_DynamicMaterialThemeState$stableprop[0]
 final val com.materialkolor/com_materialkolor_MaterialKolors$stableprop // com.materialkolor/com_materialkolor_MaterialKolors$stableprop|#static{}com_materialkolor_MaterialKolors$stableprop[0]
+final val com.materialkolor/com_materialkolor_PaletteStyle_Cmf$stableprop // com.materialkolor/com_materialkolor_PaletteStyle_Cmf$stableprop|#static{}com_materialkolor_PaletteStyle_Cmf$stableprop[0]
+final val com.materialkolor/com_materialkolor_PaletteStyle_Content$stableprop // com.materialkolor/com_materialkolor_PaletteStyle_Content$stableprop|#static{}com_materialkolor_PaletteStyle_Content$stableprop[0]
+final val com.materialkolor/com_materialkolor_PaletteStyle_Expressive$stableprop // com.materialkolor/com_materialkolor_PaletteStyle_Expressive$stableprop|#static{}com_materialkolor_PaletteStyle_Expressive$stableprop[0]
+final val com.materialkolor/com_materialkolor_PaletteStyle_Fidelity$stableprop // com.materialkolor/com_materialkolor_PaletteStyle_Fidelity$stableprop|#static{}com_materialkolor_PaletteStyle_Fidelity$stableprop[0]
+final val com.materialkolor/com_materialkolor_PaletteStyle_FruitSalad$stableprop // com.materialkolor/com_materialkolor_PaletteStyle_FruitSalad$stableprop|#static{}com_materialkolor_PaletteStyle_FruitSalad$stableprop[0]
+final val com.materialkolor/com_materialkolor_PaletteStyle_Monochrome$stableprop // com.materialkolor/com_materialkolor_PaletteStyle_Monochrome$stableprop|#static{}com_materialkolor_PaletteStyle_Monochrome$stableprop[0]
+final val com.materialkolor/com_materialkolor_PaletteStyle_Neutral$stableprop // com.materialkolor/com_materialkolor_PaletteStyle_Neutral$stableprop|#static{}com_materialkolor_PaletteStyle_Neutral$stableprop[0]
+final val com.materialkolor/com_materialkolor_PaletteStyle_Rainbow$stableprop // com.materialkolor/com_materialkolor_PaletteStyle_Rainbow$stableprop|#static{}com_materialkolor_PaletteStyle_Rainbow$stableprop[0]
+final val com.materialkolor/com_materialkolor_PaletteStyle_TonalSpot$stableprop // com.materialkolor/com_materialkolor_PaletteStyle_TonalSpot$stableprop|#static{}com_materialkolor_PaletteStyle_TonalSpot$stableprop[0]
+final val com.materialkolor/com_materialkolor_PaletteStyle_Vibrant$stableprop // com.materialkolor/com_materialkolor_PaletteStyle_Vibrant$stableprop|#static{}com_materialkolor_PaletteStyle_Vibrant$stableprop[0]
 
 final fun (androidx.compose.material3/ColorScheme).com.materialkolor.ktx/harmonizeWithPrimary(androidx.compose.ui.graphics/Color, kotlin/Boolean = ...): androidx.compose.ui.graphics/Color // com.materialkolor.ktx/harmonizeWithPrimary|harmonizeWithPrimary@androidx.compose.material3.ColorScheme(androidx.compose.ui.graphics.Color;kotlin.Boolean){}[0]
 final fun (androidx.compose.ui.graphics/Color).com.materialkolor.ktx/animate(androidx.compose.animation.core/AnimationSpec<androidx.compose.ui.graphics/Color>?, kotlin/String?, kotlin/Function1<androidx.compose.ui.graphics/Color, kotlin/Unit>?, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int): androidx.compose.runtime/State<androidx.compose.ui.graphics/Color> // com.materialkolor.ktx/animate|animate@androidx.compose.ui.graphics.Color(androidx.compose.animation.core.AnimationSpec<androidx.compose.ui.graphics.Color>?;kotlin.String?;kotlin.Function1<androidx.compose.ui.graphics.Color,kotlin.Unit>?;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
@@ -250,6 +314,16 @@ final fun com.materialkolor/DynamicMaterialTheme(androidx.compose.ui.graphics/Co
 final fun com.materialkolor/DynamicMaterialTheme(com.materialkolor/DynamicMaterialThemeState, androidx.compose.material3/Shapes?, androidx.compose.material3/Typography?, kotlin/Boolean, androidx.compose.animation.core/FiniteAnimationSpec<androidx.compose.ui.graphics/Color>?, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // com.materialkolor/DynamicMaterialTheme|DynamicMaterialTheme(com.materialkolor.DynamicMaterialThemeState;androidx.compose.material3.Shapes?;androidx.compose.material3.Typography?;kotlin.Boolean;androidx.compose.animation.core.FiniteAnimationSpec<androidx.compose.ui.graphics.Color>?;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
 final fun com.materialkolor/com_materialkolor_DynamicMaterialThemeState$stableprop_getter(): kotlin/Int // com.materialkolor/com_materialkolor_DynamicMaterialThemeState$stableprop_getter|com_materialkolor_DynamicMaterialThemeState$stableprop_getter(){}[0]
 final fun com.materialkolor/com_materialkolor_MaterialKolors$stableprop_getter(): kotlin/Int // com.materialkolor/com_materialkolor_MaterialKolors$stableprop_getter|com_materialkolor_MaterialKolors$stableprop_getter(){}[0]
+final fun com.materialkolor/com_materialkolor_PaletteStyle_Cmf$stableprop_getter(): kotlin/Int // com.materialkolor/com_materialkolor_PaletteStyle_Cmf$stableprop_getter|com_materialkolor_PaletteStyle_Cmf$stableprop_getter(){}[0]
+final fun com.materialkolor/com_materialkolor_PaletteStyle_Content$stableprop_getter(): kotlin/Int // com.materialkolor/com_materialkolor_PaletteStyle_Content$stableprop_getter|com_materialkolor_PaletteStyle_Content$stableprop_getter(){}[0]
+final fun com.materialkolor/com_materialkolor_PaletteStyle_Expressive$stableprop_getter(): kotlin/Int // com.materialkolor/com_materialkolor_PaletteStyle_Expressive$stableprop_getter|com_materialkolor_PaletteStyle_Expressive$stableprop_getter(){}[0]
+final fun com.materialkolor/com_materialkolor_PaletteStyle_Fidelity$stableprop_getter(): kotlin/Int // com.materialkolor/com_materialkolor_PaletteStyle_Fidelity$stableprop_getter|com_materialkolor_PaletteStyle_Fidelity$stableprop_getter(){}[0]
+final fun com.materialkolor/com_materialkolor_PaletteStyle_FruitSalad$stableprop_getter(): kotlin/Int // com.materialkolor/com_materialkolor_PaletteStyle_FruitSalad$stableprop_getter|com_materialkolor_PaletteStyle_FruitSalad$stableprop_getter(){}[0]
+final fun com.materialkolor/com_materialkolor_PaletteStyle_Monochrome$stableprop_getter(): kotlin/Int // com.materialkolor/com_materialkolor_PaletteStyle_Monochrome$stableprop_getter|com_materialkolor_PaletteStyle_Monochrome$stableprop_getter(){}[0]
+final fun com.materialkolor/com_materialkolor_PaletteStyle_Neutral$stableprop_getter(): kotlin/Int // com.materialkolor/com_materialkolor_PaletteStyle_Neutral$stableprop_getter|com_materialkolor_PaletteStyle_Neutral$stableprop_getter(){}[0]
+final fun com.materialkolor/com_materialkolor_PaletteStyle_Rainbow$stableprop_getter(): kotlin/Int // com.materialkolor/com_materialkolor_PaletteStyle_Rainbow$stableprop_getter|com_materialkolor_PaletteStyle_Rainbow$stableprop_getter(){}[0]
+final fun com.materialkolor/com_materialkolor_PaletteStyle_TonalSpot$stableprop_getter(): kotlin/Int // com.materialkolor/com_materialkolor_PaletteStyle_TonalSpot$stableprop_getter|com_materialkolor_PaletteStyle_TonalSpot$stableprop_getter(){}[0]
+final fun com.materialkolor/com_materialkolor_PaletteStyle_Vibrant$stableprop_getter(): kotlin/Int // com.materialkolor/com_materialkolor_PaletteStyle_Vibrant$stableprop_getter|com_materialkolor_PaletteStyle_Vibrant$stableprop_getter(){}[0]
 final fun com.materialkolor/dynamicColorScheme(androidx.compose.ui.graphics/Color, kotlin/Boolean, kotlin/Boolean = ..., androidx.compose.ui.graphics/Color? = ..., androidx.compose.ui.graphics/Color? = ..., androidx.compose.ui.graphics/Color? = ..., androidx.compose.ui.graphics/Color? = ..., androidx.compose.ui.graphics/Color? = ..., androidx.compose.ui.graphics/Color? = ..., com.materialkolor/PaletteStyle = ..., kotlin/Double = ..., com.materialkolor.dynamiccolor/ColorSpec.SpecVersion = ..., com.materialkolor.dynamiccolor/DynamicScheme.Platform = ..., kotlin/Function1<androidx.compose.material3/ColorScheme, androidx.compose.material3/ColorScheme>? = ...): androidx.compose.material3/ColorScheme // com.materialkolor/dynamicColorScheme|dynamicColorScheme(androidx.compose.ui.graphics.Color;kotlin.Boolean;kotlin.Boolean;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;com.materialkolor.PaletteStyle;kotlin.Double;com.materialkolor.dynamiccolor.ColorSpec.SpecVersion;com.materialkolor.dynamiccolor.DynamicScheme.Platform;kotlin.Function1<androidx.compose.material3.ColorScheme,androidx.compose.material3.ColorScheme>?){}[0]
 final fun com.materialkolor/dynamicColorScheme(androidx.compose.ui.graphics/Color, kotlin/Boolean, kotlin/Boolean = ..., androidx.compose.ui.graphics/Color? = ..., androidx.compose.ui.graphics/Color? = ..., androidx.compose.ui.graphics/Color? = ..., androidx.compose.ui.graphics/Color? = ..., androidx.compose.ui.graphics/Color? = ..., com.materialkolor/PaletteStyle = ..., kotlin/Double = ..., com.materialkolor.dynamiccolor/ColorSpec.SpecVersion = ..., com.materialkolor.dynamiccolor/DynamicScheme.Platform = ..., kotlin/Function1<androidx.compose.material3/ColorScheme, androidx.compose.material3/ColorScheme>? = ...): androidx.compose.material3/ColorScheme // com.materialkolor/dynamicColorScheme|dynamicColorScheme(androidx.compose.ui.graphics.Color;kotlin.Boolean;kotlin.Boolean;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;com.materialkolor.PaletteStyle;kotlin.Double;com.materialkolor.dynamiccolor.ColorSpec.SpecVersion;com.materialkolor.dynamiccolor.DynamicScheme.Platform;kotlin.Function1<androidx.compose.material3.ColorScheme,androidx.compose.material3.ColorScheme>?){}[0]
 final fun com.materialkolor/rememberDynamicColorScheme(androidx.compose.ui.graphics/Color, kotlin/Boolean, kotlin/Boolean, androidx.compose.ui.graphics/Color?, androidx.compose.ui.graphics/Color?, androidx.compose.ui.graphics/Color?, androidx.compose.ui.graphics/Color?, androidx.compose.ui.graphics/Color?, androidx.compose.ui.graphics/Color?, com.materialkolor/PaletteStyle?, kotlin/Double, com.materialkolor.dynamiccolor/ColorSpec.SpecVersion?, com.materialkolor.dynamiccolor/DynamicScheme.Platform?, kotlin/Function1<androidx.compose.material3/ColorScheme, androidx.compose.material3/ColorScheme>?, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int, kotlin/Int): androidx.compose.material3/ColorScheme // com.materialkolor/rememberDynamicColorScheme|rememberDynamicColorScheme(androidx.compose.ui.graphics.Color;kotlin.Boolean;kotlin.Boolean;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;com.materialkolor.PaletteStyle?;kotlin.Double;com.materialkolor.dynamiccolor.ColorSpec.SpecVersion?;com.materialkolor.dynamiccolor.DynamicScheme.Platform?;kotlin.Function1<androidx.compose.material3.ColorScheme,androidx.compose.material3.ColorScheme>?;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int;kotlin.Int){}[0]
