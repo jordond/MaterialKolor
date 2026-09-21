@@ -62,7 +62,7 @@ import com.materialkolor.material3.toColorScheme
 ```
 
 To build a scheme without Material3, `com.materialkolor.ktx.DynamicScheme` and
-`rememberDynamicScheme` stay in core and hand you the engine's `DynamicScheme` directly.
+`rememberDynamicScheme` stay in core and return the engine's `DynamicScheme`.
 
 ### `animateColorScheme`
 
