@@ -127,7 +127,7 @@ class QueryParamsTest {
 
     @Test
     fun testAllPaletteStyleValues() {
-        for (style in PaletteStyle.entries) {
+        for (style in PaletteStyle.KnownStyles) {
             val settingsEntity = SettingsEntity(
                 colors = mapOf(KeyColor.Seed to 0xFF000000.toInt()),
                 isDarkMode = false,
@@ -141,6 +141,24 @@ class QueryParamsTest {
 
             assertEquals(style, reconstructed.style)
         }
+    }
+
+    @Test
+    fun testCmfStyleKeepsItsTertiarySeedColor() {
+        val style = PaletteStyle.Cmf(Color(0xFF7D5260))
+        val settingsEntity = SettingsEntity(
+            colors = mapOf(KeyColor.Seed to 0xFF000000.toInt()),
+            isDarkMode = false,
+            contrast = Contrast.Default.value,
+            selectedPresetId = null,
+            style = style,
+        )
+
+        val queryParams = settingsEntity.toQueryParams()
+        val reconstructed = queryParams.toSettingsEntity()
+
+        assertTrue(queryParams.contains("style=Cmf:FF7D5260"))
+        assertEquals(style, reconstructed.style)
     }
 
     @Test

@@ -60,8 +60,59 @@ other non-CMF variants use 2021.
 `SchemeCmf` is available directly through the low-level API, accepts one or two source colors and
 requires `SPEC_2026`. It has its own 2026 default, this does not change the general default. A
 second source supplies the tertiary hue/chroma, while a one-source scheme follows upstream's
-single-source behavior. Empty lists are unsupported. There is no new high-level multi-seed or
-`PaletteStyle` abstraction in this migration.
+single-source behavior. Empty lists are unsupported. The high-level entry point for CMF is
+`PaletteStyle.Cmf`, described below.
+
+## PaletteStyle is a sealed interface
+
+`PaletteStyle` is no longer an enum. It is a sealed interface and the nine existing styles are
+`data object`s that implement it. `PaletteStyle.TonalSpot` and its siblings still work as values, as
+arguments and as `when` branches, so most call sites need no change.
+
+The generated enum members are gone. A style has no `ordinal`, and the type has no `entries`, no
+`values()`, no `valueOf` and no `enumValueOf`. Use `PaletteStyle.KnownStyles` to list the styles for
+a menu, a picker or a test. It holds the nine objects plus a default `PaletteStyle.Cmf()`.
+
+`name` stays, and `PaletteStyle.fromName` replaces `valueOf`. The names are the old entry names, so
+values you have already written keep reading:
+
+```kotlin
+// Before
+val stored = style.name
+val restored = PaletteStyle.valueOf(stored)
+
+// After
+val stored = style.toString()
+val restored = PaletteStyle.parse(stored)
+```
+
+`fromName` returns null for a name no style answers to, and `"Cmf"` gives back a `Cmf` with no
+tertiary seed color. `toString()` is the documented persistence format, the way `Duration` and
+`Uuid` write theirs, so reach for it when the seed has to survive. It round-trips every style, a
+seeded `Cmf` included, by writing it as `Cmf:AARRGGBB`.
+
+`PaletteStyle.parse` reads that format back and throws `IllegalArgumentException` on anything we
+did not write, while `PaletteStyle.parseOrNull` answers null instead, which suits a URL or a stored
+preference you do not control.
+
+`PaletteStyle` is also `@Serializable`, with a serializer that writes the same single string, so
+`Json` and the other kotlinx formats read and write a style without you applying the serialization
+plugin or registering anything. That makes `kotlinx-serialization-core` a transitive dependency of
+`material-kolor`.
+
+`PaletteStyle.Cmf(tertiarySeedColor: Color? = null)` builds the 2026 spec's CMF variant. A
+tertiary seed color becomes the second entry of the scheme's `sourceColorHctList`, and the engine
+uses it for the tertiary palette's hue and chroma, the tertiary container tone, and the error hue
+only. Every other palette still comes from the primary seed. Leave it `null`, or pass the primary
+seed again, and the tertiary palette falls back to the primary seed at reduced chroma.
+
+`Cmf` always produces a `SPEC_2026` scheme, so the `specVersion` argument of `toDynamicScheme` and
+of the theme helpers is ignored for it. As with the fallback rules above, read
+`DynamicScheme.specVersion` when the effective specification matters.
+
+An exhaustive `when` over `PaletteStyle` now needs an `is PaletteStyle.Cmf` branch. `Cmf` is a class
+rather than an object, so that branch is a type check, and the compiler reports the missing branch
+when you recompile.
 
 ## Constructors replace the nested Builder
 

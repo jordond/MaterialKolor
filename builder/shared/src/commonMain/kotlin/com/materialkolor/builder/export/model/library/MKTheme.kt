@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.decapitalize
 import androidx.compose.ui.text.intl.Locale
 import com.materialkolor.Contrast
+import com.materialkolor.PaletteStyle
 import com.materialkolor.builder.export.model.header
 import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.dynamiccolor.ColorSpec
@@ -81,7 +82,7 @@ fun $themeName(
 ) {
     val dynamicThemeState = rememberDynamicMaterialThemeState(
         isDark = isDarkTheme,
-        style = PaletteStyle.${settings.style},
+        style = ${settings.style.sourceCode},
         $params,
     )
     
@@ -91,6 +92,14 @@ $themeComposable
 }
 
 private fun Boolean.parameter(name: String) = if (this) "$name = true" else null
+
+/** How a style is written out in the code we generate. */
+private val PaletteStyle.sourceCode: String
+    get() = when (this) {
+        // Cmf carries a tertiary seed color, so it is a constructor call rather than an object.
+        is PaletteStyle.Cmf -> "PaletteStyle.Cmf()"
+        else -> "PaletteStyle.$name"
+    }
 
 private val ColorSpec.SpecVersion.include
     get() = this != ColorSpec.SpecVersion.SPEC_2021

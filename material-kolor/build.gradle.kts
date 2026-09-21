@@ -4,6 +4,8 @@ plugins {
     id("materialkolor.library")
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.poko)
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 kotlin {
@@ -39,6 +41,7 @@ kotlin {
             implementation(libs.colormath)
 
             api(project(":material-color-utilities"))
+            api(libs.kotlinx.serialization.core)
         }
 
         androidMain.dependencies {
@@ -47,6 +50,10 @@ kotlin {
 
         getByName("androidHostTest").dependencies {
             implementation(libs.androidx.compose.material3)
+        }
+
+        commonTest.dependencies {
+            implementation(libs.kotlinx.serialization.json)
         }
 
         jvmTest.dependencies {

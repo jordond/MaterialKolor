@@ -54,7 +54,7 @@ class ConsumerContractsTest {
 
     @Test
     fun absentOverridesUseTheSelectedStyle() {
-        for (style in PaletteStyle.entries) {
+        for (style in PaletteStyle.KnownStyles) {
             val seed = Color(0xff4285f4)
             val expected = seed.toDynamicScheme(isDark = true, style = style)
             val actual = DynamicScheme(seedColor = seed, isDark = true, style = style)

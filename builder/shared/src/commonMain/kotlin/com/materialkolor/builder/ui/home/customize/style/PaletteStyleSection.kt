@@ -27,7 +27,10 @@ fun PaletteStyleSection(
     onUpdate: (PaletteStyle) -> Unit,
     modifier: Modifier = Modifier,
     colorSpec: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
-    styles: PersistentList<PaletteStyle> = PaletteStyle.entries.toPersistentList(),
+    // The CMF chip stays hidden until the Builder gets a tertiary seed picker and a 2026 spec option
+    styles: PersistentList<PaletteStyle> = PaletteStyle.KnownStyles
+        .filterNot { it is PaletteStyle.Cmf }
+        .toPersistentList(),
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -102,6 +105,7 @@ private fun PaletteStyle.name() =
             PaletteStyle.Monochrome -> "Monochrome"
             PaletteStyle.Fidelity -> "Fidelity"
             PaletteStyle.Content -> "Content"
+            is PaletteStyle.Cmf -> "CMF"
         }
     }
 
@@ -135,6 +139,9 @@ private fun PaletteStyle.description() =
             }
             PaletteStyle.Content -> {
                 "Primary Container is the source color, adjusted for color relativity"
+            }
+            is PaletteStyle.Cmf -> {
+                "Multi-seed style from the 2026 spec. Builder support is coming."
             }
         }
     }
