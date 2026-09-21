@@ -204,18 +204,11 @@ public sealed interface PaletteStyle {
          * seeded [Cmf] read in either case. Anything else, a short seed or a signed one included,
          * is null.
          */
-        public fun parseOrNull(value: String): PaletteStyle? {
-            if (!value.startsWith(CMF_SEED_PREFIX)) return fromName(value)
+        public fun parseOrNull(value: String): PaletteStyle? =
+            CMF_SEED_REGEX.matchEntire(value)
+                ?.let { match -> Cmf(Color(match.groupValues[1].toUInt(radix = 16).toInt())) }
+                ?: fromNameOrNull(value)
 
-            val hex = value.removePrefix(CMF_SEED_PREFIX)
-            if (hex.length != SEED_HEX_LENGTH) return null
-            if (!hex.all { digit -> digit in '0'..'9' || digit in 'a'..'f' || digit in 'A'..'F' }) return null
-            val argb = hex.toLongOrNull(radix = 16)?.toInt() ?: return null
-            return Cmf(Color(argb))
-        }
-
-        private const val CMF_SEED_PREFIX = "Cmf:"
-
-        private const val SEED_HEX_LENGTH = 8
+        private val CMF_SEED_REGEX = Regex("Cmf:([0-9a-fA-F]{8})")
     }
 }

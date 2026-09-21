@@ -16,9 +16,15 @@ class PaletteStyleTest {
     }
 
     @Test
+    fun unknownNamesThrow() {
+        assertFailsWith<NoSuchElementException> { PaletteStyle.fromName("cmf") }
+        assertFailsWith<NoSuchElementException> { PaletteStyle.fromName("boom") }
+    }
+
+    @Test
     fun unknownNamesAreNull() {
-        assertNull(PaletteStyle.fromName("cmf"))
-        assertNull(PaletteStyle.fromName("nope"))
+        assertNull(PaletteStyle.fromNameOrNull("cmf"))
+        assertNull(PaletteStyle.fromNameOrNull("boom"))
     }
 
     @Test
@@ -59,13 +65,13 @@ class PaletteStyleTest {
         assertNull(PaletteStyle.parseOrNull("Cmf:ZZZZZZZZ"))
         assertNull(PaletteStyle.parseOrNull("Cmf:+FFFFFFF"))
         assertNull(PaletteStyle.parseOrNull("Cmf:-FFFFFFF"))
-        assertNull(PaletteStyle.parseOrNull("nope"))
+        assertNull(PaletteStyle.parseOrNull("boom"))
     }
 
     @Test
     fun parseThrowsOnAnythingWeDidNotWrite() {
         assertFailsWith<IllegalArgumentException> {
-            PaletteStyle.parse("nope")
+            PaletteStyle.parse("boom")
         }
         assertFailsWith<IllegalArgumentException> {
             PaletteStyle.parse("Cmf:FF7D52")
