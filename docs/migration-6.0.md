@@ -1,7 +1,129 @@
 # Migrating to the upstream Kotlin engine in 6.0
 
-This is an intentional source and binary API migration on `next`. Artifact coordinates remain
-unchanged. The low-level engine now comes from pinned upstream Kotlin.
+This is an intentional source and binary API migration on `next`. The `material-kolor` coordinate is
+retired and replaced by `material-kolor-core` and `material-kolor-material3`, described under
+[Module split](#module-split). The low-level engine now comes from pinned upstream Kotlin.
+
+## Module split
+
+`material-kolor` is now two artifacts. Everything that needs Compose Material3 lives in
+`material-kolor-material3`, everything else in `material-kolor-core`.
+
+| Artifact | Packages | Needs Material3 |
+|---|---|---|
+| `com.materialkolor:material-kolor-core` | `com.materialkolor`, `com.materialkolor.ktx`, `com.materialkolor.serialization` | no |
+| `com.materialkolor:material-kolor-material3` | `com.materialkolor.material3`, `com.materialkolor.material3.ktx` | yes |
+
+`material-kolor-material3` carries `material-kolor-core` as an `api` dependency, so a Material3 app
+depends on the one artifact and still sees `PaletteStyle`, `MaterialKolors` and the `ktx` helpers.
+An app that generates schemes for something other than Material3 depends on core alone and never
+resolves Compose Material3.
+
+The Material3 symbols moved to a new package rather than keeping theirs. Two modules declaring
+top-level functions in one package generate the same JVM facade class in both jars, which is a
+duplicate-class failure for anyone who pulls both. The distinct package also makes "this needs
+Material3" readable at the import.
+
+Nothing was renamed. Every entry below is an import change.
+
+### Theme wrappers, theme state and the seed composition local
+
+```kotlin
+// Before
+import com.materialkolor.DynamicMaterialTheme
+import com.materialkolor.DynamicMaterialExpressiveTheme
+import com.materialkolor.DynamicMaterialThemeState
+import com.materialkolor.rememberDynamicMaterialThemeState
+import com.materialkolor.LocalDynamicMaterialThemeSeed
+
+// After
+import com.materialkolor.material3.DynamicMaterialTheme
+import com.materialkolor.material3.DynamicMaterialExpressiveTheme
+import com.materialkolor.material3.DynamicMaterialThemeState
+import com.materialkolor.material3.rememberDynamicMaterialThemeState
+import com.materialkolor.material3.LocalDynamicMaterialThemeSeed
+```
+
+### The `toColorScheme` family
+
+`dynamicColorScheme`, `rememberDynamicColorScheme` and `DynamicScheme.toColorScheme` all produce a
+Material3 `ColorScheme`, so all three moved together.
+
+```kotlin
+// Before
+import com.materialkolor.dynamicColorScheme
+import com.materialkolor.rememberDynamicColorScheme
+import com.materialkolor.toColorScheme
+
+// After
+import com.materialkolor.material3.dynamicColorScheme
+import com.materialkolor.material3.rememberDynamicColorScheme
+import com.materialkolor.material3.toColorScheme
+```
+
+To build a scheme without Material3, `com.materialkolor.ktx.DynamicScheme` and
+`rememberDynamicScheme` stay in core and hand you the engine's `DynamicScheme` directly.
+
+### `animateColorScheme`
+
+```kotlin
+// Before
+import com.materialkolor.ktx.animateColorScheme
+
+// After
+import com.materialkolor.material3.ktx.animateColorScheme
+```
+
+The color-level animation helpers, `Color.animate` and friends in `com.materialkolor.ktx`, stay in
+core.
+
+### `harmonizeWithPrimary`
+
+`ColorScheme.harmonizeWithPrimary` reads the Material3 primary role, so it moved. Its two siblings,
+`Blend.harmonize(Color, Color, Boolean)` and `Color.harmonize`, stay in `com.materialkolor.ktx`.
+
+```kotlin
+// Before
+import com.materialkolor.ktx.harmonizeWithPrimary
+
+// After
+import com.materialkolor.material3.ktx.harmonizeWithPrimary
+```
+
+### `colors` and `m3Colors`
+
+Both are extensions on `DynamicMaterialThemeState`, which is a Material3 type, so both followed it.
+
+```kotlin
+// Before
+import com.materialkolor.ktx.colors
+import com.materialkolor.ktx.m3Colors
+
+// After
+import com.materialkolor.material3.ktx.colors
+import com.materialkolor.material3.ktx.m3Colors
+```
+
+`MaterialKolors` itself is core. Construct one from any `DynamicScheme` when you are not holding a
+theme state.
+
+### Image helper fallbacks
+
+`rememberThemeColors` and `rememberThemeColor` stayed in core, so they lost their
+`MaterialTheme.colorScheme.primary` default. They now take the same `fallback` shape as their
+non-composable twins: `rememberThemeColors` defaults to Google Blue, and `rememberThemeColor`
+requires the argument.
+
+```kotlin
+// Before
+val seed = rememberThemeColor(image = bitmap)
+
+// After
+val seed = rememberThemeColor(image = bitmap, fallback = MaterialTheme.colorScheme.primary)
+```
+
+Passing the primary role explicitly keeps the old behavior. `ImageBitmap.themeColors`,
+`themeColor` and `themeColorOrNull` are unchanged.
 
 ## Package and role changes
 
@@ -32,8 +154,8 @@ Upstream Kotlin no longer defines the eight Java-era Android roles `controlActiv
 They are gone from `ColorSpec`, `MaterialDynamicColors` and `DynamicScheme` in
 `material-color-utilities`.
 
-MaterialKolor keeps them as extension properties on `MaterialDynamicColors` in `material-kolor`, so
-they now need an explicit import:
+MaterialKolor keeps them as extension properties on `MaterialDynamicColors` in
+`material-kolor-core`, so they now need an explicit import:
 
 ```kotlin
 import com.materialkolor.ktx.controlActivated
@@ -98,7 +220,7 @@ preference you do not control.
 `PaletteStyle` is also `@Serializable`, with a serializer that writes the same single string, so
 `Json` and the other kotlinx formats read and write a style without you applying the serialization
 plugin or registering anything. That makes `kotlinx-serialization-core` a transitive dependency of
-`material-kolor`.
+`material-kolor-core`.
 
 `PaletteStyle.Cmf(tertiarySeedColor: Color? = null)` builds the 2026 spec's CMF variant. A
 tertiary seed color becomes the second entry of the scheme's `sourceColorHctList`, and the engine

@@ -77,11 +77,22 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-              implementation("com.materialkolor:material-kolor:5.0.1")
+              implementation("com.materialkolor:material-kolor-material3:5.0.1")
             }
         }
     }
 }
+```
+
+`material-kolor-material3` is the artifact a Material3 app needs. It brings in
+`material-kolor-core` as an `api` dependency, so `PaletteStyle`, `MaterialKolors` and the `ktx`
+helpers come with it.
+
+If you theme something other than Material3, depend on the core artifact on its own and Compose
+Material3 never enters your graph:
+
+```kotlin
+implementation("com.materialkolor:material-kolor-core:5.0.1")
 ```
 
 ### Single Platform
@@ -90,7 +101,7 @@ For an Android only project, add the dependency to app level `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-  implementation("com.materialkolor:material-kolor:5.0.1")
+  implementation("com.materialkolor:material-kolor-material3:5.0.1")
 }
 ```
 
@@ -101,13 +112,14 @@ dependencies {
 materialKolor = "5.0.1"
 
 [libraries]
-materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
+materialKolor-core = { module = "com.materialkolor:material-kolor-core", version.ref = "materialKolor" }
+materialKolor-material3 = { module = "com.materialkolor:material-kolor-material3", version.ref = "materialKolor" }
 ```
 
 ### Without compose
 
-If you don't use Compose and don't need any of the extension functions provided by `material-kolor`,
-you can use the `material-color-utilities` artifact instead.
+If you don't use Compose and don't need any of the extension functions provided by
+`material-kolor-core`, you can use the `material-color-utilities` artifact instead.
 It is a Kotlin Multiplatform port of
 Google's [Material Color Utilities](https://github.com/material-foundation/material-color-utilities).
 
@@ -141,7 +153,7 @@ fun MyTheme(
 ```
 
 You can also pass in
-a [`PaletteStyle`](material-kolor/src/commonMain/kotlin/com/materialkolor/PaletteStyle.kt) to
+a [`PaletteStyle`](material-kolor-core/src/commonMain/kotlin/com/materialkolor/PaletteStyle.kt) to
 customize the generated palette:
 
 ```kotlin
@@ -223,7 +235,7 @@ appear in the final theme, creating more dynamic and playful color palettes.
 ## Extensions
 
 Included in the library are some extensions for working with colors. You can check out
-the [/ktx](material-kolor/src/commonMain/kotlin/com/materialkolor/ktx) package for more information.
+the [/ktx](material-kolor-core/src/commonMain/kotlin/com/materialkolor/ktx) package for more information.
 
 But here are a couple useful examples:
 
@@ -284,7 +296,7 @@ fun calculateSeedColor(bitmap: ImageBitmap): Color {
 }
 ```
 
-See [`ImageBitmap.kt`](material-kolor/src/commonMain/kotlin/com/materialkolor/ktx/ImageBitmap.kt)
+See [`ImageBitmap.kt`](material-kolor-core/src/commonMain/kotlin/com/materialkolor/ktx/ImageBitmap.kt)
 for more information.
 
 Or in Compose land:
