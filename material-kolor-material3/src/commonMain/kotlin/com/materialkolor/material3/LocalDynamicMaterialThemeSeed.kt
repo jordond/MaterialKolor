@@ -1,4 +1,4 @@
-package com.materialkolor
+package com.materialkolor.material3
 
 import androidx.compose.runtime.CompositionLocal
 import androidx.compose.runtime.ProvidableCompositionLocal

@@ -15,8 +15,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.materialkolor.DynamicMaterialTheme
-import com.materialkolor.DynamicMaterialThemeState
 import com.materialkolor.builder.settings.model.Settings
 import com.materialkolor.builder.ui.home.model.Theme
 import com.materialkolor.builder.ui.home.preview.theme.ThemeSectionDefaults.InnerDivider
@@ -29,6 +27,8 @@ import com.materialkolor.builder.ui.home.preview.theme.ThemeSectionDefaults.Surf
 import com.materialkolor.builder.ui.home.preview.theme.ThemeSectionDefaults.inverse
 import com.materialkolor.builder.ui.theme.AppTypography
 import com.materialkolor.builder.ui.theme.createThemeState
+import com.materialkolor.material3.DynamicMaterialTheme
+import com.materialkolor.material3.DynamicMaterialThemeState
 
 private enum class ThemeMode {
     Light,

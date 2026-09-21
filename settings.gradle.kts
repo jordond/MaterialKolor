@@ -38,6 +38,7 @@ rootProject.name = "MaterialKolor"
 
 include(
     ":material-kolor-core",
+    ":material-kolor-material3",
     ":material-color-utilities",
     ":mcu-upstream",
     ":builder:shared",

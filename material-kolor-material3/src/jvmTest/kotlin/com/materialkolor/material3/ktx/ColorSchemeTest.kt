@@ -1,4 +1,4 @@
-package com.materialkolor.ktx
+package com.materialkolor.material3.ktx
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme

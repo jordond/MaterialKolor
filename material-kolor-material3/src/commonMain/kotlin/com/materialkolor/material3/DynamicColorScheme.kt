@@ -1,9 +1,12 @@
-package com.materialkolor
+package com.materialkolor.material3
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import com.materialkolor.Contrast
+import com.materialkolor.MaterialKolors
+import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.ktx.DynamicScheme

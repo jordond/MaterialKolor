@@ -1,26 +1,33 @@
-package com.materialkolor
+package com.materialkolor.material3
 
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
+import com.materialkolor.Contrast
+import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.dynamiccolor.DynamicScheme
-import com.materialkolor.ktx.animateColorScheme
-import com.materialkolor.ktx.defaultColorSpring
+import com.materialkolor.material3.ktx.animateColorScheme
+import com.materialkolor.material3.ktx.defaultColorSpring
 
 /**
- * A Material Theme that adapts to the given seed color and the provided custom colors.
+ * A wrapper around [MaterialExpressiveTheme] that adapts to the given [DynamicMaterialThemeState.seedColor].
  *
- * You can access the current seed color via [LocalDynamicMaterialThemeSeed].
+ * The [style] defaults to the [PaletteStyle.Expressive], and the [specVersion] defaults to
+ * the [ColorSpec.SpecVersion.SPEC_2025]. You can access the current seed color via [LocalDynamicMaterialThemeSeed].
  *
  * @see dynamicColorScheme
  * @see PaletteStyle
  * @param[seedColor] The seed color to use for generating the color scheme.
+ * @param[motionScheme] The motion scheme of the theme.
  * @param[isDark] Whether to use a dark theme or not.
  * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
  * @param[primary] The custom primary color of the color scheme.
@@ -39,9 +46,11 @@ import com.materialkolor.ktx.defaultColorSpring
  * @param[animationSpec] The animation spec to use for animating the color scheme.
  * @param[content] The Composable content of the theme.
  */
+@ExperimentalMaterial3ExpressiveApi
 @Composable
-public fun DynamicMaterialTheme(
+public fun DynamicMaterialExpressiveTheme(
     seedColor: Color,
+    motionScheme: MotionScheme? = null,
     isDark: Boolean = isSystemInDarkTheme(),
     isAmoled: Boolean = false,
     primary: Color? = null,
@@ -50,9 +59,9 @@ public fun DynamicMaterialTheme(
     neutral: Color? = null,
     neutralVariant: Color? = null,
     error: Color? = null,
-    style: PaletteStyle = PaletteStyle.TonalSpot,
+    style: PaletteStyle = PaletteStyle.Expressive,
     contrastLevel: Double = Contrast.Default.value,
-    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.SPEC_2025,
     platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
@@ -76,8 +85,9 @@ public fun DynamicMaterialTheme(
         platform = platform,
     )
 
-    DynamicMaterialTheme(
+    DynamicMaterialExpressiveTheme(
         state = state,
+        motionScheme = motionScheme,
         shapes = shapes,
         typography = typography,
         animate = animate,
@@ -87,13 +97,15 @@ public fun DynamicMaterialTheme(
 }
 
 /**
- * A Material Theme that adapts to the given seed color and the provided custom colors.
+ * A wrapper around [MaterialExpressiveTheme] that adapts to the given [DynamicMaterialThemeState.seedColor].
  *
- * You can access the current seed color via [LocalDynamicMaterialThemeSeed].
+ * The [style] defaults to the [PaletteStyle.Expressive], and the [specVersion] defaults to
+ * the [ColorSpec.SpecVersion.SPEC_2025]. You can access the current seed color via [LocalDynamicMaterialThemeSeed].
  *
  * @see dynamicColorScheme
- * @see PaletteStyle
+ * @see PaletteStyle.Expressive
  * @param[primary] The primary color of the color scheme.
+ * @param[motionScheme] The motion scheme of the theme.
  * @param[isDark] Whether to use a dark theme or not.
  * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
  * @param[secondary] The custom secondary color of the color scheme.
@@ -111,9 +123,11 @@ public fun DynamicMaterialTheme(
  * @param[animationSpec] The animation spec to use for animating the color scheme.
  * @param[content] The Composable content of the theme.
  */
+@ExperimentalMaterial3ExpressiveApi
 @Composable
-public fun DynamicMaterialTheme(
+public fun DynamicMaterialExpressiveTheme(
     primary: Color,
+    motionScheme: MotionScheme? = null,
     isDark: Boolean = isSystemInDarkTheme(),
     isAmoled: Boolean = false,
     secondary: Color? = null,
@@ -121,9 +135,9 @@ public fun DynamicMaterialTheme(
     neutral: Color? = null,
     neutralVariant: Color? = null,
     error: Color? = null,
-    style: PaletteStyle = PaletteStyle.TonalSpot,
+    style: PaletteStyle = PaletteStyle.Expressive,
     contrastLevel: Double = Contrast.Default.value,
-    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.SPEC_2025,
     platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
@@ -146,8 +160,9 @@ public fun DynamicMaterialTheme(
         platform = platform,
     )
 
-    DynamicMaterialTheme(
+    DynamicMaterialExpressiveTheme(
         state = state,
+        motionScheme = motionScheme,
         shapes = shapes,
         typography = typography,
         animate = animate,
@@ -157,20 +172,27 @@ public fun DynamicMaterialTheme(
 }
 
 /**
- * A Material Theme that adapts to the given [DynamicMaterialThemeState.seedColor].
+ * A wrapper around [MaterialExpressiveTheme] that adapts to the given [DynamicMaterialThemeState.seedColor].
  *
  * You can access the current seed color via [LocalDynamicMaterialThemeSeed].
  *
+ * **Note:** For best results, you should use [ColorSpec.SpecVersion.SPEC_2025] and [PaletteStyle.Expressive] when
+ * constructing the [DynamicMaterialThemeState].
+ *
  * @see DynamicMaterialThemeState
- * @see PaletteStyle
  * @param[state] The state of the dynamic material theme.
+ * @param[motionScheme] The motion scheme to use.
+ * @param[shapes] The shapes to use.
+ * @param[typography] The typography to use.
  * @param[animate] Whether to animate the color scheme or not.
  * @param[animationSpec] The animation spec to use for animating the color scheme.
  * @param[content] The Composable content of the theme.
  */
+@ExperimentalMaterial3ExpressiveApi
 @Composable
-public fun DynamicMaterialTheme(
+public fun DynamicMaterialExpressiveTheme(
     state: DynamicMaterialThemeState,
+    motionScheme: MotionScheme? = null,
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
     animate: Boolean = false,
@@ -186,8 +208,9 @@ public fun DynamicMaterialTheme(
         }
 
     CompositionLocalProvider(LocalDynamicMaterialThemeSeed provides state.seedColor) {
-        MaterialTheme(
+        MaterialExpressiveTheme(
             colorScheme = scheme,
+            motionScheme = motionScheme,
             shapes = shapes,
             typography = typography,
             content = content,

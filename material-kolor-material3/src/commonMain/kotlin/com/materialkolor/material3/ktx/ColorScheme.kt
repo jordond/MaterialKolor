@@ -1,13 +1,18 @@
-package com.materialkolor.ktx
+package com.materialkolor.material3.ktx
 
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Transition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+
+// The core module keeps its own copy of this default for the Color animation helpers. Both are
+// internal, so a shared one would have to become public API in core to cross the module line.
+internal val defaultColorSpring = spring<Color>()
 
 /**
  * Creates an animated version of a [ColorScheme] where all colors smoothly animate when changed.

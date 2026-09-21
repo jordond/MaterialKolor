@@ -1,6 +1,5 @@
 package com.materialkolor.ktx
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -113,7 +112,7 @@ public fun ImageBitmap.themeColorOrNull(
  * Determine the most suitable color in a [ImageBitmap] for a UI theme.
  *
  * @param[image] the [ImageBitmap] to extract colors from.
- * @param[fallback] color to be returned if no other options available. Defaults to primary color.
+ * @param[fallback] color to be returned if no other options available.
  * @param[maxColors] The number of colors to divide the image into.
  * @param[filter] whether to filter out undesirable combinations.
  * @param[desired] The number of colors to return.
@@ -123,7 +122,7 @@ public fun ImageBitmap.themeColorOrNull(
 @Composable
 public fun rememberThemeColors(
     image: ImageBitmap,
-    fallback: Color = MaterialTheme.colorScheme.primary,
+    fallback: Color = Color(-0xbd7a0c),
     maxColors: Int = DEFAULT_QUANTIZE_MAX_COLORS,
     filter: Boolean = true,
     desired: Int = DEFAULT_DESIRED_COLORS,
@@ -140,7 +139,7 @@ public fun rememberThemeColors(
  * Determine the most suitable color in a [ImageBitmap] for a UI theme.
  *
  * @param[image] the [ImageBitmap] to extract colors from.
- * @param[fallback] color to be returned if no other options available. Defaults to primary color.
+ * @param[fallback] color to be returned if no other options available.
  * @param[filter] whether to filter out undesirable combinations.
  * @param[maxColors] The number of colors to divide the image into.
  * @return The most suitable color for a UI theme.
@@ -149,7 +148,7 @@ public fun rememberThemeColors(
 @Composable
 public fun rememberThemeColor(
     image: ImageBitmap,
-    fallback: Color = MaterialTheme.colorScheme.primary,
+    fallback: Color,
     filter: Boolean = true,
     maxColors: Int = DEFAULT_QUANTIZE_MAX_COLORS,
 ): Color {
