@@ -186,6 +186,7 @@ public sealed interface PaletteStyle {
 
             val hex = value.removePrefix(CMF_SEED_PREFIX)
             if (hex.length != SEED_HEX_LENGTH) return null
+            if (!hex.all { digit -> digit in '0'..'9' || digit in 'a'..'f' || digit in 'A'..'F' }) return null
             val argb = hex.toLongOrNull(radix = 16)?.toInt() ?: return null
             return Cmf(Color(argb))
         }

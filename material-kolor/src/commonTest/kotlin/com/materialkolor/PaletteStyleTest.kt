@@ -40,5 +40,7 @@ class PaletteStyleTest {
         assertNull(PaletteStyle.fromStorageString("Cmf:FF7D52"))
         assertNull(PaletteStyle.fromStorageString("Cmf:"))
         assertNull(PaletteStyle.fromStorageString("Cmf:ZZZZZZZZ"))
+        assertNull(PaletteStyle.fromStorageString("Cmf:+FFFFFFF"))
+        assertNull(PaletteStyle.fromStorageString("Cmf:-FFFFFFF"))
     }
 }
