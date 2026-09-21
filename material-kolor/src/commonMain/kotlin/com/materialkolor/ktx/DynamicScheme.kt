@@ -17,6 +17,7 @@ import com.materialkolor.PaletteStyle.TonalSpot
 import com.materialkolor.PaletteStyle.Vibrant
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.dynamiccolor.DynamicScheme
+import com.materialkolor.hct.Hct
 import com.materialkolor.internal.asVariant
 import com.materialkolor.scheme.SchemeCmf
 import com.materialkolor.scheme.SchemeContent
@@ -67,17 +68,30 @@ public fun Color.toDynamicScheme(
         Monochrome -> SchemeMonochrome(hct, isDark, contrastLevel, specVersion, platform)
         Fidelity -> SchemeFidelity(hct, isDark, contrastLevel, specVersion, platform)
         Content -> SchemeContent(hct, isDark, contrastLevel, specVersion, platform)
-        is Cmf -> {
-            val sourceColorHctList = listOfNotNull(hct, style.tertiarySourceColor?.toHct())
-            SchemeCmf(
-                sourceColorHctList,
-                isDark,
-                contrastLevel,
-                ColorSpec.SpecVersion.SPEC_2026,
-                platform,
-            )
-        }
+        is Cmf -> style.toSchemeCmf(hct, isDark, contrastLevel, platform)
     }
+}
+
+/**
+ * Build the [SchemeCmf] for this style, seeding the tertiary palette from
+ * [PaletteStyle.Cmf.tertiarySourceColor] when one was given.
+ *
+ * CMF only exists in the 2026 spec, so the spec version is pinned rather than passed in.
+ */
+private fun Cmf.toSchemeCmf(
+    seedHct: Hct,
+    isDark: Boolean,
+    contrastLevel: Double,
+    platform: DynamicScheme.Platform,
+): SchemeCmf {
+    val sourceColorHctList = listOfNotNull(seedHct, tertiarySourceColor?.toHct())
+    return SchemeCmf(
+        sourceColorHctList,
+        isDark,
+        contrastLevel,
+        ColorSpec.SpecVersion.SPEC_2026,
+        platform,
+    )
 }
 
 /**

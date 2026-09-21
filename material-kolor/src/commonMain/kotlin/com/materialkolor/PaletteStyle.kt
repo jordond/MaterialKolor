@@ -10,7 +10,6 @@ import dev.drewhamilton.poko.Poko
  * Mapped to [Variant] in the Material Design guidelines.
  */
 public sealed interface PaletteStyle {
-
     /**
      * A calm theme, sedated colors that aren't particularly chromatic.
      */
@@ -88,7 +87,6 @@ public sealed interface PaletteStyle {
     ) : PaletteStyle
 
     public companion object {
-
         /**
          * Every style that can be listed without extra input, for menus, pickers and tests.
          *
