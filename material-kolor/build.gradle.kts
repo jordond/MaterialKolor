@@ -4,6 +4,7 @@ plugins {
     id("materialkolor.library")
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.poko)
 }
 
 kotlin {
