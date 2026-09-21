@@ -41,7 +41,7 @@ fun SettingsEntity.toQueryParams(): String {
     val params = listOfNotNull(
         colorParams,
         "${KEY_DARK_MODE}=${isDarkMode ?: false}",
-        style.toStorageString().param(KEY_STYLE, SettingsDefaults.style.toStorageString()),
+        style.toString().param(KEY_STYLE, SettingsDefaults.style.toString()),
         selectedPresetId.param(KEY_SELECTED_PRESET_ID),
         contrast.param(KEY_CONTRAST, SettingsDefaults.contrast.value),
         isAmoled.param(KEY_IS_AMOLED, SettingsDefaults.isAmoled),
@@ -96,4 +96,4 @@ private inline fun <reified T> T?.param(
     return "$key=${this.toString().encodeURLQueryComponent()}"
 }
 
-private fun String.safeToPaletteStyle(): PaletteStyle? = PaletteStyle.fromStorageString(this)
+private fun String.safeToPaletteStyle(): PaletteStyle? = PaletteStyle.parseOrNull(this)
