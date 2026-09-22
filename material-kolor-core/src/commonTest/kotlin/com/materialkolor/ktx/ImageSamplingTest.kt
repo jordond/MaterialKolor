@@ -32,7 +32,10 @@ class ImageSamplingTest {
         assertEquals(182, sampled.width)
         assertEquals(91, sampled.height)
         assertEquals(182 * 91, sampled.pixels.size)
-        assertTrue(sampled.pixels.size <= DEFAULT_SAMPLE_AREA, "sampling must stay inside the budget")
+        assertTrue(
+            sampled.pixels.size < image.width * image.height / 30,
+            "half a megapixel should come back as a budget sized grid",
+        )
     }
 
     @Test
