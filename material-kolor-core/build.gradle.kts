@@ -12,6 +12,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.colormath)
+            implementation(libs.kotlinx.coroutines.core)
 
             api(project(":material-color-utilities"))
             api(libs.kotlinx.serialization.core)
@@ -19,6 +20,11 @@ kotlin {
 
         commonTest.dependencies {
             implementation(libs.kotlinx.serialization.json)
+        }
+
+        jvmTest.dependencies {
+            implementation(libs.compose.ui.test)
+            implementation(compose.desktop.currentOs)
         }
     }
 }

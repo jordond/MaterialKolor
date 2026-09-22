@@ -264,15 +264,22 @@ public final class com/materialkolor/ktx/HctKt {
 }
 
 public final class com/materialkolor/ktx/ImageBitmapKt {
-	public static final fun quantize (Lcom/materialkolor/quantize/QuantizerCelebi;Landroidx/compose/ui/graphics/ImageBitmap;I)Ljava/util/Map;
-	public static final fun rememberThemeColor-sW7UJKQ (Landroidx/compose/ui/graphics/ImageBitmap;JZILandroidx/compose/runtime/Composer;II)J
-	public static final fun rememberThemeColors-8V94_ZQ (Landroidx/compose/ui/graphics/ImageBitmap;JIZILandroidx/compose/runtime/Composer;II)Ljava/util/List;
-	public static final fun themeColor-RPmYEkk (Landroidx/compose/ui/graphics/ImageBitmap;JZI)J
-	public static synthetic fun themeColor-RPmYEkk$default (Landroidx/compose/ui/graphics/ImageBitmap;JZIILjava/lang/Object;)J
-	public static final fun themeColorOrNull (Landroidx/compose/ui/graphics/ImageBitmap;ZI)Landroidx/compose/ui/graphics/Color;
-	public static synthetic fun themeColorOrNull$default (Landroidx/compose/ui/graphics/ImageBitmap;ZIILjava/lang/Object;)Landroidx/compose/ui/graphics/Color;
-	public static final fun themeColors-iJQMabo (Landroidx/compose/ui/graphics/ImageBitmap;JIZI)Ljava/util/List;
-	public static synthetic fun themeColors-iJQMabo$default (Landroidx/compose/ui/graphics/ImageBitmap;JIZIILjava/lang/Object;)Ljava/util/List;
+	public static final fun quantize (Lcom/materialkolor/quantize/QuantizerCelebi;Landroidx/compose/ui/graphics/ImageBitmap;II)Ljava/util/Map;
+	public static synthetic fun quantize$default (Lcom/materialkolor/quantize/QuantizerCelebi;Landroidx/compose/ui/graphics/ImageBitmap;IIILjava/lang/Object;)Ljava/util/Map;
+	public static final fun rememberThemeColor-8V94_ZQ (Landroidx/compose/ui/graphics/ImageBitmap;JZIILandroidx/compose/runtime/Composer;II)J
+	public static final fun rememberThemeColors-OadGlvw (Landroidx/compose/ui/graphics/ImageBitmap;JIZIILandroidx/compose/runtime/Composer;II)Ljava/util/List;
+	public static final fun themeColor-iJQMabo (Landroidx/compose/ui/graphics/ImageBitmap;JZII)J
+	public static synthetic fun themeColor-iJQMabo$default (Landroidx/compose/ui/graphics/ImageBitmap;JZIIILjava/lang/Object;)J
+	public static final fun themeColorOrNull (Landroidx/compose/ui/graphics/ImageBitmap;ZII)Landroidx/compose/ui/graphics/Color;
+	public static synthetic fun themeColorOrNull$default (Landroidx/compose/ui/graphics/ImageBitmap;ZIIILjava/lang/Object;)Landroidx/compose/ui/graphics/Color;
+	public static final fun themeColors-3IgeMak (Landroidx/compose/ui/graphics/ImageBitmap;JIZII)Ljava/util/List;
+	public static synthetic fun themeColors-3IgeMak$default (Landroidx/compose/ui/graphics/ImageBitmap;JIZIIILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class com/materialkolor/ktx/ImageSamplingKt {
+	public static final field DEFAULT_SAMPLE_AREA I
+	public static final fun samplePixels (Landroidx/compose/ui/graphics/ImageBitmap;I)Lcom/materialkolor/ktx/SampledPixels;
+	public static synthetic fun samplePixels$default (Landroidx/compose/ui/graphics/ImageBitmap;IILjava/lang/Object;)Lcom/materialkolor/ktx/SampledPixels;
 }
 
 public final class com/materialkolor/ktx/LegacyAndroidColorsKt {
@@ -284,6 +291,17 @@ public final class com/materialkolor/ktx/LegacyAndroidColorsKt {
 	public static final fun getTextPrimaryInverseDisableOnly (Lcom/materialkolor/dynamiccolor/MaterialDynamicColors;)Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public static final fun getTextSecondaryAndTertiaryInverse (Lcom/materialkolor/dynamiccolor/MaterialDynamicColors;)Lcom/materialkolor/dynamiccolor/DynamicColor;
 	public static final fun getTextSecondaryAndTertiaryInverseDisabled (Lcom/materialkolor/dynamiccolor/MaterialDynamicColors;)Lcom/materialkolor/dynamiccolor/DynamicColor;
+}
+
+public final class com/materialkolor/ktx/SampledPixels {
+	public static final field $stable I
+	public fun <init> ([III)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeight ()I
+	public final fun getPixels ()[I
+	public final fun getWidth ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/materialkolor/ktx/TemperatureKt {
