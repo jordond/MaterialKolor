@@ -30,4 +30,5 @@ dependencies {
     dokka(project(":material-kolor-material3"))
     dokka(project(":material-kolor-palette"))
     dokka(project(":material-kolor-unstyled"))
+    dokka(project(":material-kolor-fluent"))
 }

@@ -1,0 +1,11 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <MaterialKolor:material-kolor-fluent>
+final fun (com.materialkolor.dynamiccolor/DynamicScheme).com.materialkolor.fluent/toFluentColors(): io.github.composefluent/Colors // com.materialkolor.fluent/toFluentColors|toFluentColors@com.materialkolor.dynamiccolor.DynamicScheme(){}[0]
+final fun (com.materialkolor.palettes/TonalPalette).com.materialkolor.fluent/toFluentShades(): io.github.composefluent/Shades // com.materialkolor.fluent/toFluentShades|toFluentShades@com.materialkolor.palettes.TonalPalette(){}[0]
+final fun com.materialkolor.fluent/rememberFluentColors(androidx.compose.ui.graphics/Color, kotlin/Boolean, androidx.compose.ui.graphics/Color?, androidx.compose.ui.graphics/Color?, androidx.compose.ui.graphics/Color?, androidx.compose.ui.graphics/Color?, androidx.compose.ui.graphics/Color?, androidx.compose.ui.graphics/Color?, com.materialkolor/PaletteStyle?, kotlin/Double, com.materialkolor.dynamiccolor/ColorSpec.SpecVersion?, com.materialkolor.dynamiccolor/DynamicScheme.Platform?, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int, kotlin/Int): io.github.composefluent/Colors // com.materialkolor.fluent/rememberFluentColors|rememberFluentColors(androidx.compose.ui.graphics.Color;kotlin.Boolean;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;androidx.compose.ui.graphics.Color?;com.materialkolor.PaletteStyle?;kotlin.Double;com.materialkolor.dynamiccolor.ColorSpec.SpecVersion?;com.materialkolor.dynamiccolor.DynamicScheme.Platform?;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int;kotlin.Int){}[0]
