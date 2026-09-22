@@ -10,8 +10,6 @@ import androidx.compose.ui.window.rememberWindowState
 import com.materialkolor.sample.customtheme.ui.SampleApp
 
 /**
- * Desktop entry point, so the sample can be looked at and not only asserted about.
- *
  * Run it with `./gradlew :samples:custom-theme:run`.
  */
 public fun main() {

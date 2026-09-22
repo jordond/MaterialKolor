@@ -4,12 +4,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
 /**
- * Every color this sample app paints with.
- *
- * The shape is deliberately not Material's. There are seven accent families instead of three, the
- * primary accent carries two interaction tones, surfaces come in three steps, and the drink colors
- * are decorative and belong to no family at all. Nothing in here is a hand-picked hex, every slot
- * is derived from the seeds in [AppThemeSeeds].
+ * There are seven accent families instead of three, the primary accent carries two interaction tones, surfaces come
+ * in three steps, and the drink colors are decorative and belong to no family at all.
  *
  * @see appColors for how the slots are derived.
  */
@@ -124,9 +120,6 @@ public data class AppColors(
 
     /**
      * The foreground and background slots that get painted on top of each other.
-     *
-     * Publishing the pairs here rather than in the test is what keeps them honest. A new slot that
-     * is neither half of a pair nor listed in [DecorativeSlots] fails the theme's own test.
      */
     public val contrastPairs: List<ContrastPair>
         get() = listOf(

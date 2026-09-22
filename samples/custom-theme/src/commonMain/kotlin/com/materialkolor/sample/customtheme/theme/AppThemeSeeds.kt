@@ -6,9 +6,8 @@ import androidx.compose.ui.graphics.Color
 /**
  * The accent seeds the theme owns on top of the one seed the scheme is generated from.
  *
- * These are the only literal colors in the sample. They are inputs, the way a brand color is an
- * input, and every slot in [AppColors] is derived from them. Swapping one moves a whole family or
- * a whole decorative accent, in both light and dark, without touching the theme.
+ * They are inputs, the way a brand color is an input, and every slot in [AppColors] is derived from them. Swapping
+ * one moves a whole family or a whole decorative accent, in both light and dark, without touching the theme.
  *
  * @property[love] Seed for the affection family, a warm red.
  * @property[cold] Seed for the cold family, a clear blue.
@@ -31,9 +30,6 @@ public data class AppThemeSeeds(
     public val chocolate: Color = Color(0xFF3F2212),
 ) {
     public companion object {
-        /**
-         * The seed set the sample ships with.
-         */
         public val Default: AppThemeSeeds = AppThemeSeeds()
     }
 }

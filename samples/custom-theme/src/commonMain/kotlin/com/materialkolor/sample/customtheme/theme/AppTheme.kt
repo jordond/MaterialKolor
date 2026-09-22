@@ -35,18 +35,12 @@ public enum class AppThemeMode {
 
 /**
  * The theme colors for the current subtree.
- *
- * Reading this outside [AppTheme] throws, which is what you want. A missing theme is a bug, not a
- * reason to paint something arbitrary.
  */
 public val LocalAppColors: ProvidableCompositionLocal<AppColors> =
     staticCompositionLocalOf { error("No AppColors provided, wrap the content in AppTheme.") }
 
 /**
  * Generate the theme from [seed] and hand it to [content].
- *
- * Light and dark come from the same inputs, so there is no second palette to keep in step. Changing
- * [seed] changes both at once.
  *
  * @param[seed] The color the whole theme is generated from.
  * @param[mode] Which theme to show.
@@ -67,9 +61,6 @@ public fun AppTheme(
 /**
  * Generate and remember the theme colors.
  *
- * Split out of [AppTheme] so a screen can build a second theme, a preview strip or a seed picker,
- * without nesting providers.
- *
  * @param[seed] The color the whole theme is generated from.
  * @param[isDark] Whether to build the dark theme or the light one.
  * @param[seeds] The accent seeds the theme owns on top of [seed].
@@ -82,8 +73,6 @@ public fun rememberAppColors(
     seeds: AppThemeSeeds = AppThemeSeeds.Default,
 ): AppColors {
     val scheme = rememberDynamicScheme(seedColor = seed, isDark = isDark)
-
-    // The scheme carries six ramps. These are the eight accents it has no room for.
     val palettes = AppPalettes(
         love = rememberTonalPalette(seed = seeds.love, harmonizeWith = seed),
         cold = rememberTonalPalette(seed = seeds.cold, harmonizeWith = seed),

@@ -32,14 +32,6 @@ import com.materialkolor.sample.customtheme.theme.AppTheme
 import com.materialkolor.sample.customtheme.theme.AppThemeMode
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 
-/**
- * The sample app, one screen that shows the whole theme in both modes.
- *
- * Nothing here reads a color literal. Every swatch comes out of [LocalAppColors], which came out of
- * the seed at the top of this function.
- *
- * @param[seed] The color the theme is generated from.
- */
 @Composable
 public fun SampleApp(seed: Color = Color(0xFF6750A4)) {
     var mode by remember { mutableStateOf(AppThemeMode.Light) }
@@ -48,12 +40,12 @@ public fun SampleApp(seed: Color = Color(0xFF6750A4)) {
         val colors = LocalAppColors.current
 
         Column(
+            verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
                 .fillMaxSize()
                 .background(colors.surface)
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             ModeSwitch(
                 mode = mode,
@@ -164,6 +156,7 @@ private fun AccentFamilyRow(family: AccentFamily) {
             foreground = family.onColor,
             modifier = Modifier.weight(1f),
         )
+
         FamilyCell(
             label = "container",
             background = family.container,
@@ -206,6 +199,7 @@ private fun SwatchRow(swatches: List<Pair<String, Color>>) {
                         .background(color)
                         .border(1.dp, colors.borderSoft, RoundedCornerShape(10.dp)),
                 )
+
                 BasicText(
                     text = label,
                     style = TextStyle(color = colors.textMuted, fontSize = 11.sp),

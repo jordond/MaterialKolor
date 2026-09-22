@@ -9,8 +9,6 @@ plugins {
 
 kotlin {
     applyDefaultHierarchyTemplate()
-
-    // The sample is read as documentation, so every declaration states its visibility.
     explicitApi()
 
     android {
@@ -34,10 +32,6 @@ kotlin {
     jvmToolchain(libs.versions.jvmTarget.get().toInt())
 
     sourceSets {
-        jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-        }
-
         commonMain.dependencies {
             implementation(libs.compose.runtime)
             implementation(libs.compose.ui)
@@ -48,6 +42,10 @@ kotlin {
 
         commonTest.dependencies {
             implementation(kotlin("test"))
+        }
+
+        jvmMain.dependencies {
+            implementation(compose.desktop.currentOs)
         }
 
         jvmTest.dependencies {

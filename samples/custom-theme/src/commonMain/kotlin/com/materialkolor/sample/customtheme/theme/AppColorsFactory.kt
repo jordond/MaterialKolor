@@ -13,10 +13,6 @@ import com.materialkolor.palettes.TonalPalette
 /**
  * Build the whole theme from one seed color and the accent seeds.
  *
- * Use this when you already have a seed and no composition, a screenshot test or a preview fixture.
- * Inside a composition prefer [rememberAppColors], which keeps the scheme and the extra palettes
- * across recompositions.
- *
  * @param[seed] The color the scheme is generated from.
  * @param[isDark] Whether to build the dark theme or the light one.
  * @param[seeds] The accent seeds the theme owns on top of [seed].
@@ -31,12 +27,6 @@ public fun appColors(
     return AppPalettes.from(seed = seed, seeds = seeds).toColors(scheme)
 }
 
-/**
- * The palettes the scheme does not carry, one per accent the theme owns.
- *
- * Held as its own type so the composable path can remember each palette separately and still hand
- * the whole set to [toColors].
- */
 internal data class AppPalettes(
     val love: TonalPalette,
     val cold: TonalPalette,
@@ -72,7 +62,7 @@ internal data class AppPalettes(
  * problem and there is no reason to redo that work. Everything Material has no name for, the three
  * app-owned families, the pressed and raised states, the surface and border steps, the decorative
  * drink colors, is a tone this theme picks off a ramp. Each of those tones gets its content color
- * from [onTone] rather than a hand-written table.
+ * from [onTone] rather than a handwritten table.
  */
 internal fun AppPalettes.toColors(scheme: DynamicScheme): AppColors {
     val kolors = MaterialKolors(scheme)
@@ -137,9 +127,6 @@ internal fun AppPalettes.toColors(scheme: DynamicScheme): AppColors {
 
 /**
  * The tone each slot is cut at, once for light and once for dark.
- *
- * This is the whole of the theme's opinion. Core hands over the ramps, this decides where on them
- * a sunken surface or a pressed button sits.
  */
 private class ThemeTones(
     isDark: Boolean,
@@ -162,8 +149,12 @@ private class ThemeTones(
     val borderStrong = if (isDark) 65 else 55
 }
 
-/** One tone that reads on a light and a dark surface, so the drink colors never change with mode. */
+/**
+ * One tone that reads on a light and a dark surface, so the drink colors never change with mode.
+ */
 private const val DECORATIVE_TONE = 50
 
-/** The focus ring is the same accent tone in both modes, so focus never moves when the mode does. */
+/**
+ * The focus ring is the same accent tone in both modes, so focus never moves when the mode does.
+ */
 private const val FOCUS_RING_TONE = 60
