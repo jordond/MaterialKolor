@@ -37,6 +37,7 @@ The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com
     - [Lighten and Darken](#lighten-and-darken)
     - [Color Temperature](#color-temperature)
 - [Generating from an Image](#generating-from-an-image)
+    - [Palette module](#palette-module)
 - [License](#license)
     - [Changes from original source](#changes-from-original-source)
 
@@ -104,6 +105,16 @@ implementation("com.materialkolor:material-kolor-unstyled:5.0.1")
 `material-kolor-unstyled` is for Compose Unstyled apps. It brings in `material-kolor-core` as an
 `api` dependency, so it does not need Material3.
 
+If you seed your theme from images, depend on the palette artifact.
+
+```kotlin
+implementation("com.materialkolor:material-kolor-palette:5.0.1")
+```
+
+`material-kolor-palette` brings in `material-kolor-core` and
+[kmpalette](https://github.com/jordond/kmpalette) as `api` dependencies. It ships on the same
+platforms as core.
+
 ### Single Platform
 
 For an Android only project, add the dependency to app level `build.gradle.kts`:
@@ -124,6 +135,7 @@ materialKolor = "5.0.1"
 materialKolor-core = { module = "com.materialkolor:material-kolor-core", version.ref = "materialKolor" }
 materialKolor-material3 = { module = "com.materialkolor:material-kolor-material3", version.ref = "materialKolor" }
 materialKolor-unstyled = { module = "com.materialkolor:material-kolor-unstyled", version.ref = "materialKolor" }
+materialKolor-palette = { module = "com.materialkolor:material-kolor-palette", version.ref = "materialKolor" }
 ```
 
 ### Without compose
@@ -406,6 +418,56 @@ fun DynamicTheme(image: ImageBitmap, content: @Composable () -> Unit) {
     )
 }
 ```
+
+### Palette module
+
+`material-kolor-palette` starts from [kmpalette](https://github.com/jordond/kmpalette) instead of
+an `ImageBitmap`. kmpalette loads and quantizes the image off the main thread, and this module scores
+the swatches that come back with the same scoring Android applies to wallpapers.
+
+Anything kmpalette can load is an input, so you pass a loader and the thing it loads:
+
+```kotlin
+@Composable
+fun DynamicTheme(bytes: ByteArray, content: @Composable () -> Unit) {
+    val seedColor = rememberThemeColor(
+        loader = ByteArrayLoader,
+        input = bytes,
+        fallback = MaterialTheme.colorScheme.primary,
+    )
+
+    DynamicMaterialTheme(
+        seedColor = seedColor,
+        content = content,
+    )
+}
+```
+
+If you already hold a `PaletteState`, build the scheme straight from it:
+
+```kotlin
+@Composable
+fun DynamicTheme(image: ImageBitmap, content: @Composable () -> Unit) {
+    val palette = rememberPaletteState()
+    LaunchedEffect(image) { palette.generate(image) }
+
+    val scheme = rememberDynamicScheme(
+        palette = palette,
+        fallback = MaterialTheme.colorScheme.primary,
+        isDark = isSystemInDarkTheme(),
+    )
+
+    MaterialTheme(
+        colorScheme = scheme.toColorScheme(),
+        content = content,
+    )
+}
+```
+
+`Palette.themeColors()`, `Palette.themeColor()`, `Palette.themeColorOrNull()` and
+`Palette.seedColorOrNull()` are there for when you want to score a palette you generated yourself,
+and `rememberPainterThemeColor()` starts from a `Painter`. For base64 strings, network URLs and
+files, add the matching kmpalette extension artifact and pass its loader.
 
 ## License
 

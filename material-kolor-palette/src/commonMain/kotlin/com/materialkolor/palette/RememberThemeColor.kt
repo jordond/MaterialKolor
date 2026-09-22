@@ -5,10 +5,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import com.kmpalette.DEFAULT_CACHE_SIZE
-import com.kmpalette.palette.graphics.Palette
-import com.kmpalette.rememberPaletteState
 import com.kmpalette.loader.ImageBitmapLoader
 import com.kmpalette.loader.rememberPainterLoader
+import com.kmpalette.palette.graphics.Palette
+import com.kmpalette.rememberPaletteState
 import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
 

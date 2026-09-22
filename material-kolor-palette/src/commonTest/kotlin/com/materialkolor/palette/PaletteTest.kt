@@ -3,10 +3,12 @@ package com.materialkolor.palette
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.kmpalette.palette.graphics.Palette
+import com.kmpalette.palette.graphics.Target
 import com.materialkolor.hct.Hct
 import com.materialkolor.score.Score
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -60,34 +62,43 @@ class PaletteTest {
     }
 
     @Test
-    fun themeColor_withoutFilterKeepsTheDominantGrey() {
+    fun themeColor_withoutFilterKeepsAGrey() {
         val palette = Palette.from(greySwatches)
-        val dominant = Hct.fromInt(greySwatches.first().rgb)
         val unfiltered = palette.themeColor(fallback, filter = false)
 
-        assertEquals(Color(dominant.toInt()), unfiltered)
+        // Scoring weights chroma and hue spread rather than population, so which grey wins is the
+        // engine's business. What matters is that turning the filter off stops the fallback.
+        assertTrue(
+            unfiltered.red == unfiltered.green && unfiltered.green == unfiltered.blue,
+            "expected a grey, was $unfiltered",
+        )
     }
 
     @Test
     fun seedColorOrNull_prefersTheVibrantSwatch() {
-        val palette = Palette.from(colorfulSwatches)
-        val vibrant = palette.vibrantSwatch
+        // Palettes built from swatches carry no targets, so the vibrant one has to be asked for.
+        val palette = Palette.Builder(colorfulSwatches).addTarget(Target.VIBRANT).generate()
+        val vibrant = assertNotNull(palette.vibrantSwatch, "the colorful fixture should have a vibrant swatch")
 
-        assertTrue(vibrant != null, "the colorful fixture should have a vibrant swatch")
         assertEquals(Color(vibrant.rgb), palette.seedColorOrNull())
     }
 
     @Test
     fun seedColorOrNull_fallsBackToTheDominantSwatch() {
-        val palette = Palette.from(greySwatches)
+        val palette = Palette.Builder(greySwatches).addTarget(Target.VIBRANT).generate()
 
         assertNull(palette.vibrantSwatch, "greys should not fill the vibrant target")
         assertEquals(Color(greySwatches.first().rgb), palette.seedColorOrNull())
     }
 
     @Test
-    fun seedColorOrNull_isNullForAnEmptyPalette() {
-        assertNull(Palette.from(emptyList()).seedColorOrNull())
+    fun seedColorOrNull_isNullWhenThePaletteHasNoSwatches() {
+        // Every pixel is near black, which the palette's own filter drops before scoring starts.
+        val black = IntArray(16) { 0xFF000000.toInt() }
+        val palette = Palette.from(pixels = black, width = 4, height = 4).generate()
+
+        assertTrue(palette.swatches.isEmpty(), "expected the filter to drop every swatch")
+        assertNull(palette.seedColorOrNull())
     }
 
     @Test

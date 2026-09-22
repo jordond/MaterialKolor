@@ -14,12 +14,16 @@ retired and replaced by `material-kolor-core` and `material-kolor-material3`, de
 | `com.materialkolor:material-kolor-core` | `com.materialkolor`, `com.materialkolor.ktx`, `com.materialkolor.serialization` | no |
 | `com.materialkolor:material-kolor-material3` | `com.materialkolor.material3`, `com.materialkolor.material3.ktx` | yes |
 | `com.materialkolor:material-kolor-unstyled` | `com.materialkolor.unstyled` | no |
+| `com.materialkolor:material-kolor-palette` | `com.materialkolor.palette` | no |
 
 `material-kolor-material3` carries `material-kolor-core` as an `api` dependency, so a Material3 app
 depends on the one artifact and still sees `PaletteStyle`, `MaterialKolors` and the `ktx` helpers.
 An app that generates schemes for something other than Material3 depends on core alone and never
 resolves Compose Material3. `material-kolor-unstyled` is new in 6.0. It adapts schemes to Compose
-Unstyled theming and has nothing to migrate.
+Unstyled theming and has nothing to migrate. `material-kolor-palette` is new in 6.0 as well. It
+pairs [kmpalette](https://github.com/jordond/kmpalette) with the scoring in core to read seed colors
+from images, so it is an addition rather than a migration and the core image helpers stay where they
+are.
 
 The Material3 symbols moved to a new package rather than keeping theirs. Two modules declaring
 top-level functions in one package generate the same JVM facade class in both jars, which is a
