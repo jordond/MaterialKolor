@@ -105,7 +105,12 @@ implementation("com.materialkolor:material-kolor-unstyled:5.0.1")
 ```
 
 `material-kolor-unstyled` is for Compose Unstyled apps. It brings in `material-kolor-core` as an
-`api` dependency, so it does not need Material3.
+`api` dependency, so it does not need Material3. It does **not** bring Compose Unstyled itself, so
+declare the version you want alongside it.
+
+```kotlin
+implementation("com.composables:composeunstyled-theming:2.10.0")
+```
 
 If your app uses Compose Fluent, depend on the Fluent adapter artifact.
 
@@ -113,9 +118,15 @@ If your app uses Compose Fluent, depend on the Fluent adapter artifact.
 implementation("com.materialkolor:material-kolor-fluent:5.0.1")
 ```
 
-`material-kolor-fluent` brings in `material-kolor-core` and
-[Compose Fluent](https://github.com/Compose-Fluent/compose-fluent-ui) as `api` dependencies. It has
-no macOS native target, because Fluent does not publish one.
+`material-kolor-fluent` brings in `material-kolor-core` as an `api` dependency. It does **not**
+bring [Compose Fluent](https://github.com/Compose-Fluent/compose-fluent-ui) itself, so declare the
+version you want alongside it.
+
+```kotlin
+implementation("io.github.compose-fluent:fluent:v0.1.0")
+```
+
+The adapter has no macOS native target, because Fluent does not publish one.
 
 If you seed your theme from images, depend on the palette artifact.
 

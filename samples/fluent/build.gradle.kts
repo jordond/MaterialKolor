@@ -40,6 +40,10 @@ kotlin {
             implementation(libs.compose.foundation)
 
             implementation(project(":material-kolor-fluent"))
+
+            // material-kolor-fluent does not bring Fluent along, so a consumer picks its own
+            // version. This sample is that consumer.
+            implementation(libs.fluent)
         }
 
         commonTest.dependencies {

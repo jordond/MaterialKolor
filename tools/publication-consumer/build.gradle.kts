@@ -19,6 +19,11 @@ dependencies {
     implementation("com.materialkolor:material-kolor-palette-jvm:$mcuVersion")
     implementation("com.materialkolor:material-kolor-unstyled-jvm:$mcuVersion")
     implementation("com.materialkolor:material-kolor-fluent-jvm:$mcuVersion")
+
+    // The adapters declare these compileOnly, so a real consumer has to bring its own. Compiling
+    // Consumer.kt against the published artifacts is exactly what proves that contract holds.
+    implementation("io.github.compose-fluent:fluent-desktop:v0.1.0")
+    implementation("com.composables:composeunstyled-theming:2.10.0")
 }
 
 kotlin { jvmToolchain(17) }

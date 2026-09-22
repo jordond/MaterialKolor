@@ -17,7 +17,14 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":material-kolor-core"))
-            api(libs.fluent)
+
+            // Not api. The adapter's whole surface is Fluent types, so a consumer already has to
+            // declare Fluent to call any of it, and pinning our version on them helps nobody.
+            compileOnly(libs.fluent)
+        }
+
+        commonTest.dependencies {
+            implementation(libs.fluent)
         }
 
         jvmTest.dependencies {

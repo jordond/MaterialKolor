@@ -18,7 +18,15 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":material-kolor-core"))
-            api(libs.composeUnstyled.theming)
+
+            // Not api. The adapter's whole surface is Compose Unstyled types, so a consumer already
+            // has to declare Unstyled to call any of it, and pinning our version on them helps
+            // nobody.
+            compileOnly(libs.composeUnstyled.theming)
+        }
+
+        commonTest.dependencies {
+            implementation(libs.composeUnstyled.theming)
         }
 
         jvmTest.dependencies {
