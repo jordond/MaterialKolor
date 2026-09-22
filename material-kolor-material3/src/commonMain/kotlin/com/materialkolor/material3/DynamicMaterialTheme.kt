@@ -97,7 +97,11 @@ public fun DynamicMaterialTheme(
  *
  * @see dynamicColorScheme
  * @see PaletteStyle
- * @param[primary] The primary color of the color scheme.
+ *
+ * **Note:** [primary] is used as the seed color and as the primary override, so every palette in
+ * the scheme comes from it.
+ *
+ * @param[primary] The color the theme is based on, and the primary color of the color scheme.
  * @param[isDark] Whether to use a dark theme or not.
  * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
  * @param[secondary] The custom secondary color of the color scheme.
@@ -115,6 +119,19 @@ public fun DynamicMaterialTheme(
  * @param[animationSpec] The animation spec to use for animating the color scheme.
  * @param[content] The Composable content of the theme.
  */
+@Deprecated(
+    message = "A primary color is an override on top of a seed now. Pass your color as the seed, " +
+        "and keep it as primary to get the colors this overload gives you. Removed in 7.0.",
+    replaceWith = ReplaceWith(
+        "DynamicMaterialTheme(seedColor = primary, isDark = isDark, isAmoled = isAmoled, " +
+            "primary = primary, secondary = secondary, tertiary = tertiary, neutral = neutral, " +
+            "neutralVariant = neutralVariant, error = error, style = style, " +
+            "contrastLevel = contrastLevel, specVersion = specVersion, platform = platform, " +
+            "shapes = shapes, typography = typography, animate = animate, " +
+            "animationSpec = animationSpec, content = content)",
+    ),
+    level = DeprecationLevel.WARNING,
+)
 @OptIn(InternalMaterialKolorApi::class)
 @Composable
 public fun DynamicMaterialTheme(
@@ -137,9 +154,10 @@ public fun DynamicMaterialTheme(
     content: @Composable () -> Unit,
 ) {
     val state = rememberDynamicMaterialThemeState(
-        primary = primary,
+        seedColor = primary,
         isDark = isDark,
         isAmoled = isAmoled,
+        primary = primary,
         secondary = secondary,
         tertiary = tertiary,
         neutral = neutral,
