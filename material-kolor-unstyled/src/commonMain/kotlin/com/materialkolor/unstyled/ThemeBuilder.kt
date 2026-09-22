@@ -42,7 +42,8 @@ public fun ThemeBuilder.dynamicColors(
  * The light scheme becomes the base value of [property] and the dark scheme becomes the override
  * for [ColorScheme.Dark], so `AppTheme { }` follows the system setting and
  * `AppTheme(colorScheme = ColorScheme.Light) { }` pins one. Unstyled animates the change if the
- * theme sets `colorSchemeTransitionSpec`.
+ * theme sets `colorSchemeTransitionSpec`. Only [ColorScheme.Light] and [ColorScheme.Dark] are
+ * wired, so a custom scheme name reads the light values unless the theme overrides them.
  *
  * ```kotlin
  * val AppTheme = buildThemeV2 {

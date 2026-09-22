@@ -94,6 +94,15 @@ If you theme something other than Material3, depend on the core artifact on its 
 implementation("com.materialkolor:material-kolor-core:5.0.1")
 ```
 
+If your app uses Compose Unstyled instead of Material3, depend on the adapter artifact.
+
+```kotlin
+implementation("com.materialkolor:material-kolor-unstyled:5.0.1")
+```
+
+`material-kolor-unstyled` is for Compose Unstyled apps. It brings in `material-kolor-core` as an
+`api` dependency, so it does not need Material3.
+
 ### Single Platform
 
 For an Android only project, add the dependency to app level `build.gradle.kts`:
@@ -113,6 +122,7 @@ materialKolor = "5.0.1"
 [libraries]
 materialKolor-core = { module = "com.materialkolor:material-kolor-core", version.ref = "materialKolor" }
 materialKolor-material3 = { module = "com.materialkolor:material-kolor-material3", version.ref = "materialKolor" }
+materialKolor-unstyled = { module = "com.materialkolor:material-kolor-unstyled", version.ref = "materialKolor" }
 ```
 
 ### Without compose
@@ -230,6 +240,79 @@ fun MyExpressiveTheme(
 
 The Expressive theme generates vibrant color schemes where the source color's hue may not directly
 appear in the final theme, creating more dynamic and playful color palettes.
+
+## Compose Unstyled
+
+`material-kolor-unstyled` adapts a MaterialKolor scheme to
+[Compose Unstyled](https://composeunstyled.com) theming. Your app keeps `buildThemeV2`, its text
+style, its indication and its selection colors. The adapter only writes color tokens.
+
+```kotlin
+import com.composeunstyled.theme.ColorScheme
+import com.composeunstyled.theme.Theme
+import com.composeunstyled.theme.buildThemeV2
+import com.materialkolor.PaletteStyle
+import com.materialkolor.unstyled.MaterialKolorTokens
+import com.materialkolor.unstyled.dynamicColorSchemes
+
+var seedColor by mutableStateOf(Color(0xFF6750A4))
+
+val AppTheme = buildThemeV2 {
+    colorSchemeTransitionSpec = tween(300)
+    dynamicColorSchemes(seedColor = seedColor, style = PaletteStyle.Vibrant)
+}
+
+@Composable
+fun App() {
+    AppTheme {
+        val colors = Theme[MaterialKolorTokens.colors]
+        Box(Modifier.background(colors[MaterialKolorTokens.surface])) {
+            Text("Hello", color = colors[MaterialKolorTokens.onSurface])
+        }
+    }
+}
+
+// Pin a scheme regardless of the system setting
+AppTheme(colorScheme = ColorScheme.Dark) { }
+```
+
+The builder lambda is composable, so reading `seedColor` there regenerates the theme when it
+changes. Light is the base, dark is the `ColorScheme.Dark` override. Unstyled animates token changes
+through `colorSchemeTransitionSpec`, the adapter never animates.
+
+If your app owns its own token vocabulary, build the values with the DSL instead.
+
+```kotlin
+val appColors = ThemeProperty<Color>("app.colors")
+val accent = ThemeToken<Color>("accent")
+val onAccent = ThemeToken<Color>("on_accent")
+val canvas = ThemeToken<Color>("canvas")
+
+val AppTheme = buildThemeV2 {
+    val light = rememberDynamicScheme(seedColor, isDark = false)
+    val dark = rememberDynamicScheme(seedColor, isDark = true)
+
+    properties[appColors] = light.themeValues {
+        accent to primary()
+        onAccent to onPrimary()
+        canvas to surfaceContainerLow()
+    }
+    colorScheme(ColorScheme.Dark) {
+        properties[appColors] = dark.themeValues {
+            accent to primary()
+            onAccent to onPrimary()
+            canvas to surfaceContainerLow()
+        }
+    }
+}
+```
+
+Every `MaterialKolors` role is available inside the block, and `dynamicColors(scheme)` writes the
+whole role set for a scheme you built yourself.
+
+The adapter publishes android, jvm, js, wasmJs, iosArm64 and iosSimulatorArm64, because Compose
+Unstyled has no macOS native target. Android minSdk 23 and Java 17 bytecode both come from Unstyled.
+Core keeps its own floor.
 
 ## Extensions
 
