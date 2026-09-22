@@ -39,14 +39,19 @@ public fun ThemeBuilder.dynamicColors(
 /**
  * Generates a light and a dark scheme from [seedColor] and wires both into the theme.
  *
- * The light scheme becomes the base value of [property] and the dark scheme becomes the override
- * for [ColorScheme.Dark], so `AppTheme { }` follows the system setting and
- * `AppTheme(colorScheme = ColorScheme.Light) { }` pins one. Unstyled animates the change if the
- * theme sets `colorSchemeTransitionSpec`. Only [ColorScheme.Light] and [ColorScheme.Dark] are
- * wired, so a custom scheme name reads the light values unless the theme overrides them.
+ * The light scheme becomes the base value of [property] and the dark scheme becomes the override for
+ * [ColorScheme.Dark], so `AppTheme { }` follows the system setting and `AppTheme(colorScheme = ColorScheme.Light) { }`
+ * pins one. Only [ColorScheme.Light] and [ColorScheme.Dark] are wired, so a custom scheme name reads the light values
+ * unless the theme overrides them.
+ *
+ * To animate, set [ThemeBuilderV2.colorSchemeTransitionSpec] on the builder and Unstyled animates every color token
+ * whenever it changes, whether the seed moved or the scheme flipped between light and dark.
  *
  * ```kotlin
  * val AppTheme = buildThemeV2 {
+ *     // Set this property to enable color transitions.
+ *     colorSchemeTransitionSpec = tween(300)
+ *
  *     dynamicColorSchemes(seedColor = Color(0xff8811aa))
  * }
  * ```
@@ -64,8 +69,7 @@ public fun ThemeBuilder.dynamicColors(
  * @param[contrastLevel] The contrast level of the schemes.
  * @param[specVersion] The version of the color specification to use.
  * @param[platform] The platform to use for the schemes.
- * @param[property] The property to write, [MaterialKolorTokens.colors] unless the application owns
- * its own.
+ * @param[property] The property to write, [MaterialKolorTokens.colors] unless the application owns its own.
  */
 @Composable
 public fun ThemeBuilderV2.dynamicColorSchemes(

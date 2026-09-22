@@ -255,7 +255,7 @@ import com.materialkolor.PaletteStyle
 import com.materialkolor.unstyled.MaterialKolorTokens
 import com.materialkolor.unstyled.dynamicColorSchemes
 
-var seedColor by mutableStateOf(Color(0xFF6750A4))
+val seedColor = Color(0xFF6750A4)
 
 val AppTheme = buildThemeV2 {
     colorSchemeTransitionSpec = tween(300)
@@ -271,14 +271,28 @@ fun App() {
         }
     }
 }
-
-// Pin a scheme regardless of the system setting
-AppTheme(colorScheme = ColorScheme.Dark) { }
 ```
 
-The builder lambda is composable, so reading `seedColor` there regenerates the theme when it
-changes. Light is the base, dark is the `ColorScheme.Dark` override. Unstyled animates token changes
-through `colorSchemeTransitionSpec`, the adapter never animates.
+Light is the base, dark is the `ColorScheme.Dark` override. The adapter never animates. Set
+`colorSchemeTransitionSpec` on the builder, as above, and Unstyled animates every color token
+whenever it changes, whether the seed moved or the scheme flipped between light and dark.
+
+The builder lambda is composable, so to change the seed at runtime keep it in state the builder
+can read. The theme regenerates when it changes.
+
+```kotlin
+object ThemeSettings {
+    var seedColor by mutableStateOf(Color(0xFF6750A4))
+}
+
+val AppTheme = buildThemeV2 {
+    colorSchemeTransitionSpec = tween(300)
+    dynamicColorSchemes(seedColor = ThemeSettings.seedColor)
+}
+
+// Anywhere in the app. The theme regenerates and Unstyled animates the change.
+Button(onClick = { ThemeSettings.seedColor = Color(0xFF00695C) }) { Text("Teal") }
+```
 
 If your app owns its own token vocabulary, build the values with the DSL instead.
 

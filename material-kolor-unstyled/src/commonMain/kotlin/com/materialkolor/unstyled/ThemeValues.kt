@@ -7,8 +7,6 @@ import com.materialkolor.dynamiccolor.DynamicScheme
 
 /**
  * Every [MaterialKolorTokens] token paired with the color this scheme gives it.
- *
- * The result is a plain map, so it can go straight into an Unstyled property or be reshaped first.
  */
 public fun DynamicScheme.toThemeValues(): Map<ThemeToken<Color>, Color> = MaterialKolors(this).toThemeValues()
 

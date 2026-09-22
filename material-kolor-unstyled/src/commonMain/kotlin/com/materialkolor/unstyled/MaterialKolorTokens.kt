@@ -337,9 +337,6 @@ public object MaterialKolorTokens {
      */
     public val textHintInverse: ThemeToken<Color> = ThemeToken("textHintInverse")
 
-    /**
-     * Every token above, in declaration order, for consumers that enumerate the scheme.
-     */
     public val all: List<ThemeToken<Color>> =
         listOf(
             primaryPaletteKeyColor,
