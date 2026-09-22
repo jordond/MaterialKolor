@@ -50,6 +50,13 @@ include(
     ":samples:fluent",
 )
 
+// Builder v2, new modules beside the old app until the cutover
+include(
+    ":builder:domain",
+    ":builder:codegen",
+    ":builder:engine",
+)
+
 include(":mcu-source-transformer")
 project(":mcu-source-transformer").projectDir = file("tools/mcu-source-transformer")
 project(":mcu-upstream").projectDir = file("tools/mcu-upstream")

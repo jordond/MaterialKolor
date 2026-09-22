@@ -29,5 +29,15 @@ gradlePlugin {
             id = "materialkolor.library.compose"
             implementationClass = "com.materialkolor.convention.plugin.ComposeLibraryPlugin"
         }
+
+        register("materialKolorBuilderKotlin") {
+            id = "materialkolor.builder.kotlin"
+            implementationClass = "com.materialkolor.convention.plugin.BuilderKotlinPlugin"
+        }
+
+        register("materialKolorBuilderCompose") {
+            id = "materialkolor.builder.compose"
+            implementationClass = "com.materialkolor.convention.plugin.BuilderComposePlugin"
+        }
     }
 }
