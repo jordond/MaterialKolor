@@ -322,9 +322,7 @@ fun AppTheme(seed: Color, isDark: Boolean, content: @Composable () -> Unit) {
 
 [`samples/custom-theme`](samples/custom-theme) is a working version of that. Seven accent families
 instead of three, pressed and raised states, three surface steps, a border ramp and five decorative
-category colors, all from one seed plus eight accent seeds, with no hand-picked hex in the theme and
-no hand-written background to content table. Its tests assert every content pair reaches WCAG AA in
-both light and dark.
+category colors, all from one seed plus eight accent seeds.
 
 Run it with `./gradlew :samples:custom-theme:run`.
 
@@ -463,7 +461,8 @@ You can calculate a seed color, or colors that are suitable for UI theming from 
 useful for generating a color scheme from a user's profile picture, or a background image.
 
 The `ImageBitmap` helpers in core are deprecated as of 6.0 and go away in 7.0. New code should use
-the [palette module](#palette-module) below. Until then you can still call `ImageBitmap.themeColors()`,
+the [palette module](#palette-module) below. Until then you can still call
+`ImageBitmap.themeColors()`,
 `ImageBitmap.themeColor()` or the `@Composable` function `rememberThemeColors()` or
 `rememberThemeColor()`:
 
@@ -498,7 +497,8 @@ fun DynamicTheme(image: ImageBitmap, content: @Composable () -> Unit) {
 ### Palette module
 
 `material-kolor-palette` starts from [kmpalette](https://github.com/jordond/kmpalette) instead of
-an `ImageBitmap`. kmpalette loads and quantizes the image off the main thread, and this module scores
+an `ImageBitmap`. kmpalette loads and quantizes the image off the main thread, and this module
+scores
 the swatches that come back with the same scoring Android applies to wallpapers.
 
 Anything kmpalette can load is an input, so you pass a loader and the thing it loads:
