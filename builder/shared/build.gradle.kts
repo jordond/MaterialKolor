@@ -102,10 +102,12 @@ kotlin {
             implementation(libs.stateHolder.viewModel)
 
             if (useLocalMaterialKolor) {
-                implementation(project(":material-kolor"))
+                implementation(project(":material-kolor-core"))
+                implementation(project(":material-kolor-material3"))
                 implementation(project(":material-color-utilities"))
             } else {
-                implementation(libs.materialKolor)
+                implementation(libs.materialKolor.core)
+                implementation(libs.materialKolor.material3)
                 implementation(libs.materialKolor.utilities)
             }
 

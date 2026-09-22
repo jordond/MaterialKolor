@@ -10,6 +10,11 @@ import org.gradle.kotlin.dsl.withType
 internal fun Project.configureMcuPublishing() {
     // Ship the notices once in each artifact, including source-only publications.
     tasks.withType<AbstractArchiveTask>().configureEach {
+        // The multiplatform-resources zip is unpacked into consumers and ships no notices.
+        if (name.endsWith("ZipMultiplatformResourcesForPublication")) {
+            return@configureEach
+        }
+
         from(rootProject.layout.projectDirectory.file("LICENSE")) {
             into("META-INF")
             rename { "LICENSE-MaterialKolor" }

@@ -14,7 +14,8 @@ repositories {
 
 dependencies {
     implementation("com.materialkolor:material-color-utilities-jvm:$mcuVersion")
-    implementation("com.materialkolor:material-kolor-jvm:$mcuVersion")
+    implementation("com.materialkolor:material-kolor-core-jvm:$mcuVersion")
+    implementation("com.materialkolor:material-kolor-material3-jvm:$mcuVersion")
 }
 
 kotlin { jvmToolchain(17) }

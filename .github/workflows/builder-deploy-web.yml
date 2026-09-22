@@ -7,7 +7,8 @@ on:
       - main
     paths:
       - 'builder/**'
-      - 'material-kolor/**'
+      - 'material-kolor-core/**'
+      - 'material-kolor-material3/**'
       - 'material-color-utilities/**'
       - 'gradle/**'
       - 'build-logic/**'

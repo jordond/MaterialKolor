@@ -16,6 +16,8 @@ internal fun Project.configureKmpLibrary() {
     extensions.configure<KotlinMultiplatformExtension> {
         applyDefaultHierarchyTemplate()
 
+        explicitApi()
+
         abiValidation()
 
         androidLibraryTarget()?.apply {
@@ -23,6 +25,15 @@ internal fun Project.configureKmpLibrary() {
             minSdk = intVersion("sdk-min-library")
 
             withHostTest {}
+
+            val consumerRules = layout.projectDirectory.file("consumer-rules.pro")
+            if (consumerRules.asFile.exists()) {
+                @Suppress("UnstableApiUsage")
+                optimization {
+                    consumerKeepRules.publish = true
+                    consumerKeepRules.file(consumerRules.asFile.name)
+                }
+            }
 
             compilerOptions {
                 jvmTarget.set(JvmTarget.JVM_11)

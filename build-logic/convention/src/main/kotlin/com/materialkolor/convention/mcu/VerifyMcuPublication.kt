@@ -219,10 +219,10 @@ abstract class VerifyMcuPublication : DefaultTask() {
         val JVM_IMPORT = Regex("""(?m)^import (java|javax)\.""")
 
         /**
-         * One suffix per Kotlin Multiplatform target both modules publish.
+         * One suffix per Kotlin Multiplatform target every published module shares.
          *
-         * This list has to track the targets declared in the two module build scripts. A target
-         * added there without a suffix here is never inspected.
+         * This list has to track the targets declared in the module build scripts. A target added
+         * there without a suffix here is never inspected.
          */
         val SHARED_TARGET_SUFFIXES = listOf(
             "", "-android", "-jvm", "-js", "-wasm-js", "-macosarm64", "-iosarm64", "-iossimulatorarm64",

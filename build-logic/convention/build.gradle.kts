@@ -24,5 +24,10 @@ gradlePlugin {
             id = "materialkolor.library"
             implementationClass = "com.materialkolor.convention.plugin.LibraryPlugin"
         }
+
+        register("materialKolorComposeLibrary") {
+            id = "materialkolor.library.compose"
+            implementationClass = "com.materialkolor.convention.plugin.ComposeLibraryPlugin"
+        }
     }
 }

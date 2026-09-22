@@ -17,12 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.materialkolor.DynamicMaterialThemeState
 import com.materialkolor.builder.settings.model.KeyColor
 import com.materialkolor.builder.ui.theme.LocalDynamicThemeState
 import com.materialkolor.ktx.isLight
-import com.materialkolor.ktx.m3Colors
 import com.materialkolor.ktx.toneColor
+import com.materialkolor.material3.DynamicMaterialThemeState
+import com.materialkolor.material3.ktx.m3Colors
 import kotlinx.collections.immutable.persistentListOf
 
 private val keyColors = (KeyColor.entries - KeyColor.Seed)

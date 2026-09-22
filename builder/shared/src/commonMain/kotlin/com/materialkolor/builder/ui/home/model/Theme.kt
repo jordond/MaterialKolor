@@ -3,8 +3,8 @@ package com.materialkolor.builder.ui.home.model
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.materialkolor.DynamicMaterialThemeState
 import com.materialkolor.builder.ui.theme.LocalDynamicThemeState
+import com.materialkolor.material3.DynamicMaterialThemeState
 
 object Theme {
     object Colors {

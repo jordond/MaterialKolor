@@ -9,14 +9,14 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import com.materialkolor.DynamicMaterialExpressiveTheme
-import com.materialkolor.DynamicMaterialThemeState
 import com.materialkolor.MaterialKolors
 import com.materialkolor.builder.core.UrlLauncher
 import com.materialkolor.builder.settings.model.Settings
-import com.materialkolor.ktx.animateColorScheme
-import com.materialkolor.ktx.colors
-import com.materialkolor.rememberDynamicMaterialThemeState
+import com.materialkolor.material3.DynamicMaterialExpressiveTheme
+import com.materialkolor.material3.DynamicMaterialThemeState
+import com.materialkolor.material3.ktx.animateColorScheme
+import com.materialkolor.material3.ktx.colors
+import com.materialkolor.material3.rememberDynamicMaterialThemeState
 
 internal val LocalThemeIsDark: ProvidableCompositionLocal<State<Boolean>> = compositionLocalOf {
     error("Not initialized")
