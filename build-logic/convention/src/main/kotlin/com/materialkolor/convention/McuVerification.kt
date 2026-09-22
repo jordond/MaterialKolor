@@ -30,7 +30,7 @@ internal fun Project.registerMcuVerificationTasks() {
         dependsOn(":mcu-source-transformer:test", ":mcu-source-transformer:testAlternateParser", ":mcu-upstream:test")
         dependsOn(":material-color-utilities:verifyMcuParserAgreement")
         for (module in mcuLibraryModules) {
-            dependsOn(":$module:jvmTest")
+            dependsOn(":${module.name}:jvmTest")
         }
     }
 
@@ -39,7 +39,7 @@ internal fun Project.registerMcuVerificationTasks() {
         description = "Run the library tests on Node and in a headless browser, for JS and Wasm."
         dependsOn(":material-color-utilities:jsNodeTest", ":material-color-utilities:wasmJsNodeTest")
         for (module in mcuLibraryModules) {
-            dependsOn(":$module:jsBrowserTest", ":$module:wasmJsBrowserTest")
+            dependsOn(":${module.name}:jsBrowserTest", ":${module.name}:wasmJsBrowserTest")
         }
     }
 
@@ -48,9 +48,9 @@ internal fun Project.registerMcuVerificationTasks() {
         description = "Assemble the Android variants, run their host tests and lint them."
         for (module in mcuLibraryModules) {
             dependsOn(
-                ":$module:assembleAndroidMain",
-                ":$module:testAndroidHostTest",
-                ":$module:lintAnalyzeAndroidHostTest",
+                ":${module.name}:assembleAndroidMain",
+                ":${module.name}:testAndroidHostTest",
+                ":${module.name}:lintAnalyzeAndroidHostTest",
             )
         }
     }
@@ -59,10 +59,14 @@ internal fun Project.registerMcuVerificationTasks() {
         group = "verification"
         description = "Run the macOS and simulator tests, then compile and link every published Apple target."
         for (module in mcuLibraryModules) {
+            if (module.macos) {
+                dependsOn(":${module.name}:macosArm64Test")
+            }
+
             dependsOn(
-                ":$module:macosArm64Test", ":$module:iosSimulatorArm64Test",
-                ":$module:compileKotlinIosArm64", ":$module:linkDebugFrameworkIosArm64",
-                ":$module:linkDebugFrameworkIosSimulatorArm64",
+                ":${module.name}:iosSimulatorArm64Test",
+                ":${module.name}:compileKotlinIosArm64", ":${module.name}:linkDebugFrameworkIosArm64",
+                ":${module.name}:linkDebugFrameworkIosSimulatorArm64",
             )
         }
     }
@@ -74,7 +78,7 @@ internal fun Project.registerMcuVerificationTasks() {
         dependsOn("dokkaGenerate")
 
         for (module in mcuLibraryModules) {
-            dependsOn(":$module:publishAllPublicationsToMcuVerificationRepository")
+            dependsOn(":${module.name}:publishAllPublicationsToMcuVerificationRepository")
         }
 
         repositoryDirectory.set(layout.buildDirectory.dir("mcu-verification-repository"))

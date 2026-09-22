@@ -219,14 +219,19 @@ abstract class VerifyMcuPublication : DefaultTask() {
         val JVM_IMPORT = Regex("""(?m)^import (java|javax)\.""")
 
         /**
-         * One suffix per Kotlin Multiplatform target every published module shares.
+         * One suffix per Kotlin Multiplatform target every published module declares.
          *
-         * This list has to track the targets declared in the module build scripts. A target added
-         * there without a suffix here is never inspected.
+         * This list has to track the targets the `materialkolor.library` convention declares for
+         * everyone. A target added there without a suffix here is never inspected.
          */
-        val SHARED_TARGET_SUFFIXES = listOf(
-            "", "-android", "-jvm", "-js", "-wasm-js", "-macosarm64", "-iosarm64", "-iossimulatorarm64",
+        val COMMON_TARGET_SUFFIXES = listOf(
+            "", "-android", "-jvm", "-js", "-wasm-js", "-iosarm64", "-iossimulatorarm64",
         )
+
+        /**
+         * The suffix of the optional macOS target, added only for modules that publish it.
+         */
+        const val MACOS_TARGET_SUFFIX = "-macosarm64"
 
         /**
          * Names that only ever appear in build tooling, so seeing one in published metadata is a leak.
@@ -238,7 +243,9 @@ abstract class VerifyMcuPublication : DefaultTask() {
          * Coordinates expected in the repository, as published artifact names.
          */
         fun coordinates(): List<String> = mcuLibraryModules.flatMap { module ->
-            SHARED_TARGET_SUFFIXES.map { suffix -> "$module$suffix" }
+            val suffixes =
+                if (module.macos) COMMON_TARGET_SUFFIXES + MACOS_TARGET_SUFFIX else COMMON_TARGET_SUFFIXES
+            suffixes.map { suffix -> "${module.name}$suffix" }
         }
 
         fun currentArtifacts(directory: Path, artifact: String, version: String): List<Path> {
