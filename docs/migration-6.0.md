@@ -220,6 +220,48 @@ second source supplies the tertiary hue/chroma, while a one-source scheme follow
 single-source behavior. Empty lists are unsupported. The high-level entry point for CMF is
 `PaletteStyle.Cmf`, described below.
 
+## A primary color pins the primary palette
+
+`material-kolor-material3` used to throw the seed away when you also passed `primary`, and built
+every palette from the primary color instead. It now pins the primary palette only, and the seed
+keeps driving secondary, tertiary, the neutrals and error. `material-kolor-core` always worked that
+way, so the modules agree now.
+
+```kotlin
+// 5.x, brand drove every palette and wallpaper was ignored
+// 6.0, brand is the primary palette and wallpaper drives the rest
+dynamicColorScheme(seedColor = wallpaper, isDark = isDark, primary = brand)
+```
+
+`DynamicMaterialThemeState` had the same rule, through `dynamicScheme` and through `colorScheme`, so
+a state built with a seed and a primary override produces different colors after the update. If you
+want the old result, seed with the same color you pin:
+
+```kotlin
+dynamicColorScheme(seedColor = brand, isDark = isDark, primary = brand)
+```
+
+## Primary-first overloads are deprecated
+
+`rememberDynamicColorScheme`, `dynamicColorScheme`, `DynamicMaterialTheme`,
+`DynamicMaterialExpressiveTheme` and `rememberDynamicMaterialThemeState` each have an overload that
+takes `primary` where the others take `seedColor`. All five are deprecated at warning level in 6.0
+and go away in 7.0, because `primary` means an override on top of a seed everywhere else. Their
+behavior has not changed, the color you pass is still both the seed and the primary override.
+
+```kotlin
+// Before
+dynamicColorScheme(primary = brand, isDark = isDark)
+
+// After
+dynamicColorScheme(seedColor = brand, isDark = isDark)
+```
+
+Seeding with the color and leaving `primary` unset is what most people want. The style then derives
+the primary palette from `brand` the way it derives every other palette. The IDE quick fix keeps
+`primary = brand` alongside the seed instead, because that reproduces the exact colors the
+deprecated overload gave you, including the primary palette taken straight from `brand`.
+
 ## PaletteStyle is a sealed interface
 
 `PaletteStyle` is no longer an enum. It is a sealed interface and the nine existing styles are

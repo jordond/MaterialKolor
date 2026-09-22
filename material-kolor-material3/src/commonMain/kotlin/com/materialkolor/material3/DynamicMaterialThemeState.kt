@@ -87,9 +87,10 @@ public fun rememberDynamicMaterialThemeState(
 /**
  * Creates a [DynamicMaterialThemeState] that can be remembered across compositions using custom colors.
  *
- * **Note:** The [primary] color will be used as the seed color.
+ * **Note:** The [primary] color is used as the seed color and as the primary override, so every
+ * palette in the scheme comes from it.
  *
- * @param[primary] The initial seed color to generate the color scheme.
+ * @param[primary] The initial seed color, and the primary color of the generated color scheme.
  * @param[isDark] The initial dark mode state.
  * @param[isAmoled] The initial Amoled state.
  * @param[secondary] A custom color to modify the secondary color in the generated color scheme.
@@ -104,6 +105,18 @@ public fun rememberDynamicMaterialThemeState(
  * @param[modifyColorScheme] Use this callback to modify the color scheme once it has been generated.
  * Note that if you modify a color in the scheme, the on* color might not have enough contrast.
  */
+@Deprecated(
+    message = "A primary color is an override on top of a seed now. Pass your color as the seed, " +
+        "and keep it as primary to get the colors this overload gives you.",
+    replaceWith = ReplaceWith(
+        "rememberDynamicMaterialThemeState(seedColor = primary, isDark = isDark, " +
+            "isAmoled = isAmoled, primary = primary, secondary = secondary, tertiary = tertiary, " +
+            "neutral = neutral, neutralVariant = neutralVariant, error = error, style = style, " +
+            "contrastLevel = contrastLevel, specVersion = specVersion, platform = platform, " +
+            "modifyColorScheme = modifyColorScheme)",
+    ),
+    level = DeprecationLevel.WARNING,
+)
 @Composable
 public fun rememberDynamicMaterialThemeState(
     primary: Color,
@@ -245,7 +258,7 @@ public class DynamicMaterialThemeState internal constructor(
     /**
      * A custom color to modify the primary color in the generated color scheme.
      *
-     * **Note:** If this is set, then this value will be used as the seed color instead of [seedColor].
+     * **Note:** This pins the primary palette only, [seedColor] still drives every other palette.
      */
     public var primary: Color? by mutableStateOf(initialPrimary)
 
@@ -274,53 +287,25 @@ public class DynamicMaterialThemeState internal constructor(
      */
     public var error: Color? by mutableStateOf(initialError)
 
-    private val isCustomScheme: Boolean
-        get() = listOf(primary, secondary, tertiary, neutral, neutralVariant, error)
-            .any { it != null }
-
+    /**
+     * The generated scheme based on the current state.
+     */
     public val dynamicScheme: DynamicScheme
         @Composable
-        get() {
-            val primary = this.primary
-            return when {
-                primary != null -> rememberDynamicScheme(
-                    seedColor = primary,
-                    isDark = isDark,
-                    primary = primary,
-                    secondary = secondary,
-                    tertiary = tertiary,
-                    neutral = neutral,
-                    neutralVariant = neutralVariant,
-                    error = error,
-                    style = style,
-                    contrastLevel = contrastLevel,
-                    specVersion = specVersion,
-                    platform = platform,
-                )
-                isCustomScheme -> rememberDynamicScheme(
-                    seedColor = seedColor,
-                    isDark = isDark,
-                    primary = primary,
-                    secondary = secondary,
-                    tertiary = tertiary,
-                    neutral = neutral,
-                    neutralVariant = neutralVariant,
-                    error = error,
-                    style = style,
-                    contrastLevel = contrastLevel,
-                    specVersion = specVersion,
-                    platform = platform,
-                )
-                else -> rememberDynamicScheme(
-                    seedColor = seedColor,
-                    isDark = isDark,
-                    style = style,
-                    contrastLevel = contrastLevel,
-                    specVersion = specVersion,
-                    platform = platform,
-                )
-            }
-        }
+        get() = rememberDynamicScheme(
+            seedColor = seedColor,
+            isDark = isDark,
+            primary = primary,
+            secondary = secondary,
+            tertiary = tertiary,
+            neutral = neutral,
+            neutralVariant = neutralVariant,
+            error = error,
+            style = style,
+            contrastLevel = contrastLevel,
+            specVersion = specVersion,
+            platform = platform,
+        )
 
     /**
      * The generated color scheme based on the current state.
@@ -328,53 +313,24 @@ public class DynamicMaterialThemeState internal constructor(
     public val colorScheme: ColorScheme
         @Composable
         get() {
-            val primary = this.primary
             val callback: ((ColorScheme) -> ColorScheme)? = modifyColorScheme
                 ?.let { callback -> { scheme -> callback(this, scheme) } }
 
-            return when {
-                primary != null -> rememberDynamicColorScheme(
-                    primary = primary,
-                    isDark = isDark,
-                    isAmoled = isAmoled,
-                    secondary = secondary,
-                    tertiary = tertiary,
-                    neutral = neutral,
-                    neutralVariant = neutralVariant,
-                    error = error,
-                    style = style,
-                    contrastLevel = contrastLevel,
-                    specVersion = specVersion,
-                    platform = platform,
-                    modifyColorScheme = callback,
-                )
-                isCustomScheme -> rememberDynamicColorScheme(
-                    seedColor = seedColor,
-                    isDark = isDark,
-                    isAmoled = isAmoled,
-                    primary = primary,
-                    secondary = secondary,
-                    tertiary = tertiary,
-                    neutral = neutral,
-                    neutralVariant = neutralVariant,
-                    error = error,
-                    style = style,
-                    contrastLevel = contrastLevel,
-                    specVersion = specVersion,
-                    platform = platform,
-                    modifyColorScheme = callback,
-                )
-                else -> rememberDynamicColorScheme(
-                    seedColor = seedColor,
-                    isDark = isDark,
-                    isAmoled = isAmoled,
-                    primary = null,
-                    style = style,
-                    contrastLevel = contrastLevel,
-                    specVersion = specVersion,
-                    platform = platform,
-                    modifyColorScheme = callback,
-                )
-            }
+            return rememberDynamicColorScheme(
+                seedColor = seedColor,
+                isDark = isDark,
+                isAmoled = isAmoled,
+                primary = primary,
+                secondary = secondary,
+                tertiary = tertiary,
+                neutral = neutral,
+                neutralVariant = neutralVariant,
+                error = error,
+                style = style,
+                contrastLevel = contrastLevel,
+                specVersion = specVersion,
+                platform = platform,
+                modifyColorScheme = callback,
+            )
         }
 }

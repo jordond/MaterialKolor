@@ -106,7 +106,11 @@ public fun DynamicMaterialExpressiveTheme(
  *
  * @see dynamicColorScheme
  * @see PaletteStyle.Expressive
- * @param[primary] The primary color of the color scheme.
+ *
+ * **Note:** [primary] is used as the seed color and as the primary override, so every palette in
+ * the scheme comes from it.
+ *
+ * @param[primary] The color the theme is based on, and the primary color of the color scheme.
  * @param[motionScheme] The motion scheme of the theme.
  * @param[isDark] Whether to use a dark theme or not.
  * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
@@ -125,6 +129,20 @@ public fun DynamicMaterialExpressiveTheme(
  * @param[animationSpec] The animation spec to use for animating the color scheme.
  * @param[content] The Composable content of the theme.
  */
+@Deprecated(
+    message = "A primary color is an override on top of a seed now. Pass your color as the seed, " +
+        "and keep it as primary to get the colors this overload gives you.",
+    replaceWith = ReplaceWith(
+        "DynamicMaterialExpressiveTheme(seedColor = primary, motionScheme = motionScheme, " +
+            "isDark = isDark, isAmoled = isAmoled, primary = primary, secondary = secondary, " +
+            "tertiary = tertiary, neutral = neutral, neutralVariant = neutralVariant, " +
+            "error = error, style = style, contrastLevel = contrastLevel, " +
+            "specVersion = specVersion, platform = platform, shapes = shapes, " +
+            "typography = typography, animate = animate, animationSpec = animationSpec, " +
+            "content = content)",
+    ),
+    level = DeprecationLevel.WARNING,
+)
 @ExperimentalMaterial3ExpressiveApi
 @OptIn(InternalMaterialKolorApi::class)
 @Composable
@@ -149,9 +167,10 @@ public fun DynamicMaterialExpressiveTheme(
     content: @Composable () -> Unit,
 ) {
     val state = rememberDynamicMaterialThemeState(
-        primary = primary,
+        seedColor = primary,
         isDark = isDark,
         isAmoled = isAmoled,
+        primary = primary,
         secondary = secondary,
         tertiary = tertiary,
         neutral = neutral,
