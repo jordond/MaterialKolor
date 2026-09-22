@@ -31,7 +31,7 @@ private const val DEFAULT_DESIRED_COLORS = 4
  * @return A map of colors to their frequency in the image.
  */
 @Deprecated(
-    "Moved to material-kolor-palette. Generate a kmpalette Palette from the bitmap and score its swatches with Palette.themeColors. Removed in 7.0.",
+    "Moved to com.materialkolor:material-kolor-palette. Generate a kmpalette Palette from the bitmap and score its swatches with Palette.themeColors. Removed in 7.0.",
 )
 public fun QuantizerCelebi.quantize(
     image: ImageBitmap,
@@ -53,7 +53,7 @@ public fun QuantizerCelebi.quantize(
  * the input colors suit a theme, the list holds only [fallback].
  */
 @Deprecated(
-    "Moved to material-kolor-palette. Generate a kmpalette Palette from the bitmap and call Palette.themeColors. Removed in 7.0.",
+    "Moved to com.materialkolor:material-kolor-palette. Generate a kmpalette Palette from the bitmap and call Palette.themeColors. Removed in 7.0.",
 )
 @Stable
 public fun ImageBitmap.themeColors(
@@ -84,7 +84,7 @@ public fun ImageBitmap.themeColors(
  * @return The most suitable color for a UI theme.
  */
 @Deprecated(
-    "Moved to material-kolor-palette. Generate a kmpalette Palette from the bitmap and call Palette.themeColor. Removed in 7.0.",
+    "Moved to com.materialkolor:material-kolor-palette. Generate a kmpalette Palette from the bitmap and call Palette.themeColor. Removed in 7.0.",
 )
 @Stable
 public fun ImageBitmap.themeColor(
@@ -104,7 +104,7 @@ public fun ImageBitmap.themeColor(
  * @return The most suitable color for a UI theme or `null` if no suitable color found.
  */
 @Deprecated(
-    "Moved to material-kolor-palette. Generate a kmpalette Palette from the bitmap and call Palette.themeColorOrNull. Removed in 7.0.",
+    "Moved to com.materialkolor:material-kolor-palette. Generate a kmpalette Palette from the bitmap and call Palette.themeColorOrNull. Removed in 7.0.",
 )
 @Stable
 public fun ImageBitmap.themeColorOrNull(
@@ -142,7 +142,7 @@ public fun ImageBitmap.themeColorOrNull(
  * @return The most suitable colors for a UI theme.
  */
 @Deprecated(
-    "Moved to material-kolor-palette. Call rememberThemeColors with a kmpalette loader, or rememberDynamicScheme with a PaletteState. Removed in 7.0.",
+    "Moved to com.materialkolor:material-kolor-palette. Call rememberThemeColors with a kmpalette loader, or rememberDynamicScheme with a PaletteState. Removed in 7.0.",
 )
 @Stable
 @Composable
@@ -178,7 +178,7 @@ public fun rememberThemeColors(
  * @return The most suitable color for a UI theme.
  */
 @Deprecated(
-    "Moved to material-kolor-palette. Call rememberThemeColor with a kmpalette loader, or rememberDynamicScheme with a PaletteState. Removed in 7.0.",
+    "Moved to com.materialkolor:material-kolor-palette. Call rememberThemeColor with a kmpalette loader, or rememberDynamicScheme with a PaletteState. Removed in 7.0.",
 )
 @Stable
 @Composable
