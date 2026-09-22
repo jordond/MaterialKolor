@@ -62,6 +62,20 @@ class RememberTonalPaletteTest {
         }
 
     @Test
+    fun rememberTonalPalette_leavesTheSeedAlone_whenHarmonizeWithIsNull() =
+        runComposeUiTest {
+            val seed = Color(0xFF00A3FF)
+            var result: TonalPalette? = null
+
+            setContent {
+                result = rememberTonalPalette(seed = seed, harmonizeWith = null)
+            }
+
+            val expected = TonalPalette.from(seed)
+            assertEquals(expected.toneColor(40), assertNotNull(result).toneColor(40))
+        }
+
+    @Test
     fun rememberTonalPalette_matchesTheHarmonizedSeed() =
         runComposeUiTest {
             val seed = Color(0xFF00A3FF)

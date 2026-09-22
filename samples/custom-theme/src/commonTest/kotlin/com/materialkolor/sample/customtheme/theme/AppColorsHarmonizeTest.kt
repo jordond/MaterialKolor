@@ -52,8 +52,16 @@ class AppColorsHarmonizeTest {
     @Test
     fun unharmonizedPalette_keepsTheSeedHue() {
         val plain = TonalPalette.from(seeds.coffee).toneColor(DECORATIVE_TONE_UNDER_TEST)
-        val themed = appColors(seed = Color(0xFF00629E), isDark = false).drinkCoffee
 
+        // The theme harmonizes every drink seed. Skipping that step has to leave the hue alone,
+        // which is what makes harmonizing a decision rather than something that always happens.
+        assertTrue(
+            actual = hueDistance(seeds.coffee.toHct().hue, plain.toHct().hue) < UNHARMONIZED_HUE_TOLERANCE,
+            message = "an unharmonized palette moved the seed hue, " +
+                "seed=${seeds.coffee.toHct().hue} palette=${plain.toHct().hue}",
+        )
+
+        val themed = appColors(seed = Color(0xFF00629E), isDark = false).drinkCoffee
         assertNotEquals(plain, themed, "the theme should harmonize, the bare palette should not")
     }
 
@@ -68,5 +76,6 @@ class AppColorsHarmonizeTest {
     private companion object {
         const val MINIMUM_RECOGNIZABLE_HUE_SHIFT = 10.0
         const val DECORATIVE_TONE_UNDER_TEST = 50
+        const val UNHARMONIZED_HUE_TOLERANCE = 2.0
     }
 }
