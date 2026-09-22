@@ -58,7 +58,7 @@ jobs:
           # transformer, the Apple targets, the upstream monitor, or the
           # publication and artifact-only consumer verification. `tools/`
           # covers the pinned upstream checkout and the transformer alike.
-          engine_paths='^(material-color-utilities/|material-kolor-core/|material-kolor-material3/|tools/|build-logic/|gradle/|kotlin-js-store/|settings\.gradle\.kts$|build\.gradle\.kts$|gradle\.properties$|gradlew(\.bat)?$|\.github/workflows/ci\.yml$|\.github/check-upstream$|\.github/tests/)'
+          engine_paths='^(material-color-utilities/|material-kolor-core/|material-kolor-material3/|material-kolor-unstyled/|tools/|build-logic/|gradle/|kotlin-js-store/|settings\.gradle\.kts$|build\.gradle\.kts$|gradle\.properties$|gradlew(\.bat)?$|\.github/workflows/ci\.yml$|\.github/check-upstream$|\.github/tests/)'
 
           changed="$(git diff --name-only "$BASE_SHA...HEAD")"
           echo 'Files changed in this pull request:'

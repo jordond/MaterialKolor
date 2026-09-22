@@ -28,4 +28,5 @@ dependencies {
     dokka(project(":material-color-utilities"))
     dokka(project(":material-kolor-core"))
     dokka(project(":material-kolor-material3"))
+    dokka(project(":material-kolor-unstyled"))
 }

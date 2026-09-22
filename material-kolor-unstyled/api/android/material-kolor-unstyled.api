@@ -1,0 +1,154 @@
+public final class com/materialkolor/unstyled/MaterialKolorTokens {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/materialkolor/unstyled/MaterialKolorTokens;
+	public final fun getAll ()Ljava/util/List;
+	public final fun getBackground ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getColors ()Lcom/composeunstyled/theme/ThemeProperty;
+	public final fun getControlActivated ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getControlHighlight ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getControlNormal ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getError ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getErrorContainer ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getErrorPaletteKeyColor ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getInverseOnSurface ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getInversePrimary ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getInverseSurface ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getNeutralPaletteKeyColor ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getNeutralVariantPaletteKeyColor ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnBackground ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnError ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnErrorContainer ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnPrimary ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnPrimaryContainer ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnPrimaryFixed ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnPrimaryFixedVariant ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnSecondary ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnSecondaryContainer ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnSecondaryFixed ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnSecondaryFixedVariant ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnSurface ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnSurfaceVariant ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnTertiary ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnTertiaryContainer ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnTertiaryFixed ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOnTertiaryFixedVariant ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOutline ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getOutlineVariant ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getPrimary ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getPrimaryContainer ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getPrimaryFixed ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getPrimaryFixedDim ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getPrimaryPaletteKeyColor ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getScrim ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSecondary ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSecondaryContainer ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSecondaryFixed ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSecondaryFixedDim ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSecondaryPaletteKeyColor ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getShadow ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSurface ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSurfaceBright ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSurfaceContainer ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSurfaceContainerHigh ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSurfaceContainerHighest ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSurfaceContainerLow ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSurfaceContainerLowest ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSurfaceDim ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSurfaceTint ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getSurfaceVariant ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getTertiary ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getTertiaryContainer ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getTertiaryFixed ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getTertiaryFixedDim ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getTertiaryPaletteKeyColor ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getTextHintInverse ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getTextPrimaryInverse ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getTextPrimaryInverseDisableOnly ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getTextSecondaryAndTertiaryInverse ()Lcom/composeunstyled/theme/ThemeToken;
+	public final fun getTextSecondaryAndTertiaryInverseDisabled ()Lcom/composeunstyled/theme/ThemeToken;
+}
+
+public final class com/materialkolor/unstyled/ThemeBuilderKt {
+	public static final fun dynamicColorSchemes-_U98hJc (Lcom/composeunstyled/theme/ThemeBuilderV2;JLandroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lcom/materialkolor/PaletteStyle;DLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/dynamiccolor/DynamicScheme$Platform;Lcom/composeunstyled/theme/ThemeProperty;Landroidx/compose/runtime/Composer;III)V
+	public static final fun dynamicColors (Lcom/composeunstyled/theme/ThemeBuilder;Lcom/materialkolor/dynamiccolor/DynamicScheme;Lcom/composeunstyled/theme/ThemeProperty;)V
+	public static synthetic fun dynamicColors$default (Lcom/composeunstyled/theme/ThemeBuilder;Lcom/materialkolor/dynamiccolor/DynamicScheme;Lcom/composeunstyled/theme/ThemeProperty;ILjava/lang/Object;)V
+}
+
+public abstract interface annotation class com/materialkolor/unstyled/ThemeValuesDsl : java/lang/annotation/Annotation {
+}
+
+public final class com/materialkolor/unstyled/ThemeValuesKt {
+	public static final fun themeValues (Lcom/materialkolor/MaterialKolors;Lkotlin/jvm/functions/Function1;)Ljava/util/Map;
+	public static final fun themeValues (Lcom/materialkolor/dynamiccolor/DynamicScheme;Lkotlin/jvm/functions/Function1;)Ljava/util/Map;
+	public static final fun toThemeValues (Lcom/materialkolor/MaterialKolors;)Ljava/util/Map;
+	public static final fun toThemeValues (Lcom/materialkolor/dynamiccolor/DynamicScheme;)Ljava/util/Map;
+}
+
+public final class com/materialkolor/unstyled/ThemeValuesScope {
+	public static final field $stable I
+	public final fun background-0d7_KjU ()J
+	public final fun controlActivated-0d7_KjU ()J
+	public final fun controlHighlight-0d7_KjU ()J
+	public final fun controlNormal-0d7_KjU ()J
+	public final fun error-0d7_KjU ()J
+	public final fun errorContainer-0d7_KjU ()J
+	public final fun errorPaletteKeyColor-0d7_KjU ()J
+	public final fun inverseOnSurface-0d7_KjU ()J
+	public final fun inversePrimary-0d7_KjU ()J
+	public final fun inverseSurface-0d7_KjU ()J
+	public final fun neutralPaletteKeyColor-0d7_KjU ()J
+	public final fun neutralVariantPaletteKeyColor-0d7_KjU ()J
+	public final fun onBackground-0d7_KjU ()J
+	public final fun onError-0d7_KjU ()J
+	public final fun onErrorContainer-0d7_KjU ()J
+	public final fun onPrimary-0d7_KjU ()J
+	public final fun onPrimaryContainer-0d7_KjU ()J
+	public final fun onPrimaryFixed-0d7_KjU ()J
+	public final fun onPrimaryFixedVariant-0d7_KjU ()J
+	public final fun onSecondary-0d7_KjU ()J
+	public final fun onSecondaryContainer-0d7_KjU ()J
+	public final fun onSecondaryFixed-0d7_KjU ()J
+	public final fun onSecondaryFixedVariant-0d7_KjU ()J
+	public final fun onSurface-0d7_KjU ()J
+	public final fun onSurfaceVariant-0d7_KjU ()J
+	public final fun onTertiary-0d7_KjU ()J
+	public final fun onTertiaryContainer-0d7_KjU ()J
+	public final fun onTertiaryFixed-0d7_KjU ()J
+	public final fun onTertiaryFixedVariant-0d7_KjU ()J
+	public final fun outline-0d7_KjU ()J
+	public final fun outlineVariant-0d7_KjU ()J
+	public final fun primary-0d7_KjU ()J
+	public final fun primaryContainer-0d7_KjU ()J
+	public final fun primaryFixed-0d7_KjU ()J
+	public final fun primaryFixedDim-0d7_KjU ()J
+	public final fun primaryPaletteKeyColor-0d7_KjU ()J
+	public final fun scrim-0d7_KjU ()J
+	public final fun secondary-0d7_KjU ()J
+	public final fun secondaryContainer-0d7_KjU ()J
+	public final fun secondaryFixed-0d7_KjU ()J
+	public final fun secondaryFixedDim-0d7_KjU ()J
+	public final fun secondaryPaletteKeyColor-0d7_KjU ()J
+	public final fun shadow-0d7_KjU ()J
+	public final fun surface-0d7_KjU ()J
+	public final fun surfaceBright-0d7_KjU ()J
+	public final fun surfaceContainer-0d7_KjU ()J
+	public final fun surfaceContainerHigh-0d7_KjU ()J
+	public final fun surfaceContainerHighest-0d7_KjU ()J
+	public final fun surfaceContainerLow-0d7_KjU ()J
+	public final fun surfaceContainerLowest-0d7_KjU ()J
+	public final fun surfaceDim-0d7_KjU ()J
+	public final fun surfaceTint-0d7_KjU ()J
+	public final fun surfaceVariant-0d7_KjU ()J
+	public final fun tertiary-0d7_KjU ()J
+	public final fun tertiaryContainer-0d7_KjU ()J
+	public final fun tertiaryFixed-0d7_KjU ()J
+	public final fun tertiaryFixedDim-0d7_KjU ()J
+	public final fun tertiaryPaletteKeyColor-0d7_KjU ()J
+	public final fun textHintInverse-0d7_KjU ()J
+	public final fun textPrimaryInverse-0d7_KjU ()J
+	public final fun textPrimaryInverseDisableOnly-0d7_KjU ()J
+	public final fun textSecondaryAndTertiaryInverse-0d7_KjU ()J
+	public final fun textSecondaryAndTertiaryInverseDisabled-0d7_KjU ()J
+	public final fun to-4WTKRHQ (Lcom/composeunstyled/theme/ThemeToken;J)V
+}
+
