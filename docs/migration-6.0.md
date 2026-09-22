@@ -347,6 +347,9 @@ The README has a [Tonal Ramps](../README.md#tonal-ramps) section, and `samples/c
 worked example with seven accent families, interaction states and surface and border ramps generated
 from a single seed.
 
+If the theme you are arriving with is Compose Fluent rather than your own, `material-kolor-fluent`
+is new in 6.0 and does the conversion for you. See [Compose Fluent](../README.md#compose-fluent).
+
 ## Image quantization can produce different colors
 
 The old Kotlin port seeded Kotlin's `Random` in `QuantizerWsmeans`. The generated implementation

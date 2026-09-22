@@ -1,3 +1,7 @@
+public final class com/materialkolor/fluent/AnimateFluentColorsKt {
+	public static final fun animateFluentColors (Lio/github/composefluent/Colors;Lkotlin/jvm/functions/Function3;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)Lio/github/composefluent/Colors;
+}
+
 public final class com/materialkolor/fluent/FluentColorsKt {
 	public static final fun rememberFluentColors-k1ZVges (JZLandroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lcom/materialkolor/PaletteStyle;DLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/dynamiccolor/DynamicScheme$Platform;Landroidx/compose/runtime/Composer;III)Lio/github/composefluent/Colors;
 	public static final fun toFluentColors (Lcom/materialkolor/dynamiccolor/DynamicScheme;)Lio/github/composefluent/Colors;

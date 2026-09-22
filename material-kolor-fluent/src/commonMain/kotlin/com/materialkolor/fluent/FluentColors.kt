@@ -42,6 +42,14 @@ import io.github.composefluent.Shades
  * A seed with little chroma gives a Fluent theme with little chroma. A grey seed produces seven
  * greys, which is the ramp doing its job rather than a fault.
  *
+ * ```kotlin
+ * // Fluent themed off the scheme's secondary ramp rather than its primary.
+ * val shades = scheme.secondaryPalette.toFluentShades()
+ * FluentTheme(colors = Colors(shades, darkMode = scheme.isDark)) {
+ *     Text("Themed from the secondary ramp")
+ * }
+ * ```
+ *
  * @receiver The ramp to read the seven tones from, usually a scheme's primary palette.
  * @return [Shades] for [Colors], or for anything else taking Fluent's shades.
  */

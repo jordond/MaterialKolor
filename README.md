@@ -467,12 +467,38 @@ palette holds hue steady, so this matches the lightness of that ramp rather than
 That is the right trade for a generated accent: you get a ramp of one colour instead of an
 imitation of a blue you did not ask for.
 
+To fade between seeds rather than cut, wrap the colours in `animateFluentColors`.
+
+```kotlin
+@Composable
+fun App() {
+    val colors = animateFluentColors(
+        rememberFluentColors(seedColor = ThemeSettings.seedColor),
+    )
+
+    FluentTheme(colors = colors) {
+        Button(onClick = { ThemeSettings.seedColor = Color(0xFF00695C) }) {
+            Text("Teal")
+        }
+    }
+}
+```
+
+The seven shades animate and the groups derived from them follow. `system` and `controlOnImage`
+hold still, because they are built from Fluent's own constants and never depended on the accent.
+Switching between light and dark is a cut rather than a fade for the same reason: Fluent derives
+both from one set of shades and a flag, so there is no pair of colours to move between.
+
 Fluent's `success`, `caution` and `critical` live on `Colors.system`, which is built from constants
 with no setter a caller can reach, so a scheme's secondary, tertiary and error ramps have nowhere
 to go and are left alone.
 
 A seed with little chroma gives a Fluent theme with little chroma. A grey seed produces seven
 greys, which is the ramp working rather than a fault.
+
+`samples/fluent` is a worked example. Run it with `./gradlew :samples:fluent:run` to switch seeds,
+flip light and dark, and see the generated ramp beside the single blue Fluent falls back to on its
+own.
 
 Platforms: JVM, Android, iOS, JS and Wasm. No macOS native target, Java 17 bytecode from Fluent,
 and the Android floor is core's own 21.
