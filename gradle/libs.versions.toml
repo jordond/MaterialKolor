@@ -18,6 +18,7 @@ androidx-material3 = "1.5.0-alpha28"
 dokka = "2.2.0"
 publish = "0.37.0"
 colormath = "3.7.0"
+composeUnstyled = "2.10.0"
 poko = "0.23.2"
 errorProneAnnotations = "2.50.0"
 kotest = "6.2.5"
@@ -64,6 +65,7 @@ compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.re
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
 compose-ui-test = { module = "org.jetbrains.compose.ui:ui-test", version.ref = "compose-multiplatform" }
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
+composeUnstyled-theming = { module = "com.composables:composeunstyled-theming", version.ref = "composeUnstyled" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "androidx-activity" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
@@ -102,6 +104,7 @@ material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material
 material3-windowSizeClass = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "compose-windowSizeClass" }
 materialKolor-core = { module = "com.materialkolor:material-kolor-core", version.ref = "materialKolor" }
 materialKolor-material3 = { module = "com.materialkolor:material-kolor-material3", version.ref = "materialKolor" }
+materialKolor-unstyled = { module = "com.materialkolor:material-kolor-unstyled", version.ref = "materialKolor" }
 materialKolor-utilities = { module = "com.materialkolor:material-color-utilities", version.ref = "materialKolor" }
 stateHolder = { module = "dev.jordond.stateholder:core", version.ref = "stateHolder" }
 stateHolder-viewModel = { module = "dev.jordond.stateholder:extensions-viewmodel", version.ref = "stateHolder" }

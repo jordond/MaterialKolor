@@ -1,5 +1,6 @@
 package com.materialkolor
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.materialkolor.PaletteStyle.Companion.parse
@@ -23,6 +24,7 @@ import kotlinx.serialization.Serializable
  * and one that carries a seed writes `Cmf:AARRGGBB`, eight uppercase hex digits read through
  * `toArgb`, so a wide gamut seed collapses to its sRGB eight bit form and comes back in sRGB.
  */
+@Immutable
 @Serializable(with = PaletteStyleSerializer::class)
 public sealed interface PaletteStyle {
     /**
