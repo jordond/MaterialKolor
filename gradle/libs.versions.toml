@@ -51,6 +51,14 @@ stateHolder = "3.1.0"
 colorpicker = "1.3.0"
 buildKonfig = "0.23.0"
 
+# Builder v2
+builder-version = "2.0.0"
+materialKolorExport = "6.0.0"
+metro = "1.4.4"
+lucide = "1.1.0"
+filekit = "0.16.0"
+roborazzi = "1.75.0"
+
 [libraries]
 gradlePlugin-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -119,12 +127,28 @@ stateHolder-dispatcher-compose = { module = "dev.jordond.stateholder:dispatcher-
 composeIcons-fontAwesome = { module = "br.com.devsrsouza.compose.icons:font-awesome", version.ref = "composeIcons" }
 compose-colorpicker = { module = "com.github.skydoves:colorpicker-compose", version.ref = "colorpicker" }
 
+# Builder v2
+gradlePlugin-compose = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
+gradlePlugin-composeCompiler = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+gradlePlugin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+composeUnstyled = { module = "com.composables:composeunstyled", version.ref = "composeUnstyled" }
+lucide = { module = "com.composables:icons-lucide", version.ref = "lucide" }
+metrox-viewmodel = { module = "dev.zacsweers.metro:metrox-viewmodel", version.ref = "metro" }
+metrox-viewmodel-compose = { module = "dev.zacsweers.metro:metrox-viewmodel-compose", version.ref = "metro" }
+filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
+filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
+roborazzi-compose-desktop = { module = "io.github.takahirom.roborazzi:roborazzi-compose-desktop", version.ref = "roborazzi" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+
 [bundles]
 logic-plugins = [
     "gradlePlugin-android",
     "gradlePlugin-kotlin",
     "gradlePlugin-publish",
     "gradlePlugin-spotless",
+    "gradlePlugin-compose",
+    "gradlePlugin-composeCompiler",
+    "gradlePlugin-serialization",
 ]
 
 [plugins]
@@ -142,3 +166,7 @@ buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig"
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 compose-hot-reload = { id = "org.jetbrains.compose.hot-reload", version.ref = "compose-hot-reload" }
+
+# Builder v2
+metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
+roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
