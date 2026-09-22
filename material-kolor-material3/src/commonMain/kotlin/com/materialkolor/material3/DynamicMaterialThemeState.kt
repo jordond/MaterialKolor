@@ -107,7 +107,7 @@ public fun rememberDynamicMaterialThemeState(
  */
 @Deprecated(
     message = "A primary color is an override on top of a seed now. Pass your color as the seed, " +
-        "and keep it as primary to get the colors this overload gives you.",
+        "and keep it as primary to get the colors this overload gives you. Removed in 7.0.",
     replaceWith = ReplaceWith(
         "rememberDynamicMaterialThemeState(seedColor = primary, isDark = isDark, " +
             "isAmoled = isAmoled, primary = primary, secondary = secondary, tertiary = tertiary, " +

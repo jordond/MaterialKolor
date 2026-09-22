@@ -131,7 +131,7 @@ public fun DynamicMaterialExpressiveTheme(
  */
 @Deprecated(
     message = "A primary color is an override on top of a seed now. Pass your color as the seed, " +
-        "and keep it as primary to get the colors this overload gives you.",
+        "and keep it as primary to get the colors this overload gives you. Removed in 7.0.",
     replaceWith = ReplaceWith(
         "DynamicMaterialExpressiveTheme(seedColor = primary, motionScheme = motionScheme, " +
             "isDark = isDark, isAmoled = isAmoled, primary = primary, secondary = secondary, " +

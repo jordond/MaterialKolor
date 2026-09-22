@@ -279,6 +279,8 @@ class PrimaryOverrideTest {
             "background" to background,
             "error" to error,
             "errorContainer" to errorContainer,
+            "inverseOnSurface" to inverseOnSurface,
+            "inverseSurface" to inverseSurface,
             "onBackground" to onBackground,
             "onError" to onError,
             "onErrorContainer" to onErrorContainer,
@@ -316,9 +318,7 @@ class PrimaryOverrideTest {
     private fun ColorScheme.roles(): Map<String, Color> =
         seedDrivenRoles() +
             mapOf(
-                "inverseOnSurface" to inverseOnSurface,
                 "inversePrimary" to inversePrimary,
-                "inverseSurface" to inverseSurface,
                 "onPrimary" to onPrimary,
                 "onPrimaryContainer" to onPrimaryContainer,
                 "onPrimaryFixed" to onPrimaryFixed,
