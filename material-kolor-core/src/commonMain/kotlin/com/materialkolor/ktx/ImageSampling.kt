@@ -12,7 +12,7 @@ import kotlin.math.sqrt
 public const val DEFAULT_SAMPLE_AREA: Int = 128 * 128
 
 /**
- * The pixels [samplePixels] kept, and the size of the grid they came back in.
+ * The pixels [samplePixels] kept, plus the width and height of the sampled grid.
  *
  * @property[pixels] ARGB pixels in row-major order, [width] times [height] of them.
  * @property[width] Width of the sampled grid, never wider than the source.
@@ -32,8 +32,8 @@ public class SampledPixels(
  * 16k int array, never a full-size copy. Pass a [sampleArea] of zero or less to read every
  * pixel.
  *
- * Nearest neighbour is deliberate. Averaging neighbours would blend a vibrant pixel into the
- * dull ones beside it, and those vibrant pixels are exactly the ones a theme wants.
+ * Nearest neighbour is deliberate. Averaging would blend a vibrant pixel into the dull ones
+ * around it, and the vibrant pixels are the ones a theme wants.
  *
  * @param[sampleArea] The most pixels to keep, or zero and below to keep them all.
  * @return ARGB pixels in row-major order, plus the sampled width and height.

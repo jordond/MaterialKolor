@@ -322,9 +322,9 @@ quantizer a nearest-neighbour sample of that size instead of every pixel in the 
 larger than 16384 pixels can therefore pick a different seed color than 5.x did, and a camera sized
 photo now finishes in milliseconds rather than seconds. Pass `sampleArea = 0` to go back to reading
 every pixel. Empty and transparent images fall back exactly as they did before. The two
-`remember` helpers moved their work to `Dispatchers.Default`, so they answer `fallback` on the
-first frame and the extracted color once it is ready, which they already did for any recomposition
-that outlived the effect.
+`remember` helpers now run the quantizer on `Dispatchers.Default`. They still return `fallback` on
+the first frame and the extracted color once it is ready, but the main thread no longer does the
+work.
 
 For an RNG regression case, the 96-pixel fixture in the common conformance tests gives first cluster
 `0xff495e42` with population 12 in the old port and `0xff486048` with population 13 in upstream. The
