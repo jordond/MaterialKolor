@@ -18,8 +18,6 @@ kotlin {
 
         withHostTest {}
 
-        // Fluent publishes Java 17 bytecode, so this sample cannot sit on 11 the way the
-        // custom-theme sample does.
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
@@ -40,9 +38,6 @@ kotlin {
             implementation(libs.compose.foundation)
 
             implementation(project(":material-kolor-fluent"))
-
-            // material-kolor-fluent does not bring Fluent along, so a consumer picks its own
-            // version. This sample is that consumer.
             implementation(libs.fluent)
         }
 
