@@ -248,51 +248,43 @@ appear in the final theme, creating more dynamic and playful color palettes.
 style, its indication and its selection colors. The adapter only writes color tokens.
 
 ```kotlin
-import com.composeunstyled.theme.ColorScheme
 import com.composeunstyled.theme.Theme
 import com.composeunstyled.theme.buildThemeV2
 import com.materialkolor.PaletteStyle
 import com.materialkolor.unstyled.MaterialKolorTokens
 import com.materialkolor.unstyled.dynamicColorSchemes
 
-val seedColor = Color(0xFF6750A4)
-
-val AppTheme = buildThemeV2 {
-    colorSchemeTransitionSpec = tween(300)
-    dynamicColorSchemes(seedColor = seedColor, style = PaletteStyle.Vibrant)
-}
-
-@Composable
-fun App() {
-    AppTheme {
-        val colors = Theme[MaterialKolorTokens.colors]
-        Box(Modifier.background(colors[MaterialKolorTokens.surface])) {
-            Text("Hello", color = colors[MaterialKolorTokens.onSurface])
-        }
-    }
-}
-```
-
-Light is the base, dark is the `ColorScheme.Dark` override. The adapter never animates. Set
-`colorSchemeTransitionSpec` on the builder, as above, and Unstyled animates every color token
-whenever it changes, whether the seed moved or the scheme flipped between light and dark.
-
-The builder lambda is composable, so to change the seed at runtime keep it in state the builder
-can read. The theme regenerates when it changes.
-
-```kotlin
 object ThemeSettings {
     var seedColor by mutableStateOf(Color(0xFF6750A4))
 }
 
 val AppTheme = buildThemeV2 {
     colorSchemeTransitionSpec = tween(300)
-    dynamicColorSchemes(seedColor = ThemeSettings.seedColor)
+    dynamicColorSchemes(seedColor = ThemeSettings.seedColor, style = PaletteStyle.Vibrant)
 }
 
-// Anywhere in the app. The theme regenerates and Unstyled animates the change.
-Button(onClick = { ThemeSettings.seedColor = Color(0xFF00695C) }) { Text("Teal") }
+@Composable
+fun App() {
+    AppTheme {
+        val colors = Theme[MaterialKolorTokens.colors]
+        Column(Modifier.background(colors[MaterialKolorTokens.surface])) {
+            Text("Hello", color = colors[MaterialKolorTokens.onSurface])
+            Button(onClick = { ThemeSettings.seedColor = Color(0xFF00695C) }) {
+                Text("Teal")
+            }
+        }
+    }
+}
 ```
+
+The builder lambda is composable, so it reads `ThemeSettings.seedColor` on every recomposition and
+the theme regenerates when the button sets a new one. Light is the base, dark is the
+`ColorScheme.Dark` override, so `AppTheme { }` follows the system and
+`AppTheme(colorScheme = ColorScheme.Dark) { }` pins one.
+
+The adapter never animates. Set `colorSchemeTransitionSpec` on the builder, as above, and Unstyled
+animates every color token whenever it changes, whether the seed moved or the scheme flipped
+between light and dark.
 
 If your app owns its own token vocabulary, build the values with the DSL instead.
 
@@ -303,8 +295,8 @@ val onAccent = ThemeToken<Color>("on_accent")
 val canvas = ThemeToken<Color>("canvas")
 
 val AppTheme = buildThemeV2 {
-    val light = rememberDynamicScheme(seedColor, isDark = false)
-    val dark = rememberDynamicScheme(seedColor, isDark = true)
+    val light = rememberDynamicScheme(ThemeSettings.seedColor, isDark = false)
+    val dark = rememberDynamicScheme(ThemeSettings.seedColor, isDark = true)
 
     properties[appColors] = light.themeValues {
         accent to primary()

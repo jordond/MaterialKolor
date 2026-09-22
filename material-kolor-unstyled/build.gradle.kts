@@ -4,7 +4,6 @@ plugins {
     id("materialkolor.library.compose")
 }
 
-// Compose Unstyled publishes no macOS target and floors Android at 23 with JVM 17 bytecode.
 materialKolorLibrary {
     macos = false
     minSdk = 23

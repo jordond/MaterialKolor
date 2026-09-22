@@ -7,11 +7,24 @@ import com.materialkolor.dynamiccolor.DynamicScheme
 
 /**
  * Every [MaterialKolorTokens] token paired with the color this scheme gives it.
+ *
+ * ```kotlin
+ * val AppTheme = buildThemeV2 {
+ *     properties[MaterialKolorTokens.colors] = scheme.toThemeValues()
+ * }
+ * ```
+ *
+ * [dynamicColors] does the same in one call.
  */
 public fun DynamicScheme.toThemeValues(): Map<ThemeToken<Color>, Color> = MaterialKolors(this).toThemeValues()
 
 /**
  * Every [MaterialKolorTokens] token paired with the color these roles give it.
+ *
+ * ```kotlin
+ * val kolors = MaterialKolors(scheme)
+ * properties[MaterialKolorTokens.colors] = kolors.toThemeValues()
+ * ```
  */
 public fun MaterialKolors.toThemeValues(): Map<ThemeToken<Color>, Color> =
     mapOf(
@@ -101,6 +114,13 @@ public fun DynamicScheme.themeValues(build: ThemeValuesScope.() -> Unit): Map<Th
 
 /**
  * Builds the values for an application-owned vocabulary from these roles.
+ *
+ * ```kotlin
+ * val values = MaterialKolors(scheme).themeValues {
+ *     AppTokens.accent to primary()
+ *     AppTokens.onAccent to onPrimary()
+ * }
+ * ```
  *
  * @see DynamicScheme.themeValues
  */

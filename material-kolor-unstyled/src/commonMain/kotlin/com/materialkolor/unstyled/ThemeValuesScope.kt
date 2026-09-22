@@ -15,6 +15,24 @@ public annotation class ThemeValuesDsl
  *
  * It forwards every [MaterialKolors] role under the same name and turns `token to color` into a
  * recorded pair. Instances come from [themeValues] only.
+ *
+ * ```kotlin
+ * val accent = ThemeToken<Color>("accent")
+ * val onAccent = ThemeToken<Color>("on_accent")
+ * val canvas = ThemeToken<Color>("canvas")
+ *
+ * val values = scheme.themeValues {
+ *     accent to primary()
+ *     onAccent to onPrimary()
+ *     canvas to surfaceContainerLow()
+ * }
+ * ```
+ *
+ * The right-hand side is any [Color], so a role can be adjusted before it is recorded.
+ *
+ * ```kotlin
+ * scrim to scrim().copy(alpha = 0.32f)
+ * ```
  */
 @ThemeValuesDsl
 public class ThemeValuesScope internal constructor(
@@ -24,6 +42,14 @@ public class ThemeValuesScope internal constructor(
 
     /**
      * Records [color] under this token. A token assigned twice keeps the last color.
+     *
+     * ```kotlin
+     * scheme.themeValues {
+     *     accent to primary()
+     *     onAccent to onPrimary()
+     *     canvas to surfaceContainerLow()
+     * }
+     * ```
      */
     public infix fun ThemeToken<Color>.to(color: Color) {
         values[this] = color
