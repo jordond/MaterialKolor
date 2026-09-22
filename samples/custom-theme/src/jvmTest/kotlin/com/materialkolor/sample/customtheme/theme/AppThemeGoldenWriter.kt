@@ -4,11 +4,11 @@ import java.io.File
 import kotlin.test.Test
 
 /**
- * Rewrites the golden table, and only when asked.
+ * Rewrites the golden table when [OUTPUT_ENV_VAR] is set, and does nothing otherwise.
  *
- * The table is a record of every tone this theme picks, so it should move when someone decided it
- * should and never on its own. Regenerate from the repository root with an absolute output path,
- * because the test worker does not run there:
+ * The table records every tone the theme picks, so it should only change when someone meant to
+ * change it. Regenerate from the repository root with an absolute output path, because the test
+ * worker does not run there:
  *
  * ```
  * APP_THEME_GOLDEN_OUT="$PWD/samples/custom-theme/src/commonTest/kotlin/com/materialkolor/sample/customtheme/theme/AppThemeGoldenData.kt" \

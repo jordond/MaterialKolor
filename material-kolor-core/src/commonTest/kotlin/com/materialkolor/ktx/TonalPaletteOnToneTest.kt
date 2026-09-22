@@ -37,7 +37,8 @@ class TonalPaletteOnToneTest {
     fun onTone_reachesAaaNormalText_whenTheRampAllowsIt() {
         val palette = TonalPalette.from(Color(0xFF6750A4))
 
-        // Tones near the middle of the ramp are the ones with room on both sides for 7:1.
+        // Only tones near the ends of the ramp have somewhere to go for 7:1. A mid tone does
+        // not, which is what the fallback test below covers.
         for (tone in listOf(0, 10, 90, 100)) {
             val background = palette.toneColor(tone)
             val content = palette.onTone(tone, ContrastThreshold.WCAG_AAA_NORMAL_TEXT)

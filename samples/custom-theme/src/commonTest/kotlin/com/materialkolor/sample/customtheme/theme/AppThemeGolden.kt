@@ -6,8 +6,8 @@ import androidx.compose.ui.graphics.toArgb
 /**
  * The seeds the golden table is pinned to.
  *
- * Two are enough. The table exists to catch an accidental change to a tone choice, not to cover the
- * seed space, which the contrast and symmetry tests already do.
+ * Two are enough. The table catches an accidental change to a tone choice. Covering the seed space
+ * is the job of the contrast and symmetry tests.
  */
 internal val GoldenSeeds: List<Color> = listOf(
     Color(0xFF6750A4),

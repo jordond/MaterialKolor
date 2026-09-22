@@ -39,8 +39,8 @@ class AppColorsHarmonizeTest {
     fun drinkColors_stayRecognizable() {
         val theme = appColors(seed = Color(0xFF00629E), isDark = false)
 
-        // Harmonizing shifts hue towards the seed but is meant to leave the color recognizable,
-        // so a coffee brown must not arrive at the same hue as the seed.
+        // Harmonizing shifts hue towards the seed but should leave the color recognizable, so a
+        // coffee brown should not end up at the seed hue.
         val seedHue = Color(0xFF00629E).toHct().hue
         val coffeeHue = theme.drinkCoffee.toHct().hue
         assertTrue(
@@ -53,8 +53,8 @@ class AppColorsHarmonizeTest {
     fun unharmonizedPalette_keepsTheSeedHue() {
         val plain = TonalPalette.from(seeds.coffee).toneColor(DECORATIVE_TONE_UNDER_TEST)
 
-        // The theme harmonizes every drink seed. Skipping that step has to leave the hue alone,
-        // which is what makes harmonizing a decision rather than something that always happens.
+        // The theme harmonizes every drink seed, so this is the only place the unharmonized path
+        // gets checked. Leaving harmonizeWith null has to leave the hue where the seed put it.
         assertTrue(
             actual = hueDistance(seeds.coffee.toHct().hue, plain.toHct().hue) < UNHARMONIZED_HUE_TOLERANCE,
             message = "an unharmonized palette moved the seed hue, " +

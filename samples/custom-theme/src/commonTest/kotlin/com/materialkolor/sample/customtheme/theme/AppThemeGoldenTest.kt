@@ -9,8 +9,8 @@ class AppThemeGoldenTest {
         assertEquals(
             expected = appThemeGoldens.trim(),
             actual = renderAppThemeGoldens().trim(),
-            message = "A tone choice moved. Review the diff, then regenerate on purpose, " +
-                "see AppThemeGoldenWriter.",
+            message = "A tone choice moved. Read the diff, and if the change was intended, " +
+                "regenerate the table with AppThemeGoldenWriter.",
         )
     }
 }
