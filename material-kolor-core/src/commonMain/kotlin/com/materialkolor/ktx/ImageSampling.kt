@@ -6,8 +6,8 @@ import kotlin.math.ceil
 import kotlin.math.sqrt
 
 /**
- * The pixel budget the image helpers quantize by default. Upstream Material Color Utilities
- * recommends resizing to 128 by 128 before quantizing.
+ * The pixel budget the image helpers quantize by default. Upstream Material Color Utilities recommends resizing
+ * to 128 by 128 before quantizing.
  */
 public const val DEFAULT_SAMPLE_AREA: Int = 128 * 128
 
@@ -40,7 +40,7 @@ public class SampledPixels(
  */
 public fun ImageBitmap.samplePixels(sampleArea: Int = DEFAULT_SAMPLE_AREA): SampledPixels {
     val area = width * height
-    if (sampleArea <= 0 || area <= sampleArea) {
+    if (sampleArea !in 1..<area) {
         val pixels = IntArray(area)
         readPixels(buffer = pixels, startX = 0, startY = 0)
         return SampledPixels(pixels = pixels, width = width, height = height)
@@ -60,6 +60,7 @@ public fun ImageBitmap.samplePixels(sampleArea: Int = DEFAULT_SAMPLE_AREA): Samp
             width = width,
             height = 1,
         )
+
         for (x in 0 until sampledWidth) {
             out[y * sampledWidth + x] = row[(x * width) / sampledWidth]
         }

@@ -12,9 +12,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.colormath)
-
-            // The image helpers switch to Dispatchers.Default, so declare coroutines directly
-            // rather than relying on the Compose runtime's transitive dependency.
             implementation(libs.kotlinx.coroutines.core)
 
             api(project(":material-color-utilities"))

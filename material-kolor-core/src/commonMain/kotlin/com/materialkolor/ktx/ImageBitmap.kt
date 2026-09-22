@@ -21,12 +21,10 @@ private const val DEFAULT_DESIRED_COLORS = 4
 /**
  * Quantize the colors in a [ImageBitmap] to a maximum of [maxColors] colors.
  *
- * The image is sampled down to [sampleArea] pixels first, so a photo costs the same as a
- * thumbnail. See [samplePixels] if you want the sampled pixels yourself.
+ * The image is sampled down to [sampleArea] pixels first. See [samplePixels] if you want the sampled pixels yourself.
  *
  * @param[image] the [ImageBitmap] to extract colors from.
- * @param[maxColors] The number of colors to divide the image into. A lower number of colors may be
- * returned.
+ * @param[maxColors] The number of colors to divide the image into. A lower number of colors may be returned.
  * @param[sampleArea] The most pixels to read from the image, or zero and below to read them all.
  * @return A map of colors to their frequency in the image.
  */

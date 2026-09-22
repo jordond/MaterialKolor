@@ -29,16 +29,16 @@ The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com
     - [Single Platform](#single-platform)
     - [Version Catalog](#version-catalog)
 - [Usage](#usage)
-  - [Updated Colors](#updated-colors)
-  - [DynamicMaterialTheme](#dynamicmaterialtheme)
-  - [DynamicMaterialExpressiveTheme](#dynamicmaterialexpressivetheme)
+    - [Updated Colors](#updated-colors)
+    - [DynamicMaterialTheme](#dynamicmaterialtheme)
+    - [DynamicMaterialExpressiveTheme](#dynamicmaterialexpressivetheme)
 - [Extensions](#extensions)
     - [Harmonize Colors](#harmonize-colors)
     - [Lighten and Darken](#lighten-and-darken)
     - [Color Temperature](#color-temperature)
 - [Generating from an Image](#generating-from-an-image)
 - [License](#license)
-  - [Changes from original source](#changes-from-original-source)
+    - [Changes from original source](#changes-from-original-source)
 
 ## Platforms
 
@@ -66,7 +66,8 @@ library [m3color](https://github.com/Kyant0/m3color).
 
 You can add this library to your project using Gradle.
 
-Upgrading from 5.x? The [6.0 migration guide](docs/migration-6.0.md) covers the intentional API changes.
+Upgrading from 5.x? The [6.0 migration guide](docs/migration-6.0.md) covers the intentional API
+changes.
 
 ### Multiplatform
 
@@ -77,7 +78,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-              implementation("com.materialkolor:material-kolor-material3:5.0.1")
+                implementation("com.materialkolor:material-kolor-material3:5.0.1")
             }
         }
     }
@@ -109,7 +110,7 @@ For an Android only project, add the dependency to app level `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-  implementation("com.materialkolor:material-kolor-material3:5.0.1")
+    implementation("com.materialkolor:material-kolor-material3:5.0.1")
 }
 ```
 
@@ -169,7 +170,7 @@ customize the generated palette:
 dynamicColorScheme(
     seedColor = seedColor,
     isDark = isDark,
-  style = PaletteStyle.Expressive,
+    style = PaletteStyle.Expressive,
 )
 ```
 
@@ -181,10 +182,10 @@ you will need to use `ColorSpec.SpecVersion.SPEC_2025`:
 
 ```kotlin
 val scheme = rememberDynamicColorScheme(
-  seedColor = seedColor,
-  isDark = isDark,
-  specVersion = ColorSpec.SpecVersion.SPEC_2025,
-  style = PaletteStyle.Expressive, // Optional but recommended if you are using `MaterialExpressiveTheme`
+    seedColor = seedColor,
+    isDark = isDark,
+    specVersion = ColorSpec.SpecVersion.SPEC_2025,
+    style = PaletteStyle.Expressive, // Optional but recommended if you are using `MaterialExpressiveTheme`
 )
 ```
 
@@ -224,17 +225,17 @@ and `ColorSpec.SpecVersion.SPEC_2025` for optimal color generation.
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MyExpressiveTheme(
-  seedColor: Color,
-  isDark: Boolean = isSystemInDarkTheme(),
-  content: @Composable () -> Unit
+    seedColor: Color,
+    isDark: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
 ) {
-  DynamicMaterialExpressiveTheme(
-    seedColor = seedColor,
-    motionScheme = MotionScheme.expressive(),
-    isDark = isDark,
-    animate = true,
-    content = content,
-  )
+    DynamicMaterialExpressiveTheme(
+        seedColor = seedColor,
+        motionScheme = MotionScheme.expressive(),
+        isDark = isDark,
+        animate = true,
+        content = content,
+    )
 }
 ```
 
@@ -323,7 +324,8 @@ Core keeps its own floor.
 ## Extensions
 
 Included in the library are some extensions for working with colors. You can check out
-the [/ktx](material-kolor-core/src/commonMain/kotlin/com/materialkolor/ktx) package for more information.
+the [/ktx](material-kolor-core/src/commonMain/kotlin/com/materialkolor/ktx) package for more
+information.
 
 But here are a couple useful examples:
 
@@ -384,11 +386,11 @@ fun calculateSeedColor(bitmap: ImageBitmap): Color {
 }
 ```
 
-All of these sample the image down to a 128 by 128 pixel budget before quantizing, so a full
-resolution photo costs about as much as a thumbnail. Pass `sampleArea` if you want a different
-budget, or zero and below to read every pixel.
+All of these sample the image down to a 128 by 128 pixel budget before quantizing. Pass `sampleArea`
+if you want a different budget, or zero and below to read every pixel.
 
-See [`ImageBitmap.kt`](material-kolor-core/src/commonMain/kotlin/com/materialkolor/ktx/ImageBitmap.kt)
+See [
+`ImageBitmap.kt`](material-kolor-core/src/commonMain/kotlin/com/materialkolor/ktx/ImageBitmap.kt)
 for more information.
 
 Or in Compose land:
@@ -398,15 +400,12 @@ Or in Compose land:
 fun DynamicTheme(image: ImageBitmap, content: @Composable () -> Unit) {
     val seedColor = rememberThemeColor(image, fallback = MaterialTheme.colorScheme.primary)
 
-  DynamicMaterialTheme(
+    DynamicMaterialTheme(
         seedColor = seedColor,
         content = content
     )
 }
 ```
-
-**Note:** This approach can be pretty slow, so I wouldn't really recommend using it in your UI
-unless you are eagerly loading the colors.
 
 ## License
 
@@ -417,7 +416,6 @@ information.
 
 ### Changes from original source
 
-- Convert Java code to Kotlin
-- Convert library to Kotlin Multiplatform
+- Transform library to Kotlin Multiplatform
 
 For the remaining code see [LICENSE](LICENSE) for more information.
