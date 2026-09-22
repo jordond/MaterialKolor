@@ -112,6 +112,10 @@ declare the version you want alongside it.
 implementation("com.composables:composeunstyled-theming:2.10.0")
 ```
 
+On JVM and Android nothing is brought in for you, so this line is required. On iOS, JS and Wasm the
+klib format makes the dependency part of the artifact whether we like it or not, so you get a
+version by default there; declaring your own still overrides it.
+
 If your app uses Compose Fluent, depend on the Fluent adapter artifact.
 
 ```kotlin
@@ -125,6 +129,10 @@ version you want alongside it.
 ```kotlin
 implementation("io.github.compose-fluent:fluent:v0.1.0")
 ```
+
+On JVM and Android nothing is brought in for you, so this line is required. On iOS, JS and Wasm the
+klib format makes the dependency part of the artifact whether we like it or not, so you get a
+version by default there; declaring your own still overrides it.
 
 The adapter has no macOS native target, because Fluent does not publish one.
 

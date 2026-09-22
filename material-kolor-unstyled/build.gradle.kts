@@ -25,6 +25,17 @@ kotlin {
             compileOnly(libs.composeUnstyled.theming)
         }
 
+        // Klibs record their dependencies in their own manifest, whatever the Gradle scope says,
+        // so an iOS, JS or Wasm consumer resolves com.composables:composeunstyled-theming when it compiles against this
+        // module. Leaving it compileOnly on those targets publishes a klib that asks the resolver
+        // for a library the metadata never supplied, and the consumer gets
+        // `KLIB resolver: Could not find "com.composables:composeunstyled-theming"` rather than a useful error.
+        // compileOnly is genuinely supported on JVM and Android, so the version stays their choice
+        // there. See KT-70727.
+        nativeMain.dependencies { api(libs.composeUnstyled.theming) }
+        jsMain.dependencies { api(libs.composeUnstyled.theming) }
+        wasmJsMain.dependencies { api(libs.composeUnstyled.theming) }
+
         commonTest.dependencies {
             implementation(libs.composeUnstyled.theming)
         }
