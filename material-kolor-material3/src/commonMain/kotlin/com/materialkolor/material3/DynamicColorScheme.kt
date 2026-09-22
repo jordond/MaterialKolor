@@ -141,6 +141,9 @@ public fun dynamicColorScheme(
  *
  * If a color is not provided, then the color palette will be generated from the [style] and [primary].
  *
+ * **Note:** [primary] is used as the seed color and as the primary override, so every palette in
+ * the scheme comes from it.
+ *
  * @param[primary] The color to base the scheme on, and primary color of the scheme.
  * @param[isDark] Whether the scheme should be dark or light.
  * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
@@ -155,6 +158,18 @@ public fun dynamicColorScheme(
  * @param[platform] The platform of the color scheme.
  * @param[modifyColorScheme] A lambda to modify the created [ColorScheme].
  */
+@Deprecated(
+    message = "A primary color is an override on top of a seed now. Pass your color as the seed, " +
+        "and keep it as primary to get the colors this overload gives you. Removed in 7.0.",
+    replaceWith = ReplaceWith(
+        "rememberDynamicColorScheme(seedColor = primary, isDark = isDark, isAmoled = isAmoled, " +
+            "primary = primary, secondary = secondary, tertiary = tertiary, neutral = neutral, " +
+            "neutralVariant = neutralVariant, error = error, style = style, " +
+            "contrastLevel = contrastLevel, specVersion = specVersion, platform = platform, " +
+            "modifyColorScheme = modifyColorScheme)",
+    ),
+    level = DeprecationLevel.WARNING,
+)
 @Composable
 public fun rememberDynamicColorScheme(
     primary: Color,
@@ -187,9 +202,10 @@ public fun rememberDynamicColorScheme(
         platform,
     ) {
         dynamicColorScheme(
-            primary = primary,
+            seedColor = primary,
             isDark = isDark,
             isAmoled = isAmoled,
+            primary = primary,
             secondary = secondary,
             tertiary = tertiary,
             neutral = neutral,
@@ -208,6 +224,9 @@ public fun rememberDynamicColorScheme(
  *
  * If a color is not provided, then the color palette will be generated from the [style] and [primary].
  *
+ * **Note:** [primary] is used as the seed color and as the primary override, so every palette in
+ * the scheme comes from it.
+ *
  * @param[primary] The color to base the scheme on, and primary color of the scheme.
  * @param[isDark] Whether the scheme should be dark or light.
  * @param[isAmoled] Whether the dark scheme is used with Amoled screen (Pure dark).
@@ -222,6 +241,18 @@ public fun rememberDynamicColorScheme(
  * @param[platform] The platform of the color scheme.
  * @param[modifyColorScheme] A lambda to modify the created [ColorScheme].
  */
+@Deprecated(
+    message = "A primary color is an override on top of a seed now. Pass your color as the seed, " +
+        "and keep it as primary to get the colors this overload gives you. Removed in 7.0.",
+    replaceWith = ReplaceWith(
+        "dynamicColorScheme(seedColor = primary, isDark = isDark, isAmoled = isAmoled, " +
+            "primary = primary, secondary = secondary, tertiary = tertiary, neutral = neutral, " +
+            "neutralVariant = neutralVariant, error = error, style = style, " +
+            "contrastLevel = contrastLevel, specVersion = specVersion, platform = platform, " +
+            "modifyColorScheme = modifyColorScheme)",
+    ),
+    level = DeprecationLevel.WARNING,
+)
 public fun dynamicColorScheme(
     primary: Color,
     isDark: Boolean,
