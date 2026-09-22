@@ -20,8 +20,8 @@ dependencies {
     implementation("com.materialkolor:material-kolor-unstyled-jvm:$mcuVersion")
     implementation("com.materialkolor:material-kolor-fluent-jvm:$mcuVersion")
 
-    implementation("io.github.compose-fluent:fluent-desktop:v0.1.0")
-    implementation("com.composables:composeunstyled-theming:2.10.0")
+    implementation(libs.fluent)
+    implementation(libs.composeUnstyled.theming)
 }
 
 kotlin { jvmToolchain(17) }
