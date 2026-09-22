@@ -66,6 +66,12 @@ internal fun Project.configureBuilderCompose() {
     }
 
     extensions.configure<KotlinMultiplatformExtension> {
+        // The Compose compiler plugin needs the runtime on the compile classpath of every module it
+        // processes, even the ones that hold no composables.
+        sourceSets.commonMain.dependencies {
+            implementation(library("compose-runtime"))
+        }
+
         sourceSets.jvmTest.dependencies {
             implementation(kotlin("test"))
         }
