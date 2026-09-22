@@ -16,6 +16,13 @@ import com.materialkolor.ktx.textSecondaryAndTertiaryInverseDisabled
 /**
  * A class that provides various color functions based on the given dynamic scheme.
  *
+ * Roles are one projection of a [DynamicScheme], the one Material defines. The scheme also carries
+ * the six tonal ramps the roles were picked from, reachable as [DynamicScheme.primaryPalette] and
+ * its five siblings. Reach for a ramp when you want a tone Material never named, a pressed state, a
+ * gradient stop, a border that is a little stronger than the last one. Use
+ * [com.materialkolor.ktx.toneColor] to read a tone and [com.materialkolor.ktx.onTone] to get a
+ * readable content color for it.
+ *
  * @property scheme The dynamic scheme used to generate colors.
  * @property isAmoled A flag indicating whether the device is AMOLED.
  */

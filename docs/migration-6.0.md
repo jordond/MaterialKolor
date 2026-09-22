@@ -334,6 +334,19 @@ does not preserve behavior.
 This release does not promise binary compatibility with 5.x, recompile downstream code after
 updating imports, constructors and nullable results.
 
+## Themes that are not Material
+
+Not a migration, but this is where people arriving from `DynamicMaterialTheme` tend to ask. If your
+app has its own color record rather than a `ColorScheme`, you do not need `material-kolor-material3`
+at all. Core generates the scheme, `MaterialKolors` reads the roles, and the scheme's six tonal
+ramps cover everything roles have no name for. `TonalPalette.onTone` gives you a readable content
+color for any tone you pick, and `rememberTonalPalette` builds extra ramps from accent seeds your
+scheme has no room for.
+
+The README has a [Tonal Ramps](../README.md#tonal-ramps) section, and `samples/custom-theme` is a
+worked example with seven accent families, interaction states and surface and border ramps generated
+from a single seed.
+
 ## Image quantization can produce different colors
 
 The old Kotlin port seeded Kotlin's `Random` in `QuantizerWsmeans`. The generated implementation

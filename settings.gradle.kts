@@ -45,6 +45,7 @@ include(
     ":mcu-upstream",
     ":builder:shared",
     ":builder:android",
+    ":samples:custom-theme",
 )
 
 include(":mcu-source-transformer")

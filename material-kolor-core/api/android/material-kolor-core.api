@@ -315,6 +315,9 @@ public final class com/materialkolor/ktx/TonalPaletteKt {
 	public static final fun from (Lcom/materialkolor/palettes/TonalPalette$Companion;I)Lcom/materialkolor/palettes/TonalPalette;
 	public static final fun from (Lcom/materialkolor/palettes/TonalPalette$Companion;Lcom/materialkolor/hct/Hct;)Lcom/materialkolor/palettes/TonalPalette;
 	public static final fun from-4WTKRHQ (Lcom/materialkolor/palettes/TonalPalette$Companion;J)Lcom/materialkolor/palettes/TonalPalette;
+	public static final fun onTone (Lcom/materialkolor/palettes/TonalPalette;ILcom/materialkolor/ktx/ContrastThreshold;)J
+	public static synthetic fun onTone$default (Lcom/materialkolor/palettes/TonalPalette;ILcom/materialkolor/ktx/ContrastThreshold;ILjava/lang/Object;)J
+	public static final fun rememberTonalPalette-8VQfe1w (JLandroidx/compose/ui/graphics/Color;Landroidx/compose/runtime/Composer;II)Lcom/materialkolor/palettes/TonalPalette;
 	public static final fun toneColor (Lcom/materialkolor/palettes/TonalPalette;I)J
 }
 
