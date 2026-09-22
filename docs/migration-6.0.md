@@ -22,8 +22,8 @@ An app that generates schemes for something other than Material3 depends on core
 resolves Compose Material3. `material-kolor-unstyled` is new in 6.0. It adapts schemes to Compose
 Unstyled theming and has nothing to migrate. `material-kolor-palette` is new in 6.0 as well. It
 pairs [kmpalette](https://github.com/jordond/kmpalette) with the scoring in core to read seed colors
-from images, so it is an addition rather than a migration and the core image helpers stay where they
-are.
+from images. The `ImageBitmap` helpers in core are deprecated in its favour and go away in 7.0, see
+[Image helpers move to the palette module](#image-helpers-move-to-the-palette-module).
 
 The Material3 symbols moved to a new package rather than keeping theirs. Two modules declaring
 top-level functions in one package generate the same JVM facade class in both jars, which is a
@@ -132,6 +132,33 @@ val colors = bitmap.themeColors(fallback = MaterialTheme.colorScheme.primary)
 
 Passing the primary role explicitly keeps the old composable behavior. `themeColorOrNull` is
 unchanged for callers that want no fallback.
+
+### Image helpers move to the palette module
+
+`ImageBitmap.themeColors`, `ImageBitmap.themeColor`, `ImageBitmap.themeColorOrNull`,
+`rememberThemeColors`, `rememberThemeColor` and the `QuantizerCelebi.quantize(ImageBitmap)` overload
+are deprecated with a warning. They still work in 6.x and are removed in 7.0. Their replacements
+live in `com.materialkolor:material-kolor-palette`, which loads and quantizes through
+[kmpalette](https://github.com/jordond/kmpalette) and scores the result with the same `Score` core
+uses.
+
+```kotlin
+// Before
+val seed = rememberThemeColor(image = bitmap, fallback = MaterialTheme.colorScheme.primary)
+val colors = bitmap.themeColors(fallback = MaterialTheme.colorScheme.primary)
+
+// After, com.materialkolor.palette
+val seed = rememberThemeColor(
+    loader = ByteArrayLoader,
+    input = bytes,
+    fallback = MaterialTheme.colorScheme.primary,
+)
+val colors = Palette.from(bitmap).generate().themeColors(fallback = MaterialTheme.colorScheme.primary)
+```
+
+`Palette.Builder.generate` is a suspend function, so the non-composable call belongs in a coroutine
+on `Dispatchers.Default`. If you already hold a `PaletteState`, `rememberDynamicScheme` builds the
+scheme straight from it. `ImageBitmap.samplePixels` is not deprecated.
 
 ## Package and role changes
 

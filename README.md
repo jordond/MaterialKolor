@@ -388,8 +388,10 @@ val isCold = MaterialTheme.colorScheme.primary.isCold()
 You can calculate a seed color, or colors that are suitable for UI theming from an image. This is
 useful for generating a color scheme from a user's profile picture, or a background image.
 
-To do so you can call `ImageBitmap.themeColors()`, `ImageBitmap.themeColor()` or the `@Composable`
-function `rememberThemeColors()` or `rememberThemeColor()`:
+The `ImageBitmap` helpers in core are deprecated as of 6.0 and go away in 7.0. New code should use
+the [palette module](#palette-module) below. Until then you can still call `ImageBitmap.themeColors()`,
+`ImageBitmap.themeColor()` or the `@Composable` function `rememberThemeColors()` or
+`rememberThemeColor()`:
 
 ```kotlin
 fun calculateSeedColor(bitmap: ImageBitmap): Color {

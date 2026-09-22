@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.materialkolor.ktx
 
 import androidx.compose.ui.graphics.Color
