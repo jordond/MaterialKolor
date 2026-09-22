@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.materialkolor.ktx
 
 import androidx.compose.runtime.Composable
@@ -28,6 +30,9 @@ private const val DEFAULT_DESIRED_COLORS = 4
  * @param[sampleArea] The most pixels to read from the image, or zero and below to read them all.
  * @return A map of colors to their frequency in the image.
  */
+@Deprecated(
+    "Moved to com.materialkolor:material-kolor-palette. Generate a kmpalette Palette from the bitmap and score its swatches with Palette.themeColors. Removed in 7.0.",
+)
 public fun QuantizerCelebi.quantize(
     image: ImageBitmap,
     maxColors: Int,
@@ -47,6 +52,9 @@ public fun QuantizerCelebi.quantize(
  * the least suitable is the last. There will always be at least one color returned. If none of
  * the input colors suit a theme, the list holds only [fallback].
  */
+@Deprecated(
+    "Moved to com.materialkolor:material-kolor-palette. Generate a kmpalette Palette from the bitmap and call Palette.themeColors. Removed in 7.0.",
+)
 @Stable
 public fun ImageBitmap.themeColors(
     fallback: Color,
@@ -75,6 +83,9 @@ public fun ImageBitmap.themeColors(
  * @param[sampleArea] The most pixels to read from the image, or zero and below to read them all.
  * @return The most suitable color for a UI theme.
  */
+@Deprecated(
+    "Moved to com.materialkolor:material-kolor-palette. Generate a kmpalette Palette from the bitmap and call Palette.themeColor. Removed in 7.0.",
+)
 @Stable
 public fun ImageBitmap.themeColor(
     fallback: Color,
@@ -92,6 +103,9 @@ public fun ImageBitmap.themeColor(
  * @param[sampleArea] The most pixels to read from the image, or zero and below to read them all.
  * @return The most suitable color for a UI theme or `null` if no suitable color found.
  */
+@Deprecated(
+    "Moved to com.materialkolor:material-kolor-palette. Generate a kmpalette Palette from the bitmap and call Palette.themeColorOrNull. Removed in 7.0.",
+)
 @Stable
 public fun ImageBitmap.themeColorOrNull(
     filter: Boolean = true,
@@ -127,6 +141,9 @@ public fun ImageBitmap.themeColorOrNull(
  * @param[sampleArea] The most pixels to read from the image, or zero and below to read them all.
  * @return The most suitable colors for a UI theme.
  */
+@Deprecated(
+    "Moved to com.materialkolor:material-kolor-palette. Call rememberThemeColors with a kmpalette loader, or rememberDynamicScheme with a PaletteState. Removed in 7.0.",
+)
 @Stable
 @Composable
 public fun rememberThemeColors(
@@ -160,6 +177,9 @@ public fun rememberThemeColors(
  * @param[sampleArea] The most pixels to read from the image, or zero and below to read them all.
  * @return The most suitable color for a UI theme.
  */
+@Deprecated(
+    "Moved to com.materialkolor:material-kolor-palette. Call rememberThemeColor with a kmpalette loader, or rememberDynamicScheme with a PaletteState. Removed in 7.0.",
+)
 @Stable
 @Composable
 public fun rememberThemeColor(

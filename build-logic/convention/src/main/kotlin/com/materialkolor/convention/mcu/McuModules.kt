@@ -19,5 +19,6 @@ internal val mcuLibraryModules =
         McuModule("material-color-utilities"),
         McuModule("material-kolor-core"),
         McuModule("material-kolor-material3"),
+        McuModule("material-kolor-palette"),
         McuModule("material-kolor-unstyled", macos = false),
     )
