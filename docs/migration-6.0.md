@@ -315,6 +315,17 @@ established upstream expected values, do not regenerate expectations because the
 implementation disagrees. Empty/transparent image fallbacks and population/tie ordering remain
 explicit test cases.
 
+The image helpers also sample before they quantize. `themeColors`, `themeColor`,
+`themeColorOrNull`, `rememberThemeColors`, `rememberThemeColor` and `QuantizerCelebi.quantize` now
+take a trailing `sampleArea: Int = DEFAULT_SAMPLE_AREA`, a 128 by 128 pixel budget, and feed the
+quantizer a nearest-neighbour sample of that size instead of every pixel in the bitmap. Any image
+larger than 16384 pixels can therefore pick a different seed color than 5.x did, and a camera sized
+photo now finishes in milliseconds rather than seconds. Pass `sampleArea = 0` to go back to reading
+every pixel. Empty and transparent images fall back exactly as they did before. The two
+`remember` helpers moved their work to `Dispatchers.Default`, so they answer `fallback` on the
+first frame and the extracted color once it is ready, which they already did for any recomposition
+that outlived the effect.
+
 For an RNG regression case, the 96-pixel fixture in the common conformance tests gives first cluster
 `0xff495e42` with population 12 in the old port and `0xff486048` with population 13 in upstream. The
 direct ordered fixture records all eight clusters and the score result, both references

@@ -13,12 +13,21 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.colormath)
 
+            // The image helpers hop to Dispatchers.Default themselves, so ask for coroutines
+            // by name instead of leaning on the Compose runtime to bring them along.
+            implementation(libs.kotlinx.coroutines.core)
+
             api(project(":material-color-utilities"))
             api(libs.kotlinx.serialization.core)
         }
 
         commonTest.dependencies {
             implementation(libs.kotlinx.serialization.json)
+        }
+
+        jvmTest.dependencies {
+            implementation(libs.compose.ui.test)
+            implementation(compose.desktop.currentOs)
         }
     }
 }

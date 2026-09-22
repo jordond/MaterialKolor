@@ -384,6 +384,10 @@ fun calculateSeedColor(bitmap: ImageBitmap): Color {
 }
 ```
 
+All of these sample the image down to a 128 by 128 pixel budget before quantizing, so a full
+resolution photo costs about as much as a thumbnail. Pass `sampleArea` if you want a different
+budget, or zero and below to read every pixel.
+
 See [`ImageBitmap.kt`](material-kolor-core/src/commonMain/kotlin/com/materialkolor/ktx/ImageBitmap.kt)
 for more information.
 
