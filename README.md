@@ -32,6 +32,8 @@ The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com
     - [Updated Colors](#updated-colors)
     - [DynamicMaterialTheme](#dynamicmaterialtheme)
     - [DynamicMaterialExpressiveTheme](#dynamicmaterialexpressivetheme)
+- [Tonal Ramps](#tonal-ramps)
+    - [Building Your Own Theme](#building-your-own-theme)
 - [Extensions](#extensions)
     - [Harmonize Colors](#harmonize-colors)
     - [Lighten and Darken](#lighten-and-darken)
@@ -254,6 +256,76 @@ fun MyExpressiveTheme(
 The Expressive theme generates vibrant color schemes where the source color's hue may not directly
 appear in the final theme, creating more dynamic and playful color palettes.
 
+## Tonal Ramps
+
+Roles are one projection of a scheme, the one Material defines. The same scheme carries the six
+tonal ramps those roles were cut from, and you can read any tone off them:
+
+```kotlin
+val scheme = rememberDynamicScheme(seedColor = seedColor, isDark = isDark)
+
+val pressed = scheme.primaryPalette.toneColor(30)
+val sunken = scheme.neutralPalette.toneColor(94)
+val hairline = scheme.neutralVariantPalette.toneColor(85)
+```
+
+Reach for a ramp whenever you want a tone Material never gave a name to. A pressed or raised state,
+a gradient stop, a border that is one step stronger than the last one, a severity scale. Reach for a
+role for everything else, because roles already solved the accent and container problem and there is
+no reason to redo that work.
+
+Whatever tone you pick, `onTone` gives you a content color from the same ramp that is readable on
+top of it:
+
+```kotlin
+val badge = scheme.tertiaryPalette.toneColor(90)
+val badgeText = scheme.tertiaryPalette.onTone(90)
+```
+
+By default it targets WCAG AA for normal text. Pass a different `ContrastThreshold` if you need
+large text or AAA. When the ramp cannot reach the ratio in either direction, you get the nearer end
+of it, which is the most readable color the palette has.
+
+Themes usually want more accents than a scheme has ramps. `rememberTonalPalette` builds one from any
+seed, optionally pulling it towards the scheme's seed first so it looks like it belongs:
+
+```kotlin
+val success = rememberTonalPalette(seed = Color(0xFF2E7D32), harmonizeWith = seedColor)
+
+val successContainer = success.toneColor(90)
+val onSuccessContainer = success.onTone(90)
+```
+
+### Building Your Own Theme
+
+You do not need Material3 to use MaterialKolor. `material-kolor-core` has no dependency on it, so a
+theme with its own shape can be generated from one seed the same way a `ColorScheme` is:
+
+```kotlin
+@Composable
+fun AppTheme(seed: Color, isDark: Boolean, content: @Composable () -> Unit) {
+    val scheme = rememberDynamicScheme(seedColor = seed, isDark = isDark)
+    val kolors = remember(scheme) { MaterialKolors(scheme) }
+    val success = rememberTonalPalette(seed = SuccessSeed, harmonizeWith = seed)
+
+    val colors = AppColors(
+        primary = kolors.primary(),
+        onPrimary = kolors.onPrimary(),
+        primaryPressed = scheme.primaryPalette.toneColor(if (isDark) 70 else 32),
+        success = success.toneColor(if (isDark) 80 else 40),
+        onSuccess = success.onTone(if (isDark) 80 else 40),
+    )
+
+    CompositionLocalProvider(LocalAppColors provides colors, content = content)
+}
+```
+
+[`samples/custom-theme`](samples/custom-theme) is a working version of that. Seven accent families
+instead of three, pressed and raised states, three surface steps, a border ramp and five decorative
+category colors, all from one seed plus eight accent seeds.
+
+Run it with `./gradlew :samples:custom-theme:run`.
+
 ## Compose Unstyled
 
 `material-kolor-unstyled` adapts a MaterialKolor scheme to
@@ -389,7 +461,8 @@ You can calculate a seed color, or colors that are suitable for UI theming from 
 useful for generating a color scheme from a user's profile picture, or a background image.
 
 The `ImageBitmap` helpers in core are deprecated as of 6.0 and go away in 7.0. New code should use
-the [palette module](#palette-module) below. Until then you can still call `ImageBitmap.themeColors()`,
+the [palette module](#palette-module) below. Until then you can still call
+`ImageBitmap.themeColors()`,
 `ImageBitmap.themeColor()` or the `@Composable` function `rememberThemeColors()` or
 `rememberThemeColor()`:
 
@@ -424,7 +497,8 @@ fun DynamicTheme(image: ImageBitmap, content: @Composable () -> Unit) {
 ### Palette module
 
 `material-kolor-palette` starts from [kmpalette](https://github.com/jordond/kmpalette) instead of
-an `ImageBitmap`. kmpalette loads and quantizes the image off the main thread, and this module scores
+an `ImageBitmap`. kmpalette loads and quantizes the image off the main thread, and this module
+scores
 the swatches that come back with the same scoring Android applies to wallpapers.
 
 Anything kmpalette can load is an input, so you pass a loader and the thing it loads:
