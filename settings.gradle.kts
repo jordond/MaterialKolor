@@ -41,11 +41,13 @@ include(
     ":material-kolor-material3",
     ":material-kolor-palette",
     ":material-kolor-unstyled",
+    ":material-kolor-fluent",
     ":material-color-utilities",
     ":mcu-upstream",
     ":builder:shared",
     ":builder:android",
     ":samples:custom-theme",
+    ":samples:fluent",
 )
 
 include(":mcu-source-transformer")

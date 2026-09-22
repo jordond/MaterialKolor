@@ -18,6 +18,10 @@ dependencies {
     implementation("com.materialkolor:material-kolor-material3-jvm:$mcuVersion")
     implementation("com.materialkolor:material-kolor-palette-jvm:$mcuVersion")
     implementation("com.materialkolor:material-kolor-unstyled-jvm:$mcuVersion")
+    implementation("com.materialkolor:material-kolor-fluent-jvm:$mcuVersion")
+
+    implementation(libs.fluent)
+    implementation(libs.composeUnstyled.theming)
 }
 
 kotlin { jvmToolchain(17) }

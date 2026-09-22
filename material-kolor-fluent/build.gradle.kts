@@ -6,27 +6,26 @@ plugins {
 
 materialKolorLibrary {
     macos = false
-    minSdk = 23
     jvmTarget = JvmTarget.JVM_17
 }
 
 kotlin {
     android {
-        namespace = "com.materialkolor.unstyled"
+        namespace = "com.materialkolor.fluent"
     }
 
     sourceSets {
         commonMain.dependencies {
             api(project(":material-kolor-core"))
-            compileOnly(libs.composeUnstyled.theming)
+            compileOnly(libs.fluent)
         }
 
-        nativeMain.dependencies { api(libs.composeUnstyled.theming) }
-        jsMain.dependencies { api(libs.composeUnstyled.theming) }
-        wasmJsMain.dependencies { api(libs.composeUnstyled.theming) }
+        nativeMain.dependencies { api(libs.fluent) }
+        jsMain.dependencies { api(libs.fluent) }
+        wasmJsMain.dependencies { api(libs.fluent) }
 
         commonTest.dependencies {
-            implementation(libs.composeUnstyled.theming)
+            implementation(libs.fluent)
         }
 
         jvmTest.dependencies {

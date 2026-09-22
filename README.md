@@ -105,7 +105,36 @@ implementation("com.materialkolor:material-kolor-unstyled:5.0.1")
 ```
 
 `material-kolor-unstyled` is for Compose Unstyled apps. It brings in `material-kolor-core` as an
-`api` dependency, so it does not need Material3.
+`api` dependency, so it does not need Material3. It does **not** bring Compose Unstyled itself, so
+declare the version you want alongside it.
+
+```kotlin
+implementation("com.composables:composeunstyled-theming:2.10.0")
+```
+
+On JVM and Android nothing is brought in for you, so this line is required. On iOS, JS and Wasm the
+klib format makes the dependency part of the artifact whether we like it or not, so you get a
+version by default there; declaring your own still overrides it.
+
+If your app uses Compose Fluent, depend on the Fluent adapter artifact.
+
+```kotlin
+implementation("com.materialkolor:material-kolor-fluent:5.0.1")
+```
+
+`material-kolor-fluent` brings in `material-kolor-core` as an `api` dependency. It does **not**
+bring [Compose Fluent](https://github.com/Compose-Fluent/compose-fluent-ui) itself, so declare the
+version you want alongside it.
+
+```kotlin
+implementation("io.github.compose-fluent:fluent:v0.1.0")
+```
+
+On JVM and Android nothing is brought in for you, so this line is required. On iOS, JS and Wasm the
+klib format makes the dependency part of the artifact whether we like it or not, so you get a
+version by default there; declaring your own still overrides it.
+
+The adapter has no macOS native target, because Fluent does not publish one.
 
 If you seed your theme from images, depend on the palette artifact.
 
@@ -138,6 +167,7 @@ materialKolor-core = { module = "com.materialkolor:material-kolor-core", version
 materialKolor-material3 = { module = "com.materialkolor:material-kolor-material3", version.ref = "materialKolor" }
 materialKolor-unstyled = { module = "com.materialkolor:material-kolor-unstyled", version.ref = "materialKolor" }
 materialKolor-palette = { module = "com.materialkolor:material-kolor-palette", version.ref = "materialKolor" }
+materialKolor-fluent = { module = "com.materialkolor:material-kolor-fluent", version.ref = "materialKolor" }
 ```
 
 ### Without compose
@@ -404,6 +434,93 @@ whole role set for a scheme you built yourself.
 The adapter publishes android, jvm, js, wasmJs, iosArm64 and iosSimulatorArm64, because Compose
 Unstyled has no macOS native target. Android minSdk 23 and Java 17 bytecode both come from Unstyled.
 Core keeps its own floor.
+
+## Compose Fluent
+
+`material-kolor-fluent` gives [Compose Fluent](https://github.com/Compose-Fluent/compose-fluent-ui)
+an accent it can actually theme from. Fluent ships one accent colour, Windows blue, and its
+`generateShades` is a lookup with a single entry, so every other accent silently comes back as that
+same blue. The adapter replaces the lookup with a generated ramp.
+
+```kotlin
+import com.materialkolor.fluent.rememberFluentColors
+import io.github.composefluent.FluentTheme
+
+@Composable
+fun App() {
+    FluentTheme(colors = rememberFluentColors(seedColor = Color(0xFF6750A4))) {
+        Text("Themed from a seed colour")
+    }
+}
+```
+
+`rememberFluentColors` takes the same parameters as `rememberDynamicScheme`, so `style`,
+`contrastLevel` and the rest work the way they do everywhere else. If you already have a scheme,
+`scheme.toFluentColors()` reads its primary ramp and its dark flag. If you want a Fluent theme
+built on some other ramp, any `TonalPalette` converts:
+
+```kotlin
+val shades = scheme.secondaryPalette.toFluentShades()
+val shades = TonalPalette.from(seedColor).toFluentShades()
+```
+
+Those two are not the same, and the difference is worth knowing. A `PaletteStyle` reshapes chroma
+on the way into a scheme, so `TonalSpot` gives a calmer accent than the seed you handed it, while
+`TonalPalette.from(seedColor)` keeps the seed as it was.
+
+The seven shades are anchored to the lightness of Microsoft's own Windows blue family, rounded to
+the nearest five:
+
+| Shade | Windows blue | its tone | tone used here |
+|---|---|---|---|
+| `dark3` | `#001968` | 13.8 | 15 |
+| `dark2` | `#003D92` | 27.9 | 30 |
+| `dark1` | `#005EB7` | 40.3 | 40 |
+| `base` | `#0078D4` | 49.7 | 50 |
+| `light1` | `#0093F9` | 59.6 | 60 |
+| `light2` | `#60CCFE` | 77.8 | 80 |
+| `light3` | `#98ECFE` | 88.8 | 90 |
+
+Microsoft's ramp shifts hue by 64 degrees from its darkest shade to its lightest, and a tonal
+palette holds hue steady, so this matches the lightness of that ramp rather than reproducing it.
+That is the right trade for a generated accent: you get a ramp of one colour instead of an
+imitation of a blue you did not ask for.
+
+To fade between seeds rather than cut, wrap the colours in `animateFluentColors`.
+
+```kotlin
+@Composable
+fun App() {
+    val colors = animateFluentColors(
+        rememberFluentColors(seedColor = ThemeSettings.seedColor),
+    )
+
+    FluentTheme(colors = colors) {
+        Button(onClick = { ThemeSettings.seedColor = Color(0xFF00695C) }) {
+            Text("Teal")
+        }
+    }
+}
+```
+
+The seven shades animate and the groups derived from them follow. `system` and `controlOnImage`
+hold still, because they are built from Fluent's own constants and never depended on the accent.
+Switching between light and dark is a cut rather than a fade for the same reason: Fluent derives
+both from one set of shades and a flag, so there is no pair of colours to move between.
+
+Fluent's `success`, `caution` and `critical` live on `Colors.system`, which is built from constants
+with no setter a caller can reach, so a scheme's secondary, tertiary and error ramps have nowhere
+to go and are left alone.
+
+A seed with little chroma gives a Fluent theme with little chroma. A grey seed produces seven
+greys, which is the ramp working rather than a fault.
+
+`samples/fluent` is a worked example. Run it with `./gradlew :samples:fluent:run` to switch seeds,
+flip light and dark, and see the generated ramp beside the single blue Fluent falls back to on its
+own.
+
+Platforms: JVM, Android, iOS, JS and Wasm. No macOS native target, Java 17 bytecode from Fluent,
+and the Android floor is core's own 21.
 
 ## Extensions
 
