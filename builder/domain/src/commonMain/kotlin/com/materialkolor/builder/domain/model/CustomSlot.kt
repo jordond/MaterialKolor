@@ -3,13 +3,20 @@ package com.materialkolor.builder.domain.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+// Codes 18 to 29 and 41 to 45 are retired. They belonged to the Love, Cold and Warm families and
+// the five drink slots, which are now accents. A link shared before they went may still carry one,
+// so no slot ever takes those numbers again.
+
 /**
  * A slot of the custom theme target.
  *
- * The vocabulary is fixed, it is the one the custom theme sample ships, so the exported theme is
- * the same shape every time and the Custom tab can show one row per slot. Seven color families
- * instead of three, two interaction tones on primary, three surface steps, and a handful of
- * decorative colors that belong to no family.
+ * The vocabulary is fixed and structural. Two interaction tones on primary, three surface steps,
+ * two text steps, three border steps and a handful of decorative colors that belong to no family,
+ * on top of the roles the scheme already names. Every slot here resolves out of the theme itself,
+ * so the exported theme is the same shape every time and the Custom tab can show one row per slot.
+ *
+ * Color families beyond the scheme's own are not slots. They come from the document's accents,
+ * each of which carries its own seed, and they are addressed by [AccentSlot] instead.
  *
  * Each entry serializes under the name of the property it generates, so a saved document reads
  * the same way the exported theme does.
@@ -76,42 +83,6 @@ public enum class CustomSlot(
     @SerialName("onErrorContainer")
     OnErrorContainer(code = 17, resolution = SlotResolution.FromRole(Role.OnErrorContainer)),
 
-    @SerialName("love")
-    Love(code = 18, resolution = SlotResolution.FromRamp(TonalRamp.Love, light = 40, dark = 80)),
-
-    @SerialName("onLove")
-    OnLove(code = 19, resolution = SlotResolution.OnRamp(TonalRamp.Love, light = 40, dark = 80)),
-
-    @SerialName("loveContainer")
-    LoveContainer(code = 20, resolution = SlotResolution.FromRamp(TonalRamp.Love, light = 90, dark = 30)),
-
-    @SerialName("onLoveContainer")
-    OnLoveContainer(code = 21, resolution = SlotResolution.OnRamp(TonalRamp.Love, light = 90, dark = 30)),
-
-    @SerialName("cold")
-    Cold(code = 22, resolution = SlotResolution.FromRamp(TonalRamp.Cold, light = 40, dark = 80)),
-
-    @SerialName("onCold")
-    OnCold(code = 23, resolution = SlotResolution.OnRamp(TonalRamp.Cold, light = 40, dark = 80)),
-
-    @SerialName("coldContainer")
-    ColdContainer(code = 24, resolution = SlotResolution.FromRamp(TonalRamp.Cold, light = 90, dark = 30)),
-
-    @SerialName("onColdContainer")
-    OnColdContainer(code = 25, resolution = SlotResolution.OnRamp(TonalRamp.Cold, light = 90, dark = 30)),
-
-    @SerialName("warm")
-    Warm(code = 26, resolution = SlotResolution.FromRamp(TonalRamp.Warm, light = 40, dark = 80)),
-
-    @SerialName("onWarm")
-    OnWarm(code = 27, resolution = SlotResolution.OnRamp(TonalRamp.Warm, light = 40, dark = 80)),
-
-    @SerialName("warmContainer")
-    WarmContainer(code = 28, resolution = SlotResolution.FromRamp(TonalRamp.Warm, light = 90, dark = 30)),
-
-    @SerialName("onWarmContainer")
-    OnWarmContainer(code = 29, resolution = SlotResolution.OnRamp(TonalRamp.Warm, light = 90, dark = 30)),
-
     @SerialName("surface")
     Surface(code = 30, resolution = SlotResolution.FromRole(Role.Surface)),
 
@@ -145,21 +116,6 @@ public enum class CustomSlot(
     @SerialName("borderStrong")
     BorderStrong(code = 40, resolution = SlotResolution.FromRamp(TonalRamp.NeutralVariant, light = 55, dark = 65)),
 
-    @SerialName("drinkCoffee")
-    DrinkCoffee(code = 41, resolution = SlotResolution.FromRamp(TonalRamp.Coffee, light = 50, dark = 50)),
-
-    @SerialName("drinkMatcha")
-    DrinkMatcha(code = 42, resolution = SlotResolution.FromRamp(TonalRamp.Matcha, light = 50, dark = 50)),
-
-    @SerialName("drinkIced")
-    DrinkIced(code = 43, resolution = SlotResolution.FromRamp(TonalRamp.Iced, light = 50, dark = 50)),
-
-    @SerialName("drinkTea")
-    DrinkTea(code = 44, resolution = SlotResolution.FromRamp(TonalRamp.Tea, light = 50, dark = 50)),
-
-    @SerialName("drinkChoc")
-    DrinkChoc(code = 45, resolution = SlotResolution.FromRamp(TonalRamp.Chocolate, light = 50, dark = 50)),
-
     @SerialName("scrim")
     Scrim(code = 46, resolution = SlotResolution.FromRole(Role.Scrim)),
 
@@ -174,7 +130,7 @@ public enum class CustomSlot(
  * Where a custom slot gets its color.
  *
  * A slot either takes a role the scheme already solved, or cuts a tone off a ramp itself. Material
- * has no name for a pressed state, a border step or a category color, so those are tones.
+ * has no name for a pressed state, a surface step or a border step, so those are tones.
  */
 public sealed interface SlotResolution {
     /**
@@ -216,8 +172,9 @@ public sealed interface SlotResolution {
 /**
  * A palette a custom slot can cut a tone from.
  *
- * The first six are the scheme's own palettes. The rest are the families the custom target owns,
- * each built from its own seed and harmonized with the theme seed.
+ * These are the scheme's own palettes and nothing else, because those are the only ramps the
+ * theme can hand back for any document. A family with a seed of its own is an accent, and an
+ * accent's ramp is built per family rather than named here.
  */
 public enum class TonalRamp {
     Primary,
@@ -226,14 +183,6 @@ public enum class TonalRamp {
     Error,
     Neutral,
     NeutralVariant,
-    Love,
-    Cold,
-    Warm,
-    Coffee,
-    Matcha,
-    Iced,
-    Tea,
-    Chocolate,
 }
 
 /**

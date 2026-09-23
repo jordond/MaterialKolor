@@ -9,9 +9,9 @@ import kotlin.test.assertTrue
 
 class CustomSlotTest {
     /**
-     * Every slot of the custom theme sample, in the order it declares them.
+     * Every slot of the custom target, in the order the enum declares them.
      */
-    private val sampleSlots = listOf(
+    private val slotNames = listOf(
         "primary",
         "onPrimary",
         "primaryContainer",
@@ -30,18 +30,6 @@ class CustomSlotTest {
         "onError",
         "errorContainer",
         "onErrorContainer",
-        "love",
-        "onLove",
-        "loveContainer",
-        "onLoveContainer",
-        "cold",
-        "onCold",
-        "coldContainer",
-        "onColdContainer",
-        "warm",
-        "onWarm",
-        "warmContainer",
-        "onWarmContainer",
         "surface",
         "surfaceRaised",
         "surfaceSunken",
@@ -53,11 +41,6 @@ class CustomSlotTest {
         "borderFaint",
         "borderSoft",
         "borderStrong",
-        "drinkCoffee",
-        "drinkMatcha",
-        "drinkIced",
-        "drinkTea",
-        "drinkChoc",
         "scrim",
         "focusRing",
         "shadow",
@@ -88,18 +71,6 @@ class CustomSlotTest {
         "onError" to 15,
         "errorContainer" to 16,
         "onErrorContainer" to 17,
-        "love" to 18,
-        "onLove" to 19,
-        "loveContainer" to 20,
-        "onLoveContainer" to 21,
-        "cold" to 22,
-        "onCold" to 23,
-        "coldContainer" to 24,
-        "onColdContainer" to 25,
-        "warm" to 26,
-        "onWarm" to 27,
-        "warmContainer" to 28,
-        "onWarmContainer" to 29,
         "surface" to 30,
         "surfaceRaised" to 31,
         "surfaceSunken" to 32,
@@ -111,11 +82,6 @@ class CustomSlotTest {
         "borderFaint" to 38,
         "borderSoft" to 39,
         "borderStrong" to 40,
-        "drinkCoffee" to 41,
-        "drinkMatcha" to 42,
-        "drinkIced" to 43,
-        "drinkTea" to 44,
-        "drinkChoc" to 45,
         "scrim" to 46,
         "focusRing" to 47,
         "shadow" to 48,
@@ -124,8 +90,8 @@ class CustomSlotTest {
     /**
      * Where every slot gets its color before an override is applied.
      *
-     * Checked by hand against the custom theme sample, one slot at a time. B-115 builds its export
-     * against these tones, so a tone that drifts here drifts in every custom theme anyone exports.
+     * Checked by hand, one slot at a time. B-115 builds its export against these tones, so a tone
+     * that drifts here drifts in every custom theme anyone exports.
      */
     private val slotResolutions = mapOf(
         CustomSlot.Primary to SlotResolution.FromRole(Role.Primary),
@@ -146,18 +112,6 @@ class CustomSlotTest {
         CustomSlot.OnError to SlotResolution.FromRole(Role.OnError),
         CustomSlot.ErrorContainer to SlotResolution.FromRole(Role.ErrorContainer),
         CustomSlot.OnErrorContainer to SlotResolution.FromRole(Role.OnErrorContainer),
-        CustomSlot.Love to SlotResolution.FromRamp(TonalRamp.Love, light = 40, dark = 80),
-        CustomSlot.OnLove to SlotResolution.OnRamp(TonalRamp.Love, light = 40, dark = 80),
-        CustomSlot.LoveContainer to SlotResolution.FromRamp(TonalRamp.Love, light = 90, dark = 30),
-        CustomSlot.OnLoveContainer to SlotResolution.OnRamp(TonalRamp.Love, light = 90, dark = 30),
-        CustomSlot.Cold to SlotResolution.FromRamp(TonalRamp.Cold, light = 40, dark = 80),
-        CustomSlot.OnCold to SlotResolution.OnRamp(TonalRamp.Cold, light = 40, dark = 80),
-        CustomSlot.ColdContainer to SlotResolution.FromRamp(TonalRamp.Cold, light = 90, dark = 30),
-        CustomSlot.OnColdContainer to SlotResolution.OnRamp(TonalRamp.Cold, light = 90, dark = 30),
-        CustomSlot.Warm to SlotResolution.FromRamp(TonalRamp.Warm, light = 40, dark = 80),
-        CustomSlot.OnWarm to SlotResolution.OnRamp(TonalRamp.Warm, light = 40, dark = 80),
-        CustomSlot.WarmContainer to SlotResolution.FromRamp(TonalRamp.Warm, light = 90, dark = 30),
-        CustomSlot.OnWarmContainer to SlotResolution.OnRamp(TonalRamp.Warm, light = 90, dark = 30),
         CustomSlot.Surface to SlotResolution.FromRole(Role.Surface),
         CustomSlot.SurfaceRaised to SlotResolution.FromRamp(TonalRamp.Neutral, light = 100, dark = 12),
         CustomSlot.SurfaceSunken to SlotResolution.FromRamp(TonalRamp.Neutral, light = 94, dark = 4),
@@ -169,11 +123,6 @@ class CustomSlotTest {
         CustomSlot.BorderFaint to SlotResolution.FromRamp(TonalRamp.NeutralVariant, light = 92, dark = 22),
         CustomSlot.BorderSoft to SlotResolution.FromRamp(TonalRamp.NeutralVariant, light = 85, dark = 32),
         CustomSlot.BorderStrong to SlotResolution.FromRamp(TonalRamp.NeutralVariant, light = 55, dark = 65),
-        CustomSlot.DrinkCoffee to SlotResolution.FromRamp(TonalRamp.Coffee, light = 50, dark = 50),
-        CustomSlot.DrinkMatcha to SlotResolution.FromRamp(TonalRamp.Matcha, light = 50, dark = 50),
-        CustomSlot.DrinkIced to SlotResolution.FromRamp(TonalRamp.Iced, light = 50, dark = 50),
-        CustomSlot.DrinkTea to SlotResolution.FromRamp(TonalRamp.Tea, light = 50, dark = 50),
-        CustomSlot.DrinkChoc to SlotResolution.FromRamp(TonalRamp.Chocolate, light = 50, dark = 50),
         CustomSlot.Scrim to SlotResolution.FromRole(Role.Scrim),
         CustomSlot.FocusRing to SlotResolution.FromRamp(TonalRamp.Primary, light = 60, dark = 60),
         CustomSlot.Shadow to SlotResolution.FromRamp(TonalRamp.Neutral, light = 0, dark = 0),
@@ -181,7 +130,7 @@ class CustomSlotTest {
 
     @Test
     fun customSlot_entries_areTheSlotsOfTheCustomTarget() {
-        assertEquals(sampleSlots, CustomSlot.entries.map { slot -> slot.sampleName() })
+        assertEquals(slotNames, CustomSlot.entries.map { slot -> slot.propertyName() })
     }
 
     @Test
@@ -189,14 +138,14 @@ class CustomSlotTest {
         assertEquals(slotCodes.size, CustomSlot.entries.size, "A slot was added or dropped without touching the table")
 
         CustomSlot.entries.forEach { slot ->
-            val name = slot.sampleName()
+            val name = slot.propertyName()
             val expected = assertNotNull(slotCodes[name], "$name is missing from the table")
             assertEquals(expected, slot.code, "$name carries a code no shared link knows about")
         }
     }
 
     @Test
-    fun customSlot_everySlot_resolvesTheWayTheSampleDoes() {
+    fun customSlot_everySlot_resolvesWhereTheTableSays() {
         assertEquals(slotResolutions.size, CustomSlot.entries.size, "A slot resolves nowhere in particular")
 
         CustomSlot.entries.forEach { slot ->
@@ -232,19 +181,54 @@ class CustomSlotTest {
     }
 
     @Test
-    fun customTone_onAnOnRampSlot_movesTheOnColorsOwnTone() {
-        val onLove = CustomSlot.OnLove.resolution as? SlotResolution.OnRamp
-        val resolution = assertNotNull(onLove, "OnLove stopped being an on-color")
+    fun customTone_onARampSlot_movesThatSlotsOwnTone() {
+        val muted = CustomSlot.TextMuted.resolution as? SlotResolution.FromRamp
+        val resolution = assertNotNull(muted, "TextMuted stopped being cut off a ramp")
         val moved = CustomTone(light = 12, dark = 96)
 
-        val document = ThemeDocument.Default.copy(customTones = mapOf(CustomSlot.OnLove to moved))
+        val document = ThemeDocument.Default.copy(customTones = mapOf(CustomSlot.TextMuted to moved))
 
-        // Decision D22 hangs the tone on the on-color itself, so the tone it reads against stays put.
-        assertEquals(moved, document.customTones[CustomSlot.OnLove])
-        assertEquals(40, resolution.light, "The tone OnLove reads against followed the override")
-        assertEquals(80, resolution.dark, "The tone OnLove reads against followed the override")
-        assertNull(document.customTones[CustomSlot.Love], "The override landed on the slot underneath")
+        // Decision D22 hangs the tone on the slot it is attached to, so no neighbour follows it.
+        assertEquals(moved, document.customTones[CustomSlot.TextMuted])
+        assertEquals(40, resolution.light, "The slot's own light tone followed the override")
+        assertEquals(70, resolution.dark, "The slot's own dark tone followed the override")
+        assertNull(document.customTones[CustomSlot.TextStrong], "The override landed on another slot")
     }
 
-    private fun CustomSlot.sampleName(): String = name.replaceFirstChar { first -> first.lowercaseChar() }
+    @Test
+    fun customSlot_retiredCodes_areCarriedByNothing() {
+        // The Love, Cold and Warm families and the five drinks left in B-102b and became accents.
+        // A link shared before that still carries these numbers, so nothing may claim one again.
+        val retired = listOf(18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 41, 42, 43, 44, 45)
+
+        retired.forEach { code ->
+            assertNull(CustomSlot.entries.withCodeOrNull(code), "Code $code was retired and something took it back")
+        }
+    }
+
+    @Test
+    fun tonalRamp_entries_areThePalettesTheThemeBuilds() {
+        // A ramp only exists if a seed somewhere fills it, and the seeds are the key colors. A ramp
+        // with no key color behind it is one the engine cannot resolve for any document.
+        assertEquals(KeyColor.entries.map { color -> color.name }, TonalRamp.entries.map { ramp -> ramp.name })
+    }
+
+    @Test
+    fun customSlot_everyRampItNames_isOneTheThemeBuilds() {
+        val live = KeyColor.entries.map { color -> color.name }.toSet()
+
+        CustomSlot.entries.forEach { slot ->
+            val ramp = when (val resolution = slot.resolution) {
+                is SlotResolution.FromRole -> null
+                is SlotResolution.FromRamp -> resolution.ramp
+                is SlotResolution.OnRamp -> resolution.ramp
+            }
+
+            if (ramp != null) {
+                assertTrue(ramp.name in live, "${slot.name} cuts off $ramp, which no theme can hand back")
+            }
+        }
+    }
+
+    private fun CustomSlot.propertyName(): String = name.replaceFirstChar { first -> first.lowercaseChar() }
 }
