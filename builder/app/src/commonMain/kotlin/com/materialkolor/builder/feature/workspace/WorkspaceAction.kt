@@ -143,6 +143,9 @@ internal sealed interface WorkspaceAction {
     data class DismissHint(
         val id: String,
     ) : WorkspaceAction
+
+    /** Put the Expressive suggestion away. It changes nothing on its own. */
+    data object DismissExpressiveSuggestion : WorkspaceAction
 }
 
 /**

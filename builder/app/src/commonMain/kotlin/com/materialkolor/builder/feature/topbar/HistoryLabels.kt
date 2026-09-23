@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.domain.edit.ChangeKind
 import com.materialkolor.builder.domain.edit.ChangeLabel
+import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.topbar_change_add_accent
 import com.materialkolor.builder.generated.resources.topbar_change_amoled
@@ -33,53 +35,118 @@ import com.materialkolor.builder.generated.resources.workspace_undo
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** What the undo button says, naming the change it would take back ("Undo style change to Vibrant"). */
+/**
+ * What the undo button says, naming the change it would take back ("Undo library change to
+ * Expressive"). [document] is the one on screen, which is where that change landed.
+ */
 @Composable
-internal fun undoText(history: HistoryState): String {
+internal fun undoText(
+    history: HistoryState,
+    document: ThemeDocument,
+): String {
     val label = history.undoLabel ?: return stringResource(Res.string.workspace_undo)
-    return stringResource(Res.string.topbar_undo_change, changeText(label))
-}
-
-/** What the redo button says, naming the change it would bring back. */
-@Composable
-internal fun redoText(history: HistoryState): String {
-    val label = history.redoLabel ?: return stringResource(Res.string.workspace_redo)
-    return stringResource(Res.string.topbar_redo_change, changeText(label))
+    val choice = label.detail?.let { detail -> undoneChoice(detail, document) }
+    return stringResource(Res.string.topbar_undo_change, changeText(label, choice))
 }
 
 /**
- * The change [label] describes, with the value it landed on when there is one. A detail that
- * names what was changed rather than where it went, a role or a slot, is left out.
+ * What the redo button says, naming the change it would bring back. [document] is the one on
+ * screen, which is where that change started.
  */
 @Composable
-private fun changeText(label: ChangeLabel): String {
-    val (kind, namesValue) = kindText(label.kind)
-    val text = stringResource(kind)
-    val detail = label.detail
-    return if (namesValue && detail != null) stringResource(Res.string.topbar_change_to, text, detail) else text
+internal fun redoText(
+    history: HistoryState,
+    document: ThemeDocument,
+): String {
+    val label = history.redoLabel ?: return stringResource(Res.string.workspace_redo)
+    val choice = label.detail?.let { detail -> redoneChoice(detail, document) }
+    return stringResource(Res.string.topbar_redo_change, changeText(label, choice))
 }
 
-/** The string for [kind], and whether its detail is the value the change landed on. */
-private fun kindText(kind: ChangeKind): Pair<StringResource, Boolean> =
+/**
+ * The change [label] describes, with the value it landed on when there is a name for it. A
+ * library reads as the switcher names it, [library] when that is known. A seed keeps its hex and
+ * a rename its name. Every other detail is a raw key or names where the change went, a role or a
+ * slot, so it is left out.
+ */
+@Composable
+private fun changeText(
+    label: ChangeLabel,
+    library: LibraryChoice?,
+): String {
+    val (kind, shown) = kindText(label.kind)
+    val text = stringResource(kind)
+    val detail = when (shown) {
+        Detail.Hidden -> null
+        Detail.AsIs -> label.detail
+        Detail.LibraryName -> library?.let { choice -> libraryName(choice) }
+    }
+    return if (detail == null) text else stringResource(Res.string.topbar_change_to, text, detail)
+}
+
+/** How a change's detail shows after its name. */
+private enum class Detail {
+    /** Left out. */
+    Hidden,
+
+    /** Shown as it is, a hex or a name someone typed. */
+    AsIs,
+
+    /** Shown as the library switcher names it. */
+    LibraryName,
+}
+
+/**
+ * The switcher choice an undo takes back. The step landed on [document], so its flag is the one
+ * the step set. Null when [document] is on another library than [detail] names.
+ */
+private fun undoneChoice(
+    detail: String,
+    document: ThemeDocument,
+): LibraryChoice? = LibraryChoice.of(document).takeIf { choice -> choice.library.name == detail }
+
+/**
+ * The switcher choice a redo brings back. The step starts from [document] and never lands where it
+ * started, so a redo onto Material 3 from Material 3 flips the expressive flag. From another
+ * library the flag it lands on is not known, and it names nothing.
+ */
+private fun redoneChoice(
+    detail: String,
+    document: ThemeDocument,
+): LibraryChoice? =
+    when (Library.entries.firstOrNull { library -> library.name == detail }) {
+        null -> null
+        Library.Material3 -> when {
+            document.library != Library.Material3 -> null
+            document.expressive -> LibraryChoice.M3
+            else -> LibraryChoice.Expressive
+        }
+        Library.Unstyled -> LibraryChoice.Unstyled
+        Library.Fluent -> LibraryChoice.Fluent
+        Library.Custom -> LibraryChoice.Custom
+    }
+
+/** The string for [kind], and how its detail shows. */
+private fun kindText(kind: ChangeKind): Pair<StringResource, Detail> =
     when (kind) {
-        ChangeKind.Seed -> Res.string.topbar_change_seed to true
-        ChangeKind.Preset -> Res.string.topbar_change_preset to true
-        ChangeKind.KeyColor -> Res.string.topbar_change_key_color to false
-        ChangeKind.ResetKeyColors -> Res.string.topbar_change_reset_key_colors to false
-        ChangeKind.Style -> Res.string.topbar_change_style to true
-        ChangeKind.CmfSeed -> Res.string.topbar_change_cmf_seed to true
-        ChangeKind.Contrast -> Res.string.topbar_change_contrast to false
-        ChangeKind.Spec -> Res.string.topbar_change_spec to true
-        ChangeKind.Platform -> Res.string.topbar_change_platform to true
-        ChangeKind.Amoled -> Res.string.topbar_change_amoled to false
-        ChangeKind.AddAccent -> Res.string.topbar_change_add_accent to false
-        ChangeKind.UpdateAccent -> Res.string.topbar_change_update_accent to false
-        ChangeKind.RemoveAccent -> Res.string.topbar_change_remove_accent to false
-        ChangeKind.Pin -> Res.string.topbar_change_pin to false
-        ChangeKind.ClearPins -> Res.string.topbar_change_clear_pins to false
-        ChangeKind.Library -> Res.string.topbar_change_library to true
-        ChangeKind.MotionScheme -> Res.string.topbar_change_motion_scheme to true
-        ChangeKind.ThemeName -> Res.string.topbar_change_theme_name to true
-        ChangeKind.CustomTone -> Res.string.topbar_change_custom_tone to false
-        ChangeKind.Replace -> Res.string.topbar_change_replace to false
+        ChangeKind.Seed -> Res.string.topbar_change_seed to Detail.AsIs
+        ChangeKind.Preset -> Res.string.topbar_change_preset to Detail.Hidden
+        ChangeKind.KeyColor -> Res.string.topbar_change_key_color to Detail.Hidden
+        ChangeKind.ResetKeyColors -> Res.string.topbar_change_reset_key_colors to Detail.Hidden
+        ChangeKind.Style -> Res.string.topbar_change_style to Detail.Hidden
+        ChangeKind.CmfSeed -> Res.string.topbar_change_cmf_seed to Detail.AsIs
+        ChangeKind.Contrast -> Res.string.topbar_change_contrast to Detail.Hidden
+        ChangeKind.Spec -> Res.string.topbar_change_spec to Detail.Hidden
+        ChangeKind.Platform -> Res.string.topbar_change_platform to Detail.Hidden
+        ChangeKind.Amoled -> Res.string.topbar_change_amoled to Detail.Hidden
+        ChangeKind.AddAccent -> Res.string.topbar_change_add_accent to Detail.Hidden
+        ChangeKind.UpdateAccent -> Res.string.topbar_change_update_accent to Detail.Hidden
+        ChangeKind.RemoveAccent -> Res.string.topbar_change_remove_accent to Detail.Hidden
+        ChangeKind.Pin -> Res.string.topbar_change_pin to Detail.Hidden
+        ChangeKind.ClearPins -> Res.string.topbar_change_clear_pins to Detail.Hidden
+        ChangeKind.Library -> Res.string.topbar_change_library to Detail.LibraryName
+        ChangeKind.MotionScheme -> Res.string.topbar_change_motion_scheme to Detail.Hidden
+        ChangeKind.ThemeName -> Res.string.topbar_change_theme_name to Detail.AsIs
+        ChangeKind.CustomTone -> Res.string.topbar_change_custom_tone to Detail.Hidden
+        ChangeKind.Replace -> Res.string.topbar_change_replace to Detail.Hidden
     }

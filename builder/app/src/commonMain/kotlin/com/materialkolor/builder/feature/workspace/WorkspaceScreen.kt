@@ -146,6 +146,9 @@ internal fun WorkspaceScreen(
             is WorkspaceAction.DismissHint -> {
                 model.dismissHint(action.id)
             }
+            WorkspaceAction.DismissExpressiveSuggestion -> {
+                model.dismissExpressiveSuggestion()
+            }
         }
     }
 

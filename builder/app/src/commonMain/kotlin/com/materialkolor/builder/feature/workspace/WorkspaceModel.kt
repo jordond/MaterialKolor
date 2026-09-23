@@ -32,6 +32,7 @@ import com.materialkolor.builder.engine.shuffle.ShuffleResult
 import com.materialkolor.builder.engine.shuffle.shuffleLocks
 import com.materialkolor.builder.feature.canvas.VisionSimulation
 import com.materialkolor.builder.feature.picker.PickerTarget
+import com.materialkolor.builder.feature.topbar.raisesExpressiveSuggestion
 import dev.stateholder.extensions.viewmodel.StateViewModel
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -81,25 +82,44 @@ internal class WorkspaceModel(
         session.saveStatus.mergeState { state, status -> state.copy(saveStatus = status) }
     }
 
-    /** Make [change] to the document. */
+    /**
+     * Make [change] to the document.
+     *
+     * A switch onto Expressive that leaves the style or the spec where Expressive themes rarely sit
+     * raises the Expressive suggestion in the same update as the document. Behind a reveal that is
+     * when the change lands, never the press before it, whatever sent the switch. Any other edit that
+     * moves the document puts it away.
+     */
     fun edit(
         change: DocumentChange,
         phase: EditPhase,
     ) {
+        val before = session.document.value
         session.edit(change, phase)
-        syncSession()
+        val after = session.document.value
+        val suggesting = if (after == before) {
+            state.value.expressiveSuggestion
+        } else {
+            raisesExpressiveSuggestion(change, before, after)
+        }
+        syncSession(suggesting)
     }
 
     /** Step back once. */
     fun undo() {
         session.undo()
-        syncSession()
+        syncSession(expressiveSuggestion = false)
     }
 
     /** Step forward once. */
     fun redo() {
         session.redo()
-        syncSession()
+        syncSession(expressiveSuggestion = false)
+    }
+
+    /** Put the Expressive suggestion away, after Apply or Keep mine. */
+    fun dismissExpressiveSuggestion() {
+        updateState { state -> state.copy(expressiveSuggestion = false) }
     }
 
     /**
@@ -224,10 +244,12 @@ internal class WorkspaceModel(
     suspend fun copyText(text: String): Boolean = clipboard.writeText(text).isSuccess
 
     /** Read the session back into the state at once, so nothing waits on a collector. */
-    private fun syncSession() {
+    private fun syncSession(expressiveSuggestion: Boolean) {
         val document = session.document.value
         val history = session.history.value
-        updateState { state -> state.withDocument(document).copy(history = history) }
+        updateState { state ->
+            state.withDocument(document).copy(history = history, expressiveSuggestion = expressiveSuggestion)
+        }
     }
 
     private fun updateView(block: (ProjectViewState) -> ProjectViewState) {
@@ -254,6 +276,8 @@ internal class WorkspaceModel(
      * @property[fullscreen] Whether the poster and the top bar are hidden.
      * @property[projectName] The open project's name, empty until the session has opened one.
      * @property[saveStatus] Whether the open project's latest changes are saved.
+     * @property[expressiveSuggestion] Whether the top bar offers the Expressive style on the 2025
+     * spec after a switch to Expressive (F-03).
      */
     @Immutable
     data class State(
@@ -269,6 +293,7 @@ internal class WorkspaceModel(
         val fullscreen: Boolean = false,
         val projectName: String = "",
         val saveStatus: SaveStatus = SaveStatus.Idle,
+        val expressiveSuggestion: Boolean = false,
     ) {
         /** What [document] exports to. */
         val target: ExportTarget

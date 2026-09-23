@@ -62,6 +62,21 @@ internal fun ExpressiveSuggestion(
 }
 
 /**
+ * Whether [change], taking the document from [before] to [after], is a switch onto Expressive that
+ * should offer the Expressive style (F-03). Only a library switch raises it, never an undo, an
+ * import or a shuffle.
+ */
+internal fun raisesExpressiveSuggestion(
+    change: DocumentChange,
+    before: ThemeDocument,
+    after: ThemeDocument,
+): Boolean =
+    change is DocumentChange.SetLibrary &&
+        LibraryChoice.of(before) != LibraryChoice.Expressive &&
+        LibraryChoice.of(after) == LibraryChoice.Expressive &&
+        suggestsExpressiveStyle(after)
+
+/**
  * The one edit Apply makes, the Expressive style on the 2025 spec, so a single undo takes both
  * back.
  */

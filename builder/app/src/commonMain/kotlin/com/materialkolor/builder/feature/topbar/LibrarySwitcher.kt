@@ -111,8 +111,9 @@ internal fun LibrarySwitcher(
     }
 }
 
+/** What the switcher calls [choice]. The undo and redo buttons name a library switch the same way. */
 @Composable
-private fun libraryName(choice: LibraryChoice): String =
+internal fun libraryName(choice: LibraryChoice): String =
     stringResource(
         when (choice) {
             LibraryChoice.M3 -> Res.string.topbar_library_m3

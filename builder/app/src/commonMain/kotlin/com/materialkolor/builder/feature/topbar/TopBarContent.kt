@@ -13,6 +13,7 @@ import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
+import com.materialkolor.builder.feature.workspace.skinOf
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.topbar_about
 import com.materialkolor.builder.generated.resources.topbar_appearance_dark
@@ -36,6 +37,7 @@ import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.shell.TopBarRegion
+import com.materialkolor.builder.kit.skin.LocalSkin
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -50,9 +52,10 @@ private const val GITHUB_URL = "https://github.com/jordond/materialkolor"
  * code and the overflow menu. Narrower windows get the switcher as a dropdown, and phones move the
  * command palette, undo and redo into the overflow.
  *
- * A library switch goes through the reveal from the switcher as one undo entry. Everything that
- * has to outlive a skin switch, the open menu, the Expressive suggestion and which control has
- * focus, is held here, outside the skin's own top bar region.
+ * A library switch goes through the reveal from the switcher as one undo entry. What has to outlive
+ * a skin switch, the open menu and which control has focus, is held here, outside the skin's own
+ * top bar region. The Expressive suggestion is the model's, raised with the switch it follows, and
+ * shows once the skin has caught up with the document, so it first draws in the new skin.
  */
 @Composable
 internal fun TopBarContent(
@@ -62,7 +65,6 @@ internal fun TopBarContent(
 ) {
     val focus = rememberTopBarFocus()
     var menuOpen by remember { mutableStateOf(false) }
-    var suggesting by remember { mutableStateOf(false) }
     val compact = LocalLayout.current.windowClass == WindowClass.Compact
     val items = overflowItems(state, dispatcher, compact, LocalUriHandler.current)
 
@@ -72,7 +74,6 @@ internal fun TopBarContent(
             modifier = Modifier.topBarFocus(focus, TopBarControl.Library),
             onSwitch = { choice, origin ->
                 dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin))
-                suggesting = choice == LibraryChoice.Expressive && suggestsExpressiveStyle(state.document)
             },
         )
         Spacer(Modifier.weight(1f))
@@ -89,7 +90,7 @@ internal fun TopBarContent(
                 control = TopBarControl.Undo,
                 focus = focus,
                 icon = IconId.Undo,
-                description = undoText(state.history),
+                description = undoText(state.history, state.document),
                 enabled = state.history.canUndo,
                 onClick = { dispatcher.dispatch(WorkspaceAction.Undo) },
             )
@@ -97,7 +98,7 @@ internal fun TopBarContent(
                 control = TopBarControl.Redo,
                 focus = focus,
                 icon = IconId.Redo,
-                description = redoText(state.history),
+                description = redoText(state.history, state.document),
                 enabled = state.history.canRedo,
                 onClick = { dispatcher.dispatch(WorkspaceAction.Redo) },
             )
@@ -131,12 +132,15 @@ internal fun TopBarContent(
         }
     }
 
+    // The workspace can hear of a switch a frame before the root swaps the skin, so the suggestion
+    // waits for the skin the document asks for and never opens in the one being left.
+    val inDocumentSkin = LocalSkin.current == skinOf(state.document)
     ExpressiveSuggestion(
-        visible = suggesting,
+        visible = state.expressiveSuggestion && inDocumentSkin,
         returnFocusTo = focus.requester(TopBarControl.Library),
-        onKeepMine = { suggesting = false },
+        onKeepMine = { dispatcher.dispatch(WorkspaceAction.DismissExpressiveSuggestion) },
         onApply = {
-            suggesting = false
+            dispatcher.dispatch(WorkspaceAction.DismissExpressiveSuggestion)
             dispatcher.dispatch(WorkspaceAction.EditWithReveal(expressiveStyleChange(state.document), origin = null))
         },
     )
@@ -191,13 +195,13 @@ private fun overflowItems(
                 icon = IconId.Command,
             ),
             BuilderMenuItem(
-                label = undoText(state.history),
+                label = undoText(state.history, state.document),
                 onClick = { dispatcher.dispatch(WorkspaceAction.Undo) },
                 icon = IconId.Undo,
                 enabled = state.history.canUndo,
             ),
             BuilderMenuItem(
-                label = redoText(state.history),
+                label = redoText(state.history, state.document),
                 onClick = { dispatcher.dispatch(WorkspaceAction.Redo) },
                 icon = IconId.Redo,
                 enabled = state.history.canRedo,

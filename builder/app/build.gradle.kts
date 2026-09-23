@@ -137,7 +137,10 @@ tasks.withType<Test>().configureEach {
     javaLauncher.set(java21Launcher)
 }
 // b-216b
-// Compose takes the run task's JDK as a plain path, so the launcher is looked up while configuring.
-composeExtension.extensions.getByType<DesktopExtension>().application {
-    javaHome = java21Launcher.get().metadata.installationPath.asFile.absolutePath
+// Compose registers `run` after evaluation and points it at the JDK Gradle runs on. This swaps in the
+// 21 launcher when the task is configured, so only a build that runs the desktop app looks it up.
+afterEvaluate {
+    tasks.named<JavaExec>("run") {
+        executable(java21Launcher.get().executablePath.asFile.absolutePath)
+    }
 }

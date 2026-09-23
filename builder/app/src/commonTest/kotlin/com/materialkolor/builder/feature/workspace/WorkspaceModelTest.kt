@@ -126,6 +126,46 @@ class WorkspaceModelTest : SessionTestBase() {
         }
 
     @Test
+    fun edit_switchOntoExpressive_raisesTheSuggestionWithTheDocumentAndUndoPutsItAway() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val workspace = workspaceModel(session, preferences)
+            workspace.edit(DocumentChange.SetLibrary(Library.Fluent, expressive = false), EditPhase.Discrete)
+            workspace.state.value.expressiveSuggestion shouldBe false
+
+            workspace.edit(DocumentChange.SetLibrary(Library.Material3, expressive = true), EditPhase.Discrete)
+            val raised = workspace.state.value
+            raised.expressiveSuggestion shouldBe true
+            raised.document.library shouldBe Library.Material3
+            raised.document.expressive shouldBe true
+            workspace.undo()
+            workspace.state.value.expressiveSuggestion shouldBe false
+            workspace.redo()
+
+            workspace.state.value.expressiveSuggestion shouldBe false
+            workspace.state.value.document.expressive shouldBe true
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun dismissExpressiveSuggestion_afterASwitch_putsItAwayAndChangesNothing() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val workspace = workspaceModel(session, preferences)
+            workspace.edit(DocumentChange.SetLibrary(Library.Material3, expressive = true), EditPhase.Discrete)
+            val document = workspace.state.value.document
+            workspace.state.value.expressiveSuggestion shouldBe true
+
+            workspace.dismissExpressiveSuggestion()
+
+            workspace.state.value.expressiveSuggestion shouldBe false
+            workspace.state.value.document shouldBe document
+            harness.clearAndJoin()
+        }
+
+    @Test
     fun edit_thatChangesNothing_leavesNoUndoEntry() =
         runTest {
             val (session, preferences) = session()

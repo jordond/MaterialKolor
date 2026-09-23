@@ -8,6 +8,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -23,6 +24,8 @@ import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.edit.ChangeKind
 import com.materialkolor.builder.domain.edit.ChangeLabel
+import com.materialkolor.builder.domain.edit.DocumentChange
+import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
@@ -34,6 +37,7 @@ import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.feature.workspace.capabilitiesOf
+import com.materialkolor.builder.feature.workspace.skinOf
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
@@ -44,19 +48,24 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 private const val EXPRESSIVE_MESSAGE = "Expressive themes usually use the Expressive style on the 2025 spec"
-private const val UNDO_LIBRARY = "Undo library change to Material3"
+private const val UNDO_EXPRESSIVE = "Undo library change to Expressive"
+private const val REDO_EXPRESSIVE = "Redo library change to Expressive"
 
 /** A desktop window wide enough for the segmented switcher. */
 private const val WIDTH = 1280
 private const val HEIGHT = 800
 
-/** More frames than a reveal needs to record the old frame and land the change, capture timeout included. */
-private const val MAX_FRAMES = 10
+/**
+ * The frames a reveal may take from the click to the change. The host records the old frame in the
+ * first and the change lands at the start of the next, with one to spare. The 100 ms capture
+ * timeout is six frames, so a change that skipped the reveal would miss this.
+ */
+private const val REVEAL_FRAMES = 3
 
 @OptIn(ExperimentalTestApi::class)
 class TopBarContentTest {
     @Test
-    fun undoButton_afterAStyleChange_namesTheChangeInItsTooltip() =
+    fun undoButton_afterAStyleChange_namesTheChangeInItsTooltipWithoutTheRawStyleName() =
         runComposeUiTest {
             val history = HistoryState(canUndo = true, undoLabel = ChangeLabel(ChangeKind.Style, detail = "Vibrant"))
             val document = ThemeDocument.Default.copy(library = Library.Custom)
@@ -74,10 +83,10 @@ class TopBarContentTest {
                 }
             }
 
-            onNodeWithContentDescription("Undo style change to Vibrant").requestFocus()
+            onNodeWithContentDescription("Undo style change").requestFocus()
             waitForIdle()
 
-            onNodeWithText("Undo style change to Vibrant").assertExists()
+            onNodeWithText("Undo style change").assertExists()
         }
 
     @Test
@@ -91,7 +100,7 @@ class TopBarContentTest {
             // A plain edit would have landed inside the click. The reveal holds it until it has drawn the old frame.
             graph.session.document.value.expressive shouldBe false
             var frames = 0
-            while (!graph.session.document.value.expressive && frames < MAX_FRAMES) {
+            while (!graph.session.document.value.expressive && frames < REVEAL_FRAMES) {
                 mainClock.advanceTimeByFrame()
                 frames++
             }
@@ -101,12 +110,13 @@ class TopBarContentTest {
             onNodeWithText("Keep mine").performClick()
             waitForIdle()
             graph.session.history.value.undoLabel shouldBe ChangeLabel(ChangeKind.Library, detail = "Material3")
-            onNodeWithContentDescription(UNDO_LIBRARY).performClick()
+            onNodeWithContentDescription(UNDO_EXPRESSIVE).performClick()
             waitForIdle()
 
             graph.session.document.value.expressive shouldBe false
             graph.session.history.value.canUndo shouldBe false
             onNodeWithText("M3").assertIsSelected()
+            onNodeWithContentDescription(REDO_EXPRESSIVE).assertExists()
         }
 
     @Test
@@ -128,6 +138,40 @@ class TopBarContentTest {
             onNodeWithText(EXPRESSIVE_MESSAGE).assertDoesNotExist()
             graph.session.document.value.style shouldBe Style.TonalSpot
             graph.session.history.value.undoLabel shouldBe ChangeLabel(ChangeKind.Library, detail = "Material3")
+        }
+
+    @Test
+    fun expressiveSuggestion_afterASwitchFromFluent_showsOnlyOnceTheMaterialSkinIsIn() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            val graph = showRoot()
+            runOnIdle {
+                val fluent = graph.session.document.value.copy(
+                    library = Library.Fluent,
+                    expressive = false,
+                    style = Style.Rainbow,
+                    spec = SpecVersion.Spec2025,
+                )
+                graph.session.edit(DocumentChange.Replace(fluent), EditPhase.Discrete)
+            }
+            waitForIdle()
+            mainClock.autoAdvance = false
+
+            onNodeWithText("Expressive").performClick()
+            mainClock.advanceTimeBy(0)
+            var frames = 0
+            while (!graph.session.document.value.expressive && frames < REVEAL_FRAMES) {
+                // Still Fluent, so the suggestion must not have opened in the skin being left.
+                onAllNodesWithText(EXPRESSIVE_MESSAGE).fetchSemanticsNodes().isEmpty() shouldBe true
+                mainClock.advanceTimeByFrame()
+                frames++
+            }
+            skinOf(graph.session.document.value) shouldBe Skin(library = Library.Material3, expressive = true)
+            mainClock.autoAdvance = true
+            waitForIdle()
+
+            onNodeWithText(EXPRESSIVE_MESSAGE).assertExists()
+            skinOf(graph.session.document.value) shouldBe Skin(library = Library.Material3, expressive = true)
+            graph.session.document.value.style shouldBe Style.Rainbow
         }
 
     @Test
