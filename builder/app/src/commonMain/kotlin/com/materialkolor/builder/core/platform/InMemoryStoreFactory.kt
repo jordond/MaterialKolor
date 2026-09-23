@@ -27,6 +27,9 @@ import kotlin.time.Clock
  * once on [quarantined]. Reports wait until something collects them, so one found before the UI is
  * up still reaches the user.
  *
+ * Two texts moved aside from the same key in the same millisecond do not overwrite each other. The
+ * second goes under the quarantine key of the next free millisecond.
+ *
  * @param[now] The time in milliseconds since the epoch, stamped on quarantine keys.
  */
 class InMemoryStoreFactory(
@@ -36,6 +39,8 @@ class InMemoryStoreFactory(
     private val quarantines = Channel<Quarantined>(Channel.UNLIMITED)
     private val otherTabs = MutableSharedFlow<StorageKey>(extraBufferCapacity = CHANGE_BUFFER)
     private val failures = MutableStateFlow<List<StoreError>>(emptyList())
+    private val deleteFailures = MutableStateFlow<List<StoreError>>(emptyList())
+    private val beforeUpdates = MutableStateFlow<Map<String, suspend () -> Unit>>(emptyMap())
 
     override val externalChanges: Flow<StorageKey> = otherTabs.asSharedFlow()
 
@@ -70,6 +75,25 @@ class InMemoryStoreFactory(
         failures.update { queued -> queued + List(count) { error } }
     }
 
+    /** Turn down the next [count] deletes with [error], whichever stores they go to. */
+    internal fun failNextDeletes(
+        count: Int,
+        error: StoreError,
+    ) {
+        deleteFailures.update { queued -> queued + List(count) { error } }
+    }
+
+    /**
+     * Run [action] once, just before the next update to [key] reads what is stored, the way a write
+     * from elsewhere could land in between.
+     */
+    internal fun beforeNextUpdate(
+        key: String,
+        action: suspend () -> Unit,
+    ) {
+        beforeUpdates.update { pending -> pending + (key to action) }
+    }
+
     /** Put [text] under [key] the way another tab would, and report the key on [externalChanges]. */
     internal fun writeFromAnotherTab(
         key: String,
@@ -79,11 +103,11 @@ class InMemoryStoreFactory(
         StorageKeys.parse(key)?.let(otherTabs::tryEmit)
     }
 
-    private fun takeFailure(): StoreError? {
-        var taken: StoreError? = null
-        failures.update { queued ->
-            taken = queued.firstOrNull()
-            queued.drop(1)
+    private fun takeBeforeUpdate(key: String): (suspend () -> Unit)? {
+        var taken: (suspend () -> Unit)? = null
+        beforeUpdates.update { pending ->
+            taken = pending[key]
+            pending - key
         }
         return taken
     }
@@ -103,7 +127,8 @@ class InMemoryStoreFactory(
         override suspend fun get(): T = read()
 
         override suspend fun update(block: (T) -> T): StoreError? {
-            takeFailure()?.let { error -> return error }
+            takeBeforeUpdate(key)?.invoke()
+            failures.takeFirst()?.let { error -> return error }
             var moved: Quarantined? = null
             texts.update { stored ->
                 val reading = settle(stored)
@@ -115,6 +140,7 @@ class InMemoryStoreFactory(
         }
 
         override suspend fun delete(): StoreError? {
+            deleteFailures.takeFirst()?.let { error -> return error }
             texts.update { stored -> stored - key }
             return null
         }
@@ -139,13 +165,29 @@ class InMemoryStoreFactory(
                 is DecodeOutcome.Quarantine -> {
                     Reading(
                         value = default,
-                        texts = stored - key + (StorageKeys.quarantine(key, now()) to text),
+                        texts = stored - key + (freeQuarantineKey(stored) to text),
                         quarantined = Quarantined(key, outcome.reason),
                     )
                 }
             }
         }
+
+        private fun freeQuarantineKey(stored: Map<String, String>): String {
+            var time = now()
+            while (StorageKeys.quarantine(key, time) in stored) time++
+            return StorageKeys.quarantine(key, time)
+        }
     }
+}
+
+/** Take the first queued error off, or null when none is queued. */
+private fun MutableStateFlow<List<StoreError>>.takeFirst(): StoreError? {
+    var taken: StoreError? = null
+    update { queued ->
+        taken = queued.firstOrNull()
+        queued.drop(1)
+    }
+    return taken
 }
 
 /**

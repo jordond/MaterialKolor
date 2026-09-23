@@ -101,7 +101,13 @@ interface StoreFactory {
 
     // b-214
 
-    /** Records a store could not read, each reported once after it was moved to its quarantine key. */
+    /**
+     * Records a store could not read, each reported once after it was moved to its quarantine key.
+     *
+     * Reports found before anything collects are kept until the first collector comes, and each
+     * report reaches exactly one collector. B-302's localStorage store has to keep to this too, since
+     * boot reads the stores before the toast host subscribes.
+     */
     val quarantined: Flow<Quarantined>
 }
 

@@ -65,37 +65,63 @@ internal class ProjectRepository(
     /**
      * Save [record] and list it with [previewColors] as its thumbnail.
      *
-     * The saved revision is one past whatever is stored, and the index entry is stamped with the
-     * time, so the drawer and other tabs can tell it moved.
+     * The saved revision is one past the larger of the stored revision and the one [record] carries,
+     * and the index entry is stamped with the time, so the drawer and other tabs can tell it moved.
+     *
+     * Only a project the drawer lists is saved. An autosave that comes in after the project was
+     * deleted is dropped, writes nothing and returns null. When the delete lands while the save is
+     * under way, the save takes the record it wrote back out, so the project stays deleted.
      */
     suspend fun save(
         record: ProjectRecord,
         previewColors: List<Argb>,
     ): StoreError? {
         requirePreviewColors(previewColors)
+        if (meta(record.id) == null) return null
         val error = write(record.id) {
             projectStore(record.id).update { stored ->
                 record.copy(revision = maxOf(stored.revision, record.revision) + 1, writerTab = tabId)
             }
         }
         if (error != null) return error
-        return write(record.id) { indexStore.update { index -> index.withSaved(record, previewColors, now()) } }
+        var listed = true
+        val indexError = write(record.id) {
+            indexStore.update { index ->
+                listed = index.lists(record.id)
+                index.withSaved(record, previewColors, now())
+            }
+        }
+        if (listed) return indexError
+        projectStore(record.id).delete()
+        return null
     }
 
-    /** Call the project [id] [name]. Nothing happens when there is no such project. */
+    /**
+     * Call the project [id] [name]. Nothing happens when the drawer does not list it.
+     *
+     * Only the name changes, in the record and in its listing, so a save that lands just before keeps
+     * its document. A listed project whose record can no longer be read is renamed in the drawer
+     * only, and its record is left as it is.
+     *
+     * The session that has the project open holds a record of its own. It has to take the new name
+     * into that record, or its next autosave writes the old name back. B-215 or the session owner
+     * wires that.
+     */
     suspend fun rename(
         id: String,
         name: String,
     ): StoreError? {
-        val record = load(id) ?: return null
-        val meta = meta(id) ?: return null
-        return save(record.copy(name = name), meta.previewColors)
+        if (meta(id) == null) return null
+        if (load(id) != null) renameRecord(id, name)?.let { error -> return error }
+        return write(id) { indexStore.update { index -> index.withName(id, name) } }
     }
 
     /**
      * Copy the project [id] under a new id as [name], with its view state but not its history.
      *
-     * Null when there is no such project.
+     * Null when there is no such project. The copy counts as created once it is saved and listed.
+     * Its view state is copied after that if storage takes it, and when it does not the copy opens
+     * with the default view.
      */
     suspend fun duplicate(
         id: String,
@@ -107,21 +133,23 @@ internal class ProjectRepository(
         val created = add(copy, meta.previewColors)
         if (created is Creation.Failed) return created
         val view = viewState(id)
-        if (view == ProjectViewState()) return created
-        return write(copy.id) { viewStore(copy.id).update { view } }?.let(Creation::Failed) ?: created
+        if (view != ProjectViewState()) write(copy.id) { viewStore(copy.id).update { view } }
+        return created
     }
 
     /**
      * Remove the project [id] with its history and view state, and hand back what [restore] needs to
      * undo it.
      *
-     * Null when the drawer does not list [id] or storage would not take the change, and then nothing
-     * was removed. A project whose record can no longer be read can still be deleted.
+     * The project is gone once it leaves the index. Removing its record, history and view state
+     * after that is best effort, and the first of them that fails comes back as
+     * [Deletion.Deleted.cleanupError]. A project whose record can no longer be read can still be
+     * deleted.
      */
-    suspend fun delete(id: String): DeletedProject? {
+    suspend fun delete(id: String): Deletion {
         val projects = indexStore.get().projects
         val position = projects.indexOfFirst { meta -> meta.id == id }
-        if (position < 0) return null
+        if (position < 0) return Deletion.NotListed
         val deleted = DeletedProject(
             meta = projects[position],
             position = position,
@@ -130,11 +158,13 @@ internal class ProjectRepository(
             viewState = viewState(id),
         )
         val error = write(id) { indexStore.update { index -> index.without(id) } }
-        if (error != null) return null
-        projectStore(id).delete()
-        historyStore(id).delete()
-        viewStore(id).delete()
-        return deleted
+        if (error != null) return Deletion.Failed(error)
+        val cleanupError = listOfNotNull(
+            projectStore(id).delete(),
+            historyStore(id).delete(),
+            viewStore(id).delete(),
+        ).firstOrNull()
+        return Deletion.Deleted(deleted, cleanupError)
     }
 
     /** Put a project [delete] removed back, where the drawer listed it. */
@@ -192,9 +222,32 @@ internal class ProjectRepository(
         previewColors: List<Argb>,
     ): Creation {
         requirePreviewColors(previewColors)
-        val error = write(record.id) { projectStore(record.id).update { record } }
-            ?: write(record.id) { indexStore.update { index -> index.withSaved(record, previewColors, now()) } }
-        return if (error == null) Creation.Created(record) else Creation.Failed(error)
+        write(record.id) { projectStore(record.id).update { record } }?.let { error -> return Creation.Failed(error) }
+        val error = write(record.id) { indexStore.update { index -> index.withAdded(record, previewColors, now()) } }
+        if (error == null) return Creation.Created(record)
+        projectStore(record.id).delete()
+        return Creation.Failed(error)
+    }
+
+    /**
+     * Give the record of project [id] the name [name], leaving everything else it holds alone.
+     *
+     * When the record went away since it was last read, the update wrote the default in its place,
+     * and that is taken back out.
+     */
+    private suspend fun renameRecord(
+        id: String,
+        name: String,
+    ): StoreError? {
+        var gone = false
+        val error = write(id) {
+            projectStore(id).update { stored ->
+                gone = stored.revision == UNSAVED
+                if (gone) stored else stored.copy(name = name, revision = stored.revision + 1, writerTab = tabId)
+            }
+        }
+        if (error == null && gone) projectStore(id).delete()
+        return error
     }
 
     /** Run [attempt], and when storage is full drop the old histories and run it once more. */
@@ -247,6 +300,31 @@ internal sealed interface Creation {
 }
 
 /**
+ * What [ProjectRepository.delete] came to.
+ */
+internal sealed interface Deletion {
+    /**
+     * The project left the drawer.
+     *
+     * @property[project] What [ProjectRepository.restore] needs to put it back.
+     * @property[cleanupError] The first error met while removing its record, history and view state,
+     *   or null when they all went.
+     */
+    data class Deleted(
+        val project: DeletedProject,
+        val cleanupError: StoreError?,
+    ) : Deletion
+
+    /** The drawer does not list the project, so nothing was removed. */
+    data object NotListed : Deletion
+
+    /** Storage would not take the change to the index, so nothing was removed. */
+    data class Failed(
+        val error: StoreError,
+    ) : Deletion
+}
+
+/**
  * Everything a deleted project was, so [ProjectRepository.restore] can put it back while the undo
  * toast is up.
  *
@@ -267,33 +345,56 @@ internal data class DeletedProject(
 /** How many projects keep their undo history. */
 internal const val HISTORIES_KEPT: Int = 10
 
+private fun ProjectIndex.lists(id: String): Boolean = projects.any { meta -> meta.id == id }
+
+/** The index with [record] listed at the end, created and updated at [time]. */
+private fun ProjectIndex.withAdded(
+    record: ProjectRecord,
+    previewColors: List<Argb>,
+    time: Long,
+): ProjectIndex = copy(projects = projects + record.toMeta(previewColors, createdAt = time, updatedAt = time))
+
+/** The index with the entry of [record] brought up to date at [time]. It never lists a project it did not. */
 private fun ProjectIndex.withSaved(
     record: ProjectRecord,
     previewColors: List<Argb>,
     time: Long,
-): ProjectIndex {
-    val listed = projects.find { meta -> meta.id == record.id }
-    val meta = ProjectMeta(
-        id = record.id,
-        name = record.name,
-        createdAt = listed?.createdAt ?: time,
-        updatedAt = time,
-        library = record.document.library,
-        expressive = record.document.expressive,
-        previewColors = previewColors,
+): ProjectIndex =
+    copy(
+        projects = projects.map { meta ->
+            if (meta.id != record.id) return@map meta
+            record.toMeta(previewColors, createdAt = meta.createdAt, updatedAt = time)
+        },
     )
-    if (listed == null) return copy(projects = projects + meta)
-    return copy(projects = projects.map { other -> if (other.id == record.id) meta else other })
-}
+
+private fun ProjectIndex.withName(
+    id: String,
+    name: String,
+): ProjectIndex = copy(projects = projects.map { meta -> if (meta.id == id) meta.copy(name = name) else meta })
 
 private fun ProjectIndex.without(id: String): ProjectIndex =
     copy(projects = projects.filterNot { meta -> meta.id == id })
 
 private fun ProjectIndex.withRestored(deleted: DeletedProject): ProjectIndex {
-    if (projects.any { meta -> meta.id == deleted.meta.id }) return this
+    if (lists(deleted.meta.id)) return this
     val position = deleted.position.coerceAtMost(projects.size)
     return copy(projects = projects.take(position) + deleted.meta + projects.drop(position))
 }
+
+private fun ProjectRecord.toMeta(
+    previewColors: List<Argb>,
+    createdAt: Long,
+    updatedAt: Long,
+): ProjectMeta =
+    ProjectMeta(
+        id = id,
+        name = name,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        library = document.library,
+        expressive = document.expressive,
+        previewColors = previewColors,
+    )
 
 private fun requirePreviewColors(previewColors: List<Argb>) {
     require(previewColors.size == ProjectMeta.PREVIEW_COLORS) {

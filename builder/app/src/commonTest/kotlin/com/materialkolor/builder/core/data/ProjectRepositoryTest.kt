@@ -66,6 +66,34 @@ class ProjectRepositoryTest {
         }
 
     @Test
+    fun save_afterDelete_writesNothingAndRestoreStillWorks() =
+        runTest {
+            val listed = List(3) { created().id }
+            val record = repository.load(listed[1]).shouldNotBeNull()
+            val deleted = deletedProject(record.id)
+
+            repository.save(record.copy(document = DOCUMENT.copy(amoled = true)), PREVIEW) shouldBe null
+
+            listedIds() shouldBe listOf(listed[0], listed[2])
+            stores.textAt(StorageKeys.project(record.id)) shouldBe null
+            repository.restore(deleted) shouldBe null
+            listedIds() shouldBe listed
+            repository.load(record.id) shouldBe record
+        }
+
+    @Test
+    fun save_deleteLandsBeforeTheIndexUpdate_takesTheRecordBackOut() =
+        runTest {
+            val record = created()
+            stores.beforeNextUpdate(StorageKeys.INDEX) { deletedProject(record.id) }
+
+            repository.save(record.copy(document = DOCUMENT.copy(amoled = true)), PREVIEW) shouldBe null
+
+            listedIds() shouldBe emptyList()
+            stores.keys shouldBe setOf(StorageKeys.INDEX)
+        }
+
+    @Test
     fun rename_listedProject_renamesTheRecordAndItsListing() =
         runTest {
             val record = created("Before")
@@ -78,6 +106,54 @@ class ProjectRepositoryTest {
                 .projects
                 .single()
                 .name shouldBe "After"
+        }
+
+    @Test
+    fun rename_saveLandsJustBefore_keepsTheSavedDocumentAndTheNewName() =
+        runTest {
+            val record = created("Before")
+            val saved = DOCUMENT.copy(amoled = true)
+            stores.beforeNextUpdate(StorageKeys.project(record.id)) {
+                repository.save(record.copy(document = saved), PREVIEW) shouldBe null
+            }
+
+            repository.rename(record.id, "After") shouldBe null
+
+            val stored = repository.load(record.id).shouldNotBeNull()
+            stored.document shouldBe saved
+            stored.name shouldBe "After"
+            stored.revision shouldBe 3
+            repository.index
+                .first()
+                .projects
+                .single()
+                .name shouldBe "After"
+        }
+
+    @Test
+    fun rename_unreadableRecord_renamesOnlyTheListing() =
+        runTest {
+            val record = created("Before")
+            stores.seed(StorageKeys.project(record.id), "{ broken")
+
+            repository.rename(record.id, "After") shouldBe null
+
+            repository.index
+                .first()
+                .projects
+                .single()
+                .name shouldBe "After"
+            stores.textAt(StorageKeys.project(record.id)) shouldBe null
+        }
+
+    @Test
+    fun create_indexWriteFails_removesTheRecordAgain() =
+        runTest {
+            stores.beforeNextUpdate(StorageKeys.INDEX) { stores.failNextUpdates(1, StoreError.Unavailable) }
+
+            repository.create("Theme", DOCUMENT, PREVIEW) shouldBe Creation.Failed(StoreError.Unavailable)
+
+            stores.keys shouldBe emptySet()
         }
 
     @Test
@@ -99,14 +175,30 @@ class ProjectRepositoryTest {
         }
 
     @Test
+    fun duplicate_viewStateWriteFails_stillCreatesTheCopy() =
+        runTest {
+            val record = created("Original")
+            repository.saveViewState(record.id, VIEW)
+            stores.beforeNextUpdate(StorageKeys.view("p2")) { stores.failNextUpdates(1, StoreError.Unavailable) }
+
+            val copy = repository.duplicate(record.id, "Copy").shouldBeInstanceOf<Creation.Created>().record
+
+            repository.load(copy.id) shouldBe copy
+            repository.viewState(copy.id) shouldBe ProjectViewState()
+            listedIds() shouldBe listOf(record.id, copy.id)
+        }
+
+    @Test
     fun delete_thenRestore_bringsTheProjectBackWithItsHistory() =
         runTest {
             val record = created()
             repository.saveHistory(record.id, HISTORY)
             repository.saveViewState(record.id, VIEW)
 
-            val deleted = repository.delete(record.id).shouldNotBeNull()
+            val deletion = repository.delete(record.id).shouldBeInstanceOf<Deletion.Deleted>()
+            val deleted = deletion.project
 
+            deletion.cleanupError shouldBe null
             repository.load(record.id) shouldBe null
             repository.index.first().projects shouldBe emptyList()
             stores.keys shouldBe setOf(StorageKeys.INDEX)
@@ -124,12 +216,9 @@ class ProjectRepositoryTest {
         runTest {
             val listed = List(3) { created().id }
 
-            repository.restore(repository.delete(listed[1]).shouldNotBeNull())
+            repository.restore(deletedProject(listed[1]))
 
-            repository.index
-                .first()
-                .projects
-                .map { meta -> meta.id } shouldBe listed
+            listedIds() shouldBe listed
         }
 
     @Test
@@ -139,8 +228,40 @@ class ProjectRepositoryTest {
             stores.seed(StorageKeys.project(record.id), "{ broken")
 
             repository.load(record.id) shouldBe null
-            repository.delete(record.id).shouldNotBeNull().record shouldBe null
+            deletedProject(record.id).record shouldBe null
             repository.index.first().projects shouldBe emptyList()
+        }
+
+    @Test
+    fun delete_notListed_returnsNotListed() =
+        runTest {
+            repository.delete("missing") shouldBe Deletion.NotListed
+        }
+
+    @Test
+    fun delete_indexWriteRefused_removesNothing() =
+        runTest {
+            val record = created()
+            stores.failNextUpdates(1, StoreError.Unavailable)
+
+            repository.delete(record.id) shouldBe Deletion.Failed(StoreError.Unavailable)
+
+            repository.load(record.id) shouldBe record
+            listedIds() shouldBe listOf(record.id)
+        }
+
+    @Test
+    fun delete_recordRemovalFails_stillDeletesAndReportsIt() =
+        runTest {
+            val record = created()
+            repository.saveHistory(record.id, HISTORY)
+            stores.failNextDeletes(1, StoreError.Unavailable)
+
+            val deletion = repository.delete(record.id).shouldBeInstanceOf<Deletion.Deleted>()
+
+            deletion.cleanupError shouldBe StoreError.Unavailable
+            listedIds() shouldBe emptyList()
+            stores.keys shouldBe setOf(StorageKeys.INDEX, StorageKeys.project(record.id))
         }
 
     @Test
@@ -152,6 +273,19 @@ class ProjectRepositoryTest {
 
             records.count { record -> stores.textAt(StorageKeys.history(record.id)) != null } shouldBe HISTORIES_KEPT
             repository.loadHistory(records.first().id) shouldBe HistoryRecord()
+        }
+
+    @Test
+    fun saveHistory_leastRecentlyUpdatedOfEleven_keepsItsOwnHistory() =
+        runTest {
+            val records = createdOverTime(count = 11)
+            records.drop(1).forEach { record ->
+                stores.seed(StorageKeys.history(record.id), HistoryRecord.Codec.encode(HISTORY))
+            }
+
+            repository.saveHistory(records.first().id, HISTORY) shouldBe null
+
+            records.forEach { record -> repository.loadHistory(record.id) shouldBe HISTORY }
         }
 
     @Test
@@ -199,6 +333,15 @@ class ProjectRepositoryTest {
 
     private suspend fun created(name: String = "Theme"): ProjectRecord =
         repository.create(name, DOCUMENT, PREVIEW).shouldBeInstanceOf<Creation.Created>().record
+
+    private suspend fun deletedProject(id: String): DeletedProject =
+        repository.delete(id).shouldBeInstanceOf<Deletion.Deleted>().project
+
+    private suspend fun listedIds(): List<String> =
+        repository.index
+            .first()
+            .projects
+            .map { meta -> meta.id }
 
     private suspend fun createdOverTime(count: Int): List<ProjectRecord> =
         List(count) { index -> "Theme $index" }.map { name ->

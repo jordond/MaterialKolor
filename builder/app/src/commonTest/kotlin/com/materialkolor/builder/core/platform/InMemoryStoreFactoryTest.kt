@@ -35,6 +35,19 @@ class InMemoryStoreFactoryTest {
         }
 
     @Test
+    fun get_sameKeyUnreadableTwiceInOneMillisecond_keepsBothTextsAside() =
+        runTest {
+            factory.seed(StorageKeys.PREFS, BROKEN)
+            store.get()
+            factory.seed(StorageKeys.PREFS, ALSO_BROKEN)
+
+            store.get() shouldBe Preferences()
+
+            factory.textAt(StorageKeys.quarantine(StorageKeys.PREFS, MOVED_AT)) shouldBe BROKEN
+            factory.textAt(StorageKeys.quarantine(StorageKeys.PREFS, MOVED_AT + 1)) shouldBe ALSO_BROKEN
+        }
+
+    @Test
     fun data_unreadableText_emitsTheDefault() =
         runTest {
             factory.seed(StorageKeys.PREFS, BROKEN)
@@ -78,6 +91,18 @@ class InMemoryStoreFactoryTest {
         }
 
     @Test
+    fun delete_failureQueued_failsOnceThenRemoves() =
+        runTest {
+            store.update { prefs -> prefs.copy(seedLock = true) }
+            factory.failNextDeletes(1, StoreError.Unavailable)
+
+            store.delete() shouldBe StoreError.Unavailable
+            store.get().seedLock shouldBe true
+            store.delete() shouldBe null
+            factory.keys shouldBe emptySet()
+        }
+
+    @Test
     fun writeFromAnotherTab_ownAndForeignKeys_reportsOnlyTheOwnKey() =
         runTest {
             val changed = mutableListOf<StorageKey>()
@@ -96,3 +121,5 @@ class InMemoryStoreFactoryTest {
 private const val MOVED_AT = 1_700_000_000_000
 
 private const val BROKEN = "not json"
+
+private const val ALSO_BROKEN = "still not json"
