@@ -177,12 +177,15 @@ interface ImageHandle {
  * @property[height] The height of [pixels], at most 128.
  * @property[pixels] ARGB pixels row by row, scaled so the longer side is at most 128 px.
  * @property[thumbnail] The image scaled so the longer side is at most 256 px, for showing back.
+ * @property[detail] The image scaled so the longer side is at most 1024 px, for the image eyedropper.
  */
 class DecodedImage(
     val width: Int,
     val height: Int,
     val pixels: IntArray,
     val thumbnail: ImageBitmap,
+    // b-302
+    val detail: ImageBitmap,
 )
 
 /**

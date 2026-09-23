@@ -15,6 +15,7 @@ import com.materialkolor.builder.web.platform.WebImageInput
 import com.materialkolor.builder.web.platform.WebPasteInput
 import com.materialkolor.builder.web.platform.WebRouter
 import com.materialkolor.builder.web.platform.WebStoreFactory
+import com.materialkolor.builder.web.platform.exposeBrowserApisToE2e
 
 /**
  * The browser's services, one file per service under `platform`.
@@ -27,4 +28,9 @@ internal object BrowserPlatform : PlatformServices {
     override val images: ImageInput = WebImageInput
     override val pastes: PasteInput = WebPasteInput
     override val environment: Environment = WebEnvironment()
+
+    // b-302
+    init {
+        exposeBrowserApisToE2e()
+    }
 }

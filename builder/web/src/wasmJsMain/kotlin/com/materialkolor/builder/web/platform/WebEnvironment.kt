@@ -9,6 +9,7 @@ import com.materialkolor.builder.web.interop.localStorageWrite
 import com.materialkolor.builder.web.interop.mediaQueryState
 import com.materialkolor.builder.web.interop.onPageHide
 import com.materialkolor.builder.web.interop.pageHasEyeDropper
+import com.materialkolor.builder.web.interop.pickColorOnScreen
 import com.materialkolor.builder.web.interop.requestPersistentStorage
 import com.materialkolor.builder.web.interop.sessionStorageRead
 import com.materialkolor.builder.web.interop.sessionStorageWrite
@@ -45,8 +46,14 @@ internal class WebEnvironment : Environment {
         exposeToE2e()
     }
 
-    // B-302 opens the EyeDropper.
-    override suspend fun pickScreenColor(): Argb? = null
+    // b-302
+    // The eyedropper only opens inside a click, and it opens before this first suspends, so start
+    // this undispatched from the click handler. Esc comes back as null and changes nothing.
+    override suspend fun pickScreenColor(): Argb? {
+        if (!eyeDropperAvailable) return null
+        val hex = pickColorOnScreen() ?: return null
+        return runCatching { Argb.fromHex(hex) }.getOrNull()
+    }
 
     override fun hideSplash() = fadeOutSplash(SPLASH_FADE_MILLIS)
 

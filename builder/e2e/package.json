@@ -3,7 +3,8 @@
   "private": true,
   "description": "Browser tests for the MaterialKolor builder, run against the built site.",
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test",
+    "fixtures": "node fixtures/make-photo.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
