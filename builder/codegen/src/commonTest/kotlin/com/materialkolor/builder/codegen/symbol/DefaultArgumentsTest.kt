@@ -50,6 +50,7 @@ class DefaultArgumentsTest {
                 Symbols.OnTone,
                 Symbols.RememberTonalPalette,
                 Symbols.Harmonize,
+                Symbols.MaterialKolors, // b-112c
             ),
             DefaultArguments.all.keys,
         )

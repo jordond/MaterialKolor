@@ -1,7 +1,6 @@
 package com.materialkolor.builder.codegen.target.unstyled
 
 import com.materialkolor.builder.codegen.ExportInput
-import com.materialkolor.builder.codegen.dsl.ArgumentsScope
 import com.materialkolor.builder.codegen.dsl.BodyScope
 import com.materialkolor.builder.codegen.dsl.Expression
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
@@ -21,13 +20,10 @@ import com.materialkolor.builder.codegen.target.material3.SEED_COLOR
 import com.materialkolor.builder.codegen.target.material3.dynamicColorFile
 import com.materialkolor.builder.codegen.target.material3.harmonizes
 import com.materialkolor.builder.codegen.target.material3.paletteName
-import com.materialkolor.builder.codegen.target.material3.parameterName
-import com.materialkolor.builder.codegen.target.material3.platformExpression
 import com.materialkolor.builder.codegen.target.material3.seedName
-import com.materialkolor.builder.codegen.target.material3.specExpression
-import com.materialkolor.builder.codegen.target.material3.styleExpression
 import com.materialkolor.builder.codegen.target.material3.thresholdExpression
 import com.materialkolor.builder.codegen.target.propertyName
+import com.materialkolor.builder.codegen.target.schemeArguments
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.model.Accent
@@ -81,7 +77,7 @@ private fun themeFile(input: ExportInput): GeneratedFile {
                     if (document.pins.isEmpty() && document.accents.isEmpty()) {
                         val defaults = DefaultArguments.DynamicColorSchemes
                         call(Symbols.DynamicColorSchemes, multiline = document.overridesScheme(defaults)) {
-                            schemeArguments(document, defaults, isDark = null)
+                            schemeArguments(document, defaults, seed = ref(SEED_COLOR), isDark = null)
                         }
                     } else {
                         explicitSchemes(document)
@@ -104,7 +100,12 @@ private fun BodyScope.explicitSchemes(document: ThemeDocument) {
         assign(
             name = schemeName(isDark),
             value = callOf(Symbols.RememberDynamicScheme, multiline = true) {
-                schemeArguments(document, DefaultArguments.RememberDynamicScheme, Literals.boolean(isDark))
+                schemeArguments(
+                    document = document,
+                    defaults = DefaultArguments.RememberDynamicScheme,
+                    seed = ref(SEED_COLOR),
+                    isDark = Literals.boolean(isDark),
+                )
             },
         )
     }
@@ -132,28 +133,6 @@ private fun rememberedValues(
         document.accents.forEach { accent -> argument(ref(accent.paletteName)) }
         trailingLambda { statement(schemeValues(document, isDark)) }
     }
-
-/**
- * The arguments that decide a scheme, in the order the called function declares them.
- *
- * The seed is always written and each overridden palette goes in beside it, as in the Material 3
- * dynamic export. [isDark] is left out for `dynamicColorSchemes`, which writes both modes itself.
- */
-private fun ArgumentsScope.schemeArguments(
-    document: ThemeDocument,
-    defaults: SchemeDefaults,
-    isDark: Expression?,
-) {
-    argument("seedColor", ref(SEED_COLOR))
-    optionalArgument("isDark", isDark)
-    KeyColorOrder.forEach { keyColor ->
-        optionalArgument(keyColor.parameterName, document.keyColors[keyColor]?.let { ref(keyColor.name) })
-    }
-    optionalArgument(defaults.style, document.style) { style -> styleExpression(style, document) }
-    optionalArgument(defaults.contrastLevel, document.contrast) { contrast -> Literals.decimal(contrast.hundredths) }
-    optionalArgument(defaults.specVersion, document.spec) { spec -> specExpression(spec) }
-    optionalArgument(defaults.platform, document.platform) { platform -> platformExpression(platform) }
-}
 
 /** Whether a scheme call for this document has anything to say beyond its seed. */
 private fun ThemeDocument.overridesScheme(defaults: SchemeDefaults): Boolean =

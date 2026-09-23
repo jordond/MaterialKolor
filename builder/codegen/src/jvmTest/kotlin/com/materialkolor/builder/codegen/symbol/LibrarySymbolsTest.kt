@@ -95,12 +95,13 @@ class LibrarySymbolsTest {
 
     /**
      * The parameter defaults of every overload of [function], read off its multi-line signatures.
+     * A class's constructor counts as a signature, so constructor defaults are read too.
      *
      * Each overload maps parameter names to the default text, or to null when there is none.
      */
     private fun signaturesOf(function: Symbol): List<Map<String, String?>> {
         val packagePath = function.packageName.replace('.', '/')
-        val header = Regex("""^(?:public )?fun (?:[\w.<>?]+\.)?${Regex.escape(function.simpleName)}\($""")
+        val header = Regex("""^(?:public )?(?:fun (?:[\w.<>?]+\.)?|class )${Regex.escape(function.simpleName)}\($""")
 
         return root
             .listFiles { file -> file.isDirectory && file.name.startsWith("material-kolor-") }
@@ -142,7 +143,7 @@ class LibrarySymbolsTest {
     }
 
     private companion object {
-        val ParameterLine = Regex("""^ {4}(\w+): (.+?)(?: = (.+?))?,$""")
+        val ParameterLine = Regex("""^ {4}(?:(?:private )?val )?(\w+): (.+?)(?: = (.+?))?,$""")
         val ImportLine = Regex("""^import ([\w.]+)$""")
     }
 }

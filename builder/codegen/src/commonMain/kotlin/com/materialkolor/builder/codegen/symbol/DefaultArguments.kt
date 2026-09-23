@@ -162,10 +162,7 @@ public object DefaultArguments {
 
     // b-112b
 
-    /**
-     * Whether `MaterialKolors` drops dark surfaces to black. It is a constructor, which the signature
-     * check in `LibrarySymbolsTest` does not read, so `CustomDynamicGoldenTest` holds it to the source.
-     */
+    /** Whether the `MaterialKolors` constructor drops dark surfaces to black. */
     public val MaterialKolorsIsAmoled: DefaultArgument<Boolean> = notAmoled()
 
     /** Every default in this table, by the function it belongs to. */
@@ -182,6 +179,7 @@ public object DefaultArguments {
                 Symbols.OnTone to listOf(OnToneThreshold),
                 Symbols.RememberTonalPalette to listOf(RememberTonalPaletteHarmonizeWith),
                 Symbols.Harmonize to listOf(HarmonizeMatchSaturation),
+                Symbols.MaterialKolors to listOf(MaterialKolorsIsAmoled), // b-112c
             )
 
     private fun tonalSpot(): DefaultArgument<Style> =

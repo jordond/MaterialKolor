@@ -47,6 +47,22 @@ internal object Material3FrozenCases {
     // b-111c
     private val AndroidDynamicColor: ExportPrefs = frozenPrefs().copy(multiplatform = false, androidDynamicColor = true)
 
+    // b-112c
+
+    /** Accents with the wallpaper colors, which no golden covers. */
+    val AccentsAndroidDynamicColor: ExportInput = AccentsPinsAmoled.with(prefs = AndroidDynamicColor).input
+
+    /** The same, expressive. */
+    val ExpressiveAccentsAndroidDynamicColor: ExportInput = AccentsPinsAmoled
+        .with(
+            document = AccentsPinsAmoled.input.document.copy(
+                expressive = true,
+                style = Style.Expressive,
+                spec = SpecVersion.Spec2025,
+            ),
+            prefs = AndroidDynamicColor,
+        ).input
+
     val all: Map<String, ExportInput> = mapOf(
         "material3-frozen-default" to Fixtures.Default.with(prefs = frozenPrefs()).input,
         "material3-frozen-accents-pins-amoled" to AccentsPinsAmoled.input,
@@ -190,6 +206,21 @@ class Material3FrozenTest {
         }
     }
 
+    // b-112c
+    @Test
+    fun material3Frozen_accentsWithAndroidDynamicColor_provideAroundTheBranch() {
+        assertProvidesAroundTheBranch(Material3FrozenCases.AccentsAndroidDynamicColor, themeCall = "MaterialTheme(")
+    }
+
+    // b-112c
+    @Test
+    fun material3Frozen_expressiveAccentsWithAndroidDynamicColor_provideAroundTheBranch() {
+        assertProvidesAroundTheBranch(
+            input = Material3FrozenCases.ExpressiveAccentsAndroidDynamicColor,
+            themeCall = "MaterialExpressiveTheme(",
+        )
+    }
+
     @Test
     fun material3Frozen_otherLibrary_isRefused() {
         val fluent = Fixtures.input(
@@ -198,6 +229,25 @@ class Material3FrozenTest {
         )
 
         assertFailsWith<IllegalArgumentException> { Material3Frozen.files(fluent) }
+    }
+
+    /**
+     * The accents are provided around the whole `if`, so the wallpaper branch reads them too, and the
+     * `else` still calls [themeCall] on the literal standard pair.
+     */
+    private fun assertProvidesAroundTheBranch(
+        input: ExportInput,
+        themeCall: String,
+    ) {
+        val theme = theme(input)
+        val provider = theme.indexOf("    CompositionLocalProvider(LocalExtendedColors provides extendedColors) {\n")
+        val branch = theme.indexOf("        if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {\n")
+        val literal = "        } else {\n            $themeCall\n" +
+            "                colorScheme = if (isDark) darkScheme else lightScheme,\n"
+
+        assertTrue(provider >= 0, theme)
+        assertTrue(branch > provider, theme)
+        assertTrue(literal in theme, theme)
     }
 
     private fun theme(input: ExportInput): String =

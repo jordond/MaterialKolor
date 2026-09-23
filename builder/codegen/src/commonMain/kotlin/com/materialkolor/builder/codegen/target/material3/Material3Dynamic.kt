@@ -2,7 +2,6 @@ package com.materialkolor.builder.codegen.target.material3
 
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.dsl.AnnotationSpec
-import com.materialkolor.builder.codegen.dsl.ArgumentsScope
 import com.materialkolor.builder.codegen.dsl.BodyScope
 import com.materialkolor.builder.codegen.dsl.Expression
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
@@ -16,16 +15,14 @@ import com.materialkolor.builder.codegen.dsl.lambdaType
 import com.materialkolor.builder.codegen.dsl.member
 import com.materialkolor.builder.codegen.dsl.ref
 import com.materialkolor.builder.codegen.symbol.DefaultArguments
-import com.materialkolor.builder.codegen.symbol.SchemeDefaults
 import com.materialkolor.builder.codegen.symbol.Symbols
 import com.materialkolor.builder.codegen.symbol.optionalArgument
-import com.materialkolor.builder.codegen.target.DYNAMIC_COLOR_PARAMETER
 import com.materialkolor.builder.codegen.target.dynamicColorParameter
+import com.materialkolor.builder.codegen.target.schemeArguments
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.KeyColor
-import com.materialkolor.builder.domain.model.MotionSchemeChoice
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.SchemePlatform
@@ -67,7 +64,6 @@ private const val CONTENT = "content"
 private const val STATE = "state"
 private const val SCHEME = "scheme"
 private const val EXTENDED_COLORS = "extendedColors"
-private const val CONTEXT = "context" // b-111c
 
 // b-112
 
@@ -156,7 +152,12 @@ private fun BodyScope.themeBody(
         assign(
             name = STATE,
             value = callOf(Symbols.RememberDynamicMaterialThemeState, multiline = true) {
-                schemeArguments(document, DefaultArguments.RememberDynamicMaterialThemeState)
+                schemeArguments(
+                    document = document,
+                    defaults = DefaultArguments.RememberDynamicMaterialThemeState,
+                    seed = ref(SEED_COLOR),
+                    isDark = ref(IS_DARK),
+                )
                 argument("modifyColorScheme", pinnedScheme(document))
             },
         )
@@ -193,9 +194,11 @@ private fun themeCall(
     return call(function, multiline = true) {
         if (withState) {
             argument(STATE, ref(STATE))
-            defaults.motionScheme?.let { default -> motionSchemeArgument(default.parameter, document.motionScheme) }
+            defaults.motionScheme?.let { default ->
+                argument(default.parameter, motionSchemeExpression(document.motionScheme))
+            }
         } else {
-            schemeArguments(document, defaults)
+            schemeArguments(document, defaults, seed = ref(SEED_COLOR), isDark = ref(IS_DARK))
         }
         // The library's own spring is internal, so the duration someone picked is always written out.
         optionalArgument(checkNotNull(defaults.animate), prefs.animate) { animate -> Literals.boolean(animate) }
@@ -205,44 +208,6 @@ private fun themeCall(
         }
         argument(CONTENT, ref(CONTENT))
     }
-}
-
-/**
- * The arguments that decide the scheme, in the order the called function declares them.
- *
- * The seed is always written, and each overridden palette goes in beside it rather than replacing
- * it, so the seed still drives every palette the document leaves alone.
- */
-private fun ArgumentsScope.schemeArguments(
-    document: ThemeDocument,
-    defaults: SchemeDefaults,
-) {
-    argument("seedColor", ref(SEED_COLOR))
-    defaults.motionScheme?.let { default -> motionSchemeArgument(default.parameter, document.motionScheme) }
-    argument(IS_DARK, ref(IS_DARK))
-    defaults.isAmoled?.let { default ->
-        optionalArgument(default, document.amoled) { amoled -> Literals.boolean(amoled) }
-    }
-    KeyColorOrder.forEach { keyColor ->
-        optionalArgument(keyColor.parameterName, document.keyColors[keyColor]?.let { ref(keyColor.name) })
-    }
-    optionalArgument(defaults.style, document.style) { style -> styleExpression(style, document) }
-    optionalArgument(defaults.contrastLevel, document.contrast) { contrast -> Literals.decimal(contrast.hundredths) }
-    optionalArgument(defaults.specVersion, document.spec) { spec -> specExpression(spec) }
-    optionalArgument(defaults.platform, document.platform) { platform -> platformExpression(platform) }
-}
-
-/** The motion scheme has no default a document could match, so it is always written. */
-private fun ArgumentsScope.motionSchemeArgument(
-    parameter: String,
-    choice: MotionSchemeChoice,
-) {
-    val motionScheme = ref(Symbols.MotionScheme)
-    val value = when (choice) {
-        MotionSchemeChoice.Standard -> motionScheme.call("standard")
-        MotionSchemeChoice.Expressive -> motionScheme.call("expressive")
-    }
-    argument(parameter, value)
 }
 
 /**
@@ -331,48 +296,3 @@ internal val KeyColor.parameterName: String
 /** The `ColorScheme` property for this role, as in `surfaceContainerHigh`. */
 internal val Role.propertyName: String
     get() = name.replaceFirstChar { char -> char.lowercaseChar() }
-
-// b-111c
-
-/**
- * Whether the theme function offers the wallpaper colors. Only an Android project can reach them,
- * so a multiplatform export never does, whatever the option says.
- */
-internal val ExportInput.writesAndroidDynamicColor: Boolean
-    get() = !prefs.multiplatform && prefs.androidDynamicColor
-
-// b-111c
-
-/** `val context = LocalContext.current`, which the wallpaper schemes are read from. */
-internal fun BodyScope.assignContext() {
-    assign(CONTEXT, ref(Symbols.LocalContext).member("current"))
-}
-
-// b-111c
-
-/**
- * `if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)` the theme on the wallpaper
- * colors, else [otherwise].
- *
- * The wallpaper schemes only exist from Android 12, and where they do they hide the exported colors,
- * which is why the option is off unless someone turns it on.
- */
-internal fun androidDynamicColorBranch(
-    input: ExportInput,
-    otherwise: Expression,
-): Expression {
-    val build = ref(Symbols.Build)
-    val sdkAtLeastS = infix(build.member("VERSION").member("SDK_INT"), ">=", build.member("VERSION_CODES").member("S"))
-    val context = ref(CONTEXT)
-    val wallpaper = ifElse(
-        condition = ref(IS_DARK),
-        whenTrue = call(Symbols.DynamicDarkColorScheme) { argument(context) },
-        whenFalse = call(Symbols.DynamicLightColorScheme) { argument(context) },
-    )
-
-    return ifElse(
-        condition = infix(ref(DYNAMIC_COLOR_PARAMETER), "&&", sdkAtLeastS),
-        whenTrue = materialThemeCall(input, colorScheme = wallpaper),
-        whenFalse = otherwise,
-    )
-}

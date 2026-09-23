@@ -2,7 +2,6 @@ package com.materialkolor.builder.codegen.target.custom
 
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.dsl.AnnotationSpec
-import com.materialkolor.builder.codegen.dsl.ArgumentsScope
 import com.materialkolor.builder.codegen.dsl.ClassKind
 import com.materialkolor.builder.codegen.dsl.Expression
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
@@ -21,21 +20,17 @@ import com.materialkolor.builder.codegen.target.COLOR_FAMILY
 import com.materialkolor.builder.codegen.target.CONTENT_PARAMETER
 import com.materialkolor.builder.codegen.target.IS_DARK_PARAMETER
 import com.materialkolor.builder.codegen.target.colorFamilyClass
-import com.materialkolor.builder.codegen.target.material3.KeyColorOrder
 import com.materialkolor.builder.codegen.target.material3.SEED_COLOR
 import com.materialkolor.builder.codegen.target.material3.colorFamily
 import com.materialkolor.builder.codegen.target.material3.dynamicColorFile
 import com.materialkolor.builder.codegen.target.material3.familyOf
 import com.materialkolor.builder.codegen.target.material3.harmonizes
 import com.materialkolor.builder.codegen.target.material3.paletteName
-import com.materialkolor.builder.codegen.target.material3.parameterName
-import com.materialkolor.builder.codegen.target.material3.platformExpression
 import com.materialkolor.builder.codegen.target.material3.propertyName
 import com.materialkolor.builder.codegen.target.material3.seedName
-import com.materialkolor.builder.codegen.target.material3.specExpression
-import com.materialkolor.builder.codegen.target.material3.styleExpression
 import com.materialkolor.builder.codegen.target.material3.toneExpression
 import com.materialkolor.builder.codegen.target.propertyName
+import com.materialkolor.builder.codegen.target.schemeArguments
 import com.materialkolor.builder.codegen.target.themeFunction
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
@@ -162,7 +157,15 @@ private fun KotlinFileScope.rememberThemeColors(document: ThemeDocument) {
         parameter(SEED_COLOR_PARAMETER, Symbols.Color)
         parameter(IS_DARK_PARAMETER, Symbols.Boolean)
         body {
-            assign(SCHEME, callOf(Symbols.RememberDynamicScheme, multiline = true) { schemeArguments(document) })
+            val scheme = callOf(Symbols.RememberDynamicScheme, multiline = true) {
+                schemeArguments(
+                    document = document,
+                    defaults = DefaultArguments.RememberDynamicScheme,
+                    seed = ref(SEED_COLOR_PARAMETER),
+                    isDark = ref(IS_DARK_PARAMETER),
+                )
+            }
+            assign(SCHEME, scheme)
             document.accents.forEach { accent -> assign(accent.paletteName, paletteCall(accent)) }
             blankLine()
             returns(
@@ -186,26 +189,6 @@ private fun KotlinFileScope.rememberThemeColors(document: ThemeDocument) {
             )
         }
     }
-}
-
-/**
- * The arguments of `rememberDynamicScheme`, in the order it declares them.
- *
- * The seed is always written and each overridden palette goes in beside it, as in the Material 3
- * dynamic export, but from the parameter of `rememberThemeColors` rather than `SeedColor`.
- */
-private fun ArgumentsScope.schemeArguments(document: ThemeDocument) {
-    val defaults = DefaultArguments.RememberDynamicScheme
-
-    argument("seedColor", ref(SEED_COLOR_PARAMETER))
-    argument(IS_DARK_PARAMETER, ref(IS_DARK_PARAMETER))
-    KeyColorOrder.forEach { keyColor ->
-        optionalArgument(keyColor.parameterName, document.keyColors[keyColor]?.let { ref(keyColor.name) })
-    }
-    optionalArgument(defaults.style, document.style) { style -> styleExpression(style, document) }
-    optionalArgument(defaults.contrastLevel, document.contrast) { contrast -> Literals.decimal(contrast.hundredths) }
-    optionalArgument(defaults.specVersion, document.spec) { spec -> specExpression(spec) }
-    optionalArgument(defaults.platform, document.platform) { platform -> platformExpression(platform) }
 }
 
 /** `rememberTonalPalette(seed = BrandSeed, harmonizeWith = seedColor)`, the ramp the Material 3 export builds. */

@@ -9,7 +9,6 @@ import com.materialkolor.builder.codegen.dsl.infix
 import com.materialkolor.builder.codegen.dsl.kotlinFile
 import com.materialkolor.builder.codegen.dsl.ref
 import com.materialkolor.builder.codegen.symbol.Symbols
-import com.materialkolor.builder.codegen.target.CONTENT_PARAMETER
 import com.materialkolor.builder.codegen.target.FrozenMode
 import com.materialkolor.builder.codegen.target.byMode
 import com.materialkolor.builder.codegen.target.colorFamilyValue
@@ -21,7 +20,6 @@ import com.materialkolor.builder.codegen.target.themeFunction
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.export.ContrastVariant
-import com.materialkolor.builder.domain.model.MotionSchemeChoice
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RoleGroup
 import com.materialkolor.builder.domain.persist.ExportMode
@@ -33,7 +31,8 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * It writes `Color.kt` with every role in both modes, `Theme.kt` with a light and a dark scheme for
  * each contrast variant and a theme function that uses the standard pair, and `ExtendedColors.kt`
  * when the theme has accents. Nothing it writes needs MaterialKolor, and nothing is worked out here,
- * every color comes from the resolved export as it is.
+ * every color comes from the resolved export as it is. An Android export can also ask for the
+ * wallpaper colors, which then win over the standard pair from Android 12 on.
  */
 public object Material3Frozen {
     /** Every file the export of [input] writes, in the order a reader would open them. */
@@ -163,41 +162,6 @@ private fun themeCall(input: ExportInput): Expression =
             dark = schemeName(ContrastVariant.Standard, FrozenMode.Dark),
         ),
     )
-
-// b-111c
-
-/**
- * `MaterialTheme(...)`, or `MaterialExpressiveTheme(...)` with the document's motion scheme, on
- * [colorScheme]. The frozen theme and the wallpaper branch of either mode call it.
- */
-internal fun materialThemeCall(
-    input: ExportInput,
-    colorScheme: Expression,
-): Expression {
-    val content = ref(CONTENT_PARAMETER)
-
-    return if (input.target == ExportTarget.Material3Expressive) {
-        call(Symbols.MaterialExpressiveTheme, multiline = true) {
-            argument("colorScheme", colorScheme)
-            argument("motionScheme", motionSchemeExpression(input.document.motionScheme))
-            argument(CONTENT_PARAMETER, content)
-        }
-    } else {
-        call(Symbols.MaterialTheme, multiline = true) {
-            argument("colorScheme", colorScheme)
-            argument(CONTENT_PARAMETER, content)
-        }
-    }
-}
-
-private fun motionSchemeExpression(choice: MotionSchemeChoice): Expression {
-    val motionScheme = ref(Symbols.MotionScheme)
-
-    return when (choice) {
-        MotionSchemeChoice.Standard -> motionScheme.call("standard")
-        MotionSchemeChoice.Expressive -> motionScheme.call("expressive")
-    }
-}
 
 /** `lightColorScheme(primary = primaryLight, ...)` with every role, in the order the function takes them. */
 private fun schemeCall(
