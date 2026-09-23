@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The copy button on a swatch and on the code viewer, and the action a ramp stop reads out. -->
+    <string name="widget_copy">Copy</string>
+
+    <!-- The HCT tone a color sits at, as in "primary, #6750A4, tone 40". -->
+    <string name="widget_tone">tone %1$d</string>
+
+    <!-- A contrast ratio against one, as in "4.5:1". The argument is the ratio with one decimal. -->
+    <string name="widget_contrast_ratio">%1$s:1</string>
+
+    <!-- The WCAG badge a swatch earns against its on-pair. -->
+    <string name="widget_badge_aaa">AAA</string>
+    <string name="widget_badge_aa">AA</string>
+    <string name="widget_badge_aa_large">AA large</string>
+    <string name="widget_badge_fail">Fail</string>
+
+    <!-- The marker on a tonal ramp where the palette's key color sits. -->
+    <string name="widget_key_color">key color</string>
+</resources>
