@@ -1,0 +1,450 @@
+package com.materialkolor.builder.kit.skin.material
+
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Badge
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.LayoutDirection
+import com.materialkolor.builder.kit.control.BadgeStatus
+import com.materialkolor.builder.kit.control.BuilderIcon
+import com.materialkolor.builder.kit.control.BuilderText
+import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.ListRowContent
+import com.materialkolor.builder.kit.control.listRowInput
+import com.materialkolor.builder.kit.control.progressLabel
+import com.materialkolor.builder.kit.headless.radioGroupOption
+import com.materialkolor.builder.kit.headless.rememberRadioGroupFocus
+import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.skin.headless.ActionDisabledAlpha
+import com.materialkolor.builder.kit.skin.headless.actionPress
+import com.materialkolor.builder.kit.skin.headless.actionRing
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
+
+/*
+ * The Material3 actions. Each one is the library's own component, with the builder's press scale,
+ * focus ring and touch target laid over it, and the builder's type and glyphs inside it.
+ */
+
+/** Hands Material's own touch target rule the size the builder's layout asks for (AR-04). */
+@Composable
+private fun MaterialTarget(content: @Composable () -> Unit) {
+    CompositionLocalProvider(
+        LocalMinimumInteractiveComponentSize provides LocalLayout.current.primaryTouchTarget,
+        content = content,
+    )
+}
+
+/** A glyph and a label in whatever ink the surrounding Material component provides. */
+@Composable
+private fun RowScope.MaterialLabel(
+    label: String,
+    icon: IconId?,
+) {
+    val ink = LocalContentColor.current
+    if (icon != null) {
+        BuilderIcon(icon, contentDescription = null, tint = ink)
+        Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+    }
+    BuilderText(label, style = BuilderTextStyle.Label, color = ink, maxLines = 1)
+}
+
+@Composable
+internal fun MaterialButton(
+    onClick: () -> Unit,
+    label: String,
+    modifier: Modifier,
+    emphasis: Emphasis,
+    icon: IconId?,
+    enabled: Boolean,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val decorated = modifier
+        .actionPress(interactionSource)
+        .actionRing(interactionSource, ButtonDefaults.shape)
+    val content: @Composable RowScope.() -> Unit = { MaterialLabel(label, icon) }
+    MaterialTarget {
+        when (emphasis) {
+            Emphasis.Primary -> {
+                Button(onClick, decorated, enabled, interactionSource = interactionSource, content = content)
+            }
+            Emphasis.Secondary -> {
+                OutlinedButton(onClick, decorated, enabled, interactionSource = interactionSource, content = content)
+            }
+            Emphasis.Subtle -> {
+                TextButton(onClick, decorated, enabled, interactionSource = interactionSource, content = content)
+            }
+            Emphasis.Danger -> {
+                Button(
+                    onClick = onClick,
+                    modifier = decorated,
+                    enabled = enabled,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError,
+                    ),
+                    interactionSource = interactionSource,
+                    content = content,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+internal fun MaterialIconButton(
+    onClick: () -> Unit,
+    icon: IconId,
+    contentDescription: String,
+    modifier: Modifier,
+    emphasis: Emphasis,
+    enabled: Boolean,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val decorated = modifier
+        .actionPress(interactionSource)
+        .actionRing(interactionSource, IconButtonDefaults.standardShape)
+    val content: @Composable () -> Unit = {
+        BuilderIcon(icon, contentDescription = contentDescription, tint = LocalContentColor.current)
+    }
+    MaterialTarget {
+        when (emphasis) {
+            Emphasis.Primary -> {
+                FilledIconButton(onClick, decorated, enabled, interactionSource = interactionSource, content = content)
+            }
+            Emphasis.Secondary -> {
+                FilledTonalIconButton(
+                    onClick = onClick,
+                    modifier = decorated,
+                    enabled = enabled,
+                    interactionSource = interactionSource,
+                    content = content,
+                )
+            }
+            Emphasis.Subtle -> {
+                IconButton(onClick, decorated, enabled, interactionSource = interactionSource, content = content)
+            }
+            Emphasis.Danger -> {
+                IconButton(
+                    onClick = onClick,
+                    modifier = decorated,
+                    enabled = enabled,
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                    interactionSource = interactionSource,
+                    content = content,
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+internal fun MaterialToggleButton(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    label: String,
+    modifier: Modifier,
+    icon: IconId?,
+    enabled: Boolean,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    MaterialTarget {
+        ToggleButton(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            modifier = modifier
+                .actionPress(interactionSource)
+                .actionRing(interactionSource, ButtonDefaults.shape),
+            enabled = enabled,
+            interactionSource = interactionSource,
+        ) {
+            MaterialLabel(label, icon)
+        }
+    }
+}
+
+/**
+ * Material's single choice segmented row, with the radio group's roving focus and arrow keys laid
+ * over it, since Material's row moves neither. B-402 swaps in the expressive button group.
+ */
+@Composable
+internal fun <T> MaterialSegmented(
+    options: List<T>,
+    selected: T,
+    onSelect: (T) -> Unit,
+    label: String,
+    modifier: Modifier,
+    enabled: Boolean,
+    optionIcon: (T) -> IconId?,
+    optionLabel: (T) -> String,
+) {
+    val selectedIndex = options.indexOf(selected)
+    val focus = rememberRadioGroupFocus(options.size, selectedIndex)
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    MaterialTarget {
+        SingleChoiceSegmentedButtonRow(modifier.semantics { contentDescription = label }) {
+            options.forEachIndexed { index, value ->
+                key(index) {
+                    val interactionSource = remember { MutableInteractionSource() }
+                    val shape = SegmentedButtonDefaults.itemShape(index, options.size)
+                    val glyph = optionIcon(value)
+                    SegmentedButton(
+                        selected = index == selectedIndex,
+                        onClick = { onSelect(value) },
+                        shape = shape,
+                        modifier = Modifier
+                            .radioGroupOption(focus, index, selectedIndex, rtl) { target -> onSelect(options[target]) }
+                            .actionPress(interactionSource)
+                            .actionRing(interactionSource, shape),
+                        enabled = enabled,
+                        interactionSource = interactionSource,
+                        icon = {
+                            SegmentedButtonDefaults.Icon(
+                                active = index == selectedIndex,
+                                activeContent = {
+                                    BuilderIcon(
+                                        IconId.Check,
+                                        contentDescription = null,
+                                        tint = LocalContentColor.current,
+                                    )
+                                },
+                                inactiveContent = glyph?.let { id ->
+                                    { BuilderIcon(id, contentDescription = null, tint = LocalContentColor.current) }
+                                },
+                            )
+                        },
+                    ) {
+                        BuilderText(
+                            optionLabel(value),
+                            style = BuilderTextStyle.Label,
+                            color = LocalContentColor.current,
+                            maxLines = 1,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun MaterialFilterChip(
+    selected: Boolean,
+    onSelectedChange: (Boolean) -> Unit,
+    label: String,
+    modifier: Modifier,
+    icon: IconId?,
+    enabled: Boolean,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val glyph = if (selected) IconId.Check else icon
+    MaterialTarget {
+        FilterChip(
+            selected = selected,
+            onClick = { onSelectedChange(!selected) },
+            label = {
+                BuilderText(
+                    label,
+                    style = BuilderTextStyle.Label,
+                    color = LocalContentColor.current,
+                    maxLines = 1,
+                )
+            },
+            modifier = modifier
+                .actionPress(interactionSource)
+                .actionRing(interactionSource, FilterChipDefaults.shape),
+            enabled = enabled,
+            leadingIcon = glyph?.let { id ->
+                { BuilderIcon(id, contentDescription = null, tint = LocalContentColor.current) }
+            },
+            interactionSource = interactionSource,
+        )
+    }
+}
+
+@Composable
+internal fun MaterialBadge(
+    label: String,
+    modifier: Modifier,
+    status: BadgeStatus,
+    icon: IconId?,
+) {
+    val tokens = LocalBuilderTokens.current
+    val scheme = MaterialTheme.colorScheme
+    val (container, ink) = when (status) {
+        BadgeStatus.Neutral -> scheme.secondaryContainer to scheme.onSecondaryContainer
+        BadgeStatus.Info -> scheme.primary to scheme.onPrimary
+        BadgeStatus.Success -> tokens.success to tokens.panel
+        BadgeStatus.Warning -> tokens.warning to tokens.panel
+        BadgeStatus.Danger -> scheme.error to scheme.onError
+    }
+    Badge(
+        modifier = modifier.semantics(mergeDescendants = true) {},
+        containerColor = container,
+        contentColor = ink,
+    ) {
+        if (icon != null) {
+            BuilderIcon(icon, contentDescription = null, tint = ink)
+            Spacer(Modifier.width(tokens.spacing.extraSmall))
+        }
+        BuilderText(label, style = BuilderTextStyle.Value, color = ink, maxLines = 1)
+    }
+}
+
+@Composable
+internal fun MaterialCard(
+    modifier: Modifier,
+    onClick: (() -> Unit)?,
+    enabled: Boolean,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val spacing = LocalBuilderTokens.current.spacing
+    val padded: @Composable ColumnScope.() -> Unit = {
+        Column(
+            modifier = Modifier.padding(spacing.large),
+            verticalArrangement = Arrangement.spacedBy(spacing.small),
+            content = content,
+        )
+    }
+    if (onClick == null) {
+        Card(modifier.semantics { isTraversalGroup = true }, content = padded)
+        return
+    }
+    val interactionSource = remember { MutableInteractionSource() }
+    Card(
+        onClick = onClick,
+        modifier = modifier
+            .semantics { role = Role.Button }
+            .actionPress(interactionSource)
+            .actionRing(interactionSource, CardDefaults.shape),
+        enabled = enabled,
+        interactionSource = interactionSource,
+        content = padded,
+    )
+}
+
+@Composable
+internal fun MaterialDivider(
+    modifier: Modifier,
+    orientation: Orientation,
+) {
+    when (orientation) {
+        Orientation.Horizontal -> HorizontalDivider(modifier)
+        Orientation.Vertical -> VerticalDivider(modifier)
+    }
+}
+
+/** Material's linear bar. B-402 decides whether the expressive flavour gets the loading indicator. */
+@Composable
+internal fun MaterialProgress(
+    label: String,
+    modifier: Modifier,
+    progress: Float?,
+) {
+    val labelled = modifier
+        .fillMaxWidth()
+        .semantics { progressLabel(label, progress) }
+    if (progress == null) {
+        LinearProgressIndicator(labelled)
+    } else {
+        LinearProgressIndicator(progress = { progress }, modifier = labelled)
+    }
+}
+
+@Composable
+internal fun MaterialListRow(
+    row: ListRowContent,
+    modifier: Modifier,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val current = row.selected == true
+    val feedback = if (row.onClick == null) {
+        Modifier
+    } else {
+        Modifier
+            .actionPress(interactionSource)
+            .alpha(if (row.enabled) 1f else ActionDisabledAlpha)
+            .actionRing(interactionSource, RectangleShape)
+    }
+    ListItem(
+        headlineContent = {
+            BuilderText(row.headline, style = BuilderTextStyle.Label, color = LocalContentColor.current)
+        },
+        modifier = modifier
+            .listRowInput(row, interactionSource, indication = ripple())
+            .then(feedback),
+        supportingContent = row.supporting?.let { text ->
+            { BuilderText(text, style = BuilderTextStyle.Body, color = LocalContentColor.current) }
+        },
+        leadingContent = row.icon?.let { id ->
+            { BuilderIcon(id, contentDescription = null, tint = LocalContentColor.current) }
+        },
+        trailingContent = if (current || row.trailing != null) {
+            {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.small),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (current) BuilderIcon(IconId.Check, contentDescription = null, tint = LocalContentColor.current)
+                    row.trailing?.invoke()
+                }
+            }
+        } else {
+            null
+        },
+        colors = ListItemDefaults.colors(
+            containerColor = if (current) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
+        ),
+    )
+}
