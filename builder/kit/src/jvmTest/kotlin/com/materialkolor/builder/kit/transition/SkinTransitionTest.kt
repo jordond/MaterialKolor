@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PixelMap
@@ -97,6 +98,10 @@ class SkinTransitionTest {
             harness.color shouldBe Old
 
             mainClock.advanceTimeByFrame()
+            harness.transition.snapshot.size shouldNotBe IntSize.Zero
+            harness.color shouldBe Old
+
+            mainClock.advanceTimeByFrame()
             harness.transition.pendingCapture shouldBe null
             harness.color shouldBe New
             harness.transition.snapshot.size shouldNotBe IntSize.Zero
@@ -106,6 +111,31 @@ class SkinTransitionTest {
             val covered = hostPixels()
             covered.nearOrigin() shouldBe Old
             covered.farCorner() shouldBe Old
+        }
+
+    @Test
+    fun reveal_normally_neverAppliesTheChangeDuringADraw() =
+        runComposeUiTest {
+            val harness = showHost()
+
+            val reveal = reveal(harness, to = New)
+            repeat(3) { mainClock.advanceTimeByFrame() }
+            harness.color shouldBe New
+            harness.changedWhileDrawing shouldBe false
+
+            mainClock.advanceTimeBy(500)
+            reveal.isCompleted shouldBe true
+        }
+
+    @Test
+    fun reveal_inBitmapMode_neverAppliesTheChangeDuringADraw() =
+        runComposeUiTest {
+            val harness = showHost(mode = SnapshotMode.Bitmap)
+
+            reveal(harness, to = New)
+            repeat(3) { mainClock.advanceTimeByFrame() }
+            harness.color shouldBe New
+            harness.changedWhileDrawing shouldBe false
         }
 
     @Test
@@ -137,6 +167,7 @@ class SkinTransitionTest {
             val harness = showHost()
             val first = reveal(harness, to = New)
             mainClock.advanceTimeByFrame()
+            mainClock.advanceTimeByFrame()
             mainClock.advanceTimeBy(100)
             harness.transition.progress.value shouldNotBe 1f
 
@@ -147,6 +178,7 @@ class SkinTransitionTest {
             first.isCompleted shouldBe true
             harness.color shouldBe New
 
+            mainClock.advanceTimeByFrame()
             mainClock.advanceTimeByFrame()
             mainClock.advanceTimeBy(150)
             val pixels = hostPixels()
@@ -164,7 +196,8 @@ class SkinTransitionTest {
             val harness = showHost(reduced = true)
             val reveal = reveal(harness, to = New)
             mainClock.advanceTimeByFrame()
-            harness.transition.crossfade shouldBe true
+            mainClock.advanceTimeByFrame()
+            harness.transition.style shouldBe RevealStyle.Crossfade
 
             mainClock.advanceTimeBy(64)
             val pixels = hostPixels()
@@ -178,10 +211,71 @@ class SkinTransitionTest {
         }
 
     @Test
+    fun reveal_underReducedMotion_turnsTheCircleIntoTheReducedCrossfade() =
+        runComposeUiTest {
+            val harness = showHost(reduced = true)
+            val reveal = reveal(harness, to = New, style = RevealStyle.Circle(Offset.Unspecified))
+            mainClock.advanceTimeByFrame()
+            mainClock.advanceTimeByFrame()
+            harness.transition.style shouldBe RevealStyle.Crossfade
+
+            mainClock.advanceTimeBy(176)
+            reveal.isCompleted shouldBe true
+            hostPixels().farCorner() shouldBe New
+        }
+
+    @Test
+    fun reveal_withTheCrossfadeStyle_fadesTheOldFrameOutOverTheCrossfadeSpec() =
+        runComposeUiTest {
+            val harness = showHost()
+            val reveal = reveal(harness, to = New, style = RevealStyle.Crossfade)
+            mainClock.advanceTimeByFrame()
+            mainClock.advanceTimeByFrame()
+            harness.transition.style shouldBe RevealStyle.Crossfade
+
+            mainClock.advanceTimeBy(96)
+            val pixels = hostPixels()
+            pixels.nearOrigin() shouldBe pixels.farCorner()
+            pixels.center() shouldBe pixels.farCorner()
+            pixels.nearOrigin() shouldNotBe Old
+            pixels.nearOrigin() shouldNotBe New
+
+            mainClock.advanceTimeBy(96)
+            val late = harness.transition.progress.value
+            assertTrue(late < 1f, "expected the crossfade to outlast the reduced one, got $late")
+            reveal.isCompleted shouldBe false
+
+            mainClock.advanceTimeBy(64)
+            reveal.isCompleted shouldBe true
+            hostPixels().farCorner() shouldBe New
+        }
+
+    @Test
+    fun reveal_withTheCircleStyle_clipsTheOldFrameAroundTheOrigin() =
+        runComposeUiTest {
+            val harness = showHost()
+            val reveal = reveal(harness, to = New, style = RevealStyle.Circle(Offset.Unspecified))
+            mainClock.advanceTimeByFrame()
+            mainClock.advanceTimeByFrame()
+            harness.transition.style shouldBe RevealStyle.Circle(Offset.Unspecified)
+
+            mainClock.advanceTimeBy(100)
+            val pixels = hostPixels()
+            pixels.center() shouldBe New
+            pixels.nearOrigin() shouldBe Old
+            pixels.farCorner() shouldBe Old
+
+            mainClock.advanceTimeBy(400)
+            reveal.isCompleted shouldBe true
+            hostPixels().nearOrigin() shouldBe New
+        }
+
+    @Test
     fun reveal_inBitmapMode_drawsTheRasterizedFrame() =
         runComposeUiTest {
             val harness = showHost(mode = SnapshotMode.Bitmap)
             val reveal = reveal(harness, to = New)
+            mainClock.advanceTimeByFrame()
             mainClock.advanceTimeByFrame()
             harness.transition.bitmap shouldNotBe null
 
@@ -217,6 +311,12 @@ private class Harness {
     lateinit var scope: CoroutineScope
     var color: Color by mutableStateOf(Old)
     var compositions: Int = 0
+
+    /** True only while the host is drawing. A plain field so setting it from draw writes no state. */
+    var drawing: Boolean = false
+
+    /** Set by every change to whether a draw was in progress when it ran. */
+    var changedWhileDrawing: Boolean? = null
 }
 
 @OptIn(ExperimentalTestApi::class)
@@ -242,7 +342,7 @@ private fun ComposeUiTest.showHost(
             if (withHost) {
                 SkinTransitionHost(
                     transition = harness.transition,
-                    modifier = Modifier.size(100.dp).testTag(HostTag),
+                    modifier = Modifier.size(100.dp).testTag(HostTag).markDrawing(harness),
                 ) {
                     harness.compositions++
                     Box(Modifier.fillMaxSize().background(harness.color))
@@ -254,15 +354,28 @@ private fun ComposeUiTest.showHost(
     return harness
 }
 
+/** Raises [Harness.drawing] around the host's whole draw pass, the capture included. */
+private fun Modifier.markDrawing(harness: Harness): Modifier =
+    drawWithContent {
+        harness.drawing = true
+        try {
+            drawContent()
+        } finally {
+            harness.drawing = false
+        }
+    }
+
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.reveal(
     harness: Harness,
     to: Color,
+    style: RevealStyle = RevealStyle.Circle(Offset.Zero),
     awaitBeforeReveal: suspend () -> Unit = {},
 ): Job =
     runOnUiThread {
         harness.scope.launch {
-            harness.transition.reveal(origin = Offset.Zero, awaitBeforeReveal = awaitBeforeReveal) {
+            harness.transition.reveal(style = style, awaitBeforeReveal = awaitBeforeReveal) {
+                harness.changedWhileDrawing = harness.drawing
                 harness.color = to
             }
         }
@@ -274,3 +387,5 @@ private fun ComposeUiTest.hostPixels(): PixelMap = onNodeWithTag(HostTag).captur
 private fun PixelMap.nearOrigin(): Color = this[2, 2]
 
 private fun PixelMap.farCorner(): Color = this[width - 2, height - 2]
+
+private fun PixelMap.center(): Color = this[width / 2, height / 2]

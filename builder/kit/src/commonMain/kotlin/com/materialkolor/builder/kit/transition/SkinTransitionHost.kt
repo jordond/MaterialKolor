@@ -17,7 +17,9 @@ import androidx.compose.ui.graphics.layer.drawLayer
  * the host's minimum size, so a host that fills the window gets content that does too.
  *
  * The reveal runs entirely in the draw phase. Nothing inside [content] recomposes because of it,
- * only because of the change itself.
+ * only because of the change itself. When a reveal asks for the old frame, the next draw records it
+ * and completes the capture. The reveal picks up from there at the start of the following frame, so
+ * neither its state writes nor the change run inside this draw.
  */
 @Composable
 public fun SkinTransitionHost(
@@ -42,6 +44,7 @@ private fun Modifier.skinReveal(transition: SkinTransition): Modifier =
                 transition.snapshot.record { this@onDrawWithContent.drawContent() }
                 transition.snapshot.alpha = 1f
                 drawLayer(transition.snapshot)
+                // The reveal waits for the next frame after this, so completing here runs none of it.
                 capture.complete(Unit)
                 return@onDrawWithContent
             }
@@ -50,13 +53,16 @@ private fun Modifier.skinReveal(transition: SkinTransition): Modifier =
             val progress = transition.progress.value
             if (progress >= 1f) return@onDrawWithContent
 
-            if (transition.crossfade) {
-                drawSnapshot(transition, alpha = 1f - progress)
-            } else {
-                val center = revealCenter(transition.origin, size)
-                val radius = progress * farthestCorner(center, size)
-                clipPath(circlePath(circle, center, radius), ClipOp.Difference) {
-                    drawSnapshot(transition, alpha = 1f)
+            when (val style = transition.style) {
+                is RevealStyle.Circle -> {
+                    val center = revealCenter(style.origin, size)
+                    val radius = progress * farthestCorner(center, size)
+                    clipPath(circlePath(circle, center, radius), ClipOp.Difference) {
+                        drawSnapshot(transition, alpha = 1f)
+                    }
+                }
+                RevealStyle.Crossfade -> {
+                    drawSnapshot(transition, alpha = 1f - progress)
                 }
             }
         }

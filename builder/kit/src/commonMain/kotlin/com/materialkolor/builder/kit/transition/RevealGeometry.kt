@@ -12,8 +12,8 @@ import kotlin.math.sqrt
 /**
  * Where the reveal circle grows from.
  *
- * A caller that has no button to point at passes [Offset.Unspecified], and the circle then grows
- * out of the middle of the host.
+ * A caller that has no button to point at gives [RevealStyle.Circle] an [Offset.Unspecified] origin,
+ * and the circle then grows out of the middle of the host.
  */
 internal fun revealCenter(
     origin: Offset,

@@ -3,6 +3,8 @@ package com.materialkolor.builder.kit.transition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.MonotonicFrameClock
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.layer.GraphicsLayer
@@ -52,12 +55,37 @@ public enum class SnapshotMode {
 }
 
 /**
- * The reveal that plays on every discrete change, such as a library switch, the light and dark
- * toggle, a style chip, a preset, a shuffle or an image candidate (F-03, MO-04).
+ * How the old frame gives way to the new one.
  *
- * Call [reveal] with the change. The host draws one more frame of the old UI into a layer, the
- * change applies, and the old frame shrinks away behind a circle growing out of the origin. Drags
- * never come through here, and neither do undo, redo or keyboard nudges.
+ * The library switch plays [Circle] out of the switcher (MO-04). Every other discrete change, a
+ * preset, a chip, a shuffle, a style or an image candidate, plays [Crossfade] (MO-02). Reduced
+ * motion turns either one into the short crossfade.
+ */
+@Immutable
+public sealed interface RevealStyle {
+    /**
+     * The old frame shrinks away behind a circle growing out of [origin], on the skin's reveal
+     * spec.
+     *
+     * @property[origin] Where the circle grows from, in the host's coordinates. [Offset.Unspecified]
+     * grows it from the middle.
+     */
+    public data class Circle(
+        public val origin: Offset,
+    ) : RevealStyle
+
+    /** The old frame fades out in place, on the skin's crossfade spec. */
+    public data object Crossfade : RevealStyle
+}
+
+/**
+ * The reveal that plays on every discrete change, such as a library switch, the light and dark
+ * toggle, a style chip, a preset, a shuffle or an image candidate (F-03, MO-02, MO-04).
+ *
+ * Call [reveal] with a [RevealStyle] and the change. The host draws one more frame of the old UI
+ * into a layer, the change applies, and the old frame gives way to the new one, either behind a
+ * growing circle or by fading out in place. Drags never come through here, and neither do undo,
+ * redo or keyboard nudges.
  *
  * Get one from [rememberSkinTransition] and draw through [SkinTransitionHost].
  */
@@ -70,11 +98,8 @@ public class SkinTransition internal constructor(
     /** Set while a reveal waits for the host to record the old frame. The host completes it from draw. */
     internal var pendingCapture: CompletableDeferred<Unit>? by mutableStateOf(null)
 
-    /** The origin of the running reveal, in the host's coordinates. */
-    internal var origin: Offset by mutableStateOf(Offset.Unspecified)
-
-    /** True when the running reveal fades the old frame out instead of cutting a circle into it. */
-    internal var crossfade: Boolean by mutableStateOf(false)
+    /** How the running reveal draws, already turned into a crossfade under reduced motion. */
+    internal var style: RevealStyle by mutableStateOf(RevealStyle.Crossfade)
 
     /** The rasterized old frame under [SnapshotMode.Bitmap], null otherwise. */
     internal var bitmap: ImageBitmap? by mutableStateOf(null)
@@ -85,24 +110,25 @@ public class SkinTransition internal constructor(
     private val switching = Mutex()
 
     /**
-     * Applies [change] behind a reveal out of [origin].
+     * Applies [change] behind a reveal in the given [style].
      *
-     * The change applies straight away with no capture when motion is frozen or the tab is hidden,
-     * and also when the host does not draw within 100 ms. A reveal that arrives while another is
-     * still running snaps that one to its end first. Under reduced motion the old frame crossfades
-     * out in place instead.
+     * The host records the old frame while it draws, and the change applies at the start of the
+     * frame after that, never inside a draw pass. The change applies straight away with no capture
+     * when motion is frozen or the tab is hidden, and also when the host has not drawn and reached
+     * its next frame within 100 ms. A reveal that arrives while another is still running snaps that
+     * one to its end first. Under reduced motion either style becomes the short crossfade.
      *
      * Returns once the reveal has finished or been cut short by the next one. Cancelling the caller
      * after the change has applied does not stop the reveal, since the animation belongs to the host.
      *
-     * @param[origin] Where the circle grows from, in the host's coordinates. [Offset.Unspecified]
-     * grows it from the middle.
+     * @param[style] A circle out of the library switcher, or a crossfade for every other discrete
+     * change.
      * @param[awaitBeforeReveal] Runs before the capture, for up to 300 ms. The app uses it to wait on
      * the font of a skin it has not shown yet, so the new frame does not arrive in a fallback face.
      * @param[change] The edit. It runs once, synchronously, whatever path the reveal takes.
      */
     public suspend fun reveal(
-        origin: Offset,
+        style: RevealStyle,
         awaitBeforeReveal: suspend () -> Unit = {},
         change: () -> Unit,
     ) {
@@ -125,15 +151,14 @@ public class SkinTransition internal constructor(
                 SnapshotMode.Bitmap -> snapshot.toImageBitmap()
             }
             bitmap = image
-            this.origin = origin
-            crossfade = environment.reduced
+            val shown = if (environment.reduced) RevealStyle.Crossfade else style
+            this.style = shown
             change()
             progress.snapTo(0f)
 
-            val spec = if (environment.reduced) {
-                environment.motion.crossfade<Float>()
-            } else {
-                environment.motion.reveal<Float>()
+            val spec = when (shown) {
+                is RevealStyle.Circle -> environment.motion.reveal<Float>()
+                RevealStyle.Crossfade -> environment.motion.crossfade<Float>()
             }
             scope.launch(start = CoroutineStart.UNDISPATCHED) {
                 try {
@@ -146,15 +171,35 @@ public class SkinTransition internal constructor(
         animation.join()
     }
 
-    /** Asks the host to record its next frame and waits for it. False when nothing drew in time. */
+    /**
+     * Asks the host to record its next frame, then waits for the frame after it. False when that
+     * did not happen in time.
+     *
+     * The host completes the capture from inside its draw pass, and a dispatcher that resumes
+     * inline would carry straight on from there. Waiting for the next frame on the host's clock is
+     * the boundary. Everything after the capture, the state writes and the change included, runs
+     * at the start of a frame and never inside a draw, whatever dispatcher the caller is on.
+     */
     private suspend fun capture(): Boolean {
         val captured = CompletableDeferred<Unit>()
         pendingCapture = captured
         return try {
-            finishesWithin(CaptureTimeout) { captured.await() }
+            finishesWithin(CaptureTimeout) {
+                captured.await()
+                nextFrame()
+            }
         } finally {
             pendingCapture = null
         }
+    }
+
+    /**
+     * Suspends until the next frame starts, on the clock the host animates with. The caller's own
+     * context only has to carry a clock when the transition's scope somehow lacks one.
+     */
+    private suspend fun nextFrame() {
+        val clock = scope.coroutineContext[MonotonicFrameClock]
+        if (clock != null) clock.withFrameNanos {} else withFrameNanos {}
     }
 }
 
