@@ -51,4 +51,9 @@ internal class PreferencesRepository(
         target: ExportTarget,
         block: (ExportPrefs) -> ExportPrefs,
     ): StoreError? = store.update { prefs -> prefs.withExportPrefs(target, block(prefs.exportPrefsFor(target))) }
+
+    // b-215
+
+    /** The preferences as they are stored right now, for boot, before [preferences] has caught up. */
+    suspend fun current(): Preferences = store.get()
 }
