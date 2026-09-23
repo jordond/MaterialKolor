@@ -30,6 +30,51 @@ class ThemeDocumentJsonTest {
         assertEquals("#D9653B", ThemeDocument.Default.seed.toHex())
     }
 
+    /**
+     * The keys every serializable class in the model writes.
+     *
+     * Each property carries an explicit `@SerialName`, so a Kotlin rename cannot quietly move a key
+     * a saved document already holds. This table is the other half of that, it goes red when a name
+     * does move, which is the moment to decide whether the old documents need reading too.
+     */
+    @Test
+    fun model_everySerializedClass_keepsTheKeysItAlreadyWrites() {
+        val wireNames = listOf(
+            ThemeDocument.serializer() to listOf(
+                "seed",
+                "seedSource",
+                "keyColors",
+                "style",
+                "cmfTertiarySeed",
+                "contrast",
+                "spec",
+                "platform",
+                "amoled",
+                "accents",
+                "pins",
+                "library",
+                "expressive",
+                "motionScheme",
+                "themeName",
+                "customTones",
+            ),
+            KeyColors.serializer() to listOf("primary", "secondary", "tertiary", "error", "neutral", "neutralVariant"),
+            Accent.serializer() to listOf("name", "seed", "harmonize", "light", "dark", "threshold"),
+            FamilyTones.serializer() to listOf("color", "container"),
+            SeedSource.Preset.serializer() to listOf("id"),
+            SeedSource.Image.serializer() to listOf("name", "candidates"),
+            RolePin.serializer() to listOf("light", "dark"),
+            CustomTone.serializer() to listOf("light", "dark"),
+        )
+
+        wireNames.forEach { (serializer, names) ->
+            val descriptor = serializer.descriptor
+            val written = List(descriptor.elementsCount) { index -> descriptor.getElementName(index) }
+
+            assertEquals(names, written, "${descriptor.serialName} writes different keys than it used to")
+        }
+    }
+
     @Test
     fun themeDocument_pinnedRoles_serializeUnderTheirRoleNames() {
         val document = ThemeDocument.Default.copy(pins = mapOf(Role.Primary to RolePin(light = Argb(0x00FF0000))))

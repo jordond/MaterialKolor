@@ -239,6 +239,12 @@ public enum class TonalRamp {
 /**
  * The tones someone moved a custom slot to, one per mode.
  *
+ * A tone always names the slot it is attached to, never a color that slot is worked out against.
+ * On a [SlotResolution.FromRamp] slot it moves the tone the slot is cut at. On a
+ * [SlotResolution.OnRamp] slot it moves the on-color's own tone and the contrast derivation is
+ * skipped for that one slot, which is how someone sets an on-color by hand. The background tone
+ * an on-color reads against stays where its own slot puts it.
+ *
  * A null mode keeps the tone the slot's [SlotResolution] already carries, so a document only
  * holds the tones that were actually changed.
  *
@@ -247,7 +253,9 @@ public enum class TonalRamp {
  */
 @Serializable
 public data class CustomTone(
+    @SerialName("light")
     public val light: Int? = null,
+    @SerialName("dark")
     public val dark: Int? = null,
 ) {
     init {

@@ -50,11 +50,17 @@ public enum class KeyColor(
  */
 @Serializable
 public data class KeyColors(
+    @SerialName("primary")
     public val primary: Argb? = null,
+    @SerialName("secondary")
     public val secondary: Argb? = null,
+    @SerialName("tertiary")
     public val tertiary: Argb? = null,
+    @SerialName("error")
     public val error: Argb? = null,
+    @SerialName("neutral")
     public val neutral: Argb? = null,
+    @SerialName("neutralVariant")
     public val neutralVariant: Argb? = null,
 ) {
     /**

@@ -7,6 +7,10 @@ package com.materialkolor.builder.domain.model
  * be reordered, grouped or listed differently without invalidating a link someone already shared.
  * Codes are never reused, even when an entry is dropped.
  *
+ * Every enum that implements this is listed by hand in `CodedEnumTest`, because common code cannot
+ * go looking for them. A slice that adds one adds it to that list in the same change, otherwise its
+ * codes go unchecked.
+ *
  * @property[code] The number the codec writes for this entry, unique within its enum.
  */
 public interface CodedEnum {

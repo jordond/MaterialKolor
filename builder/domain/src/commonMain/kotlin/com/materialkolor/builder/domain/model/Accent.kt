@@ -19,11 +19,17 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 public data class Accent(
+    @SerialName("name")
     public val name: String,
+    @SerialName("seed")
     public val seed: Argb,
+    @SerialName("harmonize")
     public val harmonize: Boolean = true,
+    @SerialName("light")
     public val light: FamilyTones = FamilyTones(color = 40, container = 90),
+    @SerialName("dark")
     public val dark: FamilyTones = FamilyTones(color = 80, container = 30),
+    @SerialName("threshold")
     public val threshold: OnColorThreshold = OnColorThreshold.AaNormal,
 )
 
@@ -35,7 +41,9 @@ public data class Accent(
  */
 @Serializable
 public data class FamilyTones(
+    @SerialName("color")
     public val color: Int,
+    @SerialName("container")
     public val container: Int,
 ) {
     init {

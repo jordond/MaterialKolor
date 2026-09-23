@@ -41,6 +41,7 @@ public sealed interface SeedSource {
     @Serializable
     @SerialName("Preset")
     public data class Preset(
+        @SerialName("id")
         public val id: String,
     ) : SeedSource
 
@@ -56,7 +57,9 @@ public sealed interface SeedSource {
     @Serializable
     @SerialName("Image")
     public data class Image(
+        @SerialName("name")
         public val name: String,
+        @SerialName("candidates")
         public val candidates: List<Argb> = emptyList(),
     ) : SeedSource {
         init {

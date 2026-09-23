@@ -3,9 +3,16 @@ package com.materialkolor.builder.domain.model
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class CodedEnumTest {
+    /**
+     * Every enum in the model that carries codes, listed by hand.
+     *
+     * Common code cannot go looking for them, so a slice that adds a [CodedEnum] adds it here in
+     * the same change. An enum that is missing from this list has its codes checked by nothing.
+     */
     private val codedEnums: Map<String, List<CodedEnum>> = mapOf(
         "Style" to Style.entries,
         "SpecVersion" to SpecVersion.entries,
@@ -44,16 +51,43 @@ class CodedEnumTest {
 
     @Test
     fun style_everyEntry_keepsTheCodeItWasGiven() {
-        assertEquals(0, Style.TonalSpot.code)
-        assertEquals(9, Style.Cmf.code)
-        assertEquals(Style.entries.indices.toList(), Style.entries.map { style -> style.code })
+        val styleCodes = mapOf(
+            "TonalSpot" to 0,
+            "Neutral" to 1,
+            "Vibrant" to 2,
+            "Expressive" to 3,
+            "Rainbow" to 4,
+            "FruitSalad" to 5,
+            "Monochrome" to 6,
+            "Fidelity" to 7,
+            "Content" to 8,
+            "Cmf" to 9,
+        )
+
+        assertEquals(styleCodes.size, Style.entries.size, "A style was added or dropped without touching the table")
+
+        Style.entries.forEach { style ->
+            val expected = assertNotNull(styleCodes[style.name], "${style.name} is missing from the table")
+            assertEquals(expected, style.code, "${style.name} carries a code no shared link knows about")
+        }
     }
 
     @Test
-    fun keyColor_declarationOrder_isTheCodecMaskOrder() {
-        val expected = listOf("Primary", "Secondary", "Tertiary", "Error", "Neutral", "NeutralVariant")
+    fun keyColor_everyEntry_keepsItsBitOfTheCodecMask() {
+        val maskBits = mapOf(
+            "Primary" to 0,
+            "Secondary" to 1,
+            "Tertiary" to 2,
+            "Error" to 3,
+            "Neutral" to 4,
+            "NeutralVariant" to 5,
+        )
 
-        assertEquals(expected, KeyColor.entries.map { slot -> slot.name })
-        assertEquals(KeyColor.entries.indices.toList(), KeyColor.entries.map { slot -> slot.code })
+        assertEquals(maskBits.keys.toList(), KeyColor.entries.map { slot -> slot.name })
+
+        KeyColor.entries.forEach { slot ->
+            val expected = assertNotNull(maskBits[slot.name], "${slot.name} is missing from the table")
+            assertEquals(expected, slot.code, "${slot.name} moved to another bit of the presence mask")
+        }
     }
 }

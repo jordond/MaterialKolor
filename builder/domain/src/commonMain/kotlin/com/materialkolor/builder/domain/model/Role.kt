@@ -264,7 +264,9 @@ public enum class RoleGroup(
  */
 @Serializable
 public data class RolePin(
+    @SerialName("light")
     public val light: Argb? = null,
+    @SerialName("dark")
     public val dark: Argb? = null,
 ) {
     init {

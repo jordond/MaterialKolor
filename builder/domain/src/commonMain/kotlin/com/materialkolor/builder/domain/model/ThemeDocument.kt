@@ -2,6 +2,7 @@ package com.materialkolor.builder.domain.model
 
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -34,21 +35,37 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 public data class ThemeDocument(
+    @SerialName("seed")
     public val seed: Argb,
+    @SerialName("seedSource")
     public val seedSource: SeedSource = SeedSource.Typed,
+    @SerialName("keyColors")
     public val keyColors: KeyColors = KeyColors(),
+    @SerialName("style")
     public val style: Style = Style.TonalSpot,
+    @SerialName("cmfTertiarySeed")
     public val cmfTertiarySeed: Argb? = null,
+    @SerialName("contrast")
     public val contrast: ContrastLevel = ContrastLevel.Standard,
+    @SerialName("spec")
     public val spec: SpecVersion = SpecVersion.Spec2021,
+    @SerialName("platform")
     public val platform: SchemePlatform = SchemePlatform.Phone,
+    @SerialName("amoled")
     public val amoled: Boolean = false,
+    @SerialName("accents")
     public val accents: List<Accent> = emptyList(),
+    @SerialName("pins")
     public val pins: Map<Role, RolePin> = emptyMap(),
+    @SerialName("library")
     public val library: Library = Library.Material3,
+    @SerialName("expressive")
     public val expressive: Boolean = false,
+    @SerialName("motionScheme")
     public val motionScheme: MotionSchemeChoice = MotionSchemeChoice.Expressive,
+    @SerialName("themeName")
     public val themeName: String = "AppTheme",
+    @SerialName("customTones")
     public val customTones: Map<CustomSlot, CustomTone> = emptyMap(),
 ) {
     public companion object {

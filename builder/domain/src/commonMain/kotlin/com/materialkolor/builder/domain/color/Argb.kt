@@ -48,9 +48,10 @@ public value class Argb private constructor(
         /**
          * Pack [value] as an opaque color, filling in the alpha byte.
          *
-         * Every color is built here. The constructor takes its argument as given, and inside this
-         * file it wins the name over this function, so call [invoke] by name rather than writing
-         * `Argb(...)` in here.
+         * Every color is built here. The constructor takes its argument as given, and it wins the
+         * name `Argb(...)` inside the class body and inside this companion, so write [invoke] by
+         * name in those two places. Everywhere else, top level code in this file included, which
+         * is where [ArgbSerializer] sits, `Argb(...)` already resolves to this function.
          */
         public operator fun invoke(value: Int): Argb = Argb(value or OPAQUE_ALPHA)
 
