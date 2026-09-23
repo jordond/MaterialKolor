@@ -23,6 +23,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
@@ -49,6 +51,9 @@ private const val ScreenshotDir = "src/jvmTest/screenshots/controls-a"
 
 private val SheetLayout = LayoutInfo.of(widthDp = 1280.dp, heightDp = 800.dp)
 
+/** A phone, where every pressable control grows to a 48 dp footprint. */
+private val CompactLayout = LayoutInfo.of(widthDp = 400.dp, heightDp = 800.dp)
+
 @OptIn(ExperimentalTestApi::class)
 class ControlsAScreenshotTest {
     @Test
@@ -73,7 +78,7 @@ class ControlsAScreenshotTest {
 }
 
 /** One ink on one ground this batch draws, and the least contrast the pair may have. */
-private class InkPair(
+private class ActionInkPair(
     val name: String,
     val ink: Color,
     val ground: Color,
@@ -84,14 +89,14 @@ private class InkPair(
  * The pairs the headless actions add on top of the skin's own text pairs. Status badges put the
  * panel ink on a status fill, and the focus ring has to stand out from the panel by 3 to 1 (AR-01).
  */
-private fun BuilderTokens.actionPairs(): List<InkPair> =
+private fun BuilderTokens.actionPairs(): List<ActionInkPair> =
     listOf(
-        InkPair("panel on success", panel, success, 4.5),
-        InkPair("panel on warning", panel, warning, 4.5),
-        InkPair("panel on danger", panel, danger, 4.5),
-        InkPair("onAccent on accent", onAccent, accent, 4.5),
-        InkPair("textStrong on panelRaised", textStrong, panelRaised, 4.5),
-        InkPair("focus on panel", focus, panel, 3.0),
+        ActionInkPair("panel on success", panel, success, 4.5),
+        ActionInkPair("panel on warning", panel, warning, 4.5),
+        ActionInkPair("panel on danger", panel, danger, 4.5),
+        ActionInkPair("onAccent on accent", onAccent, accent, 4.5),
+        ActionInkPair("textStrong on panelRaised", textStrong, panelRaised, 4.5),
+        ActionInkPair("focus on panel", focus, panel, 3.0),
     )
 
 @OptIn(ExperimentalTestApi::class)
@@ -101,13 +106,17 @@ private fun ComposeUiTest.checkSheets(
 ) {
     val unreadable = mutableListOf<String>()
     var isDark by mutableStateOf(false)
+    var compact by mutableStateOf(false)
     var tokens: BuilderTokens? = null
     setContent {
         val result = remember { ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4))) }
-        CompositionLocalProvider(LocalMotionFrozen provides true, LocalLayout provides SheetLayout) {
+        CompositionLocalProvider(
+            LocalMotionFrozen provides true,
+            LocalLayout provides if (compact) CompactLayout else SheetLayout,
+        ) {
             BuilderTheme(skin, result, isDark, reducedMotion = false) {
                 tokens = LocalBuilderTokens.current
-                ControlSheet()
+                if (compact) CompactSheet() else ControlSheet()
             }
         }
     }
@@ -122,6 +131,16 @@ private fun ComposeUiTest.checkSheets(
         }
         onNodeWithTag(SheetTag).captureRoboImage("$ScreenshotDir/$name-$mode.png")
     }
+    compact = true
+    for (dark in listOf(false, true)) {
+        isDark = dark
+        waitForIdle()
+        // The ring has to hug the button, not the 48 dp footprint around it.
+        onNodeWithText("Share").requestFocus()
+        waitForIdle()
+        val mode = if (dark) "dark" else "light"
+        onNodeWithTag(SheetTag).captureRoboImage("$ScreenshotDir/$name-compact-$mode.png")
+    }
     unreadable.shouldBeEmpty()
 }
 
@@ -135,7 +154,7 @@ private fun contrast(
     return (lighter + 0.05) / (darker + 0.05)
 }
 
-/** Every control of the batch, enabled on the left of each row and disabled on the right. */
+/** Every control of the batch, enabled first and then the same controls disabled below them. */
 @Composable
 private fun ControlSheet() {
     val tokens = LocalBuilderTokens.current
@@ -178,6 +197,13 @@ private fun ControlSheet() {
                     enabled = enabled,
                     optionIcon = { mode -> if (mode == "Light") IconId.Sun else IconId.Moon },
                 ) { it }
+                BuilderChoiceChips(
+                    options = ActionPaletteStyles,
+                    selected = "Vibrant",
+                    onSelect = {},
+                    label = "Style",
+                    enabled = enabled,
+                ) { it }
                 BuilderListRow(
                     headline = "Ocean",
                     supporting = "Edited today",
@@ -213,6 +239,32 @@ private fun ControlSheet() {
                 BuilderText("After", style = BuilderTextStyle.Label)
             }
         }
+    }
+}
+
+/** The pressable controls on a phone, the Share button focused so the sheet shows where the ring sits. */
+@Composable
+private fun CompactSheet() {
+    val tokens = LocalBuilderTokens.current
+    Column(
+        modifier = Modifier
+            .testTag(SheetTag)
+            .width(360.dp)
+            .background(tokens.panel)
+            .padding(tokens.spacing.medium),
+        verticalArrangement = Arrangement.spacedBy(tokens.spacing.small),
+    ) {
+        SheetRow {
+            BuilderButton({}, "Share", emphasis = Emphasis.Primary)
+            BuilderIconButton({}, IconId.Undo, "Undo")
+            BuilderToggleButton(true, {}, "Inspect")
+        }
+        SheetRow {
+            BuilderFilterChip(true, {}, "Pinned")
+            BuilderFilterChip(false, {}, "Locked", icon = IconId.Lock)
+        }
+        BuilderSegmented(listOf("Light", "Split", "Dark"), "Split", onSelect = {}, label = "Preview mode") { it }
+        BuilderChoiceChips(ActionPaletteStyles, "Vibrant", onSelect = {}, label = "Style") { it }
     }
 }
 

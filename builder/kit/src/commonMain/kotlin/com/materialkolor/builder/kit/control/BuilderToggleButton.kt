@@ -37,7 +37,8 @@ import com.materialkolor.builder.kit.skin.material.MaterialToggleButton
  * @param[onCheckedChange] Called with the state the user asked for.
  * @param[label] What it switches, shown and read out.
  * @param[modifier] Applied to the button.
- * @param[icon] A glyph before the label.
+ * @param[icon] A glyph before the label. The skins with no toggle button of their own show a check
+ * in its place while the button is on.
  * @param[enabled] Whether it can be switched.
  */
 @Composable
@@ -82,7 +83,10 @@ public fun BuilderToggleButton(
     }
 }
 
-/** A toggle button drawn from [style], filled while it is on. */
+/**
+ * A toggle button drawn from [style], filled while it is on. It shows a check in place of its icon
+ * while it is on, so on and off never differ by fill alone (AR-03).
+ */
 @Composable
 internal fun HeadlessToggleButton(
     checked: Boolean,
@@ -114,7 +118,8 @@ internal fun HeadlessToggleButton(
         horizontalArrangement = Arrangement.spacedBy(style.gap, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (icon != null) BuilderIcon(icon, contentDescription = null, tint = colors.content)
+        val glyph = if (checked) IconId.Check else icon
+        if (glyph != null) BuilderIcon(glyph, contentDescription = null, tint = colors.content)
         BuilderText(label, style = BuilderTextStyle.Label, color = colors.content, maxLines = 1)
     }
 }

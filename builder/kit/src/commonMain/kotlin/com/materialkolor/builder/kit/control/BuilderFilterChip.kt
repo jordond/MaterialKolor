@@ -12,6 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -30,8 +33,10 @@ import com.materialkolor.builder.kit.skin.material.MaterialFilterChip
 /**
  * A compact on and off choice among several that can be on together, such as a filter.
  *
- * It reads out as a checkbox with its selected state, the way Material's own filter chip does. A
- * selected chip shows a check in place of its icon, so selection never rests on colour alone.
+ * It reads out as a checkbox with its selected state, the way Material's own filter chip does, and
+ * carries the matching on or off state so a reader that mirrors checkboxes never hears it as
+ * unchecked. A selected chip shows a check in place of its icon, so selection never rests on colour
+ * alone.
  *
  * @param[selected] Whether the chip is on.
  * @param[onSelectedChange] Called with the state the user asked for.
@@ -88,7 +93,8 @@ internal fun HeadlessFilterChip(
                 enabled = enabled,
                 role = Role.Checkbox,
                 onClick = { onSelectedChange(!selected) },
-            ).actionTouchTarget(LocalLayout.current.primaryTouchTarget)
+            ).semantics { toggleableState = ToggleableState(selected) }
+            .actionTouchTarget(LocalLayout.current.primaryTouchTarget)
             .actionPress(interactionSource)
             .alpha(if (enabled) 1f else ActionDisabledAlpha)
             .actionRing(interactionSource, style.shape)

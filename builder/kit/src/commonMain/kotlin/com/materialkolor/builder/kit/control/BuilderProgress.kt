@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -15,6 +17,7 @@ import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.unit.LayoutDirection
 import com.composeunstyled.Indicator
 import com.composeunstyled.UnstyledProgress
 import com.materialkolor.builder.domain.model.Library
@@ -24,9 +27,9 @@ import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.FluentProgress
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
 import com.materialkolor.builder.kit.skin.headless.ProgressStyle
+import com.materialkolor.builder.kit.skin.headless.ProgressSweep
 import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.material.MaterialProgress
-import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
@@ -37,7 +40,8 @@ import kotlin.math.roundToInt
  *
  * @param[label] What is running, read out as the bar's name.
  * @param[modifier] Applied to the bar, which fills the width it is given.
- * @param[progress] How much is done from zero to one, or null while nobody can tell.
+ * @param[progress] How much is done from zero to one, or null while nobody can tell. Anything past
+ * either end counts as that end, and NaN counts as nothing done.
  */
 @Composable
 public fun BuilderProgress(
@@ -45,7 +49,7 @@ public fun BuilderProgress(
     modifier: Modifier = Modifier,
     progress: Float? = null,
 ) {
-    val amount = progress?.coerceIn(0f, 1f)
+    val amount = progress?.let { value -> if (value.isNaN()) 0f else value.coerceIn(0f, 1f) }
     when (LocalSkin.current.library) {
         Library.Material3 -> MaterialProgress(label, modifier, amount)
         Library.Unstyled -> HeadlessProgress(label, UnstyledActionStyles.progress, modifier, amount)
@@ -63,11 +67,35 @@ internal fun SemanticsPropertyReceiver.progressLabel(
     if (progress != null) stateDescription = "${(progress * 100).roundToInt()}%"
 }
 
-/** How long the indeterminate sweep takes to cross the track once. */
-private const val SweepMillis = 1400
+/** Where the sweep rests whenever it may not move, across the middle of the track. */
+private const val StillPhase = 0.5f
 
-/** How much of the track the indeterminate sweep covers. */
-private const val SweepFraction = 0.4f
+/**
+ * The phase of an indeterminate sweep, zero as it enters the track and one as it leaves.
+ *
+ * It runs on [rememberLoopPhase], so it holds still while motion is frozen or the tab is hidden.
+ * Reduced motion holds it still as well (MO-10), resting on a partial bar so the work never looks
+ * finished.
+ */
+@Composable
+internal fun rememberSweepPhase(sweep: ProgressSweep): State<Float> =
+    if (LocalReducedMotion.current) {
+        rememberUpdatedState(StillPhase)
+    } else {
+        rememberLoopPhase(periodMillis = sweep.periodMillis, frozenPhase = StillPhase)
+    }
+
+/**
+ * The stretch of the track the sweep covers at [phase], as fractions from the reading start. Either
+ * end may hang off the track while the sweep enters or leaves.
+ */
+internal fun sweepSpan(
+    phase: Float,
+    fraction: Float,
+): ClosedFloatingPointRange<Float> {
+    val start = -fraction + (1f + fraction) * phase
+    return start..(start + fraction)
+}
 
 /** A progress bar drawn from [style] over Compose Unstyled's progress. */
 @Composable
@@ -89,22 +117,19 @@ internal fun HeadlessProgress(
         }
         return
     }
-    val phase = rememberLoopPhase(periodMillis = SweepMillis, frozenPhase = 0.5f)
-    val reducedMotion = LocalReducedMotion.current
+    val phase = rememberSweepPhase(style.sweep)
     UnstyledProgress(modifier = track) {
         Box(
             Modifier
                 .fillMaxSize()
                 .drawBehind {
-                    val now = phase.value
-                    if (reducedMotion) {
-                        // Nothing slides under reduced motion, the whole bar breathes instead.
-                        drawRect(style.indicator, alpha = 0.4f + 0.6f * (1f - abs(2f * now - 1f)))
-                    } else {
-                        val sweep = size.width * SweepFraction
-                        val start = -sweep + (size.width + sweep) * now
-                        drawRect(style.indicator, topLeft = Offset(start, 0f), size = Size(sweep, size.height))
-                    }
+                    val span = sweepSpan(phase.value, style.sweep.fraction)
+                    val from = if (layoutDirection == LayoutDirection.Ltr) span.start else 1f - span.endInclusive
+                    drawRect(
+                        color = style.indicator,
+                        topLeft = Offset(from * size.width, 0f),
+                        size = Size(style.sweep.fraction * size.width, size.height),
+                    )
                 },
         )
     }

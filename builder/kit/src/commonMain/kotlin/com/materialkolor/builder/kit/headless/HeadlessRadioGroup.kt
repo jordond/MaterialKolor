@@ -2,8 +2,10 @@ package com.materialkolor.builder.kit.headless
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +25,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import com.composeunstyled.UnstyledRadioButton
 import com.composeunstyled.UnstyledRadioGroup
@@ -32,10 +35,11 @@ import com.composeunstyled.UnstyledRadioGroup
  *
  * Tab lands on the chosen option only. The arrow keys, Home and End move the choice and the focus
  * together, the way a native radio group behaves, and wrap at either end. Every option gets the same
- * width, the width of the widest one, unless [modifier] stretches the row.
+ * width, the width of the widest one, unless [modifier] stretches the group, and then the options
+ * share the stretched width evenly.
  *
  * @param[options] What there is to choose from.
- * @param[selected] The current choice.
+ * @param[selected] The current choice. One that is not among [options] leaves nothing chosen.
  * @param[onSelect] Called with the option the user picked.
  * @param[label] What the group is for, read out when focus enters it.
  * @param[modifier] Applied to the group.
@@ -55,6 +59,76 @@ internal fun <T> HeadlessRadioGroup(
     arrangement: Arrangement.Horizontal = Arrangement.Start,
     option: @Composable (value: T, isSelected: Boolean, interactionSource: MutableInteractionSource) -> Unit,
 ) {
+    RadioGroupFrame(
+        options = options,
+        selected = selected,
+        onSelect = onSelect,
+        label = label,
+        modifier = modifier.width(IntrinsicSize.Min),
+        enabled = enabled,
+        option = option,
+    ) { eachOption ->
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = arrangement,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            eachOption(Modifier.weight(1f))
+        }
+    }
+}
+
+/**
+ * The same single choice group as [HeadlessRadioGroup], laid out as a row that wraps onto more lines
+ * when it runs out of width. Each option is as wide as its own content.
+ *
+ * @param[spacing] The gap between two options, along a line and between lines.
+ */
+@Composable
+internal fun <T> HeadlessRadioFlow(
+    options: List<T>,
+    selected: T,
+    onSelect: (T) -> Unit,
+    label: String,
+    spacing: Dp,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    option: @Composable (value: T, isSelected: Boolean, interactionSource: MutableInteractionSource) -> Unit,
+) {
+    RadioGroupFrame(
+        options = options,
+        selected = selected,
+        onSelect = onSelect,
+        label = label,
+        modifier = modifier,
+        enabled = enabled,
+        option = option,
+    ) { eachOption ->
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(spacing),
+            verticalArrangement = Arrangement.spacedBy(spacing),
+            itemVerticalAlignment = Alignment.CenterVertically,
+        ) {
+            eachOption(Modifier)
+        }
+    }
+}
+
+/**
+ * The radio group both layouts share. [layout] places the options by calling the lambda it gets,
+ * with the modifier every option takes from its parent.
+ */
+@Composable
+private fun <T> RadioGroupFrame(
+    options: List<T>,
+    selected: T,
+    onSelect: (T) -> Unit,
+    label: String,
+    modifier: Modifier,
+    enabled: Boolean,
+    option: @Composable (value: T, isSelected: Boolean, interactionSource: MutableInteractionSource) -> Unit,
+    layout: @Composable (eachOption: @Composable (Modifier) -> Unit) -> Unit,
+) {
     val selectedIndex = options.indexOf(selected)
     val focus = rememberRadioGroupFocus(options.size, selectedIndex)
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
@@ -64,19 +138,14 @@ internal fun <T> HeadlessRadioGroup(
         modifier = modifier,
         accessibilityLabel = label,
     ) {
-        Row(
-            modifier = Modifier.width(IntrinsicSize.Min),
-            horizontalArrangement = arrangement,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+        layout { placement ->
             options.forEachIndexed { index, value ->
                 key(index) {
                     val interactionSource = remember { MutableInteractionSource() }
                     val isSelected = index == selectedIndex
                     UnstyledRadioButton(
                         value = value,
-                        modifier = Modifier
-                            .weight(1f)
+                        modifier = placement
                             .radioGroupOption(focus, index, selectedIndex, rtl) { target -> onSelect(options[target]) }
                             .semantics { this.selected = isSelected },
                         enabled = enabled,
@@ -100,15 +169,25 @@ internal class RadioGroupFocus internal constructor(
 ) {
     internal val requesters: List<FocusRequester> = List(count) { FocusRequester() }
 
-    /** Set by an arrow key, so the focus follows the choice it made once the choice lands. */
-    internal var followSelection: Boolean = false
+    /**
+     * The option a key last asked for, or [NoRequest]. The focus follows the choice only when the
+     * choice lands on this option, so a key the caller turned down never pulls focus back into the
+     * group on some later, unrelated change such as an undo.
+     */
+    internal var requestedIndex: Int = NoRequest
+
+    internal companion object {
+        /** No key has asked for an option since the choice last changed. */
+        internal const val NoRequest: Int = -1
+    }
 }
 
 /**
  * Focus state for a group of [count] options with [selectedIndex] chosen.
  *
- * When an arrow key moved the choice, the focus moves onto the new choice as soon as the caller
- * hands it back, and not before, since only the chosen option can take focus.
+ * When a key moved the choice, the focus moves onto the new choice as soon as the caller hands it
+ * back, and not before, since only the chosen option can take focus. Any change of choice uses up
+ * the request, whether it follows or not.
  */
 @Composable
 internal fun rememberRadioGroupFocus(
@@ -117,8 +196,9 @@ internal fun rememberRadioGroupFocus(
 ): RadioGroupFocus {
     val focus = remember(count) { RadioGroupFocus(count) }
     LaunchedEffect(focus, selectedIndex) {
-        if (focus.followSelection && selectedIndex in focus.requesters.indices) {
-            focus.followSelection = false
+        val requested = focus.requestedIndex
+        focus.requestedIndex = RadioGroupFocus.NoRequest
+        if (requested == selectedIndex && selectedIndex in focus.requesters.indices) {
             focus.requesters[selectedIndex].requestFocus()
         }
     }
@@ -155,7 +235,7 @@ internal fun Modifier.radioGroupOption(
                 else -> return@onKeyEvent false
             }.mod(count)
             if (event.type == KeyEventType.KeyDown && target != index) {
-                focus.followSelection = true
+                focus.requestedIndex = target
                 onMove(target)
             }
             true

@@ -11,6 +11,7 @@ import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.HeadlessBadge
 import com.materialkolor.builder.kit.control.HeadlessButton
 import com.materialkolor.builder.kit.control.HeadlessCard
+import com.materialkolor.builder.kit.control.HeadlessChoiceChips
 import com.materialkolor.builder.kit.control.HeadlessDivider
 import com.materialkolor.builder.kit.control.HeadlessFilterChip
 import com.materialkolor.builder.kit.control.HeadlessIconButton
@@ -131,6 +132,30 @@ internal fun FluentFilterChip(
     enabled: Boolean,
 ) {
     HeadlessFilterChip(selected, onSelectedChange, label, FluentActionStyles.chip, modifier, icon, enabled)
+}
+
+@Composable
+internal fun <T> FluentChoiceChips(
+    options: List<T>,
+    selected: T,
+    onSelect: (T) -> Unit,
+    label: String,
+    modifier: Modifier,
+    enabled: Boolean,
+    optionIcon: (T) -> IconId?,
+    optionLabel: (T) -> String,
+) {
+    HeadlessChoiceChips(
+        options = options,
+        selected = selected,
+        onSelect = onSelect,
+        label = label,
+        style = FluentActionStyles.chip,
+        modifier = modifier,
+        enabled = enabled,
+        optionIcon = optionIcon,
+        optionLabel = optionLabel,
+    )
 }
 
 @Composable

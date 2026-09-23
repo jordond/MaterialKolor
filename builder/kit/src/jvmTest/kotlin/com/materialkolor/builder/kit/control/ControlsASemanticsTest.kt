@@ -3,6 +3,8 @@ package com.materialkolor.builder.kit.control
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -11,7 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
@@ -22,22 +24,20 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertWidthIsAtLeast
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performKeyInput
-import androidx.compose.ui.test.pressKey
-import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Library
@@ -50,10 +50,12 @@ import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-private val Skins = listOf(
+/** Every skin the action controls are checked in. */
+internal val ActionSkins: List<Skin> = listOf(
     Skin(Library.Material3, expressive = false),
     Skin(Library.Material3, expressive = true),
     Skin(Library.Unstyled, expressive = false),
@@ -64,9 +66,11 @@ private val Skins = listOf(
 private val Desktop = LayoutInfo.of(widthDp = 1280.dp, heightDp = 800.dp)
 private val Phone = LayoutInfo.of(widthDp = 400.dp, heightDp = 800.dp)
 
-private val PreviewModes = listOf("Light", "Split", "Dark")
+internal val ActionPreviewModes: List<String> = listOf("Light", "Split", "Dark")
 
-private fun hasRole(role: Role): SemanticsMatcher = SemanticsMatcher.expectValue(SemanticsProperties.Role, role)
+internal val ActionPaletteStyles: List<String> = listOf("Tonal spot", "Vibrant", "Expressive", "Fidelity", "Content")
+
+internal fun actionHasRole(role: Role): SemanticsMatcher = SemanticsMatcher.expectValue(SemanticsProperties.Role, role)
 
 private val HasNoRole = SemanticsMatcher.keyNotDefined(SemanticsProperties.Role)
 
@@ -76,7 +80,7 @@ class ControlsASemanticsTest {
     fun button_everySkin_isANamedButtonThatReportsDisabled() =
         runComposeUiTest {
             var presses by mutableIntStateOf(0)
-            eachSkin(
+            eachActionSkin(
                 content = {
                     for (emphasis in Emphasis.entries) {
                         BuilderButton(onClick = { presses++ }, label = emphasis.name, emphasis = emphasis)
@@ -86,24 +90,24 @@ class ControlsASemanticsTest {
             ) {
                 presses = 0
                 for (emphasis in Emphasis.entries) {
-                    onNodeWithText(emphasis.name).assert(hasRole(Role.Button)).assertIsEnabled().performClick()
+                    onNodeWithText(emphasis.name).assert(actionHasRole(Role.Button)).assertIsEnabled().performClick()
                 }
                 presses shouldBe Emphasis.entries.size
-                onNodeWithText("Delete").assert(hasRole(Role.Button)).assertIsNotEnabled()
+                onNodeWithText("Delete").assert(actionHasRole(Role.Button)).assertIsNotEnabled()
             }
         }
 
     @Test
     fun iconButton_everySkin_isAButtonNamedByItsDescription() =
         runComposeUiTest {
-            eachSkin(
+            eachActionSkin(
                 content = {
                     BuilderIconButton(onClick = {}, icon = IconId.Undo, contentDescription = "Undo")
                     BuilderIconButton(onClick = {}, icon = IconId.Redo, contentDescription = "Redo", enabled = false)
                 },
             ) {
-                onNodeWithContentDescription("Undo").assert(hasRole(Role.Button)).assertIsEnabled()
-                onNodeWithContentDescription("Redo").assert(hasRole(Role.Button)).assertIsNotEnabled()
+                onNodeWithContentDescription("Undo").assert(actionHasRole(Role.Button)).assertIsEnabled()
+                onNodeWithContentDescription("Redo").assert(actionHasRole(Role.Button)).assertIsNotEnabled()
             }
         }
 
@@ -111,7 +115,7 @@ class ControlsASemanticsTest {
     fun toggleButton_everySkin_isACheckboxThatReportsOnAndOff() =
         runComposeUiTest {
             var inspect by mutableStateOf(false)
-            eachSkin(
+            eachActionSkin(
                 content = {
                     BuilderToggleButton(checked = inspect, onCheckedChange = { inspect = it }, label = "Inspect")
                     BuilderToggleButton(checked = true, onCheckedChange = {}, label = "Vision", enabled = false)
@@ -119,10 +123,10 @@ class ControlsASemanticsTest {
             ) {
                 inspect = false
                 waitForIdle()
-                onNodeWithText("Inspect").assert(hasRole(Role.Checkbox)).assertIsOff().performClick()
+                onNodeWithText("Inspect").assert(actionHasRole(Role.Checkbox)).assertIsOff().performClick()
                 inspect shouldBe true
                 onNodeWithText("Inspect").assertIsOn()
-                onNodeWithText("Vision").assert(hasRole(Role.Checkbox)).assertIsOn().assertIsNotEnabled()
+                onNodeWithText("Vision").assert(actionHasRole(Role.Checkbox)).assertIsOn().assertIsNotEnabled()
             }
         }
 
@@ -130,9 +134,9 @@ class ControlsASemanticsTest {
     fun segmented_everySkin_isARadioGroupWithTheChoiceSelected() =
         runComposeUiTest {
             var mode by mutableStateOf("Light")
-            eachSkin(
+            eachActionSkin(
                 content = {
-                    BuilderSegmented(PreviewModes, mode, onSelect = { mode = it }, label = "Preview mode") { it }
+                    BuilderSegmented(ActionPreviewModes, mode, onSelect = { mode = it }, label = "Preview mode") { it }
                     BuilderSegmented(
                         listOf("Hex", "HCT"),
                         "Hex",
@@ -145,46 +149,44 @@ class ControlsASemanticsTest {
                 mode = "Light"
                 waitForIdle()
                 onNodeWithContentDescription("Preview mode").assertExists()
-                onNodeWithText("Light").assert(hasRole(Role.RadioButton)).assertIsSelected()
-                onNodeWithText("Split").assert(hasRole(Role.RadioButton)).assertIsNotSelected().performClick()
+                onNodeWithText("Light").assert(actionHasRole(Role.RadioButton)).assertIsSelected()
+                onNodeWithText("Split").assert(actionHasRole(Role.RadioButton)).assertIsNotSelected().performClick()
                 mode shouldBe "Split"
                 onNodeWithText("Split").assertIsSelected()
                 onNodeWithText("Light").assertIsNotSelected()
-                onNodeWithText("HCT").assert(hasRole(Role.RadioButton)).assertIsNotSelected().assertIsNotEnabled()
+                onNodeWithText("HCT").assert(actionHasRole(Role.RadioButton)).assertIsNotSelected().assertIsNotEnabled()
             }
         }
 
     @Test
-    fun segmented_arrowKeys_moveTheChoiceAndTheFocus() =
+    fun segmented_choiceOutsideTheOptions_leavesNothingChosen() =
         runComposeUiTest {
-            var mode by mutableStateOf("Light")
-            eachSkin(
+            eachActionSkin(
                 content = {
-                    BuilderSegmented(PreviewModes, mode, onSelect = { mode = it }, label = "Preview mode") { it }
+                    BuilderSegmented(ActionPreviewModes, "Auto", onSelect = {}, label = "Preview mode") { it }
                 },
             ) {
-                mode = "Light"
-                waitForIdle()
-                onNodeWithText("Light").requestFocus()
-                onNodeWithText("Light").assertIsFocused()
+                for (mode in ActionPreviewModes) onNodeWithText(mode).assertIsNotSelected()
+            }
+        }
 
-                onNodeWithText("Light").performKeyInput { pressKey(Key.DirectionRight) }
-                waitForIdle()
-                mode shouldBe "Split"
-                onNodeWithText("Split").assertIsSelected().assertIsFocused()
-
-                onNodeWithText("Split").performKeyInput { pressKey(Key.DirectionLeft) }
-                waitForIdle()
-                mode shouldBe "Light"
-
-                onNodeWithText("Light").performKeyInput { pressKey(Key.DirectionLeft) }
-                waitForIdle()
-                mode shouldBe "Dark"
-                onNodeWithText("Dark").assertIsSelected().assertIsFocused()
-
-                onNodeWithText("Dark").performKeyInput { pressKey(Key.MoveHome) }
-                waitForIdle()
-                mode shouldBe "Light"
+    @Test
+    fun segmented_stretchedGroup_sharesTheWidthAmongTheOptions() =
+        runComposeUiTest {
+            eachActionSkin(
+                content = {
+                    Box(Modifier.width(600.dp)) {
+                        BuilderSegmented(
+                            ActionPreviewModes,
+                            "Light",
+                            onSelect = {},
+                            label = "Preview mode",
+                            modifier = Modifier.fillMaxWidth(),
+                        ) { it }
+                    }
+                },
+            ) {
+                for (mode in ActionPreviewModes) onNodeWithText(mode).assertWidthIsAtLeast(180.dp)
             }
         }
 
@@ -192,7 +194,7 @@ class ControlsASemanticsTest {
     fun filterChip_everySkin_isACheckboxThatReportsSelection() =
         runComposeUiTest {
             var pinned by mutableStateOf(false)
-            eachSkin(
+            eachActionSkin(
                 content = {
                     BuilderFilterChip(selected = pinned, onSelectedChange = { pinned = it }, label = "Pinned")
                     BuilderFilterChip(selected = true, onSelectedChange = {}, label = "Locked", enabled = false)
@@ -200,17 +202,72 @@ class ControlsASemanticsTest {
             ) {
                 pinned = false
                 waitForIdle()
-                onNodeWithText("Pinned").assert(hasRole(Role.Checkbox)).assertIsNotSelected().performClick()
+                onNodeWithText("Pinned")
+                    .assert(actionHasRole(Role.Checkbox))
+                    .assertIsNotSelected()
+                    .assertIsOff()
+                    .performClick()
                 pinned shouldBe true
-                onNodeWithText("Pinned").assertIsSelected()
-                onNodeWithText("Locked").assert(hasRole(Role.Checkbox)).assertIsSelected().assertIsNotEnabled()
+                onNodeWithText("Pinned").assertIsSelected().assertIsOn()
+                onNodeWithText("Locked")
+                    .assert(actionHasRole(Role.Checkbox))
+                    .assertIsSelected()
+                    .assertIsOn()
+                    .assertIsNotEnabled()
+            }
+        }
+
+    @Test
+    fun choiceChips_everySkin_isARadioGroupWithTheChoiceSelected() =
+        runComposeUiTest {
+            var style by mutableStateOf("Tonal spot")
+            eachActionSkin(
+                content = {
+                    BuilderChoiceChips(ActionPaletteStyles, style, onSelect = { style = it }, label = "Style") { it }
+                    BuilderChoiceChips(
+                        listOf("Standard", "Medium"),
+                        "Standard",
+                        onSelect = {},
+                        label = "Contrast",
+                        enabled = false,
+                    ) { it }
+                },
+            ) {
+                style = "Tonal spot"
+                waitForIdle()
+                onNodeWithContentDescription("Style").assertExists()
+                onNodeWithText("Tonal spot").assert(actionHasRole(Role.RadioButton)).assertIsSelected()
+                onNodeWithText("Vibrant").assert(actionHasRole(Role.RadioButton)).assertIsNotSelected().performClick()
+                style shouldBe "Vibrant"
+                onNodeWithText("Vibrant").assertIsSelected()
+                onNodeWithText("Tonal spot").assertIsNotSelected()
+                onNodeWithText("Medium")
+                    .assert(actionHasRole(Role.RadioButton))
+                    .assertIsNotSelected()
+                    .assertIsNotEnabled()
+            }
+        }
+
+    @Test
+    fun choiceChips_narrowWidth_wrapsOntoAnotherLine() =
+        runComposeUiTest {
+            eachActionSkin(
+                content = {
+                    Box(Modifier.width(240.dp)) {
+                        BuilderChoiceChips(ActionPaletteStyles, "Vibrant", onSelect = {}, label = "Style") { it }
+                    }
+                },
+            ) {
+                val first = onNodeWithText(ActionPaletteStyles.first()).getUnclippedBoundsInRoot()
+                val last = onNodeWithText(ActionPaletteStyles.last()).getUnclippedBoundsInRoot()
+                last.top shouldBeGreaterThan first.bottom
             }
         }
 
     @Test
     fun badge_everySkin_readsAsOneNodeNamedByItsLabel() =
         runComposeUiTest {
-            eachSkin(
+            eachActionSkin(
                 content = {
                     BuilderBadge("AA", Modifier.testTag("badge"), status = BadgeStatus.Success, icon = IconId.Check)
                 },
@@ -223,7 +280,7 @@ class ControlsASemanticsTest {
     fun card_everySkin_pressableCardIsOneButtonAndPlainCardIsAGroup() =
         runComposeUiTest {
             var presses by mutableIntStateOf(0)
-            eachSkin(
+            eachActionSkin(
                 content = {
                     BuilderCard(Modifier.testTag("plain")) { BuilderText("Kotlin") }
                     BuilderCard(Modifier.testTag("pressable"), onClick = { presses++ }) { BuilderText("Swift") }
@@ -231,9 +288,9 @@ class ControlsASemanticsTest {
                 },
             ) {
                 presses = 0
-                onNodeWithTag("pressable").assert(hasRole(Role.Button)).assert(hasText("Swift")).performClick()
+                onNodeWithTag("pressable").assert(actionHasRole(Role.Button)).assert(hasText("Swift")).performClick()
                 presses shouldBe 1
-                onNodeWithTag("disabled").assert(hasRole(Role.Button)).assertIsNotEnabled()
+                onNodeWithTag("disabled").assert(actionHasRole(Role.Button)).assertIsNotEnabled()
                 onNodeWithTag("plain").assert(HasNoRole)
                 onNodeWithText("Kotlin").assertExists()
             }
@@ -242,7 +299,7 @@ class ControlsASemanticsTest {
     @Test
     fun divider_everySkin_staysOutOfTheAccessibilityTree() =
         runComposeUiTest {
-            eachSkin(content = { BuilderDivider(Modifier.testTag("divider")) }) {
+            eachActionSkin(content = { BuilderDivider(Modifier.testTag("divider")) }) {
                 onNodeWithTag("divider")
                     .assert(HasNoRole)
                     .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription))
@@ -253,10 +310,11 @@ class ControlsASemanticsTest {
     @Test
     fun progress_everySkin_reportsItsLabelAndAmount() =
         runComposeUiTest {
-            eachSkin(
+            eachActionSkin(
                 content = {
                     BuilderProgress("Exporting", progress = 0.4f)
                     BuilderProgress("Generating candidates")
+                    BuilderProgress("Broken", progress = Float.NaN)
                 },
             ) {
                 onNodeWithContentDescription("Exporting")
@@ -273,6 +331,13 @@ class ControlsASemanticsTest {
                             ProgressBarRangeInfo.Indeterminate,
                         ),
                     )
+                onNodeWithContentDescription("Broken")
+                    .assert(
+                        SemanticsMatcher.expectValue(
+                            SemanticsProperties.ProgressBarRangeInfo,
+                            ProgressBarRangeInfo(0f, 0f..1f),
+                        ),
+                    ).assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "0%"))
             }
         }
 
@@ -280,7 +345,7 @@ class ControlsASemanticsTest {
     fun listRow_everySkin_isAButtonThatReportsTheCurrentRow() =
         runComposeUiTest {
             var opened by mutableStateOf<String?>(null)
-            eachSkin(
+            eachActionSkin(
                 content = {
                     BuilderListRow(
                         "Ocean",
@@ -294,11 +359,14 @@ class ControlsASemanticsTest {
                 },
             ) {
                 opened = null
-                onNodeWithText("Ocean").assert(hasRole(Role.Button)).assert(hasText("Edited today")).assertIsSelected()
-                onNodeWithText("Forest").assert(hasRole(Role.Button)).assertIsNotSelected().performClick()
+                onNodeWithText("Ocean")
+                    .assert(actionHasRole(Role.Button))
+                    .assert(hasText("Edited today"))
+                    .assertIsSelected()
+                onNodeWithText("Forest").assert(actionHasRole(Role.Button)).assertIsNotSelected().performClick()
                 opened shouldBe "Forest"
                 onNodeWithText("Archived")
-                    .assert(hasRole(Role.Button))
+                    .assert(actionHasRole(Role.Button))
                     .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.Selected))
                     .assertIsNotEnabled()
                 onNodeWithTag("info").assert(HasNoRole).assert(hasText("Nothing to press"))
@@ -308,7 +376,7 @@ class ControlsASemanticsTest {
     @Test
     fun touchTarget_compactLayout_growsEveryPressableControlToFortyEightDp() =
         runComposeUiTest {
-            eachSkin(
+            eachActionSkin(
                 layout = Phone,
                 content = {
                     Footprint("button") { BuilderButton(onClick = {}, label = "Share") }
@@ -317,11 +385,19 @@ class ControlsASemanticsTest {
                     Footprint("chip") { BuilderFilterChip(false, {}, label = "Pinned") }
                     Footprint("row") { BuilderListRow("Ocean", onClick = {}) }
                     Footprint("segmented") {
-                        BuilderSegmented(PreviewModes, "Light", onSelect = {}, label = "Preview mode") { it }
+                        BuilderSegmented(ActionPreviewModes, "Light", onSelect = {}, label = "Preview mode") { it }
+                    }
+                    Footprint("choice") {
+                        BuilderChoiceChips(
+                            ActionPaletteStyles.take(2),
+                            "Vibrant",
+                            onSelect = {},
+                            label = "Style",
+                        ) { it }
                     }
                 },
             ) {
-                for (tag in listOf("button", "icon", "toggle", "chip", "row", "segmented")) {
+                for (tag in listOf("button", "icon", "toggle", "chip", "row", "segmented", "choice")) {
                     onNodeWithTag(tag).assertHeightIsAtLeast(48.dp)
                 }
                 onNodeWithTag("icon").assertWidthIsAtLeast(48.dp)
@@ -347,24 +423,29 @@ private fun Footprint(
  * Draws [content] once and walks it through every skin, running [check] in each.
  *
  * Motion is frozen so a press or a sweep never leaves the tree mid animation, and a failure names
- * the skin it happened in.
+ * the skin it happened in. [direction] sets the reading direction for the right to left runs.
  */
 @OptIn(ExperimentalTestApi::class)
-private fun ComposeUiTest.eachSkin(
+internal fun ComposeUiTest.eachActionSkin(
     layout: LayoutInfo = Desktop,
+    direction: LayoutDirection = LayoutDirection.Ltr,
     content: @Composable () -> Unit,
     check: ComposeUiTest.(Skin) -> Unit,
 ) {
-    var skin by mutableStateOf(Skins.first())
+    var skin by mutableStateOf(ActionSkins.first())
     setContent {
         val result = remember { ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4))) }
-        CompositionLocalProvider(LocalMotionFrozen provides true, LocalLayout provides layout) {
+        CompositionLocalProvider(
+            LocalMotionFrozen provides true,
+            LocalLayout provides layout,
+            LocalLayoutDirection provides direction,
+        ) {
             BuilderTheme(skin, result, isDark = false, reducedMotion = false) {
                 Column(Modifier.background(LocalBuilderTokens.current.panel)) { content() }
             }
         }
     }
-    for (next in Skins) {
+    for (next in ActionSkins) {
         skin = next
         waitForIdle()
         try {

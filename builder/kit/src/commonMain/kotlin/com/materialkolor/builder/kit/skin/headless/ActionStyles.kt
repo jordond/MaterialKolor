@@ -127,12 +127,31 @@ internal data class DividerStyle(
     val thickness: Dp,
 )
 
+/**
+ * How an indeterminate bar moves.
+ *
+ * No motion duration fits a loop. The longest one, the reveal, is under a third of a trip, so the
+ * pace lives here with the rest of the bar's look.
+ *
+ * @property[periodMillis] How long the sweep takes to cross the track once.
+ * @property[fraction] How much of the track the sweep covers.
+ */
+@Immutable
+internal data class ProgressSweep(
+    val periodMillis: Int,
+    val fraction: Float,
+)
+
+/** The sweep every skin runs, Material3 included, so a skin switch keeps the pace. */
+internal val ActionSweep: ProgressSweep = ProgressSweep(periodMillis = 1400, fraction = 0.4f)
+
 @Immutable
 internal data class ProgressStyle(
     val shape: Shape,
     val height: Dp,
     val track: Color,
     val indicator: Color,
+    val sweep: ProgressSweep,
 )
 
 @Immutable
@@ -188,7 +207,7 @@ internal data class ActionMetrics(
     val borderedSecondary: Boolean,
 )
 
-/** The Unstyled skin's actions, square cornered and flat, with an outline wherever there is no fill. */
+/** The Unstyled skin's actions, flat with small corners, with an outline wherever there is no fill. */
 internal val UnstyledActionStyles: ActionStyles
     @Composable get() = rememberActionStyles(::unstyledActionStyles)
 
@@ -335,6 +354,7 @@ internal fun actionStyles(
             height = metrics.barHeight,
             track = tokens.border,
             indicator = tokens.accent,
+            sweep = ActionSweep,
         ),
         listRow = ListRowStyle(
             shape = metrics.rowShape,

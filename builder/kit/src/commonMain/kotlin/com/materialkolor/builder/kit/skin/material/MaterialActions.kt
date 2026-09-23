@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Badge
@@ -24,7 +23,6 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
@@ -47,12 +45,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.control.BuilderIcon
@@ -61,7 +63,6 @@ import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.ListRowContent
 import com.materialkolor.builder.kit.control.listRowInput
-import com.materialkolor.builder.kit.control.progressLabel
 import com.materialkolor.builder.kit.headless.radioGroupOption
 import com.materialkolor.builder.kit.headless.rememberRadioGroupFocus
 import com.materialkolor.builder.kit.icon.IconId
@@ -69,6 +70,7 @@ import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.ActionDisabledAlpha
 import com.materialkolor.builder.kit.skin.headless.actionPress
 import com.materialkolor.builder.kit.skin.headless.actionRing
+import com.materialkolor.builder.kit.skin.headless.actionTouchTarget
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /*
@@ -76,14 +78,31 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * focus ring and touch target laid over it, and the builder's type and glyphs inside it.
  */
 
-/** Hands Material's own touch target rule the size the builder's layout asks for (AR-04). */
+/**
+ * Turns Material's own touch target rule off, so [materialFeedback] grows the footprint instead
+ * (AR-04). Material grows it inside the component, which would put the press scale and the focus
+ * ring around the grown footprint rather than the control.
+ */
 @Composable
-private fun MaterialTarget(content: @Composable () -> Unit) {
+internal fun MaterialTarget(content: @Composable () -> Unit) {
     CompositionLocalProvider(
-        LocalMinimumInteractiveComponentSize provides LocalLayout.current.primaryTouchTarget,
+        LocalMinimumInteractiveComponentSize provides Dp.Unspecified,
         content = content,
     )
 }
+
+/**
+ * Grows the footprint to the layout's touch target, then shrinks on press and rings on focus inside
+ * it, so both hug the control whatever the footprint.
+ */
+@Composable
+internal fun Modifier.materialFeedback(
+    interactionSource: MutableInteractionSource,
+    shape: Shape,
+): Modifier =
+    actionTouchTarget(LocalLayout.current.primaryTouchTarget)
+        .actionPress(interactionSource)
+        .actionRing(interactionSource, shape)
 
 /** A glyph and a label in whatever ink the surrounding Material component provides. */
 @Composable
@@ -109,9 +128,7 @@ internal fun MaterialButton(
     enabled: Boolean,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val decorated = modifier
-        .actionPress(interactionSource)
-        .actionRing(interactionSource, ButtonDefaults.shape)
+    val decorated = modifier.materialFeedback(interactionSource, ButtonDefaults.shape)
     val content: @Composable RowScope.() -> Unit = { MaterialLabel(label, icon) }
     MaterialTarget {
         when (emphasis) {
@@ -151,9 +168,7 @@ internal fun MaterialIconButton(
     enabled: Boolean,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val decorated = modifier
-        .actionPress(interactionSource)
-        .actionRing(interactionSource, IconButtonDefaults.standardShape)
+    val decorated = modifier.materialFeedback(interactionSource, IconButtonDefaults.standardShape)
     val content: @Composable () -> Unit = {
         BuilderIcon(icon, contentDescription = contentDescription, tint = LocalContentColor.current)
     }
@@ -203,9 +218,7 @@ internal fun MaterialToggleButton(
         ToggleButton(
             checked = checked,
             onCheckedChange = onCheckedChange,
-            modifier = modifier
-                .actionPress(interactionSource)
-                .actionRing(interactionSource, ButtonDefaults.shape),
+            modifier = modifier.materialFeedback(interactionSource, ButtonDefaults.shape),
             enabled = enabled,
             interactionSource = interactionSource,
         ) {
@@ -245,8 +258,7 @@ internal fun <T> MaterialSegmented(
                         shape = shape,
                         modifier = Modifier
                             .radioGroupOption(focus, index, selectedIndex, rtl) { target -> onSelect(options[target]) }
-                            .actionPress(interactionSource)
-                            .actionRing(interactionSource, shape),
+                            .materialFeedback(interactionSource, shape),
                         enabled = enabled,
                         interactionSource = interactionSource,
                         icon = {
@@ -302,8 +314,8 @@ internal fun MaterialFilterChip(
                 )
             },
             modifier = modifier
-                .actionPress(interactionSource)
-                .actionRing(interactionSource, FilterChipDefaults.shape),
+                .semantics { toggleableState = ToggleableState(selected) }
+                .materialFeedback(interactionSource, FilterChipDefaults.shape),
             enabled = enabled,
             leadingIcon = glyph?.let { id ->
                 { BuilderIcon(id, contentDescription = null, tint = LocalContentColor.current) }
@@ -382,23 +394,6 @@ internal fun MaterialDivider(
     when (orientation) {
         Orientation.Horizontal -> HorizontalDivider(modifier)
         Orientation.Vertical -> VerticalDivider(modifier)
-    }
-}
-
-/** Material's linear bar. B-402 decides whether the expressive flavour gets the loading indicator. */
-@Composable
-internal fun MaterialProgress(
-    label: String,
-    modifier: Modifier,
-    progress: Float?,
-) {
-    val labelled = modifier
-        .fillMaxWidth()
-        .semantics { progressLabel(label, progress) }
-    if (progress == null) {
-        LinearProgressIndicator(labelled)
-    } else {
-        LinearProgressIndicator(progress = { progress }, modifier = labelled)
     }
 }
 
