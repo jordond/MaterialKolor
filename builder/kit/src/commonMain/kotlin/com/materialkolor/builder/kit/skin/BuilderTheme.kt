@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.engine.resolve.ThemeResult
+import com.materialkolor.builder.kit.headless.OverlayHost
 import com.materialkolor.builder.kit.icon.BuilderIcons
 import com.materialkolor.builder.kit.icon.LocalBuilderIcons
 import com.materialkolor.builder.kit.motion.BuilderMotion
@@ -51,11 +52,14 @@ public fun BuilderTheme(
         LocalBuilderType provides rememberBuilderType(),
         LocalReducedMotion provides reducedMotion,
     ) {
-        when (skin.library) {
-            Library.Material3 -> MaterialSkinTheme(result.chrome(isDark), skin.expressive, reducedMotion, content)
-            Library.Unstyled -> UnstyledSkinTheme(result.chrome(isDark), isDark, reducedMotion, content)
-            Library.Fluent -> FluentSkinTheme(result.chrome(isDark), isDark, reducedMotion, content)
-            Library.Custom -> CustomSkinTheme(result.chromeCustomSlots, isDark, reducedMotion, content)
+        // b-219
+        OverlayHost {
+            when (skin.library) {
+                Library.Material3 -> MaterialSkinTheme(result.chrome(isDark), skin.expressive, reducedMotion, content)
+                Library.Unstyled -> UnstyledSkinTheme(result.chrome(isDark), isDark, reducedMotion, content)
+                Library.Fluent -> FluentSkinTheme(result.chrome(isDark), isDark, reducedMotion, content)
+                Library.Custom -> CustomSkinTheme(result.chromeCustomSlots, isDark, reducedMotion, content)
+            }
         }
     }
 }

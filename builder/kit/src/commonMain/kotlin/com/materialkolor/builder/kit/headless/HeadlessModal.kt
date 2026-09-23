@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -37,10 +38,12 @@ import com.materialkolor.builder.kit.skin.headless.scrimExit
 /**
  * A modal layer over the page, the ground every dialog, side panel and sheet stands on.
  *
- * It lives in a focusable layer of its own, so Tab stays inside it until it closes (AR-09). Esc and
- * a click on the veil both ask to close it. Focus moves to the first thing inside that can take it,
- * and once the layer is gone it goes back to [returnFocusTo]. The layer stays up while [content]
- * animates out, and [content] animates itself through `animateEnterExit`.
+ * It lives in a focusable layer of its own, a dialog window or a modal layer of the overlay host,
+ * so Tab stays inside it until it closes (AR-09). In the host the page under it also leaves the
+ * semantics tree while it is open (AR-11). Esc and a click on the veil both ask to close it. Focus
+ * moves to the first thing inside that can take it, and once the layer is gone it goes back to
+ * [returnFocusTo]. The layer stays up while [content] animates out, and [content] animates itself
+ * through `animateEnterExit`.
  *
  * @param[visible] Whether the layer is wanted.
  * @param[onDismissRequest] Called on Esc and on a click on the veil.
@@ -64,6 +67,13 @@ internal fun HeadlessModal(
     ReturnFocusWhenGone(shown, returnFocusTo)
     if (!shown) return
     val dismiss by rememberUpdatedState(onDismissRequest)
+    val host = inTreeOverlayHost()
+    if (host != null) {
+        OverlayPortal(host, OverlayKind.Modal) {
+            ModalLayer(state, { dismiss() }, scrim, contentAlignment, content)
+        }
+        return
+    }
     Dialog(
         onDismissRequest = { dismiss() },
         properties = DialogProperties(
@@ -74,35 +84,47 @@ internal fun HeadlessModal(
             animateTransition = false,
         ),
     ) {
-        AnimatedVisibility(
-            visibleState = state,
-            enter = EnterTransition.None,
-            exit = ExitTransition.None,
+        ModalLayer(state, { dismiss() }, scrim, contentAlignment, content)
+    }
+}
+
+/** The veil and the panel over it, the same in a dialog window and in the overlay host. */
+@Composable
+private fun ModalLayer(
+    state: MutableTransitionState<Boolean>,
+    dismiss: () -> Unit,
+    scrim: Color,
+    contentAlignment: Alignment,
+    content: @Composable AnimatedVisibilityScope.() -> Unit,
+) {
+    AnimatedVisibility(
+        visibleState = state,
+        enter = EnterTransition.None,
+        exit = ExitTransition.None,
+    ) {
+        val initialFocus = remember { FocusRequester() }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .onKeyEvent { event ->
+                    val escape = event.type == KeyEventType.KeyDown && event.key == Key.Escape
+                    if (escape) dismiss()
+                    escape
+                },
+            contentAlignment = contentAlignment,
         ) {
-            val initialFocus = remember { FocusRequester() }
             Box(
                 modifier = Modifier
+                    .animateEnterExit(enter = scrimEnter(), exit = scrimExit())
                     .fillMaxSize()
-                    .onKeyEvent { event ->
-                        val escape = event.type == KeyEventType.KeyDown && event.key == Key.Escape
-                        if (escape) dismiss()
-                        escape
-                    },
-                contentAlignment = contentAlignment,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .animateEnterExit(enter = scrimEnter(), exit = scrimExit())
-                        .fillMaxSize()
-                        .background(scrim)
-                        .pointerInput(Unit) { detectTapGestures { dismiss() } },
-                )
-                Box(Modifier.focusRequester(initialFocus)) {
-                    content()
-                }
+                    .background(scrim)
+                    .pointerInput(Unit) { detectTapGestures { dismiss() } },
+            )
+            Box(Modifier.focusRequester(initialFocus)) {
+                content()
             }
-            LaunchedEffect(Unit) { initialFocus.requestFocus() }
         }
+        LaunchedEffect(Unit) { initialFocus.requestFocus() }
     }
 }
 

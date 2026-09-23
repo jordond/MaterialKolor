@@ -73,14 +73,17 @@ import kotlin.math.max
 /**
  * A popover list anchored under whatever it shares a parent with.
  *
- * It opens in a focusable popup, so Esc and a click outside both call [onDismissRequest], and focus
- * lands on [initialFocus] or else on the first row. The arrows and Tab walk the rows.
+ * It opens in a focusable popup, or as a popover in the overlay host, so Esc and a click outside
+ * both call [onDismissRequest], and focus lands on [initialFocus] or else on the first row. The
+ * arrows and Tab walk the rows. In the host focus goes back to [returnFocusTo] once the list has
+ * gone, since no popup window hands it back.
  *
  * @param[expanded] Whether the list is open.
  * @param[onDismissRequest] Called when the list asks to close.
  * @param[style] The skin's overlay style.
  * @param[minWidth] The narrowest the list may be, the anchor's width for a select.
  * @param[initialFocus] The row that takes focus when the list opens, the selected option for a select.
+ * @param[returnFocusTo] The trigger or the field that opened the list.
  * @param[content] The rows.
  */
 @Composable
@@ -90,18 +93,19 @@ internal fun HeadlessDropdown(
     style: OverlayStyle,
     minWidth: Dp = OverlayMetrics.menuMinWidth,
     initialFocus: FocusRequester? = null,
+    returnFocusTo: FocusRequester? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val host = inTreeOverlayHost()
+    val anchor = if (host != null) rememberOverlayAnchor(host) else null
     val state = rememberOverlayVisibility(expanded)
-    if (!state.isOverlayShown(expanded)) return
+    val shown = state.isOverlayShown(expanded)
+    if (host != null) ReturnFocusWhenGone(shown, returnFocusTo)
+    if (!shown) return
     val tokens = LocalBuilderTokens.current
     val gap = with(LocalDensity.current) { tokens.spacing.extraSmall.roundToPx() }
     val provider = remember(gap) { DropdownPositionProvider(gap) }
-    Popup(
-        popupPositionProvider = provider,
-        onDismissRequest = onDismissRequest,
-        properties = PopupProperties(focusable = true),
-    ) {
+    val list: @Composable () -> Unit = {
         AnimatedVisibility(visibleState = state, enter = popoverEnter(), exit = popoverExit()) {
             val firstRow = remember { FocusRequester() }
             Column(
@@ -121,6 +125,16 @@ internal fun HeadlessDropdown(
             )
             LaunchedEffect(Unit) { (initialFocus ?: firstRow).requestFocus() }
         }
+    }
+    if (host != null && anchor != null) {
+        OverlayPortal(host, OverlayKind.Popover, OverlayPlacement(anchor, provider), onDismissRequest, list)
+    } else {
+        Popup(
+            popupPositionProvider = provider,
+            onDismissRequest = onDismissRequest,
+            properties = PopupProperties(focusable = true),
+            content = list,
+        )
     }
 }
 
@@ -184,9 +198,10 @@ internal fun HeadlessMenu(
     modifier: Modifier,
     anchor: @Composable () -> Unit,
 ) {
-    Box(modifier) {
+    val trigger = remember { FocusRequester() }
+    Box(modifier.focusRequester(trigger)) {
         anchor()
-        HeadlessDropdown(expanded, onDismissRequest, style) {
+        HeadlessDropdown(expanded, onDismissRequest, style, returnFocusTo = trigger) {
             for (item in items) {
                 HeadlessDropdownItem(
                     label = item.label,
@@ -228,12 +243,14 @@ internal fun <T> HeadlessSelect(
     var expanded by remember { mutableStateOf(false) }
     var fieldWidth by remember { mutableIntStateOf(0) }
     val selectedRow = remember { FocusRequester() }
+    val field = remember { FocusRequester() }
     val current = optionLabel(selected)
     Box(modifier) {
         Row(
             modifier = Modifier
                 .heightIn(min = LocalLayout.current.minTouchTarget)
                 .onSizeChanged { size -> fieldWidth = size.width }
+                .focusRequester(field)
                 .background(style.field, style.itemShape)
                 .border(style.fieldBorder, style.itemShape)
                 .overlayFeedback(interaction, style, enabled = enabled)
@@ -260,6 +277,7 @@ internal fun <T> HeadlessSelect(
             style = style,
             minWidth = with(density) { fieldWidth.toDp() },
             initialFocus = if (selected in options) selectedRow else null,
+            returnFocusTo = field,
         ) {
             for (option in options) {
                 HeadlessDropdownItem(
@@ -278,7 +296,7 @@ internal fun <T> HeadlessSelect(
 }
 
 /** Under the anchor and lined up with its start, or above it when the window runs out below. */
-private class DropdownPositionProvider(
+internal class DropdownPositionProvider(
     private val gap: Int,
 ) : PopupPositionProvider {
     override fun calculatePosition(
