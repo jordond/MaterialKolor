@@ -1,6 +1,7 @@
 package com.materialkolor.builder.codegen.check
 
 import com.materialkolor.builder.codegen.ExportInput
+import com.materialkolor.builder.codegen.FluentBinding
 import com.materialkolor.builder.codegen.GoldenCases
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.generate
@@ -13,10 +14,13 @@ import java.io.File
  * `:builder:codegen:writeCompileFixtures` task runs with the fixtures directory as its argument.
  *
  * Each target and mode gets one project, and each case its own package in it, so a target compiles
- * in one compilation. The first multiplatform case sits in `commonMain` and is the one the wasm
- * compile covers, the other multiplatform cases sit in `jvmMain`, and the Android only cases sit in
- * `androidMain`. Every project takes its dependencies from the snippets its cases generate, and the
- * build takes its catalog from their generated catalogs, so the check proves the snippets too.
+ * in one compilation. Dynamic Fluent gets a project per binding, since the module and the inline
+ * shades need different dependencies. A project's plainest case, `<target>-<mode>-default` or for
+ * inline Fluent `fluent-dynamic-inline`, sits in `commonMain` and is the one the wasm compile covers,
+ * or the first case by name when the project has no such case. The other multiplatform cases sit in
+ * `jvmMain`, and the Android only cases sit in `androidMain`. Every project takes its dependencies
+ * from the snippets its cases generate, and the build takes its catalog from their generated
+ * catalogs, so the check proves the snippets too.
  */
 fun main(args: Array<String>) {
     val root = File(args.single())
@@ -40,7 +44,15 @@ private class FixtureCase(
     val input: ExportInput,
     val files: List<GeneratedFile>,
 ) {
+    /** The project this case compiles in, as in `material3-dynamic` or `fluent-dynamic-inline`. */
     val fixture: String
+        get() = listOfNotNull(targetAndMode, fluentBinding).joinToString("-")
+
+    /** The name of the plainest case of this case's project, the one its wasm compile covers. */
+    val plainCase: String
+        get() = if (fluentBinding == INLINE) fixture else "$targetAndMode-default"
+
+    private val targetAndMode: String
         get() {
             val target = when (input.target) {
                 ExportTarget.Material3, ExportTarget.Material3Expressive -> "material3"
@@ -50,6 +62,12 @@ private class FixtureCase(
             }
             return "$target-${input.prefs.mode.name.lowercase()}"
         }
+
+    /** How a dynamic Fluent case gets its shades, `module` or `inline`, which splits its project in two. */
+    private val fluentBinding: String?
+        get() = input.versions.fluentBinding.name
+            .lowercase()
+            .takeIf { input.target == ExportTarget.Fluent && input.prefs.mode == ExportMode.Dynamic }
 
     val androidOnly: Boolean
         get() = !input.prefs.multiplatform
@@ -71,6 +89,8 @@ private class FixtureCase(
             val packaged = input.copy(prefs = input.prefs.copy(packageName = "check.${name.replace('-', '_')}"))
             return FixtureCase(name, packaged, generate(packaged))
         }
+
+        private val INLINE = FluentBinding.Inline.name.lowercase()
     }
 }
 
@@ -84,6 +104,18 @@ private class Catalog {
         LIBS_ACCESSOR.findAll(case.snippet.orEmpty()).forEach { match ->
             require(match.groupValues[1] in aliases) {
                 "The snippet of ${case.name} names ${match.value}, which its own catalog does not define"
+            }
+        }
+        // The merged catalog would find a version another case defines, so each case has to define its own.
+        val versions = entries["versions"].orEmpty().keys
+        entries.filterKeys { section -> section != "versions" }.forEach { (section, lines) ->
+            lines.forEach { (key, value) ->
+                VERSION_REF.findAll(value).forEach { match ->
+                    require(match.groupValues[1] in versions) {
+                        "The catalog of ${case.name} has $section.$key take version.ref ${match.groupValues[1]}, " +
+                            "which its own [versions] does not define"
+                    }
+                }
             }
         }
         entries.forEach { (section, lines) ->
@@ -118,6 +150,7 @@ private class Catalog {
 
     private companion object {
         val LIBS_ACCESSOR = Regex("""\blibs\.([A-Za-z0-9.]+)""")
+        val VERSION_REF = Regex("""\bversion\.ref = "([^"]+)"""")
     }
 }
 
@@ -128,7 +161,7 @@ private class FixtureProject(
 ) {
     private val multiplatform = cases.filterNot { case -> case.androidOnly }
     private val android = cases.filter { case -> case.androidOnly }
-    private val wasmCase = multiplatform.firstOrNull { case -> case.name == "$name-default" } ?: multiplatform.first()
+    private val wasmCase = multiplatform.firstOrNull { case -> case.name == case.plainCase } ?: multiplatform.first()
 
     fun write(dir: File) {
         cases.forEach { case ->
@@ -211,21 +244,38 @@ private class FixtureProject(
                 "Frozen Material 3 writes no snippet, its README names Compose Material 3." to "repo.compose.material3"
             }
             "material3-dynamic" -> {
-                "A Material 3 project has Compose Material 3 already, and material-kolor-material3 keeps its " +
-                    "own copy off the compile classpath." to "repo.compose.material3"
+                "Dynamic Material 3 and Expressive import androidx.compose.material3 themselves, which " +
+                    "material-kolor-material3 keeps off the compile classpath, so their README names Compose " +
+                    "Material 3." to "repo.compose.material3"
             }
             else -> {
                 null
             }
         }
 
-    /** The dependency lines of every Android snippet, which add to a plain `dependencies` block. */
+    /**
+     * The dependency lines of every Android snippet, which add to a plain `dependencies` block. A
+     * line that is none of a comment, the block itself or an `implementation(...)` fails, rather than
+     * the check dropping what the snippet asks for.
+     */
     private fun androidDependencies(): List<String> =
         android
-            .mapNotNull { case -> case.snippet }
-            .flatMap { snippet -> snippet.lines().map(String::trim) }
-            .filter { line -> line.startsWith("implementation(") }
-            .distinct()
+            .flatMap { case ->
+                case.snippet
+                    .orEmpty()
+                    .lines()
+                    .map(String::trim)
+                    .filterNot { line -> line.isEmpty() || line.startsWith("//") || line in ANDROID_BLOCK }
+                    .onEach { line ->
+                        require(line.startsWith("implementation(")) {
+                            "The Android snippet of ${case.name} has the line $line, which the compile check cannot add"
+                        }
+                    }
+            }.distinct()
+
+    private companion object {
+        val ANDROID_BLOCK = setOf("dependencies {", "}")
+    }
 }
 
 private const val WRITTEN_BY = "# Written by :builder:codegen:writeCompileFixtures, which rewrites it on every run."

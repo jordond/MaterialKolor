@@ -187,9 +187,7 @@ internal fun customDynamicSlots(
  */
 internal fun accentFamilies(document: ThemeDocument): List<AccentFamilyValues> =
     document.accents.map { accent ->
-        val seed = accent.seed.asColor()
-        val harmonizeWith = document.seed.asColor().takeIf { accent.harmonize }
-        val palette = TonalPalette.from(harmonizeWith?.let { themeSeed -> seed.harmonize(themeSeed) } ?: seed)
+        val palette = tonalPalette(seed = accent.seed, harmonizeWith = document.seed.takeIf { accent.harmonize })
         val threshold = accent.threshold.referenceThreshold()
         AccentFamilyValues(
             name = accent.name,
@@ -197,6 +195,27 @@ internal fun accentFamilies(document: ThemeDocument): List<AccentFamilyValues> =
             dark = palette.accentColors(accent.dark, threshold),
         )
     }
+
+/** The ramp core's `rememberTonalPalette(seed, harmonizeWith)` remembers, built by the chain its body runs. */
+internal fun tonalPalette(
+    seed: Argb,
+    harmonizeWith: Argb?,
+): TonalPalette {
+    val color = seed.asColor()
+    return TonalPalette.from(harmonizeWith?.let { themeSeed -> color.harmonize(themeSeed.asColor()) } ?: color)
+}
+
+/** Every shade by the name `Shades` gives it, as in `light2`. */
+internal fun FluentShadeValues.byShade(): Map<String, Argb> =
+    mapOf(
+        "dark3" to dark3,
+        "dark2" to dark2,
+        "dark1" to dark1,
+        "base" to base,
+        "light1" to light1,
+        "light2" to light2,
+        "light3" to light3,
+    )
 
 /**
  * The shades `toFluentColors` in the Fluent module gives [document] in the mode [isDark] picks,

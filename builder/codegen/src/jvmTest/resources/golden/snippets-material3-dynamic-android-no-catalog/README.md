@@ -20,6 +20,8 @@ dependencies {
 }
 ```
 
+These files also need Compose Material 3, which a Material 3 app already has.
+
 ## Open it again
 
 To change the theme later, open it in the builder at <https://materialkolor.com/t/AdllOwAAAAAT>

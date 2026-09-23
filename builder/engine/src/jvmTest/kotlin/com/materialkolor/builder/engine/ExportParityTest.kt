@@ -78,68 +78,81 @@ class ExportParityTest {
     }
 
     @Test
+    fun dynamicFluentInlineExport_everyDocument_passesTheArgumentsTheEngineResolvesWith() {
+        assertPassesTheEngineArguments(ExportTarget.Fluent, InlineFluentVersions)
+    }
+
+    @Test
     fun dynamicCustomExport_everyDocument_passesTheArgumentsTheEngineResolvesWith() {
         assertPassesTheEngineArguments(ExportTarget.Custom)
     }
 
     @Test
-    fun dynamicMaterial3Export_everyDocument_libraryCallGivesThePreviewColors() {
-        assertLibraryCallGivesThePreviewColors(ExportTarget.Material3)
+    fun dynamicMaterial3Export_everyDocument_givesThePreviewColors() {
+        assertGivesThePreviewColors(ExportTarget.Material3)
     }
 
     @Test
-    fun dynamicExpressiveExport_everyDocument_libraryCallGivesThePreviewColors() {
-        assertLibraryCallGivesThePreviewColors(ExportTarget.Material3Expressive)
+    fun dynamicExpressiveExport_everyDocument_givesThePreviewColors() {
+        assertGivesThePreviewColors(ExportTarget.Material3Expressive)
     }
 
     @Test
-    fun dynamicUnstyledExport_everyDocument_libraryCallGivesThePreviewColors() {
-        assertLibraryCallGivesThePreviewColors(ExportTarget.Unstyled)
+    fun dynamicUnstyledExport_everyDocument_givesThePreviewColors() {
+        assertGivesThePreviewColors(ExportTarget.Unstyled)
     }
 
     @Test
-    fun dynamicFluentExport_everyDocument_libraryCallGivesThePreviewColors() {
-        assertLibraryCallGivesThePreviewColors(ExportTarget.Fluent)
+    fun dynamicFluentExport_everyDocument_givesThePreviewColors() {
+        assertGivesThePreviewColors(ExportTarget.Fluent)
     }
 
     @Test
-    fun dynamicCustomExport_everyDocument_libraryCallGivesThePreviewColors() {
-        assertLibraryCallGivesThePreviewColors(ExportTarget.Custom)
+    fun dynamicFluentInlineExport_everyDocument_givesThePreviewColors() {
+        assertGivesThePreviewColors(ExportTarget.Fluent, InlineFluentVersions)
+    }
+
+    @Test
+    fun dynamicCustomExport_everyDocument_givesThePreviewColors() {
+        assertGivesThePreviewColors(ExportTarget.Custom)
     }
 
     /** Every document's dynamic [target] export passes the arguments the engine resolves its preview with. */
-    private fun assertPassesTheEngineArguments(target: ExportTarget) {
+    private fun assertPassesTheEngineArguments(
+        target: ExportTarget,
+        versions: ExportVersions = Versions,
+    ) {
         for (document in documents.map { document -> document.on(target) }) {
-            val context = "$target dynamic, in $document"
-            val written = SchemeArguments.read(target, export(document, DynamicPrefs), context)
+            val context = "${target.dynamicName(versions)}, in $document"
+            val written = DynamicExport.read(target, export(document, DynamicPrefs, versions), context).arguments
             val preview = themes.resolve(document)
 
             assertEquals(SchemeArguments.of(target, document, preview), written, context)
         }
     }
 
-    /** The library call every document's dynamic [target] export makes gives the preview's colors. */
-    private fun assertLibraryCallGivesThePreviewColors(target: ExportTarget) {
+    /**
+     * Every document's dynamic [target] export gives the preview's colors in both modes: every role
+     * with its pins, every Custom slot with its tones, every accent family and every Fluent shade,
+     * each worked out from what the export writes.
+     */
+    private fun assertGivesThePreviewColors(
+        target: ExportTarget,
+        versions: ExportVersions = Versions,
+    ) {
         for (document in documents.map { document -> document.on(target) }) {
-            val context = "$target dynamic, in $document"
-            val written = SchemeArguments.read(target, export(document, DynamicPrefs), context).applyTo(document)
+            val context = "${target.dynamicName(versions)}, in $document"
+            val written = DynamicExport.read(target, export(document, DynamicPrefs, versions), context)
             val preview = themes.resolve(document)
 
             for (isDark in listOf(false, true)) {
-                val modeContext = "$target dynamic, dark $isDark, in $document"
-                when (target) {
-                    ExportTarget.Material3, ExportTarget.Material3Expressive -> {
-                        assertEquals(preview.roleColors(isDark), material3Roles(written, isDark), modeContext)
-                    }
-                    ExportTarget.Unstyled -> {
-                        assertEquals(preview.roleColors(isDark), unstyledRoles(written, isDark), modeContext)
-                    }
-                    ExportTarget.Fluent -> {
-                        assertEquals(preview.fluentShades(isDark), fluentShades(written, isDark), modeContext)
-                    }
-                    ExportTarget.Custom -> {
-                        assertEquals(preview.customSlots.mode(isDark), customDynamicSlots(written, isDark), modeContext)
-                    }
+                val expected = dynamicColors(target, preview, isDark)
+                val colors = written.colors(isDark)
+                val differing = (expected.keys + colors.keys).filter { name -> expected[name] != colors[name] }
+
+                if (differing.isNotEmpty()) {
+                    val lines = differing.map { name -> "$name wanted ${expected[name]}, wrote ${colors[name]}" }
+                    fail("$context, dark $isDark\n" + lines.joinToString("\n"))
                 }
             }
         }
@@ -148,13 +161,14 @@ class ExportParityTest {
     private fun export(
         document: ThemeDocument,
         prefs: ExportPrefs,
+        versions: ExportVersions = Versions,
     ): List<GeneratedFile> =
         generate(
             ExportInput(
                 document = document,
                 prefs = prefs,
                 resolved = exports.resolve(document, prefs),
-                versions = Versions,
+                versions = versions,
                 shareUrl = "https://materialkolor.com/t/parity",
             ),
         )
@@ -190,7 +204,7 @@ class ExportParityTest {
                         }
                         ExportTarget.Fluent -> {
                             if (variant == ContrastVariant.Standard) {
-                                preview.fluentShades(isDark).named().forEach { (shade, color) ->
+                                preview.fluentShades(isDark).byShade().forEach { (shade, color) ->
                                     put("${mode}ThemeShades/$shade", color)
                                 }
                             }
@@ -200,6 +214,40 @@ class ExportParityTest {
                 }
             }
         }
+
+    /**
+     * Every color the preview shows for a dynamic [target] export in the mode [isDark] picks, by the
+     * name `DynamicExport.colors` gives it.
+     */
+    private fun dynamicColors(
+        target: ExportTarget,
+        preview: ThemeResult,
+        isDark: Boolean,
+    ): Map<String, Argb> {
+        val roles = preview.roleColors(isDark).mapKeys { (role, _) -> role.name.lowerFirst() }
+        val families = preview.accents.families
+            .flatMap { family ->
+                val name = family.accent.name.lowerFirst()
+                AccentPart.entries.map { part ->
+                    val key = when (target) {
+                        ExportTarget.Unstyled -> "ThemeTokens.${part.unstyledToken(name)}"
+                        else -> "$name/${part.property}"
+                    }
+                    key to family.mode(isDark).part(part)
+                }
+            }.toMap()
+        return when (target) {
+            ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Unstyled -> {
+                roles + families
+            }
+            ExportTarget.Fluent -> {
+                preview.fluentShades(isDark).byShade()
+            }
+            ExportTarget.Custom -> {
+                preview.customSlots.mode(isDark).mapKeys { (slot, _) -> slot.name.lowerFirst() } + families
+            }
+        }
+    }
 
     /** Every accent color [target] writes in the mode [isDark] picks, by the name it sits under. */
     private fun accentColors(
@@ -246,6 +294,9 @@ class ExportParityTest {
             fluent = "v0.1.0",
             composeUnstyled = "2.10.0",
         )
+
+        /** A release that does not publish `material-kolor-fluent`, so a Fluent export builds its shades inline. */
+        val InlineFluentVersions = Versions.copy(fluentModuleAvailable = false)
     }
 }
 
@@ -259,6 +310,10 @@ private fun ThemeDocument.on(target: ExportTarget): ThemeDocument {
     }
     return copy(library = library, expressive = target == ExportTarget.Material3Expressive).forTarget(target)
 }
+
+/** How a failure names the dynamic export of [this] target, the inline Fluent binding apart. */
+private fun ExportTarget.dynamicName(versions: ExportVersions): String =
+    if (this == ExportTarget.Fluent && !versions.fluentModuleAvailable) "$this dynamic inline" else "$this dynamic"
 
 /** [this] document at the contrast [variant] stands for, the way `ExportResolver` resolves it. */
 private fun ThemeDocument.atContrast(variant: ContrastVariant): ThemeDocument =
@@ -292,17 +347,6 @@ private fun ThemeResult.fluentShades(isDark: Boolean): FluentShadeValues {
         light3 = shades.light3.asArgb(),
     )
 }
-
-private fun FluentShadeValues.named(): Map<String, Argb> =
-    mapOf(
-        "dark3" to dark3,
-        "dark2" to dark2,
-        "dark1" to dark1,
-        "base" to base,
-        "light1" to light1,
-        "light2" to light2,
-        "light3" to light3,
-    )
 
 /** The Unstyled token an accent part is written under, as in `onBrandContainer`. */
 private fun AccentPart.unstyledToken(accent: String): String =
