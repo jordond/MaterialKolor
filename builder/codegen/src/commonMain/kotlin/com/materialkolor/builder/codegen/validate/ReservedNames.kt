@@ -68,6 +68,8 @@ public object ReservedNames {
     /**
      * Every name an accent cannot take in [target], whichever mode it is exported in. That is every
      * name the export refers to by its simple name, and the members an accent's family sits beside.
+     * [clashes] also checks each Unstyled accent's four flattened token names, which this set alone
+     * cannot catch.
      */
     public fun of(target: ExportTarget): Set<String> = topLevel(target) + members(target)
 
@@ -230,12 +232,16 @@ private val UnstyledDeclared: Set<String> =
         FrozenMode.entries.map { mode -> colorsName(variant, mode) }
     }
 
+// b-112
+
 /**
- * The members of `ThemeTokens` other than the accents, which are the names of all 63 `MaterialKolorTokens`
- * and its `colors` property. The 15 tokens with no [Role] are held too, since the dynamic export writes
- * accents into `MaterialKolorTokens.colors` beside them.
+ * The token names an Unstyled accent cannot take, all 63 `MaterialKolorTokens` and `colors`.
+ *
+ * The frozen `ThemeTokens` declares `colors` and a token for each of the 48 roles, named as
+ * `MaterialKolorTokens` names them. The 15 library tokens with no [Role] are reserved too, since the
+ * dynamic export writes accents into `MaterialKolorTokens.colors` beside them.
  */
-private val UnstyledTokens: Set<String> =
+internal val UnstyledTokens: Set<String> =
     Role.entries.mapTo(mutableSetOf(COLORS_PROPERTY)) { role -> role.tokenName } +
         listOf(
             "primaryPaletteKeyColor",

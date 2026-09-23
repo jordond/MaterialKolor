@@ -222,7 +222,7 @@ private fun rolePins(target: ExportTarget): ControlState =
         ExportTarget.Material3Expressive,
         ExportTarget.Custom,
         -> enabled
-        // v-02 B-112 may disable this with a new reason once the explicit-scheme export is checked.
+        // v-02 B-112 checked the explicit-scheme export, so Unstyled pins stay on.
         ExportTarget.Unstyled -> enabled
         ExportTarget.Fluent -> ControlState.Disabled(Reason.FluentUsesNoRoles)
     }
@@ -252,9 +252,8 @@ private fun colorAnimation(target: ExportTarget): ControlState =
         ExportTarget.Material3,
         ExportTarget.Material3Expressive,
         ExportTarget.Unstyled,
+        ExportTarget.Fluent,
         -> enabled
-        // u2-animate B-112 enables this once the Fluent export can call animateFluentColors.
-        ExportTarget.Fluent -> ControlState.Hidden(Reason.FluentNoAnimation)
         // Hidden until F-56 gives the Custom export somewhere to animate.
         ExportTarget.Custom -> hidden
     }

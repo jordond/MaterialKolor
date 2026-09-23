@@ -52,7 +52,7 @@ class CapabilitiesTest {
         Control.RolePins to listOf(yes, yes, yes, no(Reason.FluentUsesNoRoles), yes),
         Control.AmoledDark to listOf(yes, yes, no(Reason.UnstyledNoAmoled), hidden, yes),
         Control.MotionScheme to listOf(hidden, yes, hidden, hidden, hidden),
-        Control.ColorAnimation to listOf(yes, yes, yes, hidden(Reason.FluentNoAnimation), hidden),
+        Control.ColorAnimation to listOf(yes, yes, yes, yes, hidden),
         Control.ExtendedColors to listOf(yes, yes, yes, no(Reason.FluentNoAccents), yes),
         Control.CustomToneTable to listOf(hidden, hidden, hidden, hidden, yes),
         Control.PreviewModes to listOf(yes, yes, yes, yes, yes),

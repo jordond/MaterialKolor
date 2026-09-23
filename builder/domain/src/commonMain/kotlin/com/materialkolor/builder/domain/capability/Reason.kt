@@ -36,9 +36,6 @@ public enum class Reason(
      */
     UnstyledNoAmoled(key = "reason_unstyled_no_amoled"),
 
-    /** R7. Fluent colors do not animate. */
-    FluentNoAnimation(key = "reason_fluent_no_animation"),
-
     /** R8. Fluent has no place for extra accents in v1. */
     FluentNoAccents(key = "reason_fluent_no_accents"),
 

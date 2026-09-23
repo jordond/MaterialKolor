@@ -101,15 +101,17 @@ internal fun KotlinFileScope.extendedColorsDeclarations(
 internal val Accent.seedName: String
     get() = name.replaceFirstChar { char -> char.uppercaseChar() } + "Seed"
 
+// b-112
+
 /**
  * The local holding an accent's ramp. The suffix keeps an accent called `isDark` or `seedColor`
  * from shadowing the parameter of the same name.
  */
-private val Accent.paletteName: String
+internal val Accent.paletteName: String
     get() = "${propertyName}Palette"
 
 /** Whether the ramp call of the accent passes `harmonizeWith`, which gives it a second argument. */
-private val Accent.harmonizes: Boolean
+internal val Accent.harmonizes: Boolean
     get() = !DefaultArguments.RememberTonalPaletteHarmonizeWith.isDefault(harmonize)
 
 private fun KotlinFileScope.rememberExtendedColors(accents: List<Accent>) {
@@ -211,12 +213,14 @@ private fun onToneCall(tone: String): Expression =
         argument(ref(THRESHOLD))
     }
 
+// b-112
+
 /**
  * The core threshold for a document threshold, the same mapping the engine uses.
  *
  * AAA maps to the normal text rule, since an on color carries body text.
  */
-private fun thresholdExpression(threshold: OnColorThreshold): Expression {
+internal fun thresholdExpression(threshold: OnColorThreshold): Expression {
     val contrastThreshold = ref(Symbols.ContrastThreshold)
 
     return when (threshold) {
