@@ -266,6 +266,14 @@ interface Environment {
 
     /** Remember [id] as the project this tab has open, or forget it with null. */
     fun writeTabProject(id: String?)
+
+    // b-301
+
+    /**
+     * Emits when the page goes out of sight, hidden behind another tab, closed or put in the back and
+     * forward cache, so the session can save before the page may be gone. Never emits off the web.
+     */
+    val pageHides: Flow<Unit>
 }
 
 // b-214

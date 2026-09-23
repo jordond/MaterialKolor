@@ -1,0 +1,12 @@
+{
+  "name": "materialkolor-builder-e2e",
+  "private": true,
+  "description": "Browser tests for the MaterialKolor builder, run against the built site.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^22.0.0"
+  }
+}
