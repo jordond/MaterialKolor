@@ -25,6 +25,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -48,7 +49,8 @@ import kotlin.math.max
  *
  * Focus shows it as readily as hover, so nothing it says is only there for a mouse (AR-03). The
  * pointer can move onto the label without it going away (WCAG 1.4.13). Esc hides it until the
- * pointer and focus have both left, and it never takes focus itself.
+ * pointer and focus have both left, and it never takes focus itself. Drawn in the page, the label
+ * stays out of the semantics tree, since [content] already carries the name.
  *
  * @param[text] The label.
  * @param[style] The skin's overlay style.
@@ -91,16 +93,21 @@ private fun TooltipPopup(
     style: OverlayStyle,
     interaction: MutableInteractionSource,
 ) {
+    val anchor = if (LocalOverlaysInTree.current) rememberOverlayAnchor() else null
     val state = rememberOverlayVisibility(visible)
     if (!state.isOverlayShown(visible)) return
+    val host = inTreeOverlayHost()
     val tokens = LocalBuilderTokens.current
     val gap = with(LocalDensity.current) { tokens.spacing.extraSmall.roundToPx() }
     val provider = remember(gap) { TooltipPositionProvider(gap) }
-    Popup(popupPositionProvider = provider, properties = PopupProperties(focusable = false)) {
+    // In the page the anchor already carries the name, so the bubble stays out of the semantics tree.
+    val quiet = if (host != null) Modifier.clearAndSetSemantics {} else Modifier
+    val bubble: @Composable () -> Unit = {
         AnimatedVisibility(visibleState = state, enter = popoverEnter(), exit = popoverExit()) {
             Box(
                 modifier = Modifier
                     .hoverable(interaction)
+                    .then(quiet)
                     .padding(tokens.spacing.extraSmall)
                     .widthIn(max = OverlayMetrics.tooltipMaxWidth)
                     .shadow(style.shadow, style.popoverShape)
@@ -118,10 +125,17 @@ private fun TooltipPopup(
             }
         }
     }
+    if (host != null && anchor != null) {
+        val layer = remember { OverlayLayer(OverlayKind.Passive) }
+        val placement = remember(anchor, provider) { OverlayPlacement(anchor, provider) }
+        OverlayPortal(host, layer, visible, placement, content = bubble)
+    } else {
+        Popup(popupPositionProvider = provider, properties = PopupProperties(focusable = false), content = bubble)
+    }
 }
 
 /** Centred above the anchor, or below it when the window runs out above. */
-private class TooltipPositionProvider(
+internal class TooltipPositionProvider(
     private val gap: Int,
 ) : PopupPositionProvider {
     override fun calculatePosition(

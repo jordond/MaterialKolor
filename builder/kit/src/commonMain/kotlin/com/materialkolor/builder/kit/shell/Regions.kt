@@ -108,7 +108,8 @@ public fun PanelRegion(
  *
  * They stack at the bottom start beside a docked poster, and wherever the poster is a sheet they
  * rise above its peek and the dock. Every skin shares one host, which already draws each toast in
- * the skin's own dress, a `Snackbar` under Material3.
+ * the skin's own dress, a `Snackbar` under Material3. Where overlays render in the page the toasts
+ * keep these spots but draw over every open dialog, sheet and menu.
  *
  * @param[state] The toasts to show.
  * @param[modifier] Applied to the region, which fills the space it is given without taking any

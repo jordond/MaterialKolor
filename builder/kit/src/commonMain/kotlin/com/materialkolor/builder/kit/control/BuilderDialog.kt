@@ -19,7 +19,6 @@ import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessModal
-import com.materialkolor.builder.kit.headless.ReturnFocusWhenGone
 import com.materialkolor.builder.kit.headless.keepTaps
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
@@ -36,9 +35,11 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * A modal dialog with a title, a body and a row of actions.
  *
  * The title is the dialog's name. While it is open, focus starts inside it and Tab cannot leave
- * it. Esc and a click on the veil call [onDismissRequest], and once it has gone focus goes back to
- * [returnFocusTo] (AR-09). It scales up from 0.96 with a fade, or only fades under reduced motion.
- * Material3 draws its `AlertDialog`, the other skins the headless dialog.
+ * it, even with no actions to focus. Esc and a click on the veil call
+ * [onDismissRequest], and once it has gone focus goes back to [returnFocusTo] (AR-09). It scales up
+ * from 0.96 with a fade, or only fades under reduced motion. Material3 draws its `AlertDialog`, the
+ * other skins the headless dialog. Where overlays render in the page (D40) Material3 draws its own
+ * dialog container over the headless modal instead.
  *
  * @param[visible] Whether the dialog is open.
  * @param[onDismissRequest] Called when the dialog asks to close.
@@ -62,8 +63,7 @@ public fun BuilderDialog(
     val tokens = LocalBuilderTokens.current
     when (LocalSkin.current.library) {
         Library.Material3 -> {
-            ReturnFocusWhenGone(visible, returnFocusTo)
-            MaterialDialog(visible, onDismissRequest, title, modifier, actions, content)
+            MaterialDialog(visible, onDismissRequest, title, returnFocusTo, modifier, actions, content)
         }
         Library.Unstyled -> {
             HeadlessDialog(
@@ -105,6 +105,7 @@ public fun BuilderDialog(
     }
 }
 
+/** The headless dialog in [style]. */
 @Composable
 private fun HeadlessDialog(
     visible: Boolean,
