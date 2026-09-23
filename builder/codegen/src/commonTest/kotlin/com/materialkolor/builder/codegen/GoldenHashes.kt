@@ -8,6 +8,7 @@ package com.materialkolor.builder.codegen
  */
 internal object GoldenHashes {
     val cases: Map<String, Long> = mapOf(
+        "dsl-forms" to 0xB78D435AL,
         "header-default" to 0xB68DC275L,
     )
 }
