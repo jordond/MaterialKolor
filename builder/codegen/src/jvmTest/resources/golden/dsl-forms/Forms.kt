@@ -57,6 +57,12 @@ private fun Color.toFamily(isDark: Boolean): ColorFamily {
     return ColorFamily(color = this, onColor = onColor)
 }
 
+private fun swapTones(tones: IntArray) {
+    val first = tones[0]
+    tones[0] = tones[1]
+    tones[1] = first
+}
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AppTheme(

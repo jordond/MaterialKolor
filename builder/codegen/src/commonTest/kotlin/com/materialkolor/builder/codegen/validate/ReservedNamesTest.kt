@@ -10,6 +10,8 @@ import com.materialkolor.builder.codegen.target.material3.Material3Dynamic
 import com.materialkolor.builder.codegen.target.material3.Material3DynamicCases
 import com.materialkolor.builder.codegen.target.material3.Material3Frozen
 import com.materialkolor.builder.codegen.target.material3.Material3FrozenCases
+import com.materialkolor.builder.codegen.target.unstyled.UnstyledFrozen
+import com.materialkolor.builder.codegen.target.unstyled.UnstyledFrozenCases
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.Library
@@ -158,7 +160,8 @@ class ReservedNamesTest {
     fun of_frozenTargets_coverEveryNameTheFrozenExportsImport() {
         val exports = Material3FrozenCases.all.mapValues { (_, input) -> input to Material3Frozen.files(input) } +
             FluentFrozenCases.all.mapValues { (_, input) -> input to FluentFrozen.files(input) } +
-            CustomFrozenCases.all.mapValues { (_, input) -> input to CustomFrozen.files(input) }
+            CustomFrozenCases.all.mapValues { (_, input) -> input to CustomFrozen.files(input) } +
+            UnstyledFrozenCases.all.mapValues { (_, input) -> input to UnstyledFrozen.files(input) } // b-111b
 
         exports.forEach { (case, export) ->
             val (input, files) = export
@@ -170,5 +173,66 @@ class ReservedNamesTest {
 
             assertTrue(reserved.containsAll(imported), "$case imports ${imported - reserved}")
         }
+    }
+
+    // b-111b
+    @Test
+    fun clashes_unstyledAccentsWhoseFlattenedTokensMeet_reportTheLaterOne() {
+        listOf("OnBrand", "BrandContainer").forEach { other ->
+            val document = ThemeDocument.Default.copy(
+                library = Library.Unstyled,
+                accents = listOf(Accent(name = "Brand", seed = seed), Accent(name = other, seed = seed)),
+            )
+
+            assertEquals(listOf(ReservedNameClash.AccentName(1, other)), ReservedNames.clashes(document), other)
+            assertEquals(emptyList(), ReservedNames.clashes(document.copy(library = Library.Material3)), other)
+        }
+    }
+
+    @Test
+    fun clashes_unstyledAccentFlattenedOntoALibraryToken_isReported() {
+        val document = ThemeDocument.Default.copy(
+            library = Library.Unstyled,
+            accents = listOf(
+                Accent(name = "PrimaryFixedVariant", seed = seed),
+                Accent(name = "Brand", seed = seed),
+                Accent(name = "Shadow", seed = seed),
+            ),
+        )
+
+        assertEquals(
+            listOf(
+                ReservedNameClash.AccentName(0, "PrimaryFixedVariant"),
+                ReservedNameClash.AccentName(2, "Shadow"),
+            ),
+            ReservedNames.clashes(document),
+        )
+        assertEquals(emptyList(), ReservedNames.clashes(document.copy(library = Library.Material3)))
+    }
+
+    @Test
+    fun clashes_unstyledNamesTheFrozenExportDeclaresOrImports_areReported() {
+        val document = ThemeDocument.Default.copy(
+            library = Library.Unstyled,
+            themeName = "ThemeTokens",
+            accents = listOf(
+                Accent(name = "LightColors", seed = seed),
+                Accent(name = "highContrastDarkColors", seed = seed),
+                Accent(name = "ThemeProperty", seed = seed),
+            ),
+        )
+
+        assertEquals(
+            listOf(
+                ReservedNameClash.ThemeName("ThemeTokens"),
+                ReservedNameClash.AccentName(0, "LightColors"),
+                ReservedNameClash.AccentName(1, "highContrastDarkColors"),
+                ReservedNameClash.AccentName(2, "ThemeProperty"),
+            ),
+            ReservedNames.clashes(document),
+        )
+        val colorScheme = ThemeDocument.Default.copy(library = Library.Unstyled, themeName = "ColorScheme")
+        assertEquals(listOf(ReservedNameClash.ThemeName("ColorScheme")), ReservedNames.clashes(colorScheme))
+        assertFailsWith<IllegalArgumentException> { UnstyledFrozen.files(Fixtures.input(colorScheme, frozenPrefs())) }
     }
 }

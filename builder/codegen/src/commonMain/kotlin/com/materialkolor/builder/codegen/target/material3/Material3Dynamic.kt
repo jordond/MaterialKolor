@@ -30,6 +30,7 @@ import com.materialkolor.builder.domain.model.SchemePlatform
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportTarget
 
 /**
@@ -79,7 +80,7 @@ private fun colorFile(input: ExportInput): GeneratedFile {
     val document = input.document
 
     return kotlinFile(path = input.sourcePath("Color.kt"), packageName = input.prefs.packageName) {
-        header(Header.lines(input))
+        header(Header.lines(input, ExportMode.Dynamic))
         property(SEED_COLOR, Literals.colorLiteral(document.seed.value))
         KeyColorOrder.forEach { keyColor ->
             document.keyColors[keyColor]?.let { color -> property(keyColor.name, Literals.colorLiteral(color.value)) }
@@ -102,7 +103,7 @@ private fun themeFile(input: ExportInput): GeneratedFile {
     }
 
     return kotlinFile(path = input.sourcePath("Theme.kt"), packageName = input.prefs.packageName) {
-        header(Header.lines(input))
+        header(Header.lines(input, ExportMode.Dynamic))
         function(name = input.document.themeName, annotations = annotations) {
             parameter(IS_DARK, Symbols.Boolean, default = call(Symbols.IsSystemInDarkTheme))
             parameter(CONTENT, lambdaType(annotations = listOf(Symbols.Composable)))

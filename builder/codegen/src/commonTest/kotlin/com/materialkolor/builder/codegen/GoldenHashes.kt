@@ -11,7 +11,7 @@ internal object GoldenHashes {
         "custom-frozen-accents-pins-amoled" to 0x73FABDFEL,
         "custom-frozen-all-contrasts" to 0x95DEE013L,
         "custom-frozen-default" to 0x1467FC7CL,
-        "dsl-forms" to 0xB78D435AL,
+        "dsl-forms" to 0x373CA3C3L,
         "expressive-dynamic-default" to 0x6130410BL,
         "expressive-dynamic-pins" to 0x8FFC05C6L,
         "expressive-dynamic-tonal-spot-2021" to 0xD5F905D9L,
@@ -36,5 +36,8 @@ internal object GoldenHashes {
         "material3-frozen-accents-pins-amoled" to 0xE5D431E8L,
         "material3-frozen-all-contrasts" to 0xE0953497L,
         "material3-frozen-default" to 0xF7BE6FF7L,
+        "unstyled-frozen-accents-pins-amoled" to 0xE372A610L,
+        "unstyled-frozen-all-contrasts" to 0x841D55F4L,
+        "unstyled-frozen-default" to 0x22B4252DL,
     )
 }

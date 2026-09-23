@@ -281,6 +281,45 @@ class KotlinFileBuilderTest {
         assertEquals(expected, file.text)
     }
 
+    // b-111b
+    @Test
+    fun kotlinFile_reassign_writesTheTargetAndImportsItsSymbols() {
+        val file = kotlinFile(path = "Theme.kt", packageName = "com.example") {
+            property(
+                name = "AppTheme",
+                value = call(Symbols.BuildThemeV2) {
+                    trailingLambda {
+                        val spec = callOf(Symbols.Tween) { argument(Literals.int(300)) }
+                        reassign(ref("colorSchemeTransitionSpec"), spec)
+                        reassign(ref("properties").index(ref(Symbols.ThemeProperty)), ref("lightColors"))
+                    }
+                },
+            )
+        }
+
+        val expected =
+            """
+            val AppTheme = buildThemeV2 {
+                colorSchemeTransitionSpec = tween(300)
+                properties[ThemeProperty] = lightColors
+            }
+            """.trimIndent()
+
+        assertTrue(expected in file.text, file.text)
+        assertTrue("import com.composeunstyled.theme.ThemeProperty" in file.text, file.text)
+    }
+
+    @Test
+    fun reassign_targetThatBreaks_fails() {
+        assertFailsWith<IllegalArgumentException> {
+            kotlinFile(path = "Theme.kt", packageName = "com.example") {
+                function(name = "theme") {
+                    body { reassign(whenExpression { otherwise(ref("x")) }, ref("y")) }
+                }
+            }
+        }
+    }
+
     @Test
     fun generatedFile_colorLiteral_carriesTheArgbOnTheToken() {
         val file = kotlinFile(path = "Color.kt", packageName = "com.example") {

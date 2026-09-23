@@ -375,6 +375,21 @@ public class BodyScope internal constructor() {
         statements += Statement(prefix, value)
     }
 
+    // b-111b
+
+    /**
+     * `target = value`, which sets something that already exists, as in
+     * `properties[ThemeTokens.colors] = lightColors` or `colorSchemeTransitionSpec = tween(300)`.
+     */
+    public fun reassign(
+        target: Expression,
+        value: Expression,
+    ) {
+        require(!target.breaksOnItsOwn) { "The target of an assignment has to fit on one line" }
+        val prefix = target.tokens + listOf(spaceToken, punctuationToken("="), spaceToken)
+        statements += Statement(prefix, value, target.symbols)
+    }
+
     /** An explicit `return`. */
     public fun returns(value: Expression) {
         statements += Statement(listOf(keywordToken("return"), spaceToken), value)
@@ -390,7 +405,8 @@ public class BodyScope internal constructor() {
         statements += Statement(emptyList(), null)
     }
 
-    internal fun collectSymbols(): List<Symbol> = statements.flatMap { it.value?.symbols.orEmpty() }
+    internal fun collectSymbols(): List<Symbol> =
+        statements.flatMap { statement -> statement.prefixSymbols + statement.value?.symbols.orEmpty() }
 
     internal fun render(writer: CodeWriter) {
         statements.forEach { statement ->
@@ -407,6 +423,7 @@ public class BodyScope internal constructor() {
 internal class Statement(
     val prefix: List<Token>,
     val value: Expression?,
+    val prefixSymbols: List<Symbol> = emptyList(), // b-111b
 )
 
 /**
