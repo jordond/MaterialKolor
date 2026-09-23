@@ -119,9 +119,17 @@ class LegacyQueryTest {
         val dark = LegacyQuery.parse("dark_mode=true")
         assertEquals(LegacyPreviewMode.Dark, dark.previewMode)
         assertEquals(default, dark.document)
-        assertEquals(LegacyPreviewMode.Light, LegacyQuery.parse("dark_mode=false").previewMode)
         assertNull(LegacyQuery.parse("dark_mode=yes").previewMode)
         assertNull(LegacyQuery.parse("color_seed=FF6750A4").previewMode)
+    }
+
+    @Test
+    fun parse_darkModeFalse_leavesThePreviewModeUnset() {
+        val light = LegacyQuery.parse("dark_mode=false")
+        assertNull(light.previewMode)
+        assertEquals(default, light.document)
+        assertNull(LegacyQuery.parse("dark_mode=true&dark_mode=false").previewMode)
+        assertEquals(LegacyPreviewMode.Dark, LegacyQuery.parse("dark_mode=false&dark_mode=true").previewMode)
     }
 
     @Test

@@ -18,7 +18,10 @@ import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.model.withCodeOrNull
+import com.materialkolor.builder.domain.validate.MAX_ACCENTS
+import com.materialkolor.builder.domain.validate.MAX_ACCENT_NAME_BYTES
 import com.materialkolor.builder.domain.validate.MAX_PROJECT_NAME_BYTES
+import com.materialkolor.builder.domain.validate.validateAccents
 
 /**
  * What reading a share code came to.
@@ -61,6 +64,11 @@ public sealed interface DecodeResult {
  * codes. Reading is just as strict and refuses anything the writer would never produce, which
  * means a code that reads cleanly always writes back to itself.
  *
+ * A document that passes [validateAccents] comes back from its code unchanged apart from its seed
+ * source. The writer refuses more than [MAX_ACCENTS] accents or an accent name over
+ * [MAX_ACCENT_NAME_BYTES] UTF-8 bytes, because the reader would refuse them too. The project name is
+ * the one field cut to fit rather than refused.
+ *
  * The seed source never travels. It is local history, and an image source would leak a file name.
  * Accents travel as their seed, name, harmonize choice, tones and threshold, and nothing else.
  */
@@ -73,11 +81,22 @@ public object ShareCodec {
      *
      * An empty [projectName] is the same as none. One longer than [MAX_PROJECT_NAME_BYTES] UTF-8
      * bytes is cut to fit at a character boundary, so this never fails on a name typed elsewhere.
+     *
+     * @throws IllegalArgumentException when [document] has more than [MAX_ACCENTS] accents or an
+     * accent name over [MAX_ACCENT_NAME_BYTES] UTF-8 bytes, both of which [validateAccents] reports.
      */
     public fun encode(
         document: ThemeDocument,
         projectName: String? = null,
     ): String {
+        require(document.accents.size <= MAX_ACCENTS) {
+            "A share code carries at most $MAX_ACCENTS accents, not ${document.accents.size}"
+        }
+        document.accents.forEach { accent ->
+            require(accent.name.encodeToByteArray().size <= MAX_ACCENT_NAME_BYTES) {
+                "Accent name '${accent.name}' is over $MAX_ACCENT_NAME_BYTES UTF-8 bytes"
+            }
+        }
         val name = projectName.orEmpty().truncateUtf8(MAX_PROJECT_NAME_BYTES)
         val options = TargetOptions.of(document)
         val sections =
@@ -271,6 +290,10 @@ private fun ByteWriter.pins(pins: Map<Role, RolePin>) {
     }
 }
 
+/**
+ * Writes the target options section. The theme name is bounded only by the 28-bit varint and
+ * relies on validation upstream.
+ */
 private fun ByteWriter.targetOptions(options: TargetOptions) {
     byte(options.flags)
     if (options.flags has OPTION_MOTION_SCHEME) byte(options.motionScheme.code)
@@ -395,7 +418,7 @@ private fun ByteReader.keyColors(): KeyColors? {
 
 private fun ByteReader.accents(): List<Accent>? {
     val count = varint() ?: return null
-    if (count == 0) return null
+    if (count == 0 || count > MAX_ACCENTS) return null
     val accents = mutableListOf<Accent>()
     repeat(count) { accents += accent() ?: return null }
     return accents
@@ -405,7 +428,7 @@ private fun ByteReader.accent(): Accent? {
     val flags = byte() ?: return null
     if (flags has ACCENT_RESERVED) return null
     val seed = argb() ?: return null
-    val name = text() ?: return null
+    val name = text(maxBytes = MAX_ACCENT_NAME_BYTES) ?: return null
     val light = if (flags has ACCENT_TONES) familyTones() ?: return null else DEFAULT_ACCENT.light
     val dark = if (flags has ACCENT_TONES) familyTones() ?: return null else DEFAULT_ACCENT.dark
     if (flags has ACCENT_TONES && light == DEFAULT_ACCENT.light && dark == DEFAULT_ACCENT.dark) return null

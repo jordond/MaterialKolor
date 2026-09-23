@@ -14,10 +14,13 @@ import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.validate.MAX_ACCENTS
+import com.materialkolor.builder.domain.validate.MAX_ACCENT_NAME_BYTES
 import com.materialkolor.builder.domain.validate.MAX_PROJECT_NAME_BYTES
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
@@ -143,6 +146,35 @@ class ShareCodecTest {
         val name = "é".repeat(25)
         val decoded = ShareCodec.decode(ShareCodec.encode(ThemeDocument.Default, name)) as DecodeResult.Ok
         assertEquals("é".repeat(24), decoded.projectName)
+    }
+
+    @Test
+    fun shareCodec_mostAccentsAnExportCarries_roundTrip() {
+        val accents = List(MAX_ACCENTS) { index -> Accent(name = "accent$index", seed = Argb(0x102030 * (index + 1))) }
+        val document = ThemeDocument.Default.copy(accents = accents)
+        assertEquals(DecodeResult.Ok(document, null), ShareCodec.decode(ShareCodec.encode(document)))
+    }
+
+    @Test
+    fun encode_oneAccentMoreThanAnExportCarries_throws() {
+        val accents = List(MAX_ACCENTS + 1) { index -> Accent(name = "accent$index", seed = Argb(0x336699)) }
+        assertFailsWith<IllegalArgumentException> { ShareCodec.encode(ThemeDocument.Default.copy(accents = accents)) }
+    }
+
+    @Test
+    fun shareCodec_longestAccentName_roundTrips() {
+        listOf("a".repeat(MAX_ACCENT_NAME_BYTES), "é".repeat(MAX_ACCENT_NAME_BYTES / 2)).forEach { name ->
+            val document = ThemeDocument.Default.copy(accents = listOf(Accent(name = name, seed = Argb(0x336699))))
+            assertEquals(DecodeResult.Ok(document, null), ShareCodec.decode(ShareCodec.encode(document)), name)
+        }
+    }
+
+    @Test
+    fun encode_accentNameOneByteOverTheLimit_throws() {
+        listOf("a".repeat(MAX_ACCENT_NAME_BYTES + 1), "a" + "é".repeat(MAX_ACCENT_NAME_BYTES / 2)).forEach { name ->
+            val document = ThemeDocument.Default.copy(accents = listOf(Accent(name = name, seed = Argb(0x336699))))
+            assertFailsWith<IllegalArgumentException>(name) { ShareCodec.encode(document) }
+        }
     }
 
     @Test

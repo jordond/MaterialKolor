@@ -11,6 +11,8 @@ import com.materialkolor.builder.domain.model.OnColorThreshold
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.validate.MAX_ACCENTS
+import com.materialkolor.builder.domain.validate.MAX_ACCENT_NAME_BYTES
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -167,6 +169,27 @@ class ShareCodecCorruptionTest {
             DecodeResult.Ok(default.copy(accents = listOf(accent)), null),
             ShareCodec.decode(header.sealedWith(flags = 0x04, 1, 0x05, 1, 2, 3, 1, 'a'.code, 2)),
         )
+    }
+
+    @Test
+    fun decode_moreAccentsThanAnExportCarries_isCorrupt() {
+        val header = bytesOf(ShareCodec.encode(default))
+        // Each accent is plain flags, the seed 010203 and a one letter name.
+        val accents = List(MAX_ACCENTS + 1) { index -> listOf(0x00, 1, 2, 3, 1, 'a'.code + index) }
+        val eight = header.sealedWith(flags = 0x04, MAX_ACCENTS, *accents.take(MAX_ACCENTS).flatten().toIntArray())
+        assertEquals(MAX_ACCENTS, assertIs<DecodeResult.Ok>(ShareCodec.decode(eight)).document.accents.size)
+        assertCorrupt(header.sealedWith(flags = 0x04, MAX_ACCENTS + 1, *accents.flatten().toIntArray()))
+    }
+
+    @Test
+    fun decode_accentNameOverTheLimit_isCorrupt() {
+        val header = bytesOf(ShareCodec.encode(default))
+        val longest = MAX_ACCENT_NAME_BYTES
+        val code = header.sealedWith(flags = 0x04, 1, 0x00, 1, 2, 3, longest, *IntArray(longest) { 'a'.code })
+        val accent = Accent(name = "a".repeat(longest), seed = Argb(0x010203), harmonize = false)
+        assertEquals(DecodeResult.Ok(default.copy(accents = listOf(accent)), null), ShareCodec.decode(code))
+        val tooLong = longest + 1
+        assertCorrupt(header.sealedWith(flags = 0x04, 1, 0x00, 1, 2, 3, tooLong, *IntArray(tooLong) { 'a'.code }))
     }
 
     @Test

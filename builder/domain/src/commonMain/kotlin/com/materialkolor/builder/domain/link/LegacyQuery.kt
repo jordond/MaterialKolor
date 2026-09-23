@@ -11,10 +11,9 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import kotlin.math.roundToInt
 
 /**
- * The light or dark preview an old link asked for.
+ * The preview an old link asked for. Only dark is ever asked for, see [LegacyImport.previewMode].
  */
 public enum class LegacyPreviewMode {
-    Light,
     Dark,
 }
 
@@ -22,7 +21,9 @@ public enum class LegacyPreviewMode {
  * What an old builder link held, split into the theme and the two things that are not the theme.
  *
  * @property[document] The theme the link described, with everything it did not mention left at the defaults.
- * @property[previewMode] The preview the link asked for, or null when it did not say.
+ * @property[previewMode] The preview the link asked for, or null when it did not ask for dark. The
+ * old builder wrote `dark_mode=false` on every link where dark was off, whether or not anyone chose
+ * it, so a light preview is never something a link asked for.
  * @property[packageName] The package the old builder exported to, or null when the link had none.
  * It belongs to the exporting browser's preferences, never to the document.
  */
@@ -121,11 +122,11 @@ private fun LegacyImport.keyColor(
 ): LegacyImport? = value.legacyColor()?.let { color -> edit { copy(keyColors = keyColors.with(slot, color)) } }
 
 /**
- * The old builder wrote `false` whenever dark mode was off, so a light preview is what it asked for.
+ * The old builder wrote `false` on every link where dark mode was off, so only `true` says anything.
  */
 private fun LegacyImport.darkMode(value: String): LegacyImport? {
     val dark = value.toBooleanStrictOrNull() ?: return null
-    return copy(previewMode = if (dark) LegacyPreviewMode.Dark else LegacyPreviewMode.Light)
+    return copy(previewMode = if (dark) LegacyPreviewMode.Dark else null)
 }
 
 /**
