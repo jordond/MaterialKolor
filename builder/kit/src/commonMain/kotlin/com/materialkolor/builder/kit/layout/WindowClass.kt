@@ -91,20 +91,27 @@ public enum class PosterMode {
 /**
  * Everything the shell and the controls need to know about the space they are in.
  *
- * @property[windowClass] Which of the three layouts applies.
+ * The size and the pointer are the whole state. Everything else is read off them, so a `copy` to a
+ * new width cannot leave a class or a poster mode behind that belongs to the old one.
+ *
  * @property[widthDp] The container width.
  * @property[heightDp] The container height, which the poster peek reads in short landscape.
  * @property[coarsePointer] True for touch and pen, false for a mouse or a trackpad.
- * @property[posterMode] How the poster panel is shown.
  */
 @Immutable
 public data class LayoutInfo(
-    public val windowClass: WindowClass,
     public val widthDp: Dp,
     public val heightDp: Dp,
     public val coarsePointer: Boolean = false,
-    public val posterMode: PosterMode = PosterMode.of(windowClass, widthDp),
 ) {
+    /** Which of the three layouts applies. */
+    public val windowClass: WindowClass
+        get() = WindowClass.of(widthDp)
+
+    /** How the poster panel is shown. */
+    public val posterMode: PosterMode
+        get() = PosterMode.of(windowClass, widthDp)
+
     /**
      * The smallest a tappable thing is allowed to be.
      *
@@ -139,7 +146,6 @@ public data class LayoutInfo(
             coarsePointer: Boolean = false,
         ): LayoutInfo =
             LayoutInfo(
-                windowClass = WindowClass.of(widthDp),
                 widthDp = widthDp,
                 heightDp = heightDp,
                 coarsePointer = coarsePointer,

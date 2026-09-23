@@ -16,8 +16,9 @@ kotlin {
             api(project(":builder:engine"))
 
             // The code viewer renders codegen tokens, so the token kinds are part of what a skin
-            // has to colour.
-            implementation(project(":builder:codegen"))
+            // has to colour. `TokenKind` is in the signature of `CodePalette`, so anyone who builds
+            // or reads a palette needs the type too.
+            api(project(":builder:codegen"))
 
             implementation(project(":material-kolor-material3"))
             implementation(project(":material-kolor-unstyled"))

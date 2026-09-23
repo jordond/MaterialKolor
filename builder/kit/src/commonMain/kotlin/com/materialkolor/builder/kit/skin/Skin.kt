@@ -3,7 +3,7 @@ package com.materialkolor.builder.kit.skin
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.materialkolor.builder.domain.Library
+import com.materialkolor.builder.domain.model.Library
 
 /**
  * Which library the builder is wearing right now.

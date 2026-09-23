@@ -23,6 +23,7 @@ kotlin {
             implementation(libs.compose.material3)
             implementation(libs.composeUnstyled)
             implementation(libs.composeUnstyled.theming)
+            implementation(libs.lucide)
         }
 
         jvmTest.dependencies {

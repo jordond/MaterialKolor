@@ -19,14 +19,22 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 out_dir="$repo_root/builder/kit/src/commonMain/composeResources/font"
-license_dir="$repo_root/builder/tools/fonts/licenses"
+# The OFL texts land beside the faces rather than next to this script, so they travel into the wasm
+# bundle the site serves. The about page is what has to credit both faces and link these two files.
+license_dir="$repo_root/builder/kit/src/commonMain/composeResources/files"
 work_dir="$(mktemp -d)"
 trap 'rm -rf "$work_dir"' EXIT
 
 # Sources. Both are the upstream variable builds, pinned so a rerun gives the same bytes.
-bricolage_version="2024-09-17"
-bricolage_url="https://raw.githubusercontent.com/google/fonts/main/ofl/bricolagegrotesque/BricolageGrotesque%5Bopsz%2Cwdth%2Cwght%5D.ttf"
-bricolage_license_url="https://raw.githubusercontent.com/google/fonts/main/ofl/bricolagegrotesque/OFL.txt"
+#
+# Bricolage comes from google/fonts, which has no tags, so the pin is the commit that last touched
+# the file. Reading it off `main` would have meant a rerun could quietly produce a different face
+# from the one committed here.
+bricolage_version="1.001"
+bricolage_commit="b9f6c712059d72742282ebdf06eadfc264c827f3"
+bricolage_dir="https://raw.githubusercontent.com/google/fonts/$bricolage_commit/ofl/bricolagegrotesque"
+bricolage_url="$bricolage_dir/BricolageGrotesque%5Bopsz%2Cwdth%2Cwght%5D.ttf"
+bricolage_license_url="$bricolage_dir/OFL.txt"
 jetbrains_version="2.304"
 jetbrains_url="https://github.com/JetBrains/JetBrainsMono/releases/download/v${jetbrains_version}/JetBrainsMono-${jetbrains_version}.zip"
 
@@ -43,14 +51,22 @@ latin_range='U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0
 # 400 default costs about 6 KB brotli, which puts the face over budget, so the default is left
 # alone and every caller passes a weight. Compose resources do that for us, the `Font` overload
 # the kit uses always sends a `wght` variation.
+#
+# The instancer runs without `--update-name-table`, so the shipped face still names itself "96pt
+# ExtraBold". Only the family name matters to `FontFamily`, so this is cosmetic and staying.
 bricolage_pins=(opsz=14 wdth=100)
 bricolage_axes="wght 200 to 800, default 800 upstream"
 # JetBrains Mono ships wght 100 to 800 on the upright face. The builder never sets mono italic.
 jetbrains_axes="wght 100 to 800"
 
-# Features. Kerning, the mark attachments the combining marks need, and the localised forms. The
-# brand face keeps its ligatures, the mono face drops them so code reads literally.
-brand_features='kern,liga,calt,ccmp,mark,mkmk,locl'
+# Features. Kerning, the mark attachments the combining marks need, and the localised forms.
+#
+# Neither upstream face carries liga or calt, so the brand face has no ligatures to keep and asking
+# for them only made this list read as though it did. What the shipped faces end up with is ccmp
+# and locl in GSUB, plus kern, mark and mkmk in Bricolage's GPOS. The mono list stays separate so a
+# future JetBrains Mono that does ship calt is still subset without it, because code has to read
+# literally.
+brand_features='kern,ccmp,mark,mkmk,locl'
 mono_features='kern,ccmp,mark,mkmk,locl'
 
 # Budget from architecture 6.11, per face, brotli compressed.
@@ -59,9 +75,16 @@ budget_bytes=$((40 * 1024))
 echo "Working in $work_dir"
 mkdir -p "$out_dir" "$license_dir"
 
-echo "Fetching Bricolage Grotesque ($bricolage_version)"
+echo "Fetching Bricolage Grotesque $bricolage_version (google/fonts ${bricolage_commit:0:12})"
 curl -sSL --fail -o "$work_dir/bricolage.ttf" "$bricolage_url"
 curl -sSL --fail -o "$license_dir/OFL-BricolageGrotesque.txt" "$bricolage_license_url"
+
+# The pin is a commit rather than a release, so make sure it still carries the version the
+# committed subset was cut from.
+if ! fonttools ttx -q -t name -o - "$work_dir/bricolage.ttf" | grep -q "Version $bricolage_version"; then
+    echo "  the pinned commit no longer reports version $bricolage_version" >&2
+    exit 1
+fi
 
 echo "Fetching JetBrains Mono ($jetbrains_version)"
 curl -sSL --fail -o "$work_dir/jetbrains.zip" "$jetbrains_url"

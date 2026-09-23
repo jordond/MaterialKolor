@@ -6,7 +6,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.codegen.TokenKind
+import com.materialkolor.builder.codegen.dsl.TokenKind
 
 /**
  * The neutral layer every builder widget reads.
@@ -55,12 +55,13 @@ public data class BuilderTokens(
 )
 
 /**
- * One colour per codegen token kind, with a fallback for any kind the skin did not name.
+ * One colour per codegen token kind.
  *
- * The fallback means a new token kind in codegen cannot break a skin, it just renders as plain
- * text until someone gives it a colour.
+ * Every kind other than [TokenKind.Plain] has to be named. A skin that forgets one would otherwise
+ * render that kind as flat prose and nothing would say so, and a kind added to codegen later has to
+ * be a visible break rather than a quiet downgrade.
  *
- * @property[plain] The colour used for [TokenKind.Plain] and for any kind [colors] leaves out.
+ * @property[plain] The colour used for [TokenKind.Plain].
  */
 @Immutable
 public class CodePalette(
@@ -69,7 +70,13 @@ public class CodePalette(
 ) {
     private val colors: Map<TokenKind, Color> = colors.toMap()
 
-    public operator fun get(kind: TokenKind): Color = colors[kind] ?: plain
+    init {
+        require(colors.keys.containsAll(TokenKind.entries - TokenKind.Plain)) {
+            "A palette needs a colour for every kind, missing ${TokenKind.entries - TokenKind.Plain - colors.keys}"
+        }
+    }
+
+    public operator fun get(kind: TokenKind): Color = if (kind == TokenKind.Plain) plain else colors.getValue(kind)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

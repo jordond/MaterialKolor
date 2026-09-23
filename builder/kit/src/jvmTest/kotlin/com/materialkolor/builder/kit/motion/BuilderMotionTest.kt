@@ -29,6 +29,8 @@ class BuilderMotionTest {
     fun builderDurations_outsideTheSpecRanges_areRejected() {
         assertFailsWith<IllegalArgumentException> { BuilderDurations(reveal = 300) }
         assertFailsWith<IllegalArgumentException> { BuilderDurations(panelEnter = 500) }
+        assertFailsWith<IllegalArgumentException> { BuilderDurations(panelExit = 300) }
+        assertFailsWith<IllegalArgumentException> { BuilderDurations(panelExit = 100) }
         assertFailsWith<IllegalArgumentException> { BuilderDurations(popover = 400) }
         assertFailsWith<IllegalArgumentException> { BuilderDurations(reducedCrossfade = 400) }
     }

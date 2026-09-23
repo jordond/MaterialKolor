@@ -70,6 +70,16 @@ class WindowClassTest {
         layout.coarsePointer shouldBe false
     }
 
+    @Test
+    fun layoutInfo_copiedToANewWidth_derivesTheNewClassAndPosterMode() {
+        val phone = LayoutInfo.of(widthDp = 390.dp, heightDp = 844.dp)
+
+        val desktop = phone.copy(widthDp = 1280.dp)
+
+        desktop.windowClass shouldBe WindowClass.Expanded
+        desktop.posterMode shouldBe PosterMode.Docked400
+    }
+
     private fun posterModeAt(widthDp: Dp): PosterMode = layoutAt(widthDp).posterMode
 
     private fun layoutAt(

@@ -19,7 +19,8 @@ import androidx.compose.runtime.Immutable
  * @property[slow] A move that crosses the canvas, such as the split wipe handle (MO-03).
  * @property[reveal] The circle that grows out of the library switcher (MO-04).
  * @property[panelEnter] Panels, sheets and the poster collapse arriving (MO-05).
- * @property[panelExit] The same things leaving, which is always quicker than arriving.
+ * @property[panelExit] The same things leaving, which is always quicker than arriving. Decision D23
+ * keeps it under the 250 to 350 ms arrival band, so it has a band of its own.
  * @property[popover] A menu or tooltip scaling in (MO-05).
  * @property[press] The press scale (MO-06).
  * @property[reducedCrossfade] What a discrete change costs under reduced motion (F-37).
@@ -39,6 +40,7 @@ public data class BuilderDurations(
     init {
         require(reveal in 400..450) { "The skin reveal runs 400 to 450 ms, got $reveal" }
         require(panelEnter in 250..350) { "Panels arrive in 250 to 350 ms, got $panelEnter" }
+        require(panelExit in 150..250) { "Panels leave in 150 to 250 ms (D23), got $panelExit" }
         require(popover in 125..200) { "Popovers arrive in 125 to 200 ms, got $popover" }
         require(reducedCrossfade <= 150) { "Reduced motion crossfades in 150 ms or less, got $reducedCrossfade" }
     }

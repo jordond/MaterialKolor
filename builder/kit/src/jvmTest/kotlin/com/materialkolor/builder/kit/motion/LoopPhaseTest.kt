@@ -14,6 +14,7 @@ class LoopPhaseTest {
     @Test
     fun loopPhase_whenMotionIsFrozen_staysOnTheFrozenPhase() =
         runComposeUiTest {
+            mainClock.autoAdvance = false
             var phase: State<Float>? = null
             setContent {
                 CompositionLocalProvider(LocalMotionFrozen provides true) {
@@ -21,7 +22,7 @@ class LoopPhaseTest {
                 }
             }
 
-            waitForIdle()
+            mainClock.advanceTimeByFrame()
             mainClock.advanceTimeBy(5_000)
 
             assertNotNull(phase).value shouldBe 0.25f
@@ -30,6 +31,7 @@ class LoopPhaseTest {
     @Test
     fun loopPhase_whenTheTabIsHidden_holdsWhereItWas() =
         runComposeUiTest {
+            mainClock.autoAdvance = false
             var phase: State<Float>? = null
             setContent {
                 CompositionLocalProvider(LocalTabVisible provides false) {
@@ -37,7 +39,7 @@ class LoopPhaseTest {
                 }
             }
 
-            waitForIdle()
+            mainClock.advanceTimeByFrame()
             mainClock.advanceTimeBy(5_000)
 
             assertNotNull(phase).value shouldBe 0f

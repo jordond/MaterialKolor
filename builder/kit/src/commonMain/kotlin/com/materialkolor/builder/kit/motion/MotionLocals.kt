@@ -9,9 +9,13 @@ import androidx.compose.runtime.staticCompositionLocalOf
  *
  * Each skin theme provides this next to its tokens, and it already accounts for
  * [LocalReducedMotion], so nothing downstream has to branch on the preference.
+ *
+ * It has no default for the same reason the tokens have none. A widget drawn outside a skin would
+ * otherwise animate on the Custom timings and ignore the reduced motion preference, and nothing
+ * would say so.
  */
 public val LocalBuilderMotion: ProvidableCompositionLocal<BuilderMotion> = staticCompositionLocalOf {
-    tweenBuilderMotion()
+    error("No BuilderMotion provided")
 }
 
 /**
