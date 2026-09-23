@@ -52,15 +52,23 @@ internal enum class GalleryComponent(
     /** Most disabled components, faded OnSurface on a faded OnSurface container if they have one. */
     Disabled(Role.OnSurface),
 
-    /** A disabled filled, elevated or text button, whose label fades OnSurfaceVariant instead. */
+    /** A disabled filled or elevated button, a faded OnSurface container under a faded OnSurfaceVariant label. */
     DisabledButton(Role.OnSurface, Role.OnSurfaceVariant),
     DisabledOutlinedButton(Role.OutlineVariant, Role.OnSurfaceVariant),
     DisabledSwitch(Role.SurfaceContainerHighest, Role.OnSurface),
-    DisabledFilledCard(Role.SurfaceVariant, Role.OnSurface),
+
+    /** A disabled filled card, SurfaceVariant blended over SurfaceContainerHighest. */
+    DisabledFilledCard(Role.SurfaceVariant, Role.SurfaceContainerHighest, Role.OnSurface),
     DisabledElevatedCard(Role.Surface, Role.OnSurface),
     DisabledOutlinedCard(Role.Surface, Role.OnSurface, Role.Outline),
 
-    /** A disabled text button, navigation item or tab, faded OnSurfaceVariant with no container. */
+    /** A disabled list item, which keeps its Surface container and fades only its content. */
+    DisabledListItem(Role.Surface, Role.OnSurface),
+
+    /** A disabled segmented button, faded OnSurface inside a faded Outline border. */
+    DisabledSegmentedButton(Role.Outline, Role.OnSurface),
+
+    /** A disabled text button or navigation item, faded OnSurfaceVariant with no container. */
     DisabledVariant(Role.OnSurfaceVariant),
     ;
 

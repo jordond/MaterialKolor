@@ -11,18 +11,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -31,29 +26,33 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isSecondaryPressed
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalTextToolbar
+import androidx.compose.ui.platform.TextToolbar
+import androidx.compose.ui.platform.TextToolbarStatus
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.Archive
 import com.composables.icons.lucide.ArrowLeft
-import com.composables.icons.lucide.Bell
 import com.composables.icons.lucide.Bookmark
 import com.composables.icons.lucide.Compass
 import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Mail
 import com.composables.icons.lucide.MapPin
 import com.composables.icons.lucide.Plane
 import com.composables.icons.lucide.Share2
@@ -66,14 +65,12 @@ import com.materialkolor.builder.preview.canvas.GalleryGroup
 import com.materialkolor.builder.preview.split.PaneSpec
 import androidx.compose.ui.semantics.Role as SemanticsRole
 
-// The entry, its cards and their frame, then the samples of the Containment, Navigation and
-// Feedback cards. MaterialGallery.kt keeps the samples of the other three groups.
+// The entry, its cards and their frame, then the samples of the Containment and Navigation cards.
+// MaterialGallery.kt keeps the samples of the Actions, Inputs and Selection cards, and
+// GalleryFeedback.kt those of the Feedback cards.
 
 /** The padding inside a dialog, which Material 3 does not publish. */
 private val DialogPadding = 24.dp
-
-/** How far along both progress indicators are. */
-private const val DemoProgress = 0.6f
 
 private val Places = listOf(
     "Lisbon, Portugal" to "12 to 19 May",
@@ -98,6 +95,9 @@ private enum class GalleryDestination(
  * component shows up enabled and disabled, apart from the few Material 3 gives no disabled look.
  * Nothing in the gallery opens a popup or a dialog window, since on the web the first one takes
  * the accessibility mirror over for good (D40). Menus, dialogs and tooltips are drawn in place.
+ * The text fields would open a context menu on a right click and a text toolbar on a long press,
+ * both popups, so the gallery swallows right-button presses and hands its text fields a toolbar
+ * that never shows. Copy and paste still work from the keyboard.
  *
  * @param[spec] The pane the gallery is drawn in.
  * @param[state] What the gallery's controls remember, shared by both copies.
@@ -112,15 +112,49 @@ internal fun MaterialGalleryEntry(
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier.fillMaxSize().previewRoles(Role.Surface, Role.OnSurface)) {
-        GalleryGrid(
-            cards = MaterialCards,
-            listState = state.rememberListState("gallery.material"),
-            gap = SectionGap,
-            header = { group -> MaterialGroupHeader(group) },
-            card = { card, cardModifier -> MaterialCardFrame(card, state, cardModifier) },
-        )
+        CompositionLocalProvider(LocalTextToolbar provides HiddenTextToolbar) {
+            GalleryGrid(
+                cards = MaterialCards,
+                listState = state.rememberListState("gallery.material"),
+                gap = SectionGap,
+                modifier = Modifier.swallowRightPresses(),
+                header = { group -> MaterialGroupHeader(group) },
+                card = { card, cardModifier -> MaterialCardFrame(card, state, cardModifier) },
+            )
+        }
     }
 }
+
+/** A text toolbar that never shows, standing in for the web's, which opens in a popup (D40). */
+private object HiddenTextToolbar : TextToolbar {
+    override val status: TextToolbarStatus = TextToolbarStatus.Hidden
+
+    override fun showMenu(
+        rect: Rect,
+        onCopyRequested: (() -> Unit)?,
+        onPasteRequested: (() -> Unit)?,
+        onCutRequested: (() -> Unit)?,
+        onSelectAllRequested: (() -> Unit)?,
+    ) = Unit
+
+    override fun hide() = Unit
+}
+
+/**
+ * Consume every right-button press before anything under it sees one, so no text field opens its
+ * context menu in a popup (D40).
+ */
+private fun Modifier.swallowRightPresses(): Modifier =
+    pointerInput(Unit) {
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                if (event.type == PointerEventType.Press && event.buttons.isSecondaryPressed) {
+                    event.changes.forEach { change -> change.consume() }
+                }
+            }
+        }
+    }
 
 /** Every card of the Material 3 gallery, in the order they show within each group. */
 internal val MaterialCards: List<GalleryCard> = listOf(
@@ -236,7 +270,11 @@ internal fun ListItems() {
             if (index > 0) HorizontalDivider(Modifier.previewRoles(MaterialComponent.HorizontalDivider))
             ListItem(
                 onClick = {},
-                modifier = Modifier.previewRoles(enabled, MaterialComponent.ListItem),
+                modifier = Modifier.previewRoles(
+                    enabled,
+                    MaterialComponent.ListItem,
+                    GalleryComponent.DisabledListItem,
+                ),
                 enabled = enabled,
                 leadingContent = { Icon(Lucide.MapPin, contentDescription = null) },
                 supportingContent = { Text(dates) },
@@ -364,18 +402,16 @@ internal fun NavigationRails(state: DemoAppState) {
     }
 }
 
+/** Material 3 gives tabs no disabled look, so every tab is enabled. */
 @Composable
 internal fun Tabs(state: DemoAppState) {
-    // The last tab is the disabled one, so the tab index never lands on it.
-    val picked = state.tabIndex.coerceIn(0, TabLabels.size - 2)
+    val picked = state.tabIndex.coerceIn(0, TabLabels.lastIndex)
     PrimaryTabRow(selectedTabIndex = picked, modifier = Modifier.previewRoles(GalleryComponent.TabRow)) {
         TabLabels.forEachIndexed { index, label ->
-            val enabled = index != TabLabels.lastIndex
             Tab(
                 selected = index == picked,
                 onClick = { state.tabIndex = index },
-                modifier = Modifier.previewRoles(enabled, GalleryComponent.Tab, GalleryComponent.DisabledVariant),
-                enabled = enabled,
+                modifier = Modifier.previewRoles(GalleryComponent.Tab),
                 text = { Text(label) },
                 unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -383,117 +419,7 @@ internal fun Tabs(state: DemoAppState) {
     }
 }
 
-/** Badges on icon buttons, cleared and brought back by a click on either enabled button. */
-@Composable
-internal fun Badges(state: DemoAppState) {
-    val read = state.isOn(ReadKey)
-    EnabledAndDisabled { enabled ->
-        IconButton(
-            onClick = { state.setOn(ReadKey, !read) },
-            modifier = Modifier.previewRoles(MaterialComponent.IconButton),
-            enabled = enabled,
-        ) {
-            BadgedBox(badge = { if (!read) Badge(Modifier.previewRoles(MaterialComponent.Badge)) { Text("8") } }) {
-                Icon(Lucide.Mail, contentDescription = if (read) "Messages" else "Messages, 8 new")
-            }
-        }
-        IconButton(
-            onClick = { state.setOn(ReadKey, !read) },
-            modifier = Modifier.previewRoles(MaterialComponent.IconButton),
-            enabled = enabled,
-        ) {
-            BadgedBox(badge = { if (!read) Badge(Modifier.previewRoles(MaterialComponent.Badge)) }) {
-                Icon(Lucide.Bell, contentDescription = if (read) "Notifications" else "Notifications, new")
-            }
-        }
-    }
-}
-
-/** Determinate indicators only, since an endless one would never let the preview settle. */
-@Composable
-internal fun ProgressIndicators() {
-    Row(horizontalArrangement = Arrangement.spacedBy(SectionGap), verticalAlignment = Alignment.CenterVertically) {
-        CircularProgressIndicator(
-            progress = { DemoProgress },
-            modifier = Modifier.previewRoles(GalleryComponent.CircularProgressIndicator),
-        )
-        LinearProgressIndicator(
-            progress = { DemoProgress },
-            modifier = Modifier.weight(1f).previewRoles(MaterialComponent.LinearProgressIndicator),
-        )
-    }
-}
-
-/** A snackbar shown in place, its action flipping the message. Snackbar actions have no disabled look. */
-@Composable
-internal fun Snackbars(state: DemoAppState) {
-    val restored = state.isOn(RestoredKey)
-    Snackbar(
-        modifier = Modifier.previewRoles(GalleryComponent.Snackbar),
-        action = {
-            TextButton(
-                onClick = { state.setOn(RestoredKey, !restored) },
-                modifier = Modifier.previewRoles(GalleryComponent.SnackbarAction),
-                colors = ButtonDefaults.textButtonColors(contentColor = SnackbarDefaults.actionColor),
-            ) { Text(if (restored) "Archive" else "Undo") }
-        },
-    ) { Text(if (restored) "Trip restored" else "Trip archived") }
-}
-
-/**
- * A plain tooltip over the button it labels and a rich tooltip, both drawn in place rather than
- * in a popup (D40). Tooltips have no disabled look.
- */
-@Composable
-internal fun InlineTooltips(state: DemoAppState) {
-    val saved = state.isOn(SavedKey)
-    val label = if (saved) "Saved" else "Save trip"
-    val rich = TooltipDefaults.richTooltipColors()
-    Column(verticalArrangement = Arrangement.spacedBy(PaneGap)) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Gap / 2),
-        ) {
-            Surface(
-                modifier = Modifier.previewRoles(GalleryComponent.PlainTooltip),
-                shape = TooltipDefaults.plainTooltipContainerShape,
-                color = TooltipDefaults.plainTooltipContainerColor,
-                contentColor = TooltipDefaults.plainTooltipContentColor,
-            ) {
-                Text(
-                    text = label,
-                    modifier = Modifier.padding(horizontal = Gap, vertical = Gap / 2),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-            IconButton(
-                onClick = { state.setOn(SavedKey, !saved) },
-                modifier = Modifier.previewRoles(MaterialComponent.IconButton),
-            ) { Icon(Lucide.Bookmark, contentDescription = label) }
-        }
-        Surface(
-            modifier = Modifier.previewRoles(GalleryComponent.RichTooltip),
-            shape = TooltipDefaults.richTooltipContainerShape,
-            color = rich.containerColor,
-            contentColor = rich.contentColor,
-        ) {
-            Column(Modifier.padding(start = SectionGap, top = PaneGap, end = Gap)) {
-                Text("Offline maps", color = rich.titleContentColor, style = MaterialTheme.typography.titleSmall)
-                Text("Download the map so it works without a signal.", style = MaterialTheme.typography.bodyMedium)
-                TextButton(
-                    onClick = {},
-                    modifier = Modifier.previewRoles(MaterialComponent.TextButton),
-                    colors = ButtonDefaults.textButtonColors(contentColor = rich.actionContentColor),
-                ) { Text("Learn more") }
-            }
-        }
-    }
-}
-
 private const val UnderstoodKey = "gallery.dialog.understood"
-private const val ReadKey = "gallery.badges.read"
-private const val RestoredKey = "gallery.snackbar.restored"
-private const val SavedKey = "gallery.tooltip.saved"
 
 /** The destination the navigation samples show selected, never the disabled last one. */
 private fun pickedDestination(state: DemoAppState): GalleryDestination =

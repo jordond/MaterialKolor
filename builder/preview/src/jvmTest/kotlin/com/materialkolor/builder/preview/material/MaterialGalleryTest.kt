@@ -10,6 +10,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.platform.LocalTextToolbar
+import androidx.compose.ui.platform.TextToolbar
+import androidx.compose.ui.platform.TextToolbarStatus
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -21,13 +25,19 @@ import androidx.compose.ui.test.assertAll
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.isSelected
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.IntSize
@@ -52,7 +62,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.ints.shouldBeInRange
-import io.kotest.matchers.ints.shouldBeLessThan
+import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.test.Test
@@ -66,6 +76,9 @@ private const val GalleryScreenshotDir = "src/jvmTest/screenshots/gallery"
 /** The phone and desktop frames the gallery is checked at, at the height of a first screen. */
 private val GalleryFrames: List<IntSize> = listOf(IntSize(412, 900), IntSize(1280, 800))
 
+/** How many columns of 280 dp cards, 16 dp apart, fit across each frame's width. */
+private val GalleryColumns: Map<Int, Int> = mapOf(412 to 1, 1280 to 4)
+
 /** Wide enough for four columns and tall enough that every card composes. */
 private val GalleryWhole: Modifier = Modifier
     .wrapContentSize(Alignment.TopStart, unbounded = true)
@@ -73,7 +86,7 @@ private val GalleryWhole: Modifier = Modifier
 
 /** The cards whose component Material 3 gives no disabled look, or that hold nothing to press. */
 private val GalleryNoDisabled: Set<String> =
-    setOf("Floating action button", "Extended FAB", "Progress indicators", "Snackbar", "Tooltips")
+    setOf("Floating action button", "Extended FAB", "Tabs", "Progress indicators", "Snackbar", "Tooltips")
 
 /** Imports that open a popup or a window, which on the web take the accessibility mirror over (D40). */
 private val GalleryPopupImports: List<String> = listOf(
@@ -92,6 +105,7 @@ private val GallerySources: List<String> = listOf(
     "src/commonMain/kotlin/com/materialkolor/builder/preview/canvas/ComponentsTab.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/GalleryEntry.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/MaterialGallery.kt",
+    "src/commonMain/kotlin/com/materialkolor/builder/preview/material/GalleryFeedback.kt",
 )
 
 @OptIn(ExperimentalTestApi::class)
@@ -155,7 +169,9 @@ class MaterialGalleryTest {
                     setContent { GalleryHarness(LightSpec, DemoAppState(), Modifier.fillMaxSize(), composed) }
                     waitForIdle()
 
-                    composed.size shouldBeLessThan MaterialCards.size
+                    // The rows on screen and the one the list prefetches below them, and no more.
+                    val bound = (galleryRowsOnScreen(composed) + 1) * GalleryColumns.getValue(frame.width)
+                    composed.size shouldBeLessThanOrEqual bound
                     composed shouldNotContain MaterialCards.last().title
                     composed
                         .filterNot { title -> galleryCardDeclaresRoles(title) }
@@ -168,7 +184,12 @@ class MaterialGalleryTest {
     @Test
     fun gallery_everyControlPressed_opensNoPopupOrWindow() =
         runComposeUiTest {
-            setContent { GalleryHarness(LightSpec, DemoAppState(), GalleryWhole) }
+            val toolbar = GalleryToolbarProbe()
+            setContent {
+                CompositionLocalProvider(LocalTextToolbar provides toolbar) {
+                    GalleryHarness(LightSpec, DemoAppState(), GalleryWhole)
+                }
+            }
             waitForIdle()
 
             val pressable = onAllNodes(hasClickAction(), useUnmergedTree = true).fetchSemanticsNodes()
@@ -185,6 +206,21 @@ class MaterialGalleryTest {
             }
             waitForIdle()
             onAllNodes(isRoot()).assertCountEquals(1)
+
+            // A word to select, so a text field has a context menu and a text toolbar to open.
+            val destinations = onAllNodes(hasSetTextAction() and hasText("Destination")).assertCountEquals(2)
+            destinations[0].performTextReplacement("Lisbon")
+            for (index in 0..1) {
+                withClue("Destination field $index") {
+                    destinations[index].performMouseInput { rightClick() }
+                    waitForIdle()
+                    onAllNodes(isRoot()).assertCountEquals(1)
+                    destinations[index].performTouchInput { longClick() }
+                    waitForIdle()
+                    onAllNodes(isRoot()).assertCountEquals(1)
+                }
+            }
+            toolbar.shown shouldBe 0
         }
 
     @Test
@@ -289,9 +325,43 @@ private fun SemanticsNodeInteractionsProvider.galleryFrame(title: String): Seman
         .mapNotNull { text -> text.parent }
         .first { frame -> PreviewRoles in frame.config }
 
+/**
+ * How many rows of the [composed] cards show at least partly on screen. The cards of a row share
+ * their top edge, so each distinct top is a row.
+ */
+private fun SemanticsNodeInteractionsProvider.galleryRowsOnScreen(composed: Set<String>): Int {
+    val screen = onRoot().fetchSemanticsNode().boundsInRoot
+    return composed
+        .map { title -> galleryFrame(title) }
+        .filter { frame -> frame.layoutInfo.isPlaced && frame.boundsInRoot.overlaps(screen) }
+        .map { frame -> frame.boundsInRoot.top }
+        .distinct()
+        .size
+}
+
 /** Whether anything in the card called [title] declares roles, its frame aside. */
 private fun SemanticsNodeInteractionsProvider.galleryCardDeclaresRoles(title: String): Boolean =
     galleryFrame(title).galleryDescendants().any { node -> PreviewRoles in node.config }
+
+/** A text toolbar that counts how often it is asked to show, where the web's would open a popup. */
+private class GalleryToolbarProbe : TextToolbar {
+    var shown: Int = 0
+        private set
+
+    override val status: TextToolbarStatus = TextToolbarStatus.Hidden
+
+    override fun showMenu(
+        rect: Rect,
+        onCopyRequested: (() -> Unit)?,
+        onPasteRequested: (() -> Unit)?,
+        onCutRequested: (() -> Unit)?,
+        onSelectAllRequested: (() -> Unit)?,
+    ) {
+        shown++
+    }
+
+    override fun hide() = Unit
+}
 
 /** The Material 3 gallery in a pane of [spec], under the chrome, with motion frozen. */
 @Composable

@@ -71,9 +71,9 @@ import kotlin.math.roundToInt
 import androidx.compose.ui.semantics.Role as SemanticsRole
 
 // The samples of the Actions, Inputs and Selection cards of MaterialCards in GalleryEntry.kt, which
-// keeps the rest. Everything a sample remembers lives in DemoAppState under a "gallery." key, so both
-// copies of a split agree. Where a component has no enabled and disabled pair, the last option of
-// its set is the disabled one.
+// keeps the rest with GalleryFeedback.kt. Everything a sample remembers lives in DemoAppState under
+// a "gallery." key, so both copies of a split agree. Where a component has no enabled and disabled
+// pair, the last option of its set is the disabled one.
 
 /** The stops on both sliders, 0 to 10. */
 private const val SliderStops = 11
@@ -257,7 +257,9 @@ internal fun RangeSliders(state: DemoAppState) {
                     state.choose(RangeFromKey, SliderStops, range.start.roundToInt())
                     state.choose(RangeToKey, SliderStops, range.endInclusive.roundToInt())
                 },
-                modifier = Modifier.previewRoles(enabled, GalleryComponent.Slider),
+                modifier = Modifier
+                    .semantics { contentDescription = "Price range" }
+                    .previewRoles(enabled, GalleryComponent.Slider),
                 enabled = enabled,
                 valueRange = 0f..SliderTop,
                 steps = SliderStops - 2,
@@ -329,7 +331,11 @@ internal fun SegmentedButtons(state: DemoAppState) {
                 selected = picked == index,
                 onClick = { state.choose(PeriodKey, Periods.size, index) },
                 shape = SegmentedButtonDefaults.itemShape(index, Periods.size),
-                modifier = Modifier.previewRoles(enabled, GalleryComponent.SegmentedButton),
+                modifier = Modifier.previewRoles(
+                    enabled,
+                    GalleryComponent.SegmentedButton,
+                    GalleryComponent.DisabledSegmentedButton,
+                ),
                 enabled = enabled,
                 label = { Text(period) },
             )
