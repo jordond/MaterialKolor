@@ -2,24 +2,24 @@ package com.materialkolor.builder.codegen.dsl
 
 import com.materialkolor.builder.codegen.symbol.Symbol
 import com.materialkolor.builder.codegen.symbol.SymbolKind
-import com.materialkolor.builder.codegen.symbol.TestSymbols
+import com.materialkolor.builder.codegen.symbol.Symbols
 import com.materialkolor.builder.codegen.text.Literals
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-private val ComposableLambda = lambdaType(annotations = listOf(TestSymbols.Composable))
+private val ComposableLambda = lambdaType(annotations = listOf(Symbols.Composable))
 
 class KotlinFileBuilderTest {
     @Test
     fun kotlinFile_themeFunction_writesTheWholeFile() {
         val file = kotlinFile(path = "Theme.kt", packageName = "com.example") {
-            function(name = "AppTheme", annotations = listOf(TestSymbols.Composable)) {
-                parameter("isDark", TestSymbols.Boolean, default = call(TestSymbols.IsSystemInDarkTheme))
+            function(name = "AppTheme", annotations = listOf(Symbols.Composable)) {
+                parameter("isDark", Symbols.Boolean, default = call(Symbols.IsSystemInDarkTheme))
                 parameter("content", ComposableLambda)
                 body {
-                    call(TestSymbols.DynamicMaterialTheme) {
+                    call(Symbols.DynamicMaterialTheme) {
                         argument("seedColor", ref("SeedColor"))
                         optionalArgument("contrastLevel", null)
                         argument("content", ref("content"))
@@ -34,7 +34,7 @@ class KotlinFileBuilderTest {
 
             import androidx.compose.foundation.isSystemInDarkTheme
             import androidx.compose.runtime.Composable
-            import com.materialkolor.DynamicMaterialTheme
+            import com.materialkolor.material3.DynamicMaterialTheme
 
             @Composable
             fun AppTheme(
@@ -61,7 +61,7 @@ class KotlinFileBuilderTest {
                 ),
             )
             property("SeedColor", Literals.colorLiteral(-0x98AF5C))
-            property("Primary", Literals.colorLiteral(-0x98AF5C), type = type(TestSymbols.Color))
+            property("Primary", Literals.colorLiteral(-0x98AF5C), type = type(Symbols.Color))
         }
 
         val expected =
@@ -85,7 +85,7 @@ class KotlinFileBuilderTest {
     @Test
     fun kotlinFile_singleParameter_keepsTheSignatureOnOneLine() {
         val file = kotlinFile(path = "Theme.kt", packageName = "com.example") {
-            function(name = "AppTheme", annotations = listOf(TestSymbols.Composable)) {
+            function(name = "AppTheme", annotations = listOf(Symbols.Composable)) {
                 parameter("content", ComposableLambda)
                 body {
                     call("content")
@@ -118,7 +118,7 @@ class KotlinFileBuilderTest {
         val file = kotlinFile(path = "Theme.kt", packageName = "com.example") {
             function(name = "AppTheme") {
                 body {
-                    call(TestSymbols.DynamicMaterialTheme) {
+                    call(Symbols.DynamicMaterialTheme) {
                         argument("motionScheme", call(motionScheme))
                         argument("specVersion", ref(colorSpec))
                         argument("fallback", ref(colorSpec))
@@ -133,8 +133,8 @@ class KotlinFileBuilderTest {
         assertEquals(
             listOf(
                 "import androidx.compose.material3.MotionScheme",
-                "import com.materialkolor.DynamicMaterialTheme",
                 "import com.materialkolor.dynamiccolor.ColorSpec",
+                "import com.materialkolor.material3.DynamicMaterialTheme",
             ),
             imports,
         )
@@ -155,12 +155,12 @@ class KotlinFileBuilderTest {
     @Test
     fun kotlinFile_callPastTheColumnLimit_breaksWithTrailingCommas() {
         val file = kotlinFile(path = "Theme.kt", packageName = "com.example") {
-            function(name = "AppTheme", annotations = listOf(TestSymbols.Composable)) {
-                parameter("isDark", TestSymbols.Boolean, default = call(TestSymbols.IsSystemInDarkTheme))
-                parameter("useDarkerSurfacesInTheAmoledVariant", TestSymbols.Boolean)
+            function(name = "AppTheme", annotations = listOf(Symbols.Composable)) {
+                parameter("isDark", Symbols.Boolean, default = call(Symbols.IsSystemInDarkTheme))
+                parameter("useDarkerSurfacesInTheAmoledVariant", Symbols.Boolean)
                 parameter("content", ComposableLambda)
                 body {
-                    call(TestSymbols.DynamicMaterialTheme) {
+                    call(Symbols.DynamicMaterialTheme) {
                         argument("seedColor", ref("SeedColor"))
                         argument("isDark", ref("isDark"))
                         argument("isAmoled", ref("useDarkerSurfacesInTheAmoledVariant"))
@@ -177,7 +177,7 @@ class KotlinFileBuilderTest {
 
             import androidx.compose.foundation.isSystemInDarkTheme
             import androidx.compose.runtime.Composable
-            import com.materialkolor.DynamicMaterialTheme
+            import com.materialkolor.material3.DynamicMaterialTheme
 
             @Composable
             fun AppTheme(
@@ -205,7 +205,7 @@ class KotlinFileBuilderTest {
         val file = kotlinFile(path = "Theme.kt", packageName = "com.example") {
             function(name = "AppTheme") {
                 body {
-                    call(TestSymbols.DynamicMaterialTheme, multiline = true) {
+                    call(Symbols.DynamicMaterialTheme, multiline = true) {
                         argument("seedColor", ref("SeedColor"))
                         argument("content", ref("content"))
                     }
@@ -217,7 +217,7 @@ class KotlinFileBuilderTest {
             """
             package com.example
 
-            import com.materialkolor.DynamicMaterialTheme
+            import com.materialkolor.material3.DynamicMaterialTheme
 
             fun AppTheme() {
                 DynamicMaterialTheme(
@@ -255,7 +255,7 @@ class KotlinFileBuilderTest {
     @Test
     fun kotlinFile_returnAndLocalValue_writesTheBody() {
         val file = kotlinFile(path = "Scheme.kt", packageName = "com.example") {
-            function(name = "scheme", returns = type(TestSymbols.Color)) {
+            function(name = "scheme", returns = type(Symbols.Color)) {
                 body {
                     assign("seed", Literals.colorLiteral(-0x98AF5C))
                     blankLine()
@@ -297,11 +297,11 @@ class KotlinFileBuilderTest {
     @Test
     fun kotlinFile_callAsAValue_assignsAndReturnsIt() {
         val file = kotlinFile(path = "Scheme.kt", packageName = "com.example") {
-            function(name = "scheme", returns = type(TestSymbols.Color)) {
+            function(name = "scheme", returns = type(Symbols.Color)) {
                 body {
                     assign(
                         name = "theme",
-                        value = callOf(TestSymbols.DynamicMaterialTheme) {
+                        value = callOf(Symbols.DynamicMaterialTheme) {
                             argument("seedColor", ref("SeedColor"))
                         },
                     )
@@ -315,7 +315,7 @@ class KotlinFileBuilderTest {
             package com.example
 
             import androidx.compose.ui.graphics.Color
-            import com.materialkolor.DynamicMaterialTheme
+            import com.materialkolor.material3.DynamicMaterialTheme
 
             fun scheme(): Color {
                 val theme = DynamicMaterialTheme(seedColor = SeedColor)
@@ -342,6 +342,39 @@ class KotlinFileBuilderTest {
         val message = failure.message.orEmpty()
         assertTrue("androidx.compose.ui.graphics.Color" in message, message)
         assertTrue("com.materialkolor.ktx.Color" in message, message)
+    }
+
+    // b-109
+    @Test
+    fun kotlinFile_declaredNameMatchesAnImport_failsNamingTheImport() {
+        val failure = assertFailsWith<IllegalArgumentException> {
+            kotlinFile(path = "Theme.kt", packageName = "com.example") {
+                function(name = "MaterialTheme", annotations = listOf(Symbols.Composable)) {
+                    body {
+                        call(Symbols.MaterialTheme) {
+                            argument("content", ref("content"))
+                        }
+                    }
+                }
+            }
+        }
+
+        val message = failure.message.orEmpty()
+        assertTrue("androidx.compose.material3.MaterialTheme" in message, message)
+        assertTrue("declares its own MaterialTheme" in message, message)
+    }
+
+    // b-109
+    @Test
+    fun kotlinFile_declaredNameMatchesASamePackageSymbol_writesTheFile() {
+        val neighbour = Symbol("com.example", "SeedColor", SymbolKind.Property)
+
+        val file = kotlinFile(path = "Color.kt", packageName = "com.example") {
+            property("SeedColor", Literals.colorLiteral(-0x98AF5C))
+            property("Seed", ref(neighbour))
+        }
+
+        assertTrue("import com.example.SeedColor" !in file.text, file.text)
     }
 
     @Test
@@ -373,7 +406,7 @@ class KotlinFileBuilderTest {
         val file = kotlinFile(path = "Theme.kt", packageName = "com.example") {
             function(name = "AppTheme") {
                 body {
-                    call(TestSymbols.DynamicMaterialTheme) {
+                    call(Symbols.DynamicMaterialTheme) {
                         argument(
                             name = "seedColor",
                             value = call("Color", multiline = true) {
@@ -389,7 +422,7 @@ class KotlinFileBuilderTest {
             """
             package com.example
 
-            import com.materialkolor.DynamicMaterialTheme
+            import com.materialkolor.material3.DynamicMaterialTheme
 
             fun AppTheme() {
                 DynamicMaterialTheme(

@@ -45,6 +45,10 @@ public class KotlinFileScope internal constructor(
     private val blocks = mutableListOf<Block>()
     private val symbols = mutableListOf<Symbol>()
 
+    // b-109
+    // What this file declares at the top level, so an import that would shadow one of them fails.
+    private val declaredNames = mutableSetOf<String>()
+
     /** The comment lines that sit above the package declaration. */
     public fun header(lines: List<String>) {
         headerLines += lines
@@ -62,6 +66,7 @@ public class KotlinFileScope internal constructor(
         type: TypeRef? = null,
         const: Boolean = false,
     ) {
+        declaredNames += name // b-109
         symbols += value.symbols
         type?.let { symbols += it.symbols }
 
@@ -95,6 +100,7 @@ public class KotlinFileScope internal constructor(
         returns: TypeRef? = null,
         build: FunctionScope.() -> Unit,
     ) {
+        declaredNames += name // b-109
         val scope = FunctionScope().apply(build)
         symbols += annotations
         symbols += scope.collectSymbols()
@@ -148,6 +154,12 @@ public class KotlinFileScope internal constructor(
                 "Cannot import two symbols named $simpleName into $packageName, " +
                     "${clashing.joinToString(" and ")}. Generated code writes simple names and the " +
                     "DSL has no import alias yet."
+            }
+            // b-109
+            // An import beats a declaration of the same name, so the file's own one would never be called.
+            require(simpleName !in declaredNames) {
+                "Cannot import ${clashing.single()} into $packageName, which declares its own $simpleName. " +
+                    "Generated code writes simple names and the DSL has no import alias yet."
             }
         }
 
