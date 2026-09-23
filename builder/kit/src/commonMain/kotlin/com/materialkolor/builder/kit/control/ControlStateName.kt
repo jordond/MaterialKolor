@@ -145,14 +145,20 @@ internal fun foldStateIntoName(
  *
  * For a control that already sets its own content description on the node that merges it. A
  * control that loaded [words] for its own state description passes them in, so they load once.
+ * Left null, they load only when the fold is on.
  */
 @Composable
 internal fun stateName(
     name: String,
     state: ControlState?,
     enabled: Boolean = true,
-    words: StateWords = stateWords(),
-): String = if (LocalFoldsStateIntoName.current) foldStateIntoName(name, state, enabled, words) else name
+    words: StateWords? = null,
+): String =
+    if (LocalFoldsStateIntoName.current) {
+        foldStateIntoName(name, state, enabled, words ?: stateWords())
+    } else {
+        name
+    }
 
 /**
  * Folds [state] into the name of the node this lands on, or of the control that merges it, where
@@ -162,16 +168,16 @@ internal fun stateName(
  * @param[state] The control's state, or null for none but the disabled note.
  * @param[enabled] Whether the control takes input.
  * @param[words] The state words, for a control that already loaded them for its own state
- * description.
+ * description. Left null, they load only when the fold is on.
  */
 @Composable
 internal fun Modifier.foldState(
     name: String,
     state: ControlState?,
     enabled: Boolean = true,
-    words: StateWords = stateWords(),
+    words: StateWords? = null,
 ): Modifier {
     if (!LocalFoldsStateIntoName.current) return this
-    val folded = foldStateIntoName(name, state, enabled, words)
+    val folded = foldStateIntoName(name, state, enabled, words ?: stateWords())
     return semantics { contentDescription = folded }
 }

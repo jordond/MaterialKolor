@@ -6,7 +6,7 @@ import androidx.compose.ui.input.key.Key
  * The stop [key] moves roving focus to, from [index] in a row of [count] stops, or null for a key
  * that does not move it. The radio group and both tab rows read their arrow keys through it.
  *
- * Left and right follow the reading direction, so Right moves toward the end of the row either way.
+ * Left and right follow the screen, so Right always moves to the stop on its right in either direction.
  * Up and down step back and forth when [upDown] is set, and Home and End jump to either end when
  * [homeEnd] is set. Every step wraps at the ends.
  */
