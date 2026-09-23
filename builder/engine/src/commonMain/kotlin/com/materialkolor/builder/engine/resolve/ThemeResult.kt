@@ -3,7 +3,9 @@ package com.materialkolor.builder.engine.resolve
 import androidx.compose.runtime.Immutable
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.engine.audit.ContrastAudit
 import com.materialkolor.builder.engine.mapping.toDomain
+import com.materialkolor.builder.engine.poster.PosterColors
 import com.materialkolor.dynamiccolor.DynamicScheme
 
 /**
@@ -38,6 +40,20 @@ public class ThemeResult internal constructor(
 
     /** The six tonal palettes in both modes, with the tones their roles picked. */
     public val ramps: RampSet by lazy { RampSet.from(light, dark) }
+
+    // b-116
+
+    /** Every accent of the document as a family, in the document's order. */
+    public val accents: AccentFamilies by lazy { AccentFamilies.from(document) }
+
+    /** Every slot of the Custom target in both modes, with the document's custom tones moved in. */
+    public val customSlots: CustomSlotColors by lazy { CustomSlotColors.from(document, light, dark, roles) }
+
+    /** The colors of the seed poster. */
+    public val poster: PosterColors by lazy { PosterColors.of(document.seed) }
+
+    /** Every contrast pair of the document's target, rated in both modes. */
+    public val audit: ContrastAudit by lazy { ContrastAudit.from(this) }
 
     /** The document scheme for the mode [isDark] picks. */
     public fun scheme(isDark: Boolean): DynamicScheme = if (isDark) dark else light
