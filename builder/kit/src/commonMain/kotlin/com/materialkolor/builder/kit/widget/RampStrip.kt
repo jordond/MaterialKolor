@@ -1,0 +1,294 @@
+package com.materialkolor.builder.kit.widget
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.materialkolor.builder.engine.mapping.toColor
+import com.materialkolor.builder.engine.resolve.Ramp
+import com.materialkolor.builder.engine.resolve.RampStep
+import com.materialkolor.builder.kit.control.BuilderText
+import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.generated.resources.Res
+import com.materialkolor.builder.kit.generated.resources.widget_copy
+import com.materialkolor.builder.kit.generated.resources.widget_key_color
+import com.materialkolor.builder.kit.generated.resources.widget_tone
+import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
+
+/** How tall the continuous strip is. */
+private val StripHeight: Dp = 16.dp
+
+/** The stroke width of a marker tick and of the ring at the key tone. */
+private val TickWidth: Dp = 2.dp
+
+/** The narrowest a stop can be and still carry its tone as a label. */
+private val LabeledStopWidth: Dp = 32.dp
+
+/** The tone at and above which a stop is light enough to take the darkest stop as ink. */
+private const val LIGHT_TONE = 50
+
+/** The whole tonal range, 0 to 100. */
+private const val TONE_RANGE = 100f
+
+/**
+ * A tone on a ramp that something picked, labeled on the strip.
+ *
+ * @property[name] What picked it, a role name such as "primary" or an accent role.
+ * @property[tone] The HCT tone it landed on, which rarely sits on a stop.
+ */
+@Immutable
+public data class RampMark(
+    public val name: String,
+    public val tone: Double,
+)
+
+/**
+ * One tonal palette in one mode, for the palettes tab.
+ *
+ * The top row holds the stops, each a button that hands its tone to [onCopyTone]. Under it runs a
+ * continuous 0 to 100 strip with a tick for every one of [markers] and a ring at [keyTone], labeled
+ * below. Narrow rows fold the stops onto as many lines as it takes to keep every stop at the
+ * layout's minimum touch target, and drop the tone labels, which the stops still read out.
+ *
+ * @param[tones] The stops, darkest first, such as a [Ramp]'s steps.
+ * @param[markers] Where roles landed on this palette.
+ * @param[keyTone] The tone of the palette's key color.
+ * @param[onCopyTone] Called with the stop that was pressed. The caller does the copying.
+ * @param[modifier] Applied to the strip.
+ */
+@Composable
+public fun RampStrip(
+    tones: List<RampStep>,
+    markers: List<RampMark>,
+    keyTone: Double,
+    onCopyTone: (RampStep) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val tokens = LocalBuilderTokens.current
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(tokens.spacing.small)) {
+        RampStops(tones, onCopyTone)
+        ContinuousStrip(tones, markers, keyTone)
+        MarkerLabels(markers, keyTone)
+    }
+}
+
+/** [RampStrip] for one of the engine's ramps, marked with the roles that picked from it. */
+@Composable
+public fun RampStrip(
+    ramp: Ramp,
+    onCopyTone: (RampStep) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val markers = remember(ramp) {
+        ramp.markers.map { marker ->
+            RampMark(marker.role.name.replaceFirstChar { char -> char.lowercaseChar() }, marker.tone)
+        }
+    }
+    RampStrip(ramp.steps, markers, ramp.keyTone, onCopyTone, modifier)
+}
+
+@Composable
+private fun RampStops(
+    tones: List<RampStep>,
+    onCopyTone: (RampStep) -> Unit,
+) {
+    if (tones.isEmpty()) return
+    val tokens = LocalBuilderTokens.current
+    val target = LocalLayout.current.minTouchTarget
+    val darkInk = tones.minBy { step -> step.tone }.argb.toColor()
+    val lightInk = tones.maxBy { step -> step.tone }.argb.toColor()
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val fits = (maxWidth / target).toInt().coerceIn(1, tones.size)
+        val rows = ceilDiv(tones.size, fits)
+        val perRow = ceilDiv(tones.size, rows)
+        val labeled = maxWidth / perRow >= LabeledStopWidth
+        val shape = RoundedCornerShape(tokens.radius.small)
+        Column(Modifier.clip(shape)) {
+            for (row in tones.chunked(perRow)) {
+                Row(Modifier.fillMaxWidth()) {
+                    for (step in row) {
+                        RampStop(
+                            step = step,
+                            ink = if (step.tone >= LIGHT_TONE) darkInk else lightInk,
+                            labeled = labeled,
+                            onClick = { onCopyTone(step) },
+                            modifier = Modifier.weight(1f).heightIn(min = target),
+                        )
+                    }
+                    repeat(perRow - row.size) { Box(Modifier.weight(1f)) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RampStop(
+    step: RampStep,
+    ink: Color,
+    labeled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier,
+) {
+    val tokens = LocalBuilderTokens.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val hovered by interactionSource.collectIsHoveredAsState()
+    val focused by interactionSource.collectIsFocusedAsState()
+    val name = listOf(stringResource(Res.string.widget_tone, step.tone), step.argb.toHex()).joinToString(", ")
+    Box(
+        modifier = modifier
+            .background(step.argb.toColor())
+            .then(
+                when {
+                    focused -> Modifier.stopFocusRing(tokens.focus, halo = tokens.panel)
+                    hovered -> Modifier.border(WidgetOutlineWidth, tokens.borderStrong)
+                    else -> Modifier
+                },
+            ).hoverable(interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                role = Role.Button,
+                onClickLabel = stringResource(Res.string.widget_copy),
+                onClick = onClick,
+            ).semantics { contentDescription = name },
+        contentAlignment = Alignment.Center,
+    ) {
+        if (labeled) BuilderText(step.tone.toString(), style = BuilderTextStyle.Value, color = ink, maxLines = 1)
+    }
+}
+
+/**
+ * The focus ring of a stop, a [focus] line with a [halo] on both sides the way the strip's ticks are
+ * drawn, so the ring still reads on a stop whose color sits close to the focus color.
+ */
+private fun Modifier.stopFocusRing(
+    focus: Color,
+    halo: Color,
+): Modifier {
+    val haloWidth = WidgetFocusWidth / 2
+    return border(haloWidth, halo)
+        .border(haloWidth + WidgetFocusWidth, focus)
+        .border(haloWidth * 2 + WidgetFocusWidth, halo)
+}
+
+/** [count] split into groups of at most [size], rounded up. */
+private fun ceilDiv(
+    count: Int,
+    size: Int,
+): Int = (count + size - 1) / size
+
+/** The palette from 0 to 100 as one gradient, with a tick at every marker and a ring at the key tone. */
+@Composable
+private fun ContinuousStrip(
+    tones: List<RampStep>,
+    markers: List<RampMark>,
+    keyTone: Double,
+) {
+    if (tones.size < 2) return
+    val tokens = LocalBuilderTokens.current
+    val brush = remember(tones) {
+        Brush.horizontalGradient(
+            colorStops = tones.map { step -> step.tone / TONE_RANGE to step.argb.toColor() }.toTypedArray(),
+        )
+    }
+    Canvas(
+        Modifier
+            .fillMaxWidth()
+            .height(StripHeight)
+            .clip(RoundedCornerShape(tokens.radius.small))
+            .background(brush),
+    ) {
+        val tick = TickWidth.toPx()
+        for (marker in markers) {
+            val x = (marker.tone / TONE_RANGE).toFloat() * size.width
+            drawLine(tokens.panel, Offset(x, 0f), Offset(x, size.height), strokeWidth = tick * 2)
+            drawLine(tokens.textStrong, Offset(x, 0f), Offset(x, size.height), strokeWidth = tick)
+        }
+        val center = Offset((keyTone / TONE_RANGE).toFloat() * size.width, size.height / 2f)
+        val radius = size.height / 2f - tick
+        drawCircle(tokens.panel, radius, center, style = Stroke(tick * 2))
+        drawCircle(tokens.textStrong, radius, center, style = Stroke(tick))
+    }
+}
+
+/**
+ * The names under the strip, each centred on its tone. A name that would run into the one before it
+ * drops to the next free line, so every name stays readable however close the tones are.
+ */
+@Composable
+private fun MarkerLabels(
+    markers: List<RampMark>,
+    keyTone: Double,
+) {
+    val tokens = LocalBuilderTokens.current
+    val keyMark = RampMark(stringResource(Res.string.widget_key_color), keyTone)
+    val marks = (markers + keyMark).sortedBy { mark -> mark.tone }
+    val toneWords = marks.map { mark -> stringResource(Res.string.widget_tone, mark.tone.roundToInt()) }
+    Layout(
+        modifier = Modifier.fillMaxWidth(),
+        content = {
+            marks.forEachIndexed { index, mark ->
+                val name = "${mark.name}, ${toneWords[index]}"
+                BuilderText(
+                    mark.name,
+                    modifier = Modifier.semantics { contentDescription = name },
+                    style = BuilderTextStyle.Value,
+                    emphasis = if (mark === keyMark) Emphasis.Primary else Emphasis.Secondary,
+                    maxLines = 1,
+                )
+            }
+        },
+    ) { measurables, constraints ->
+        val width = constraints.maxWidth
+        val gap = tokens.spacing.small.roundToPx()
+        val loose = constraints.copy(minWidth = 0, minHeight = 0)
+        val placeables = measurables.map { measurable -> measurable.measure(loose) }
+        val lineEnds = mutableListOf<Int>()
+        val positions = placeables.mapIndexed { index, placeable ->
+            val centre = (marks[index].tone / TONE_RANGE * width).roundToInt()
+            val x = (centre - placeable.width / 2).coerceIn(0, (width - placeable.width).coerceAtLeast(0))
+            val line = lineEnds.indexOfFirst { end -> end + gap <= x }.takeIf { free -> free >= 0 } ?: lineEnds.size
+            if (line == lineEnds.size) lineEnds += x + placeable.width else lineEnds[line] = x + placeable.width
+            Triple(placeable, x, line)
+        }
+        val lineHeight = placeables.maxOfOrNull { placeable -> placeable.height } ?: 0
+        layout(width, lineHeight * lineEnds.size) {
+            for ((placeable, x, line) in positions) placeable.place(x, line * lineHeight)
+        }
+    }
+}
