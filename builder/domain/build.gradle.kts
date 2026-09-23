@@ -6,8 +6,9 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            // Generated serializers are part of the public API, so consumers need this on their compile path.
-            api(libs.kotlinx.serialization.json)
+            // Nothing public here names a Json type, the serializers only expose KSerializer, so the format stays
+            // an implementation detail and a consumer that wants to encode brings its own Json.
+            implementation(libs.kotlinx.serialization.json)
         }
     }
 }
