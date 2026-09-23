@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The undo button in the top bar, read out in place of its glyph. -->
+    <string name="workspace_undo">Undo</string>
+    <!-- The redo button in the top bar, read out in place of its glyph. -->
+    <string name="workspace_redo">Redo</string>
+    <!-- The toast after a copy. The argument names what was copied, such as "Primary hex". -->
+    <string name="workspace_copied">Copied %1$s</string>
+    <!-- The toast when the clipboard would not take a copy. -->
+    <string name="workspace_copy_failed">Could not copy to the clipboard</string>
+</resources>

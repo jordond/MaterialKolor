@@ -4,14 +4,16 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.materialkolor.builder.BuilderApp
-import com.materialkolor.builder.PlaceholderModel
 import com.materialkolor.builder.desktop.DesktopPlatform
+import com.materialkolor.builder.fakes.FakePlatform
+import com.materialkolor.builder.fakes.RouterCall
+import com.materialkolor.builder.feature.workspace.AppModel
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
@@ -42,13 +44,13 @@ class AppGraphTest {
             val graph = createGraphFactory<AppGraph.Factory>().create(DesktopPlatform)
             val owner = TestOwner()
             val tick = mutableIntStateOf(0)
-            val seen = mutableListOf<PlaceholderModel>()
+            val seen = mutableListOf<AppModel>()
             setContent {
                 CompositionLocalProvider(
                     LocalViewModelStoreOwner provides owner,
                     LocalMetroViewModelFactory provides graph.metroViewModelFactory,
                 ) {
-                    val model = metroViewModel<PlaceholderModel>()
+                    val model = metroViewModel<AppModel>()
                     seen += model
                     BasicText("tick ${tick.intValue}")
                 }
@@ -64,16 +66,20 @@ class AppGraphTest {
         }
 
     @Test
-    fun builderApp_onDesktop_showsThePlaceholder() =
+    fun builderApp_onFirstFrame_bootsHidesTheSplashAndShowsTheWorkspace() =
         runComposeUiTest {
+            val platform = FakePlatform()
             val owner = TestOwner()
             setContent {
                 CompositionLocalProvider(LocalViewModelStoreOwner provides owner) {
-                    BuilderApp(DesktopPlatform)
+                    BuilderApp(platform)
                 }
             }
 
-            onNodeWithText("MaterialKolor Builder").assertExists()
+            waitUntil { platform.environment.splashHidden }
+            onNodeWithContentDescription("Undo").assertExists()
+            platform.router.calls shouldBe listOf(RouterCall.ReplaceHome)
+            platform.environment.themeColors.isNotEmpty() shouldBe true
         }
 
     private class TestOwner : ViewModelStoreOwner {

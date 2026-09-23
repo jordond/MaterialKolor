@@ -128,3 +128,10 @@ tasks.named<Test>("jvmTest") {
         ).withPathSensitivity(PathSensitivity.RELATIVE)
         .withPropertyName("builderSources")
 }
+
+// b-216
+// stateholder 3.1.0 ships Java 21 bytecode, so the JVM tests run on a 21 launcher while the
+// module still compiles for 17. The desktop run task already uses the JDK Gradle runs on.
+tasks.withType<Test>().configureEach {
+    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(21)) })
+}
