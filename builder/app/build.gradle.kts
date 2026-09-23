@@ -2,6 +2,7 @@ import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.compose.ComposeExtension
 import org.jetbrains.compose.desktop.DesktopExtension
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode
 
 plugins {
@@ -30,9 +31,18 @@ buildkonfig {
 }
 
 kotlin {
-    // Everything here is internal apart from the entry point and the platform interfaces the web
-    // module implements, so the explicit API mode the builder convention turns on is off again.
+    // Everything here is internal apart from the entry point, the platform interfaces the web module
+    // implements and the in-memory stores it borrows, so the explicit API mode the builder convention
+    // turns on is off again. ArchitectureTest keeps the rest internal instead.
     explicitApi = ExplicitApiMode.Disabled
+
+    // Compose UI tests on wasm only get the Skiko runtime when webpack bundles them, and that only
+    // happens for a target with an executable (CMP-4906). Nothing ships from it, the site is built
+    // by `:builder:web`.
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        binaries.executable()
+    }
 
     sourceSets {
         commonMain.dependencies {
@@ -72,6 +82,11 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.compose.ui.test)
             implementation(libs.roborazzi.compose.desktop)
+        }
+
+        // S10 has to hold in the browser too, so one Compose UI test runs in headless Chrome.
+        wasmJsTest.dependencies {
+            implementation(libs.compose.ui.test)
         }
     }
 }

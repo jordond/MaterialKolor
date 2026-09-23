@@ -12,7 +12,8 @@ import kotlin.test.Test
  *
  * Gradle already keeps UI libraries out of the modules that do not declare them. This catches what
  * slips through anyway, a scheme built outside the engine, browser interop outside the web shell,
- * `Dispatchers.IO`, or an animation that would keep running while the tab sleeps.
+ * `Dispatchers.IO`, an animation that would keep running while the tab sleeps, or a public
+ * declaration in the app or the web shell.
  */
 class ArchitectureTest {
     @Test
@@ -60,7 +61,28 @@ class ArchitectureTest {
             """,
         )
 
-        scan(listOf(file)).map { violation -> violation.rule } shouldBe List(3) { ArchitectureRule.UiLibraryImport }
+        scan(listOf(file)).map { violation -> violation.rule } shouldBe List(3) { ArchitectureRule.UiLibraryUse }
+    }
+
+    @Test
+    fun scan_fullyQualifiedUiLibraryUseInApp_reportsEachUse() {
+        val file = planted(
+            "app/src/commonMain",
+            """
+            private val scheme = androidx.compose.material3.MaterialTheme.colorScheme
+            com.composeunstyled.Text("Hi")
+            io.github.composefluent.FluentTheme {}
+            """,
+        )
+
+        scan(listOf(file)).map { violation -> violation.rule } shouldBe List(3) { ArchitectureRule.UiLibraryUse }
+    }
+
+    @Test
+    fun scan_uiLibraryNameInCodegen_passes() {
+        val file = planted("codegen/src/commonMain", "private const val THEME = \"com.composeunstyled.theme.Theme\"")
+
+        scan(listOf(file)).shouldBeEmpty()
     }
 
     @Test
@@ -83,8 +105,8 @@ class ArchitectureTest {
         val file = planted(
             "app/src/wasmJsMain",
             """
-            val now: Double = js("Date.now()")
-            @JsFun("() => 1") external fun one(): Int
+            private val now: Double = js("Date.now()")
+            @JsFun("() => 1") private external fun one(): Int
             import kotlinx.browser.window
             """,
         )
@@ -98,7 +120,7 @@ class ArchitectureTest {
             "web/src/wasmJsMain",
             """
             import kotlinx.browser.window
-            val now: Double = js("Date.now()")
+            private val now: Double = js("Date.now()")
             """,
         )
 
@@ -151,8 +173,91 @@ class ArchitectureTest {
     }
 
     @Test
+    fun scan_patternInATrailingComment_passes() {
+        val file = planted(
+            "app/src/commonMain",
+            """
+            private val roles = resolver.resolve(document) // never DynamicScheme( here
+            private val theme = Theme() // not androidx.compose.material3.MaterialTheme either
+            private val home = "https://materialkolor.com" // and no Dispatchers.IO
+            """,
+        )
+
+        scan(listOf(file)).shouldBeEmpty()
+    }
+
+    @Test
+    fun scan_codeAfterAUrl_isStillScanned() {
+        val file = planted("app/src/commonMain", "private val s = load(\"https://a.b\", DynamicScheme(seed))")
+
+        scan(listOf(file)).map { violation -> violation.rule } shouldBe listOf(ArchitectureRule.SchemeGeneration)
+    }
+
+    @Test
+    fun scan_publicTopLevelDeclarationInAppOrWeb_reportsEach() {
+        val app = planted(
+            "app/src/commonMain",
+            """
+            class Leaked
+            data class Record(val a: Int)
+            fun interface Factory { fun create(): Leaked }
+            @Composable fun Screen() {}
+            val leakedValue = 1
+            """,
+        )
+        val web = planted(
+            "web/src/wasmJsMain",
+            """
+            public object Stated
+            typealias Alias = Int
+            """,
+        )
+
+        val rules = scan(listOf(app, web)).map { violation -> violation.rule }
+
+        rules shouldBe List(7) { ArchitectureRule.PublicDeclaration }
+    }
+
+    @Test
+    fun scan_entryPointsAndHiddenDeclarationsInAppOrWeb_pass() {
+        val app = planted(
+            "app/src/commonMain",
+            """
+            @Composable
+            fun BuilderApp(platform: PlatformServices) {}
+            class InMemoryStoreFactory : StoreFactory
+            internal class Graph {
+                val nested = 1
+                fun member() = Unit
+            }
+            @Inject internal class Model
+            private fun helper() = Unit
+            internal data class Record(val a: Int)
+            """,
+        )
+        val web = planted("web/src/wasmJsMain", "fun main() {}\nprivate object Hidden")
+
+        scan(listOf(app, web)).shouldBeEmpty()
+    }
+
+    @Test
+    fun scan_publicDeclarationInThePlatformContract_passes() {
+        val file = SourceFile(path = PLATFORM_CONTRACT_PATH, text = "interface Router\nenum class StoreError")
+
+        scan(listOf(file)).shouldBeEmpty()
+    }
+
+    @Test
+    fun scan_publicDeclarationOutsideAppAndWebOrInATest_passes() {
+        val kit = planted("kit/src/commonMain", "public class Skin")
+        val test = planted("app/src/jvmTest", "class AppGraphTest")
+
+        scan(listOf(kit, test)).shouldBeEmpty()
+    }
+
+    @Test
     fun scan_violation_pointsAtItsLine() {
-        val file = planted("app/src/commonMain", "val a = 1\nval b = dynamicColorScheme(seed, false)")
+        val file = planted("app/src/commonMain", "private val a = 1\nprivate val b = dynamicColorScheme(seed, false)")
 
         val violations = scan(listOf(file))
 
@@ -184,14 +289,16 @@ internal enum class ArchitectureRule(
     ),
 
     /**
-     * Only kit and preview import UI libraries. Test source sets are left out because they never
-     * ship, and the engine checks its role tables against what Material3 builds.
+     * Only kit and preview use UI libraries, by import or by fully qualified name. Test source sets
+     * are left out because they never ship, and the engine checks its role tables against what
+     * Material3 builds. Codegen is left out because it has no UI library on its classpath, so every
+     * match there is a package name it writes into an export.
      */
-    UiLibraryImport(
+    UiLibraryUse(
         pattern = Regex(
-            """^\s*import\s+(androidx\.compose\.material3|com\.composeunstyled|io\.github\.composefluent)\b""",
+            """(?<![\w.])(androidx\.compose\.material3|com\.composeunstyled|io\.github\.composefluent)\.""",
         ),
-        appliesTo = { file -> file.module != "kit" && file.module != "preview" && file.sourceSet.endsWith("Main") },
+        appliesTo = { file -> file.module !in UI_LIBRARY_EXEMPT_MODULES && file.sourceSet.endsWith("Main") },
     ),
 
     /** Only the web shell talks to the browser. */
@@ -210,6 +317,25 @@ internal enum class ArchitectureRule(
     InfiniteAnimation(
         pattern = Regex("""\b(rememberInfiniteTransition|infiniteRepeatable)\b"""),
         appliesTo = { file -> file.path != LOOP_PHASE_PATH },
+    ),
+
+    /**
+     * The app and the web shell keep every top level declaration `internal` or `private`, apart from
+     * the entry points, the in-memory stores web borrows and the platform contract web implements.
+     * Explicit API mode is off in both modules, so this is what holds the line. It reads
+     * declarations that start at the first column, which is where ktlint leaves every top level one.
+     */
+    PublicDeclaration(
+        pattern = Regex(
+            """^(?:@[\w.:]+(?:\([^)]*\))?\s+)*(?:(?!internal\b|private\b)[a-z]+\s+)*""" +
+                """(?:class|interface|object|fun|val|var|typealias)\s+""" +
+                """(?!(?:BuilderApp|main|InMemoryStoreFactory)\b)""",
+        ),
+        appliesTo = { file ->
+            file.module in INTERNAL_ONLY_MODULES &&
+                file.sourceSet.endsWith("Main") &&
+                file.path != PLATFORM_CONTRACT_PATH
+        },
     ),
 }
 
@@ -240,16 +366,17 @@ internal data class Violation(
 }
 
 /**
- * Every line of [sources] that breaks a rule, skipping comment lines.
+ * Every line of [sources] that breaks a rule, skipping comment lines and trailing comments.
  */
 internal fun scan(sources: List<SourceFile>): List<Violation> =
     sources.flatMap { file ->
         val rules = ArchitectureRule.entries.filter { rule -> rule.appliesTo(file) }
         file.text.lines().withIndex().flatMap { (index, line) ->
             if (line.isComment()) return@flatMap emptyList()
+            val code = line.withoutTrailingComment()
             rules.flatMap { rule ->
                 rule.pattern
-                    .findAll(line)
+                    .findAll(code)
                     .map { Violation(rule, file.path, index + 1, line.trim()) }
                     .toList()
             }
@@ -279,6 +406,12 @@ private fun String.isComment(): Boolean {
     return code.startsWith("//") || code.startsWith("*") || code.startsWith("/*")
 }
 
+/**
+ * The line up to its `//` comment. A `//` right after a colon stays, since that is a URL in a
+ * string far more often than a comment.
+ */
+private fun String.withoutTrailingComment(): String = replace(TRAILING_COMMENT, "")
+
 private fun planted(
     sourceRoot: String,
     code: String,
@@ -286,5 +419,14 @@ private fun planted(
 
 private val BUILDER_MODULES = listOf("domain", "codegen", "engine", "kit", "preview", "app", "web")
 
+private val UI_LIBRARY_EXEMPT_MODULES = setOf("kit", "preview", "codegen")
+
+private val INTERNAL_ONLY_MODULES = setOf("app", "web")
+
+private val TRAILING_COMMENT = Regex("""(?<!:)//.*""")
+
 private const val LOOP_PHASE_PATH =
     "builder/kit/src/commonMain/kotlin/com/materialkolor/builder/kit/motion/LoopPhase.kt"
+
+private const val PLATFORM_CONTRACT_PATH =
+    "builder/app/src/commonMain/kotlin/com/materialkolor/builder/core/platform/PlatformServices.kt"

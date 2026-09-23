@@ -8,8 +8,9 @@ import com.materialkolor.builder.domain.persist.StorageKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
-// These are the only public types in the app besides `BuilderApp`, because `:builder:web` and the
-// desktop entry implement them. Everything that uses them lives behind the graph.
+// These are the only public types in the app besides `BuilderApp` and `InMemoryStoreFactory`,
+// because `:builder:web` and the desktop entry implement them. Everything that uses them lives
+// behind the graph. ArchitectureTest keeps everything else in app and web internal or private.
 
 /**
  * Everything the builder needs from the platform it runs on.
@@ -54,6 +55,10 @@ interface Router {
  *
  * A record that is missing reads as its default. One that no longer decodes is set aside under its
  * quarantine key and also reads as the default, so user data is never dropped silently.
+ *
+ * A failed write comes back as a [StoreError] rather than the `Result` that [Clipboard] and
+ * [FileSaver] use, because store failures are a closed set the UI branches on (a full quota shows
+ * its own banner) while clipboard and file failures are opaque platform errors.
  */
 interface Store<T> {
     /** The record now and after every change, including changes from another tab. */

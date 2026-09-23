@@ -6,26 +6,19 @@ import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.FileSaver
 import com.materialkolor.builder.core.platform.ImageHandle
 import com.materialkolor.builder.core.platform.ImageInput
+import com.materialkolor.builder.core.platform.InMemoryStoreFactory
 import com.materialkolor.builder.core.platform.OutgoingFile
 import com.materialkolor.builder.core.platform.Paste
 import com.materialkolor.builder.core.platform.PasteInput
 import com.materialkolor.builder.core.platform.PlatformServices
 import com.materialkolor.builder.core.platform.Router
-import com.materialkolor.builder.core.platform.Store
-import com.materialkolor.builder.core.platform.StoreError
 import com.materialkolor.builder.core.platform.StoreFactory
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.Route
-import com.materialkolor.builder.domain.persist.DecodeOutcome
-import com.materialkolor.builder.domain.persist.RecordCodec
-import com.materialkolor.builder.domain.persist.StorageKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import java.util.UUID
 
 /**
@@ -36,7 +29,7 @@ import java.util.UUID
  */
 internal object DesktopPlatform : PlatformServices {
     override val router: Router = DesktopRouter
-    override val stores: StoreFactory = MemoryStoreFactory()
+    override val stores: StoreFactory = InMemoryStoreFactory()
     override val clipboard: Clipboard = DesktopClipboard
     override val files: FileSaver = DesktopFileSaver
     override val images: ImageInput = DesktopImageInput
@@ -54,46 +47,6 @@ private object DesktopRouter : Router {
     override fun pushOverlay(id: String) = Unit
 
     override fun popOverlay() = Unit
-}
-
-/**
- * Stores that keep each record as the text its codec writes, so a desktop run exercises the same
- * encode and decode path the browser does.
- */
-private class MemoryStoreFactory : StoreFactory {
-    private val texts = MutableStateFlow<Map<String, String>>(emptyMap())
-
-    override val externalChanges: Flow<StorageKey> = emptyFlow()
-
-    override fun <T> create(
-        key: String,
-        codec: RecordCodec<T>,
-        default: T,
-    ): Store<T> = MemoryStore(key, codec, default, texts)
-}
-
-private class MemoryStore<T>(
-    private val key: String,
-    private val codec: RecordCodec<T>,
-    private val default: T,
-    private val texts: MutableStateFlow<Map<String, String>>,
-) : Store<T> {
-    override val data: Flow<T> = texts.map { stored -> stored[key] }.distinctUntilChanged().map(::read)
-
-    override suspend fun get(): T = read(texts.value[key])
-
-    override suspend fun update(block: (T) -> T): StoreError? {
-        texts.update { stored -> stored + (key to codec.encode(block(read(stored[key])))) }
-        return null
-    }
-
-    private fun read(text: String?): T {
-        if (text == null) return default
-        return when (val outcome = codec.decode(text)) {
-            is DecodeOutcome.Ok -> outcome.value
-            is DecodeOutcome.Quarantine -> default
-        }
-    }
 }
 
 private object DesktopClipboard : Clipboard {
