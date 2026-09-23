@@ -31,7 +31,10 @@ class ResolvedExportTest {
             light = AccentColors(color = black, onColor = white, container = white, onContainer = black),
             dark = AccentColors(color = white, onColor = black, container = black, onContainer = white),
         )
-        val shades = FluentShadeValues(black, black, black, white, white, white, white)
+        val shades = FluentShades(
+            light = FluentShadeValues(black, black, black, white, white, white, white),
+            dark = FluentShadeValues(white, white, white, black, black, black, black),
+        )
 
         val export = ResolvedExport(roles = roles, accents = listOf(accent), customSlots = slots, fluentShades = shades)
 
@@ -39,6 +42,8 @@ class ResolvedExportTest {
         assertEquals(listOf(accent), export.accents)
         assertEquals(slots, export.customSlots)
         assertEquals(shades, export.fluentShades)
+        assertEquals(white, export.fluentShades?.light?.base)
+        assertEquals(black, export.fluentShades?.dark?.base)
     }
 
     @Test

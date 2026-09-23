@@ -14,15 +14,16 @@ import com.materialkolor.builder.domain.model.Role
  * @property[roles] The scheme's roles at each contrast variant the export writes. Standard is
  * always there, Medium and High only when a frozen export asks for every contrast.
  * @property[accents] One entry per accent, in the document's order.
- * @property[customSlots] The Custom target's slots at the same contrast variants as [roles], or
- * empty for every other target.
- * @property[fluentShades] The seven Fluent shades, or null for every target but Fluent.
+ * @property[customSlots] The Custom target's slots at the same contrast variants as [roles]. The
+ * engine fills them whatever the target, so they are only empty when a caller leaves them out.
+ * @property[fluentShades] The seven Fluent shades of each mode. The engine fills them whatever the
+ * target, so they are only null when a caller leaves them out.
  */
 public data class ResolvedExport(
     public val roles: Map<ContrastVariant, RoleTable>,
     public val accents: List<AccentFamilyValues> = emptyList(),
     public val customSlots: Map<ContrastVariant, CustomSlotValues> = emptyMap(),
-    public val fluentShades: FluentShadeValues? = null,
+    public val fluentShades: FluentShades? = null,
 ) {
     init {
         require(ContrastVariant.Standard in roles) { "A resolved export always carries the standard role table" }
@@ -115,10 +116,23 @@ public data class CustomSlotValues(
 }
 
 /**
- * The seven shades a Fluent theme is built from, named the way Fluent's `Shades` names them.
+ * The Fluent shades of both modes.
  *
- * Fluent uses the same seven in both modes and picks different ones for light and dark itself, so
- * there is only one set.
+ * Fluent builds its shades from the primary palette of the scheme for the mode it shows, and the
+ * 2025 spec gives TonalSpot and Expressive a softer dark primary palette, so the two sets can
+ * differ. A frozen export writes both and picks one by mode, the way the Fluent module does.
+ *
+ * @property[light] The shades in light mode.
+ * @property[dark] The shades in dark mode.
+ */
+public data class FluentShades(
+    public val light: FluentShadeValues,
+    public val dark: FluentShadeValues,
+)
+
+/**
+ * The seven shades a Fluent theme is built from in one mode, named the way Fluent's `Shades` names
+ * them.
  *
  * @property[dark3] The darkest shade.
  * @property[dark2] The second darkest shade.

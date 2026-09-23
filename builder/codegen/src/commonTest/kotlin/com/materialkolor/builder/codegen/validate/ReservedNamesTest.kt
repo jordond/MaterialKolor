@@ -149,10 +149,12 @@ class ReservedNamesTest {
 
     // b-111
     @Test
-    fun clashes_fluentThemeNamedThemeShades_isReported() {
-        val document = ThemeDocument.Default.copy(library = Library.Fluent, themeName = "ThemeShades")
+    fun clashes_fluentThemeNamedAfterEitherShadeSet_isReported() {
+        listOf("LightThemeShades", "DarkThemeShades").forEach { name ->
+            val document = ThemeDocument.Default.copy(library = Library.Fluent, themeName = name)
 
-        assertEquals(listOf(ReservedNameClash.ThemeName("ThemeShades")), ReservedNames.clashes(document))
+            assertEquals(listOf(ReservedNameClash.ThemeName(name)), ReservedNames.clashes(document), name)
+        }
     }
 
     // b-111

@@ -5,10 +5,13 @@ import com.materialkolor.builder.domain.capability.EffectiveSpec
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.export.ContrastVariant
+import com.materialkolor.builder.domain.export.FluentShades
 import com.materialkolor.builder.domain.export.ResolvedExport
 import com.materialkolor.builder.domain.export.RoleTable
+import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.SchemePlatform
+import com.materialkolor.builder.domain.model.SlotResolution
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
@@ -20,6 +23,7 @@ import com.materialkolor.builder.engine.resolve.RampSet
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.ktx.DynamicScheme
+import com.materialkolor.ktx.harmonize
 import com.materialkolor.palettes.TonalPalette
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -43,13 +47,19 @@ class EngineParityTest {
     fun parityDocuments_fiftyDocuments_coverEveryInputAnExportReads() {
         val pairs = documents.map { document -> document.style to document.spec }.toSet()
         val accents = documents.flatMap { document -> document.accents }
+        val tonedSlots = documents.flatMap { document -> document.customTones.keys }
+        val pins = documents.flatMap { document -> document.pins.values }
 
         assertEquals(Style.entries.size * SpecVersion.entries.size, pairs.size, "every style and spec pair")
         assertTrue(documents.any { document -> document.amoled }, "an AMOLED document")
-        assertTrue(documents.any { document -> document.pins.isNotEmpty() }, "a pin")
-        assertTrue(documents.any { document -> document.customTones.isNotEmpty() }, "a custom tone")
+        assertTrue(pins.any { pin -> (pin.light == null) != (pin.dark == null) }, "a pin for one mode only")
+        assertTrue(tonedSlots.any { slot -> slot.resolution is SlotResolution.FromRamp }, "a moved ramp slot")
+        assertTrue(tonedSlots.any { slot -> slot.resolution is SlotResolution.FromRole }, "an ignored role slot")
         assertTrue(documents.any { document -> document.keyColors.primary != null }, "a primary override")
-        assertTrue(accents.any { accent -> accent.harmonize }, "a harmonized accent")
+        assertTrue(
+            documents.any { document -> document.accents.any { accent -> accent.harmonizeMoves(document) } },
+            "a harmonized accent that harmonizing moves",
+        )
         assertTrue(accents.any { accent -> !accent.harmonize }, "an accent left as it is")
     }
 
@@ -131,10 +141,24 @@ class EngineParityTest {
     }
 
     @Test
-    fun resolve_randomDocuments_fluentShadesMatchToFluentShades() {
+    fun resolve_randomDocuments_fluentShadesMatchToFluentShadesInEachMode() {
         for (document in documents) {
-            assertEquals(fluentShades(document), exports.resolve(document, StandardOnly).fluentShades, "in $document")
+            assertEquals(fluentShadesOf(document), exports.resolve(document, StandardOnly).fluentShades, "in $document")
         }
+    }
+
+    /** `toFluentColors` reads each mode's own primary palette, and 2025 TonalSpot softens the dark one. */
+    @Test
+    fun resolve_tonalSpot2025_fluentShadesDifferBetweenModes() {
+        val document = ThemeDocument(
+            seed = Argb(0xFF6750A4.toInt()),
+            style = Style.TonalSpot,
+            spec = SpecVersion.Spec2025,
+        )
+        val shades = checkNotNull(exports.resolve(document, StandardOnly).fluentShades)
+
+        assertEquals(fluentShadesOf(document), shades)
+        assertNotEquals(shades.light, shades.dark, "light and dark shades")
     }
 
     @Test
@@ -163,6 +187,17 @@ class EngineParityTest {
                 }
             }
         }
+    }
+
+    /** Every contrast is a frozen option, so a dynamic export that still carries it gets standard alone. */
+    @Test
+    fun resolve_dynamicWithAllContrastsLeftOver_resolvesStandardOnly() {
+        val leftover = ExportPrefs(mode = ExportMode.Dynamic, frozenVariants = FrozenVariants.AllContrasts)
+        val resolved = exports.resolve(documents.first(), leftover)
+
+        assertEquals(setOf(ContrastVariant.Standard), resolved.roles.keys)
+        assertEquals(setOf(ContrastVariant.Standard), resolved.customSlots.keys)
+        assertEquals(exports.resolve(documents.first(), StandardOnly), resolved)
     }
 
     @Test
@@ -217,7 +252,7 @@ class EngineParityTest {
                 val actualSlots = if (isDark) slots.dark else slots.light
                 assertSameColors(customDynamicSlots(document, isDark), actualSlots, "Custom", document, isDark)
             }
-            assertEquals(fluentShades(document), resolved.fluentShades, "Fluent in $document")
+            assertEquals(fluentShadesOf(document), resolved.fluentShades, "Fluent in $document")
         }
     }
 
@@ -277,6 +312,15 @@ class EngineParityTest {
 
     private fun ResolvedExport.standardRoles(): RoleTable = roles.getValue(ContrastVariant.Standard)
 
+    private fun fluentShadesOf(document: ThemeDocument): FluentShades =
+        FluentShades(light = fluentShades(document, isDark = false), dark = fluentShades(document, isDark = true))
+
+    /** Whether harmonizing this accent with the theme seed moves its color, alpha aside. */
+    private fun Accent.harmonizeMoves(document: ThemeDocument): Boolean {
+        val harmonized = seed.asColor().harmonize(document.seed.asColor()).asArgb()
+        return harmonize && (harmonized.value and RGB_MASK) != (seed.value and RGB_MASK)
+    }
+
     private fun RoleTable.mode(isDark: Boolean): Map<Role, Argb> = if (isDark) dark else light
 
     private fun forEachMode(block: (isDark: Boolean) -> Unit) {
@@ -311,6 +355,7 @@ class EngineParityTest {
     private companion object {
         const val DOCUMENT_COUNT = 50
         const val OVERRIDE_SEED = 1170
+        const val RGB_MASK = 0xFFFFFF
 
         val StandardOnly = ExportPrefs()
         val AllContrasts = ExportPrefs(mode = ExportMode.Frozen, frozenVariants = FrozenVariants.AllContrasts)

@@ -11,7 +11,7 @@ import io.github.composefluent.Colors
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.Shades
 
-val ThemeShades = Shades(
+val LightThemeShades = Shades(
     base = Color(0xFFD9653B),
     light1 = Color(0xFFDC6A42),
     light2 = Color(0xFFDF6F49),
@@ -21,6 +21,16 @@ val ThemeShades = Shades(
     dark3 = Color(0xFF5CEAC2),
 )
 
+val DarkThemeShades = Shades(
+    base = Color(0xFFE57957),
+    light1 = Color(0xFFE87E5E),
+    light2 = Color(0xFFEB8365),
+    light3 = Color(0xFFEE886C),
+    dark1 = Color(0xFF6F08EC),
+    dark2 = Color(0xFF6C03E5),
+    dark3 = Color(0xFF68FEDE),
+)
+
 @Composable
 fun AppTheme(
     isDark: Boolean = isSystemInDarkTheme(),
@@ -28,7 +38,7 @@ fun AppTheme(
 ) {
     val colors = remember(isDark) {
         Colors(
-            shades = ThemeShades,
+            shades = if (isDark) DarkThemeShades else LightThemeShades,
             darkMode = isDark,
         )
     }
