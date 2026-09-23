@@ -46,6 +46,7 @@ class DefaultArgumentsTest {
                 Symbols.RememberDynamicMaterialThemeState,
                 Symbols.RememberFluentColors,
                 Symbols.DynamicColorSchemes,
+                Symbols.RememberDynamicScheme, // b-112
                 Symbols.OnTone,
                 Symbols.RememberTonalPalette,
                 Symbols.Harmonize,

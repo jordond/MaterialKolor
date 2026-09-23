@@ -130,6 +130,21 @@ public object DefaultArguments {
         platform = defaultPlatform(),
     )
 
+    // b-112
+
+    /**
+     * Core's own `rememberDynamicScheme`, which the Unstyled export calls when it writes its schemes
+     * out and the Fluent export calls when it maps the shades itself. Core spells its style default
+     * without the class name.
+     */
+    public val RememberDynamicScheme: SchemeDefaults = SchemeDefaults(
+        function = Symbols.RememberDynamicScheme,
+        style = DefaultArgument("style", Style.TonalSpot, "TonalSpot"),
+        contrastLevel = standardContrast(),
+        specVersion = defaultSpec(),
+        platform = defaultPlatform(),
+    )
+
     /** The contrast `TonalPalette.onTone` aims for when an accent does not say. */
     public val OnToneThreshold: DefaultArgument<OnColorThreshold> =
         DefaultArgument("threshold", OnColorThreshold.AaNormal, "ContrastThreshold.WCAG_AA_NORMAL_TEXT")
@@ -153,6 +168,7 @@ public object DefaultArguments {
             RememberDynamicMaterialThemeState,
             RememberFluentColors,
             DynamicColorSchemes,
+            RememberDynamicScheme, // b-112
         ).associate { defaults -> defaults.function to defaults.arguments } +
             mapOf(
                 Symbols.OnTone to listOf(OnToneThreshold),

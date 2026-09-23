@@ -65,8 +65,10 @@ private const val STATE = "state"
 private const val SCHEME = "scheme"
 private const val EXTENDED_COLORS = "extendedColors"
 
+// b-112
+
 /** The key colors in the order the theme functions take them, which is also the order `Color.kt` lists them. */
-private val KeyColorOrder: List<KeyColor> =
+internal val KeyColorOrder: List<KeyColor> =
     listOf(
         KeyColor.Primary,
         KeyColor.Secondary,
@@ -91,6 +93,11 @@ private fun colorFile(input: ExportInput): GeneratedFile {
         document.accents.forEach { accent -> property(accent.seedName, Literals.colorLiteral(accent.seed.value)) }
     }
 }
+
+// b-112
+
+/** `Color.kt` of every dynamic export, which the Unstyled and Fluent dynamic exports write as it is. */
+internal fun dynamicColorFile(input: ExportInput): GeneratedFile = colorFile(input)
 
 private fun themeFile(input: ExportInput): GeneratedFile {
     val expressive = input.target == ExportTarget.Material3Expressive
@@ -302,8 +309,10 @@ internal fun platformExpression(platform: SchemePlatform): Expression {
 /** The tertiary seed a CMF theme is built with, and nothing for any other style. */
 private fun ThemeDocument.tertiarySeedForCmf(): Argb? = cmfTertiarySeed.takeIf { style == Style.Cmf }
 
+// b-112
+
 /** The theme function's parameter for this key color, as in `neutralVariant`. */
-private val KeyColor.parameterName: String
+internal val KeyColor.parameterName: String
     get() = name.replaceFirstChar { char -> char.lowercaseChar() }
 
 /** The `ColorScheme` property for this role, as in `surfaceContainerHigh`. */
