@@ -12,7 +12,7 @@ The `src` folder is laid out like a module, so copy it into the module that hold
 
 ## Add the dependencies
 
-These files need nothing beyond Compose, so there is nothing to add.
+These files need Compose Material 3, which a Material 3 app already has, so there is nothing to add.
 
 ## Open it again
 

@@ -15,7 +15,7 @@ Merge `gradle/libs.versions.toml` into the version catalog of your project, then
 
 ```kotlin
 dependencies {
-    implementation(libs.fluent)
+    implementation(libs.composeFluent)
 }
 ```
 

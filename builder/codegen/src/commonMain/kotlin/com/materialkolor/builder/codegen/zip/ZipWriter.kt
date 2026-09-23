@@ -32,7 +32,9 @@ internal object ZipWriter {
 
     /** The archive holding [entries] in the order given. */
     fun write(entries: List<Entry>): ByteArray {
-        require(entries.size <= MAX_ENTRIES) { "A zip without the 64 bit extension holds at most $MAX_ENTRIES entries" }
+        require(entries.size < ZIP64_ENTRY_COUNT) {
+            "A zip without the 64 bit extension holds fewer than $ZIP64_ENTRY_COUNT entries"
+        }
         require(entries.map { it.path }.distinct().size == entries.size) { "A zip entry path appears twice" }
 
         val stored = entries.map { entry -> Stored(entry.path.encodeToByteArray(), entry.bytes, Crc32.of(entry.bytes)) }
@@ -145,7 +147,9 @@ internal object ZipWriter {
     private const val DOS_DATE = (1 shl 5) or 1
 
     private const val MAX_SHORT = 0xFFFF
-    private const val MAX_ENTRIES = 0xFFFF
+
+    /** The entry count that tells a reader the real count sits in the 64 bit extension. */
+    private const val ZIP64_ENTRY_COUNT = 0xFFFF
 }
 
 /** Little endian writes into a buffer sized up front. */

@@ -64,6 +64,59 @@ class CodegenTest {
     }
 
     @Test
+    fun generate_everyTargetModeLayoutAndCatalog_namesEachLibraryAtItsVersion() {
+        val bindings = listOf(Fixtures.Versions, Fixtures.Versions.copy(fluentModuleAvailable = false))
+        bindings.forEach { versions ->
+            ExportTarget.entries.forEach { target ->
+                ExportMode.entries.forEach { mode ->
+                    listOf(true, false).forEach { multiplatform ->
+                        listOf(true, false).forEach { versionCatalog ->
+                            val prefs = ExportPrefs(
+                                multiplatform = multiplatform,
+                                versionCatalog = versionCatalog,
+                                mode = mode,
+                            )
+                            val case = "$target $mode multiplatform=$multiplatform catalog=$versionCatalog " +
+                                "binding=${versions.fluentBinding}"
+                            val expected = buildSet {
+                                if (mode == ExportMode.Dynamic) {
+                                    val module = materialKolorModule(target, versions)
+                                    add("com.materialkolor:material-kolor-$module:${versions.materialKolor}")
+                                }
+                                if (target == ExportTarget.Unstyled) {
+                                    add("com.composables:composeunstyled-theming:${versions.composeUnstyled}")
+                                }
+                                if (target == ExportTarget.Fluent) {
+                                    add("io.github.compose-fluent:fluent:${versions.fluent}")
+                                }
+                            }
+                            val files = generate(Fixtures.input(documentFor(target), prefs, versions))
+
+                            assertEquals(expected, namedCoordinates(files), case)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun generate_frozenWithoutSnippets_readmeNamesWhatTheFilesLeanOn() {
+        val expected = mapOf(
+            ExportTarget.Material3 to "need Compose Material 3, which a Material 3 app already has",
+            ExportTarget.Material3Expressive to "`MaterialExpressiveTheme` and `MotionScheme`",
+            ExportTarget.Custom to "need nothing beyond Compose",
+        )
+
+        expected.forEach { (target, phrase) ->
+            val files = generate(Fixtures.input(documentFor(target), ExportPrefs(mode = ExportMode.Frozen)))
+
+            val readme = files.single { it.path == "README.md" }.text
+            assertTrue(phrase in readme, "$target\n$readme")
+        }
+    }
+
+    @Test
     fun generate_fluentWithoutTheModule_dependsOnCoreAndFluent() {
         val input = Fixtures.input(
             document = documentFor(ExportTarget.Fluent),
@@ -142,6 +195,56 @@ class CodegenTest {
         }
 
         return ThemeDocument.Default.copy(library = library, expressive = target == ExportTarget.Material3Expressive)
+    }
+
+    /** The MaterialKolor module a dynamic export of [target] builds on. */
+    private fun materialKolorModule(
+        target: ExportTarget,
+        versions: ExportVersions,
+    ): String =
+        when (target) {
+            ExportTarget.Material3, ExportTarget.Material3Expressive -> {
+                "material3"
+            }
+            ExportTarget.Unstyled -> {
+                "unstyled"
+            }
+            ExportTarget.Fluent -> {
+                when (versions.fluentBinding) {
+                    FluentBinding.Module -> "fluent"
+                    FluentBinding.Inline -> "core"
+                }
+            }
+            ExportTarget.Custom -> {
+                "core"
+            }
+        }
+
+    /**
+     * Every `group:artifact:version` the build file snippet in [files] names, looked up through the
+     * catalog snippet when there is one, so both layouts are held to the same coordinates.
+     */
+    private fun namedCoordinates(files: List<GeneratedFile>): Set<String> {
+        val build = files.firstOrNull { file -> file.path == "snippets/build.gradle.kts" }?.text ?: return emptySet()
+        val catalog = files.firstOrNull { file -> file.path == "gradle/libs.versions.toml" }?.text
+        if (catalog == null) {
+            return Regex("""implementation\("([^"]+)"\)""").findAll(build).map { it.groupValues[1] }.toSet()
+        }
+
+        val versions = Regex("""^(\S+) = "([^"]+)"$""", RegexOption.MULTILINE)
+            .findAll(catalog)
+            .associate { match -> match.groupValues[1] to match.groupValues[2] }
+        val library = """^(\S+) = \{ module = "([^"]+)", version\.ref = "([^"]+)" \}$"""
+        val libraries = Regex(library, RegexOption.MULTILINE)
+            .findAll(catalog)
+            .associate { match ->
+                val (alias, module, versionKey) = match.destructured
+                "libs." + alias.replace('-', '.') to "$module:${versions.getValue(versionKey)}"
+            }
+        return Regex("""implementation\((libs\.[\w.]+)\)""")
+            .findAll(build)
+            .map { match -> libraries.getValue(match.groupValues[1]) }
+            .toSet()
     }
 
     /** The Kotlin files each export writes for a default theme, which has no accents. */

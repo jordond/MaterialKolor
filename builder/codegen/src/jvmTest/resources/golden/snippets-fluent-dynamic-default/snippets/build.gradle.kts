@@ -4,7 +4,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.materialKolor.fluent)
-            implementation(libs.fluent)
+            implementation(libs.composeFluent)
         }
     }
 }

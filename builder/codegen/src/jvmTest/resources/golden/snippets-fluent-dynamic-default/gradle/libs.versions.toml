@@ -2,8 +2,8 @@
 
 [versions]
 materialKolor = "6.0.0"
-fluent = "v0.1.0"
+composeFluent = "v0.1.0"
 
 [libraries]
 materialKolor-fluent = { module = "com.materialkolor:material-kolor-fluent", version.ref = "materialKolor" }
-fluent = { module = "io.github.compose-fluent:fluent", version.ref = "fluent" }
+composeFluent = { module = "io.github.compose-fluent:fluent", version.ref = "composeFluent" }

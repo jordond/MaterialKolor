@@ -2,6 +2,8 @@
 
 [versions]
 materialKolor = "6.0.0"
+composeUnstyled = "2.10.0"
 
 [libraries]
 materialKolor-unstyled = { module = "com.materialkolor:material-kolor-unstyled", version.ref = "materialKolor" }
+composeUnstyled-theming = { module = "com.composables:composeunstyled-theming", version.ref = "composeUnstyled" }

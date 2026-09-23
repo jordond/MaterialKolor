@@ -1,7 +1,7 @@
 # Merge these into the version catalog of your own project.
 
 [versions]
-fluent = "v0.1.0"
+composeFluent = "v0.1.0"
 
 [libraries]
-fluent = { module = "io.github.compose-fluent:fluent", version.ref = "fluent" }
+composeFluent = { module = "io.github.compose-fluent:fluent", version.ref = "composeFluent" }

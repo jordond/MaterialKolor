@@ -5,6 +5,7 @@ import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.dsl.Language
 import com.materialkolor.builder.codegen.dsl.plainToken
 import com.materialkolor.builder.domain.persist.ExportMode
+import com.materialkolor.builder.domain.persist.ExportTarget
 
 /** Where the readme sits in the export. */
 internal const val README_PATH: String = "README.md"
@@ -58,7 +59,7 @@ internal object Readme {
             add("## Add the dependencies")
             add("")
             if (build == null) {
-                add("These files need nothing beyond Compose, so there is nothing to add.")
+                add(nothingToAdd(input))
             } else {
                 val addLines = "these lines to the build file of the same module. They are also in `${build.path}`."
                 if (catalog == null) {
@@ -87,4 +88,24 @@ internal object Readme {
             lines = text.map { line -> if (line.isEmpty()) emptyList() else listOf(plainToken(line)) },
         )
     }
+
+    /**
+     * What the files lean on when the export writes no snippet, which only a frozen Material 3,
+     * Expressive or Custom export does. The Material 3 files import `androidx.compose.material3`, a
+     * separate artifact from Compose itself.
+     */
+    private fun nothingToAdd(input: ExportInput): String =
+        when (input.target) {
+            ExportTarget.Material3 -> {
+                "These files need Compose Material 3, which a Material 3 app already has, " +
+                    "so there is nothing to add."
+            }
+            ExportTarget.Material3Expressive -> {
+                "These files need a Compose Material 3 version that has `MaterialExpressiveTheme` and " +
+                    "`MotionScheme`. Beyond that there is nothing to add."
+            }
+            ExportTarget.Unstyled, ExportTarget.Fluent, ExportTarget.Custom -> {
+                "These files need nothing beyond Compose, so there is nothing to add."
+            }
+        }
 }

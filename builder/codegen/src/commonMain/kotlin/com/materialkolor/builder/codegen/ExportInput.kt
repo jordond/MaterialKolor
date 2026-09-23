@@ -61,7 +61,7 @@ public data class ExportInput(
  * @property[builder] The builder's own version.
  * @property[materialKolor] The MaterialKolor version the generated code is written against.
  * @property[fluent] The Compose Fluent version a Fluent export depends on.
- * @property[composeUnstyled] The Compose Unstyled version a frozen Unstyled export depends on.
+ * @property[composeUnstyled] The Compose Unstyled version an Unstyled export depends on.
  * @property[fluentModuleAvailable] Whether `material-kolor-fluent` is published at [materialKolor].
  * When it is not, a Fluent export builds its shades inline from core.
  */

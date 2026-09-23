@@ -6,6 +6,7 @@ import com.materialkolor.builder.codegen.zipArchive
 import com.materialkolor.builder.domain.persist.ExportPrefs
 import java.io.ByteArrayInputStream
 import java.io.File
+import java.time.LocalDateTime
 import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
@@ -96,8 +97,9 @@ class ZipWriterTest {
         val files = generate(Fixtures.ThreeAccents.input)
 
         assertContentEquals(zipArchive("AppTheme", files), zipArchive("AppTheme", files))
-        val times = readStream(zipArchive("AppTheme", files)).map { it.first.lastModifiedTime.toMillis() }.distinct()
-        assertEquals(1, times.size)
+        readStream(zipArchive("AppTheme", files)).forEach { (entry, _) ->
+            assertEquals(LocalDateTime.of(1980, 1, 1, 0, 0), entry.timeLocal, entry.name)
+        }
     }
 
     @Test

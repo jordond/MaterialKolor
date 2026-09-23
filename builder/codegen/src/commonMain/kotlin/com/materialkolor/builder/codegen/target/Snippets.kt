@@ -42,11 +42,11 @@ internal class Dependency(
 /**
  * The dependency snippets that go with an export.
  *
- * A dynamic export needs the MaterialKolor module for its target, and Fluent needs Compose Fluent
- * on top. A frozen export needs no MaterialKolor at all. Material 3, Expressive and Custom then need
- * nothing beyond Compose, so they get no snippet, while Unstyled still needs the Compose Unstyled
- * theming library and Fluent still needs Compose Fluent. Every MaterialKolor module is named at the
- * one pinned version (D9).
+ * A dynamic export needs the MaterialKolor module for its target. A frozen export needs no
+ * MaterialKolor at all, so Material 3, Expressive and Custom get no snippet. In either mode an
+ * Unstyled export needs the Compose Unstyled theming library, which `material-kolor-unstyled` leaves
+ * to the app on JVM and Android, and a Fluent export needs Compose Fluent. Every MaterialKolor module
+ * is named at the one pinned version (D9).
  */
 internal object Snippets {
     /** The catalog snippet when [ExportInput.prefs] asks for one, then the build file snippet, or nothing. */
@@ -69,7 +69,7 @@ internal object Snippets {
                         listOf(materialKolor("material3", input))
                     }
                     ExportTarget.Unstyled -> {
-                        listOf(materialKolor("unstyled", input))
+                        listOf(materialKolor("unstyled", input), unstyledTheming(input))
                     }
                     ExportTarget.Fluent -> {
                         when (input.versions.fluentBinding) {
@@ -119,9 +119,9 @@ internal object Snippets {
 
     private fun fluent(input: ExportInput): Dependency =
         Dependency(
-            alias = "fluent",
+            alias = "composeFluent",
             module = "io.github.compose-fluent:fluent",
-            versionKey = "fluent",
+            versionKey = "composeFluent",
             version = input.versions.fluent,
         )
 
