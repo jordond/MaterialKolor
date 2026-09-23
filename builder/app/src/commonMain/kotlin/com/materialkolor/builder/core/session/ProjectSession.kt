@@ -19,12 +19,15 @@ import com.materialkolor.builder.domain.persist.ProjectRecord
 import com.materialkolor.builder.domain.persist.ProjectViewState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
@@ -119,6 +122,12 @@ internal class ProjectSession(
 
     /** Whether the open project is saved. A failure comes after the repository pruned and tried again. */
     val saveStatus: StateFlow<SaveStatus> = _saveStatus.asStateFlow()
+
+    // b-216b
+
+    /** The open project's name, the one its next save writes. It follows renames and other tabs. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val projectName: Flow<String> = current.flatMapLatest { open -> open.name }
 
     /**
      * Open the project [BootResolver] picks for [route], and apply what a legacy link asked for.

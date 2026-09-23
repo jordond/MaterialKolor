@@ -1,4 +1,4 @@
-package com.materialkolor.builder.feature.picker
+package com.materialkolor.builder.feature.projects
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -9,10 +9,10 @@ import dev.stateholder.dispatcher.Dispatcher
 // stub
 
 /**
- * The color picker, open while `state.panel` is `Panel.Picker` on `state.pickerTarget` (B-307).
+ * The share sheet, open while `state.panel` is `Panel.Share` (B-310).
  */
 @Composable
-internal fun PickerHost(
+internal fun ShareHost(
     state: WorkspaceModel.State,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,

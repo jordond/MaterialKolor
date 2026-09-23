@@ -20,12 +20,12 @@ import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 
 /**
- * What the root needs to dress the builder, the chrome's appearance, its motion and its skin, and
- * the boot that opens the first project.
+ * What the root needs to dress the builder, the chrome's appearance and its motion, and the boot
+ * that opens the first project.
  *
  * The chrome's appearance comes from the preferences and the system, never from the preview mode,
- * and nothing here writes the preview mode (F-04). The skin follows the document's library and
- * expressive flag.
+ * and nothing here writes the preview mode (F-04). The skin is not held here. The root derives it
+ * from the same collected document it resolves the theme from, so there is one skin source.
  */
 @Stable
 @Inject
@@ -43,7 +43,6 @@ internal class AppModel(
             systemDark = environment.prefersDark.value,
             systemReducedMotion = environment.reducedMotion.value,
             coarsePointer = environment.coarsePointer.value,
-            skin = skinOf(session.document.value),
         ),
     ) {
     private var booted = false
@@ -55,7 +54,6 @@ internal class AppModel(
         environment.prefersDark.mergeState { state, dark -> state.copy(systemDark = dark) }
         environment.reducedMotion.mergeState { state, reduced -> state.copy(systemReducedMotion = reduced) }
         environment.coarsePointer.mergeState { state, coarse -> state.copy(coarsePointer = coarse) }
-        session.document.mergeState { state, document -> state.copy(skin = skinOf(document)) }
     }
 
     /**
@@ -84,7 +82,6 @@ internal class AppModel(
      * @property[systemDark] Whether the system is in dark mode right now.
      * @property[systemReducedMotion] Whether the system asks for less motion right now.
      * @property[coarsePointer] Whether the main pointer is a finger.
-     * @property[skin] The library the chrome wears.
      * @property[bootNotice] Why the address did not open what it asked for, or null.
      */
     @Immutable
@@ -94,7 +91,6 @@ internal class AppModel(
         val systemDark: Boolean,
         val systemReducedMotion: Boolean,
         val coarsePointer: Boolean,
-        val skin: Skin,
         val bootNotice: BootNotice? = null,
     ) {
         /** Whether the chrome is dark, following the system live when [appearance] says so. */

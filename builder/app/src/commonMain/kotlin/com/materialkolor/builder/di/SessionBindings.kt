@@ -6,8 +6,10 @@ import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.StoreFactory
 import com.materialkolor.builder.core.session.ProjectSession
 import com.materialkolor.builder.core.session.SessionColors
+import com.materialkolor.builder.domain.capability.forTarget
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Role
+import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.generated.resources.Res
@@ -64,7 +66,12 @@ internal object SessionBindings {
             projects = projects,
             preferences = preferences,
             environment = environment,
-            colorsOf = { document -> resolver.resolve(document).sessionColors() },
+            // b-216b
+            // The thumbnail and the splash show the theme as its own target sees it (D35).
+            colorsOf = { document ->
+                val target = ExportTarget.of(document.library, document.expressive)
+                resolver.resolve(document.forTarget(target)).sessionColors()
+            },
             sharedThemeName = { getString(Res.string.shared_theme_name) },
             scope = scope,
             now = ::epochMillis,

@@ -3,6 +3,7 @@ package com.materialkolor.builder.feature.workspace
 import com.materialkolor.builder.ViewModelHarness
 import com.materialkolor.builder.core.data.PreferencesRepository
 import com.materialkolor.builder.core.session.ProjectSession
+import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.core.session.SessionTestBase
 import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.capability.ControlState
@@ -14,9 +15,11 @@ import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.PreviewMode
+import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakeClipboard
 import com.materialkolor.builder.fakes.FakeRouter
 import com.materialkolor.builder.fakes.RouterCall
+import com.materialkolor.builder.feature.picker.PickerTarget
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.Dispatchers
@@ -123,6 +126,46 @@ class WorkspaceModelTest : SessionTestBase() {
         }
 
     @Test
+    fun edit_switchOntoExpressive_raisesTheSuggestionWithTheDocumentAndUndoPutsItAway() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val workspace = workspaceModel(session, preferences)
+            workspace.edit(DocumentChange.SetLibrary(Library.Fluent, expressive = false), EditPhase.Discrete)
+            workspace.state.value.expressiveSuggestion shouldBe false
+
+            workspace.edit(DocumentChange.SetLibrary(Library.Material3, expressive = true), EditPhase.Discrete)
+            val raised = workspace.state.value
+            raised.expressiveSuggestion shouldBe true
+            raised.document.library shouldBe Library.Material3
+            raised.document.expressive shouldBe true
+            workspace.undo()
+            workspace.state.value.expressiveSuggestion shouldBe false
+            workspace.redo()
+
+            workspace.state.value.expressiveSuggestion shouldBe false
+            workspace.state.value.document.expressive shouldBe true
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun dismissExpressiveSuggestion_afterASwitch_putsItAwayAndChangesNothing() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val workspace = workspaceModel(session, preferences)
+            workspace.edit(DocumentChange.SetLibrary(Library.Material3, expressive = true), EditPhase.Discrete)
+            val document = workspace.state.value.document
+            workspace.state.value.expressiveSuggestion shouldBe true
+
+            workspace.dismissExpressiveSuggestion()
+
+            workspace.state.value.expressiveSuggestion shouldBe false
+            workspace.state.value.document shouldBe document
+            harness.clearAndJoin()
+        }
+
+    @Test
     fun edit_thatChangesNothing_leavesNoUndoEntry() =
         runTest {
             val (session, preferences) = session()
@@ -150,6 +193,58 @@ class WorkspaceModelTest : SessionTestBase() {
 
             router.calls shouldBe listOf(RouterCall.PushOverlay("Export"))
             workspace.state.value.panel shouldBe null
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun closePanel_fromTheUi_popsItsEntryOnceAndALaterBackDoesNothingMore() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val workspace = workspaceModel(session, preferences)
+
+            workspace.openPanel(Panel.Export)
+            workspace.closePanel()
+            workspace.closePanel()
+            router.back()
+            runCurrent()
+
+            router.calls shouldBe listOf(RouterCall.PushOverlay("Export"), RouterCall.PopOverlay)
+            workspace.state.value.panel shouldBe null
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun openPicker_overAnOpenPanel_pushesNothing() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val workspace = workspaceModel(session, preferences)
+
+            workspace.openPanel(Panel.Export)
+            workspace.openPicker(PickerTarget.Seed)
+
+            router.calls shouldBe listOf(RouterCall.PushOverlay("Export"))
+            workspace.state.value.panel shouldBe Panel.Picker
+            workspace.state.value.pickerTarget shouldBe PickerTarget.Seed
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun state_afterBoot_carriesTheProjectNameAndSaveStatus() =
+        runTest {
+            val (session, preferences) = session()
+            val id = booted(session)
+            val workspace = workspaceModel(session, preferences)
+
+            session.rename(id, "Harbor")
+            workspace.edit(DocumentChange.SetContrast(ContrastLevel.High), EditPhase.Discrete)
+            runCurrent()
+
+            workspace.state.value.projectName shouldBe "Harbor"
+            workspace.state.value.saveStatus shouldBe SaveStatus.Pending
+            settle()
+            workspace.state.value.saveStatus shouldBe SaveStatus.Idle
             harness.clearAndJoin()
         }
 
@@ -187,5 +282,5 @@ class WorkspaceModelTest : SessionTestBase() {
     private fun workspaceModel(
         session: ProjectSession,
         preferences: PreferencesRepository,
-    ): WorkspaceModel = harness.own(WorkspaceModel(session, preferences, FakeClipboard(), router))
+    ): WorkspaceModel = harness.own(WorkspaceModel(session, preferences, FakeClipboard(), router, ThemeResolver()))
 }
