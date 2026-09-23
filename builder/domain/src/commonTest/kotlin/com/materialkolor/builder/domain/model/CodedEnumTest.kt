@@ -24,6 +24,7 @@ class CodedEnumTest {
         "Role" to Role.entries,
         "RoleGroup" to RoleGroup.entries,
         "CustomSlot" to CustomSlot.entries,
+        "AccentPart" to AccentPart.entries,
     )
 
     @Test
