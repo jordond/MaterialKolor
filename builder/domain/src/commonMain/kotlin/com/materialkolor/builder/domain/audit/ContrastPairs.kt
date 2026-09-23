@@ -47,6 +47,15 @@ public sealed interface ColorRef {
     public data class OfFluentText(
         public val text: FluentText,
     ) : ColorRef
+
+    /**
+     * One of the seven accent shades Fluent cuts from the primary palette of the mode it shows.
+     *
+     * @property[shade] The shade.
+     */
+    public data class OfFluentShade(
+        public val shade: FluentShade,
+    ) : ColorRef
 }
 
 /**
@@ -58,6 +67,32 @@ public enum class FluentText {
 
     /** Quieter text on an accent fill, the same color with some of the fill showing through. */
     OnAccentSecondary,
+}
+
+/**
+ * The accent shades a Fluent theme is built from, named the way Fluent's `Shades` names them.
+ */
+public enum class FluentShade {
+    /** The darkest shade. */
+    Dark3,
+
+    /** The second darkest shade. */
+    Dark2,
+
+    /** The shade just darker than the accent. */
+    Dark1,
+
+    /** The accent itself. */
+    Base,
+
+    /** The shade just lighter than the accent. */
+    Light1,
+
+    /** The second lightest shade. */
+    Light2,
+
+    /** The lightest shade. */
+    Light3,
 }
 
 /**

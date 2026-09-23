@@ -102,9 +102,10 @@ private fun AccentFamily.toValues(): AccentFamilyValues =
  * `toFluentShades` in the Fluent module uses.
  *
  * `toFluentColors` builds its shades from the scheme of the mode it shows, and the 2025 spec gives
- * TonalSpot and Expressive a softer dark primary palette, so each mode reads its own.
+ * TonalSpot and Expressive a softer dark primary palette, so each mode reads its own. The contrast
+ * audit rates a Fluent shade from the same cut.
  */
-private fun ThemeResult.fluentShades(): FluentShades =
+internal fun ThemeResult.fluentShades(): FluentShades =
     FluentShades(
         light = light.primaryPalette.shades(),
         dark = dark.primaryPalette.shades(),

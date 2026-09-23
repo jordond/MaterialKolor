@@ -4,7 +4,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toArgb
 import com.materialkolor.builder.domain.audit.ColorRef
+import com.materialkolor.builder.domain.audit.ContrastPair
 import com.materialkolor.builder.domain.audit.ContrastPairs
+import com.materialkolor.builder.domain.audit.FluentShade
 import com.materialkolor.builder.domain.audit.FluentText
 import com.materialkolor.builder.domain.audit.PairKind
 import com.materialkolor.builder.domain.color.Argb
@@ -116,6 +118,43 @@ class ContrastAuditTest {
             assertNotEquals(result.roles[Role.Primary, row.isDark].argb, row.background, "$row")
             assertEquals(Argb(expected.toArgb()), row.foreground, "$row")
         }
+    }
+
+    @Test
+    fun rate_fluentShade_readsTheShadeOfThatModeAndSuggestsTheSeed() {
+        val result = ThemeResolver().resolve(document.copy(library = Library.Fluent))
+        val tones = mapOf(
+            FluentShade.Dark3 to 15,
+            FluentShade.Dark2 to 30,
+            FluentShade.Dark1 to 40,
+            FluentShade.Base to 50,
+            FluentShade.Light1 to 60,
+            FluentShade.Light2 to 80,
+            FluentShade.Light3 to 90,
+        )
+        for ((shade, tone) in tones) {
+            for (isDark in listOf(false, true)) {
+                val pair = ContrastPair(
+                    foreground = ColorRef.OfFluentText(FluentText.OnAccentPrimary),
+                    background = ColorRef.OfFluentShade(shade),
+                    kind = PairKind.Text,
+                )
+                val row = ContrastAudit.rate(result, pair, isDark)
+                val expected = Argb(result.scheme(isDark).primaryPalette.tone(tone))
+
+                assertEquals(expected, row.background, "$shade, dark $isDark")
+            }
+        }
+
+        val pale = ContrastPair(
+            foreground = ColorRef.OfFluentText(FluentText.OnAccentPrimary),
+            background = ColorRef.OfFluentShade(FluentShade.Light3),
+            kind = PairKind.Text,
+        )
+        val light = ContrastAudit.rate(result, pale, isDark = false)
+
+        assertEquals(AuditReason.TextUnreadable, light.reason)
+        assertEquals(AuditSuggestion.ChangeSeed, light.suggestion)
     }
 
     @Test
