@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The color picker's three tracks, each also the label of the field that types its value. -->
+    <string name="picker_hue">Hue</string>
+    <string name="picker_chroma">Chroma</string>
+    <string name="picker_tone">Tone</string>
+
+    <!-- Under a track's value field when the typed text is not a number in the track's range. -->
+    <string name="picker_track_range">From %1$d to %2$d</string>
+
+    <!-- The format switch and its options. -->
+    <string name="picker_format">Format</string>
+    <string name="picker_format_hex">HEX</string>
+    <string name="picker_format_rgb">RGB</string>
+    <string name="picker_format_hsl">HSL</string>
+    <string name="picker_format_oklch">OKLCH</string>
+
+    <!-- The field under the format switch that shows and takes the color. -->
+    <string name="picker_color">Color</string>
+
+    <!-- Under the color field when the typed text is not a color, one per reason. -->
+    <string name="picker_error_empty">Type a color</string>
+    <string name="picker_error_bad_hex">Hex takes 3, 6 or 8 digits</string>
+    <string name="picker_error_bad_arguments">Check the values in the brackets</string>
+    <string name="picker_error_unknown_function">Use rgb(), hsl() or oklch()</string>
+    <string name="picker_error_unknown_name">Not a CSS color name</string>
+    <string name="picker_error_unrecognized">Not a color</string>
+
+    <!-- Under the color field when the color had to change to fit, one sentence per change. -->
+    <string name="picker_note_alpha_dropped">Transparency dropped.</string>
+    <string name="picker_note_clamped">Pulled inside sRGB.</string>
+</resources>
