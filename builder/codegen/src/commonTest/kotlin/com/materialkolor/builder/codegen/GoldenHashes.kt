@@ -8,6 +8,11 @@ package com.materialkolor.builder.codegen
  */
 internal object GoldenHashes {
     val cases: Map<String, Long> = mapOf(
+        "custom-dynamic-accents" to 0xDE8612C0L,
+        "custom-dynamic-cmf" to 0xE5256BEEL,
+        "custom-dynamic-custom-tones" to 0x80CDD677L,
+        "custom-dynamic-default" to 0x79063DDAL,
+        "custom-dynamic-pins-amoled" to 0xB8FAE5CEL,
         "custom-frozen-accents-pins-amoled" to 0x73FABDFEL,
         "custom-frozen-all-contrasts" to 0x95DEE013L,
         "custom-frozen-default" to 0x1467FC7CL,

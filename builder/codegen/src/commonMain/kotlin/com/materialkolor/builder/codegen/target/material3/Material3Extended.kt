@@ -150,8 +150,10 @@ private fun KotlinFileScope.rememberExtendedColors(accents: List<Accent>) {
     }
 }
 
+// b-112b
+
 /** `brandPalette.colorFamily(tone = ..., containerTone = ...)`, at the accent's tones for each mode. */
-private fun familyOf(accent: Accent): Expression =
+internal fun familyOf(accent: Accent): Expression =
     ref(accent.paletteName).call(TO_COLOR_FAMILY, multiline = true) {
         argument(TONE, toneExpression(light = accent.light.color, dark = accent.dark.color))
         argument(CONTAINER_TONE, toneExpression(light = accent.light.container, dark = accent.dark.container))
@@ -161,8 +163,10 @@ private fun familyOf(accent: Accent): Expression =
         ) { threshold -> thresholdExpression(threshold) }
     }
 
+// b-112b
+
 /** `if (isDark) 80 else 40`, or just the tone when both modes use the same one. */
-private fun toneExpression(
+internal fun toneExpression(
     light: Int,
     dark: Int,
 ): Expression =
@@ -172,13 +176,15 @@ private fun toneExpression(
         ifElse(condition = ref(IS_DARK), whenTrue = Literals.int(dark), whenFalse = Literals.int(light))
     }
 
+// b-112b
+
 /**
  * The private helper that cuts one family out of a ramp.
  *
  * Its threshold defaults to the one `onTone` defaults to, so an accent on the usual threshold does
  * not have to say so.
  */
-private fun KotlinFileScope.colorFamily() {
+internal fun KotlinFileScope.colorFamily() {
     function(
         name = TO_COLOR_FAMILY,
         returns = type(COLOR_FAMILY),

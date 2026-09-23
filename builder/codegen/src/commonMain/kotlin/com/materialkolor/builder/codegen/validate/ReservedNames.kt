@@ -5,6 +5,7 @@ import com.materialkolor.builder.codegen.symbol.Symbols
 import com.materialkolor.builder.codegen.target.COLOR_FAMILY
 import com.materialkolor.builder.codegen.target.FrozenMode
 import com.materialkolor.builder.codegen.target.custom.LOCAL_THEME_COLORS
+import com.materialkolor.builder.codegen.target.custom.REMEMBER_THEME_COLORS
 import com.materialkolor.builder.codegen.target.custom.THEME_COLORS
 import com.materialkolor.builder.codegen.target.custom.propertyName
 import com.materialkolor.builder.codegen.target.fluent.THEME_SHADES
@@ -95,7 +96,7 @@ public object ReservedNames {
             ExportTarget.Material3, ExportTarget.Material3Expressive -> Material3Symbols.names() + Material3Declared
             ExportTarget.Unstyled -> UnstyledSymbols.names() + UnstyledDeclared // b-111b
             ExportTarget.Fluent -> FluentSymbols.names() + FluentDeclared // b-111
-            ExportTarget.Custom -> CommonSymbols.names() + CustomDeclared // b-111
+            ExportTarget.Custom -> CommonSymbols.names() + CustomDeclared + CustomDynamicNames // b-111, b-112b
         }
 
     /**
@@ -260,3 +261,8 @@ internal val UnstyledTokens: Set<String> =
             "textSecondaryAndTertiaryInverseDisabled",
             "textHintInverse",
         )
+
+// b-112b
+
+/** What the Custom dynamic export imports or declares on top of the frozen one. */
+private val CustomDynamicNames: Set<String> = setOf(Symbols.MaterialKolors.simpleName, REMEMBER_THEME_COLORS)
