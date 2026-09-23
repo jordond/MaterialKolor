@@ -15,6 +15,7 @@ import com.materialkolor.builder.kit.control.BuilderToastHost
 import com.materialkolor.builder.kit.control.BuilderToastHostState
 import com.materialkolor.builder.kit.control.overlayStyle
 import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.layout.PosterMode
 import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.FluentDockRegion
@@ -105,9 +106,9 @@ public fun PanelRegion(
 /**
  * Where the toasts of [state] land. Lay it over the whole shell.
  *
- * They stack at the bottom start on Medium and Expanded, and on a phone they rise above the poster
- * peek and the dock. Every skin shares one host, which already draws each toast in the skin's own
- * dress, a `Snackbar` under Material3.
+ * They stack at the bottom start beside a docked poster, and wherever the poster is a sheet they
+ * rise above its peek and the dock. Every skin shares one host, which already draws each toast in
+ * the skin's own dress, a `Snackbar` under Material3.
  *
  * @param[state] The toasts to show.
  * @param[modifier] Applied to the region, which fills the space it is given without taking any
@@ -121,9 +122,8 @@ public fun ToastRegion(
     val layout = LocalLayout.current
     val tokens = LocalBuilderTokens.current
     Box(modifier.fillMaxSize()) {
-        if (layout.windowClass == WindowClass.Compact) {
-            val lift = posterPeekHeight(layout) + tokens.spacing.large + ShellMetrics.dockHeight
-            BuilderToastHost(state, Modifier.padding(bottom = lift))
+        if (layout.posterMode == PosterMode.Sheet) {
+            BuilderToastHost(state, Modifier.padding(bottom = sheetClearance(layout, tokens)))
         } else {
             BuilderToastHost(
                 state = state,
@@ -134,9 +134,10 @@ public fun ToastRegion(
 }
 
 /**
- * The command palette's frame. A centred dialog on Medium and Expanded, a full width one on a
- * phone. Material3 wears its dialog container, the other skins their dialog dress. The modal
- * plumbing around it, the scrim and the focus trap, is the caller's.
+ * The command palette's frame. A centred dialog on Medium and Expanded, up to 560 dp wide on
+ * Medium and 640 dp on Expanded, and a full width one on a phone. Material3 wears its dialog
+ * container, the other skins their dialog dress. The modal plumbing around it, the scrim and the
+ * focus trap, is the caller's.
  *
  * @param[modifier] Applied to the frame.
  * @param[content] The query field and the results, laid in a column.
@@ -147,10 +148,11 @@ public fun PaletteFrame(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val library = LocalSkin.current.library
-    val sized = if (LocalLayout.current.windowClass == WindowClass.Compact) {
-        modifier.fillMaxWidth()
-    } else {
-        modifier.widthIn(min = OverlayMetrics.dialogMinWidth, max = OverlayMetrics.dialogMaxWidth)
+    val widest = ShellMetrics.paletteWideWidth
+    val sized = when (LocalLayout.current.windowClass) {
+        WindowClass.Compact -> modifier.fillMaxWidth()
+        WindowClass.Medium -> modifier.widthIn(min = OverlayMetrics.dialogMinWidth, max = OverlayMetrics.dialogMaxWidth)
+        WindowClass.Expanded -> modifier.widthIn(min = OverlayMetrics.dialogMinWidth, max = widest)
     }
     when (library) {
         Library.Material3 -> MaterialPaletteFrame(sized, content)

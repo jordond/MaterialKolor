@@ -66,6 +66,7 @@ public fun PosterSurface(
  * The handful of colours every skin's roles are cut from.
  *
  * @property[page] The exact seed.
+ * @property[inkMuted] Muted ink, floored at 3 to 1 on the seed, so only for strokes and never text.
  * @property[shade] The ramp's darkest tone, for shadows and the scrim role.
  * @property[isLight] Whether the seed is light, so ink is darker than the page.
  */
@@ -90,7 +91,8 @@ private const val ShadeTone = 0
  * the skin's own, since the shapes of the controls follow the skin.
  *
  * No status hue is sure to read on every seed, so success, warning and danger all take the ink.
- * The poster says what a state means in words.
+ * The poster says what a state means in words. Muted text takes the ink too, since muted ink is
+ * only floored at 3 to 1 on the seed (D39).
  */
 private fun PosterPaint.builderTokens(outer: BuilderTokens): BuilderTokens =
     outer.copy(
@@ -100,14 +102,14 @@ private fun PosterPaint.builderTokens(outer: BuilderTokens): BuilderTokens =
         border = outline,
         borderStrong = ink,
         textStrong = ink,
-        textMuted = inkMuted,
+        textMuted = ink,
         accent = ink,
         onAccent = page,
         focus = ink,
         codeBackground = sunken,
         codePalette = builderCodePalette(
             plain = ink,
-            muted = inkMuted,
+            muted = ink,
             primary = ink,
             secondary = ink,
             tertiary = ink,
@@ -145,8 +147,8 @@ private fun MaterialPoster(
 }
 
 /**
- * Material's roles mapped from the poster. Surface is the seed, onSurface and primary are ink, and
- * onPrimary is the seed. The containers and the outline come from the ramp.
+ * Material's roles mapped from the poster. Surface is the seed, onSurface, onSurfaceVariant and
+ * primary are ink, and onPrimary is the seed. The containers and the outline come from the ramp.
  *
  * Every role is named, so nothing of the baseline scheme shows through. Each container is a surface
  * the ink still reads on. The surface tint is the page, so tonal elevation never pulls a surface
@@ -172,7 +174,7 @@ private fun PosterPaint.colorScheme(): ColorScheme =
         surface = page,
         onSurface = ink,
         surfaceVariant = sunken,
-        onSurfaceVariant = inkMuted,
+        onSurfaceVariant = ink,
         surfaceTint = page,
         inverseSurface = ink,
         inverseOnSurface = page,
@@ -230,7 +232,10 @@ private fun UnstyledPoster(
     }
 }
 
-/** Every MaterialKolor token, read off the poster's Material roles. The key colours are the seed. */
+/**
+ * Every MaterialKolor token, read off the poster's Material roles. The key colours are the seed, and
+ * the resting control stroke is muted ink, the one part here that is never text.
+ */
 private fun ColorScheme.unstyledValues(paint: PosterPaint): Map<ThemeToken<Color>, Color> =
     mapOf(
         MaterialKolorTokens.primaryPaletteKeyColor to paint.page,
@@ -289,7 +294,7 @@ private fun ColorScheme.unstyledValues(paint: PosterPaint): Map<ThemeToken<Color
         MaterialKolorTokens.onTertiaryFixed to onTertiaryFixed,
         MaterialKolorTokens.onTertiaryFixedVariant to onTertiaryFixedVariant,
         MaterialKolorTokens.controlActivated to primaryContainer,
-        MaterialKolorTokens.controlNormal to onSurfaceVariant,
+        MaterialKolorTokens.controlNormal to paint.inkMuted,
         MaterialKolorTokens.controlHighlight to surfaceVariant,
         MaterialKolorTokens.textPrimaryInverse to inverseOnSurface,
         MaterialKolorTokens.textSecondaryAndTertiaryInverse to inverseOnSurface,
@@ -331,6 +336,7 @@ private fun PosterPaint.slot(slot: CustomSlot): Color =
         CustomSlot.TextStrong,
         CustomSlot.BorderStrong,
         CustomSlot.FocusRing,
+        CustomSlot.TextMuted,
         -> ink
         CustomSlot.OnPrimary,
         CustomSlot.OnSecondary,
@@ -346,7 +352,6 @@ private fun PosterPaint.slot(slot: CustomSlot): Color =
         CustomSlot.SurfaceRaised,
         -> raised
         CustomSlot.SurfaceSunken -> sunken
-        CustomSlot.TextMuted -> inkMuted
         CustomSlot.BorderFaint,
         CustomSlot.BorderSoft,
         -> outline

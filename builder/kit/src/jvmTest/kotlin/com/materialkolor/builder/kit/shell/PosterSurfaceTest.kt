@@ -32,6 +32,7 @@ import com.materialkolor.ktx.contrastRatio
 import com.materialkolor.unstyled.MaterialKolorTokens
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -79,6 +80,10 @@ class PosterSurfaceTest {
                     for (next in ShellSeeds) {
                         seed = next
                         waitForIdle()
+                        withClue(next.toHex()) {
+                            inks.shouldNotBeEmpty()
+                            inks.map { pair -> pair.ground }.distinct() shouldBe listOf(next.toColor())
+                        }
                         misses += inks.mapNotNull { pair ->
                             val ratio = pair.ink.contrastRatio(pair.ground)
                             if (ratio < ShellTextRatio) "${next.toHex()} ${pair.name} ${"%.2f".format(ratio)}" else null
@@ -142,6 +147,7 @@ private fun shellInks(
         ShellInk("tokens text on seed", tokens.textStrong, seed),
         ShellInk("tokens text on panel", tokens.textStrong, tokens.panel),
         ShellInk("tokens text on canvas", tokens.textStrong, tokens.canvas),
+        ShellInk("tokens muted text on panel", tokens.textMuted, tokens.panel),
     )
     val own = when (skin.library) {
         Library.Material3 -> {
@@ -150,6 +156,7 @@ private fun shellInks(
                 ShellInk("onSurface on surface", scheme.onSurface, scheme.surface),
                 ShellInk("primary on surface", scheme.primary, scheme.surface),
                 ShellInk("content colour on surface", LocalContentColor.current, scheme.surface),
+                ShellInk("onSurfaceVariant on surface", scheme.onSurfaceVariant, scheme.surface),
             )
         }
         Library.Unstyled -> {
@@ -158,6 +165,7 @@ private fun shellInks(
             listOf(
                 ShellInk("onSurface on surface", colors[MaterialKolorTokens.onSurface], surface),
                 ShellInk("primary on surface", colors[MaterialKolorTokens.primary], surface),
+                ShellInk("onSurfaceVariant on surface", colors[MaterialKolorTokens.onSurfaceVariant], surface),
             )
         }
         Library.Custom -> {
@@ -166,6 +174,7 @@ private fun shellInks(
             listOf(
                 ShellInk("TextStrong on Surface", identity[CustomSlot.TextStrong], surface),
                 ShellInk("OnSurface on Surface", identity[CustomSlot.OnSurface], surface),
+                ShellInk("TextMuted on Surface", identity[CustomSlot.TextMuted], surface),
             )
         }
         Library.Fluent -> {

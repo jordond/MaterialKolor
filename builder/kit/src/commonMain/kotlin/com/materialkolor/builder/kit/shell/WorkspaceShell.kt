@@ -6,9 +6,7 @@ import androidx.compose.animation.core.snap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,12 +21,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.zIndex
 import com.materialkolor.builder.engine.poster.PosterColors
 import com.materialkolor.builder.kit.control.BottomSheetDetent
 import com.materialkolor.builder.kit.control.BottomSheetState
@@ -42,6 +43,7 @@ import com.materialkolor.builder.kit.headless.HeadlessBottomSheet
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.PosterMode
+import com.materialkolor.builder.kit.layout.ShortHeightBreakpoint
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
@@ -73,11 +75,11 @@ internal object ShellMetrics {
     /** How much of the poster sheet shows at peek on a phone held upright. */
     val posterPeekHeight: Dp = 344.dp
 
-    /** A phone shorter than this is lying on its side, and its poster peek shrinks. */
-    val shortHeight: Dp = 480.dp
-
     /** The room a floating dock takes, Material's floating toolbar height. */
     val dockHeight: Dp = 64.dp
+
+    /** The command palette's widest on Expanded, where the other dialogs stop at 560 dp. */
+    val paletteWideWidth: Dp = 640.dp
 }
 
 /**
@@ -85,28 +87,41 @@ internal object ShellMetrics {
  * sheet peek so the canvas keeps some room.
  */
 internal fun posterPeekHeight(layout: LayoutInfo): Dp =
-    if (layout.heightDp < ShellMetrics.shortHeight) OverlayMetrics.sheetPeekHeight else ShellMetrics.posterPeekHeight
+    if (layout.heightDp < ShortHeightBreakpoint) OverlayMetrics.sheetPeekHeight else ShellMetrics.posterPeekHeight
+
+/** How far above the bottom edge the poster peek and the floating dock reach in the sheet layout. */
+internal fun sheetClearance(
+    layout: LayoutInfo,
+    tokens: BuilderTokens,
+): Dp = posterPeekHeight(layout) + tokens.spacing.large + ShellMetrics.dockHeight
 
 /**
  * The workspace laid out for the space it is in, the poster, the top bar, the canvas and the dock.
  *
  * The geometry comes from `LocalLayout` and is the same in every skin (design D). On Expanded the
- * poster docks at 400 dp and collapses to the 72 dp rail. On Medium it docks at 320 dp from 840 dp,
- * and below that it is the rail, which opens over the canvas. On a phone it lives in a bottom sheet
- * with the dock floating above its peek. The poster keeps its seed coloured look in every skin, since
- * the shell draws it inside [PosterSurface]. The canvas is a rounded frame whose content stops
- * growing at the content cap on very wide screens, with the dock floating at its bottom.
+ * poster docks at 400 dp and on Medium at 320 dp from 840 dp, and both collapse to the 72 dp rail.
+ * Below 840 dp it is the rail, which opens over the canvas. On a phone, upright or on its side, it
+ * lives in a bottom sheet with the dock floating above its peek. The poster keeps its seed coloured
+ * look in every skin, since the shell draws it inside [PosterSurface]. The canvas is a rounded frame
+ * whose content stops growing at the content cap on very wide screens, with the dock floating at its
+ * bottom.
+ *
+ * Tab walks the regions in reading order in every layout (AR-01), the top bar, the poster, the
+ * canvas and then the dock.
  *
  * The shell only places the slots. The skin owned regions, `TopBarRegion` and `DockRegion` among
  * them, are for the slots to wear.
  *
  * @param[posterColors] The poster's colours, from the resolved document.
  * @param[posterCollapsed] Whether the poster shows as the rail. It collapses the docked poster on
- * Expanded, and on the narrow Medium rail false opens the poster over the canvas. The 320 dp poster
- * and the phone sheet leave it be.
- * @param[poster] The poster's content.
+ * Medium and Expanded, and on the narrow Medium rail false opens the poster over the canvas. The
+ * phone sheet leaves it be.
+ * @param[poster] The poster's content, told whether to show as the rail. That turns true as soon as
+ * a collapse starts. An opening poster gets false at once and is laid out at its full width, which
+ * its frame then reveals, so neither form squeezes through the widths in between.
  * @param[topBar] The top bar, usually a `TopBarRegion`.
- * @param[canvas] The preview and its tabs.
+ * @param[canvas] The preview and its tabs, given the padding its content scrolls out from under.
+ * On a phone that clears the poster peek and the dock, and everywhere else it is zero.
  * @param[dock] The floating dock, usually a `DockRegion`.
  * @param[modifier] Applied to the whole shell.
  * @param[sheetState] Where the poster sheet rests on a phone.
@@ -116,9 +131,9 @@ internal fun posterPeekHeight(layout: LayoutInfo): Dp =
 public fun WorkspaceShell(
     posterColors: PosterColors,
     posterCollapsed: Boolean,
-    poster: @Composable () -> Unit,
+    poster: @Composable (rail: Boolean) -> Unit,
     topBar: @Composable () -> Unit,
-    canvas: @Composable () -> Unit,
+    canvas: @Composable (contentPadding: PaddingValues) -> Unit,
     dock: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     sheetState: BottomSheetState = rememberBottomSheetState(),
@@ -139,66 +154,68 @@ public fun WorkspaceShell(
 
 /** The phone layout, the canvas under the top bar and the poster in a sheet over both. */
 @Composable
-private fun BoxScope.SheetShell(
+private fun SheetShell(
     posterColors: PosterColors,
     sheetState: BottomSheetState,
-    poster: @Composable () -> Unit,
+    poster: @Composable (rail: Boolean) -> Unit,
     topBar: @Composable () -> Unit,
-    canvas: @Composable () -> Unit,
+    canvas: @Composable (contentPadding: PaddingValues) -> Unit,
     dock: @Composable () -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
-    val peek = posterPeekHeight(LocalLayout.current)
-    Column(Modifier.fillMaxSize()) {
-        topBar()
-        CanvasFrame(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(start = tokens.spacing.medium, top = tokens.spacing.extraSmall, end = tokens.spacing.medium),
-            shape = RoundedCornerShape(topStart = tokens.radius.large, topEnd = tokens.radius.large),
-            canvas = canvas,
-        )
-    }
-    Box(
-        modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .padding(start = tokens.spacing.medium, end = tokens.spacing.medium, bottom = peek + tokens.spacing.large),
-    ) {
-        dock()
-    }
-    PosterSurface(posterColors) {
-        HeadlessBottomSheet(
-            state = sheetState,
-            label = stringResource(Res.string.shell_poster_label),
-            detentLabel = posterDetentNames(),
-            peekHeight = peek,
-            style = posterOverlayStyle(LocalBuilderTokens.current),
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            poster()
-        }
-    }
+    val layout = LocalLayout.current
+    val peek = posterPeekHeight(layout)
+    val clearance = PaddingValues(bottom = sheetClearance(layout, tokens))
+    ShellLayout(
+        start = { 0.dp },
+        topBar = topBar,
+        poster = {
+            PosterSurface(posterColors) {
+                HeadlessBottomSheet(
+                    state = sheetState,
+                    label = stringResource(Res.string.shell_poster_label),
+                    detentLabel = posterDetentNames(),
+                    peekHeight = peek,
+                    style = posterOverlayStyle(LocalBuilderTokens.current),
+                    modifier = Modifier.zIndex(1f).fillMaxSize(),
+                ) {
+                    poster(false)
+                }
+            }
+        },
+        canvas = {
+            CanvasFrame(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = tokens.spacing.medium)
+                    .padding(top = tokens.spacing.extraSmall),
+                shape = RoundedCornerShape(topStart = tokens.radius.large, topEnd = tokens.radius.large),
+                canvas = { canvas(clearance) },
+            ) {
+                Box(Modifier.align(Alignment.BottomCenter).padding(bottom = peek + tokens.spacing.large)) { dock() }
+            }
+        },
+    )
 }
 
 /**
  * Every wider layout. The poster stands on the start edge and the top bar and the canvas share the
- * rest. On the narrow Medium rail the row only makes room for the rail, so the opened poster floats
- * over the canvas instead of pushing it.
+ * rest. On the narrow Medium rail the canvas only makes room for the rail, so the opened poster
+ * floats over the canvas instead of pushing it.
  */
 @Composable
-private fun BoxScope.DockedShell(
+private fun DockedShell(
     posterColors: PosterColors,
     mode: PosterMode,
     collapsed: Boolean,
-    poster: @Composable () -> Unit,
+    poster: @Composable (rail: Boolean) -> Unit,
     topBar: @Composable () -> Unit,
-    canvas: @Composable () -> Unit,
+    canvas: @Composable (contentPadding: PaddingValues) -> Unit,
     dock: @Composable () -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
     val margin = tokens.spacing.medium
-    val open = mode == PosterMode.Docked320 || !collapsed
+    val open = !collapsed
     val openWidth = if (mode == PosterMode.Docked400) ShellMetrics.posterWideWidth else ShellMetrics.posterNarrowWidth
     val floats = mode == PosterMode.Rail72
     val openness by animateFloatAsState(
@@ -208,36 +225,82 @@ private fun BoxScope.DockedShell(
     )
     val posterWidth = { lerp(ShellMetrics.railWidth, openWidth, openness) }
     val roomWidth = if (floats) ({ ShellMetrics.railWidth }) else posterWidth
-    Row(Modifier.fillMaxSize()) {
-        Spacer(Modifier.fillMaxHeight().padding(horizontal = margin).layoutWidth(roomWidth))
-        Column(Modifier.weight(1f).fillMaxHeight()) {
-            topBar()
+    ShellLayout(
+        start = { roomWidth() + margin * 2 },
+        topBar = topBar,
+        poster = {
+            PosterSurface(posterColors) {
+                PosterPanel(
+                    modifier = Modifier
+                        .zIndex(1f)
+                        .padding(margin)
+                        .fillMaxHeight()
+                        .layoutWidth(posterWidth),
+                    floating = floats && open,
+                    contentWidth = if (open) openWidth else null,
+                ) {
+                    poster(!open)
+                }
+            }
+        },
+        canvas = {
             CanvasFrame(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(end = margin, bottom = margin),
+                modifier = Modifier.fillMaxSize().padding(end = margin, bottom = margin),
                 shape = RoundedCornerShape(tokens.radius.large),
-                canvas = canvas,
+                canvas = { canvas(PaddingValues()) },
             ) {
                 Box(Modifier.align(Alignment.BottomCenter).padding(bottom = tokens.spacing.large)) { dock() }
             }
+        },
+    )
+}
+
+/**
+ * Places the top bar, the poster and the canvas, in that order.
+ *
+ * Tab follows the order children are placed in, so this is what puts the poster between the top
+ * bar and the canvas for keyboard users. The poster still draws over the canvas through its own
+ * `zIndex`. The top bar and the canvas stand [start] in from the start edge, read at layout time so
+ * the rail animating only lays out again, and the canvas takes the height the top bar leaves.
+ */
+@Composable
+private fun ShellLayout(
+    start: () -> Dp,
+    topBar: @Composable () -> Unit,
+    poster: @Composable () -> Unit,
+    canvas: @Composable () -> Unit,
+) {
+    Layout(
+        contents = listOf(topBar, poster, canvas),
+        modifier = Modifier.fillMaxSize(),
+    ) { (bars, posters, canvases), constraints ->
+        val width = constraints.maxWidth
+        val height = constraints.maxHeight
+        val x = start().roundToPx().coerceIn(0, width)
+        val bar = bars.map { measurable -> measurable.measure(Constraints(maxWidth = width - x, maxHeight = height)) }
+        val barHeight = bar.maxOfOrNull { placeable -> placeable.height } ?: 0
+        val panel = posters.map { measurable -> measurable.measure(Constraints(maxWidth = width, maxHeight = height)) }
+        val frame = Constraints.fixed(width - x, (height - barHeight).coerceAtLeast(0))
+        val room = canvases.map { measurable -> measurable.measure(frame) }
+        layout(width, height) {
+            bar.forEach { placeable -> placeable.placeRelative(x, 0) }
+            panel.forEach { placeable -> placeable.placeRelative(0, 0) }
+            room.forEach { placeable -> placeable.placeRelative(x, barHeight) }
         }
-    }
-    PosterSurface(posterColors) {
-        PosterPanel(
-            modifier = Modifier.padding(margin).fillMaxHeight().layoutWidth(posterWidth),
-            floating = floats && open,
-            content = poster,
-        )
     }
 }
 
-/** The poster's own frame, the seed page with design D's corners, lifted when it floats. */
+/**
+ * The poster's own frame, the seed page with design D's corners, lifted when it floats.
+ *
+ * With a [contentWidth] the content is laid out at that width whatever the frame's, so an opening
+ * panel is revealed by the frame rather than squeezed by it. Without one it fills the frame.
+ */
 @Composable
 private fun PosterPanel(
     modifier: Modifier,
     floating: Boolean,
+    contentWidth: Dp?,
     content: @Composable () -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
@@ -251,7 +314,8 @@ private fun PosterPanel(
             .background(style.surface)
             .semantics { paneTitle = label },
     ) {
-        content()
+        val sized = if (contentWidth == null) Modifier.fillMaxWidth() else Modifier.revealWidth(contentWidth)
+        Box(sized.fillMaxHeight()) { content() }
     }
 }
 
@@ -300,6 +364,18 @@ private fun Modifier.layoutWidth(width: () -> Dp): Modifier =
         val px = width().roundToPx().coerceIn(constraints.minWidth, constraints.maxWidth)
         val placeable = measurable.measure(constraints.copy(minWidth = px, maxWidth = px))
         layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+    }
+
+/**
+ * Lays the content out at [width] even while the space it is given is narrower, its start edge on
+ * the start edge. Whatever sticks out past the end is for the parent to clip.
+ */
+private fun Modifier.revealWidth(width: Dp): Modifier =
+    layout { measurable, constraints ->
+        val px = width.roundToPx()
+        val placeable = measurable.measure(constraints.copy(minWidth = px, maxWidth = px))
+        val shown = px.coerceIn(constraints.minWidth, constraints.maxWidth)
+        layout(shown, placeable.height) { placeable.placeRelative(0, 0) }
     }
 
 /** The kit's names for the detents, remembered on the three names like the public sheet's. */

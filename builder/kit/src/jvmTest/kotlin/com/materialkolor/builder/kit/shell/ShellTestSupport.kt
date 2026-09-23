@@ -43,17 +43,18 @@ internal val ShellSkins: List<Pair<String, Skin>> = listOf(
     "fluent" to Skin(Library.Fluent, expressive = false),
 )
 
-/** A skin over a resolved document, a measured layout and frozen motion. */
+/** A skin over a resolved document, a measured layout for a mouse or a finger, and frozen motion. */
 @Composable
 internal fun ShellHarness(
     skin: Skin,
     reducedMotion: Boolean = false,
+    coarsePointer: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val result = remember { ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4))) }
     CompositionLocalProvider(LocalMotionFrozen provides true) {
         BuilderTheme(skin, result, isDark = false, reducedMotion = reducedMotion) {
-            ProvideBuilderLayout(modifier = Modifier.fillMaxSize().testTag(ShellRootTag)) { content() }
+            ProvideBuilderLayout(coarsePointer, Modifier.fillMaxSize().testTag(ShellRootTag)) { content() }
         }
     }
 }

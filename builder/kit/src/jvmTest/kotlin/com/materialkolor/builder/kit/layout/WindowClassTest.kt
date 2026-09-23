@@ -33,6 +33,22 @@ class WindowClassTest {
     }
 
     @Test
+    fun posterMode_phoneOnItsSide_takesTheSheet() {
+        modeAt(844.dp, 390.dp, coarsePointer = true) shouldBe PosterMode.Sheet
+        modeAt(915.dp, 412.dp, coarsePointer = true) shouldBe PosterMode.Sheet
+        modeAt(1280.dp, 479.dp, coarsePointer = true) shouldBe PosterMode.Sheet
+        LayoutInfo.of(widthDp = 915.dp, heightDp = 412.dp, coarsePointer = true).windowClass shouldBe WindowClass.Medium
+    }
+
+    @Test
+    fun posterMode_shortWindowWithAMouseOrTallWithAFinger_keepsItsWidthsTreatment() {
+        modeAt(1280.dp, 450.dp, coarsePointer = false) shouldBe PosterMode.Docked400
+        modeAt(844.dp, 390.dp, coarsePointer = false) shouldBe PosterMode.Docked320
+        modeAt(844.dp, 480.dp, coarsePointer = true) shouldBe PosterMode.Docked320
+        modeAt(1280.dp, 800.dp, coarsePointer = true) shouldBe PosterMode.Docked400
+    }
+
+    @Test
     fun minTouchTarget_perClassAndPointer_followsTheSpecTable() {
         layoutAt(390.dp, coarsePointer = true).minTouchTarget shouldBe 44.dp
         layoutAt(390.dp, coarsePointer = false).minTouchTarget shouldBe 44.dp
@@ -81,6 +97,12 @@ class WindowClassTest {
     }
 
     private fun posterModeAt(widthDp: Dp): PosterMode = layoutAt(widthDp).posterMode
+
+    private fun modeAt(
+        widthDp: Dp,
+        heightDp: Dp,
+        coarsePointer: Boolean,
+    ): PosterMode = LayoutInfo.of(widthDp = widthDp, heightDp = heightDp, coarsePointer = coarsePointer).posterMode
 
     private fun layoutAt(
         widthDp: Dp,
