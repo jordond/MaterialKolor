@@ -1,10 +1,17 @@
 package com.materialkolor.builder.codegen.validate
 
 import com.materialkolor.builder.codegen.Fixtures
+import com.materialkolor.builder.codegen.target.custom.CustomFrozen
+import com.materialkolor.builder.codegen.target.custom.CustomFrozenCases
+import com.materialkolor.builder.codegen.target.fluent.FluentFrozen
+import com.materialkolor.builder.codegen.target.fluent.FluentFrozenCases
 import com.materialkolor.builder.codegen.target.material3.Material3Dynamic
 import com.materialkolor.builder.codegen.target.material3.Material3DynamicCases
+import com.materialkolor.builder.codegen.target.material3.Material3Frozen
+import com.materialkolor.builder.codegen.target.material3.Material3FrozenCases
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Accent
+import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportTarget
 import kotlin.test.Test
@@ -92,5 +99,59 @@ class ReservedNamesTest {
     @Test
     fun of_bothMaterial3Targets_reserveTheSameNames() {
         assertEquals(ReservedNames.of(ExportTarget.Material3), ReservedNames.of(ExportTarget.Material3Expressive))
+    }
+
+    // b-111
+    @Test
+    fun clashes_customAccentNamedLikeASlotOrADeclaration_isReported() {
+        val document = ThemeDocument.Default.copy(
+            library = Library.Custom,
+            themeName = "ThemeColors",
+            accents = listOf(
+                Accent(name = "TextStrong", seed = seed),
+                Accent(name = "focusRing", seed = seed),
+                Accent(name = "brand", seed = seed),
+                Accent(name = "LocalThemeColors", seed = seed),
+                Accent(name = "ColorFamily", seed = seed),
+            ),
+        )
+
+        assertEquals(
+            listOf(
+                ReservedNameClash.ThemeName("ThemeColors"),
+                ReservedNameClash.AccentName(0, "TextStrong"),
+                ReservedNameClash.AccentName(1, "focusRing"),
+                ReservedNameClash.AccentName(3, "LocalThemeColors"),
+                ReservedNameClash.AccentName(4, "ColorFamily"),
+            ),
+            ReservedNames.clashes(document),
+        )
+    }
+
+    // b-111
+    @Test
+    fun clashes_fluentThemeNamedThemeShades_isReported() {
+        val document = ThemeDocument.Default.copy(library = Library.Fluent, themeName = "ThemeShades")
+
+        assertEquals(listOf(ReservedNameClash.ThemeName("ThemeShades")), ReservedNames.clashes(document))
+    }
+
+    // b-111
+    @Test
+    fun of_frozenTargets_coverEveryNameTheFrozenExportsImport() {
+        val exports = Material3FrozenCases.all.mapValues { (_, input) -> input to Material3Frozen.files(input) } +
+            FluentFrozenCases.all.mapValues { (_, input) -> input to FluentFrozen.files(input) } +
+            CustomFrozenCases.all.mapValues { (_, input) -> input to CustomFrozen.files(input) }
+
+        exports.forEach { (case, export) ->
+            val (input, files) = export
+            val reserved = ReservedNames.of(input.target)
+            val imported = files
+                .flatMap { file -> file.text.lines() }
+                .filter { line -> line.startsWith("import ") }
+                .map { line -> line.substringAfterLast('.') }
+
+            assertTrue(reserved.containsAll(imported), "$case imports ${imported - reserved}")
+        }
     }
 }

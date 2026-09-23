@@ -41,7 +41,7 @@ private const val CONTAINER_TONE = "containerTone"
 private const val THRESHOLD = "threshold"
 
 /** The four colors of a family, in the order `ColorFamily` declares them. */
-private val FamilyParts: List<String> = listOf("color", "onColor", "colorContainer", "onColorContainer")
+internal val FamilyParts: List<String> = listOf("color", "onColor", "colorContainer", "onColorContainer") // b-111
 
 /**
  * `ExtendedColors.kt`, the color families the theme's accents turn into.
