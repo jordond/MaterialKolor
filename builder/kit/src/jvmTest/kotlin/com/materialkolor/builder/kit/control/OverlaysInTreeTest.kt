@@ -18,6 +18,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -28,18 +29,24 @@ import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasStateDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
+import androidx.compose.ui.test.rightClick
+import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.test.withKeyDown
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -47,17 +54,22 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.DropdownPositionProvider
+import com.materialkolor.builder.kit.headless.HeadlessDropdown
 import com.materialkolor.builder.kit.headless.LocalOverlayHost
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
 import com.materialkolor.builder.kit.headless.OverlayHostState
 import com.materialkolor.builder.kit.headless.OverlayKind
 import com.materialkolor.builder.kit.headless.TooltipPositionProvider
 import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.shell.PosterSurface
+import com.materialkolor.builder.kit.shell.ShellPosterColors
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import kotlin.test.Test
 
 /** [ControlsHarness] with the overlays rendering in the page or in windows of their own. */
@@ -97,7 +109,7 @@ class OverlaysInTreeTest {
     @Test
     fun dialog_eachWay_trapsTabClosesOnEscAndReturnsFocus() =
         hostEachWay { skin, inTree ->
-            checkModal(skin, inTree, "Delete project", DialogCycle) { open, close, trigger ->
+            hostCheckModal(skin, inTree, "Delete project", DialogCycle) { open, close, trigger ->
                 BuilderDialog(
                     visible = open,
                     onDismissRequest = close,
@@ -114,7 +126,7 @@ class OverlaysInTreeTest {
     @Test
     fun sheet_eachWay_trapsTabClosesOnEscAndReturnsFocus() =
         hostEachWay { skin, inTree ->
-            checkModal(skin, inTree, "Export", PanelCycle) { open, close, trigger ->
+            hostCheckModal(skin, inTree, "Export", PanelCycle) { open, close, trigger ->
                 BuilderSheet(open, close, "Export", SheetPresentation.EndPanel, returnFocusTo = trigger) {
                     OverlayTestButton("first")
                     OverlayTestButton("second")
@@ -125,7 +137,7 @@ class OverlaysInTreeTest {
     @Test
     fun sidePanel_eachWay_trapsTabClosesOnEscAndReturnsFocus() =
         hostEachWay { skin, inTree ->
-            checkModal(skin, inTree, "Projects", PanelCycle) { open, close, trigger ->
+            hostCheckModal(skin, inTree, "Projects", PanelCycle) { open, close, trigger ->
                 BuilderSidePanel(open, close, "Projects", returnFocusTo = trigger) {
                     OverlayTestButton("first")
                     OverlayTestButton("second")
@@ -200,6 +212,7 @@ class OverlaysInTreeTest {
             onNodeWithTag("trigger").requestFocus()
             open = true
             waitForIdle()
+            onNodeWithTag("page").assertExists()
             duplicate.assertIsFocused()
             duplicate.performKeyInput { pressKey(Key.Tab) }
             waitForIdle()
@@ -303,30 +316,197 @@ class OverlaysInTreeTest {
         }
 
     @Test
-    fun overlay_inTree_keepsTheTokensAndLayoutDirectionOfWhereItOpened() =
+    fun overlay_inTree_keepsTheTokensDensityAndLayoutDirectionOfWhereItOpened() =
         forEachSkin { _, skin ->
-            var changed: BuilderTokens? = null
-            val seen = mutableMapOf<String, Pair<BuilderTokens, LayoutDirection>>()
+            var changed: HostLocals? = null
+            var poster: HostLocals? = null
+            val seen = mutableMapOf<String, HostLocals>()
             setContent {
                 HostOverlays(skin, inTree = true) {
-                    val tokens = LocalBuilderTokens.current.copy(canvas = Color.Magenta).also { changed = it }
+                    val style = overlayStyle(skin.library)
                     CompositionLocalProvider(
-                        LocalBuilderTokens provides tokens,
+                        LocalBuilderTokens provides LocalBuilderTokens.current.copy(canvas = Color.Magenta),
                         LocalLayoutDirection provides LayoutDirection.Rtl,
+                        LocalDensity provides Density(density = 3f, fontScale = 1.5f),
                     ) {
+                        changed = hostLocals()
                         BuilderDialog(visible = true, onDismissRequest = {}, title = "Theme") {
-                            seen["dialog"] = LocalBuilderTokens.current to LocalLayoutDirection.current
+                            seen["dialog"] = hostLocals()
                         }
                         BuilderSheet(true, {}, "Export", SheetPresentation.FullScreen) {
-                            seen["sheet"] = LocalBuilderTokens.current to LocalLayoutDirection.current
+                            seen["sheet"] = hostLocals()
                         }
+                        Box { HeadlessDropdown(true, {}, style) { _ -> seen["menu"] = hostLocals() } }
+                    }
+                    PosterSurface(ShellPosterColors) {
+                        poster = hostLocals()
+                        Box { HeadlessDropdown(true, {}, style) { _ -> seen["poster"] = hostLocals() } }
                     }
                 }
             }
             waitForIdle()
             onNode(hasOverlayPaneTitle("Export")).assertExists()
-            val expected = checkNotNull(changed) to LayoutDirection.Rtl
-            seen shouldBe mapOf("dialog" to expected, "sheet" to expected)
+            val expected = checkNotNull(changed)
+            seen shouldBe mapOf(
+                "dialog" to expected,
+                "sheet" to expected,
+                "menu" to expected,
+                "poster" to checkNotNull(poster),
+            )
+        }
+
+    @Test
+    fun dialogWithoutActions_inTree_holdsFocusThroughTabAndClosesOnEsc() =
+        forEachSkin { _, skin ->
+            hostCheckHeldFocus(skin) { open, close, focus, trigger ->
+                trigger()
+                BuilderDialog(open, close, "Rename", returnFocusTo = focus) { BuilderText("Sunset") }
+            }
+        }
+
+    @Test
+    fun menuOfDisabledRows_inTree_holdsFocusThroughTabAndClosesOnEsc() =
+        forEachSkin { _, skin ->
+            hostCheckHeldFocus(skin) { open, close, _, trigger ->
+                BuilderMenu(open, close, listOf(BuilderMenuItem("Archive", {}, enabled = false))) { trigger() }
+            }
+        }
+
+    @Test
+    fun menuRowThatFocusesAPageField_inTree_leavesFocusOnTheField() =
+        forEachSkin { _, skin ->
+            var open by mutableStateOf(false)
+            val name = FocusRequester()
+            setContent {
+                HostOverlays(skin, inTree = true) {
+                    Column {
+                        Box(
+                            Modifier
+                                .testTag("name")
+                                .size(40.dp)
+                                .focusRequester(name)
+                                .focusable(),
+                        )
+                        val items = listOf(BuilderMenuItem("Rename", { name.requestFocus() }))
+                        BuilderMenu(open, { open = false }, items) {
+                            Box(Modifier.testTag("trigger").size(40.dp).focusable())
+                        }
+                    }
+                }
+            }
+            onNodeWithTag("trigger").requestFocus()
+            open = true
+            waitForIdle()
+            onNode(hasText("Rename") and hasRole(Role.Button)).performClick()
+            waitForIdle()
+            open shouldBe false
+            onNodeWithText("Rename").assertDoesNotExist()
+            onNodeWithTag("name").assertIsFocused()
+        }
+
+    @Test
+    fun dialog_inTree_callerLeavingMidExit_emptiesTheHostAndBringsThePageBack() =
+        forEachSkin { _, skin ->
+            lateinit var host: OverlayHostState
+            var caller by mutableStateOf(true)
+            var open by mutableStateOf(true)
+            setContent {
+                HostOverlays(skin, inTree = true) {
+                    host = checkNotNull(LocalOverlayHost.current)
+                    Column {
+                        Box(Modifier.testTag("page").size(40.dp).focusable())
+                        if (caller) BuilderDialog(open, { open = false }, "Rename") { BuilderText("Sunset") }
+                    }
+                }
+            }
+            waitForIdle()
+            onNodeWithTag("page").assertDoesNotExist()
+            mainClock.autoAdvance = false
+            open = false
+            mainClock.advanceTimeByFrame()
+            mainClock.advanceTimeByFrame()
+            host.layers.size shouldBe 1
+            caller = false
+            mainClock.advanceTimeByFrame()
+            host.layers.size shouldBe 0
+            onNodeWithTag("page").assertExists()
+        }
+
+    @Test
+    fun toast_inTree_drawsOverAnOpenDialogInItsOwnRegion() =
+        forEachSkin { _, skin ->
+            lateinit var host: OverlayHostState
+            val toasts = BuilderToastHostState()
+            setContent {
+                HostOverlays(skin, inTree = true) {
+                    host = checkNotNull(LocalOverlayHost.current)
+                    Box(Modifier.fillMaxSize()) {
+                        Box(Modifier.align(Alignment.BottomStart).size(width = 320.dp, height = 240.dp)) {
+                            BuilderToastHost(toasts)
+                        }
+                        BuilderDialog(visible = true, onDismissRequest = {}, title = "Export") {
+                            BuilderText("Kotlin")
+                        }
+                    }
+                }
+            }
+            waitForIdle()
+            toasts.show("Copied", duration = ToastDuration.Indefinite)
+            waitForIdle()
+            host.top.size shouldBe 1
+            host.layers.map { it.kind } shouldBe listOf(OverlayKind.Modal)
+            val root = onRoot().getBoundsInRoot()
+            val toast = onNodeWithText("Copied").assertExists().getBoundsInRoot()
+            (toast.right <= root.left + 320.dp) shouldBe true
+            (toast.top >= root.bottom - 240.dp) shouldBe true
+        }
+
+    @Test
+    fun textField_rightClick_opensNoPopupWhereOverlaysRenderInThePage() =
+        hostEachWay { skin, inTree ->
+            setContent { HostOverlays(skin, inTree) { BuilderTextField("Ocean", {}, "Project name") } }
+            onNode(hasSetTextAction()).performMouseInput { rightClick() }
+            waitForIdle()
+            val popups = onAllNodes(isPopup()).fetchSemanticsNodes().size
+            // In windows foundation's own context menu opens, which shows the click lands.
+            if (inTree) popups shouldBe 0 else (popups > 0) shouldBe true
+        }
+
+    @Test
+    fun overlays_switchOnWithoutAHost_composeWhileClosed() =
+        forEachSkin { _, skin ->
+            val saved = BuilderToastHostState().apply { show("Saved", duration = ToastDuration.Indefinite) }
+            setContent {
+                HostOverlays(skin, inTree = true) {
+                    CompositionLocalProvider(LocalOverlayHost provides null) {
+                        Column {
+                            BuilderMenu(false, {}, MenuItems) { BuilderText("Project") }
+                            BuilderSelect("Style", listOf("Vibrant", "Expressive"), "Vibrant", {})
+                            BuilderTooltip("Undo last edit") { Box(Modifier.size(40.dp)) }
+                            BuilderDialog(false, {}, "Rename") { BuilderText("Sunset") }
+                            BuilderToastHost(saved, Modifier.size(200.dp))
+                        }
+                    }
+                }
+            }
+            waitForIdle()
+            onNodeWithText("Project").assertExists()
+            onNodeWithText("Saved").assertExists()
+        }
+
+    @Test
+    fun overlay_switchOnWithoutAHost_failsAsItOpens() =
+        runComposeUiTest {
+            val failure = shouldThrow<IllegalStateException> {
+                setContent {
+                    HostOverlays(Skin(Library.Unstyled, expressive = false), inTree = true) {
+                        CompositionLocalProvider(LocalOverlayHost provides null) {
+                            BuilderDialog(true, {}, "Rename") { BuilderText("Sunset") }
+                        }
+                    }
+                }
+            }
+            failure.message shouldContain "OverlayHost"
         }
 
     @Test
@@ -383,7 +563,7 @@ class OverlaysInTreeTest {
  * has to be gone from the semantics tree while the modal is open, and back once it closes.
  */
 @OptIn(ExperimentalTestApi::class)
-private fun ComposeUiTest.checkModal(
+private fun ComposeUiTest.hostCheckModal(
     skin: Skin,
     inTree: Boolean,
     title: String,
@@ -436,3 +616,73 @@ private fun ComposeUiTest.checkModal(
     onNodeWithTag("page").assertExists()
     onNodeWithTag("trigger").assertIsFocused()
 }
+
+/**
+ * Opens [overlay], which holds nothing that takes focus, from a trigger. Focus has to leave the
+ * trigger for the overlay, Tab both ways must not reach the page, and Esc closes it with focus back
+ * on the trigger.
+ */
+@OptIn(ExperimentalTestApi::class)
+private fun ComposeUiTest.hostCheckHeldFocus(
+    skin: Skin,
+    overlay: @Composable (
+        open: Boolean,
+        close: () -> Unit,
+        focus: FocusRequester,
+        trigger: @Composable () -> Unit,
+    ) -> Unit,
+) {
+    var open by mutableStateOf(false)
+    var pageTookFocus = false
+    var triggerFocused = false
+    val focus = FocusRequester()
+    setContent {
+        HostOverlays(skin, inTree = true) {
+            Column {
+                Box(
+                    Modifier
+                        .size(40.dp)
+                        .onFocusChanged { state -> if (state.isFocused) pageTookFocus = true }
+                        .focusable(),
+                )
+                overlay(open, { open = false }, focus) {
+                    Box(
+                        Modifier
+                            .testTag("trigger")
+                            .size(40.dp)
+                            .focusRequester(focus)
+                            .onFocusChanged { state -> triggerFocused = state.isFocused }
+                            .focusable(),
+                    )
+                }
+            }
+        }
+    }
+    onNodeWithTag("trigger").requestFocus()
+    waitForIdle()
+    triggerFocused shouldBe true
+    open = true
+    waitForIdle()
+    triggerFocused shouldBe false
+    onRoot().performKeyInput { pressKey(Key.Tab) }
+    waitForIdle()
+    onRoot().performKeyInput { withKeyDown(Key.ShiftLeft) { pressKey(Key.Tab) } }
+    waitForIdle()
+    pageTookFocus shouldBe false
+    triggerFocused shouldBe false
+    onRoot().performKeyInput { pressKey(Key.Escape) }
+    waitForIdle()
+    open shouldBe false
+    triggerFocused shouldBe true
+}
+
+/** The locals an overlay has to carry from where it opened. */
+private data class HostLocals(
+    val tokens: BuilderTokens,
+    val direction: LayoutDirection,
+    val density: Density,
+)
+
+@Composable
+private fun hostLocals(): HostLocals =
+    HostLocals(LocalBuilderTokens.current, LocalLayoutDirection.current, LocalDensity.current)

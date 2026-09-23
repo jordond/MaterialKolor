@@ -93,10 +93,10 @@ private fun TooltipPopup(
     style: OverlayStyle,
     interaction: MutableInteractionSource,
 ) {
-    val host = inTreeOverlayHost()
-    val anchor = if (host != null) rememberOverlayAnchor(host) else null
+    val anchor = if (LocalOverlaysInTree.current) rememberOverlayAnchor() else null
     val state = rememberOverlayVisibility(visible)
     if (!state.isOverlayShown(visible)) return
+    val host = inTreeOverlayHost()
     val tokens = LocalBuilderTokens.current
     val gap = with(LocalDensity.current) { tokens.spacing.extraSmall.roundToPx() }
     val provider = remember(gap) { TooltipPositionProvider(gap) }
@@ -126,7 +126,9 @@ private fun TooltipPopup(
         }
     }
     if (host != null && anchor != null) {
-        OverlayPortal(host, OverlayKind.Passive, OverlayPlacement(anchor, provider), content = bubble)
+        val layer = remember { OverlayLayer(OverlayKind.Passive) }
+        val placement = remember(anchor, provider) { OverlayPlacement(anchor, provider) }
+        OverlayPortal(host, layer, visible, placement, content = bubble)
     } else {
         Popup(popupPositionProvider = provider, properties = PopupProperties(focusable = false), content = bubble)
     }

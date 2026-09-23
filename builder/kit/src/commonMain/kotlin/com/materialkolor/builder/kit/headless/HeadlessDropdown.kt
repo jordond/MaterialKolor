@@ -74,9 +74,10 @@ import kotlin.math.max
  * A popover list anchored under whatever it shares a parent with.
  *
  * It opens in a focusable popup, or as a popover in the overlay host, so Esc and a click outside
- * both call [onDismissRequest], and focus lands on [initialFocus] or else on the first row. The
- * arrows and Tab walk the rows. In the host focus goes back to [returnFocusTo] once the list has
- * gone, since no popup window hands it back.
+ * both call [onDismissRequest], and focus lands on [initialFocus], or else on the first row, or else
+ * on the list itself when every row is disabled. The arrows and Tab walk the rows. In the host focus
+ * goes back to [returnFocusTo] once the list has gone, since no popup window hands it back, unless a
+ * row has already moved it somewhere else.
  *
  * @param[expanded] Whether the list is open.
  * @param[onDismissRequest] Called when the list asks to close.
@@ -84,7 +85,8 @@ import kotlin.math.max
  * @param[minWidth] The narrowest the list may be, the anchor's width for a select.
  * @param[initialFocus] The row that takes focus when the list opens, the selected option for a select.
  * @param[returnFocusTo] The trigger or the field that opened the list.
- * @param[content] The rows.
+ * @param[content] The rows. A row calls `close` rather than [onDismissRequest], so the list lets go of
+ * the page at once and a row that moves focus there keeps it.
  */
 @Composable
 internal fun HeadlessDropdown(
@@ -94,20 +96,26 @@ internal fun HeadlessDropdown(
     minWidth: Dp = OverlayMetrics.menuMinWidth,
     initialFocus: FocusRequester? = null,
     returnFocusTo: FocusRequester? = null,
-    content: @Composable ColumnScope.() -> Unit,
+    content: @Composable ColumnScope.(close: () -> Unit) -> Unit,
 ) {
-    val host = inTreeOverlayHost()
-    val anchor = if (host != null) rememberOverlayAnchor(host) else null
+    val inTree = LocalOverlaysInTree.current
+    val anchor = if (inTree) rememberOverlayAnchor() else null
     val state = rememberOverlayVisibility(expanded)
     val shown = state.isOverlayShown(expanded)
-    if (host != null) ReturnFocusWhenGone(shown, returnFocusTo)
+    if (inTree) ReturnFocusWhenGone(shown, returnFocusTo, currentOverlayHost())
     if (!shown) return
+    val host = inTreeOverlayHost()
     val tokens = LocalBuilderTokens.current
     val gap = with(LocalDensity.current) { tokens.spacing.extraSmall.roundToPx() }
     val provider = remember(gap) { DropdownPositionProvider(gap) }
+    val layer = remember { OverlayLayer(OverlayKind.Popover) }
+    val close = {
+        layer.open = false
+        onDismissRequest()
+    }
     val list: @Composable () -> Unit = {
         AnimatedVisibility(visibleState = state, enter = popoverEnter(), exit = popoverExit()) {
-            val firstRow = remember { FocusRequester() }
+            val focus = remember { OverlayFocus() }
             Column(
                 modifier = Modifier
                     .padding(tokens.spacing.small)
@@ -119,15 +127,15 @@ internal fun HeadlessDropdown(
                     .width(IntrinsicSize.Max)
                     .heightIn(max = OverlayMetrics.menuMaxHeight)
                     .verticalScroll(rememberScrollState())
-                    .focusRequester(firstRow)
+                    .then(focus.modifier)
                     .padding(tokens.spacing.extraSmall),
-                content = content,
-            )
-            LaunchedEffect(Unit) { (initialFocus ?: firstRow).requestFocus() }
+            ) { this.content(close) }
+            LaunchedEffect(Unit) { focus.enter(initialFocus) }
         }
     }
     if (host != null && anchor != null) {
-        OverlayPortal(host, OverlayKind.Popover, OverlayPlacement(anchor, provider), onDismissRequest, list)
+        val placement = remember(anchor, provider) { OverlayPlacement(anchor, provider) }
+        OverlayPortal(host, layer, expanded, placement, close, list)
     } else {
         Popup(
             popupPositionProvider = provider,
@@ -201,12 +209,12 @@ internal fun HeadlessMenu(
     val trigger = remember { FocusRequester() }
     Box(modifier.focusRequester(trigger)) {
         anchor()
-        HeadlessDropdown(expanded, onDismissRequest, style, returnFocusTo = trigger) {
+        HeadlessDropdown(expanded, onDismissRequest, style, returnFocusTo = trigger) { close ->
             for (item in items) {
                 HeadlessDropdownItem(
                     label = item.label,
                     onClick = {
-                        onDismissRequest()
+                        close()
                         item.onClick()
                     },
                     style = style,
@@ -278,12 +286,12 @@ internal fun <T> HeadlessSelect(
             minWidth = with(density) { fieldWidth.toDp() },
             initialFocus = if (selected in options) selectedRow else null,
             returnFocusTo = field,
-        ) {
+        ) { close ->
             for (option in options) {
                 HeadlessDropdownItem(
                     label = optionLabel(option),
                     onClick = {
-                        expanded = false
+                        close()
                         onSelect(option)
                     },
                     style = style,

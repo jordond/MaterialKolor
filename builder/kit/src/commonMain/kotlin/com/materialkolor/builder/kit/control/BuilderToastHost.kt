@@ -37,6 +37,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.kit.headless.OverlayTopSlot
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
@@ -139,7 +140,9 @@ public fun rememberBuilderToastHostState(): BuilderToastHostState = remember { B
  * toast goes by itself after its duration, and its action closes it. The countdown waits while the
  * pointer rests on a toast or focus is inside it, and picks up with the time it had left (WCAG
  * 2.2.1), so a keyboard user on Undo never loses the toast under them. Material3 draws each toast
- * as a `Snackbar`, the other skins as a headless toast.
+ * as a `Snackbar`, the other skins as a headless toast. Where overlays render in the page (D40) the
+ * stack is drawn in the overlay host's top slot over the space it is given, so a toast raised from
+ * inside a dialog or a sheet shows over its veil rather than under it.
  *
  * @param[state] The toasts to show.
  * @param[modifier] Applied to the host, which fills the space it is given without taking any
@@ -152,18 +155,20 @@ public fun BuilderToastHost(
 ) {
     val tokens = LocalBuilderTokens.current
     val library = LocalSkin.current.library
-    Box(modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-        Column(
-            modifier = Modifier
-                .widthIn(max = OverlayMetrics.toastMaxWidth)
-                .semantics { liveRegion = LiveRegionMode.Polite }
-                .padding(tokens.spacing.large),
-            verticalArrangement = Arrangement.spacedBy(tokens.spacing.small),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            for (toast in state.toasts) {
-                key(toast.id) {
-                    ToastEntry(toast, state, library)
+    OverlayTopSlot(modifier.fillMaxSize()) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+            Column(
+                modifier = Modifier
+                    .widthIn(max = OverlayMetrics.toastMaxWidth)
+                    .semantics { liveRegion = LiveRegionMode.Polite }
+                    .padding(tokens.spacing.large),
+                verticalArrangement = Arrangement.spacedBy(tokens.spacing.small),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                for (toast in state.toasts) {
+                    key(toast.id) {
+                        ToastEntry(toast, state, library)
+                    }
                 }
             }
         }
