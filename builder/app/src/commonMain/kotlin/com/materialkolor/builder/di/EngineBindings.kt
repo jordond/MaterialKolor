@@ -31,6 +31,7 @@ internal object EngineBindings {
             builder = BuildKonfig.BUILDER_VERSION,
             materialKolor = BuildKonfig.MATERIAL_KOLOR_VERSION,
             fluent = BuildKonfig.FLUENT_VERSION,
+            composeUnstyled = BuildKonfig.COMPOSE_UNSTYLED_VERSION,
             fluentModuleAvailable = BuildKonfig.FLUENT_MODULE,
         )
 }

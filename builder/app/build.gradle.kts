@@ -26,6 +26,7 @@ buildkonfig {
         // The one place the exported MaterialKolor version is named (D9).
         buildConfigField(STRING, "MATERIAL_KOLOR_VERSION", libs.versions.materialKolorExport.get(), const = true)
         buildConfigField(STRING, "FLUENT_VERSION", libs.versions.fluent.get(), const = true)
+        buildConfigField(STRING, "COMPOSE_UNSTYLED_VERSION", libs.versions.composeUnstyled.get(), const = true)
         buildConfigField(BOOLEAN, "FLUENT_MODULE", "true", const = true)
     }
 }

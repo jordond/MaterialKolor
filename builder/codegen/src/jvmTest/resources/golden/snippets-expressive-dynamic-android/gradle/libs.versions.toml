@@ -1,0 +1,7 @@
+# Merge these into the version catalog of your own project.
+
+[versions]
+materialKolor = "6.0.0"
+
+[libraries]
+materialKolor-material3 = { module = "com.materialkolor:material-kolor-material3", version.ref = "materialKolor" }

@@ -15,6 +15,8 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * @property[prefs] The options it is exported with, which belong to whoever is exporting rather
  * than to the theme.
  * @property[resolved] Every color a frozen export writes out, already worked out by the engine.
+ * The caller resolves it from the document as the target sees it, with
+ * `ExportResolver.resolve(document.forTarget(target), prefs)`.
  * @property[versions] The versions the generated files and snippets name.
  * @property[shareUrl] The link that opens this theme in the builder, which the file header points
  * back to.
@@ -59,6 +61,7 @@ public data class ExportInput(
  * @property[builder] The builder's own version.
  * @property[materialKolor] The MaterialKolor version the generated code is written against.
  * @property[fluent] The Compose Fluent version a Fluent export depends on.
+ * @property[composeUnstyled] The Compose Unstyled version a frozen Unstyled export depends on.
  * @property[fluentModuleAvailable] Whether `material-kolor-fluent` is published at [materialKolor].
  * When it is not, a Fluent export builds its shades inline from core.
  */
@@ -66,6 +69,7 @@ public data class ExportVersions(
     public val builder: String,
     public val materialKolor: String,
     public val fluent: String,
+    public val composeUnstyled: String,
     public val fluentModuleAvailable: Boolean = true,
 ) {
     /** How a Fluent export gets its colors, which follows from whether the module is published. */
