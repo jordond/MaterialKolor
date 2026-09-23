@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.selection.selectableGroup
@@ -15,6 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -23,15 +26,23 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.assertWidthIsEqualTo
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -50,19 +61,25 @@ import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportPrefs
 import com.materialkolor.builder.domain.persist.ExportTarget
+import com.materialkolor.builder.engine.audit.ContrastBadge
 import com.materialkolor.builder.engine.export.ExportResolver
 import com.materialkolor.builder.engine.resolve.RampSet
 import com.materialkolor.builder.engine.resolve.RampStep
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
+import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
+import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.token.BuilderTokens
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.test.Test
 
@@ -264,12 +281,138 @@ class WidgetsSemanticsTest {
             onNodeWithTag("screen").assertWidthIsEqualTo(DeviceWidth.Phone.screenWidth)
             onNodeWithTag("framed").getUnclippedBoundsInRoot().width shouldBeGreaterThan DeviceWidth.Phone.screenWidth
         }
+
+    @Test
+    fun deviceWidth_screenWidths_eachFallInADifferentWindowClass() {
+        DeviceWidth.entries.associateWith { width -> WindowClass.of(width.screenWidth) } shouldBe mapOf(
+            DeviceWidth.Phone to WindowClass.Compact,
+            DeviceWidth.Tablet to WindowClass.Medium,
+            DeviceWidth.Desktop to WindowClass.Expanded,
+        )
+    }
+
+    @Test
+    fun oneDecimal_ratioJustUnderATenth_floorsSoItNeverReadsAboveItsBadge() {
+        oneDecimal(4.49) shouldBe "4.4"
+        textBadge(4.49) shouldBe ContrastBadge.AaLarge
+        oneDecimal(6.96) shouldBe "6.9"
+        textBadge(6.96) shouldBe ContrastBadge.Aa
+        oneDecimal(4.5) shouldBe "4.5"
+        oneDecimal(7.0) shouldBe "7.0"
+        oneDecimal(21.0) shouldBe "21.0"
+    }
+
+    @Test
+    fun swatchTile_ratioJustUnderAA_showsTheFlooredRatioBesideAaLarge() =
+        runComposeUiTest {
+            setContent { WidgetHarness(WidgetSkins.first().second) { WidgetSwatch(contrast = 4.49) } }
+
+            onNodeWithText("4.4:1", useUnmergedTree = true).assertExists()
+            onNodeWithText("AA large", useUnmergedTree = true).assertExists()
+        }
+
+    @Test
+    fun swatchTile_noOnPair_hidesTheContrastLine() =
+        runComposeUiTest {
+            setContent { WidgetHarness(WidgetSkins.first().second) { WidgetSwatch(contrast = null) } }
+
+            onNodeWithContentDescription(SwatchName).assert(widgetHasRole(Role.Button))
+            onAllNodesWithText(":1", substring = true, useUnmergedTree = true).assertCountEquals(0)
+            for (badge in listOf("AAA", "AA", "AA large", "Fail")) {
+                onAllNodesWithText(badge, useUnmergedTree = true).assertCountEquals(0)
+            }
+        }
+
+    @Test
+    fun rampStrip_compactCoarsePointerAt320_keepsEveryStopAtTheMinimumTarget() =
+        runComposeUiTest {
+            val ramp = ThemeResolver().resolve(WidgetDocument).ramps[KeyColor.Primary, false]
+            val target = LayoutInfo.of(320.dp, 640.dp, coarsePointer = true).minTouchTarget
+            setContent {
+                Box(Modifier.size(320.dp, 640.dp)) {
+                    WidgetHarness(WidgetSkins.first().second, coarsePointer = true) {
+                        RampStrip(ramp, onCopyTone = {}, Modifier.fillMaxWidth())
+                    }
+                }
+            }
+
+            val stops = onAllNodes(widgetHasRole(Role.Button))
+            stops.assertCountEquals(RampSet.Tones.size)
+            repeat(RampSet.Tones.size) { index ->
+                stops[index].assertWidthIsAtLeast(target).assertHeightIsAtLeast(target)
+            }
+        }
+
+    @Test
+    fun rampStrip_focusedStop_drawsTheFocusLineBetweenTwoPanelHalos() =
+        runComposeUiTest {
+            val ramp = ThemeResolver().resolve(WidgetDocument).ramps[KeyColor.Primary, false]
+            var tokens: BuilderTokens? = null
+            setContent {
+                WidgetHarness(WidgetSkins.first().second) {
+                    tokens = LocalBuilderTokens.current
+                    RampStrip(ramp, onCopyTone = {}, Modifier.width(720.dp))
+                }
+            }
+            val forty = ramp.steps.first { step -> step.tone == 40 }
+            val stop = onNodeWithContentDescription("tone 40, ${forty.argb.toHex()}")
+            stop.requestFocus()
+            waitForIdle()
+
+            val colors = requireNotNull(tokens)
+            val pixels = stop.captureToImage().toPixelMap()
+            val halo = with(density) { (WidgetFocusWidth / 2).toPx() }
+            val line = with(density) { WidgetFocusWidth.toPx() }
+            val y = pixels.height / 2
+            widgetShouldMatch(pixels[(halo / 2).toInt(), y], colors.panel)
+            widgetShouldMatch(pixels[(halo + line / 2).toInt(), y], colors.focus)
+            widgetShouldMatch(pixels[(halo * 1.5f + line).toInt(), y], colors.panel)
+        }
+
+    @Test
+    fun codeView_scrollArea_takesFocusAndScrollsOnPageDown() =
+        runComposeUiTest {
+            val file = widgetGoldenColorFile()
+            setContent {
+                WidgetHarness(WidgetSkins.first().second) {
+                    CodeView(file.lines, onCopy = {}, Modifier.size(480.dp, 200.dp))
+                }
+            }
+            val scrollArea = onNodeWithTag(CodeScrollTag, useUnmergedTree = true)
+            val scrollRange = SemanticsProperties.VerticalScrollAxisRange
+            val lines = onNode(SemanticsMatcher.keyIsDefined(scrollRange), useUnmergedTree = true)
+
+            fun offset(): Float = lines.fetchSemanticsNode().config[scrollRange].value()
+
+            scrollArea.requestFocus()
+            scrollArea.assertIsFocused()
+            offset() shouldBe 0f
+            scrollArea.performKeyInput { pressKey(Key.PageDown) }
+            waitForIdle()
+            offset() shouldBeGreaterThan 0f
+        }
 }
+
+/** Fails unless [actual] is [expected] to within rounding. */
+private fun widgetShouldMatch(
+    actual: Color,
+    expected: Color,
+) {
+    val close = listOf(
+        actual.red to expected.red,
+        actual.green to expected.green,
+        actual.blue to expected.blue,
+    ).all { (a, b) -> abs(a - b) <= WidgetColorTolerance }
+    withClue("$actual should be $expected") { close shouldBe true }
+}
+
+private const val WidgetColorTolerance = 0.02f
 
 @Composable
 private fun WidgetSwatch(
     onCopy: () -> Unit = {},
     onClick: () -> Unit = {},
+    contrast: Double? = 6.4,
 ) {
     Box(Modifier.fillMaxSize()) {
         SwatchTile(
@@ -277,7 +420,7 @@ private fun WidgetSwatch(
             color = SwatchColor,
             onColor = SwatchOnColor,
             tone = 40.0,
-            contrast = 6.4,
+            contrast = contrast,
             onCopy = onCopy,
             onClick = onClick,
             modifier = Modifier.testTag(SwatchTag).width(200.dp),

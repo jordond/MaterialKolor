@@ -2,9 +2,11 @@ package com.materialkolor.builder.kit.widget
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +27,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.semantics.Role
@@ -51,7 +52,7 @@ import kotlin.math.roundToInt
 /** How tall the continuous strip is. */
 private val StripHeight: Dp = 16.dp
 
-/** How tall a marker tick stands on the strip. */
+/** The stroke width of a marker tick and of the ring at the key tone. */
 private val TickWidth: Dp = 2.dp
 
 /** The narrowest a stop can be and still carry its tone as a label. */
@@ -80,8 +81,8 @@ public data class RampMark(
  *
  * The top row holds the stops, each a button that hands its tone to [onCopyTone]. Under it runs a
  * continuous 0 to 100 strip with a tick for every one of [markers] and a ring at [keyTone], labeled
- * below. Narrow rows fold the stops onto two lines and drop the tone labels, which the stops still
- * read out.
+ * below. Narrow rows fold the stops onto as many lines as it takes to keep every stop at the
+ * layout's minimum touch target, and drop the tone labels, which the stops still read out.
  *
  * @param[tones] The stops, darkest first, such as a [Ramp]'s steps.
  * @param[markers] Where roles landed on this palette.
@@ -131,7 +132,9 @@ private fun RampStops(
     val darkInk = tones.minBy { step -> step.tone }.argb.toColor()
     val lightInk = tones.maxBy { step -> step.tone }.argb.toColor()
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val perRow = if (maxWidth / tones.size >= target) tones.size else (tones.size + 1) / 2
+        val fits = (maxWidth / target).toInt().coerceIn(1, tones.size)
+        val rows = ceilDiv(tones.size, fits)
+        val perRow = ceilDiv(tones.size, rows)
         val labeled = maxWidth / perRow >= LabeledStopWidth
         val shape = RoundedCornerShape(tokens.radius.small)
         Column(Modifier.clip(shape)) {
@@ -161,14 +164,21 @@ private fun RampStop(
     onClick: () -> Unit,
     modifier: Modifier,
 ) {
+    val tokens = LocalBuilderTokens.current
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
+    val focused by interactionSource.collectIsFocusedAsState()
     val name = listOf(stringResource(Res.string.widget_tone, step.tone), step.argb.toHex()).joinToString(", ")
     Box(
         modifier = modifier
             .background(step.argb.toColor())
-            .widgetOutline(interactionSource, RectangleShape, hovered, atRest = false)
-            .hoverable(interactionSource)
+            .then(
+                when {
+                    focused -> Modifier.stopFocusRing(tokens.focus, halo = tokens.panel)
+                    hovered -> Modifier.border(WidgetOutlineWidth, tokens.borderStrong)
+                    else -> Modifier
+                },
+            ).hoverable(interactionSource)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -181,6 +191,26 @@ private fun RampStop(
         if (labeled) BuilderText(step.tone.toString(), style = BuilderTextStyle.Value, color = ink, maxLines = 1)
     }
 }
+
+/**
+ * The focus ring of a stop, a [focus] line with a [halo] on both sides the way the strip's ticks are
+ * drawn, so the ring still reads on a stop whose color sits close to the focus color.
+ */
+private fun Modifier.stopFocusRing(
+    focus: Color,
+    halo: Color,
+): Modifier {
+    val haloWidth = WidgetFocusWidth / 2
+    return border(haloWidth, halo)
+        .border(haloWidth + WidgetFocusWidth, focus)
+        .border(haloWidth * 2 + WidgetFocusWidth, halo)
+}
+
+/** [count] split into groups of at most [size], rounded up. */
+private fun ceilDiv(
+    count: Int,
+    size: Int,
+): Int = (count + size - 1) / size
 
 /** The palette from 0 to 100 as one gradient, with a tick at every marker and a ring at the key tone. */
 @Composable

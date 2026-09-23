@@ -1,8 +1,12 @@
 package com.materialkolor.builder.kit.widget
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,7 +17,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -22,15 +28,28 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
@@ -45,10 +64,15 @@ import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.CodePalette
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 /** Tags the swatch before a color literal, so a test can count them. */
 internal const val CodeSwatchTag: String = "code-swatch"
+
+/** Tags the scroll area, so a test can focus it and press keys. */
+internal const val CodeScrollTag: String = "code-scroll"
 
 /** One run of a line, either text or the swatch of the color literal that follows. */
 @Immutable
@@ -68,7 +92,8 @@ private sealed interface CodePart {
  * Each kind of token takes its color from the skin's code palette, and a small swatch sits before
  * every color literal. Lines are numbered, the text can be selected, long lines scroll sideways and
  * only the lines on screen are composed, so a 400 line file scrolls smoothly. Give it a bounded
- * height, since it scrolls its own lines.
+ * height, since it scrolls its own lines. The scroll area takes keyboard focus and shows the focus
+ * ring, so the arrows, Page Up and Page Down scroll it without a pointer.
  *
  * The copy button sits in the top corner. Selecting text takes a part of the file, the button takes
  * all of it, byte for byte.
@@ -109,6 +134,19 @@ public fun CodeView(
         widest ?: charWidth
     }
     val shape = RoundedCornerShape(tokens.radius.medium)
+    val look = remember(style, tokens, gutterWidth, swatchSize) {
+        CodeLineLook(
+            gutter = style.merge(color = tokens.textMuted, textAlign = TextAlign.End),
+            code = style.merge(color = tokens.codePalette.plain),
+            gutterWidth = gutterWidth,
+            swatchSize = swatchSize,
+            swatchShape = RoundedCornerShape(tokens.radius.small / 2),
+        )
+    }
+    val listState = rememberLazyListState()
+    val sideways = rememberScrollState()
+    val scrollSource = remember { MutableInteractionSource() }
+    val scope = rememberCoroutineScope()
 
     Box(
         modifier = modifier
@@ -117,15 +155,24 @@ public fun CodeView(
             .border(WidgetOutlineWidth, tokens.border, shape),
     ) {
         SelectionContainer {
-            Box(Modifier.fillMaxSize().horizontalScroll(rememberScrollState())) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag(CodeScrollTag)
+                    .widgetOutline(scrollSource, shape, hovered = false, atRest = false)
+                    .onKeyEvent { event -> scope.scrollOnKey(event, listState, sideways) }
+                    .focusable(interactionSource = scrollSource)
+                    .horizontalScroll(sideways),
+            ) {
                 LazyColumn(
                     modifier = Modifier
                         .width(gutterWidth + tokens.spacing.medium + codeWidth + tokens.spacing.medium * 2)
                         .fillMaxHeight(),
+                    state = listState,
                     contentPadding = PaddingValues(vertical = tokens.spacing.medium),
                 ) {
                     itemsIndexed(parts) { index, line ->
-                        CodeLine(index + 1, line, gutterWidth, swatchSize)
+                        CodeLine(index + 1, line, look)
                     }
                 }
             }
@@ -139,15 +186,26 @@ public fun CodeView(
     }
 }
 
+/**
+ * What every line of one [CodeView] is drawn with, worked out once so a line scrolling into view
+ * does not merge styles or build shapes again.
+ */
+@Immutable
+private data class CodeLineLook(
+    val gutter: TextStyle,
+    val code: TextStyle,
+    val gutterWidth: Dp,
+    val swatchSize: Dp,
+    val swatchShape: Shape,
+)
+
 @Composable
 private fun CodeLine(
     number: Int,
     parts: List<CodePart>,
-    gutterWidth: Dp,
-    swatchSize: Dp,
+    look: CodeLineLook,
 ) {
     val tokens = LocalBuilderTokens.current
-    val style = LocalBuilderType.current.code
     Row(
         modifier = Modifier.padding(horizontal = tokens.spacing.medium),
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.medium),
@@ -156,8 +214,8 @@ private fun CodeLine(
         DisableSelection {
             BasicText(
                 text = number.toString(),
-                modifier = Modifier.width(gutterWidth).clearAndSetSemantics {},
-                style = style.merge(color = tokens.textMuted, textAlign = TextAlign.End),
+                modifier = Modifier.width(look.gutterWidth).clearAndSetSemantics {},
+                style = look.gutter,
                 maxLines = 1,
             )
         }
@@ -165,23 +223,53 @@ private fun CodeLine(
             for (part in parts) {
                 when (part) {
                     is CodePart.Text -> {
-                        BasicText(part.text, style = style.merge(color = tokens.codePalette.plain), softWrap = false)
+                        BasicText(part.text, style = look.code, softWrap = false)
                     }
                     is CodePart.Swatch -> {
                         Box(
                             modifier = Modifier
                                 .testTag(CodeSwatchTag)
                                 .padding(end = tokens.spacing.extraSmall)
-                                .size(swatchSize)
-                                .clip(RoundedCornerShape(tokens.radius.small / 2))
+                                .size(look.swatchSize)
+                                .clip(look.swatchShape)
                                 .background(part.color)
-                                .border(WidgetOutlineWidth, tokens.border, RoundedCornerShape(tokens.radius.small / 2)),
+                                .border(WidgetOutlineWidth, tokens.border, look.swatchShape),
                         )
                     }
                 }
             }
         }
     }
+}
+
+/**
+ * Scrolls the code on the keys a reader expects, since a lazy list scrolls for a pointer but not for
+ * a keyboard. The arrows move a line, Page Up and Page Down move a screen less one line, and Home
+ * and End jump to the ends of the file. A key with a modifier held is left for the selection.
+ */
+private fun CoroutineScope.scrollOnKey(
+    event: KeyEvent,
+    list: LazyListState,
+    sideways: ScrollState,
+): Boolean {
+    if (event.type != KeyEventType.KeyDown) return false
+    if (event.isShiftPressed || event.isCtrlPressed || event.isAltPressed || event.isMetaPressed) return false
+    val info = list.layoutInfo
+    val first = info.visibleItemsInfo.firstOrNull() ?: return false
+    val line = first.size.toFloat()
+    val page = (info.viewportSize.height - line).coerceAtLeast(line)
+    when (event.key) {
+        Key.DirectionDown -> launch { list.scrollBy(line) }
+        Key.DirectionUp -> launch { list.scrollBy(-line) }
+        Key.PageDown -> launch { list.scrollBy(page) }
+        Key.PageUp -> launch { list.scrollBy(-page) }
+        Key.DirectionRight -> launch { sideways.scrollBy(line) }
+        Key.DirectionLeft -> launch { sideways.scrollBy(-line) }
+        Key.MoveHome -> launch { list.scrollToItem(0) }
+        Key.MoveEnd -> launch { list.scrollToItem((info.totalItemsCount - 1).coerceAtLeast(0)) }
+        else -> return false
+    }
+    return true
 }
 
 /** Whether [this] gets a swatch before it. */

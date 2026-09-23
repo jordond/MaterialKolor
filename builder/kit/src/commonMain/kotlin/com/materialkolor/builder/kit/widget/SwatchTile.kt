@@ -55,6 +55,7 @@ import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 /** How tall the colored part of a swatch is. */
@@ -74,7 +75,9 @@ private const val AA_LARGE = 3.0
  * One role of a scheme, filled with its color and inked with its on-pair.
  *
  * It shows the role name, the hex, the tone the role resolved to and its contrast against [onColor]
- * as a ratio and a WCAG badge. It reads out as a button named like "primary, #6750A4, tone 40".
+ * as a ratio and a WCAG badge. A role with no on-pair, such as outline or an on role, has no ratio to
+ * rate, so it passes a null [contrast] and the contrast line stays hidden. It reads out as a button
+ * named like "primary, #6750A4, tone 40".
  *
  * The copy button is a visible button, not a hover trick. It shows on a touch screen, while the
  * swatch or the button has keyboard focus, and while a mouse is over the swatch.
@@ -83,7 +86,7 @@ private const val AA_LARGE = 3.0
  * @param[color] The role's color.
  * @param[onColor] The color that sits on it, which inks the name and the hex.
  * @param[tone] The HCT tone [color] resolved to, read from the scheme at runtime.
- * @param[contrast] The WCAG ratio between [color] and [onColor].
+ * @param[contrast] The WCAG ratio between [color] and [onColor], or null when the role has no on-pair.
  * @param[onCopy] Called when the copy button is pressed. The caller does the copying.
  * @param[onClick] Called when the swatch itself is pressed.
  * @param[modifier] Applied to the swatch.
@@ -94,7 +97,7 @@ public fun SwatchTile(
     color: Color,
     onColor: Color,
     tone: Double,
-    contrast: Double,
+    contrast: Double?,
     onCopy: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -159,7 +162,7 @@ public fun SwatchTile(
                 verticalArrangement = Arrangement.spacedBy(tokens.spacing.extraSmall),
             ) {
                 BuilderText(toneText, style = BuilderTextStyle.Value, emphasis = Emphasis.Secondary)
-                ContrastLine(contrast)
+                if (contrast != null) ContrastLine(contrast)
             }
         }
         if (showCopy) {
@@ -190,13 +193,11 @@ private fun ContrastLine(contrast: Double) {
             id = badge.icon,
             contentDescription = null,
             tint = badge.tint(tokens),
-            size = tokens.iconSize * BadgeIconScale,
+            size = tokens.iconSize,
         )
         BuilderText(badge.label(), style = BuilderTextStyle.Label)
     }
 }
-
-private const val BadgeIconScale = 0.8f
 
 /** The badge a text pair at [ratio] earns under WCAG 2.2. */
 internal fun textBadge(ratio: Double): ContrastBadge =
@@ -230,9 +231,12 @@ private fun ContrastBadge.label(): String =
         ContrastBadge.Fail -> stringResource(Res.string.widget_badge_fail)
     }
 
-/** [value] rounded to one decimal, "4.5" rather than "4.4999". */
-private fun oneDecimal(value: Double): String {
-    val tenths = (value * 10).roundToInt()
+/**
+ * [value] floored to one decimal, "4.4" for 4.49, so the ratio shown never reads higher than the
+ * ratio its badge was rated on.
+ */
+internal fun oneDecimal(value: Double): String {
+    val tenths = floor(value * 10).toInt()
     return "${tenths / 10}.${tenths % 10}"
 }
 
