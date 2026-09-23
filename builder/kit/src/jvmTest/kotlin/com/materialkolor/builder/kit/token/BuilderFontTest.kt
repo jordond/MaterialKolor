@@ -10,33 +10,36 @@ import org.jetbrains.compose.resources.FontResource
 import org.jetbrains.compose.resources.getFontResourceBytes
 import org.jetbrains.compose.resources.getSystemResourceEnvironment
 import org.jetbrains.skia.Data
+import org.jetbrains.skia.FontMgr
 import org.jetbrains.skia.Typeface
 import kotlin.test.Test
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class BuilderFontTest {
+    @Test
+    fun brandFont_readFromResources_decodesAsBricolageGrotesque() =
+        runTest {
+            val typeface = load(Res.font.BricolageGrotesque_Variable)
+
+            assertTrue(
+                typeface.familyName.contains("Bricolage"),
+                "expected the brand face, got ${typeface.familyName}",
+            )
+            assertTrue(typeface.glyphsCount > 200, "expected a Latin subset, got ${typeface.glyphsCount} glyphs")
+        }
 
     @Test
-    fun brandFont_readFromResources_decodesAsBricolageGrotesque() = runTest {
-        val typeface = load(Res.font.BricolageGrotesque_Variable)
+    fun monoFont_readFromResources_decodesAsJetBrainsMono() =
+        runTest {
+            val typeface = load(Res.font.JetBrainsMono_Variable)
 
-        assertTrue(
-            typeface.familyName.contains("Bricolage"),
-            "expected the brand face, got ${typeface.familyName}",
-        )
-        assertTrue(typeface.glyphsCount > 200, "expected a Latin subset, got ${typeface.glyphsCount} glyphs")
-    }
-
-    @Test
-    fun monoFont_readFromResources_decodesAsJetBrainsMono() = runTest {
-        val typeface = load(Res.font.JetBrainsMono_Variable)
-
-        assertTrue(
-            typeface.familyName.contains("JetBrains"),
-            "expected the mono face, got ${typeface.familyName}",
-        )
-        assertTrue(typeface.glyphsCount > 200, "expected a Latin subset, got ${typeface.glyphsCount} glyphs")
-    }
+            assertTrue(
+                typeface.familyName.contains("JetBrains"),
+                "expected the mono face, got ${typeface.familyName}",
+            )
+            assertTrue(typeface.glyphsCount > 200, "expected a Latin subset, got ${typeface.glyphsCount} glyphs")
+        }
 
     @Test
     fun builderType_builtFromTheTwoFaces_putsTheMonoFaceOnValuesAndCode() {
@@ -57,6 +60,9 @@ class BuilderFontTest {
 
     private suspend fun load(resource: FontResource): Typeface {
         val bytes = getFontResourceBytes(getSystemResourceEnvironment(), resource)
-        return Typeface.makeFromData(Data.makeFromBytes(bytes))
+        return assertNotNull(
+            FontMgr.default.makeFromData(Data.makeFromBytes(bytes)),
+            "Skia could not decode the subset, which means the face would silently fall back",
+        )
     }
 }

@@ -6,7 +6,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class WindowClassTest {
-
     @Test
     fun windowClass_acrossTheBreakpoints_followsTheSpecTable() {
         WindowClass.of(360.dp) shouldBe WindowClass.Compact
@@ -73,6 +72,8 @@ class WindowClassTest {
 
     private fun posterModeAt(widthDp: Dp): PosterMode = layoutAt(widthDp).posterMode
 
-    private fun layoutAt(widthDp: Dp, coarsePointer: Boolean = false): LayoutInfo =
-        LayoutInfo.of(widthDp = widthDp, heightDp = 900.dp, coarsePointer = coarsePointer)
+    private fun layoutAt(
+        widthDp: Dp,
+        coarsePointer: Boolean = false,
+    ): LayoutInfo = LayoutInfo.of(widthDp = widthDp, heightDp = 900.dp, coarsePointer = coarsePointer)
 }

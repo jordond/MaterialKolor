@@ -10,7 +10,6 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 
 class BuilderMotionTest {
-
     @Test
     fun builderDurations_default_matchTheMotionPrinciples() {
         val durations = BuilderDurations()

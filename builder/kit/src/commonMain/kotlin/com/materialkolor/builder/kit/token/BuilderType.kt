@@ -50,24 +50,26 @@ public data class BuilderType(
  * family never falls back to the default instance.
  */
 @Composable
-public fun brandFontFamily(): FontFamily = FontFamily(
-    Font(Res.font.BricolageGrotesque_Variable, FontWeight.Light),
-    Font(Res.font.BricolageGrotesque_Variable, FontWeight.Normal),
-    Font(Res.font.BricolageGrotesque_Variable, FontWeight.Medium),
-    Font(Res.font.BricolageGrotesque_Variable, FontWeight.SemiBold),
-    Font(Res.font.BricolageGrotesque_Variable, FontWeight.Bold),
-    Font(Res.font.BricolageGrotesque_Variable, FontWeight.ExtraBold),
-)
+public fun brandFontFamily(): FontFamily =
+    FontFamily(
+        Font(Res.font.BricolageGrotesque_Variable, FontWeight.Light),
+        Font(Res.font.BricolageGrotesque_Variable, FontWeight.Normal),
+        Font(Res.font.BricolageGrotesque_Variable, FontWeight.Medium),
+        Font(Res.font.BricolageGrotesque_Variable, FontWeight.SemiBold),
+        Font(Res.font.BricolageGrotesque_Variable, FontWeight.Bold),
+        Font(Res.font.BricolageGrotesque_Variable, FontWeight.ExtraBold),
+    )
 
 /** The mono face, a Latin subset of JetBrains Mono with its weight axis live. */
 @Composable
-public fun monoFontFamily(): FontFamily = FontFamily(
-    Font(Res.font.JetBrainsMono_Variable, FontWeight.Light),
-    Font(Res.font.JetBrainsMono_Variable, FontWeight.Normal),
-    Font(Res.font.JetBrainsMono_Variable, FontWeight.Medium),
-    Font(Res.font.JetBrainsMono_Variable, FontWeight.SemiBold),
-    Font(Res.font.JetBrainsMono_Variable, FontWeight.Bold),
-)
+public fun monoFontFamily(): FontFamily =
+    FontFamily(
+        Font(Res.font.JetBrainsMono_Variable, FontWeight.Light),
+        Font(Res.font.JetBrainsMono_Variable, FontWeight.Normal),
+        Font(Res.font.JetBrainsMono_Variable, FontWeight.Medium),
+        Font(Res.font.JetBrainsMono_Variable, FontWeight.SemiBold),
+        Font(Res.font.JetBrainsMono_Variable, FontWeight.Bold),
+    )
 
 /**
  * Builds the builder's type from the two bundled faces.
@@ -84,59 +86,63 @@ public fun rememberBuilderType(): BuilderType {
 /**
  * The type scale, split out so a test can build it without a composition.
  */
-internal fun builderType(brand: FontFamily, mono: FontFamily): BuilderType = BuilderType(
-    posterHero = TextStyle(
-        fontFamily = brand,
-        fontWeight = FontWeight.Bold,
-        fontSize = 72.sp,
-        lineHeight = 76.sp,
-        letterSpacing = (-1.5).sp,
-    ),
-    wordmark = TextStyle(
-        fontFamily = brand,
-        fontWeight = FontWeight.ExtraBold,
-        fontSize = 20.sp,
-        lineHeight = 24.sp,
-        letterSpacing = (-0.2).sp,
-    ),
-    title = TextStyle(
-        fontFamily = brand,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp,
-        lineHeight = 24.sp,
-    ),
-    sectionLabel = TextStyle(
-        fontFamily = brand,
-        fontWeight = FontWeight.Medium,
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.8.sp,
-    ),
-    body = TextStyle(
-        fontFamily = brand,
-        fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-    ),
-    label = TextStyle(
-        fontFamily = brand,
-        fontWeight = FontWeight.Medium,
-        fontSize = 13.sp,
-        lineHeight = 18.sp,
-    ),
-    value = TextStyle(
-        fontFamily = mono,
-        fontWeight = FontWeight.Medium,
-        fontSize = 13.sp,
-        lineHeight = 18.sp,
-    ),
-    code = TextStyle(
-        fontFamily = mono,
-        fontWeight = FontWeight.Normal,
-        fontSize = 13.sp,
-        lineHeight = 20.sp,
-    ),
-)
+internal fun builderType(
+    brand: FontFamily,
+    mono: FontFamily,
+): BuilderType =
+    BuilderType(
+        posterHero = TextStyle(
+            fontFamily = brand,
+            fontWeight = FontWeight.Bold,
+            fontSize = 72.sp,
+            lineHeight = 76.sp,
+            letterSpacing = (-1.5).sp,
+        ),
+        wordmark = TextStyle(
+            fontFamily = brand,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 20.sp,
+            lineHeight = 24.sp,
+            letterSpacing = (-0.2).sp,
+        ),
+        title = TextStyle(
+            fontFamily = brand,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 18.sp,
+            lineHeight = 24.sp,
+        ),
+        sectionLabel = TextStyle(
+            fontFamily = brand,
+            fontWeight = FontWeight.Medium,
+            fontSize = 12.sp,
+            lineHeight = 16.sp,
+            letterSpacing = 0.8.sp,
+        ),
+        body = TextStyle(
+            fontFamily = brand,
+            fontWeight = FontWeight.Normal,
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
+        ),
+        label = TextStyle(
+            fontFamily = brand,
+            fontWeight = FontWeight.Medium,
+            fontSize = 13.sp,
+            lineHeight = 18.sp,
+        ),
+        value = TextStyle(
+            fontFamily = mono,
+            fontWeight = FontWeight.Medium,
+            fontSize = 13.sp,
+            lineHeight = 18.sp,
+        ),
+        code = TextStyle(
+            fontFamily = mono,
+            fontWeight = FontWeight.Normal,
+            fontSize = 13.sp,
+            lineHeight = 20.sp,
+        ),
+    )
 
 /** The builder's type for the surrounding tree. Every skin provides the same value. */
 public val LocalBuilderType: ProvidableCompositionLocal<BuilderType> = staticCompositionLocalOf {

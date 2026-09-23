@@ -125,14 +125,11 @@ private class TweenBuilderMotion(
 ) : BuilderMotion {
     override val pressScale: Float = PressScale
 
-    override fun <T> spatial(): FiniteAnimationSpec<T> =
-        tween(durations.standard, easing = BuilderEasing.Standard)
+    override fun <T> spatial(): FiniteAnimationSpec<T> = tween(durations.standard, easing = BuilderEasing.Standard)
 
-    override fun <T> effects(): FiniteAnimationSpec<T> =
-        tween(durations.quick, easing = BuilderEasing.Standard)
+    override fun <T> effects(): FiniteAnimationSpec<T> = tween(durations.quick, easing = BuilderEasing.Standard)
 
-    override fun <T> slide(): FiniteAnimationSpec<T> =
-        tween(durations.slow, easing = BuilderEasing.Standard)
+    override fun <T> slide(): FiniteAnimationSpec<T> = tween(durations.slow, easing = BuilderEasing.Standard)
 
     override fun <T> reveal(): FiniteAnimationSpec<T> =
         tween(durations.reveal, easing = BuilderEasing.EmphasizedDecelerate)
@@ -146,11 +143,9 @@ private class TweenBuilderMotion(
     override fun <T> popover(): FiniteAnimationSpec<T> =
         tween(durations.popover, easing = BuilderEasing.EmphasizedDecelerate)
 
-    override fun <T> press(): FiniteAnimationSpec<T> =
-        tween(durations.press, easing = BuilderEasing.Standard)
+    override fun <T> press(): FiniteAnimationSpec<T> = tween(durations.press, easing = BuilderEasing.Standard)
 
-    override fun <T> crossfade(): FiniteAnimationSpec<T> =
-        tween(durations.standard, easing = BuilderEasing.Standard)
+    override fun <T> crossfade(): FiniteAnimationSpec<T> = tween(durations.standard, easing = BuilderEasing.Standard)
 }
 
 private class ReducedBuilderMotion(
@@ -158,8 +153,7 @@ private class ReducedBuilderMotion(
 ) : BuilderMotion {
     override val pressScale: Float = 1f
 
-    private fun <T> fade(): FiniteAnimationSpec<T> =
-        tween(durations.reducedCrossfade, easing = BuilderEasing.Standard)
+    private fun <T> fade(): FiniteAnimationSpec<T> = tween(durations.reducedCrossfade, easing = BuilderEasing.Standard)
 
     override fun <T> spatial(): FiniteAnimationSpec<T> = snap()
 

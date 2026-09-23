@@ -46,11 +46,12 @@ public enum class WindowClass {
 
     public companion object {
         /** The class a container of [widthDp] belongs to. */
-        public fun of(widthDp: Dp): WindowClass = when {
-            widthDp < MediumBreakpoint -> Compact
-            widthDp < ExpandedBreakpoint -> Medium
-            else -> Expanded
-        }
+        public fun of(widthDp: Dp): WindowClass =
+            when {
+                widthDp < MediumBreakpoint -> Compact
+                widthDp < ExpandedBreakpoint -> Medium
+                else -> Expanded
+            }
     }
 }
 
@@ -75,11 +76,15 @@ public enum class PosterMode {
 
     public companion object {
         /** The poster treatment for a container of [widthDp] in [windowClass]. */
-        public fun of(windowClass: WindowClass, widthDp: Dp): PosterMode = when (windowClass) {
-            WindowClass.Compact -> Sheet
-            WindowClass.Medium -> if (widthDp >= DockedPosterBreakpoint) Docked320 else Rail72
-            WindowClass.Expanded -> Docked400
-        }
+        public fun of(
+            windowClass: WindowClass,
+            widthDp: Dp,
+        ): PosterMode =
+            when (windowClass) {
+                WindowClass.Compact -> Sheet
+                WindowClass.Medium -> if (widthDp >= DockedPosterBreakpoint) Docked320 else Rail72
+                WindowClass.Expanded -> Docked400
+            }
     }
 }
 
@@ -132,12 +137,13 @@ public data class LayoutInfo(
             widthDp: Dp,
             heightDp: Dp,
             coarsePointer: Boolean = false,
-        ): LayoutInfo = LayoutInfo(
-            windowClass = WindowClass.of(widthDp),
-            widthDp = widthDp,
-            heightDp = heightDp,
-            coarsePointer = coarsePointer,
-        )
+        ): LayoutInfo =
+            LayoutInfo(
+                windowClass = WindowClass.of(widthDp),
+                widthDp = widthDp,
+                heightDp = heightDp,
+                coarsePointer = coarsePointer,
+            )
     }
 }
 
