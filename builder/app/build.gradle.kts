@@ -112,3 +112,19 @@ composeExtension.extensions.getByType<org.jetbrains.compose.resources.ResourcesE
     packageOfResClass = "com.materialkolor.builder.generated.resources"
     publicResClass = false
 }
+
+// b-223
+// ArchitectureTest reads every builder module's Kotlin sources straight off disk, so they are inputs
+// of the JVM test task. Without this a cached pass can hide a new violation in another module.
+tasks.named<Test>("jvmTest") {
+    inputs
+        .files(
+            fileTree(rootDir.resolve("builder")) {
+                // The modules ArchitectureTest's BUILDER_MODULES lists.
+                listOf("domain", "codegen", "engine", "kit", "preview", "app", "web").forEach { module ->
+                    include("$module/src/*/kotlin/**/*.kt")
+                }
+            },
+        ).withPathSensitivity(PathSensitivity.RELATIVE)
+        .withPropertyName("builderSources")
+}
