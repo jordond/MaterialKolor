@@ -2,6 +2,7 @@ package com.materialkolor.builder.domain.validate
 
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Accent
+import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.ThemeDocument
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -145,6 +146,7 @@ class ValidationTest {
             listOf(
                 ValidationError.AccentNameDuplicate(2, "brand"),
                 ValidationError.AccentNameDuplicate(3, "brand"),
+                ValidationError.AccentNameCaseClash(4, "Brand"), // b-110
             ),
             validateAccents(accents),
         )
@@ -191,5 +193,78 @@ class ValidationTest {
         validateDocument(document)
 
         assertEquals(untouched, document)
+    }
+
+    // b-110
+
+    @Test
+    fun validateAccents_namesDifferingOnlyInCase_isACaseClash() {
+        val accents = listOf(Accent(name = "brand", seed = seed), Accent(name = "Brand", seed = seed))
+
+        assertEquals(listOf(ValidationError.AccentNameCaseClash(1, "Brand")), validateAccents(accents))
+    }
+
+    @Test
+    fun validateAccents_caseClashWithAnExactRepeat_isOnlyReportedOnce() {
+        val accents = listOf(
+            Accent(name = "brand", seed = seed),
+            Accent(name = "BRAND", seed = seed),
+            Accent(name = "brand", seed = seed),
+        )
+
+        assertEquals(
+            listOf(
+                ValidationError.AccentNameDuplicate(2, "brand"),
+                ValidationError.AccentNameCaseClash(1, "BRAND"),
+            ),
+            validateAccents(accents),
+        )
+    }
+
+    @Test
+    fun validateAccents_roleName_isReportedWithTheRole() {
+        val accents = listOf(
+            Accent(name = "primary", seed = seed),
+            Accent(name = "SurfaceContainerHigh", seed = seed),
+            Accent(name = "ONERROR", seed = seed),
+            Accent(name = "brand", seed = seed),
+        )
+
+        assertEquals(
+            listOf(
+                ValidationError.AccentNameRole(0, "primary", Role.Primary),
+                ValidationError.AccentNameRole(1, "SurfaceContainerHigh", Role.SurfaceContainerHigh),
+                ValidationError.AccentNameRole(2, "ONERROR", Role.OnError),
+            ),
+            validateAccents(accents),
+        )
+    }
+
+    @Test
+    fun validateAccents_nameThatIsAKeywordOnceLowered_isReported() {
+        val accents = listOf(
+            Accent(name = "Object", seed = seed),
+            Accent(name = "brand", seed = seed),
+            Accent(name = "When", seed = seed),
+        )
+
+        assertEquals(
+            listOf(ValidationError.AccentNameKeyword(0, "Object"), ValidationError.AccentNameKeyword(2, "When")),
+            validateAccents(accents),
+        )
+    }
+
+    @Test
+    fun validateAccents_keywordAsTyped_isOnlyReportedOnce() {
+        val accents = listOf(Accent(name = "object", seed = seed))
+
+        assertEquals(listOf(ValidationError.AccentNameKeyword(0, "object")), validateAccents(accents))
+    }
+
+    @Test
+    fun validateAccents_nameThatOnlyContainsARole_passes() {
+        val accents = listOf(Accent(name = "primaryBrand", seed = seed), Accent(name = "surfaces", seed = seed))
+
+        assertEquals(emptyList(), validateAccents(accents))
     }
 }

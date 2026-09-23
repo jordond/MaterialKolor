@@ -1,6 +1,7 @@
 package com.materialkolor.builder.domain.validate
 
 import com.materialkolor.builder.domain.model.Accent
+import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.ThemeDocument
 
 /** The most accents an export carries. */
@@ -51,6 +52,7 @@ public fun validateAccents(accents: List<Accent>): List<ValidationError> =
             if (bytes > MAX_ACCENT_NAME_BYTES) add(ValidationError.AccentNameTooLong(index, name, bytes))
             if (!seen.add(name)) add(ValidationError.AccentNameDuplicate(index, name))
         }
+        addAll(accentNameClashes(accents)) // b-110
     }
 
 /**
@@ -91,6 +93,32 @@ internal fun String.isKotlinIdentifier(): Boolean {
 }
 
 private fun String.utf8Size(): Int = encodeToByteArray().size
+
+// b-110
+// An export names each accent's family after it with the first letter lowered, and its on colors with
+// "on" in front, so two names that only differ in case, or a name that is also a scheme role, collide.
+// Lowering the first letter can also turn a name like `Object` into a keyword.
+private fun accentNameClashes(accents: List<Accent>): List<ValidationError> =
+    buildList {
+        val exact = mutableSetOf<String>()
+        val folded = mutableSetOf<String>()
+        accents.forEachIndexed { index, accent ->
+            val name = accent.name
+            // A name that is a keyword as typed was already reported, so only the lowered one is new here.
+            val lowered = name.replaceFirstChar { char -> char.lowercaseChar() }
+            if (lowered in KOTLIN_HARD_KEYWORDS && name !in KOTLIN_HARD_KEYWORDS) {
+                add(ValidationError.AccentNameKeyword(index, name))
+            }
+
+            val role = Role.entries.firstOrNull { role -> role.name.equals(name, ignoreCase = true) }
+            if (role != null) add(ValidationError.AccentNameRole(index, name, role))
+
+            // An exact repeat is already reported as a duplicate, so only a clash in case is new here.
+            val repeated = !exact.add(name)
+            val clashes = !folded.add(name.lowercase())
+            if (clashes && !repeated) add(ValidationError.AccentNameCaseClash(index, name))
+        }
+    }
 
 private val PACKAGE_SEGMENT = Regex("[a-z][a-z0-9_]*")
 
