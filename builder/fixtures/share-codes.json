@@ -1,0 +1,1565 @@
+[
+    {
+        "label": "default",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAAAAT",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "default with a project name",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": "Acme",
+        "code": "AdllOwAAABAEQWNtZVA",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "typed seed",
+        "document": {
+            "seed": "#6750A4",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AWdQpAAAAABw",
+        "seedHex": "#6750A4",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "style TonalSpot",
+        "document": {
+            "seed": "#1E3A5F",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AR46XwAAAACU",
+        "seedHex": "#1E3A5F",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "style Neutral",
+        "document": {
+            "seed": "#295766",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "Neutral",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "ASlXZgEAAABB",
+        "seedHex": "#295766",
+        "library": "Material3",
+        "style": "Neutral"
+    },
+    {
+        "label": "style Vibrant",
+        "document": {
+            "seed": "#34746D",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "Vibrant",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "ATR0bQIAAAAX",
+        "seedHex": "#34746D",
+        "library": "Material3",
+        "style": "Vibrant"
+    },
+    {
+        "label": "style Expressive",
+        "document": {
+            "seed": "#3F9174",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "Expressive",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AT-RdAMAAADo",
+        "seedHex": "#3F9174",
+        "library": "Material3",
+        "style": "Expressive"
+    },
+    {
+        "label": "style Rainbow",
+        "document": {
+            "seed": "#4AAE7B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "Rainbow",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AUquewQAAAAS",
+        "seedHex": "#4AAE7B",
+        "library": "Material3",
+        "style": "Rainbow"
+    },
+    {
+        "label": "style FruitSalad",
+        "document": {
+            "seed": "#55CB82",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "FruitSalad",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AVXLggUAAACc",
+        "seedHex": "#55CB82",
+        "library": "Material3",
+        "style": "FruitSalad"
+    },
+    {
+        "label": "style Monochrome",
+        "document": {
+            "seed": "#60E889",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "Monochrome",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AWDoiQYAAACB",
+        "seedHex": "#60E889",
+        "library": "Material3",
+        "style": "Monochrome"
+    },
+    {
+        "label": "style Fidelity",
+        "document": {
+            "seed": "#6C0590",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "Fidelity",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AWwFkAcAAAAi",
+        "seedHex": "#6C0590",
+        "library": "Material3",
+        "style": "Fidelity"
+    },
+    {
+        "label": "style Content",
+        "document": {
+            "seed": "#772297",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "Content",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AXcilwgAAABi",
+        "seedHex": "#772297",
+        "library": "Material3",
+        "style": "Content"
+    },
+    {
+        "label": "style Cmf",
+        "document": {
+            "seed": "#823F9E",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "Cmf",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AYI_ngkAAABE",
+        "seedHex": "#823F9E",
+        "library": "Material3",
+        "style": "Cmf"
+    },
+    {
+        "label": "cmf with a tertiary seed",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "Cmf",
+            "cmfTertiarySeed": "#7D5260",
+            "contrast": 0,
+            "spec": "Spec2026",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOykAAAJ9UmBQ",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "Cmf"
+    },
+    {
+        "label": "cmf seed kept under another style",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": "#386A20",
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAAAI4aiAU",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "spec 2025 on a watch",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2025",
+            "platform": "Watch",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllO1AAAADv",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "amoled",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": true,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllO4AAAAAi",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "contrast -100",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": -100,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAnAAO",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "contrast 50",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 50,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAMgDA",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "contrast 100",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 100,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAZACy",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "contrast -37",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": -37,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAA2wA-",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "library Unstyled",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Unstyled",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwABAAB4",
+        "seedHex": "#D9653B",
+        "library": "Unstyled",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "library Fluent",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Fluent",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwACAADF",
+        "seedHex": "#D9653B",
+        "library": "Fluent",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "library Custom",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Custom",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwADAACu",
+        "seedHex": "#D9653B",
+        "library": "Custom",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "material3 expressive",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": true,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAEAAC4",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "one key color",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": "#00658E",
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAAAEBAGWOPg",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "every key color",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": "#102030",
+                "secondary": "#204060",
+                "tertiary": "#306090",
+                "error": "#4080C0",
+                "neutral": "#50A0F0",
+                "neutralVariant": "#60C120"
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAAAE_ECAwIEBgMGCQQIDAUKDwYMEgrw",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "default accent",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [
+                {
+                    "name": "brand",
+                    "seed": "#E91E63",
+                    "harmonize": true,
+                    "light": {
+                        "color": 40,
+                        "container": 90
+                    },
+                    "dark": {
+                        "color": 80,
+                        "container": 30
+                    },
+                    "threshold": "AaNormal"
+                }
+            ],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAAAQBAekeYwVicmFuZEM",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "accent with its own tones and threshold",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [
+                {
+                    "name": "status",
+                    "seed": "#386A20",
+                    "harmonize": false,
+                    "light": {
+                        "color": 35,
+                        "container": 85
+                    },
+                    "dark": {
+                        "color": 75,
+                        "container": 25
+                    },
+                    "threshold": "Aaa"
+                }
+            ],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAAAQBBjhqIAZzdGF0dXMjVUsZAkI",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "accent with only a threshold",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [
+                {
+                    "name": "brand",
+                    "seed": "#E91E63",
+                    "harmonize": true,
+                    "light": {
+                        "color": 40,
+                        "container": 90
+                    },
+                    "dark": {
+                        "color": 80,
+                        "container": 30
+                    },
+                    "threshold": "AaLarge"
+                }
+            ],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAAAQBBekeYwVicmFuZAG1",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "accent with a non ascii name",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [
+                {
+                    "name": "crème",
+                    "seed": "#E91E63",
+                    "harmonize": true,
+                    "light": {
+                        "color": 40,
+                        "container": 90
+                    },
+                    "dark": {
+                        "color": 80,
+                        "container": 30
+                    },
+                    "threshold": "AaNormal"
+                }
+            ],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAAAQBAekeYwZjcsOobWUj",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "three accents",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [
+                {
+                    "name": "brand",
+                    "seed": "#E91E63",
+                    "harmonize": true,
+                    "light": {
+                        "color": 40,
+                        "container": 90
+                    },
+                    "dark": {
+                        "color": 80,
+                        "container": 30
+                    },
+                    "threshold": "AaNormal"
+                },
+                {
+                    "name": "status",
+                    "seed": "#386A20",
+                    "harmonize": false,
+                    "light": {
+                        "color": 35,
+                        "container": 85
+                    },
+                    "dark": {
+                        "color": 75,
+                        "container": 25
+                    },
+                    "threshold": "Aaa"
+                },
+                {
+                    "name": "info",
+                    "seed": "#00658E",
+                    "harmonize": true,
+                    "light": {
+                        "color": 40,
+                        "container": 90
+                    },
+                    "dark": {
+                        "color": 80,
+                        "container": 30
+                    },
+                    "threshold": "AaNormal"
+                }
+            ],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAAAQDAekeYwVicmFuZAY4aiAGc3RhdHVzI1VLGQIBAGWOBGluZm93",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "light pin",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {
+                "Primary": {
+                    "light": "#6750A4",
+                    "dark": null
+                }
+            },
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAAAgBAAFnUKSa",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "pins in every mode",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {
+                "Surface": {
+                    "light": null,
+                    "dark": "#000000"
+                },
+                "Error": {
+                    "light": "#B3261E",
+                    "dark": "#F2B8B5"
+                },
+                "OnTertiaryFixedVariant": {
+                    "light": "#7D5260",
+                    "dark": null
+                }
+            },
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAAAgDDwIAAAAWA7MmHvK4tS8BfVJgvA",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "standard motion",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Standard",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAACABAD4",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "renamed theme",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "BrandTheme",
+            "customTones": {}
+        },
+        "projectName": null,
+        "code": "AdllOwAAACAECkJyYW5kVGhlbWWu",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "custom tones",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Custom",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {
+                "primaryPressed": {
+                    "light": 28,
+                    "dark": null
+                },
+                "surfaceRaised": {
+                    "light": null,
+                    "dark": 10
+                },
+                "borderStrong": {
+                    "light": 50,
+                    "dark": 60
+                },
+                "shadow": {
+                    "light": null,
+                    "dark": null
+                }
+            }
+        },
+        "projectName": null,
+        "code": "AdllOwADACACBAQc_x__CigyPDD___o",
+        "seedHex": "#D9653B",
+        "library": "Custom",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "longest project name",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "code": "AdllOwAAABAweHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh47g",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "non ascii project name",
+        "document": {
+            "seed": "#D9653B",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": null,
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "TonalSpot",
+            "cmfTertiarySeed": null,
+            "contrast": 0,
+            "spec": "Spec2021",
+            "platform": "Phone",
+            "amoled": false,
+            "accents": [],
+            "pins": {},
+            "library": "Material3",
+            "expressive": false,
+            "motionScheme": "Expressive",
+            "themeName": "AppTheme",
+            "customTones": {}
+        },
+        "projectName": "Café Olé ☕",
+        "code": "AdllOwAAABAOQ2Fmw6kgT2zDqSDimJU-",
+        "seedHex": "#D9653B",
+        "library": "Material3",
+        "style": "TonalSpot"
+    },
+    {
+        "label": "every section at once",
+        "document": {
+            "seed": "#6750A4",
+            "seedSource": {
+                "type": "Typed"
+            },
+            "keyColors": {
+                "primary": null,
+                "secondary": "#00658E",
+                "tertiary": null,
+                "error": null,
+                "neutral": null,
+                "neutralVariant": null
+            },
+            "style": "Cmf",
+            "cmfTertiarySeed": "#7D5260",
+            "contrast": 50,
+            "spec": "Spec2026",
+            "platform": "Phone",
+            "amoled": true,
+            "accents": [
+                {
+                    "name": "brand",
+                    "seed": "#E91E63",
+                    "harmonize": true,
+                    "light": {
+                        "color": 40,
+                        "container": 90
+                    },
+                    "dark": {
+                        "color": 80,
+                        "container": 30
+                    },
+                    "threshold": "AaNormal"
+                }
+            ],
+            "pins": {
+                "Primary": {
+                    "light": "#00658E",
+                    "dark": null
+                }
+            },
+            "library": "Custom",
+            "expressive": true,
+            "motionScheme": "Standard",
+            "themeName": "Kit",
+            "customTones": {
+                "focusRing": {
+                    "light": 55,
+                    "dark": null
+                }
+            }
+        },
+        "projectName": "Kit",
+        "code": "AWdQpKkHMj8CAGWOfVJgAQHpHmMFYnJhbmQBAAEAZY4DS2l0BwADS2l0AS83_9s",
+        "seedHex": "#6750A4",
+        "library": "Custom",
+        "style": "Cmf"
+    }
+]
