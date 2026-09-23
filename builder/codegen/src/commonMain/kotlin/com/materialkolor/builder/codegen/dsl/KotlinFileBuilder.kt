@@ -1,6 +1,7 @@
 package com.materialkolor.builder.codegen.dsl
 
 import com.materialkolor.builder.codegen.symbol.Symbol
+import kotlin.jvm.JvmName
 
 /** Keeps the nested builder scopes from reaching into each other by accident. */
 @DslMarker
@@ -46,7 +47,7 @@ public class KotlinFileScope internal constructor(
     private val symbols = mutableListOf<Symbol>()
 
     // b-109
-    // What this file declares at the top level, so an import that would shadow one of them fails.
+    // What this file declares, class members included, so an import that would shadow one of them fails.
     private val declaredNames = mutableSetOf<String>()
 
     /** The comment lines that sit above the package declaration. */
@@ -59,56 +60,80 @@ public class KotlinFileScope internal constructor(
         blocks += Block(lines.map { listOf(lineCommentToken(it)) }, isComment = true)
     }
 
-    /** A top level `val`, as in `val SeedColor = Color(0xFF6750A4)`. */
+    /**
+     * A top level `val`, as in `val SeedColor = Color(0xFF6750A4)`.
+     *
+     * With a [receiver] it becomes an extension property and [value] moves into its getter.
+     */
     public fun property(
         name: String,
         value: Expression,
         type: TypeRef? = null,
         const: Boolean = false,
+        visibility: Visibility? = null,
+        receiver: TypeRef? = null,
     ) {
-        declaredNames += name // b-109
-        symbols += value.symbols
-        type?.let { symbols += it.symbols }
-
-        val prefix = buildList {
-            if (const) {
-                add(keywordToken("const"))
-                add(spaceToken)
-            }
-            add(keywordToken("val"))
-            add(spaceToken)
-            add(plainToken(name))
-            if (type != null) {
-                add(punctuationToken(":"))
-                add(spaceToken)
-                addAll(type.tokens)
-            }
-            add(spaceToken)
-            add(punctuationToken("="))
-            add(spaceToken)
-        }
-
-        val writer = CodeWriter()
-        writer.expression(value, prefix)
-        blocks += Block(writer.result, isComment = false)
+        declare(PropertyDeclaration(name, value, type, const, visibility, receiver))
     }
 
-    /** A top level function. */
+    /** A top level function, which is an extension function when it has a [receiver]. */
     public fun function(
         name: String,
         annotations: List<Symbol> = emptyList(),
         returns: TypeRef? = null,
+        visibility: Visibility? = null,
+        receiver: TypeRef? = null,
         build: FunctionScope.() -> Unit,
     ) {
-        declaredNames += name // b-109
+        function(name, annotations.map { AnnotationSpec(it) }, returns, visibility, receiver, build)
+    }
+
+    /** The same, for annotations that take arguments. */
+    @JvmName("functionWithAnnotations")
+    public fun function(
+        name: String,
+        annotations: List<AnnotationSpec>,
+        returns: TypeRef? = null,
+        visibility: Visibility? = null,
+        receiver: TypeRef? = null,
+        build: FunctionScope.() -> Unit,
+    ) {
         val scope = FunctionScope().apply(build)
-        symbols += annotations
-        symbols += scope.collectSymbols()
-        returns?.let { symbols += it.symbols }
+        declare(FunctionDeclaration(name, annotations, returns, visibility, receiver, scope))
+    }
+
+    /**
+     * A class, or with [ClassKind.DataClass] a data class, as in
+     * `data class ColorFamily(val color: Color, val onColor: Color)`.
+     */
+    public fun classDeclaration(
+        name: String,
+        kind: ClassKind = ClassKind.Class,
+        annotations: List<AnnotationSpec> = emptyList(),
+        visibility: Visibility? = null,
+        build: ClassScope.() -> Unit = {},
+    ) {
+        val scope = ClassScope().apply(build)
+        declare(ClassDeclaration.ofClass(name, kind, annotations, visibility, scope))
+    }
+
+    /** An `object` with the given members. */
+    public fun objectDeclaration(
+        name: String,
+        annotations: List<AnnotationSpec> = emptyList(),
+        visibility: Visibility? = null,
+        build: MembersScope.() -> Unit = {},
+    ) {
+        val scope = MembersScope().apply(build)
+        declare(ClassDeclaration.ofObject(name, annotations, visibility, scope))
+    }
+
+    private fun declare(declaration: Declaration) {
+        declaredNames += declaration.names // b-109
+        symbols += declaration.symbols
 
         val writer = CodeWriter()
-        annotations.forEach { annotationSymbol -> writer.line(listOf(symbolToken(annotationSymbol))) }
-        scope.render(writer, name, returns)
+        declaration.render(writer)
         blocks += Block(writer.result, isComment = false)
     }
 
@@ -205,12 +230,12 @@ public class FunctionScope internal constructor() {
             body?.let { addAll(it.collectSymbols()) }
         }
 
+    /** Writes the signature after [head], which is everything up to and including the name. */
     internal fun render(
         writer: CodeWriter,
-        name: String,
+        head: List<Token>,
         returns: TypeRef?,
     ) {
-        val head = listOf(keywordToken("fun"), spaceToken, functionToken(name))
         val tail = buildList {
             add(punctuationToken(")"))
             if (returns != null) {
@@ -235,8 +260,9 @@ public class FunctionScope internal constructor() {
             addAll(tail)
         }
 
+        val defaultsFit = parameters.none { it.default?.breaksOnItsOwn == true }
         val onOneLine = parameters.isEmpty() ||
-            (parameters.size < FORCE_MULTILINE_PARAMETERS && writer.fits(flat))
+            (parameters.size < FORCE_MULTILINE_PARAMETERS && defaultsFit && writer.fits(flat))
         if (onOneLine) {
             writer.line(flat)
         } else {
@@ -252,12 +278,18 @@ public class FunctionScope internal constructor() {
     }
 }
 
+/** A function parameter, or with [isProperty] a `val` in a primary constructor. */
 internal class ParameterSpec(
     val name: String,
     val type: TypeRef,
     val default: Expression?,
+    val isProperty: Boolean = false,
 ) {
-    fun headTokens(): List<Token> = listOf(parameterToken(name), punctuationToken(":"), spaceToken) + type.tokens
+    fun headTokens(): List<Token> {
+        val binding = if (isProperty) listOf(keywordToken("val"), spaceToken) else emptyList()
+
+        return binding + listOf(parameterToken(name), punctuationToken(":"), spaceToken) + type.tokens
+    }
 
     fun flatTokens(): List<Token> {
         val head = headTokens()
@@ -283,7 +315,7 @@ internal class ParameterSpec(
 /** The statements inside a generated function. */
 @CodegenDsl
 public class BodyScope internal constructor() {
-    private val statements = mutableListOf<Statement>()
+    internal val statements: MutableList<Statement> = mutableListOf()
 
     /** A call written as a statement of its own. */
     public fun call(
