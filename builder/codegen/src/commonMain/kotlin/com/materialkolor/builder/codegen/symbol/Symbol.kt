@@ -92,21 +92,3 @@ public class Symbol(
         ): Symbol = Symbol("", simpleName, kind)
     }
 }
-
-/**
- * The handful of symbols the DSL and its tests need before the real table exists.
- *
- * B-109 replaces this with the generated library symbol table that is checked against the ABI dumps.
- */
-public object Symbols {
-    public val Boolean: Symbol = Symbol("kotlin", "Boolean", SymbolKind.Class)
-    public val Int: Symbol = Symbol("kotlin", "Int", SymbolKind.Class)
-    public val String: Symbol = Symbol("kotlin", "String", SymbolKind.Class)
-    public val Unit: Symbol = Symbol("kotlin", "Unit", SymbolKind.Class)
-
-    public val Composable: Symbol = Symbol("androidx.compose.runtime", "Composable", SymbolKind.Annotation)
-    public val Color: Symbol = Symbol("androidx.compose.ui.graphics", "Color", SymbolKind.Class)
-    public val IsSystemInDarkTheme: Symbol =
-        Symbol("androidx.compose.foundation", "isSystemInDarkTheme", SymbolKind.Function)
-    public val DynamicMaterialTheme: Symbol = Symbol("com.materialkolor", "DynamicMaterialTheme", SymbolKind.Function)
-}

@@ -4,8 +4,16 @@ import com.materialkolor.builder.codegen.dsl.Expression
 import com.materialkolor.builder.codegen.dsl.Token
 import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.codegen.dsl.raw
-import com.materialkolor.builder.codegen.symbol.Symbols
+import com.materialkolor.builder.codegen.symbol.Symbol
+import com.materialkolor.builder.codegen.symbol.SymbolKind
 import kotlin.math.abs
+
+/**
+ * Compose's `Color`, which every colour literal is wrapped in.
+ *
+ * B-109's generated library symbol table replaces this.
+ */
+private val ColorSymbol: Symbol = Symbol("androidx.compose.ui.graphics", "Color", SymbolKind.Class)
 
 /**
  * Every number, colour and string that reaches generated source is formatted here.
@@ -28,7 +36,7 @@ public object Literals {
                 Token(TokenKind.ColorLiteral, hexText(argb), color = argb),
                 Token(TokenKind.Punctuation, ")"),
             ),
-            symbols = listOf(Symbols.Color),
+            symbols = listOf(ColorSymbol),
         )
 
     /** An ARGB colour as the bare `0xFF6750A4` text, in upper case and always eight digits. */

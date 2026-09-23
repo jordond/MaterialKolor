@@ -42,6 +42,18 @@ public class GradleScope internal constructor() {
         statement(buildCall(listOf(functionToken(name)), emptyList(), multiline, build))
     }
 
+    /**
+     * A call used as a value, as in `dependency("implementation", callOf("platform") { })`.
+     *
+     * The statement form of [call] hands back nothing and is the nearer candidate in a block, so the
+     * expression form needs a name of its own.
+     */
+    public fun callOf(
+        name: String,
+        multiline: Boolean = false,
+        build: ArgumentsScope.() -> Unit = {},
+    ): Expression = buildCall(listOf(functionToken(name)), emptyList(), multiline, build)
+
     /** A dependency on a literal coordinate, as in `implementation("group:name:version")`. */
     public fun dependency(
         configuration: String,
@@ -55,13 +67,13 @@ public class GradleScope internal constructor() {
         configuration: String,
         notation: Expression,
     ) {
-        val call = buildCall(
+        val configured = buildCall(
             callee = listOf(functionToken(configuration)),
             calleeSymbols = emptyList(),
             multiline = false,
         ) { argument(notation) }
 
-        statement(call)
+        statement(configured)
     }
 
     /** Any expression on its own line. */
@@ -71,7 +83,7 @@ public class GradleScope internal constructor() {
 
     /** A comment line. */
     public fun comment(text: String) {
-        entries += GradleEntry.Line(listOf(commentToken("// $text")), null)
+        entries += GradleEntry.Line(listOf(lineCommentToken(text)), null)
     }
 
     /** A blank line. */

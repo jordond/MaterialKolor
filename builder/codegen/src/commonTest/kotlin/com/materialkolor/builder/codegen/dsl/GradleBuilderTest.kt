@@ -1,5 +1,6 @@
 package com.materialkolor.builder.codegen.dsl
 
+import com.materialkolor.builder.codegen.text.Literals
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -32,6 +33,32 @@ class GradleBuilderTest {
 
         assertEquals(expected, file.text)
         assertEquals(Language.Kotlin, file.language)
+    }
+
+    @Test
+    fun gradleFile_callAsAValue_writesItAsTheNotation() {
+        val file = gradleFile(path = "snippets/build.gradle.kts") {
+            block("dependencies") {
+                dependency(
+                    configuration = "implementation",
+                    notation = callOf("platform") {
+                        argument(Literals.string("com.materialkolor:material-kolor-bom:6.0.0"))
+                    },
+                )
+                statement(callOf("implementation") { argument(ref("libs.material.kolor.core")) })
+            }
+        }
+
+        val expected =
+            """
+            dependencies {
+                implementation(platform("com.materialkolor:material-kolor-bom:6.0.0"))
+                implementation(libs.material.kolor.core)
+            }
+
+            """.trimIndent()
+
+        assertEquals(expected, file.text)
     }
 
     @Test

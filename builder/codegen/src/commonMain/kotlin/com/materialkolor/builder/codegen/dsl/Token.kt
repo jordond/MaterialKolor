@@ -89,6 +89,13 @@ internal fun punctuationToken(text: String): Token = Token(TokenKind.Punctuation
 
 internal fun commentToken(text: String): Token = Token(TokenKind.Comment, text)
 
+/**
+ * A `//` comment, written without the space when there is nothing to say.
+ *
+ * ktlint has no patience for a trailing space, and the generated file is linted like any other.
+ */
+internal fun lineCommentToken(text: String): Token = commentToken(if (text.isBlank()) "//" else "// $text")
+
 internal fun plainToken(text: String): Token = Token(TokenKind.Plain, text)
 
 internal val spaceToken: Token = plainToken(" ")

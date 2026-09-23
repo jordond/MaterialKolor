@@ -38,7 +38,7 @@ public class TomlScope internal constructor() {
         if (lines.isNotEmpty()) blankLine()
         lines += listOf(
             punctuationToken("["),
-            Token(TokenKind.TomlTable, name),
+            Token(TokenKind.TomlTable, keyText(name)),
             punctuationToken("]"),
         )
         lines += TomlTableScope().apply(build).result()
@@ -116,26 +116,62 @@ internal class TomlEntry(
     val value: String,
 )
 
+private const val TOML_HEX_DIGITS = "0123456789ABCDEF"
+
 private fun keyTokens(name: String): List<Token> =
     listOf(
-        Token(TokenKind.TomlKey, name),
+        Token(TokenKind.TomlKey, keyText(name)),
         spaceToken,
         punctuationToken("="),
         spaceToken,
     )
 
+/**
+ * A key as TOML wants to read it.
+ *
+ * Dots separate the parts of a path, and any part that is not made of letters, digits, dashes and
+ * underscores is quoted, because TOML only takes those bare.
+ */
+private fun keyText(name: String): String {
+    require(name.isNotBlank()) { "A TOML key needs a name" }
+    val parts = name.split('.')
+    require(parts.none { it.isEmpty() }) { "A TOML key cannot have an empty part, $name" }
+
+    return parts.joinToString(".") { part ->
+        if (part.all { it.isBareKeyCharacter() }) part else "\"${escapeToml(part)}\""
+    }
+}
+
+private fun Char.isBareKeyCharacter(): Boolean =
+    this in 'a'..'z' || this in 'A'..'Z' || this in '0'..'9' || this == '_' || this == '-'
+
 private fun stringToken(value: String): Token = Token(TokenKind.StringLiteral, "\"${escapeToml(value)}\"")
 
+/**
+ * The body of a TOML basic string, without the quotes.
+ *
+ * TOML bans raw control characters the same way Kotlin does, so anything below a space comes out as
+ * an escape, either one of the named ones or a `\u` sequence.
+ */
 private fun escapeToml(value: String): String =
     buildString {
         value.forEach { character ->
             when (character) {
                 '\\' -> append("\\\\")
                 '"' -> append("\\\"")
+                '\b' -> append("\\b")
+                '\u000C' -> append("\\f")
                 '\n' -> append("\\n")
                 '\r' -> append("\\r")
                 '\t' -> append("\\t")
-                else -> append(character)
+                else -> if (character.code < 0x20 || character.code == 0x7F) {
+                    append("\\u")
+                    for (shift in 12 downTo 0 step 4) {
+                        append(TOML_HEX_DIGITS[(character.code ushr shift) and 0xF])
+                    }
+                } else {
+                    append(character)
+                }
             }
         }
     }

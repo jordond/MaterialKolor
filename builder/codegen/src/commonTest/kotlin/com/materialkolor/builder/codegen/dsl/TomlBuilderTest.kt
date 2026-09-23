@@ -2,6 +2,7 @@ package com.materialkolor.builder.codegen.dsl
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class TomlBuilderTest {
     @Test
@@ -33,6 +34,57 @@ class TomlBuilderTest {
 
         assertEquals(expected, file.text)
         assertEquals(Language.Toml, file.language)
+    }
+
+    @Test
+    fun tomlFile_controlCharactersInAValue_writesTomlEscapes() {
+        val file = tomlFile(path = "libs.versions.toml") {
+            table("versions") {
+                key("materialKolor", "6.0.0\u0000\b\u000C")
+            }
+        }
+
+        val expected =
+            """
+            [versions]
+            materialKolor = "6.0.0\u0000\b\f"
+
+            """.trimIndent()
+
+        assertEquals(expected, file.text)
+    }
+
+    @Test
+    fun tomlFile_keyThatIsNotBare_isQuoted() {
+        val file = tomlFile(path = "libs.versions.toml") {
+            table("versions") {
+                key("material kolor", "6.0.0")
+                inlineTable("material kolor core") {
+                    entry("version.ref", "material kolor")
+                }
+            }
+        }
+
+        val expected =
+            """
+            [versions]
+            "material kolor" = "6.0.0"
+            "material kolor core" = { version.ref = "material kolor" }
+
+            """.trimIndent()
+
+        assertEquals(expected, file.text)
+    }
+
+    @Test
+    fun tomlFile_blankKey_failsBeforeWritingAnything() {
+        assertFailsWith<IllegalArgumentException> {
+            tomlFile(path = "libs.versions.toml") {
+                table("versions") {
+                    key(" ", "6.0.0")
+                }
+            }
+        }
     }
 
     @Test
