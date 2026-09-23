@@ -2,10 +2,15 @@ package com.materialkolor.builder.codegen.validate
 
 import com.materialkolor.builder.codegen.symbol.Symbol
 import com.materialkolor.builder.codegen.symbol.Symbols
+import com.materialkolor.builder.codegen.target.custom.LOCAL_THEME_COLORS
+import com.materialkolor.builder.codegen.target.custom.THEME_COLORS
+import com.materialkolor.builder.codegen.target.custom.propertyName
+import com.materialkolor.builder.codegen.target.fluent.THEME_SHADES
 import com.materialkolor.builder.codegen.target.material3.COLOR_FAMILY
 import com.materialkolor.builder.codegen.target.material3.EXTENDED_COLORS_TYPE
 import com.materialkolor.builder.codegen.target.material3.LOCAL_EXTENDED_COLORS
 import com.materialkolor.builder.codegen.target.material3.REMEMBER_EXTENDED_COLORS
+import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportTarget
 
@@ -56,8 +61,8 @@ public object ReservedNames {
         when (target) {
             ExportTarget.Material3, ExportTarget.Material3Expressive -> Material3Symbols.names() + Material3Declared
             ExportTarget.Unstyled -> UnstyledSymbols.names()
-            ExportTarget.Fluent -> FluentSymbols.names()
-            ExportTarget.Custom -> CommonSymbols.names()
+            ExportTarget.Fluent -> FluentSymbols.names() + FluentDeclared // b-111
+            ExportTarget.Custom -> CommonSymbols.names() + CustomDeclared // b-111
         }
 
     /** The theme and accent names of [document] that its export target cannot use, theme name first. */
@@ -147,3 +152,16 @@ private val FluentSymbols: List<Symbol> =
             Symbols.FluentColors,
             Symbols.FluentShades,
         )
+
+// b-111
+
+/**
+ * What the Custom export declares. An accent becomes a property of `ThemeColors` beside the slots,
+ * so it cannot share a slot's name either.
+ */
+private val CustomDeclared: Set<String> =
+    CustomSlot.entries.mapTo(mutableSetOf()) { slot -> slot.propertyName } +
+        setOf(THEME_COLORS, LOCAL_THEME_COLORS, COLOR_FAMILY)
+
+/** What the Fluent export declares. */
+private val FluentDeclared: Set<String> = setOf(THEME_SHADES)
