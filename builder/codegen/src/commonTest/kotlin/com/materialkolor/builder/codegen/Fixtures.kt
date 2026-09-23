@@ -7,6 +7,7 @@ import com.materialkolor.builder.domain.export.AccentFamilyValues
 import com.materialkolor.builder.domain.export.ContrastVariant
 import com.materialkolor.builder.domain.export.CustomSlotValues
 import com.materialkolor.builder.domain.export.FluentShadeValues
+import com.materialkolor.builder.domain.export.FluentShades
 import com.materialkolor.builder.domain.export.ResolvedExport
 import com.materialkolor.builder.domain.export.RoleTable
 import com.materialkolor.builder.domain.link.ShareCodec
@@ -22,6 +23,7 @@ import com.materialkolor.builder.domain.model.SchemePlatform
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportPrefs
 import com.materialkolor.builder.domain.persist.FrozenVariants
 
@@ -200,7 +202,7 @@ internal object Fixtures {
 
     /**
      * Colors for every role, accent and slot the export could ask for, at the contrast variants
-     * [prefs] asks for.
+     * [prefs] asks for. Like the engine, only a frozen export gets more than the standard one.
      *
      * Each color is its palette's source nudged by the role and the contrast, so overrides, pins,
      * AMOLED and contrast each change the colors the way a reviewer would expect to see in a diff.
@@ -209,9 +211,16 @@ internal object Fixtures {
         document: ThemeDocument,
         prefs: ExportPrefs,
     ): ResolvedExport {
-        val variants = when (prefs.frozenVariants) {
-            FrozenVariants.StandardOnly -> listOf(ContrastVariant.Standard)
-            FrozenVariants.AllContrasts -> ContrastVariant.entries
+        val variants = when (prefs.mode) {
+            ExportMode.Dynamic -> {
+                listOf(ContrastVariant.Standard)
+            }
+            ExportMode.Frozen -> {
+                when (prefs.frozenVariants) {
+                    FrozenVariants.StandardOnly -> listOf(ContrastVariant.Standard)
+                    FrozenVariants.AllContrasts -> ContrastVariant.entries
+                }
+            }
         }
 
         return ResolvedExport(
@@ -309,15 +318,25 @@ internal object Fixtures {
             },
         )
 
-    private fun fluentShades(seed: Argb): FluentShadeValues =
+    private fun fluentShades(seed: Argb): FluentShades =
+        FluentShades(
+            light = fluentShadeValues(seed, from = 0),
+            dark = fluentShadeValues(seed, from = DARK_SHADES_SALT),
+        )
+
+    /** The seven shades of one mode, nudged on from the salt [from]. Dark starts further along, so the sets differ. */
+    private fun fluentShadeValues(
+        seed: Argb,
+        from: Int,
+    ): FluentShadeValues =
         FluentShadeValues(
-            dark3 = nudge(seed, salt = 1, dark = true),
-            dark2 = nudge(seed, salt = 2, dark = true),
-            dark1 = nudge(seed, salt = 3, dark = true),
-            base = seed,
-            light1 = nudge(seed, salt = 1, dark = false),
-            light2 = nudge(seed, salt = 2, dark = false),
-            light3 = nudge(seed, salt = 3, dark = false),
+            dark3 = nudge(seed, salt = from + 1, dark = true),
+            dark2 = nudge(seed, salt = from + 2, dark = true),
+            dark1 = nudge(seed, salt = from + 3, dark = true),
+            base = nudge(seed, salt = from, dark = false),
+            light1 = nudge(seed, salt = from + 1, dark = false),
+            light2 = nudge(seed, salt = from + 2, dark = false),
+            light3 = nudge(seed, salt = from + 3, dark = false),
         )
 
     /** [source] moved by [salt] steps, and lifted for dark mode. Plain Int math, so every platform agrees. */
@@ -335,3 +354,4 @@ private const val SALT_STEP = 0x00030507
 private const val DARK_LIFT = 0x00808080
 private const val ROLE_SPREAD = 7
 private const val SLOT_SPREAD = 11
+private const val DARK_SHADES_SALT = 4

@@ -8,7 +8,8 @@ import com.materialkolor.builder.codegen.target.custom.LOCAL_THEME_COLORS
 import com.materialkolor.builder.codegen.target.custom.REMEMBER_THEME_COLORS
 import com.materialkolor.builder.codegen.target.custom.THEME_COLORS
 import com.materialkolor.builder.codegen.target.custom.propertyName
-import com.materialkolor.builder.codegen.target.fluent.THEME_SHADES
+import com.materialkolor.builder.codegen.target.fluent.DARK_THEME_SHADES
+import com.materialkolor.builder.codegen.target.fluent.LIGHT_THEME_SHADES
 import com.materialkolor.builder.codegen.target.material3.EXTENDED_COLORS_TYPE
 import com.materialkolor.builder.codegen.target.material3.LOCAL_EXTENDED_COLORS
 import com.materialkolor.builder.codegen.target.material3.REMEMBER_EXTENDED_COLORS
@@ -228,7 +229,7 @@ private val CustomDeclared: Set<String> = setOf(THEME_COLORS, LOCAL_THEME_COLORS
 private val CustomMembers: Set<String> = CustomSlot.entries.mapTo(mutableSetOf()) { slot -> slot.propertyName }
 
 /** What the Fluent export declares. */
-private val FluentDeclared: Set<String> = setOf(THEME_SHADES)
+private val FluentDeclared: Set<String> = setOf(LIGHT_THEME_SHADES, DARK_THEME_SHADES)
 
 // b-111b
 

@@ -22,7 +22,7 @@ import com.materialkolor.builder.codegen.target.schemeArguments
 import com.materialkolor.builder.codegen.target.themeFunction
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
-import com.materialkolor.builder.domain.model.KeyColors
+import com.materialkolor.builder.domain.capability.forTarget
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportTarget
@@ -46,7 +46,7 @@ public object FluentDynamic {
         require(input.target == ExportTarget.Fluent) {
             "The Fluent dynamic export cannot write a ${input.target} theme"
         }
-        val fluentInput = input.copy(document = input.document.asFluentSeesIt())
+        val fluentInput = input.copy(document = input.document.forTarget(ExportTarget.Fluent))
 
         return listOf(dynamicColorFile(fluentInput), themeFile(fluentInput))
     }
@@ -99,17 +99,6 @@ private fun themeFile(input: ExportInput): GeneratedFile {
         if (binding == FluentBinding.Inline) toShades()
     }
 }
-
-/**
- * The document with only what reaches the shades. R1 keeps every key color but the primary one away
- * from them, and R8 leaves Fluent without accents, so both are dropped before anything is written.
- * The seed and the primary override stay.
- */
-private fun ThemeDocument.asFluentSeesIt(): ThemeDocument =
-    copy(
-        keyColors = KeyColors(primary = keyColors.primary),
-        accents = emptyList(),
-    )
 
 /** The inline form's header note, which says the colors animate once the module is in when they would. */
 private fun swapNote(animate: Boolean): String = if (animate) SWAP_TO_MODULE_ANIMATED_NOTE else SWAP_TO_MODULE_NOTE

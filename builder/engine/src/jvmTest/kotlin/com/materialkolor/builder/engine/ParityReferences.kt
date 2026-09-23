@@ -8,7 +8,7 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import com.materialkolor.MaterialKolors
 import com.materialkolor.PaletteStyle
 import com.materialkolor.builder.domain.color.Argb
@@ -199,14 +199,18 @@ internal fun accentFamilies(document: ThemeDocument): List<AccentFamilyValues> =
     }
 
 /**
- * The shades the Fluent module's `toFluentShades` cuts off the light scheme's primary palette.
+ * The shades `toFluentColors` in the Fluent module gives [document] in the mode [isDark] picks,
+ * which `toFluentShades` cuts off that mode's own primary palette.
  *
  * The Fluent export only passes a primary override, since Fluent reads nothing but that ramp.
  */
-internal fun fluentShades(document: ThemeDocument): FluentShadeValues {
+internal fun fluentShades(
+    document: ThemeDocument,
+    isDark: Boolean,
+): FluentShadeValues {
     val scheme = DynamicScheme(
         seedColor = document.seed.asColor(),
-        isDark = false,
+        isDark = isDark,
         primary = document.keyColors.primary?.asColor(),
         style = referenceStyle(document),
         contrastLevel = document.contrastLevel,

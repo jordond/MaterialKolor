@@ -6,9 +6,11 @@ import com.materialkolor.builder.domain.export.AccentFamilyValues
 import com.materialkolor.builder.domain.export.ContrastVariant
 import com.materialkolor.builder.domain.export.CustomSlotValues
 import com.materialkolor.builder.domain.export.FluentShadeValues
+import com.materialkolor.builder.domain.export.FluentShades
 import com.materialkolor.builder.domain.export.ResolvedExport
 import com.materialkolor.builder.domain.export.RoleTable
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportPrefs
 import com.materialkolor.builder.domain.persist.FrozenVariants
 import com.materialkolor.builder.engine.resolve.AccentFamily
@@ -27,7 +29,9 @@ import com.materialkolor.palettes.TonalPalette
  * reach an export.
  *
  * Every part is filled whatever the target, custom slots and Fluent shades included. That keeps
- * this blind to which target asked, and the extra work is a few table reads.
+ * this blind to which target asked, and the extra work is a few table reads. So callers pass the
+ * document as the target sees it, `document.forTarget(target)`, and never the raw one. The export
+ * entry and the preview both do, so a setting another target left behind never reaches the colors.
  *
  * Like the resolver it goes through, this belongs to the thread that created it.
  *
@@ -39,17 +43,20 @@ public class ExportResolver(
     /**
      * Every color the export of [document] writes with [prefs].
      *
-     * The standard variant is the document at its own contrast. When [prefs] asks for every
-     * contrast, medium and high are the same document resolved at those levels. Pins, AMOLED and
-     * custom tones land on every variant. Accents have one set of values, since contrast never
-     * moves them.
+     * The standard variant is the document at its own contrast. Only a frozen export that asks for
+     * every contrast gets medium and high too, the same document resolved at those levels, so a
+     * dynamic export with every contrast left over from a frozen one still gets standard alone.
+     * Pins, AMOLED and custom tones land on every variant. Accents and Fluent shades have one set
+     * of values, since contrast never moves them.
+     *
+     * @param[document] The document as the target sees it, from `forTarget`.
      */
     public fun resolve(
         document: ThemeDocument,
         prefs: ExportPrefs,
     ): ResolvedExport {
         val standard = themes.resolve(document)
-        val variants = variantsFor(prefs.frozenVariants).associateWith { variant ->
+        val variants = variantsFor(prefs).associateWith { variant ->
             when (variant) {
                 ContrastVariant.Standard -> standard
                 ContrastVariant.Medium -> themes.resolve(document.copy(contrast = ContrastLevel.Medium))
@@ -65,10 +72,17 @@ public class ExportResolver(
         )
     }
 
-    private fun variantsFor(frozen: FrozenVariants): List<ContrastVariant> =
-        when (frozen) {
-            FrozenVariants.StandardOnly -> listOf(ContrastVariant.Standard)
-            FrozenVariants.AllContrasts -> ContrastVariant.entries
+    private fun variantsFor(prefs: ExportPrefs): List<ContrastVariant> =
+        when (prefs.mode) {
+            ExportMode.Dynamic -> {
+                listOf(ContrastVariant.Standard)
+            }
+            ExportMode.Frozen -> {
+                when (prefs.frozenVariants) {
+                    FrozenVariants.StandardOnly -> listOf(ContrastVariant.Standard)
+                    FrozenVariants.AllContrasts -> ContrastVariant.entries
+                }
+            }
         }
 }
 
@@ -84,24 +98,28 @@ private fun AccentFamily.toValues(): AccentFamilyValues =
     AccentFamilyValues(name = accent.name, light = light, dark = dark)
 
 /**
- * The seven Fluent shades, cut at the tones `toFluentShades` in the Fluent module uses.
+ * The Fluent shades of both modes, each cut from that mode's own primary palette at the tones
+ * `toFluentShades` in the Fluent module uses.
  *
- * Fluent takes one set for both modes, so they come from the light scheme's primary palette. The
- * 2025 spec gives some styles a softer dark primary palette, and a frozen Fluent theme keeps the
- * light one in both modes.
+ * `toFluentColors` builds its shades from the scheme of the mode it shows, and the 2025 spec gives
+ * TonalSpot and Expressive a softer dark primary palette, so each mode reads its own.
  */
-private fun ThemeResult.fluentShades(): FluentShadeValues {
-    val palette = light.primaryPalette
-    return FluentShadeValues(
-        dark3 = palette.shade(DARK_3_TONE),
-        dark2 = palette.shade(DARK_2_TONE),
-        dark1 = palette.shade(DARK_1_TONE),
-        base = palette.shade(BASE_TONE),
-        light1 = palette.shade(LIGHT_1_TONE),
-        light2 = palette.shade(LIGHT_2_TONE),
-        light3 = palette.shade(LIGHT_3_TONE),
+private fun ThemeResult.fluentShades(): FluentShades =
+    FluentShades(
+        light = light.primaryPalette.shades(),
+        dark = dark.primaryPalette.shades(),
     )
-}
+
+private fun TonalPalette.shades(): FluentShadeValues =
+    FluentShadeValues(
+        dark3 = shade(DARK_3_TONE),
+        dark2 = shade(DARK_2_TONE),
+        dark1 = shade(DARK_1_TONE),
+        base = shade(BASE_TONE),
+        light1 = shade(LIGHT_1_TONE),
+        light2 = shade(LIGHT_2_TONE),
+        light3 = shade(LIGHT_3_TONE),
+    )
 
 private fun TonalPalette.shade(tone: Int): Argb = Argb(tone(tone))
 

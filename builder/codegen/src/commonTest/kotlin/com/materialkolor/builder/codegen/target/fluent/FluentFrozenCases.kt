@@ -9,6 +9,9 @@ import com.materialkolor.builder.codegen.target.frozenPrefs
 import com.materialkolor.builder.codegen.target.lintFailures
 import com.materialkolor.builder.codegen.target.materialKolorImports
 import com.materialkolor.builder.codegen.text.Literals
+import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.export.FluentShadeValues
+import com.materialkolor.builder.domain.export.FluentShades
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
@@ -65,29 +68,36 @@ class FluentFrozenTest {
     }
 
     @Test
-    fun fluentFrozen_everyShade_isWrittenAsALiteral() {
+    fun fluentFrozen_everyShadeOfBothModes_isWrittenAsALiteral() {
         val input = FluentFrozenCases.all.getValue("fluent-frozen-default")
         val shades = checkNotNull(input.resolved.fluentShades)
         val theme = FluentFrozen.files(input).single().text
 
-        listOf(
-            "base" to shades.base,
-            "light1" to shades.light1,
-            "light2" to shades.light2,
-            "light3" to shades.light3,
-            "dark1" to shades.dark1,
-            "dark2" to shades.dark2,
-            "dark3" to shades.dark3,
-        ).forEach { (name, color) ->
-            val expected = "    $name = Color(${Literals.hexText(color.value)}),"
-            assertTrue(expected in theme, expected)
+        listOf(LIGHT_THEME_SHADES to shades.light, DARK_THEME_SHADES to shades.dark).forEach { (property, values) ->
+            val declared = theme.substringAfter("val $property = Shades(\n").substringBefore(")\n")
+            named(values).forEach { (name, color) ->
+                val expected = "    $name = Color(${Literals.hexText(color.value)}),"
+                assertTrue(expected in declared, "$expected in $property")
+            }
         }
-        assertTrue("shades = ThemeShades," in theme, theme)
+        assertTrue("shades = if (isDark) DarkThemeShades else LightThemeShades," in theme, theme)
         assertTrue("darkMode = isDark," in theme, theme)
     }
 
     @Test
-    fun fluentFrozen_allContrasts_writesTheOneSet() {
+    fun fluentFrozen_sameShadesInBothModes_stillWritesBothSets() {
+        val input = FluentFrozenCases.all.getValue("fluent-frozen-default")
+        val light = checkNotNull(input.resolved.fluentShades).light
+        val same = input.copy(resolved = input.resolved.copy(fluentShades = FluentShades(light = light, dark = light)))
+        val theme = FluentFrozen.files(same).single().text
+
+        assertTrue("val LightThemeShades = Shades(" in theme, theme)
+        assertTrue("val DarkThemeShades = Shades(" in theme, theme)
+        assertTrue("shades = if (isDark) DarkThemeShades else LightThemeShades," in theme, theme)
+    }
+
+    @Test
+    fun fluentFrozen_allContrasts_writesTheSameShadesAsStandard() {
         val standard = codeOf(FluentFrozenCases.files("fluent-frozen-default"))
         val every = codeOf(FluentFrozenCases.files("fluent-frozen-all-contrasts"))
 
@@ -100,6 +110,17 @@ class FluentFrozenTest {
 
         assertFailsWith<IllegalArgumentException> { FluentFrozen.files(material3) }
     }
+
+    private fun named(shades: FluentShadeValues): List<Pair<String, Argb>> =
+        listOf(
+            "base" to shades.base,
+            "light1" to shades.light1,
+            "light2" to shades.light2,
+            "light3" to shades.light3,
+            "dark1" to shades.dark1,
+            "dark2" to shades.dark2,
+            "dark3" to shades.dark3,
+        )
 
     /** The files without their header, which carries the link and so differs between cases. */
     private fun codeOf(files: List<GeneratedFile>): List<String> =
