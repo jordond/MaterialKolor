@@ -30,10 +30,7 @@ public enum class Reason(
     /** R5. Pins set Material roles, which Fluent does not use. */
     FluentUsesNoRoles(key = "reason_fluent_uses_no_roles"),
 
-    /**
-     * R6. The Unstyled adapter has no AMOLED switch yet. It arrives once the explicit-scheme
-     * export is verified (V-02, F-56).
-     */
+    /** R6. The Unstyled adapter has no AMOLED switch yet. It arrives with F-56. */
     UnstyledNoAmoled(key = "reason_unstyled_no_amoled"),
 
     /** R8. Fluent has no place for extra accents in v1. */

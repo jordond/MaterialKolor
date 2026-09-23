@@ -8,7 +8,7 @@ import com.materialkolor.builder.codegen.dsl.ref
 import com.materialkolor.builder.codegen.symbol.Symbols
 import com.materialkolor.builder.codegen.target.CONTENT_PARAMETER
 import com.materialkolor.builder.codegen.target.IS_DARK_PARAMETER
-import com.materialkolor.builder.codegen.target.frozenThemeFunction
+import com.materialkolor.builder.codegen.target.themeFunction
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.persist.ExportMode
@@ -55,7 +55,7 @@ private fun themeFile(input: ExportInput): GeneratedFile {
                 named.forEach { (name, color) -> argument(name, Literals.colorLiteral(color.value)) }
             },
         )
-        frozenThemeFunction(input) {
+        themeFunction(input) {
             // Colors holds state of its own, so it is remembered the way rememberFluentColors does.
             assign(
                 name = COLORS,

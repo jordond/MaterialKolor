@@ -15,9 +15,9 @@ import com.materialkolor.builder.codegen.target.byMode
 import com.materialkolor.builder.codegen.target.colorFamilyValue
 import com.materialkolor.builder.codegen.target.colorsIn
 import com.materialkolor.builder.codegen.target.contrastVariants
-import com.materialkolor.builder.codegen.target.frozenThemeFunction
 import com.materialkolor.builder.codegen.target.namePrefix
 import com.materialkolor.builder.codegen.target.propertyName
+import com.materialkolor.builder.codegen.target.themeFunction
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.color.Argb
@@ -127,7 +127,7 @@ private fun themeFile(input: ExportInput): GeneratedFile {
             }
             FrozenMode.entries.forEach { mode -> property(schemeName(variant, mode), schemeCall(variant, mode)) }
         }
-        frozenThemeFunction(input) { themeBody(input) }
+        themeFunction(input) { themeBody(input) }
     }
 }
 

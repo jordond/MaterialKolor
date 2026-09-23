@@ -94,7 +94,8 @@ private fun themeFile(input: ExportInput): GeneratedFile {
 
 /**
  * Both schemes, the accent ramps, and the light values as the base with the dark values as the
- * dark override, each with the pins and accents of that mode laid over it.
+ * dark override, each with the pins and accents of that mode laid over it and remembered the way
+ * `dynamicColorSchemes` remembers its own.
  */
 private fun BodyScope.explicitSchemes(document: ThemeDocument) {
     val colors = ref(PROPERTIES).index(ref(Symbols.MaterialKolorTokens).member(COLORS_PROPERTY))
@@ -109,13 +110,28 @@ private fun BodyScope.explicitSchemes(document: ThemeDocument) {
     }
     document.accents.forEach { accent -> assign(accent.paletteName, paletteCall(accent)) }
     blankLine()
-    reassign(colors, schemeValues(document, isDark = false))
+    reassign(colors, rememberedValues(document, isDark = false))
     blankLine()
     call("colorScheme") {
         argument(ref(Symbols.UnstyledColorScheme).member("Dark"))
-        trailingLambda { reassign(colors, schemeValues(document, isDark = true)) }
+        trailingLambda { reassign(colors, rememberedValues(document, isDark = true)) }
     }
 }
+
+/**
+ * `remember(lightScheme, brandPalette) { ... }` around the values of one mode. It is keyed on that
+ * mode's scheme and every accent ramp, so the map and the accents' `onTone` searches only run again
+ * when one of them changes.
+ */
+private fun rememberedValues(
+    document: ThemeDocument,
+    isDark: Boolean,
+): Expression =
+    call(Symbols.Remember) {
+        argument(ref(schemeName(isDark)))
+        document.accents.forEach { accent -> argument(ref(accent.paletteName)) }
+        trailingLambda { statement(schemeValues(document, isDark)) }
+    }
 
 /**
  * The arguments that decide a scheme, in the order the called function declares them.
