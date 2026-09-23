@@ -1,6 +1,5 @@
 package com.materialkolor.builder.domain.color
 
-import kotlin.jvm.JvmInline
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -8,6 +7,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlin.jvm.JvmInline
 
 /**
  * How much contrast a scheme is generated with, held in hundredths so it stays exact.
@@ -59,7 +59,10 @@ public object ContrastLevelSerializer : KSerializer<ContrastLevel> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("com.materialkolor.builder.domain.color.ContrastLevel", PrimitiveKind.INT)
 
-    override fun serialize(encoder: Encoder, value: ContrastLevel) {
+    override fun serialize(
+        encoder: Encoder,
+        value: ContrastLevel,
+    ) {
         encoder.encodeInt(value.hundredths)
     }
 

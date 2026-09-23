@@ -2,10 +2,10 @@ package com.materialkolor.builder.domain.model
 
 import com.materialkolor.builder.domain.DocumentArb
 import com.materialkolor.builder.domain.color.Argb
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlinx.serialization.json.Json
 
 class ThemeDocumentJsonTest {
     private val json = Json

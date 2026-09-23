@@ -1,9 +1,9 @@
 package com.materialkolor.builder.domain.color
 
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlinx.serialization.json.Json
 
 class ArgbTest {
     @Test

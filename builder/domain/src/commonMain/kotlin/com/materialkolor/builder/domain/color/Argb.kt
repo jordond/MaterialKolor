@@ -1,6 +1,5 @@
 package com.materialkolor.builder.domain.color
 
-import kotlin.jvm.JvmInline
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -8,6 +7,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlin.jvm.JvmInline
 
 /**
  * An opaque color packed as `0xAARRGGBB`.
@@ -47,6 +47,10 @@ public value class Argb private constructor(
     public companion object {
         /**
          * Pack [value] as an opaque color, filling in the alpha byte.
+         *
+         * Every color is built here. The constructor takes its argument as given, and inside this
+         * file it wins the name over this function, so call [invoke] by name rather than writing
+         * `Argb(...)` in here.
          */
         public operator fun invoke(value: Int): Argb = Argb(value or OPAQUE_ALPHA)
 
@@ -61,7 +65,7 @@ public value class Argb private constructor(
         public fun fromHex(hex: String): Argb {
             val digits = hex.removePrefix("#")
             require(digits.length == 6 || digits.length == 8) { "Expected #RRGGBB or #AARRGGBB, got \"$hex\"" }
-            return Argb(digits.toLong(radix = 16).toInt())
+            return invoke(digits.toLong(radix = 16).toInt())
         }
     }
 }
@@ -79,7 +83,10 @@ public object ArgbSerializer : KSerializer<Argb> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("com.materialkolor.builder.domain.color.Argb", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: Argb) {
+    override fun serialize(
+        encoder: Encoder,
+        value: Argb,
+    ) {
         encoder.encodeString(value.toHex())
     }
 

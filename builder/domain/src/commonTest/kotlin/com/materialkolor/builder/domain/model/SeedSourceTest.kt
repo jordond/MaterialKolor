@@ -1,10 +1,10 @@
 package com.materialkolor.builder.domain.model
 
 import com.materialkolor.builder.domain.color.Argb
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlinx.serialization.json.Json
 
 class SeedSourceTest {
     private val json = Json

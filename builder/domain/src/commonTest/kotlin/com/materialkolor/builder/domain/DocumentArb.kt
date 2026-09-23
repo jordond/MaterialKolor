@@ -40,24 +40,25 @@ class DocumentArb(
     /**
      * One document with every field filled at random.
      */
-    fun nextDocument(): ThemeDocument = ThemeDocument(
-        seed = nextArgb(),
-        seedSource = nextSeedSource(),
-        keyColors = nextKeyColors(),
-        style = Style.entries.random(random),
-        cmfTertiarySeed = nextArgbOrNull(),
-        contrast = nextContrast(),
-        spec = SpecVersion.entries.random(random),
-        platform = SchemePlatform.entries.random(random),
-        amoled = random.nextBoolean(),
-        accents = nextAccents(),
-        pins = nextPins(),
-        library = Library.entries.random(random),
-        expressive = random.nextBoolean(),
-        motionScheme = MotionSchemeChoice.entries.random(random),
-        themeName = "${nextWord()}Theme",
-        customTones = nextCustomTones(),
-    )
+    fun nextDocument(): ThemeDocument =
+        ThemeDocument(
+            seed = nextArgb(),
+            seedSource = nextSeedSource(),
+            keyColors = nextKeyColors(),
+            style = Style.entries.random(random),
+            cmfTertiarySeed = nextArgbOrNull(),
+            contrast = nextContrast(),
+            spec = SpecVersion.entries.random(random),
+            platform = SchemePlatform.entries.random(random),
+            amoled = random.nextBoolean(),
+            accents = nextAccents(),
+            pins = nextPins(),
+            library = Library.entries.random(random),
+            expressive = random.nextBoolean(),
+            motionScheme = MotionSchemeChoice.entries.random(random),
+            themeName = "${nextWord()}Theme",
+            customTones = nextCustomTones(),
+        )
 
     /** An opaque color. */
     fun nextArgb(): Argb = Argb(random.nextInt())
@@ -67,47 +68,52 @@ class DocumentArb(
 
     private fun nextArgbOrNull(): Argb? = if (random.nextBoolean()) nextArgb() else null
 
-    private fun nextSeedSource(): SeedSource = when (random.nextInt(until = 6)) {
-        0 -> SeedSource.Typed
-        1 -> SeedSource.Picked
-        2 -> SeedSource.Eyedropper
-        3 -> SeedSource.Shuffled
-        4 -> SeedSource.Preset(id = nextWord())
-        else -> SeedSource.Image(
-            name = "${nextWord()}.png",
-            candidates = List(random.nextInt(from = 0, until = 6)) { nextArgb() },
-        )
-    }
+    private fun nextSeedSource(): SeedSource =
+        when (random.nextInt(until = 6)) {
+            0 -> SeedSource.Typed
+            1 -> SeedSource.Picked
+            2 -> SeedSource.Eyedropper
+            3 -> SeedSource.Shuffled
+            4 -> SeedSource.Preset(id = nextWord())
+            else -> SeedSource.Image(
+                name = "${nextWord()}.png",
+                candidates = List(random.nextInt(from = 0, until = 6)) { nextArgb() },
+            )
+        }
 
     private fun nextKeyColors(): KeyColors =
         KeyColor.entries.fold(KeyColors()) { colors, slot -> colors.with(slot, nextArgbOrNull()) }
 
     private fun nextAccents(): List<Accent> = List(random.nextInt(from = 0, until = 4)) { nextAccent() }
 
-    private fun nextAccent(): Accent = Accent(
-        name = nextWord(),
-        seed = nextArgb(),
-        harmonize = random.nextBoolean(),
-        light = FamilyTones(color = nextTone(), container = nextTone()),
-        dark = FamilyTones(color = nextTone(), container = nextTone()),
-        threshold = OnColorThreshold.entries.random(random),
-    )
+    private fun nextAccent(): Accent =
+        Accent(
+            name = nextWord(),
+            seed = nextArgb(),
+            harmonize = random.nextBoolean(),
+            light = FamilyTones(color = nextTone(), container = nextTone()),
+            dark = FamilyTones(color = nextTone(), container = nextTone()),
+            threshold = OnColorThreshold.entries.random(random),
+        )
 
-    private fun nextPins(): Map<Role, RolePin> = Role.entries
-        .shuffled(random)
-        .take(random.nextInt(from = 0, until = 5))
-        .associateWith { role -> nextRolePin() }
+    private fun nextPins(): Map<Role, RolePin> =
+        Role.entries
+            .shuffled(random)
+            .take(random.nextInt(from = 0, until = 5))
+            .associateWith { role -> nextRolePin() }
 
-    private fun nextRolePin(): RolePin = when (random.nextInt(until = 3)) {
-        0 -> RolePin(light = nextArgb())
-        1 -> RolePin(dark = nextArgb())
-        else -> RolePin(light = nextArgb(), dark = nextArgb())
-    }
+    private fun nextRolePin(): RolePin =
+        when (random.nextInt(until = 3)) {
+            0 -> RolePin(light = nextArgb())
+            1 -> RolePin(dark = nextArgb())
+            else -> RolePin(light = nextArgb(), dark = nextArgb())
+        }
 
-    private fun nextCustomTones(): Map<CustomSlot, CustomTone> = CustomSlot.entries
-        .shuffled(random)
-        .take(random.nextInt(from = 0, until = 5))
-        .associateWith { slot -> CustomTone(light = nextToneOrNull(), dark = nextToneOrNull()) }
+    private fun nextCustomTones(): Map<CustomSlot, CustomTone> =
+        CustomSlot.entries
+            .shuffled(random)
+            .take(random.nextInt(from = 0, until = 5))
+            .associateWith { slot -> CustomTone(light = nextToneOrNull(), dark = nextToneOrNull()) }
 
     private fun nextTone(): Int = random.nextInt(from = 0, until = 101)
 

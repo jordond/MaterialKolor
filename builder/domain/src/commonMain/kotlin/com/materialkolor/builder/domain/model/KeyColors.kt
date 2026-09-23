@@ -60,26 +60,31 @@ public data class KeyColors(
     /**
      * The color set for [slot], or null when that palette still comes from the seed.
      */
-    public operator fun get(slot: KeyColor): Argb? = when (slot) {
-        KeyColor.Primary -> primary
-        KeyColor.Secondary -> secondary
-        KeyColor.Tertiary -> tertiary
-        KeyColor.Error -> error
-        KeyColor.Neutral -> neutral
-        KeyColor.NeutralVariant -> neutralVariant
-    }
+    public operator fun get(slot: KeyColor): Argb? =
+        when (slot) {
+            KeyColor.Primary -> primary
+            KeyColor.Secondary -> secondary
+            KeyColor.Tertiary -> tertiary
+            KeyColor.Error -> error
+            KeyColor.Neutral -> neutral
+            KeyColor.NeutralVariant -> neutralVariant
+        }
 
     /**
      * A copy with [slot] set to [value], or back to the seed when [value] is null.
      */
-    public fun with(slot: KeyColor, value: Argb?): KeyColors = when (slot) {
-        KeyColor.Primary -> copy(primary = value)
-        KeyColor.Secondary -> copy(secondary = value)
-        KeyColor.Tertiary -> copy(tertiary = value)
-        KeyColor.Error -> copy(error = value)
-        KeyColor.Neutral -> copy(neutral = value)
-        KeyColor.NeutralVariant -> copy(neutralVariant = value)
-    }
+    public fun with(
+        slot: KeyColor,
+        value: Argb?,
+    ): KeyColors =
+        when (slot) {
+            KeyColor.Primary -> copy(primary = value)
+            KeyColor.Secondary -> copy(secondary = value)
+            KeyColor.Tertiary -> copy(tertiary = value)
+            KeyColor.Error -> copy(error = value)
+            KeyColor.Neutral -> copy(neutral = value)
+            KeyColor.NeutralVariant -> copy(neutralVariant = value)
+        }
 
     /**
      * Whether every palette still comes from the seed.
