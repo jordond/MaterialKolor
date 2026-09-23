@@ -1,12 +1,10 @@
 package com.materialkolor.builder.engine.resolve
 
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotSame
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -37,24 +35,29 @@ class LruCacheTest {
     }
 
     @Test
-    fun getOrPut_racingMisses_allGetTheSameInstance() {
-        val cache = LruCache<String, Any>(maxSize = 4)
-        val threads = 8
-        val start = CountDownLatch(1)
-        val pool = Executors.newFixedThreadPool(threads)
-        val answers = List(threads) {
-            pool.submit<Any> {
-                start.await()
-                cache.getOrPut("shared") { Any() }
-            }
-        }
+    fun contains_cachedKey_doesNotCountAsAUse() {
+        val cache = LruCache<String, Int>(maxSize = 2)
+        cache.getOrPut("a") { 1 }
+        cache.getOrPut("b") { 2 }
+        assertTrue("a" in cache)
 
-        start.countDown()
-        val values = answers.map { answer -> answer.get(10, TimeUnit.SECONDS) }
-        pool.shutdown()
+        cache.getOrPut("c") { 3 }
 
-        assertEquals(1, values.distinct().size)
-        assertSame(values.first(), cache.getOrPut("shared") { Any() })
+        assertFalse("a" in cache)
+        assertTrue("b" in cache)
+        assertTrue("c" in cache)
+    }
+
+    @Test
+    fun getOrPut_evictedKey_buildsAFreshValue() {
+        val cache = LruCache<String, Any>(maxSize = 1)
+        val first = cache.getOrPut("a") { Any() }
+        cache.getOrPut("b") { Any() }
+
+        val second = cache.getOrPut("a") { Any() }
+
+        assertNotSame(first, second)
+        assertEquals(1, cache.size)
     }
 
     @Test

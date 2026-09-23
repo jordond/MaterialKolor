@@ -1,22 +1,12 @@
 package com.materialkolor.builder.engine.resolve
 
-import kotlinx.collections.immutable.PersistentMap
-import kotlinx.collections.immutable.persistentMapOf
-import kotlin.concurrent.atomics.AtomicReference
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
-
 /**
- * A small least recently used cache that is safe to share between threads.
+ * A small least recently used cache for a single thread.
  *
- * The entries live in one ordered persistent map behind an atomic reference, oldest first. A hit
- * moves its entry to the back and a miss appends one, dropping from the front once the cache is
- * over [maxSize]. Every change swaps the whole map, so readers never see one half written.
- *
- * Two threads that miss on the same key at once may both run the factory, but only the first
- * answer is stored and both callers get that one back. That keeps the promise the resolver makes,
- * the same key gives the same instance.
+ * The entries live in one insertion ordered map, oldest first. A hit moves its entry to the back
+ * and a miss appends one, dropping from the front once the cache is over [maxSize]. Nothing here
+ * is synchronized, because the values it holds are not safe to share between threads either.
  */
-@OptIn(ExperimentalAtomicApi::class)
 internal class LruCache<K : Any, V : Any>(
     private val maxSize: Int,
 ) {
@@ -24,14 +14,14 @@ internal class LruCache<K : Any, V : Any>(
         require(maxSize > 0) { "An LRU cache needs room for at least one entry, got $maxSize" }
     }
 
-    private val entries = AtomicReference<PersistentMap<K, V>>(persistentMapOf())
+    private val entries = LinkedHashMap<K, V>()
 
     /** How many entries the cache holds right now. */
     val size: Int
-        get() = entries.load().size
+        get() = entries.size
 
     /** Whether [key] is cached, without counting as a use. */
-    operator fun contains(key: K): Boolean = key in entries.load()
+    operator fun contains(key: K): Boolean = key in entries
 
     /**
      * The value cached for [key], or the one [create] builds when there is none.
@@ -40,34 +30,15 @@ internal class LruCache<K : Any, V : Any>(
         key: K,
         create: () -> V,
     ): V {
-        touch(key)?.let { cached -> return cached }
+        entries.remove(key)?.let { cached ->
+            entries[key] = cached
+            return cached
+        }
         val created = create()
-        while (true) {
-            val current = entries.load()
-            val existing = current[key]
-            val next = if (existing != null) current.moveToBack(key, existing) else current.putting(key, created).trim()
-            if (entries.compareAndSet(current, next)) return existing ?: created
+        entries[key] = created
+        while (entries.size > maxSize) {
+            entries.remove(entries.keys.first())
         }
-    }
-
-    private fun touch(key: K): V? {
-        while (true) {
-            val current = entries.load()
-            val value = current[key] ?: return null
-            if (entries.compareAndSet(current, current.moveToBack(key, value))) return value
-        }
-    }
-
-    private fun PersistentMap<K, V>.moveToBack(
-        key: K,
-        value: V,
-    ): PersistentMap<K, V> = removing(key).putting(key, value)
-
-    private fun PersistentMap<K, V>.trim(): PersistentMap<K, V> {
-        var map = this
-        while (map.size > maxSize) {
-            map = map.removing(map.keys.first())
-        }
-        return map
+        return created
     }
 }

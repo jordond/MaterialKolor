@@ -121,21 +121,21 @@ public class RampSet internal constructor(
         /**
          * Every role of [scheme] grouped by the palette it reads from.
          *
-         * A role names its palette as a function of the scheme, so the answer is matched back to
-         * one of the six by identity first. Equality is the fallback for a palette rebuilt on the
-         * way out, and a role whose palette matches none of the six gets no marker.
+         * A role names its palette as a function of the scheme, and every core role hands back one
+         * of the scheme's own six, so the answer is matched back by identity alone. Equality would
+         * not do, since a Monochrome scheme holds equal neutral and neutral variant palettes. A role
+         * that matches none of the six is a bug in the mapping and stops the build.
          */
         private fun markers(scheme: DynamicScheme): Map<KeyColor, List<RampMarker>> {
             val colors = MaterialDynamicColors()
             return Role.entries
-                .mapNotNull { role ->
+                .map { role ->
                     val color = role.dynamicColor(colors)
                     val picked = color.palette(scheme)
-                    val owner = Palettes.firstOrNull { palette -> scheme.palette(palette) === picked }
-                        ?: Palettes.firstOrNull { palette -> scheme.palette(palette) == picked }
-                    owner?.let { palette ->
-                        palette to RampMarker(role, color.getHct(scheme).tone, Argb(color.getArgb(scheme)))
+                    val owner = checkNotNull(Palettes.firstOrNull { palette -> scheme.palette(palette) === picked }) {
+                        "$role reads a palette that is none of the scheme's six"
                     }
+                    owner to RampMarker(role, color.getHct(scheme).tone, Argb(color.getArgb(scheme)))
                 }.groupBy(keySelector = { pick -> pick.first }, valueTransform = { pick -> pick.second })
         }
 

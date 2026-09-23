@@ -16,8 +16,9 @@ import com.materialkolor.ktx.DynamicScheme
  * around schemes that already exist. Style chips and project thumbnails go through [scheme] and
  * share that second cache.
  *
- * The same inputs always give back the same scheme instance while it is cached. Both caches are
- * safe to use from more than one thread.
+ * The same inputs always give back the same scheme instance while it is cached. The resolver, and
+ * every [ThemeResult] and [DynamicScheme] it hands out, belong to the thread that created them,
+ * which is the UI thread in the app.
  */
 public class ThemeResolver {
     private val results = LruCache<ThemeDocument, ThemeResult>(RESULT_CACHE_SIZE)

@@ -9,7 +9,6 @@ kotlin {
             api(project(":material-kolor-core"))
             implementation(project(":material-kolor-palette"))
             implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.kotlinx.collections)
 
             // b-115
             // Core takes and returns Compose colors but keeps Compose UI to itself, and the mapping
