@@ -5,6 +5,11 @@
   "ignoreDeps": ["org.jetbrains.kotlin.android"],
   "packageRules": [
     {
+      "description": "Compose snapshots from the JetBrains dev repo are not release candidates. One slipped in through #535 and pinned material3 to a branch build",
+      "matchPackageNames": ["org.jetbrains.compose{/,}**"],
+      "allowedVersions": "!/-SNAPSHOT/"
+    },
+    {
       "groupName": "Kotlin & Compose",
       "matchPackageNames": [
         "org.jetbrains.compose{/,}**",
