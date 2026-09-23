@@ -37,5 +37,12 @@ kotlin {
             implementation(libs.compose.ui.test)
             implementation(project.extensions.getByType<org.jetbrains.compose.ComposeExtension>().dependencies.desktop.currentOs)
         }
+
+        // b-114
+        // The export parity gate generates each export and holds its colors to the preview. The Material 3 module
+        // it builds the dynamic scheme with is already on the test classpath from b-115.
+        jvmTest.dependencies {
+            implementation(project(":builder:codegen"))
+        }
     }
 }

@@ -7,7 +7,8 @@ on:
       - main
       - next
     paths:
-      - 'builder/**'
+      - 'builder/shared/**'
+      - 'builder/android/**'
       - 'material-kolor-core/**'
       - 'material-kolor-material3/**'
       - 'material-color-utilities/**'
@@ -24,7 +25,8 @@ on:
       - next
     types: [ opened, synchronize, reopened, ready_for_review ]
     paths:
-      - 'builder/**'
+      - 'builder/shared/**'
+      - 'builder/android/**'
       - 'material-kolor-core/**'
       - 'material-kolor-material3/**'
       - 'material-color-utilities/**'
