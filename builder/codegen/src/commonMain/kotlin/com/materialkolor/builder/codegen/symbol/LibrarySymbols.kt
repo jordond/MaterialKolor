@@ -60,6 +60,9 @@ public object Symbols {
     public val ContrastThreshold: Symbol = Symbol(KOLOR_KTX, "ContrastThreshold", SymbolKind.Class)
     public val RememberDynamicScheme: Symbol = Symbol(KOLOR_KTX, "rememberDynamicScheme", SymbolKind.Function)
 
+    // b-112b
+    public val MaterialKolors: Symbol = Symbol(KOLOR, "MaterialKolors", SymbolKind.Class)
+
     // MaterialKolor Material 3.
 
     public val DynamicMaterialTheme: Symbol = Symbol(KOLOR_MATERIAL3, "DynamicMaterialTheme", SymbolKind.Function)

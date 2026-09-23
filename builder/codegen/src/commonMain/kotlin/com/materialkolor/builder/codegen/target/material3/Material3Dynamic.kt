@@ -318,6 +318,8 @@ private fun ThemeDocument.tertiarySeedForCmf(): Argb? = cmfTertiarySeed.takeIf {
 internal val KeyColor.parameterName: String
     get() = name.replaceFirstChar { char -> char.lowercaseChar() }
 
+// b-112b
+
 /** The `ColorScheme` property for this role, as in `surfaceContainerHigh`. */
-private val Role.propertyName: String
+internal val Role.propertyName: String
     get() = name.replaceFirstChar { char -> char.lowercaseChar() }
