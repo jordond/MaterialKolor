@@ -33,7 +33,11 @@ export interface Site {
 export async function serveSite(root: string): Promise<Site> {
   const base = path.resolve(root);
   const server = createServer(async (request, response) => {
-    const pathname = decodeURIComponent(new URL(request.url ?? '/', 'http://localhost').pathname);
+    const pathname = decodePath(request.url ?? '/');
+    if (pathname === null) {
+      response.writeHead(400).end();
+      return;
+    }
     const file = await findFile(base, pathname);
     if (!file) {
       response.writeHead(404).end();
@@ -53,6 +57,15 @@ export async function serveSite(root: string): Promise<Site> {
     url: `http://127.0.0.1:${address.port}`,
     close: () => new Promise<void>((resolve) => server.close(() => resolve())),
   };
+}
+
+/** The decoded path of [url], or null when its escapes are malformed, `/%E0%A4%A` for example. */
+function decodePath(url: string): string | null {
+  try {
+    return decodeURIComponent(new URL(url, 'http://localhost').pathname);
+  } catch {
+    return null;
+  }
 }
 
 async function findFile(base: string, pathname: string): Promise<string | null> {

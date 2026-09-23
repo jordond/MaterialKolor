@@ -55,7 +55,8 @@ interface Router {
  * One stored record.
  *
  * A record that is missing reads as its default. One that no longer decodes is set aside under its
- * quarantine key and also reads as the default, so user data is never dropped silently.
+ * quarantine key and also reads as the default, so user data is never dropped silently. One written
+ * by a newer build stays where it is, reads as the default and turns down every update (D41).
  *
  * A failed write comes back as a [StoreError] rather than the `Result` that [Clipboard] and
  * [FileSaver] use, because store failures are a closed set the UI branches on (a full quota shows
@@ -102,11 +103,12 @@ interface StoreFactory {
     // b-214
 
     /**
-     * Records a store could not read, each reported once after it was moved to its quarantine key.
+     * Records a store could not read, each reported once. Unreadable text has been moved to its
+     * quarantine key by then, while a record from a newer build is left in place (D41).
      *
      * Reports found before anything collects are kept until the first collector comes, and each
-     * report reaches exactly one collector. B-302's localStorage store has to keep to this too, since
-     * boot reads the stores before the toast host subscribes.
+     * report reaches exactly one collector. The web store keeps to this too, since boot reads the
+     * stores before the toast host subscribes.
      */
     val quarantined: Flow<Quarantined>
 }
@@ -271,7 +273,11 @@ interface Environment {
 
     /**
      * Emits when the page goes out of sight, hidden behind another tab, closed or put in the back and
-     * forward cache, so the session can save before the page may be gone. Never emits off the web.
+     * forward cache. Never emits off the web.
+     *
+     * The session can save before the page is gone only when its collector runs undispatched. On wasm
+     * `Dispatchers.Main` resumes a collector in a later task, and after `pagehide` that task may never
+     * run, so the wiring collects on `Dispatchers.Unconfined`.
      */
     val pageHides: Flow<Unit>
 }
@@ -279,8 +285,8 @@ interface Environment {
 // b-214
 
 /**
- * A record a store could not read, moved to its quarantine key so the user can be told and nothing
- * is lost.
+ * A record a store could not read, so the user can be told and nothing is lost. Unreadable text is
+ * moved to its quarantine key, and a record from a newer build is left where it is (D41).
  *
  * @property[key] Where the record was stored.
  * @property[reason] Why it could not be read.

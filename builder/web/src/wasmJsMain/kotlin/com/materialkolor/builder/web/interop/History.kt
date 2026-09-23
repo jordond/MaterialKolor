@@ -45,11 +45,19 @@ internal fun historyPushOverlay(
     }""",
     )
 
-/** Go back one entry. The browser does it later and reports it through [onHistoryPop]. */
-internal fun historyBack(): Unit =
+/**
+ * Go back [steps] entries in one move. The browser does it later and reports it through
+ * [onHistoryPop]. False when the browser refused, and then no report comes.
+ */
+internal fun historyBack(steps: Int): Boolean =
     js(
         """{
-        try { window.history.back(); } catch (e) {}
+        try {
+            window.history.go(-steps);
+            return true;
+        } catch (e) {
+            return false;
+        }
     }""",
     )
 

@@ -5,6 +5,7 @@ import com.materialkolor.builder.core.platform.Router
 import com.materialkolor.builder.core.platform.StoreFactory
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.persist.Preferences
+import com.materialkolor.builder.domain.persist.ProjectIndex
 import com.materialkolor.builder.domain.persist.StorageKeys
 import com.materialkolor.builder.web.interop.e2eHooksWanted
 import com.materialkolor.builder.web.interop.exposeE2eHook
@@ -32,15 +33,21 @@ internal fun Router.exposeToE2e() {
     exposeE2eHook("overlayPops") { pops.toString() }
 }
 
-/** Hang hooks for the preferences record on the page when a spec opened it. */
+/**
+ * Hang hooks for the preferences and project index records on the page when a spec opened it.
+ *
+ * Each quarantine report reaches one collector, so the hooks only collect them once a spec asks with
+ * `watchQuarantine`. Reports wait until then.
+ */
 internal fun StoreFactory.exposeToE2e() {
     if (!e2eHooksWanted()) return
     val prefs = create(StorageKeys.PREFS, Preferences.Codec, Preferences())
+    val index = create(StorageKeys.INDEX, ProjectIndex.Codec, ProjectIndex())
     val external = mutableListOf<String>()
     val quarantine = mutableListOf<String>()
+    var watching = false
     var seen = ""
     hookScope.launch { externalChanges.collect { key -> external += key.toString() } }
-    hookScope.launch { quarantined.collect { report -> quarantine += "${report.key} ${report.reason}" } }
     hookScope.launch { prefs.data.collect { value -> seen = value.dismissedHints.sorted().joinToString(",") } }
     exposeE2eHook("addHint") { hint ->
         var outcome = "Pending"
@@ -62,7 +69,28 @@ internal fun StoreFactory.exposeToE2e() {
         hints
     }
     exposeE2eHook("seenHints") { seen }
+    exposeE2eHook("readIndex") {
+        var projects = "Pending"
+        hookScope.launch {
+            projects = index
+                .get()
+                .projects.size
+                .toString()
+        }
+        projects
+    }
+    exposeE2eHook("touchIndex") {
+        var outcome = "Pending"
+        hookScope.launch { outcome = index.update { value -> value }?.name ?: "Done" }
+        outcome
+    }
     exposeE2eHook("externalChanges") { external.joinToString(",") }
+    exposeE2eAction("watchQuarantine") {
+        if (!watching) {
+            watching = true
+            hookScope.launch { quarantined.collect { report -> quarantine += "${report.key} ${report.reason}" } }
+        }
+    }
     exposeE2eHook("quarantined") { quarantine.joinToString(",") }
 }
 

@@ -1,6 +1,7 @@
 package com.materialkolor.builder.core.platform
 
 import com.materialkolor.builder.domain.persist.DecodeOutcome
+import com.materialkolor.builder.domain.persist.QuarantineReason
 import com.materialkolor.builder.domain.persist.RecordCodec
 import com.materialkolor.builder.domain.persist.StorageKey
 import com.materialkolor.builder.domain.persist.StorageKeys
@@ -19,9 +20,8 @@ import kotlin.time.Clock
  * Stores that live in memory for the session.
  *
  * Each record is kept as the text its codec writes, so anything using these goes through the same
- * encode and decode path as real storage. Desktop runs on it, the web shell leans on it until
- * localStorage lands, and tests can use it in place of either. It is public because `:builder:web`
- * uses it.
+ * encode and decode path as real storage. Desktop runs on it, and tests use it in place of the web
+ * store. It was public for the web shell, which no longer uses it, so it can become internal.
  *
  * Text that no longer decodes is moved to its quarantine key the first time it is read and reported
  * once on [quarantined]. Reports wait until something collects them, so one found before the UI is
@@ -29,6 +29,10 @@ import kotlin.time.Clock
  *
  * Two texts moved aside from the same key in the same millisecond do not overwrite each other. The
  * second goes under the quarantine key of the next free millisecond.
+ *
+ * A record a newer build wrote is never moved, the way the web stores leave it for that build in
+ * another tab. It reads as the default, every update to its key is turned down with
+ * [StoreError.Unavailable], and it is reported once per key.
  *
  * @param[now] The time in milliseconds since the epoch, stamped on quarantine keys.
  */
@@ -41,6 +45,9 @@ class InMemoryStoreFactory(
     private val failures = MutableStateFlow<List<StoreError>>(emptyList())
     private val deleteFailures = MutableStateFlow<List<StoreError>>(emptyList())
     private val beforeUpdates = MutableStateFlow<Map<String, suspend () -> Unit>>(emptyMap())
+
+    // b-301a
+    private val newerReported = MutableStateFlow<Set<String>>(emptySet())
 
     override val externalChanges: Flow<StorageKey> = otherTabs.asSharedFlow()
 
@@ -103,6 +110,19 @@ class InMemoryStoreFactory(
         StorageKeys.parse(key)?.let(otherTabs::tryEmit)
     }
 
+    // b-301a
+    private fun report(quarantined: Quarantined) {
+        if (quarantined.reason == QuarantineReason.NewerSchema) {
+            var first = false
+            newerReported.update { reported ->
+                first = quarantined.key !in reported
+                reported + quarantined.key
+            }
+            if (!first) return
+        }
+        quarantines.trySend(quarantined)
+    }
+
     private fun takeBeforeUpdate(key: String): (suspend () -> Unit)? {
         var taken: (suspend () -> Unit)? = null
         beforeUpdates.update { pending ->
@@ -130,13 +150,15 @@ class InMemoryStoreFactory(
             takeBeforeUpdate(key)?.invoke()
             failures.takeFirst()?.let { error -> return error }
             var moved: Quarantined? = null
+            var refused = false
             texts.update { stored ->
                 val reading = settle(stored)
                 moved = reading.quarantined
-                reading.texts + (key to codec.encode(block(reading.value)))
+                refused = reading.refused
+                if (refused) stored else reading.texts + (key to codec.encode(block(reading.value)))
             }
-            moved?.let(quarantines::trySend)
-            return null
+            moved?.let(::report)
+            return if (refused) StoreError.Unavailable else null
         }
 
         override suspend fun delete(): StoreError? {
@@ -151,7 +173,7 @@ class InMemoryStoreFactory(
                 reading = settle(stored)
                 reading.texts
             }
-            reading.quarantined?.let(quarantines::trySend)
+            reading.quarantined?.let(::report)
             return reading.value
         }
 
@@ -161,6 +183,10 @@ class InMemoryStoreFactory(
             return when (val outcome = codec.decode(text)) {
                 is DecodeOutcome.Ok -> {
                     Reading(outcome.value, stored, quarantined = null)
+                }
+                // b-301a
+                is DecodeOutcome.Quarantine if outcome.reason == QuarantineReason.NewerSchema -> {
+                    Reading(default, stored, Quarantined(key, outcome.reason), refused = true)
                 }
                 is DecodeOutcome.Quarantine -> {
                     Reading(
@@ -192,11 +218,14 @@ private fun MutableStateFlow<List<StoreError>>.takeFirst(): StoreError? {
 
 /**
  * What a store holds, and the stored texts once anything unreadable has been moved aside.
+ *
+ * @property[refused] True when a newer build wrote the record, so no update may land on it.
  */
 private class Reading<T>(
     val value: T,
     val texts: Map<String, String>,
     val quarantined: Quarantined?,
+    val refused: Boolean = false,
 )
 
 private const val CHANGE_BUFFER = 64

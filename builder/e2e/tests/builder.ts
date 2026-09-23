@@ -24,6 +24,16 @@ export async function wantHooks(context: BrowserContext): Promise<void> {
 /** Open [path] and wait until the shell has built its services and hung their hooks. */
 export async function openBuilder(page: Page, path = '/'): Promise<void> {
   await page.goto(site(path));
+  await waitForHooks(page);
+}
+
+/** Reload [page] and wait until the shell has hung its hooks again. */
+export async function reloadBuilder(page: Page): Promise<void> {
+  await page.reload();
+  await waitForHooks(page);
+}
+
+async function waitForHooks(page: Page): Promise<void> {
   await page.waitForFunction(() =>
     ['route', 'addHint', 'media'].every((name) => typeof window.__mk?.[name] === 'function'),
   );

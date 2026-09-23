@@ -39,6 +39,10 @@ import kotlin.time.Clock
  * in-memory stores do it. When there is no room to move it, it stays where it is and every update to
  * that key is turned down with the storage error, so a write never lands on top of it.
  *
+ * A record a newer build wrote is never moved, since that build may still be open in another tab.
+ * It reads as the default, every update to its key is turned down with [StoreError.Unavailable], and
+ * it is reported once per key so the app can ask for a reload.
+ *
  * @param[now] The time in milliseconds since the epoch, stamped on quarantine keys.
  */
 internal class WebStoreFactory(
@@ -48,6 +52,7 @@ internal class WebStoreFactory(
     private val writes = MutableStateFlow(0L)
     private val otherTabs = MutableSharedFlow<StorageKey>(extraBufferCapacity = CHANGE_BUFFER)
     private val quarantines = Channel<Quarantined>(Channel.UNLIMITED)
+    private val newerReported = mutableSetOf<String>()
 
     override val externalChanges: Flow<StorageKey> = otherTabs.asSharedFlow()
 
@@ -101,9 +106,25 @@ internal class WebStoreFactory(
         private fun settle(): Reading<T> {
             val text = localStorageRead(key) ?: return Reading(default, blocked = null)
             return when (val outcome = codec.decode(text)) {
-                is DecodeOutcome.Ok -> Reading(outcome.value, blocked = null)
-                is DecodeOutcome.Quarantine -> Reading(default, blocked = setAside(text, outcome.reason))
+                is DecodeOutcome.Ok -> {
+                    Reading(outcome.value, blocked = null)
+                }
+                is DecodeOutcome.Quarantine -> {
+                    val blocked = when (outcome.reason) {
+                        QuarantineReason.NewerSchema -> leaveForNewerBuild()
+                        QuarantineReason.Unreadable,
+                        QuarantineReason.MigrationFailed,
+                        QuarantineReason.WrongShape,
+                        -> setAside(text, outcome.reason)
+                    }
+                    Reading(default, blocked)
+                }
             }
+        }
+
+        private fun leaveForNewerBuild(): StoreError {
+            if (newerReported.add(key)) quarantines.trySend(Quarantined(key, QuarantineReason.NewerSchema))
+            return StoreError.Unavailable
         }
 
         // Copy first and remove after, so the text is never in neither place.
@@ -127,8 +148,8 @@ internal class WebStoreFactory(
 }
 
 /**
- * What a store holds, and the error that keeps it from being written when unreadable text could not
- * be moved aside.
+ * What a store holds, and the error that keeps it from being written when a newer build wrote it or
+ * unreadable text could not be moved aside.
  */
 private class Reading<T>(
     val value: T,

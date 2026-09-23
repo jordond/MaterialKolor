@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { hook, openBuilder, wantHooks } from './builder';
+import { hook, openBuilder, reloadBuilder, site, wantHooks } from './builder';
 
 // The browser services behind the builder, driven through the shell's test hooks while the app is
 // still a placeholder. Storage first, then the router and the page around it.
@@ -54,6 +54,7 @@ test.describe('storage', () => {
 
   test('an unreadable record is set aside and reported once', async ({ page }) => {
     await openBuilder(page);
+    await hook(page, 'watchQuarantine');
     await page.evaluate(() => localStorage.setItem('mk:prefs', 'not json'));
 
     expect(await hook(page, 'readHints')).toBe('');
@@ -63,7 +64,28 @@ test.describe('storage', () => {
       Object.keys(localStorage).filter((key) => localStorage.getItem(key) === 'not json'),
     );
     expect(holders).toHaveLength(1);
-    expect(holders[0]).not.toBe('mk:prefs');
+    expect(holders[0]).toMatch(/^mk:quarantine:/);
+  });
+
+  test("a newer build's index from another tab stays as it is and refuses writes", async ({ context }) => {
+    const newer = '{"schema":999,"data":{"projects":[],"from":"a newer build"}}';
+    const older = await context.newPage();
+    const other = await context.newPage();
+    await openBuilder(older);
+    await openBuilder(other);
+    await hook(older, 'watchQuarantine');
+
+    await other.evaluate((text) => localStorage.setItem('mk:index', text), newer);
+    await expect.poll(() => hook(older, 'externalChanges')).toContain('Index');
+
+    expect(await hook(older, 'readIndex')).toBe('0');
+    expect(await hook(older, 'touchIndex')).toBe('Unavailable');
+    expect(await hook(older, 'readIndex')).toBe('0');
+    expect(await hook(older, 'quarantined')).toBe('mk:index NewerSchema');
+    expect(await older.evaluate(() => localStorage.getItem('mk:index'))).toBe(newer);
+    expect(await older.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith('mk:quarantine:')))).toEqual(
+      [],
+    );
   });
 });
 
@@ -113,6 +135,94 @@ test.describe('router', () => {
 
     await page.evaluate(() => history.back());
     await expect.poll(() => hook(page, 'overlayPops')).toBe('1');
+  });
+
+  test('backs the browser folds into one move are all settled', async ({ page }) => {
+    await openBuilder(page);
+    await hook(page, 'pushOverlay', 'export');
+    await hook(page, 'pushOverlay', 'projects');
+
+    // Both closes land as one two-entry move.
+    await closeWithBacksHeld(page, 2);
+    await page.evaluate(() => history.go(-2));
+    await expect.poll(() => historyState(page)).toBe('null');
+    expect(await hook(page, 'overlayPops')).toBe('0');
+
+    // One close and one user back land as one move, and only the user's back is reported.
+    await hook(page, 'pushOverlay', 'export');
+    expect(await historyState(page)).toBe('{"mkOverlay":"export","mkDepth":1}');
+    await hook(page, 'pushOverlay', 'projects');
+    await closeWithBacksHeld(page, 1);
+    await page.evaluate(() => history.go(-2));
+    await expect.poll(() => hook(page, 'overlayPops')).toBe('1');
+    expect(await historyState(page)).toBe('null');
+
+    await hook(page, 'pushOverlay', 'export');
+    expect(await historyState(page)).toBe('{"mkOverlay":"export","mkDepth":1}');
+    await page.evaluate(() => history.back());
+    await expect.poll(() => hook(page, 'overlayPops')).toBe('2');
+  });
+
+  test('a back the browser refuses leaves nothing pending', async ({ page }) => {
+    await openBuilder(page);
+    await hook(page, 'pushOverlay', 'export');
+    await page.evaluate(() => {
+      history.go = () => {
+        throw new DOMException('Too many calls to the history API', 'SecurityError');
+      };
+      window.__mk!.popOverlay();
+      delete (history as { go?: unknown }).go;
+    });
+    expect(await historyState(page)).toBe('{"mkOverlay":"export","mkDepth":1}');
+
+    // The next overlay goes on at once, and the next back closes it.
+    await hook(page, 'pushOverlay', 'projects');
+    expect(await historyState(page)).toBe('{"mkOverlay":"projects","mkDepth":2}');
+    await page.evaluate(() => history.back());
+    await expect.poll(() => hook(page, 'overlayPops')).toBe('1');
+
+    // The entry the refused back left behind is skipped quietly after that.
+    await expect.poll(() => historyState(page)).toBe('null');
+    expect(await hook(page, 'overlayPops')).toBe('1');
+  });
+
+  test('a reload on an overlay entry goes back quietly', async ({ page }) => {
+    await openBuilder(page);
+    await hook(page, 'pushOverlay', 'export');
+    await hook(page, 'pushOverlay', 'projects');
+
+    await reloadBuilder(page);
+    await expect.poll(() => historyState(page)).toBe('null');
+    await page.waitForTimeout(250);
+    expect(await hook(page, 'overlayPops')).toBe('0');
+
+    await hook(page, 'pushOverlay', 'export');
+    expect(await historyState(page)).toBe('{"mkOverlay":"export","mkDepth":1}');
+    await page.evaluate(() => history.back());
+    await expect.poll(() => hook(page, 'overlayPops')).toBe('1');
+  });
+
+  test('a forward into an overlay entry goes back quietly', async ({ page }) => {
+    await openBuilder(page);
+    await hook(page, 'pushOverlay', 'export');
+    await page.evaluate(() => history.back());
+    await expect.poll(() => hook(page, 'overlayPops')).toBe('1');
+
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          window.addEventListener('popstate', () => resolve(), { once: true });
+          history.forward();
+        }),
+    );
+    await expect.poll(() => historyState(page)).toBe('null');
+    await page.waitForTimeout(250);
+    expect(await hook(page, 'overlayPops')).toBe('1');
+
+    await hook(page, 'pushOverlay', 'projects');
+    expect(await historyState(page)).toBe('{"mkOverlay":"projects","mkDepth":1}');
+    await page.evaluate(() => history.back());
+    await expect.poll(() => hook(page, 'overlayPops')).toBe('2');
   });
 });
 
@@ -172,6 +282,23 @@ test.describe('environment', () => {
     );
   });
 });
+
+test('the site server answers a malformed path with 400 and keeps serving', async ({ request }) => {
+  expect((await request.get(site('/%E0%A4%A'))).status()).toBe(400);
+  expect((await request.get(site('/'))).status()).toBe(200);
+});
+
+/** Close [count] overlays from the UI while the browser's back does nothing, so the router's backs stay pending. */
+async function closeWithBacksHeld(page: Page, count: number): Promise<void> {
+  await page.evaluate((closes) => {
+    history.go = () => {};
+    try {
+      for (let close = 0; close < closes; close++) window.__mk!.popOverlay();
+    } finally {
+      delete (history as { go?: unknown }).go;
+    }
+  }, count);
+}
 
 /** Fill localStorage until not even a few characters fit, and return how many filler keys it took. */
 async function fillStorage(page: Page): Promise<number> {
