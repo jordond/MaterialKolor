@@ -25,6 +25,9 @@ public val WideBreakpoint: Dp = 1600.dp
 /** How wide the canvas content is allowed to get past [WideBreakpoint]. */
 public val CanvasContentCap: Dp = 1400.dp
 
+/** Below this height a window held with a coarse pointer is a phone on its side, and gets the sheet. */
+public val ShortHeightBreakpoint: Dp = 480.dp // b-209a
+
 /**
  * The three widths the builder lays itself out for.
  *
@@ -57,7 +60,7 @@ public enum class WindowClass {
 
 /**
  * How the poster panel is shown, which is the one piece of geometry that changes at four widths
- * rather than three.
+ * rather than three. A phone on its side is Medium by width but still gets the sheet (D38).
  */
 public enum class PosterMode {
     /** Inside the bottom sheet, with detents. */
@@ -66,7 +69,7 @@ public enum class PosterMode {
     /** A 72 dp seed strip that opens over the canvas. */
     Rail72,
 
-    /** Docked at 320 dp. */
+    /** Docked at 320 dp, collapsible to the rail. */
     Docked320,
 
     /** Docked at 400 dp, collapsible to the rail. */
@@ -75,15 +78,27 @@ public enum class PosterMode {
     ;
 
     public companion object {
-        /** The poster treatment for a container of [widthDp] in [windowClass]. */
+        /**
+         * The poster treatment for a container of [widthDp] by [heightDp] in [windowClass].
+         *
+         * A window shorter than [ShortHeightBreakpoint] with a [coarsePointer] is a phone on its side,
+         * and takes the sheet whatever its width, since a rail or a docked panel would eat half of it.
+         * A short window with a mouse keeps its width's treatment, where a scrolling poster works.
+         */
         public fun of(
             windowClass: WindowClass,
             widthDp: Dp,
+            heightDp: Dp,
+            coarsePointer: Boolean,
         ): PosterMode =
-            when (windowClass) {
-                WindowClass.Compact -> Sheet
-                WindowClass.Medium -> if (widthDp >= DockedPosterBreakpoint) Docked320 else Rail72
-                WindowClass.Expanded -> Docked400
+            if (heightDp < ShortHeightBreakpoint && coarsePointer) {
+                Sheet // b-209a
+            } else {
+                when (windowClass) {
+                    WindowClass.Compact -> Sheet
+                    WindowClass.Medium -> if (widthDp >= DockedPosterBreakpoint) Docked320 else Rail72
+                    WindowClass.Expanded -> Docked400
+                }
             }
     }
 }
@@ -95,7 +110,7 @@ public enum class PosterMode {
  * new width cannot leave a class or a poster mode behind that belongs to the old one.
  *
  * @property[widthDp] The container width.
- * @property[heightDp] The container height, which the poster peek reads in short landscape.
+ * @property[heightDp] The container height, which the poster mode and its peek read in short landscape.
  * @property[coarsePointer] True for touch and pen, false for a mouse or a trackpad.
  */
 @Immutable
@@ -110,7 +125,7 @@ public data class LayoutInfo(
 
     /** How the poster panel is shown. */
     public val posterMode: PosterMode
-        get() = PosterMode.of(windowClass, widthDp)
+        get() = PosterMode.of(windowClass, widthDp, heightDp, coarsePointer) // b-209a
 
     /**
      * The smallest a tappable thing is allowed to be.
