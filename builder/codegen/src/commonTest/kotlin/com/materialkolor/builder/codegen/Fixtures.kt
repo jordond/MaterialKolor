@@ -55,7 +55,12 @@ internal class Fixture(
  * right.
  */
 internal object Fixtures {
-    val Versions: ExportVersions = ExportVersions(builder = "2.0.0", materialKolor = "6.0.0", fluent = "v0.1.0")
+    val Versions: ExportVersions = ExportVersions(
+        builder = "2.0.0",
+        materialKolor = "6.0.0",
+        fluent = "v0.1.0",
+        composeUnstyled = "2.10.0",
+    )
 
     // Declared ahead of the fixtures, which read them while the object is still being built.
     private val Black: Argb = Argb(0)

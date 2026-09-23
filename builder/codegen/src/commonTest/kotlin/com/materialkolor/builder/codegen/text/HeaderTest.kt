@@ -35,7 +35,12 @@ class HeaderTest {
     @Test
     fun lines_otherVersionsAndLink_followTheInput() {
         val input = Fixtures.Default.input.copy(
-            versions = ExportVersions(builder = "2.1.0", materialKolor = "6.1.0", fluent = "v0.2.0"),
+            versions = ExportVersions(
+                builder = "2.1.0",
+                materialKolor = "6.1.0",
+                fluent = "v0.2.0",
+                composeUnstyled = "2.11.0",
+            ),
             shareUrl = "https://example.com/t/abc",
         )
 
