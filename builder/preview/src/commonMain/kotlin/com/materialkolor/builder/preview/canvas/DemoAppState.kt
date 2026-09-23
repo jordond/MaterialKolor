@@ -11,7 +11,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 
 /**
@@ -98,7 +101,9 @@ private class ScrollMirror {
      * Lead whenever [list] moves on its own, and follow whenever another copy leads.
      *
      * A move that lands where the mirror just sent [list] is its own echo, not a scroll, so it does
-     * not take the lead back.
+     * not take the lead back. While [list] is being dragged, flung or wheeled it waits, and it
+     * catches up with the leader once it stops. A drag that starts in the middle of a catch-up
+     * takes the list from under it, which ends that catch-up and not the mirroring.
      */
     suspend fun follow(list: LazyListState) {
         var expected = list.position()
@@ -111,10 +116,18 @@ private class ScrollMirror {
                     }
                 }
             }
-            snapshotFlow { lead }.collect { current ->
+            snapshotFlow { if (list.isScrollInProgress) null else lead }.collect { current ->
                 if (current != null && current.source !== list && current.position != expected) {
                     expected = current.position
-                    list.scrollToItem(current.position.index, current.position.offset)
+                    try {
+                        list.scrollToItem(current.position.index, current.position.offset)
+                    } catch (lost: CancellationException) {
+                        // Cancelling this coroutine still ends the mirroring.
+                        currentCoroutineContext().ensureActive()
+                        // A scroll of higher priority holds the list. Forget the jump, so the list
+                        // leads if that scroll moves it, and catches up once it stops if not.
+                        expected = list.position()
+                    }
                 }
             }
         }

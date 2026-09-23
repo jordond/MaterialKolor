@@ -2,9 +2,7 @@ package com.materialkolor.builder.preview.split
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
@@ -25,12 +23,19 @@ public class SplitState(
         require(initial in 0f..1f) { "A split fraction lies between 0 and 1, got $initial" }
     }
 
+    private val state = mutableFloatStateOf(initial)
+
     /**
      * How much of the preview the start copy shows, from 0 at the start edge to 1 at the end edge.
      *
-     * Read it only in layer, placement and draw blocks, so moving the handle never recomposes a pane.
+     * A value past either end is held at that end. Read it only in layer, placement and draw
+     * blocks, so moving the handle never recomposes a pane.
      */
-    public var fraction: Float by mutableFloatStateOf(initial)
+    public var fraction: Float
+        get() = state.floatValue
+        set(value) {
+            state.floatValue = value.coerceIn(0f, 1f)
+        }
 
     /** Put the handle back in the middle. */
     public fun reset() {

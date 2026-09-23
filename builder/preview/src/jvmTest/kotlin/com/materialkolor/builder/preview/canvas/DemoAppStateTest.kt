@@ -75,6 +75,63 @@ class DemoAppStateTest {
         }
 
     @Test
+    fun scroll_eachCopyMovingWhileTheOtherIsDragged_keepsMirroringAfterwards() =
+        runComposeUiTest {
+            val state = DemoAppState()
+            val lists = mutableMapOf<String, LazyListState>()
+            setContent {
+                Chrome {
+                    SplitPreview(
+                        LightSpec,
+                        DarkSpec,
+                        SplitState(),
+                        Modifier.size(400.dp, 300.dp).testTag("split"),
+                    ) { spec ->
+                        val list = state.rememberListState("feed")
+                        lists[spec.label] = list
+                        LazyColumn(state = list, modifier = Modifier.fillMaxSize()) {
+                            items(2000) { Box(Modifier.fillMaxWidth().height(40.dp)) }
+                        }
+                    }
+                }
+            }
+            val light = { lists.getValue("Light") }
+            val dark = { lists.getValue("Dark") }
+
+            // One finger drags the dark copy and holds it, while a second drags the light copy and
+            // lets it fling. Each copy moves on its own while the other is held by a drag.
+            onNodeWithTag("split").performTouchInput {
+                down(DARK, Offset(width * 0.9f, height * 0.8f))
+                repeat(5) { moveBy(DARK, Offset(0f, -10f)) }
+                down(LIGHT, Offset(width * 0.1f, height * 0.9f))
+                repeat(8) {
+                    updatePointerBy(LIGHT, Offset(0f, -25f))
+                    updatePointerBy(DARK, Offset(0f, -2f))
+                    move()
+                }
+                up(LIGHT)
+                repeat(5) { moveBy(DARK, Offset(0f, -2f)) }
+                up(DARK)
+            }
+            waitForIdle()
+            dark().position() shouldBe light().position()
+
+            val settled = light().firstVisibleItemIndex
+            onNodeWithTag("split").performTouchInput {
+                swipe(Offset(width * 0.1f, height * 0.8f), Offset(width * 0.1f, height * 0.2f), durationMillis = 300)
+            }
+            waitForIdle()
+            light().firstVisibleItemIndex shouldBeGreaterThan settled
+            dark().position() shouldBe light().position()
+
+            onNodeWithTag("split").performTouchInput {
+                swipe(Offset(width * 0.9f, height * 0.8f), Offset(width * 0.9f, height * 0.2f), durationMillis = 300)
+            }
+            waitForIdle()
+            light().position() shouldBe dark().position()
+        }
+
+    @Test
     fun switchesAndCheckboxes_untouched_readOffAndRememberWhatIsSet() {
         val state = DemoAppState()
 
@@ -90,3 +147,9 @@ class DemoAppStateTest {
 
     private fun LazyListState.position(): Pair<Int, Int> = firstVisibleItemIndex to firstVisibleItemScrollOffset
 }
+
+/** The finger on the dark copy. */
+private const val DARK = 0
+
+/** The finger on the light copy. */
+private const val LIGHT = 1

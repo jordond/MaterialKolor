@@ -5,6 +5,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.preview.split.PaneSide
 
 /**
@@ -40,11 +41,13 @@ public class InspectRegistry {
         return best
     }
 
-    /** Record or move the element [owner]. */
+    /** Record or move the element [owner], which makes it the one recorded last. */
     internal fun record(
         owner: Any,
         entry: InspectEntry,
     ) {
+        // A put on a key already there keeps its old place, so take it out first.
+        entries.remove(owner)
         entries[owner] = entry
     }
 
@@ -58,12 +61,12 @@ public class InspectRegistry {
  * One element that declared its roles, as Inspect sees it.
  *
  * @property[side] The copy of the split it is drawn in.
- * @property[roles] The roles it reads, in the order it declared them.
+ * @property[roles] The colors it reads, in the order it declared them.
  * @property[bounds] Where it sits in the window.
  */
 public data class InspectEntry(
     public val side: PaneSide,
-    public val roles: List<RoleRef>,
+    public val roles: List<ColorRef>,
     public val bounds: Rect,
 )
 

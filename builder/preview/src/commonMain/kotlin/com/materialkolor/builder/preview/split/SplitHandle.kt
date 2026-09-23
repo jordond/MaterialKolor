@@ -40,11 +40,12 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.preview.generated.resources.Res
+import com.materialkolor.builder.preview.generated.resources.split_handle_label
+import com.materialkolor.builder.preview.generated.resources.split_handle_state
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.max
 import kotlin.math.roundToInt
-
-/** What a screen reader calls the handle. */
-private const val HANDLE_LABEL = "Split"
 
 /**
  * The handle between the two copies of a split preview.
@@ -53,7 +54,8 @@ private const val HANDLE_LABEL = "Split"
  * places it reads [split], so a drag touches placement and drawing and nothing else. A drag moves it,
  * each arrow key moves it by five percent, Home and End send it to either edge, and a double click
  * or Enter puts it back in the middle. Assistive tech sees a slider that says how much of the start
- * copy shows.
+ * copy shows. Its words load in composition and the percentage goes in inside the semantics block,
+ * so a drag still recomposes nothing.
  *
  * @param[split] Where the handle sits.
  * @param[orientation] Horizontal for side by side, vertical for top and bottom.
@@ -72,11 +74,13 @@ internal fun SplitHandle(
     val tokens = LocalBuilderTokens.current
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val horizontal = orientation == Orientation.Horizontal
+    val label = stringResource(Res.string.split_handle_label)
+    val stateFormat = stringResource(Res.string.split_handle_state)
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
     val dragState = rememberDraggableState { delta ->
         val extent = size().along(horizontal)
-        if (extent > 0) split.fraction = (split.fraction + delta / extent).coerceIn(0f, 1f)
+        if (extent > 0) split.fraction += delta / extent
     }
     val thickness = tokens.spacing.section
     val span = if (horizontal) Modifier.fillMaxHeight().width(thickness) else Modifier.fillMaxWidth().height(thickness)
@@ -89,11 +93,11 @@ internal fun SplitHandle(
                 }.then(span)
                 .semantics {
                     val fraction = split.fraction
-                    contentDescription = HANDLE_LABEL
-                    stateDescription = "${(fraction * 100).roundToInt()}% $startLabel"
+                    contentDescription = label
+                    stateDescription = stateFormat.fillIn(percent = (fraction * 100).roundToInt(), label = startLabel)
                     progressBarRangeInfo = ProgressBarRangeInfo(current = fraction, range = 0f..1f)
-                    setProgress(HANDLE_LABEL) { target ->
-                        split.fraction = target.coerceIn(0f, 1f)
+                    setProgress(label) { target ->
+                        split.fraction = target
                         true
                     }
                 }.onKeyEvent { event -> split.onKey(event, horizontal, isRtl) }
@@ -130,7 +134,7 @@ private fun SplitState.onKey(
         else -> null
     }
     when {
-        step != null -> fraction = (fraction + step).coerceIn(0f, 1f)
+        step != null -> fraction += step
         event.key == Key.MoveHome -> fraction = 0f
         event.key == Key.MoveEnd -> fraction = 1f
         event.key == Key.Enter || event.key == Key.NumPadEnter -> reset()
@@ -138,6 +142,18 @@ private fun SplitState.onKey(
     }
     return true
 }
+
+/**
+ * The handle's state text, with [percent] and [label] put in where the string resource's `%1$d`
+ * and `%2$s` stand.
+ *
+ * It runs in the semantics block, outside composition, so it cannot take the resource's own
+ * formatting.
+ */
+private fun String.fillIn(
+    percent: Int,
+    label: String,
+): String = replace("%1\$d", percent.toString()).replace("%2\$s", label)
 
 /** The handle's line across the preview, the grip on it, and the focus ring round the grip. */
 private fun DrawScope.drawHandle(

@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -18,6 +20,10 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
@@ -58,37 +64,46 @@ private const val WIFI = "wifi"
 @OptIn(ExperimentalTestApi::class)
 class SplitPreviewTest {
     @Test
-    fun click_onEitherSide_landsOnTheVisibleCopyAndFlipsBoth() =
+    fun click_onEitherSide_landsOnTheVisibleCopyAndFlipsBoth() = clickEitherSide(LayoutDirection.Ltr)
+
+    @Test
+    fun click_onEitherSideRightToLeft_landsOnTheVisibleCopyAndFlipsBoth() = clickEitherSide(LayoutDirection.Rtl)
+
+    /** Click the end side then the start side, wherever [direction] puts them. */
+    private fun clickEitherSide(direction: LayoutDirection) =
         runComposeUiTest {
             val state = DemoAppState()
             val handled = mutableListOf<String>()
             val seen = mutableMapOf<String, Boolean>()
             setContent {
-                Chrome {
-                    SplitPreview(
-                        LightSpec,
-                        DarkSpec,
-                        SplitState(),
-                        Modifier.size(400.dp, 300.dp).testTag(SPLIT),
-                    ) { spec ->
-                        val on = state.isOn(WIFI)
-                        seen[spec.label] = on
-                        Box(
-                            Modifier.fillMaxSize().testTag(WIFI).toggleable(value = on) { checked ->
-                                state.setOn(WIFI, checked)
-                                handled += spec.label
-                            },
-                        )
+                CompositionLocalProvider(LocalLayoutDirection provides direction) {
+                    Chrome {
+                        SplitPreview(
+                            LightSpec,
+                            DarkSpec,
+                            SplitState(),
+                            Modifier.size(400.dp, 300.dp).testTag(SPLIT),
+                        ) { spec ->
+                            val on = state.isOn(WIFI)
+                            seen[spec.label] = on
+                            Box(
+                                Modifier.fillMaxSize().testTag(WIFI).toggleable(value = on) { checked ->
+                                    state.setOn(WIFI, checked)
+                                    handled += spec.label
+                                },
+                            )
+                        }
                     }
                 }
             }
+            val (startX, endX) = if (direction == LayoutDirection.Ltr) 0.1f to 0.9f else 0.9f to 0.1f
 
-            onNodeWithTag(SPLIT).performTouchInput { click(Offset(width * 0.9f, height / 2f)) }
+            onNodeWithTag(SPLIT).performTouchInput { click(Offset(width * endX, height / 2f)) }
             waitForIdle()
             handled shouldContainExactly listOf("Dark")
             seen shouldBe mapOf("Light" to true, "Dark" to true)
 
-            onNodeWithTag(SPLIT).performTouchInput { click(Offset(width * 0.1f, height / 2f)) }
+            onNodeWithTag(SPLIT).performTouchInput { click(Offset(width * startX, height / 2f)) }
             waitForIdle()
             handled shouldContainExactly listOf("Dark", "Light")
             seen shouldBe mapOf("Light" to false, "Dark" to false)
@@ -145,20 +160,68 @@ class SplitPreviewTest {
         }
 
     @Test
+    fun tap_onATextFieldOnTheEndSide_focusesItAndTakesKeysButTabStillSkipsTheEndCopy() =
+        runComposeUiTest {
+            val focused = mutableSetOf<String>()
+            val keys = mutableListOf<String>()
+            lateinit var focusManager: FocusManager
+            setContent {
+                focusManager = LocalFocusManager.current
+                Chrome {
+                    SplitPreview(
+                        LightSpec,
+                        DarkSpec,
+                        SplitState(),
+                        Modifier.size(400.dp, 300.dp).testTag(SPLIT),
+                    ) { spec ->
+                        BasicTextField(
+                            state = rememberTextFieldState(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .onFocusChanged { focus -> if (focus.isFocused) focused += spec.label }
+                                .onPreviewKeyEvent { event ->
+                                    if (event.type == KeyEventType.KeyDown) keys += "${spec.label}/${event.key}"
+                                    false
+                                },
+                        )
+                    }
+                }
+            }
+
+            onNodeWithTag(SPLIT).performTouchInput { click(Offset(width * 0.9f, height / 2f)) }
+            waitForIdle()
+            focused shouldBe setOf("Dark")
+
+            onNodeWithTag(SPLIT).performKeyInput { pressKey(Key.A) }
+            keys shouldBe listOf("Dark/${Key.A}")
+
+            runOnIdle { focusManager.clearFocus() }
+            focused.clear()
+            repeat(4) {
+                runOnIdle { focusManager.moveFocus(FocusDirection.Next) }
+            }
+            waitForIdle()
+            focused shouldBe setOf("Light")
+        }
+
+    @Test
     fun drag_acrossTheWholeRange_sweepsTheHandleWithoutRecomposingEitherCopy() =
         runComposeUiTest {
             val split = SplitState()
             val compositions = mutableMapOf<String, Int>()
+            val count = { where: String -> compositions[where] = (compositions[where] ?: 0) + 1 }
             setContent {
                 Chrome {
-                    SplitPreview(
-                        start = LightSpec,
-                        end = DarkSpec,
-                        split = split,
-                        modifier = Modifier.padding(100.dp).size(400.dp, 300.dp).testTag(SPLIT),
-                    ) { spec ->
-                        compositions[spec.label] = (compositions[spec.label] ?: 0) + 1
-                        Box(Modifier.fillMaxSize())
+                    CompositionLocalProvider(LocalCompositionProbe provides count) {
+                        SplitPreview(
+                            start = LightSpec,
+                            end = DarkSpec,
+                            split = split,
+                            modifier = Modifier.padding(100.dp).size(400.dp, 300.dp).testTag(SPLIT),
+                        ) { spec ->
+                            count(spec.label)
+                            Box(Modifier.fillMaxSize())
+                        }
                     }
                 }
             }
@@ -183,7 +246,7 @@ class SplitPreviewTest {
             samples.min() shouldBe 0f
             samples.max() shouldBe 1f
             samples.distinct() shouldHaveAtLeastSize 30
-            before.keys shouldBe setOf("Light", "Dark")
+            before.keys shouldBe setOf("Light", "Dark", SPLIT_PREVIEW, "PreviewPane/Light", "PreviewPane/Dark")
             compositions shouldBe before
         }
 
@@ -257,6 +320,16 @@ class SplitPreviewTest {
             waitForIdle()
             split.fraction shouldBe 0.5f
         }
+
+    @Test
+    fun fraction_setPastEitherEnd_isHeldAtThatEnd() {
+        val split = SplitState()
+
+        split.fraction = 1.4f
+        split.fraction shouldBe 1f
+        split.fraction = -0.2f
+        split.fraction shouldBe 0f
+    }
 
     @Test
     fun splitShape_eachDirectionAndAxis_keepsThePartPastTheHandle() {

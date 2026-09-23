@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -18,6 +19,7 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.composeunstyled.theme.Theme
 import com.materialkolor.builder.domain.color.Argb
@@ -130,6 +132,29 @@ class PreviewPaneTest {
 
                     primary shouldBe pin.toColor()
                     background shouldBe Color.Black
+                }
+            }
+        }
+    }
+
+    @Test
+    fun materialPane_underTheBrandChrome_setsTextInTheLibraryDefaultNotTheBrandFace() {
+        val skins = listOf(Skin(Library.Material3, expressive = false), Skin(Library.Material3, expressive = true))
+        for (skin in skins) {
+            withClue(skin) {
+                runComposeUiTest {
+                    var chrome: TextStyle? = null
+                    var pane: TextStyle? = null
+                    setContent {
+                        Chrome(skin) {
+                            chrome = MaterialTheme.typography.bodyLarge
+                            PreviewPane(LightSpec) { pane = MaterialTheme.typography.bodyLarge }
+                        }
+                    }
+                    waitForIdle()
+
+                    pane?.fontFamily shouldNotBe chrome?.fontFamily
+                    pane shouldBe Typography().bodyLarge
                 }
             }
         }

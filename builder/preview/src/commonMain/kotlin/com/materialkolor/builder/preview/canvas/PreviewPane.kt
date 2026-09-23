@@ -11,6 +11,8 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -36,6 +38,7 @@ import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.RoleEntry
 import com.materialkolor.builder.kit.skin.LocalSkin
+import com.materialkolor.builder.preview.split.LocalCompositionProbe
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.unstyled.MaterialKolorTokens
 import androidx.compose.material3.LocalContentColor as MaterialContentColor
@@ -51,7 +54,8 @@ import com.composeunstyled.theme.ColorScheme as UnstyledColorScheme
  * the document's pins show, and the Custom slots for Custom. Nothing is generated here. Before the
  * library theme goes on, the pane sets content color, text style, selection colors and indication
  * for every library, so nothing the builder's own chrome provides reaches the preview, and whatever
- * the pane provides ends at its edge.
+ * the pane provides ends at its edge. Material's themes get the library's own typography and
+ * shapes too, since left out they would take the chrome's.
  *
  * @param[spec] The result, mode and filter to draw.
  * @param[modifier] Applied to the pane, outside its filter and background.
@@ -63,6 +67,7 @@ public fun PreviewPane(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
+    LocalCompositionProbe.current?.invoke("PreviewPane/${spec.label}")
     val skin = LocalSkin.current
     val roles = spec.result.roles.mode(spec.isDark)
     // Only a Custom pane reads the Custom slots, so no other pane works them out.
@@ -174,7 +179,13 @@ private fun PaneLocals(
     )
 }
 
-/** A Material theme, expressive or not, whose scheme is all 48 roles from the role table. */
+/**
+ * A Material theme, expressive or not, whose scheme is all 48 roles from the role table.
+ *
+ * Typography and shapes are the library's defaults, the ones an app gets from a bare theme. Both
+ * themes read them from the theme around them when they are not passed, and around the preview
+ * that is the chrome with its brand face.
+ */
 @Composable
 private fun MaterialPane(
     roles: Map<Role, RoleEntry>,
@@ -182,10 +193,18 @@ private fun MaterialPane(
     content: @Composable () -> Unit,
 ) {
     val colorScheme = remember(roles) { roles.toColorScheme() }
+    val typography = remember { Typography() }
+    val shapes = remember { Shapes() }
     if (expressive) {
-        MaterialExpressiveTheme(colorScheme = colorScheme, motionScheme = MotionScheme.expressive(), content = content)
+        MaterialExpressiveTheme(
+            colorScheme = colorScheme,
+            motionScheme = MotionScheme.expressive(),
+            shapes = shapes,
+            typography = typography,
+            content = content,
+        )
     } else {
-        MaterialTheme(colorScheme = colorScheme, content = content)
+        MaterialTheme(colorScheme = colorScheme, shapes = shapes, typography = typography, content = content)
     }
 }
 

@@ -6,12 +6,15 @@ import androidx.compose.ui.graphics.compositeOver
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.audit.ContrastPair
 import com.materialkolor.builder.domain.audit.ContrastPairs
+import com.materialkolor.builder.domain.audit.FluentShade
 import com.materialkolor.builder.domain.audit.FluentText
 import com.materialkolor.builder.domain.audit.PairKind
 import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.export.FluentShadeValues
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.SlotResolution
 import com.materialkolor.builder.domain.persist.PreviewMode
+import com.materialkolor.builder.engine.export.fluentShades
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.engine.resolve.toDomain
@@ -150,7 +153,8 @@ public class ContrastAudit internal constructor(
             )
         }
 
-        private fun rate(
+        /** Rate [pair] in the mode [isDark] picks, the one place a pair's colors are looked up. */
+        internal fun rate(
             result: ThemeResult,
             pair: ContrastPair,
             isDark: Boolean,
@@ -176,8 +180,9 @@ public class ContrastAudit internal constructor(
          * The color [ref] names in the mode [isDark] picks.
          *
          * In a Fluent pair the primary role stands for Fluent's accent fill, which is cut from the
-         * scheme's own primary palette. Fluent's text colors can carry alpha, and the caller lays
-         * them over the background before measuring.
+         * scheme's own primary palette. A Fluent shade is the one the export writes for that mode.
+         * Fluent's text colors can carry alpha, and the caller lays them over the background before
+         * measuring.
          */
         private fun ThemeResult.color(
             ref: ColorRef,
@@ -201,10 +206,17 @@ public class ContrastAudit internal constructor(
                 is ColorRef.OfFluentText -> {
                     ref.text.color(isDark)
                 }
+                is ColorRef.OfFluentShade -> {
+                    val shades = fluentShades()
+                    (if (isDark) shades.dark else shades.light)[ref.shade].toColor()
+                }
             }
 
         private val ContrastPair.isFluent: Boolean
-            get() = foreground is ColorRef.OfFluentText || background is ColorRef.OfFluentText
+            get() = foreground.isFluent || background.isFluent
+
+        private val ColorRef.isFluent: Boolean
+            get() = this is ColorRef.OfFluentText || this is ColorRef.OfFluentShade
 
         /** The roles the document pins in the mode [isDark] picks. */
         private fun ThemeResult.pinnedIn(isDark: Boolean): Set<Role> =
@@ -276,7 +288,9 @@ public class ContrastAudit internal constructor(
                         -> AuditSuggestion.MoveSlotTone
                     }
                 }
-                is ColorRef.OfFluentText -> {
+                is ColorRef.OfFluentText,
+                is ColorRef.OfFluentShade,
+                -> {
                     AuditSuggestion.ChangeSeed
                 }
             }
@@ -292,6 +306,17 @@ public class ContrastAudit internal constructor(
             when (this) {
                 FluentText.OnAccentPrimary -> if (isDark) Color(0xFF000000) else Color(0xFFFFFFFF)
                 FluentText.OnAccentSecondary -> if (isDark) Color(0x80000000) else Color(0xB3FFFFFF)
+            }
+
+        private operator fun FluentShadeValues.get(shade: FluentShade): Argb =
+            when (shade) {
+                FluentShade.Dark3 -> dark3
+                FluentShade.Dark2 -> dark2
+                FluentShade.Dark1 -> dark1
+                FluentShade.Base -> base
+                FluentShade.Light1 -> light1
+                FluentShade.Light2 -> light2
+                FluentShade.Light3 -> light3
             }
 
         private fun PreviewMode.shows(isDark: Boolean): Boolean =

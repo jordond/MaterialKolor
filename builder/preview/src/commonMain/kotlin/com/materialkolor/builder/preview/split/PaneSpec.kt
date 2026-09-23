@@ -17,7 +17,9 @@ import com.materialkolor.builder.engine.resolve.ThemeResult
  * @property[isDark] Which mode of [result] the pane wears.
  * @property[label] What the pane is called, read out by the split handle, such as "Light".
  * @property[filter] A color matrix the whole pane is drawn through, for vision simulation and the
- * held grayscale peek, or null to draw it as it is.
+ * held grayscale peek, or null to draw it as it is. A `ColorMatrix` wraps a mutable array and
+ * compares by that array, so pass a fresh matrix for a new filter rather than editing the old one,
+ * or the spec looks unchanged and the pane keeps the filter it already drew with.
  */
 @Immutable
 public class PaneSpec(

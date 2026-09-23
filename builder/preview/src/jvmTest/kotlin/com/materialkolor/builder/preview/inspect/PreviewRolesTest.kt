@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
@@ -15,6 +16,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.DarkSpec
@@ -26,8 +28,8 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-private val Card = listOf(RoleRef.OfRole(Role.SurfaceContainerLow), RoleRef.OfRole(Role.OnSurface))
-private val Button = listOf(RoleRef.OfRole(Role.Primary), RoleRef.OfRole(Role.OnPrimary))
+private val Card = listOf(ColorRef.OfRole(Role.SurfaceContainerLow), ColorRef.OfRole(Role.OnSurface))
+private val Button = listOf(ColorRef.OfRole(Role.Primary), ColorRef.OfRole(Role.OnPrimary))
 
 @OptIn(ExperimentalTestApi::class)
 class PreviewRolesTest {
@@ -42,7 +44,7 @@ class PreviewRolesTest {
         }
 
     @Test
-    fun inspect_turnedOnAfterLayout_recordsEveryElementAndHitsTheSmallest() =
+    fun inspect_turnedOnAfterLayoutOffAndOnAgain_recordsEveryElementAndHitsTheSmallest() =
         runComposeUiTest {
             val registry = InspectRegistry()
             var inspect: InspectRegistry? by mutableStateOf(null)
@@ -69,7 +71,28 @@ class PreviewRolesTest {
             inspect = null
             waitForIdle()
             registry.size shouldBe 0
+
+            val again = InspectRegistry()
+            inspect = again
+            waitForIdle()
+            again.size shouldBe 2
+            again.hit(PaneSide.Start, button.center)?.roles shouldBe Button
         }
+
+    @Test
+    fun registry_twoElementsOfOneSize_hitsTheOneRecordedLast() {
+        val registry = InspectRegistry()
+        val bounds = Rect(0f, 0f, 10f, 10f)
+        val first = Any()
+        val second = Any()
+
+        registry.record(first, InspectEntry(PaneSide.Start, Card, bounds))
+        registry.record(second, InspectEntry(PaneSide.Start, Button, bounds))
+        registry.hit(PaneSide.Start, bounds.center)?.roles shouldBe Button
+
+        registry.record(first, InspectEntry(PaneSide.Start, Card, bounds))
+        registry.hit(PaneSide.Start, bounds.center)?.roles shouldBe Card
+    }
 
     @Test
     fun inspect_inASplit_recordsEachCopyUnderItsSide() =
