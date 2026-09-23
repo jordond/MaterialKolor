@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
-import com.materialkolor.builder.PlaceholderModel
 import com.materialkolor.builder.core.platform.Clipboard
 import com.materialkolor.builder.core.platform.DecodedImage
 import com.materialkolor.builder.core.platform.Environment
@@ -22,6 +21,7 @@ import com.materialkolor.builder.core.platform.Router
 import com.materialkolor.builder.core.platform.StoreFactory
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.Route
+import com.materialkolor.builder.feature.workspace.AppModel
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
@@ -44,10 +44,10 @@ class AppGraphBrowserTest {
         runComposeUiTest {
             val graph = createGraphFactory<AppGraph.Factory>().create(TestPlatform)
             val tick = mutableIntStateOf(0)
-            val seen = mutableListOf<PlaceholderModel>()
+            val seen = mutableListOf<AppModel>()
             setContent {
                 CompositionLocalProvider(LocalMetroViewModelFactory provides graph.metroViewModelFactory) {
-                    val model = metroViewModel<PlaceholderModel>()
+                    val model = metroViewModel<AppModel>()
                     seen += model
                     BasicText("tick ${tick.intValue}")
                 }

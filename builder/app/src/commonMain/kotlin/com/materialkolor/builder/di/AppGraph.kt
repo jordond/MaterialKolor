@@ -2,6 +2,7 @@ package com.materialkolor.builder.di
 
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.PlatformServices
+import com.materialkolor.builder.core.session.ProjectSession
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Includes
@@ -20,6 +21,11 @@ internal interface AppGraph : ViewModelGraph {
 
     /** Dark mode and reduced motion for the root, straight from the platform. */
     val environment: Environment
+
+    // b-216
+
+    /** The open project, for the root's theme result. */
+    val session: ProjectSession
 
     @DependencyGraph.Factory
     fun interface Factory {

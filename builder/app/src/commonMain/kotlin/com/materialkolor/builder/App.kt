@@ -1,41 +1,41 @@
 package com.materialkolor.builder
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.ViewModel
-import com.materialkolor.builder.codegen.ExportVersions
+import androidx.compose.ui.graphics.toArgb
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.PlatformServices
+import com.materialkolor.builder.core.session.ProjectSession
 import com.materialkolor.builder.di.AppGraph
-import com.materialkolor.builder.di.AppScope
-import com.materialkolor.builder.domain.model.Library
-import com.materialkolor.builder.domain.model.Role
-import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.capability.forTarget
+import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.engine.resolve.ThemeResolver
-import com.materialkolor.builder.kit.motion.LocalBuilderMotion
-import com.materialkolor.builder.kit.motion.LocalReducedMotion
-import com.materialkolor.builder.kit.motion.reducedBuilderMotion
-import com.materialkolor.builder.kit.motion.tweenBuilderMotion
-import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.token.LocalBuilderType
-import com.materialkolor.builder.kit.token.rememberBuilderType
-import dev.zacsweers.metro.ContributesIntoMap
-import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.binding
+import com.materialkolor.builder.engine.resolve.ThemeResult
+import com.materialkolor.builder.feature.workspace.AppModel
+import com.materialkolor.builder.feature.workspace.WorkspaceScreen
+import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
+import com.materialkolor.builder.kit.skin.BuilderTheme
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.kit.transition.SkinTransitionHost
+import com.materialkolor.builder.kit.transition.rememberSkinTransition
+import dev.stateholder.extensions.collectAsState
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
-import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 /**
@@ -47,59 +47,80 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
 @Composable
 fun BuilderApp(platform: PlatformServices) {
     val graph = remember(platform) { createGraphFactory<AppGraph.Factory>().create(platform) }
-    val reducedMotion by graph.environment.reducedMotion.collectAsState()
-    val prefersDark by graph.environment.prefersDark.collectAsState()
-    val motion = remember(reducedMotion) { if (reducedMotion) reducedBuilderMotion() else tweenBuilderMotion() }
-
-    CompositionLocalProvider(
-        LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-        LocalReducedMotion provides reducedMotion,
-        LocalBuilderMotion provides motion,
-    ) {
-        PlaceholderRoot(resolver = graph.themeResolver, isDark = prefersDark)
+    CompositionLocalProvider(LocalMetroViewModelFactory provides graph.metroViewModelFactory) {
+        BuilderRoot(graph)
     }
 }
 
 /**
- * Stands in for the workspace until the real shell lands (B-216). It wears the Material3 skin in
- * the colors of the default seed.
+ * The theme result of the frame being drawn, resolved once at the root for everything below.
+ */
+internal val LocalThemeResult: ProvidableCompositionLocal<ThemeResult> = compositionLocalOf {
+    error("No ThemeResult provided")
+}
+
+/**
+ * The one theme result per frame, derived from the session's document as its own target sees it
+ * (D35). A setting the target turns off never reaches the chrome or the preview.
  */
 @Composable
-private fun PlaceholderRoot(
+internal fun rememberThemeResult(
+    session: ProjectSession,
     resolver: ThemeResolver,
-    isDark: Boolean,
-    model: PlaceholderModel = metroViewModel(),
-) {
-    val roles = remember(resolver) { resolver.resolve(ThemeDocument.Default).roles }
-    val surface = Color(roles[Role.Surface, isDark].argb.value)
-    val onSurface = Color(roles[Role.OnSurface, isDark].argb.value)
-    val primary = Color(roles[Role.Primary, isDark].argb.value)
-    val type = rememberBuilderType()
-
-    CompositionLocalProvider(
-        LocalSkin provides Skin(library = Library.Material3, expressive = false),
-        LocalBuilderType provides type,
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize().background(surface),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            BasicText(text = "MaterialKolor Builder", style = type.title.copy(color = primary))
-            BasicText(text = model.versionLine, style = type.body.copy(color = onSurface))
+): State<ThemeResult> {
+    val document = session.document.collectAsState()
+    return remember(session, resolver) {
+        derivedStateOf {
+            val stored = document.value
+            resolver.resolve(stored.forTarget(ExportTarget.of(stored.library, stored.expressive)))
         }
     }
 }
 
 /**
- * The smallest model there is, here to prove a graph built model survives recomposition (S10).
- * B-216 replaces it with the real app model.
+ * Dresses the workspace in the skin and colors of the open project.
+ *
+ * The workspace is movable content, so a library switch, which swaps the skin theme it sits in,
+ * carries its state across instead of starting it over. The reveal that is playing, the toasts and
+ * every scroll position survive the switch that way (F-03).
  */
-@Inject
-@ContributesIntoMap(AppScope::class, binding<ViewModel>())
-@ViewModelKey
-internal class PlaceholderModel(
-    versions: ExportVersions,
-) : ViewModel() {
-    val versionLine: String = "Builder ${versions.builder}, MaterialKolor ${versions.materialKolor}"
+@Composable
+private fun BuilderRoot(
+    graph: AppGraph,
+    model: AppModel = metroViewModel(),
+) {
+    val state by model.collectAsState()
+    val result by rememberThemeResult(graph.session, graph.themeResolver)
+    val environment = graph.environment
+    val workspace = remember {
+        movableContentOf { coarsePointer: Boolean ->
+            ProvideBuilderLayout(coarsePointer = coarsePointer, modifier = Modifier.fillMaxSize()) {
+                val transition = rememberSkinTransition()
+                SkinTransitionHost(transition = transition, modifier = Modifier.fillMaxSize()) {
+                    WorkspaceScreen(transition = transition)
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(model) {
+        model.boot()
+        withFrameNanos {}
+        environment.hideSplash()
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { model.flush() }
+
+    CompositionLocalProvider(LocalThemeResult provides result) {
+        BuilderTheme(skin = state.skin, result = result, isDark = state.isDark, reducedMotion = state.reducedMotion) {
+            ThemeColorEffect(environment)
+            workspace(state.coarsePointer)
+        }
+    }
+}
+
+/** Tints the browser's own chrome with the surface the shell stands on (F-04). */
+@Composable
+private fun ThemeColorEffect(environment: Environment) {
+    val surface = Argb(LocalBuilderTokens.current.panel.toArgb())
+    LaunchedEffect(environment, surface) { environment.setThemeColor(surface) }
 }
