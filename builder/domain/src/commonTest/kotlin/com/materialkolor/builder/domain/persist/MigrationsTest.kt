@@ -1,6 +1,7 @@
 package com.materialkolor.builder.domain.persist
 
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
@@ -10,57 +11,51 @@ import kotlin.test.assertFailsWith
 
 class MigrationsTest {
     @Test
-    fun preferences_schema0Fixture_migratesToOneSetOfExportPrefsPerTarget() {
-        val shared = ExportPrefs(
-            packageName = "com.cactus.theme",
-            multiplatform = false,
-            mode = ExportMode.Frozen,
-            frozenVariants = FrozenVariants.AllContrasts,
-        )
-        val expected = Preferences(
-            appearance = Appearance.Dark,
-            styleLock = false,
-            dismissedHints = setOf("shuffle"),
-            exportPrefs = ExportTarget.entries.associateWith { shared },
-        )
+    fun recordCodec_schema0Fixture_migratesToSchema1() {
+        val expected = Swatch(name = "Cactus", colors = listOf("#6750A4"))
 
-        assertEquals(expected, assertOk(Preferences.Codec.decode(SCHEMA_0_PREFERENCES)))
+        assertEquals(1, SwatchCodec.schema)
+        assertEquals(expected, assertOk(SwatchCodec.decode(SCHEMA_0_SWATCH)))
     }
 
     @Test
-    fun preferences_schema0Fixture_writesBackInSchema1() {
-        val migrated = assertOk(Preferences.Codec.decode(SCHEMA_0_PREFERENCES))
-        val rewritten = Json.parseToJsonElement(Preferences.Codec.encode(migrated)).jsonObject
+    fun recordCodec_migratedRecord_writesBackInSchema1() {
+        val migrated = assertOk(SwatchCodec.decode(SCHEMA_0_SWATCH))
+        val rewritten = Json.parseToJsonElement(SwatchCodec.encode(migrated)).jsonObject
 
-        assertEquals(1, Preferences.Codec.schema)
         assertEquals(JsonPrimitive(1), rewritten["schema"])
-        assertEquals(migrated, assertOk(Preferences.Codec.decode(rewritten.toString())))
+        assertEquals(setOf("name", "colors"), rewritten.getValue("data").jsonObject.keys)
+        assertEquals(migrated, assertOk(SwatchCodec.decode(rewritten.toString())))
     }
 
     @Test
-    fun preferences_schema0WithoutExport_migratesToDefaults() {
-        val text = """{"schema":0,"data":{"posterCollapsed":true}}"""
+    fun recordCodec_schema0WithoutTheOldKey_migratesToTheDefaults() {
+        val text = """{"schema":0,"data":{"name":"Cactus"}}"""
 
-        assertEquals(Preferences(posterCollapsed = true), assertOk(Preferences.Codec.decode(text)))
+        assertEquals(Swatch(name = "Cactus"), assertOk(SwatchCodec.decode(text)))
     }
 
     @Test
-    fun exportPrefsPerTarget_step_leavesTheOtherKeysAlone() {
+    fun recordCodec_currentSchema_skipsTheStep() {
+        val text = """{"schema":1,"data":{"name":"Cactus","color":"#FFFFFF","colors":["#000000"]}}"""
+
+        assertEquals(Swatch(name = "Cactus", colors = listOf("#000000")), assertOk(SwatchCodec.decode(text)))
+    }
+
+    @Test
+    fun oneColorToMany_step_leavesTheOtherKeysAlone() {
         val before = JsonObject(
             mapOf(
-                "hueLock" to JsonPrimitive(true),
-                "export" to JsonObject(mapOf("animate" to JsonPrimitive(true))),
+                "name" to JsonPrimitive("Cactus"),
+                "color" to JsonPrimitive("#6750A4"),
             ),
         )
 
-        val after = ExportPrefsPerTarget.migrate(before)
+        val after = OneColorToMany.migrate(before)
 
-        assertEquals(setOf("hueLock", "exportPrefs"), after.keys)
-        assertEquals(JsonPrimitive(true), after["hueLock"])
-        assertEquals(
-            setOf("Material3", "Material3Expressive", "Unstyled", "Fluent", "Custom"),
-            after.getValue("exportPrefs").jsonObject.keys,
-        )
+        assertEquals(setOf("name", "colors"), after.keys)
+        assertEquals(JsonPrimitive("Cactus"), after["name"])
+        assertEquals(JsonArray(listOf(JsonPrimitive("#6750A4"))), after["colors"])
     }
 
     @Test
@@ -92,23 +87,16 @@ class MigrationsTest {
 
     private companion object {
         /**
-         * Preferences as schema 0 wrote them, one set of export options under `export` for every
-         * target, written by hand the way a browser would still hold them.
+         * A [Swatch] as schema 0 wrote it, one color under `color`, written by hand the way a
+         * browser would still hold it.
          */
-        val SCHEMA_0_PREFERENCES: String =
+        val SCHEMA_0_SWATCH: String =
             """
             {
               "schema": 0,
               "data": {
-                "appearance": "Dark",
-                "styleLock": false,
-                "dismissedHints": ["shuffle"],
-                "export": {
-                  "packageName": "com.cactus.theme",
-                  "multiplatform": false,
-                  "mode": "Frozen",
-                  "frozenVariants": "AllContrasts"
-                }
+                "name": "Cactus",
+                "color": "#6750A4"
               }
             }
             """.trimIndent()

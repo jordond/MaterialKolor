@@ -63,7 +63,7 @@ public data class Preferences(
 
     public companion object {
         /** Reads and writes [Preferences]. */
-        public val Codec: RecordCodec<Preferences> = RecordCodec(serializer(), PreferencesMigrations)
+        public val Codec: RecordCodec<Preferences> = RecordCodec(serializer(), Migrations.None)
     }
 }
 

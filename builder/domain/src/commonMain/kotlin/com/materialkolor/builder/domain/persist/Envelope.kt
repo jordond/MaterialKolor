@@ -27,10 +27,18 @@ internal data class Envelope(
 /**
  * The JSON every stored value is written and read with.
  *
+ * Every field is written out, defaults included. A stored record says what it held when it was
+ * saved, so changing a default in a later build never quietly changes a theme someone already
+ * saved.
+ *
  * Unknown keys are skipped, so a field this builder has never heard of, or one an older schema had
  * and this one dropped, never stops a record from loading.
  */
-internal val PersistJson: Json = Json { ignoreUnknownKeys = true }
+internal val PersistJson: Json =
+    Json {
+        encodeDefaults = true
+        ignoreUnknownKeys = true
+    }
 
 /**
  * Writes [value] in the current schema of [migrations].

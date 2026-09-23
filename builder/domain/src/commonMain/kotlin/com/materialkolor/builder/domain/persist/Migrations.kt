@@ -1,7 +1,6 @@
 package com.materialkolor.builder.domain.persist
 
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
 
 /**
  * One schema bump, turning a record written in one schema into the next.
@@ -9,6 +8,9 @@ import kotlinx.serialization.json.jsonObject
  * A step works on plain JSON because the Kotlin types only know the newest shape. It throws an
  * [IllegalArgumentException] when the data is not what its schema looked like, and the record is
  * then quarantined rather than guessed at.
+ *
+ * A step spells its keys out rather than reading them off the Kotlin types. It describes a format
+ * that is already out in the world, so it must not move when the code does.
  */
 internal fun interface MigrationStep {
     fun migrate(data: JsonObject): JsonObject
@@ -44,29 +46,3 @@ internal class Migrations(
         val None: Migrations = Migrations(emptyList())
     }
 }
-
-/**
- * Schema 0 to 1 of [Preferences].
- *
- * Schema 0 kept one set of export options under `export`, shared by every target. Schema 1 keeps a
- * set per target under `exportPrefs`, and each target starts from what the shared set said.
- *
- * The keys are written out rather than read off the Kotlin types on purpose. A step describes a
- * format that is already out in the world, so it must not move when the code does.
- */
-internal val ExportPrefsPerTarget: MigrationStep =
-    MigrationStep { data ->
-        val shared = data[SCHEMA_0_EXPORT_KEY]?.jsonObject ?: return@MigrationStep data
-        val perTarget = JsonObject(SCHEMA_1_EXPORT_TARGETS.associateWith { shared })
-        JsonObject(data - SCHEMA_0_EXPORT_KEY + (SCHEMA_1_EXPORT_PREFS_KEY to perTarget))
-    }
-
-/** The steps for [Preferences], declared after the step it lists so it is set up in time. */
-internal val PreferencesMigrations: Migrations = Migrations(listOf(ExportPrefsPerTarget))
-
-private const val SCHEMA_0_EXPORT_KEY: String = "export"
-
-private const val SCHEMA_1_EXPORT_PREFS_KEY: String = "exportPrefs"
-
-private val SCHEMA_1_EXPORT_TARGETS: List<String> =
-    listOf("Material3", "Material3Expressive", "Unstyled", "Fluent", "Custom")

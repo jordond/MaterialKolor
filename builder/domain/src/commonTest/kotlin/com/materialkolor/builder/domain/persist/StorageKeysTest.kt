@@ -3,6 +3,7 @@ package com.materialkolor.builder.domain.persist
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 
 class StorageKeysTest {
     @Test
@@ -30,5 +31,57 @@ class StorageKeysTest {
             assertFailsWith<IllegalArgumentException> { StorageKeys.history(id) }
             assertFailsWith<IllegalArgumentException> { StorageKeys.view(id) }
         }
+    }
+
+    @Test
+    fun parse_everyBuiltKey_readsBackWhatItNames() {
+        val ids = listOf("k3x9", "p", "a-b_c.d")
+        val expected = mapOf(
+            StorageKeys.INDEX to StorageKey.Index,
+            StorageKeys.PREFS to StorageKey.Prefs,
+            StorageKeys.SPLASH to StorageKey.Splash,
+        ) + ids.flatMap { id ->
+            listOf(
+                StorageKeys.project(id) to StorageKey.Project(id),
+                StorageKeys.history(id) to StorageKey.History(id),
+                StorageKeys.view(id) to StorageKey.View(id),
+            )
+        }
+
+        expected.forEach { (key, named) -> assertEquals(named, StorageKeys.parse(key)) }
+    }
+
+    @Test
+    fun parse_quarantineKey_isNull() {
+        val keys = listOf(
+            StorageKeys.INDEX,
+            StorageKeys.PREFS,
+            StorageKeys.SPLASH,
+            StorageKeys.project("k3x9"),
+            StorageKeys.history("k3x9"),
+            StorageKeys.view("k3x9"),
+        )
+
+        keys.forEach { key -> assertNull(StorageKeys.parse(StorageKeys.quarantine(key, time = 1_758_000_000_000L))) }
+    }
+
+    @Test
+    fun parse_keyTheBuilderDoesNotOwn_isNull() {
+        val strangers = listOf(
+            "",
+            "mk:",
+            "mk:index:k3x9",
+            "mk:indexes",
+            "mk:project:",
+            "mk:project:a:b",
+            "mk:history",
+            "mk:unknown:k3x9",
+            "k3x9",
+            "theme",
+            "MK:INDEX",
+            "xmk:project:k3x9",
+        )
+
+        strangers.forEach { key -> assertNull(StorageKeys.parse(key), key) }
     }
 }

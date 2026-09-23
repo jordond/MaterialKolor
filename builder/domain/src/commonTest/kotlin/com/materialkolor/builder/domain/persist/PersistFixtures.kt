@@ -6,6 +6,11 @@ import com.materialkolor.builder.domain.edit.ChangeLabel
 import com.materialkolor.builder.domain.history.History
 import com.materialkolor.builder.domain.history.HistoryEntry
 import com.materialkolor.builder.domain.model.Library
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
@@ -97,3 +102,31 @@ fun assertQuarantined(
 ) {
     assertEquals(DecodeOutcome.Quarantine(reason), outcome)
 }
+
+/**
+ * A record that only exists to walk the migration path, since every real record is still in its
+ * first shape.
+ *
+ * Schema 0 kept a single color under `color`. Schema 1 keeps a list under `colors`, and
+ * [OneColorToMany] is the step between them.
+ */
+@Serializable
+data class Swatch(
+    @SerialName("name")
+    val name: String,
+    @SerialName("colors")
+    val colors: List<String> = emptyList(),
+)
+
+/**
+ * Schema 0 to 1 of [Swatch]. A schema 0 color that is not a string cannot be carried over.
+ */
+internal val OneColorToMany: MigrationStep =
+    MigrationStep { data ->
+        val color = data["color"] ?: return@MigrationStep data
+        require(color is JsonPrimitive && color.isString) { "A schema 0 color is a string, got $color" }
+        JsonObject(data - "color" + ("colors" to JsonArray(listOf(color))))
+    }
+
+/** Reads and writes a [Swatch] at schema 1, declared after its step so the step is set up in time. */
+internal val SwatchCodec: RecordCodec<Swatch> = RecordCodec(Swatch.serializer(), Migrations(listOf(OneColorToMany)))

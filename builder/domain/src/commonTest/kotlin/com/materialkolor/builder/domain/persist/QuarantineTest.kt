@@ -36,10 +36,19 @@ class QuarantineTest {
 
     @Test
     fun decode_schemaNewerThanTheBuilder_isQuarantinedAsNewer() {
-        val text = """{"schema":${Preferences.Codec.schema + 1},"data":{}}"""
+        val codecs = listOf(
+            ProjectRecord.Codec,
+            ProjectIndex.Codec,
+            HistoryRecord.Codec,
+            ProjectViewState.Codec,
+            Preferences.Codec,
+            SwatchCodec,
+        )
 
-        assertQuarantined(QuarantineReason.NewerSchema, Preferences.Codec.decode(text))
-        assertQuarantined(QuarantineReason.NewerSchema, ProjectIndex.Codec.decode(text))
+        codecs.forEach { codec ->
+            val text = """{"schema":${codec.schema + 1},"data":{}}"""
+            assertQuarantined(QuarantineReason.NewerSchema, codec.decode(text))
+        }
     }
 
     @Test
@@ -82,10 +91,13 @@ class QuarantineTest {
     }
 
     @Test
-    fun decode_schema0PreferencesWithAnExportThatIsNotAnObject_failsItsMigration() {
-        val text = """{"schema":0,"data":{"export":"com.example.theme"}}"""
+    fun decode_schema0DataTheStepCannotFollow_failsItsMigration() {
+        val texts = listOf(
+            """{"schema":0,"data":{"name":"Cactus","color":{"hex":"#6750A4"}}}""",
+            """{"schema":0,"data":{"name":"Cactus","color":42}}""",
+        )
 
-        assertQuarantined(QuarantineReason.MigrationFailed, Preferences.Codec.decode(text))
+        texts.forEach { text -> assertQuarantined(QuarantineReason.MigrationFailed, SwatchCodec.decode(text)) }
     }
 
     @Test
