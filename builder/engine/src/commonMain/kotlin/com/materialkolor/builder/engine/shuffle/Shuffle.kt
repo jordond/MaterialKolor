@@ -24,8 +24,11 @@ import kotlin.random.Random
  * is fixed on the way out. A draw is thrown back when it repeats the current seed, is still
  * disliked, or leaves primary on onPrimary under 4.5 to 1 at standard contrast in either mode.
  * After [MAX_DRAWS] misses a short fixed list of seeds takes over, so a shuffle always lands.
+ * When no seed on that list reads either, which a primary override can cause, the first one that
+ * is new and not disliked is taken anyway, so this last resort can land under 4.5 to 1.
  *
  * With the style unlocked a style is picked too, from those the document's target offers.
+ * Monochrome is never picked, since it hides the new seed.
  * Nothing else ever moves. Contrast, spec, target, key colors, pins and accents stay as they are.
  */
 public object Shuffle {
@@ -35,7 +38,8 @@ public object Shuffle {
      * The same [random] state and document always give the same result.
      *
      * @param[resolver] Generates the schemes a candidate seed is checked against. Pass the app's
-     * own so the winning seed's schemes are cached for later.
+     * own so the winning seed's schemes are cached for later. Candidates are checked at standard
+     * contrast, so the cached schemes only match the app's while the document sits there.
      */
     public fun next(
         random: Random,
@@ -62,11 +66,12 @@ public object Shuffle {
     }
 
     /**
-     * The styles [document]'s target lets someone pick, leaving out the one it already has.
+     * The styles [document]'s target lets someone pick, leaving out the one it already has and
+     * Monochrome, which would hide the new seed.
      */
     internal fun pickableStyles(document: ThemeDocument): List<Style> =
         Style.entries.filter { style ->
-            style != document.style && isPickable(document, style)
+            style != document.style && style != Style.Monochrome && isPickable(document, style)
         }
 
     private fun pickStyle(
@@ -100,7 +105,7 @@ public object Shuffle {
     ): Argb {
         val current = document.seed
         val lockedHue = if (hueLock) Hct.fromInt(current.value).hue else null
-        val inputs = SchemeInputs.from(document).copy(style = style, contrast = ContrastLevel.Standard)
+        val inputs = SchemeInputs.from(document.copy(style = style, contrast = ContrastLevel.Standard))
         repeat(MAX_DRAWS) {
             val candidate = draw(random, lockedHue)
             if (isGoodSeed(candidate, current, inputs, resolver)) return candidate

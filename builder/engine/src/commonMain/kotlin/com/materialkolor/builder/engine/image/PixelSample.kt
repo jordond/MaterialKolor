@@ -18,8 +18,8 @@ public class PixelSample(
 ) {
     init {
         require(width > 0 && height > 0) { "A pixel sample needs a size, got $width by $height" }
-        require(pixels.size == width * height) {
-            "A $width by $height sample holds ${width * height} pixels, got ${pixels.size}"
+        require(pixels.size.toLong() == width.toLong() * height) {
+            "A $width by $height sample holds ${width.toLong() * height} pixels, got ${pixels.size}"
         }
     }
 }

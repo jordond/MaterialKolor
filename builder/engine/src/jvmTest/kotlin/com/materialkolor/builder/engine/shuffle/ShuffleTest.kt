@@ -99,6 +99,30 @@ class ShuffleTest {
     }
 
     @Test
+    fun next_styleUnlocked_neverPicksMonochrome() {
+        Library.entries.forEach { library ->
+            listOf(Style.Monochrome, Style.Content).forEach { current ->
+                val document = ThemeDocument.Default.copy(library = library, style = current)
+                val random = Random(8)
+                val picked = List(150) { shuffled(random, document, ShuffleLocks(style = false)).style }
+
+                assertFalse(Style.Monochrome in picked, "Monochrome was picked for $library from $current")
+            }
+        }
+    }
+
+    @Test
+    fun next_hueLockedOnADislikedHue_liftsADarkDrawToTheFixedTone() {
+        val document = ThemeDocument.Default.copy(seed = Argb(Hct.from(DISLIKED_HUE, 40.0, 50.0).toInt()))
+        // Every draw asks for the lowest tone, which is disliked on this hue until it is fixed.
+        val result = shuffled(ConstantRandom, document, ShuffleLocks(hue = true))
+        val found = Hct.fromInt(result.seed.value)
+
+        assertTrue(abs(found.tone - FIXED_TONE) < TONE_TOLERANCE, "${result.seed} sits at tone ${found.tone}")
+        assertTrue(hueDistance(DISLIKED_HUE, found.hue) < HUE_TOLERANCE, "${result.seed} moved off the locked hue")
+    }
+
+    @Test
     fun next_seedLocked_keepsTheSeedAndItsSource() {
         val document = ThemeDocument.Default.copy(seedSource = SeedSource.Preset(id = "sunset"))
         val result = shuffled(Random(5), document, ShuffleLocks(style = false, seed = true))
@@ -186,5 +210,14 @@ class ShuffleTest {
     private companion object {
         /** How far rounding to ARGB can move a hue at the lowest chroma a shuffle draws. */
         const val HUE_TOLERANCE = 2.0
+
+        /** A hue inside the yellow green band [DislikeAnalyzer] dislikes at darker tones. */
+        const val DISLIKED_HUE = 100.0
+
+        /** The tone [DislikeAnalyzer] lifts a disliked color to. */
+        const val FIXED_TONE = 70.0
+
+        /** How far rounding to ARGB can move a tone. */
+        const val TONE_TOLERANCE = 1.0
     }
 }
