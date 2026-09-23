@@ -36,6 +36,8 @@ import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.color.InvalidReason
+import com.materialkolor.builder.domain.color.ParseNote
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
@@ -104,7 +106,48 @@ internal fun forEverySkin(block: ComposeUiTest.(SkinVariant) -> Unit) {
     }
 }
 
-internal fun hasRole(role: Role): SemanticsMatcher = SemanticsMatcher.expectValue(SemanticsProperties.Role, role)
+internal fun hasInputRole(role: Role): SemanticsMatcher = SemanticsMatcher.expectValue(SemanticsProperties.Role, role)
+
+/** What the seed field says under itself in these tests, standing in for the app's own copy. */
+internal fun inputErrorMessage(reason: InvalidReason): String =
+    when (reason) {
+        InvalidReason.Empty -> "Type a color"
+        InvalidReason.BadHex -> "Hex takes 3, 6 or 8 digits"
+        InvalidReason.BadArguments -> "Check the values inside the brackets"
+        InvalidReason.UnknownFunction -> "Try rgb(), hsl() or oklch()"
+        InvalidReason.UnknownName -> "Not a CSS color name"
+        InvalidReason.Unrecognized -> "Not a color"
+    }
+
+internal fun inputNoteMessage(notes: Set<ParseNote>): String =
+    notes.sorted().joinToString(". ") { note ->
+        when (note) {
+            ParseNote.AlphaDropped -> "Alpha dropped, the seed is always opaque"
+            ParseNote.Clamped -> "Clamped to sRGB"
+        }
+    }
+
+/** The hex field with the test copy for its messages. */
+@Composable
+internal fun InputHexField(
+    value: Argb,
+    onCommit: (Argb, Set<ParseNote>) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    large: Boolean = false,
+    enabled: Boolean = true,
+) {
+    BuilderHexField(
+        value = value,
+        onCommit = onCommit,
+        label = label,
+        errorMessage = ::inputErrorMessage,
+        noteMessage = ::inputNoteMessage,
+        modifier = modifier,
+        large = large,
+        enabled = enabled,
+    )
+}
 
 internal fun hasStateDescription(state: String): SemanticsMatcher =
     SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, state)
@@ -118,15 +161,22 @@ class ControlsBSemanticsTest {
     fun switch_everySkin_isOneSwitchTargetLabelIncluded() =
         forEverySkin { variant ->
             var checked by mutableStateOf(false)
+            var disabledFlipped by mutableStateOf(false)
             setSkinnedContent(variant) {
                 Column {
                     BuilderSwitch(checked, { checked = it }, "Dark mode", Modifier.testTag(On))
-                    BuilderSwitch(false, { checked = true }, "AMOLED black", Modifier.testTag(Off), enabled = false)
+                    BuilderSwitch(
+                        checked = false,
+                        onCheckedChange = { disabledFlipped = true },
+                        label = "AMOLED black",
+                        modifier = Modifier.testTag(Off),
+                        enabled = false,
+                    )
                 }
             }
 
             onNodeWithTag(On)
-                .assert(hasRole(Role.Switch))
+                .assert(hasInputRole(Role.Switch))
                 .assert(SemanticsMatcher.expectValue(SemanticsProperties.ToggleableState, ToggleableState.Off))
                 .assert(hasStateDescription("Off"))
                 .assertIsEnabled()
@@ -135,11 +185,11 @@ class ControlsBSemanticsTest {
             onNodeWithTag(On).assert(hasStateDescription("On"))
 
             onNodeWithTag(Off)
-                .assert(hasRole(Role.Switch))
+                .assert(hasInputRole(Role.Switch))
                 .assert(hasStateDescription("Off, disabled"))
                 .assertIsNotEnabled()
             onNodeWithTag(Off).performClick()
-            checked shouldBe true
+            disabledFlipped shouldBe false
         }
 
     @Test
@@ -154,7 +204,7 @@ class ControlsBSemanticsTest {
             }
 
             onNodeWithTag(On)
-                .assert(hasRole(Role.Checkbox))
+                .assert(hasInputRole(Role.Checkbox))
                 .assert(SemanticsMatcher.expectValue(SemanticsProperties.ToggleableState, ToggleableState.Off))
                 .assert(hasStateDescription("Not checked"))
             onNodeWithText("Show pins", useUnmergedTree = true).performClick()
@@ -217,7 +267,7 @@ class ControlsBSemanticsTest {
 
             val row = onNode(hasText("Core colors and pins") and hasClickAction())
             row
-                .assert(hasRole(Role.Button))
+                .assert(hasInputRole(Role.Button))
                 .assert(hasStateDescription("Collapsed"))
                 .assert(SemanticsMatcher.keyIsDefined(SemanticsActions.Expand))
             onNodeWithText("Inside the row").assertDoesNotExist()
@@ -228,6 +278,33 @@ class ControlsBSemanticsTest {
         }
 
     @Test
+    fun disclosure_everySkin_disabledOffersNoExpandOrCollapse() =
+        forEverySkin { variant ->
+            var changes = 0
+            setSkinnedContent(variant) {
+                Column {
+                    BuilderDisclosure(false, { changes++ }, "Locked closed", enabled = false) {
+                        BuilderText("Closed inside")
+                    }
+                    BuilderDisclosure(true, { changes++ }, "Locked open", enabled = false) {
+                        BuilderText("Open inside")
+                    }
+                }
+            }
+
+            for (title in listOf("Locked closed", "Locked open")) {
+                withClue(title) {
+                    onNode(hasText(title) and hasInputRole(Role.Button))
+                        .assertIsNotEnabled()
+                        .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.Expand))
+                        .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.Collapse))
+                        .performClick()
+                }
+            }
+            changes shouldBe 0
+        }
+
+    @Test
     fun textFields_everySkin_areEditableAndReportErrorsAndDisabled() =
         forEverySkin { variant ->
             setSkinnedContent(variant) {
@@ -235,7 +312,7 @@ class ControlsBSemanticsTest {
                     BuilderTextField("Ocean", {}, "Project name", Modifier.testTag(On), error = { text ->
                         if (text.isBlank()) "A project needs a name" else null
                     })
-                    BuilderHexField(Argb(0x6750A4), { _, _ -> }, "Seed", Modifier.testTag(Off), enabled = false)
+                    InputHexField(Argb(0x6750A4), { _, _ -> }, "Seed", Modifier.testTag(Off), enabled = false)
                 }
             }
 
@@ -252,7 +329,8 @@ class ControlsBSemanticsTest {
 }
 
 @OptIn(ExperimentalTestApi::class)
-internal fun ComposeUiTest.tab(name: String): SemanticsNodeInteraction = onNode(hasText(name) and hasRole(Role.Tab))
+internal fun ComposeUiTest.tab(name: String): SemanticsNodeInteraction =
+    onNode(hasText(name) and hasInputRole(Role.Tab))
 
 @OptIn(ExperimentalTestApi::class)
 internal fun ComposeUiTest.editableText(tag: String): String =

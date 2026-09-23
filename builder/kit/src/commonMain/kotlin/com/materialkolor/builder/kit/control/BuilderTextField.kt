@@ -59,8 +59,12 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
  * A text field that hands its text over only once someone is done with it.
  *
  * Typing edits a draft. Enter or leaving the field commits it, Esc throws it away, and neither key
- * does anything while an input method is still composing. Cmd or Ctrl+Z inside the field stays the
- * field's own text undo.
+ * does anything while an input method is still composing. A new [value] from outside replaces the
+ * draft, even halfway through an edit.
+ *
+ * Cmd or Ctrl+Z inside the field stays the field's own text undo. The field takes the key as it
+ * bubbles back up from the focused text, so the app's global undo shortcut has to listen with
+ * `onKeyEvent` and never with `onPreviewKeyEvent`, which would see the key before the field does.
  *
  * @param[value] The committed text.
  * @param[onCommit] Called with the draft when it differs from [value] and [error] has nothing to
@@ -104,11 +108,12 @@ public fun BuilderTextField(
 }
 
 /**
- * The text a field is showing, and the committed text it came from.
+ * The text a field is showing, and the committed value it came from.
  *
- * A field only takes a new committed text while it is not being edited, so a value arriving
- * mid-edit, such as the result of its own debounced commit, never yanks the text out from under
- * someone typing.
+ * The committed value is kept twice. [committed] is the value as its owner writes it, and
+ * [committedText] is the text that stands for it on screen. The two only differ after the field
+ * committed text its owner writes another way, such as "red" for `#FF0000`. When that value comes
+ * back the text stays as typed, while any other value from outside replaces the draft.
  */
 @Stable
 internal class FieldDraft(
@@ -119,38 +124,59 @@ internal class FieldDraft(
     /** Whether the field has focus, which the commit on leaving needs to know. */
     var focused: Boolean by mutableStateOf(false)
 
-    /** The committed text this draft started from. */
+    /** The committed value as its owner writes it. */
     var committed: String by mutableStateOf(committed)
+        private set
+
+    /** The text that stands for [committed], which is [committed] itself unless the field sent it. */
+    var committedText: String by mutableStateOf(committed)
         private set
 
     val text: String
         get() = value.text
 
-    /** True when the draft differs from what was committed. */
+    /** True when the draft differs from the text that stands for the committed value. */
     val dirty: Boolean
-        get() = value.text != committed
+        get() = value.text != committedText
 
     /** True while an input method is still composing, when Enter and Esc belong to it. */
     val composing: Boolean
         get() = value.composition != null
 
-    /** Takes a committed text from outside, unless someone is halfway through an edit. */
+    /**
+     * Takes a committed value from its owner. The field's own commit coming back leaves the text
+     * alone, and any other value replaces it, halfway through an edit or not.
+     */
     fun sync(external: String) {
         if (external == committed) return
-        val clean = !dirty
         committed = external
-        if (!focused || clean) show(external)
+        committedText = external
+        show(external)
+    }
+
+    /**
+     * Notes that the field committed [text], which its owner writes as [canonical]. The text stays as
+     * typed and counts as committed.
+     */
+    fun commit(
+        text: String,
+        canonical: String,
+    ) {
+        committed = canonical
+        committedText = text
     }
 
     /** Shows [text] and treats it as committed. */
     fun settle(text: String) {
         committed = text
+        committedText = text
         if (value.text != text) show(text)
     }
 
-    /** Throws the draft away. False when there was nothing to throw away. */
+    /** Throws the draft away for the committed value. False when there was nothing to throw away. */
     fun revert(): Boolean {
         if (!dirty) return false
+        committedText = committed
         show(committed)
         return true
     }
@@ -160,7 +186,7 @@ internal class FieldDraft(
     }
 }
 
-/** A draft that follows [committed] whenever nobody is editing it. */
+/** A draft that follows [committed] whenever it changes from outside. */
 @Composable
 internal fun rememberFieldDraft(committed: String): FieldDraft {
     val draft = remember { FieldDraft(committed) }

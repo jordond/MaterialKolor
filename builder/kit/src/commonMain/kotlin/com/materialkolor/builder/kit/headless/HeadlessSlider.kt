@@ -28,6 +28,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -119,17 +120,27 @@ internal class SliderRules(
 internal const val SliderBigStep: Int = 10
 
 /**
+ * Whether the key held on a slider has moved its value, so letting go of it knows whether a change
+ * ended. A slider remembers one for as long as it is shown.
+ */
+internal class SliderKeyPress {
+    var moved: Boolean = false
+}
+
+/**
  * The slider keys, read before the underlying slider sees them so every skin steps the same way.
  *
  * The arrows move one step and ten with Shift, Page Up and Page Down move ten, Home and End jump to
- * the ends. Each key press reports a new value, and letting go of the key reports the end of the
- * change once.
+ * the ends. Each key press that moves the value reports it, and letting go of a key that moved it
+ * reports the end of the change once. A key that finds the value already where it would go, such
+ * as Home at the start, reports nothing.
  */
 internal fun Modifier.sliderKeys(
     value: Float,
     rules: SliderRules,
     enabled: Boolean,
     isRtl: Boolean,
+    press: SliderKeyPress,
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: () -> Unit,
 ): Modifier {
@@ -149,25 +160,50 @@ internal fun Modifier.sliderKeys(
             else -> return@onPreviewKeyEvent false
         }
         when (event.type) {
-            KeyEventType.KeyDown -> if (target != value) onValueChange(target)
-            KeyEventType.KeyUp -> onValueChangeFinished()
+            KeyEventType.KeyDown -> {
+                if (target != value) {
+                    press.moved = true
+                    onValueChange(target)
+                }
+            }
+            KeyEventType.KeyUp -> {
+                if (press.moved) {
+                    press.moved = false
+                    onValueChangeFinished()
+                }
+            }
         }
         true
     }
 }
 
 /**
- * The slider's name and spoken value. Set-progress comes from the slider underneath, and the
- * disabled state is spoken as well since the web mirror drops it (AR-10).
+ * The slider's name, spoken value and set-progress action. The disabled state is spoken as well
+ * since the web mirror drops it (AR-10).
+ *
+ * Set-progress replaces the one the slider underneath brings, since this modifier sits outside it
+ * and the outer one wins. Like the keys it never snaps to a stop. It clamps the target into the
+ * range, and reports a change and its end only when the value moves. A disabled slider turns it down.
  */
 internal fun Modifier.sliderSemantics(
     label: String,
     stateDescription: String,
+    value: Float,
+    rules: SliderRules,
     enabled: Boolean,
+    onValueChange: (Float) -> Unit,
+    onValueChangeFinished: () -> Unit,
 ): Modifier =
     semantics {
         contentDescription = label
         this.stateDescription = inputStateDescription(stateDescription, enabled)
+        setProgress { target ->
+            val next = target.coerceIn(rules.range.start, rules.range.endInclusive)
+            if (!enabled || next == value) return@setProgress false
+            onValueChange(next)
+            onValueChangeFinished()
+            true
+        }
     }
 
 /** The value as a slider reads it out when the caller has nothing better, to two decimals. */
@@ -198,14 +234,15 @@ internal fun HeadlessSlider(
     enabled: Boolean = true,
 ) {
     val interactions = remember { MutableInteractionSource() }
+    val press = remember { SliderKeyPress() }
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     UnstyledSlider(
         value = value,
         onValueChange = { raw -> onValueChange(rules.snap(raw)) },
         modifier = modifier
             .heightIn(min = LocalLayout.current.primaryTouchTarget)
-            .sliderKeys(value, rules, enabled, isRtl, onValueChange, onValueChangeFinished)
-            .sliderSemantics(label, stateDescription, enabled)
+            .sliderKeys(value, rules, enabled, isRtl, press, onValueChange, onValueChangeFinished)
+            .sliderSemantics(label, stateDescription, value, rules, enabled, onValueChange, onValueChangeFinished)
             .alpha(inputAlpha(enabled)),
         enabled = enabled,
         interactionSource = interactions,
@@ -226,7 +263,8 @@ internal fun HeadlessSlider(
 
 /**
  * The track with its active part and a dot at each stop. Both are inset by half a thumb, since
- * that is how far in the thumb's centre stops at either end.
+ * that is how far in the thumb's centre stops at either end. Drawing does not mirror on its own, so
+ * right to left the positions are flipped to follow the thumb, which starts on the right.
  */
 @Composable
 private fun SliderTrack(
@@ -242,13 +280,20 @@ private fun SliderTrack(
             .drawBehind {
                 val inset = style.thumbSize.toPx() / 2
                 val travel = (size.width - 2 * inset).coerceAtLeast(0f)
+                val isRtl = layoutDirection == LayoutDirection.Rtl
+                val active = inset + travel * fraction
                 drawRect(style.inactiveTrack)
-                drawRect(style.activeTrack, size = Size(inset + travel * fraction, size.height))
+                drawRect(
+                    color = style.activeTrack,
+                    topLeft = Offset(if (isRtl) size.width - active else 0f, 0f),
+                    size = Size(active, size.height),
+                )
                 for (stop in rules.stops) {
+                    val along = inset + travel * rules.fractionOf(stop)
                     drawCircle(
                         color = style.stop,
                         radius = style.stopSize.toPx() / 2,
-                        center = Offset(inset + travel * rules.fractionOf(stop), size.height / 2),
+                        center = Offset(if (isRtl) size.width - along else along, size.height / 2),
                     )
                 }
             },

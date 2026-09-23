@@ -24,12 +24,18 @@ import kotlinx.coroutines.delay
  * left a valid color. Text that is not a color shows an error and never commits. Esc puts back the
  * committed color. When the color had to change to fit, because its alpha was dropped or it was
  * clamped into sRGB, the note shows under the field and goes along with the commit. Enter and
- * leaving the field also tidy the text into `#RRGGBB`.
+ * leaving the field also tidy the text into `#RRGGBB`, while the pause keeps it as typed.
+ *
+ * A new [value] from outside, such as a shuffle or an undo, replaces whatever the field shows and
+ * cancels a pending commit.
  *
  * @param[value] The committed color.
  * @param[onCommit] Called with a new color and what had to change to read it. Only called when the
  * color differs from [value].
  * @param[label] Names the field, on screen and to assistive tech.
+ * @param[errorMessage] What to say under the field about text that is not a color.
+ * @param[noteMessage] What to say under the field about what had to change to read the color. Only
+ * asked about a set with at least one note in it, and the words depend on what the color is for.
  * @param[modifier] Applied to the field.
  * @param[large] Draw it as the poster's 72 sp seed headline (F-66), which shows no label.
  * @param[enabled] Whether the field takes input.
@@ -39,6 +45,8 @@ public fun BuilderHexField(
     value: Argb,
     onCommit: (Argb, Set<ParseNote>) -> Unit,
     label: String,
+    errorMessage: (InvalidReason) -> String,
+    noteMessage: (Set<ParseNote>) -> String,
     modifier: Modifier = Modifier,
     large: Boolean = false,
     enabled: Boolean = true,
@@ -53,22 +61,25 @@ public fun BuilderHexField(
         val read = ColorInput.parse(draft.text) as? ParseResult.Ok ?: return
         if (read.argb != current) commit(read.argb, read.notes)
         committedNotes = read.notes
-        if (tidy) draft.settle(read.argb.toHex())
+        val canonical = read.argb.toHex()
+        if (tidy) draft.settle(canonical) else draft.commit(draft.text, canonical)
     }
 
-    LaunchedEffect(draft.text) {
-        if (!draft.dirty || parsed !is ParseResult.Ok) return@LaunchedEffect
+    // Keyed on the value as well, so a color arriving from outside cancels the wait, and on focus,
+    // so leaving the field cancels it too.
+    LaunchedEffect(draft.text, value, draft.focused) {
+        if (!draft.focused || !draft.dirty || parsed !is ParseResult.Ok) return@LaunchedEffect
         delay(CommitDelayMillis)
         if (!draft.composing) commitDraft(tidy = false)
     }
 
-    val error = (parsed as? ParseResult.Invalid)?.takeIf { draft.dirty }?.reason?.message()
+    val error = (parsed as? ParseResult.Invalid)?.takeIf { draft.dirty }?.reason?.let(errorMessage)
     val notes = (parsed as? ParseResult.Ok)?.notes?.takeIf { it.isNotEmpty() } ?: committedNotes
     val type = LocalBuilderType.current
     SkinField(
         draft = draft,
         label = label,
-        message = error ?: notes.message(),
+        message = error ?: notes.takeIf { it.isNotEmpty() }?.let(noteMessage),
         isError = error != null,
         textStyle = if (large) type.posterHero else type.value,
         large = large,
@@ -81,23 +92,3 @@ public fun BuilderHexField(
 
 /** How long the field waits after the last valid keystroke before it commits (F-05). */
 internal const val CommitDelayMillis: Long = 400L
-
-private fun InvalidReason.message(): String =
-    when (this) {
-        InvalidReason.Empty -> "Type a color"
-        InvalidReason.BadHex -> "Hex takes 3, 6 or 8 digits"
-        InvalidReason.BadArguments -> "Check the values inside the brackets"
-        InvalidReason.UnknownFunction -> "Try rgb(), hsl() or oklch()"
-        InvalidReason.UnknownName -> "Not a CSS color name"
-        InvalidReason.Unrecognized -> "Not a color"
-    }
-
-private fun Set<ParseNote>.message(): String? {
-    if (isEmpty()) return null
-    return sorted().joinToString(". ") { note ->
-        when (note) {
-            ParseNote.AlphaDropped -> "Alpha dropped, the seed is always opaque"
-            ParseNote.Clamped -> "Clamped to sRGB"
-        }
-    }
-}

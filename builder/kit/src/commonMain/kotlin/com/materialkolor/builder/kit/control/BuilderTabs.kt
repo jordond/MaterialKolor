@@ -15,7 +15,9 @@ import com.materialkolor.builder.kit.skin.material.MaterialTabs
  * and Contrast.
  *
  * Each tab has the tab role and its selected state. Focus roves. Tab lands on the selected tab
- * only, and the arrow keys move along the row, wrapping at the ends and selecting as they go.
+ * only, and the arrow keys move along the row in reading order, wrapping at the ends and selecting
+ * as they go. When the tabs do not fit, as on a Compact canvas, the row scrolls sideways and keeps
+ * the focused tab in view.
  *
  * @param[tabs] The tabs, in order. Each has to be distinct.
  * @param[selected] The selected tab, one of [tabs].

@@ -16,7 +16,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.headless.DisclosureChevron
+import com.materialkolor.builder.kit.headless.SliderKeyPress
 import com.materialkolor.builder.kit.headless.SliderRules
 import com.materialkolor.builder.kit.headless.checkboxStateDescription
 import com.materialkolor.builder.kit.headless.disclosureEnter
@@ -144,12 +145,13 @@ internal fun MaterialSlider(
     enabled: Boolean,
 ) {
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val press = remember { SliderKeyPress() }
     Slider(
         value = value,
         onValueChange = { raw -> onValueChange(rules.snap(raw)) },
         modifier = modifier
-            .sliderKeys(value, rules, enabled, isRtl, onValueChange, onValueChangeFinished)
-            .sliderSemantics(label, stateDescription, enabled),
+            .sliderKeys(value, rules, enabled, isRtl, press, onValueChange, onValueChangeFinished)
+            .sliderSemantics(label, stateDescription, value, rules, enabled, onValueChange, onValueChangeFinished),
         enabled = enabled,
         valueRange = rules.range,
         onValueChangeFinished = onValueChangeFinished,
@@ -198,10 +200,12 @@ internal fun materialHeroFieldStyle(): FieldStyle =
     )
 
 /**
- * A Material3 primary tab row with roving focus, which Material leaves out.
+ * A Material3 primary tab row that scrolls sideways (spec section 7), with roving focus, which
+ * Material leaves out.
  *
  * Only the selected tab can take focus from Tab, so Tab enters and leaves the row in one step. The
- * arrow keys select the next or previous tab, wrapping at the ends, and move focus with it.
+ * arrow keys select the next or previous tab, wrapping at the ends, and move focus with it. The row
+ * scrolls the selected tab into view.
  */
 @Composable
 internal fun <T> MaterialTabs(
@@ -224,7 +228,7 @@ internal fun <T> MaterialTabs(
         onSelect(tabs[next])
     }
 
-    PrimaryTabRow(
+    PrimaryScrollableTabRow(
         selectedTabIndex = selectedIndex,
         modifier = modifier
             .focusGroup()
@@ -256,7 +260,7 @@ internal fun <T> MaterialTabs(
 
 /**
  * A disclosure row as a Material3 list item, since Material has no disclosure of its own. The item
- * is a button with expand and collapse actions and speaks its state.
+ * is a button that speaks its state, with expand and collapse actions while it is enabled.
  */
 @Composable
 internal fun MaterialDisclosure(
@@ -277,6 +281,7 @@ internal fun MaterialDisclosure(
                 .clickable(enabled = enabled, role = Role.Button) { onExpandedChange(!expanded) }
                 .semantics {
                     stateDescription = disclosureStateDescription(expanded, enabled)
+                    if (!enabled) return@semantics
                     if (expanded) {
                         collapse {
                             onExpandedChange(false)

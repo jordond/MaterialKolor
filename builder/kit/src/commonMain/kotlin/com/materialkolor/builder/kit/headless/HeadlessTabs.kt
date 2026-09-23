@@ -2,25 +2,39 @@ package com.materialkolor.builder.kit.headless
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import com.composeunstyled.Tab
 import com.composeunstyled.TabList
 import com.composeunstyled.UnstyledTabGroup
@@ -65,11 +79,12 @@ internal class TabsStyle(
 )
 
 /**
- * A row of tabs over Compose Unstyled's tab group.
+ * A row of tabs over Compose Unstyled's tab group, scrolling sideways when the tabs do not fit
+ * (spec section 7).
  *
  * Focus roves. Only the selected tab sits in the Tab order, the arrow keys move focus along the row
- * and wrap at the ends, Home and End jump, and focusing a tab selects it. Each tab has the tab role
- * and its selected state.
+ * in reading order and wrap at the ends, Home and End jump, and focusing a tab selects it and
+ * scrolls it into view. Each tab has the tab role and its selected state.
  */
 @Composable
 internal fun <T> HeadlessTabs(
@@ -81,6 +96,9 @@ internal fun <T> HeadlessTabs(
     modifier: Modifier = Modifier,
 ) {
     val target = LocalLayout.current.primaryTouchTarget
+    val requesters = remember(tabs.size) { List(tabs.size) { FocusRequester() } }
+    val focused = remember { mutableIntStateOf(tabs.indexOf(selected)) }
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     UnstyledTabGroup(
         selectedTab = selected,
         onSelectedTabChange = onSelect,
@@ -89,17 +107,23 @@ internal fun <T> HeadlessTabs(
     ) {
         TabList(
             modifier = Modifier
+                .tabArrows(tabs.size, focused, requesters, isRtl)
                 .background(style.container, style.containerShape)
                 .padding(style.containerPadding),
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(style.gap)) {
-                for (tab in tabs) {
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(style.gap),
+            ) {
+                tabs.forEachIndexed { index, tab ->
                     key(tab) {
                         val interactions = remember { MutableInteractionSource() }
                         val isSelected = tab == selected
                         Tab(
                             key = tab,
                             modifier = Modifier
+                                .focusRequester(requesters[index])
+                                .onFocusChanged { state -> if (state.isFocused) focused.intValue = index }
                                 .heightIn(min = target)
                                 .inputFocusRing(interactions, style.focus, style.tabShape)
                                 .tabFill(isSelected, style),
@@ -114,6 +138,30 @@ internal fun <T> HeadlessTabs(
         }
     }
 }
+
+/**
+ * Left and Right, read before Compose Unstyled's tab list sees them, which maps Left to the
+ * previous tab even right to left. Here Right moves toward the end of the row as it reads, and
+ * both wrap at the ends.
+ */
+private fun Modifier.tabArrows(
+    count: Int,
+    focused: MutableIntState,
+    requesters: List<FocusRequester>,
+    isRtl: Boolean,
+): Modifier =
+    onPreviewKeyEvent { event ->
+        val forward = if (isRtl) -1 else 1
+        val step = when (event.key) {
+            Key.DirectionRight -> forward
+            Key.DirectionLeft -> -forward
+            else -> return@onPreviewKeyEvent false
+        }
+        if (event.type == KeyEventType.KeyDown && count > 0) {
+            requesters[(focused.intValue + step).mod(count)].requestFocus()
+        }
+        true
+    }
 
 @Composable
 private fun Modifier.tabFill(

@@ -28,11 +28,13 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.collapse
+import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import com.composeunstyled.DisclosedContent
-import com.composeunstyled.DisclosureButton
+import com.composeunstyled.UnstyledButton
 import com.composeunstyled.UnstyledDisclosure
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
@@ -98,7 +100,9 @@ internal fun DisclosureChevron(expanded: Boolean) {
 /**
  * A row that opens and closes the content under it, over Compose Unstyled's disclosure.
  *
- * The row is a button with expand and collapse actions and speaks its state.
+ * The row is a button that speaks its state, with expand and collapse actions while it is enabled.
+ * It is a plain Compose Unstyled button rather than the disclosure's own, since that one keeps the
+ * two actions even when disabled.
  */
 @Composable
 internal fun HeadlessDisclosure(
@@ -121,12 +125,13 @@ internal fun HeadlessDisclosure(
             .border(style.outlineWidth, style.outline, style.shape),
     ) {
         Column {
-            DisclosureButton(
+            UnstyledButton(
+                onClick = { onExpandedChange(!expanded) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = LocalLayout.current.primaryTouchTarget)
                     .inputFocusRing(interactions, style.focus, style.shape)
-                    .semantics { stateDescription = disclosureStateDescription(expanded, enabled) }
+                    .disclosureSemantics(expanded, enabled, onExpandedChange)
                     .alpha(inputAlpha(enabled)),
                 enabled = enabled,
                 contentPadding = style.headerPadding,
@@ -143,6 +148,28 @@ internal fun HeadlessDisclosure(
         }
     }
 }
+
+/** The spoken state, and the expand or collapse action while the row is enabled. */
+private fun Modifier.disclosureSemantics(
+    expanded: Boolean,
+    enabled: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+): Modifier =
+    semantics {
+        stateDescription = disclosureStateDescription(expanded, enabled)
+        if (!enabled) return@semantics
+        if (expanded) {
+            collapse {
+                onExpandedChange(false)
+                true
+            }
+        } else {
+            expand {
+                onExpandedChange(true)
+                true
+            }
+        }
+    }
 
 @Composable
 private fun DisclosureHeading(
