@@ -85,6 +85,3 @@ internal data class SessionColors(
 
 /** How recent an edit in this tab has to be for another tab's save to raise a [Conflict]. */
 internal const val CONFLICT_WINDOW_MILLIS: Long = 2_000
-
-/** What a project opened from a link without a name is called once it is saved. */
-internal const val SHARED_THEME_NAME: String = "Shared theme"

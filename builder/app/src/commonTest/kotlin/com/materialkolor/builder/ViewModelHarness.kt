@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.job
 import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.test.runTest
 
 /**
  * Owns the `viewModelScope` of every model a test builds, because a model built bare is never
@@ -13,11 +12,9 @@ import kotlinx.coroutines.test.runTest
  *
  * Clearing only asks a fold to stop. One that hops off Main is done only once its thread has resumed
  * it on Main, and a resume that lands during or after `resetMain()` throws into whichever test runs
- * next. So both ways out wait for every scope while the test's Main is still installed.
- * [clearAndJoin] is for inside a `runTest` body and [clear] is for `@AfterTest`, ahead of
- * `resetMain()`. [clear] runs its own `runTest`, because those resumes queue on Main's test
- * scheduler and nothing else runs it once the body has ended, so it must not be called from inside
- * one.
+ * next. So [clearAndJoin] waits for every scope, and a test calls it at the end of its `runTest`
+ * body while the test's Main is still installed. There is no blocking way out, because on wasm a
+ * nested `runTest` returns before its body has run and the wait would be skipped.
  */
 internal class ViewModelHarness {
     private val store = ViewModelStore()
@@ -30,12 +27,7 @@ internal class ViewModelHarness {
         return model
     }
 
-    /** Clear every model and wait for their scopes, from outside any `runTest`. */
-    fun clear() {
-        runTest { clearAndJoin() }
-    }
-
-    /** Clear every model and wait for their scopes. */
+    /** Clear every model and wait for their scopes, from inside a `runTest` body. */
     suspend fun clearAndJoin() {
         val scopes = owned.map { model -> model.viewModelScope.coroutineContext.job }
         store.clear()

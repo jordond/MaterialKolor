@@ -10,11 +10,14 @@ import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.resolve.ThemeResult
+import com.materialkolor.builder.generated.resources.Res
+import com.materialkolor.builder.generated.resources.shared_theme_name
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineScope
+import org.jetbrains.compose.resources.getString
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
@@ -62,6 +65,7 @@ internal object SessionBindings {
             preferences = preferences,
             environment = environment,
             colorsOf = { document -> resolver.resolve(document).sessionColors() },
+            sharedThemeName = { getString(Res.string.shared_theme_name) },
             scope = scope,
             now = ::epochMillis,
         )

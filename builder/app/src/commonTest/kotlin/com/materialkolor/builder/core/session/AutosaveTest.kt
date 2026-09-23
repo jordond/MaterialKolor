@@ -62,6 +62,40 @@ class AutosaveTest {
             autosave.hasPending shouldBe false
         }
 
+    @Test
+    fun schedule_underAnotherKeyAfterAWriteThatDidNotLand_keepsBoth() =
+        runTest {
+            val autosave = Autosave<String>(backgroundScope, keyOf = { value -> value.first() }) { value ->
+                record(value)
+            }
+            lands = false
+            autosave.schedule("a1")
+            autosave.flush()
+
+            lands = true
+            autosave.schedule("b1")
+            autosave.flush()
+
+            written shouldBe listOf("a1", "a1", "b1")
+            autosave.hasPending shouldBe false
+        }
+
+    @Test
+    fun cancelTimer_withAValueWaiting_leavesItForTheNextFlush() =
+        runTest {
+            val autosave = Autosave<String>(backgroundScope) { value -> record(value) }
+            autosave.schedule("a")
+
+            autosave.cancelTimer()
+            advanceTimeBy(AUTOSAVE_DELAY_MILLIS * 2)
+            runCurrent()
+
+            written shouldBe emptyList()
+            autosave.hasPending shouldBe true
+            autosave.flush()
+            written shouldBe listOf("a")
+        }
+
     private fun record(value: String): Boolean {
         written += value
         return lands

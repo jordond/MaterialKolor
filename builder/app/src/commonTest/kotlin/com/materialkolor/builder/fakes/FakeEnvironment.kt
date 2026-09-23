@@ -57,4 +57,13 @@ internal class FakeEnvironment(
         persistRequests++
         return persistGranted
     }
+
+    /** The project this tab has open, as a reload would find it. */
+    var tabProject: String? = null
+
+    override fun readTabProject(): String? = tabProject
+
+    override fun writeTabProject(id: String?) {
+        tabProject = id
+    }
 }

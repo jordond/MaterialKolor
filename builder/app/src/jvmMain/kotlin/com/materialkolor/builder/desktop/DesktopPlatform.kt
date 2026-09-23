@@ -99,6 +99,17 @@ private object DesktopEnvironment : Environment {
     ) = Unit
 
     override suspend fun requestPersist(): Boolean = false
+
+    // b-215a
+    // A window has no reload, so the tab's project only has to last as long as the window.
+    @Volatile
+    private var tabProject: String? = null
+
+    override fun readTabProject(): String? = tabProject
+
+    override fun writeTabProject(id: String?) {
+        tabProject = id
+    }
 }
 
 private fun notOnDesktop(): Result<Unit> = Result.failure(UnsupportedOperationException("Not available on desktop yet"))

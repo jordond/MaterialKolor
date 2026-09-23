@@ -121,12 +121,37 @@ class BootResolverTest {
         plan shouldBe BootPlan(BootStart.Reopen("forest"), notice = BootNotice.UnknownPath)
     }
 
+    @Test
+    fun readsRecords_eachRoute_onlyForLinks() {
+        BootResolver.readsRecords(Route.Home) shouldBe false
+        BootResolver.readsRecords(Route.Unknown("/settings")) shouldBe false
+        BootResolver.readsRecords(Route.Theme(codeOf(ocean))) shouldBe true
+        BootResolver.readsRecords(Route.Legacy("color_seed=FF1565C0")) shouldBe true
+    }
+
+    @Test
+    fun resolve_linkAgainstTheIndexOnly_opensItUnsaved() {
+        val code = codeOf(ocean)
+
+        val plan = BootResolver.resolve(Route.Theme(code), null, null, SavedProjects.Listed(listOf("ocean")))
+
+        plan shouldBe BootPlan(BootStart.Shared(code, ocean.document, projectName = "ocean"))
+    }
+
+    /** Resolve the way boot does, with records for a link and the index alone otherwise. */
     private fun resolve(
         route: Route,
         tab: String? = null,
         last: String? = null,
         projects: List<ProjectRecord> = emptyList(),
-    ): BootPlan = BootResolver.resolve(route, tab, last, projects)
+    ): BootPlan {
+        val saved = if (BootResolver.readsRecords(route)) {
+            SavedProjects.Read(projects)
+        } else {
+            SavedProjects.Listed(projects.map { record -> record.id })
+        }
+        return BootResolver.resolve(route, tab, last, saved)
+    }
 
     private fun codeOf(record: ProjectRecord): String = ShareCodec.encode(record.document, record.name)
 

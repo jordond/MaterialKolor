@@ -21,23 +21,39 @@ import com.materialkolor.builder.domain.persist.ProjectRecord
  * | `/t/` with a code that does not read | as `/`, with [BootNotice.InvalidLink] or [BootNotice.NewerVersion] |
  * | any other path | as `/`, with [BootNotice.UnknownPath] |
  *
- * Matching a link encodes every saved project, which is fine at the few dozen projects a browser
- * holds. Documents are compared by their code without the project name, so a project renamed after
- * it was shared still matches its link.
+ * `/` needs only the drawer's index, so boot reads no record it does not open. Matching a link reads
+ * and encodes every saved project, which is fine at the few dozen projects a browser holds.
+ * [readsRecords] says which routes need that. Documents are compared by their code without the
+ * project name, so a project renamed after it was shared still matches its link.
  */
 internal object BootResolver {
     /**
+     * Whether [route] can open a saved project by its theme, so boot has to pass
+     * [SavedProjects.Read] rather than [SavedProjects.Listed].
+     */
+    fun readsRecords(route: Route): Boolean =
+        when (route) {
+            Route.Home -> false
+            is Route.Unknown -> false
+            is Route.Theme -> true
+            is Route.Legacy -> true
+        }
+
+    /**
      * Where to start for [route].
+     *
+     * A link resolved against [SavedProjects.Listed] never matches a saved project, so boot passes
+     * [SavedProjects.Read] whenever [readsRecords] asks for it.
      *
      * @param[tabProjectId] The project this tab had open before a reload, or null in a new tab.
      * @param[lastProjectId] The project open last in any tab, from the preferences.
-     * @param[projects] Every project the drawer lists that could be read, in drawer order.
+     * @param[projects] What boot read about the saved projects.
      */
     fun resolve(
         route: Route,
         tabProjectId: String?,
         lastProjectId: String?,
-        projects: List<ProjectRecord>,
+        projects: SavedProjects,
     ): BootPlan =
         when (route) {
             Route.Home -> {
@@ -87,9 +103,9 @@ internal object BootResolver {
     private fun home(
         tabProjectId: String?,
         lastProjectId: String?,
-        projects: List<ProjectRecord>,
+        projects: SavedProjects,
     ): BootStart {
-        val listed = projects.mapTo(mutableSetOf()) { record -> record.id }
+        val listed = projects.ids.toSet()
         val id = listOfNotNull(tabProjectId, lastProjectId).firstOrNull { candidate -> candidate in listed }
         return if (id != null) BootStart.Reopen(id) else BootStart.New
     }
@@ -99,9 +115,13 @@ internal object BootResolver {
         document: ThemeDocument,
         projectName: String?,
         tabProjectId: String?,
-        projects: List<ProjectRecord>,
+        projects: SavedProjects,
     ): BootStart {
-        val local = matching(document, projects, preferredId = tabProjectId)
+        val records = when (projects) {
+            is SavedProjects.Listed -> emptyList()
+            is SavedProjects.Read -> projects.records
+        }
+        val local = matching(document, records, preferredId = tabProjectId)
         return if (local != null) BootStart.Reopen(local.id) else BootStart.Shared(code, document, projectName)
     }
 
@@ -112,6 +132,31 @@ internal object BootResolver {
         } catch (_: IllegalArgumentException) {
             null
         }
+}
+
+/**
+ * What boot read about the saved projects before it resolved the address.
+ */
+internal sealed interface SavedProjects {
+    /** Every project the drawer lists, in drawer order. */
+    val ids: List<String>
+
+    /** Only the drawer's index, for an address that cannot match a saved project by its theme. */
+    data class Listed(
+        override val ids: List<String>,
+    ) : SavedProjects
+
+    /**
+     * Every listed project that could be read, for matching a link.
+     *
+     * @property[records] The records in drawer order.
+     */
+    data class Read(
+        val records: List<ProjectRecord>,
+    ) : SavedProjects {
+        override val ids: List<String>
+            get() = records.map { record -> record.id }
+    }
 }
 
 /**

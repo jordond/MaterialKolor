@@ -1,8 +1,5 @@
 package com.materialkolor.builder.core.session
 
-import com.materialkolor.builder.core.data.PreferencesRepository
-import com.materialkolor.builder.core.data.ProjectRepository
-import com.materialkolor.builder.core.platform.InMemoryStoreFactory
 import com.materialkolor.builder.core.platform.StoreError
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ColorNames
@@ -18,15 +15,12 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
-import com.materialkolor.builder.domain.persist.ProjectRecord
 import com.materialkolor.builder.domain.persist.StorageKeys
-import com.materialkolor.builder.fakes.FakeEnvironment
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -34,18 +28,13 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ProjectSessionTest {
-    private var ids = 0
-    private val stores = InMemoryStoreFactory(now = { 0 })
-    private val environment = FakeEnvironment(tabId = TAB)
-    private val projects = ProjectRepository(stores, tabId = TAB, now = { 0 }, newId = { "p${++ids}" })
-
+class ProjectSessionTest : SessionTestBase() {
     @Test
     fun boot_firstVisit_createsTheDefaultProject() =
         runTest {
             val (session, preferences) = session()
 
-            session.boot(Route.Home, tabProjectId = null) shouldBe null
+            session.boot(Route.Home) shouldBe null
 
             val ref = session.project.value.shouldBeInstanceOf<ProjectRef.Persisted>()
             val meta = projects.index
@@ -65,7 +54,7 @@ class ProjectSessionTest {
         runTest {
             val (session, preferences) = session()
 
-            session.boot(Route.Legacy("color_seed=FF1565C0&dark_mode=true&package_name=com.ocean"), tabProjectId = null)
+            session.boot(Route.Legacy("color_seed=FF1565C0&dark_mode=true&package_name=com.ocean"))
 
             session.project.value.shouldBeInstanceOf<ProjectRef.Transient>()
             session.document.value.seed shouldBe OCEAN.seed
@@ -78,7 +67,7 @@ class ProjectSessionTest {
         runTest {
             val (session) = session()
 
-            session.boot(Route.Theme("not-a-code"), tabProjectId = null) shouldBe BootNotice.InvalidLink
+            session.boot(Route.Theme("not-a-code")) shouldBe BootNotice.InvalidLink
 
             session.project.value.shouldBeInstanceOf<ProjectRef.Persisted>()
         }
@@ -128,7 +117,7 @@ class ProjectSessionTest {
                 .first()
                 .projects
                 .single()
-                .name shouldBe SHARED_THEME_NAME
+                .name shouldBe SHARED_THEME
         }
 
     @Test
@@ -202,8 +191,9 @@ class ProjectSessionTest {
             val id = booted(session)
             session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
 
-            session.flush().join()
+            session.flush()
 
+            // No join and no scheduler step, so the write has to start before flush returns.
             testScheduler.currentTime shouldBe 0
             projects
                 .load(id)
@@ -331,50 +321,101 @@ class ProjectSessionTest {
             session.document.value shouldBe ThemeDocument.Default
         }
 
-    private fun TestScope.session(): Pair<ProjectSession, PreferencesRepository> {
-        val preferences = PreferencesRepository(stores, backgroundScope)
-        val session = ProjectSession(
-            projects = projects,
-            preferences = preferences,
-            environment = environment,
-            colorsOf = { document -> colorsOf(document) },
-            scope = backgroundScope,
-            now = { testScheduler.currentTime },
-        )
-        return session to preferences
-    }
+    @Test
+    fun boot_homeWithATabProject_reopensItOverTheLastProject() =
+        runTest {
+            val (session) = session()
+            val tabs = booted(session)
+            session.newProject(copyCurrent = false)
+            environment.tabProject = tabs
+            val (reloaded, preferences) = session()
 
-    /** Boot on a first visit and let the session start watching other tabs. */
-    private suspend fun TestScope.booted(session: ProjectSession): String {
-        session.boot(Route.Home, tabProjectId = null)
-        runCurrent()
-        return session.project.value
-            .shouldBeInstanceOf<ProjectRef.Persisted>()
-            .id
-    }
+            reloaded.boot(Route.Home)
 
-    private fun TestScope.settle() {
-        advanceTimeBy(AUTOSAVE_DELAY_MILLIS)
-        runCurrent()
-    }
+            reloaded.project.value shouldBe ProjectRef.Persisted(tabs)
+            preferences.current().lastProjectId shouldBe tabs
+        }
 
-    private suspend fun TestScope.saveFromAnotherTab(
-        id: String,
-        document: ThemeDocument,
-    ): ProjectRecord {
-        val theirs = projects.load(id).shouldNotBeNull().copy(document = document, revision = 10, writerTab = "other")
-        stores.writeFromAnotherTab(StorageKeys.project(id), ProjectRecord.Codec.encode(theirs))
-        runCurrent()
-        return theirs
-    }
+    @Test
+    fun boot_home_readsNoRecordItDoesNotOpen() =
+        runTest {
+            val (session) = session()
+            val broken = booted(session)
+            session.newProject(copyCurrent = false)
+            stores.seed(StorageKeys.project(broken), "not a record")
+            val (reloaded) = session()
 
-    private fun colorsOf(document: ThemeDocument): SessionColors =
-        SessionColors(List(4) { document.seed }, splashLight = document.seed, splashDark = DARK_SPLASH)
+            reloaded.boot(Route.Home)
 
-    private companion object {
-        const val TAB = "this-tab"
-        val OCEAN = ThemeDocument(seed = Argb(0xFF1565C0.toInt()))
-        val FOREST = ThemeDocument(seed = Argb(0xFF2E7D32.toInt()))
-        val DARK_SPLASH = Argb(0xFF101010.toInt())
-    }
+            stores.textAt(StorageKeys.project(broken)) shouldBe "not a record"
+        }
+
+    @Test
+    fun open_anotherProject_remembersItAsTheTabsProject() =
+        runTest {
+            val (session) = session()
+            val first = booted(session)
+            environment.tabProject shouldBe first
+            session.newProject(copyCurrent = false)
+            val second = session.project.value
+                .shouldBeInstanceOf<ProjectRef.Persisted>()
+                .id
+            environment.tabProject shouldBe second
+
+            session.open(first)
+
+            environment.tabProject shouldBe first
+        }
+
+    @Test
+    fun edit_onASharedTheme_remembersTheNewIdAsTheTabsProject() =
+        runTest {
+            val (session) = session()
+            session.openShared(ShareCodec.encode(OCEAN))
+            environment.tabProject shouldBe null
+
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            settle()
+
+            val ref = session.project.value.shouldBeInstanceOf<ProjectRef.Persisted>()
+            environment.tabProject shouldBe ref.id
+        }
+
+    @Test
+    fun saveStatus_editWhileTheSaveBeforeItIsWriting_staysPending() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            stores.beforeNextUpdate(StorageKeys.project(id)) {
+                session.edit(DocumentChange.SetStyle(Style.Vibrant), EditPhase.Discrete)
+            }
+
+            session.flush().join()
+
+            session.saveStatus.value shouldBe SaveStatus.Pending
+            settle()
+            session.saveStatus.value shouldBe SaveStatus.Idle
+            projects
+                .load(id)
+                .shouldNotBeNull()
+                .document.style shouldBe Style.Vibrant
+        }
+
+    @Test
+    fun rename_storageRefusesIt_keepsTheOldNameForTheNextSave() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+            val before = projects.load(id).shouldNotBeNull().name
+            stores.failNextUpdates(count = 1, StoreError.Unavailable)
+
+            session.rename(id, "Renamed") shouldBe StoreError.Unavailable
+            session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            settle()
+
+            val saved = projects.load(id).shouldNotBeNull()
+            saved.name shouldBe before
+            saved.document.amoled shouldBe true
+        }
 }
