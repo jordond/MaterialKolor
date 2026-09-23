@@ -33,7 +33,7 @@ public enum class ColorFormat {
  * and lightness from 0 to 100. OKLCH gives lightness from 0 to 1, chroma, then the hue in degrees. A
  * grey has no hue of its own, so it reads as 0.
  */
-public fun ColorFormat.channelsOf(color: Argb): List<Double> =
+internal fun ColorFormat.channelsOf(color: Argb): List<Double> =
     when (this) {
         ColorFormat.Hex, ColorFormat.Rgb -> {
             listOf(color.red.toDouble(), color.green.toDouble(), color.blue.toDouble())

@@ -67,7 +67,12 @@ internal fun PickerFormat(
     }
 }
 
-/** The color in [format], read from [picker] here so a drag recomposes the field and nothing around it. */
+/**
+ * The color in [format], read from [picker] here so a drag recomposes the field and nothing around it.
+ *
+ * Outside hex, what the last typed color had to change to fit shows under the field for as long as
+ * the picker stays on that color, the way [BuilderHexField] shows it.
+ */
 @Composable
 private fun FormatField(
     picker: PickerState,
@@ -87,15 +92,21 @@ private fun FormatField(
             modifier = modifier,
         )
     } else {
+        var typed by remember(format) { mutableStateOf<ParseResult.Ok?>(null) }
+        val noted = typed?.takeIf { read -> read.argb == color && read.notes.isNotEmpty() }
         BuilderTextField(
             value = format.textOf(color),
-            onCommit = { typed ->
-                val read = ColorInput.parse(typed)
-                if (read is ParseResult.Ok) picker.type(read.argb)
+            onCommit = { text ->
+                val read = ColorInput.parse(text)
+                if (read is ParseResult.Ok) {
+                    typed = read
+                    picker.type(read.argb)
+                }
             },
             label = label,
             modifier = modifier,
             error = { draft -> (ColorInput.parse(draft) as? ParseResult.Invalid)?.reason?.let(messages::errorOf) },
+            supportingText = noted?.let { read -> messages.notesOf(read.notes) },
             style = BuilderTextStyle.Value,
         )
     }

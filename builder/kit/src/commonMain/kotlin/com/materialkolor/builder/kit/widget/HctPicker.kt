@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -107,6 +108,8 @@ internal class PickerState(
 
     private var dragging: Boolean = false
 
+    private val shown = HctChannel.entries.map { channel -> derivedStateOf { valueOf(channel).roundToInt() } }
+
     init {
         adopt(initial)
     }
@@ -119,6 +122,12 @@ internal class PickerState(
             HctChannel.Tone -> tone
         }
 
+    /**
+     * [valueOf] to the whole number, the way a track shows and reads it out. Composition reads this
+     * rather than [valueOf], so a drag composes again only when the number on screen changes.
+     */
+    fun shownOf(channel: HctChannel): Int = shown[channel.ordinal].value
+
     /** Starts over from a new [value] from outside, unless it is the color the picker already made. */
     fun follow(value: Argb) {
         if (value == seen) return
@@ -128,7 +137,8 @@ internal class PickerState(
 
     /**
      * Moves [channel] to [target], clamped into its range, and reports the new color with [phase]
-     * when it changed. Chroma also stops at the most the current hue and tone reach.
+     * when it changed. Chroma also stops at the most the exact current hue and tone reach, so a color
+     * on the edge of sRGB keeps its chroma.
      *
      * @return Whether the color changed.
      */
@@ -140,7 +150,7 @@ internal class PickerState(
         val next = target.coerceIn(channel.range)
         when (channel) {
             HctChannel.Hue -> hue = next
-            HctChannel.Chroma -> chroma = min(next, GamutLimit.maxChroma(hue, tone))
+            HctChannel.Chroma -> chroma = min(next, GamutLimit.edge(hue, tone))
             HctChannel.Tone -> tone = next
         }
         val made = Hct.from(hue, chroma, tone)
@@ -223,7 +233,7 @@ private fun TrackRow(
     ) {
         GamutTrack(picker, channel, label, Modifier.weight(1f))
         BuilderTextField(
-            value = channel.textOf(picker.valueOf(channel)),
+            value = picker.shownOf(channel).toString(),
             onCommit = { typed ->
                 val target = typed.trim().toDoubleOrNull()
                 if (target != null) picker.set(channel, target, EditPhase.Discrete)

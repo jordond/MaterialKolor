@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.CacheDrawScope
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
@@ -50,6 +51,8 @@ import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.hct.Hct
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
@@ -71,42 +74,29 @@ internal enum class HctChannel(
 
     /** The value [fraction] of the way along the track. */
     fun valueAt(fraction: Float): Double = range.start + fraction.coerceIn(0f, 1f) * (range.endInclusive - range.start)
-
-    /** How the track shows and reads out [value], a whole number. */
-    fun textOf(value: Double): String = value.roundToInt().toString()
 }
 
 /**
  * The most chroma sRGB can show at a hue and tone.
  *
- * [Hct.from] hands back less chroma than it was asked for once the ask leaves sRGB, so a binary
- * search over the ask finds the edge. Each answer is kept per whole hue and whole tone, which is as
- * fine as a track can show and small enough to keep every one of them.
+ * [edge] answers at the exact hue and tone and is what limits the chroma a picker sets.
+ * [maxChroma] keeps one answer per whole hue and whole tone for shading the tracks, which is as fine
+ * as a track can show and small enough to keep every one of them.
  */
 internal object GamutLimit {
     private val cache = DoubleArray(HueSlots * ToneSlots) { Double.NaN }
 
-    /** The most chroma at [hue] and [tone], both rounded to whole numbers first. */
-    fun maxChroma(
-        hue: Double,
-        tone: Double,
-    ): Double {
-        val wholeHue = hue.roundToInt().mod(HueSlots)
-        val wholeTone = tone.roundToInt().coerceIn(0, ToneSlots - 1)
-        val slot = wholeHue * ToneSlots + wholeTone
-        val cached = cache[slot]
-        if (!cached.isNaN()) return cached
-        return search(wholeHue.toDouble(), wholeTone.toDouble()).also { found -> cache[slot] = found }
-    }
-
     /**
-     * The binary search behind [maxChroma], without the cache.
+     * The most chroma at exactly [hue] and [tone], found by a binary search over the chroma asked of
+     * [Hct.from].
      *
-     * An ask inside sRGB comes back within an eight bit rounding of itself, so the search treats
-     * anything within [SearchSlack] as reached. It settles just past the edge, where [Hct.from]
-     * returns the edge color itself, and reports that color's chroma.
+     * Asked for more than sRGB can show, [Hct.from] mostly hands back the color on the edge, but not
+     * at the exact hue and tone of a corner of the sRGB cube. There #00FF00 comes back with a chroma
+     * of 57 rather than 108. So the search only trusts an ask that comes back within an eight bit
+     * rounding of itself, [SearchSlack], and answers with the smaller of the last such ask and the
+     * chroma it came back with. Asking the picker for that much always lands on the edge.
      */
-    fun search(
+    fun edge(
         hue: Double,
         tone: Double,
     ): Double {
@@ -116,7 +106,20 @@ internal object GamutLimit {
             val ask = (reached + beyond) / 2
             if (Hct.from(hue, ask, tone).chroma >= ask - SearchSlack) reached = ask else beyond = ask
         }
-        return Hct.from(hue, reached, tone).chroma.coerceAtMost(ChromaCeiling)
+        return min(reached, Hct.from(hue, reached, tone).chroma)
+    }
+
+    /** The most chroma at [hue] and [tone], both rounded to whole numbers first. Only for shading. */
+    fun maxChroma(
+        hue: Double,
+        tone: Double,
+    ): Double {
+        val wholeHue = hue.roundToInt().mod(HueSlots)
+        val wholeTone = tone.roundToInt().coerceIn(0, ToneSlots - 1)
+        val slot = wholeHue * ToneSlots + wholeTone
+        val cached = cache[slot]
+        if (!cached.isNaN()) return cached
+        return edge(wholeHue.toDouble(), wholeTone.toDouble()).also { found -> cache[slot] = found }
     }
 }
 
@@ -125,7 +128,8 @@ internal object GamutLimit {
  * cannot show shaded.
  *
  * The colors and the thumb are read while drawing, so a drag redraws the track without composing
- * anything. Only the spoken value is composed. A drag reports [EditPhase.Dragging] for every change
+ * anything. Only the spoken value is composed, as a whole number, so the track composes again only
+ * when that number changes. A drag reports [EditPhase.Dragging] for every change
  * and [EditPhase.Released] once when it lets go. The arrows move one and ten with Shift, Page Up and
  * Page Down move ten, Home and End jump to the ends, and each of those reports
  * [EditPhase.Discrete]. The track reads out as a slider named [label], its value folded into the
@@ -140,8 +144,8 @@ internal fun GamutTrack(
 ) {
     val tokens = LocalBuilderTokens.current
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-    val value = picker.valueOf(channel)
-    val valueText = channel.textOf(value)
+    val shown = picker.shownOf(channel)
+    val valueText = shown.toString()
     val name = stateName(label, ControlState.Value(valueText))
     var focused by remember { mutableStateOf(false) }
     Box(
@@ -160,14 +164,14 @@ internal fun GamutTrack(
                 contentDescription = name
                 stateDescription = valueText
                 progressBarRangeInfo = ProgressBarRangeInfo(
-                    current = value.toFloat(),
+                    current = shown.toFloat(),
                     range = channel.range.start.toFloat()..channel.range.endInclusive.toFloat(),
                 )
                 setProgress { target -> picker.set(channel, target.toDouble(), EditPhase.Discrete) }
             }.pointerInput(picker, channel, tokens, isRtl) { dragTrack(picker, channel, tokens, isRtl) }
             .drawWithCache {
-                val paint = trackPaint(channel, picker)
-                onDrawBehind { drawTrack(paint, picker, channel, tokens, isRtl, focused) }
+                val drawing = trackDrawing(trackPaint(channel, picker), tokens, isRtl)
+                onDrawBehind { drawTrack(drawing, picker, channel, focused) }
             },
     )
 }
@@ -198,6 +202,10 @@ private fun keyTarget(
 /**
  * Follows one pointer from press to release. The press moves the thumb to it, every move after
  * that follows, and letting go reports [EditPhase.Released] once when anything moved.
+ *
+ * A drag cut off before the pointer lifts ends without [EditPhase.Released], so a caller that put
+ * the prior color back keeps it. Leaving the screen cuts it off with a consumed up, and a change of
+ * the track's keys by cancelling the gesture.
  */
 private suspend fun PointerInputScope.dragTrack(
     picker: PickerState,
@@ -217,15 +225,17 @@ private suspend fun PointerInputScope.dragTrack(
         down.consume()
         picker.startDrag()
         var moved = false
-        try {
+        val lifted = try {
             moved = picker.set(channel, valueAt(down.position.x), EditPhase.Dragging)
             horizontalDrag(down.id) { change ->
                 change.consume()
                 if (picker.set(channel, valueAt(change.position.x), EditPhase.Dragging)) moved = true
             }
-        } finally {
-            picker.endDrag(released = moved)
+        } catch (cancelled: CancellationException) {
+            picker.endDrag(released = false)
+            throw cancelled
         }
+        picker.endDrag(released = moved && lifted)
     }
 }
 
@@ -289,63 +299,119 @@ private fun outsideRuns(reached: BooleanArray): List<ClosedFloatingPointRange<Fl
 }
 
 /**
- * Draws the track, its shaded stretches and the thumb. The thumb's place and fill are read here,
- * so moving it only redraws.
+ * What a track draws that holds still while its thumb moves, built once per size, paint, tokens and
+ * direction so a drag frame allocates nothing.
+ *
+ * @property[shaded] The left and right edges in pixels of each shaded stretch, one pair after another.
  */
-private fun DrawScope.drawTrack(
+private class TrackDrawing(
+    val tokens: BuilderTokens,
+    val isRtl: Boolean,
+    val thumbRadius: Float,
+    val travel: Float,
+    val top: Float,
+    val trackHeight: Float,
+    val outline: Path,
+    val brush: Brush,
+    val shaded: FloatArray,
+    val hatchGap: Float,
+    val hatchWidth: Float,
+    val focusRing: Stroke,
+    val rim: Stroke,
+    val innerRim: Stroke,
+) {
+    /** How far from the left [fraction] of the way along the travel sits, in pixels. */
+    fun xOf(fraction: Float): Float = thumbRadius + travel * (if (isRtl) 1f - fraction else fraction)
+}
+
+/** Lays out the track for the current size and builds everything a frame reuses. */
+private fun CacheDrawScope.trackDrawing(
     paint: TrackPaint,
-    picker: PickerState,
-    channel: HctChannel,
     tokens: BuilderTokens,
     isRtl: Boolean,
-    focused: Boolean,
-) {
+): TrackDrawing {
     val thumbRadius = tokens.spacing.extraLarge.toPx() / 2
     val stroke = tokens.spacing.extraSmall.toPx() / 2
     val trackHeight = tokens.spacing.large.toPx()
     val top = (size.height - trackHeight) / 2
-    val travel = (size.width - 2 * thumbRadius).coerceAtLeast(0f)
-
-    fun xOf(fraction: Float): Float = thumbRadius + travel * (if (isRtl) 1f - fraction else fraction)
-
     val colors = if (isRtl) paint.colors.reversed() else paint.colors
     val track = RoundRect(0f, top, size.width, top + trackHeight, CornerRadius(trackHeight / 2))
-    val outline = Path().apply { addRoundRect(track) }
-    drawPath(outline, Brush.horizontalGradient(colors, startX = thumbRadius, endX = size.width - thumbRadius))
-    clipPath(outline) {
-        for (run in paint.outside) {
-            // A stretch that reaches either end of the travel runs on under the rounded cap past it.
-            val leftEnd = if (isRtl) run.endInclusive == 1f else run.start == 0f
-            val rightEnd = if (isRtl) run.start == 0f else run.endInclusive == 1f
-            val left = if (leftEnd) 0f else minOf(xOf(run.start), xOf(run.endInclusive))
-            val right = if (rightEnd) size.width else maxOf(xOf(run.start), xOf(run.endInclusive))
-            shade(left, right, top, trackHeight, tokens, stroke)
+    val drawing = TrackDrawing(
+        tokens = tokens,
+        isRtl = isRtl,
+        thumbRadius = thumbRadius,
+        travel = (size.width - 2 * thumbRadius).coerceAtLeast(0f),
+        top = top,
+        trackHeight = trackHeight,
+        outline = Path().apply { addRoundRect(track) },
+        brush = Brush.horizontalGradient(colors, startX = thumbRadius, endX = size.width - thumbRadius),
+        shaded = FloatArray(paint.outside.size * 2),
+        hatchGap = tokens.spacing.small.toPx(),
+        hatchWidth = stroke / 2,
+        focusRing = Stroke(stroke),
+        rim = Stroke(stroke),
+        innerRim = Stroke(stroke / 2),
+    )
+    paint.outside.forEachIndexed { index, run ->
+        // A stretch that reaches either end of the travel runs on under the rounded cap past it.
+        val leftEnd = if (isRtl) run.endInclusive == 1f else run.start == 0f
+        val rightEnd = if (isRtl) run.start == 0f else run.endInclusive == 1f
+        val from = drawing.xOf(run.start)
+        val to = drawing.xOf(run.endInclusive)
+        drawing.shaded[2 * index] = if (leftEnd) 0f else minOf(from, to)
+        drawing.shaded[2 * index + 1] = if (rightEnd) size.width else maxOf(from, to)
+    }
+    return drawing
+}
+
+/**
+ * Draws the track, its shaded stretches and the thumb. The thumb's place and fill are read here,
+ * so moving it only redraws.
+ */
+private fun DrawScope.drawTrack(
+    drawing: TrackDrawing,
+    picker: PickerState,
+    channel: HctChannel,
+    focused: Boolean,
+) {
+    val tokens = drawing.tokens
+    drawPath(drawing.outline, drawing.brush)
+    clipPath(drawing.outline) {
+        var index = 0
+        while (index < drawing.shaded.size) {
+            shade(drawing, left = drawing.shaded[index], right = drawing.shaded[index + 1])
+            index += 2
         }
     }
 
-    val center = Offset(xOf(channel.fractionOf(picker.valueOf(channel))), size.height / 2)
-    if (focused) drawCircle(tokens.focus, radius = thumbRadius + stroke * 2, center = center, style = Stroke(stroke))
-    drawCircle(Color(picker.color.value), radius = thumbRadius, center = center)
-    drawCircle(tokens.textStrong, radius = thumbRadius - stroke / 2, center = center, style = Stroke(stroke))
-    drawCircle(tokens.panel, radius = thumbRadius - stroke * 1.5f, center = center, style = Stroke(stroke / 2))
+    val stroke = drawing.rim.width
+    val radius = drawing.thumbRadius
+    val center = Offset(drawing.xOf(channel.fractionOf(picker.valueOf(channel))), size.height / 2)
+    if (focused) drawCircle(tokens.focus, radius = radius + stroke * 2, center = center, style = drawing.focusRing)
+    drawCircle(Color(picker.color.value), radius = radius, center = center)
+    drawCircle(tokens.textStrong, radius = radius - stroke / 2, center = center, style = drawing.rim)
+    drawCircle(tokens.panel, radius = radius - stroke * 1.5f, center = center, style = drawing.innerRim)
 }
 
 /** Veils a stretch of the track and hatches it, so it reads as out of reach without relying on color. */
 private fun DrawScope.shade(
+    drawing: TrackDrawing,
     left: Float,
     right: Float,
-    top: Float,
-    height: Float,
-    tokens: BuilderTokens,
-    stroke: Float,
 ) {
+    val top = drawing.top
+    val height = drawing.trackHeight
     clipRect(left, top, right, top + height) {
-        drawRect(tokens.scrim, topLeft = Offset(left, top), size = Size(right - left, height))
-        val gap = tokens.spacing.small.toPx()
+        drawRect(drawing.tokens.scrim, topLeft = Offset(left, top), size = Size(right - left, height))
         var x = left - height
         while (x < right) {
-            drawLine(tokens.panel, Offset(x, top + height), Offset(x + height, top), strokeWidth = stroke / 2)
-            x += gap
+            drawLine(
+                color = drawing.tokens.panel,
+                start = Offset(x, top + height),
+                end = Offset(x + height, top),
+                strokeWidth = drawing.hatchWidth,
+            )
+            x += drawing.hatchGap
         }
     }
 }

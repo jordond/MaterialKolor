@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -28,6 +29,7 @@ import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.withKeyDown
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ColorInput
@@ -36,11 +38,16 @@ import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.hct.Hct
 import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldNotContain
+import io.kotest.matchers.doubles.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -97,6 +104,46 @@ private class PickerCompositions {
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.pickerTrackValue(name: String): Float =
     onNode(pickerTrack(name)).fetchSemanticsNode().config[SemanticsProperties.ProgressBarRangeInfo].current
+
+private val PickerUnstyled: Skin = Skin(Library.Unstyled, expressive = false)
+
+/** The value a picker under test was handed last, and every phase it reported. */
+private class PickerReports(
+    start: Argb,
+) {
+    var value: Argb by mutableStateOf(start)
+    val phases: MutableList<EditPhase> = mutableListOf()
+}
+
+/** Shows an unstyled picker at [start] that is handed back every color it reports. */
+@OptIn(ExperimentalTestApi::class)
+private fun ComposeUiTest.pickerShow(
+    start: Argb = PickerSeed,
+    direction: LayoutDirection = LayoutDirection.Ltr,
+    foldsState: Boolean = false,
+): PickerReports {
+    val reports = PickerReports(start)
+    setContent {
+        PickerHarness(PickerUnstyled) {
+            CompositionLocalProvider(
+                LocalLayoutDirection provides direction,
+                LocalFoldsStateIntoName provides foldsState,
+            ) {
+                HctPicker(
+                    value = reports.value,
+                    onChange = { argb, phase ->
+                        reports.value = argb
+                        reports.phases += phase
+                    },
+                    modifier = Modifier.width(PickerWidth),
+                )
+            }
+        }
+    }
+    return reports
+}
+
+private fun pickerChromaOf(color: Argb): Double = Hct.fromInt(color.value).chroma
 
 @OptIn(ExperimentalTestApi::class)
 class HctPickerTest {
@@ -175,6 +222,162 @@ class HctPickerTest {
             value shouldBe Argb(0x000000)
 
             phases shouldBe List(5) { EditPhase.Discrete }
+        }
+
+    @Test
+    fun hueTrack_rtl_mirrorsTheSideArrowsButNotUpAndDown() =
+        runComposeUiTest {
+            val reports = pickerShow(direction = LayoutDirection.Rtl)
+            val hue = onNode(pickerTrack("Hue"))
+            hue.requestFocus()
+            val start = pickerTrackValue("Hue")
+
+            hue.performKeyInput { pressKey(Key.DirectionRight) }
+            pickerTrackValue("Hue") shouldBe start - 1f
+            hue.performKeyInput {
+                pressKey(Key.DirectionLeft)
+                pressKey(Key.DirectionLeft)
+            }
+            pickerTrackValue("Hue") shouldBe start + 1f
+            hue.performKeyInput { pressKey(Key.DirectionUp) }
+            pickerTrackValue("Hue") shouldBe start + 2f
+
+            reports.phases shouldBe List(4) { EditPhase.Discrete }
+        }
+
+    @Test
+    fun toneTrack_pageUpAndPageDown_stepByTen() =
+        runComposeUiTest {
+            val reports = pickerShow()
+            val tone = onNode(pickerTrack("Tone"))
+            tone.requestFocus()
+            val start = pickerTrackValue("Tone")
+
+            tone.performKeyInput { pressKey(Key.PageUp) }
+            pickerTrackValue("Tone") shouldBe start + 10f
+            tone.performKeyInput {
+                pressKey(Key.PageDown)
+                pressKey(Key.PageDown)
+            }
+            pickerTrackValue("Tone") shouldBe start - 10f
+
+            reports.phases shouldBe List(3) { EditPhase.Discrete }
+        }
+
+    @Test
+    fun chromaTrack_keys_stepTheChromaAndHomeTurnsGrey() =
+        runComposeUiTest {
+            val reports = pickerShow()
+            val chroma = onNode(pickerTrack("Chroma"))
+            chroma.requestFocus()
+            val start = pickerTrackValue("Chroma")
+
+            chroma.performKeyInput { withKeyDown(Key.ShiftLeft) { pressKey(Key.DirectionDown) } }
+            assertEquals(start - 10f, pickerTrackValue("Chroma"), absoluteTolerance = 1f)
+            chroma.performKeyInput { pressKey(Key.MoveHome) }
+            waitForIdle()
+
+            // A grey still has a little chroma in HCT, so the track reads a small number rather than 0.
+            reports.value.green shouldBe reports.value.red
+            reports.value.blue shouldBe reports.value.red
+            reports.phases shouldBe List(2) { EditPhase.Discrete }
+        }
+
+    @Test
+    fun chromaTrack_endOnTheSrgbEdge_keepsTheChroma() =
+        runComposeUiTest {
+            val green = Argb(0x00FF00)
+            val reports = pickerShow(start = green)
+            val chroma = onNode(pickerTrack("Chroma"))
+            chroma.requestFocus()
+
+            chroma.performKeyInput { pressKey(Key.MoveEnd) }
+            waitForIdle()
+
+            pickerChromaOf(reports.value) shouldBeGreaterThan pickerChromaOf(green) - 0.5
+        }
+
+    @Test
+    fun chromaTrack_arrowUpAtAFractionalTone_keepsTheColorOffGrey() =
+        runComposeUiTest {
+            val navy = Argb(0x000011)
+            val reports = pickerShow(start = navy)
+            val chroma = onNode(pickerTrack("Chroma"))
+            chroma.requestFocus()
+
+            chroma.performKeyInput { pressKey(Key.DirectionUp) }
+            waitForIdle()
+
+            reports.value.blue shouldBeGreaterThan reports.value.red
+            pickerChromaOf(reports.value) shouldBeGreaterThan pickerChromaOf(navy) - 0.5
+        }
+
+    @Test
+    fun tracks_foldsStateIntoName_carryTheirValueInTheName() =
+        runComposeUiTest {
+            // The seed #6750A4 sits at hue 298.98.
+            pickerShow(foldsState = true)
+            val hue = onNode(pickerTrack("Hue, 299"))
+            hue.assertExists()
+            hue.requestFocus()
+
+            hue.performKeyInput { pressKey(Key.DirectionRight) }
+
+            onNode(pickerTrack("Hue, 300")).assertExists()
+        }
+
+    @Test
+    fun toneTrack_pickerRemovedMidDrag_reportsNoRelease() =
+        runComposeUiTest {
+            var shown by mutableStateOf(true)
+            val phases = mutableListOf<EditPhase>()
+            setContent {
+                PickerHarness(PickerUnstyled) {
+                    if (shown) {
+                        HctPicker(
+                            value = PickerSeed,
+                            onChange = { _, phase -> phases += phase },
+                            modifier = Modifier.width(PickerWidth),
+                        )
+                    }
+                }
+            }
+
+            onNode(pickerTrack("Tone")).performTouchInput {
+                down(Offset(width * 0.2f, centerY))
+                moveTo(Offset(width * 0.5f, centerY))
+            }
+            waitForIdle()
+            shown = false
+            waitForIdle()
+
+            phases shouldContain EditPhase.Dragging
+            phases shouldNotContain EditPhase.Released
+        }
+
+    @Test
+    fun formatField_clampedColorInEachFormat_saysItWasPulledInsideSrgb() =
+        runComposeUiTest {
+            pickerShow()
+            val clamped = listOf(
+                "RGB" to "rgb(300 0 0)",
+                "HSL" to "hsl(0 150% 50%)",
+                "OKLCH" to "oklch(0.9 0.4 150)",
+            )
+
+            for ((format, text) in clamped) {
+                withClue(format) {
+                    onNodeWithText(format).performClick()
+                    waitForIdle()
+                    onNodeWithText("Pulled inside sRGB.", useUnmergedTree = true).assertDoesNotExist()
+                    val field = onNode(hasSetTextAction() and hasContentDescription("Color"))
+                    field.performTextReplacement(text)
+                    field.performKeyInput { pressKey(Key.Enter) }
+                    waitForIdle()
+
+                    onNodeWithText("Pulled inside sRGB.", useUnmergedTree = true).assertExists()
+                }
+            }
         }
 
     @Test
