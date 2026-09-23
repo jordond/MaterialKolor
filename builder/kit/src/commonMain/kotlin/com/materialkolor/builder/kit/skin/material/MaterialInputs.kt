@@ -33,7 +33,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -62,13 +61,14 @@ import com.materialkolor.builder.kit.headless.SliderRules
 import com.materialkolor.builder.kit.headless.disclosureEnter
 import com.materialkolor.builder.kit.headless.disclosureExit
 import com.materialkolor.builder.kit.headless.disclosureName
+import com.materialkolor.builder.kit.headless.rovingTarget
 import com.materialkolor.builder.kit.headless.sliderKeys
 import com.materialkolor.builder.kit.headless.sliderSemantics
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.skin.headless.FieldStyle
+import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 import com.materialkolor.builder.kit.skin.headless.heroFieldStyle
-import com.materialkolor.builder.kit.skin.headless.inputAlpha
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
@@ -91,7 +91,7 @@ internal fun MaterialSwitch(
             .heightIn(min = LocalLayout.current.primaryTouchTarget)
             .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onCheckedChange)
             .semantics { stateDescription = words.of(state) }
-            .foldState(label, state, enabled),
+            .foldState(label, state, enabled, words),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -100,7 +100,7 @@ internal fun MaterialSwitch(
             modifier = Modifier
                 .weight(1f, fill = false)
                 .padding(end = tokens.spacing.medium)
-                .alpha(inputAlpha(enabled)),
+                .alpha(enabledAlpha(enabled)),
             style = BuilderTextStyle.Label,
         )
         Switch(checked = checked, onCheckedChange = null, enabled = enabled)
@@ -124,14 +124,14 @@ internal fun MaterialCheckbox(
             .heightIn(min = LocalLayout.current.primaryTouchTarget)
             .toggleable(value = checked, enabled = enabled, role = Role.Checkbox, onValueChange = onCheckedChange)
             .semantics { stateDescription = words.of(state) }
-            .foldState(label, state, enabled),
+            .foldState(label, state, enabled, words),
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.extraSmall),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(checked = checked, onCheckedChange = null, enabled = enabled)
         BuilderText(
             text = label,
-            modifier = Modifier.alpha(inputAlpha(enabled)),
+            modifier = Modifier.alpha(enabledAlpha(enabled)),
             style = BuilderTextStyle.Label,
         )
     }
@@ -238,10 +238,9 @@ internal fun <T> MaterialTabs(
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     fun moveTo(index: Int) {
-        val next = index.mod(tabs.size)
-        roving.intValue = next
-        requesters[next].requestFocus()
-        onSelect(tabs[next])
+        roving.intValue = index
+        requesters[index].requestFocus()
+        onSelect(tabs[index])
     }
 
     PrimaryScrollableTabRow(
@@ -249,14 +248,8 @@ internal fun <T> MaterialTabs(
         modifier = modifier
             .focusGroup()
             .onPreviewKeyEvent { event ->
-                val forward = if (isRtl) -1 else 1
-                val target = when (event.key) {
-                    Key.DirectionRight -> roving.intValue + forward
-                    Key.DirectionLeft -> roving.intValue - forward
-                    Key.MoveHome -> 0
-                    Key.MoveEnd -> tabs.lastIndex
-                    else -> return@onPreviewKeyEvent false
-                }
+                val target = rovingTarget(event.key, roving.intValue, tabs.size, isRtl, upDown = false, homeEnd = true)
+                    ?: return@onPreviewKeyEvent false
                 if (event.type == KeyEventType.KeyDown) moveTo(target)
                 true
             },
@@ -291,7 +284,8 @@ internal fun MaterialDisclosure(
 ) {
     val motion = LocalBuilderMotion.current
     val state = ControlState.Expanded(expanded)
-    val spoken = stateWords().of(state)
+    val words = stateWords()
+    val spoken = words.of(state)
     Column(modifier) {
         ListItem(
             headlineContent = { Text(title) },
@@ -312,8 +306,8 @@ internal fun MaterialDisclosure(
                             true
                         }
                     }
-                }.foldState(disclosureName(title, summary), state, enabled)
-                .alpha(inputAlpha(enabled)),
+                }.foldState(disclosureName(title, summary), state, enabled, words)
+                .alpha(enabledAlpha(enabled)),
             supportingContent = summary?.let { text -> { Text(text) } },
             trailingContent = { DisclosureChevron(expanded) },
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),

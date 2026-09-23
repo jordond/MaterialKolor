@@ -36,8 +36,8 @@ import com.composeunstyled.UnstyledSlider
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.layout.LocalLayout
-import com.materialkolor.builder.kit.skin.headless.inputAlpha
-import com.materialkolor.builder.kit.skin.headless.inputFocusRing
+import com.materialkolor.builder.kit.skin.headless.controlRing
+import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -251,7 +251,7 @@ internal fun HeadlessSlider(
                 enabled = enabled,
                 onValueChange = onValueChange,
                 onValueChangeFinished = onValueChangeFinished,
-            ).alpha(inputAlpha(enabled)),
+            ).alpha(enabledAlpha(enabled)),
         enabled = enabled,
         interactionSource = interactions,
         valueRange = rules.range,
@@ -260,7 +260,7 @@ internal fun HeadlessSlider(
         thumb = {
             Box(
                 Modifier
-                    .inputFocusRing(interactions, style.focus, style.thumbShape)
+                    .controlRing(interactions, style.thumbShape, style.focus)
                     .size(style.thumbSize)
                     .background(style.thumb, style.thumbShape)
                     .border(style.thumbOutlineWidth, style.thumbOutline, style.thumbShape),

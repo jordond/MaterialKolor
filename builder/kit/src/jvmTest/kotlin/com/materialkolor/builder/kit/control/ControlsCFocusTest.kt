@@ -35,9 +35,6 @@ import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.withKeyDown
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.model.Library
-import com.materialkolor.builder.kit.headless.BottomSheetDetent
-import com.materialkolor.builder.kit.headless.BottomSheetState
-import com.materialkolor.builder.kit.headless.rememberBottomSheetState
 import com.materialkolor.builder.kit.skin.Skin
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -84,7 +81,7 @@ class ControlsCFocusTest {
                     }
                 }
             }
-            onNode(hasContentDescription("Poster") and overlayHasRole(Role.Button)).requestFocus()
+            onNode(hasContentDescription("Poster") and hasRole(Role.Button)).requestFocus()
             val steps = listOf(
                 "top" to BottomSheetDetent.Peek,
                 "middle" to BottomSheetDetent.Half,
@@ -110,7 +107,7 @@ class ControlsCFocusTest {
                     ) { BuilderText("#6750A4") }
                 }
             }
-            onNode(hasContentDescription("Poster") and overlayHasRole(Role.Button))
+            onNode(hasContentDescription("Poster") and hasRole(Role.Button))
                 .assert(hasStateDescription("Poster at peek"))
         }
 
@@ -125,9 +122,9 @@ class ControlsCFocusTest {
                     BuilderSelect("Style", listOf("Tonal spot", "Vibrant", "Expressive"), style, { style = it })
                 }
             }
-            val chosen = onNode(hasText("Vibrant") and overlayHasRole(Role.RadioButton))
+            val chosen = onNode(hasText("Vibrant") and hasRole(Role.RadioButton))
             for (alt in listOf(false, true)) {
-                val field = onNode(overlayHasRole(Role.DropdownList))
+                val field = onNode(hasRole(Role.DropdownList))
                 field.requestFocus()
                 field.performKeyInput {
                     if (alt) withKeyDown(Key.AltLeft) { pressKey(Key.DirectionDown) } else pressKey(Key.DirectionDown)
@@ -146,7 +143,7 @@ class ControlsCFocusTest {
             val toasts = showHostOverPage(skin)
             toasts.show("Pin removed", actionLabel = "Undo") {}
             mainClock.advanceTimeBy(2_000)
-            onNode(hasText("Undo") and overlayHasRole(Role.Button)).requestFocus()
+            onNode(hasText("Undo") and hasRole(Role.Button)).requestFocus()
             mainClock.advanceTimeBy(30_000)
             onNodeWithText("Pin removed").assertExists()
             onNodeWithTag("page").requestFocus()
@@ -220,7 +217,7 @@ private fun ComposeUiTest.checkPanelFocus(
     onNodeWithTag("trigger").requestFocus()
     open = true
     waitForIdle()
-    val close = onNode(hasContentDescription("Close") and overlayHasRole(Role.Button))
+    val close = onNode(hasContentDescription("Close") and hasRole(Role.Button))
     close.assertIsFocused()
     // The page keeps its own focused node under the modal layer, so each step names where it starts.
     var from = close

@@ -6,14 +6,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
-import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.anchoredDraggable
-import androidx.compose.foundation.gestures.animateTo
-import androidx.compose.foundation.gestures.snapTo
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -27,11 +23,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,6 +56,8 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
+import com.materialkolor.builder.kit.control.BottomSheetDetent
+import com.materialkolor.builder.kit.control.BottomSheetState
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -74,84 +69,6 @@ import com.materialkolor.builder.kit.skin.headless.overlayFeedback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-
-/** The heights a bottom sheet rests at, smallest first. */
-public enum class BottomSheetDetent {
-    /** Only the top of the sheet shows, enough to see what it holds. */
-    Peek,
-
-    /** The sheet covers half of its host. */
-    Half,
-
-    /** The sheet covers all of its host. */
-    Full,
-}
-
-/**
- * Where a bottom sheet rests and where it is heading.
- *
- * Hoist it to read the detent from outside, for instance to hide something the sheet covers at
- * [BottomSheetDetent.Full], or to move the sheet from a button.
- */
-@Stable
-public class BottomSheetState internal constructor(
-    initialDetent: BottomSheetDetent,
-) {
-    internal val draggable: AnchoredDraggableState<BottomSheetDetent> = AnchoredDraggableState(initialDetent)
-
-    /** How the sheet rises to a higher detent, handed in by the motion set it is drawn in. */
-    internal var raiseSpec: AnimationSpec<Float> = snap()
-
-    /** How the sheet sinks to a lower detent. */
-    internal var lowerSpec: AnimationSpec<Float> = snap()
-
-    /** The detent the sheet last came to rest at. */
-    public val detent: BottomSheetDetent
-        get() = draggable.settledValue
-
-    /** The detent the sheet is on its way to, which is [detent] while it rests. */
-    public val targetDetent: BottomSheetDetent
-        get() = draggable.targetValue
-
-    /** Moves the sheet to [detent] with the skin's motion. */
-    public suspend fun animateTo(detent: BottomSheetDetent) {
-        draggable.animateTo(detent, if (detent > targetDetent) raiseSpec else lowerSpec)
-    }
-
-    /** Lets the sheet coast on [velocity] to the detent the fling carries it to. */
-    internal suspend fun fling(
-        velocity: Float,
-        behavior: FlingBehavior,
-    ) {
-        draggable.anchoredDrag { anchors ->
-            val scope = object : ScrollScope {
-                override fun scrollBy(pixels: Float): Float {
-                    val from = draggable.offset
-                    dragTo((from + pixels).coerceIn(anchors.minPosition(), anchors.maxPosition()))
-                    return draggable.offset - from
-                }
-            }
-            with(behavior) { scope.performFling(velocity) }
-        }
-    }
-
-    /** Moves the sheet to [detent] at once. */
-    public suspend fun snapTo(detent: BottomSheetDetent) {
-        draggable.snapTo(detent)
-    }
-
-    internal companion object {
-        val Saver: Saver<BottomSheetState, String> = Saver(
-            save = { state -> state.detent.name },
-            restore = { name -> BottomSheetState(BottomSheetDetent.valueOf(name)) },
-        )
-    }
-}
-
-/** A bottom sheet state that starts at [initialDetent] and survives recreation. */
-@Composable
-public fun rememberBottomSheetState(initialDetent: BottomSheetDetent = BottomSheetDetent.Peek): BottomSheetState =
-    rememberSaveable(saver = BottomSheetState.Saver) { BottomSheetState(initialDetent) }
 
 /**
  * A sheet docked to the bottom of its host that rests at three detents.

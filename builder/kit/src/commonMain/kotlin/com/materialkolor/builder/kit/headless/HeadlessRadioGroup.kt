@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
@@ -224,16 +223,8 @@ internal fun Modifier.radioGroupOption(
     return focusRequester(focus.requesters[index])
         .focusProperties { canFocus = index == tabStop }
         .onKeyEvent { event ->
-            val forward = if (rtl) -1 else 1
-            val target = when (event.key) {
-                Key.DirectionRight -> index + forward
-                Key.DirectionLeft -> index - forward
-                Key.DirectionDown -> index + 1
-                Key.DirectionUp -> index - 1
-                Key.MoveHome -> 0
-                Key.MoveEnd -> count - 1
-                else -> return@onKeyEvent false
-            }.mod(count)
+            val target = rovingTarget(event.key, index, count, rtl, upDown = true, homeEnd = true)
+                ?: return@onKeyEvent false
             if (event.type == KeyEventType.KeyDown && target != index) {
                 focus.requestedIndex = target
                 onMove(target)

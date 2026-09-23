@@ -20,7 +20,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
@@ -144,6 +144,8 @@ class SkinTransitionTest {
             val harness = showHost()
             val reveal = reveal(harness, to = New)
             mainClock.advanceTimeByFrame()
+            mainClock.advanceTimeByFrame()
+            // Under the v2 test dispatcher the change recomposes the content on the frame after it lands.
             mainClock.advanceTimeByFrame()
             val compositionsAfterChange = harness.compositions
 
@@ -371,8 +373,8 @@ private fun ComposeUiTest.reveal(
     to: Color,
     style: RevealStyle = RevealStyle.Circle(Offset.Zero),
     awaitBeforeReveal: suspend () -> Unit = {},
-): Job =
-    runOnUiThread {
+): Job {
+    val job = runOnUiThread {
         harness.scope.launch {
             harness.transition.reveal(style = style, awaitBeforeReveal = awaitBeforeReveal) {
                 harness.changedWhileDrawing = harness.drawing
@@ -380,6 +382,10 @@ private fun ComposeUiTest.reveal(
             }
         }
     }
+    // The v2 test dispatcher queues the launch, so run it now, up to its first wait on a frame or a delay.
+    mainClock.advanceTimeBy(0)
+    return job
+}
 
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.hostPixels(): PixelMap = onNodeWithTag(HostTag).captureToImage().toPixelMap()

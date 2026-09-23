@@ -21,14 +21,14 @@ import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.FluentListRow
-import com.materialkolor.builder.kit.skin.headless.ActionDisabledAlpha
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
 import com.materialkolor.builder.kit.skin.headless.ListRowStyle
 import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
-import com.materialkolor.builder.kit.skin.headless.actionPress
-import com.materialkolor.builder.kit.skin.headless.actionRing
 import com.materialkolor.builder.kit.skin.headless.actionSurface
-import com.materialkolor.builder.kit.skin.headless.actionTouchTarget
+import com.materialkolor.builder.kit.skin.headless.controlPress
+import com.materialkolor.builder.kit.skin.headless.controlRing
+import com.materialkolor.builder.kit.skin.headless.controlTouchTarget
+import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 import com.materialkolor.builder.kit.skin.material.MaterialListRow
 
 /**
@@ -134,10 +134,10 @@ internal fun HeadlessListRow(
         Modifier
     } else {
         Modifier
-            .actionTouchTarget(LocalLayout.current.primaryTouchTarget)
-            .actionPress(interactionSource)
-            .alpha(if (row.enabled) 1f else ActionDisabledAlpha)
-            .actionRing(interactionSource, style.shape)
+            .controlTouchTarget(LocalLayout.current.primaryTouchTarget)
+            .controlPress(interactionSource)
+            .alpha(enabledAlpha(row.enabled))
+            .controlRing(interactionSource, style.shape)
     }
     Row(
         modifier = modifier

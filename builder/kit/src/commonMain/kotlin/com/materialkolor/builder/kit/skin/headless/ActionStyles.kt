@@ -1,29 +1,19 @@
 package com.materialkolor.builder.kit.skin.headless
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.InteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.constrainHeight
-import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
-import com.composeunstyled.focusRing
 import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.control.Emphasis
-import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
@@ -370,48 +360,6 @@ internal fun actionStyles(
     )
 }
 
-/** How faint a disabled action draws, container and ink together. */
-internal const val ActionDisabledAlpha: Float = 0.38f
-
-/** How thick the keyboard focus ring is in every skin. */
-internal val ActionRingWidth: Dp = 2.dp
-
-/** How far the focus ring stands off the control, so it never sits on the control's own outline. */
-internal val ActionRingOffset: Dp = 2.dp
-
-/**
- * Shrinks the control while it is pressed, by the skin's press scale over the skin's press timing
- * (MO-06). Reduced motion sets the scale to one, so nothing moves.
- */
-@Composable
-internal fun Modifier.actionPress(interactionSource: InteractionSource): Modifier {
-    val motion = LocalBuilderMotion.current
-    val pressed by interactionSource.collectIsPressedAsState()
-    val scale = animateFloatAsState(
-        targetValue = if (pressed) motion.pressScale else 1f,
-        animationSpec = motion.press(),
-        label = "press",
-    )
-    return graphicsLayer {
-        scaleX = scale.value
-        scaleY = scale.value
-    }
-}
-
-/** Draws the skin's focus ring around [shape] while the control has keyboard focus (AR-01). */
-@Composable
-internal fun Modifier.actionRing(
-    interactionSource: InteractionSource,
-    shape: Shape,
-): Modifier =
-    focusRing(
-        interactionSource = interactionSource,
-        width = ActionRingWidth,
-        color = LocalBuilderTokens.current.focus,
-        shape = shape,
-        offset = ActionRingOffset,
-    )
-
 /** Fills and outlines the control in [colors]. A transparent fill or outline draws nothing. */
 internal fun Modifier.actionSurface(
     colors: ActionColors,
@@ -427,20 +375,3 @@ internal fun Modifier.actionSurface(
         filled
     }
 }
-
-/**
- * Grows the space the control takes to at least [size] on each side and centres the control in it.
- *
- * Put it after the modifier that takes the input, so a press anywhere in the grown box counts, and
- * before the modifiers that draw, so the control keeps its own size on screen (AR-04).
- */
-internal fun Modifier.actionTouchTarget(size: Dp): Modifier =
-    layout { measurable, constraints ->
-        val placeable = measurable.measure(constraints)
-        val least = size.roundToPx()
-        val width = constraints.constrainWidth(maxOf(placeable.width, least))
-        val height = constraints.constrainHeight(maxOf(placeable.height, least))
-        layout(width, height) {
-            placeable.place((width - placeable.width) / 2, (height - placeable.height) / 2)
-        }
-    }

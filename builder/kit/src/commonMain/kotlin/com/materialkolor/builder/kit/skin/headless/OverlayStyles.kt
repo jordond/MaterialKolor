@@ -3,7 +3,6 @@ package com.materialkolor.builder.kit.skin.headless
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -18,7 +17,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -29,18 +27,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
-import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
-import com.materialkolor.builder.kit.skin.material.materialOverlayStyle
 import com.materialkolor.builder.kit.token.BuilderTokens
-import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
  * How one skin dresses the headless overlays.
@@ -97,25 +90,11 @@ internal class OverlayStyle(
     val thumb: Color,
 )
 
-/** The style set the headless overlays wear in [library]. */
-@Composable
-internal fun overlayStyle(library: Library): OverlayStyle =
-    when (library) {
-        Library.Material3 -> materialOverlayStyle()
-        Library.Unstyled -> unstyledOverlayStyle(LocalBuilderTokens.current)
-        Library.Fluent -> fluentOverlayStyle(LocalBuilderTokens.current) // fluent-placeholder
-        Library.Custom -> customOverlayStyle(LocalBuilderTokens.current)
-    }
-
 /** How much of the canvas shows through the veil behind a modal overlay, on the skins that veil with it. */
 internal const val ScrimAlpha: Float = 0.6f
 
-/** How much a disabled row fades. */
-internal const val DisabledAlpha: Float = 0.38f
-
-/** The width of a hairline border and of the focus ring. */
+/** The width of a hairline border. */
 internal val Hairline: Dp = 1.dp
-internal val FocusRingWidth: Dp = 2.dp
 
 /**
  * The sizes every skin gives its overlays alike.
@@ -313,11 +292,8 @@ internal fun Modifier.overlayFeedback(
     highlight: Color = style.highlight,
     focus: Color = style.focus,
 ): Modifier {
-    val motion = LocalBuilderMotion.current
-    val pressed by interactionSource.collectIsPressedAsState()
     val hovered by interactionSource.collectIsHoveredAsState()
     val focused by interactionSource.collectIsFocusedAsState()
-    val scale by animateFloatAsState(if (pressed && enabled) motion.pressScale else 1f, motion.press())
     val ground = when {
         !enabled -> Color.Transparent
         selected -> style.selected
@@ -325,10 +301,8 @@ internal fun Modifier.overlayFeedback(
         else -> Color.Transparent
     }
     return this
-        .graphicsLayer {
-            scaleX = scale
-            scaleY = scale
-        }.background(ground, shape)
+        .controlPress(interactionSource, enabled)
+        .background(ground, shape)
         .then(if (focused) Modifier.border(FocusRingWidth, focus, shape) else Modifier)
         .then(if (enabled) Modifier else Modifier.alpha(DisabledAlpha))
 }

@@ -27,7 +27,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -44,7 +43,7 @@ import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
-import com.materialkolor.builder.kit.skin.headless.inputFocusRing
+import com.materialkolor.builder.kit.skin.headless.controlRing
 
 /**
  * How [HeadlessTabs] draws its row of tabs.
@@ -127,7 +126,7 @@ internal fun <T> HeadlessTabs(
                                 .focusRequester(requesters[index])
                                 .onFocusChanged { state -> if (state.isFocused) focused.intValue = index }
                                 .heightIn(min = target)
-                                .inputFocusRing(interactions, style.focus, style.tabShape)
+                                .controlRing(interactions, style.tabShape, style.focus)
                                 .tabFill(isSelected, style)
                                 .foldState(label(tab), ControlState.Selected(isSelected)),
                             interactionSource = interactions,
@@ -154,15 +153,9 @@ private fun Modifier.tabArrows(
     isRtl: Boolean,
 ): Modifier =
     onPreviewKeyEvent { event ->
-        val forward = if (isRtl) -1 else 1
-        val step = when (event.key) {
-            Key.DirectionRight -> forward
-            Key.DirectionLeft -> -forward
-            else -> return@onPreviewKeyEvent false
-        }
-        if (event.type == KeyEventType.KeyDown && count > 0) {
-            requesters[(focused.intValue + step).mod(count)].requestFocus()
-        }
+        val target = rovingTarget(event.key, focused.intValue, count, isRtl, upDown = false, homeEnd = false)
+            ?: return@onPreviewKeyEvent false
+        if (event.type == KeyEventType.KeyDown) requesters[target].requestFocus()
         true
     }
 

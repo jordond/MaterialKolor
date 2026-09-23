@@ -70,8 +70,6 @@ internal val ActionPreviewModes: List<String> = listOf("Light", "Split", "Dark")
 
 internal val ActionPaletteStyles: List<String> = listOf("Tonal spot", "Vibrant", "Expressive", "Fidelity", "Content")
 
-internal fun actionHasRole(role: Role): SemanticsMatcher = SemanticsMatcher.expectValue(SemanticsProperties.Role, role)
-
 private val HasNoRole = SemanticsMatcher.keyNotDefined(SemanticsProperties.Role)
 
 @OptIn(ExperimentalTestApi::class)
@@ -90,10 +88,10 @@ class ControlsASemanticsTest {
             ) {
                 presses = 0
                 for (emphasis in Emphasis.entries) {
-                    onNodeWithText(emphasis.name).assert(actionHasRole(Role.Button)).assertIsEnabled().performClick()
+                    onNodeWithText(emphasis.name).assert(hasRole(Role.Button)).assertIsEnabled().performClick()
                 }
                 presses shouldBe Emphasis.entries.size
-                onNodeWithText("Delete").assert(actionHasRole(Role.Button)).assertIsNotEnabled()
+                onNodeWithText("Delete").assert(hasRole(Role.Button)).assertIsNotEnabled()
             }
         }
 
@@ -106,8 +104,8 @@ class ControlsASemanticsTest {
                     BuilderIconButton(onClick = {}, icon = IconId.Redo, contentDescription = "Redo", enabled = false)
                 },
             ) {
-                onNodeWithContentDescription("Undo").assert(actionHasRole(Role.Button)).assertIsEnabled()
-                onNodeWithContentDescription("Redo").assert(actionHasRole(Role.Button)).assertIsNotEnabled()
+                onNodeWithContentDescription("Undo").assert(hasRole(Role.Button)).assertIsEnabled()
+                onNodeWithContentDescription("Redo").assert(hasRole(Role.Button)).assertIsNotEnabled()
             }
         }
 
@@ -123,10 +121,10 @@ class ControlsASemanticsTest {
             ) {
                 inspect = false
                 waitForIdle()
-                onNodeWithText("Inspect").assert(actionHasRole(Role.Checkbox)).assertIsOff().performClick()
+                onNodeWithText("Inspect").assert(hasRole(Role.Checkbox)).assertIsOff().performClick()
                 inspect shouldBe true
                 onNodeWithText("Inspect").assertIsOn()
-                onNodeWithText("Vision").assert(actionHasRole(Role.Checkbox)).assertIsOn().assertIsNotEnabled()
+                onNodeWithText("Vision").assert(hasRole(Role.Checkbox)).assertIsOn().assertIsNotEnabled()
             }
         }
 
@@ -149,12 +147,12 @@ class ControlsASemanticsTest {
                 mode = "Light"
                 waitForIdle()
                 onNodeWithContentDescription("Preview mode").assertExists()
-                onNodeWithText("Light").assert(actionHasRole(Role.RadioButton)).assertIsSelected()
-                onNodeWithText("Split").assert(actionHasRole(Role.RadioButton)).assertIsNotSelected().performClick()
+                onNodeWithText("Light").assert(hasRole(Role.RadioButton)).assertIsSelected()
+                onNodeWithText("Split").assert(hasRole(Role.RadioButton)).assertIsNotSelected().performClick()
                 mode shouldBe "Split"
                 onNodeWithText("Split").assertIsSelected()
                 onNodeWithText("Light").assertIsNotSelected()
-                onNodeWithText("HCT").assert(actionHasRole(Role.RadioButton)).assertIsNotSelected().assertIsNotEnabled()
+                onNodeWithText("HCT").assert(hasRole(Role.RadioButton)).assertIsNotSelected().assertIsNotEnabled()
             }
         }
 
@@ -203,14 +201,14 @@ class ControlsASemanticsTest {
                 pinned = false
                 waitForIdle()
                 onNodeWithText("Pinned")
-                    .assert(actionHasRole(Role.Checkbox))
+                    .assert(hasRole(Role.Checkbox))
                     .assertIsNotSelected()
                     .assertIsOff()
                     .performClick()
                 pinned shouldBe true
                 onNodeWithText("Pinned").assertIsSelected().assertIsOn()
                 onNodeWithText("Locked")
-                    .assert(actionHasRole(Role.Checkbox))
+                    .assert(hasRole(Role.Checkbox))
                     .assertIsSelected()
                     .assertIsOn()
                     .assertIsNotEnabled()
@@ -236,13 +234,13 @@ class ControlsASemanticsTest {
                 style = "Tonal spot"
                 waitForIdle()
                 onNodeWithContentDescription("Style").assertExists()
-                onNodeWithText("Tonal spot").assert(actionHasRole(Role.RadioButton)).assertIsSelected()
-                onNodeWithText("Vibrant").assert(actionHasRole(Role.RadioButton)).assertIsNotSelected().performClick()
+                onNodeWithText("Tonal spot").assert(hasRole(Role.RadioButton)).assertIsSelected()
+                onNodeWithText("Vibrant").assert(hasRole(Role.RadioButton)).assertIsNotSelected().performClick()
                 style shouldBe "Vibrant"
                 onNodeWithText("Vibrant").assertIsSelected()
                 onNodeWithText("Tonal spot").assertIsNotSelected()
                 onNodeWithText("Medium")
-                    .assert(actionHasRole(Role.RadioButton))
+                    .assert(hasRole(Role.RadioButton))
                     .assertIsNotSelected()
                     .assertIsNotEnabled()
             }
@@ -288,9 +286,9 @@ class ControlsASemanticsTest {
                 },
             ) {
                 presses = 0
-                onNodeWithTag("pressable").assert(actionHasRole(Role.Button)).assert(hasText("Swift")).performClick()
+                onNodeWithTag("pressable").assert(hasRole(Role.Button)).assert(hasText("Swift")).performClick()
                 presses shouldBe 1
-                onNodeWithTag("disabled").assert(actionHasRole(Role.Button)).assertIsNotEnabled()
+                onNodeWithTag("disabled").assert(hasRole(Role.Button)).assertIsNotEnabled()
                 onNodeWithTag("plain").assert(HasNoRole)
                 onNodeWithText("Kotlin").assertExists()
             }
@@ -360,13 +358,13 @@ class ControlsASemanticsTest {
             ) {
                 opened = null
                 onNodeWithText("Ocean")
-                    .assert(actionHasRole(Role.Button))
+                    .assert(hasRole(Role.Button))
                     .assert(hasText("Edited today"))
                     .assertIsSelected()
-                onNodeWithText("Forest").assert(actionHasRole(Role.Button)).assertIsNotSelected().performClick()
+                onNodeWithText("Forest").assert(hasRole(Role.Button)).assertIsNotSelected().performClick()
                 opened shouldBe "Forest"
                 onNodeWithText("Archived")
-                    .assert(actionHasRole(Role.Button))
+                    .assert(hasRole(Role.Button))
                     .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.Selected))
                     .assertIsNotEnabled()
                 onNodeWithTag("info").assert(HasNoRole).assert(hasText("Nothing to press"))

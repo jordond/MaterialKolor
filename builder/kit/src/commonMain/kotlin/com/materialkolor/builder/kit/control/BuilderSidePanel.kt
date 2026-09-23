@@ -13,7 +13,6 @@ import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.PanelEdge
-import com.materialkolor.builder.kit.skin.headless.overlayStyle
 import org.jetbrains.compose.resources.stringResource
 
 /**
