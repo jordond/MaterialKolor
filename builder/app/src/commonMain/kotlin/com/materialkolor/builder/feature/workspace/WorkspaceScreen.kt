@@ -17,6 +17,7 @@ import com.materialkolor.builder.feature.image.ImageHost
 import com.materialkolor.builder.feature.picker.PickerHost
 import com.materialkolor.builder.feature.poster.PosterPanel
 import com.materialkolor.builder.feature.projects.ProjectsHost
+import com.materialkolor.builder.feature.projects.ShareHost
 import com.materialkolor.builder.feature.topbar.TopBarContent
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.workspace_copied
@@ -49,15 +50,22 @@ internal fun WorkspaceScreen(
     val state by model.collectAsState()
     val scope = rememberCoroutineScope()
     val toasts = rememberBuilderToastHostState()
+
+    // Plays the transition's reveal out of the origin, or a crossfade without one, around the change.
+    fun reveal(
+        origin: Offset?,
+        change: () -> Unit,
+    ) {
+        scope.launch { transition.reveal(revealFrom(origin), change = change) }
+    }
+
     val dispatcher = rememberDispatcher<WorkspaceAction> { action ->
         when (action) {
             is WorkspaceAction.Edit -> {
                 model.edit(action.change, action.phase)
             }
             is WorkspaceAction.EditWithReveal -> {
-                scope.launch {
-                    transition.reveal(revealFrom(action.origin)) { model.edit(action.change, EditPhase.Discrete) }
-                }
+                reveal(action.origin) { model.edit(action.change, EditPhase.Discrete) }
             }
             WorkspaceAction.Undo -> {
                 model.undo()
@@ -65,9 +73,9 @@ internal fun WorkspaceScreen(
             WorkspaceAction.Redo -> {
                 model.redo()
             }
-            // B-303 draws the shuffle and sends it here.
+            // A shuffle crossfades wherever it was pressed (MO-02).
             is WorkspaceAction.Shuffle -> {
-                Unit
+                model.drawShuffle()?.let { shuffle -> reveal(origin = null) { model.applyShuffle(shuffle) } }
             }
             is WorkspaceAction.SetLock -> {
                 model.setLock(action.lock, action.on)
@@ -83,9 +91,7 @@ internal fun WorkspaceScreen(
                 model.setPreviewTab(action.tab)
             }
             is WorkspaceAction.SetPreviewMode -> {
-                scope.launch {
-                    transition.reveal(revealFrom(action.origin)) { model.setPreviewMode(action.mode) }
-                }
+                reveal(action.origin) { model.setPreviewMode(action.mode) }
             }
             is WorkspaceAction.SetSplitFraction -> {
                 model.setSplitFraction(action.fraction)
@@ -175,6 +181,7 @@ internal fun WorkspaceScreen(
         overlays = {
             ExportHost(state, dispatcher)
             ProjectsHost(state, dispatcher)
+            ShareHost(state, dispatcher)
             CommandHost(state, dispatcher)
             PickerHost(state, dispatcher)
             ImageHost(state, dispatcher)

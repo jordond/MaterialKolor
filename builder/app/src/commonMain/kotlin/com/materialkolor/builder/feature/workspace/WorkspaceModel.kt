@@ -9,6 +9,7 @@ import com.materialkolor.builder.core.platform.Clipboard
 import com.materialkolor.builder.core.platform.Router
 import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.core.session.ProjectSession
+import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.di.AppScope
 import com.materialkolor.builder.domain.capability.Capabilities
 import com.materialkolor.builder.domain.capability.EffectiveSpec
@@ -25,6 +26,10 @@ import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.domain.persist.ProjectViewState
+import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.engine.shuffle.Shuffle
+import com.materialkolor.builder.engine.shuffle.ShuffleResult
+import com.materialkolor.builder.engine.shuffle.shuffleLocks
 import com.materialkolor.builder.feature.canvas.VisionSimulation
 import com.materialkolor.builder.feature.picker.PickerTarget
 import dev.stateholder.extensions.viewmodel.StateViewModel
@@ -33,6 +38,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 /**
  * The workspace's view of the open project, its history, how the preview is set up, the browser's
@@ -54,6 +60,7 @@ internal class WorkspaceModel(
     private val preferences: PreferencesRepository,
     private val clipboard: Clipboard,
     private val router: Router,
+    private val resolver: ThemeResolver,
 ) : StateViewModel<WorkspaceModel.State>(
         State(
             document = session.document.value,
@@ -61,6 +68,7 @@ internal class WorkspaceModel(
             history = session.history.value,
             view = session.viewState.value,
             preferences = preferences.preferences.value,
+            saveStatus = session.saveStatus.value,
         ),
     ) {
     init {
@@ -69,6 +77,8 @@ internal class WorkspaceModel(
         session.viewState.mergeState { state, view -> state.copy(view = view) }
         preferences.preferences.mergeState { state, prefs -> state.copy(preferences = prefs) }
         router.overlayPops.mergeState { state, _ -> state.copy(panel = null, pickerTarget = null) }
+        session.projectName.mergeState { state, name -> state.copy(projectName = name) }
+        session.saveStatus.mergeState { state, status -> state.copy(saveStatus = status) }
     }
 
     /** Make [change] to the document. */
@@ -90,6 +100,28 @@ internal class WorkspaceModel(
     fun redo() {
         session.redo()
         syncSession()
+    }
+
+    /**
+     * Draw the next shuffle of the document, leaving alone what the locks in the preferences hold.
+     * Null when the locks leave nothing to move.
+     *
+     * It resolves candidates on the shared resolver, so call it on the UI thread.
+     */
+    fun drawShuffle(random: Random = Random.Default): ShuffleResult.Shuffled? {
+        val locks = preferences.preferences.value.shuffleLocks()
+        return when (val result = Shuffle.next(random, session.document.value, locks, resolver)) {
+            is ShuffleResult.Shuffled -> result
+            ShuffleResult.NothingToShuffle -> null
+        }
+    }
+
+    /**
+     * Land [shuffle] on the document as it is now. It is one undo entry that never folds into the
+     * shuffle before it.
+     */
+    fun applyShuffle(shuffle: ShuffleResult.Shuffled) {
+        edit(DocumentChange.Replace(shuffle.applyTo(session.document.value)), EditPhase.Discrete)
     }
 
     fun setPreviewTab(tab: PreviewTab) {
@@ -220,6 +252,8 @@ internal class WorkspaceModel(
      * @property[vision] The color vision simulated over the canvas. It resets on reload.
      * @property[inspect] Whether the inspect overlay is on.
      * @property[fullscreen] Whether the poster and the top bar are hidden.
+     * @property[projectName] The open project's name, empty until the session has opened one.
+     * @property[saveStatus] Whether the open project's latest changes are saved.
      */
     @Immutable
     data class State(
@@ -233,6 +267,8 @@ internal class WorkspaceModel(
         val vision: VisionSimulation = VisionSimulation.None,
         val inspect: Boolean = false,
         val fullscreen: Boolean = false,
+        val projectName: String = "",
+        val saveStatus: SaveStatus = SaveStatus.Idle,
     ) {
         /** What [document] exports to. */
         val target: ExportTarget

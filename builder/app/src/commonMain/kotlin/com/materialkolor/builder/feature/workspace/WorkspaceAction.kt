@@ -156,6 +156,7 @@ internal enum class Panel {
     CheatSheet,
     Picker,
     Explainer,
+    Share,
 }
 
 /**

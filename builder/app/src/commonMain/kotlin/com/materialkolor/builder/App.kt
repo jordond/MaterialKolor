@@ -19,17 +19,19 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.PlatformServices
-import com.materialkolor.builder.core.session.ProjectSession
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.capability.forTarget
 import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.feature.workspace.AppModel
 import com.materialkolor.builder.feature.workspace.WorkspaceScreen
+import com.materialkolor.builder.feature.workspace.skinOf
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
+import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.transition.SkinTransitionHost
 import com.materialkolor.builder.kit.transition.rememberSkinTransition
@@ -60,22 +62,28 @@ internal val LocalThemeResult: ProvidableCompositionLocal<ThemeResult> = composi
 }
 
 /**
- * The one theme result per frame, derived from the session's document as its own target sees it
+ * The one theme result per frame, derived from the collected [document] as its own target sees it
  * (D35). A setting the target turns off never reaches the chrome or the preview.
  */
 @Composable
 internal fun rememberThemeResult(
-    session: ProjectSession,
+    document: State<ThemeDocument>,
     resolver: ThemeResolver,
-): State<ThemeResult> {
-    val document = session.document.collectAsState()
-    return remember(session, resolver) {
+): State<ThemeResult> =
+    remember(document, resolver) {
         derivedStateOf {
             val stored = document.value
             resolver.resolve(stored.forTarget(ExportTarget.of(stored.library, stored.expressive)))
         }
     }
-}
+
+/**
+ * The skin of the collected [document]. It reads the same state as [rememberThemeResult], so a
+ * library switch or its undo never draws a frame of new colors in the old skin.
+ */
+@Composable
+internal fun rememberSkin(document: State<ThemeDocument>): State<Skin> =
+    remember(document) { derivedStateOf { skinOf(document.value) } }
 
 /**
  * Dresses the workspace in the skin and colors of the open project.
@@ -85,12 +93,14 @@ internal fun rememberThemeResult(
  * every scroll position survive the switch that way (F-03).
  */
 @Composable
-private fun BuilderRoot(
+internal fun BuilderRoot(
     graph: AppGraph,
     model: AppModel = metroViewModel(),
 ) {
     val state by model.collectAsState()
-    val result by rememberThemeResult(graph.session, graph.themeResolver)
+    val document = graph.session.document.collectAsState()
+    val result by rememberThemeResult(document, graph.themeResolver)
+    val skin by rememberSkin(document)
     val environment = graph.environment
     val workspace = remember {
         movableContentOf { coarsePointer: Boolean ->
@@ -111,7 +121,7 @@ private fun BuilderRoot(
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { model.flush() }
 
     CompositionLocalProvider(LocalThemeResult provides result) {
-        BuilderTheme(skin = state.skin, result = result, isDark = state.isDark, reducedMotion = state.reducedMotion) {
+        BuilderTheme(skin = skin, result = result, isDark = state.isDark, reducedMotion = state.reducedMotion) {
             ThemeColorEffect(environment)
             workspace(state.coarsePointer)
         }

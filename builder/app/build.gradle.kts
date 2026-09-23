@@ -130,8 +130,14 @@ tasks.named<Test>("jvmTest") {
 }
 
 // b-216
-// stateholder 3.1.0 ships Java 21 bytecode, so the JVM tests run on a 21 launcher while the
-// module still compiles for 17. The desktop run task already uses the JDK Gradle runs on.
+// stateholder 3.1.0 ships Java 21 bytecode, so the JVM tests and the desktop `run` task start on a
+// 21 launcher while the module still compiles for 17.
+val java21Launcher = javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(21)) }
 tasks.withType<Test>().configureEach {
-    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(21)) })
+    javaLauncher.set(java21Launcher)
+}
+// b-216b
+// Compose takes the run task's JDK as a plain path, so the launcher is looked up while configuring.
+composeExtension.extensions.getByType<DesktopExtension>().application {
+    javaHome = java21Launcher.get().metadata.installationPath.asFile.absolutePath
 }
