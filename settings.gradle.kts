@@ -55,6 +55,8 @@ include(
     ":builder:engine",
     ":builder:kit",
     ":builder:preview",
+    ":builder:app",
+    ":builder:web",
 )
 
 include(":mcu-source-transformer")
