@@ -24,5 +24,18 @@ kotlin {
             implementation(project(":material-kolor-material3"))
             implementation(libs.compose.material3)
         }
+
+        // b-117
+        // The export parity gate checks the engine against every library adapter an export calls.
+        // The expressive theme is composed to read its own defaults, hence the UI test runtime.
+        // Unstyled and Fluent only reach compile time in their modules, so the tests add them.
+        jvmTest.dependencies {
+            implementation(project(":material-kolor-unstyled"))
+            implementation(libs.composeUnstyled.theming)
+            implementation(project(":material-kolor-fluent"))
+            implementation(libs.fluent)
+            implementation(libs.compose.ui.test)
+            implementation(project.extensions.getByType<org.jetbrains.compose.ComposeExtension>().dependencies.desktop.currentOs)
+        }
     }
 }
