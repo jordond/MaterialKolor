@@ -1,0 +1,228 @@
+package com.materialkolor.builder.core.data
+
+import com.materialkolor.builder.core.platform.InMemoryStoreFactory
+import com.materialkolor.builder.core.platform.StoreError
+import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.edit.ChangeKind
+import com.materialkolor.builder.domain.edit.ChangeLabel
+import com.materialkolor.builder.domain.history.HistoryEntry
+import com.materialkolor.builder.domain.model.DEFAULT_SEED
+import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.HistoryRecord
+import com.materialkolor.builder.domain.persist.PreviewTab
+import com.materialkolor.builder.domain.persist.ProjectMeta
+import com.materialkolor.builder.domain.persist.ProjectRecord
+import com.materialkolor.builder.domain.persist.ProjectViewState
+import com.materialkolor.builder.domain.persist.StorageKeys
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class ProjectRepositoryTest {
+    private var time = START
+    private var ids = 0
+    private val stores = InMemoryStoreFactory(now = { time })
+    private val repository = ProjectRepository(stores, tabId = TAB, now = { time }, newId = { "p${++ids}" })
+
+    @Test
+    fun create_newProject_savesItAndListsIt() =
+        runTest {
+            val record = created("Sunset")
+
+            record.revision shouldBe 1
+            record.writerTab shouldBe TAB
+            repository.load(record.id) shouldBe record
+            repository.index.first().projects shouldBe listOf(
+                ProjectMeta(record.id, "Sunset", createdAt = START, updatedAt = START, previewColors = PREVIEW),
+            )
+        }
+
+    @Test
+    fun save_later_bumpsTheRevisionAndIndexUpdatedAt() =
+        runTest {
+            val record = created()
+            time += MINUTE
+
+            repository.save(record.copy(document = DOCUMENT.copy(amoled = true)), OTHER_PREVIEW) shouldBe null
+
+            val saved = repository.load(record.id).shouldNotBeNull()
+            saved.revision shouldBe 2
+            saved.document.amoled shouldBe true
+            val meta = repository.index
+                .first()
+                .projects
+                .single()
+            meta.createdAt shouldBe START
+            meta.updatedAt shouldBe START + MINUTE
+            meta.previewColors shouldBe OTHER_PREVIEW
+        }
+
+    @Test
+    fun rename_listedProject_renamesTheRecordAndItsListing() =
+        runTest {
+            val record = created("Before")
+
+            repository.rename(record.id, "After") shouldBe null
+
+            repository.load(record.id)?.name shouldBe "After"
+            repository.index
+                .first()
+                .projects
+                .single()
+                .name shouldBe "After"
+        }
+
+    @Test
+    fun duplicate_listedProject_copiesItAndItsViewUnderANewId() =
+        runTest {
+            val record = created("Original")
+            repository.saveViewState(record.id, VIEW)
+
+            val copy = repository.duplicate(record.id, "Copy").shouldBeInstanceOf<Creation.Created>().record
+
+            copy.id shouldBe "p2"
+            copy.name shouldBe "Copy"
+            copy.document shouldBe record.document
+            repository.viewState(copy.id) shouldBe VIEW
+            repository.index
+                .first()
+                .projects
+                .map { meta -> meta.id } shouldBe listOf(record.id, copy.id)
+        }
+
+    @Test
+    fun delete_thenRestore_bringsTheProjectBackWithItsHistory() =
+        runTest {
+            val record = created()
+            repository.saveHistory(record.id, HISTORY)
+            repository.saveViewState(record.id, VIEW)
+
+            val deleted = repository.delete(record.id).shouldNotBeNull()
+
+            repository.load(record.id) shouldBe null
+            repository.index.first().projects shouldBe emptyList()
+            stores.keys shouldBe setOf(StorageKeys.INDEX)
+
+            repository.restore(deleted) shouldBe null
+
+            repository.load(record.id) shouldBe record
+            repository.loadHistory(record.id) shouldBe HISTORY
+            repository.viewState(record.id) shouldBe VIEW
+            repository.index.first().projects shouldBe listOf(deleted.meta)
+        }
+
+    @Test
+    fun restore_projectFromTheMiddle_putsItBackWhereItWas() =
+        runTest {
+            val listed = List(3) { created().id }
+
+            repository.restore(repository.delete(listed[1]).shouldNotBeNull())
+
+            repository.index
+                .first()
+                .projects
+                .map { meta -> meta.id } shouldBe listed
+        }
+
+    @Test
+    fun delete_unreadableRecord_stillRemovesTheListing() =
+        runTest {
+            val record = created()
+            stores.seed(StorageKeys.project(record.id), "{ broken")
+
+            repository.load(record.id) shouldBe null
+            repository.delete(record.id).shouldNotBeNull().record shouldBe null
+            repository.index.first().projects shouldBe emptyList()
+        }
+
+    @Test
+    fun saveHistory_elevenProjects_keepsOnlyTheTenMostRecentlyUpdated() =
+        runTest {
+            val records = createdOverTime(count = 11)
+
+            records.forEach { record -> repository.saveHistory(record.id, HISTORY) }
+
+            records.count { record -> stores.textAt(StorageKeys.history(record.id)) != null } shouldBe HISTORIES_KEPT
+            repository.loadHistory(records.first().id) shouldBe HistoryRecord()
+        }
+
+    @Test
+    fun save_quotaExceededOnce_prunesTheOldestHistoryAndRetries() =
+        runTest {
+            val records = createdOverTime(count = 11)
+            records.forEach { record ->
+                stores.seed(StorageKeys.history(record.id), HistoryRecord.Codec.encode(HISTORY))
+            }
+            stores.failNextUpdates(1, StoreError.QuotaExceeded)
+
+            repository.save(records.last().copy(name = "Renamed"), PREVIEW) shouldBe null
+
+            repository.load(records.last().id)?.name shouldBe "Renamed"
+            repository.loadHistory(records.first().id) shouldBe HistoryRecord()
+            records.drop(1).forEach { record -> repository.loadHistory(record.id) shouldBe HISTORY }
+        }
+
+    @Test
+    fun save_quotaExceededAfterPruning_returnsQuotaExceeded() =
+        runTest {
+            val record = created()
+            stores.failNextUpdates(2, StoreError.QuotaExceeded)
+
+            repository.save(record.copy(name = "Renamed"), PREVIEW) shouldBe StoreError.QuotaExceeded
+
+            repository.load(record.id) shouldBe record
+        }
+
+    @Test
+    fun changes_anotherTabSavesTheProject_emitsTheirRecord() =
+        runTest {
+            val record = created()
+            val seen = mutableListOf<ProjectRecord>()
+            backgroundScope.launch { repository.changes(record.id).toList(seen) }
+            runCurrent()
+            val theirs = record.copy(name = "Theirs", revision = 2, writerTab = "other")
+
+            stores.writeFromAnotherTab(StorageKeys.project(record.id), ProjectRecord.Codec.encode(theirs))
+            stores.writeFromAnotherTab(StorageKeys.project("elsewhere"), ProjectRecord.Codec.encode(theirs))
+            runCurrent()
+
+            seen shouldBe listOf(theirs)
+        }
+
+    private suspend fun created(name: String = "Theme"): ProjectRecord =
+        repository.create(name, DOCUMENT, PREVIEW).shouldBeInstanceOf<Creation.Created>().record
+
+    private suspend fun createdOverTime(count: Int): List<ProjectRecord> =
+        List(count) { index -> "Theme $index" }.map { name ->
+            time += MINUTE
+            created(name)
+        }
+}
+
+private const val TAB = "this-tab"
+
+private const val START = 1_700_000_000_000
+
+private const val MINUTE = 60_000L
+
+private val DOCUMENT = ThemeDocument(seed = DEFAULT_SEED)
+
+private val PREVIEW = List(ProjectMeta.PREVIEW_COLORS) { index -> Argb(0x202020 * (index + 1)) }
+
+private val OTHER_PREVIEW = List(ProjectMeta.PREVIEW_COLORS) { index -> Argb(0x101010 * (index + 1)) }
+
+private val HISTORY = HistoryRecord(
+    listOf(
+        HistoryEntry(before = DOCUMENT, after = DOCUMENT.copy(amoled = true), label = ChangeLabel(ChangeKind.Seed)),
+    ),
+)
+
+private val VIEW = ProjectViewState(tab = PreviewTab.Palettes, splitFraction = 0.3f)

@@ -14,7 +14,7 @@ public sealed interface DecodeOutcome<out T> {
     ) : DecodeOutcome<T>
 
     /**
-     * The record could not be read. The repository moves it aside and tells the user, it is never
+     * The record could not be read. The store moves it aside and tells the user, it is never
      * deleted.
      *
      * @property[reason] Why the record could not be read.
