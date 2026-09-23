@@ -18,23 +18,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.kit.headless.BottomSheetDetent
-import com.materialkolor.builder.kit.headless.rememberBottomSheetState
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
-import com.materialkolor.builder.kit.skin.headless.overlayStyle
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.github.takahirom.roborazzi.captureRoboImage
@@ -97,10 +92,7 @@ private fun ComposeUiTest.captureOverlays(
             onNodeWithTag(SceneTag).captureRoboImage("$ScreenshotDir/$name-$mode-${step.name.lowercase()}.png")
         }
         val (style, tokens) = assertNotNull(seen)
-        for (pair in style.inkPairs(tokens)) {
-            val ratio = contrast(pair.ink, pair.ground)
-            if (ratio < pair.minimum) unreadable += "$mode ${pair.name} ${"%.2f".format(ratio)} < ${pair.minimum}"
-        }
+        unreadable += style.inkPairs(tokens).shortfalls(mode)
     }
     unreadable.shouldBeEmpty()
 }
@@ -162,39 +154,21 @@ private fun OverlayScene(
     }
 }
 
-/** One ink on one ground, and the least contrast the pair may have. */
-private class OverlayInkPair(
-    val name: String,
-    val ink: Color,
-    val ground: Color,
-    val minimum: Double,
-)
-
 /**
  * Every ink the overlays draw on every ground they draw it on. Text keeps to WCAG AA at 4.5, the
  * focus ring and the scrollbar thumb are marks and need 3.
  */
-private fun OverlayStyle.inkPairs(tokens: BuilderTokens): List<OverlayInkPair> =
+private fun OverlayStyle.inkPairs(tokens: BuilderTokens): List<InkPair> =
     listOf(
-        OverlayInkPair("content on surface", content, surface, 4.5),
-        OverlayInkPair("muted on surface", muted, surface, 4.5),
-        OverlayInkPair("danger on surface", tokens.danger, surface, 4.5),
-        OverlayInkPair("content on highlight", content, highlight.compositeOver(surface), 4.5),
-        OverlayInkPair("content on selected", content, selected.compositeOver(surface), 4.5),
-        OverlayInkPair("muted on field", muted, field, 4.5),
-        OverlayInkPair("content on field", content, field, 4.5),
-        OverlayInkPair("tooltip ink", tooltipContent, tooltip, 4.5),
-        OverlayInkPair("toast ink", toastContent, toast, 4.5),
-        OverlayInkPair("focus on surface", focus, surface, 3.0),
-        OverlayInkPair("thumb on surface", thumb, surface, 3.0),
+        InkPair("content on surface", content, surface, 4.5),
+        InkPair("muted on surface", muted, surface, 4.5),
+        InkPair("danger on surface", tokens.danger, surface, 4.5),
+        InkPair("content on highlight", content, highlight.compositeOver(surface), 4.5),
+        InkPair("content on selected", content, selected.compositeOver(surface), 4.5),
+        InkPair("muted on field", muted, field, 4.5),
+        InkPair("content on field", content, field, 4.5),
+        InkPair("tooltip ink", tooltipContent, tooltip, 4.5),
+        InkPair("toast ink", toastContent, toast, 4.5),
+        InkPair("focus on surface", focus, surface, 3.0),
+        InkPair("thumb on surface", thumb, surface, 3.0),
     )
-
-/** The WCAG contrast ratio of two opaque colours. */
-private fun contrast(
-    a: Color,
-    b: Color,
-): Double {
-    val lighter = maxOf(a.luminance(), b.luminance())
-    val darker = minOf(a.luminance(), b.luminance())
-    return (lighter + 0.05) / (darker + 0.05)
-}

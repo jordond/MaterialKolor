@@ -47,8 +47,8 @@ import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.BuilderMotion
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
-import com.materialkolor.builder.kit.skin.headless.inputAlpha
-import com.materialkolor.builder.kit.skin.headless.inputFocusRing
+import com.materialkolor.builder.kit.skin.headless.controlRing
+import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 
 /**
  * How [HeadlessDisclosure] draws its row and what it opens.
@@ -120,7 +120,8 @@ internal fun HeadlessDisclosure(
     val interactions = remember { MutableInteractionSource() }
     val motion = LocalBuilderMotion.current
     val state = ControlState.Expanded(expanded)
-    val spoken = stateWords().of(state)
+    val words = stateWords()
+    val spoken = words.of(state)
     UnstyledDisclosure(
         expanded = expanded,
         onExpandedChange = onExpandedChange,
@@ -134,10 +135,10 @@ internal fun HeadlessDisclosure(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = LocalLayout.current.primaryTouchTarget)
-                    .inputFocusRing(interactions, style.focus, style.shape)
+                    .controlRing(interactions, style.shape, style.focus)
                     .disclosureSemantics(spoken, expanded, enabled, onExpandedChange)
-                    .foldState(disclosureName(title, summary), state, enabled)
-                    .alpha(inputAlpha(enabled)),
+                    .foldState(disclosureName(title, summary), state, enabled, words)
+                    .alpha(enabledAlpha(enabled)),
                 enabled = enabled,
                 contentPadding = style.headerPadding,
                 interactionSource = interactions,

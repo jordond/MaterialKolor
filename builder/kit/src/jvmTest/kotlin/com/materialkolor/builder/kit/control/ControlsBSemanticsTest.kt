@@ -106,8 +106,6 @@ internal fun forEverySkin(block: ComposeUiTest.(SkinVariant) -> Unit) {
     }
 }
 
-internal fun hasInputRole(role: Role): SemanticsMatcher = SemanticsMatcher.expectValue(SemanticsProperties.Role, role)
-
 /** What the seed field says under itself in these tests, standing in for the app's own copy. */
 internal fun inputErrorMessage(reason: InvalidReason): String =
     when (reason) {
@@ -176,7 +174,7 @@ class ControlsBSemanticsTest {
             }
 
             onNodeWithTag(On)
-                .assert(hasInputRole(Role.Switch))
+                .assert(hasRole(Role.Switch))
                 .assert(SemanticsMatcher.expectValue(SemanticsProperties.ToggleableState, ToggleableState.Off))
                 .assert(hasStateDescription("Off"))
                 .assertIsEnabled()
@@ -185,7 +183,7 @@ class ControlsBSemanticsTest {
             onNodeWithTag(On).assert(hasStateDescription("On"))
 
             onNodeWithTag(Off)
-                .assert(hasInputRole(Role.Switch))
+                .assert(hasRole(Role.Switch))
                 .assert(hasStateDescription("Off"))
                 .assertIsNotEnabled()
             onNodeWithTag(Off).performClick()
@@ -204,7 +202,7 @@ class ControlsBSemanticsTest {
             }
 
             onNodeWithTag(On)
-                .assert(hasInputRole(Role.Checkbox))
+                .assert(hasRole(Role.Checkbox))
                 .assert(SemanticsMatcher.expectValue(SemanticsProperties.ToggleableState, ToggleableState.Off))
                 .assert(hasStateDescription("Not checked"))
             onNodeWithText("Show pins", useUnmergedTree = true).performClick()
@@ -267,7 +265,7 @@ class ControlsBSemanticsTest {
 
             val row = onNode(hasText("Core colors and pins") and hasClickAction())
             row
-                .assert(hasInputRole(Role.Button))
+                .assert(hasRole(Role.Button))
                 .assert(hasStateDescription("Collapsed"))
                 .assert(SemanticsMatcher.keyIsDefined(SemanticsActions.Expand))
             onNodeWithText("Inside the row").assertDoesNotExist()
@@ -294,7 +292,7 @@ class ControlsBSemanticsTest {
 
             for (title in listOf("Locked closed", "Locked open")) {
                 withClue(title) {
-                    onNode(hasText(title) and hasInputRole(Role.Button))
+                    onNode(hasText(title) and hasRole(Role.Button))
                         .assertIsNotEnabled()
                         .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.Expand))
                         .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.Collapse))
@@ -329,8 +327,7 @@ class ControlsBSemanticsTest {
 }
 
 @OptIn(ExperimentalTestApi::class)
-internal fun ComposeUiTest.tab(name: String): SemanticsNodeInteraction =
-    onNode(hasText(name) and hasInputRole(Role.Tab))
+internal fun ComposeUiTest.tab(name: String): SemanticsNodeInteraction = onNode(hasText(name) and hasRole(Role.Tab))
 
 @OptIn(ExperimentalTestApi::class)
 internal fun ComposeUiTest.editableText(tag: String): String =

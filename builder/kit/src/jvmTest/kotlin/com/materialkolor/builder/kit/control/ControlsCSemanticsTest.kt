@@ -40,7 +40,6 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasStateDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -56,9 +55,6 @@ import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
-import com.materialkolor.builder.kit.headless.BottomSheetDetent
-import com.materialkolor.builder.kit.headless.BottomSheetState
-import com.materialkolor.builder.kit.headless.rememberBottomSheetState
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
@@ -105,8 +101,6 @@ internal fun ControlsHarness(
         }
     }
 }
-
-internal fun overlayHasRole(role: Role): SemanticsMatcher = SemanticsMatcher.expectValue(SemanticsProperties.Role, role)
 
 internal fun hasOverlayPaneTitle(title: String): SemanticsMatcher =
     SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, title)
@@ -181,7 +175,7 @@ class ControlsCSemanticsTest {
             }
             waitForIdle()
             onNode(hasOverlayPaneTitle("Projects")).assertExists()
-            val close = onNode(hasContentDescription("Close") and overlayHasRole(Role.Button))
+            val close = onNode(hasContentDescription("Close") and hasRole(Role.Button))
             close.assertIsFocused()
             close.performKeyInput { pressKey(Key.Escape) }
             waitForIdle()
@@ -200,7 +194,7 @@ class ControlsCSemanticsTest {
             }
             waitForIdle()
             onNode(hasOverlayPaneTitle("Export")).assertExists()
-            onNode(hasContentDescription("Close") and overlayHasRole(Role.Button)).performClick()
+            onNode(hasContentDescription("Close") and hasRole(Role.Button)).performClick()
             waitForIdle()
             open shouldBe false
             onNodeWithText("Kotlin").assertDoesNotExist()
@@ -246,7 +240,7 @@ class ControlsCSemanticsTest {
                     BuilderBottomSheet(state, label = "Poster") { BuilderText("#6750A4") }
                 }
             }
-            val handle = onNode(hasContentDescription("Poster") and overlayHasRole(Role.Button))
+            val handle = onNode(hasContentDescription("Poster") and hasRole(Role.Button))
             state.detent shouldBe BottomSheetDetent.Peek
             handle.assert(hasStateDescription("Peek"))
 
@@ -297,7 +291,7 @@ class ControlsCSemanticsTest {
             setContent { ControlsHarness(skin) { BuilderToastHost(toasts) } }
             toasts.show("Pin removed", actionLabel = "Undo", duration = ToastDuration.Indefinite) { undone = true }
             waitForIdle()
-            onNode(hasText("Undo") and overlayHasRole(Role.Button)).performClick()
+            onNode(hasText("Undo") and hasRole(Role.Button)).performClick()
             waitForIdle()
             undone shouldBe true
             toasts.toasts shouldHaveSize 0
@@ -360,10 +354,10 @@ class ControlsCSemanticsTest {
                 }
             }
             waitForIdle()
-            onNode(hasText("Duplicate") and overlayHasRole(Role.Button)).assertIsEnabled()
-            onNode(hasText("Delete") and overlayHasRole(Role.Button)).assertIsEnabled()
-            onNode(hasText("Archive") and overlayHasRole(Role.Button)).assertIsNotEnabled()
-            onNode(hasText("Delete") and overlayHasRole(Role.Button)).performClick()
+            onNode(hasText("Duplicate") and hasRole(Role.Button)).assertIsEnabled()
+            onNode(hasText("Delete") and hasRole(Role.Button)).assertIsEnabled()
+            onNode(hasText("Archive") and hasRole(Role.Button)).assertIsNotEnabled()
+            onNode(hasText("Delete") and hasRole(Role.Button)).performClick()
             waitForIdle()
             chosen shouldBe "Delete"
             open shouldBe false
@@ -382,19 +376,19 @@ class ControlsCSemanticsTest {
                     }
                 }
             }
-            val field = onNode(overlayHasRole(Role.DropdownList) and hasStateDescription("Tonal spot"))
+            val field = onNode(hasRole(Role.DropdownList) and hasStateDescription("Tonal spot"))
             field.assertIsEnabled()
-            onNode(overlayHasRole(Role.DropdownList) and hasStateDescription("2021")).assertIsNotEnabled()
+            onNode(hasRole(Role.DropdownList) and hasStateDescription("2021")).assertIsNotEnabled()
 
             field.performClick()
             waitForIdle()
-            onNode(hasText("Tonal spot") and overlayHasRole(Role.RadioButton)).assertIsSelected()
-            onNode(hasText("Vibrant") and overlayHasRole(Role.RadioButton)).assertIsNotSelected()
-            onNode(hasText("Vibrant") and overlayHasRole(Role.RadioButton)).performClick()
+            onNode(hasText("Tonal spot") and hasRole(Role.RadioButton)).assertIsSelected()
+            onNode(hasText("Vibrant") and hasRole(Role.RadioButton)).assertIsNotSelected()
+            onNode(hasText("Vibrant") and hasRole(Role.RadioButton)).performClick()
             waitForIdle()
             style shouldBe "Vibrant"
             onAllNodesWithText("Expressive").assertCountEquals(0)
-            onNode(overlayHasRole(Role.DropdownList) and hasStateDescription("Vibrant")).assertExists()
+            onNode(hasRole(Role.DropdownList) and hasStateDescription("Vibrant")).assertExists()
         }
 
     @Test

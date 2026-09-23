@@ -52,7 +52,7 @@ internal sealed interface ControlState {
         val on: Boolean,
     ) : ControlState
 
-    /** A disclosure or a select that opens and closes. */
+    /** A disclosure that opens and closes. */
     data class Expanded(
         val expanded: Boolean,
     ) : ControlState
@@ -123,7 +123,7 @@ internal fun stateWords(): StateWords =
     )
 
 /**
- * [name] followed by [state] and, when the control is off, the disabled word, "Tonal spot, selected"
+ * [name] followed by [state] and, when the control is disabled, the disabled word, "Tonal spot, selected"
  * or "Dark mode, off, disabled". Blank parts are left out.
  */
 internal fun foldStateIntoName(
@@ -143,14 +143,22 @@ internal fun foldStateIntoName(
  * The name a stateful control goes by. Where [LocalFoldsStateIntoName] is set it carries [state]
  * and a disabled note as well, elsewhere it is [name] as it is.
  *
- * For a control that already sets its own content description on the node that merges it.
+ * For a control that already sets its own content description on the node that merges it. A
+ * control that loaded [words] for its own state description passes them in, so they load once.
+ * Left null, they load only when the fold is on.
  */
 @Composable
 internal fun stateName(
     name: String,
     state: ControlState?,
     enabled: Boolean = true,
-): String = if (LocalFoldsStateIntoName.current) foldStateIntoName(name, state, enabled, stateWords()) else name
+    words: StateWords? = null,
+): String =
+    if (LocalFoldsStateIntoName.current) {
+        foldStateIntoName(name, state, enabled, words ?: stateWords())
+    } else {
+        name
+    }
 
 /**
  * Folds [state] into the name of the node this lands on, or of the control that merges it, where
@@ -159,14 +167,17 @@ internal fun stateName(
  * @param[name] What the control's text says, the name it goes by without the fold.
  * @param[state] The control's state, or null for none but the disabled note.
  * @param[enabled] Whether the control takes input.
+ * @param[words] The state words, for a control that already loaded them for its own state
+ * description. Left null, they load only when the fold is on.
  */
 @Composable
 internal fun Modifier.foldState(
     name: String,
     state: ControlState?,
     enabled: Boolean = true,
+    words: StateWords? = null,
 ): Modifier {
     if (!LocalFoldsStateIntoName.current) return this
-    val folded = foldStateIntoName(name, state, enabled, stateWords())
+    val folded = foldStateIntoName(name, state, enabled, words ?: stateWords())
     return semantics { contentDescription = folded }
 }

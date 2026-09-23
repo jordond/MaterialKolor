@@ -17,14 +17,14 @@ import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.FluentToggleButton
-import com.materialkolor.builder.kit.skin.headless.ActionDisabledAlpha
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
 import com.materialkolor.builder.kit.skin.headless.SelectableStyle
 import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
-import com.materialkolor.builder.kit.skin.headless.actionPress
-import com.materialkolor.builder.kit.skin.headless.actionRing
 import com.materialkolor.builder.kit.skin.headless.actionSurface
-import com.materialkolor.builder.kit.skin.headless.actionTouchTarget
+import com.materialkolor.builder.kit.skin.headless.controlPress
+import com.materialkolor.builder.kit.skin.headless.controlRing
+import com.materialkolor.builder.kit.skin.headless.controlTouchTarget
+import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 import com.materialkolor.builder.kit.skin.material.MaterialToggleButton
 
 /**
@@ -109,10 +109,10 @@ internal fun HeadlessToggleButton(
                 role = Role.Checkbox,
                 onValueChange = onCheckedChange,
             ).foldState(label, ControlState.Checked(checked), enabled)
-            .actionTouchTarget(LocalLayout.current.primaryTouchTarget)
-            .actionPress(interactionSource)
-            .alpha(if (enabled) 1f else ActionDisabledAlpha)
-            .actionRing(interactionSource, style.shape)
+            .controlTouchTarget(LocalLayout.current.primaryTouchTarget)
+            .controlPress(interactionSource)
+            .alpha(enabledAlpha(enabled))
+            .controlRing(interactionSource, style.shape)
             .actionSurface(colors, style.shape, style.borderWidth)
             .heightIn(min = style.height)
             .padding(horizontal = style.horizontalPadding),

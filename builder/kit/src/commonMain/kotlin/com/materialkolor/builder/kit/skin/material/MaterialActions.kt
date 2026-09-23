@@ -70,10 +70,10 @@ import com.materialkolor.builder.kit.headless.radioGroupOption
 import com.materialkolor.builder.kit.headless.rememberRadioGroupFocus
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
-import com.materialkolor.builder.kit.skin.headless.ActionDisabledAlpha
-import com.materialkolor.builder.kit.skin.headless.actionPress
-import com.materialkolor.builder.kit.skin.headless.actionRing
-import com.materialkolor.builder.kit.skin.headless.actionTouchTarget
+import com.materialkolor.builder.kit.skin.headless.controlPress
+import com.materialkolor.builder.kit.skin.headless.controlRing
+import com.materialkolor.builder.kit.skin.headless.controlTouchTarget
+import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /*
@@ -103,9 +103,9 @@ internal fun Modifier.materialFeedback(
     interactionSource: MutableInteractionSource,
     shape: Shape,
 ): Modifier =
-    actionTouchTarget(LocalLayout.current.primaryTouchTarget)
-        .actionPress(interactionSource)
-        .actionRing(interactionSource, shape)
+    controlTouchTarget(LocalLayout.current.primaryTouchTarget)
+        .controlPress(interactionSource)
+        .controlRing(interactionSource, shape)
 
 /** A glyph and a label in whatever ink the surrounding Material component provides. */
 @Composable
@@ -385,8 +385,8 @@ internal fun MaterialCard(
         onClick = onClick,
         modifier = modifier
             .semantics { role = Role.Button }
-            .actionPress(interactionSource)
-            .actionRing(interactionSource, CardDefaults.shape),
+            .controlPress(interactionSource)
+            .controlRing(interactionSource, CardDefaults.shape),
         enabled = enabled,
         interactionSource = interactionSource,
         content = padded,
@@ -415,9 +415,9 @@ internal fun MaterialListRow(
         Modifier
     } else {
         Modifier
-            .actionPress(interactionSource)
-            .alpha(if (row.enabled) 1f else ActionDisabledAlpha)
-            .actionRing(interactionSource, RectangleShape)
+            .controlPress(interactionSource)
+            .alpha(enabledAlpha(row.enabled))
+            .controlRing(interactionSource, RectangleShape)
     }
     ListItem(
         headlineContent = {

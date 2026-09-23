@@ -1,28 +1,20 @@
 package com.materialkolor.builder.kit.skin.headless
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.interaction.InteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.composeunstyled.focusRing
 import com.materialkolor.builder.kit.headless.CheckboxStyle
 import com.materialkolor.builder.kit.headless.DisclosureStyle
 import com.materialkolor.builder.kit.headless.SliderStyle
 import com.materialkolor.builder.kit.headless.SwitchStyle
 import com.materialkolor.builder.kit.headless.TabsStyle
-import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
@@ -325,42 +317,3 @@ internal fun heroFieldStyle(
         gap = tokens.spacing.extraSmall,
         cursor = tokens.textStrong,
     )
-
-/** How thick the keyboard focus ring around an input is. */
-internal val InputFocusRingWidth: Dp = 2.dp
-
-/** How far the focus ring sits outside the input it rings. */
-internal val InputFocusRingOffset: Dp = 2.dp
-
-/** How opaque a disabled input is drawn. */
-internal const val InputDisabledAlpha: Float = 0.38f
-
-/** Full opacity, or the disabled one. */
-internal fun inputAlpha(enabled: Boolean): Float = if (enabled) 1f else InputDisabledAlpha
-
-/**
- * Shrinks an input by the skin's press scale while it is held (MO-06). The scale is one under
- * reduced motion, so nothing moves then.
- */
-@Composable
-internal fun Modifier.inputPress(interactions: InteractionSource): Modifier {
-    val motion = LocalBuilderMotion.current
-    val pressed by interactions.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (pressed) motion.pressScale else 1f,
-        animationSpec = motion.press(),
-        label = "inputPress",
-    )
-    return graphicsLayer {
-        scaleX = scale
-        scaleY = scale
-    }
-}
-
-/** The keyboard focus ring in the skin's focus ink, shown only for keyboard focus. */
-@Composable
-internal fun Modifier.inputFocusRing(
-    interactions: InteractionSource,
-    color: Color,
-    shape: Shape,
-): Modifier = focusRing(interactions, InputFocusRingWidth, color, shape, InputFocusRingOffset)

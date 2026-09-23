@@ -17,8 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -77,26 +75,18 @@ class ControlsAScreenshotTest {
         runComposeUiTest { checkSheets(Skin(Library.Fluent, expressive = false), "fluent") }
 }
 
-/** One ink on one ground this batch draws, and the least contrast the pair may have. */
-private class ActionInkPair(
-    val name: String,
-    val ink: Color,
-    val ground: Color,
-    val minimum: Double,
-)
-
 /**
  * The pairs the headless actions add on top of the skin's own text pairs. Status badges put the
  * panel ink on a status fill, and the focus ring has to stand out from the panel by 3 to 1 (AR-01).
  */
-private fun BuilderTokens.actionPairs(): List<ActionInkPair> =
+private fun BuilderTokens.actionPairs(): List<InkPair> =
     listOf(
-        ActionInkPair("panel on success", panel, success, 4.5),
-        ActionInkPair("panel on warning", panel, warning, 4.5),
-        ActionInkPair("panel on danger", panel, danger, 4.5),
-        ActionInkPair("onAccent on accent", onAccent, accent, 4.5),
-        ActionInkPair("textStrong on panelRaised", textStrong, panelRaised, 4.5),
-        ActionInkPair("focus on panel", focus, panel, 3.0),
+        InkPair("panel on success", panel, success, 4.5),
+        InkPair("panel on warning", panel, warning, 4.5),
+        InkPair("panel on danger", panel, danger, 4.5),
+        InkPair("onAccent on accent", onAccent, accent, 4.5),
+        InkPair("textStrong on panelRaised", textStrong, panelRaised, 4.5),
+        InkPair("focus on panel", focus, panel, 3.0),
     )
 
 @OptIn(ExperimentalTestApi::class)
@@ -125,10 +115,7 @@ private fun ComposeUiTest.checkSheets(
         isDark = dark
         waitForIdle()
         val mode = if (dark) "dark" else "light"
-        for (pair in assertNotNull(tokens).actionPairs()) {
-            val ratio = contrast(pair.ink, pair.ground)
-            if (ratio < pair.minimum) unreadable += "$mode ${pair.name} ${"%.2f".format(ratio)} < ${pair.minimum}"
-        }
+        unreadable += assertNotNull(tokens).actionPairs().shortfalls(mode)
         onNodeWithTag(SheetTag).captureRoboImage("$ScreenshotDir/$name-$mode.png")
     }
     compact = true
@@ -142,16 +129,6 @@ private fun ComposeUiTest.checkSheets(
         onNodeWithTag(SheetTag).captureRoboImage("$ScreenshotDir/$name-compact-$mode.png")
     }
     unreadable.shouldBeEmpty()
-}
-
-/** The WCAG contrast ratio of two opaque colours. */
-private fun contrast(
-    a: Color,
-    b: Color,
-): Double {
-    val lighter = maxOf(a.luminance(), b.luminance())
-    val darker = minOf(a.luminance(), b.luminance())
-    return (lighter + 0.05) / (darker + 0.05)
 }
 
 /** Every control of the batch, enabled first and then the same controls disabled below them. */

@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.kit.headless.HeadlessScrollArea
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.headless.overlayStyle
 
 /**
  * A column that scrolls, with a scrollbar that stays on screen and can be dragged.

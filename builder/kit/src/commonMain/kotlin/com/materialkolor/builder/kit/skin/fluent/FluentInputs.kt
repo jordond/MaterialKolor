@@ -10,11 +10,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.kit.control.HeadlessField
 import com.materialkolor.builder.kit.headless.CheckboxStyle
 import com.materialkolor.builder.kit.headless.DisclosureStyle
 import com.materialkolor.builder.kit.headless.HeadlessCheckbox
 import com.materialkolor.builder.kit.headless.HeadlessDisclosure
+import com.materialkolor.builder.kit.headless.HeadlessField
 import com.materialkolor.builder.kit.headless.HeadlessSlider
 import com.materialkolor.builder.kit.headless.HeadlessSwitch
 import com.materialkolor.builder.kit.headless.HeadlessTabs

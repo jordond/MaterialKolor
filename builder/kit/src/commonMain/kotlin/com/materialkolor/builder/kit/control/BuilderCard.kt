@@ -16,13 +16,13 @@ import androidx.compose.ui.semantics.semantics
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.FluentCard
-import com.materialkolor.builder.kit.skin.headless.ActionDisabledAlpha
 import com.materialkolor.builder.kit.skin.headless.CardStyle
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
 import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
-import com.materialkolor.builder.kit.skin.headless.actionPress
-import com.materialkolor.builder.kit.skin.headless.actionRing
 import com.materialkolor.builder.kit.skin.headless.actionSurface
+import com.materialkolor.builder.kit.skin.headless.controlPress
+import com.materialkolor.builder.kit.skin.headless.controlRing
+import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 import com.materialkolor.builder.kit.skin.material.MaterialCard
 
 /**
@@ -71,9 +71,9 @@ internal fun HeadlessCard(
                 enabled = enabled,
                 role = Role.Button,
                 onClick = onClick,
-            ).actionPress(interactionSource)
-            .alpha(if (enabled) 1f else ActionDisabledAlpha)
-            .actionRing(interactionSource, style.shape)
+            ).controlPress(interactionSource)
+            .alpha(enabledAlpha(enabled))
+            .controlRing(interactionSource, style.shape)
     }
     Column(
         modifier = modifier

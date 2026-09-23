@@ -35,9 +35,9 @@ import com.materialkolor.builder.kit.control.stateWords
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
-import com.materialkolor.builder.kit.skin.headless.inputAlpha
-import com.materialkolor.builder.kit.skin.headless.inputFocusRing
-import com.materialkolor.builder.kit.skin.headless.inputPress
+import com.materialkolor.builder.kit.skin.headless.controlPress
+import com.materialkolor.builder.kit.skin.headless.controlRing
+import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 
 /**
  * How [HeadlessSwitch] draws its track and thumb.
@@ -128,7 +128,7 @@ internal fun HeadlessSwitch(
     Row(
         modifier = modifier
             .heightIn(min = LocalLayout.current.primaryTouchTarget)
-            .inputFocusRing(interactions, style.focus, style.focusShape)
+            .controlRing(interactions, style.focusShape, style.focus)
             .toggleable(
                 value = checked,
                 interactionSource = interactions,
@@ -137,8 +137,8 @@ internal fun HeadlessSwitch(
                 role = Role.Switch,
                 onValueChange = onCheckedChange,
             ).semantics { stateDescription = words.of(state) }
-            .foldState(label, state, enabled)
-            .alpha(inputAlpha(enabled)),
+            .foldState(label, state, enabled, words)
+            .alpha(enabledAlpha(enabled)),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -151,7 +151,7 @@ internal fun HeadlessSwitch(
             checked = checked,
             onCheckedChange = null,
             modifier = Modifier
-                .inputPress(interactions)
+                .controlPress(interactions)
                 .size(style.trackWidth, style.trackHeight)
                 .background(track, style.trackShape)
                 .border(style.outlineWidth, edge, style.trackShape)
@@ -193,7 +193,7 @@ internal fun HeadlessCheckbox(
     Row(
         modifier = modifier
             .heightIn(min = LocalLayout.current.primaryTouchTarget)
-            .inputFocusRing(interactions, style.focus, style.focusShape)
+            .controlRing(interactions, style.focusShape, style.focus)
             .toggleable(
                 value = checked,
                 interactionSource = interactions,
@@ -202,14 +202,14 @@ internal fun HeadlessCheckbox(
                 role = Role.Checkbox,
                 onValueChange = onCheckedChange,
             ).semantics { stateDescription = words.of(state) }
-            .foldState(label, state, enabled)
-            .alpha(inputAlpha(enabled)),
+            .foldState(label, state, enabled, words)
+            .alpha(enabledAlpha(enabled)),
         horizontalArrangement = Arrangement.spacedBy(style.labelGap),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .inputPress(interactions)
+                .controlPress(interactions)
                 .size(style.boxSize)
                 .background(fill, style.boxShape)
                 .border(style.outlineWidth, edge, style.boxShape),

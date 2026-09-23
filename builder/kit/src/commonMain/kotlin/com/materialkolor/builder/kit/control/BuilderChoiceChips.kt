@@ -14,14 +14,14 @@ import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.FluentChoiceChips
-import com.materialkolor.builder.kit.skin.headless.ActionDisabledAlpha
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
 import com.materialkolor.builder.kit.skin.headless.SelectableStyle
 import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
-import com.materialkolor.builder.kit.skin.headless.actionPress
-import com.materialkolor.builder.kit.skin.headless.actionRing
 import com.materialkolor.builder.kit.skin.headless.actionSurface
-import com.materialkolor.builder.kit.skin.headless.actionTouchTarget
+import com.materialkolor.builder.kit.skin.headless.controlPress
+import com.materialkolor.builder.kit.skin.headless.controlRing
+import com.materialkolor.builder.kit.skin.headless.controlTouchTarget
+import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 import com.materialkolor.builder.kit.skin.material.MaterialChoiceChips
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
@@ -113,16 +113,16 @@ internal fun <T> HeadlessChoiceChips(
         onSelect = onSelect,
         label = label,
         spacing = LocalBuilderTokens.current.spacing.small,
-        modifier = modifier.alpha(if (enabled) 1f else ActionDisabledAlpha),
+        modifier = modifier.alpha(enabledAlpha(enabled)),
         enabled = enabled,
     ) { value, isSelected, interactionSource ->
         val colors = style.colors(isSelected)
         Row(
             modifier = Modifier
                 .foldState(optionLabel(value), ControlState.Selected(isSelected), enabled)
-                .actionTouchTarget(target)
-                .actionPress(interactionSource)
-                .actionRing(interactionSource, style.shape)
+                .controlTouchTarget(target)
+                .controlPress(interactionSource)
+                .controlRing(interactionSource, style.shape)
                 .actionSurface(colors, style.shape, style.borderWidth)
                 .heightIn(min = style.height)
                 .padding(horizontal = style.horizontalPadding),

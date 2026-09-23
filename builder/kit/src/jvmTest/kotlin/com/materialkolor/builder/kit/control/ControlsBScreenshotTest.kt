@@ -13,7 +13,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
@@ -99,10 +98,7 @@ private fun checkSheets(variant: SkinVariant) =
             onNodeWithTag(ErrorField).requestFocus()
             onNodeWithTag(ErrorField).performTextReplacement("#12345")
             waitForIdle()
-            for (pair in assertNotNull(seen).inkPairs()) {
-                val ratio = contrast(pair.ink, pair.ground)
-                if (ratio < pair.minimum) unreadable += "$mode ${pair.name} ${"%.2f".format(ratio)} < ${pair.minimum}"
-            }
+            unreadable += assertNotNull(seen).inkPairs().shortfalls(mode)
             onNodeWithTag(SheetTag).captureRoboImage("$ScreenshotDir/${variant.name.lowercase()}-$mode.png")
         }
         withClue(variant.name) { unreadable.shouldBeEmpty() }
@@ -151,46 +147,38 @@ private fun seenStyles(): SeenStyles {
     }
 }
 
-/** One ink on one ground, and the least contrast the pair may have. */
-private class InputInkPair(
-    val name: String,
-    val ink: Color,
-    val ground: Color,
-    val minimum: Double,
-)
-
 /**
  * The parts of each input that have to stand out, on what they stand on. Text keeps to 4.5, the
  * edges and marks that say what an input is or which state it is in keep to 3 (WCAG 1.4.11).
  */
-private fun SeenStyles.inkPairs(): List<InputInkPair> {
+private fun SeenStyles.inkPairs(): List<InkPair> {
     val panel = tokens.panel
 
     fun Color.onPanel(): Color = compositeOver(panel)
     return buildList {
-        add(InputInkPair("focus on panel", tokens.focus, panel, 3.0))
-        add(InputInkPair("hero text on panel", hero.active, panel, 4.5))
-        add(InputInkPair("hero error on panel", hero.error, panel, 4.5))
+        add(InkPair("focus on panel", tokens.focus, panel, 3.0))
+        add(InkPair("hero text on panel", hero.active, panel, 4.5))
+        add(InkPair("hero error on panel", hero.error, panel, 4.5))
         switch?.let { style ->
-            add(InputInkPair("switch edge off", style.outlineOff, panel, 3.0))
-            add(InputInkPair("switch thumb off", style.thumbOff, style.trackOff.onPanel(), 3.0))
-            add(InputInkPair("switch track on", style.trackOn, panel, 3.0))
-            add(InputInkPair("switch thumb on", style.thumbOn, style.trackOn, 3.0))
+            add(InkPair("switch edge off", style.outlineOff, panel, 3.0))
+            add(InkPair("switch thumb off", style.thumbOff, style.trackOff.onPanel(), 3.0))
+            add(InkPair("switch track on", style.trackOn, panel, 3.0))
+            add(InkPair("switch thumb on", style.thumbOn, style.trackOn, 3.0))
         }
         checkbox?.let { style ->
-            add(InputInkPair("checkbox edge", style.outline, panel, 3.0))
-            add(InputInkPair("checkbox fill", style.checkedFill, panel, 3.0))
-            add(InputInkPair("checkbox check", style.checkInk, style.checkedFill, 3.0))
+            add(InkPair("checkbox edge", style.outline, panel, 3.0))
+            add(InkPair("checkbox fill", style.checkedFill, panel, 3.0))
+            add(InkPair("checkbox check", style.checkInk, style.checkedFill, 3.0))
         }
         slider?.let { style ->
-            add(InputInkPair("slider thumb", style.thumb, panel, 3.0))
-            add(InputInkPair("slider active track", style.activeTrack, panel, 3.0))
+            add(InkPair("slider thumb", style.thumb, panel, 3.0))
+            add(InkPair("slider active track", style.activeTrack, panel, 3.0))
         }
         tabs?.let { style ->
             val ground = style.container.onPanel()
-            add(InputInkPair("tab label", style.ink, ground, 4.5))
+            add(InkPair("tab label", style.ink, ground, 4.5))
             add(
-                InputInkPair(
+                InkPair(
                     "selected tab label",
                     style.selectedInk,
                     style.selectedContainer.compositeOver(ground),
@@ -199,21 +187,11 @@ private fun SeenStyles.inkPairs(): List<InputInkPair> {
             )
         }
         field?.let { style ->
-            add(InputInkPair("field edge", style.outline, panel, 3.0))
-            add(InputInkPair("field text", tokens.textStrong, style.container.onPanel(), 4.5))
-            add(InputInkPair("field focus edge", style.active, panel, 3.0))
+            add(InkPair("field edge", style.outline, panel, 3.0))
+            add(InkPair("field text", tokens.textStrong, style.container.onPanel(), 4.5))
+            add(InkPair("field focus edge", style.active, panel, 3.0))
         }
     }
-}
-
-/** The WCAG contrast ratio of two opaque colours. */
-private fun contrast(
-    a: Color,
-    b: Color,
-): Double {
-    val lighter = maxOf(a.luminance(), b.luminance())
-    val darker = minOf(a.luminance(), b.luminance())
-    return (lighter + 0.05) / (darker + 0.05)
 }
 
 /** Every input of this batch in its states, on one panel. */

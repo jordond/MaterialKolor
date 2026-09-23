@@ -21,11 +21,9 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isNotSelected
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.isSelected
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.kit.headless.rememberBottomSheetState
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -104,23 +102,26 @@ class ControlStateNameTest {
                 }
             }
 
-            onNodeWithTag(Chip).assert(hasContentDescription("Pins, selected"))
+            onNodeWithTag(Chip).assert(hasContentDescriptionExactly("Pins, selected"))
             onNodeWithTag(Switch)
-                .assert(hasContentDescription("AMOLED black, off, disabled"))
+                .assert(hasContentDescriptionExactly("AMOLED black, off, disabled"))
                 .assert(hasStateDescription("Off"))
-            onNodeWithTag(Checkbox).assert(hasContentDescription("Show pins, checked"))
-            onNodeWithTag(Toggle).assert(hasContentDescription("Bold, not checked"))
-            onNodeWithContentDescription("Colours, Seed and roles, collapsed").assert(hasStateDescription("Collapsed"))
-            onNodeWithTag(Row).assert(hasContentDescription("Poster theme, selected"))
+            onNodeWithTag(Checkbox).assert(hasContentDescriptionExactly("Show pins, checked"))
+            onNodeWithTag(Toggle).assert(hasContentDescriptionExactly("Bold, not checked"))
+            onNode(hasContentDescriptionExactly("Colours, Seed and roles, collapsed"))
+                .assert(hasStateDescription("Collapsed"))
+            onNodeWithTag(Row).assert(hasContentDescriptionExactly("Poster theme, selected"))
             onNodeWithTag(Progress).assert(hasContentDescriptionExactly("Exporting, 40%"))
             onNodeWithTag(Slider).assert(hasContentDescriptionExactly("Chroma, 0.25, disabled"))
-            onNodeWithContentDescription("Dark, selected").assert(hasRole(Role.Tab)).assert(isSelected())
-            onNodeWithContentDescription("Light, not selected").assert(hasRole(Role.Tab)).assert(isNotSelected())
-            onNodeWithContentDescription("Tonal spot, selected").assert(isSelected())
-            onNodeWithContentDescription("Vibrant, not selected").assert(isNotSelected())
-            onNodeWithContentDescription("Grid, selected").assert(isSelected())
-            onNodeWithContentDescription("Scheme style, Tonal spot").assert(hasRole(Role.DropdownList))
-            onNodeWithContentDescription("Poster, Peek").assert(hasRole(Role.Button))
+            onNode(hasContentDescriptionExactly("Dark, selected")).assert(hasRole(Role.Tab)).assert(isSelected())
+            onNode(hasContentDescriptionExactly("Light, not selected"))
+                .assert(hasRole(Role.Tab))
+                .assert(isNotSelected())
+            onNode(hasContentDescriptionExactly("Tonal spot, selected")).assert(isSelected())
+            onNode(hasContentDescriptionExactly("Vibrant, not selected")).assert(isNotSelected())
+            onNode(hasContentDescriptionExactly("Grid, selected")).assert(isSelected())
+            onNode(hasContentDescriptionExactly("Scheme style, Tonal spot")).assert(hasRole(Role.DropdownList))
+            onNode(hasContentDescriptionExactly("Poster, Peek")).assert(hasRole(Role.Button))
         }
 
     /** One of every stateful control, each in a state worth reading. */
@@ -150,8 +151,6 @@ class ControlStateNameTest {
             BuilderBottomSheet(rememberBottomSheetState(), label = "Poster") { BuilderText("#6750A4") }
         }
     }
-
-    private fun hasRole(role: Role): SemanticsMatcher = SemanticsMatcher.expectValue(SemanticsProperties.Role, role)
 
     private fun hasNoContentDescription(): SemanticsMatcher =
         SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription)

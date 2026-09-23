@@ -1,9 +1,5 @@
 package com.materialkolor.builder.kit.headless
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,27 +19,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.paneTitle
@@ -52,8 +35,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
@@ -61,108 +42,10 @@ import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.PanelEdge
-import com.materialkolor.builder.kit.skin.headless.isOverlayShown
 import com.materialkolor.builder.kit.skin.headless.overlayFeedback
 import com.materialkolor.builder.kit.skin.headless.panelEnter
 import com.materialkolor.builder.kit.skin.headless.panelExit
-import com.materialkolor.builder.kit.skin.headless.rememberOverlayVisibility
-import com.materialkolor.builder.kit.skin.headless.scrimEnter
-import com.materialkolor.builder.kit.skin.headless.scrimExit
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
-
-/**
- * A modal layer over the page, the ground every dialog, side panel and sheet stands on.
- *
- * It lives in a focusable layer of its own, so Tab stays inside it until it closes (AR-09). Esc and
- * a click on the veil both ask to close it. Focus moves to the first thing inside that can take it,
- * and once the layer is gone it goes back to [returnFocusTo]. The layer stays up while [content]
- * animates out, and [content] animates itself through `animateEnterExit`.
- *
- * @param[visible] Whether the layer is wanted.
- * @param[onDismissRequest] Called on Esc and on a click on the veil.
- * @param[scrim] The veil drawn behind [content].
- * @param[contentAlignment] Where [content] sits in the layer.
- * @param[returnFocusTo] The trigger that opened the layer, focused again once it is gone.
- * @param[content] The panel.
- */
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-internal fun HeadlessModal(
-    visible: Boolean,
-    onDismissRequest: () -> Unit,
-    scrim: Color,
-    contentAlignment: Alignment,
-    returnFocusTo: FocusRequester?,
-    content: @Composable AnimatedVisibilityScope.() -> Unit,
-) {
-    val state = rememberOverlayVisibility(visible)
-    val shown = state.isOverlayShown(visible)
-    ReturnFocusWhenGone(shown, returnFocusTo)
-    if (!shown) return
-    val dismiss by rememberUpdatedState(onDismissRequest)
-    Dialog(
-        onDismissRequest = { dismiss() },
-        properties = DialogProperties(
-            dismissOnBackPress = true,
-            dismissOnClickOutside = false,
-            usePlatformDefaultWidth = false,
-            scrimColor = Color.Transparent,
-            animateTransition = false,
-        ),
-    ) {
-        AnimatedVisibility(
-            visibleState = state,
-            enter = EnterTransition.None,
-            exit = ExitTransition.None,
-        ) {
-            val initialFocus = remember { FocusRequester() }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .onKeyEvent { event ->
-                        val escape = event.type == KeyEventType.KeyDown && event.key == Key.Escape
-                        if (escape) dismiss()
-                        escape
-                    },
-                contentAlignment = contentAlignment,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .animateEnterExit(enter = scrimEnter(), exit = scrimExit())
-                        .fillMaxSize()
-                        .background(scrim)
-                        .pointerInput(Unit) { detectTapGestures { dismiss() } },
-                )
-                Box(Modifier.focusRequester(initialFocus)) {
-                    content()
-                }
-            }
-            LaunchedEffect(Unit) { initialFocus.requestFocus() }
-        }
-    }
-}
-
-/**
- * Focuses [target] once an overlay that was shown has gone.
- *
- * It waits for the layer to leave rather than for the request to close, because a node in the page
- * cannot take focus while a focusable layer still sits over it.
- */
-@Composable
-internal fun ReturnFocusWhenGone(
-    shown: Boolean,
-    target: FocusRequester?,
-) {
-    var wasShown by remember { mutableStateOf(false) }
-    LaunchedEffect(shown) {
-        if (shown) {
-            wasShown = true
-        } else if (wasShown) {
-            wasShown = false
-            target?.requestFocus()
-        }
-    }
-}
 
 /**
  * A panel pinned to one edge of the page, over a veil. The projects drawer and the export sheet
