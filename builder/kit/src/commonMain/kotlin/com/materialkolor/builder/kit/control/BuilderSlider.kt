@@ -22,8 +22,8 @@ import com.materialkolor.builder.kit.skin.material.MaterialSlider
  * Shift, and each key press ends with one [onValueChangeFinished]. Keys never snap, so a stop never
  * swallows an arrow press next to it.
  *
- * The slider sets set-progress and speaks [stateDescription], which is how it reads on the web
- * until the CMP mirror learns slider semantics (AR-10).
+ * The slider sets set-progress and speaks [stateDescription]. On the web the value follows the name
+ * as well, until the CMP mirror learns slider semantics (AR-10, D37).
  *
  * @param[value] Where the thumb is.
  * @param[onValueChange] Called with every new value, snapped when a drag lands near a stop.

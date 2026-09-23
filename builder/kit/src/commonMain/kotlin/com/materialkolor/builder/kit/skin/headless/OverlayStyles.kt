@@ -45,8 +45,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 /**
  * How one skin dresses the headless overlays.
  *
- * Every colour comes from the skin's tokens or its library theme. There is no scrim token, so each
- * skin veils the page with its own canvas or its library's scrim role.
+ * Every colour comes from the skin's tokens or its library theme. The veil is the skin's scrim
+ * token, its canvas on the headless skins and Material's scrim role on Material3.
  *
  * @property[surface] Menus, dialogs, panels and sheets.
  * @property[content] Ink on [surface].
@@ -107,7 +107,7 @@ internal fun overlayStyle(library: Library): OverlayStyle =
         Library.Custom -> customOverlayStyle(LocalBuilderTokens.current)
     }
 
-/** How much of the canvas shows through the veil behind a modal overlay. */
+/** How much of the canvas shows through the veil behind a modal overlay, on the skins that veil with it. */
 internal const val ScrimAlpha: Float = 0.6f
 
 /** How much a disabled row fades. */
@@ -120,8 +120,8 @@ internal val FocusRingWidth: Dp = 2.dp
 /**
  * The sizes every skin gives its overlays alike.
  *
- * None of them has a token yet. Each one is a token request, and they wait here together so the
- * tokens can take them over in one move.
+ * B-218 reviewed them as token requests. Every skin gives each one the same value, so none of them
+ * became a builder token. A size that starts to differ by skin moves to the tokens then.
  */
 internal object OverlayMetrics {
     /** The narrowest and the widest a dialog panel gets. */
@@ -170,7 +170,7 @@ internal fun unstyledOverlayStyle(tokens: BuilderTokens): OverlayStyle {
         dialogShape = RoundedCornerShape(tokens.radius.small),
         panelRadius = 0.dp,
         shadow = 0.dp,
-        scrim = tokens.canvas.copy(alpha = ScrimAlpha),
+        scrim = tokens.scrim,
         itemShape = RoundedCornerShape(tokens.radius.small),
         highlight = tokens.textStrong.copy(alpha = 0.06f),
         selected = tokens.textStrong.copy(alpha = 0.1f),
@@ -198,7 +198,7 @@ internal fun customOverlayStyle(tokens: BuilderTokens): OverlayStyle =
         dialogShape = RoundedCornerShape(tokens.radius.large),
         panelRadius = tokens.radius.large,
         shadow = 8.dp,
-        scrim = tokens.canvas.copy(alpha = ScrimAlpha),
+        scrim = tokens.scrim,
         itemShape = RoundedCornerShape(tokens.radius.small),
         highlight = tokens.accent.copy(alpha = 0.1f),
         selected = tokens.accent.copy(alpha = 0.16f),

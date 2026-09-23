@@ -13,7 +13,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -21,6 +20,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import com.composeunstyled.Indicator
 import com.composeunstyled.UnstyledProgress
 import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.kit.generated.resources.Res
+import com.materialkolor.builder.kit.generated.resources.progress_percent
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.motion.rememberLoopPhase
 import com.materialkolor.builder.kit.skin.LocalSkin
@@ -30,6 +31,7 @@ import com.materialkolor.builder.kit.skin.headless.ProgressStyle
 import com.materialkolor.builder.kit.skin.headless.ProgressSweep
 import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.material.MaterialProgress
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 /**
@@ -58,13 +60,21 @@ public fun BuilderProgress(
     }
 }
 
-/** Names a progress bar and, when [progress] is known, states it as a whole percentage. */
-internal fun SemanticsPropertyReceiver.progressLabel(
+/**
+ * Names a progress bar and, when [progress] is known, states it as a whole percentage. On the web
+ * the percentage rides in the name as well (D37).
+ */
+@Composable
+internal fun Modifier.progressLabel(
     label: String,
     progress: Float?,
-) {
-    contentDescription = label
-    if (progress != null) stateDescription = "${(progress * 100).roundToInt()}%"
+): Modifier {
+    val percent = progress?.let { amount -> stringResource(Res.string.progress_percent, (amount * 100).roundToInt()) }
+    val name = stateName(label, percent?.let { text -> ControlState.Value(text) })
+    return semantics {
+        contentDescription = name
+        if (percent != null) stateDescription = percent
+    }
 }
 
 /** Where the sweep rests whenever it may not move, across the middle of the track. */
@@ -108,7 +118,7 @@ internal fun HeadlessProgress(
     val track = modifier
         .fillMaxWidth()
         .height(style.height)
-        .semantics { progressLabel(label, progress) }
+        .progressLabel(label, progress)
         .clip(style.shape)
         .background(style.track)
     if (progress != null) {

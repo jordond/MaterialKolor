@@ -63,6 +63,8 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
+import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
@@ -244,6 +246,8 @@ private fun SheetHandle(
     val detents = BottomSheetDetent.entries
     val higher = detents.getOrNull(detent.ordinal + 1)
     val lower = detents.getOrNull(detent.ordinal - 1)
+    val spoken = detentLabel(detent)
+    val name = stateName(label, ControlState.Value(spoken))
 
     fun moveTo(target: BottomSheetDetent?): Boolean {
         if (target == null || target == detent) return false
@@ -264,8 +268,8 @@ private fun SheetHandle(
                     else -> false
                 }
             }.semantics {
-                contentDescription = label
-                stateDescription = detentLabel(detent)
+                contentDescription = name
+                stateDescription = spoken
                 if (higher != null) expand { moveTo(higher) }
                 if (lower != null) collapse { moveTo(lower) }
             }.overlayFeedback(interaction, style, shape = RectangleShape)

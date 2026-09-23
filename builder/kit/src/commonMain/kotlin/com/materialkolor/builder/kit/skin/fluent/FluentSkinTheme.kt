@@ -8,6 +8,7 @@ import com.materialkolor.builder.kit.skin.ProvideSkinLocals
 import com.materialkolor.builder.kit.skin.StatusColors
 import com.materialkolor.builder.kit.skin.builderCodePalette
 import com.materialkolor.builder.kit.skin.builderMotion
+import com.materialkolor.builder.kit.skin.headless.ScrimAlpha
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.ktx.toneColor
@@ -51,8 +52,9 @@ private fun fluentTokens(
     val textStrong = WindowsGrey.toneColor(tones.textStrong)
     val textMuted = WindowsGrey.toneColor(tones.textMuted)
     val accent = scheme.primaryPalette.toneColor(tones.accent)
+    val canvas = WindowsGrey.toneColor(tones.canvas)
     return BuilderTokens(
-        canvas = WindowsGrey.toneColor(tones.canvas),
+        canvas = canvas,
         panel = WindowsGrey.toneColor(tones.panel),
         panelRaised = WindowsGrey.toneColor(tones.panelRaised),
         border = WindowsGrey.toneColor(tones.border),
@@ -74,6 +76,7 @@ private fun fluentTokens(
         success = status.success,
         warning = status.warning,
         danger = scheme.errorPalette.toneColor(tones.accent),
+        scrim = canvas.copy(alpha = ScrimAlpha),
         iconSize = 16.dp,
     )
 }

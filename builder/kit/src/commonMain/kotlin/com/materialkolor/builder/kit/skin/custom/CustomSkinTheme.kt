@@ -16,6 +16,7 @@ import com.materialkolor.builder.kit.skin.ProvideSkinLocals
 import com.materialkolor.builder.kit.skin.StatusColors
 import com.materialkolor.builder.kit.skin.builderCodePalette
 import com.materialkolor.builder.kit.skin.builderMotion
+import com.materialkolor.builder.kit.skin.headless.ScrimAlpha
 import com.materialkolor.builder.kit.token.BuilderTokens
 
 /**
@@ -101,5 +102,6 @@ private fun BuilderIdentity.builderTokens(status: StatusColors): BuilderTokens =
         success = status.success,
         warning = status.warning,
         danger = this[CustomSlot.Error],
+        scrim = this[CustomSlot.SurfaceSunken].copy(alpha = ScrimAlpha),
         iconSize = 18.dp,
     )

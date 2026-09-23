@@ -102,8 +102,12 @@ private fun ColorScheme.builderTokens(status: StatusColors): BuilderTokens =
         success = status.success,
         warning = status.warning,
         danger = error,
+        scrim = scrim.copy(alpha = MaterialScrimAlpha),
         iconSize = 20.dp,
     )
+
+/** Material's own scrim opacity. */
+private const val MaterialScrimAlpha = 0.32f
 
 /**
  * Material's own springs for everything that moves, and the builder's fenced tweens for the reveal,

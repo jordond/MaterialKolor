@@ -186,7 +186,7 @@ class ControlsBSemanticsTest {
 
             onNodeWithTag(Off)
                 .assert(hasInputRole(Role.Switch))
-                .assert(hasStateDescription("Off, disabled"))
+                .assert(hasStateDescription("Off"))
                 .assertIsNotEnabled()
             onNodeWithTag(Off).performClick()
             disabledFlipped shouldBe false
@@ -211,7 +211,7 @@ class ControlsBSemanticsTest {
             checked shouldBe true
             onNodeWithTag(On).assert(hasStateDescription("Checked"))
 
-            onNodeWithTag(Off).assert(hasStateDescription("Checked, disabled")).assertIsNotEnabled()
+            onNodeWithTag(Off).assert(hasStateDescription("Checked")).assertIsNotEnabled()
         }
 
     @Test
@@ -237,7 +237,7 @@ class ControlsBSemanticsTest {
                 .assert(SemanticsMatcher.expectValue(SemanticsProperties.ContentDescription, listOf("Contrast")))
                 .assert(hasStateDescription("0.50"))
                 .assertIsEnabled()
-            onNodeWithTag(Off).assert(hasStateDescription("Quarter, disabled")).assertIsNotEnabled()
+            onNodeWithTag(Off).assert(hasStateDescription("Quarter")).assertIsNotEnabled()
         }
 
     @Test

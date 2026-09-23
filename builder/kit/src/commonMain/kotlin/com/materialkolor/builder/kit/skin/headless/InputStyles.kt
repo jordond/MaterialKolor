@@ -339,17 +339,6 @@ internal const val InputDisabledAlpha: Float = 0.38f
 internal fun inputAlpha(enabled: Boolean): Float = if (enabled) 1f else InputDisabledAlpha
 
 /**
- * The state an input reads out.
- *
- * The disabled state is spoken as part of it because the web mirror in CMP 1.12.1 drops disabled
- * semantics (AR-10).
- */
-internal fun inputStateDescription(
-    state: String,
-    enabled: Boolean,
-): String = if (enabled) state else "$state, disabled"
-
-/**
  * Shrinks an input by the skin's press scale while it is held (MO-06). The scale is one under
  * reduced motion, so nothing moves then.
  */

@@ -40,6 +40,8 @@ import com.composeunstyled.TabList
 import com.composeunstyled.UnstyledTabGroup
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.skin.headless.inputFocusRing
@@ -126,7 +128,8 @@ internal fun <T> HeadlessTabs(
                                 .onFocusChanged { state -> if (state.isFocused) focused.intValue = index }
                                 .heightIn(min = target)
                                 .inputFocusRing(interactions, style.focus, style.tabShape)
-                                .tabFill(isSelected, style),
+                                .tabFill(isSelected, style)
+                                .foldState(label(tab), ControlState.Selected(isSelected)),
                             interactionSource = interactions,
                             contentAlignment = Alignment.Center,
                         ) {

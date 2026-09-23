@@ -108,7 +108,8 @@ internal fun HeadlessToggleButton(
                 enabled = enabled,
                 role = Role.Checkbox,
                 onValueChange = onCheckedChange,
-            ).actionTouchTarget(LocalLayout.current.primaryTouchTarget)
+            ).foldState(label, ControlState.Checked(checked), enabled)
+            .actionTouchTarget(LocalLayout.current.primaryTouchTarget)
             .actionPress(interactionSource)
             .alpha(if (enabled) 1f else ActionDisabledAlpha)
             .actionRing(interactionSource, style.shape)
