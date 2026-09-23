@@ -53,6 +53,8 @@ include(
     ":builder:domain",
     ":builder:codegen",
     ":builder:engine",
+    ":builder:kit",
+    ":builder:preview",
 )
 
 include(":mcu-source-transformer")
