@@ -20,7 +20,7 @@ public object Header {
      */
     public fun lines(
         input: ExportInput,
-        mode: ExportMode = ExportMode.Dynamic,
+        mode: ExportMode,
     ): List<String> {
         val relation = when (mode) {
             ExportMode.Dynamic -> "for"

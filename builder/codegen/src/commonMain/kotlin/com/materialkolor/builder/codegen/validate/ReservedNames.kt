@@ -3,6 +3,7 @@ package com.materialkolor.builder.codegen.validate
 import com.materialkolor.builder.codegen.symbol.Symbol
 import com.materialkolor.builder.codegen.symbol.Symbols
 import com.materialkolor.builder.codegen.target.COLOR_FAMILY
+import com.materialkolor.builder.codegen.target.FrozenMode
 import com.materialkolor.builder.codegen.target.custom.LOCAL_THEME_COLORS
 import com.materialkolor.builder.codegen.target.custom.THEME_COLORS
 import com.materialkolor.builder.codegen.target.custom.propertyName
@@ -10,7 +11,15 @@ import com.materialkolor.builder.codegen.target.fluent.THEME_SHADES
 import com.materialkolor.builder.codegen.target.material3.EXTENDED_COLORS_TYPE
 import com.materialkolor.builder.codegen.target.material3.LOCAL_EXTENDED_COLORS
 import com.materialkolor.builder.codegen.target.material3.REMEMBER_EXTENDED_COLORS
+import com.materialkolor.builder.codegen.target.unstyled.COLORS_PROPERTY
+import com.materialkolor.builder.codegen.target.unstyled.THEME_TOKENS
+import com.materialkolor.builder.codegen.target.unstyled.accentTokenNames
+import com.materialkolor.builder.codegen.target.unstyled.colorsName
+import com.materialkolor.builder.codegen.target.unstyled.tokenName
+import com.materialkolor.builder.domain.export.ContrastVariant
+import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.CustomSlot
+import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportTarget
 
@@ -71,7 +80,9 @@ public object ReservedNames {
         return buildList {
             if (document.themeName.folded() in forTheme) add(ReservedNameClash.ThemeName(document.themeName))
             document.accents.forEachIndexed { index, accent ->
-                if (accent.name.folded() in forAccents) add(ReservedNameClash.AccentName(index, accent.name))
+                val taken = accent.name.folded() in forAccents ||
+                    (target == ExportTarget.Unstyled && flattenedClash(document.accents, index)) // b-111b
+                if (taken) add(ReservedNameClash.AccentName(index, accent.name))
             }
         }
     }
@@ -80,7 +91,7 @@ public object ReservedNames {
     private fun topLevel(target: ExportTarget): Set<String> =
         when (target) {
             ExportTarget.Material3, ExportTarget.Material3Expressive -> Material3Symbols.names() + Material3Declared
-            ExportTarget.Unstyled -> UnstyledSymbols.names()
+            ExportTarget.Unstyled -> UnstyledSymbols.names() + UnstyledDeclared // b-111b
             ExportTarget.Fluent -> FluentSymbols.names() + FluentDeclared // b-111
             ExportTarget.Custom -> CommonSymbols.names() + CustomDeclared // b-111
         }
@@ -91,13 +102,34 @@ public object ReservedNames {
      */
     private fun members(target: ExportTarget): Set<String> =
         when (target) {
-            ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Unstyled, ExportTarget.Fluent -> {
+            ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Fluent -> {
                 emptySet()
+            }
+            ExportTarget.Unstyled -> {
+                UnstyledTokens // b-111b
             }
             ExportTarget.Custom -> {
                 CustomMembers
             }
         }
+
+    // b-111b
+
+    /**
+     * Whether the accent at [index] shares one of its four flattened token names with a library token
+     * or with an earlier accent. Tokens are equal by name, so either one would quietly overwrite the other.
+     */
+    private fun flattenedClash(
+        accents: List<Accent>,
+        index: Int,
+    ): Boolean {
+        val tokens = UnstyledTokens.mapTo(mutableSetOf()) { it.folded() }
+        val earlier = accents.take(index).flatMapTo(mutableSetOf()) { accent -> accent.flattened() }
+
+        return accents[index].flattened().any { name -> name in tokens || name in earlier }
+    }
+
+    private fun Accent.flattened(): List<String> = accentTokenNames(name).map { it.folded() }
 
     private fun String.folded(): String = replaceFirstChar { char -> char.uppercaseChar() }
 
@@ -163,6 +195,10 @@ private val UnstyledSymbols: List<Symbol> =
             Symbols.MaterialKolorTokens,
             Symbols.BuildThemeV2,
             Symbols.ThemeToken,
+            Symbols.ThemeProperty, // b-111b
+            Symbols.UnstyledColorScheme,
+            Symbols.Map,
+            Symbols.MapOf,
         )
 
 private val FluentSymbols: List<Symbol> =
@@ -185,3 +221,36 @@ private val CustomMembers: Set<String> = CustomSlot.entries.mapTo(mutableSetOf()
 
 /** What the Fluent export declares. */
 private val FluentDeclared: Set<String> = setOf(THEME_SHADES)
+
+// b-111b
+
+/** What the Unstyled frozen export declares, the tokens object and a light and dark map per contrast. */
+private val UnstyledDeclared: Set<String> =
+    ContrastVariant.entries.flatMapTo(mutableSetOf(THEME_TOKENS)) { variant ->
+        FrozenMode.entries.map { mode -> colorsName(variant, mode) }
+    }
+
+/**
+ * The members of `ThemeTokens` other than the accents, which are the names of all 63 `MaterialKolorTokens`
+ * and its `colors` property. The 15 tokens with no [Role] are held too, since the dynamic export writes
+ * accents into `MaterialKolorTokens.colors` beside them.
+ */
+private val UnstyledTokens: Set<String> =
+    Role.entries.mapTo(mutableSetOf(COLORS_PROPERTY)) { role -> role.tokenName } +
+        listOf(
+            "primaryPaletteKeyColor",
+            "secondaryPaletteKeyColor",
+            "tertiaryPaletteKeyColor",
+            "errorPaletteKeyColor",
+            "neutralPaletteKeyColor",
+            "neutralVariantPaletteKeyColor",
+            "shadow",
+            "controlActivated",
+            "controlNormal",
+            "controlHighlight",
+            "textPrimaryInverse",
+            "textSecondaryAndTertiaryInverse",
+            "textPrimaryInverseDisableOnly",
+            "textSecondaryAndTertiaryInverseDisabled",
+            "textHintInverse",
+        )

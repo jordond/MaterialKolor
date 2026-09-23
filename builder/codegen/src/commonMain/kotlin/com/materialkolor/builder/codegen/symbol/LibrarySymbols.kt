@@ -18,6 +18,10 @@ public object Symbols {
     public val Unit: Symbol = Symbol("kotlin", "Unit", SymbolKind.Class)
     public val OptIn: Symbol = Symbol("kotlin", "OptIn", SymbolKind.Annotation)
 
+    // b-111b
+    public val Map: Symbol = Symbol("kotlin.collections", "Map", SymbolKind.Class)
+    public val MapOf: Symbol = Symbol("kotlin.collections", "mapOf", SymbolKind.Function)
+
     // Compose runtime, foundation, graphics and animation.
 
     public val Composable: Symbol = Symbol(COMPOSE_RUNTIME, "Composable", SymbolKind.Annotation)
@@ -75,6 +79,10 @@ public object Symbols {
     public val MaterialKolorTokens: Symbol = Symbol(KOLOR_UNSTYLED, "MaterialKolorTokens", SymbolKind.Class)
     public val BuildThemeV2: Symbol = Symbol(UNSTYLED_THEME, "buildThemeV2", SymbolKind.Function)
     public val ThemeToken: Symbol = Symbol(UNSTYLED_THEME, "ThemeToken", SymbolKind.Class)
+
+    // b-111b
+    public val ThemeProperty: Symbol = Symbol(UNSTYLED_THEME, "ThemeProperty", SymbolKind.Class)
+    public val UnstyledColorScheme: Symbol = Symbol(UNSTYLED_THEME, "ColorScheme", SymbolKind.Class)
 
     // MaterialKolor Fluent, and Compose Fluent itself.
 

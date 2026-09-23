@@ -139,6 +139,19 @@ public fun Expression.member(name: String): Expression = access(this, plainToken
 /** An imported extension property read off this value, which imports it. */
 public fun Expression.member(symbol: Symbol): Expression = access(this, plainToken(symbol.simpleName), listOf(symbol))
 
+// b-111b
+
+/** `receiver[key]`, as in `properties[ThemeTokens.colors]`, written on one line. */
+public fun Expression.index(key: Expression): Expression {
+    require(!breaksOnItsOwn) { "The receiver of an index has to fit on one line" }
+    require(!key.breaksOnItsOwn) { "The key of an index has to fit on one line" }
+
+    return Expression(
+        tokens = tokens + punctuationToken("[") + key.tokens + punctuationToken("]"),
+        symbols = symbols + key.symbols,
+    )
+}
+
 /**
  * A member function called on this value, as in `scheme.copy(primary = SeedColor)`.
  *

@@ -296,6 +296,22 @@ class ControlFlowTest {
         }
     }
 
+    // b-111b
+    @Test
+    fun index_memberKey_writesTheKeyInBrackets() {
+        val value = ref("properties").index(ref("ThemeTokens").member("colors"))
+
+        assertEquals("val x = properties[ThemeTokens.colors]", written(value))
+    }
+
+    @Test
+    fun index_receiverOrKeyThatBreaks_fails() {
+        val breaks = whenExpression { otherwise(ref("x")) }
+
+        assertFailsWith<IllegalArgumentException> { breaks.index(ref("key")) }
+        assertFailsWith<IllegalArgumentException> { ref("map").index(breaks) }
+    }
+
     @Test
     fun infix_provides_writesTheNameBetweenTheSides() {
         assertEquals(

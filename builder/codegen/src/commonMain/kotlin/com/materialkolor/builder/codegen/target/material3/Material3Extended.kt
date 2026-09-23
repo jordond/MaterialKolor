@@ -24,6 +24,7 @@ import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.OnColorThreshold
+import com.materialkolor.builder.domain.persist.ExportMode
 
 /** The composable in `ExtendedColors.kt` that builds every accent family, which `Theme.kt` calls. */
 internal const val REMEMBER_EXTENDED_COLORS: String = "rememberExtendedColors"
@@ -60,7 +61,7 @@ internal object Material3Extended {
         if (accents.isEmpty()) return null
 
         return kotlinFile(path = input.sourcePath("ExtendedColors.kt"), packageName = input.prefs.packageName) {
-            header(Header.lines(input))
+            header(Header.lines(input, ExportMode.Dynamic))
             extendedColorsDeclarations(input, accents.map { accent -> accent.propertyName })
             rememberExtendedColors(accents)
             colorFamily()
