@@ -32,3 +32,23 @@ kotlin {
         }
     }
 }
+
+// b-220
+// The interop tests are plain DOM checks with no Compose scene. `wasmJsBrowserTest` runs them in
+// headless Chrome, the same way `:builder:app` runs its browser test.
+kotlin {
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser {
+            testTask {
+                useKarma { useChromeHeadless() }
+            }
+        }
+    }
+
+    sourceSets {
+        wasmJsTest.dependencies {
+            implementation(kotlin("test"))
+        }
+    }
+}
