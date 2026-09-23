@@ -6,11 +6,12 @@ import com.materialkolor.builder.codegen.dsl.call
 import com.materialkolor.builder.codegen.dsl.kotlinFile
 import com.materialkolor.builder.codegen.dsl.ref
 import com.materialkolor.builder.codegen.symbol.Symbols
-import com.materialkolor.builder.codegen.target.material3.CONTENT_PARAMETER
-import com.materialkolor.builder.codegen.target.material3.IS_DARK_PARAMETER
-import com.materialkolor.builder.codegen.target.material3.frozenThemeFunction
+import com.materialkolor.builder.codegen.target.CONTENT_PARAMETER
+import com.materialkolor.builder.codegen.target.IS_DARK_PARAMETER
+import com.materialkolor.builder.codegen.target.frozenThemeFunction
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
+import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportTarget
 
 /**
@@ -47,7 +48,7 @@ private fun themeFile(input: ExportInput): GeneratedFile {
     )
 
     return kotlinFile(path = input.sourcePath("Theme.kt"), packageName = input.prefs.packageName) {
-        header(Header.lines(input))
+        header(Header.lines(input, ExportMode.Frozen))
         property(
             name = THEME_SHADES,
             value = call(Symbols.FluentShades, multiline = true) {

@@ -1,31 +1,32 @@
 package com.materialkolor.builder.codegen.target.material3
 
 import com.materialkolor.builder.codegen.ExportInput
-import com.materialkolor.builder.codegen.dsl.AnnotationSpec
 import com.materialkolor.builder.codegen.dsl.BodyScope
-import com.materialkolor.builder.codegen.dsl.ClassKind
 import com.materialkolor.builder.codegen.dsl.Expression
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
-import com.materialkolor.builder.codegen.dsl.KotlinFileScope
 import com.materialkolor.builder.codegen.dsl.call
-import com.materialkolor.builder.codegen.dsl.ifElse
 import com.materialkolor.builder.codegen.dsl.infix
 import com.materialkolor.builder.codegen.dsl.kotlinFile
-import com.materialkolor.builder.codegen.dsl.lambdaType
 import com.materialkolor.builder.codegen.dsl.ref
-import com.materialkolor.builder.codegen.dsl.type
 import com.materialkolor.builder.codegen.symbol.Symbols
+import com.materialkolor.builder.codegen.target.CONTENT_PARAMETER
+import com.materialkolor.builder.codegen.target.FrozenMode
+import com.materialkolor.builder.codegen.target.byMode
+import com.materialkolor.builder.codegen.target.colorFamilyValue
+import com.materialkolor.builder.codegen.target.colorsIn
+import com.materialkolor.builder.codegen.target.contrastVariants
+import com.materialkolor.builder.codegen.target.frozenThemeFunction
+import com.materialkolor.builder.codegen.target.namePrefix
+import com.materialkolor.builder.codegen.target.propertyName
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.color.Argb
-import com.materialkolor.builder.domain.export.AccentColors
-import com.materialkolor.builder.domain.export.AccentFamilyValues
 import com.materialkolor.builder.domain.export.ContrastVariant
-import com.materialkolor.builder.domain.export.ResolvedExport
 import com.materialkolor.builder.domain.export.RoleTable
 import com.materialkolor.builder.domain.model.MotionSchemeChoice
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RoleGroup
+import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportTarget
 
 /**
@@ -47,18 +48,6 @@ public object Material3Frozen {
         return listOfNotNull(colorFile(input), themeFile(input), extendedColorsFile(input))
     }
 }
-
-/** The two modes a frozen export writes each set of colors in, light first. */
-internal enum class FrozenMode {
-    Light,
-    Dark,
-}
-
-/** The theme function's first parameter, which every frozen theme picks its colors by. */
-internal const val IS_DARK_PARAMETER: String = "isDark"
-
-/** The theme function's content parameter. */
-internal const val CONTENT_PARAMETER: String = "content"
 
 private const val EXTENDED_COLORS = "extendedColors"
 private const val EXTENDED_LIGHT = "extendedLight"
@@ -105,79 +94,11 @@ private val SchemeOrder: List<Role> =
         Role.SurfaceDim,
     ) + Role.entries.filter { role -> role.group == RoleGroup.Fixed }
 
-/** The contrast variants the export writes, standard first and then medium and high. */
-internal val ResolvedExport.contrastVariants: List<ContrastVariant>
-    get() = ContrastVariant.entries.filter { variant -> variant in roles }
-
-/** What a value at this contrast is prefixed with, as in `mediumContrast`, and nothing at the standard one. */
-internal val ContrastVariant.namePrefix: String
-    get() = when (this) {
-        ContrastVariant.Standard -> ""
-        ContrastVariant.Medium -> "mediumContrast"
-        ContrastVariant.High -> "highContrast"
-    }
-
-/** The property an accent's family is read from, as in `brand`. */
-internal val AccentFamilyValues.propertyName: String
-    get() = name.replaceFirstChar { char -> char.lowercaseChar() }
-
-/** The accent's four colors in [mode]. */
-internal fun AccentFamilyValues.colorsIn(mode: FrozenMode): AccentColors =
-    when (mode) {
-        FrozenMode.Light -> light
-        FrozenMode.Dark -> dark
-    }
-
-/** `if (isDark) dark else light`, which is how a frozen theme picks between its two standard values. */
-internal fun byMode(
-    light: String,
-    dark: String,
-): Expression = ifElse(condition = ref(IS_DARK_PARAMETER), whenTrue = ref(dark), whenFalse = ref(light))
-
-/**
- * `@Composable fun AppTheme(isDark: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit)`,
- * the one theme function every frozen export writes, with [statements] as its body.
- */
-internal fun KotlinFileScope.frozenThemeFunction(
-    input: ExportInput,
-    statements: BodyScope.() -> Unit,
-) {
-    function(name = input.document.themeName, annotations = listOf(Symbols.Composable)) {
-        parameter(IS_DARK_PARAMETER, Symbols.Boolean, default = call(Symbols.IsSystemInDarkTheme))
-        parameter(CONTENT_PARAMETER, lambdaType(annotations = listOf(Symbols.Composable)))
-        body(statements)
-    }
-}
-
-/** The `ColorFamily` data class, the same one the dynamic export declares for its accents. */
-internal fun KotlinFileScope.colorFamilyClass() {
-    classDeclaration(
-        name = COLOR_FAMILY,
-        kind = ClassKind.DataClass,
-        annotations = listOf(AnnotationSpec(Symbols.Immutable)),
-    ) {
-        FamilyParts.forEach { part -> property(part, Symbols.Color) }
-    }
-}
-
-/**
- * `ColorFamily(color = ..., onColor = ..., colorContainer = ..., onColorContainer = ...)` with the
- * accent's literal colors. The domain's container and on container land in the family's
- * `colorContainer` and `onColorContainer`.
- */
-internal fun colorFamilyValue(colors: AccentColors): Expression {
-    val values = listOf(colors.color, colors.onColor, colors.container, colors.onContainer)
-
-    return call(COLOR_FAMILY, multiline = true) {
-        FamilyParts.zip(values).forEach { (part, color) -> argument(part, Literals.colorLiteral(color.value)) }
-    }
-}
-
 private fun colorFile(input: ExportInput): GeneratedFile {
     val resolved = input.resolved
 
     return kotlinFile(path = input.sourcePath("Color.kt"), packageName = input.prefs.packageName) {
-        header(Header.lines(input))
+        header(Header.lines(input, ExportMode.Frozen))
         resolved.contrastVariants.forEach { variant ->
             val table = resolved.roles.getValue(variant)
             FrozenMode.entries.forEach { mode ->
@@ -196,7 +117,7 @@ private fun themeFile(input: ExportInput): GeneratedFile {
         schemeName(ContrastVariant.Standard, FrozenMode.Dark)
 
     return kotlinFile(path = input.sourcePath("Theme.kt"), packageName = input.prefs.packageName) {
-        header(Header.lines(input))
+        header(Header.lines(input, ExportMode.Frozen))
         variants.forEach { variant ->
             if (variant == variants.firstOrNull { other -> other != ContrastVariant.Standard }) {
                 comment(
@@ -282,25 +203,8 @@ private fun extendedColorsFile(input: ExportInput): GeneratedFile? {
     if (accents.isEmpty()) return null
 
     return kotlinFile(path = input.sourcePath("ExtendedColors.kt"), packageName = input.prefs.packageName) {
-        header(Header.lines(input))
-        colorFamilyClass()
-        classDeclaration(
-            name = EXTENDED_COLORS_TYPE,
-            kind = ClassKind.DataClass,
-            annotations = listOf(AnnotationSpec(Symbols.Immutable)),
-        ) {
-            accents.forEach { accent -> property(accent.propertyName, type(COLOR_FAMILY)) }
-        }
-        property(
-            name = LOCAL_EXTENDED_COLORS,
-            value = call(Symbols.StaticCompositionLocalOf) {
-                typeArgument(type(EXTENDED_COLORS_TYPE))
-                trailingLambda {
-                    val message = "ExtendedColors are only provided inside ${input.document.themeName}"
-                    call("error") { argument(Literals.string(message)) }
-                }
-            },
-        )
+        header(Header.lines(input, ExportMode.Frozen))
+        extendedColorsDeclarations(input, accents.map { accent -> accent.propertyName })
         FrozenMode.entries.forEach { mode ->
             val name = when (mode) {
                 FrozenMode.Light -> EXTENDED_LIGHT

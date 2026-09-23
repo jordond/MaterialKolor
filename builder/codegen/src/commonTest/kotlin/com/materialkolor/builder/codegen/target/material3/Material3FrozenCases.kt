@@ -6,7 +6,10 @@ import com.materialkolor.builder.codegen.Fixtures
 import com.materialkolor.builder.codegen.GoldenDigest
 import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
-import com.materialkolor.builder.codegen.dsl.MAX_LINE_LENGTH
+import com.materialkolor.builder.codegen.target.expectedVariants
+import com.materialkolor.builder.codegen.target.frozenPrefs
+import com.materialkolor.builder.codegen.target.lintFailures
+import com.materialkolor.builder.codegen.target.materialKolorImports
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.export.ContrastVariant
 import com.materialkolor.builder.domain.model.Library
@@ -15,32 +18,12 @@ import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.domain.persist.ExportMode
-import com.materialkolor.builder.domain.persist.ExportPrefs
 import com.materialkolor.builder.domain.persist.FrozenVariants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-
-/** The prefs of a frozen export, at the standard contrast or at every contrast. */
-internal fun frozenPrefs(variants: FrozenVariants = FrozenVariants.StandardOnly): ExportPrefs =
-    ExportPrefs(mode = ExportMode.Frozen, frozenVariants = variants)
-
-/** Every file in [files] that imports anything from MaterialKolor, which a frozen export never does. */
-internal fun materialKolorImports(files: List<GeneratedFile>): List<String> =
-    files.flatMap { file -> file.text.lines() }.filter { line -> line.startsWith("import com.materialkolor") }
-
-/** Every code line of [files] past the column limit or ending in a space, which ktlint would reject. */
-internal fun lintFailures(files: List<GeneratedFile>): List<String> =
-    files.flatMap { file ->
-        val lines = file.text.lines()
-        // The header's share link grows with the theme. ktlint leaves a line that is only a comment alone.
-        val tooLong = lines.filterNot { it.startsWith("//") }.filter { it.length > MAX_LINE_LENGTH }
-
-        (tooLong + lines.filter { it.endsWith(" ") }).map { line -> "${file.path} $line" }
-    }
 
 /**
  * The golden cases of the Material 3 frozen export, by case name.
@@ -106,7 +89,7 @@ class Material3FrozenTest {
             val colors = files.single { it.path.endsWith("/Color.kt") }.text
             val theme = files.single { it.path.endsWith("/Theme.kt") }.text
 
-            assertEquals(input.resolved.roles.keys, input.prefs.frozenVariants.expected(), case)
+            assertEquals(input.resolved.roles.keys, input.prefs.frozenVariants.expectedVariants(), case)
             input.resolved.roles.forEach { (variant, table) ->
                 Role.entries.forEach { role ->
                     val parameter = role.name.replaceFirstChar { it.lowercaseChar() }
@@ -187,11 +170,5 @@ class Material3FrozenTest {
             ContrastVariant.Standard -> ""
             ContrastVariant.Medium -> "MediumContrast"
             ContrastVariant.High -> "HighContrast"
-        }
-
-    private fun FrozenVariants.expected(): Set<ContrastVariant> =
-        when (this) {
-            FrozenVariants.StandardOnly -> setOf(ContrastVariant.Standard)
-            FrozenVariants.AllContrasts -> ContrastVariant.entries.toSet()
         }
 }

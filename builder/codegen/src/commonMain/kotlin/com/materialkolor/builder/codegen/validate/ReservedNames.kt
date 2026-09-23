@@ -2,11 +2,11 @@ package com.materialkolor.builder.codegen.validate
 
 import com.materialkolor.builder.codegen.symbol.Symbol
 import com.materialkolor.builder.codegen.symbol.Symbols
+import com.materialkolor.builder.codegen.target.COLOR_FAMILY
 import com.materialkolor.builder.codegen.target.custom.LOCAL_THEME_COLORS
 import com.materialkolor.builder.codegen.target.custom.THEME_COLORS
 import com.materialkolor.builder.codegen.target.custom.propertyName
 import com.materialkolor.builder.codegen.target.fluent.THEME_SHADES
-import com.materialkolor.builder.codegen.target.material3.COLOR_FAMILY
 import com.materialkolor.builder.codegen.target.material3.EXTENDED_COLORS_TYPE
 import com.materialkolor.builder.codegen.target.material3.LOCAL_EXTENDED_COLORS
 import com.materialkolor.builder.codegen.target.material3.REMEMBER_EXTENDED_COLORS
@@ -56,8 +56,28 @@ public sealed interface ReservedNameClash {
  * ways, as `brand` for its family and `BrandSeed` for its seed.
  */
 public object ReservedNames {
-    /** Every name [target] refers to by its simple name, whichever mode it is exported in. */
-    public fun of(target: ExportTarget): Set<String> =
+    /**
+     * Every name an accent cannot take in [target], whichever mode it is exported in. That is every
+     * name the export refers to by its simple name, and the members an accent's family sits beside.
+     */
+    public fun of(target: ExportTarget): Set<String> = topLevel(target) + members(target)
+
+    /** The theme and accent names of [document] that its export target cannot use, theme name first. */
+    public fun clashes(document: ThemeDocument): List<ReservedNameClash> {
+        val target = ExportTarget.of(document.library, document.expressive)
+        val forTheme = topLevel(target).mapTo(mutableSetOf()) { it.folded() }
+        val forAccents = of(target).mapTo(mutableSetOf()) { it.folded() }
+
+        return buildList {
+            if (document.themeName.folded() in forTheme) add(ReservedNameClash.ThemeName(document.themeName))
+            document.accents.forEachIndexed { index, accent ->
+                if (accent.name.folded() in forAccents) add(ReservedNameClash.AccentName(index, accent.name))
+            }
+        }
+    }
+
+    /** What [target] imports or declares at the top of a file, which the theme function sits beside too. */
+    private fun topLevel(target: ExportTarget): Set<String> =
         when (target) {
             ExportTarget.Material3, ExportTarget.Material3Expressive -> Material3Symbols.names() + Material3Declared
             ExportTarget.Unstyled -> UnstyledSymbols.names()
@@ -65,17 +85,19 @@ public object ReservedNames {
             ExportTarget.Custom -> CommonSymbols.names() + CustomDeclared // b-111
         }
 
-    /** The theme and accent names of [document] that its export target cannot use, theme name first. */
-    public fun clashes(document: ThemeDocument): List<ReservedNameClash> {
-        val reserved = of(ExportTarget.of(document.library, document.expressive)).mapTo(mutableSetOf()) { it.folded() }
-
-        return buildList {
-            if (document.themeName.folded() in reserved) add(ReservedNameClash.ThemeName(document.themeName))
-            document.accents.forEachIndexed { index, accent ->
-                if (accent.name.folded() in reserved) add(ReservedNameClash.AccentName(index, accent.name))
+    /**
+     * The members of the class an accent's family is a property of, other than the accents. A theme
+     * function cannot clash with a member property, so only accents are held to these.
+     */
+    private fun members(target: ExportTarget): Set<String> =
+        when (target) {
+            ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Unstyled, ExportTarget.Fluent -> {
+                emptySet()
+            }
+            ExportTarget.Custom -> {
+                CustomMembers
             }
         }
-    }
 
     private fun String.folded(): String = replaceFirstChar { char -> char.uppercaseChar() }
 
@@ -155,13 +177,11 @@ private val FluentSymbols: List<Symbol> =
 
 // b-111
 
-/**
- * What the Custom export declares. An accent becomes a property of `ThemeColors` beside the slots,
- * so it cannot share a slot's name either.
- */
-private val CustomDeclared: Set<String> =
-    CustomSlot.entries.mapTo(mutableSetOf()) { slot -> slot.propertyName } +
-        setOf(THEME_COLORS, LOCAL_THEME_COLORS, COLOR_FAMILY)
+/** What the Custom export declares. */
+private val CustomDeclared: Set<String> = setOf(THEME_COLORS, LOCAL_THEME_COLORS, COLOR_FAMILY)
+
+/** The slots of `ThemeColors`, which an accent becomes a property beside and so cannot share a name with. */
+private val CustomMembers: Set<String> = CustomSlot.entries.mapTo(mutableSetOf()) { slot -> slot.propertyName }
 
 /** What the Fluent export declares. */
 private val FluentDeclared: Set<String> = setOf(THEME_SHADES)

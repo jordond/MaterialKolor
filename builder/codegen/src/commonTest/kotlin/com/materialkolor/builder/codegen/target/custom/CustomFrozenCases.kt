@@ -6,9 +6,10 @@ import com.materialkolor.builder.codegen.Fixtures
 import com.materialkolor.builder.codegen.GoldenDigest
 import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
-import com.materialkolor.builder.codegen.target.material3.frozenPrefs
-import com.materialkolor.builder.codegen.target.material3.lintFailures
-import com.materialkolor.builder.codegen.target.material3.materialKolorImports
+import com.materialkolor.builder.codegen.target.expectedVariants
+import com.materialkolor.builder.codegen.target.frozenPrefs
+import com.materialkolor.builder.codegen.target.lintFailures
+import com.materialkolor.builder.codegen.target.materialKolorImports
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.export.ContrastVariant
 import com.materialkolor.builder.domain.model.CustomSlot
@@ -79,6 +80,7 @@ class CustomFrozenTest {
             val colors = themeColors(input)
             val blocks = colors.split("\n\n")
 
+            assertEquals(input.resolved.customSlots.keys, input.prefs.frozenVariants.expectedVariants(), case)
             input.resolved.customSlots.forEach { (variant, slots) ->
                 listOf("Light" to slots.light, "Dark" to slots.dark).forEach { (mode, values) ->
                     val name = variant.valueName(mode)

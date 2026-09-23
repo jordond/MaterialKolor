@@ -16,6 +16,10 @@ import com.materialkolor.builder.codegen.dsl.type
 import com.materialkolor.builder.codegen.symbol.DefaultArguments
 import com.materialkolor.builder.codegen.symbol.Symbols
 import com.materialkolor.builder.codegen.symbol.optionalArgument
+import com.materialkolor.builder.codegen.target.COLOR_FAMILY
+import com.materialkolor.builder.codegen.target.FamilyParts
+import com.materialkolor.builder.codegen.target.colorFamilyClass
+import com.materialkolor.builder.codegen.target.propertyName
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.model.Accent
@@ -27,9 +31,6 @@ internal const val REMEMBER_EXTENDED_COLORS: String = "rememberExtendedColors"
 /** The composition local `Theme.kt` provides the accent families through. */
 internal const val LOCAL_EXTENDED_COLORS: String = "LocalExtendedColors"
 
-/** The data class `ExtendedColors.kt` declares for the four colors of one accent. */
-internal const val COLOR_FAMILY: String = "ColorFamily"
-
 /** The data class `ExtendedColors.kt` declares to hold every accent family. */
 internal const val EXTENDED_COLORS_TYPE: String = "ExtendedColors"
 
@@ -39,9 +40,6 @@ private const val IS_DARK = "isDark"
 private const val TONE = "tone"
 private const val CONTAINER_TONE = "containerTone"
 private const val THRESHOLD = "threshold"
-
-/** The four colors of a family, in the order `ColorFamily` declares them. */
-internal val FamilyParts: List<String> = listOf("color", "onColor", "colorContainer", "onColorContainer") // b-111
 
 /**
  * `ExtendedColors.kt`, the color families the theme's accents turn into.
@@ -60,35 +58,43 @@ internal object Material3Extended {
     fun file(input: ExportInput): GeneratedFile? {
         val accents = input.document.accents
         if (accents.isEmpty()) return null
-        val immutable = listOf(AnnotationSpec(Symbols.Immutable))
 
         return kotlinFile(path = input.sourcePath("ExtendedColors.kt"), packageName = input.prefs.packageName) {
             header(Header.lines(input))
-            classDeclaration(name = COLOR_FAMILY, kind = ClassKind.DataClass, annotations = immutable) {
-                FamilyParts.forEach { part -> property(part, Symbols.Color) }
-            }
-            classDeclaration(name = EXTENDED_COLORS_TYPE, kind = ClassKind.DataClass, annotations = immutable) {
-                accents.forEach { accent -> property(accent.propertyName, type(COLOR_FAMILY)) }
-            }
-            property(
-                name = LOCAL_EXTENDED_COLORS,
-                value = call(Symbols.StaticCompositionLocalOf) {
-                    typeArgument(type(EXTENDED_COLORS_TYPE))
-                    trailingLambda {
-                        val message = "ExtendedColors are only provided inside ${input.document.themeName}"
-                        call("error") { argument(Literals.string(message)) }
-                    }
-                },
-            )
+            extendedColorsDeclarations(input, accents.map { accent -> accent.propertyName })
             rememberExtendedColors(accents)
             colorFamily()
         }
     }
 }
 
-/** The property an accent's family is read from, as in `brand`. */
-internal val Accent.propertyName: String
-    get() = name.replaceFirstChar { char -> char.lowercaseChar() }
+/**
+ * `ColorFamily`, `ExtendedColors` with a family per name in [accentNames], and `LocalExtendedColors`,
+ * which open `ExtendedColors.kt` in both modes. The two differ only in how they fill the families.
+ */
+internal fun KotlinFileScope.extendedColorsDeclarations(
+    input: ExportInput,
+    accentNames: List<String>,
+) {
+    colorFamilyClass()
+    classDeclaration(
+        name = EXTENDED_COLORS_TYPE,
+        kind = ClassKind.DataClass,
+        annotations = listOf(AnnotationSpec(Symbols.Immutable)),
+    ) {
+        accentNames.forEach { name -> property(name, type(COLOR_FAMILY)) }
+    }
+    property(
+        name = LOCAL_EXTENDED_COLORS,
+        value = call(Symbols.StaticCompositionLocalOf) {
+            typeArgument(type(EXTENDED_COLORS_TYPE))
+            trailingLambda {
+                val message = "ExtendedColors are only provided inside ${input.document.themeName}"
+                call("error") { argument(Literals.string(message)) }
+            }
+        },
+    )
+}
 
 /** The value in `Color.kt` that holds an accent's seed, as in `BrandSeed`. */
 internal val Accent.seedName: String

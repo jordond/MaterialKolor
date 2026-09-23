@@ -11,17 +11,17 @@ import com.materialkolor.builder.codegen.dsl.kotlinFile
 import com.materialkolor.builder.codegen.dsl.ref
 import com.materialkolor.builder.codegen.dsl.type
 import com.materialkolor.builder.codegen.symbol.Symbols
-import com.materialkolor.builder.codegen.target.material3.COLOR_FAMILY
-import com.materialkolor.builder.codegen.target.material3.CONTENT_PARAMETER
-import com.materialkolor.builder.codegen.target.material3.FrozenMode
-import com.materialkolor.builder.codegen.target.material3.byMode
-import com.materialkolor.builder.codegen.target.material3.colorFamilyClass
-import com.materialkolor.builder.codegen.target.material3.colorFamilyValue
-import com.materialkolor.builder.codegen.target.material3.colorsIn
-import com.materialkolor.builder.codegen.target.material3.contrastVariants
-import com.materialkolor.builder.codegen.target.material3.frozenThemeFunction
-import com.materialkolor.builder.codegen.target.material3.namePrefix
-import com.materialkolor.builder.codegen.target.material3.propertyName
+import com.materialkolor.builder.codegen.target.COLOR_FAMILY
+import com.materialkolor.builder.codegen.target.CONTENT_PARAMETER
+import com.materialkolor.builder.codegen.target.FrozenMode
+import com.materialkolor.builder.codegen.target.byMode
+import com.materialkolor.builder.codegen.target.colorFamilyClass
+import com.materialkolor.builder.codegen.target.colorFamilyValue
+import com.materialkolor.builder.codegen.target.colorsIn
+import com.materialkolor.builder.codegen.target.contrastVariants
+import com.materialkolor.builder.codegen.target.frozenThemeFunction
+import com.materialkolor.builder.codegen.target.namePrefix
+import com.materialkolor.builder.codegen.target.propertyName
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.color.Argb
@@ -29,6 +29,7 @@ import com.materialkolor.builder.domain.export.AccentFamilyValues
 import com.materialkolor.builder.domain.export.ContrastVariant
 import com.materialkolor.builder.domain.export.CustomSlotValues
 import com.materialkolor.builder.domain.model.CustomSlot
+import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportTarget
 
 /**
@@ -71,7 +72,7 @@ private fun themeColorsFile(input: ExportInput): GeneratedFile {
         themeColorsName(ContrastVariant.Standard, FrozenMode.Dark)
 
     return kotlinFile(path = input.sourcePath("ThemeColors.kt"), packageName = input.prefs.packageName) {
-        header(Header.lines(input))
+        header(Header.lines(input, ExportMode.Frozen))
         if (accents.isNotEmpty()) colorFamilyClass()
         classDeclaration(
             name = THEME_COLORS,
@@ -111,7 +112,7 @@ private fun themeColorsValue(
 
 private fun themeFile(input: ExportInput): GeneratedFile =
     kotlinFile(path = input.sourcePath("Theme.kt"), packageName = input.prefs.packageName) {
-        header(Header.lines(input))
+        header(Header.lines(input, ExportMode.Frozen))
         property(
             name = LOCAL_THEME_COLORS,
             value = call(Symbols.StaticCompositionLocalOf) {

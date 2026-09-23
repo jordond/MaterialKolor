@@ -5,6 +5,7 @@ import com.materialkolor.builder.codegen.target.custom.CustomFrozen
 import com.materialkolor.builder.codegen.target.custom.CustomFrozenCases
 import com.materialkolor.builder.codegen.target.fluent.FluentFrozen
 import com.materialkolor.builder.codegen.target.fluent.FluentFrozenCases
+import com.materialkolor.builder.codegen.target.frozenPrefs
 import com.materialkolor.builder.codegen.target.material3.Material3Dynamic
 import com.materialkolor.builder.codegen.target.material3.Material3DynamicCases
 import com.materialkolor.builder.codegen.target.material3.Material3Frozen
@@ -126,6 +127,22 @@ class ReservedNamesTest {
             ),
             ReservedNames.clashes(document),
         )
+    }
+
+    @Test
+    fun clashes_customThemeNamedLikeASlot_passesWhileAnAccentNamedLikeOneIsReported() {
+        listOf("Surface", "TextStrong").forEach { themeName ->
+            val document = ThemeDocument.Default.copy(
+                library = Library.Custom,
+                themeName = themeName,
+                accents = listOf(Accent(name = "TextStrong", seed = seed)),
+            )
+
+            val expected = listOf(ReservedNameClash.AccentName(0, "TextStrong"))
+
+            assertEquals(expected, ReservedNames.clashes(document), themeName)
+            CustomFrozen.files(Fixtures.input(document.copy(accents = emptyList()), frozenPrefs()))
+        }
     }
 
     // b-111
