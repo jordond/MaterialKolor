@@ -110,6 +110,10 @@ private object DesktopEnvironment : Environment {
     override fun writeTabProject(id: String?) {
         tabProject = id
     }
+
+    // b-301
+    // A window is never hidden the way a tab is, and closing it ends the session anyway.
+    override val pageHides: Flow<Unit> = emptyFlow()
 }
 
 private fun notOnDesktop(): Result<Unit> = Result.failure(UnsupportedOperationException("Not available on desktop yet"))

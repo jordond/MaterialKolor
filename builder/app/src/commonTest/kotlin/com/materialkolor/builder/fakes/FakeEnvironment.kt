@@ -2,7 +2,9 @@ package com.materialkolor.builder.fakes
 
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.domain.color.Argb
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 
 /**
  * An [Environment] a test can set, that remembers what the builder asked of it.
@@ -66,4 +68,7 @@ internal class FakeEnvironment(
     override fun writeTabProject(id: String?) {
         tabProject = id
     }
+
+    // b-301
+    override val pageHides: Flow<Unit> = emptyFlow()
 }

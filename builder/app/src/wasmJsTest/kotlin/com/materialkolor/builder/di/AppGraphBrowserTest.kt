@@ -139,4 +139,7 @@ private object TestEnvironment : Environment {
     override fun readTabProject(): String? = null
 
     override fun writeTabProject(id: String?) = Unit
+
+    // b-301
+    override val pageHides: Flow<Unit> = emptyFlow()
 }

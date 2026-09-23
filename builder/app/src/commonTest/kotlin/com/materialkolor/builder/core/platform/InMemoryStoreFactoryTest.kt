@@ -67,6 +67,43 @@ class InMemoryStoreFactoryTest {
             factory.textAt(StorageKeys.quarantine(StorageKeys.PREFS, MOVED_AT)) shouldBe BROKEN
         }
 
+    // b-301a
+    @Test
+    fun get_newerSchemaText_leavesItInPlaceAndReportsItOnce() =
+        runTest {
+            val reported = mutableListOf<Quarantined>()
+            backgroundScope.launch { factory.quarantined.toList(reported) }
+            factory.seed(StorageKeys.PREFS, NEWER)
+            val sameKey = factory.create(StorageKeys.PREFS, Preferences.Codec, Preferences())
+
+            store.get() shouldBe Preferences()
+            store.get() shouldBe Preferences()
+            sameKey.data.first() shouldBe Preferences()
+            runCurrent()
+
+            reported shouldBe listOf(Quarantined(StorageKeys.PREFS, QuarantineReason.NewerSchema))
+            factory.textAt(StorageKeys.PREFS) shouldBe NEWER
+            factory.keys shouldBe setOf(StorageKeys.PREFS)
+        }
+
+    // b-301a
+    @Test
+    fun update_overNewerSchemaText_isRefusedAndLeavesTheText() =
+        runTest {
+            val reported = mutableListOf<Quarantined>()
+            backgroundScope.launch { factory.quarantined.toList(reported) }
+            factory.seed(StorageKeys.PREFS, NEWER)
+
+            store.update { prefs -> prefs.copy(hueLock = true) } shouldBe StoreError.Unavailable
+            store.update { prefs -> prefs.copy(hueLock = true) } shouldBe StoreError.Unavailable
+            runCurrent()
+
+            store.get().hueLock shouldBe false
+            factory.textAt(StorageKeys.PREFS) shouldBe NEWER
+            factory.keys shouldBe setOf(StorageKeys.PREFS)
+            reported shouldBe listOf(Quarantined(StorageKeys.PREFS, QuarantineReason.NewerSchema))
+        }
+
     @Test
     fun update_failuresQueued_failsThatManyTimesThenWrites() =
         runTest {
@@ -123,3 +160,5 @@ private const val MOVED_AT = 1_700_000_000_000
 private const val BROKEN = "not json"
 
 private const val ALSO_BROKEN = "still not json"
+
+private const val NEWER = """{"schema":999,"data":{"hueLock":true}}"""
