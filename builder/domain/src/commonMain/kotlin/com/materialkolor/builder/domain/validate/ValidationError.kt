@@ -1,5 +1,7 @@
 package com.materialkolor.builder.domain.validate
 
+import com.materialkolor.builder.domain.model.Role
+
 /**
  * Something about a theme or its export settings that would stop the export from compiling or
  * from fitting where it has to go.
@@ -112,5 +114,32 @@ public sealed interface ValidationError {
     public data class ProjectNameTooLong(
         public val name: String,
         public val bytes: Int,
+    ) : ValidationError
+
+    // b-110
+
+    /**
+     * An accent's name matches one listed before it once case is ignored, as `brand` and `Brand`
+     * do. Both would generate the same `onBrand`.
+     *
+     * @property[index] Where the later of the two sits in the document's list.
+     * @property[name] The name as it was typed.
+     */
+    public data class AccentNameCaseClash(
+        public val index: Int,
+        public val name: String,
+    ) : ValidationError
+
+    /**
+     * An accent's name is also the name of a scheme role, ignoring case, as `primary` is.
+     *
+     * @property[index] Where the accent sits in the document's list.
+     * @property[name] The name as it was typed.
+     * @property[role] The role it would collide with.
+     */
+    public data class AccentNameRole(
+        public val index: Int,
+        public val name: String,
+        public val role: Role,
     ) : ValidationError
 }
