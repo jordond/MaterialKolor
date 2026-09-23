@@ -19,6 +19,8 @@ import com.materialkolor.builder.codegen.symbol.DefaultArguments
 import com.materialkolor.builder.codegen.symbol.SchemeDefaults
 import com.materialkolor.builder.codegen.symbol.Symbols
 import com.materialkolor.builder.codegen.symbol.optionalArgument
+import com.materialkolor.builder.codegen.target.DYNAMIC_COLOR_PARAMETER
+import com.materialkolor.builder.codegen.target.dynamicColorParameter
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.color.Argb
@@ -39,7 +41,8 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * It writes `Color.kt` with the seed and every color the document sets by hand, `Theme.kt` with a
  * single call of `DynamicMaterialTheme` or `DynamicMaterialExpressiveTheme`, and `ExtendedColors.kt`
  * when the theme has accents. An argument only appears when it changes what the called function
- * would do on its own, so a default theme exports as little more than its seed.
+ * would do on its own, so a default theme exports as little more than its seed. An Android export
+ * can also ask for the wallpaper colors, which then win over the seed from Android 12 on.
  */
 public object Material3Dynamic {
     /** Every file the export of [input] writes, in the order a reader would open them. */
@@ -64,6 +67,7 @@ private const val CONTENT = "content"
 private const val STATE = "state"
 private const val SCHEME = "scheme"
 private const val EXTENDED_COLORS = "extendedColors"
+private const val CONTEXT = "context" // b-111c
 
 // b-112
 
@@ -116,6 +120,7 @@ private fun themeFile(input: ExportInput): GeneratedFile {
         header(Header.lines(input, ExportMode.Dynamic))
         function(name = input.document.themeName, annotations = annotations) {
             parameter(IS_DARK, Symbols.Boolean, default = call(Symbols.IsSystemInDarkTheme))
+            if (input.writesAndroidDynamicColor) dynamicColorParameter() // b-111c
             parameter(CONTENT, lambdaType(annotations = listOf(Symbols.Composable)))
             body { themeBody(input, expressive) }
         }
@@ -127,7 +132,7 @@ private fun themeFile(input: ExportInput): GeneratedFile {
  *
  * Pins need the scheme after it is generated, which only the state form hands over, so a pinned
  * theme remembers a state first and passes that on. Accents are provided around the theme so that
- * `LocalExtendedColors.current` works anywhere inside it.
+ * `LocalExtendedColors.current` works anywhere inside it, the wallpaper branch included.
  */
 private fun BodyScope.themeBody(
     input: ExportInput,
@@ -136,6 +141,7 @@ private fun BodyScope.themeBody(
     val document = input.document
     val hasAccents = document.accents.isNotEmpty()
     val hasPins = document.pins.isNotEmpty()
+    val dynamicColor = input.writesAndroidDynamicColor // b-111c
 
     if (hasAccents) {
         assign(
@@ -155,9 +161,11 @@ private fun BodyScope.themeBody(
             },
         )
     }
-    if (hasAccents || hasPins) blankLine()
+    if (dynamicColor) assignContext() // b-111c
+    if (hasAccents || hasPins || dynamicColor) blankLine()
 
-    val theme = themeCall(input, expressive, withState = hasPins)
+    val generated = themeCall(input, expressive, withState = hasPins)
+    val theme = if (dynamicColor) androidDynamicColorBranch(input, generated) else generated // b-111c
     if (hasAccents) {
         call(Symbols.CompositionLocalProvider) {
             argument(infix(ref(LOCAL_EXTENDED_COLORS), "provides", ref(EXTENDED_COLORS)))
@@ -323,3 +331,48 @@ internal val KeyColor.parameterName: String
 /** The `ColorScheme` property for this role, as in `surfaceContainerHigh`. */
 internal val Role.propertyName: String
     get() = name.replaceFirstChar { char -> char.lowercaseChar() }
+
+// b-111c
+
+/**
+ * Whether the theme function offers the wallpaper colors. Only an Android project can reach them,
+ * so a multiplatform export never does, whatever the option says.
+ */
+internal val ExportInput.writesAndroidDynamicColor: Boolean
+    get() = !prefs.multiplatform && prefs.androidDynamicColor
+
+// b-111c
+
+/** `val context = LocalContext.current`, which the wallpaper schemes are read from. */
+internal fun BodyScope.assignContext() {
+    assign(CONTEXT, ref(Symbols.LocalContext).member("current"))
+}
+
+// b-111c
+
+/**
+ * `if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)` the theme on the wallpaper
+ * colors, else [otherwise].
+ *
+ * The wallpaper schemes only exist from Android 12, and where they do they hide the exported colors,
+ * which is why the option is off unless someone turns it on.
+ */
+internal fun androidDynamicColorBranch(
+    input: ExportInput,
+    otherwise: Expression,
+): Expression {
+    val build = ref(Symbols.Build)
+    val sdkAtLeastS = infix(build.member("VERSION").member("SDK_INT"), ">=", build.member("VERSION_CODES").member("S"))
+    val context = ref(CONTEXT)
+    val wallpaper = ifElse(
+        condition = ref(IS_DARK),
+        whenTrue = call(Symbols.DynamicDarkColorScheme) { argument(context) },
+        whenFalse = call(Symbols.DynamicLightColorScheme) { argument(context) },
+    )
+
+    return ifElse(
+        condition = infix(ref(DYNAMIC_COLOR_PARAMETER), "&&", sdkAtLeastS),
+        whenTrue = materialThemeCall(input, colorScheme = wallpaper),
+        whenFalse = otherwise,
+    )
+}

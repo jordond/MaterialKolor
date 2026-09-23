@@ -20,9 +20,7 @@ import com.materialkolor.builder.codegen.target.propertyName
 import com.materialkolor.builder.codegen.target.themeFunction
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
-import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.export.ContrastVariant
-import com.materialkolor.builder.domain.export.RoleTable
 import com.materialkolor.builder.domain.model.MotionSchemeChoice
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RoleGroup
@@ -127,21 +125,26 @@ private fun themeFile(input: ExportInput): GeneratedFile {
             }
             FrozenMode.entries.forEach { mode -> property(schemeName(variant, mode), schemeCall(variant, mode)) }
         }
-        themeFunction(input) { themeBody(input) }
+        themeFunction(input, dynamicColor = input.writesAndroidDynamicColor) { themeBody(input) } // b-111c
     }
 }
 
 /**
  * The theme function's body. Accents are provided around the theme so that
- * `LocalExtendedColors.current` works anywhere inside it.
+ * `LocalExtendedColors.current` works anywhere inside it, the wallpaper branch included.
  */
 private fun BodyScope.themeBody(input: ExportInput) {
     val hasAccents = input.resolved.accents.isNotEmpty()
-    val theme = themeCall(input)
+    // b-111c
+    val dynamicColor = input.writesAndroidDynamicColor
+    val literal = themeCall(input)
+    val theme = if (dynamicColor) androidDynamicColorBranch(input, literal) else literal
+
+    if (hasAccents) assign(EXTENDED_COLORS, byMode(EXTENDED_LIGHT, EXTENDED_DARK))
+    if (dynamicColor) assignContext() // b-111c
+    if (hasAccents || dynamicColor) blankLine()
 
     if (hasAccents) {
-        assign(EXTENDED_COLORS, byMode(EXTENDED_LIGHT, EXTENDED_DARK))
-        blankLine()
         call(Symbols.CompositionLocalProvider) {
             argument(infix(ref(LOCAL_EXTENDED_COLORS), "provides", ref(EXTENDED_COLORS)))
             trailingLambda { statement(theme) }
@@ -151,12 +154,26 @@ private fun BodyScope.themeBody(input: ExportInput) {
     }
 }
 
-/** `MaterialTheme(...)`, or `MaterialExpressiveTheme(...)` with the document's motion scheme. */
-private fun themeCall(input: ExportInput): Expression {
-    val colorScheme = byMode(
-        light = schemeName(ContrastVariant.Standard, FrozenMode.Light),
-        dark = schemeName(ContrastVariant.Standard, FrozenMode.Dark),
+/** The theme call on the standard pair. */
+private fun themeCall(input: ExportInput): Expression =
+    materialThemeCall(
+        input = input,
+        colorScheme = byMode(
+            light = schemeName(ContrastVariant.Standard, FrozenMode.Light),
+            dark = schemeName(ContrastVariant.Standard, FrozenMode.Dark),
+        ),
     )
+
+// b-111c
+
+/**
+ * `MaterialTheme(...)`, or `MaterialExpressiveTheme(...)` with the document's motion scheme, on
+ * [colorScheme]. The frozen theme and the wallpaper branch of either mode call it.
+ */
+internal fun materialThemeCall(
+    input: ExportInput,
+    colorScheme: Expression,
+): Expression {
     val content = ref(CONTENT_PARAMETER)
 
     return if (input.target == ExportTarget.Material3Expressive) {
@@ -219,12 +236,6 @@ private fun extendedColorsFile(input: ExportInput): GeneratedFile? {
         }
     }
 }
-
-private fun RoleTable.colorsIn(mode: FrozenMode): Map<Role, Argb> =
-    when (mode) {
-        FrozenMode.Light -> light
-        FrozenMode.Dark -> dark
-    }
 
 /** `primaryLight`, or `primaryDarkHighContrast` for a role at another contrast. */
 private fun roleValueName(

@@ -18,6 +18,7 @@ import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.ExportPrefs
 import com.materialkolor.builder.domain.persist.FrozenVariants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -43,6 +44,9 @@ internal object Material3FrozenCases {
         prefs = frozenPrefs(),
     )
 
+    // b-111c
+    private val AndroidDynamicColor: ExportPrefs = frozenPrefs().copy(multiplatform = false, androidDynamicColor = true)
+
     val all: Map<String, ExportInput> = mapOf(
         "material3-frozen-default" to Fixtures.Default.with(prefs = frozenPrefs()).input,
         "material3-frozen-accents-pins-amoled" to AccentsPinsAmoled.input,
@@ -55,6 +59,8 @@ internal object Material3FrozenCases {
                 document = ExpressiveDocument.copy(motionScheme = MotionSchemeChoice.Standard),
                 prefs = frozenPrefs(FrozenVariants.AllContrasts),
             ).input,
+        // b-111c
+        "material3-frozen-android-dynamic-color" to Fixtures.Default.with(prefs = AndroidDynamicColor).input,
     )
 
     fun files(case: String): List<GeneratedFile> = Material3Frozen.files(all.getValue(case))
@@ -149,6 +155,41 @@ class Material3FrozenTest {
         assertTrue("LocalExtendedColors provides extendedColors" in withAccents[1].text)
     }
 
+    // b-111c
+    @Test
+    fun material3Frozen_androidDynamicColor_fallsBackToTheLiteralScheme() {
+        val theme = theme(Material3FrozenCases.all.getValue("material3-frozen-android-dynamic-color"))
+        val expected =
+            """
+            |    val context = LocalContext.current
+            |
+            |    if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            |        MaterialTheme(
+            |            colorScheme = if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context),
+            |            content = content,
+            |        )
+            |    } else {
+            |        MaterialTheme(
+            |            colorScheme = if (isDark) darkScheme else lightScheme,
+            |            content = content,
+            |        )
+            |    }
+            """.trimMargin()
+
+        assertTrue("    dynamicColor: Boolean = true,\n" in theme, theme)
+        assertTrue(expected in theme, theme)
+    }
+
+    // b-111c
+    @Test
+    fun material3Frozen_androidDynamicColor_changesNothingInAMultiplatformExport() {
+        Material3FrozenCases.all.values.filter { input -> input.prefs.multiplatform }.forEach { input ->
+            val asked = input.copy(prefs = input.prefs.copy(androidDynamicColor = true))
+
+            assertEquals(Material3Frozen.files(input).texts(), Material3Frozen.files(asked).texts())
+        }
+    }
+
     @Test
     fun material3Frozen_otherLibrary_isRefused() {
         val fluent = Fixtures.input(
@@ -164,6 +205,8 @@ class Material3FrozenTest {
 
     private val GeneratedFile.fileName: String
         get() = path.substringAfterLast('/')
+
+    private fun List<GeneratedFile>.texts(): List<Pair<String, String>> = map { file -> file.path to file.text }
 
     private val ContrastVariant.suffix: String
         get() = when (this) {
