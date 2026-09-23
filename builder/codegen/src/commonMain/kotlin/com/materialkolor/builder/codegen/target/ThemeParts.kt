@@ -18,8 +18,9 @@ import com.materialkolor.builder.domain.export.ContrastVariant
 import com.materialkolor.builder.domain.export.ResolvedExport
 import com.materialkolor.builder.domain.model.Accent
 
-// The pieces more than one target writes. The frozen theme function and its modes serve every
-// frozen export, and the accent family serves the frozen exports and the Material 3 dynamic one.
+// The pieces more than one target writes. The theme function serves every frozen export and the
+// Fluent dynamic one, the modes serve every frozen export, and the accent family serves the frozen
+// exports and the Material 3 dynamic one.
 
 /** The two modes a frozen export writes each set of colors in, light first. */
 internal enum class FrozenMode {
@@ -74,9 +75,10 @@ internal fun byMode(
 
 /**
  * `@Composable fun AppTheme(isDark: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit)`,
- * the one theme function every frozen export writes, with [statements] as its body.
+ * the theme function every frozen export and the Fluent dynamic export write, with [statements] as
+ * its body.
  */
-internal fun KotlinFileScope.frozenThemeFunction(
+internal fun KotlinFileScope.themeFunction(
     input: ExportInput,
     statements: BodyScope.() -> Unit,
 ) {

@@ -22,12 +22,27 @@ import kotlin.test.assertTrue
  * the JVM goldens were written with.
  */
 internal object UnstyledDynamicCases {
+    /**
+     * Pins with High contrast, a primary override, the 2025 watch spec and animation, the one case
+     * where contrast, spec and platform reach the two `rememberDynamicScheme` calls.
+     */
+    val ExplicitOverrides: Fixture = Fixture(name = "explicit-overrides", input = Fixtures.Pins.input).with(
+        document = Fixtures.Pins.input.document.copy(
+            keyColors = Fixtures.PrimaryOverride.input.document.keyColors,
+            contrast = Fixtures.HighContrast.input.document.contrast,
+            spec = Fixtures.Watch2025.input.document.spec,
+            platform = Fixtures.Watch2025.input.document.platform,
+        ),
+        prefs = Fixtures.Animated.input.prefs,
+    )
+
     private val fixtures: List<Fixture> = listOf(
         Fixtures.Default,
         Fixtures.PrimaryOverride,
         Fixtures.Pins,
         Fixtures.ThreeAccents,
         Fixtures.Animated,
+        ExplicitOverrides,
     ).map { fixture -> fixture.unstyled() }
 
     val all: Map<String, ExportInput> =
@@ -93,6 +108,32 @@ class UnstyledDynamicTest {
         assertTrue("MaterialKolorTokens.primary to Color(0xFFFFB4A8)," in dark, dark)
         assertTrue("MaterialKolorTokens.outline to Color(0xFF9A8C89)," in dark, dark)
         assertFalse("MaterialKolorTokens.surface" in dark, dark)
+    }
+
+    @Test
+    fun unstyledDynamic_explicitValues_areRememberedPerMode() {
+        val pins = theme(Fixtures.Pins.unstyled().input)
+        val accents = theme(Fixtures.ThreeAccents.unstyled().input)
+        val palettes = "brandPalette, successPalette, warningPalette"
+
+        assertTrue("properties[MaterialKolorTokens.colors] = remember(lightScheme) {" in pins, pins)
+        assertTrue("properties[MaterialKolorTokens.colors] = remember(darkScheme) {" in pins, pins)
+        assertTrue("import androidx.compose.runtime.remember" in pins, pins)
+        assertTrue("remember(lightScheme, $palettes) {" in accents, accents)
+        assertTrue("remember(darkScheme, $palettes) {" in accents, accents)
+    }
+
+    @Test
+    fun unstyledDynamic_explicitOverrides_reachBothSchemes() {
+        val theme = theme(UnstyledDynamicCases.ExplicitOverrides.unstyled().input)
+
+        listOf(
+            "primary = Primary,",
+            "contrastLevel = 1.0,",
+            "specVersion = ColorSpec.SpecVersion.SPEC_2025,",
+            "platform = DynamicScheme.Platform.WATCH,",
+        ).forEach { argument -> assertEquals(2, theme.occurrences(argument), "$argument in $theme") }
+        assertTrue("$TRANSITION = tween(durationMillis = 500)" in theme, theme)
     }
 
     @Test

@@ -96,7 +96,10 @@ private fun colorFile(input: ExportInput): GeneratedFile {
 
 // b-112
 
-/** `Color.kt` of every dynamic export, which the Unstyled and Fluent dynamic exports write as it is. */
+/**
+ * `Color.kt` of every dynamic export. Unstyled writes it as it is, and Fluent writes it less its
+ * accent seeds and the key colors R1 hides.
+ */
 internal fun dynamicColorFile(input: ExportInput): GeneratedFile = colorFile(input)
 
 private fun themeFile(input: ExportInput): GeneratedFile {

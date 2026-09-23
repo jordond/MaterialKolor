@@ -3,6 +3,7 @@
 
 package com.example.theme
 
+import androidx.compose.runtime.remember
 import com.composeunstyled.theme.ColorScheme
 import com.composeunstyled.theme.buildThemeV2
 import com.materialkolor.ktx.ContrastThreshold
@@ -32,35 +33,39 @@ val AppTheme = buildThemeV2 {
         harmonizeWith = SeedColor,
     )
 
-    properties[MaterialKolorTokens.colors] = lightScheme.toThemeValues() + mapOf(
-        ThemeTokens.brand to brandPalette.toneColor(40),
-        ThemeTokens.onBrand to brandPalette.onTone(40),
-        ThemeTokens.brandContainer to brandPalette.toneColor(90),
-        ThemeTokens.onBrandContainer to brandPalette.onTone(90),
-        ThemeTokens.success to successPalette.toneColor(40),
-        ThemeTokens.onSuccess to successPalette.onTone(40),
-        ThemeTokens.successContainer to successPalette.toneColor(90),
-        ThemeTokens.onSuccessContainer to successPalette.onTone(90),
-        ThemeTokens.warning to warningPalette.toneColor(50),
-        ThemeTokens.onWarning to warningPalette.onTone(50, ContrastThreshold.WCAG_AAA_NORMAL_TEXT),
-        ThemeTokens.warningContainer to warningPalette.toneColor(95),
-        ThemeTokens.onWarningContainer to warningPalette.onTone(95, ContrastThreshold.WCAG_AAA_NORMAL_TEXT),
-    )
+    properties[MaterialKolorTokens.colors] = remember(lightScheme, brandPalette, successPalette, warningPalette) {
+        lightScheme.toThemeValues() + mapOf(
+            ThemeTokens.brand to brandPalette.toneColor(40),
+            ThemeTokens.onBrand to brandPalette.onTone(40),
+            ThemeTokens.brandContainer to brandPalette.toneColor(90),
+            ThemeTokens.onBrandContainer to brandPalette.onTone(90),
+            ThemeTokens.success to successPalette.toneColor(40),
+            ThemeTokens.onSuccess to successPalette.onTone(40),
+            ThemeTokens.successContainer to successPalette.toneColor(90),
+            ThemeTokens.onSuccessContainer to successPalette.onTone(90),
+            ThemeTokens.warning to warningPalette.toneColor(50),
+            ThemeTokens.onWarning to warningPalette.onTone(50, ContrastThreshold.WCAG_AAA_NORMAL_TEXT),
+            ThemeTokens.warningContainer to warningPalette.toneColor(95),
+            ThemeTokens.onWarningContainer to warningPalette.onTone(95, ContrastThreshold.WCAG_AAA_NORMAL_TEXT),
+        )
+    }
 
     colorScheme(ColorScheme.Dark) {
-        properties[MaterialKolorTokens.colors] = darkScheme.toThemeValues() + mapOf(
-            ThemeTokens.brand to brandPalette.toneColor(80),
-            ThemeTokens.onBrand to brandPalette.onTone(80),
-            ThemeTokens.brandContainer to brandPalette.toneColor(30),
-            ThemeTokens.onBrandContainer to brandPalette.onTone(30),
-            ThemeTokens.success to successPalette.toneColor(80),
-            ThemeTokens.onSuccess to successPalette.onTone(80),
-            ThemeTokens.successContainer to successPalette.toneColor(30),
-            ThemeTokens.onSuccessContainer to successPalette.onTone(30),
-            ThemeTokens.warning to warningPalette.toneColor(70),
-            ThemeTokens.onWarning to warningPalette.onTone(70, ContrastThreshold.WCAG_AAA_NORMAL_TEXT),
-            ThemeTokens.warningContainer to warningPalette.toneColor(20),
-            ThemeTokens.onWarningContainer to warningPalette.onTone(20, ContrastThreshold.WCAG_AAA_NORMAL_TEXT),
-        )
+        properties[MaterialKolorTokens.colors] = remember(darkScheme, brandPalette, successPalette, warningPalette) {
+            darkScheme.toThemeValues() + mapOf(
+                ThemeTokens.brand to brandPalette.toneColor(80),
+                ThemeTokens.onBrand to brandPalette.onTone(80),
+                ThemeTokens.brandContainer to brandPalette.toneColor(30),
+                ThemeTokens.onBrandContainer to brandPalette.onTone(30),
+                ThemeTokens.success to successPalette.toneColor(80),
+                ThemeTokens.onSuccess to successPalette.onTone(80),
+                ThemeTokens.successContainer to successPalette.toneColor(30),
+                ThemeTokens.onSuccessContainer to successPalette.onTone(30),
+                ThemeTokens.warning to warningPalette.toneColor(70),
+                ThemeTokens.onWarning to warningPalette.onTone(70, ContrastThreshold.WCAG_AAA_NORMAL_TEXT),
+                ThemeTokens.warningContainer to warningPalette.toneColor(20),
+                ThemeTokens.onWarningContainer to warningPalette.onTone(20, ContrastThreshold.WCAG_AAA_NORMAL_TEXT),
+            )
+        }
     }
 }

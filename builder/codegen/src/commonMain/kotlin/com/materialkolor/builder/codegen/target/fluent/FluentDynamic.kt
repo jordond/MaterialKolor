@@ -19,7 +19,6 @@ import com.materialkolor.builder.codegen.symbol.Symbols
 import com.materialkolor.builder.codegen.symbol.optionalArgument
 import com.materialkolor.builder.codegen.target.CONTENT_PARAMETER
 import com.materialkolor.builder.codegen.target.IS_DARK_PARAMETER
-import com.materialkolor.builder.codegen.target.frozenThemeFunction
 import com.materialkolor.builder.codegen.target.material3.KeyColorOrder
 import com.materialkolor.builder.codegen.target.material3.SEED_COLOR
 import com.materialkolor.builder.codegen.target.material3.dynamicColorFile
@@ -27,8 +26,10 @@ import com.materialkolor.builder.codegen.target.material3.parameterName
 import com.materialkolor.builder.codegen.target.material3.platformExpression
 import com.materialkolor.builder.codegen.target.material3.specExpression
 import com.materialkolor.builder.codegen.target.material3.styleExpression
+import com.materialkolor.builder.codegen.target.themeFunction
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
+import com.materialkolor.builder.domain.model.KeyColors
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportTarget
@@ -36,14 +37,15 @@ import com.materialkolor.builder.domain.persist.ExportTarget
 /**
  * The Fluent export that builds its shades from the seed at runtime.
  *
- * It writes the same `Color.kt` as the Material 3 dynamic export, less the accent seeds, and
- * `Theme.kt` with a theme function that hands the colors to `FluentTheme`. With
- * `material-kolor-fluent` published it calls `rememberFluentColors`, and `animateFluentColors` when
- * the theme animates. Without it the export maps the primary palette onto the seven shades itself,
- * the same way the module does, and does not animate.
+ * It writes the same `Color.kt` as the Material 3 dynamic export, less the accent seeds and every
+ * key color but the primary one, and `Theme.kt` with a theme function that hands the colors to
+ * `FluentTheme`. With `material-kolor-fluent` published it calls `rememberFluentColors`, and
+ * `animateFluentColors` when the theme animates. Without it the export maps the primary palette onto
+ * the seven shades itself, the same way the module does, and does not animate.
  *
- * Contrast is never written, since the shades come from the primary palette and contrast does not
- * move it. Fluent has no pins, accents or AMOLED, so none of those are written either.
+ * The shades come from the primary palette alone, so contrast and the other key colors cannot move
+ * them and are never written. Fluent has no pins, accents or AMOLED, so none of those are written
+ * either.
  */
 public object FluentDynamic {
     /** Every file the export of [input] writes, in the order a reader would open them. */
@@ -51,14 +53,18 @@ public object FluentDynamic {
         require(input.target == ExportTarget.Fluent) {
             "The Fluent dynamic export cannot write a ${input.target} theme"
         }
-        val withoutAccents = input.copy(document = input.document.copy(accents = emptyList()))
+        val fluentInput = input.copy(document = input.document.asFluentSeesIt())
 
-        return listOf(dynamicColorFile(withoutAccents), themeFile(input))
+        return listOf(dynamicColorFile(fluentInput), themeFile(fluentInput))
     }
 }
 
 /** The line the inline form adds to its header. */
 internal const val SWAP_TO_MODULE_NOTE: String = "Swap to material-kolor-fluent when it is available."
+
+/** The same line when the theme animates, which only the module can do. */
+internal const val SWAP_TO_MODULE_ANIMATED_NOTE: String =
+    "Swap to material-kolor-fluent when it is available, and the colors animate once it is."
 
 private const val COLORS = "colors"
 private const val TARGET_COLORS = "targetColors"
@@ -81,12 +87,12 @@ private fun themeFile(input: ExportInput): GeneratedFile {
     val binding = input.versions.fluentBinding
     val header = when (binding) {
         FluentBinding.Module -> Header.lines(input, ExportMode.Dynamic)
-        FluentBinding.Inline -> Header.lines(input, ExportMode.Dynamic) + SWAP_TO_MODULE_NOTE
+        FluentBinding.Inline -> Header.lines(input, ExportMode.Dynamic) + swapNote(input.prefs.animate)
     }
 
     return kotlinFile(path = input.sourcePath("Theme.kt"), packageName = input.prefs.packageName) {
         header(header)
-        frozenThemeFunction(input) {
+        themeFunction(input) {
             when (binding) {
                 FluentBinding.Module -> moduleColors(input)
                 FluentBinding.Inline -> inlineColors(input.document)
@@ -100,6 +106,20 @@ private fun themeFile(input: ExportInput): GeneratedFile {
         if (binding == FluentBinding.Inline) toShades()
     }
 }
+
+/**
+ * The document with only what reaches the shades. R1 keeps every key color but the primary one away
+ * from them, and R8 leaves Fluent without accents, so both are dropped before anything is written.
+ * The seed and the primary override stay.
+ */
+private fun ThemeDocument.asFluentSeesIt(): ThemeDocument =
+    copy(
+        keyColors = KeyColors(primary = keyColors.primary),
+        accents = emptyList(),
+    )
+
+/** The inline form's header note, which says the colors animate once the module is in when they would. */
+private fun swapNote(animate: Boolean): String = if (animate) SWAP_TO_MODULE_ANIMATED_NOTE else SWAP_TO_MODULE_NOTE
 
 /** `rememberFluentColors(...)`, passed through `animateFluentColors` when the theme animates. */
 private fun BodyScope.moduleColors(input: ExportInput) {

@@ -34,6 +34,7 @@ internal object FluentDynamicCases {
         "fluent-dynamic-animated" to Fixtures.Animated.fluent().input,
         "fluent-dynamic-inline" to Fixtures.Default.fluentInline(),
         "fluent-dynamic-inline-vibrant-primary-override" to VibrantPrimaryOverride.input.inline(),
+        "fluent-dynamic-inline-animated" to Fixtures.Animated.fluentInline(),
     )
 
     fun files(case: String): List<GeneratedFile> = FluentDynamic.files(all.getValue(case))
@@ -110,6 +111,33 @@ class FluentDynamicTest {
         assertTrue(wrapped in module, module)
         assertFalse("animateFluentColors" in inline, inline)
         assertFalse("tween" in inline, inline)
+    }
+
+    @Test
+    fun fluentDynamic_inlineAnimate_saysTheModuleAnimates() {
+        val animated = theme(Fixtures.Animated.fluentInline())
+        val still = theme(Fixtures.Default.fluentInline())
+        val module = theme(Fixtures.Animated.fluent().input)
+
+        assertTrue("// $SWAP_TO_MODULE_ANIMATED_NOTE\n" in animated, animated)
+        assertFalse("// $SWAP_TO_MODULE_NOTE\n" in animated, animated)
+        assertTrue("// $SWAP_TO_MODULE_NOTE\n" in still, still)
+        assertFalse(SWAP_TO_MODULE_ANIMATED_NOTE in module, module)
+    }
+
+    @Test
+    fun fluentDynamic_hiddenKeyColors_areNeverWritten() {
+        val input = Fixtures.AllOverrides.fluent().input
+
+        listOf(input, input.inline()).forEach { candidate ->
+            val text = FluentDynamic.files(candidate).joinToString("\n") { it.text }
+
+            assertTrue("val Primary = Color(0xFF6750A4)" in text, text)
+            assertTrue("primary = Primary," in text, text)
+            listOf("Secondary", "Tertiary", "Neutral", "Error").forEach { hidden ->
+                assertFalse(hidden in text, "$hidden in $text")
+            }
+        }
     }
 
     @Test
