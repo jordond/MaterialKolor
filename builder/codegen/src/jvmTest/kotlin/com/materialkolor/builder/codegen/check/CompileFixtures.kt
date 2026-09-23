@@ -23,7 +23,9 @@ fun main(args: Array<String>) {
     root.deleteRecursively()
     root.mkdirs()
 
-    val cases = GoldenCases.exports.entries.sortedBy { it.key }.map { (name, input) -> FixtureCase.of(name, input) }
+    val cases = GoldenCases.exports.entries
+        .sortedBy { it.key }
+        .map { (name, input) -> FixtureCase.of(name, input) }
     val catalog = Catalog()
     cases.groupBy { case -> case.fixture }.forEach { (fixture, members) ->
         members.forEach { case -> catalog.merge(case) }
@@ -212,7 +214,9 @@ private class FixtureProject(
                 "A Material 3 project has Compose Material 3 already, and material-kolor-material3 keeps its " +
                     "own copy off the compile classpath." to "repo.compose.material3"
             }
-            else -> null
+            else -> {
+                null
+            }
         }
 
     /** The dependency lines of every Android snippet, which add to a plain `dependencies` block. */
