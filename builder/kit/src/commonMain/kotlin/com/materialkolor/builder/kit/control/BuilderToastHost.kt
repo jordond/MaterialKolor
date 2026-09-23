@@ -5,7 +5,9 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,22 +20,27 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
+import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.overlayFeedback
@@ -127,9 +134,12 @@ public fun rememberBuilderToastHostState(): BuilderToastHostState = remember { B
 /**
  * Stacks the toasts of [state] at the bottom centre of the space it is given, newest at the bottom.
  *
- * Each toast is a polite live region, so a screen reader reads it once it has finished what it was
- * saying (AR-06). A toast goes by itself after its duration, and its action closes it. Material3
- * draws each toast as a `Snackbar`, the other skins as a headless toast.
+ * The stack is one polite live region that is always there, even with no toast in it, so a screen
+ * reader hears each toast arrive and reads it once it has finished what it was saying (AR-06). A
+ * toast goes by itself after its duration, and its action closes it. The countdown waits while the
+ * pointer rests on a toast or focus is inside it, and picks up with the time it had left (WCAG
+ * 2.2.1), so a keyboard user on Undo never loses the toast under them. Material3 draws each toast
+ * as a `Snackbar`, the other skins as a headless toast.
  *
  * @param[state] The toasts to show.
  * @param[modifier] Applied to the host, which fills the space it is given without taking any
@@ -145,7 +155,8 @@ public fun BuilderToastHost(
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
         Column(
             modifier = Modifier
-                .widthIn(max = ToastMaxWidth)
+                .widthIn(max = OverlayMetrics.toastMaxWidth)
+                .semantics { liveRegion = LiveRegionMode.Polite }
                 .padding(tokens.spacing.large),
             verticalArrangement = Arrangement.spacedBy(tokens.spacing.small),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -166,10 +177,19 @@ private fun ToastEntry(
     library: Library,
 ) {
     val tokens = LocalBuilderTokens.current
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    var focused by remember { mutableStateOf(false) }
     val millis = toast.duration.millis
     if (millis != null) {
-        LaunchedEffect(toast) {
-            delay(millis)
+        val left = remember { mutableLongStateOf(millis) }
+        LaunchedEffect(toast, hovered || focused) {
+            if (hovered || focused) return@LaunchedEffect
+            while (left.longValue > 0) {
+                val step = minOf(left.longValue, ToastTickMillis)
+                delay(step)
+                left.longValue -= step
+            }
             state.dismiss(toast)
         }
     }
@@ -180,13 +200,15 @@ private fun ToastEntry(
     }
     val entered = remember { MutableTransitionState(false).apply { targetState = true } }
     AnimatedVisibility(visibleState = entered, enter = popoverEnter()) {
-        val live = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+        val holds = Modifier
+            .hoverable(interaction)
+            .onFocusChanged { focus -> focused = focus.hasFocus }
         when (library) {
-            Library.Material3 -> MaterialToast(toast, onAction, live)
-            Library.Unstyled -> HeadlessToast(toast, onAction, unstyledOverlayStyle(tokens), live)
+            Library.Material3 -> MaterialToast(toast, onAction, holds)
+            Library.Unstyled -> HeadlessToast(toast, onAction, unstyledOverlayStyle(tokens), holds)
             // fluent-placeholder
-            Library.Fluent -> HeadlessToast(toast, onAction, fluentOverlayStyle(tokens), live)
-            Library.Custom -> HeadlessToast(toast, onAction, customOverlayStyle(tokens), live)
+            Library.Fluent -> HeadlessToast(toast, onAction, fluentOverlayStyle(tokens), holds)
+            Library.Custom -> HeadlessToast(toast, onAction, customOverlayStyle(tokens), holds)
         }
     }
 }
@@ -237,7 +259,7 @@ private fun ToastAction(
             .overlayFeedback(
                 interactionSource = interaction,
                 style = style,
-                highlight = style.toastContent.copy(alpha = ToastActionHighlightAlpha),
+                highlight = style.toastContent.copy(alpha = OverlayMetrics.toastActionHighlightAlpha),
                 focus = style.toastContent,
             ).clickable(interaction, null, role = Role.Button, onClick = onClick)
             .padding(horizontal = tokens.spacing.medium),
@@ -247,5 +269,5 @@ private fun ToastAction(
     }
 }
 
-private val ToastMaxWidth = 560.dp
-private const val ToastActionHighlightAlpha = 0.12f
+/** How finely the countdown keeps the time a paused toast has left. */
+private const val ToastTickMillis = 100L

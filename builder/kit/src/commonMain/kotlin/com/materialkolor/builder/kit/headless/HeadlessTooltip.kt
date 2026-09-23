@@ -29,12 +29,12 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.isOverlayShown
 import com.materialkolor.builder.kit.skin.headless.popoverEnter
@@ -46,8 +46,9 @@ import kotlin.math.max
 /**
  * A short label over [content], shown while the pointer rests on it and while it has keyboard focus.
  *
- * Focus shows it as readily as hover, so nothing it says is only there for a mouse (AR-03). Esc hides
- * it until the pointer and focus have both left, and it never takes focus itself.
+ * Focus shows it as readily as hover, so nothing it says is only there for a mouse (AR-03). The
+ * pointer can move onto the label without it going away (WCAG 1.4.13). Esc hides it until the
+ * pointer and focus have both left, and it never takes focus itself.
  *
  * @param[text] The label.
  * @param[style] The skin's overlay style.
@@ -79,7 +80,7 @@ internal fun HeadlessTooltip(
             },
     ) {
         content()
-        TooltipPopup(visible, text, style)
+        TooltipPopup(visible, text, style, interaction)
     }
 }
 
@@ -88,6 +89,7 @@ private fun TooltipPopup(
     visible: Boolean,
     text: String,
     style: OverlayStyle,
+    interaction: MutableInteractionSource,
 ) {
     val state = rememberOverlayVisibility(visible)
     if (!state.isOverlayShown(visible)) return
@@ -98,8 +100,9 @@ private fun TooltipPopup(
         AnimatedVisibility(visibleState = state, enter = popoverEnter(), exit = popoverExit()) {
             Box(
                 modifier = Modifier
+                    .hoverable(interaction)
                     .padding(tokens.spacing.extraSmall)
-                    .widthIn(max = TooltipMaxWidth)
+                    .widthIn(max = OverlayMetrics.tooltipMaxWidth)
                     .shadow(style.shadow, style.popoverShape)
                     .clip(style.popoverShape)
                     .background(style.tooltip)
@@ -116,8 +119,6 @@ private fun TooltipPopup(
         }
     }
 }
-
-private val TooltipMaxWidth = 280.dp
 
 /** Centred above the anchor, or below it when the window runs out above. */
 private class TooltipPositionProvider(

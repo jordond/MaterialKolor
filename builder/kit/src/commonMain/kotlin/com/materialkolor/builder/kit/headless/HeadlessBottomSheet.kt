@@ -8,7 +8,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.gestures.snapTo
@@ -35,13 +37,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.requireLayoutCoordinates
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.relocation.BringIntoViewModifierNode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.collapse
 import androidx.compose.ui.semantics.contentDescription
@@ -51,9 +62,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Velocity
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
+import com.materialkolor.builder.kit.motion.LocalReducedMotion
+import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.overlayFeedback
 import kotlinx.coroutines.CoroutineScope
@@ -84,8 +97,11 @@ public class BottomSheetState internal constructor(
 ) {
     internal val draggable: AnchoredDraggableState<BottomSheetDetent> = AnchoredDraggableState(initialDetent)
 
-    /** The sheet's own settle motion, handed in by the skin it is drawn in. */
-    internal var settleSpec: AnimationSpec<Float> = snap()
+    /** How the sheet rises to a higher detent, handed in by the motion set it is drawn in. */
+    internal var raiseSpec: AnimationSpec<Float> = snap()
+
+    /** How the sheet sinks to a lower detent. */
+    internal var lowerSpec: AnimationSpec<Float> = snap()
 
     /** The detent the sheet last came to rest at. */
     public val detent: BottomSheetDetent
@@ -97,7 +113,24 @@ public class BottomSheetState internal constructor(
 
     /** Moves the sheet to [detent] with the skin's motion. */
     public suspend fun animateTo(detent: BottomSheetDetent) {
-        draggable.animateTo(detent, settleSpec)
+        draggable.animateTo(detent, if (detent > targetDetent) raiseSpec else lowerSpec)
+    }
+
+    /** Lets the sheet coast on [velocity] to the detent the fling carries it to. */
+    internal suspend fun fling(
+        velocity: Float,
+        behavior: FlingBehavior,
+    ) {
+        draggable.anchoredDrag { anchors ->
+            val scope = object : ScrollScope {
+                override fun scrollBy(pixels: Float): Float {
+                    val from = draggable.offset
+                    dragTo((from + pixels).coerceIn(anchors.minPosition(), anchors.maxPosition()))
+                    return draggable.offset - from
+                }
+            }
+            with(behavior) { scope.performFling(velocity) }
+        }
     }
 
     /** Moves the sheet to [detent] at once. */
@@ -126,8 +159,15 @@ public fun rememberBottomSheetState(initialDetent: BottomSheetDetent = BottomShe
  * ends, and Enter or Space step through the detents in turn. The handle reads the detent as its
  * state and offers expand and collapse to assistive technology.
  *
+ * Focus never lands below the fold. When Tab reaches a row the sheet hides, the sheet rises to the
+ * lowest detent that shows it (WCAG 2.4.11). A scrolling body raises the sheet before it scrolls up,
+ * and hands a drag back down to the sheet once it has scrolled to its top, the way Material's sheet
+ * does. The sheet rises with the panel arrival motion and sinks with the panel exit motion, and
+ * snaps under reduced motion (MO-05).
+ *
  * @param[state] The sheet's detent.
  * @param[label] The sheet's name, read on the handle and as the pane title.
+ * @param[detentLabel] What the handle reads as its state at each detent.
  * @param[peekHeight] How much of the sheet shows at [BottomSheetDetent.Peek].
  * @param[style] The skin's overlay style.
  * @param[modifier] Applied to the host the sheet slides inside.
@@ -137,13 +177,22 @@ public fun rememberBottomSheetState(initialDetent: BottomSheetDetent = BottomShe
 internal fun HeadlessBottomSheet(
     state: BottomSheetState,
     label: String,
+    detentLabel: (BottomSheetDetent) -> String,
     peekHeight: Dp,
     style: OverlayStyle,
     modifier: Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val settle = LocalBuilderMotion.current.spatial<Float>()
-    SideEffect { state.settleSpec = settle }
+    val motion = LocalBuilderMotion.current
+    val reduced = LocalReducedMotion.current
+    val raise: AnimationSpec<Float> = if (reduced) snap() else motion.panelEnter()
+    val lower: AnimationSpec<Float> = if (reduced) snap() else motion.panelExit()
+    SideEffect {
+        state.raiseSpec = raise
+        state.lowerSpec = lower
+    }
+    val fling = AnchoredDraggableDefaults.flingBehavior(state.draggable, animationSpec = raise)
+    val nestedScroll = remember(state, fling) { SheetScrollConnection(state, fling) }
     BoxWithConstraints(modifier.fillMaxSize().clipToBounds()) {
         val height = constraints.maxHeight.toFloat()
         val peek = with(LocalDensity.current) { peekHeight.toPx() }.coerceIn(0f, height)
@@ -164,17 +213,19 @@ internal fun HeadlessBottomSheet(
                     val offset = state.draggable.offset
                     val y = if (offset.isNaN()) anchors.positionOf(state.draggable.currentValue) else offset
                     IntOffset(0, y.roundToInt())
-                }.anchoredDraggable(
+                }.then(RaiseToShowFocusElement(state))
+                .nestedScroll(nestedScroll)
+                .anchoredDraggable(
                     state = state.draggable,
                     orientation = Orientation.Vertical,
-                    flingBehavior = AnchoredDraggableDefaults.flingBehavior(state.draggable, animationSpec = settle),
+                    flingBehavior = fling,
                 ).shadow(style.shadow, shape)
                 .clip(shape)
                 .background(style.surface)
                 .then(if (style.border != null) Modifier.border(style.border, shape) else Modifier)
                 .semantics { paneTitle = label },
         ) {
-            SheetHandle(state, label, style, rememberCoroutineScope())
+            SheetHandle(state, label, detentLabel, style, rememberCoroutineScope())
             content()
         }
     }
@@ -184,6 +235,7 @@ internal fun HeadlessBottomSheet(
 private fun SheetHandle(
     state: BottomSheetState,
     label: String,
+    detentLabel: (BottomSheetDetent) -> String,
     style: OverlayStyle,
     scope: CoroutineScope,
 ) {
@@ -213,7 +265,7 @@ private fun SheetHandle(
                 }
             }.semantics {
                 contentDescription = label
-                stateDescription = detent.name
+                stateDescription = detentLabel(detent)
                 if (higher != null) expand { moveTo(higher) }
                 if (lower != null) collapse { moveTo(lower) }
             }.overlayFeedback(interaction, style, shape = RectangleShape)
@@ -222,9 +274,100 @@ private fun SheetHandle(
             },
         contentAlignment = Alignment.Center,
     ) {
-        Box(Modifier.size(HandleWidth, HandleHeight).background(style.thumb, RoundedCornerShape(HandleHeight)))
+        Box(
+            Modifier
+                .size(
+                    OverlayMetrics.sheetHandleWidth,
+                    OverlayMetrics.sheetHandleHeight,
+                ).background(style.thumb, RoundedCornerShape(OverlayMetrics.sheetHandleHeight)),
+        )
     }
 }
 
-private val HandleWidth = 32.dp
-private val HandleHeight = 4.dp
+/**
+ * Raises the sheet when a child inside asks to be seen, which every focusable does as it takes
+ * focus. The sheet goes to the lowest detent that shows the whole child, and never sinks.
+ */
+private class RaiseToShowFocusElement(
+    private val state: BottomSheetState,
+) : ModifierNodeElement<RaiseToShowFocusNode>() {
+    override fun create(): RaiseToShowFocusNode = RaiseToShowFocusNode(state)
+
+    override fun update(node: RaiseToShowFocusNode) {
+        node.state = state
+    }
+
+    override fun equals(other: Any?): Boolean = other is RaiseToShowFocusElement && other.state === state
+
+    override fun hashCode(): Int = state.hashCode()
+}
+
+private class RaiseToShowFocusNode(
+    var state: BottomSheetState,
+) : Modifier.Node(),
+    BringIntoViewModifierNode {
+    override suspend fun bringIntoView(
+        childCoordinates: LayoutCoordinates,
+        boundsProvider: () -> Rect?,
+    ) {
+        val bounds = boundsProvider() ?: return
+        if (!childCoordinates.isAttached) return
+        val sheet = requireLayoutCoordinates()
+        val bottom = sheet.localPositionOf(childCoordinates, bounds.bottomLeft).y
+        val height = sheet.size.height
+        val anchors = state.draggable.anchors
+        val shows = BottomSheetDetent.entries.firstOrNull { detent -> height - anchors.positionOf(detent) >= bottom }
+        val target = shows ?: BottomSheetDetent.Full
+        if (target > state.targetDetent) state.animateTo(target)
+    }
+}
+
+/**
+ * Shares a drag between the sheet and a scrolling body, the way Material's sheet does.
+ *
+ * A drag up raises the sheet before the body scrolls, and whatever the body leaves over moves the
+ * sheet, so a body scrolled to its top hands a drag down back to the sheet.
+ */
+private class SheetScrollConnection(
+    private val state: BottomSheetState,
+    private val fling: FlingBehavior,
+) : NestedScrollConnection {
+    override fun onPreScroll(
+        available: Offset,
+        source: NestedScrollSource,
+    ): Offset {
+        val delta = available.y
+        return if (delta < 0 && source == NestedScrollSource.UserInput) {
+            Offset(0f, state.draggable.dispatchRawDelta(delta))
+        } else {
+            Offset.Zero
+        }
+    }
+
+    override fun onPostScroll(
+        consumed: Offset,
+        available: Offset,
+        source: NestedScrollSource,
+    ): Offset =
+        if (source == NestedScrollSource.UserInput) {
+            Offset(0f, state.draggable.dispatchRawDelta(available.y))
+        } else {
+            Offset.Zero
+        }
+
+    override suspend fun onPreFling(available: Velocity): Velocity {
+        val offset = state.draggable.offset
+        val rising = available.y < 0 && !offset.isNaN() && offset > state.draggable.anchors.minPosition()
+        if (!rising) return Velocity.Zero
+        state.fling(available.y, fling)
+        return available
+    }
+
+    override suspend fun onPostFling(
+        consumed: Velocity,
+        available: Velocity,
+    ): Velocity {
+        state.fling(available.y, fling)
+        return available
+    }
+}

@@ -32,6 +32,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -43,7 +48,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
@@ -54,6 +58,7 @@ import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.isOverlayShown
 import com.materialkolor.builder.kit.skin.headless.overlayFeedback
@@ -67,12 +72,13 @@ import kotlin.math.max
  * A popover list anchored under whatever it shares a parent with.
  *
  * It opens in a focusable popup, so Esc and a click outside both call [onDismissRequest], and focus
- * lands on the first row. The arrows and Tab walk the rows.
+ * lands on [initialFocus] or else on the first row. The arrows and Tab walk the rows.
  *
  * @param[expanded] Whether the list is open.
  * @param[onDismissRequest] Called when the list asks to close.
  * @param[style] The skin's overlay style.
  * @param[minWidth] The narrowest the list may be, the anchor's width for a select.
+ * @param[initialFocus] The row that takes focus when the list opens, the selected option for a select.
  * @param[content] The rows.
  */
 @Composable
@@ -80,7 +86,8 @@ internal fun HeadlessDropdown(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     style: OverlayStyle,
-    minWidth: Dp = MenuMinWidth,
+    minWidth: Dp = OverlayMetrics.menuMinWidth,
+    initialFocus: FocusRequester? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val state = rememberOverlayVisibility(expanded)
@@ -102,15 +109,15 @@ internal fun HeadlessDropdown(
                     .clip(style.popoverShape)
                     .background(style.surface)
                     .then(if (style.border != null) Modifier.border(style.border, style.popoverShape) else Modifier)
-                    .widthIn(min = maxOf(minWidth, MenuMinWidth), max = MenuMaxWidth)
+                    .widthIn(min = maxOf(minWidth, OverlayMetrics.menuMinWidth), max = OverlayMetrics.menuMaxWidth)
                     .width(IntrinsicSize.Max)
-                    .heightIn(max = MenuMaxHeight)
+                    .heightIn(max = OverlayMetrics.menuMaxHeight)
                     .verticalScroll(rememberScrollState())
                     .focusRequester(firstRow)
                     .padding(tokens.spacing.extraSmall),
                 content = content,
             )
-            LaunchedEffect(Unit) { firstRow.requestFocus() }
+            LaunchedEffect(Unit) { (initialFocus ?: firstRow).requestFocus() }
         }
     }
 }
@@ -197,7 +204,8 @@ internal fun HeadlessMenu(
  * A field showing the chosen option, opening the list of the rest.
  *
  * The field reads as a dropdown list with the chosen option as its state, and each option reads as
- * a radio button that knows whether it is selected.
+ * a radio button that knows whether it is selected. Down and Alt+Down open the list as well as a
+ * click, Enter and Space, and the list opens with focus on the chosen option.
  */
 @Composable
 internal fun <T> HeadlessSelect(
@@ -215,6 +223,7 @@ internal fun <T> HeadlessSelect(
     val interaction = remember { MutableInteractionSource() }
     var expanded by remember { mutableStateOf(false) }
     var fieldWidth by remember { mutableIntStateOf(0) }
+    val selectedRow = remember { FocusRequester() }
     val current = optionLabel(selected)
     Box(modifier) {
         Row(
@@ -224,7 +233,11 @@ internal fun <T> HeadlessSelect(
                 .background(style.field, style.itemShape)
                 .border(style.fieldBorder, style.itemShape)
                 .overlayFeedback(interaction, style, enabled = enabled)
-                .clickable(interaction, null, enabled, role = Role.DropdownList) { expanded = !expanded }
+                .onKeyEvent { event ->
+                    val open = enabled && event.type == KeyEventType.KeyDown && event.key == Key.DirectionDown
+                    if (open) expanded = true
+                    open
+                }.clickable(interaction, null, enabled, role = Role.DropdownList) { expanded = !expanded }
                 .semantics { stateDescription = current }
                 .padding(horizontal = tokens.spacing.medium, vertical = tokens.spacing.extraSmall),
             verticalAlignment = Alignment.CenterVertically,
@@ -241,6 +254,7 @@ internal fun <T> HeadlessSelect(
             onDismissRequest = { expanded = false },
             style = style,
             minWidth = with(density) { fieldWidth.toDp() },
+            initialFocus = if (selected in options) selectedRow else null,
         ) {
             for (option in options) {
                 HeadlessDropdownItem(
@@ -250,16 +264,13 @@ internal fun <T> HeadlessSelect(
                         onSelect(option)
                     },
                     style = style,
+                    modifier = if (option == selected) Modifier.focusRequester(selectedRow) else Modifier,
                     selected = option == selected,
                 )
             }
         }
     }
 }
-
-private val MenuMinWidth = 160.dp
-private val MenuMaxWidth = 360.dp
-private val MenuMaxHeight = 400.dp
 
 /** Under the anchor and lined up with its start, or above it when the window runs out below. */
 private class DropdownPositionProvider(

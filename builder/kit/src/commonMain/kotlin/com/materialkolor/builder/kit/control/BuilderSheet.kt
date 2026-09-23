@@ -5,13 +5,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import com.materialkolor.builder.kit.headless.BottomSheetDetent
 import com.materialkolor.builder.kit.headless.BottomSheetState
 import com.materialkolor.builder.kit.headless.HeadlessBottomSheet
 import com.materialkolor.builder.kit.headless.HeadlessDrawer
 import com.materialkolor.builder.kit.layout.DockedPosterBreakpoint
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.skin.LocalSkin
+import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.PanelEdge
 import com.materialkolor.builder.kit.skin.headless.overlayStyle
 
@@ -87,12 +88,16 @@ private const val EndPanelFraction = 0.6f
  *
  * It fills the host it is given and slides inside it, so put it in a box over the content it
  * covers. It drags anywhere on its surface, and its handle takes focus so the arrows, Page Up,
- * Page Down, Home and End move it too. Read or drive the detent through [state]. Material3's own
- * bottom sheet only has two states, so every skin draws the headless sheet in its own dress.
+ * Page Down, Home and End move it too. Tab onto a row below the fold raises the sheet until the
+ * row shows, and a scrolling body hands a drag back to the sheet once it reaches its top. Read or
+ * drive the detent through [state]. Material3's own bottom sheet only has two states, so every skin
+ * draws the headless sheet in its own dress.
  *
  * @param[state] The sheet's detent, from `rememberBottomSheetState`.
  * @param[label] The sheet's name, read on the handle.
  * @param[modifier] Applied to the host the sheet slides inside.
+ * @param[detentLabel] What the handle reads as its state at each detent, the detent's name unless
+ * the caller words it.
  * @param[peekHeight] How much of the sheet shows at peek.
  * @param[content] The sheet's body, below the handle.
  */
@@ -101,10 +106,17 @@ public fun BuilderBottomSheet(
     state: BottomSheetState,
     label: String,
     modifier: Modifier = Modifier,
-    peekHeight: Dp = DefaultPeekHeight,
+    detentLabel: (BottomSheetDetent) -> String = { detent -> detent.name },
+    peekHeight: Dp = OverlayMetrics.sheetPeekHeight,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    HeadlessBottomSheet(state, label, peekHeight, overlayStyle(LocalSkin.current.library), modifier, content)
+    HeadlessBottomSheet(
+        state = state,
+        label = label,
+        detentLabel = detentLabel,
+        peekHeight = peekHeight,
+        style = overlayStyle(LocalSkin.current.library),
+        modifier = modifier,
+        content = content,
+    )
 }
-
-private val DefaultPeekHeight = 96.dp

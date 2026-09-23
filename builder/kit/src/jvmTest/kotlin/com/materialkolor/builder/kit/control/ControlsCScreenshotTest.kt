@@ -163,7 +163,7 @@ private fun OverlayScene(
 }
 
 /** One ink on one ground, and the least contrast the pair may have. */
-private class InkPair(
+private class OverlayInkPair(
     val name: String,
     val ink: Color,
     val ground: Color,
@@ -174,19 +174,19 @@ private class InkPair(
  * Every ink the overlays draw on every ground they draw it on. Text keeps to WCAG AA at 4.5, the
  * focus ring and the scrollbar thumb are marks and need 3.
  */
-private fun OverlayStyle.inkPairs(tokens: BuilderTokens): List<InkPair> =
+private fun OverlayStyle.inkPairs(tokens: BuilderTokens): List<OverlayInkPair> =
     listOf(
-        InkPair("content on surface", content, surface, 4.5),
-        InkPair("muted on surface", muted, surface, 4.5),
-        InkPair("danger on surface", tokens.danger, surface, 4.5),
-        InkPair("content on highlight", content, highlight.compositeOver(surface), 4.5),
-        InkPair("content on selected", content, selected.compositeOver(surface), 4.5),
-        InkPair("muted on field", muted, field, 4.5),
-        InkPair("content on field", content, field, 4.5),
-        InkPair("tooltip ink", tooltipContent, tooltip, 4.5),
-        InkPair("toast ink", toastContent, toast, 4.5),
-        InkPair("focus on surface", focus, surface, 3.0),
-        InkPair("thumb on surface", thumb, surface, 3.0),
+        OverlayInkPair("content on surface", content, surface, 4.5),
+        OverlayInkPair("muted on surface", muted, surface, 4.5),
+        OverlayInkPair("danger on surface", tokens.danger, surface, 4.5),
+        OverlayInkPair("content on highlight", content, highlight.compositeOver(surface), 4.5),
+        OverlayInkPair("content on selected", content, selected.compositeOver(surface), 4.5),
+        OverlayInkPair("muted on field", muted, field, 4.5),
+        OverlayInkPair("content on field", content, field, 4.5),
+        OverlayInkPair("tooltip ink", tooltipContent, tooltip, 4.5),
+        OverlayInkPair("toast ink", toastContent, toast, 4.5),
+        OverlayInkPair("focus on surface", focus, surface, 3.0),
+        OverlayInkPair("thumb on surface", thumb, surface, 3.0),
     )
 
 /** The WCAG contrast ratio of two opaque colours. */

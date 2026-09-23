@@ -17,13 +17,13 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessModal
 import com.materialkolor.builder.kit.headless.ReturnFocusWhenGone
 import com.materialkolor.builder.kit.headless.keepTaps
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
+import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.popoverEnter
@@ -122,7 +122,7 @@ private fun HeadlessDialog(
             modifier = modifier
                 .animateEnterExit(enter = popoverEnter(), exit = popoverExit())
                 .padding(tokens.spacing.large)
-                .widthIn(min = DialogMinWidth, max = DialogMaxWidth)
+                .widthIn(min = OverlayMetrics.dialogMinWidth, max = OverlayMetrics.dialogMaxWidth)
                 .shadow(style.shadow, style.dialogShape)
                 .clip(style.dialogShape)
                 .background(style.surface)
@@ -143,6 +143,3 @@ private fun HeadlessDialog(
         }
     }
 }
-
-private val DialogMinWidth = 280.dp
-private val DialogMaxWidth = 560.dp

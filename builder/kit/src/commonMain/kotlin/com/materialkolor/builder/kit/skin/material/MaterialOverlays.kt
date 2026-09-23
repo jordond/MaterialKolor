@@ -15,6 +15,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Snackbar
@@ -31,9 +32,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -46,10 +49,13 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderMenuItem
 import com.materialkolor.builder.kit.control.BuilderToast
+import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.skin.headless.Hairline
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
@@ -96,6 +102,7 @@ private const val MaterialHoverAlpha = 0.08f
  * Material's `AlertDialog`. Its window keeps focus inside, focus starts on the first action, and Esc
  * closes it even where the platform does not turn Esc into back.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun MaterialDialog(
     visible: Boolean,
@@ -125,6 +132,7 @@ internal fun MaterialDialog(
             },
         title = { Text(title) },
         text = { Column(content = content) },
+        properties = DialogProperties(animateTransition = !LocalReducedMotion.current),
     )
     LaunchedEffect(Unit) { firstAction.requestFocus() }
 }
@@ -143,6 +151,8 @@ internal fun MaterialMenu(
         DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
             for (item in items) {
                 val icon = item.icon
+                val danger = item.emphasis == Emphasis.Danger
+                val error = MaterialTheme.colorScheme.error
                 DropdownMenuItem(
                     text = { Text(item.label) },
                     onClick = {
@@ -153,9 +163,21 @@ internal fun MaterialMenu(
                     leadingIcon = if (icon == null) {
                         null
                     } else {
-                        { BuilderIcon(icon, contentDescription = null, emphasis = item.emphasis) }
+                        {
+                            BuilderIcon(
+                                id = icon,
+                                contentDescription = null,
+                                emphasis = item.emphasis,
+                                tint = if (danger) error else Color.Unspecified,
+                            )
+                        }
                     },
                     enabled = item.enabled,
+                    colors = if (danger) {
+                        MenuDefaults.itemColors(textColor = error, leadingIconColor = error, trailingIconColor = error)
+                    } else {
+                        MenuDefaults.itemColors()
+                    },
                 )
             }
         }

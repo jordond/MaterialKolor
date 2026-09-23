@@ -117,6 +117,47 @@ internal const val DisabledAlpha: Float = 0.38f
 internal val Hairline: Dp = 1.dp
 internal val FocusRingWidth: Dp = 2.dp
 
+/**
+ * The sizes every skin gives its overlays alike.
+ *
+ * None of them has a token yet. Each one is a token request, and they wait here together so the
+ * tokens can take them over in one move.
+ */
+internal object OverlayMetrics {
+    /** The narrowest and the widest a dialog panel gets. */
+    val dialogMinWidth: Dp = 280.dp
+    val dialogMaxWidth: Dp = 560.dp
+
+    /** The widest the toast stack gets. */
+    val toastMaxWidth: Dp = 560.dp
+
+    /** How strongly a toast's action takes the toast's own ink while hovered or focused. */
+    val toastActionHighlightAlpha: Float = 0.12f
+
+    /** How much of a bottom sheet shows at peek. */
+    val sheetPeekHeight: Dp = 96.dp
+
+    /** The widest a side panel gets, and how much of a narrower screen it takes. */
+    val sidePanelWidth: Dp = 320.dp
+    val sidePanelNarrowFraction: Float = 0.85f
+
+    /** The narrowest, the widest and the tallest a dropdown list gets. */
+    val menuMinWidth: Dp = 160.dp
+    val menuMaxWidth: Dp = 360.dp
+    val menuMaxHeight: Dp = 400.dp
+
+    /** The widest a tooltip gets before its label wraps. */
+    val tooltipMaxWidth: Dp = 280.dp
+
+    /** The grab handle drawn on top of a bottom sheet. */
+    val sheetHandleWidth: Dp = 32.dp
+    val sheetHandleHeight: Dp = 4.dp
+
+    /** How thick a scrollbar thumb is, and how far it keeps from the edge. */
+    val thumbThickness: Dp = 6.dp
+    val thumbInset: Dp = 2.dp
+}
+
 /** Unstyled keeps to hairlines and small corners, and floats nothing. */
 internal fun unstyledOverlayStyle(tokens: BuilderTokens): OverlayStyle {
     val hairline = BorderStroke(Hairline, tokens.border)

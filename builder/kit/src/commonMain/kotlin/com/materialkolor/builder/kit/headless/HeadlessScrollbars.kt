@@ -14,11 +14,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.composeunstyled.Thumb
 import com.composeunstyled.ThumbVisibility
 import com.composeunstyled.UnstyledVerticalScrollbar
 import com.composeunstyled.rememberScrollbarState
+import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 
 /**
@@ -44,7 +44,7 @@ internal fun HeadlessScrollArea(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(state)
-                .padding(end = ThumbThickness + ThumbInset * 2),
+                .padding(end = OverlayMetrics.thumbThickness + OverlayMetrics.thumbInset * 2),
             content = content,
         )
         HeadlessVerticalScrollbar(state, style, Modifier.align(Alignment.CenterEnd).fillMaxHeight())
@@ -61,17 +61,14 @@ internal fun HeadlessVerticalScrollbar(
     UnstyledVerticalScrollbar(
         scrollbarState = rememberScrollbarState(state),
         modifier = modifier
-            .padding(ThumbInset)
-            .width(ThumbThickness),
+            .padding(OverlayMetrics.thumbInset)
+            .width(OverlayMetrics.thumbThickness),
     ) {
         Thumb(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(style.thumb, RoundedCornerShape(ThumbThickness / 2)),
+                .background(style.thumb, RoundedCornerShape(OverlayMetrics.thumbThickness / 2)),
             thumbVisibility = ThumbVisibility.AlwaysVisible,
         )
     }
 }
-
-private val ThumbThickness = 6.dp
-private val ThumbInset = 2.dp
