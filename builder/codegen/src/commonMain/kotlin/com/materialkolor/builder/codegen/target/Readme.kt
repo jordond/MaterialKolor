@@ -71,6 +71,10 @@ internal object Readme {
                 add("```kotlin")
                 addAll(build.text.lines().filterNot { line -> line.startsWith("//") || line.isEmpty() })
                 add("```")
+                composeMaterial3(input.target)?.let { need ->
+                    add("")
+                    add("These files also need $need.")
+                }
                 Snippets.platformNote(input.target)?.let { note ->
                     add("")
                     add(note)
@@ -91,21 +95,37 @@ internal object Readme {
 
     /**
      * What the files lean on when the export writes no snippet, which only a frozen Material 3,
-     * Expressive or Custom export does. The Material 3 files import `androidx.compose.material3`, a
-     * separate artifact from Compose itself.
+     * Expressive or Custom export does.
      */
     private fun nothingToAdd(input: ExportInput): String =
         when (input.target) {
             ExportTarget.Material3 -> {
-                "These files need Compose Material 3, which a Material 3 app already has, " +
-                    "so there is nothing to add."
+                "These files need ${composeMaterial3(input.target)}, so there is nothing to add."
             }
             ExportTarget.Material3Expressive -> {
-                "These files need a Compose Material 3 version that has `MaterialExpressiveTheme` and " +
-                    "`MotionScheme`. Beyond that there is nothing to add."
+                "These files need ${composeMaterial3(input.target)}. Beyond that there is nothing to add."
             }
             ExportTarget.Unstyled, ExportTarget.Fluent, ExportTarget.Custom -> {
                 "These files need nothing beyond Compose, so there is nothing to add."
+            }
+        }
+
+    /**
+     * The Compose Material 3 the Material 3 and Expressive files import `androidx.compose.material3`
+     * from, in both modes. It is a separate artifact from Compose itself, and
+     * `material-kolor-material3` does not hand it on at compile time, so a dynamic export names it
+     * next to its dependency lines the way a frozen one names it in place of them.
+     */
+    private fun composeMaterial3(target: ExportTarget): String? =
+        when (target) {
+            ExportTarget.Material3 -> {
+                "Compose Material 3, which a Material 3 app already has"
+            }
+            ExportTarget.Material3Expressive -> {
+                "a Compose Material 3 version that has `MaterialExpressiveTheme` and `MotionScheme`"
+            }
+            ExportTarget.Unstyled, ExportTarget.Fluent, ExportTarget.Custom -> {
+                null
             }
         }
 }

@@ -117,6 +117,27 @@ class CodegenTest {
     }
 
     @Test
+    fun generate_dynamic_readmeNamesComposeMaterial3WhereTheFilesImportIt() {
+        val expected = mapOf(
+            ExportTarget.Material3 to "also need Compose Material 3, which a Material 3 app already has.",
+            ExportTarget.Material3Expressive to
+                "also need a Compose Material 3 version that has `MaterialExpressiveTheme` and `MotionScheme`.",
+        )
+
+        ExportTarget.entries.forEach { target ->
+            val files = generate(Fixtures.input(documentFor(target), ExportPrefs(mode = ExportMode.Dynamic)))
+
+            val readme = files.single { it.path == "README.md" }.text
+            val phrase = expected[target]
+            if (phrase == null) {
+                assertTrue("Compose Material 3" !in readme, "$target\n$readme")
+            } else {
+                assertTrue(phrase in readme, "$target\n$readme")
+            }
+        }
+    }
+
+    @Test
     fun generate_fluentWithoutTheModule_dependsOnCoreAndFluent() {
         val input = Fixtures.input(
             document = documentFor(ExportTarget.Fluent),

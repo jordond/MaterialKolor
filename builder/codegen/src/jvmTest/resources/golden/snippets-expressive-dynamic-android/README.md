@@ -20,6 +20,8 @@ dependencies {
 }
 ```
 
+These files also need a Compose Material 3 version that has `MaterialExpressiveTheme` and `MotionScheme`.
+
 ## Open it again
 
 To change the theme later, open it in the builder at <https://materialkolor.com/t/AdllOwAEAAC4>

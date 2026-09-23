@@ -1,0 +1,117 @@
+name: Builder
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/builder-v2
+      - next
+    paths:
+      - 'builder/**'
+      - '!builder/shared/**'
+      - '!builder/android/**'
+      - 'material-kolor-core/**'
+      - 'material-kolor-material3/**'
+      - 'material-kolor-unstyled/**'
+      - 'material-kolor-fluent/**'
+      - 'material-kolor-palette/**'
+      - 'material-color-utilities/**'
+      - 'tools/**'
+      - 'gradle/**'
+      - 'build-logic/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - '.editorconfig'
+      - '.github/workflows/builder.yml'
+  pull_request:
+    branches:
+      - feat/builder-v2
+      - next
+    types: [ opened, synchronize, reopened, ready_for_review ]
+    paths:
+      - 'builder/**'
+      - '!builder/shared/**'
+      - '!builder/android/**'
+      - 'material-kolor-core/**'
+      - 'material-kolor-material3/**'
+      - 'material-kolor-unstyled/**'
+      - 'material-kolor-fluent/**'
+      - 'material-kolor-palette/**'
+      - 'material-color-utilities/**'
+      - 'tools/**'
+      - 'gradle/**'
+      - 'build-logic/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - '.editorconfig'
+      - '.github/workflows/builder.yml'
+
+concurrency:
+  group: builder-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: "Test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: setup-java
+        uses: actions/setup-java@v6
+        with:
+          java-version: 25
+          distribution: temurin
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Tests
+        run: >-
+          ./gradlew
+          :builder:domain:jvmTest :builder:domain:wasmJsNodeTest
+          :builder:codegen:jvmTest :builder:codegen:wasmJsNodeTest
+          :builder:engine:jvmTest
+
+      # Its own invocation, since the wasm test compile writes to build/ while spotless reads the tree.
+      - name: Lint
+        run: >-
+          ./gradlew
+          :builder:domain:spotlessCheck :builder:codegen:spotlessCheck :builder:engine:spotlessCheck
+          :builder:kit:spotlessCheck :builder:preview:spotlessCheck :builder:app:spotlessCheck
+          :builder:web:spotlessCheck
+
+  compile-check:
+    name: "Compile check"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: setup-java
+        uses: actions/setup-java@v6
+        with:
+          java-version: 25
+          distribution: temurin
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Write the fixtures
+        run: ./gradlew :builder:codegen:writeCompileFixtures
+
+      - name: Compile every case on JVM and Android
+        run: ./gradlew -p builder/codegen-check compileKotlinJvm compileAndroidMain
+
+      - name: Compile one case per target on wasm
+        run: ./gradlew -p builder/codegen-check compileKotlinWasmJs

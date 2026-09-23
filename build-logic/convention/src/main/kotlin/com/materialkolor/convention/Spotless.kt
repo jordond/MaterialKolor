@@ -22,7 +22,9 @@ internal fun Project.configureSpotless() {
         extensions.configure<SpotlessExtension> {
             kotlin {
                 ktlint(version("ktlint")).setEditorConfigPath("$rootDir/.editorconfig")
-                target("**/*.kt")
+                // b-114
+                // Sources only, since walking build/ races the wasm test compile writing there.
+                target("src/**/*.kt")
                 targetExclude(*formatterExcludes.toTypedArray())
                 toggleOffOn()
                 endWithNewline()
