@@ -17,11 +17,11 @@ class SymbolTest {
 
     @Test
     fun isImportable_defaultAndLocalPackages_isFalse() {
-        assertFalse(TestSymbols.Boolean.isImportable)
+        assertFalse(Symbols.Boolean.isImportable)
         assertFalse(Symbol("kotlin.collections", "List", SymbolKind.Class).isImportable)
         assertFalse(Symbol.local("SeedColor", SymbolKind.Property).isImportable)
         assertTrue(Symbol("kotlin.time", "Duration", SymbolKind.Class).isImportable)
-        assertTrue(TestSymbols.Composable.isImportable)
+        assertTrue(Symbols.Composable.isImportable)
     }
 
     @Test
