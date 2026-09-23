@@ -39,6 +39,9 @@ internal object Material3DynamicCases {
         ),
     )
 
+    // b-111c
+    private val AndroidDynamicColor: ExportPrefs = ExportPrefs(multiplatform = false, androidDynamicColor = true)
+
     private val plain: List<Fixture> = listOf(
         Fixtures.Default,
         Fixtures.PrimaryOverride,
@@ -60,6 +63,17 @@ internal object Material3DynamicCases {
                 "expressive-dynamic-default" to ExpressiveDefault.input,
                 "expressive-dynamic-tonal-spot-2021" to Fixtures.ExpressiveOnTonalSpot2021.input,
                 "expressive-dynamic-pins" to ExpressivePins.input,
+                // b-111c
+                "material3-dynamic-android-dynamic-color" to
+                    Fixtures.AndroidOnly.with(prefs = AndroidDynamicColor).input,
+                "expressive-dynamic-android-dynamic-color" to ExpressiveDefault
+                    .with(
+                        document = ExpressiveDefault.input.document.copy(
+                            accents = Fixtures.ThreeAccents.input.document.accents
+                                .take(1),
+                        ),
+                        prefs = AndroidDynamicColor,
+                    ).input,
             )
 
     fun files(case: String): List<GeneratedFile> = Material3Dynamic.files(all.getValue(case))
@@ -158,6 +172,32 @@ class Material3DynamicTest {
         assertTrue("threshold = ContrastThreshold.WCAG_AAA_NORMAL_TEXT" in extended, extended)
     }
 
+    // b-111c
+    @Test
+    fun material3Dynamic_androidDynamicColor_branchesAroundTheGeneratedTheme() {
+        val theme = theme(Material3DynamicCases.all.getValue("expressive-dynamic-android-dynamic-color"))
+        val provider = theme.indexOf("CompositionLocalProvider(LocalExtendedColors provides extendedColors) {")
+        val branch = theme.indexOf("if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {")
+
+        assertTrue("    dynamicColor: Boolean = true,\n" in theme, theme)
+        assertTrue("val context = LocalContext.current" in theme, theme)
+        assertTrue("if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)," in theme, theme)
+        assertTrue("MaterialExpressiveTheme(" in theme, theme)
+        assertTrue("DynamicMaterialExpressiveTheme(" in theme, theme)
+        assertEquals(2, theme.split("motionScheme = MotionScheme.expressive(),").size - 1, theme)
+        assertTrue(provider in 0..<branch, theme)
+    }
+
+    // b-111c
+    @Test
+    fun material3Dynamic_androidDynamicColor_changesNothingInAMultiplatformExport() {
+        Material3DynamicCases.all.values.filter { input -> input.prefs.multiplatform }.forEach { input ->
+            val asked = input.copy(prefs = input.prefs.copy(androidDynamicColor = true))
+
+            assertEquals(Material3Dynamic.files(input).texts(), Material3Dynamic.files(asked).texts())
+        }
+    }
+
     @Test
     fun material3Dynamic_otherLibrary_isRefused() {
         val fluent = Fixtures.input(
@@ -170,4 +210,6 @@ class Material3DynamicTest {
 
     private fun theme(input: ExportInput): String =
         Material3Dynamic.files(input).single { it.path.endsWith("/Theme.kt") }.text
+
+    private fun List<GeneratedFile>.texts(): List<Pair<String, String>> = map { file -> file.path to file.text }
 }

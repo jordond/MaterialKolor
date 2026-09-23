@@ -109,6 +109,33 @@ class UnstyledFrozenTest {
         assertTrue(entry("onBrandContainer", brand.dark.onContainer) in colors.mapBlock("darkColors"), colors)
     }
 
+    // b-111c
+    @Test
+    fun unstyledFrozen_allContrastsWithAccents_carriesEveryAccentInEveryMap() {
+        val input = UnstyledFrozenCases.AccentsPinsAmoled.with(prefs = frozenPrefs(FrozenVariants.AllContrasts)).input
+        val colors = UnstyledFrozen.files(input).text("Color.kt")
+
+        assertEquals(ContrastVariant.entries.toSet(), input.resolved.roles.keys)
+        assertEquals(3, input.resolved.accents.size)
+        input.resolved.roles.keys.forEach { variant ->
+            listOf(true, false).forEach { isLight ->
+                val map = colors.mapBlock(mapName(variant, isLight))
+                input.resolved.accents.forEach { accent ->
+                    val values = if (isLight) accent.light else accent.dark
+                    val upper = accent.name.replaceFirstChar { it.uppercaseChar() }
+                    val lower = accent.name.replaceFirstChar { it.lowercaseChar() }
+                    val entries = listOf(
+                        entry(lower, values.color),
+                        entry("on$upper", values.onColor),
+                        entry("${lower}Container", values.container),
+                        entry("on${upper}Container", values.onContainer),
+                    )
+                    entries.forEach { expected -> assertTrue(expected in map, "$expected in $variant") }
+                }
+            }
+        }
+    }
+
     @Test
     fun unstyledFrozen_theme_setsTheStandardPairAndPointsAtTheOtherVariants() {
         val default = UnstyledFrozenCases.files("unstyled-frozen-default").text("Theme.kt")

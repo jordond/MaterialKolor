@@ -182,6 +182,11 @@ private val Material3Symbols: List<Symbol> =
             Symbols.DynamicMaterialExpressiveTheme,
             Symbols.DynamicMaterialThemeState,
             Symbols.RememberDynamicMaterialThemeState,
+            // b-111c
+            Symbols.Build,
+            Symbols.LocalContext,
+            Symbols.DynamicDarkColorScheme,
+            Symbols.DynamicLightColorScheme,
         )
 
 /** What the Material 3 export declares in `ExtendedColors.kt`, kept apart since none of it is imported. */

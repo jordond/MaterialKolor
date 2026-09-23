@@ -22,7 +22,6 @@ import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.export.AccentColors
 import com.materialkolor.builder.domain.export.ContrastVariant
-import com.materialkolor.builder.domain.export.RoleTable
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportTarget
@@ -158,12 +157,6 @@ private fun tokenCall(
 private fun token(name: String): Expression = ref(THEME_TOKENS).member(name)
 
 private fun AccentColors.asList(): List<Argb> = listOf(color, onColor, container, onContainer)
-
-private fun RoleTable.colorsIn(mode: FrozenMode): Map<Role, Argb> =
-    when (mode) {
-        FrozenMode.Light -> light
-        FrozenMode.Dark -> dark
-    }
 
 /** The token for this role, named as `MaterialKolorTokens` names it, as in `surfaceContainerHigh`. */
 internal val Role.tokenName: String

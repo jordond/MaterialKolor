@@ -47,6 +47,14 @@ public object Symbols {
     public val ExperimentalMaterial3ExpressiveApi: Symbol =
         Symbol(MATERIAL3, "ExperimentalMaterial3ExpressiveApi", SymbolKind.Annotation)
 
+    // b-111c
+    // Android only, for the wallpaper colors an Android export can switch to.
+
+    public val Build: Symbol = Symbol("android.os", "Build", SymbolKind.Class)
+    public val LocalContext: Symbol = Symbol("androidx.compose.ui.platform", "LocalContext", SymbolKind.Property)
+    public val DynamicDarkColorScheme: Symbol = Symbol(MATERIAL3, "dynamicDarkColorScheme", SymbolKind.Function)
+    public val DynamicLightColorScheme: Symbol = Symbol(MATERIAL3, "dynamicLightColorScheme", SymbolKind.Function)
+
     // MaterialKolor core and the color utilities it ships with.
 
     public val PaletteStyle: Symbol = Symbol(KOLOR, "PaletteStyle", SymbolKind.Class)

@@ -5,6 +5,7 @@ import com.materialkolor.builder.codegen.dsl.AnnotationSpec
 import com.materialkolor.builder.codegen.dsl.BodyScope
 import com.materialkolor.builder.codegen.dsl.ClassKind
 import com.materialkolor.builder.codegen.dsl.Expression
+import com.materialkolor.builder.codegen.dsl.FunctionScope
 import com.materialkolor.builder.codegen.dsl.KotlinFileScope
 import com.materialkolor.builder.codegen.dsl.call
 import com.materialkolor.builder.codegen.dsl.ifElse
@@ -12,11 +13,14 @@ import com.materialkolor.builder.codegen.dsl.lambdaType
 import com.materialkolor.builder.codegen.dsl.ref
 import com.materialkolor.builder.codegen.symbol.Symbols
 import com.materialkolor.builder.codegen.text.Literals
+import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.export.AccentColors
 import com.materialkolor.builder.domain.export.AccentFamilyValues
 import com.materialkolor.builder.domain.export.ContrastVariant
 import com.materialkolor.builder.domain.export.ResolvedExport
+import com.materialkolor.builder.domain.export.RoleTable
 import com.materialkolor.builder.domain.model.Accent
+import com.materialkolor.builder.domain.model.Role
 
 // The pieces more than one target writes. The theme function serves every frozen export and the
 // Fluent dynamic one, the modes serve every frozen export, and the accent family serves the frozen
@@ -33,6 +37,11 @@ internal const val IS_DARK_PARAMETER: String = "isDark"
 
 /** The theme function's content parameter. */
 internal const val CONTENT_PARAMETER: String = "content"
+
+// b-111c
+
+/** The theme function's switch for the wallpaper colors, which only an Android export that asks for them has. */
+internal const val DYNAMIC_COLOR_PARAMETER: String = "dynamicColor"
 
 /** The data class an export declares for the four colors of one accent. */
 internal const val COLOR_FAMILY: String = "ColorFamily"
@@ -67,6 +76,15 @@ internal fun AccentFamilyValues.colorsIn(mode: FrozenMode): AccentColors =
         FrozenMode.Dark -> dark
     }
 
+// b-111c
+
+/** Every role's color in [mode], at the contrast variant this table was resolved at. */
+internal fun RoleTable.colorsIn(mode: FrozenMode): Map<Role, Argb> =
+    when (mode) {
+        FrozenMode.Light -> light
+        FrozenMode.Dark -> dark
+    }
+
 /** `if (isDark) dark else light`, which is how a frozen theme picks between its two standard values. */
 internal fun byMode(
     light: String,
@@ -76,14 +94,16 @@ internal fun byMode(
 /**
  * `@Composable fun AppTheme(isDark: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit)`,
  * the theme function every frozen export and the Fluent dynamic export write, with [statements] as
- * its body.
+ * its body. With [dynamicColor] it also takes the Android switch for the wallpaper colors.
  */
 internal fun KotlinFileScope.themeFunction(
     input: ExportInput,
+    dynamicColor: Boolean = false,
     statements: BodyScope.() -> Unit,
 ) {
     function(name = input.document.themeName, annotations = listOf(Symbols.Composable)) {
         parameter(IS_DARK_PARAMETER, Symbols.Boolean, default = call(Symbols.IsSystemInDarkTheme))
+        if (dynamicColor) dynamicColorParameter() // b-111c
         parameter(CONTENT_PARAMETER, lambdaType(annotations = listOf(Symbols.Composable)))
         body(statements)
     }
@@ -114,3 +134,10 @@ internal fun colorFamilyValue(colors: AccentColors): Expression {
 }
 
 private fun accentPropertyName(name: String): String = name.replaceFirstChar { char -> char.lowercaseChar() }
+
+// b-111c
+
+/** `dynamicColor: Boolean = true`, which goes right after `isDark`. */
+internal fun FunctionScope.dynamicColorParameter() {
+    parameter(DYNAMIC_COLOR_PARAMETER, Symbols.Boolean, default = Literals.boolean(true))
+}
