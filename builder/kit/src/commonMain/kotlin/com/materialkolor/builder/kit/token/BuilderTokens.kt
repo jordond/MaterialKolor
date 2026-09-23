@@ -30,6 +30,7 @@ import com.materialkolor.builder.codegen.dsl.TokenKind
  * @property[success] Passing contrast, a completed export.
  * @property[warning] A pair that only just passes, a capability the target downgrades.
  * @property[danger] A failing pair, a destructive action.
+ * @property[scrim] The veil over the page behind a dialog, a side panel or a sheet.
  * @property[radius] Corner radii, small through large.
  * @property[spacing] The spacing scale.
  * @property[iconSize] How big the skin draws an icon in the chrome.
@@ -51,6 +52,7 @@ public data class BuilderTokens(
     public val success: Color,
     public val warning: Color,
     public val danger: Color,
+    public val scrim: Color, // b-218
     public val radius: BuilderRadii = BuilderRadii(),
     public val spacing: BuilderSpacing = BuilderSpacing(),
     public val iconSize: Dp = 20.dp, // b-202a

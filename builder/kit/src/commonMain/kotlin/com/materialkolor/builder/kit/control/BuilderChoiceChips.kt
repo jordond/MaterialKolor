@@ -119,6 +119,7 @@ internal fun <T> HeadlessChoiceChips(
         val colors = style.colors(isSelected)
         Row(
             modifier = Modifier
+                .foldState(optionLabel(value), ControlState.Selected(isSelected), enabled)
                 .actionTouchTarget(target)
                 .actionPress(interactionSource)
                 .actionRing(interactionSource, style.shape)

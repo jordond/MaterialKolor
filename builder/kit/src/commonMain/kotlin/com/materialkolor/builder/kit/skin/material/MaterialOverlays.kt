@@ -53,7 +53,9 @@ import androidx.compose.ui.window.DialogProperties
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderMenuItem
 import com.materialkolor.builder.kit.control.BuilderToast
+import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.skin.headless.Hairline
@@ -77,7 +79,7 @@ internal fun materialOverlayStyle(): OverlayStyle {
         dialogShape = shapes.extraLarge,
         panelRadius = LocalBuilderTokens.current.radius.medium,
         shadow = 1.dp,
-        scrim = colors.scrim.copy(alpha = MaterialScrimAlpha),
+        scrim = LocalBuilderTokens.current.scrim,
         itemShape = shapes.extraSmall,
         highlight = colors.onSurface.copy(alpha = MaterialHoverAlpha),
         selected = colors.secondaryContainer,
@@ -94,8 +96,7 @@ internal fun materialOverlayStyle(): OverlayStyle {
     )
 }
 
-/** Material's own scrim opacity and hover state layer. */
-private const val MaterialScrimAlpha = 0.32f
+/** Material's own hover state layer. */
 private const val MaterialHoverAlpha = 0.08f
 
 /**
@@ -211,7 +212,7 @@ internal fun <T> MaterialSelect(
                 .semantics {
                     role = Role.DropdownList
                     stateDescription = current
-                },
+                }.foldState(label, ControlState.Value(current), enabled),
             enabled = enabled,
             readOnly = true,
             label = { Text(label) },
@@ -227,10 +228,11 @@ internal fun <T> MaterialSelect(
                         expanded = false
                         onSelect(option)
                     },
-                    modifier = Modifier.semantics {
-                        role = Role.RadioButton
-                        this.selected = isSelected
-                    },
+                    modifier = Modifier
+                        .semantics {
+                            role = Role.RadioButton
+                            this.selected = isSelected
+                        }.foldState(optionLabel(option), ControlState.Selected(isSelected)),
                     trailingIcon = if (isSelected) {
                         { BuilderIcon(IconId.Check, contentDescription = null) }
                     } else {

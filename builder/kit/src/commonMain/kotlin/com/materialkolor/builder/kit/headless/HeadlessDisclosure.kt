@@ -39,14 +39,16 @@ import com.composeunstyled.UnstyledDisclosure
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.foldState
+import com.materialkolor.builder.kit.control.stateWords
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.BuilderMotion
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.skin.headless.inputAlpha
 import com.materialkolor.builder.kit.skin.headless.inputFocusRing
-import com.materialkolor.builder.kit.skin.headless.inputStateDescription
 
 /**
  * How [HeadlessDisclosure] draws its row and what it opens.
@@ -70,11 +72,11 @@ internal class DisclosureStyle(
     val focus: Color,
 )
 
-/** What a disclosure reads out, "Expanded" or "Collapsed". */
-internal fun disclosureStateDescription(
-    expanded: Boolean,
-    enabled: Boolean,
-): String = inputStateDescription(if (expanded) "Expanded" else "Collapsed", enabled)
+/** What a disclosure row says, its title and then its summary, the name the web folds its state into. */
+internal fun disclosureName(
+    title: String,
+    summary: String?,
+): String = listOfNotNull(title, summary).joinToString(", ")
 
 /** Content opening under a disclosure, which under reduced motion only fades. */
 internal fun disclosureEnter(motion: BuilderMotion): EnterTransition =
@@ -117,6 +119,8 @@ internal fun HeadlessDisclosure(
 ) {
     val interactions = remember { MutableInteractionSource() }
     val motion = LocalBuilderMotion.current
+    val state = ControlState.Expanded(expanded)
+    val spoken = stateWords().of(state)
     UnstyledDisclosure(
         expanded = expanded,
         onExpandedChange = onExpandedChange,
@@ -131,7 +135,8 @@ internal fun HeadlessDisclosure(
                     .fillMaxWidth()
                     .heightIn(min = LocalLayout.current.primaryTouchTarget)
                     .inputFocusRing(interactions, style.focus, style.shape)
-                    .disclosureSemantics(expanded, enabled, onExpandedChange)
+                    .disclosureSemantics(spoken, expanded, enabled, onExpandedChange)
+                    .foldState(disclosureName(title, summary), state, enabled)
                     .alpha(inputAlpha(enabled)),
                 enabled = enabled,
                 contentPadding = style.headerPadding,
@@ -151,12 +156,13 @@ internal fun HeadlessDisclosure(
 
 /** The spoken state, and the expand or collapse action while the row is enabled. */
 private fun Modifier.disclosureSemantics(
+    spoken: String,
     expanded: Boolean,
     enabled: Boolean,
     onExpandedChange: (Boolean) -> Unit,
 ): Modifier =
     semantics {
-        stateDescription = disclosureStateDescription(expanded, enabled)
+        stateDescription = spoken
         if (!enabled) return@semantics
         if (expanded) {
             collapse {

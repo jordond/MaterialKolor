@@ -5,7 +5,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.skin.headless.Hairline
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
-import com.materialkolor.builder.kit.skin.headless.ScrimAlpha
 import com.materialkolor.builder.kit.token.BuilderTokens
 
 // fluent-placeholder
@@ -27,7 +26,7 @@ internal fun fluentOverlayStyle(tokens: BuilderTokens): OverlayStyle {
         dialogShape = RoundedCornerShape(tokens.radius.small),
         panelRadius = tokens.radius.small,
         shadow = 8.dp,
-        scrim = tokens.canvas.copy(alpha = ScrimAlpha),
+        scrim = tokens.scrim,
         itemShape = RoundedCornerShape(FluentItemRadius),
         highlight = tokens.textStrong.copy(alpha = 0.06f),
         selected = tokens.textStrong.copy(alpha = 0.09f),

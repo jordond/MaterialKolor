@@ -60,9 +60,12 @@ import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.ListRowContent
+import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.control.listRowInput
+import com.materialkolor.builder.kit.control.listRowState
 import com.materialkolor.builder.kit.headless.radioGroupOption
 import com.materialkolor.builder.kit.headless.rememberRadioGroupFocus
 import com.materialkolor.builder.kit.icon.IconId
@@ -218,7 +221,9 @@ internal fun MaterialToggleButton(
         ToggleButton(
             checked = checked,
             onCheckedChange = onCheckedChange,
-            modifier = modifier.materialFeedback(interactionSource, ButtonDefaults.shape),
+            modifier = modifier
+                .foldState(label, ControlState.Checked(checked), enabled)
+                .materialFeedback(interactionSource, ButtonDefaults.shape),
             enabled = enabled,
             interactionSource = interactionSource,
         ) {
@@ -258,6 +263,7 @@ internal fun <T> MaterialSegmented(
                         shape = shape,
                         modifier = Modifier
                             .radioGroupOption(focus, index, selectedIndex, rtl) { target -> onSelect(options[target]) }
+                            .foldState(optionLabel(value), ControlState.Selected(index == selectedIndex), enabled)
                             .materialFeedback(interactionSource, shape),
                         enabled = enabled,
                         interactionSource = interactionSource,
@@ -315,6 +321,7 @@ internal fun MaterialFilterChip(
             },
             modifier = modifier
                 .semantics { toggleableState = ToggleableState(selected) }
+                .foldState(label, ControlState.Selected(selected), enabled)
                 .materialFeedback(interactionSource, FilterChipDefaults.shape),
             enabled = enabled,
             leadingIcon = glyph?.let { id ->
@@ -418,6 +425,7 @@ internal fun MaterialListRow(
         },
         modifier = modifier
             .listRowInput(row, interactionSource, indication = ripple())
+            .listRowState(row)
             .then(feedback),
         supportingContent = row.supporting?.let { text ->
             { BuilderText(text, style = BuilderTextStyle.Body, color = LocalContentColor.current) }

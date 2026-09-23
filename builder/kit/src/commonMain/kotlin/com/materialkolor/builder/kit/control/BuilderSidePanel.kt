@@ -5,6 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.Dp
+import com.materialkolor.builder.kit.generated.resources.Res
+import com.materialkolor.builder.kit.generated.resources.close
 import com.materialkolor.builder.kit.headless.HeadlessDrawer
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.WindowClass
@@ -12,6 +14,7 @@ import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.PanelEdge
 import com.materialkolor.builder.kit.skin.headless.overlayStyle
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * A modal panel along the start edge, the projects drawer.
@@ -36,7 +39,7 @@ public fun BuilderSidePanel(
     onDismissRequest: () -> Unit,
     title: String,
     modifier: Modifier = Modifier,
-    closeLabel: String = "Close",
+    closeLabel: String = stringResource(Res.string.close),
     returnFocusTo: FocusRequester? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {

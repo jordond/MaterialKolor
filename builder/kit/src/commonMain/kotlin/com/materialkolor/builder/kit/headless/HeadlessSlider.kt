@@ -33,10 +33,11 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import com.composeunstyled.UnstyledSlider
+import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.inputAlpha
 import com.materialkolor.builder.kit.skin.headless.inputFocusRing
-import com.materialkolor.builder.kit.skin.headless.inputStateDescription
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -178,15 +179,15 @@ internal fun Modifier.sliderKeys(
 }
 
 /**
- * The slider's name, spoken value and set-progress action. The disabled state is spoken as well
- * since the web mirror drops it (AR-10).
+ * The slider's name, spoken value and set-progress action. On the web [name] carries the value and
+ * the disabled state too, from [stateName], since the mirror drops both (AR-10, D37).
  *
  * Set-progress replaces the one the slider underneath brings, since this modifier sits outside it
  * and the outer one wins. Like the keys it never snaps to a stop. It clamps the target into the
  * range, and reports a change and its end only when the value moves. A disabled slider turns it down.
  */
 internal fun Modifier.sliderSemantics(
-    label: String,
+    name: String,
     stateDescription: String,
     value: Float,
     rules: SliderRules,
@@ -195,8 +196,8 @@ internal fun Modifier.sliderSemantics(
     onValueChangeFinished: () -> Unit,
 ): Modifier =
     semantics {
-        contentDescription = label
-        this.stateDescription = inputStateDescription(stateDescription, enabled)
+        contentDescription = name
+        this.stateDescription = stateDescription
         setProgress { target ->
             val next = target.coerceIn(rules.range.start, rules.range.endInclusive)
             if (!enabled || next == value) return@setProgress false
@@ -242,8 +243,15 @@ internal fun HeadlessSlider(
         modifier = modifier
             .heightIn(min = LocalLayout.current.primaryTouchTarget)
             .sliderKeys(value, rules, enabled, isRtl, press, onValueChange, onValueChangeFinished)
-            .sliderSemantics(label, stateDescription, value, rules, enabled, onValueChange, onValueChangeFinished)
-            .alpha(inputAlpha(enabled)),
+            .sliderSemantics(
+                name = stateName(label, ControlState.Value(stateDescription), enabled),
+                stateDescription = stateDescription,
+                value = value,
+                rules = rules,
+                enabled = enabled,
+                onValueChange = onValueChange,
+                onValueChangeFinished = onValueChangeFinished,
+            ).alpha(inputAlpha(enabled)),
         enabled = enabled,
         interactionSource = interactions,
         valueRange = rules.range,

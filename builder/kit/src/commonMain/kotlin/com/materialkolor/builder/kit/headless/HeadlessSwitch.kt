@@ -29,13 +29,15 @@ import com.composeunstyled.UnstyledSwitch
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.foldState
+import com.materialkolor.builder.kit.control.stateWords
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.skin.headless.inputAlpha
 import com.materialkolor.builder.kit.skin.headless.inputFocusRing
 import com.materialkolor.builder.kit.skin.headless.inputPress
-import com.materialkolor.builder.kit.skin.headless.inputStateDescription
 
 /**
  * How [HeadlessSwitch] draws its track and thumb.
@@ -101,23 +103,11 @@ internal class CheckboxStyle(
     val focusShape: Shape,
 )
 
-/** What a switch reads out, "On" or "Off". */
-internal fun switchStateDescription(
-    checked: Boolean,
-    enabled: Boolean,
-): String = inputStateDescription(if (checked) "On" else "Off", enabled)
-
-/** What a checkbox reads out, "Checked" or "Not checked". */
-internal fun checkboxStateDescription(
-    checked: Boolean,
-    enabled: Boolean,
-): String = inputStateDescription(if (checked) "Checked" else "Not checked", enabled)
-
 /**
  * A labelled switch over Compose Unstyled's switch.
  *
  * The whole row is the target, label included, so the switch itself only draws. The row carries
- * the switch role, the toggle state and a spoken state.
+ * the switch role, the toggle state and a spoken state, and on the web the state in its name.
  */
 @Composable
 internal fun HeadlessSwitch(
@@ -130,6 +120,8 @@ internal fun HeadlessSwitch(
 ) {
     val interactions = remember { MutableInteractionSource() }
     val motion = LocalBuilderMotion.current
+    val words = stateWords()
+    val state = ControlState.Switched(checked)
     val track by animateColorAsState(if (checked) style.trackOn else style.trackOff, motion.effects())
     val edge by animateColorAsState(if (checked) style.trackOn else style.outlineOff, motion.effects())
     val thumb by animateColorAsState(if (checked) style.thumbOn else style.thumbOff, motion.effects())
@@ -144,7 +136,8 @@ internal fun HeadlessSwitch(
                 enabled = enabled,
                 role = Role.Switch,
                 onValueChange = onCheckedChange,
-            ).semantics { stateDescription = switchStateDescription(checked, enabled) }
+            ).semantics { stateDescription = words.of(state) }
+            .foldState(label, state, enabled)
             .alpha(inputAlpha(enabled)),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -193,6 +186,8 @@ internal fun HeadlessCheckbox(
 ) {
     val interactions = remember { MutableInteractionSource() }
     val motion = LocalBuilderMotion.current
+    val words = stateWords()
+    val state = ControlState.Checked(checked)
     val fill by animateColorAsState(if (checked) style.checkedFill else Color.Transparent, motion.effects())
     val edge by animateColorAsState(if (checked) style.checkedFill else style.outline, motion.effects())
     Row(
@@ -206,7 +201,8 @@ internal fun HeadlessCheckbox(
                 enabled = enabled,
                 role = Role.Checkbox,
                 onValueChange = onCheckedChange,
-            ).semantics { stateDescription = checkboxStateDescription(checked, enabled) }
+            ).semantics { stateDescription = words.of(state) }
+            .foldState(label, state, enabled)
             .alpha(inputAlpha(enabled)),
         horizontalArrangement = Arrangement.spacedBy(style.labelGap),
         verticalAlignment = Alignment.CenterVertically,

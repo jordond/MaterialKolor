@@ -94,6 +94,7 @@ internal fun HeadlessFilterChip(
                 role = Role.Checkbox,
                 onClick = { onSelectedChange(!selected) },
             ).semantics { toggleableState = ToggleableState(selected) }
+            .foldState(label, ControlState.Selected(selected), enabled)
             .actionTouchTarget(LocalLayout.current.primaryTouchTarget)
             .actionPress(interactionSource)
             .alpha(if (enabled) 1f else ActionDisabledAlpha)

@@ -34,7 +34,7 @@ internal fun MaterialProgress(
 ) {
     val labelled = modifier
         .fillMaxWidth()
-        .semantics { progressLabel(label, progress) }
+        .progressLabel(label, progress)
     if (progress != null) {
         LinearProgressIndicator(progress = { progress }, modifier = labelled)
         return

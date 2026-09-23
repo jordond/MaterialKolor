@@ -55,7 +55,9 @@ import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderMenuItem
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
@@ -147,12 +149,14 @@ internal fun HeadlessDropdownItem(
     } else {
         Modifier.selectable(selected, interaction, null, enabled, Role.RadioButton, onClick)
     }
+    val folded = if (selected == null) Modifier else Modifier.foldState(label, ControlState.Selected(selected), enabled)
     Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = LocalLayout.current.minTouchTarget)
             .overlayFeedback(interaction, style, enabled = enabled, selected = selected == true)
             .then(action)
+            .then(folded)
             .padding(horizontal = tokens.spacing.medium),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.medium),
@@ -239,6 +243,7 @@ internal fun <T> HeadlessSelect(
                     open
                 }.clickable(interaction, null, enabled, role = Role.DropdownList) { expanded = !expanded }
                 .semantics { stateDescription = current }
+                .foldState(label, ControlState.Value(current), enabled)
                 .padding(horizontal = tokens.spacing.medium, vertical = tokens.spacing.extraSmall),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),

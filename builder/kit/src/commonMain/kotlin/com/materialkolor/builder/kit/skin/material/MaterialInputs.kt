@@ -52,16 +52,18 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.foldState
+import com.materialkolor.builder.kit.control.stateName
+import com.materialkolor.builder.kit.control.stateWords
 import com.materialkolor.builder.kit.headless.DisclosureChevron
 import com.materialkolor.builder.kit.headless.SliderKeyPress
 import com.materialkolor.builder.kit.headless.SliderRules
-import com.materialkolor.builder.kit.headless.checkboxStateDescription
 import com.materialkolor.builder.kit.headless.disclosureEnter
 import com.materialkolor.builder.kit.headless.disclosureExit
-import com.materialkolor.builder.kit.headless.disclosureStateDescription
+import com.materialkolor.builder.kit.headless.disclosureName
 import com.materialkolor.builder.kit.headless.sliderKeys
 import com.materialkolor.builder.kit.headless.sliderSemantics
-import com.materialkolor.builder.kit.headless.switchStateDescription
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.skin.headless.FieldStyle
@@ -82,11 +84,14 @@ internal fun MaterialSwitch(
     enabled: Boolean,
 ) {
     val tokens = LocalBuilderTokens.current
+    val words = stateWords()
+    val state = ControlState.Switched(checked)
     Row(
         modifier = modifier
             .heightIn(min = LocalLayout.current.primaryTouchTarget)
             .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onCheckedChange)
-            .semantics { stateDescription = switchStateDescription(checked, enabled) },
+            .semantics { stateDescription = words.of(state) }
+            .foldState(label, state, enabled),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -112,11 +117,14 @@ internal fun MaterialCheckbox(
     enabled: Boolean,
 ) {
     val tokens = LocalBuilderTokens.current
+    val words = stateWords()
+    val state = ControlState.Checked(checked)
     Row(
         modifier = modifier
             .heightIn(min = LocalLayout.current.primaryTouchTarget)
             .toggleable(value = checked, enabled = enabled, role = Role.Checkbox, onValueChange = onCheckedChange)
-            .semantics { stateDescription = checkboxStateDescription(checked, enabled) },
+            .semantics { stateDescription = words.of(state) }
+            .foldState(label, state, enabled),
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.extraSmall),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -151,7 +159,15 @@ internal fun MaterialSlider(
         onValueChange = { raw -> onValueChange(rules.snap(raw)) },
         modifier = modifier
             .sliderKeys(value, rules, enabled, isRtl, press, onValueChange, onValueChangeFinished)
-            .sliderSemantics(label, stateDescription, value, rules, enabled, onValueChange, onValueChangeFinished),
+            .sliderSemantics(
+                name = stateName(label, ControlState.Value(stateDescription), enabled),
+                stateDescription = stateDescription,
+                value = value,
+                rules = rules,
+                enabled = enabled,
+                onValueChange = onValueChange,
+                onValueChangeFinished = onValueChangeFinished,
+            ),
         enabled = enabled,
         valueRange = rules.range,
         onValueChangeFinished = onValueChangeFinished,
@@ -251,7 +267,8 @@ internal fun <T> MaterialTabs(
                 onClick = { onSelect(tab) },
                 modifier = Modifier
                     .focusRequester(requesters[index])
-                    .focusProperties { canFocus = index == roving.intValue },
+                    .focusProperties { canFocus = index == roving.intValue }
+                    .foldState(label(tab), ControlState.Selected(index == selectedIndex)),
                 text = { Text(label(tab), maxLines = 1) },
             )
         }
@@ -273,6 +290,8 @@ internal fun MaterialDisclosure(
     content: @Composable () -> Unit,
 ) {
     val motion = LocalBuilderMotion.current
+    val state = ControlState.Expanded(expanded)
+    val spoken = stateWords().of(state)
     Column(modifier) {
         ListItem(
             headlineContent = { Text(title) },
@@ -280,7 +299,7 @@ internal fun MaterialDisclosure(
                 .heightIn(min = LocalLayout.current.primaryTouchTarget)
                 .clickable(enabled = enabled, role = Role.Button) { onExpandedChange(!expanded) }
                 .semantics {
-                    stateDescription = disclosureStateDescription(expanded, enabled)
+                    stateDescription = spoken
                     if (!enabled) return@semantics
                     if (expanded) {
                         collapse {
@@ -293,7 +312,8 @@ internal fun MaterialDisclosure(
                             true
                         }
                     }
-                }.alpha(inputAlpha(enabled)),
+                }.foldState(disclosureName(title, summary), state, enabled)
+                .alpha(inputAlpha(enabled)),
             supportingContent = summary?.let { text -> { Text(text) } },
             trailingContent = { DisclosureChevron(expanded) },
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),

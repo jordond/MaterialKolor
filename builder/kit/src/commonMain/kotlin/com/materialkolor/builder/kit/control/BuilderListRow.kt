@@ -110,6 +110,17 @@ internal fun Modifier.listRowInput(
     }
 }
 
+/**
+ * On the web, a pressable row's current state and its disabled note in its name (D37). A row with
+ * neither keeps the name its text gives it, trailing slot included.
+ */
+@Composable
+internal fun Modifier.listRowState(row: ListRowContent): Modifier {
+    if (row.onClick == null || (row.selected == null && row.enabled)) return this
+    val name = listOfNotNull(row.headline, row.supporting).joinToString(", ")
+    return foldState(name, row.selected?.let { current -> ControlState.Selected(current) }, row.enabled)
+}
+
 /** A list row drawn from [style]. */
 @Composable
 internal fun HeadlessListRow(
@@ -131,6 +142,7 @@ internal fun HeadlessListRow(
     Row(
         modifier = modifier
             .listRowInput(row, interactionSource, indication = null)
+            .listRowState(row)
             .then(pressableFeedback)
             .actionSurface(colors, style.shape, style.borderWidth)
             .heightIn(min = style.minHeight)

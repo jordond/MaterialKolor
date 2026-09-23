@@ -129,6 +129,7 @@ internal fun <T> HeadlessSegmented(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .foldState(optionLabel(value), ControlState.Selected(isSelected), enabled)
                 .actionTouchTarget(target)
                 .actionPress(interactionSource)
                 .actionRing(interactionSource, option.shape)

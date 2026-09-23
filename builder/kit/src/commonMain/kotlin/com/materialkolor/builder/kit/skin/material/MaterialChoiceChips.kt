@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.headless.radioGroupOption
 import com.materialkolor.builder.kit.headless.rememberRadioGroupFocus
 import com.materialkolor.builder.kit.icon.IconId
@@ -76,6 +78,7 @@ internal fun <T> MaterialChoiceChips(
                         modifier = Modifier
                             .semantics { role = Role.RadioButton }
                             .radioGroupOption(focus, index, selectedIndex, rtl) { target -> onSelect(options[target]) }
+                            .foldState(optionLabel(value), ControlState.Selected(isSelected), enabled)
                             .materialFeedback(interactionSource, FilterChipDefaults.shape),
                         enabled = enabled,
                         leadingIcon = glyph?.let { id ->
