@@ -32,6 +32,7 @@ import com.materialkolor.builder.codegen.dsl.TokenKind
  * @property[danger] A failing pair, a destructive action.
  * @property[radius] Corner radii, small through large.
  * @property[spacing] The spacing scale.
+ * @property[iconSize] How big the skin draws an icon in the chrome.
  */
 @Immutable
 public data class BuilderTokens(
@@ -52,6 +53,7 @@ public data class BuilderTokens(
     public val danger: Color,
     public val radius: BuilderRadii = BuilderRadii(),
     public val spacing: BuilderSpacing = BuilderSpacing(),
+    public val iconSize: Dp = 20.dp, // b-202a
 )
 
 /**

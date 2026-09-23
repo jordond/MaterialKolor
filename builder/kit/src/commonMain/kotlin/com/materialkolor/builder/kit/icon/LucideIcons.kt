@@ -50,7 +50,7 @@ import com.composables.icons.lucide.X
  * Several Lucide names differ from the builder's, for example [IconId.Eyedropper] is `Pipette`
  * and [IconId.More] is `Ellipsis`.
  */
-public object LucideIcons : BuilderIcons {
+internal object LucideIcons : BuilderIcons {
     override fun get(id: IconId): ImageVector =
         when (id) {
             IconId.Undo -> Lucide.Undo2

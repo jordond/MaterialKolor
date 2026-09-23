@@ -5,8 +5,10 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.icon.MaterialIcons
 import com.materialkolor.builder.kit.motion.BuilderDurations
 import com.materialkolor.builder.kit.motion.BuilderMotion
@@ -17,6 +19,7 @@ import com.materialkolor.builder.kit.skin.ProvideSkinLocals
 import com.materialkolor.builder.kit.skin.StatusColors
 import com.materialkolor.builder.kit.skin.builderCodePalette
 import com.materialkolor.builder.kit.token.BuilderTokens
+import com.materialkolor.builder.kit.token.brandFontFamily
 import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.material3.toColorScheme
 
@@ -25,7 +28,9 @@ import com.materialkolor.material3.toColorScheme
  *
  * Expressive swaps in `MaterialExpressiveTheme` with the expressive motion scheme. Everything
  * Material draws tints from [scheme], and the builder tokens are read back out of the theme so a
- * builder widget and a Material component beside it agree.
+ * builder widget and a Material component beside it agree. Both flavours set Material's type
+ * scale in the brand face at the library's own sizes and weights, since the default family on wasm
+ * is a fallback font fetched from the network.
  *
  * @param[scheme] The chrome scheme for the current mode.
  * @param[expressive] Whether to wear the expressive theme and motion.
@@ -41,12 +46,18 @@ internal fun MaterialSkinTheme(
 ) {
     val colorScheme = remember(scheme) { scheme.toColorScheme() }
     val isDark = scheme.isDark
+    val brand = brandFontFamily()
+    val typography = remember(brand) { Typography(fontFamily = brand) }
     if (expressive) {
-        MaterialExpressiveTheme(colorScheme = colorScheme, motionScheme = MotionScheme.expressive()) {
+        MaterialExpressiveTheme(
+            colorScheme = colorScheme,
+            motionScheme = MotionScheme.expressive(),
+            typography = typography,
+        ) {
             MaterialSkinLocals(isDark, reducedMotion, content)
         }
     } else {
-        MaterialTheme(colorScheme = colorScheme) {
+        MaterialTheme(colorScheme = colorScheme, typography = typography) {
             MaterialSkinLocals(isDark, reducedMotion, content)
         }
     }
@@ -91,6 +102,7 @@ private fun ColorScheme.builderTokens(status: StatusColors): BuilderTokens =
         success = status.success,
         warning = status.warning,
         danger = error,
+        iconSize = 20.dp,
     )
 
 /**

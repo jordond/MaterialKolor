@@ -1,6 +1,8 @@
 /*
  * The path data below is copied from the Material Icons Rounded set, as shipped in the
- * androidx.compose.material:material-icons-extended 1.7.6 sources.
+ * androidx.compose.material:material-icons-core 1.7.6 and material-icons-extended 1.7.6 sources.
+ * Share, Check, Close, Search, Lock, Info, Add, Delete and Warning come from the core set, every
+ * other glyph from the extended set.
  *
  * Copyright 2024 The Android Open Source Project
  *
@@ -32,7 +34,7 @@ import androidx.compose.ui.unit.dp
  * The data is hand copied so kit does not pull in the whole extended icon pack for 41 glyphs. Each
  * glyph is built the first time it is asked for and kept after that, on the UI thread only.
  */
-public object MaterialIcons : BuilderIcons {
+internal object MaterialIcons : BuilderIcons {
     private val vectors = arrayOfNulls<ImageVector>(IconId.entries.size)
 
     override fun get(id: IconId): ImageVector =

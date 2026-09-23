@@ -2,6 +2,7 @@ package com.materialkolor.builder.kit.skin.fluent
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.icon.FluentIcons
 import com.materialkolor.builder.kit.skin.ProvideSkinLocals
 import com.materialkolor.builder.kit.skin.StatusColors
@@ -73,6 +74,7 @@ private fun fluentTokens(
         success = status.success,
         warning = status.warning,
         danger = scheme.errorPalette.toneColor(tones.accent),
+        iconSize = 16.dp,
     )
 }
 

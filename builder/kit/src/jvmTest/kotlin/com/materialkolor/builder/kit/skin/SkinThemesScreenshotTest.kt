@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -25,7 +26,10 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.composeunstyled.LocalTextStyle
 import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
@@ -52,8 +56,9 @@ import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.custom.LocalBuilderIdentity
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.kit.token.LocalBuilderType
 import io.github.takahirom.roborazzi.captureRoboImage
-import io.kotest.matchers.doubles.shouldBeGreaterThanOrEqual
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
@@ -79,23 +84,23 @@ private val Document = ThemeDocument(
 class SkinThemesScreenshotTest {
     @Test
     fun material3_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = false), "material3", MaterialIcons) }
+        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = false), "material3", MaterialIcons, 20.dp) }
 
     @Test
     fun material3Expressive_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = true), "expressive", MaterialIcons) }
+        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = true), "expressive", MaterialIcons, 20.dp) }
 
     @Test
     fun unstyled_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(Library.Unstyled, expressive = false), "unstyled", LucideIcons) }
+        runComposeUiTest { checkSheets(Skin(Library.Unstyled, expressive = false), "unstyled", LucideIcons, 16.dp) }
 
     @Test
     fun custom_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(Library.Custom, expressive = false), "custom", LucideIcons) }
+        runComposeUiTest { checkSheets(Skin(Library.Custom, expressive = false), "custom", LucideIcons, 18.dp) }
 
     @Test
     fun fluentPlaceholder_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(Library.Fluent, expressive = false), "fluent", FluentIcons) }
+        runComposeUiTest { checkSheets(Skin(Library.Fluent, expressive = false), "fluent", FluentIcons, 16.dp) }
 
     @Test
     fun custom_pinnedDocument_drawsTheChromeSlotsNotTheDocumentSlots() =
@@ -115,6 +120,39 @@ class SkinThemesScreenshotTest {
             assertNotNull(seen) shouldBe expected
             seen shouldNotBe pinned
         }
+
+    @Test
+    fun material3AndUnstyled_libraryText_wearsTheBrandFace() =
+        runComposeUiTest {
+            val seen = mutableMapOf<String, FontFamily?>()
+            var brand: FontFamily? = null
+            setContent {
+                val result = remember { ThemeResolver().resolve(Document) }
+                for (expressive in listOf(false, true)) {
+                    BuilderTheme(Skin(Library.Material3, expressive), result, isDark = false, reducedMotion = false) {
+                        brand = LocalBuilderType.current.body.fontFamily
+                        val typography = MaterialTheme.typography
+                        seen["m3 expressive=$expressive bodyLarge"] = typography.bodyLarge.fontFamily
+                        seen["m3 expressive=$expressive labelLarge"] = typography.labelLarge.fontFamily
+                        seen["m3 expressive=$expressive titleMedium"] = typography.titleMedium.fontFamily
+                    }
+                }
+                BuilderTheme(
+                    Skin(Library.Unstyled, expressive = false),
+                    result,
+                    isDark = false,
+                    reducedMotion = false,
+                ) {
+                    seen["unstyled text style"] = LocalTextStyle.current.fontFamily
+                }
+            }
+
+            waitForIdle()
+            val face = assertNotNull(brand)
+            face shouldNotBe FontFamily.Default
+            seen.size shouldBe 7
+            seen.filterValues { family -> family != face } shouldBe emptyMap()
+        }
 }
 
 /** What one sheet saw of its skin. */
@@ -125,12 +163,44 @@ private class Seen(
     val durations: BuilderDurations,
 )
 
+/** One ink on one ground, and the least contrast the pair may have. */
+private class InkPair(
+    val name: String,
+    val ink: Color,
+    val ground: Color,
+    val minimum: Double,
+)
+
+/**
+ * Every ink the builder draws as text or as a mark, on every ground it draws it on.
+ *
+ * Text keeps to WCAG AA at 4.5, the accent is a mark and only needs 3. Danger counts as text because
+ * `Emphasis.Danger` labels a destructive action.
+ */
+private fun BuilderTokens.inkPairs(): List<InkPair> =
+    listOf(
+        InkPair("textStrong on panel", textStrong, panel, 4.5),
+        InkPair("textMuted on panel", textMuted, panel, 4.5),
+        InkPair("accent on panel", accent, panel, 3.0),
+        InkPair("onAccent on accent", onAccent, accent, 4.5),
+        InkPair("danger on panel", danger, panel, 4.5),
+        InkPair("textStrong on canvas", textStrong, canvas, 4.5),
+        InkPair("textMuted on canvas", textMuted, canvas, 4.5),
+        InkPair("textStrong on panelRaised", textStrong, panelRaised, 4.5),
+        InkPair("textMuted on panelRaised", textMuted, panelRaised, 4.5),
+    ) +
+        (TokenKind.entries - TokenKind.Plain).map { kind ->
+            InkPair("$kind on codeBackground", codePalette[kind], codeBackground, 4.5)
+        }
+
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.checkSheets(
     skin: Skin,
     name: String,
     icons: BuilderIcons,
+    iconSize: Dp,
 ) {
+    val unreadable = mutableListOf<String>()
     var isDark by mutableStateOf(false)
     var seen: Seen? = null
     setContent {
@@ -155,16 +225,19 @@ private fun ComposeUiTest.checkSheets(
         sheet.skin shouldBe skin
         sheet.icons shouldBe icons
         sheet.durations shouldBe BuilderDurations()
-        contrast(sheet.tokens.textStrong, sheet.tokens.panel) shouldBeGreaterThanOrEqual 4.5
-        contrast(sheet.tokens.textMuted, sheet.tokens.panel) shouldBeGreaterThanOrEqual 4.5
-        contrast(sheet.tokens.accent, sheet.tokens.panel) shouldBeGreaterThanOrEqual 3.0
+        sheet.tokens.iconSize shouldBe iconSize
+        val mode = if (dark) "dark" else "light"
+        for (pair in sheet.tokens.inkPairs()) {
+            val ratio = contrast(pair.ink, pair.ground)
+            if (ratio < pair.minimum) unreadable += "$mode ${pair.name} ${"%.2f".format(ratio)} < ${pair.minimum}"
+        }
         onNodeWithTag(SheetTag).assertExists()
         onNodeWithText(SeedHex).assertExists()
         onNodeWithContentDescription(IconId.Undo.name).assertExists()
         onNodeWithContentDescription(IconId.ExternalLink.name).assertExists()
-        val mode = if (dark) "dark" else "light"
         onNodeWithTag(SheetTag).captureRoboImage("$ScreenshotDir/$name-$mode.png")
     }
+    unreadable.shouldBeEmpty()
 }
 
 /** The WCAG contrast ratio of two opaque colours. */

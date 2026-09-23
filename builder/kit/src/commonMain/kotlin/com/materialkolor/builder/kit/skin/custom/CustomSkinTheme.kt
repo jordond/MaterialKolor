@@ -7,6 +7,7 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.CustomSlotColors
@@ -100,4 +101,5 @@ private fun BuilderIdentity.builderTokens(status: StatusColors): BuilderTokens =
         success = status.success,
         warning = status.warning,
         danger = this[CustomSlot.Error],
+        iconSize = 18.dp,
     )

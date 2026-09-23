@@ -32,4 +32,16 @@ class ChromeCustomSlotsTest {
         assertEquals(standard.customSlots.dark, reduced.chromeCustomSlots.dark)
         assertNotEquals(pin, reduced.chromeCustomSlots[CustomSlot.Primary, false])
     }
+
+    @Test
+    fun chromeCustomSlots_reducedContrastOnly_matchTheStandardSlots() {
+        val resolver = ThemeResolver()
+        val standard = resolver.resolve(ThemeDocument(seed = Argb(0x6750A4)))
+        val reduced = resolver.resolve(standard.document.copy(contrast = ContrastLevel.Reduced))
+
+        assertNotEquals(standard.customSlots.light, reduced.customSlots.light)
+        assertNotEquals(standard.customSlots.dark, reduced.customSlots.dark)
+        assertEquals(standard.customSlots.light, reduced.chromeCustomSlots.light)
+        assertEquals(standard.customSlots.dark, reduced.chromeCustomSlots.dark)
+    }
 }

@@ -8,13 +8,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.icon.LocalBuilderIcons
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
-
-/** The size of an icon in the chrome, a notch under Material's 24 dp to sit beside 13 sp labels. */
-public val BuilderIconSize: Dp = 20.dp
 
 /**
  * The glyph the surrounding skin draws for [id].
@@ -25,7 +21,7 @@ public val BuilderIconSize: Dp = 20.dp
  * @param[modifier] Applied to the icon.
  * @param[emphasis] Picks the ink from the skin's tokens when [tint] is left unspecified.
  * @param[tint] An explicit ink, for an icon standing on something other than a panel.
- * @param[size] The width and height.
+ * @param[size] The width and height, the skin's own icon size unless a caller needs another.
  */
 @Composable
 public fun BuilderIcon(
@@ -34,7 +30,7 @@ public fun BuilderIcon(
     modifier: Modifier = Modifier,
     emphasis: Emphasis = Emphasis.Primary,
     tint: Color = Color.Unspecified,
-    size: Dp = BuilderIconSize,
+    size: Dp = LocalBuilderTokens.current.iconSize,
 ) {
     val ink = tint.takeOrElse { emphasis.ink(LocalBuilderTokens.current) }
     Image(
