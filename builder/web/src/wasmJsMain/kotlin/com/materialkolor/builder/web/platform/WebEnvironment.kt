@@ -31,4 +31,14 @@ internal class WebEnvironment : Environment {
     ) = Unit
 
     override suspend fun requestPersist(): Boolean = false
+
+    // b-215a
+    // B-302 keeps this in sessionStorage. Until then a reload forgets the tab's project.
+    private var tabProject: String? = null
+
+    override fun readTabProject(): String? = tabProject
+
+    override fun writeTabProject(id: String?) {
+        tabProject = id
+    }
 }

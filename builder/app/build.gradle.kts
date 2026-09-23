@@ -78,6 +78,11 @@ kotlin {
             implementation(libs.filekit.dialogs)
         }
 
+        // b-215a
+        commonMain.dependencies {
+            implementation(libs.compose.resources)
+        }
+
         // b-214
         commonTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)
@@ -98,4 +103,11 @@ kotlin {
 
 composeExtension.extensions.getByType<DesktopExtension>().application {
     mainClass = "com.materialkolor.builder.desktop.MainKt"
+}
+
+// b-215a
+// The session's strings are the first in this module. `Res` stays internal like the rest.
+composeExtension.extensions.getByType<org.jetbrains.compose.resources.ResourcesExtension>().apply {
+    packageOfResClass = "com.materialkolor.builder.generated.resources"
+    publicResClass = false
 }

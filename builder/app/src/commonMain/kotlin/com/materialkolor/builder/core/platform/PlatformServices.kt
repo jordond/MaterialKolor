@@ -258,6 +258,14 @@ interface Environment {
 
     /** Whether writes to [StoreFactory] stores outlive this session. */
     val storageAvailable: Boolean
+
+    // b-215a
+
+    /** The project this tab had open, kept through a reload and gone with the tab. Null when there is none. */
+    fun readTabProject(): String?
+
+    /** Remember [id] as the project this tab has open, or forget it with null. */
+    fun writeTabProject(id: String?)
 }
 
 // b-214

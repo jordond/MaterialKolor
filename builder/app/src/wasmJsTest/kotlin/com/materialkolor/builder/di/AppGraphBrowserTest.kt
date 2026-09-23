@@ -134,4 +134,9 @@ private object TestEnvironment : Environment {
     ) = Unit
 
     override suspend fun requestPersist(): Boolean = false
+
+    // b-215a
+    override fun readTabProject(): String? = null
+
+    override fun writeTabProject(id: String?) = Unit
 }
