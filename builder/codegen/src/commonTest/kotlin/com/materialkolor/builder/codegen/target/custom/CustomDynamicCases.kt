@@ -235,7 +235,7 @@ class CustomDynamicTest {
     }
 
     @Test
-    fun customDynamic_reservedNames_coverEveryImportAndDeclaration() {
+    fun customDynamic_reservedNames_coverEveryImport() {
         val reserved = ReservedNames.of(ExportTarget.Custom)
 
         CustomDynamicCases.all.forEach { (case, input) ->

@@ -269,5 +269,5 @@ internal val UnstyledTokens: Set<String> =
 
 // b-112b
 
-/** What the Custom dynamic export imports or declares on top of the frozen one. */
+/** The Custom dynamic export's names beyond the frozen set that can clash. */
 private val CustomDynamicNames: Set<String> = setOf(Symbols.MaterialKolors.simpleName, REMEMBER_THEME_COLORS)

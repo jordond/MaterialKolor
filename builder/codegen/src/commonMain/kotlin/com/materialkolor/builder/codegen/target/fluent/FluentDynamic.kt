@@ -2,7 +2,6 @@ package com.materialkolor.builder.codegen.target.fluent
 
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.FluentBinding
-import com.materialkolor.builder.codegen.dsl.ArgumentsScope
 import com.materialkolor.builder.codegen.dsl.BodyScope
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.dsl.KotlinFileScope
@@ -14,18 +13,12 @@ import com.materialkolor.builder.codegen.dsl.member
 import com.materialkolor.builder.codegen.dsl.ref
 import com.materialkolor.builder.codegen.dsl.type
 import com.materialkolor.builder.codegen.symbol.DefaultArguments
-import com.materialkolor.builder.codegen.symbol.SchemeDefaults
 import com.materialkolor.builder.codegen.symbol.Symbols
-import com.materialkolor.builder.codegen.symbol.optionalArgument
 import com.materialkolor.builder.codegen.target.CONTENT_PARAMETER
 import com.materialkolor.builder.codegen.target.IS_DARK_PARAMETER
-import com.materialkolor.builder.codegen.target.material3.KeyColorOrder
 import com.materialkolor.builder.codegen.target.material3.SEED_COLOR
 import com.materialkolor.builder.codegen.target.material3.dynamicColorFile
-import com.materialkolor.builder.codegen.target.material3.parameterName
-import com.materialkolor.builder.codegen.target.material3.platformExpression
-import com.materialkolor.builder.codegen.target.material3.specExpression
-import com.materialkolor.builder.codegen.target.material3.styleExpression
+import com.materialkolor.builder.codegen.target.schemeArguments
 import com.materialkolor.builder.codegen.target.themeFunction
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
@@ -124,7 +117,13 @@ private fun swapNote(animate: Boolean): String = if (animate) SWAP_TO_MODULE_ANI
 /** `rememberFluentColors(...)`, passed through `animateFluentColors` when the theme animates. */
 private fun BodyScope.moduleColors(input: ExportInput) {
     val colors = callOf(Symbols.RememberFluentColors, multiline = true) {
-        schemeArguments(input.document, DefaultArguments.RememberFluentColors)
+        schemeArguments(
+            document = input.document,
+            defaults = DefaultArguments.RememberFluentColors,
+            seed = ref(SEED_COLOR),
+            isDark = ref(IS_DARK_PARAMETER),
+            withContrast = false,
+        )
     }
     if (!input.prefs.animate) {
         assign(COLORS, colors)
@@ -148,7 +147,13 @@ private fun BodyScope.inlineColors(document: ThemeDocument) {
     assign(
         name = SCHEME,
         value = callOf(Symbols.RememberDynamicScheme, multiline = true) {
-            schemeArguments(document, DefaultArguments.RememberDynamicScheme)
+            schemeArguments(
+                document = document,
+                defaults = DefaultArguments.RememberDynamicScheme,
+                seed = ref(SEED_COLOR),
+                isDark = ref(IS_DARK_PARAMETER),
+                withContrast = false,
+            )
         },
     )
     assign(
@@ -163,24 +168,6 @@ private fun BodyScope.inlineColors(document: ThemeDocument) {
             }
         },
     )
-}
-
-/**
- * The arguments that decide the scheme, in the order both functions declare them. The seed is
- * always written and each overridden palette goes in beside it, as in the Material 3 dynamic export.
- */
-private fun ArgumentsScope.schemeArguments(
-    document: ThemeDocument,
-    defaults: SchemeDefaults,
-) {
-    argument("seedColor", ref(SEED_COLOR))
-    argument(IS_DARK_PARAMETER, ref(IS_DARK_PARAMETER))
-    KeyColorOrder.forEach { keyColor ->
-        optionalArgument(keyColor.parameterName, document.keyColors[keyColor]?.let { ref(keyColor.name) })
-    }
-    optionalArgument(defaults.style, document.style) { style -> styleExpression(style, document) }
-    optionalArgument(defaults.specVersion, document.spec) { spec -> specExpression(spec) }
-    optionalArgument(defaults.platform, document.platform) { platform -> platformExpression(platform) }
 }
 
 /** The private `TonalPalette.toShades()` of the inline form, the module's `toFluentShades` written out. */

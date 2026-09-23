@@ -2,6 +2,7 @@ package com.materialkolor.builder.codegen.target
 
 import com.materialkolor.builder.codegen.ExportInput
 import com.materialkolor.builder.codegen.dsl.AnnotationSpec
+import com.materialkolor.builder.codegen.dsl.ArgumentsScope
 import com.materialkolor.builder.codegen.dsl.BodyScope
 import com.materialkolor.builder.codegen.dsl.ClassKind
 import com.materialkolor.builder.codegen.dsl.Expression
@@ -11,7 +12,15 @@ import com.materialkolor.builder.codegen.dsl.call
 import com.materialkolor.builder.codegen.dsl.ifElse
 import com.materialkolor.builder.codegen.dsl.lambdaType
 import com.materialkolor.builder.codegen.dsl.ref
+import com.materialkolor.builder.codegen.symbol.SchemeDefaults
 import com.materialkolor.builder.codegen.symbol.Symbols
+import com.materialkolor.builder.codegen.symbol.optionalArgument
+import com.materialkolor.builder.codegen.target.material3.KeyColorOrder
+import com.materialkolor.builder.codegen.target.material3.motionSchemeExpression
+import com.materialkolor.builder.codegen.target.material3.parameterName
+import com.materialkolor.builder.codegen.target.material3.platformExpression
+import com.materialkolor.builder.codegen.target.material3.specExpression
+import com.materialkolor.builder.codegen.target.material3.styleExpression
 import com.materialkolor.builder.codegen.text.Literals
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.export.AccentColors
@@ -21,6 +30,7 @@ import com.materialkolor.builder.domain.export.ResolvedExport
 import com.materialkolor.builder.domain.export.RoleTable
 import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.Role
+import com.materialkolor.builder.domain.model.ThemeDocument
 
 // The pieces more than one target writes. The theme function serves every frozen export and the
 // Fluent dynamic one, the modes serve every frozen export, and the accent family serves the frozen
@@ -140,4 +150,45 @@ private fun accentPropertyName(name: String): String = name.replaceFirstChar { c
 /** `dynamicColor: Boolean = true`, which goes right after `isDark`. */
 internal fun FunctionScope.dynamicColorParameter() {
     parameter(DYNAMIC_COLOR_PARAMETER, Symbols.Boolean, default = Literals.boolean(true))
+}
+
+// b-112c
+
+/**
+ * The arguments that decide a scheme, in the order the called function declares them.
+ *
+ * The seed is always written, and each overridden palette goes in beside it rather than replacing
+ * it, so the seed still drives every palette the document leaves alone. [seed] is `SeedColor`, or
+ * the parameter a wrapper hands it on through. [isDark] is left out when it is null, as it is for
+ * `dynamicColorSchemes`, which writes both modes itself. The motion scheme and AMOLED only go in
+ * when [defaults] has them, and without [withContrast] the contrast level stays out, which is how
+ * Fluent writes its shades.
+ */
+internal fun ArgumentsScope.schemeArguments(
+    document: ThemeDocument,
+    defaults: SchemeDefaults,
+    seed: Expression,
+    isDark: Expression?,
+    withContrast: Boolean = true,
+) {
+    argument("seedColor", seed)
+    // The motion scheme has no default a document could match, so it is always written.
+    defaults.motionScheme?.let { default ->
+        argument(default.parameter, motionSchemeExpression(document.motionScheme))
+    }
+    optionalArgument(IS_DARK_PARAMETER, isDark)
+    defaults.isAmoled?.let { default ->
+        optionalArgument(default, document.amoled) { amoled -> Literals.boolean(amoled) }
+    }
+    KeyColorOrder.forEach { keyColor ->
+        optionalArgument(keyColor.parameterName, document.keyColors[keyColor]?.let { ref(keyColor.name) })
+    }
+    optionalArgument(defaults.style, document.style) { style -> styleExpression(style, document) }
+    if (withContrast) {
+        optionalArgument(defaults.contrastLevel, document.contrast) { contrast ->
+            Literals.decimal(contrast.hundredths)
+        }
+    }
+    optionalArgument(defaults.specVersion, document.spec) { spec -> specExpression(spec) }
+    optionalArgument(defaults.platform, document.platform) { platform -> platformExpression(platform) }
 }
