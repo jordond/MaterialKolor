@@ -30,7 +30,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.model.Role
@@ -61,11 +61,12 @@ import kotlin.test.Test
  */
 private const val TripsScreenshotDir = "src/jvmTest/screenshots/trips"
 
-/** The width the dock frames each device at, the kit's screen widths. */
-private val TripsFrames: Map<DeviceWidth, Dp> =
-    mapOf(DeviceWidth.Phone to 412.dp, DeviceWidth.Tablet to 840.dp, DeviceWidth.Desktop to 1280.dp)
-
-private const val TripsFrameHeight = 900
+/** The frame the dock shows each device in, the kit's screen widths at the height of a first screen. */
+private val TripsFrames: Map<DeviceWidth, IntSize> = mapOf(
+    DeviceWidth.Phone to IntSize(412, 900),
+    DeviceWidth.Tablet to IntSize(840, 900),
+    DeviceWidth.Desktop to IntSize(1280, 800),
+)
 
 /** The four families F-20 wants on every screen. */
 private val TripsFamilies: Map<String, Set<Role>> = mapOf(
@@ -89,7 +90,7 @@ private val TripsOfflineRow: SemanticsMatcher = isToggleable() and hasText("Offl
 @OptIn(ExperimentalTestApi::class)
 class TripsAppTest {
     @Test
-    fun roles_everyDeviceWidth_coverEveryControlAndTheSchemeF20Asks() {
+    fun controls_everyDeviceWidth_declareTheirOwnRoles() {
         for ((width, frame) in TripsFrames) {
             withClue(width) {
                 runComposeUiTest {
@@ -101,19 +102,34 @@ class TripsAppTest {
                             // Tall enough that every lazy item composes, wider than the window on desktop.
                             modifier = Modifier
                                 .wrapContentSize(Alignment.TopStart, unbounded = true)
-                                .requiredSize(frame, 2400.dp),
+                                .requiredSize(frame.width.dp, 2400.dp),
                         )
                     }
 
-                    val controls = onAllNodes(hasClickAction() or hasSetTextAction()).fetchSemanticsNodes()
+                    // Unmerged, since a merged node also carries the roles its children declared.
+                    val controls = onAllNodes(hasClickAction() or hasSetTextAction(), useUnmergedTree = true)
+                        .fetchSemanticsNodes()
                     controls.shouldNotBeEmpty()
                     controls
                         .filter { node -> PreviewRoles !in node.config }
                         .map { node -> node.config.toString() }
                         .shouldBeEmpty()
+                }
+            }
+        }
+    }
 
+    @Test
+    fun roles_everyDeviceWidthFirstScreen_showTheSchemeF20Asks() {
+        for ((width, frame) in TripsFrames) {
+            withClue(width) {
+                runDesktopComposeUiTest(frame.width, frame.height) {
+                    setContent { TripsHarness(LightSpec, DemoAppState(), width, Modifier.fillMaxSize()) }
+
+                    val screen = onRoot().fetchSemanticsNode().boundsInRoot
                     val used = onAllNodes(SemanticsMatcher.keyIsDefined(PreviewRoles), useUnmergedTree = true)
                         .fetchSemanticsNodes()
+                        .filter { node -> node.boundsInRoot.overlaps(screen) }
                         .flatMap { node -> node.config[PreviewRoles] }
                         .filterIsInstance<ColorRef.OfRole>()
                         .map { ref -> ref.role }
@@ -130,7 +146,7 @@ class TripsAppTest {
     fun screens_everyDeviceWidthBothModes_layOutForTheWidthAndRender() {
         for ((width, frame) in TripsFrames) {
             withClue(width) {
-                runDesktopComposeUiTest(frame.value.toInt(), TripsFrameHeight) {
+                runDesktopComposeUiTest(frame.width, frame.height) {
                     var spec by mutableStateOf(LightSpec)
                     setContent { TripsHarness(spec, DemoAppState(), width, Modifier.fillMaxSize()) }
 

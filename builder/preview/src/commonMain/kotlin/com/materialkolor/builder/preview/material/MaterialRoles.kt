@@ -11,7 +11,8 @@ import com.materialkolor.builder.preview.inspect.previewRoles
  *
  * The roles follow the component tokens of the Material 3 library the preview ships with, the
  * container first and then what is drawn on it. A component whose colors the screen passes itself
- * declares those roles instead, through the [Role] overload of [previewRoles].
+ * declares those roles instead, through the [Role] overload of [previewRoles]. An icon button paints
+ * the local content color, which the app's Surface sets to OnSurface.
  *
  * @property[refs] The roles, named the way the contrast audit names them.
  */
@@ -22,17 +23,17 @@ internal enum class MaterialComponent(
     TonalButton(Role.SecondaryContainer, Role.OnSecondaryContainer),
     OutlinedButton(Role.OutlineVariant, Role.OnSurfaceVariant),
     TextButton(Role.Primary),
-    IconButton(Role.OnSurfaceVariant),
+    IconButton(Role.OnSurface),
     Fab(Role.PrimaryContainer, Role.OnPrimaryContainer),
     FilledCard(Role.SurfaceContainerHighest, Role.OnSurface),
     ElevatedCard(Role.SurfaceContainerLow, Role.OnSurface),
     OutlinedCard(Role.Surface, Role.OnSurface, Role.OutlineVariant),
     ListItem(Role.Surface, Role.OnSurface, Role.OnSurfaceVariant),
-    NavigationRail(Role.Surface, Role.OnSurfaceVariant),
+    NavigationRail(Role.Surface, Role.OnSurface),
     NavigationRailItem(Role.SecondaryContainer, Role.OnSecondaryContainer, Role.Secondary, Role.OnSurfaceVariant),
     FilterChip(Role.SecondaryContainer, Role.OnSecondaryContainer, Role.OutlineVariant, Role.OnSurfaceVariant),
     AssistChip(Role.OutlineVariant, Role.OnSurface, Role.Primary),
-    Switch(Role.Primary, Role.OnPrimary, Role.OnPrimaryContainer, Role.SurfaceContainerHighest, Role.Outline),
+    Switch(Role.Primary, Role.OnPrimary, Role.SurfaceContainerHighest, Role.Outline),
     Checkbox(Role.Primary, Role.OnPrimary, Role.OnSurfaceVariant),
     LinearProgressIndicator(Role.Primary, Role.SecondaryContainer),
     OutlinedTextField(Role.Outline, Role.Primary, Role.OnSurface, Role.OnSurfaceVariant),
