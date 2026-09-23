@@ -24,11 +24,12 @@ import kotlinx.collections.immutable.toImmutableList
 /**
  * One accent of the document, worked out into its four colors for both modes.
  *
- * The colors come from the same public calls the exported `ExtendedColors.kt` makes, in the same
- * order. The seed is pulled toward the theme seed with `harmonize` when the accent asks for it, a
- * ramp is built from the result, and each mode cuts its color and container off that ramp with
- * `toneColor`. The two on colors come from `onTone` at the accent's own threshold. Change one
- * without the other and the preview stops matching the export.
+ * The exported `ExtendedColors.kt` builds its ramp with `rememberTonalPalette`, whose body in core
+ * is the chain below, and B-117's parity gate checks the two agree. The seed is pulled toward the
+ * theme seed with `harmonize` when the accent asks for it, a ramp is built from the result, and each
+ * mode cuts its color and container off that ramp with `toneColor`. The two on colors come from
+ * `onTone` at the accent's own threshold. Change one without the other and the preview stops
+ * matching the export.
  *
  * @property[accent] The accent this family was built from.
  * @property[palette] The ramp every color of the family is cut from.

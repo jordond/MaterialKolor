@@ -241,6 +241,27 @@ class ValidationTest {
     }
 
     @Test
+    fun validateAccents_nameThatIsAKeywordOnceLowered_isReported() {
+        val accents = listOf(
+            Accent(name = "Object", seed = seed),
+            Accent(name = "brand", seed = seed),
+            Accent(name = "When", seed = seed),
+        )
+
+        assertEquals(
+            listOf(ValidationError.AccentNameKeyword(0, "Object"), ValidationError.AccentNameKeyword(2, "When")),
+            validateAccents(accents),
+        )
+    }
+
+    @Test
+    fun validateAccents_keywordAsTyped_isOnlyReportedOnce() {
+        val accents = listOf(Accent(name = "object", seed = seed))
+
+        assertEquals(listOf(ValidationError.AccentNameKeyword(0, "object")), validateAccents(accents))
+    }
+
+    @Test
     fun validateAccents_nameThatOnlyContainsARole_passes() {
         val accents = listOf(Accent(name = "primaryBrand", seed = seed), Accent(name = "surfaces", seed = seed))
 

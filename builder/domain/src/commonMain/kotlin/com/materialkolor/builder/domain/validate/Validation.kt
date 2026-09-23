@@ -97,12 +97,19 @@ private fun String.utf8Size(): Int = encodeToByteArray().size
 // b-110
 // An export names each accent's family after it with the first letter lowered, and its on colors with
 // "on" in front, so two names that only differ in case, or a name that is also a scheme role, collide.
+// Lowering the first letter can also turn a name like `Object` into a keyword.
 private fun accentNameClashes(accents: List<Accent>): List<ValidationError> =
     buildList {
         val exact = mutableSetOf<String>()
         val folded = mutableSetOf<String>()
         accents.forEachIndexed { index, accent ->
             val name = accent.name
+            // A name that is a keyword as typed was already reported, so only the lowered one is new here.
+            val lowered = name.replaceFirstChar { char -> char.lowercaseChar() }
+            if (lowered in KOTLIN_HARD_KEYWORDS && name !in KOTLIN_HARD_KEYWORDS) {
+                add(ValidationError.AccentNameKeyword(index, name))
+            }
+
             val role = Role.entries.firstOrNull { role -> role.name.equals(name, ignoreCase = true) }
             if (role != null) add(ValidationError.AccentNameRole(index, name, role))
 

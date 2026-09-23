@@ -27,8 +27,12 @@ internal const val REMEMBER_EXTENDED_COLORS: String = "rememberExtendedColors"
 /** The composition local `Theme.kt` provides the accent families through. */
 internal const val LOCAL_EXTENDED_COLORS: String = "LocalExtendedColors"
 
-private const val COLOR_FAMILY = "ColorFamily"
-private const val EXTENDED_COLORS_TYPE = "ExtendedColors"
+/** The data class `ExtendedColors.kt` declares for the four colors of one accent. */
+internal const val COLOR_FAMILY: String = "ColorFamily"
+
+/** The data class `ExtendedColors.kt` declares to hold every accent family. */
+internal const val EXTENDED_COLORS_TYPE: String = "ExtendedColors"
+
 private const val TO_COLOR_FAMILY = "colorFamily"
 private const val SEED_COLOR_PARAMETER = "seedColor"
 private const val IS_DARK = "isDark"
@@ -42,11 +46,12 @@ private val FamilyParts: List<String> = listOf("color", "onColor", "colorContain
 /**
  * `ExtendedColors.kt`, the color families the theme's accents turn into.
  *
- * Each family comes from the same public calls, in the same order, as the builder's own preview in
- * the engine's `AccentFamily`. The accent seed is pulled toward the theme seed when the accent asks
- * for it, `rememberTonalPalette` builds a ramp from the result, and each mode cuts its color and
- * container out of that ramp, with `onTone` finding the content color on top of each. Keep the two
- * in step or the export stops matching the preview.
+ * The families match the builder's own preview in the engine's `AccentFamily`, though not by making
+ * the same calls. The engine calls `harmonize` and then `TonalPalette.from`, while the export calls
+ * `rememberTonalPalette`, whose body in core is that same chain. Parity rests on that body, and
+ * B-117's parity gate checks it. Each mode then cuts its color and container out of the ramp, with
+ * `onTone` finding the content color on top of each. Keep the two in step or the export stops
+ * matching the preview.
  *
  * The families snap from light to dark rather than animating, even when the theme animates.
  */
@@ -96,6 +101,10 @@ internal val Accent.seedName: String
 private val Accent.paletteName: String
     get() = "${propertyName}Palette"
 
+/** Whether the ramp call of the accent passes `harmonizeWith`, which gives it a second argument. */
+private val Accent.harmonizes: Boolean
+    get() = !DefaultArguments.RememberTonalPaletteHarmonizeWith.isDefault(harmonize)
+
 private fun KotlinFileScope.rememberExtendedColors(accents: List<Accent>) {
     function(
         name = REMEMBER_EXTENDED_COLORS,
@@ -108,7 +117,7 @@ private fun KotlinFileScope.rememberExtendedColors(accents: List<Accent>) {
             accents.forEach { accent ->
                 assign(
                     name = accent.paletteName,
-                    value = callOf(Symbols.RememberTonalPalette) {
+                    value = callOf(Symbols.RememberTonalPalette, multiline = accent.harmonizes) {
                         argument("seed", ref(accent.seedName))
                         optionalArgument(DefaultArguments.RememberTonalPaletteHarmonizeWith, accent.harmonize) {
                             ref(SEED_COLOR_PARAMETER)
@@ -134,7 +143,7 @@ private fun KotlinFileScope.rememberExtendedColors(accents: List<Accent>) {
 
 /** `brandPalette.colorFamily(tone = ..., containerTone = ...)`, at the accent's tones for each mode. */
 private fun familyOf(accent: Accent): Expression =
-    ref(accent.paletteName).call(TO_COLOR_FAMILY) {
+    ref(accent.paletteName).call(TO_COLOR_FAMILY, multiline = true) {
         argument(TONE, toneExpression(light = accent.light.color, dark = accent.dark.color))
         argument(CONTAINER_TONE, toneExpression(light = accent.light.container, dark = accent.dark.container))
         optionalArgument(

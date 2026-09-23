@@ -129,7 +129,7 @@ private fun BodyScope.themeBody(
     if (hasAccents) {
         assign(
             name = EXTENDED_COLORS,
-            value = callOf(REMEMBER_EXTENDED_COLORS) {
+            value = callOf(REMEMBER_EXTENDED_COLORS, multiline = true) {
                 argument("seedColor", ref(SEED_COLOR))
                 argument(IS_DARK, ref(IS_DARK))
             },

@@ -38,14 +38,26 @@ fun rememberExtendedColors(
     seedColor: Color,
     isDark: Boolean,
 ): ExtendedColors {
-    val brandPalette = rememberTonalPalette(seed = BrandSeed, harmonizeWith = seedColor)
+    val brandPalette = rememberTonalPalette(
+        seed = BrandSeed,
+        harmonizeWith = seedColor,
+    )
     val successPalette = rememberTonalPalette(seed = SuccessSeed)
-    val warningPalette = rememberTonalPalette(seed = WarningSeed, harmonizeWith = seedColor)
+    val warningPalette = rememberTonalPalette(
+        seed = WarningSeed,
+        harmonizeWith = seedColor,
+    )
 
     return remember(brandPalette, successPalette, warningPalette, isDark) {
         ExtendedColors(
-            brand = brandPalette.colorFamily(tone = if (isDark) 80 else 40, containerTone = if (isDark) 30 else 90),
-            success = successPalette.colorFamily(tone = if (isDark) 80 else 40, containerTone = if (isDark) 30 else 90),
+            brand = brandPalette.colorFamily(
+                tone = if (isDark) 80 else 40,
+                containerTone = if (isDark) 30 else 90,
+            ),
+            success = successPalette.colorFamily(
+                tone = if (isDark) 80 else 40,
+                containerTone = if (isDark) 30 else 90,
+            ),
             warning = warningPalette.colorFamily(
                 tone = if (isDark) 70 else 50,
                 containerTone = if (isDark) 20 else 95,

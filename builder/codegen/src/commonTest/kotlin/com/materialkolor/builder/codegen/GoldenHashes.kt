@@ -23,7 +23,7 @@ internal object GoldenHashes {
         "material3-dynamic-pins" to 0xFC40E256L,
         "material3-dynamic-primary-override" to 0x6AAEEF2DL,
         "material3-dynamic-reduced-contrast" to 0x3A01E9A9L,
-        "material3-dynamic-three-accents" to 0xF03122F1L,
+        "material3-dynamic-three-accents" to 0xAC3EEDF8L,
         "material3-dynamic-watch-2025" to 0x92B5CCF4L,
     )
 }

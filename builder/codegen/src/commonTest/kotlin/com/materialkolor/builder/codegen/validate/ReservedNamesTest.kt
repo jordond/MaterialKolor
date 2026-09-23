@@ -39,6 +39,28 @@ class ReservedNamesTest {
     }
 
     @Test
+    fun clashes_nameTheMaterial3ExportDeclares_isReported() {
+        val document = ThemeDocument.Default.copy(
+            themeName = "ExtendedColors",
+            accents = listOf(
+                Accent(name = "colorFamily", seed = seed),
+                Accent(name = "LocalExtendedColors", seed = seed),
+                Accent(name = "RememberExtendedColors", seed = seed),
+            ),
+        )
+
+        assertEquals(
+            listOf(
+                ReservedNameClash.ThemeName("ExtendedColors"),
+                ReservedNameClash.AccentName(0, "colorFamily"),
+                ReservedNameClash.AccentName(1, "LocalExtendedColors"),
+                ReservedNameClash.AccentName(2, "RememberExtendedColors"),
+            ),
+            ReservedNames.clashes(document),
+        )
+    }
+
+    @Test
     fun clashes_everyFixture_hasNone() {
         Fixtures.all.forEach { fixture ->
             assertEquals(emptyList(), ReservedNames.clashes(fixture.input.document), fixture.name)

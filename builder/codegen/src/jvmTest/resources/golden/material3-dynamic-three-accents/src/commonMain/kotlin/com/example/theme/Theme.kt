@@ -13,7 +13,10 @@ fun AppTheme(
     isDark: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    val extendedColors = rememberExtendedColors(seedColor = SeedColor, isDark = isDark)
+    val extendedColors = rememberExtendedColors(
+        seedColor = SeedColor,
+        isDark = isDark,
+    )
 
     CompositionLocalProvider(LocalExtendedColors provides extendedColors) {
         DynamicMaterialTheme(

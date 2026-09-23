@@ -151,7 +151,9 @@ class Material3DynamicTest {
     fun material3Dynamic_accents_harmonizeOnlyWhenAsked() {
         val extended = Material3Dynamic.files(Fixtures.ThreeAccents.input).last().text
 
-        assertTrue("rememberTonalPalette(seed = BrandSeed, harmonizeWith = seedColor)" in extended, extended)
+        // b-110a
+        val harmonized = "rememberTonalPalette(\n        seed = BrandSeed,\n        harmonizeWith = seedColor,\n    )"
+        assertTrue(harmonized in extended, extended)
         assertTrue("rememberTonalPalette(seed = SuccessSeed)" in extended, extended)
         assertTrue("threshold = ContrastThreshold.WCAG_AAA_NORMAL_TEXT" in extended, extended)
     }

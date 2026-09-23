@@ -2,6 +2,10 @@ package com.materialkolor.builder.codegen.validate
 
 import com.materialkolor.builder.codegen.symbol.Symbol
 import com.materialkolor.builder.codegen.symbol.Symbols
+import com.materialkolor.builder.codegen.target.material3.COLOR_FAMILY
+import com.materialkolor.builder.codegen.target.material3.EXTENDED_COLORS_TYPE
+import com.materialkolor.builder.codegen.target.material3.LOCAL_EXTENDED_COLORS
+import com.materialkolor.builder.codegen.target.material3.REMEMBER_EXTENDED_COLORS
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportTarget
 
@@ -35,8 +39,8 @@ public sealed interface ReservedNameClash {
 }
 
 /**
- * The names a theme or accent cannot take in an export, because the generated files import
- * something by that name.
+ * The names a theme or accent cannot take in an export, because the generated files import or
+ * declare something by that name.
  *
  * Generated code refers to everything by its simple name, so a theme called `MaterialTheme` would
  * collide with the import it sits next to and the generator would refuse to write it. The domain
@@ -50,11 +54,11 @@ public object ReservedNames {
     /** Every name [target] refers to by its simple name, whichever mode it is exported in. */
     public fun of(target: ExportTarget): Set<String> =
         when (target) {
-            ExportTarget.Material3, ExportTarget.Material3Expressive -> Material3Symbols
-            ExportTarget.Unstyled -> UnstyledSymbols
-            ExportTarget.Fluent -> FluentSymbols
-            ExportTarget.Custom -> CommonSymbols
-        }.mapTo(mutableSetOf()) { symbol -> symbol.simpleName }
+            ExportTarget.Material3, ExportTarget.Material3Expressive -> Material3Symbols.names() + Material3Declared
+            ExportTarget.Unstyled -> UnstyledSymbols.names()
+            ExportTarget.Fluent -> FluentSymbols.names()
+            ExportTarget.Custom -> CommonSymbols.names()
+        }
 
     /** The theme and accent names of [document] that its export target cannot use, theme name first. */
     public fun clashes(document: ThemeDocument): List<ReservedNameClash> {
@@ -69,6 +73,8 @@ public object ReservedNames {
     }
 
     private fun String.folded(): String = replaceFirstChar { char -> char.uppercaseChar() }
+
+    private fun List<Symbol>.names(): Set<String> = mapTo(mutableSetOf()) { symbol -> symbol.simpleName }
 }
 
 /** What every export can name, the Kotlin types, the Compose runtime and graphics, and core. */
@@ -115,6 +121,10 @@ private val Material3Symbols: List<Symbol> =
             Symbols.DynamicMaterialThemeState,
             Symbols.RememberDynamicMaterialThemeState,
         )
+
+/** What the Material 3 export declares in `ExtendedColors.kt`, kept apart since none of it is imported. */
+private val Material3Declared: Set<String> =
+    setOf(COLOR_FAMILY, EXTENDED_COLORS_TYPE, LOCAL_EXTENDED_COLORS, REMEMBER_EXTENDED_COLORS)
 
 private val UnstyledSymbols: List<Symbol> =
     CommonSymbols +
