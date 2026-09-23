@@ -78,6 +78,11 @@ kotlin {
             implementation(libs.filekit.dialogs)
         }
 
+        // b-214
+        commonTest.dependencies {
+            implementation(libs.kotlinx.coroutines.test)
+        }
+
         jvmTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.compose.ui.test)

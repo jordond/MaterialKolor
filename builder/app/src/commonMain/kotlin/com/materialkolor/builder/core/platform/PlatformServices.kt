@@ -3,6 +3,7 @@ package com.materialkolor.builder.core.platform
 import androidx.compose.ui.graphics.ImageBitmap
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.Route
+import com.materialkolor.builder.domain.persist.QuarantineReason
 import com.materialkolor.builder.domain.persist.RecordCodec
 import com.materialkolor.builder.domain.persist.StorageKey
 import kotlinx.coroutines.flow.Flow
@@ -73,6 +74,15 @@ interface Store<T> {
      * Returns the reason the write did not land, or null when it did.
      */
     suspend fun update(block: (T) -> T): StoreError?
+
+    // b-214
+
+    /**
+     * Remove the record, so it reads as its default again.
+     *
+     * Returns the reason it could not be removed, or null when it was.
+     */
+    suspend fun delete(): StoreError?
 }
 
 /**
@@ -88,6 +98,17 @@ interface StoreFactory {
 
     /** Keys another tab wrote. Keys the builder does not know are left out. */
     val externalChanges: Flow<StorageKey>
+
+    // b-214
+
+    /**
+     * Records a store could not read, each reported once after it was moved to its quarantine key.
+     *
+     * Reports found before anything collects are kept until the first collector comes, and each
+     * report reaches exactly one collector. B-302's localStorage store has to keep to this too, since
+     * boot reads the stores before the toast host subscribes.
+     */
+    val quarantined: Flow<Quarantined>
 }
 
 /**
@@ -238,3 +259,17 @@ interface Environment {
     /** Whether writes to [StoreFactory] stores outlive this session. */
     val storageAvailable: Boolean
 }
+
+// b-214
+
+/**
+ * A record a store could not read, moved to its quarantine key so the user can be told and nothing
+ * is lost.
+ *
+ * @property[key] Where the record was stored.
+ * @property[reason] Why it could not be read.
+ */
+data class Quarantined(
+    val key: String,
+    val reason: QuarantineReason,
+)
