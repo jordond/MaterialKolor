@@ -1,14 +1,23 @@
 // Runs in the head, before the body is parsed and before anything paints. It checks the browser can
-// run the builder, colors the splash and loads the app. It reads mk:splash and the address and never
-// writes storage. Kept to plain ES2015 so an old browser still reaches the unsupported page. It adds
-// no preloads. WebKit fetches an as=fetch preload with an Origin header and the real request without
-// one, so each file would download twice there, and the glue's tag goes in during this same task.
+// run the builder, colors the splash, keeps a few shortcuts from the browser and loads the app. It
+// reads mk:splash and the address and never writes storage. Kept to plain ES2015 so an old browser
+// still reaches the unsupported page. It adds no preloads. WebKit fetches an as=fetch preload with an
+// Origin header and the real request without one, so each file would download twice there, and the
+// glue's tag goes in during this same task.
 (() => {
   // What the default document writes to mk:splash, and its seed, for a first visit. The shell spec
   // holds the two colors to what the app writes.
   const DEFAULT_LIGHT = 0xfff8f6;
   const DEFAULT_DARK = 0x1a110f;
   const DEFAULT_SEED = 0xd9653b;
+
+  // The keys whose browser action, save page, open file and search, the builder takes over with Cmd
+  // or Ctrl. By name and by where they sit, so other layouts work too.
+  const BROWSER_KEYS = ['s', 'o', 'k'];
+  const BROWSER_CODES = ['KeyS', 'KeyO', 'KeyK'];
+
+  // An Apple system by its user agent, the markers the app's keymap reads to pick Cmd over Ctrl.
+  const APPLE = /Macintosh|Mac OS|iPhone|iPad|iPod|Darwin/;
 
   // The smallest module that uses what Kotlin/Wasm needs. The struct type needs WasmGC, and the
   // function body is a try with catch_all, the legacy exception handling Kotlin/Wasm emits.
@@ -35,6 +44,7 @@
   const assets = JSON.parse(document.getElementById('mk-assets').textContent);
   catchErrors(assets.glue.split('/').pop());
   paintSplash();
+  window.addEventListener('keydown', keepBrowserShortcuts, true);
 
   const glue = document.createElement('script');
   glue.src = assets.glue;
@@ -52,6 +62,19 @@
     } catch (error) {
       return false;
     }
+  }
+
+  /**
+   * Keeps the browser from saving the page, opening a file or starting its own search on Cmd or Ctrl
+   * with S, O or K (B-501c). Compose hears a key typed in a text field a frame late, too late to stop
+   * these itself, so this stops them first. It never stops the key going on, since Compose still runs
+   * the builder's own command for it. Cmd on an Apple system and Ctrl elsewhere, as the app's keymap.
+   */
+  function keepBrowserShortcuts(event) {
+    const primary = APPLE.test(navigator.userAgent) ? event.metaKey : event.ctrlKey;
+    if (!primary || event.shiftKey || event.altKey) return;
+    const key = typeof event.key === 'string' ? event.key.toLowerCase() : '';
+    if (BROWSER_KEYS.indexOf(key) >= 0 || BROWSER_CODES.indexOf(event.code) >= 0) event.preventDefault();
   }
 
   /**
