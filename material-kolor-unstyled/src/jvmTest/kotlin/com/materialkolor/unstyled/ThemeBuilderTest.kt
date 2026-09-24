@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.runComposeUiTest
+import com.composeunstyled.LocalContentColor
 import com.composeunstyled.theme.ColorScheme
 import com.composeunstyled.theme.Theme
 import com.composeunstyled.theme.buildThemeV2
@@ -94,6 +95,76 @@ class ThemeBuilderTest {
             waitForIdle()
             val expected = scheme.toThemeValues().mapKeys { (token, _) -> token.name }
             assertEquals(expected, read)
+        }
+
+    @Test
+    fun dynamicColorSchemes_darkBlockAddsToTheDarkTokens() =
+        runComposeUiTest {
+            val theme = buildThemeV2 {
+                defaultContentColor = Color.Black
+                dynamicColorSchemes(seedColor = seed) {
+                    defaultContentColor = Color.White
+                }
+            }
+            var primary: Color? = null
+            var contentColor: Color? = null
+
+            setContent {
+                theme(ColorScheme.Dark) {
+                    primary = Theme[MaterialKolorTokens.colors][MaterialKolorTokens.primary]
+                    contentColor = LocalContentColor.current
+                }
+            }
+
+            waitForIdle()
+            assertEquals(kolors(seed, isDark = true).primary(), primary)
+            assertEquals(Color.White, contentColor)
+        }
+
+    @Test
+    fun dynamicColorSchemes_darkBlockLeavesTheLightSchemeAlone() =
+        runComposeUiTest {
+            val theme = buildThemeV2 {
+                defaultContentColor = Color.Black
+                dynamicColorSchemes(seedColor = seed) {
+                    defaultContentColor = Color.White
+                }
+            }
+            var primary: Color? = null
+            var contentColor: Color? = null
+
+            setContent {
+                theme(ColorScheme.Light) {
+                    primary = Theme[MaterialKolorTokens.colors][MaterialKolorTokens.primary]
+                    contentColor = LocalContentColor.current
+                }
+            }
+
+            waitForIdle()
+            assertEquals(kolors(seed, isDark = false).primary(), primary)
+            assertEquals(Color.Black, contentColor)
+        }
+
+    @Test
+    fun dynamicColors_writesACustomSchemeOverride() =
+        runComposeUiTest {
+            val sepia = ColorScheme("sepia")
+            val theme = buildThemeV2 {
+                dynamicColorSchemes(seedColor = seed)
+                colorScheme(sepia) {
+                    dynamicColors(DynamicScheme(seedColor = otherSeed, isDark = false))
+                }
+            }
+            var primary: Color? = null
+
+            setContent {
+                theme(sepia) {
+                    primary = Theme[MaterialKolorTokens.colors][MaterialKolorTokens.primary]
+                }
+            }
+
+            waitForIdle()
+            assertEquals(kolors(otherSeed, isDark = false).primary(), primary)
         }
 
     private fun kolors(

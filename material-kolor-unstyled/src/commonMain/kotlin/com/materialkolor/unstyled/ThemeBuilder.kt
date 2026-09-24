@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import com.composeunstyled.theme.ColorScheme
+import com.composeunstyled.theme.ColorSchemedThemeBuilder
 import com.composeunstyled.theme.ThemeBuilder
 import com.composeunstyled.theme.ThemeBuilderV2
 import com.composeunstyled.theme.ThemeProperty
@@ -37,6 +38,38 @@ public fun ThemeBuilder.dynamicColors(
 }
 
 /**
+ * Writes [scheme] into [property] as MaterialKolor tokens, inside one color scheme's overrides.
+ *
+ * Use this when you write the override block yourself, for a custom scheme or for a dark scheme you
+ * build by hand.
+ *
+ * ```kotlin
+ * val Sepia = ColorScheme("sepia")
+ *
+ * val AppTheme = buildThemeV2 {
+ *     dynamicColorSchemes(seedColor = Color(0xff8811aa))
+ *
+ *     colorScheme(Sepia) {
+ *         dynamicColors(DynamicScheme(seedColor = Color(0xff704214), isDark = false))
+ *     }
+ * }
+ * ```
+ *
+ * Do not use it for [ColorScheme.Dark] next to [dynamicColorSchemes], which already owns that override.
+ * Use its `dark` block instead.
+ *
+ * @param[scheme] The scheme whose roles become token values.
+ * @param[property] The property to write, [MaterialKolorTokens.colors] unless the application owns
+ * its own.
+ */
+public fun ColorSchemedThemeBuilder.dynamicColors(
+    scheme: DynamicScheme,
+    property: ThemeProperty<Color> = MaterialKolorTokens.colors,
+) {
+    properties[property] = scheme.toThemeValues()
+}
+
+/**
  * Generates a light and a dark scheme from [seedColor] and wires both into the theme.
  *
  * The light scheme becomes the base value of [property] and the dark scheme becomes the override for
@@ -56,6 +89,21 @@ public fun ThemeBuilder.dynamicColors(
  * }
  * ```
  *
+ * This call owns the [ColorScheme.Dark] override. Unstyled keeps one override per color scheme and
+ * each `colorScheme(ColorScheme.Dark) { }` replaces the one before it. A separate dark block after this
+ * call would drop the dark tokens, and one before it would lose its own settings. Put anything the dark
+ * scheme needs on top of the tokens in [dark] instead.
+ *
+ * ```kotlin
+ * val AppTheme = buildThemeV2 {
+ *     defaultContentColor = Color(0xff1d1b20)
+ *
+ *     dynamicColorSchemes(seedColor = Color(0xff8811aa)) {
+ *         defaultContentColor = Color(0xffe6e0e9)
+ *     }
+ * }
+ * ```
+ *
  * The parameters are the ones [rememberDynamicScheme] takes, minus `isDark` which both schemes own.
  *
  * @param[seedColor] The color to base the schemes on.
@@ -70,6 +118,7 @@ public fun ThemeBuilder.dynamicColors(
  * @param[specVersion] The version of the color specification to use.
  * @param[platform] The platform to use for the schemes.
  * @param[property] The property to write, [MaterialKolorTokens.colors] unless the application owns its own.
+ * @param[dark] Extra overrides for [ColorScheme.Dark]. It runs after the dark tokens are written.
  */
 @Composable
 public fun ThemeBuilderV2.dynamicColorSchemes(
@@ -85,6 +134,7 @@ public fun ThemeBuilderV2.dynamicColorSchemes(
     specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
     platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
     property: ThemeProperty<Color> = MaterialKolorTokens.colors,
+    dark: @Composable ColorSchemedThemeBuilder.() -> Unit = {},
 ) {
     val lightScheme = rememberDynamicScheme(
         seedColor = seedColor,
@@ -123,5 +173,6 @@ public fun ThemeBuilderV2.dynamicColorSchemes(
 
     colorScheme(ColorScheme.Dark) {
         properties[property] = darkValues
+        dark()
     }
 }
