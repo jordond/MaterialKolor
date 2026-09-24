@@ -32,6 +32,7 @@ public class History(
     private var parked: List<HistoryEntry>? = null
 
     // The oldest step the open one pushed out at capacity, handed back if the open step comes to nothing.
+    // Undo and redo clear it only as a guard. They clear last too, so the next record pushes and sets it anew.
     private var trimmed: HistoryEntry? = null
 
     /** Whether there is a step to undo. */

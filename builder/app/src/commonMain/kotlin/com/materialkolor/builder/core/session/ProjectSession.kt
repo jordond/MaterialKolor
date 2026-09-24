@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.update
@@ -161,7 +160,7 @@ internal class ProjectSession(
     suspend fun boot(route: Route): BootNotice? {
         val tabProjectId = environment.readTabProject()
         val lastProjectId = preferences.current().lastProjectId
-        val plan = BootResolver.resolve(route, tabProjectId, lastProjectId, savedProjects(route))
+        val plan = BootResolver.resolve(route, tabProjectId, lastProjectId, projects.savedProjects(route))
         when (val start = plan.start) {
             is BootStart.Reopen -> if (!open(start.id)) startNew(ThemeDocument.Default, ProjectViewState())
             is BootStart.Shared -> showShared(start)
@@ -179,8 +178,8 @@ internal class ProjectSession(
      *
      * A [EditPhase.Dragging] step only moves the document. The save waits for the release. A release
      * that lands back on the document last committed, a cancelled picker or a slider dragged back to
-     * its start, saves nothing and does not count as an edit. A project opened from a link stays
-     * unsaved through it.
+     * its start, saves nothing and does not count as an edit. Neither does a discrete change that
+     * leaves the document as it was. A project opened from a link stays unsaved through both.
      */
     fun edit(
         change: DocumentChange,
@@ -196,8 +195,9 @@ internal class ProjectSession(
             lastEditAt = committedEditAt
             return
         }
+        if (phase == EditPhase.Discrete && after == before) return
         lastEditAt = time
-        if (phase == EditPhase.Dragging || (phase == EditPhase.Discrete && after == before)) return
+        if (phase == EditPhase.Dragging) return
         commit(after)
     }
 
@@ -245,7 +245,7 @@ internal class ProjectSession(
             DecodeResult.Corrupt -> return BootNotice.InvalidLink
         }
         flushAll()
-        val local = BootResolver.matching(link.document, listedRecords(), preferredId = current.value.id.value)
+        val local = BootResolver.matching(link.document, projects.listedRecords(), preferredId = current.value.id.value)
         if (local != null && open(local.id)) return null
         showShared(BootStart.Shared(code, link.document, link.projectName))
         return null
@@ -480,20 +480,6 @@ internal class ProjectSession(
     private suspend fun rememberLastProject(id: String) {
         preferences.update { prefs -> prefs.copy(lastProjectId = id) }
     }
-
-    /** What boot needs about the saved projects for [route], the index alone unless it is a link. */
-    private suspend fun savedProjects(route: Route): SavedProjects {
-        if (!BootResolver.readsRecords(route)) return SavedProjects.Listed(listedIds())
-        return SavedProjects.Read(listedRecords())
-    }
-
-    private suspend fun listedIds(): List<String> =
-        projects.index
-            .first()
-            .projects
-            .map { meta -> meta.id }
-
-    private suspend fun listedRecords(): List<ProjectRecord> = listedIds().mapNotNull { id -> projects.load(id) }
 
     /** A project whose changes from other tabs come back to the caller's dispatcher, the UI thread. */
     private suspend fun openHere(

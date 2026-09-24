@@ -1,5 +1,6 @@
 package com.materialkolor.builder.core.session
 
+import com.materialkolor.builder.core.data.ProjectRepository
 import com.materialkolor.builder.domain.link.DecodeResult
 import com.materialkolor.builder.domain.link.LegacyPreviewMode
 import com.materialkolor.builder.domain.link.LegacyQuery
@@ -8,6 +9,7 @@ import com.materialkolor.builder.domain.link.ShareCodec
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.ProjectRecord
+import kotlinx.coroutines.flow.first
 
 /**
  * Picks the project the builder opens on, from the address and what this browser has saved, before
@@ -158,6 +160,21 @@ internal sealed interface SavedProjects {
             get() = records.map { record -> record.id }
     }
 }
+
+/** What boot needs about the saved projects for [route], the index alone unless it is a link. */
+internal suspend fun ProjectRepository.savedProjects(route: Route): SavedProjects {
+    if (!BootResolver.readsRecords(route)) return SavedProjects.Listed(listedIds())
+    return SavedProjects.Read(listedRecords())
+}
+
+/** Every listed project that could be read, in drawer order, for matching a link. */
+internal suspend fun ProjectRepository.listedRecords(): List<ProjectRecord> = listedIds().mapNotNull { id -> load(id) }
+
+private suspend fun ProjectRepository.listedIds(): List<String> =
+    index
+        .first()
+        .projects
+        .map { meta -> meta.id }
 
 /**
  * What boot settled on.

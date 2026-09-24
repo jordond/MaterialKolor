@@ -39,6 +39,21 @@ class ProjectSessionConflictTest : SessionTestBase() {
         }
 
     @Test
+    fun savedElsewhere_rightAfterAnEditThatChangesNothing_takesTheirsAsAnUndoStep() =
+        runTest {
+            val (session) = session()
+            val id = booted(session)
+            session.edit(DocumentChange.SetAmoled(false), EditPhase.Discrete)
+
+            saveFromAnotherTab(id, FOREST)
+
+            session.conflict.value shouldBe null
+            session.document.value shouldBe FOREST
+            session.undo()
+            session.document.value shouldBe ThemeDocument.Default
+        }
+
+    @Test
     fun savedElsewhere_againWhileAConflictIsUp_replacesTheirsAndKeepMineSavesMine() =
         runTest {
             val (session) = session()

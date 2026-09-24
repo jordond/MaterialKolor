@@ -58,8 +58,13 @@ class HistoryCapacityTest {
         assertEquals("Theme1", shown.themeName)
     }
 
+    /**
+     * A regression guard. It passes with or without the `trimmed = null` in undo and redo, since both
+     * clear the open step as well, so the next record always pushes and replaces the step it trimmed.
+     * The clears are there in case undo or redo ever leave a step open to fold into.
+     */
     @Test
-    fun history_undoAfterAPushAtCapacity_doesNotBringTheOldestBack() {
+    fun regressionGuard_undoAfterAPushAtCapacity_doesNotBringTheOldestBack() {
         val session = Session.full()
         session.edit(DocumentChange.SetThemeName("Newest"), at = END)
 
