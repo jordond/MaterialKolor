@@ -195,7 +195,7 @@ private fun fluentActionStyles(
                 container = colors.background.card.default
                     .onPanel(),
                 content = tokens.textStrong,
-                border = colors.stroke.card.default
+                border = poster?.outline ?: colors.stroke.card.default
                     .onPanel(),
             ),
         ),
@@ -203,7 +203,7 @@ private fun fluentActionStyles(
             neutral = ActionColors(colors.controlSolid.default, tokens.textStrong, tokens.borderStrong),
         ),
         divider = styles.divider.copy(
-            color = colors.stroke.divider.default
+            color = poster?.outline ?: colors.stroke.divider.default
                 .onPanel(),
         ),
         progress = styles.progress.copy(
