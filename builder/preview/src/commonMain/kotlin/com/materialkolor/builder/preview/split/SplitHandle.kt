@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.inset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -38,6 +39,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import com.materialkolor.builder.kit.a11y.foldsValueIntoName
 import com.materialkolor.builder.kit.a11y.valueNodeName
+import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.preview.generated.resources.Res
@@ -85,12 +88,18 @@ internal fun SplitHandle(
         if (extent > 0) split.fraction += delta / extent
     }
     val thickness = tokens.spacing.section
-    val span = if (horizontal) Modifier.fillMaxHeight().width(thickness) else Modifier.fillMaxWidth().height(thickness)
+    // b-406
+    // A phone or a finger gets a thumb sized reach round the same drawn line and grip.
+    val layout = LocalLayout.current
+    val touch = layout.windowClass == WindowClass.Compact || layout.coarsePointer
+    val reach = if (touch) maxOf(thickness, layout.primaryTouchTarget) else thickness
+    val span = if (horizontal) Modifier.fillMaxHeight().width(reach) else Modifier.fillMaxWidth().height(reach)
     Box(modifier) {
         Box(
             Modifier
                 .offset {
-                    val start = handleStart(size().along(horizontal), split.fraction, thickness.roundToPx())
+                    val drawnStart = handleStart(size().along(horizontal), split.fraction, thickness.roundToPx())
+                    val start = drawnStart - ((reach - thickness) / 2).roundToPx()
                     if (horizontal) IntOffset(start, 0) else IntOffset(0, start)
                 }.then(span)
                 .semantics {
@@ -114,7 +123,11 @@ internal fun SplitHandle(
                     val extent = size().along(horizontal)
                     val fromStart = extent * split.fraction - handleStart(extent, split.fraction, thickness.roundToPx())
                     val along = if (isRtl && horizontal) thickness.toPx() - fromStart else fromStart
-                    drawHandle(tokens, along, horizontal, focused)
+                    // b-406
+                    val edge = ((reach - thickness) / 2).roundToPx().toFloat()
+                    val sideways = if (horizontal) edge else 0f
+                    val upDown = if (horizontal) 0f else edge
+                    inset(sideways, upDown, sideways, upDown) { drawHandle(tokens, along, horizontal, focused) }
                 },
         )
     }

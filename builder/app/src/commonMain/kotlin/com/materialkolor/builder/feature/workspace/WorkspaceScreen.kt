@@ -1,6 +1,7 @@
 package com.materialkolor.builder.feature.workspace
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,17 +31,20 @@ import com.materialkolor.builder.feature.image.ImageSeedModel
 import com.materialkolor.builder.feature.image.ProvideImageSeeds
 import com.materialkolor.builder.feature.picker.PickerHost
 import com.materialkolor.builder.feature.poster.ExplainerHost
+import com.materialkolor.builder.feature.poster.LocalPosterSheetState
 import com.materialkolor.builder.feature.poster.PosterFocus
 import com.materialkolor.builder.feature.poster.PosterPanel
 import com.materialkolor.builder.feature.poster.shareReturn
 import com.materialkolor.builder.feature.projects.ProjectsHost
 import com.materialkolor.builder.feature.projects.ShareHost
+import com.materialkolor.builder.feature.topbar.LocalSwitcherForm
 import com.materialkolor.builder.feature.topbar.TopBarContent
 import com.materialkolor.builder.feature.topbar.TopBarControl
 import com.materialkolor.builder.feature.topbar.rememberTopBarFocus
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.workspace_copied
 import com.materialkolor.builder.kit.control.BuilderToastHostState
+import com.materialkolor.builder.kit.control.rememberBottomSheetState
 import com.materialkolor.builder.kit.control.rememberBuilderToastHostState
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.WindowClass
@@ -266,16 +270,24 @@ internal fun WorkspaceScreen(
     // b-221c
     // Share and Export hand focus back to the buttons that opened them once they close (AR-09).
     val focus = rememberTopBarFocus()
+    // b-406
+    // The poster reads where its phone sheet rests, to know which of its sections are in view.
+    val sheetState = rememberBottomSheetState()
     WorkspaceShell(
         posterColors = posterColors,
         posterCollapsed = state.preferences.posterCollapsed,
         // b-221f
         // b-311
-        poster = { rail -> ProvideImageSeeds(state) { PosterPanel(state, rail, dispatcher, focus = posterFocus) } },
+        poster = { rail ->
+            CompositionLocalProvider(LocalPosterSheetState provides sheetState) { // b-406
+                ProvideImageSeeds(state) { PosterPanel(state, rail, dispatcher, focus = posterFocus) }
+            }
+        },
         topBar = { TopBarContent(state, dispatcher, focus = focus) }, // b-221c
         canvas = { contentPadding -> CanvasArea(state, contentPadding, dispatcher) },
         dock = { CanvasDock(state, dispatcher) },
         modifier = modifier,
+        sheetState = sheetState, // b-406
         // b-217
         fullscreen = state.fullscreen,
         // b-217
@@ -289,7 +301,10 @@ internal fun WorkspaceScreen(
             val shareReturn = posterFocus.shareReturn(state.panel, focus.requester(TopBarControl.Share))
             ShareHost(state, dispatcher, returnFocusTo = shareReturn)
             // b-315
-            val compact = LocalLayout.current.windowClass == WindowClass.Compact
+            // b-406
+            // A Medium bar short of room moves Commands into the overflow as a phone does.
+            val overflowed = LocalSwitcherForm.current?.overflowed.orEmpty()
+            val compact = LocalLayout.current.windowClass == WindowClass.Compact || TopBarControl.Commands in overflowed
             CommandHost(
                 state = state,
                 dispatcher = dispatcher,

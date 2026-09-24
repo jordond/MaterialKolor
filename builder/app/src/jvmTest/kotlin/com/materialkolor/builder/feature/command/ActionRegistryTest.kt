@@ -38,20 +38,8 @@ class ActionRegistryTest {
         runDesktopComposeUiTest(width = 1280, height = HEIGHT) {
             val harness = CommandHarness()
             with(harness) { show() }
-            val missing = mutableListOf<String>()
 
-            // Menus first, so no panel's closing hand-off lands while a menu is open.
-            val order = harness.commands.sortedBy { command -> if (command.site is ControlSite.MenuItem) 0 else 1 }
-            order.filter { command -> !command.id.startsWith("export.variants") }.forEach { command ->
-                if (!found(harness, command)) missing += "${command.id} at ${command.site}"
-            }
-            runOnUiThread { harness.command("export.mode.${ExportMode.Frozen.name}").run() }
-            waitForIdle()
-            harness.commands.filter { command -> command.id.startsWith("export.variants") }.forEach { command ->
-                if (!found(harness, command)) missing += "${command.id} at ${command.site}"
-            }
-
-            missing.joinToString("\n") shouldBe ""
+            missingSites(harness).joinToString("\n") shouldBe ""
             val withoutControl = harness.commands.filter { command -> command.site == null }
             withoutControl.map { command -> command.id } shouldBe listOf("save")
         }
@@ -73,17 +61,20 @@ class ActionRegistryTest {
                 .size shouldBe harness.commands.size
         }
 
+    // b-406
     @Test
-    fun medium_hasAnEntryForEveryCommand() =
+    fun medium_findsEachCommandsControlWhereTheRegistrySays() =
         runDesktopComposeUiTest(width = 800, height = HEIGHT) {
             val harness = CommandHarness()
             with(harness) { show() }
 
             harness.commands.map { command -> command.id } shouldContainAll EXPECTED_IDS
+            missingSites(harness).joinToString("\n") shouldBe ""
         }
 
+    // b-406
     @Test
-    fun compact_hasAnEntryForEveryCommandButTheDeviceWidths() =
+    fun compact_findsEachCommandsControlWhereTheRegistrySaysButTheDeviceWidths() =
         runDesktopComposeUiTest(width = 400, height = HEIGHT) {
             val harness = CommandHarness()
             with(harness) { show() }
@@ -91,7 +82,50 @@ class ActionRegistryTest {
 
             ids shouldContainAll EXPECTED_IDS.filterNot { id -> id.startsWith("deviceWidth") }
             ids.filter { id -> id.startsWith("deviceWidth") }.shouldBeEmpty()
+            missingSites(harness).joinToString("\n") shouldBe ""
         }
+
+    // b-406
+    /**
+     * The Medium bar moves Commands, Redo and Undo into the overflow when the library dropdown needs
+     * their room, so the top bar's commands and the libraries are found wherever each width puts them.
+     */
+    @Test
+    fun medium_topBarCommandsAtEachWidth_sitWhereTheRegistrySays() {
+        for (width in listOf(600, 720, 840, 1024)) {
+            runDesktopComposeUiTest(width = width, height = HEIGHT) {
+                val harness = CommandHarness()
+                with(harness) { show() }
+                val topBar = harness.commands.filter { command ->
+                    command.id in TOP_BAR_IDS || command.id.startsWith("library.")
+                }
+                val order = topBar.sortedBy { command -> if (command.site is ControlSite.MenuItem) 0 else 1 }
+
+                val missing = order.filterNot { command -> found(harness, command) }
+
+                missing.joinToString("\n") { command -> "$width dp: ${command.id} at ${command.site}" } shouldBe ""
+            }
+        }
+    }
+
+    /**
+     * Every command whose control is not where the registry says, found by opening its menu, panel
+     * or disclosure first. The export variants only show on frozen output, so they go last.
+     */
+    private fun ComposeUiTest.missingSites(harness: CommandHarness): List<String> {
+        val missing = mutableListOf<String>()
+        // Menus first, so no panel's closing hand-off lands while a menu is open.
+        val order = harness.commands.sortedBy { command -> if (command.site is ControlSite.MenuItem) 0 else 1 }
+        order.filter { command -> !command.id.startsWith("export.variants") }.forEach { command ->
+            if (!found(harness, command)) missing += "${command.id} at ${command.site}"
+        }
+        runOnUiThread { harness.command("export.mode.${ExportMode.Frozen.name}").run() }
+        waitForIdle()
+        harness.commands.filter { command -> command.id.startsWith("export.variants") }.forEach { command ->
+            if (!found(harness, command)) missing += "${command.id} at ${command.site}"
+        }
+        return missing
+    }
 
     /** Whether [command]'s control is on screen, opening its menu, panel or disclosure first. */
     private fun ComposeUiTest.found(
@@ -183,6 +217,9 @@ private const val HEIGHT = 800
 
 /** The top bar's overflow button, which opens most of the menu sites. */
 private const val MORE_OPTIONS = "More options" // b-231
+
+/** The commands whose buttons sit in the top bar or its overflow, depending on the room (b-406). */
+private val TOP_BAR_IDS = setOf("palette", "undo", "redo", "share", "export")
 
 /** Every command id the registry has at Expanded on the default theme. */
 private val EXPECTED_IDS = listOf(
