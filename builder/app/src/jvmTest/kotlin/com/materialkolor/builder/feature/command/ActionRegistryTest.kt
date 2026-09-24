@@ -20,6 +20,7 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import com.materialkolor.builder.domain.persist.ExportMode
+import com.materialkolor.builder.kit.layout.PosterMode
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
@@ -67,6 +68,10 @@ class ActionRegistryTest {
         runDesktopComposeUiTest(width = 800, height = HEIGHT) {
             val harness = CommandHarness()
             with(harness) { show() }
+            // b-406g
+            // Below 840 dp the poster starts as the rail, so the walk opens it over the canvas first.
+            runOnUiThread { harness.workspace.setPosterCollapsed(false, PosterMode.Rail72) }
+            waitForIdle()
 
             harness.commands.map { command -> command.id } shouldContainAll EXPECTED_IDS
             missingSites(harness).joinToString("\n") shouldBe ""

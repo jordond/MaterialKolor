@@ -134,11 +134,13 @@ internal fun previewCommands(
         shortcut = Shortcut.Fullscreen,
         selected = state.fullscreen,
     ) { dispatcher.dispatch(WorkspaceAction.ToggleFullscreen) }
-    val collapsed = state.preferences.posterCollapsed
+    // b-406g
+    val mode = LocalLayout.current.posterMode
+    val collapsed = state.posterCollapsed(mode)
     val poster = stringResource(if (collapsed) Res.string.poster_expand else Res.string.poster_collapse)
     // b-406
     // The phone's sheet has no collapse button, so there only the keys and the palette ask for it.
-    val sheet = LocalLayout.current.posterMode == PosterMode.Sheet
+    val sheet = mode == PosterMode.Sheet
     list.add(
         id = "poster",
         category = CommandCategory.Preview,

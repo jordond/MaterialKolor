@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -87,6 +88,9 @@ internal fun WorkspaceScreen(
     var manualCopyFrom by remember { mutableStateOf<FocusRequester?>(null) } // b-221f
     var pickerFrom by remember { mutableStateOf<FocusRequester?>(null) } // b-307
     val shortcutFocus = remember { ShortcutFocus() } // b-315
+    // b-406g
+    // Read by the dispatcher, which is remembered once, so it follows the window as it resizes.
+    val posterMode by rememberUpdatedState(LocalLayout.current.posterMode)
 
     // Plays the transition's reveal out of the origin, or a crossfade without one, around the change.
     fun reveal(
@@ -153,7 +157,7 @@ internal fun WorkspaceScreen(
                 model.toggleFullscreen()
             }
             is WorkspaceAction.SetPosterCollapsed -> {
-                model.setPosterCollapsed(action.collapsed)
+                model.setPosterCollapsed(action.collapsed, posterMode) // b-406g
             }
             is WorkspaceAction.SetFineTuneRowOpen -> {
                 model.setFineTuneRowOpen(action.row, action.open)
@@ -275,7 +279,7 @@ internal fun WorkspaceScreen(
     val sheetState = rememberBottomSheetState()
     WorkspaceShell(
         posterColors = posterColors,
-        posterCollapsed = state.preferences.posterCollapsed,
+        posterCollapsed = state.posterCollapsed(LocalLayout.current.posterMode), // b-406g
         // b-221f
         // b-311
         poster = { rail ->
