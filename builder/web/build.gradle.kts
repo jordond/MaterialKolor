@@ -27,7 +27,6 @@ kotlin {
             implementation(libs.compose.ui)
             implementation(libs.kstore.storage)
             implementation(libs.kotlinx.browser)
-            implementation(libs.filekit.dialogs)
             implementation(libs.kermit)
         }
     }

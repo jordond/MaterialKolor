@@ -90,11 +90,16 @@ test.describe('download', () => {
 });
 
 test.describe('share', () => {
-  test('canShareFiles says what the browser says', async ({ page }) => {
+  test('canShareFiles says what the browser says of a zip and a Kotlin file', async ({ page }) => {
     await openWithBrowserApis(page);
     const native = await page.evaluate(() => {
       if (typeof navigator.canShare !== 'function' || typeof navigator.share !== 'function') return false;
-      return navigator.canShare({ files: [new File(['x'], 'probe.txt', { type: 'text/plain' })] });
+      return navigator.canShare({
+        files: [
+          new File([], 'theme.zip', { type: 'application/zip' }),
+          new File([], 'Theme.kt', { type: 'text/x-kotlin' }),
+        ],
+      });
     });
     expect(await hook(page, 'canShareFiles')).toBe(String(native));
   });
@@ -120,6 +125,9 @@ test.describe('share', () => {
     });
     await openWithBrowserApis(page);
     expect(await hook(page, 'canShareFiles')).toBe('true');
+    // The click asks first, so it can choose between sharing and saving before anything waits.
+    expect(await hook(page, 'canShare', 'text/plain')).toBe('true');
+    expect(await hook(page, 'canShare', 'application/x-refused')).toBe('false');
 
     await gesture(page, 'share:text/plain');
     await expect.poll(() => hook(page, 'outcome', 'share')).toBe('Done');
@@ -154,7 +162,7 @@ test.describe('images', () => {
     await expectNear(page, 'detailPixel', ['256,192', '768,192', '256,576', '768,576']);
   });
 
-  test('a drop hands over image files and the drag is followed', async ({ page }) => {
+  test('a drop hands over every file and the drag is followed', async ({ page }) => {
     await openWithBrowserApis(page);
     expect(await hook(page, 'dragging')).toBe('false');
 
@@ -164,10 +172,10 @@ test.describe('images', () => {
     expect(await hook(page, 'dragging')).toBe('false');
 
     await dispatchDrag(page, 'dragenter', []);
-    const taken = await dispatchDrag(page, 'drop', ['quadrants.png', 'notes.txt']);
+    const taken = await dispatchDrag(page, 'drop', ['notes.txt', 'quadrants.png']);
     expect(taken).toBe(true);
     expect(await hook(page, 'dragging')).toBe('false');
-    await expect.poll(() => hook(page, 'inputs')).toBe('drop quadrants.png');
+    await expect.poll(() => hook(page, 'inputs')).toBe('drop notes.txt\ndrop quadrants.png');
 
     // The PNG is lossless and every scaled pixel at a quadrant center is that quadrant's color, so
     // the RGBA to ARGB swizzle has to be exact.
@@ -180,24 +188,107 @@ test.describe('images', () => {
     expect(await hook(page, 'thumbnailPixel', '150,75')).toBe('#FFFFA000');
   });
 
-  test('a file that only claims to be an image decodes to nothing', async ({ page }) => {
+  test('a file that is not an image, or only claims to be one, arrives and decodes to nothing', async ({ page }) => {
     await openWithBrowserApis(page);
-    await dispatchDrag(page, 'drop', ['broken.png']);
-    await expect.poll(() => hook(page, 'inputs')).toBe('drop broken.png');
-    await hook(page, 'decodeLatest');
-    await expect.poll(() => hook(page, 'decoded')).toBe('None');
+    const inputs: string[] = [];
+    for (const name of ['broken.png', 'notes.txt', 'untyped']) {
+      await dispatchDrag(page, 'drop', [name]);
+      inputs.push(`drop ${name}`);
+      await expect.poll(() => hook(page, 'inputs')).toBe(inputs.join('\n'));
+      await hook(page, 'decodeLatest');
+      await expect.poll(() => hook(page, 'decoded')).toBe('None');
+    }
   });
 
-  test('a paste hands over text and images, but not while a field has focus', async ({ page }) => {
+  test('an image too big to decode safely decodes to nothing', async ({ page, browserName }) => {
+    await openWithBrowserApis(page);
+    // Both are images the browser reads, so nothing but the caps turns them down.
+    expect(await readableSize(page, 'padded.png')).toBe('200x100');
+    if (browserName === 'chromium') expect(await readableSize(page, 'huge.png')).toBe('10000x10000');
+
+    const inputs: string[] = [];
+    for (const name of ['huge.png', 'padded.png']) {
+      await dispatchDrag(page, 'drop', [name]);
+      inputs.push(`drop ${name}`);
+      await expect.poll(() => hook(page, 'inputs')).toBe(inputs.join('\n'));
+      await hook(page, 'decodeLatest');
+      await expect.poll(() => hook(page, 'decoded')).toBe('None');
+    }
+  });
+
+  test('a pick started without a click comes back empty and leaves no input behind', async ({ page }) => {
+    // Playwright's evaluate can count as a click in Chromium, so the page is told plainly there is none.
+    await page.addInitScript(() => {
+      Object.defineProperty(Navigator.prototype, 'userActivation', {
+        configurable: true,
+        get: () => ({ isActive: false, hasBeenActive: false }),
+      });
+    });
+    await openWithBrowserApis(page);
+    let choosers = 0;
+    page.on('filechooser', () => {
+      choosers += 1;
+    });
+    await hook(page, 'pickWithoutGesture');
+    await expect.poll(() => hook(page, 'outcome', 'pick')).toBe('None');
+    expect(await page.evaluate(() => document.querySelectorAll('input[type=file]').length)).toBe(0);
+    expect(choosers).toBe(0);
+  });
+
+  test('a paste hands over text and files, but not while a field has focus', async ({ page }) => {
     await openWithBrowserApis(page);
     expect(await dispatchPaste(page, { text: '#6750A4' })).toBe(true);
-    expect(await dispatchPaste(page, { text: 'quadrants.png', files: ['quadrants.png'] })).toBe(true);
+    expect(await dispatchPaste(page, { text: 'notes.txt', files: ['notes.txt'] })).toBe(true);
     expect(await dispatchPaste(page, { text: '   ' })).toBe(false);
-    expect(await dispatchPaste(page, { text: '#FFFFFF', intoField: true })).toBe(false);
-    await expect.poll(() => hook(page, 'inputs')).toBe('text #6750A4\nfiles quadrants.png');
+    expect(await dispatchPaste(page, { text: '#FFFFFF', into: 'field' })).toBe(false);
+    expect(await dispatchPaste(page, { text: '#FFFFFF', into: 'shadowField' })).toBe(false);
+    // Compose's hidden clip target is not a field, so a paste there is the builder's.
+    expect(await dispatchPaste(page, { text: 'quadrants.png', files: ['quadrants.png'], into: 'clipTarget' })).toBe(true);
+    await expect.poll(() => hook(page, 'inputs')).toBe('text #6750A4\nfiles notes.txt\nfiles quadrants.png');
 
     const decoded = await decodeLatest(page);
     expect(decoded).toMatchObject({ width: 128, height: 64 });
+  });
+
+  test('Cmd or Ctrl+V on the canvas hands over an image and text', async ({ page, context, browserName }) => {
+    test.skip(browserName !== 'chromium', 'only Chromium lets a test fill the clipboard without a click');
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    // The Desktop Chrome device claims Windows, so Compose would wait for Ctrl while Playwright
+    // presses Cmd on a Mac. The page reports the host's platform so both agree on the key.
+    const host = process.platform === 'darwin' ? 'macOS' : process.platform === 'win32' ? 'Windows' : 'Linux';
+    await page.addInitScript((platform) => {
+      Object.defineProperty(Navigator.prototype, 'userAgentData', { configurable: true, get: () => ({ platform }) });
+      // Where each paste really lands, seen through the shadow root Compose keeps its elements in.
+      const targets: string[] = [];
+      (window as any).__pasteTargets = targets;
+      document.addEventListener(
+        'paste',
+        (event) => {
+          const node = event.composedPath()[0] as HTMLElement;
+          targets.push(`${node.tagName} ${node.getAttribute('aria-hidden')}`);
+        },
+        true,
+      );
+    }, host);
+    await openWithBrowserApis(page);
+    const canvas = page.locator('canvas').first();
+    const targets = () => page.evaluate(() => (window as any).__pasteTargets as string[]);
+
+    await page.evaluate(async () => {
+      const [file] = await (window as any).__makeFiles(['quadrants.png']);
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': file })]);
+    });
+    await canvas.focus();
+    await page.keyboard.press('ControlOrMeta+V');
+    await expect.poll(() => hook(page, 'inputs')).toMatch(/^files \S+$/);
+    expect(await decodeLatest(page)).toMatchObject({ width: 128, height: 64 });
+
+    await page.evaluate(() => navigator.clipboard.writeText('#6750A4'));
+    await canvas.focus();
+    await page.keyboard.press('ControlOrMeta+V');
+    await expect.poll(() => hook(page, 'inputs')).toMatch(/\ntext #6750A4$/);
+    // Both went through Compose's hidden text area, the path that used to drop them.
+    expect(await targets()).toEqual(['TEXTAREA true', 'TEXTAREA true']);
   });
 
   test('S7 a 12 MP JPEG decodes and scales well inside 150 ms', async ({ page }, testInfo) => {
@@ -299,8 +390,11 @@ async function expectNear(page: Page, pixelHook: string, points: string[]): Prom
 }
 
 // Files the page makes for itself. `quadrants.png` is 200 by 100 with the four quadrant colors,
-// `broken.png` claims to be a PNG and is not, and `notes.txt` is text. The transfer is a real
-// DataTransfer where the browser lets a page fill one, else a stand-in with the same shape.
+// `broken.png` claims to be a PNG and is not, `notes.txt` is text and `untyped` has no type at all.
+// `padded.png` is the quadrants with 51 MB of zeros after the end, which decoders ignore, and
+// `huge.png` is a real 10000 by 10000 PNG, one bit a pixel, that packs 100 MP into a few kilobytes.
+// The transfer is a real DataTransfer where the browser lets a page fill one, else a stand-in with
+// the same shape.
 function installFileMakers(): void {
   const quadrants = () => {
     const canvas = document.createElement('canvas');
@@ -313,12 +407,45 @@ function installFileMakers(): void {
     });
     return new Promise<Blob>((resolve) => canvas.toBlob((blob) => resolve(blob!), 'image/png'));
   };
+  const crcTable = Array.from({ length: 256 }, (_, value) => {
+    let crc = value;
+    for (let bit = 0; bit < 8; bit++) crc = crc & 1 ? 0xedb88320 ^ (crc >>> 1) : crc >>> 1;
+    return crc >>> 0;
+  });
+  const chunk = (type: string, data: Uint8Array) => {
+    const bytes = new Uint8Array(12 + data.length);
+    const view = new DataView(bytes.buffer);
+    view.setUint32(0, data.length);
+    bytes.set(Array.from(type, (letter) => letter.charCodeAt(0)), 4);
+    bytes.set(data, 8);
+    let crc = 0xffffffff;
+    for (const byte of bytes.subarray(4, 8 + data.length)) crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+    view.setUint32(8 + data.length, (crc ^ 0xffffffff) >>> 0);
+    return bytes;
+  };
+  const huge = async () => {
+    const side = 10_000;
+    const header = new Uint8Array(13);
+    new DataView(header.buffer).setUint32(0, side);
+    new DataView(header.buffer).setUint32(4, side);
+    header.set([1, 0, 0, 0, 0], 8);
+    // Each row is a filter byte and 1250 bytes of black.
+    const rows = new Blob([new Uint8Array(side * (1 + side / 8))]).stream().pipeThrough(new CompressionStream('deflate'));
+    const packed = new Uint8Array(await new Response(rows).arrayBuffer());
+    const signature = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    return [signature, chunk('IHDR', header), chunk('IDAT', packed), chunk('IEND', new Uint8Array(0))];
+  };
   (window as any).__makeFiles = async (names: string[]) => {
     const files: File[] = [];
     for (const name of names) {
       if (name === 'quadrants.png') files.push(new File([await quadrants()], name, { type: 'image/png' }));
       if (name === 'broken.png') files.push(new File(['not a png'], name, { type: 'image/png' }));
       if (name === 'notes.txt') files.push(new File(['notes'], name, { type: 'text/plain' }));
+      if (name === 'untyped') files.push(new File(['no type'], name));
+      if (name === 'padded.png') {
+        files.push(new File([await quadrants(), new Uint8Array(51 * 1024 * 1024)], name, { type: 'image/png' }));
+      }
+      if (name === 'huge.png') files.push(new File(await huge(), name, { type: 'image/png' }));
     }
     return files;
   };
@@ -354,26 +481,53 @@ async function dispatchDrag(page: Page, type: string, names: string[]): Promise<
   );
 }
 
-/** Paste [text] and [files] where focus is, or into a text field. True when the page took it. */
+/** The size the browser itself decodes the made file [name] to, as `WIDTHxHEIGHT`. */
+async function readableSize(page: Page, name: string): Promise<string> {
+  return page.evaluate(async (name) => {
+    const [file] = await (window as any).__makeFiles([name]);
+    const bitmap = await createImageBitmap(file);
+    const size = `${bitmap.width}x${bitmap.height}`;
+    bitmap.close();
+    return size;
+  }, name);
+}
+
+/**
+ * Paste [text] and [files] on the page, into a text field, into a text field in a shadow root the
+ * way Compose keeps its inputs, or into a stand-in for Compose's hidden clip target. True when the
+ * page took it.
+ */
 async function dispatchPaste(
   page: Page,
-  { text, files = [], intoField = false }: { text?: string; files?: string[]; intoField?: boolean },
+  {
+    text,
+    files = [],
+    into = 'page',
+  }: { text?: string; files?: string[]; into?: 'page' | 'field' | 'shadowField' | 'clipTarget' },
 ): Promise<boolean> {
   return page.evaluate(
-    async ({ text, names, intoField }) => {
+    async ({ text, names, into }) => {
       let target: HTMLElement = document.body;
-      if (intoField) {
+      let added: HTMLElement | null = null;
+      if (into !== 'page') {
         target = document.createElement('textarea');
-        document.body.appendChild(target);
+        if (into === 'field') {
+          added = target;
+        } else {
+          added = document.createElement('div');
+          added.attachShadow({ mode: 'open' }).appendChild(target);
+          if (into === 'clipTarget') target.setAttribute('aria-hidden', 'true');
+        }
+        document.body.appendChild(added);
         target.focus();
       }
       const transfer = (window as any).__makeTransfer(await (window as any).__makeFiles(names), text);
-      const event = new Event('paste', { bubbles: true, cancelable: true });
+      const event = new Event('paste', { bubbles: true, cancelable: true, composed: true });
       Object.defineProperty(event, 'clipboardData', { value: transfer });
       target.dispatchEvent(event);
-      if (intoField) target.remove();
+      added?.remove();
       return event.defaultPrevented;
     },
-    { text, names: files, intoField },
+    { text, names: files, into },
   );
 }

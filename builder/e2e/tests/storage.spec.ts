@@ -239,11 +239,12 @@ test.describe('environment', () => {
   test('the tab keeps its project through a reload and gets a fresh id', async ({ page }) => {
     await openBuilder(page);
     const firstId = await hook(page, 'tabId');
-    expect(await hook(page, 'readTabProject')).toBe('');
-    await hook(page, 'writeTabProject', 'p1');
+    // The session writes down the project it opens at boot, so a fresh tab already has one.
+    await expect.poll(() => hook(page, 'readTabProject')).not.toBe('');
+    const booted = await hook(page, 'readTabProject');
 
     await openBuilder(page);
-    expect(await hook(page, 'readTabProject')).toBe('p1');
+    await expect.poll(() => hook(page, 'readTabProject')).toBe(booted);
     expect(await hook(page, 'tabId')).not.toBe(firstId);
   });
 

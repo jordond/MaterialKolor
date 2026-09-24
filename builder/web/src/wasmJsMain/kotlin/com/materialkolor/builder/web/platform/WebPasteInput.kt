@@ -10,8 +10,9 @@ import kotlinx.coroutines.flow.callbackFlow
 /**
  * Pastes on the document while nothing editable has focus.
  *
- * Each collector adds its own `paste` listener and removes it when it stops. Pasted images win over
- * pasted text, since copying an image file usually puts its name on the clipboard as text too.
+ * Each collector adds its own `paste` listener and removes it when it stops. Pasted files win over
+ * pasted text, since copying a file usually puts its name on the clipboard as text too. Files that
+ * are not images come through as well, so `decode` turns them down and the user hears why.
  */
 internal object WebPasteInput : PasteInput {
     override val pastes: Flow<Paste> =

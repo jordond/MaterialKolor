@@ -48,17 +48,21 @@ internal external interface ScaledImage : JsAny {
 
 /**
  * Decode [blob] and scale it to [pixelEdge], [thumbnailEdge] and [detailEdge] on the longer side.
- * Null when the browser cannot read it as an image.
+ * Null when the browser cannot read it as an image, when it is over [maxBytes] or when its header
+ * says it has more than [maxPixels] pixels.
  *
  * The browser decodes off the main thread and the full image stays in browser memory until it is
- * closed here. Only the 128 px pixels ever reach Kotlin, and the other two go straight to Skia.
+ * closed here. Only the 128 px pixels ever reach Kotlin, and the other two go straight to Skia. The
+ * caps come first because a full decode takes four bytes a pixel before anything is scaled.
  */
 internal suspend fun scaleImage(
     blob: Blob,
     pixelEdge: Int,
     thumbnailEdge: Int,
     detailEdge: Int,
-): ScaledImage? = startScaling(blob, pixelEdge, thumbnailEdge, detailEdge).await<ScaledImage?>()
+    maxBytes: Int,
+    maxPixels: Int,
+): ScaledImage? = startScaling(blob, pixelEdge, thumbnailEdge, detailEdge, maxBytes, maxPixels).await<ScaledImage?>()
 
 /** Copy these ints into Kotlin in one go, through linear memory rather than one call per element. */
 internal fun Int32Array.copyToIntArray(): IntArray {
@@ -81,18 +85,85 @@ private fun copyIntoMemory(
 // The detail comes from the full image, then the two smaller ones from the detail, which is much
 // cheaper than scaling the full image three times. Any browser that ignores the resize options
 // (the bitmap comes back at full size) gets the canvas instead.
+//
+// Every bitmap is closed and every canvas shrunk to nothing on the way out, whichever way that is,
+// since Safari holds their memory until the next collection otherwise. The header read knows PNG,
+// JPEG, GIF, WebP and BMP. Anything else, HEIC for one, has only the byte cap.
 private fun startScaling(
     blob: Blob,
     pixelEdge: Int,
     thumbnailEdge: Int,
     detailEdge: Int,
+    maxBytes: Int,
+    maxPixels: Int,
 ): Promise<ScaledImage?> =
     js(
         """(async () => {
+        const headerPixels = async () => {
+            let bytes;
+            try {
+                bytes = new Uint8Array(await blob.slice(0, 262144).arrayBuffer());
+            } catch (e) {
+                return 0;
+            }
+            const view = new DataView(bytes.buffer);
+            const has = (offset, length) => offset + length <= bytes.length;
+            const ascii = (offset, text) =>
+                has(offset, text.length) && Array.from(text).every((c, i) => bytes[offset + i] === c.charCodeAt(0));
+            if (bytes[0] === 0x89 && ascii(1, 'PNG') && ascii(12, 'IHDR') && has(16, 8)) {
+                return view.getUint32(16) * view.getUint32(20);
+            }
+            if (ascii(0, 'GIF8') && has(6, 4)) return view.getUint16(6, true) * view.getUint16(8, true);
+            if (ascii(0, 'BM') && has(18, 8)) return Math.abs(view.getInt32(18, true) * view.getInt32(22, true));
+            if (ascii(0, 'RIFF') && ascii(8, 'WEBP')) {
+                const triple = (offset) => bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16);
+                if (ascii(12, 'VP8X') && has(24, 6)) return (triple(24) + 1) * (triple(27) + 1);
+                if (ascii(12, 'VP8L') && has(21, 4)) {
+                    const bits = view.getUint32(21, true);
+                    return ((bits & 0x3fff) + 1) * (((bits >>> 14) & 0x3fff) + 1);
+                }
+                if (ascii(12, 'VP8 ') && has(26, 4)) {
+                    return (view.getUint16(26, true) & 0x3fff) * (view.getUint16(28, true) & 0x3fff);
+                }
+                return 0;
+            }
+            // JPEG keeps its size in the first start of frame segment, after EXIF and the rest.
+            if (bytes[0] === 0xff && bytes[1] === 0xd8) {
+                // Every C0 to CF marker starts a frame except C4, C8 and CC.
+                const frame = (marker) => marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker);
+                let offset = 2;
+                while (has(offset, 9) && bytes[offset] === 0xff) {
+                    const marker = bytes[offset + 1];
+                    if (marker === 0xff) {
+                        offset += 1;
+                    } else if (frame(marker)) {
+                        return view.getUint16(offset + 5) * view.getUint16(offset + 7);
+                    } else {
+                        offset += 2 + view.getUint16(offset + 2);
+                    }
+                }
+            }
+            return 0;
+        };
+        if (blob.size > maxBytes || (await headerPixels()) > maxPixels) return null;
+
+        const held = [];
+        const hold = (source) => {
+            held.push(source);
+            return source;
+        };
+        const release = (source) => {
+            if (typeof source.close === 'function') {
+                source.close();
+            } else {
+                source.width = 0;
+                source.height = 0;
+            }
+        };
         const started = performance.now();
         let full;
         try {
-            full = await createImageBitmap(blob);
+            full = hold(await createImageBitmap(blob));
         } catch (e) {
             return null;
         }
@@ -110,7 +181,7 @@ private fun startScaling(
             return canvas;
         };
         const draw = (source, width, height) => {
-            const canvas = canvasOf(width, height);
+            const canvas = hold(canvasOf(width, height));
             const context = canvas.getContext('2d', { willReadFrequently: true });
             context.imageSmoothingEnabled = true;
             context.imageSmoothingQuality = 'high';
@@ -121,11 +192,13 @@ private fun startScaling(
             const [width, height] = fit(source, edge);
             if (width === source.width && height === source.height) return source;
             try {
-                const bitmap = await createImageBitmap(source, {
-                    resizeWidth: width,
-                    resizeHeight: height,
-                    resizeQuality: 'medium',
-                });
+                const bitmap = hold(
+                    await createImageBitmap(source, {
+                        resizeWidth: width,
+                        resizeHeight: height,
+                        resizeQuality: 'medium',
+                    }),
+                );
                 if (bitmap.width === width && bitmap.height === height) return bitmap;
                 bitmap.close();
             } catch (e) {}
@@ -133,11 +206,11 @@ private fun startScaling(
             return draw(source, width, height);
         };
         const read = (source) => {
-            const context = draw(source, source.width, source.height).getContext('2d', { willReadFrequently: true });
-            return context.getImageData(0, 0, source.width, source.height).data.buffer;
-        };
-        const release = (source) => {
-            if (typeof source.close === 'function') source.close();
+            const canvas = draw(source, source.width, source.height);
+            const context = canvas.getContext('2d', { willReadFrequently: true });
+            const buffer = context.getImageData(0, 0, source.width, source.height).data.buffer;
+            release(canvas);
+            return buffer;
         };
         try {
             const detail = await scale(full, detailEdge);
@@ -164,11 +237,11 @@ private fun startScaling(
                 scaleMillis: scaled - decoded,
                 readMillis: performance.now() - scaled,
             };
-            new Set([full, detail, thumbnail, small]).forEach(release);
             return image;
         } catch (e) {
-            release(full);
             return null;
+        } finally {
+            held.forEach(release);
         }
     })()""",
     )

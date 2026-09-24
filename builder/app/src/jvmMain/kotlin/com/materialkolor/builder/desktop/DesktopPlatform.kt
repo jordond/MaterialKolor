@@ -63,10 +63,16 @@ private object DesktopFileSaver : FileSaver {
     ): Result<Unit> = notOnDesktop()
 
     override suspend fun shareFiles(files: List<OutgoingFile>): Result<Unit> = notOnDesktop()
+
+    // b-302a
+    override fun canShare(files: List<OutgoingFile>): Boolean = false
 }
 
 private object DesktopImageInput : ImageInput {
     override val drops: Flow<ImageHandle> = emptyFlow()
+
+    // b-302a
+    override val dragging: StateFlow<Boolean> = MutableStateFlow(false)
 
     override suspend fun pick(): ImageHandle? = null
 

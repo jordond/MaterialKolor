@@ -11,13 +11,31 @@ import kotlin.js.JsString
 import kotlin.js.Promise
 import kotlin.js.toJsArray
 
-/** Whether the share sheet takes files here, asked with a small text file. */
+/**
+ * Whether the share sheet takes the kinds of file an export makes here, asked with an empty zip and
+ * an empty Kotlin file. Chromium only shares images, text and a few media types, so it says no.
+ */
 internal fun pageCanShareFiles(): Boolean =
+    pageCanShare(listOf(shareProbe("theme.zip", "application/zip"), shareProbe("Theme.kt", "text/x-kotlin")))
+
+/**
+ * Whether the share sheet takes [files], asked without waiting so a click can choose between sharing
+ * and saving before anything suspends.
+ */
+internal fun pageCanShare(files: List<File>): Boolean = askCanShare(files.toJsArray())
+
+/** An empty file called [name] of type [mime]. `navigator.canShare` only looks at those two. */
+internal fun shareProbe(
+    name: String,
+    mime: String,
+): File = browserFile(Int8Array(0), name, mime)
+
+private fun askCanShare(files: JsArray<File>): Boolean =
     js(
         """{
         if (typeof navigator.canShare !== 'function' || typeof navigator.share !== 'function') return false;
         try {
-            return navigator.canShare({ files: [new File(['MaterialKolor'], 'probe.txt', { type: 'text/plain' })] });
+            return navigator.canShare({ files });
         } catch (error) {
             return false;
         }

@@ -5,6 +5,7 @@ import com.materialkolor.builder.core.platform.ImageHandle
 import com.materialkolor.builder.core.platform.ImageInput
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 
 /**
@@ -24,6 +25,11 @@ internal class FakeImageInput : ImageInput {
     val decoded: MutableMap<ImageHandle, DecodedImage> = mutableMapOf()
 
     override val drops: Flow<ImageHandle> = dropped.receiveAsFlow()
+
+    // b-302a
+
+    /** Whether files are over the builder. A test sets it to show or hide the drop overlay. */
+    override val dragging: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     override suspend fun pick(): ImageHandle? {
         picks++

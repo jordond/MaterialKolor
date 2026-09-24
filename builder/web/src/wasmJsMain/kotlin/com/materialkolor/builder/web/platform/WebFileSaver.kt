@@ -4,8 +4,10 @@ import com.materialkolor.builder.core.platform.FileSaver
 import com.materialkolor.builder.core.platform.OutgoingFile
 import com.materialkolor.builder.web.interop.browserFile
 import com.materialkolor.builder.web.interop.downloadBytes
+import com.materialkolor.builder.web.interop.pageCanShare
 import com.materialkolor.builder.web.interop.pageCanShareFiles
 import com.materialkolor.builder.web.interop.shareBrowserFiles
+import com.materialkolor.builder.web.interop.shareProbe
 import org.khronos.webgl.toInt8Array
 
 /**
@@ -15,7 +17,11 @@ import org.khronos.webgl.toInt8Array
  * starts before its function first suspends, so start them undispatched from the click handler.
  */
 internal object WebFileSaver : FileSaver {
+    /** Whether the share sheet takes a zip and a Kotlin file, the kinds an export makes. */
     override val canShareFiles: Boolean = pageCanShareFiles()
+
+    override fun canShare(files: List<OutgoingFile>): Boolean =
+        pageCanShare(files.map { file -> shareProbe(file.name, file.mime) })
 
     /** Start a download. Success means the browser took it, since a page never learns where it went. */
     override suspend fun save(
@@ -26,7 +32,8 @@ internal object WebFileSaver : FileSaver {
 
     /**
      * Open the share sheet with [files], or fail when `navigator.canShare` turns them down. Chromium
-     * only shares images, text and a few media types, so a zip goes to [save] instead.
+     * only shares images, text and a few media types, so the click asks [canShare] first and sends a
+     * zip to [save] instead.
      */
     override suspend fun shareFiles(files: List<OutgoingFile>): Result<Unit> {
         val shared = files.map { file -> browserFile(file.bytes.toInt8Array(), file.name, file.mime) }

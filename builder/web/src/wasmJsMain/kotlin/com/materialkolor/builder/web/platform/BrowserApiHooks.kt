@@ -86,9 +86,11 @@ internal fun PlatformServices.exposeBrowserApisToE2e() {
     }
     exposeE2eAction("gesture") { action -> armed = action }
     exposeE2eAction("copyWithoutGesture") { text -> start("copy", text) }
+    exposeE2eAction("pickWithoutGesture") { start("pick", "") }
     exposeE2eHook("outcome") { action -> outcomes[action].orEmpty() }
     exposeE2eHook("canShareFiles") { files.canShareFiles.toString() }
-    exposeE2eHook("dragging") { WebImageInput.dragging.value.toString() }
+    exposeE2eHook("canShare") { mime -> files.canShare(sharedFiles(mime)).toString() }
+    exposeE2eHook("dragging") { images.dragging.value.toString() }
     exposeE2eHook("inputs") { inputs.joinToString("\n") }
     exposeE2eHook("decodeLatest") {
         val handle = latest
