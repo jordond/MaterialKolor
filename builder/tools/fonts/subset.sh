@@ -118,7 +118,81 @@ pyftsubset "$work_dir/jetbrains.ttf" \
     --name-legacy \
     --notdef-outline
 
+# B-404
+# Selawik stands in for Segoe UI on the Fluent skin (architecture 6.11). It ships as static faces,
+# and Fluent's type scale only sets Regular and SemiBold, so those two are cut to the same Latin
+# range. The release is a tag with a zip, pinned by its checksum.
+#
+# Selawik carries a Reserved Font Name, and the OFL counts a subset as a Modified Version, which may
+# not present that name to users. So the subsets are renamed in their name tables. Only the file
+# names still say Selawik, which is where it came from and not a name anyone sees.
+selawik_version="1.01"
+selawik_url="https://github.com/microsoft/Selawik/releases/download/${selawik_version}/Selawik_Release.zip"
+selawik_sha256="3f62c51e05e3b5a1e6241cf92a371f0be2ea1183aa87b30718bbd40832a8d423"
+selawik_license_commit="1908e0b053079879b2afdc03334521dc991b6de9"
+selawik_license_url="https://raw.githubusercontent.com/microsoft/Selawik/$selawik_license_commit/LICENSE.txt"
+selawik_family="Builder Fluent Sans"
+selawik_features='kern,ccmp,mark,mkmk,locl'
+
+echo "Fetching Selawik $selawik_version"
+curl -sSL --fail -o "$work_dir/selawik.zip" "$selawik_url"
+if ! echo "$selawik_sha256  $work_dir/selawik.zip" | shasum -a 256 -c - >/dev/null; then
+    echo "  the Selawik $selawik_version zip no longer matches its pinned checksum" >&2
+    exit 1
+fi
+unzip -q -o "$work_dir/selawik.zip" -d "$work_dir/selawik"
+curl -sSL --fail -o "$license_dir/OFL-Selawik.txt" "$selawik_license_url"
+
+for pair in "selawk:Regular" "selawksb:Semibold"; do
+    source_name="${pair%%:*}"
+    style="${pair##*:}"
+    echo "Subsetting Selawik $style to Latin"
+    pyftsubset "$work_dir/selawik/$source_name.ttf" \
+        --output-file="$work_dir/selawik-$style.ttf" \
+        --unicodes="$latin_range" \
+        --layout-features="$selawik_features" \
+        --no-hinting \
+        --name-IDs='*' \
+        --name-legacy \
+        --notdef-outline
+    python3 - "$work_dir/selawik-$style.ttf" "$out_dir/Selawik_$style.ttf" "$selawik_family" "$style" <<'PY'
+import sys
+from fontTools.ttLib import TTFont
+
+source, target, family, style = sys.argv[1:]
+font = TTFont(source)
+names = font["name"]
+# Only the records that name the font itself. The copyright, trademark and license records keep
+# Microsoft's wording, the Reserved Font Name included, as the OFL asks.
+renamed = {1: family, 3: family, 4: family, 6: family.replace(" ", ""), 16: family, 18: family, 21: family}
+for record in list(names.names):
+    text = record.toUnicode()
+    if record.nameID not in renamed or "Selawik" not in text:
+        continue
+    names.setName(
+        text.replace("Selawik", renamed[record.nameID]),
+        record.nameID,
+        record.platformID,
+        record.platEncID,
+        record.langID,
+    )
+font.save(target)
+PY
+done
+
 status=0
+selawik_bytes=0
+for face in "$out_dir/Selawik_Regular.ttf" "$out_dir/Selawik_Semibold.ttf"; do
+    brotli -f -q 11 -o "$work_dir/size.br" "$face"
+    selawik_bytes=$((selawik_bytes + $(wc -c <"$work_dir/size.br" | tr -d ' ')))
+done
+# The two Selawik weights load together, so they share the one face budget.
+printf '%-34s %7s bytes brotli for both weights\n' "Selawik" "$selawik_bytes"
+if [ "$selawik_bytes" -gt "$budget_bytes" ]; then
+    echo "  over the ${budget_bytes} byte budget, drop the second weight or trim the range" >&2
+    status=1
+fi
+
 for face in "$out_dir/BricolageGrotesque_Variable.ttf" "$out_dir/JetBrainsMono_Variable.ttf"; do
     raw=$(wc -c <"$face" | tr -d ' ')
     brotli -f -q 11 -o "$work_dir/size.br" "$face"
