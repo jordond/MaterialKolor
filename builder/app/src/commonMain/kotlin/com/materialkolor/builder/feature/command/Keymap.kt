@@ -111,8 +111,8 @@ internal enum class ShortcutGroup {
  * Shortcuts marked [inFields] fire while a text field has focus. The rest stay out of the way of
  * typing, and every single key, Space included, can be turned off in the cheat sheet.
  *
- * V and the held B work the dock straight from the keys, so no registry command runs them and
- * [inRegistry] is false for both. The export sheet takes C and Shift+C for its own copies, since
+ * The held B works the dock straight from the keys, so no registry command runs it and [inRegistry]
+ * is false for it. The export sheet takes C and Shift+C for its own copies, since
  * the page never hears a key pressed inside it.
  */
 internal enum class Shortcut(
@@ -163,7 +163,7 @@ internal enum class Shortcut(
     Poster(ShortcutGroup.Preview, listOf(Chord(physical(Key.Backslash, "\\"), primary = true)), inFields = true),
 
     // b-315c
-    VisionMenu(ShortcutGroup.Preview, listOf(Chord(physical(Key.V, "V"))), inRegistry = false),
+    VisionMenu(ShortcutGroup.Preview, listOf(Chord(physical(Key.V, "V")))), // b-315d
     Grayscale(ShortcutGroup.Preview, listOf(Chord(physical(Key.B, "B"))), inRegistry = false),
     ;
 

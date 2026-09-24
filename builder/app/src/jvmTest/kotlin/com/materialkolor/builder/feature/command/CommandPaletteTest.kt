@@ -15,10 +15,12 @@ import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performScrollTo
@@ -33,6 +35,7 @@ import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.link.ShareCodec
 import com.materialkolor.builder.domain.model.Role
+import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.FineTuneRow
@@ -63,8 +66,12 @@ class CommandPaletteTest {
             boot()
             openPalette()
             val apple = isApple(platform.environment.browser)
+            // b-315d
+            // All but its own row, which would only open what is already open.
+            val palette = harness.command("palette")
+            onAllNodes(rowMatcher(palette.label)).fetchSemanticsNodes().size shouldBe 0
 
-            val missing = harness.commands.filter { command ->
+            val missing = harness.commands.filter { command -> command.id != palette.id }.filter { command ->
                 val category = categories.getValue(command.category)
                 val keys = command.shortcut?.text(apple)
                 val supporting = when (val state = command.state) {
@@ -261,7 +268,7 @@ class CommandPaletteTest {
             field().performKeyInput { pressKey(Key.Escape) }
             waitForIdle()
             harness.workspace.state.value.panel shouldBe Panel.Palette
-            rowLabels().first() shouldBe harness.commands.first().label
+            rowLabels().first() shouldBe harness.commands.first { command -> command.id != "palette" }.label
             field().performKeyInput { pressKey(Key.Escape) }
             waitForIdle()
 
@@ -318,6 +325,79 @@ class CommandPaletteTest {
             keys { pressKey(Key.Spacebar) }
 
             harness.graph.session.document.value.seed shouldNotBe seed
+        }
+
+    // b-315d
+
+    /**
+     * On the desktop the palette is a window of its own, so the page's holder keeps focus in the
+     * page's window, the way it does on the web in the frames before the palette takes focus.
+     */
+    @Test
+    fun esc_thatReachesThePage_closesThePalette() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.K) } }
+            harness.workspace.state.value.panel shouldBe Panel.Palette
+
+            onNode(isRoot() and hasAnyDescendant(CommandsButton)).performKeyInput { pressKey(Key.Escape) }
+            waitForIdle()
+
+            harness.workspace.state.value.panel shouldBe null
+        }
+
+    @Test
+    fun ctrlSInsideThePalette_saves_andCtrlO_leavesItOpen() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            openPalette()
+
+            field().performKeyInput { withKeyDown(Key.CtrlLeft) { pressKey(Key.O) } }
+            waitForIdle()
+            harness.workspace.state.value.panel shouldBe Panel.Palette
+            field().performKeyInput { withKeyDown(Key.CtrlLeft) { pressKey(Key.S) } }
+            waitForIdle()
+
+            harness.workspace.state.value.panel shouldBe Panel.Palette
+            waitUntil { named("Saved") }
+        }
+
+    @Test
+    fun aClosedPalette_buildsNoRegistryOnADragStep() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            var builds = 0
+            with(harness) { show(probe = { categories() }, registryBuilds = { builds++ }) }
+
+            fun dragStepBuilds(seed: Int): Int {
+                builds = 0
+                runOnUiThread {
+                    harness.workspace.edit(DocumentChange.SetSeed(Argb(seed), SeedSource.Typed), EditPhase.Dragging)
+                }
+                waitForIdle()
+                return builds
+            }
+
+            // The page's own registry, as often as a drag step recomposes the page.
+            val page = dragStepBuilds(0xFF1A73E8.toInt())
+            openPalette()
+            runOnUiThread { harness.workspace.closePanel() }
+            waitForIdle()
+
+            dragStepBuilds(0xFF6750A4.toInt()) shouldBe page
+        }
+
+    @Test
+    fun theVisionMenuRow_closesThePalette_andOpensTheMenu() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            openPalette()
+            search("vision menu")
+            rowLabels().first() shouldBe harness.command("visionMenu").label
+
+            enter()
+
+            harness.workspace.state.value.panel shouldBe null
+            harness.workspace.state.value.visionMenuOpen shouldBe true
         }
 
     private fun ComposeUiTest.boot() {
@@ -378,3 +458,7 @@ private val InPalette: SemanticsMatcher = hasAnyAncestor(
 
 private val PaletteRow: SemanticsMatcher =
     hasClickAction() and InPalette and !hasSetTextAction() and !hasText("Close")
+
+/** The top bar's Commands button, which only the page's own window holds. */
+private val CommandsButton: SemanticsMatcher =
+    hasClickAction() and hasContentDescription("Command palette") and !InPalette // b-315d

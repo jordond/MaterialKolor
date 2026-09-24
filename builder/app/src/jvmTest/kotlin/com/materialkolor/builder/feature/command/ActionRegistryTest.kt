@@ -35,10 +35,7 @@ class ActionRegistryTest {
      */
     @Test
     fun expanded_findsEachCommandsControlWhereTheRegistrySays() =
-        // b-231
-        // The registry puts the libraries straight in the top bar on any wide window, and the bar only
-        // shows them there once the segmented switcher fits beside the full actions, as it does here.
-        runDesktopComposeUiTest(width = 1600, height = HEIGHT) {
+        runDesktopComposeUiTest(width = 1280, height = HEIGHT) {
             val harness = CommandHarness()
             with(harness) { show() }
             val missing = mutableListOf<String>()
@@ -68,7 +65,7 @@ class ActionRegistryTest {
             val shortcuts = harness.commands.mapNotNull { command -> command.shortcut }
 
             // b-315c
-            // V and the held B work the dock straight from the keys.
+            // The held B works the dock straight from the keys.
             shortcuts.sorted() shouldBe Shortcut.entries.filter { shortcut -> shortcut.inRegistry }.sorted()
             harness.commands
                 .map { command -> command.id }
@@ -223,6 +220,7 @@ private val EXPECTED_IDS = listOf(
     "deviceWidth.Phone",
     "deviceWidth.Tablet",
     "deviceWidth.Desktop",
+    "visionMenu", // b-315d
     "vision.None",
     "vision.Achromatopsia",
     "fullscreen",

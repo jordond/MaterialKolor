@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalWasmJsInterop::class)
+
 package com.materialkolor.builder.web.platform
 
 import com.materialkolor.builder.core.platform.Router
@@ -10,9 +12,11 @@ import com.materialkolor.builder.web.interop.historyReplaceUrl
 import com.materialkolor.builder.web.interop.locationPath
 import com.materialkolor.builder.web.interop.locationQuery
 import com.materialkolor.builder.web.interop.onHistoryPop
+import kotlinx.browser.window
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlin.js.ExperimentalWasmJsInterop
 
 /**
  * The address bar and the back button, through the History API.
@@ -27,15 +31,21 @@ import kotlinx.coroutines.flow.asSharedFlow
  * [replaceHome]. The browser may fold several backs into one move, so a move settles as many of the
  * router's own backs as it covers and reports the rest as the user's.
  *
+ * A back whose move has not come after a short wait is given up on, so what waits for it still
+ * lands. A move that comes after all took the entry pushed in its place, and it closes nothing. The
+ * entry it lands on stands in for the overlay that is still open, until that overlay closes.
+ *
  * Only overlays this page load opened can be closed by a back. An overlay entry the page lands on
  * without having opened it, after a reload on one or a forward into one, has nothing open behind it,
  * so the router goes back over it quietly.
  */
-internal class WebRouter : Router {
-    override val initial: Route = RoutePath.parse(locationPath(), locationQuery())
+internal class WebRouter(
+    private val history: HistoryPort = BrowserHistory,
+) : Router {
+    override val initial: Route = RoutePath.parse(history.path(), history.query())
 
     private val pops = MutableSharedFlow<Unit>(extraBufferCapacity = POP_BUFFER)
-    private var depth = historyOverlayDepth()
+    private var depth = history.depth()
 
     // Overlays this page load opened and has not closed yet, the entries from depth 1 up.
     private var opened = 0
@@ -43,23 +53,36 @@ internal class WebRouter : Router {
     private val waitingPushes = ArrayDeque<String>()
     private var homeWaiting = false
 
+    // b-315d
+    // Backs given up on whose move may still come, how many moves have come, so a wait that a move
+    // ended gives nothing up, and how many times backs were given up, so only the last one expires.
+    private var lateBacks = 0
+    private var moves = 0
+    private var givenUp = 0
+
     override val overlayPops: Flow<Unit> = pops.asSharedFlow()
 
     init {
-        onHistoryPop(::moved)
+        history.onPop(::moved)
         goBackQuietly(depth)
         exposeToE2e()
     }
 
     // While a back is on its way the current entry is about to change, so home waits for it too.
     override fun replaceHome() {
-        if (pendingBacks > 0) homeWaiting = true else historyReplaceUrl(HOME)
+        if (pendingBacks > 0) {
+            homeWaiting = true
+            waitForMove()
+        } else {
+            history.replaceUrl(HOME)
+        }
     }
 
     override fun pushOverlay(id: String) {
         if (pendingBacks > 0) {
             waitingPushes.addLast(id)
-        } else if (historyPushOverlay(id, depth + 1)) {
+            waitForMove()
+        } else if (history.push(id, depth + 1)) {
             depth++
             opened++
         }
@@ -73,12 +96,15 @@ internal class WebRouter : Router {
     }
 
     private fun moved(newDepth: Int) {
+        moves++
         val popped = depth - newDepth
         depth = newDepth
         if (popped > 0) {
             val ours = minOf(popped, pendingBacks)
             pendingBacks -= ours
-            val closed = minOf(popped - ours, opened)
+            val late = minOf(popped - ours, lateBacks) // b-315d
+            lateBacks -= late
+            val closed = minOf(popped - ours - late, opened)
             opened -= closed
             repeat(closed) { pops.tryEmit(Unit) }
         }
@@ -90,17 +116,106 @@ internal class WebRouter : Router {
     private fun goBackQuietly(steps: Int) {
         if (steps <= 0) return
         pendingBacks += steps
-        if (!historyBack(steps)) pendingBacks -= steps
+        if (!history.back(steps)) pendingBacks -= steps
     }
 
     private fun catchUp() {
         if (homeWaiting) {
             homeWaiting = false
-            historyReplaceUrl(HOME)
+            history.replaceUrl(HOME)
         }
         while (waitingPushes.isNotEmpty()) pushOverlay(waitingPushes.removeFirst())
+    }
+
+    // b-315d
+
+    // Gives the backs on their way up once no move has come for a while, unless a move came since.
+    private fun waitForMove() {
+        val movesBefore = moves
+        history.later(MOVE_WAIT_MS) { if (moves == movesBefore && pendingBacks > 0) giveUp() }
+    }
+
+    // A move whose report never came still shows in the entry's depth. Otherwise the backs are
+    // late, or lost, and what waits for them lands now on top of the entries they were to pop.
+    private fun giveUp() {
+        val now = history.depth()
+        if (now < depth) {
+            moved(now)
+            return
+        }
+        lateBacks += pendingBacks
+        pendingBacks = 0
+        val given = ++givenUp
+        history.later(LATE_MOVE_MS) { if (givenUp == given) lateBacks = 0 }
+        catchUp()
+    }
+}
+
+/**
+ * The History API as the router uses it, so a test can hold a move back or drop it. [later] runs
+ * a block after a delay in milliseconds.
+ */
+internal interface HistoryPort {
+    fun path(): String
+
+    fun query(): String
+
+    fun depth(): Int
+
+    fun push(
+        id: String,
+        depth: Int,
+    ): Boolean
+
+    fun back(steps: Int): Boolean
+
+    fun replaceUrl(url: String): Boolean
+
+    fun onPop(listener: (depth: Int) -> Unit)
+
+    fun later(
+        delayMs: Int,
+        block: () -> Unit,
+    )
+}
+
+/** The browser's own history. */
+internal object BrowserHistory : HistoryPort {
+    override fun path(): String = locationPath()
+
+    override fun query(): String = locationQuery()
+
+    override fun depth(): Int = historyOverlayDepth()
+
+    override fun push(
+        id: String,
+        depth: Int,
+    ): Boolean = historyPushOverlay(id, depth)
+
+    override fun back(steps: Int): Boolean = historyBack(steps)
+
+    override fun replaceUrl(url: String): Boolean = historyReplaceUrl(url)
+
+    override fun onPop(listener: (depth: Int) -> Unit) {
+        onHistoryPop(listener)
+    }
+
+    override fun later(
+        delayMs: Int,
+        block: () -> Unit,
+    ) {
+        window.setTimeout({
+            block()
+            null
+        }, delayMs)
     }
 }
 
 private const val HOME = "/"
 private const val POP_BUFFER = 16
+
+/** How long a push or home waits for a back's move before it gives the back up. */
+private const val MOVE_WAIT_MS = 250
+
+/** How long a back given up on may still land and close nothing. */
+private const val LATE_MOVE_MS = 1_000

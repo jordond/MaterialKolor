@@ -15,7 +15,6 @@ import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.feature.canvas.VisionSimulation
 import com.materialkolor.builder.feature.topbar.LibraryChoice
-import com.materialkolor.builder.feature.workspace.Panel
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -39,14 +38,9 @@ class DockKeysTest {
     fun v_opensTheVisionMenuWithFocusInIt_andClosingItHandsFocusBackToItsButton() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             with(harness) { show() }
-            // A new skin builds the page anew and focus goes with it. A panel closing hands it back, to
-            // More here, the button the cheat sheet opens from, and keys reach the page through it.
-            runOnUiThread {
-                harness.workspace.edit(LibraryChoice.Unstyled.change, EditPhase.Discrete)
-                harness.workspace.openPanel(Panel.CheatSheet)
-            }
-            waitForIdle()
-            runOnUiThread { harness.workspace.closePanel() }
+            // b-315d
+            // The switch moves the page into the new skin, and the holder takes focus back once it has.
+            runOnUiThread { harness.workspace.edit(LibraryChoice.Unstyled.change, EditPhase.Discrete) }
             waitForIdle()
             harness.workspace.state.value.document.library shouldBe Library.Unstyled
 
@@ -59,6 +53,23 @@ class DockKeysTest {
             waitForIdle()
             harness.workspace.state.value.visionMenuOpen shouldBe false
             onNode(hasContentDescription("Color vision, None") and InWorkspace).assertIsFocused()
+        }
+
+    // b-315d
+    @Test
+    fun aNumberKey_thenSpaceAndV_workWithNoClick() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            with(harness) { show() }
+            keys { pressKey(Key.Three) }
+            waitUntil { harness.workspace.state.value.document.library == Library.Unstyled }
+            waitForIdle()
+            val seed = harness.graph.session.document.value.seed
+
+            keys { pressKey(Key.Spacebar) }
+            waitUntil { harness.graph.session.document.value.seed != seed }
+            keys { pressKey(Key.V) }
+
+            harness.workspace.state.value.visionMenuOpen shouldBe true
         }
 
     @Test

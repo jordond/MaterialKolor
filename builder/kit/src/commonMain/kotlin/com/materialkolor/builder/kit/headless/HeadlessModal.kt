@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
@@ -81,6 +82,9 @@ internal fun HeadlessModal(
         }
         return
     }
+    // b-315d
+    // A dialog window has no layer of the host around it to hand the page's keys on.
+    val keys = LocalOverlayKeys.current
     Dialog(
         onDismissRequest = { dismiss() },
         properties = DialogProperties(
@@ -91,7 +95,7 @@ internal fun HeadlessModal(
             animateTransition = false,
         ),
     ) {
-        ModalLayer(state, { dismiss() }, scrim, contentAlignment, content)
+        ModalLayer(state, { dismiss() }, scrim, contentAlignment, content, keys = keys)
     }
 }
 
@@ -103,6 +107,7 @@ private fun ModalLayer(
     scrim: Color,
     contentAlignment: Alignment,
     content: @Composable AnimatedVisibilityScope.() -> Unit,
+    keys: ((KeyEvent) -> Boolean)? = null, // b-315d
 ) {
     AnimatedVisibility(
         visibleState = state,
@@ -113,6 +118,7 @@ private fun ModalLayer(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .overlayKeys { keys } // b-315d
                 .onKeyEvent { event ->
                     val escape = event.type == KeyEventType.KeyDown && event.key == Key.Escape
                     if (escape) dismiss()

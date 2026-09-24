@@ -47,8 +47,8 @@ import org.jetbrains.compose.resources.getString
  * Text pasted while nothing editable has focus, read by [classify] (F-05, F-32).
  *
  * A color and a share link or code come out of [pasted] for the workspace to act on once. Anything
- * else is left alone, a style name included, and so is every paste while a panel is open, since the
- * panel owns the page then. Pasted files are the image seeding's.
+ * else is left alone, a style name included, and so is every paste while a panel or the dock's Vision
+ * menu is open, since it owns the page then. Pasted files are the image seeding's.
  */
 @Inject
 @ContributesIntoMap(AppScope::class, binding<ViewModel>())
@@ -71,7 +71,7 @@ internal class PasteRouter(
         }
     }
 
-    /** Keep up with the workspace, where an open panel leaves every paste alone. */
+    /** Keep up with the workspace, where an open panel or Vision menu leaves every paste alone. */
     fun follow(panelOpen: Boolean) {
         this.panelOpen = panelOpen
     }
@@ -102,7 +102,7 @@ internal fun PasteHost(
     PasteHostContent(
         model = model,
         dispatcher = dispatcher,
-        panelOpen = state.panel != null,
+        panelOpen = state.panel != null || state.visionMenuOpen, // b-315d
         project = state.projectGeneration,
         document = state.document,
         openShared = share::openShared,
@@ -116,7 +116,7 @@ internal fun PasteHost(
  * nothing once the document has moved on, and the toast goes as soon as it does. A color that is
  * already the seed makes no undo entry and so offers no Undo.
  *
- * @param[panelOpen] Whether a panel is open, which leaves every paste alone.
+ * @param[panelOpen] Whether a panel or the Vision menu is open, which leaves every paste alone.
  * @param[project] The open project's generation, so the Undo stops at a project switch.
  * @param[document] The open document, which tells the Undo when to stop.
  * @param[openShared] Opens the theme a share code carries, and says why when it could not.

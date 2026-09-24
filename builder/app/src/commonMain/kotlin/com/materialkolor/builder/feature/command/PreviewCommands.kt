@@ -33,6 +33,7 @@ import com.materialkolor.builder.generated.resources.canvas_vision_none
 import com.materialkolor.builder.generated.resources.canvas_vision_protanopia
 import com.materialkolor.builder.generated.resources.canvas_vision_tritanopia
 import com.materialkolor.builder.generated.resources.command_choice
+import com.materialkolor.builder.generated.resources.command_key_vision_menu
 import com.materialkolor.builder.generated.resources.command_next_device_width
 import com.materialkolor.builder.generated.resources.command_next_preview_mode
 import com.materialkolor.builder.generated.resources.command_next_tab
@@ -184,6 +185,15 @@ private fun visionCommands(
     dispatcher: Dispatcher<WorkspaceAction>,
 ) {
     val menu = stringResource(Res.string.canvas_vision_button, stringResource(visionName(state.vision)))
+    // b-315d
+    // The held B has no command, since a toggle would only repeat the Achromatopsia row below.
+    list.add(
+        id = "visionMenu",
+        category = CommandCategory.Vision,
+        label = stringResource(Res.string.command_key_vision_menu),
+        site = ControlSite.Direct(Region.Dock, menu),
+        shortcut = Shortcut.VisionMenu,
+    ) { dispatcher.dispatch(WorkspaceAction.SetVisionMenuOpen(open = true)) }
     VisionSimulation.entries.forEach { vision ->
         val name = stringResource(visionName(vision))
         list.add(
