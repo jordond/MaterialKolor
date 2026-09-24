@@ -1,0 +1,248 @@
+import { expect, test, type Page } from '@playwright/test';
+import { site } from './builder';
+
+// The static shell around the app. boot.js checks the browser and colors the splash before any app
+// code loads. index.html carries the splash, the unsupported page and the error overlay.
+
+/** The glue, the script boot.js adds last. Holding it keeps the page on the splash. */
+const GLUE = /\/assets\/builder\.[0-9a-f]{16}\.js$/;
+
+/** A share code with the default seed, #D9653B. */
+const DEFAULT_LINK = '/t/AdllOwAAAAAT';
+
+/** The start of a share code for seed #1A73E8. The splash only reads the seed, bytes 1 to 3. */
+const BLUE_LINK = '/t/ARpz6A';
+
+const LIGHT = 0xff102030 | 0;
+const DARK = 0xff405060 | 0;
+const BLUE = 0xff1a73e8 | 0;
+
+test.describe('splash', () => {
+  test('paints the stored chrome for each scheme and a neutral poster with no seed', async ({ page }) => {
+    await storeSplash(page, { light: LIGHT, dark: DARK });
+    await holdGlue(page);
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto(site('/'), { waitUntil: 'domcontentloaded' });
+
+    const light = await splash(page);
+    expect(light.chrome).toBe(rgb(LIGHT));
+    expect(light.poster).toBe(light.canvas);
+    expect(light.hex).not.toContain('#');
+
+    await page.emulateMedia({ colorScheme: 'dark' });
+    expect((await splash(page)).chrome).toBe(rgb(DARK));
+  });
+
+  test('paints a stored seed on the poster, and a link seed over it', async ({ page }) => {
+    await storeSplash(page, { light: LIGHT, dark: DARK, seed: BLUE });
+    await holdGlue(page);
+    await page.goto(site('/'), { waitUntil: 'domcontentloaded' });
+    expect(await splash(page)).toMatchObject({ poster: rgb(BLUE), hex: '"#1A73E8"' });
+
+    await page.goto(site(DEFAULT_LINK), { waitUntil: 'domcontentloaded' });
+    expect(await splash(page)).toMatchObject({ chrome: rgb(LIGHT), poster: 'rgb(217, 101, 59)', hex: '"#D9653B"' });
+  });
+
+  test('paints the default seed on a first visit', async ({ page }) => {
+    await holdGlue(page);
+    await page.goto(site('/'), { waitUntil: 'domcontentloaded' });
+    expect(await splash(page)).toMatchObject({ poster: 'rgb(217, 101, 59)', hex: '"#D9653B"' });
+  });
+
+  test('paints the seed of a theme link with no storage', async ({ page }) => {
+    await holdGlue(page);
+    await page.goto(site(DEFAULT_LINK), { waitUntil: 'domcontentloaded' });
+    expect(await splash(page)).toMatchObject({ poster: 'rgb(217, 101, 59)', hex: '"#D9653B"' });
+  });
+
+  test('with no storage paints the colors the app then writes, and leaves with the summary', async ({ page }) => {
+    const release = await holdGlue(page);
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto(site('/'), { waitUntil: 'domcontentloaded' });
+    const light = (await splash(page)).chrome;
+    await page.emulateMedia({ colorScheme: 'dark' });
+    const dark = (await splash(page)).chrome;
+    // The Compose mirror lives in a shadow root, so the page's own h1 is the summary.
+    expect(await page.evaluate(() => document.querySelector('h1')?.textContent)).toBe('MaterialKolor Builder');
+
+    release();
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('mk:splash')), { timeout: 30_000 }).not.toBeNull();
+    const written = JSON.parse((await page.evaluate(() => localStorage.getItem('mk:splash')))!);
+    expect({ light, dark }).toEqual({ light: rgb(written.light), dark: rgb(written.dark) });
+
+    await expect(page.locator('#splash')).toHaveCount(0, { timeout: 30_000 });
+    expect(await page.evaluate(() => document.querySelector('h1'))).toBeNull();
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const host = document.activeElement;
+          return (host?.shadowRoot?.activeElement ?? host)?.tagName;
+        }),
+      )
+      .toBe('CANVAS');
+  });
+});
+
+test.describe('unsupported browsers', () => {
+  const stubs: [string, () => void][] = [
+    [
+      'without WasmGC',
+      () => {
+        WebAssembly.validate = () => false;
+      },
+    ],
+    [
+      'without WebGL 2',
+      () => {
+        const getContext = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, type: string, ...rest: unknown[]) {
+          return type === 'webgl2' ? null : (getContext as (...args: unknown[]) => unknown).call(this, type, ...rest);
+        } as never;
+      },
+    ],
+  ];
+
+  for (const [name, stub] of stubs) {
+    test(`a browser ${name} gets the floors and the link seed and loads no app`, async ({ page }) => {
+      await page.addInitScript(stub);
+      const requests = collectRequests(page);
+      await page.goto(site(BLUE_LINK));
+
+      const unsupported = page.locator('#unsupported');
+      await expect(unsupported).toBeVisible();
+      for (const floor of ['Chrome or Edge 119', 'Firefox 120', 'Safari 18.2', '#1A73E8']) {
+        await expect(unsupported).toContainText(floor);
+      }
+      await expect(unsupported.getByRole('link', { name: 'MaterialKolor on GitHub' })).toBeVisible();
+      await expect(page.locator('.mk-skeleton')).toBeHidden();
+      await page.waitForLoadState('networkidle');
+      expect(requests.filter((pathname) => pathname.startsWith('/assets/') || pathname.endsWith('.wasm'))).toEqual([]);
+      expect(await page.locator('link[rel="preload"]').count()).toBe(0);
+    });
+  }
+});
+
+test('boot adds no preload and fetches the glue, each wasm file and each font once', async ({ page }) => {
+  const requests = collectRequests(page);
+  await page.goto(site('/'));
+  await expect(page.locator('#splash')).toHaveCount(0, { timeout: 30_000 });
+  await settle(requests);
+
+  expect(await page.locator('link[rel="preload"]').count()).toBe(0);
+  const assets = JSON.parse((await page.locator('#mk-assets').textContent()) ?? '{}');
+  expect(assets.wasm).toHaveLength(2);
+  expect(assets.fonts.length).toBeGreaterThan(0);
+  const expected: string[] = [assets.glue, ...assets.wasm, ...assets.fonts];
+  for (const pathname of expected) {
+    expect(requests.filter((request) => request === pathname), pathname).toHaveLength(1);
+  }
+});
+
+test.describe('error overlay', () => {
+  test('shows on an uncaught error, holds focus and copies the details', async ({ page, context, browserName }) => {
+    if (browserName === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    await page.goto(site('/'));
+    await expect(page.locator('#splash')).toHaveCount(0, { timeout: 30_000 });
+    await page.evaluate(() => {
+      setTimeout(() => {
+        throw new Error('Thrown by the shell spec');
+      });
+    });
+
+    const dialog = page.getByRole('alertdialog', { name: 'Something went wrong' });
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText('Your work is saved. Reload.');
+    await expect(page.locator('#error-reload')).toBeFocused();
+    expect(await page.evaluate(() => document.getElementById('app')?.inert)).toBe(true);
+
+    await page.locator('#error-copy').click();
+    await expect(page.locator('#error-status')).toHaveText('Details copied.');
+    if (browserName === 'chromium') {
+      const details = await page.evaluate(() => navigator.clipboard.readText());
+      expect(details).toContain('Error: Thrown by the shell spec');
+      expect(details).toMatch(/^Build: builder\.[0-9a-f]{16}\.js$/m);
+      expect(details).toContain(await page.evaluate(() => navigator.userAgent));
+    }
+  });
+
+  test('shows on an unhandled rejection and not on the notices it ignores', async ({ page }) => {
+    await holdGlue(page);
+    await page.goto(site('/'), { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => {
+      window.dispatchEvent(new ErrorEvent('error', { message: 'ResizeObserver loop completed with undelivered notifications.' }));
+      window.dispatchEvent(new ErrorEvent('error', { message: 'Script error.' }));
+    });
+    await expect(page.locator('#error-overlay')).toBeHidden();
+
+    await page.evaluate(() => {
+      void Promise.reject(new Error('Rejected by the shell spec'));
+    });
+    await expect(page.getByRole('alertdialog')).toBeVisible();
+  });
+});
+
+/** What the splash shows, as computed colors and the poster's hex as a CSS string. */
+async function splash(page: Page): Promise<{ chrome: string; poster: string; canvas: string; hex: string }> {
+  return page.evaluate(() => {
+    const style = (selector: string, pseudo?: string) => getComputedStyle(document.querySelector(selector)!, pseudo);
+    return {
+      chrome: style('#splash').backgroundColor,
+      poster: style('.mk-poster').backgroundColor,
+      canvas: style('.mk-canvas').backgroundColor,
+      hex: style('.mk-poster', '::after').content,
+    };
+  });
+}
+
+/** Store [value] as mk:splash before any script on the page runs. */
+async function storeSplash(page: Page, value: object): Promise<void> {
+  await page.addInitScript((text) => {
+    try {
+      localStorage.setItem('mk:splash', text);
+    } catch {
+      // about:blank has no storage.
+    }
+  }, JSON.stringify(value));
+}
+
+/** Hold every request for the glue until the returned function is called. */
+async function holdGlue(page: Page): Promise<() => void> {
+  let release = (): void => {};
+  const released = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route(GLUE, async (route) => {
+    await released;
+    await route.continue();
+  });
+  return () => release();
+}
+
+function rgb(argb: number): string {
+  return `rgb(${(argb >> 16) & 0xff}, ${(argb >> 8) & 0xff}, ${argb & 0xff})`;
+}
+
+/** The path of every request the page makes to the site. */
+function collectRequests(page: Page): string[] {
+  const origin = new URL(site('/')).origin;
+  const requests: string[] = [];
+  page.on('request', (request) => {
+    const url = new URL(request.url());
+    if (url.origin === origin) requests.push(url.pathname);
+  });
+  return requests;
+}
+
+/** Waits until no new request has gone out for two seconds, or fifteen seconds have passed. */
+async function settle(requests: unknown[]): Promise<void> {
+  const deadline = Date.now() + 15_000;
+  let seen = requests.length;
+  let quietSince = Date.now();
+  while (Date.now() < deadline && Date.now() - quietSince < 2_000) {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    if (requests.length !== seen) {
+      seen = requests.length;
+      quietSince = Date.now();
+    }
+  }
+}

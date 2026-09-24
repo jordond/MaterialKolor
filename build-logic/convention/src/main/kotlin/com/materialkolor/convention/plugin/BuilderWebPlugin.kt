@@ -27,7 +27,7 @@ import javax.inject.Inject
  * Turns the production wasm distribution of `:builder:web` into the site the host serves.
  *
  * Webpack already names the glue and wasm files by content. `assembleSite` moves them under
- * `/assets/`, where one `_headers` rule marks them immutable, and keeps `index.html` and
+ * `/assets/`, where one `_headers` rule marks them immutable, and keeps `index.html`, `boot.js` and
  * `composeResources/` at the root. `checkBudget` holds the result against `budget.json`.
  *
  * `-Psite.env=staging` adds a noindex header and a robots file that turns every crawler away.
@@ -37,7 +37,8 @@ class BuilderWebPlugin : Plugin<Project> {
         with(target) {
             val rewriteIndexHtml = tasks.register<RewriteIndexHtml>("rewriteIndexHtml") {
                 group = SITE_GROUP
-                description = "Points index.html at the hashed glue and lists the assets it boots with."
+                // b-501
+                description = "Fills the asset list in index.html that boot.js boots from."
                 dependsOn(DISTRIBUTION_TASK)
                 distribution.set(distributionDirectory())
                 index.set(layout.buildDirectory.file("site-parts/index.html"))
@@ -78,7 +79,14 @@ class BuilderWebPlugin : Plugin<Project> {
         layout.dir(tasks.named(DISTRIBUTION_TASK, Sync::class.java).map(Sync::getDestinationDir))
 }
 
-/** Rewrites the distribution's `index.html` for the site layout. */
+// b-501
+/**
+ * Fills the `#mk-assets` placeholder in the distribution's `index.html` with the hashed glue and
+ * wasm under `/assets/` and the fonts the first frame asks for.
+ *
+ * `boot.js` reads the list to load the glue, so the placeholder has to come before the tag that loads
+ * `boot.js`. The dev page runs on the placeholder's own value.
+ */
 abstract class RewriteIndexHtml : DefaultTask() {
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -105,9 +113,13 @@ abstract class RewriteIndexHtml : DefaultTask() {
             .sorted()
             .toList()
 
+        // b-501
         val html = root.resolve("index.html").readText()
-        if (GLUE_TAG !in html) throw GradleException("index.html no longer loads $GLUE_TAG, update rewriteIndexHtml")
-        if ("</head>" !in html) throw GradleException("index.html has no </head> to put the asset list before")
+        val placeholder = ASSETS_ELEMENT.findAll(html).singleOrNull()
+            ?: throw GradleException("index.html needs one #mk-assets placeholder, update rewriteIndexHtml")
+        val boot = html.indexOf(BOOT_TAG)
+        if (boot < 0) throw GradleException("index.html no longer has $BOOT_TAG, update rewriteIndexHtml")
+        if (placeholder.range.first > boot) throw GradleException("#mk-assets has to come before $BOOT_TAG")
 
         val assets = buildString {
             append("{\"glue\":").append(jsonString("/$ASSETS/$glue"))
@@ -115,10 +127,8 @@ abstract class RewriteIndexHtml : DefaultTask() {
             append(",\"fonts\":").append(fonts.joinToString(",", "[", "]", transform = ::jsonString))
             append("}")
         }
-        val rewritten = html
-            .replace(GLUE_TAG, "src=\"/$ASSETS/$glue\"")
-            .replace("</head>", "  <script type=\"application/json\" id=\"mk-assets\">$assets</script>\n  </head>")
-        index.get().asFile.writeText(rewritten)
+        val filled = "<script type=\"application/json\" id=\"mk-assets\">$assets</script>"
+        index.get().asFile.writeText(html.replaceRange(placeholder.range, filled))
     }
 
     private fun jsonString(value: String): String = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
@@ -246,7 +256,10 @@ private const val DISTRIBUTION_TASK = "wasmJsBrowserDistribution"
 private const val ASSETS = "assets"
 private const val RESOURCES = "composeResources"
 private const val BUILDER_RESOURCES = "com.materialkolor."
-private const val GLUE_TAG = "src=\"builder.js\""
+
+// b-501
+private const val BOOT_TAG = "<script src=\"/boot.js\"></script>"
+private val ASSETS_ELEMENT = Regex("""<script type="application/json" id="mk-assets">[^<]*</script>""")
 
 /** A name webpack gave a content hash, matching `webpack.config.d/output.js`. */
 private val HASHED = Regex("""\.[0-9a-f]{16}\.""")

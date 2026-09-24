@@ -41,7 +41,9 @@ test.describe('environment', () => {
     await hook(page, 'writeSplashColors', '#000000,#ffffff');
     expect(await page.evaluate(() => localStorage.getItem('mk:splash'))).toBe('{"light":-16777216,"dark":-1}');
 
-    // No splash on the page yet, so there is nothing to do.
+    // b-501
+    // The boot splash goes after the first frame. Once it has, there is nothing to do.
+    await expect.poll(() => page.evaluate(() => document.getElementById('splash') === null)).toBe(true);
     await hook(page, 'hideSplash');
     await page.evaluate(() => {
       const splash = document.createElement('div');
