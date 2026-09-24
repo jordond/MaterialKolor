@@ -48,8 +48,13 @@ test.describe('environment', () => {
       splash.id = 'splash';
       document.body.appendChild(splash);
     });
-    await hook(page, 'hideSplash');
-    expect(await page.evaluate(() => document.getElementById('splash')?.style.opacity)).toBe('0');
+    // Read the opacity in the same turn as the hook. The fade takes 200 ms, and a second round trip
+    // can take longer than that on a busy machine, by which time the splash is gone.
+    const opacity = await page.evaluate(() => {
+      window.__mk!.hideSplash('');
+      return document.getElementById('splash')?.style.opacity;
+    });
+    expect(opacity).toBe('0');
     await expect.poll(() => page.evaluate(() => document.getElementById('splash') === null)).toBe(true);
     expect(
       await page.evaluate(() => {

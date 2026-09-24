@@ -23,6 +23,7 @@ import com.materialkolor.builder.LocalThemeResult
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
+import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.canvas_mode_dark
 import com.materialkolor.builder.generated.resources.canvas_mode_light
@@ -39,6 +40,7 @@ import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.split.SplitPreview
+import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
@@ -108,7 +110,8 @@ internal fun CanvasTabs(
  * The body of the visible [tab], the only one that composes.
  *
  * App and Components wipe light over dark with the split handle, or show one copy in Light and
- * Dark. The data tabs lay their own light and dark columns out for [mode].
+ * Dark. The data tabs lay their own light and dark columns out for [mode] and send what they are
+ * asked to do through [dispatcher].
  */
 @Composable
 internal fun CanvasTabBody(
@@ -119,6 +122,7 @@ internal fun CanvasTabBody(
     appState: DemoAppState,
     componentsState: DemoAppState,
     deviceWidth: DeviceWidth,
+    dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
 ) {
     val probe = LocalCanvasProbe.current
@@ -138,7 +142,7 @@ internal fun CanvasTabBody(
         }
         PreviewTab.Roles -> {
             probe?.invoke(PreviewTab.Roles)
-            RolesTab(result, mode, specs.filter, modifier)
+            RolesTab(result, mode, specs.filter, dispatcher, modifier)
         }
         PreviewTab.Palettes -> {
             probe?.invoke(PreviewTab.Palettes)

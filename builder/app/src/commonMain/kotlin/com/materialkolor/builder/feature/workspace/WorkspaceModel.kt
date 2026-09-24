@@ -29,6 +29,7 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.shuffle.Shuffle
 import com.materialkolor.builder.engine.shuffle.ShuffleResult
 import com.materialkolor.builder.engine.shuffle.shuffleLocks
+import com.materialkolor.builder.feature.canvas.RampTarget
 import com.materialkolor.builder.feature.canvas.VisionSimulation
 import com.materialkolor.builder.feature.picker.PickerTarget
 import com.materialkolor.builder.feature.topbar.raisesExpressiveSuggestion
@@ -155,6 +156,7 @@ internal class WorkspaceModel(
 
     fun setPreviewTab(tab: PreviewTab) {
         updateView { view -> view.copy(tab = tab) }
+        updateState { state -> state.copy(rampTarget = null) } // b-308
     }
 
     /** Only the preview's mode moves. The chrome keeps its appearance (F-04). */
@@ -242,6 +244,14 @@ internal class WorkspaceModel(
         updatePreferences { prefs -> prefs.copy(dismissedHints = prefs.dismissedHints + id) }
     }
 
+    // b-308
+
+    /** Show the Palettes tab with the ramp of [target] picked out, until the next tab switch. */
+    fun showOnRamp(target: RampTarget) {
+        updateView { view -> view.copy(tab = PreviewTab.Palettes) }
+        updateState { state -> state.copy(rampTarget = target) }
+    }
+
     /** Read the session back into the state at once, so nothing waits on a collector. */
     private fun syncSession(expressiveSuggestion: Boolean) {
         val document = session.document.value
@@ -280,6 +290,8 @@ internal class WorkspaceModel(
      * belongs to one project can tell a new project from an edit.
      * @property[expressiveSuggestion] Whether the top bar offers the Expressive style on the 2025
      * spec after a switch to Expressive (F-03).
+     * @property[rampTarget] What the Palettes tab picks out after Show on ramp, or null. A tab
+     * switch clears it and nothing saves it.
      */
     @Immutable
     data class State(
@@ -298,6 +310,7 @@ internal class WorkspaceModel(
         // b-221c
         val projectGeneration: Int = 0,
         val expressiveSuggestion: Boolean = false,
+        val rampTarget: RampTarget? = null, // b-308
     ) {
         /** What [document] exports to. */
         val target: ExportTarget

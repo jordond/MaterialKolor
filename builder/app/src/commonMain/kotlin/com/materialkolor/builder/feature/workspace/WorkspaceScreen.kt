@@ -166,6 +166,10 @@ internal fun WorkspaceScreen(
             WorkspaceAction.DismissExpressiveSuggestion -> {
                 model.dismissExpressiveSuggestion()
             }
+            // b-308
+            is WorkspaceAction.ShowOnRamp -> {
+                model.showOnRamp(action.target)
+            }
         }
     }
 

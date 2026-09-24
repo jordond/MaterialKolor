@@ -21,6 +21,7 @@ import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.ktx.contrastRatio
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -207,5 +208,32 @@ class ContrastAuditTest {
 
         assertEquals(AuditReason.TextUnreadable, pressed.reason)
         assertEquals(AuditSuggestion.MoveSlotTone, pressed.suggestion)
+    }
+
+    // b-308
+
+    @Test
+    fun themeResultRate_pairTheAuditHas_equalsTheAuditRow() {
+        val result = ThemeResolver().resolve(document)
+        val row = result.audit.rows.first { row -> row.isDark }
+
+        assertEquals(row, result.rate(row.pair, isDark = true))
+    }
+
+    @Test
+    fun themeResultRate_custom_ratesOnPrimaryOverPrimary() {
+        val result = ThemeResolver().resolve(document.copy(library = Library.Custom, pins = emptyMap()))
+        val pair = ContrastPair(
+            foreground = ColorRef.OfRole(Role.OnPrimary),
+            background = ColorRef.OfRole(Role.Primary),
+            kind = PairKind.Text,
+        )
+        val row = result.rate(pair, isDark = false)
+        val expected = Color(result.roles[Role.OnPrimary, false].argb.value)
+            .contrastRatio(Color(result.roles[Role.Primary, false].argb.value))
+
+        assertTrue(result.audit.rows.none { audited -> audited.pair == pair })
+        assertEquals(result.roles[Role.Primary, false].argb, row.background)
+        assertEquals(expected, row.ratio, 1e-9)
     }
 }
