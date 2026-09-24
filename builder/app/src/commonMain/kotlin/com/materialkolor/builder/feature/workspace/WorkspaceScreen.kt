@@ -20,6 +20,8 @@ import com.materialkolor.builder.feature.command.CommandHost
 import com.materialkolor.builder.feature.export.ExportHost
 import com.materialkolor.builder.feature.export.launchCopy
 import com.materialkolor.builder.feature.image.ImageHost
+import com.materialkolor.builder.feature.image.ImageSeedModel
+import com.materialkolor.builder.feature.image.ProvideImageSeeds
 import com.materialkolor.builder.feature.picker.PickerHost
 import com.materialkolor.builder.feature.poster.ExplainerHost
 import com.materialkolor.builder.feature.poster.PosterFocus
@@ -41,6 +43,8 @@ import com.materialkolor.builder.kit.transition.SkinTransition
 import dev.stateholder.dispatcher.Dispatcher
 import dev.stateholder.dispatcher.rememberDispatcher
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 
@@ -61,6 +65,7 @@ internal fun WorkspaceScreen(
     transition: SkinTransition,
     modifier: Modifier = Modifier,
     model: WorkspaceModel = metroViewModel(),
+    images: ImageSeedModel = metroViewModel(), // b-311
 ) {
     val scope = rememberCoroutineScope()
     val toasts = rememberBuilderToastHostState()
@@ -104,8 +109,7 @@ internal fun WorkspaceScreen(
                 model.openPicker(action.target)
             }
             WorkspaceAction.OpenImagePicker -> {
-                // b-221c
-                // Nothing yet. B-311 opens the platform picker from here.
+                scope.launchImagePick(images) // b-311
             }
             is WorkspaceAction.SetPreviewTab -> {
                 model.setPreviewTab(action.tab)
@@ -185,6 +189,12 @@ internal fun WorkspaceScreen(
             is WorkspaceAction.SetColorAnimationDuration -> {
                 model.setColorAnimationDuration(action.target, action.durationMs)
             }
+            // b-311a
+            is WorkspaceAction.ShowWithdrawableToast -> {
+                val toast = action.toast
+                val shown = toasts.show(toast.message, toast.actionLabel, toast.duration, toast.onAction)
+                action.onShown { toasts.dismiss(shown) }
+            }
         }
     }
 
@@ -233,7 +243,9 @@ internal fun WorkspaceScreen(
     WorkspaceShell(
         posterColors = posterColors,
         posterCollapsed = state.preferences.posterCollapsed,
-        poster = { rail -> PosterPanel(state, rail, dispatcher, focus = posterFocus) }, // b-221f
+        // b-221f
+        // b-311
+        poster = { rail -> ProvideImageSeeds(state) { PosterPanel(state, rail, dispatcher, focus = posterFocus) } },
         topBar = { TopBarContent(state, dispatcher, focus = focus) }, // b-221c
         canvas = { contentPadding -> CanvasArea(state, contentPadding, dispatcher) },
         dock = { CanvasDock(state, dispatcher) },
@@ -265,3 +277,19 @@ private fun revealFrom(origin: Offset?): RevealStyle =
     } else {
         RevealStyle.Circle(origin)
     }
+
+// b-311
+
+/**
+ * What Image and Add the image again do. Opens the platform picker and hands what was picked to
+ * [images].
+ *
+ * Browsers only open the picker inside the click, so the pick is the first suspension and it starts
+ * before this returns (R-B-302), with no hop through the model before it.
+ */
+private fun CoroutineScope.launchImagePick(images: ImageSeedModel) {
+    launch(start = CoroutineStart.UNDISPATCHED) {
+        val handle = images.images.pick() ?: return@launch
+        images.take(handle)
+    }
+}

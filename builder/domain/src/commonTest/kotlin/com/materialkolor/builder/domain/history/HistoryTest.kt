@@ -238,6 +238,39 @@ class HistoryTest {
         assertFalse(session.history.canRedo)
     }
 
+    // b-307a
+    @Test
+    fun history_dragThroughTheStartThatLandsElsewhere_throwsAwayRedo() {
+        val session = Session()
+        session.edit(DocumentChange.SetAmoled(true), at = 0)
+        session.undo()
+
+        session.edit(contrast(30), EditPhase.Dragging, at = 10_000)
+        session.edit(contrast(0), EditPhase.Dragging, at = 10_016)
+        session.edit(contrast(20), EditPhase.Dragging, at = 10_032)
+        session.edit(contrast(40), EditPhase.Released, at = 10_048)
+
+        assertFalse(session.history.canRedo)
+        assertNull(session.history.redoLabel)
+        assertEquals(1, session.history.persisted().size)
+        assertEquals(ThemeDocument.Default, session.history.undo())
+    }
+
+    @Test
+    fun history_undoMidDrag_dropsTheRedoStepsTheDragSetAside() {
+        val session = Session()
+        session.edit(DocumentChange.SetAmoled(true), at = 0)
+        session.undo()
+
+        session.edit(contrast(30), EditPhase.Dragging, at = 10_000)
+        session.undo()
+        session.edit(contrast(50), EditPhase.Dragging, at = 10_016)
+        session.edit(contrast(0), EditPhase.Released, at = 10_032)
+
+        assertEquals(ContrastLevel(30), session.history.redo()?.contrast)
+        assertFalse(session.history.canRedo)
+    }
+
     @Test
     fun history_mergedEditsBackToTheStart_leaveNoEntry() {
         val session = Session()
@@ -374,6 +407,35 @@ class HistoryTest {
         session.edit(DocumentChange.SetThemeName("Ab"), at = 900)
 
         assertEquals(2, session.history.persisted().size)
+    }
+
+    // b-311a
+
+    @Test
+    fun history_newImageSeedRightAfterASeedEdit_isItsOwnStep() {
+        val session = Session()
+        val image = SeedSource.Image("photo.png", listOf(blue, red))
+
+        session.edit(DocumentChange.SetSeed(red, SeedSource.Typed), at = 0)
+        val typed = session.document
+        session.edit(DocumentChange.SetSeed(blue, image), at = 100)
+        session.edit(DocumentChange.SetSeed(red, SeedSource.Image("other.png", listOf(red))), at = 200)
+
+        assertEquals(3, session.history.persisted().size)
+        assertEquals(image, session.history.undo()?.seedSource)
+        assertEquals(typed, session.history.undo())
+    }
+
+    @Test
+    fun history_chipSwapWithinOneImage_stillFoldsIntoTheImageSeed() {
+        val session = Session()
+        val image = SeedSource.Image("photo.png", listOf(blue, red))
+
+        session.edit(DocumentChange.SetSeed(blue, image), at = 0)
+        session.edit(DocumentChange.SetSeed(red, image), at = 100)
+
+        assertEquals(1, session.history.persisted().size)
+        assertEquals(ThemeDocument.Default, session.history.undo())
     }
 
     private fun contrast(hundredths: Int): DocumentChange = DocumentChange.SetContrast(ContrastLevel(hundredths))

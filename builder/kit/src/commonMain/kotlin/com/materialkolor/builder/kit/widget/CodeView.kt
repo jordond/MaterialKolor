@@ -24,7 +24,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.selection.DisableSelection
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -74,6 +73,7 @@ import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.generated.resources.Res
 import com.materialkolor.builder.kit.generated.resources.code_view_name
 import com.materialkolor.builder.kit.generated.resources.widget_copy
+import com.materialkolor.builder.kit.headless.TouchlessSelectionContainer
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.token.CodePalette
@@ -112,7 +112,10 @@ private sealed interface CodePart {
  * scroll it without a pointer, and the copy keys copy what is selected.
  *
  * The copy button sits in the top corner. Selecting text takes a part of the file, the button takes
- * all of it, byte for byte.
+ * all of it, byte for byte. On the web a finger does not select, since the selection's handles would
+ * take the page's accessibility mirror over (D45), so there the button is how a finger copies. A
+ * mouse still selects. On a touch screen with a keyboard a key brings selection back and the code
+ * area keeps its focus. No key selects on its own, so a keyboard copies all of it with the button.
  *
  * On the web the list of lines goes by [label], since the page reads it as a list and a list with
  * no name is announced as nothing but a list (S5 row 33).
@@ -179,7 +182,8 @@ public fun CodeView(
     ) {
         // The selection is its own focus target and asks for focus when a drag starts, so it is the
         // one stop. The scroll keys and the focus flag go on its modifier, ahead of that target.
-        SelectionContainer(
+        // b-228a
+        TouchlessSelectionContainer(
             modifier = Modifier
                 .fillMaxSize()
                 .testTag(CodeScrollTag)

@@ -55,7 +55,7 @@
     <!-- The second seed Cmf reads for its tertiary palette. -->
     <string name="style_cmf_field">Tertiary seed, any format</string>
     <!-- Under the tertiary seed field while Cmf derives the seed itself. -->
-    <string name="style_cmf_derived">Derived from your seed until you type one</string>
+    <string name="style_cmf_derived">Derived from your seed until you type or pick one</string>
     <!-- Hands the tertiary seed back to Cmf. -->
     <string name="style_cmf_derive">Derive from seed</string>
 

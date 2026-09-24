@@ -8,7 +8,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,6 +26,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.input.TextFieldValue
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.foldState
@@ -71,9 +71,10 @@ internal fun <T> MaterialSelect(
         onExpandedChange = { open -> expanded = open && enabled },
         modifier = modifier,
     ) {
-        OutlinedTextField(
-            value = current,
-            onValueChange = {},
+        // b-228a
+        MaterialChoiceField(
+            current = current,
+            label = label,
             modifier = Modifier
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled)
                 .then(
@@ -87,10 +88,6 @@ internal fun <T> MaterialSelect(
                     stateDescription = current
                 }.foldState(label, null, enabled),
             enabled = enabled,
-            readOnly = true,
-            label = { Text(label) },
-            trailingIcon = { BuilderIcon(IconId.ChevronDown, contentDescription = null) },
-            singleLine = true,
         )
         if (inTree) {
             HeadlessDropdown(
@@ -131,9 +128,10 @@ internal fun <T> MaterialSelectPanel(
 ) {
     val current = optionLabel(selected)
     Column(modifier.width(IntrinsicSize.Max)) {
-        OutlinedTextField(
-            value = current,
-            onValueChange = {},
+        // b-228a
+        MaterialChoiceField(
+            current = current,
+            label = label,
             modifier = Modifier
                 .fillMaxWidth()
                 .focusProperties { canFocus = false }
@@ -141,15 +139,37 @@ internal fun <T> MaterialSelectPanel(
                     role = Role.DropdownList
                     stateDescription = current
                 }.foldState(label, null),
-            readOnly = true,
-            label = { Text(label) },
-            trailingIcon = { BuilderIcon(IconId.ChevronDown, contentDescription = null) },
-            singleLine = true,
         )
         DropdownList(materialMenuStyle(), modifier = Modifier.fillMaxWidth()) {
             MaterialSelectRows(options, selected, optionLabel, onSelect, selectedRow = null)
         }
     }
+}
+
+// b-228a
+
+/**
+ * The choice in Material's read only outlined field with its chevron. The field keeps its own
+ * selection, as `OutlinedTextField` does for text, so a tap that moves the caret recomposes the field
+ * alone and not the menu box around it, which would drop the tap that opens the menu.
+ */
+@Composable
+private fun MaterialChoiceField(
+    current: String,
+    label: String,
+    modifier: Modifier,
+    enabled: Boolean = true,
+) {
+    var shown by remember { mutableStateOf(TextFieldValue(current)) }
+    MaterialOutlinedField(
+        value = shown.copy(text = current),
+        onValueChange = { next -> shown = next },
+        label = label,
+        modifier = modifier,
+        enabled = enabled,
+        readOnly = true,
+        trailingIcon = { BuilderIcon(IconId.ChevronDown, contentDescription = null) },
+    )
 }
 
 @Composable

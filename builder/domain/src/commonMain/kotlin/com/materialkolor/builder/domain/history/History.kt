@@ -3,6 +3,7 @@ package com.materialkolor.builder.domain.history
 import com.materialkolor.builder.domain.edit.ChangeLabel
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.ThemeDocument
 
 /**
@@ -67,7 +68,7 @@ public class History(
         phase: EditPhase,
         now: Long,
     ) {
-        if (canFold(change, phase, now)) {
+        if (canFold(change, phase, now, before)) { // b-311a
             fold(after, change, phase, now)
         } else {
             push(before, after, change, phase, now)
@@ -107,6 +108,7 @@ public class History(
         change: DocumentChange,
         phase: EditPhase,
         now: Long,
+        before: ThemeDocument, // b-311a
     ): Boolean {
         val previous = last ?: return false
         if (previous.coalesceKey != change.coalesceKey) return false
@@ -114,7 +116,7 @@ public class History(
         // A release closes its drag even when the change never merges, so a preset seed put back
         // after a drag leaves no second step.
         if (phase == EditPhase.Released && previous.phase == EditPhase.Dragging) return true
-        if (!change.merges || !previous.merges) return false
+        if (!change.merges || !previous.merges || change.startsNewImage(before)) return false // b-311a
         return when (phase) {
             EditPhase.Dragging -> {
                 previous.phase == EditPhase.Dragging
@@ -185,3 +187,13 @@ public class History(
         public const val MERGE_WINDOW_MILLIS: Long = 600
     }
 }
+
+// b-311a
+
+/**
+ * Whether this sets the seed from an image [before] had no seed from. A new image is always its own
+ * step, the way a preset is, so undoing it never takes an earlier seed edit with it. Swapping to
+ * another of the same image's colors is still a seed edit like any other and folds as one.
+ */
+private fun DocumentChange.startsNewImage(before: ThemeDocument): Boolean =
+    this is DocumentChange.SetSeed && source is SeedSource.Image && source != before.seedSource

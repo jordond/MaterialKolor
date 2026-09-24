@@ -17,7 +17,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -222,7 +221,10 @@ internal fun MaterialSlider(
     )
 }
 
-/** The Material3 outlined text field over a builder field draft. */
+/**
+ * The Material3 outlined text field over a builder field draft. An error field always has its
+ * message here, which names the error on the field.
+ */
 @Composable
 internal fun MaterialField(
     value: TextFieldValue,
@@ -235,18 +237,17 @@ internal fun MaterialField(
     onDone: () -> Unit,
     modifier: Modifier,
 ) {
-    OutlinedTextField(
+    MaterialOutlinedField(
         value = value,
         onValueChange = onValueChange,
+        label = label,
         modifier = modifier.semantics { if (isError && message != null) error(message) },
         enabled = enabled,
         textStyle = textStyle,
-        label = { Text(label) },
-        supportingText = message?.let { text -> { Text(text) } },
+        supportingText = message,
         isError = isError,
         keyboardOptions = KeyboardOptions(autoCorrectEnabled = false, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { onDone() }),
-        singleLine = true,
     )
 }
 
