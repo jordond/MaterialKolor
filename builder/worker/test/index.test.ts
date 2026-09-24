@@ -1,4 +1,4 @@
-import { createExecutionContext, env } from 'cloudflare:test';
+import { createExecutionContext, env, waitOnExecutionContext } from 'cloudflare:test';
 import { describe, expect, it } from 'vitest';
 import worker from '../src/index';
 import { expectSiteHeaders, namedCode, vectors } from './support';
@@ -29,6 +29,36 @@ describe('a route that throws', () => {
     expect(response.headers.get('Content-Type')).toBe('image/png');
     expectSiteHeaders(response, 'no-cache');
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(new Uint8Array(await fallback.arrayBuffer()));
+  });
+});
+
+// b-505
+describe('the robots tag', () => {
+  const staging = { ...env, ROBOTS_TAG: 'noindex' } as Env;
+  const card = `/og/${namedCode([...new TextEncoder().encode('Robots')])}.png`;
+
+  it.each([
+    ['a theme page', `/t/${vectors[0]!.code}`, 'no-cache'],
+    ['a code that does not read', '/t/AdllOwAAAAAU', 'no-cache'],
+    ['a theme card', card, 'public, max-age=31536000, immutable'],
+  ])('is noindex on %s on staging', async (_, path, cacheControl) => {
+    const response = await worker.fetch(request(path), staging, createExecutionContext());
+    expect(response.headers.get('X-Robots-Tag')).toBe('noindex');
+    expectSiteHeaders(response, cacheControl);
+  });
+
+  it('is noindex on a card out of the cache on staging', async () => {
+    const first = createExecutionContext();
+    await worker.fetch(request(card), staging, first);
+    await waitOnExecutionContext(first);
+    const response = await worker.fetch(request(card), staging, createExecutionContext());
+    expect(response.headers.get('X-Robots-Tag')).toBe('noindex');
+    expectSiteHeaders(response, 'public, max-age=31536000, immutable');
+  });
+
+  it('is left off on production', async () => {
+    const response = await worker.fetch(request(`/t/${vectors[0]!.code}`), env, createExecutionContext());
+    expect(response.headers.get('X-Robots-Tag')).toBeNull();
   });
 });
 
