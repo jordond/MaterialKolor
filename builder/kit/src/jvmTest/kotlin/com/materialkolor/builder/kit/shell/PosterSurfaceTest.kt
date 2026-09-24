@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
@@ -27,16 +28,23 @@ import com.materialkolor.builder.engine.poster.PosterColors
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.custom.LocalBuilderIdentity
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.fluent.toFluentShades
 import com.materialkolor.hct.Hct
 import com.materialkolor.ktx.contrastRatio
 import com.materialkolor.unstyled.MaterialKolorTokens
+import io.github.composefluent.Colors
+import io.github.composefluent.FluentTheme
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
+import io.github.composefluent.LocalContentColor as FluentContentColor
 
 private const val ShellTextRatio = 4.5
+
+/** The least Fluent's own fixed text reaches on the fifty seeds, 4.35 at worst when measured. */
+private const val FluentTextFloor = 4.3
 private const val ShellClickTag = "shell-click"
 
 /** Ten hues at five tones, mid tones included, where ink sits closest to the floor. */
@@ -117,6 +125,45 @@ class PosterSurfaceTest {
         }
     }
 
+    /**
+     * Fluent on the poster takes its shades from the seed's own ramp, and its dark flag from the
+     * ink, so its fixed black or white text lands on the side that reads on the seed.
+     *
+     * That text is Fluent's and cannot be recoloured. On a mid tone seed neither side reaches 4.5
+     * to 1, since light mode text is black at 89 percent and white peaks near 4.48 at tone 50. So
+     * this holds it to the floor it does reach, which a text on the wrong side would miss by far.
+     */
+    @Test
+    fun posterSurface_fluent_takesItsShadesFromTheRampAndItsModeFromTheInk() =
+        runComposeUiTest {
+            var seed by mutableStateOf(ShellSeeds.first())
+            var colors: Colors? = null
+            setContent {
+                ShellHarness(Skin(Library.Fluent, expressive = false)) {
+                    val poster = remember(seed) { PosterColors.of(seed) }
+                    PosterSurface(poster) { colors = FluentTheme.colors }
+                }
+            }
+
+            val misses = mutableListOf<String>()
+            for (next in ShellSeeds) {
+                seed = next
+                waitForIdle()
+                val poster = PosterColors.of(next)
+                val page = next.toColor()
+                withClue(next.toHex()) {
+                    val fluent = checkNotNull(colors)
+                    fluent.darkMode shouldBe !poster.isLight
+                    fluent.shades.base shouldBe poster.ramp.toFluentShades().base
+                    val ratio = fluent.text.text.primary
+                        .compositeOver(page)
+                        .contrastRatio(page)
+                    if (ratio < FluentTextFloor) misses += "${next.toHex()} ${"%.2f".format(ratio)}"
+                }
+            }
+            misses.shouldBeEmpty()
+        }
+
     @Test
     fun posterSurface_unstyled_givesAPlainClickableAnIndication() =
         runComposeUiTest {
@@ -178,7 +225,7 @@ private fun shellInks(
             )
         }
         Library.Fluent -> {
-            emptyList()
+            listOf(ShellInk("Fluent content colour on seed", FluentContentColor.current, seed))
         }
     }
     return shared + own

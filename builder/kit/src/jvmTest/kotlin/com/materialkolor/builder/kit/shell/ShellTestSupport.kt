@@ -49,11 +49,12 @@ internal fun ShellHarness(
     skin: Skin,
     reducedMotion: Boolean = false,
     coarsePointer: Boolean = false,
+    isDark: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val result = remember { ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4))) }
     CompositionLocalProvider(LocalMotionFrozen provides true) {
-        BuilderTheme(skin, result, isDark = false, reducedMotion = reducedMotion) {
+        BuilderTheme(skin, result, isDark = isDark, reducedMotion = reducedMotion) {
             ProvideBuilderLayout(coarsePointer, Modifier.fillMaxSize().testTag(ShellRootTag)) { content() }
         }
     }
