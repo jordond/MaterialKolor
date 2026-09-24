@@ -99,10 +99,17 @@ private val GallerySources: List<String> = listOf(
 private val GalleryPopupWords: List<String> =
     listOf("Popup", "Dialog", "Modal", "BottomSheet", "DropdownMenu", "Tooltip", "Portal")
 
-/** What the gallery may take from the kit, its motion, the fold modifiers and the text lever of D45. */
+/**
+ * What the gallery may take from the kit, its motion, the fold modifiers, the value node names and
+ * the text lever of D45.
+ */
 private val GalleryKitImports: List<String> = listOf(
     "com.materialkolor.builder.kit.motion.",
     "com.materialkolor.builder.kit.control.folded",
+    "com.materialkolor.builder.kit.a11y.foldsValueIntoName",
+    "com.materialkolor.builder.kit.a11y.valueNodeName",
+    "com.materialkolor.builder.kit.a11y.sliderRoleWord",
+    "com.materialkolor.builder.kit.a11y.progressRoleWord",
     "com.materialkolor.builder.kit.headless.InnerTextWithoutHandles",
 )
 
@@ -296,6 +303,16 @@ class UnstyledGalleryTest {
             waitForIdle()
 
             for (name in WebNames) withClue(name) { onNode(named(name), useUnmergedTree = true).assertExists() }
+            for (name in WebValueNames) {
+                withClue(name) {
+                    onAllNodes(hasText(name), useUnmergedTree = true).fetchSemanticsNodes().shouldNotBeEmpty()
+                }
+            }
+
+            onNode(named("Wi-Fi, switch, off"), useUnmergedTree = true).performSemanticsAction(SemanticsActions.OnClick)
+            waitForIdle()
+            state.isOn(GalleryKeys.Wifi) shouldBe true
+            onNode(named("Wi-Fi, switch, on"), useUnmergedTree = true).assertExists()
 
             onNode(named("Shipping details, collapsed"), useUnmergedTree = true)
                 .performSemanticsAction(SemanticsActions.OnClick)
@@ -381,9 +398,21 @@ private val WebNames: List<String> = listOf(
     "Favourite, checkbox, not checked",
     "Email me the newsletter, checkbox, not checked",
     "Keep a copy on this device, checkbox, checked, disabled",
+    "Wi-Fi, switch, off",
+    "Airplane mode, switch, on, disabled",
     "Home, selected",
     "Team, not selected, disabled",
     "Shipping details, collapsed",
+)
+
+/**
+ * What the web mirror hears from the slider and the progress bars, which play no role of their own
+ * and so read their name, role word and value as text.
+ */
+private val WebValueNames: List<String> = listOf(
+    "Volume, slider, 6",
+    "Uploading, progress bar, 40%",
+    "Exporting, progress bar, 75%",
 )
 
 /** Wide enough for four columns and tall enough that every card composes. */

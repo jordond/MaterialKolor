@@ -27,7 +27,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -56,6 +55,9 @@ import com.composeunstyled.UnstyledTabGroup
 import com.composeunstyled.UnstyledVerticalScrollbar
 import com.composeunstyled.UnstyledVerticalSeparator
 import com.composeunstyled.rememberScrollbarState
+import com.materialkolor.builder.kit.a11y.foldsValueIntoName
+import com.materialkolor.builder.kit.a11y.progressRoleWord
+import com.materialkolor.builder.kit.a11y.valueNodeName
 import com.materialkolor.builder.kit.control.foldedExpandedName
 import com.materialkolor.builder.kit.control.foldedSelectedName
 import com.materialkolor.builder.kit.control.foldedTabName
@@ -408,6 +410,8 @@ private fun NavigationItem(
 
 @Composable
 internal fun GalleryProgress() {
+    val folds = foldsValueIntoName
+    val roleWord = progressRoleWord
     GalleryColumn {
         for ((label, done) in listOf("Uploading" to 0.4f, "Exporting" to 0.75f)) {
             Text("$label, ${(done * 100).toInt()}%", style = SmallStyle, color = DashboardToken.OnSurfaceVariant.color)
@@ -417,7 +421,7 @@ internal fun GalleryProgress() {
                     .fillMaxWidth()
                     .height(ProgressHeight)
                     .previewRoles(UnstyledGalleryComponent.Progress)
-                    .semantics { contentDescription = label }
+                    .semantics { valueNodeName(label, "${(done * 100).toInt()}%", folds, roleWord) }
                     .clip(PillShape)
                     .background(DashboardToken.SurfaceContainerHighest.color),
             ) {
