@@ -49,8 +49,7 @@ internal fun IconButton(
                 indication = null,
                 role = Role.Button,
                 onClick = onClick,
-            )
-            .semantics { this.contentDescription = contentDescription }
+            ).semantics { this.contentDescription = contentDescription }
             .pointerHoverIcon(PointerIcon.Hand)
             .focusRing(state = state, color = colors.focusRing, shape = shape),
     ) {

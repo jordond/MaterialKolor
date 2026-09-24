@@ -45,8 +45,7 @@ internal fun Checkbox(
                 indication = null,
                 role = Role.Checkbox,
                 onValueChange = onCheckedChange,
-            )
-            .pointerHoverIcon(PointerIcon.Hand)
+            ).pointerHoverIcon(PointerIcon.Hand)
             .focusRing(state = state, color = colors.focusRing, shape = target),
     ) {
         Box(

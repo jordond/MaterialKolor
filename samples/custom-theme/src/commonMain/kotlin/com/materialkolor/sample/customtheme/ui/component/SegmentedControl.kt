@@ -96,8 +96,7 @@ private fun Segment(
                 indication = null,
                 role = Role.RadioButton,
                 onClick = onClick,
-            )
-            .pointerHoverIcon(PointerIcon.Hand)
+            ).pointerHoverIcon(PointerIcon.Hand)
             .focusRing(state = state, color = colors.focusRing, shape = shape)
             .padding(horizontal = 12.dp),
     ) {

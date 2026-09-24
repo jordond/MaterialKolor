@@ -68,8 +68,7 @@ internal fun Button(
                 enabled = enabled,
                 role = Role.Button,
                 onClick = onClick,
-            )
-            .pointerHoverIcon(if (enabled) PointerIcon.Hand else PointerIcon.Default)
+            ).pointerHoverIcon(if (enabled) PointerIcon.Hand else PointerIcon.Default)
             .focusRing(state = state, color = colors.focusRing, shape = shape)
             .padding(horizontal = 16.dp),
     ) {

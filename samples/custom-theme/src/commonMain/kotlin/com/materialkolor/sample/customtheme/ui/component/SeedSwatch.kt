@@ -59,8 +59,7 @@ internal fun SeedSwatch(
                 indication = null,
                 role = Role.RadioButton,
                 onClick = onClick,
-            )
-            .semantics { contentDescription = label }
+            ).semantics { contentDescription = label }
             .pointerHoverIcon(PointerIcon.Hand)
             .padding(5.dp),
     ) {

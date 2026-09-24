@@ -90,8 +90,7 @@ private fun Tab(
                 indication = null,
                 role = Role.Tab,
                 onClick = onClick,
-            )
-            .pointerHoverIcon(PointerIcon.Hand)
+            ).pointerHoverIcon(PointerIcon.Hand)
             .focusRing(state = state, color = colors.focusRing, shape = TabShape)
             .drawBehind {
                 if (isSelected) {
@@ -102,8 +101,7 @@ private fun Tab(
                         size = Size(size.width, thickness),
                     )
                 }
-            }
-            .padding(horizontal = 12.dp),
+            }.padding(horizontal = 12.dp),
     ) {
         Text(
             text = text,
