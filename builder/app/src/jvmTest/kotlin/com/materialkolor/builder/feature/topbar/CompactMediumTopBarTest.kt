@@ -186,8 +186,8 @@ class CompactMediumTopBarTest {
 
     /**
      * The keys the kit's own select tests drive. The list opens on the chosen library, Tab walks the
-     * options and Enter picks. The kit's lists move focus with Tab, since Compose maps no arrow key to
-     * a focus move on the desktop or the web.
+     * options and Enter picks. Up and Down walk them too since P-M4b, which the kit's
+     * `HeadlessDropdownKeysTest` covers.
      */
     @Test
     fun dropdown_enterOpensOnTheChosenAndTabThenEnterPicks() =
