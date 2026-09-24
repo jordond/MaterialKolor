@@ -1,6 +1,5 @@
 package com.materialkolor.builder.kit.widget
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,9 +17,8 @@ import com.materialkolor.builder.kit.control.get
 import com.materialkolor.builder.kit.control.ink
 import com.materialkolor.builder.kit.generated.resources.Res
 import com.materialkolor.builder.kit.generated.resources.selectable_text_name
-import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
+import com.materialkolor.builder.kit.headless.InnerTextWithoutHandles
 import com.materialkolor.builder.kit.headless.TouchlessSelectionContainer
-import com.materialkolor.builder.kit.headless.withoutSelectionHandles
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderType
 import org.jetbrains.compose.resources.stringResource
@@ -62,7 +60,6 @@ public fun SelectableText(
         return
     }
     val ink = Emphasis.Primary.ink(LocalBuilderTokens.current)
-    val inTree = LocalOverlaysInTree.current
     var shown by remember { mutableStateOf(TextFieldValue(text)) }
     BasicTextField(
         value = shown.copy(text = text),
@@ -71,8 +68,6 @@ public fun SelectableText(
         readOnly = true,
         textStyle = LocalBuilderType.current[style].merge(color = ink),
         singleLine = true,
-        decorationBox = { field ->
-            Box(Modifier.withoutSelectionHandles(inTree), propagateMinConstraints = true) { field() }
-        },
+        decorationBox = { field -> InnerTextWithoutHandles(field) },
     )
 }

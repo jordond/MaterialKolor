@@ -63,15 +63,16 @@ internal fun ShareDialog(
     returnFocusTo: FocusRequester? = null,
 ) {
     val scope = rememberCoroutineScope()
-    // The copy or share that failed, while the dialog says so.
-    var failed by remember(link, visible) { mutableStateOf<ShareOutcome?>(null) }
+    // b-228c
+    // The copy and the share that failed, the latest last, while the dialog says so.
+    var failed by remember(link, visible) { mutableStateOf(emptyList<ShareOutcome>()) }
 
     fun send(call: suspend (String) -> ShareOutcome) {
         val url = link ?: return
         scope.launchSend(url, call) { outcome ->
             when (outcome) {
                 ShareOutcome.Copied, ShareOutcome.Shared -> onDone(outcome)
-                ShareOutcome.CopyFailed, ShareOutcome.ShareFailed -> failed = outcome
+                ShareOutcome.CopyFailed, ShareOutcome.ShareFailed -> failed = failed - outcome + outcome
             }
         }
     }
@@ -115,8 +116,8 @@ internal fun ShareDialog(
                 singleLine = false,
             )
         }
-        failed?.let { outcome ->
-            BuilderText(text = manualText(outcome, sharesToSheet), emphasis = Emphasis.Danger)
+        failed.lastOrNull()?.let { outcome ->
+            BuilderText(text = manualText(outcome, failed.size > 1, sharesToSheet), emphasis = Emphasis.Danger)
         }
     }
 }
@@ -126,17 +127,21 @@ internal fun ShareDialog(
 /**
  * What the dialog says when [outcome], a copy or share, did not land. With a mouse that is to copy
  * the link by hand. A finger on the web cannot select the wrapped link (D45), so on a touch screen
- * it sends the finger to the other button when there are two, or back to Copy link.
+ * it sends the finger to the other button when there are two, or back to Copy link. Once Copy link
+ * and Share have [bothFailed], it sends the finger back to Copy link.
  */
 @Composable
 private fun manualText(
     outcome: ShareOutcome,
+    bothFailed: Boolean,
     sharesToSheet: Boolean,
 ): String {
     // Only the web reports a coarse pointer, so this is a finger on the web.
     if (!LocalLayout.current.coarsePointer) return stringResource(Res.string.share_manual)
     val copy = stringResource(Res.string.share_copy)
     return when {
+        // b-228c
+        bothFailed -> stringResource(Res.string.share_manual_touch_again, copy)
         outcome == ShareOutcome.ShareFailed -> stringResource(Res.string.share_manual_touch_instead, copy)
         sharesToSheet -> stringResource(Res.string.share_manual_touch_instead, stringResource(Res.string.share_send))
         else -> stringResource(Res.string.share_manual_touch_again, copy)

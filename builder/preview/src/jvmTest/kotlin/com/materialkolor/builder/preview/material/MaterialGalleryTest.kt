@@ -104,13 +104,16 @@ private val GalleryPopupImports: List<String> = listOf(
     "androidx.compose.material3.OutlinedTextField",
 )
 
-/** The sources every gallery card is drawn from. */
+/** The sources every gallery card is drawn from, and the Trips screen that holds the note. */
 private val GallerySources: List<String> = listOf(
     "src/commonMain/kotlin/com/materialkolor/builder/preview/canvas/ComponentsTab.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/GalleryEntry.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/MaterialGallery.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/GalleryFeedback.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/SampleFields.kt", // b-228b
+    // b-228c
+    // The Trips note is a sample field too, so the text field ban reaches it.
+    "src/commonMain/kotlin/com/materialkolor/builder/preview/material/TripDetail.kt",
 )
 
 @OptIn(ExperimentalTestApi::class)

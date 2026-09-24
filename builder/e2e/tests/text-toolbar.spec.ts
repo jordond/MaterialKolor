@@ -1,5 +1,6 @@
 import { expect, test, type CDPSession, type Locator, type Page } from '@playwright/test';
 import { openBuilder, reloadBuilder, wantHooks } from './builder';
+import { longPressAt, mirrorButton, openBy, settledBox, settledMirror, tap, type Box, type Point } from './touch';
 
 // b-224
 // The text toolbar the kit draws in the page for a touch selection (D40). A long press on a field
@@ -13,9 +14,20 @@ import { openBuilder, reloadBuilder, wantHooks } from './builder';
 // each button by the gaps between the labels. That dates from when a long press put up foundation's
 // selection handles, popups that took the mirror over for good (D40), and it still works now that
 // the handles stay off on the web (D45).
+//
+// b-228c
+// Under a full parallel run the page can take a while to settle and to draw the row, so every long
+// press waits for its field to hold still first, and the row counts as found only once it shows all
+// the labels it should. The preview's own sample fields have their spec in `sample-fields.spec.ts`.
 
 /** The digits the Paste test puts over the long pressed word, the hex's own digits. */
 const PASTED = '0B6E4F';
+
+/** The row over a word long pressed in a field that takes input. */
+const FULL_ROW = ['Cut', 'Copy', 'Paste', 'Select all'];
+
+/** The row over a word long pressed in a read only field. */
+const READ_ONLY_ROW = ['Copy', 'Select all'];
 
 test.use({ hasTouch: true });
 
@@ -30,11 +42,11 @@ test('a long press on a field shows the toolbar and Paste puts the clipboard tex
   await page.evaluate((text) => navigator.clipboard.writeText(text), PASTED);
   const cdp = await context.newCDPSession(page);
   const field = await seedField(page);
-  const box = await boxOf(field);
+  const box = await settledBox(field);
   const tint = await themeColor(page);
 
   const row = await longPressForRow(page, cdp, box);
-  expect(row.labels).toEqual(['Cut', 'Copy', 'Paste', 'Select all']);
+  expect(row.labels).toEqual(FULL_ROW);
   await tap(cdp, row.button('Paste'));
 
   // The new seed tints the page, and once saved it is what the field shows after a reload.
@@ -50,7 +62,7 @@ test('Copy from the toolbar puts the selection on the clipboard', async ({ page,
   const cdp = await context.newCDPSession(page);
   const field = await seedField(page);
   const text = (await field.textContent()) ?? '';
-  const box = await boxOf(field);
+  const box = await settledBox(field);
 
   const row = await longPressForRow(page, cdp, box);
   await tap(cdp, row.button('Copy'));
@@ -69,7 +81,7 @@ test('the mirror keeps the page through a long press and hears the paste after i
   await page.evaluate((text) => navigator.clipboard.writeText(text), PASTED);
   const cdp = await context.newCDPSession(page);
   const field = await seedField(page);
-  const box = await boxOf(field);
+  const box = await settledBox(field);
   const before = await settledMirror(page);
 
   const row = await longPressForRow(page, cdp, box);
@@ -97,7 +109,7 @@ test('a long press on the share link keeps the mirror', async ({ page, context }
   const cdp = await context.newCDPSession(page);
   const link = page.locator('#cmp_a11y_root').getByLabel('Share link', { exact: true });
   await openBy(page, mirrorButton(page, 'Share'), link);
-  const box = await boxOf(link);
+  const box = await settledBox(link);
   const before = await settledMirror(page);
 
   await longPressAt(page, cdp, { x: box.x + 24, y: box.y + box.height / 2 });
@@ -120,7 +132,7 @@ test('a long press on the text of a refused copy keeps the mirror and shows Copy
 
   const at = { x: hex.x + 16, y: hex.y + hex.height / 2 };
   const row = await longPressForRow(page, cdp, hex, { readOnly: true, at });
-  expect(row.labels).toEqual(['Copy', 'Select all']);
+  expect(row.labels).toEqual(READ_ONLY_ROW);
   const after = await settledMirror(page);
   console.log(`b-228a mirror nodes in the manual copy dialog: before ${before}, after the long press ${after}`);
   expect(after).toBeGreaterThan(before * 0.8);
@@ -131,7 +143,7 @@ test('a long press on the export code keeps the mirror', async ({ page, context 
   const cdp = await context.newCDPSession(page);
   const code = page.locator('#cmp_a11y_root').getByRole('list', { name: 'Color.kt' });
   await openBy(page, mirrorButton(page, 'Export code'), code);
-  const box = await boxOf(code);
+  const box = await settledBox(code);
   const before = await settledMirror(page);
 
   await longPressAt(page, cdp, { x: box.x + 120, y: box.y + 44 });
@@ -140,216 +152,11 @@ test('a long press on the export code keeps the mirror', async ({ page, context 
   expect(after).toBeGreaterThan(before * 0.8);
 });
 
-// b-228b
-// The preview's own sample fields keep the mirror through a long press too, Material3's filled and
-// outlined text fields in the gallery and the Trips note. The gallery hands its fields a toolbar
-// that never shows, so no row comes up there. Instead each field takes a word before the long press,
-// since a long press on an empty field selects nothing, and another after it, which only replaces
-// the first if the long press selected it, and only reaches the mirror while the mirror is alive.
-
-/** The preview's text fields. Their labels are their text in the mirror, so they have no `aria-label`. */
-const SAMPLE_FIELDS = '#cmp_a11y_root [contenteditable]:not([aria-label])';
-
-/** The word each sample field gets before the long press. */
-const SAMPLE_WORD = 'Lisbon';
-
-/** The word typed over it after the long press. */
-const SAMPLE_REPLACEMENT = 'Porto';
-
-/**
- * The text input Compose keeps in its shadow root while a text field has focus, laid over that field.
- * It takes the touches meant for the field under it.
- */
-const BACKING_FIELD = '.compose-backing-field';
-
-/** Long enough for a key or a scroll to reach Compose and settle. */
-const SETTLE_MS = 300;
-
-// The Filled and Outlined cards each hold a "Destination" field and a disabled "Origin" one, in that
-// order in `SAMPLE_FIELDS`.
-for (const [name, nth] of [
-  ['filled', 0],
-  ['outlined', 2],
-] as const) {
-  test(`a long press on the gallery's ${name} text field keeps the mirror`, async ({ page, context }) => {
-    await openBuilder(page);
-    const cdp = await context.newCDPSession(page);
-    const field = await typeInGalleryField(page, nth);
-    await longPressKeepsMirror(page, cdp, field, `the gallery's ${name} field`);
-  });
-}
-
-test('a long press on the Trips note keeps the mirror', async ({ page, context }) => {
-  // Tall enough that the note sits clear of the preview's bar at the foot of the pane.
-  await page.setViewportSize({ width: 1280, height: 1400 });
-  await openBuilder(page);
-  const cdp = await context.newCDPSession(page);
-  const note = await typeInTripsNote(page);
-  await longPressKeepsMirror(page, cdp, note, 'the Trips note');
-});
-
-/**
- * Long presses the word in [field] and checks the mirror kept the page through it, then that the
- * word was selected and the mirror hears what takes its place.
- */
-async function longPressKeepsMirror(page: Page, cdp: CDPSession, field: Locator, what: string): Promise<void> {
-  // Focus leaves the text fields first, since the backing input would take the touch.
-  for (let tab = 0; tab < 3 && (await page.locator(BACKING_FIELD).count()) > 0; tab++) {
-    await page.keyboard.press('Tab');
-    await page.waitForTimeout(SETTLE_MS);
-  }
-  await expect(page.locator(BACKING_FIELD)).toHaveCount(0);
-  const box = await boxOf(field);
-  // The word starts 16 px in, and its line sits 36 px down, under a filled field's label and under
-  // the half line an outlined field's label takes above its outline.
-  const word = { x: box.x + 36, y: box.y + 36 };
-  // The first touch after the mouse goes unheard in Chromium through CDP, so a tap goes first.
-  await tap(cdp, word);
-  await page.waitForTimeout(SETTLE_MS);
-  await expect(page.locator(BACKING_FIELD)).toHaveCount(0);
-  const before = await settledMirror(page);
-
-  await longPressAt(page, cdp, word);
-  const after = await settledMirror(page);
-  console.log(`b-228b mirror nodes on ${what}: before ${before}, after the long press ${after}`);
-  expect(after).toBeGreaterThan(before * 0.8);
-
-  await page.keyboard.type(SAMPLE_REPLACEMENT);
-  await expect(field).toHaveText(SAMPLE_REPLACEMENT, { timeout: 10_000 });
-}
-
-/**
- * Shows the preview in light only, one copy of the screen, the one the mirror reads. Split, the dark
- * copy past the handle takes the touches on its side.
- */
-async function showOneCopy(page: Page): Promise<void> {
-  await expect(page.locator('#cmp_a11y_root > *').first()).toBeAttached({ timeout: 30_000 });
-  const light = await boxOf(mirrorButton(page, /^Light/));
-  await page.mouse.click(light.x + light.width / 2, light.y + light.height / 2);
-  await page.waitForTimeout(SETTLE_MS);
-}
-
-/** Opens the gallery, clicks into its text field [nth] of `SAMPLE_FIELDS` and types the word there. */
-async function typeInGalleryField(page: Page, nth: number): Promise<Locator> {
-  await showOneCopy(page);
-  const tab = await boxOf(page.locator('#cmp_a11y_root [aria-label^="Components, tab"]'));
-  await page.mouse.click(tab.x + tab.width / 2, tab.y + tab.height / 2);
-  // The Inputs cards sit 600 px down the gallery, and a fixed scroll lands there.
-  await page.mouse.move(tab.x + tab.width / 2, tab.y + 240);
-  for (const _ of [1, 2]) {
-    await page.mouse.wheel(0, 300);
-    await page.waitForTimeout(SETTLE_MS);
-  }
-  return typeInto(page, page.locator(SAMPLE_FIELDS).nth(nth));
-}
-
-/** Opens the App tab, scrolls the open trip to its note, clicks into the note and types the word there. */
-async function typeInTripsNote(page: Page): Promise<Locator> {
-  await showOneCopy(page);
-  const tab = await boxOf(page.locator('#cmp_a11y_root [aria-label^="App, tab"]'));
-  await page.mouse.click(tab.x + tab.width / 2, tab.y + tab.height / 2);
-  // The note closes the open trip's pane, so scrolling that pane well past it only stops at its end.
-  const checkIn = page.locator('#cmp_a11y_root [role="button"]').filter({ hasText: /^Check in$/ });
-  await expect(checkIn).toBeAttached({ timeout: 15_000 });
-  const pane = await boxOf(checkIn);
-  await page.mouse.move(pane.x + pane.width / 2, pane.y + pane.height / 2);
-  for (const _ of [1, 2, 3]) {
-    await page.mouse.wheel(0, 400);
-    await page.waitForTimeout(SETTLE_MS);
-  }
-  // The note is the only text field in the app.
-  return typeInto(page, page.locator(SAMPLE_FIELDS).first());
-}
-
-/** Waits for [field] to show, clicks into it with the mouse and types the word. */
-async function typeInto(page: Page, field: Locator): Promise<Locator> {
-  await expect.poll(async () => (await field.boundingBox())?.height ?? 0, { timeout: 15_000 }).toBeGreaterThan(0);
-  const box = await boxOf(field);
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-  await page.keyboard.type(SAMPLE_WORD);
-  await page.waitForTimeout(SETTLE_MS);
-  await expect(field).toHaveText(SAMPLE_WORD);
-  return field;
-}
-
-/** Holds a finger at [at] past the long press timeout, then lifts it. */
-async function longPressAt(page: Page, cdp: CDPSession, at: { x: number; y: number }): Promise<void> {
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [at] });
-  await page.waitForTimeout(800);
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-}
-
-/** The button named [name] in the mirror, the whole name when it is a string. */
-function mirrorButton(page: Page, name: string | RegExp): Locator {
-  return page.locator('#cmp_a11y_root').getByRole('button', { name, exact: true }).first();
-}
-
-/**
- * Clicks [button] and waits for [opened] to show in the mirror, and clicks again if it does not,
- * since a click that lands while the page is still settling can go unheard. It never clicks while
- * a click may still be opening, since a second click would land on the scrim and close it.
- */
-async function openBy(page: Page, button: Locator, opened: Locator): Promise<void> {
-  await expect(button).toBeAttached({ timeout: 30_000 });
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const box = await button.boundingBox();
-    if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-    try {
-      await opened.first().waitFor({ state: 'attached', timeout: 8_000 });
-      return;
-    } catch {
-      // Not open yet, so the click went unheard.
-    }
-  }
-  throw new Error('The click never opened it');
-}
-
 /** The read only field of the open dialog, which holds the text to copy by hand. */
 async function copyField(page: Page): Promise<Box> {
   const field = page.locator('#cmp_a11y_root').getByRole('textbox', { name: /^Text to copy/ });
   await expect(field).toBeAttached({ timeout: 10_000 });
-  await expect.poll(async () => (await field.boundingBox())?.height ?? 0, { timeout: 10_000 }).toBeGreaterThan(0);
-  return boxOf(field);
-}
-
-/**
- * The number of elements in the mirror once it has held still for a second, which is longer than
- * the listener's longest wait before it syncs.
- */
-async function settledMirror(page: Page): Promise<number> {
-  // The mirror sits in the viewport's shadow root, out of reach of a plain document query.
-  const count = () =>
-    page.evaluate(() => {
-      const roots: (Document | ShadowRoot)[] = [document];
-      for (let i = 0; i < roots.length; i++) {
-        const mirror = roots[i].querySelector('#cmp_a11y_root');
-        if (mirror) return mirror.querySelectorAll('*').length;
-        roots[i].querySelectorAll('*').forEach((element) => {
-          if (element.shadowRoot) roots.push(element.shadowRoot);
-        });
-      }
-      return -1;
-    });
-  let last = -1;
-  for (let round = 0; round < 20; round++) {
-    await page.waitForTimeout(1_000);
-    const now = await count();
-    if (now === last) return now;
-    last = now;
-  }
-  return last;
-}
-
-interface Box {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-interface Point {
-  x: number;
-  y: number;
+  return settledBox(field);
 }
 
 /** The toolbar row as it shows on screen, its labels in order and a point on each button. */
@@ -366,12 +173,6 @@ async function seedField(page: Page): Promise<Locator> {
   return field;
 }
 
-async function boxOf(target: Locator): Promise<Box> {
-  const box = await target.boundingBox();
-  if (!box) throw new Error('The field has no box');
-  return box;
-}
-
 /** The `theme-color` the shell tints the browser with, which follows the seed. */
 async function themeColor(page: Page): Promise<string> {
   return page.evaluate(() => document.querySelector('meta[name="theme-color"]')?.getAttribute('content') ?? '');
@@ -381,6 +182,9 @@ async function themeColor(page: Page): Promise<string> {
  * Holds a finger on the middle of the field's hex, or on [options.at], for longer than a long press
  * takes, then finds the row that came up, in the pixels that changed outside the field. A read only
  * field's row has no Cut or Paste.
+ *
+ * The row counts as found once it shows every label it should, since a row still drawing in, or the
+ * field still settling, shows fewer, and a point read off a row like that has no button under it.
  */
 async function longPressForRow(
   page: Page,
@@ -388,29 +192,20 @@ async function longPressForRow(
   field: Box,
   options: { readOnly?: boolean; at?: Point } = {},
 ): Promise<Row> {
+  const readOnly = options.readOnly ?? false;
   const before = await page.screenshot();
-  const point = options.at ?? { x: field.x + field.width / 2, y: field.y + field.height * 0.4 };
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
-  await page.waitForTimeout(800);
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await longPressAt(page, cdp, options.at ?? { x: field.x + field.width / 2, y: field.y + field.height * 0.4 });
   let row: Row | null = null;
   await expect
     .poll(
       async () => {
-        row = await findRow(page, before, field, options.readOnly ?? false);
-        return row?.labels.length ?? 0;
+        row = await findRow(page, before, field, readOnly);
+        return row?.labels ?? [];
       },
-      { timeout: 10_000 },
+      { timeout: 15_000 },
     )
-    .toBeGreaterThan(0);
+    .toEqual(readOnly ? READ_ONLY_ROW : FULL_ROW);
   return row!;
-}
-
-/** Taps [point] with a finger. */
-async function tap(cdp: CDPSession, point: Point): Promise<void> {
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
-  await new Promise((resolve) => setTimeout(resolve, 60));
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
 }
 
 /**
@@ -495,10 +290,15 @@ async function findRow(page: Page, before: Buffer, field: Box, readOnly: boolean
     3: ['Cut', 'Copy', 'Paste'],
     4: ['Cut', 'Copy', 'Paste', 'Select all'],
   };
+  // Any other count is a row still drawing in, so the caller looks again.
   const labels = names[found.centers.length];
-  if (!labels) throw new Error(`The row shows ${found.centers.length} labels`);
+  if (!labels) return null;
   return {
     labels,
-    button: (label) => ({ x: found.centers[labels.indexOf(label)], y: found.y }),
+    button: (label) => {
+      const index = labels.indexOf(label);
+      if (index < 0) throw new Error(`The row shows ${labels.join(', ')}, not ${label}`);
+      return { x: found.centers[index], y: found.y };
+    },
   };
 }

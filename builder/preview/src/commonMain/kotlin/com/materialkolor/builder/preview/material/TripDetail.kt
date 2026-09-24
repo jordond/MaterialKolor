@@ -273,6 +273,8 @@ private fun NoteCard(state: DemoAppState) {
         // b-228b
         // One line, since on a field over several lines a long press on the web would put up selection
         // handles, popups that take the accessibility mirror over (D45).
+        // b-228c
+        // When D45 drops the note goes back to `minLines = 2`, together with `tabMovesFocus` below.
         SampleOutlinedTextField(
             value = state.text,
             onValueChange = { text -> state.text = text },

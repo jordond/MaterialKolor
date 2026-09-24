@@ -189,7 +189,6 @@ internal fun HeadlessField(
     val tokens = LocalBuilderTokens.current
     val interactions = remember { MutableInteractionSource() }
     val focused by interactions.collectIsFocusedAsState()
-    val inTree = LocalOverlaysInTree.current
     val edge = when {
         isError -> style.error
         focused -> style.active
@@ -222,7 +221,7 @@ internal fun HeadlessField(
                     contentAlignment = Alignment.CenterStart,
                 ) {
                     // b-228a
-                    Box(Modifier.withoutSelectionHandles(inTree), propagateMinConstraints = true) { text() }
+                    InnerTextWithoutHandles(text)
                 }
                 if (message != null) {
                     BuilderText(
