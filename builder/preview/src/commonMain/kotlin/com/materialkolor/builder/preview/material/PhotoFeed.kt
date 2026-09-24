@@ -47,9 +47,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.CircleAlert
 import com.composables.icons.lucide.CloudUpload
@@ -132,6 +134,7 @@ private fun MemoryCarousel(
     val carousel = rememberCarouselState(initialItem = featured) { count }
     val still = LocalMotionFrozen.current || LocalReducedMotion.current
     val spatial = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     LaunchedEffect(carousel, featured, still) {
         if (still) carousel.scrollToItem(featured) else carousel.animateScrollToItem(featured, spatial)
     }
@@ -168,7 +171,11 @@ private fun MemoryCarousel(
                         .align(Alignment.TopStart)
                         .padding(SectionGap)
                         .graphicsLayer {
-                            // The title fades out as the memory shrinks toward the edge.
+                            // A memory shows only the part of it inside its mask, which narrows
+                            // around its middle as it shrinks toward the edge. So the title keeps to
+                            // the mask's start edge, and fades out as the memory shrinks.
+                            val mask = info.maskRect
+                            translationX = if (rtl) -mask.left else mask.left
                             val range = info.maxSize - info.minSize
                             alpha = if (range > 0f) ((info.size - info.minSize) / range).coerceIn(0f, 1f) else 1f
                         },

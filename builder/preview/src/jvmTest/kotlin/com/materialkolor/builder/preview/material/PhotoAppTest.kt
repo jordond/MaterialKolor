@@ -11,8 +11,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -37,6 +39,7 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Role
@@ -67,6 +70,7 @@ import io.kotest.matchers.floats.shouldBeLessThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import java.io.File
+import kotlin.math.absoluteValue
 import kotlin.test.Test
 
 /**
@@ -229,31 +233,71 @@ class PhotoAppTest {
         }
 
     @Test
-    fun webNames_carryTheStateOfEveryChoiceDestinationAndTheMenu() =
-        runComposeUiTest {
-            val state = DemoAppState()
-            setContent {
-                PhotoHarness(LightSpec, state, DeviceWidth.Phone, Modifier.size(412.dp, 900.dp), webFolds = true)
-            }
+    fun webNames_phoneAndDesktop_carryTheStateOfEveryChoiceDestinationAndTheMenu() {
+        // The phone's destinations are in its bottom bar, the desktop's in its rail.
+        for (width in listOf(DeviceWidth.Phone, DeviceWidth.Desktop)) {
+            withClue(width) {
+                runComposeUiTest {
+                    val state = DemoAppState()
+                    val frame = PhotoFrames.getValue(width)
+                    setContent {
+                        PhotoHarness(
+                            spec = LightSpec,
+                            state = state,
+                            width = width,
+                            modifier = Modifier.size(frame.width.dp, frame.height.dp),
+                            webFolds = true,
+                        )
+                    }
 
-            for (name in listOf(
-                "${PhotoView.Recent.label}, radio, selected",
-                "${PhotoView.Shared.label}, radio, not selected",
-                "${PhotoMemories[0].title}, selected",
-                "${PhotoMemories[1].title}, not selected",
-                "${PhotoDestination.Photos.label}, selected",
-                "${PhotoDestination.Albums.label}, not selected",
-                "${PhotoCopy.Create}, collapsed",
-            )) {
-                withClue(name) { onNode(hasContentDescription(name)).assertExists() }
-            }
+                    for (name in listOf(
+                        "${PhotoView.Recent.label}, radio, selected",
+                        "${PhotoView.Shared.label}, radio, not selected",
+                        "${PhotoMemories[0].title}, selected",
+                        "${PhotoMemories[1].title}, not selected",
+                        "${PhotoDestination.Photos.label}, selected",
+                        "${PhotoDestination.Albums.label}, not selected",
+                        "${PhotoCopy.Create}, collapsed",
+                    )) {
+                        withClue(name) { onNode(hasContentDescription(name)).assertExists() }
+                    }
 
-            onNode(hasContentDescription("${PhotoCopy.Create}, collapsed"))
-                .performSemanticsAction(SemanticsActions.OnClick)
-            waitForIdle()
-            state.isOn(PhotoCreateSwitch) shouldBe true
-            onNode(hasContentDescription("${PhotoCopy.Create}, expanded")).assertExists()
+                    onNode(hasContentDescription("${PhotoCopy.Create}, collapsed"))
+                        .performSemanticsAction(SemanticsActions.OnClick)
+                    waitForIdle()
+                    state.isOn(PhotoCreateSwitch) shouldBe true
+                    onNode(hasContentDescription("${PhotoCopy.Create}, expanded")).assertExists()
+                }
+            }
         }
+    }
+
+    @Test
+    fun memoryTitles_everyDeviceWidth_sitWholeInsideTheVisiblePartOfTheirMemory() {
+        for ((width, frame) in PhotoFrames) {
+            withClue(width) {
+                runDesktopComposeUiTest(frame.width, frame.height) {
+                    setContent { PhotoHarness(LightSpec, DemoAppState(), width, Modifier.fillMaxSize()) }
+                    waitForIdle()
+
+                    val masks = memoryMasks()
+                    masks.size shouldBeGreaterThanOrEqual 3
+                    // Only the memories that shrank all the way to the edge fade their titles out.
+                    val smallest = masks.values.minOf { mask -> mask.width }
+                    val titled = masks.filterValues { mask -> mask.width > smallest + 1f }
+                    titled.size shouldBeGreaterThanOrEqual 2
+                    for ((index, mask) in titled) {
+                        val title = onNode(hasText(PhotoMemories[index].title), useUnmergedTree = true)
+                            .fetchSemanticsNode()
+                            .unclippedBoundsInRoot()
+                        withClue("${PhotoMemories[index].title} at $title in $mask") {
+                            (title.left >= mask.left && title.right <= mask.right) shouldBe true
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     @Test
     fun appTab_expressiveOrNot_showsThePhotoAppOrTrips() {
@@ -333,6 +377,41 @@ class PhotoAppTest {
             }
         }
     }
+}
+
+/**
+ * The part of each memory on screen that its mask leaves visible, by index, with the carousel at
+ * its start.
+ *
+ * The carousel lays every memory out at the featured size and masks it down around its middle, and
+ * it pins the masks edge to edge a gap apart from the start of its padding. So each mask spans
+ * from the end of the one before it, a gap on, to as far past the memory's middle.
+ */
+@OptIn(ExperimentalTestApi::class)
+private fun ComposeUiTest.memoryMasks(): Map<Int, Rect> {
+    val feed = onNode(PhotoFeedNode).fetchSemanticsNode().boundsInRoot
+    val (padding, gap) = with(density) { SectionGap.toPx() to Gap.toPx() }
+    val end = feed.right - padding
+    val masks = mutableMapOf<Int, Rect>()
+    var left = feed.left + padding
+    for (index in PhotoMemories.indices) {
+        if (left >= end - 1f) break
+        val memory = onNode(hasClickAction() and hasText(PhotoMemories[index].title))
+            .fetchSemanticsNode()
+            .unclippedBoundsInRoot()
+        val right = 2 * memory.center.x - left
+        masks[index] = Rect(left, memory.top, right, memory.bottom)
+        left = right + gap
+    }
+    // The masks fill the carousel between its paddings, or the reading of them is off.
+    (masks.values.maxOf { mask -> mask.right } - end).absoluteValue shouldBeLessThan 1f
+    return masks
+}
+
+/** Where the node's layout sits in the root, moved by every layer above it but clipped by none. */
+private fun SemanticsNode.unclippedBoundsInRoot(): Rect {
+    val coordinates = layoutInfo.coordinates
+    return Rect(coordinates.localToRoot(Offset.Zero), coordinates.size.toSize())
 }
 
 /** The bounds of the node [matcher] finds in each copy of a split, which have to be the same. */
