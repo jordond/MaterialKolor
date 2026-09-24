@@ -1,6 +1,8 @@
 package com.materialkolor.builder.preview.inspect
 
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusEventModifierNode
+import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
@@ -30,8 +32,11 @@ public val PreviewRoles: SemanticsPropertyKey<List<ColorRef>> =
  *
  * The colors are named the way the contrast audit names them, so the Inspect popover can rate a
  * pair of them. They always land in semantics under [PreviewRoles], and with Inspect off that is
- * all the element costs. While Inspect is on, meaning [LocalInspectRegistry] holds a registry, the
- * element also records its window bounds there so the overlay can find it under the pointer.
+ * all the element costs besides noting whether it holds focus. While Inspect is on, meaning
+ * [LocalInspectRegistry] holds a registry, the element also records its window bounds there so the
+ * overlay can find it under the pointer, and tells the registry when focus is on it or inside it.
+ * Put it before the element's clickable or focusable, as a modifier passed to a component is, so
+ * it hears that focus.
  *
  * @param[refs] The colors the element reads, most important first.
  */
@@ -61,9 +66,13 @@ private class PreviewRolesNode(
 ) : DelegatingNode(),
     SemanticsModifierNode,
     CompositionLocalConsumerModifierNode,
-    ObserverModifierNode {
+    ObserverModifierNode,
+    FocusEventModifierNode {
     private var registry: InspectRegistry? = null
     private var coordinates: LayoutCoordinates? = null
+
+    /** Whether focus is on this element or inside it, kept while Inspect is off for when it comes on. */
+    private var focused = false
 
     /** Hears about every placement, so it is only delegated to while Inspect is on. */
     private var positions: PositionNode? = null
@@ -76,6 +85,12 @@ private class PreviewRolesNode(
         registry?.remove(this)
         registry = null
         coordinates = null
+        focused = false
+    }
+
+    override fun onFocusEvent(focusState: FocusState) {
+        focused = focusState.hasFocus
+        registry?.focus(this, focused)
     }
 
     override fun onObservedReadsChanged() {
@@ -84,6 +99,7 @@ private class PreviewRolesNode(
         if (current !== registry) {
             registry?.remove(this)
             registry = current
+            current?.focus(this, focused)
         }
         val placed = positions
         if (current == null) {

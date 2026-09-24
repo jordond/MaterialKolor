@@ -3,25 +3,46 @@ package com.materialkolor.builder.preview.inspect
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.preview.split.PaneSide
 
 /**
- * Where each element that declared its roles sits in the window, per pane.
+ * Where each element that declared its roles sits in the window, per pane, and which of them hold
+ * keyboard focus.
  *
  * Elements only record themselves while a registry is provided, which is while Inspect is on. The
- * overlay picks the pane under the pointer and asks [hit] for the element there. The registry is
- * read and written on the UI thread only.
+ * overlay picks the pane under the pointer and asks [hit] for the element there, and reads
+ * [focused] for the card keyboard focus shows. The registry is read and written on the UI thread
+ * only.
  */
 @Stable
 public class InspectRegistry {
     private val entries = LinkedHashMap<Any, InspectEntry>()
 
+    /** The elements that hold focus or contain what does, whether or not they are recorded yet. */
+    private val focusedOwners = HashSet<Any>()
+
+    /** The recorded elements among [focusedOwners], kept in snapshot state so a reader sees focus move. */
+    private val focusedEntries = mutableStateMapOf<Any, InspectEntry>()
+
     /** How many elements are recorded right now, across every pane. */
     public val size: Int
         get() = entries.size
+
+    /**
+     * The smallest recorded element that holds focus or contains what does, or null when none does.
+     *
+     * An element holding focus sits inside every declared element around it, so the smallest is
+     * the one focus is really on. Reading it in composition recomposes when focus moves.
+     */
+    public val focused: InspectEntry?
+        get() = focusedOwner()?.let { owner -> focusedEntries[owner] }
+
+    /** The element behind [focused], so a reader can tell focus moving from the same element moving. */
+    internal fun focusedOwner(): Any? = focusedEntries.entries.minByOrNull { (_, entry) -> entry.bounds.area }?.key
 
     /**
      * The smallest element on [side] whose window bounds hold [point], or null when none does.
@@ -49,11 +70,28 @@ public class InspectRegistry {
         // A put on a key already there keeps its old place, so take it out first.
         entries.remove(owner)
         entries[owner] = entry
+        if (owner in focusedOwners && focusedEntries[owner] != entry) focusedEntries[owner] = entry
+    }
+
+    /** Note whether the element [owner] holds focus or contains what does. */
+    internal fun focus(
+        owner: Any,
+        focused: Boolean,
+    ) {
+        if (focused) {
+            focusedOwners += owner
+            val entry = entries[owner]
+            if (entry != null && focusedEntries[owner] != entry) focusedEntries[owner] = entry
+        } else {
+            focusedOwners -= owner
+            focusedEntries -= owner
+        }
     }
 
     /** Forget the element [owner], which has left the screen. */
     internal fun remove(owner: Any) {
         entries.remove(owner)
+        focus(owner, focused = false)
     }
 }
 

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The heading of the Inspect card when the element sits in the light copy of the preview. -->
+    <string name="inspect_mode_light">Light mode</string>
+    <!-- The heading of the Inspect card when the element sits in the dark copy of the preview. -->
+    <string name="inspect_mode_dark">Dark mode</string>
+    <!-- How light one color on the Inspect card is. %1$d is its tone, from 0 for black to 100 for white. -->
+    <string name="inspect_tone">tone %1$d</string>
+    <!-- The contrast between two colors on the Inspect card. %1$s is the ratio to one decimal, such as 4.5. -->
+    <string name="inspect_ratio">%1$s to 1</string>
+    <!-- The badge for a pair that passes AAA. -->
+    <string name="inspect_badge_aaa">AAA</string>
+    <!-- The badge for a pair that passes AA. -->
+    <string name="inspect_badge_aa">AA</string>
+    <!-- The badge for a pair that passes AA for large text only. -->
+    <string name="inspect_badge_aa_large">AA large</string>
+    <!-- The badge for a pair that fails AA. -->
+    <string name="inspect_badge_fail">Fails AA</string>
+    <!-- The pinned Inspect card's action that pins the element's first role to the color it has now. -->
+    <string name="inspect_pin_role">Pin this role</string>
+    <!-- The pinned Inspect card's action that opens the Palettes tab at the color. -->
+    <string name="inspect_show_on_ramp">Show on ramp</string>
+    <!-- The pinned Inspect card's action that opens the key colors on the poster. -->
+    <string name="inspect_jump_to_key_color">Jump to key color</string>
+</resources>

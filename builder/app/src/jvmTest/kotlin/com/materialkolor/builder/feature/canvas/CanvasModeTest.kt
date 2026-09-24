@@ -2,6 +2,7 @@ package com.materialkolor.builder.feature.canvas
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -10,8 +11,11 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.materialkolor.builder.BuilderRoot
@@ -31,6 +35,9 @@ import kotlin.test.Test
 
 /** How many frames a stepped drag of the handle takes. */
 private const val DRAG_STEPS = 6
+
+/** How far either side of the settle time the keyboard save is checked, a few frames. */
+private const val SETTLE_MARGIN_MILLIS = 50L
 
 @OptIn(ExperimentalTestApi::class)
 class CanvasModeTest {
@@ -154,6 +161,83 @@ class CanvasModeTest {
             host.savedFractions shouldBe listOf(fraction)
             host.state.view.splitFraction shouldBe fraction
         }
+
+    @Test
+    fun splitHandle_touchDraggedAndReleased_savesAFrameLaterWithoutTheWait() =
+        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+            val host = CanvasHost()
+            setContent { Canvas(host) }
+            waitForIdle()
+            mainClock.autoAdvance = false
+
+            val handle = onNode(SplitHandle)
+            handle.performTouchInput { down(center) }
+            repeat(DRAG_STEPS) {
+                handle.performTouchInput { moveBy(Offset(-40f, 0f)) }
+                mainClock.advanceTimeByFrame()
+            }
+            handle.performTouchInput { up() }
+            mainClock.advanceTimeByFrame()
+
+            val fraction = handleFraction()
+            fraction shouldBeLessThan 0.45f
+            host.savedFractions shouldBe listOf(fraction)
+            mainClock.advanceTimeBy(HANDLE_SETTLE_MILLIS * 2)
+            host.savedFractions shouldBe listOf(fraction)
+        }
+
+    @Test
+    fun splitHandle_movedByAnArrowKey_savesOnlyOnceItHasRested() =
+        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+            val host = CanvasHost()
+            setContent { Canvas(host) }
+            waitForIdle()
+            onNode(SplitHandle).requestFocus()
+            waitForIdle()
+            mainClock.autoAdvance = false
+
+            // The key goes down, and moves the handle, when the press starts. The press itself takes time.
+            val pressed = mainClock.currentTime
+            onNode(SplitHandle).performKeyInput { pressKey(Key.DirectionLeft) }
+            mainClock.advanceTimeBy(HANDLE_SETTLE_MILLIS - SETTLE_MARGIN_MILLIS - (mainClock.currentTime - pressed))
+            host.savedFractions shouldBe emptyList()
+
+            mainClock.advanceTimeBy(SETTLE_MARGIN_MILLIS * 2)
+            host.savedFractions shouldBe listOf(handleFraction())
+            handleFraction() shouldBe (0.45f plusOrMinus 0.001f)
+        }
+
+    @Test
+    fun splitHandle_savedElsewhereWhileASaveWaits_dropsTheWaitingSave() =
+        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+            val host = CanvasHost()
+            setContent { Canvas(host) }
+            waitForIdle()
+            mainClock.autoAdvance = false
+
+            onNode(SplitHandle).performSemanticsAction(SemanticsActions.SetProgress) { move -> move(0.25f) }
+            mainClock.advanceTimeByFrame()
+            // Leaving Split keeps the save waiting, and the handle stays put for the save from elsewhere.
+            host.state = host.state.copy(view = host.state.view.copy(mode = PreviewMode.Dark))
+            mainClock.advanceTimeByFrame()
+            host.state = host.state.copy(view = host.state.view.copy(splitFraction = 0.8f))
+            mainClock.advanceTimeBy(HANDLE_SETTLE_MILLIS * 2)
+
+            host.savedFractions shouldBe emptyList()
+        }
+
+    @Test
+    fun previewSplit_mark_goesStaleOnlyOnceAFractionIsSavedElsewhere() {
+        val preview = PreviewSplit(PreviewMode.Split, saved = 0.5f)
+        val mark = preview.mark()
+
+        preview.send(0.3f) shouldBe true
+        preview.onSaved(0.3f)
+        preview.savedElsewhereSince(mark) shouldBe false
+
+        preview.onSaved(0.7f)
+        preview.savedElsewhereSince(mark) shouldBe true
+    }
 
     @Test
     fun modeSwitch_fromTheDock_appliesAtOnceWithoutAReveal() =
