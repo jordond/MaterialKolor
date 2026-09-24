@@ -40,7 +40,8 @@ public val LocalAppColors: ProvidableCompositionLocal<AppColors> =
     staticCompositionLocalOf { error("No AppColors provided, wrap the content in AppTheme.") }
 
 /**
- * Generate the theme from [seed] and hand it to [content].
+ * Generate the theme from [seed] and hand it to [content]. A new seed or mode fades the colors over instead of
+ * swapping them in one frame.
  *
  * @param[seed] The color the whole theme is generated from.
  * @param[mode] Which theme to show.
@@ -54,7 +55,8 @@ public fun AppTheme(
     seeds: AppThemeSeeds = AppThemeSeeds.Default,
     content: @Composable () -> Unit,
 ) {
-    val colors = rememberAppColors(seed = seed, isDark = mode.isDark(), seeds = seeds)
+    val target = rememberAppColors(seed = seed, isDark = mode.isDark(), seeds = seeds)
+    val colors = animateAppColors(target)
     CompositionLocalProvider(LocalAppColors provides colors, content = content)
 }
 
