@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The label above the style chips. -->
+    <string name="style_label">Style</string>
+    <!-- The style chips as a group, read out before the chips. -->
+    <string name="style_chips">Palette style</string>
+
+    <!-- Each style's name, spelled the way the library names it. -->
+    <string name="style_name_tonal_spot">TonalSpot</string>
+    <string name="style_name_neutral">Neutral</string>
+    <string name="style_name_vibrant">Vibrant</string>
+    <string name="style_name_expressive">Expressive</string>
+    <string name="style_name_rainbow">Rainbow</string>
+    <string name="style_name_fruit_salad">FruitSalad</string>
+    <string name="style_name_monochrome">Monochrome</string>
+    <string name="style_name_fidelity">Fidelity</string>
+    <string name="style_name_content">Content</string>
+    <string name="style_name_cmf">Cmf</string>
+
+    <!-- A chip's tooltip and name for assistive tech. The first argument is the style's name, the second its tooltip below. -->
+    <string name="style_chip">%1$s, %2$s</string>
+
+    <!-- The short hint each chip shows on hover and focus. -->
+    <string name="style_tooltip_tonal_spot">calm and even, the Material default</string>
+    <string name="style_tooltip_neutral">nearly gray with a hint of your seed</string>
+    <string name="style_tooltip_vibrant">loud, primary as colorful as it gets</string>
+    <string name="style_tooltip_expressive">playful, primary leaves your hue</string>
+    <string name="style_tooltip_rainbow">your hue on gray surfaces</string>
+    <string name="style_tooltip_fruit_salad">a bright mix of shifted hues</string>
+    <string name="style_tooltip_monochrome">black, white and gray only</string>
+    <string name="style_tooltip_fidelity">your seed as is, with a complementary tertiary</string>
+    <string name="style_tooltip_content">your seed as is, with a neighboring tertiary</string>
+    <string name="style_tooltip_cmf">the 2026 style, with a second seed for tertiary</string>
+
+    <!-- The line under the chips about the chosen style. The first argument is the style's name, the second its description below. -->
+    <string name="style_line">%1$s. %2$s</string>
+
+    <!-- One line on what each style does with the seed. -->
+    <string name="style_description_tonal_spot">Soft, balanced palettes that sit back and let the content lead.</string>
+    <string name="style_description_neutral">Mutes every palette almost to gray, so only a trace of your seed is left.</string>
+    <string name="style_description_vibrant">Asks primary for all the chroma its hue can hold and turns up the other palettes to match.</string>
+    <string name="style_description_expressive">Swings primary well away from your hue for a theme that feels playful rather than on brand.</string>
+    <string name="style_description_rainbow">Keeps primary on your hue while the surfaces go fully gray and tertiary drifts along the wheel.</string>
+    <string name="style_description_fruit_salad">Shifts primary and secondary off your hue and hands tertiary your seed, for a lively mix.</string>
+    <string name="style_description_monochrome">Takes out every bit of chroma, leaving a theme of black, white and grays.</string>
+    <string name="style_description_fidelity">Keeps the chroma of your seed and sets the seed itself in primaryContainer, opposite a complementary tertiary.</string>
+    <string name="style_description_content">Keeps your seed intact like Fidelity does, but pairs it with a tertiary from the next hues over.</string>
+    <string name="style_description_cmf">The 2026 color, material and finish style. Give it a second seed for tertiary or let it pick one.</string>
+
+    <!-- The badge under each chip naming the specs the style runs in. -->
+    <string name="style_spec_classic">2021 only</string>
+    <string name="style_spec_revised">2021 or 2025</string>
+    <string name="style_spec_cmf">2026</string>
+
+    <!-- The second seed Cmf reads for its tertiary palette. -->
+    <string name="style_cmf_field">Tertiary seed, any format</string>
+    <!-- Under the tertiary seed field while Cmf derives the seed itself. -->
+    <string name="style_cmf_derived">Derived from your seed until you type one</string>
+    <!-- Hands the tertiary seed back to Cmf. -->
+    <string name="style_cmf_derive">Derive from seed</string>
+
+    <!-- The label above the contrast control. -->
+    <string name="contrast_label">Contrast</string>
+    <!-- The contrast slider, read out as its name. -->
+    <string name="contrast_slider">Contrast level</string>
+    <!-- The typed contrast field. -->
+    <string name="contrast_field">Contrast level, -1 to 1</string>
+    <!-- Under the typed field when the text is not a level. -->
+    <string name="contrast_field_error">Type a number from -1 to 1</string>
+    <!-- The four named contrast stops. -->
+    <string name="contrast_reduced">Reduced</string>
+    <string name="contrast_standard">Standard</string>
+    <string name="contrast_medium">Medium</string>
+    <string name="contrast_high">High</string>
+    <!-- How the slider reads out on a named stop. The first argument is the level, the second the stop's name. -->
+    <string name="contrast_state">%1$s, %2$s</string>
+    <!-- The readout under the slider. The arguments are the text role, the role it sits on and the ratio. -->
+    <string name="contrast_lowest_light">Lowest in light, %1$s on %2$s at %3$s to 1</string>
+    <string name="contrast_lowest_dark">Lowest in dark, %1$s on %2$s at %3$s to 1</string>
+    <!-- The badge beside the readout. -->
+    <string name="contrast_badge_aaa">AAA</string>
+    <string name="contrast_badge_aa">AA</string>
+    <string name="contrast_badge_aa_large">AA large</string>
+    <string name="contrast_badge_fail">Fails AA</string>
+</resources>

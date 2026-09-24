@@ -12,6 +12,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
@@ -60,6 +61,14 @@ fun BuilderApp(platform: PlatformServices) {
 internal val LocalThemeResult: ProvidableCompositionLocal<ThemeResult> = compositionLocalOf {
     error("No ThemeResult provided")
 }
+
+// b-304
+
+/**
+ * The resolver behind [LocalThemeResult], for the few places that need a scheme the open theme does
+ * not hold, such as the style chips. It belongs to the UI thread. Null outside the app root.
+ */
+internal val LocalThemeResolver: ProvidableCompositionLocal<ThemeResolver?> = staticCompositionLocalOf { null }
 
 /**
  * The one theme result per frame, derived from the collected [document] as its own target sees it
@@ -120,7 +129,11 @@ internal fun BuilderRoot(
     }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { model.flush() }
 
-    CompositionLocalProvider(LocalThemeResult provides result) {
+    CompositionLocalProvider(
+        LocalThemeResult provides result,
+        // b-304
+        LocalThemeResolver provides graph.themeResolver,
+    ) {
         BuilderTheme(skin = skin, result = result, isDark = state.isDark, reducedMotion = state.reducedMotion) {
             ThemeColorEffect(environment)
             workspace(state.coarsePointer)

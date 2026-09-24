@@ -477,7 +477,9 @@ class PosterPanelTest {
         inPeek.shouldNotBeEmpty()
     }
 
-    private fun ComposeUiTest.seedField() = onNode(hasSetTextAction())
+    // b-304
+    private fun ComposeUiTest.seedField() =
+        onNode(hasSetTextAction() and hasContentDescription("Seed color, any format"))
 
     private fun ComposeUiTest.fieldText(): String =
         seedField().fetchSemanticsNode().config[SemanticsProperties.EditableText].text
