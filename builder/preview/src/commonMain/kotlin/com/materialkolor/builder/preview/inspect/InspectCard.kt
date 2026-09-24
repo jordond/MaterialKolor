@@ -53,6 +53,8 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
+// b-308b
+
 /**
  * The Inspect card for [target]. It names the mode, then each color the element declared with its
  * hex and tone, then the ratio and badge of the first pair the audit rates, or of a role and the
@@ -66,7 +68,7 @@ internal fun InspectCard(
     actions: InspectActions,
     modifier: Modifier = Modifier,
 ) {
-    val refs = target.entry.roles
+    val refs = target.roles // b-217d
     val isDark = target.isDark
     val colors = remember(result, refs, isDark) { refs.map { ref -> result.inspectColor(ref, isDark) } }
     // b-308b

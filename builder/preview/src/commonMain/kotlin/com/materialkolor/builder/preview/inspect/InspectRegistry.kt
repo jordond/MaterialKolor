@@ -4,6 +4,8 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import com.materialkolor.builder.domain.audit.ColorRef
@@ -21,6 +23,13 @@ import com.materialkolor.builder.preview.split.PaneSide
 @Stable
 public class InspectRegistry {
     private val entries = LinkedHashMap<Any, InspectEntry>()
+
+    /**
+     * The same map again, in snapshot state that takes every write for a change. It is set each time
+     * an element arrives, moves or leaves, so a draw or placement that reads [entryOf] runs again then
+     * without recomposing anything.
+     */
+    private val live = mutableStateOf(entries, neverEqualPolicy())
 
     /** The elements that hold focus or contain what does, whether or not they are recorded yet. */
     private val focusedOwners = HashSet<Any>()
@@ -53,14 +62,30 @@ public class InspectRegistry {
     public fun hit(
         side: PaneSide,
         point: Offset,
-    ): InspectEntry? {
-        var best: InspectEntry? = null
-        for (entry in entries.values) {
+    ): InspectEntry? = ownerAt(side, point)?.let { owner -> entries[owner] }
+
+    /** The element [hit] finds, as its key in the registry. */
+    internal fun ownerAt(
+        side: PaneSide,
+        point: Offset,
+    ): Any? {
+        var best: Any? = null
+        var bestArea = Float.POSITIVE_INFINITY
+        for ((owner, entry) in entries) {
             if (entry.side != side || !entry.bounds.contains(point)) continue
-            if (best == null || entry.bounds.area <= best.bounds.area) best = entry
+            if (entry.bounds.area <= bestArea) {
+                best = owner
+                bestArea = entry.bounds.area
+            }
         }
         return best
     }
+
+    /**
+     * The element [owner] as last recorded, or null once it has left. A draw or placement block that
+     * reads it runs again each time the element moves, as it does while the preview scrolls.
+     */
+    internal fun entryOf(owner: Any): InspectEntry? = live.value[owner]
 
     /** Record or move the element [owner], which makes it the one recorded last. */
     internal fun record(
@@ -68,8 +93,9 @@ public class InspectRegistry {
         entry: InspectEntry,
     ) {
         // A put on a key already there keeps its old place, so take it out first.
-        entries.remove(owner)
+        val old = entries.remove(owner)
         entries[owner] = entry
+        if (old != entry) live.value = entries
         if (owner in focusedOwners && focusedEntries[owner] != entry) focusedEntries[owner] = entry
     }
 
@@ -90,7 +116,7 @@ public class InspectRegistry {
 
     /** Forget the element [owner], which has left the screen. */
     internal fun remove(owner: Any) {
-        entries.remove(owner)
+        if (entries.remove(owner) != null) live.value = entries
         focus(owner, focused = false)
     }
 }

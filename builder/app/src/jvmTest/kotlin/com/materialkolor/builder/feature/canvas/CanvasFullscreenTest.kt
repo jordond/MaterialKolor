@@ -6,6 +6,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -61,6 +62,24 @@ class CanvasFullscreenTest {
             waitForIdle()
             host.state.fullscreen shouldBe false
             onNodeWithContentDescription("Fullscreen").assertIsFocused()
+        }
+
+    @Test
+    fun fullscreen_clickedInAndOut_movesNoFocus() =
+        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+            val host = CanvasHost()
+            showWorkspace(host)
+            waitForIdle()
+
+            onNodeWithContentDescription("Fullscreen").performClick()
+            waitForIdle()
+            host.state.fullscreen shouldBe true
+            onNodeWithText("Exit fullscreen").assertIsNotFocused()
+
+            onNodeWithText("Exit fullscreen").performClick()
+            waitForIdle()
+            host.state.fullscreen shouldBe false
+            onNodeWithContentDescription("Fullscreen").assertIsNotFocused()
         }
 
     @Test

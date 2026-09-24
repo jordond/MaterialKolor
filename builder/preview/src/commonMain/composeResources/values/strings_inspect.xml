@@ -18,7 +18,7 @@
     <string name="inspect_badge_fail">Fails AA</string>
     <!-- The pinned Inspect card's action that pins the element's first role to the color it has now. -->
     <string name="inspect_pin_role">Pin this role</string>
-    <!-- The pinned Inspect card's action that opens the Palettes tab and picks out the ramp the color sits on. -->
+    <!-- The pinned Inspect card's action that opens the Palettes tab and, for a role or an extra color, picks out the ramp the color sits on. -->
     <string name="inspect_show_on_ramp">Show on ramp</string>
     <!-- The pinned Inspect card's action that opens the key colors on the poster. -->
     <string name="inspect_jump_to_key_color">Jump to key color</string>
