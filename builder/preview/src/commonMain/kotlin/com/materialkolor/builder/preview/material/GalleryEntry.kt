@@ -86,8 +86,9 @@ private enum class GalleryDestination(
  * The Material 3 components gallery (F-21).
  *
  * Every card holds stock Material 3 components on their default colors, under the theme the pane
- * already wears, so the Expressive flavour shows the same set in its own shapes and motion. Each
- * component shows up enabled and disabled, apart from the few Material 3 gives no disabled look.
+ * already wears, so the Expressive flavour shows the same set in its own shapes and motion, and
+ * then its own components after them in each group. Each component shows up enabled and disabled,
+ * apart from the few Material 3 gives no disabled look.
  * Nothing in the gallery opens a popup or a dialog window, since on the web the first one takes
  * the accessibility mirror over for good (D40). Menus, dialogs and tooltips are drawn in place.
  * The text fields would open a context menu on a right click and a text toolbar on a long press,
@@ -96,7 +97,7 @@ private enum class GalleryDestination(
  *
  * @param[spec] The pane the gallery is drawn in.
  * @param[state] What the gallery's controls remember, shared by both copies.
- * @param[expressive] Whether to show the Expressive flavour instead.
+ * @param[expressive] Whether to add the Expressive components, [ExpressiveCards].
  * @param[modifier] Applied to the gallery.
  */
 @Composable
@@ -109,7 +110,7 @@ internal fun MaterialGalleryEntry(
     Surface(modifier.fillMaxSize().previewRoles(Role.Surface, Role.OnSurface)) {
         CompositionLocalProvider(LocalTextToolbar provides GalleryHiddenTextToolbar) {
             GalleryGrid(
-                cards = MaterialCards,
+                cards = if (expressive) ExpressiveGalleryCards else MaterialCards,
                 listState = state.rememberListState("gallery.material"),
                 gap = SectionGap,
                 modifier = Modifier.gallerySwallowRightPresses(),

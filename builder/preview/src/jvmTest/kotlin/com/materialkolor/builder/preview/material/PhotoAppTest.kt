@@ -371,6 +371,7 @@ class PhotoAppTest {
                 // A loading indicator only with its progress, a wavy one only holding its wave still.
                 text
                     .callArguments("""(Contained)?LoadingIndicator""")
+                    .filterNot { arguments -> arguments.trim().startsWith("Role.") }
                     .filterNot { arguments -> "progress" in arguments }
                     .shouldBeEmpty()
                 text

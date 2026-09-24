@@ -45,6 +45,18 @@ internal enum class ExpressiveComponent(
 
     /** One destination of a short navigation bar. */
     ShortNavigationBarItem(Role.SecondaryContainer, Role.OnSecondaryContainer, Role.Secondary, Role.OnSurfaceVariant),
+
+    /** A circular wavy progress indicator, its wave on the track. */
+    CircularWavyProgressIndicator(Role.Primary, Role.SecondaryContainer),
+
+    /** A loading indicator on no container, its shape in the primary color. */
+    LoadingIndicator(Role.Primary),
+
+    /** A loading indicator on its own container. */
+    ContainedLoadingIndicator(Role.PrimaryContainer, Role.OnPrimaryContainer),
+
+    /** A standard floating toolbar, whose buttons take the content color it sets. */
+    FloatingToolbar(Role.SurfaceContainer, Role.OnSurface),
     ;
 
     val refs: List<ColorRef> = roles.map { role -> ColorRef.OfRole(role) }
@@ -53,3 +65,10 @@ internal enum class ExpressiveComponent(
 /** Declare the roles [component] paints on its default colors, for the role usage check and Inspect. */
 internal fun Modifier.previewRoles(component: ExpressiveComponent): Modifier =
     previewRoles(*component.refs.toTypedArray())
+
+/** Declare the roles of [component] while [enabled], and of its [disabled] look otherwise. */
+internal fun Modifier.previewRoles(
+    enabled: Boolean,
+    component: ExpressiveComponent,
+    disabled: GalleryComponent = GalleryComponent.Disabled,
+): Modifier = if (enabled) previewRoles(component) else previewRoles(disabled)
