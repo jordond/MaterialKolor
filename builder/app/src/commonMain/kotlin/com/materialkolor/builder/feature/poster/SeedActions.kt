@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.feature.picker.PickerTarget
+import com.materialkolor.builder.feature.picker.pickButtonFocus
 import com.materialkolor.builder.feature.workspace.ShuffleLock
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
@@ -74,9 +77,12 @@ internal fun SeedActions(
                     }
                 }
             }
+            // b-307
+            val pick = remember { FocusRequester() }
             BuilderButton(
-                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.Seed)) },
+                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.Seed, returnFocusTo = pick)) },
                 label = stringResource(Res.string.poster_pick),
+                modifier = pickButtonFocus(pick),
                 icon = IconId.Eyedropper,
             )
             BuilderButton(
