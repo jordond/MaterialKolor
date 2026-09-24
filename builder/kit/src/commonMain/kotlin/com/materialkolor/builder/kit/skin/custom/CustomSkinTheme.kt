@@ -53,10 +53,11 @@ public val LocalBuilderIdentity: ProvidableCompositionLocal<BuilderIdentity> = s
 /**
  * The Custom skin, the builder's own identity drawn from the Custom target's slots.
  *
- * [slots] come from the chrome schemes with no pins, no AMOLED and no custom tones, so the builder
- * stays readable whatever the document does to its own slots.
+ * `BuilderTheme` hands it the chrome's slots, which come from the chrome schemes with no pins, no
+ * AMOLED and no custom tones, so the builder stays readable whatever the document does to its own
+ * slots. `CustomPaneTheme` hands it a pane's slots exactly as the document resolved them.
  *
- * @param[slots] The chrome's Custom slots in both modes.
+ * @param[slots] The chrome's or a pane's Custom slots in both modes.
  * @param[isDark] Which mode of [slots] to draw.
  * @param[reducedMotion] Whether to provide the reduced motion set instead of the builder tweens.
  * @param[content] The builder.

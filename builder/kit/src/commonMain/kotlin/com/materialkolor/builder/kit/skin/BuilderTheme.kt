@@ -2,6 +2,10 @@ package com.materialkolor.builder.kit.skin
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.domain.model.Library
@@ -33,6 +37,9 @@ import com.materialkolor.palettes.TonalPalette
  * skin generates anything. Each one provides [LocalSkin], the builder's type, its tokens, its
  * motion and its icons.
  *
+ * [content] moves from one skin to the next rather than starting over, so everything it remembers,
+ * an open dialog or menu included, and the overlay host it draws into survive a skin switch.
+ *
  * @param[skin] The library and flavour to wear.
  * @param[result] The resolved document, read on the UI thread only like every result.
  * @param[isDark] Which mode of the chrome to draw.
@@ -47,6 +54,8 @@ public fun BuilderTheme(
     reducedMotion: Boolean,
     content: @Composable () -> Unit,
 ) {
+    val current by rememberUpdatedState(content)
+    val builder = remember { movableContentOf { current() } }
     CompositionLocalProvider(
         LocalSkin provides skin,
         LocalBuilderType provides rememberBuilderType(),
@@ -55,10 +64,10 @@ public fun BuilderTheme(
         // b-219
         OverlayHost {
             when (skin.library) {
-                Library.Material3 -> MaterialSkinTheme(result.chrome(isDark), skin.expressive, reducedMotion, content)
-                Library.Unstyled -> UnstyledSkinTheme(result.chrome(isDark), isDark, reducedMotion, content)
-                Library.Fluent -> FluentSkinTheme(result.chrome(isDark), isDark, reducedMotion, content)
-                Library.Custom -> CustomSkinTheme(result.chromeCustomSlots, isDark, reducedMotion, content)
+                Library.Material3 -> MaterialSkinTheme(result.chrome(isDark), skin.expressive, reducedMotion, builder)
+                Library.Unstyled -> UnstyledSkinTheme(result.chrome(isDark), isDark, reducedMotion, builder)
+                Library.Fluent -> FluentSkinTheme(result.chrome(isDark), isDark, reducedMotion, builder)
+                Library.Custom -> CustomSkinTheme(result.chromeCustomSlots, isDark, reducedMotion, builder)
             }
         }
     }

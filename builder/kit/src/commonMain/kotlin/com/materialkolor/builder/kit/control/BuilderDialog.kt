@@ -20,7 +20,7 @@ import androidx.compose.ui.semantics.semantics
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessModal
 import com.materialkolor.builder.kit.headless.keepTaps
-import com.materialkolor.builder.kit.skin.LocalSkin
+import com.materialkolor.builder.kit.headless.overlayLibrary
 import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
@@ -61,7 +61,8 @@ public fun BuilderDialog(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
-    when (LocalSkin.current.library) {
+    // b-221b
+    when (overlayLibrary()) {
         Library.Material3 -> {
             MaterialDialog(visible, onDismissRequest, title, returnFocusTo, modifier, actions, content)
         }

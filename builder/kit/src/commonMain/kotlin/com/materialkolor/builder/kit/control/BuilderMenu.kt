@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessMenu
+import com.materialkolor.builder.kit.headless.overlayLibrary
 import com.materialkolor.builder.kit.icon.IconId
-import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.unstyledOverlayStyle
@@ -55,7 +55,8 @@ public fun BuilderMenu(
     anchor: @Composable () -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
-    when (LocalSkin.current.library) {
+    // b-221b
+    when (overlayLibrary()) {
         Library.Material3 -> MaterialMenu(expanded, onDismissRequest, items, modifier, anchor)
         Library.Unstyled -> HeadlessMenu(
             expanded,

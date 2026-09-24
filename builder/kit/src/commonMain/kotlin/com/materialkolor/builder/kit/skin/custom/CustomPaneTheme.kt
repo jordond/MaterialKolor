@@ -18,8 +18,9 @@ private val PaneSkin = Skin(Library.Custom, expressive = false)
  * A preview pane sits inside the builder's chrome, and a kit control reads the skin, identity,
  * tokens and motion of the nearest theme above it. Without this that is the chrome, so a kit
  * control in a Custom pane would paint in the chrome's colours. Inside this the controls wear
- * [slots] exactly as the document resolved them, and the overlays they open render into the
- * host the chrome already has, or into one of their own where there is none.
+ * [slots] exactly as the document resolved them. Where overlays render in the page (D40) the pane
+ * has an overlay host of its own, clipped to the pane, so its menus and dialogs stay inside the
+ * pane's clip and filters, and a modal in the pane clears the pane rather than the whole builder.
  *
  * This is for preview panes and never for the chrome. The chrome takes its Custom skin from
  * `BuilderTheme`, whose slots leave pins and AMOLED out so the builder stays readable.
@@ -40,7 +41,7 @@ public fun CustomPaneTheme(
         LocalSkin provides PaneSkin,
         LocalReducedMotion provides reducedMotion,
     ) {
-        OverlayHost {
+        OverlayHost(nested = true) {
             CustomSkinTheme(slots, isDark, reducedMotion, content)
         }
     }
