@@ -97,6 +97,12 @@ internal class WebStoreFactory(
             return error
         }
 
+        override suspend fun fromNewerBuild(): Boolean {
+            val text = localStorageRead(key) ?: return false
+            val outcome = codec.decode(text)
+            return outcome is DecodeOutcome.Quarantine && outcome.reason == QuarantineReason.NewerSchema
+        }
+
         override suspend fun delete(): StoreError? {
             val error = localStorageRemove(key)
             if (error == null) wrote()

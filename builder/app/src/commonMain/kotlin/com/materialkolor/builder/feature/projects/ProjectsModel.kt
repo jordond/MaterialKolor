@@ -33,8 +33,8 @@ import kotlin.time.Clock
  * Every rename goes through the session, so the open project's next save keeps the new name. The
  * model keeps the last deletion for its undo toast until the next delete or its undo, with no timer
  * of its own, since the toast keeps its own time. An undo from an older toast still brings its
- * project back. Deleting the open project opens the newest other one first, or a fresh one when there
- * is none. Persistent storage is asked for once, when the drawer first lists a second project,
+ * project back. Deleting the open project opens the newest other one once the delete lands, or a
+ * fresh one when there is none, and a refused delete leaves it open. Persistent storage is asked for once, when the drawer first lists a second project,
  * however it got there.
  *
  * The model is the one collector of [StoreFactory.quarantined]. A record from a newer build raises
@@ -136,11 +136,19 @@ internal class ProjectsModel(
         }
     }
 
+    /**
+     * Delete [id] once anything still waiting to be saved has gone out, so its undo holds the latest
+     * edit. The open project is only left once the delete has landed, so a refused delete keeps it
+     * open.
+     */
     private fun delete(id: String) {
         viewModelScope.launch {
-            if (state.value.openId == id) moveOffDoomed(id)
+            session.flush().join()
             when (val deletion = projects.delete(id)) {
-                is Deletion.Deleted -> updateState { state -> state.copy(lastDeletion = deletion.project) }
+                is Deletion.Deleted -> {
+                    updateState { state -> state.copy(lastDeletion = deletion.project) }
+                    if (state.value.openId == id) moveOffDeleted(id)
+                }
                 Deletion.NotListed -> Unit
                 Deletion.NewerBuild -> report(ProjectsProblem.NotDeletedNewer)
                 is Deletion.Failed -> report(ProjectsProblem.NotDeleted)
@@ -148,8 +156,8 @@ internal class ProjectsModel(
         }
     }
 
-    /** Open the newest project other than [id], or a fresh one when [id] is the only one. */
-    private suspend fun moveOffDoomed(id: String) {
+    /** Open the newest project other than [id], or a fresh one when [id] was the only one. */
+    private suspend fun moveOffDeleted(id: String) {
         val next = state.value.projects.firstOrNull { meta -> meta.id != id }
         if (next != null && session.open(next.id)) return
         session.newProject(copyCurrent = false)

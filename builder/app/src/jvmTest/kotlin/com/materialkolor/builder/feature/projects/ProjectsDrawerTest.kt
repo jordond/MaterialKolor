@@ -64,6 +64,37 @@ class ProjectsDrawerTest {
             onAllSearchFields().assertCountEquals(1)
         }
 
+    // b-310aa
+    @Test
+    fun search_typing_narrowsTheListWithoutACommit() =
+        runComposeUiTest {
+            var state by mutableStateOf(ProjectsModel.State(projects = metas(SEARCH_THRESHOLD + 1)))
+            setContent {
+                Themed {
+                    ProjectsDrawer(
+                        visible = true,
+                        state = state,
+                        now = 0,
+                        onAction = { action ->
+                            actions += action
+                            if (action is ProjectsAction.Search) state = state.copy(query = action.query)
+                        },
+                        onGetLink = {},
+                        onDismissRequest = {},
+                    )
+                }
+            }
+            waitForIdle()
+
+            onAllSearchFields()[0].performTextReplacement("Theme 3")
+            waitForIdle()
+
+            onNode(hasContentDescription("Theme 3")).assertExists()
+            onNode(hasContentDescription("Theme 4")).assertDoesNotExist()
+            onNode(hasSetTextAction() and hasText("Theme 3")).assertExists()
+            actions shouldBe listOf(ProjectsAction.Search("Theme 3"))
+        }
+
     @Test
     fun row_showsTheNameAgeAndTarget() =
         runComposeUiTest {

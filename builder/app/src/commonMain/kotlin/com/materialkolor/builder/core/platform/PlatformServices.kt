@@ -72,9 +72,23 @@ interface Store<T> {
     /**
      * Replace the record with what [block] makes of it.
      *
-     * Returns the reason the write did not land, or null when it did.
+     * Returns the reason the write did not land, or null when it did. An update the store turns down
+     * for what the key holds, a record from a newer build or unreadable text it could not move aside,
+     * is turned down before [block] runs, so [block] never sees it. Only a write that fails after
+     * that, on a full storage for example, has called [block].
      */
     suspend fun update(block: (T) -> T): StoreError?
+
+    // b-310aa
+
+    /**
+     * Whether a newer build wrote the record, so this one reads its default and turns down every
+     * update to it (D41).
+     *
+     * Asking only reads. Nothing is moved aside or reported on [StoreFactory.quarantined], and a
+     * record that is missing, readable or unreadable answers false.
+     */
+    suspend fun fromNewerBuild(): Boolean
 
     // b-214
 

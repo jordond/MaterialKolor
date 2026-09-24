@@ -144,18 +144,20 @@ internal class ProjectRepository(
      * The project is gone once it leaves the index. Removing its record, history and view state
      * after that is best effort, and the first of them that fails comes back as
      * [Deletion.Deleted.cleanupError]. A project whose record can no longer be read can still be
-     * deleted, since that text is set aside by then.
+     * deleted. Reading it sets that text aside first, but only as best the store can, so on a full
+     * storage the text can stay under its key and go with the project.
      *
-     * A record a newer build saved reads as missing here too, but it is left where it is (D41), so
-     * the delete is turned down with [Deletion.NewerBuild] before anything is written. Removing it
-     * would lose it for good, since an undo from here could not put it back.
+     * When a newer build saved the record, the history or the view state, it reads as missing or
+     * empty here but is left where it is (D41). The delete is turned down with [Deletion.NewerBuild]
+     * before anything is written, since removing it would lose it for good and an undo from here
+     * could not put it back.
      */
     suspend fun delete(id: String): Deletion {
         val projects = indexStore.get().projects
         val position = projects.indexOfFirst { meta -> meta.id == id }
         if (position < 0) return Deletion.NotListed
+        if (fromNewerBuild(id)) return Deletion.NewerBuild
         val record = load(id)
-        if (record == null && savedByNewerBuild(id)) return Deletion.NewerBuild
         val deleted = DeletedProject(
             meta = projects[position],
             position = position,
@@ -257,22 +259,11 @@ internal class ProjectRepository(
     }
 
     /**
-     * Whether a newer build saved the record of [id]. The store turns down any update to such a
-     * record before it looks at the change (D41). Any other record reaches the change, which stops
-     * the update there, so asking never writes.
+     * Whether a newer build saved the record, the history or the view state of project [id], which
+     * this build leaves where they are (D41). Asking only reads.
      */
-    private suspend fun savedByNewerBuild(id: String): Boolean {
-        var reached = false
-        val error = try {
-            projectStore(id).update { stored ->
-                reached = true
-                throw UpdateStopped(stored.id)
-            }
-        } catch (_: UpdateStopped) {
-            null
-        }
-        return !reached && error == StoreError.Unavailable
-    }
+    suspend fun fromNewerBuild(id: String): Boolean =
+        projectStore(id).fromNewerBuild() || historyStore(id).fromNewerBuild() || viewStore(id).fromNewerBuild()
 
     /** Run [attempt], and when storage is full drop the old histories and run it once more. */
     private suspend fun write(
@@ -368,11 +359,6 @@ internal data class DeletedProject(
     val history: HistoryRecord,
     val viewState: ProjectViewState,
 )
-
-/** Stops a store update that only asked what the store holds. */
-private class UpdateStopped(
-    id: String,
-) : IllegalStateException("The update to project $id was only a question")
 
 /** How many projects keep their undo history. */
 internal const val HISTORIES_KEPT: Int = 10

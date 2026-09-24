@@ -34,7 +34,7 @@ import org.jetbrains.compose.resources.stringResource
  * screen at Compact.
  *
  * It lists every saved project newest first, with New and Copy this one above them and a search once
- * there are more than [SEARCH_THRESHOLD]. Without storage a banner says nothing will be kept and
+ * there are more than [SEARCH_THRESHOLD] that narrows the list as it is typed. Without storage a banner says nothing will be kept and
  * offers the share link instead.
  *
  * @param[visible] Whether the drawer is open.
@@ -56,6 +56,9 @@ internal fun ProjectsDrawer(
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     var renaming by remember { mutableStateOf<String?>(null) }
+    // The field shows what was last committed. The query follows every keystroke, and feeding it
+    // back in as the value would reset the caret and any composition on each one.
+    var searched by remember { mutableStateOf(state.query) }
     BuilderSidePanel(
         visible = visible,
         onDismissRequest = onDismissRequest,
@@ -82,10 +85,14 @@ internal fun ProjectsDrawer(
             }
             if (state.searchable) {
                 BuilderTextField(
-                    value = state.query,
-                    onCommit = { query -> onAction(ProjectsAction.Search(query)) },
+                    value = searched,
+                    onCommit = { query ->
+                        searched = query
+                        onAction(ProjectsAction.Search(query))
+                    },
                     label = stringResource(Res.string.projects_search),
                     modifier = Modifier.fillMaxWidth(),
+                    onDraftChange = { query -> onAction(ProjectsAction.Search(query)) },
                 )
             }
         }

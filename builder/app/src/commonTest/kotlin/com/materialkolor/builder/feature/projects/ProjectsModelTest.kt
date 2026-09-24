@@ -122,8 +122,32 @@ class ProjectsModelTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
+    // b-310aa
     @Test
-    fun delete_theOpenProject_opensTheNewestOtherOneFirst() =
+    fun delete_theOpenProjectANewerBuildSaved_leavesItOpenAndSaysSo() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            session.newProject(copyCurrent = false)
+            val open = session.project.value
+                .shouldBeInstanceOf<ProjectRef.Persisted>()
+                .id
+            val model = model(session, preferences)
+            runCurrent()
+            stores.seed(StorageKeys.project(open), NEWER_TEXT)
+
+            model.handle(ProjectsAction.Delete(open))
+            runCurrent()
+
+            session.project.value shouldBe ProjectRef.Persisted(open)
+            model.state.value.openId shouldBe open
+            listedIds() shouldContain open
+            model.state.value.problem shouldBe ProjectsProblem.NotDeletedNewer
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun delete_theOpenProject_thenOpensTheNewestOtherOne() =
         runTest {
             val (session, preferences) = session()
             val first = booted(session)
