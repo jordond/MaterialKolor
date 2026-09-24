@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import kotlin.math.roundToInt
 
 /**
  * Where the split handle sits.
@@ -58,6 +59,10 @@ public class SplitState(
  * holds the start edge, so the kept rectangle mirrors in right to left. Stacked, the start copy is
  * on top whatever the direction.
  *
+ * The edge lands on a whole pixel. The renderer then clips with a plain scissor, where an edge
+ * partway through a pixel needs an anti-aliased clip that builds a new shader for everything the
+ * end copy draws, which made the first drag of a visit stall.
+ *
  * @param[fraction] How much of the pane the start copy shows.
  * @param[orientation] Horizontal for side by side, vertical for top and bottom.
  */
@@ -72,18 +77,22 @@ public class SplitShape(
     ): Outline {
         val rect = when (orientation) {
             Orientation.Horizontal -> {
+                val edge = wholePixel(size.width)
                 if (layoutDirection == LayoutDirection.Ltr) {
-                    Rect(left = size.width * fraction, top = 0f, right = size.width, bottom = size.height)
+                    Rect(left = edge, top = 0f, right = size.width, bottom = size.height)
                 } else {
-                    Rect(left = 0f, top = 0f, right = size.width * (1f - fraction), bottom = size.height)
+                    Rect(left = 0f, top = 0f, right = size.width - edge, bottom = size.height)
                 }
             }
             Orientation.Vertical -> {
-                Rect(left = 0f, top = size.height * fraction, right = size.width, bottom = size.height)
+                Rect(left = 0f, top = wholePixel(size.height), right = size.width, bottom = size.height)
             }
         }
         return Outline.Rectangle(rect)
     }
+
+    /** How far from the start edge the handle sits along [extent], rounded to a whole pixel. */
+    private fun wholePixel(extent: Float): Float = (extent * fraction).roundToInt().toFloat()
 
     override fun equals(other: Any?): Boolean =
         this === other || (other is SplitShape && fraction == other.fraction && orientation == other.orientation)
