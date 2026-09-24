@@ -91,8 +91,15 @@ internal fun WorkspaceScreen(
             is WorkspaceAction.SetPreviewTab -> {
                 model.setPreviewTab(action.tab)
             }
+            // b-217aa
+            // The dock's switch only slides the handle (MO-03). A switch with an origin still reveals.
             is WorkspaceAction.SetPreviewMode -> {
-                reveal(action.origin) { model.setPreviewMode(action.mode) }
+                val origin = action.origin
+                if (origin == null) {
+                    model.setPreviewMode(action.mode)
+                } else {
+                    reveal(origin) { model.setPreviewMode(action.mode) }
+                }
             }
             is WorkspaceAction.SetSplitFraction -> {
                 model.setSplitFraction(action.fraction)

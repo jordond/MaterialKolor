@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.LocalThemeResult
@@ -43,11 +44,14 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 /** The smallest an app screen shrinks to fit the canvas before the canvas scrolls it instead. */
-private const val MIN_SCREEN_SCALE = 0.6f
+internal const val MIN_SCREEN_SCALE = 0.6f
+
+/** Tags the scrolling frame each app screen sits in, for tests to read its scroll range. */
+internal const val DEVICE_SCREEN_TAG: String = "canvas-device-screen"
 
 /**
- * Told the tab each time the canvas composes a tab body, or null, which it always is outside
- * tests. Tests provide it to prove only the visible tab composes.
+ * Told the tab each time the canvas composes that tab's body, from inside the body, or null, which
+ * it always is outside tests. Tests provide it to prove only the visible tab composes.
  */
 internal val LocalCanvasProbe: ProvidableCompositionLocal<((tab: PreviewTab) -> Unit)?> =
     staticCompositionLocalOf { null }
@@ -117,10 +121,11 @@ internal fun CanvasTabBody(
     deviceWidth: DeviceWidth,
     modifier: Modifier = Modifier,
 ) {
-    LocalCanvasProbe.current?.invoke(tab)
+    val probe = LocalCanvasProbe.current
     val result = specs.light.result
     when (tab) {
         PreviewTab.App -> {
+            probe?.invoke(PreviewTab.App)
             // One scroll for both copies, so a screen wider than the canvas scrolls as one.
             val scroll = rememberScrollState()
             PreviewCopies(preview, specs, modifier) { spec ->
@@ -128,15 +133,19 @@ internal fun CanvasTabBody(
             }
         }
         PreviewTab.Components -> {
+            probe?.invoke(PreviewTab.Components)
             PreviewCopies(preview, specs, modifier) { spec -> ComponentsTab(spec, componentsState) }
         }
         PreviewTab.Roles -> {
+            probe?.invoke(PreviewTab.Roles)
             RolesTab(result, mode, specs.filter, modifier)
         }
         PreviewTab.Palettes -> {
+            probe?.invoke(PreviewTab.Palettes)
             PalettesTab(result, mode, specs.filter, modifier)
         }
         PreviewTab.Contrast -> {
+            probe?.invoke(PreviewTab.Contrast)
             ContrastTab(result, mode, specs.filter, modifier)
         }
     }
@@ -178,7 +187,13 @@ private fun DeviceScreen(
 ) {
     val room = remember { ScreenRoom() }
     Box(Modifier.fillMaxSize().measureRoom(room), contentAlignment = Alignment.TopCenter) {
-        Box(Modifier.fillMaxHeight().horizontalScroll(scroll).scaledScreen(width.screenWidth, room)) { content() }
+        Box(
+            Modifier
+                .fillMaxHeight()
+                .testTag(DEVICE_SCREEN_TAG)
+                .horizontalScroll(scroll)
+                .scaledScreen(width.screenWidth, room),
+        ) { content() }
     }
 }
 

@@ -21,6 +21,7 @@ import com.materialkolor.builder.kit.skin.Skin
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.comparables.shouldBeLessThan
+import io.kotest.matchers.comparables.shouldBeLessThanOrEqualTo
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -31,7 +32,7 @@ private val FullscreenSkin = Skin(Library.Material3, expressive = false)
 @OptIn(ExperimentalTestApi::class)
 class ShellFullscreenTest {
     @Test
-    fun fullscreen_everyPosterMode_hidesThePosterAndTopBarAndKeepsTheDockAndTheExit() {
+    fun fullscreen_everyPosterMode_hidesThePosterAndTopBarAndKeepsTheDockAndTheExitClearOfTheCanvas() {
         val windows = listOf(390 to PosterMode.Sheet, 600 to PosterMode.Rail72, 1280 to PosterMode.Docked400)
         for ((width, expected) in windows) {
             withClue("$width dp") {
@@ -51,11 +52,12 @@ class ShellFullscreenTest {
                     val canvas = shellBounds(ShellCanvasTag)
                     val exit = shellBounds(FullscreenExitTag)
                     val dock = shellBounds(ShellDockTag)
-                    canvas.top shouldBeLessThan 16.dp
+                    exit.top shouldBeLessThan 16.dp
+                    exit.bottom shouldBeLessThanOrEqualTo canvas.top
+                    canvas.top shouldBeLessThan exit.bottom + 16.dp
                     canvas.left shouldBeLessThan 16.dp
                     canvas.right shouldBe width.dp - 12.dp
-                    exit.top shouldBeLessThan dock.top
-                    exit.right shouldBeLessThan canvas.right
+                    exit.right shouldBe canvas.right
                     dock.bottom shouldBeLessThan canvas.bottom
                 }
             }

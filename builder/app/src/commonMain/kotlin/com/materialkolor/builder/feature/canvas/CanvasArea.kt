@@ -29,6 +29,9 @@ import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.split.SplitState
 import dev.stateholder.dispatcher.Dispatcher
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 
 /**
  * The color vision the canvas simulates (F-25). Nothing remembers it across a reload.
@@ -98,13 +101,17 @@ internal fun CanvasDock(
 /** How many unconfirmed saves of the handle to keep before the oldest is dropped. */
 private const val MAX_UNCONFIRMED = 32
 
+/** How long the handle has to rest before where it rests is saved, so a drag saves once (F-19). */
+internal const val HANDLE_SETTLE_MILLIS = 250L
+
 /**
  * Where the split handle sits and what the canvas composes for the preview mode (F-19, MO-03).
  *
  * Light and Dark compose one copy. A switch first slides the handle to the matching edge, the end
  * edge for Light so the light copy fills the canvas, or back to where Split left it, and only then
  * drops the copy that slid out of view. Moves of the handle in Split are handed on to be saved. A
- * saved fraction that did not start here, as when another project opens, moves the handle.
+ * saved fraction that did not start here, as when another project opens, moves the handle, and
+ * steers a slide that is under way.
  *
  * @param[mode] The mode the canvas opens in.
  * @param[saved] Where the handle was saved.
@@ -129,14 +136,22 @@ internal class PreviewSplit(
     /** Fractions sent to be saved that have not come back as saved yet, oldest first. */
     private val unconfirmed = ArrayDeque<Float>()
 
-    /** Slide the handle to where [mode] keeps it over [spec], or jump there when it is null. */
+    /** Counts the saved fractions that did not start here. A save waiting on an older count is stale. */
+    var foreignSaves: Int = 0
+        private set
+
+    /**
+     * Slide the handle to where [mode] keeps it over [spec], or jump there when it is null.
+     *
+     * The slide reads where [mode] keeps the handle on every frame, so a fraction saved while it
+     * runs, as when another project opens with another mode, is where it ends.
+     */
     suspend fun slideTo(
         mode: PreviewMode,
         spec: AnimationSpec<Float>?,
     ) {
-        val target = handleFor(mode, handle)
-        if (spec == null || (shown == mode && split.fraction == target)) {
-            split.fraction = target
+        if (spec == null || (shown == mode && split.fraction == handleFor(mode, handle))) {
+            split.fraction = handleFor(mode, handle)
             shown = mode
             sliding = false
             return
@@ -145,7 +160,11 @@ internal class PreviewSplit(
         sliding = true
         if (shown != PreviewMode.Split) split.fraction = handleFor(shown, handle)
         shown = PreviewMode.Split
-        animate(split.fraction, target, animationSpec = spec) { value, _ -> split.fraction = value }
+        val from = split.fraction
+        animate(0f, 1f, animationSpec = spec) { progress, _ ->
+            split.fraction = from + (handleFor(mode, handle) - from) * progress
+        }
+        split.fraction = handleFor(mode, handle)
         shown = mode
         sliding = false
     }
@@ -171,6 +190,7 @@ internal class PreviewSplit(
         }
         if (saved == handle) return
         unconfirmed.clear()
+        foreignSaves++
         handle = saved
         if (shown == PreviewMode.Split && !sliding) split.fraction = saved
     }
@@ -189,7 +209,8 @@ private fun handleFor(
 
 /**
  * The split handle for the preview [mode], opening at [saved], sliding between modes on the skin's
- * slide motion and jumping under `LocalMotionFrozen`. [onSave] hears every resting move in Split.
+ * slide motion and jumping under `LocalMotionFrozen`. [onSave] hears where the handle comes to rest
+ * in Split once it has stayed there for [HANDLE_SETTLE_MILLIS], so a drag saves once.
  */
 @Composable
 internal fun rememberPreviewSplit(
@@ -204,8 +225,14 @@ internal fun rememberPreviewSplit(
     LaunchedEffect(preview, mode) { preview.slideTo(mode, spec) }
     LaunchedEffect(preview, saved) { preview.onSaved(saved) }
     LaunchedEffect(preview) {
+        // Leaving Split keeps a waiting save. A fraction saved from elsewhere in the meantime drops it.
         snapshotFlow { if (currentMode == PreviewMode.Split) preview.restingHandle() else null }
-            .collect { fraction -> if (fraction != null && preview.send(fraction)) save(fraction) }
+            .filterNotNull()
+            .collectLatest { fraction ->
+                val foreign = preview.foreignSaves
+                delay(HANDLE_SETTLE_MILLIS)
+                if (preview.foreignSaves == foreign && preview.send(fraction)) save(fraction)
+            }
     }
     return preview
 }

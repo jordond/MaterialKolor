@@ -64,7 +64,12 @@ internal sealed interface WorkspaceAction {
         val tab: PreviewTab,
     ) : WorkspaceAction
 
-    /** Show the preview light, dark or split, behind a reveal. It never touches the chrome's appearance. */
+    // b-217aa
+
+    /**
+     * Show the preview light, dark or split, behind a reveal out of [origin] if there is one. It
+     * never touches the chrome's appearance.
+     */
     data class SetPreviewMode(
         val mode: PreviewMode,
         val origin: Offset?,

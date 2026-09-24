@@ -6,10 +6,15 @@ import androidx.compose.ui.graphics.ColorMatrix
  * The color matrices the canvas draws through to simulate color vision deficiencies (F-25).
  *
  * The three dichromacies are Machado, Oliveira and Fernandes 2009 at severity 1.0, and
- * achromatopsia maps every color to its Rec. 709 luminance. Each is three rows of red, green and
- * blue weights and leaves alpha alone. [colorMatrix] builds a fresh [ColorMatrix] every call, since
- * a `PaneSpec` compares filters by their array and one shared matrix edited in place would look
- * unchanged.
+ * achromatopsia weighs every color with the Rec. 709 luminance weights. Each is three rows of red,
+ * green and blue weights and leaves alpha alone. [colorMatrix] builds a fresh [ColorMatrix] every
+ * call, since a `PaneSpec` compares filters by their array and one shared matrix edited in place
+ * would look unchanged.
+ *
+ * Both are a gamma space approximation. Machado's matrices are made for linear RGB and the Rec. 709
+ * weights give luminance only on linear values, but a [ColorMatrix] runs on the gamma encoded sRGB
+ * the canvas draws, so the dichromacies come out a little off and achromatopsia shows luma. Close
+ * enough for a preview, so nothing is linearised first.
  */
 public object VisionMatrices {
     /** Machado 2009 protanopia, no working long wavelength cones. */
@@ -33,7 +38,7 @@ public object VisionMatrices {
         listOf(0.004733f, 0.691367f, 0.303900f),
     )
 
-    /** Every channel set to the color's Rec. 709 luminance, so only lightness is left. */
+    /** Every channel set to the color's Rec. 709 luma, so only lightness is left. */
     public val Achromatopsia: List<List<Float>> = List(CHANNELS) { listOf(0.2126f, 0.7152f, 0.0722f) }
 
     /**

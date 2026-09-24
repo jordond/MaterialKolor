@@ -1,11 +1,14 @@
 package com.materialkolor.builder.feature.canvas
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
@@ -42,7 +45,8 @@ import org.jetbrains.compose.resources.stringResource
  * Vision and Fullscreen (F-19).
  *
  * A phone has no device width, its preview is always a phone (F-46), and its mode switch drops the
- * glyphs to fit. Fullscreen leaves through the floating exit instead of the dock.
+ * glyphs to fit. Fullscreen leaves through the floating exit instead of the dock, and when it ends
+ * focus comes back to the Fullscreen button, since the exit that held it is gone.
  */
 @Composable
 internal fun DockContent(
@@ -52,6 +56,12 @@ internal fun DockContent(
 ) {
     val compact = LocalLayout.current.windowClass == WindowClass.Compact
     val modes = PreviewMode.entries.associateWith { mode -> stringResource(mode.title) }
+    val fullscreenButton = remember { FocusRequester() }
+    val wasFullscreen = remember { mutableStateOf(state.fullscreen) }
+    LaunchedEffect(state.fullscreen) {
+        if (wasFullscreen.value && !state.fullscreen) fullscreenButton.requestFocus()
+        wasFullscreen.value = state.fullscreen
+    }
     DockRegion(modifier) {
         BuilderSegmented(
             options = PreviewMode.entries,
@@ -59,6 +69,8 @@ internal fun DockContent(
             onSelect = { mode -> dispatcher.dispatch(WorkspaceAction.SetPreviewMode(mode, origin = null)) },
             label = stringResource(Res.string.canvas_mode_label),
             optionIcon = { mode -> if (compact) null else mode.icon },
+            // Arrowing along the modes should not slide the handle at every stop.
+            selectOnFocus = false,
             optionLabel = { mode -> modes.getValue(mode) },
         )
         if (!compact) {
@@ -82,21 +94,27 @@ internal fun DockContent(
                 onClick = { dispatcher.dispatch(WorkspaceAction.ToggleFullscreen) },
                 icon = IconId.Fullscreen,
                 contentDescription = stringResource(Res.string.canvas_fullscreen),
+                modifier = Modifier.focusRequester(fullscreenButton),
             )
         }
     }
 }
 
-/** The floating pill that leaves fullscreen and brings the poster and the top bar back (F-19). */
+/**
+ * The floating pill that leaves fullscreen and brings the poster and the top bar back (F-19). It
+ * takes focus as it arrives, since the Fullscreen button that had it is gone.
+ */
 @Composable
 internal fun FullscreenExit(
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
 ) {
+    val pill = remember { FocusRequester() }
+    LaunchedEffect(pill) { pill.requestFocus() }
     BuilderButton(
         onClick = { dispatcher.dispatch(WorkspaceAction.ToggleFullscreen) },
         label = stringResource(Res.string.canvas_fullscreen_exit),
-        modifier = modifier,
+        modifier = modifier.focusRequester(pill),
         emphasis = Emphasis.Secondary,
         icon = IconId.Close,
     )
