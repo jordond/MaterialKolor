@@ -2,7 +2,6 @@ package com.materialkolor.builder.feature.canvas
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animate
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -31,6 +31,7 @@ import com.materialkolor.builder.preview.split.SplitState
 import dev.stateholder.dispatcher.Dispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterNotNull
 
 /**
@@ -70,7 +71,7 @@ internal fun CanvasArea(
             selected = state.view.tab,
             onSelect = { tab -> dispatcher.dispatch(WorkspaceAction.SetPreviewTab(tab)) },
         )
-        Box(Modifier.weight(1f).fillMaxWidth().padding(contentPadding)) {
+        InspectLayer(state, preview, dispatcher, Modifier.weight(1f).fillMaxWidth().padding(contentPadding)) {
             CanvasTabBody(
                 tab = state.view.tab,
                 mode = state.view.mode,
@@ -80,7 +81,6 @@ internal fun CanvasArea(
                 componentsState = componentsState,
                 deviceWidth = if (compact) DeviceWidth.Phone else state.view.deviceWidth,
             )
-            // B-217b lays the inspect overlay here, over the active tab, while `state.inspect` is on.
         }
     }
 }
@@ -137,8 +137,10 @@ internal class PreviewSplit(
     private val unconfirmed = ArrayDeque<Float>()
 
     /** Counts the saved fractions that did not start here. A save waiting on an older count is stale. */
-    var foreignSaves: Int = 0
-        private set
+    private var foreignSaves: Int = 0
+
+    /** Counts the pointer releases over the canvas, each a cue to save a moved handle at once. */
+    private var releases by mutableIntStateOf(0)
 
     /**
      * Slide the handle to where [mode] keeps it over [spec], or jump there when it is null.
@@ -181,6 +183,20 @@ internal class PreviewSplit(
         return true
     }
 
+    /** A mark to hold a waiting save against, which [savedElsewhereSince] checks when the wait is over. */
+    fun mark(): Int = foreignSaves
+
+    /** True when a fraction saved elsewhere came in after [mark] was taken, which makes a save waiting on it stale. */
+    fun savedElsewhereSince(mark: Int): Boolean = foreignSaves != mark
+
+    /** A pointer let go over the canvas. The handle, if it rests somewhere new, is saved a frame later. */
+    fun release() {
+        releases++
+    }
+
+    /** The release count, read in a snapshot flow so each release is heard once the frame is applied. */
+    fun releaseCount(): Int = releases
+
     /** The saved fraction is now [saved]. Unless it is one sent from here, the handle goes there. */
     fun onSaved(saved: Float) {
         val sent = unconfirmed.indexOf(saved)
@@ -210,7 +226,9 @@ private fun handleFor(
 /**
  * The split handle for the preview [mode], opening at [saved], sliding between modes on the skin's
  * slide motion and jumping under `LocalMotionFrozen`. [onSave] hears where the handle comes to rest
- * in Split once it has stayed there for [HANDLE_SETTLE_MILLIS], so a drag saves once.
+ * in Split once it has stayed there for [HANDLE_SETTLE_MILLIS], so a keyboard or assistive move
+ * saves once. A pointer letting go over the canvas saves a moved handle straight away instead, so a
+ * drag that ends just before the tab closes is not lost.
  */
 @Composable
 internal fun rememberPreviewSplit(
@@ -229,9 +247,18 @@ internal fun rememberPreviewSplit(
         snapshotFlow { if (currentMode == PreviewMode.Split) preview.restingHandle() else null }
             .filterNotNull()
             .collectLatest { fraction ->
-                val foreign = preview.foreignSaves
+                val mark = preview.mark()
                 delay(HANDLE_SETTLE_MILLIS)
-                if (preview.foreignSaves == foreign && preview.send(fraction)) save(fraction)
+                if (!preview.savedElsewhereSince(mark) && preview.send(fraction)) save(fraction)
+            }
+    }
+    LaunchedEffect(preview) {
+        // Sending the fraction here leaves nothing new for the waiting save above, which then drops it.
+        snapshotFlow { preview.releaseCount() }
+            .drop(1)
+            .collect {
+                val fraction = if (currentMode == PreviewMode.Split) preview.restingHandle() else null
+                if (fraction != null && preview.send(fraction)) save(fraction)
             }
     }
     return preview

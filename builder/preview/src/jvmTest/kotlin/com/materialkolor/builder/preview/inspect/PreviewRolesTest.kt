@@ -1,18 +1,25 @@
 package com.materialkolor.builder.preview.inspect
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -77,6 +84,43 @@ class PreviewRolesTest {
             waitForIdle()
             again.size shouldBe 2
             again.hit(PaneSide.Start, button.center)?.roles shouldBe Button
+        }
+
+    @Test
+    fun focus_onTheInnerOfTwoDeclaredElements_isTheInnerUntilBlurClearsIt() =
+        runComposeUiTest {
+            val registry = InspectRegistry()
+            val inner = FocusRequester()
+            lateinit var focusManager: FocusManager
+            setContent {
+                focusManager = LocalFocusManager.current
+                CompositionLocalProvider(LocalInspectRegistry provides registry) {
+                    Box(Modifier.size(200.dp).previewRoles(*Card.toTypedArray())) {
+                        Box(
+                            Modifier
+                                .size(50.dp)
+                                .previewRoles(*Button.toTypedArray())
+                                .focusRequester(inner)
+                                .focusable(),
+                        )
+                    }
+                    // Composition reads the focused element, so a move of focus has to recompose this.
+                    val focused = registry.focused?.roles?.first()
+                    BasicText(focused?.toString() ?: "none", Modifier.testTag("readout"))
+                }
+            }
+            waitForIdle()
+            registry.focused.shouldBeNull()
+
+            runOnIdle { inner.requestFocus() }
+            waitForIdle()
+            registry.focused?.roles shouldBe Button
+            onNodeWithTag("readout").assertTextEquals(Button.first().toString())
+
+            runOnIdle { focusManager.clearFocus() }
+            waitForIdle()
+            registry.focused.shouldBeNull()
+            onNodeWithTag("readout").assertTextEquals("none")
         }
 
     @Test
