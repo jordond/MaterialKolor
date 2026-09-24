@@ -93,7 +93,7 @@ class ActionRegistryTest {
     // b-406
 
     /**
-     * The Medium bar moves Commands, Redo and Undo into the overflow when the library dropdown needs
+     * The Medium bar moves History, Commands, Redo and Undo into the overflow when the library dropdown needs
      * their room, so the top bar's commands and the libraries are found wherever each width puts them.
      */
     @Test
@@ -225,7 +225,7 @@ private const val HEIGHT = 800
 private const val MORE_OPTIONS = "More options" // b-231
 
 /** The commands whose buttons sit in the top bar or its overflow, depending on the room (b-406). */
-private val TOP_BAR_IDS = setOf("palette", "undo", "redo", "share", "export")
+private val TOP_BAR_IDS = setOf("palette", "undo", "redo", "history", "share", "export") // b-509
 
 /** Every command id the registry has at Expanded on the default theme. */
 private val EXPECTED_IDS = listOf(
@@ -237,6 +237,7 @@ private val EXPECTED_IDS = listOf(
     "github",
     "undo",
     "redo",
+    "history", // b-509
     "shuffle",
     "lock.Hue",
     "lock.Style",

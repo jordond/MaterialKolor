@@ -399,6 +399,7 @@ private val SINGLE_KEYS = listOf(
     // b-315c
     Key.V,
     Key.B,
+    Key.H, // b-509
 )
 
 private val SHIFTED_KEYS = listOf(Key.L, Key.D, Key.C, Key.N, Key.Slash)
