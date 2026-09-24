@@ -40,9 +40,11 @@ import com.materialkolor.builder.kit.skin.headless.controlRing
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.background.BackgroundSizing
 import io.github.composefluent.background.Layer
+import io.github.composefluent.component.CheckBoxColor
 import io.github.composefluent.component.CheckBoxDefaults
 import io.github.composefluent.component.SwitcherDefaults
 import io.github.composefluent.component.SwitcherStyle
+import io.github.composefluent.scheme.VisualStateScheme
 import io.github.composefluent.scheme.collectVisualState
 
 /*
@@ -70,8 +72,7 @@ internal fun FluentSwitch(
     val interactions = remember { MutableInteractionSource() }
     val words = stateWords()
     val state = ControlState.Switched(checked)
-    val scheme = if (checked) SwitcherDefaults.selectedSwitcherStyle() else SwitcherDefaults.defaultSwitcherStyle()
-    val look = scheme.schemeFor(interactions.collectVisualState(disabled = !enabled))
+    val look = fluentSwitchStyles(checked).schemeFor(interactions.collectVisualState(disabled = !enabled))
     Row(
         modifier = modifier
             .heightIn(min = LocalLayout.current.primaryTouchTarget)
@@ -96,6 +97,13 @@ internal fun FluentSwitch(
         )
         SwitchTrack(checked, look, Modifier.controlPress(interactions))
     }
+}
+
+/** Fluent's switch styles, in the poster's ink on the poster. */
+@Composable
+internal fun fluentSwitchStyles(checked: Boolean): VisualStateScheme<SwitcherStyle> {
+    val fluent = if (checked) SwitcherDefaults.selectedSwitcherStyle() else SwitcherDefaults.defaultSwitcherStyle()
+    return LocalFluentPosterInk.current?.switches(fluent, checked) ?: fluent
 }
 
 /** Fluent's switch track and thumb, the thumb sliding to the end while on and swelling under the pointer. */
@@ -163,8 +171,7 @@ internal fun FluentCheckbox(
     val motion = LocalBuilderMotion.current
     val words = stateWords()
     val state = ControlState.Checked(checked)
-    val scheme = if (checked) CheckBoxDefaults.selectedCheckBoxColors() else CheckBoxDefaults.defaultCheckBoxColors()
-    val look = scheme.schemeFor(interactions.collectVisualState(disabled = !enabled))
+    val look = fluentCheckboxColors(checked).schemeFor(interactions.collectVisualState(disabled = !enabled))
     val fill by animateColorAsState(look.fillColor, motion.effects(), label = "box")
     Row(
         modifier = modifier
@@ -196,13 +203,19 @@ internal fun FluentCheckbox(
                 }
             }
         }
-        BuilderText(
-            text = label,
-            style = BuilderTextStyle.Label,
-            // Fluent keeps a disabled checkbox label in the primary ink, so it dims here the way the box does.
-            color = if (enabled) look.labelTextColor else FluentTheme.colors.text.text.disabled,
-        )
+        BuilderText(text = label, style = BuilderTextStyle.Label, color = look.labelTextColor)
     }
+}
+
+/**
+ * Fluent's checkbox colours, in the poster's ink on the poster. Fluent keeps a disabled checkbox
+ * label in the primary ink, so it dims here the way the box does.
+ */
+@Composable
+internal fun fluentCheckboxColors(checked: Boolean): VisualStateScheme<CheckBoxColor> {
+    val scheme = if (checked) CheckBoxDefaults.selectedCheckBoxColors() else CheckBoxDefaults.defaultCheckBoxColors()
+    val fluent = scheme.copy(disabled = scheme.disabled.copy(labelTextColor = FluentTheme.colors.text.text.disabled))
+    return LocalFluentPosterInk.current?.checkboxes(fluent, checked) ?: fluent
 }
 
 /** Fluent's checkbox. */

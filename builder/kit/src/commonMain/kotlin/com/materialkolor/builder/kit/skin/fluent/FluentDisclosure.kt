@@ -44,8 +44,9 @@ import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 import io.github.composefluent.FluentTheme
 
 /**
- * Fluent's expander, built from Fluent's parts: its card coloured header, its outline and the
- * separator under the header, with the chevron that turns as it opens.
+ * Fluent's expander, built from Fluent's parts. It has Fluent's card coloured header, its outline
+ * and the separator under the header, with the chevron that turns as it opens. On the poster the
+ * outline and the separator take the poster's ink.
  *
  * Fluent's own `Expander` takes its press on an inner header and again on a chevron button, two
  * stops for one control, and clips everything to its outline, which would cut the header's focus
@@ -71,7 +72,8 @@ internal fun FluentDisclosure(
     val words = stateWords()
     val spoken = words.of(state)
     val interactions = remember { MutableInteractionSource() }
-    Column(modifier.border(1.dp, colors.stroke.card.default, shape)) {
+    val stroke = LocalFluentPosterInk.current?.line(enabled = true) ?: colors.stroke.card.default
+    Column(modifier.border(1.dp, stroke, shape)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -119,7 +121,7 @@ internal fun FluentDisclosure(
             exit = disclosureExit(motion),
         ) {
             Column {
-                Box(Modifier.fillMaxWidth().height(1.dp).background(colors.stroke.card.default))
+                Box(Modifier.fillMaxWidth().height(1.dp).background(stroke))
                 Box(Modifier.padding(ContentPadding)) { content() }
             }
         }

@@ -28,6 +28,7 @@ import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.control.foldState
@@ -74,12 +75,13 @@ internal fun <T> FluentSegmented(
     val target = LocalLayout.current.primaryTouchTarget
     val colors = FluentTheme.colors
     val shape = FluentTheme.shapes.control
+    val frame = colors.stroke.control.default
     Row(
         modifier = modifier
             .semantics { roleLessName(label, folds) }
             .selectableGroup()
             .background(colors.controlAlt.secondary, shape)
-            .border(SegmentedFrameWidth, colors.stroke.control.default, shape),
+            .border(SegmentedFrameWidth, LocalFluentPosterInk.current?.stroke(frame, enabled) ?: frame, shape),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         options.forEachIndexed { index, value ->
@@ -90,6 +92,8 @@ internal fun <T> FluentSegmented(
                 SegmentedButton(
                     checked = isSelected,
                     onCheckedChanged = { onSelect(value) },
+                    // Fluent's own pair, a standard button for the chosen option and a subtle one for the rest.
+                    colors = fluentButtonColors(if (isSelected) Emphasis.Secondary else Emphasis.Subtle),
                     indicator = { FluentIndicator(visible = isSelected, enabled = enabled) },
                     modifier = Modifier
                         .weight(1f)
@@ -139,7 +143,7 @@ private fun segmentPosition(
 /**
  * Fluent's short accent bar under a chosen segment or tab, drawn the way Fluent's own
  * `HorizontalIndicator` draws it but grown and shrunk on the skin's motion, so reduced motion holds
- * it still.
+ * it still. On the poster it is drawn in the poster's ink.
  */
 @Composable
 internal fun FluentIndicator(
@@ -148,6 +152,8 @@ internal fun FluentIndicator(
     modifier: Modifier = Modifier,
 ) {
     val colors = FluentTheme.colors
+    val accent = if (enabled) colors.fillAccent.default else colors.fillAccent.disabled
+    val poster = LocalFluentPosterInk.current
     val width by animateDpAsState(
         targetValue = if (visible) IndicatorWidth else 0.dp,
         animationSpec = LocalBuilderMotion.current.spatial(),
@@ -158,11 +164,7 @@ internal fun FluentIndicator(
             .padding(bottom = SegmentedFrameWidth)
             .size(width = width, height = IndicatorHeight)
             .background(
-                color = if (visible) {
-                    if (enabled) colors.fillAccent.default else colors.fillAccent.disabled
-                } else {
-                    Color.Transparent
-                },
+                color = if (visible) poster?.accent(accent) ?: accent else Color.Transparent,
                 shape = CircleShape,
             ),
     )

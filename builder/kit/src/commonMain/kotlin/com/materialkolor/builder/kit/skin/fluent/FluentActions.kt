@@ -95,10 +95,18 @@ private fun FluentLabel(
 
 /**
  * Fluent's colours for each emphasis. Fluent has no destructive button, so danger is an accent
- * button in the critical ink.
+ * button in the critical ink. On the poster every one draws in the poster's ink, with primary and
+ * danger filled in it.
  */
 @Composable
-private fun fluentButtonColors(emphasis: Emphasis): VisualStateScheme<ButtonColor> =
+internal fun fluentButtonColors(emphasis: Emphasis): VisualStateScheme<ButtonColor> {
+    val fluent = fluentOwnButtonColors(emphasis)
+    val poster = LocalFluentPosterInk.current ?: return fluent
+    return poster.buttons(fluent, accent = emphasis == Emphasis.Primary || emphasis == Emphasis.Danger)
+}
+
+@Composable
+private fun fluentOwnButtonColors(emphasis: Emphasis): VisualStateScheme<ButtonColor> =
     when (emphasis) {
         Emphasis.Primary -> {
             ButtonDefaults.accentButtonColors()
@@ -146,12 +154,14 @@ private val FluentActionStyles: ActionStyles
     @Composable get() {
         val tokens = LocalBuilderTokens.current
         val colors = FluentTheme.colors
-        return remember(tokens, colors) { fluentActionStyles(tokens, colors) }
+        val poster = LocalFluentPosterInk.current
+        return remember(tokens, colors, poster) { fluentActionStyles(tokens, colors, poster) }
     }
 
 private fun fluentActionStyles(
     tokens: BuilderTokens,
     colors: Colors,
+    poster: FluentPosterInk?,
 ): ActionStyles {
     val corner = RoundedCornerShape(4.dp)
     val styles = actionStyles(
@@ -198,7 +208,7 @@ private fun fluentActionStyles(
         ),
         progress = styles.progress.copy(
             track = colors.controlStrong.default.onPanel(),
-            indicator = colors.fillAccent.default,
+            indicator = poster?.ink ?: colors.fillAccent.default,
         ),
         listRow = styles.listRow.copy(
             selected = styles.listRow.selected.copy(container = colors.subtleFill.secondary.onPanel()),
@@ -343,6 +353,8 @@ internal fun FluentToggleButton(
             .semantics { toggleableState = ToggleableState(checked) }
             .fluentFeedback(interactionSource),
         disabled = !enabled,
+        // Fluent's own pair, an accent button while on and a standard one while off.
+        colors = fluentButtonColors(if (checked) Emphasis.Primary else Emphasis.Secondary),
         interaction = interactionSource,
     ) {
         FluentLabel(label, if (checked) IconId.Check else icon)

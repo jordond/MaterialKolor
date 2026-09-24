@@ -38,7 +38,10 @@ import com.materialkolor.builder.kit.skin.headless.controlRing
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.LocalContentColor
 import io.github.composefluent.component.SelectorBar
+import io.github.composefluent.component.SelectorBarDefaults
 import io.github.composefluent.component.SelectorBarItem
+import io.github.composefluent.component.SelectorBarItemColor
+import io.github.composefluent.scheme.VisualStateScheme
 
 /**
  * Fluent's selector bar as the tab row, each tab one of Fluent's own `SelectorBarItem`s, which takes
@@ -107,12 +110,20 @@ internal fun <T> FluentTabs(
                         .foldState(label(tab), ControlState.Selected(isSelected), role = FoldedRole.Tab)
                         .heightIn(min = target)
                         .controlRing(interactions, shape),
+                    colors = fluentTabColors(isSelected),
                     indicator = { _ -> FluentIndicator(visible = isSelected, enabled = true) },
                     interactionSource = interactions,
                 )
             }
         }
     }
+}
+
+/** Fluent's selector bar item colours, in the poster's ink on the poster. */
+@Composable
+internal fun fluentTabColors(selected: Boolean): VisualStateScheme<SelectorBarItemColor> {
+    val fluent = if (selected) SelectorBarDefaults.selectedItemColors() else SelectorBarDefaults.defaultItemColors()
+    return LocalFluentPosterInk.current?.tabs(fluent) ?: fluent
 }
 
 /** How far a tab's focus ring reaches past the tab, which the ends of the row keep free. */

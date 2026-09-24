@@ -25,8 +25,13 @@ import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.poster.PosterColors
+import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.custom.LocalBuilderIdentity
+import com.materialkolor.builder.kit.skin.fluent.fluentButtonColors
+import com.materialkolor.builder.kit.skin.fluent.fluentCheckboxColors
+import com.materialkolor.builder.kit.skin.fluent.fluentSwitchStyles
+import com.materialkolor.builder.kit.skin.fluent.fluentTabColors
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.fluent.toFluentShades
 import com.materialkolor.hct.Hct
@@ -34,6 +39,7 @@ import com.materialkolor.ktx.contrastRatio
 import com.materialkolor.unstyled.MaterialKolorTokens
 import io.github.composefluent.Colors
 import io.github.composefluent.FluentTheme
+import io.github.composefluent.scheme.VisualState
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -42,9 +48,6 @@ import kotlin.test.Test
 import io.github.composefluent.LocalContentColor as FluentContentColor
 
 private const val ShellTextRatio = 4.5
-
-/** The least Fluent's own fixed text reaches on the fifty seeds, 4.35 at worst when measured. */
-private const val FluentTextFloor = 4.3
 private const val ShellClickTag = "shell-click"
 
 /** Ten hues at five tones, mid tones included, where ink sits closest to the floor. */
@@ -126,42 +129,65 @@ class PosterSurfaceTest {
     }
 
     /**
-     * Fluent on the poster takes its shades from the seed's own ramp, and its dark flag from the
-     * ink, so its fixed black or white text lands on the side that reads on the seed.
-     *
-     * That text is Fluent's and cannot be recoloured. On a mid tone seed neither side reaches 4.5
-     * to 1, since light mode text is black at 89 percent and white peaks near 4.48 at tone 50. So
-     * this holds it to the floor it does reach, which a text on the wrong side would miss by far.
+     * Fluent on the poster takes its shades from the seed's own ramp and its dark flag from the
+     * ink, and every Fluent control there draws its labels, glyphs and strokes in the ink. Fluent's
+     * own black or white text reaches only about 4.35 to 1 on a mid tone seed, so each control's
+     * resting ink has to hold 4.5 on the ground it stands on, in the light chrome and the dark.
      */
     @Test
-    fun posterSurface_fluent_takesItsShadesFromTheRampAndItsModeFromTheInk() =
+    fun posterSurface_fluent_drawsEveryControlInTheInkInBothModes() {
+        for (isDark in listOf(false, true)) {
+            withClue(if (isDark) "dark chrome" else "light chrome") {
+                runComposeUiTest {
+                    var seed by mutableStateOf(ShellSeeds.first())
+                    var colors: Colors? = null
+                    var inks: List<ShellInk> = emptyList()
+                    setContent {
+                        ShellHarness(Skin(Library.Fluent, expressive = false), isDark = isDark) {
+                            val poster = remember(seed) { PosterColors.of(seed) }
+                            PosterSurface(poster) {
+                                colors = FluentTheme.colors
+                                inks = fluentControlInks(poster.seed.toColor())
+                            }
+                        }
+                    }
+
+                    val misses = mutableListOf<String>()
+                    for (next in ShellSeeds) {
+                        seed = next
+                        waitForIdle()
+                        val poster = PosterColors.of(next)
+                        withClue(next.toHex()) {
+                            val fluent = checkNotNull(colors)
+                            fluent.darkMode shouldBe !poster.isLight
+                            fluent.shades.base shouldBe poster.ramp.toFluentShades().base
+                            inks.shouldNotBeEmpty()
+                        }
+                        misses += inks.mapNotNull { pair ->
+                            val ratio = pair.ink.contrastRatio(pair.ground)
+                            if (ratio < ShellTextRatio) "${next.toHex()} ${pair.name} ${"%.2f".format(ratio)}" else null
+                        }
+                    }
+                    misses.shouldBeEmpty()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun fluentControls_offThePoster_keepFluentsOwnColours() =
         runComposeUiTest {
-            var seed by mutableStateOf(ShellSeeds.first())
-            var colors: Colors? = null
+            var label: Color? = null
+            var fluentLabel: Color? = null
             setContent {
                 ShellHarness(Skin(Library.Fluent, expressive = false)) {
-                    val poster = remember(seed) { PosterColors.of(seed) }
-                    PosterSurface(poster) { colors = FluentTheme.colors }
+                    label = fluentSwitchStyles(checked = false).schemeFor(VisualState.Default).labelColor
+                    fluentLabel = FluentTheme.colors.text.text.primary
                 }
             }
+            waitForIdle()
 
-            val misses = mutableListOf<String>()
-            for (next in ShellSeeds) {
-                seed = next
-                waitForIdle()
-                val poster = PosterColors.of(next)
-                val page = next.toColor()
-                withClue(next.toHex()) {
-                    val fluent = checkNotNull(colors)
-                    fluent.darkMode shouldBe !poster.isLight
-                    fluent.shades.base shouldBe poster.ramp.toFluentShades().base
-                    val ratio = fluent.text.text.primary
-                        .compositeOver(page)
-                        .contrastRatio(page)
-                    if (ratio < FluentTextFloor) misses += "${next.toHex()} ${"%.2f".format(ratio)}"
-                }
-            }
-            misses.shouldBeEmpty()
+            label shouldBe fluentLabel
         }
 
     @Test
@@ -229,4 +255,38 @@ private fun shellInks(
         }
     }
     return shared + own
+}
+
+/**
+ * The resting ink of every Fluent control on the poster, each on the ground it stands on. A fill
+ * Fluent lays on the seed is laid over it first, since Fluent's fills are translucent.
+ */
+@Composable
+private fun fluentControlInks(seed: Color): List<ShellInk> {
+    val rest = VisualState.Default
+
+    fun Color.onSeed(): Color = compositeOver(seed)
+    return buildList {
+        for (emphasis in Emphasis.entries) {
+            val look = fluentButtonColors(emphasis).schemeFor(rest)
+            add(ShellInk("$emphasis button label", look.contentColor, look.fillColor.onSeed()))
+            if (emphasis == Emphasis.Primary || emphasis == Emphasis.Danger) {
+                add(ShellInk("$emphasis button fill", look.fillColor.onSeed(), seed))
+            }
+        }
+        for (on in listOf(false, true)) {
+            val switch = fluentSwitchStyles(on).schemeFor(rest)
+            add(ShellInk("switch label, on $on", switch.labelColor, seed))
+            add(ShellInk("switch thumb, on $on", switch.controlColor, switch.fillColor.onSeed()))
+            val box = fluentCheckboxColors(on).schemeFor(rest)
+            add(ShellInk("checkbox label, on $on", box.labelTextColor, seed))
+            if (on) {
+                add(ShellInk("checkbox check", box.contentColor, box.fillColor.onSeed()))
+            } else {
+                add(ShellInk("checkbox box", box.borderColor, seed))
+            }
+            val tab = fluentTabColors(on).schemeFor(rest)
+            add(ShellInk("tab label, selected $on", tab.contentColor, tab.fillColor.onSeed()))
+        }
+    }
 }
