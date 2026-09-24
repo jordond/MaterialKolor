@@ -47,6 +47,7 @@ include(
     ":builder:shared",
     ":builder:android",
     ":samples:shared",
+    ":samples:testing",
     ":samples:custom-theme",
     ":samples:fluent",
 )
