@@ -47,9 +47,14 @@ import androidx.lifecycle.viewModelScope
 import com.materialkolor.builder.core.data.PreferencesRepository
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.di.AppScope
+import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.feature.topbar.LocalSwitcherForm
+import com.materialkolor.builder.feature.topbar.SwitcherFormState
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
+import com.materialkolor.builder.kit.headless.LocalOverlayKeys
+import com.materialkolor.builder.kit.skin.LocalSkin
 import dev.stateholder.dispatcher.Dispatcher
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -79,6 +84,9 @@ internal class ShortcutsModel(
 
     /** Emits when the page goes out of sight, which lets go of a held B whose release never comes. */
     val pageHides: Flow<Unit> = environment.pageHides
+
+    /** The form the top bar's library switcher shows, which the registry reads. */
+    val switcherForm: SwitcherFormState = SwitcherFormState() // b-315d
 
     /** Turn the single-key shortcuts on or off, in every tab of this browser. */
     fun setSingleKeys(on: Boolean) {
@@ -113,6 +121,9 @@ internal class ShortcutFocus {
 
     /** Whether single keys are on, kept here for the keys a panel takes itself. */
     internal var singleKeys: Boolean = true // b-315c
+
+    /** The page's handling of a key pressed inside an overlay, which the page root never hears. */
+    internal var overlayKey: (KeyEvent) -> Boolean = { false } // b-315d
 
     private var fromKeys = false
 
@@ -162,7 +173,8 @@ internal fun InputModeManager.useKeyboard() {
 
 /**
  * Counts the text input sessions [content] opens for [focus], and says whether the shortcuts are
- * written with Cmd, from [model].
+ * written with Cmd, from [model]. Every overlay opened in [content] hands the page the keys it
+ * keeps while an overlay is open, and the library switcher reports its form to the registry.
  */
 @Composable
 internal fun ShortcutScope(
@@ -170,6 +182,7 @@ internal fun ShortcutScope(
     model: ShortcutsModel = metroViewModel(),
     content: @Composable () -> Unit,
 ) {
+    val overlayKeys = remember(focus) { { event: KeyEvent -> focus.overlayKey(event) } } // b-315d
     val interceptor = remember(focus) {
         PlatformTextInputInterceptor { request, nextHandler ->
             focus.textSessions++
@@ -185,6 +198,8 @@ internal fun ShortcutScope(
         CompositionLocalProvider(
             LocalAppleKeys provides model.apple,
             LocalShortcutFocus provides focus, // b-315c
+            LocalOverlayKeys provides overlayKeys, // b-315d
+            LocalSwitcherForm provides model.switcherForm, // b-315d
             content = content,
         )
     }
@@ -241,8 +256,8 @@ internal class PanelShortcuts(
  * taking Space say, keeps it. Undo and Redo wait the same way, so a field keeps its own text undo.
  * Only Cmd or Ctrl with K, S, O and \, which fire in fields, are taken on the way down. Single keys
  * and Space never fire while a text field below takes input, and Cmd or Ctrl with V, C, X or A is
- * always left alone. Esc leaves Inspect, or else moves focus out of a field to the holder, once
- * overlays and Inspect have had their turn.
+ * always left alone. Esc closes a panel that has not taken the keyboard yet, or else leaves Inspect,
+ * or else moves focus out of a field to the holder, once overlays and Inspect have had their turn.
  *
  * A shortcut whose command cannot run toasts the reason once per press, all but Undo and Redo, which
  * stay quiet with nothing to undo or redo as they do in any editor.
@@ -250,6 +265,10 @@ internal class PanelShortcuts(
  * V opens the dock's Vision menu, and B shows the canvas in grayscale for as long as it is held. The
  * key's repeats change nothing, and B lets go when it comes up, when the holder or the window loses
  * focus and when the page goes out of sight, since the release may never reach the page then.
+ *
+ * Inside an overlay, which the page root never hears, Cmd or Ctrl+S still saves and Cmd or Ctrl+O
+ * does nothing while a panel or the Vision menu is open, so neither reaches the browser. An overlay
+ * on its way out that still holds focus hands both to the page as they are.
  */
 @Composable
 internal fun rememberShortcuts(
@@ -263,7 +282,8 @@ internal fun rememberShortcuts(
     val latestState by rememberUpdatedState(state)
     val inputModes = LocalInputModeManager.current
     val scope = rememberCoroutineScope()
-    ClaimFocusWhenNowhere(focus, state.panel)
+    // b-315d
+    ClaimFocusWhenNowhere(focus, state.panel, LocalSkin.current.library, state.visionMenuOpen)
     // b-315c
     val singleKeys = state.preferences.singleKeyShortcuts
     SideEffect { focus.singleKeys = singleKeys }
@@ -281,34 +301,32 @@ internal fun rememberShortcuts(
         snapshotFlow { window.isWindowFocused }.collect { focused -> if (!focused) letGoOfGrayscale() }
     }
 
-    // V and B work the dock straight away, with no command behind them and no focus to claim after.
+    // B works the dock straight away, with no command behind it and no focus to claim after.
     fun dockKey(shortcut: Shortcut) {
-        when (shortcut) {
-            Shortcut.VisionMenu -> {
-                dispatcher.dispatch(WorkspaceAction.SetVisionMenuOpen(open = true))
-            }
-            Shortcut.Grayscale -> {
-                if (grayscale.down) return
-                grayscale.down = true
-                dispatcher.dispatch(WorkspaceAction.HoldGrayscale(held = true))
-            }
-            else -> {
-                Unit
-            }
-        }
+        if (shortcut != Shortcut.Grayscale || grayscale.down) return
+        grayscale.down = true
+        dispatcher.dispatch(WorkspaceAction.HoldGrayscale(held = true))
     }
 
-    // After a shortcut, focus that the shortcut left nowhere goes to the holder.
+    // After a shortcut, focus that the shortcut left nowhere goes to the holder. The Vision menu
+    // keeps the focus it took.
     fun claimIfNowhere() {
         scope.launch {
             repeat(SETTLE_FRAMES) { withFrameNanos { } }
-            if (!focus.pageHasFocus && latestState.panel == null) focus.focusHolder()
+            val open = latestState.panel != null || latestState.visionMenuOpen // b-315d
+            if (!focus.pageHasFocus && !open) focus.focusHolder()
         }
     }
 
     fun escape(): Boolean {
         inputModes.useKeyboard()
         return when {
+            // b-315d
+            // In the frames between the key that opened a panel and the panel taking focus.
+            latestState.panel != null -> {
+                dispatcher.dispatch(WorkspaceAction.ClosePanel)
+                true
+            }
             latestState.inspect -> {
                 dispatcher.dispatch(WorkspaceAction.SetInspect(false))
                 true
@@ -321,6 +339,23 @@ internal fun rememberShortcuts(
                 false
             }
         }
+    }
+
+    // Runs the command [shortcut] presses, or toasts why it cannot run.
+    fun runCommand(shortcut: Shortcut): Boolean {
+        val command = latestCommands.firstOrNull { command -> command.shortcut == shortcut } ?: return false
+        inputModes.useKeyboard()
+        when (val commandState = command.state) {
+            CommandState.Enabled -> {
+                focus.runFromKeys(command.run)
+                claimIfNowhere()
+            }
+            is CommandState.Disabled -> {
+                val reason = commandState.reason
+                if (shortcut !in QUIET_WHEN_DISABLED) dispatcher.dispatch(WorkspaceAction.ShowToast(reason))
+            }
+        }
+        return true
     }
 
     // The chords that fire in fields go first, since a field may map one of them to an edit of its
@@ -344,20 +379,19 @@ internal fun rememberShortcuts(
             dockKey(shortcut)
             return true
         }
-        val command = latestCommands.firstOrNull { command -> command.shortcut == shortcut } ?: return false
-        inputModes.useKeyboard()
-        when (val commandState = command.state) {
-            CommandState.Enabled -> {
-                focus.runFromKeys(command.run)
-                claimIfNowhere()
-            }
-            is CommandState.Disabled -> {
-                val reason = commandState.reason
-                if (shortcut !in QUIET_WHEN_DISABLED) dispatcher.dispatch(WorkspaceAction.ShowToast(reason))
-            }
-        }
-        return true
+        return runCommand(shortcut)
     }
+
+    // b-315d
+    fun onOverlayKey(event: KeyEvent): Boolean {
+        if (event.type != KeyEventType.KeyDown) return false
+        val (shortcut, chord) = Shortcut.match(event, model.apple) ?: return false
+        if (chord.singleKey || shortcut !in OVERLAY_SHORTCUTS) return false
+        val covered = latestState.panel != null || latestState.visionMenuOpen
+        if (covered && shortcut == Shortcut.Projects) return true
+        return runCommand(shortcut)
+    }
+    SideEffect { focus.overlayKey = ::onOverlayKey }
 
     return remember(focus) {
         Modifier
@@ -375,18 +409,31 @@ internal fun rememberShortcuts(
     }
 }
 
+/** The page's shortcuts that an overlay hands on, since each would otherwise reach the browser. */
+private val OVERLAY_SHORTCUTS = setOf(Shortcut.Save, Shortcut.Projects) // b-315d
+
 /**
- * Hands focus to the holder after boot and after a panel closed, when nothing on the page has it by
- * then. Two frames go by first, so a panel's own hand-off lands before this looks.
+ * Hands focus to the holder after boot, after a panel closed and after a library switch, when
+ * nothing on the page has it by then. Two frames go by first, so a panel's own hand-off lands
+ * before this looks, and so does a top bar control taking focus back after a switch.
+ *
+ * A switch moves the whole page into the new skin's components, which drops the focused node, and
+ * the move lands with the skin's library rather than with the key that asked for it, so this keys
+ * on [library] the way it keys on [panel].
  *
  * Focus that leaves the page while no panel is open is left alone, since on the desktop a menu's
- * popup takes it the same way, and a menu in the page's own overlay host keeps it by its trap.
+ * popup takes it the same way, and a menu in the page's own overlay host keeps it by its trap. The
+ * Vision menu keeps it the same way when a palette row opens it.
  */
 @Composable
 private fun ClaimFocusWhenNowhere(
     focus: ShortcutFocus,
     panel: Panel?,
+    library: Library,
+    visionMenuOpen: Boolean,
 ) {
+    val latestPanel by rememberUpdatedState(panel)
+    val menuOpen by rememberUpdatedState(visionMenuOpen)
     val lastPanel = remember { mutableStateOf<Panel?>(null) }
     LaunchedEffect(panel) {
         val closed = lastPanel.value != null && panel == null
@@ -394,7 +441,15 @@ private fun ClaimFocusWhenNowhere(
         lastPanel.value = panel
         if (!closed && !booted) return@LaunchedEffect
         repeat(SETTLE_FRAMES) { withFrameNanos { } }
-        if (!focus.pageHasFocus) focus.focusHolder()
+        if (!focus.pageHasFocus && !menuOpen) focus.focusHolder()
+    }
+    // b-315d
+    val lastLibrary = remember { mutableStateOf(library) }
+    LaunchedEffect(library) {
+        if (lastLibrary.value == library) return@LaunchedEffect
+        lastLibrary.value = library
+        repeat(SETTLE_FRAMES) { withFrameNanos { } }
+        if (!focus.pageHasFocus && latestPanel == null && !menuOpen) focus.focusHolder()
     }
     LaunchedEffect(focus.armed) {
         if (!focus.armed) return@LaunchedEffect

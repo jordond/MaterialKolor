@@ -216,7 +216,10 @@ internal fun libraryAndStyleCommands(
     val switcher = stringResource(Res.string.topbar_library)
     LibraryChoice.entries.forEachIndexed { index, choice ->
         val name = stringResource(libraryName(choice))
-        val site = if (list.windowClass == WindowClass.Expanded) {
+        // b-315d
+        // Wherever the switcher shows them, as it measured itself, which on a wide window depends on
+        // the room the top bar's actions leave it.
+        val site = if (list.librarySegmented) {
             ControlSite.Direct(Region.TopBar, name)
         } else {
             ControlSite.MenuItem(Region.TopBar, switcher, name)

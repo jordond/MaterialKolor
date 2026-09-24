@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { openBuilder, wantHooks } from './builder';
+import { clickMiddle, openBuilder, pressBareCanvas, SETTLE_MS, wantHooks } from './builder';
 
 // b-315
 // The page's keyboard map on the real builder (F-34), read from the page's accessibility tree. Keys
@@ -15,9 +15,6 @@ const A11Y = '#cmp_a11y_root';
 /** The cheat sheet's line for screen reader users, `command_screen_reader_note`. */
 const SCREEN_READER_NOTE =
   'With a screen reader, single-key shortcuts reach the page in focus mode, also called forms mode, and not in browse mode.';
-
-/** Long enough for a key or a press to reach Compose and settle. */
-const SETTLE_MS = 300;
 
 test.beforeEach(async ({ context }) => {
   await wantHooks(context);
@@ -80,30 +77,92 @@ test('Cmd or Ctrl with K, S and O belong to the page, and K opens the palette pa
   await pressBareCanvas(page);
   const primary = await primaryKey(page);
   // Added after the page's own listeners, so it hears each key once the page has handled it.
+  await listenForKeys(page);
+
+  await page.keyboard.press(`${primary}+s`);
+  await page.keyboard.press(`${primary}+k`);
+  await expect.poll(() => openOverlay(page), { timeout: 10_000 }).toBe('Palette');
+  // b-315d
+  // The router names the palette on the key, before the palette has drawn, so its search field
+  // showing is what says it is open. The palette owns the keyboard then, so Esc closes it first, and
+  // its pane leaving the page's tree says focus is back on the page. Until then a key goes to the
+  // search field, where Compose on the web hears it a frame late, too late to keep it from the browser.
+  await expect(searchField(page)).toBeAttached({ timeout: 10_000 });
+  await page.keyboard.press('Escape');
+  await expect.poll(() => openOverlay(page), { timeout: 10_000 }).toBeNull();
+  await expect(page.locator(A11Y).getByText(/^Command palette, dialog/)).toHaveCount(0, { timeout: 10_000 });
+  await page.keyboard.press(`${primary}+o`);
+  await expect(page.locator(A11Y).getByText(/^Projects, dialog/)).toHaveCount(1, { timeout: 10_000 });
+
+  expect(await seenKeys(page)).toEqual(['s true', 'k true', 'o true']);
+});
+
+// b-315d
+
+test('inside the palette, Cmd or Ctrl with S and O never reach the browser, and S saves', async ({ page }) => {
+  await openBuilder(page);
+  await seedField(page);
+  await pressBareCanvas(page);
+  const primary = await primaryKey(page);
+  await page.keyboard.press(`${primary}+k`);
+  await expect(searchField(page)).toBeAttached({ timeout: 10_000 });
+  // A key pressed in the search field reaches Compose a frame late on the web, too late to keep it
+  // from the browser, so focus moves down into the rows first.
+  await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(SETTLE_MS);
+  await listenForKeys(page);
+  const saved = page.locator(A11Y).getByText('Saved', { exact: true });
+  const savedBefore = await saved.count();
+
+  await page.keyboard.press(`${primary}+s`);
+  await page.keyboard.press(`${primary}+o`);
+
+  await expect.poll(() => saved.count(), { timeout: 10_000 }).toBeGreaterThan(savedBefore);
+  expect(await openOverlay(page)).toBe('Palette');
+  await expect(page.locator(A11Y).getByText(/^Projects, dialog/)).toHaveCount(0);
+  expect(await seenKeys(page)).toEqual(['s true', 'o true']);
+});
+
+test('after a number key switches the library, Space and V work with no click', async ({ page }) => {
+  await openBuilder(page);
+  const before = await seedText(page);
+  await pressBareCanvas(page);
+  const visionRow = page.locator(A11Y).getByText('Deuteranopia', { exact: true });
+  await expect(visionRow).toHaveCount(0);
+
+  await page.keyboard.press('3');
+  // The top bar's Undo names the switch once it has landed, and the page moves into the new skin then.
+  await expect(page.locator(A11Y).getByRole('button', { name: /^Undo library change/ })).toHaveCount(1, {
+    timeout: 10_000,
+  });
+  await page.waitForTimeout(SETTLE_MS);
+  await page.keyboard.press('Space');
+  await expect.poll(() => seedText(page), { timeout: 10_000 }).not.toBe(before);
+  await page.keyboard.press('v');
+
+  await expect(visionRow.first()).toBeAttached({ timeout: 10_000 });
+});
+
+/** The palette's search field, once it shows. */
+function searchField(page: Page): Locator {
+  return page.locator(A11Y).getByRole('textbox', { name: /^Search commands/ });
+}
+
+/** Notes each key down and whether the page kept it from the browser, once the page has handled it. */
+async function listenForKeys(page: Page): Promise<void> {
   await page.evaluate(() => {
     const seen: string[] = [];
     (window as unknown as { __mkKeys: string[] }).__mkKeys = seen;
     window.addEventListener('keydown', (event) => seen.push(`${event.key.toLowerCase()} ${event.defaultPrevented}`));
   });
+}
 
-  await page.keyboard.press(`${primary}+s`);
-  await page.keyboard.press(`${primary}+k`);
-  await expect.poll(() => openOverlay(page), { timeout: 10_000 }).toBe('Palette');
-  // b-315a
-  // The palette owns the keyboard while it is open, so Esc closes it first, and its search field
-  // leaving says focus is on its way back to the page.
-  await page.keyboard.press('Escape');
-  await expect(page.locator(A11Y).getByRole('textbox', { name: /^Search commands/ })).toHaveCount(0, {
-    timeout: 10_000,
-  });
-  await page.keyboard.press(`${primary}+o`);
-  await expect(page.locator(A11Y).getByText(/^Projects, dialog/)).toHaveCount(1, { timeout: 10_000 });
-
-  const seen = await page.evaluate(() =>
+/** The keys [listenForKeys] noted, K, S and O only. */
+async function seenKeys(page: Page): Promise<string[]> {
+  return page.evaluate(() =>
     (window as unknown as { __mkKeys: string[] }).__mkKeys.filter((entry) => /^[kso] /.test(entry)),
   );
-  expect(seen).toEqual(['s true', 'k true', 'o true']);
-});
+}
 
 /** The seed field, once the page has drawn it. */
 async function seedField(page: Page): Promise<Locator> {
@@ -134,31 +193,6 @@ async function lockState(page: Page): Promise<string> {
       .sort()
       .join(' '),
   );
-}
-
-/**
- * Presses the canvas where nothing is, in the preview's header row halfway from its last tab to the
- * window's edge, and waits for the page's focus holder to take focus.
- */
-async function pressBareCanvas(page: Page): Promise<void> {
-  const viewport = page.viewportSize();
-  if (!viewport) throw new Error('The page has no viewport');
-  const tabs = page.locator(A11Y).getByText('Contrast', { exact: true });
-  await expect(tabs.first()).toBeAttached({ timeout: 30_000 });
-  const boxes = (await Promise.all((await tabs.all()).map((tab) => tab.boundingBox()))).filter(
-    (box): box is NonNullable<typeof box> => box !== null && box.x > viewport.width / 3,
-  );
-  if (boxes.length === 0) throw new Error('The preview has no Contrast tab on screen');
-  const tab = boxes.reduce((top, box) => (box.y < top.y ? box : top));
-  await page.mouse.click((tab.x + tab.width + viewport.width) / 2, tab.y + tab.height / 2);
-  await page.waitForTimeout(SETTLE_MS);
-}
-
-async function clickMiddle(page: Page, locator: Locator): Promise<void> {
-  const box = await locator.boundingBox();
-  if (!box) throw new Error('Nothing to click');
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-  await page.waitForTimeout(SETTLE_MS);
 }
 
 /** `Meta` when the page's user agent names an Apple system, where it takes Cmd, else `Control`. */

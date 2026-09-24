@@ -33,6 +33,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
@@ -119,6 +120,9 @@ internal class OverlayLayer(
 
     /** The panel drawn in the layer that takes focus as it opens, which the host can lead focus back into. */
     var focus: OverlayFocus? = null
+
+    /** The keys the place it was opened from hears first, from [LocalOverlayKeys]. */
+    var keys: ((KeyEvent) -> Boolean)? = null // b-315d
 }
 
 /** The layer the overlay drawn here sits in, so its [OverlayFocus] can offer itself to the host. */
@@ -339,6 +343,7 @@ internal fun OverlayPortal(
     layer.placement = placement
     layer.onDismissRequest = onDismissRequest
     layer.open = open
+    layer.keys = LocalOverlayKeys.current // b-315d
     DisposableEffect(host, layer) {
         val stack = if (layer.kind == OverlayKind.Top) host.top else host.layers
         stack.add(layer)
@@ -413,6 +418,7 @@ private fun OverlayLayerContent(
                 layer.hasFocus = state.hasFocus
                 if (letGo && layer.kind == OverlayKind.Top) host.topLostFocus()
             }.then(modifier)
+            .overlayKeys { layer.keys } // b-315d
             .then(if (dismiss != null) Modifier.dismissOnEscape(layer) else Modifier),
     ) {
         if (dismiss != null) {

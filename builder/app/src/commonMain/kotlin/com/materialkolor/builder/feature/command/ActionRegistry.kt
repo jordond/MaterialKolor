@@ -1,10 +1,12 @@
 package com.materialkolor.builder.feature.command
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.platform.LocalUriHandler
 import com.materialkolor.builder.core.session.SaveStatus
@@ -148,10 +150,14 @@ internal sealed interface ControlSite {
 /**
  * Collects the registry's commands for one composition, a small builder so each section reads as
  * a list.
+ *
+ * @property[librarySegmented] Whether the top bar shows the libraries as a segmented row rather than
+ * in its dropdown, the form the switcher measured last.
  */
 internal class CommandList(
     private val reasons: Map<Reason, String>,
     val windowClass: WindowClass,
+    val librarySegmented: Boolean, // b-315d
 ) {
     private val commands = mutableListOf<Command>()
 
@@ -188,6 +194,9 @@ internal class CommandList(
  * It covers the keyboard map, every top bar and overflow item, the libraries, the styles, the
  * target options, the preview's modes, tabs, widths and vision, motion, and every export option
  * and action. A control the target hides adds no command, so nothing ever says "Not supported".
+ *
+ * @param[scope] Where a command's work that goes on after it returns runs, a download or the Saved
+ * toast, so a registry that leaves composition early hands in a scope that outlives it.
  */
 @Composable
 internal fun actionRegistry(
@@ -197,11 +206,15 @@ internal fun actionRegistry(
     share: ShareController = metroViewModel(),
     export: ExportModel = metroViewModel(),
     shortcuts: ShortcutsModel = metroViewModel(),
+    scope: CoroutineScope = rememberCoroutineScope(), // b-315d
 ): List<Command> {
-    val scope = rememberCoroutineScope()
+    LocalRegistryBuilds.current?.invoke() // b-315d
     val latest by rememberUpdatedState(state)
     val reasons = Reason.entries.associateWith { reason -> stringResource(reasonText(reason)) }
-    val list = CommandList(reasons, LocalLayout.current.windowClass)
+    val windowClass = LocalLayout.current.windowClass
+    // b-315d
+    val segmented = shortcuts.switcherForm.segmented ?: (windowClass == WindowClass.Expanded)
+    val list = CommandList(reasons, windowClass, segmented)
     val uriHandler = LocalUriHandler.current
     val saved = stringResource(Res.string.command_saved)
     val saveFailed = stringResource(Res.string.export_save_failed)
@@ -262,6 +275,14 @@ internal fun actionRegistry(
     appearanceCommands(list, state, dispatcher)
     return list.all
 }
+
+// b-315d
+
+/**
+ * Told each time a registry builds, or null, which it always is outside tests. Tests provide it to
+ * count the builds a workspace change costs.
+ */
+internal val LocalRegistryBuilds: ProvidableCompositionLocal<(() -> Unit)?> = staticCompositionLocalOf { null }
 
 /** Toasts [saved] once the save [status] reports has landed, and nothing when it failed. */
 private fun CoroutineScope.announceSaved(

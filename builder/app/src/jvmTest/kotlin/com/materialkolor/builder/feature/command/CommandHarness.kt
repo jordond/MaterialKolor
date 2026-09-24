@@ -42,10 +42,13 @@ internal class CommandHarness(
     /**
      * Boots the builder. [onTextInput] hears each text input session a field starts, after the
      * shortcuts have counted it, so a test can drive the session as an input method would.
+     * [registryBuilds] hears each build of the builder's own registries, the page's and the
+     * palette's, and not the one this harness keeps in [commands].
      */
     fun ComposeUiTest.show(
         onTextInput: (PlatformTextInputMethodRequest) -> Unit = {},
         probe: @Composable (state: WorkspaceModel.State) -> Unit = {},
+        registryBuilds: (() -> Unit)? = null, // b-315d
     ) {
         graph = createGraphFactory<AppGraph.Factory>().create(platform)
         val owner = TestOwner()
@@ -57,11 +60,14 @@ internal class CommandHarness(
             CompositionLocalProvider(
                 LocalViewModelStoreOwner provides owner,
                 LocalMetroViewModelFactory provides graph.metroViewModelFactory,
+                LocalRegistryBuilds provides registryBuilds, // b-315d
             ) {
                 workspace = metroViewModel()
                 InterceptPlatformTextInput(watcher) {
                     BuilderRoot(graph, workspaceModel = workspace) { state ->
-                        commands = actionRegistry(state, rememberDispatcher { })
+                        CompositionLocalProvider(LocalRegistryBuilds provides null) {
+                            commands = actionRegistry(state, rememberDispatcher { })
+                        }
                         probe(state)
                     }
                 }

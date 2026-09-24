@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { openBuilder, wantHooks } from './builder';
+import { clickMiddle, openBuilder, pressBareCanvas, wantHooks } from './builder';
 
 // b-315a
 // The command palette on the real builder (F-33), opened with Cmd or Ctrl+K and read from the page's
@@ -11,9 +11,6 @@ import { openBuilder, wantHooks } from './builder';
 // shortcuts.spec.ts.
 
 const A11Y = '#cmp_a11y_root';
-
-/** Long enough for a press to reach Compose and settle. */
-const SETTLE_MS = 300;
 
 test.beforeEach(async ({ context }) => {
   await wantHooks(context);
@@ -45,6 +42,30 @@ test('a typed hex leads with setting the seed to it', async ({ page }) => {
   await expect.poll(() => seedText(page), { timeout: 10_000 }).toMatch(/0B6E4F/i);
 });
 
+// b-315d
+test('Esc then Cmd or Ctrl+O opens Projects in the history, and Back closes it', async ({ page }) => {
+  await openBuilder(page);
+  await openPalette(page);
+  const primary = await primaryKey(page);
+
+  await page.keyboard.press('Escape');
+  await expect.poll(() => openOverlay(page), { timeout: 10_000 }).toBeNull();
+  // Straight away, while the palette may still be on its way out with focus in it.
+  await page.keyboard.press(`${primary}+o`);
+
+  const projects = page.locator(A11Y).getByText(/^Projects, dialog/);
+  await expect(projects).toHaveCount(1, { timeout: 10_000 });
+  await expect.poll(() => openOverlay(page), { timeout: 10_000 }).toBe('Projects');
+  await page.evaluate(() => history.back());
+  await expect(projects).toHaveCount(0, { timeout: 10_000 });
+  expect(await openOverlay(page)).toBeNull();
+});
+
+/** The overlay the page's router last put in the history, the open panel's name. */
+async function openOverlay(page: Page): Promise<string | null> {
+  return page.evaluate(() => (history.state as { mkOverlay?: string } | null)?.mkOverlay ?? null);
+}
+
 /** Opens the palette with Cmd or Ctrl+K and returns its search field. */
 async function openPalette(page: Page): Promise<Locator> {
   await seedField(page);
@@ -72,31 +93,6 @@ async function seedField(page: Page): Promise<Locator> {
 /** What the seed field shows, the seed's hex. */
 async function seedText(page: Page): Promise<string> {
   return (await (await seedField(page)).textContent()) ?? '';
-}
-
-/**
- * Presses the canvas where nothing is, in the preview's header row halfway from its last tab to the
- * window's edge, and waits for the page's focus holder to take focus.
- */
-async function pressBareCanvas(page: Page): Promise<void> {
-  const viewport = page.viewportSize();
-  if (!viewport) throw new Error('The page has no viewport');
-  const tabs = page.locator(A11Y).getByText('Contrast', { exact: true });
-  await expect(tabs.first()).toBeAttached({ timeout: 30_000 });
-  const boxes = (await Promise.all((await tabs.all()).map((tab) => tab.boundingBox()))).filter(
-    (box): box is NonNullable<typeof box> => box !== null && box.x > viewport.width / 3,
-  );
-  if (boxes.length === 0) throw new Error('The preview has no Contrast tab on screen');
-  const tab = boxes.reduce((top, box) => (box.y < top.y ? box : top));
-  await page.mouse.click((tab.x + tab.width + viewport.width) / 2, tab.y + tab.height / 2);
-  await page.waitForTimeout(SETTLE_MS);
-}
-
-async function clickMiddle(page: Page, locator: Locator): Promise<void> {
-  const box = await locator.boundingBox();
-  if (!box) throw new Error('Nothing to click');
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-  await page.waitForTimeout(SETTLE_MS);
 }
 
 /** `Meta` when the page's user agent names an Apple system, where it takes Cmd, else `Control`. */

@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -122,15 +120,10 @@ internal fun CommandPalette(
     model: CommandPaletteModel = metroViewModel(),
     share: ShareController = metroViewModel(),
 ) {
-    // Outlives the palette, so a shared theme still opens once it has closed.
+    // Outlives the palette, so a shared theme still opens once it has closed, and so does what a
+    // command starts and finishes later, a download or the Saved toast.
     val scope = rememberCoroutineScope()
     val runner = remember(dispatcher) { PaletteRunner(dispatcher) }
-    // Once the palette has opened, its commands stay composed out here rather than in the dialog,
-    // so what one starts and finishes later, a download or the Saved toast, carries on after the
-    // palette has closed.
-    val opened = remember { mutableStateOf(false) }
-    val commands = if (visible || opened.value) actionRegistry(state, runner) else emptyList()
-    if (visible && !opened.value) SideEffect { opened.value = true }
     val width = if (LocalLayout.current.windowClass == WindowClass.Expanded) ExpandedWidth else MediumWidth
     // The dialog keeps this much clear around its panel, so the panel itself comes out at the width.
     val margin = LocalBuilderTokens.current.spacing.large
@@ -143,6 +136,10 @@ internal fun CommandPalette(
         returnFocusTo = returnFocusTo,
         actions = { BuilderButton(onClick = close, label = stringResource(Res.string.palette_close)) },
     ) {
+        // b-315d
+        // Only the dialog's content builds the registry, so a closed palette costs a workspace change
+        // nothing, drag frames included.
+        val commands = actionRegistry(state, runner, scope = scope)
         PaletteBody(
             state = state,
             commands = commands,
@@ -324,7 +321,9 @@ private fun paletteEntries(
     val apple = LocalAppleKeys.current
     val categories = CommandCategory.entries.associateWith { category -> stringResource(category.title) }
     val words = paletteWords()
-    val rows = commands.map { command ->
+    // b-315d
+    // Its own row would only open what is already open.
+    val rows = commands.filter { command -> command.shortcut != Shortcut.Palette }.map { command ->
         PaletteEntry(
             id = command.id,
             label = command.label,
@@ -390,6 +389,7 @@ private val WORDS: Map<String, StringResource> = mapOf(
     "appearance" to Res.string.palette_words_appearance,
     "motion" to Res.string.palette_words_motion,
     "vision" to Res.string.palette_words_vision,
+    "visionMenu" to Res.string.palette_words_vision, // b-315d
     "deviceWidth" to Res.string.palette_words_device,
     "cheatSheet" to Res.string.palette_words_keys,
     "singleKeys" to Res.string.palette_words_keys,

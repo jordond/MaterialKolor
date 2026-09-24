@@ -3,7 +3,12 @@ package com.materialkolor.builder.feature.topbar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -33,6 +38,22 @@ internal const val LIBRARY_SWITCHER_TAG: String = "top-bar-library-switcher"
 internal val LocalSwitcherFitProbe: ProvidableCompositionLocal<(() -> Unit)?> =
     staticCompositionLocalOf { null }
 
+// b-315d
+
+/**
+ * The form the library switcher shows, which the command registry reads to say where each library
+ * sits (P6), the segmented row or a row of the dropdown.
+ */
+@Stable
+internal class SwitcherFormState {
+    /** True for the segmented row, false for the dropdown, or null before the switcher has shown. */
+    var segmented: Boolean? by mutableStateOf(null)
+}
+
+/** Where the switcher reports its form, or null where nothing reads it. */
+internal val LocalSwitcherForm: ProvidableCompositionLocal<SwitcherFormState?> =
+    staticCompositionLocalOf { null }
+
 /**
  * The library switcher in the width the top bar's actions leave it.
  *
@@ -40,7 +61,7 @@ internal val LocalSwitcherFitProbe: ProvidableCompositionLocal<(() -> Unit)?> =
  * screen and out of the accessibility tree, and shown only when it fits. Everywhere else the
  * dropdown shows, and a dropdown wider than the room it gets is narrowed to fit. The row is only
  * measured again when something that sets its width changes, so an edit that keeps the library
- * costs the switcher nothing.
+ * costs the switcher nothing. The form it shows goes to [LocalSwitcherForm] for the command registry.
  *
  * @param[selected] The library the document is on.
  * @param[modifier] Applied to the room the switcher gets, which it fills.
@@ -61,6 +82,7 @@ internal fun FittedLibrarySwitcher(
     val type = LocalBuilderType.current
     val labels = LibraryChoice.entries.map { choice -> libraryName(choice) }
     val probe = LocalSwitcherFitProbe.current
+    val report = LocalSwitcherForm.current // b-315d
     val fit = remember { SwitcherFit() }
     SubcomposeLayout(modifier) { constraints ->
         val loose = constraints.copy(minWidth = 0, minHeight = 0)
@@ -77,6 +99,7 @@ internal fun FittedLibrarySwitcher(
             // A form's slot composes afresh each time the switcher changes to it.
             val changedForm = remember { refit }
             if (changedForm) LaunchedEffect(Unit) { onRefit() }
+            if (report != null) SideEffect { report.segmented = segmented } // b-315d
             LibrarySwitcher(
                 selected = selected,
                 onSwitch = onSwitch,

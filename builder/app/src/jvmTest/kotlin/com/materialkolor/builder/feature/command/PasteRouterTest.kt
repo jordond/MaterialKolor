@@ -82,6 +82,28 @@ class PasteRouterTest {
             named("Open the shared theme?") shouldBe false
         }
 
+    // b-315d
+    @Test
+    fun pasteWithTheVisionMenuOpen_changesNothing() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            val start = document()
+            runOnUiThread { harness.workspace.setVisionMenuOpen(true) }
+            waitForIdle()
+
+            platform.pastes.paste(Paste.Text("#6750A4"))
+            waitForIdle()
+            runOnUiThread { harness.workspace.setVisionMenuOpen(false) }
+            waitForIdle()
+            // A paste once the menu has closed lands, and undoing it goes straight back to the start.
+            platform.pastes.paste(Paste.Text("#1A73E8"))
+            waitUntil { document().seed == Blue }
+
+            runOnUiThread { harness.workspace.undo() }
+            waitForIdle()
+            document() shouldBe start
+        }
+
     private fun ComposeUiTest.boot() {
         with(harness) { show() }
     }

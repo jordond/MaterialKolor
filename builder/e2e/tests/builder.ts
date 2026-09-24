@@ -1,4 +1,4 @@
-import type { BrowserContext, Page } from '@playwright/test';
+import { expect, type BrowserContext, type Locator, type Page } from '@playwright/test';
 
 declare global {
   interface Window {
@@ -102,4 +102,35 @@ export async function dispatchPaste(
     },
     { text, names: files, into },
   );
+}
+
+// b-315d
+
+/** Long enough for a key or a press to reach Compose and settle. */
+export const SETTLE_MS = 300;
+
+/**
+ * Presses the canvas where nothing is, in the preview's header row halfway from its last tab to the
+ * window's edge, and waits for the page's focus holder to take focus.
+ */
+export async function pressBareCanvas(page: Page): Promise<void> {
+  const viewport = page.viewportSize();
+  if (!viewport) throw new Error('The page has no viewport');
+  const tabs = page.locator('#cmp_a11y_root').getByText('Contrast', { exact: true });
+  await expect(tabs.first()).toBeAttached({ timeout: 30_000 });
+  const boxes = (await Promise.all((await tabs.all()).map((tab) => tab.boundingBox()))).filter(
+    (box): box is NonNullable<typeof box> => box !== null && box.x > viewport.width / 3,
+  );
+  if (boxes.length === 0) throw new Error('The preview has no Contrast tab on screen');
+  const tab = boxes.reduce((top, box) => (box.y < top.y ? box : top));
+  await page.mouse.click((tab.x + tab.width + viewport.width) / 2, tab.y + tab.height / 2);
+  await page.waitForTimeout(SETTLE_MS);
+}
+
+/** Clicks the middle of [locator] and lets the press settle. */
+export async function clickMiddle(page: Page, locator: Locator): Promise<void> {
+  const box = await locator.boundingBox();
+  if (!box) throw new Error('Nothing to click');
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await page.waitForTimeout(SETTLE_MS);
 }
