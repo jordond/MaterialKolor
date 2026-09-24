@@ -17,7 +17,8 @@ export default defineConfig({
     // The production smoke runs on Chromium only for now.
     { name: 'webkit', use: { ...devices['Desktop Safari'] }, testIgnore: /smoke\.spec\.ts/ },
     // b-302
-    // Firefox runs the browser API spec only, for spike S7 and the eyedropper check.
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] }, testMatch: /browser-apis\.spec\.ts/ },
+    // b-503
+    // Firefox runs the whole suite but the production smoke too. CI runs Chromium only, see builder.yml.
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] }, testIgnore: /smoke\.spec\.ts/ },
   ],
 });

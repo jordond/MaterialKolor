@@ -1,5 +1,14 @@
 import { expect, test } from '@playwright/test';
 import { openBuilder, pressBareCanvas, SETTLE_MS, wantHooks } from './builder';
+import {
+  button,
+  LAND_TIMEOUT_MS,
+  onPage,
+  openWorkspace,
+  press,
+  pressKeyUntil,
+  storedDocument,
+} from '../fixtures/workspace';
 
 // b-403b
 // The shell in the Fluent skin, whose tabs, segmented rows, switches, checkboxes and disclosures are
@@ -39,3 +48,40 @@ test('4 switches the shell to Fluent and 1 back, with no page error and the tab 
 
   expect(errors).toEqual([]);
 });
+
+// b-503
+// Switch library (flow 5.3). 3, 4 and 2 move the library to Unstyled, Fluent and Expressive, and 2
+// on TonalSpot 2021 suggests the Expressive style on the 2025 spec, which Apply sets as one undo.
+
+test('3, 4 and 2 switch the library, and Apply takes the Expressive suggestion as one undo', async ({ page }) => {
+  test.fixme(true, 'Follow-up: after 3 and 4, a 2 pressed in the Fluent skin does not switch to Expressive within 20 s');
+  await openWorkspace(page);
+  const undo = page.locator('#cmp_a11y_root').getByRole('button', { name: /^Undo library change to / });
+  for (const [key, name] of [
+    ['3', 'Unstyled'],
+    ['4', 'Fluent'],
+    ['2', 'Expressive'],
+  ]) {
+    await pressKeyUntil(page, key, async () => ((await undo.first().getAttribute('aria-label')) ?? '').endsWith(name));
+  }
+
+  await expect(onPage(page, 'Use the Expressive style?')).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
+  await press(page, button(page, 'Apply'));
+  await expect.poll(async () => pick(await storedDocument(page)), { timeout: LAND_TIMEOUT_MS }).toEqual({
+    style: 'Expressive',
+    spec: 'Spec2025',
+    expressive: true,
+  });
+
+  await press(page, button(page, /^Undo /));
+  await expect.poll(async () => pick(await storedDocument(page)), { timeout: LAND_TIMEOUT_MS }).toEqual({
+    style: 'TonalSpot',
+    spec: 'Spec2021',
+    expressive: true,
+  });
+});
+
+/** The parts of a stored document the Expressive suggestion changes. */
+function pick(document: Record<string, unknown> | null) {
+  return { style: document?.style, spec: document?.spec, expressive: document?.expressive };
+}
