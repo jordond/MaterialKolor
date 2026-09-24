@@ -22,9 +22,11 @@ import com.materialkolor.builder.domain.model.CustomTone
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.MotionSchemeChoice
 import com.materialkolor.builder.domain.model.SchemePlatform
+import com.materialkolor.builder.domain.model.SlotResolution
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.model.TonalRamp
 import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import io.kotest.matchers.shouldBe
@@ -34,7 +36,7 @@ private val Plain = ThemeDocument(seed = Argb(0x6750A4))
 
 private const val TITLE = "Spec, platform, extra colors and target options"
 
-private const val CLASSIC_ONLY = "This style only exists in the 2021 spec"
+private const val CLASSIC_ONLY = "This style only exists in the 2021 spec." // b-306c
 
 private const val COMES_BACK = "Your 2025 spec comes back as soon as you pick a style that has it."
 
@@ -307,4 +309,15 @@ class SpecExtrasRowTest {
             onNodeWithText("Reset textMuted").assertDoesNotExist()
             harness.undoEntries() shouldBe 1
         }
+
+    // b-306c
+    @Test
+    fun toneTable_onRampSlot_startsAtTheOnColorsOwnToneNotItsBackground() {
+        val onRamp = SlotResolution.OnRamp(TonalRamp.Primary, light = 40, dark = 80)
+        val fromRamp = SlotResolution.FromRamp(TonalRamp.Primary, light = 40, dark = 80)
+
+        onRamp.ownTone(isDark = false, color = Argb(0xFFFFFF)) shouldBe 100
+        onRamp.ownTone(isDark = true, color = Argb(0x000000)) shouldBe 0
+        fromRamp.ownTone(isDark = true, color = Argb(0x000000)) shouldBe 80
+    }
 }

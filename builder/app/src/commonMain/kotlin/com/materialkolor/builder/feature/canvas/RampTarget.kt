@@ -45,3 +45,20 @@ internal sealed interface RampTarget {
         override val isDark: Boolean,
     ) : RampTarget
 }
+
+// b-308b
+
+/**
+ * What Show on ramp last asked for, with the project it was asked in.
+ *
+ * The Palettes tab draws it only while that project is still the one open, so a target from an
+ * earlier project never lands on the next one's ramps.
+ *
+ * @property[target] What to pick out.
+ * @property[generation] The workspace's `projectGeneration` when it was asked for.
+ */
+@Immutable
+internal data class RampHighlight(
+    val target: RampTarget,
+    val generation: Int,
+)

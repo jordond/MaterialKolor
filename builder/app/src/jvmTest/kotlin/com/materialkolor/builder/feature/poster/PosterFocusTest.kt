@@ -38,6 +38,8 @@ private val CalmerSeed = Argb(0xE53935)
 
 private const val EXPLAINER_TITLE = "Why primary differs from your seed"
 
+private const val SHARE_TITLE = "Share this theme" // b-306c
+
 /** The panels the poster opens hand focus back to the button that opened them (AR-09). */
 @OptIn(ExperimentalTestApi::class)
 class PosterFocusTest {
@@ -118,6 +120,65 @@ class PosterFocusTest {
 
             onNodeWithText("Copy it yourself").assertDoesNotExist()
             onNodeWithText("Copy Kotlin").assertIsFocused()
+        }
+
+    // b-306c
+    @Test
+    fun manualCopy_posterCollapsedWhileOpen_doneStillCloses() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            platform.clipboard.failure = IllegalStateException("No user activation")
+            showRoot()
+
+            onNodeWithText("Copy Kotlin").performSemanticsAction(SemanticsActions.OnClick)
+            waitForIdle()
+            collapsePoster()
+            onNodeWithText("Copy Kotlin").assertDoesNotExist()
+            onNodeWithText("Done").performSemanticsAction(SemanticsActions.OnClick)
+            waitForIdle()
+
+            onNodeWithText("Copy it yourself").assertDoesNotExist()
+        }
+
+    // b-306c
+    @Test
+    fun share_openedFromTheDrawersGetALink_handsFocusBackToProjects() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            platform.environment.storageAvailable = false
+            showRoot()
+            waitUntil { projectName().isNotBlank() }
+            val projects = onNodeWithContentDescription("Projects, ${projectName()}")
+
+            projects.performSemanticsAction(SemanticsActions.OnClick)
+            waitForIdle()
+            onNodeWithText("Get a link").performSemanticsAction(SemanticsActions.OnClick)
+            waitForIdle()
+            onNodeWithText(SHARE_TITLE).assertExists()
+            escapeFromTheOverlay()
+
+            onNodeWithText(SHARE_TITLE).assertDoesNotExist()
+            projects.assertIsFocused()
+        }
+
+    // b-306c
+    @Test
+    fun share_openedFromTheTopBarAfterTheDrawer_handsFocusBackToTheTopBar() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            platform.environment.storageAvailable = false
+            showRoot()
+            waitUntil { projectName().isNotBlank() }
+            onNodeWithContentDescription("Projects, ${projectName()}").performSemanticsAction(SemanticsActions.OnClick)
+            waitForIdle()
+            onNodeWithText("Get a link").performSemanticsAction(SemanticsActions.OnClick)
+            waitForIdle()
+            escapeFromTheOverlay()
+            val share = onNodeWithContentDescription("Share")
+
+            share.performSemanticsAction(SemanticsActions.OnClick)
+            waitForIdle()
+            onNodeWithText(SHARE_TITLE).assertExists()
+            escapeFromTheOverlay()
+
+            share.assertIsFocused()
         }
 
     private fun projectName(): String = workspace.state.value.projectName
