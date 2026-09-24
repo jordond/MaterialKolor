@@ -120,6 +120,22 @@ class TopBarFitTest {
             onAllNodes(hasText("Fluent") and InSwitcher).fetchSemanticsNodes().size shouldBe 1
         }
 
+    // b-509a
+    @Test
+    fun switcher_fluentAt1280BesideHistory_fitsWholeOrFallsBackToTheDropdown() =
+        runDesktopComposeUiTest(width = 1280, height = HEIGHT) {
+            val graph = showRoot()
+            runOnIdle { graph.session.edit(LibraryChoice.Fluent.change, EditPhase.Discrete) }
+            waitForIdle()
+
+            onAllNodes(hasContentDescription("History") and hasClickAction() and InBar)
+                .fetchSemanticsNodes()
+                .size shouldBe 1
+            // Fluent shares the row out evenly, so every option needs the widest one's room.
+            val clipped = if (segmentedShown()) clippedOptions() else emptyList()
+            clipped shouldBe emptyList()
+        }
+
     @Test
     fun switcher_focusedAcrossASwitchToFluent_keepsFocus() =
         runDesktopComposeUiTest(width = ROOMY_WIDTH, height = HEIGHT) {
