@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { decodeBase64Url, decodeShareCode, VERSION } from '../src/code';
-import { BAD_CODES, codeOf, DEFAULT_CODE, namedCode, spell, vector, vectors } from './support';
+import { decodeBase64Url, decodeShareCode, MAX_CODE_LENGTH, THEME_NAME_ALLOWANCE_BYTES, VERSION } from '../src/code';
+import { BAD_CODES, codeOf, DEFAULT_CODE, longestCode, namedCode, spell, vector, vectors } from './support';
 
 // The Kotlin encoder writes these, so this is where the two sides are held to one format.
 describe('share vectors', () => {
@@ -74,6 +74,17 @@ describe('codes the builder would not read', () => {
     expect(decodeShareCode(namedCode(Array(49).fill(0x61)))).toBeNull();
     expect(decodeShareCode(namedCode([0xc3, 0x28]))).toBeNull();
     expect(decodeShareCode(namedCode([]))).toBeNull();
+  });
+
+  it('reads the longest code up to the length cap and nothing longer', () => {
+    const longest = longestCode();
+    expect(longest.length).toBe(MAX_CODE_LENGTH);
+    expect(decodeShareCode(longest)?.projectName).toBe('b'.repeat(48));
+    expect(decodeShareCode(longest)?.accents).toHaveLength(8);
+    const over = longestCode(THEME_NAME_ALLOWANCE_BYTES + 1);
+    expect(over.length).toBeGreaterThan(MAX_CODE_LENGTH);
+    expect(decodeShareCode(over)).toBeNull();
+    expect(decodeShareCode(DEFAULT_CODE.padEnd(MAX_CODE_LENGTH + 1, 'A'))).toBeNull();
   });
 
   it('refuses text that is not canonical base64url', () => {

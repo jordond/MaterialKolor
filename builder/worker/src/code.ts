@@ -102,8 +102,37 @@ const OPTION_RESERVED = 0xf8;
 // An accent's default light and dark tones, which the writer never spells out.
 const DEFAULT_ACCENT_TONES = [40, 90, 80, 30];
 
+/**
+ * The theme name bytes allowed here. The codec caps every other field but not this one, so a code
+ * with a longer theme name still opens in the app and only its preview falls back to the defaults.
+ */
+export const THEME_NAME_ALLOWANCE_BYTES = 255;
+
+// The longest code the builder writes, every section present and at its cap, checksum included.
+const MAX_CODE_BYTES =
+  // Version, seed, scheme, target, contrast and section flags.
+  8 +
+  // Key color mask and every slot.
+  (1 + KEY_COLOR_COUNT * 3) +
+  // The CMF tertiary seed.
+  3 +
+  // Each accent is flags, seed, name, four tones and a threshold.
+  (varintBytes(MAX_ACCENTS) +
+    MAX_ACCENTS * (1 + 3 + varintBytes(MAX_ACCENT_NAME_BYTES) + MAX_ACCENT_NAME_BYTES + 4 + 1)) +
+  // Each pinned role is its code, its modes and a light and a dark color.
+  (1 + ROLE_COUNT * (1 + 1 + 3 + 3)) +
+  (varintBytes(MAX_PROJECT_NAME_BYTES) + MAX_PROJECT_NAME_BYTES) +
+  // Target option flags, motion scheme, theme name, then each custom slot with a light and a dark tone.
+  (1 + 1 + varintBytes(THEME_NAME_ALLOWANCE_BYTES) + THEME_NAME_ALLOWANCE_BYTES + 1 + CUSTOM_SLOTS.size * 3) +
+  // The CRC-8.
+  1;
+
+/** The longest code read here, MAX_CODE_BYTES spelled in unpadded base64url. Longer ones get the defaults. */
+export const MAX_CODE_LENGTH = Math.ceil((MAX_CODE_BYTES * 4) / 3);
+
 /** The theme [code] carries, or null for anything the builder would not read. Never throws. */
 export function decodeShareCode(code: string): SharedTheme | null {
+  if (code.length > MAX_CODE_LENGTH) return null;
   const bytes = decodeBase64Url(code);
   if (bytes === null || bytes.length < MIN_CODE_BYTES || bytes[0] !== VERSION) return null;
   const checksum = bytes.length - 1;
@@ -323,6 +352,13 @@ class Reader {
     }
     return true;
   }
+}
+
+/** How many bytes the writer's varint takes for [value]. */
+function varintBytes(value: number): number {
+  let bytes = 1;
+  for (let rest = value >>> 7; rest > 0; rest >>>= 7) bytes++;
+  return bytes;
 }
 
 function isToneOrNone(value: number): boolean {
