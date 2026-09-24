@@ -1,6 +1,5 @@
 package com.materialkolor.builder.feature.topbar
 
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -9,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.platform.testTag
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.feature.about.GITHUB_URL
 import com.materialkolor.builder.feature.command.LocalAppleKeys
@@ -49,9 +49,10 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The top bar, the library switcher on the start edge and the project's actions on the end edge.
  *
- * On a wide window it holds the segmented switcher, the command palette, undo, redo, Share, Export
- * code and the overflow menu. Narrower windows get the switcher as a dropdown, and phones move the
- * command palette, undo and redo into the overflow.
+ * On a wide window it holds the switcher, the command palette, undo, redo, Share, Export code and
+ * the overflow menu. The actions always get their full width, and the switcher takes what is left,
+ * segmented where the window is wide and the row fits, a dropdown otherwise. Phones move the command
+ * palette, undo and redo into the overflow.
  *
  * A library switch goes through the reveal from the switcher as one undo entry. What has to outlive
  * a skin switch, the open menu and which control has focus, is held here, outside the skin's own
@@ -70,15 +71,22 @@ internal fun TopBarContent(
     val compact = LocalLayout.current.windowClass == WindowClass.Compact
     val items = overflowItems(state, dispatcher, compact, LocalUriHandler.current)
 
-    TopBarRegion(modifier) {
-        LibrarySwitcher(
-            document = state.document,
-            modifier = Modifier.topBarFocus(focus, TopBarControl.Library).switcherPulse(state, dispatcher), // b-314
+    TopBarRegion(modifier.testTag(TOP_BAR_TAG)) {
+        // b-231
+        // The actions take their full width first, since a row measures its weighted child last, and
+        // the switcher gets what is left, so More options is never squeezed.
+        FittedLibrarySwitcher(
+            selected = LibraryChoice.of(state.document),
+            modifier = Modifier.weight(1f),
+            switcherModifier = Modifier
+                .testTag(LIBRARY_SWITCHER_TAG)
+                .topBarFocus(focus, TopBarControl.Library)
+                .switcherPulse(state, dispatcher), // b-314
             onSwitch = { choice, origin ->
                 dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin))
             },
+            onRefit = { focus.restoreAfterRefit(TopBarControl.Library) },
         )
-        Spacer(Modifier.weight(1f))
         if (!compact) {
             TopBarIconButton(
                 control = TopBarControl.Commands,

@@ -68,11 +68,23 @@ internal class TopBarFocus(
             if (changes == lostAt) focused = null
         }
     }
+
+    /**
+     * Puts focus back on [control] after it was rebuilt in another form at a new width, the library
+     * switcher turning from its segmented row into its dropdown or back (b-231). Only a control that
+     * had focus a moment ago takes it, so a resize never pulls focus into the top bar.
+     */
+    fun restoreAfterRefit(control: TopBarControl) {
+        if (focused != control) return
+        // A control this width does not show has no node to take focus, and that is fine.
+        runCatching { requester(control).requestFocus() }
+    }
 }
 
 /**
  * A [TopBarFocus] that puts focus back after every skin switch. Call it outside the skin's top bar
- * region so it lives across the switch.
+ * region so it lives across the switch. The library switcher asks for focus back itself when a
+ * resize changes its form, through [TopBarFocus.restoreAfterRefit].
  */
 @Composable
 internal fun rememberTopBarFocus(): TopBarFocus {

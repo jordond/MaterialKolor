@@ -12,6 +12,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performSemanticsAction
@@ -34,7 +35,10 @@ class ActionRegistryTest {
      */
     @Test
     fun expanded_findsEachCommandsControlWhereTheRegistrySays() =
-        runDesktopComposeUiTest(width = 1280, height = HEIGHT) {
+        // b-231
+        // The registry puts the libraries straight in the top bar on any wide window, and the bar only
+        // shows them there once the segmented switcher fits beside the full actions, as it does here.
+        runDesktopComposeUiTest(width = 1600, height = HEIGHT) {
             val harness = CommandHarness()
             with(harness) { show() }
             val missing = mutableListOf<String>()
@@ -162,21 +166,26 @@ class ActionRegistryTest {
             .size
 
     /**
-     * Clicks the workspace control named [name] through its click action, the way assistive
-     * technology does. The top bar's More options button reports empty bounds here, so a press at
-     * its middle would land on the bare page instead.
+     * Clicks the workspace control named [name]. More options takes a press at its middle, the way a
+     * mouse does, so a top bar that squeezes it shows here. Every other control goes through its
+     * click action, the way assistive technology does, since a press at the middle of some, such
+     * as the poster's disclosures, does not reach them in this window.
      */
     private fun ComposeUiTest.clickNamed(name: String) {
         val clickable = hasClickAction() and InWorkspace
         val described = onAllNodes(hasContentDescription(name) and clickable)
         val shown = onAllNodes(hasText(name) and clickable)
         val node = (if (described.fetchSemanticsNodes().isEmpty()) shown else described).onFirst()
-        node.performSemanticsAction(SemanticsActions.OnClick)
+        // b-231
+        if (name == MORE_OPTIONS) node.performClick() else node.performSemanticsAction(SemanticsActions.OnClick)
         waitForIdle()
     }
 }
 
 private const val HEIGHT = 800
+
+/** The top bar's overflow button, which opens most of the menu sites. */
+private const val MORE_OPTIONS = "More options" // b-231
 
 /** Every command id the registry has at Expanded on the default theme. */
 private val EXPECTED_IDS = listOf(

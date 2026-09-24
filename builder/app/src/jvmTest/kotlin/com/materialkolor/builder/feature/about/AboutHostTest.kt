@@ -59,9 +59,7 @@ import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.getString
 import kotlin.test.Test
 
-// At 1280 the top bar runs out of room before More options, which gets no width at all.
-// TODO(b-231) Back to 1280 wide once B-231 fixes the top bar at 1280 dp.
-private const val WIDTH = 1600
+private const val WIDTH = 1280
 private const val HEIGHT = 800
 
 // b-314a

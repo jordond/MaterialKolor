@@ -99,7 +99,9 @@ class BuilderRootTest {
 
     @Test
     fun librarySwitcher_arrowMovesFocusOnlyAndEnterSwitchesAsOneUndoEntry() =
-        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+        // b-231
+        // Wide enough for the segmented switcher beside the top bar's full actions.
+        runDesktopComposeUiTest(width = 1600, height = HEIGHT) {
             val graph = showRoot()
             val start = graph.session.document.value
 
