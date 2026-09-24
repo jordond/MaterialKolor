@@ -24,29 +24,40 @@ The script prints the brotli version it ran with, since another version can diff
 
 ## The limits
 
-- Per file by role. Each role in `budget.json` names its files with a glob, and every file it names
-  must be at or under the role's limit. The roles are skiko, app wasm, glue and initial fonts, the
-  last one per font file.
+- By role. Each role in `budget.json` names its files with a glob. A role with `maxBytes` holds
+  every file it names to that limit on its own: skiko, app wasm, glue and `index.html`. A role
+  with `totalBytes` holds the sum of all its files: initial fonts, which is every font under a
+  `com.materialkolor.*` resource folder, the same fonts `index.html` lists for boot. A font added
+  there adds its whole size to that one total.
 - First visit, in total. The sum of every file in `firstVisit.files` minus `firstVisit.exclude`,
   which is everything `index.html` loads before the first complete screen. That is the page, the
-  glue, both wasm files, the builder's fonts and its string resources. Library fallback fonts the page never
-  asks for at boot are left out. The Playwright smoke fails if the page loads a file at boot that
-  this set does not count, so the set cannot drift from what the browser really fetches.
+  glue, both wasm files, the builder's fonts and its string resources. Library fallback fonts the
+  page never asks for at boot are left out. The Playwright smoke holds the set to what the browser
+  really fetches both ways: it fails if the page loads a file at boot that the set does not count,
+  and if the set counts a file the page does not load at boot. So the change that makes a file
+  lazy also moves it into `firstVisit.exclude` and, for a font, out of the initial fonts role and
+  the boot list. Until it does, the file counts toward first visit and the smoke fails.
 - Growth, per file. A file a role names may not grow more than `growth.maxPercent` (5%) over its
-  size in `budget-baseline.json`. Files are keyed without their content hash, so
-  `assets/skiko.<hash>.wasm` is `assets/skiko.wasm`. A role file with no baseline fails too. Files
-  outside the roles count toward first visit only, so a string added to a small resource file does
-  not trip the rule.
+  size in `budget-baseline.json`, whether its role has a per-file limit or a total. Files are keyed
+  without their content hash, so `assets/skiko.<hash>.wasm` is `assets/skiko.wasm`. A role file
+  with no baseline fails too. Files outside the roles count toward first visit only, so a string
+  added to a small resource file does not trip the rule.
 - Anything under `assets/` that no role names fails, so a new chunk cannot slip in unbudgeted.
+- Raw size, per file. No file in the site may be over `rawFile.maxBytes`, 26,214,400 raw bytes,
+  which is Cloudflare's 25 MiB cap on one asset. This one counts every file, skipped and
+  unmeasured ones too, since the host is given all of them. The script prints the largest file
+  and how far under the cap it is. Today that is the platform theme's `NotoColorEmoji.ttf`.
 
 ## What a skin costs
 
 A skin has no line of its own. All skins ship in the one app wasm (D1, architecture 2), so a skin is
-paid for out of the app wasm limit, the font limit for any font it brings, and the first visit
-total. Its cost is its share of that one bundle, the growth the full build shows in the change that
-adds it. It is not a delta against a build without it. That delta depends on what the stand-in
-build already pulls in, and spike S1 measured the same Fluent code at 446 KB against one stand-in
-and 220 KB against another.
+paid for out of the app wasm limit, the initial fonts total for any font it brings, and the first
+visit total. Its cost is the brotli size at the head of the change that adds it minus the brotli
+size at that change's merge base, per file and for first visit, both measured as above on full
+production builds of the whole site. It is not a delta against a stand-in, a build with other
+parts left out, or any partial build. Such a delta depends on what the stand-in already pulls in,
+and spike S1 measured the same Fluent code at 446 KB against one stand-in and 220 KB against
+another.
 
 ## Changing the numbers
 

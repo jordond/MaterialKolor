@@ -1,5 +1,5 @@
 {
-  "$comment": "Sizes are brotli bytes, 1 MB = 1000000 bytes. BUDGET.md says what is measured and how. Raising a number here is a reviewed edit.",
+  "$comment": "Sizes are brotli bytes, 1 MB = 1000000 bytes. A role's maxBytes holds each file it names, its totalBytes all of them together. BUDGET.md says what is measured and how. Raising a number here is a reviewed edit.",
   "compression": {
     "algorithm": "brotli",
     "quality": 11,
@@ -15,7 +15,8 @@
     { "name": "skiko", "files": "assets/skiko.*.wasm", "maxBytes": 2650000 },
     { "name": "app wasm", "files": "assets/MaterialKolor-builder-web.*.wasm", "maxBytes": 1300000 },
     { "name": "glue", "files": "assets/builder.*.js", "maxBytes": 150000 },
-    { "name": "initial fonts", "files": "composeResources/com.materialkolor.builder.kit.generated.resources/font/*", "maxBytes": 120000 }
+    { "name": "initial fonts", "files": "composeResources/com.materialkolor.**/font/*", "totalBytes": 120000 },
+    { "name": "index.html", "files": "index.html", "maxBytes": 20000 }
   ],
   "firstVisit": {
     "files": [
@@ -27,6 +28,10 @@
       "composeResources/**/files/OFL-*.txt"
     ],
     "maxBytes": 4200000
+  },
+  "rawFile": {
+    "$comment": "Raw bytes, not brotli, for every file in the site. Cloudflare will not serve one asset over 25 MiB.",
+    "maxBytes": 26214400
   },
   "growth": {
     "maxPercent": 5,

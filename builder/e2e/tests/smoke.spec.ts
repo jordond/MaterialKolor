@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { site } from './builder';
@@ -34,7 +34,9 @@ for (const route of ['/', '/t/AdllOwAAAAAT']) {
   });
 }
 
-test('everything the site loads at boot is counted as first visit by the budget', async ({ page }) => {
+// Both ways, so the first visit total means what the site fetches at boot and nothing else. A file
+// the page stops loading at boot has to move to `firstVisit.exclude` in the same change.
+test('the budget counts as first visit exactly what the site loads at boot', async ({ page }) => {
   const responses = collectResponses(page);
   await page.goto(site('/'));
   await expect(page.locator('#cmp_a11y_root > *').first()).toBeAttached({ timeout: 30_000 });
@@ -42,11 +44,15 @@ test('everything the site loads at boot is counted as first visit by the budget'
 
   const counted = firstVisitFiles();
   const origin = new URL(site('/')).origin;
-  const files = responses
+  const fetched = responses
     .map((response) => new URL(response.url))
     .filter((url) => url.origin === origin)
     .map((url) => (url.pathname === '/' ? 'index.html' : url.pathname.slice(1)));
-  expect(files.filter((file) => !counted(file))).toEqual([]);
+  expect(fetched.filter((file) => !counted(file)), 'loaded at boot but not counted').toEqual([]);
+  const root = process.env.MK_E2E_SITE_DIR;
+  if (!root) throw new Error('MK_E2E_SITE_DIR is not set, the global setup did not run');
+  const unfetched = siteFiles(root).filter((file) => counted(file) && !fetched.includes(file));
+  expect(unfetched, 'counted but not loaded at boot').toEqual([]);
 });
 
 test('the page lists the hashed assets it boots with', async ({ page, request }) => {
@@ -89,9 +95,21 @@ function collectResponses(page: Page): { url: string; status: number }[] {
 /** Whether `budget.json` counts a site file as part of first visit, read the way `check-budget.mjs` reads it. */
 function firstVisitFiles(): (file: string) => boolean {
   const budget = JSON.parse(readFileSync(path.resolve(__dirname, '../../web/budget.json'), 'utf8'));
+  const skipped = (budget.skip as string[]).map(globToRegExp);
   const counted = (budget.firstVisit.files as string[]).map(globToRegExp);
   const lazy = (budget.firstVisit.exclude as string[]).map(globToRegExp);
-  return (file) => counted.some((pattern) => pattern.test(file)) && !lazy.some((pattern) => pattern.test(file));
+  return (file) =>
+    !skipped.some((pattern) => pattern.test(file)) &&
+    counted.some((pattern) => pattern.test(file)) &&
+    !lazy.some((pattern) => pattern.test(file));
+}
+
+/** The site-relative path of every file under [root], with forward slashes. */
+function siteFiles(root: string, prefix = ''): string[] {
+  return readdirSync(path.join(root, prefix), { withFileTypes: true }).flatMap((entry) => {
+    const relative = prefix ? `${prefix}/${entry.name}` : entry.name;
+    return entry.isDirectory() ? siteFiles(root, relative) : [relative];
+  });
 }
 
 /** `*` matches within one path segment and `**` across segments, as in `check-budget.mjs`. */

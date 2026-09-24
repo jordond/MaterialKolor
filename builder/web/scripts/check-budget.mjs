@@ -4,8 +4,9 @@
 //
 //   node scripts/check-budget.mjs [--site dir] [--budget file] [--baseline file] [--write-baseline]
 //
-// Exits 1 when a file is over its role's limit, first visit is over its total, a budgeted file grew
-// more than the growth rule allows against the baseline, or an asset belongs to no role.
+// Exits 1 when a file is over its role's limit, a role's files together are over its total, first
+// visit is over its total, a budgeted file grew more than the growth rule allows against the
+// baseline, an asset belongs to no role, or any site file is over the host's raw size cap.
 
 import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -19,26 +20,33 @@ const budgetFile = path.resolve(args.budget ?? path.join(moduleDir, 'budget.json
 const budget = JSON.parse(readFileSync(budgetFile, 'utf8'));
 const baselineFile = path.resolve(args.baseline ?? path.join(path.dirname(budgetFile), budget.growth.baseline));
 
-const roles = budget.roles.map((role) => ({ ...role, pattern: globToRegExp(role.files) }));
+const roles = budget.roles.map((role) => {
+  if ((role.maxBytes === undefined) === (role.totalBytes === undefined)) {
+    throw new Error(`Role ${role.name} in budget.json needs one of maxBytes (each file) or totalBytes (all files together)`);
+  }
+  return { ...role, pattern: globToRegExp(role.files) };
+});
 const skipped = budget.skip.map(globToRegExp);
 const firstVisit = budget.firstVisit.files.map(globToRegExp);
 const lazy = budget.firstVisit.exclude.map(globToRegExp);
 
+const site = listFiles(siteDir);
+
 // Files that are neither budgeted nor loaded on first visit are not compressed at all. Quality 11
 // is slow, and the platform theme's fallback fonts alone are 75 MB.
-const files = listFiles(siteDir)
-  .filter((file) => !skipped.some((pattern) => pattern.test(file)))
-  .map((file) => ({
+const files = site
+  .filter(({ file }) => !skipped.some((pattern) => pattern.test(file)))
+  .map(({ file, raw }) => ({
     file,
+    raw,
     key: stableKey(file),
     role: roles.find((role) => role.pattern.test(file)),
     firstVisit: firstVisit.some((pattern) => pattern.test(file)) && !lazy.some((pattern) => pattern.test(file)),
   }))
   .filter((entry) => entry.role || entry.firstVisit || entry.file.startsWith('assets/'))
   .map((entry) => {
-    const bytes = readFileSync(path.join(siteDir, entry.file));
     const measured = entry.role || entry.firstVisit;
-    return { ...entry, raw: bytes.length, brotli: measured ? compress(bytes).length : 0 };
+    return { ...entry, brotli: measured ? compress(readFileSync(path.join(siteDir, entry.file))).length : 0 };
   });
 
 if (args['write-baseline']) {
@@ -71,10 +79,20 @@ for (const entry of files) {
       failures.push(`${entry.file} grew ${growth} against its baseline of ${allowed} bytes, the limit is +${budget.growth.maxPercent}%`);
     }
   }
-  if (entry.brotli > role.maxBytes) {
+  if (role.maxBytes !== undefined && entry.brotli > role.maxBytes) {
     failures.push(`${entry.file} is ${entry.brotli} bytes, over the ${role.name} limit of ${role.maxBytes}`);
   }
-  rows.push([entry.file, role.name, entry.raw, entry.brotli, role.maxBytes, allowed ?? '', growth]);
+  rows.push([entry.file, role.name, entry.raw, entry.brotli, role.maxBytes ?? '', allowed ?? '', growth]);
+}
+
+// A role with a total holds its files together, whatever their number. The growth rule above still
+// holds each of them on its own.
+for (const role of roles.filter((role) => role.totalBytes !== undefined)) {
+  const sum = files.filter((entry) => entry.role === role).reduce((total, entry) => total + entry.brotli, 0);
+  if (sum > role.totalBytes) {
+    failures.push(`${role.name} are ${sum} bytes together, over the limit of ${role.totalBytes}`);
+  }
+  rows.push([`${role.name}, all files`, role.name, '', sum, role.totalBytes, '', '']);
 }
 
 const total = files.filter((entry) => entry.firstVisit).reduce((sum, entry) => sum + entry.brotli, 0);
@@ -83,8 +101,16 @@ if (total > budget.firstVisit.maxBytes) {
 }
 rows.push(['first visit', '', '', total, budget.firstVisit.maxBytes, '', '']);
 
+// The host's cap is on raw bytes and holds every file it is given, measured or skipped here.
+const rawLimit = budget.rawFile.maxBytes;
+for (const { file, raw } of site.filter((entry) => entry.raw > rawLimit)) {
+  failures.push(`${file} is ${raw} raw bytes, over the host's per-file cap of ${rawLimit}`);
+}
+const largest = site.reduce((max, entry) => (entry.raw > max.raw ? entry : max));
+
 console.log(`brotli ${process.versions.brotli} (node ${process.versions.node}), quality ${budget.compression.quality}\n`);
 printTable(['file', 'role', 'raw', 'brotli', 'limit', 'baseline', 'growth'], rows);
+console.log(`\nLargest file: ${largest.file}, ${largest.raw} raw bytes, ${rawLimit - largest.raw} under the per-file cap of ${rawLimit}.`);
 if (failures.length > 0) {
   console.error(`\nOver budget:\n${failures.map((failure) => `  ${failure}`).join('\n')}`);
   console.error('\nRaising a limit or the baseline is a reviewed edit of budget.json or budget-baseline.json.');
@@ -103,13 +129,14 @@ function compress(bytes) {
   });
 }
 
-/** The site-relative path of every file under [root], with forward slashes. */
+/** Every file under [root], its site-relative path with forward slashes and its raw size. */
 function listFiles(root, prefix = '') {
   return readdirSync(path.join(root, prefix))
     .sort()
     .flatMap((name) => {
       const relative = prefix ? `${prefix}/${name}` : name;
-      return statSync(path.join(root, relative)).isDirectory() ? listFiles(root, relative) : [relative];
+      const stats = statSync(path.join(root, relative));
+      return stats.isDirectory() ? listFiles(root, relative) : [{ file: relative, raw: stats.size }];
     });
 }
 
