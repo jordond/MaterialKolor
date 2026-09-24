@@ -1,0 +1,30 @@
+package com.materialkolor.sample.material3
+
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
+import com.materialkolor.sample.material3.ui.Material3SampleApp
+
+/**
+ * Run it with `./gradlew :samples:material3:run`.
+ */
+public fun main() {
+    application {
+        val state = rememberWindowState(
+            size = DpSize(960.dp, 760.dp),
+            position = WindowPosition(Alignment.Center),
+        )
+
+        Window(
+            onCloseRequest = ::exitApplication,
+            state = state,
+            title = "MaterialKolor Material 3 sample",
+        ) {
+            Material3SampleApp()
+        }
+    }
+}

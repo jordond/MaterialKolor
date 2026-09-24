@@ -258,6 +258,9 @@ fun MyTheme(
 }
 ```
 
+[`samples/material3`](samples/material3) builds the [Tasks sample](#samples) on Material 3
+components themed by `DynamicMaterialTheme`. Run it with `./gradlew :samples:material3:run`.
+
 ### DynamicMaterialExpressiveTheme
 
 For more vibrant and playful themes, use `DynamicMaterialExpressiveTheme`. This composable is
@@ -703,14 +706,15 @@ files, add the matching kmpalette extension artifact and pass its loader.
 
 ## Samples
 
-The [samples](samples) are one small app, Tasks, built three times. A to-do list with a seed picker
+The [samples](samples) are one small app, Tasks, built four times. A to-do list with a seed picker
 and a light and dark switch on top. The behaviour, the copy and the data live in one shared module,
-so the three differ only in their UI stack and in how they turn a seed into a theme.
+so the four differ only in their UI stack and in how they turn a seed into a theme.
 
 | Sample | UI | Theme from | Run it |
 |---|---|---|---|
 | [`custom-theme`](samples/custom-theme) | Compose Foundation | `material-kolor-core` tonal ramps | `./gradlew :samples:custom-theme:run` |
 | [`fluent`](samples/fluent) | Compose Fluent | `material-kolor-fluent` | `./gradlew :samples:fluent:run` |
+| [`material3`](samples/material3) | Compose Material 3 | `material-kolor-material3` | `./gradlew :samples:material3:run` |
 | [`unstyled`](samples/unstyled) | Compose Unstyled | `material-kolor-unstyled` | `./gradlew :samples:unstyled:run` |
 
 [`samples/README.md`](samples/README.md) has the full spec.

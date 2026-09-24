@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":samples:shared"))
     implementation(project(":samples:custom-theme"))
     implementation(project(":samples:fluent"))
+    implementation(project(":samples:material3"))
     implementation(project(":samples:unstyled"))
 }
 

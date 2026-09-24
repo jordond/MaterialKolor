@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import com.materialkolor.sample.customtheme.ui.SampleApp
 import com.materialkolor.sample.fluent.ui.FluentSampleApp
+import com.materialkolor.sample.material3.ui.Material3SampleApp
 import com.materialkolor.sample.shared.model.AppSection
 import com.materialkolor.sample.shared.state.SampleState
 import com.materialkolor.sample.shared.state.SampleStore
@@ -51,6 +52,7 @@ private enum class Sample(
 ) {
     CustomTheme(slug = "custom-theme", content = { store -> SampleApp(store) }),
     Fluent(slug = "fluent", content = { store -> FluentSampleApp(store) }),
+    Material3(slug = "material3", content = { store -> Material3SampleApp(store) }),
     Unstyled(slug = "unstyled", content = { store -> UnstyledSampleApp(store) }),
 }
 
