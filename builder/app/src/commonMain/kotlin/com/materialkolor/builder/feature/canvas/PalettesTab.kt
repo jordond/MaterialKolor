@@ -119,7 +119,7 @@ internal fun PalettesTab(
         top = shared,
         columns = layout.light.isNotEmpty() || layout.dark.isNotEmpty(),
     ) { isDark ->
-        for (entry in layout.mode(isDark)) RampBlock(entry, result, picked, requesters, dispatcher)
+        for (entry in layout.mode(isDark)) RampBlock(entry, entry.title(result), picked, requesters, dispatcher)
     }
 }
 
@@ -147,7 +147,7 @@ private fun SharedRamps(
             modifier = Modifier.semantics { heading() },
             style = BuilderTextStyle.Title,
         )
-        DataPanel { for (entry in entries) RampBlock(entry, result, picked, requesters, dispatcher) }
+        DataPanel { for (entry in entries) RampBlock(entry, entry.title(result), picked, requesters, dispatcher) }
     }
 }
 
@@ -171,7 +171,7 @@ private sealed interface RampSource {
  * @property[isDark] The mode it picked it in, or null on a ramp that shows one mode only.
  */
 @Immutable
-private class ModeMark(
+private data class ModeMark(
     val name: String,
     val tone: Double,
     val isDark: Boolean?,
@@ -189,7 +189,7 @@ private class ModeMark(
  * markers, or null.
  */
 @Immutable
-private class RampEntry(
+private data class RampEntry(
     val source: RampSource,
     val isDark: Boolean?,
     val steps: List<RampStep>,
@@ -224,7 +224,7 @@ private class RampLayout(
  * every ramp is under 2021.
  */
 @Immutable
-private class PickedRamp(
+private data class PickedRamp(
     val source: RampSource,
     val isDark: Boolean,
     val name: String,
@@ -343,19 +343,22 @@ private fun ThemeResult.sameInBothModes(palette: KeyColor): Boolean =
     ramps[palette, false].steps == ramps[palette, true].steps
 
 /**
- * One ramp under its name. The picked ramp wears an outline and a label saying what sits on it,
+ * One ramp under its [title]. The picked ramp wears an outline and a label saying what sits on it,
  * and takes [requesters], so the tab can scroll to it and focus its first stop.
+ *
+ * It takes nothing of the theme but its own ramp, so a change that leaves the ramp alone, such as
+ * another accent or a custom tone, does not compose it again.
  */
 @Composable
 private fun RampBlock(
     entry: RampEntry,
-    result: ThemeResult,
+    title: String, // pf-1
     picked: PickedRamp?,
     requesters: PickedRequesters,
     dispatcher: Dispatcher<WorkspaceAction>,
 ) {
+    LocalTileProbe.current?.invoke(title) // pf-1
     val tokens = LocalBuilderTokens.current
-    val title = entry.title(result)
     val shown = picked?.takeIf { pick -> pick.matches(entry) }
     val labels = entry.steps.associate { step ->
         step.tone to stringResource(Res.string.tabs_copied_tone, title, step.tone)
