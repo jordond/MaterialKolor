@@ -2,6 +2,7 @@ package com.materialkolor.builder.domain.link
 
 import com.materialkolor.builder.domain.DocumentArb
 import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.CustomTone
@@ -231,11 +232,23 @@ class ShareCodecCorruptionTest {
     }
 
     /**
-     * Decodes [code] and, when it reads cleanly, checks it writes back to exactly the same text.
+     * Decodes [code] and, when it reads cleanly, checks it writes back to exactly the same text, or
+     * to the same text with its contrast on the nearest named level when it held one in between (D53).
      */
     private fun assertStable(code: String) {
         val result = ShareCodec.decode(code)
-        if (result is DecodeResult.Ok) assertEquals(code, ShareCodec.encode(result.document, result.projectName))
+        if (result is DecodeResult.Ok) {
+            assertEquals(snapped(code), ShareCodec.encode(result.document, result.projectName))
+        }
+    }
+
+    /** [code] with its contrast byte moved onto the nearest named level, or [code] itself when it sits on one. */
+    private fun snapped(code: String): String {
+        val bytes = bytesOf(code)
+        val level = ContrastLevel(bytes[CONTRAST_BYTE].toInt()).snapped()
+        if (level.hundredths == bytes[CONTRAST_BYTE].toInt()) return code
+        bytes[CONTRAST_BYTE] = level.hundredths.toByte()
+        return resealed(bytes)
     }
 
     private fun assertReservedBitsRejected(
@@ -280,6 +293,9 @@ class ShareCodecCorruptionTest {
     private fun ByteArray.unsignedValues(): IntArray = IntArray(size) { index -> unsigned(index) }
 
     private companion object {
+        /** Where the header keeps the contrast, as a signed byte of hundredths. */
+        const val CONTRAST_BYTE = 6
+
         val RETIRED_SLOT_CODES: List<Int> = (18..29) + (41..45)
     }
 }
