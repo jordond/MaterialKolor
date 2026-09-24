@@ -28,9 +28,11 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -42,6 +44,7 @@ import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.BuilderTooltip
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.generated.resources.Res
 import com.materialkolor.builder.kit.generated.resources.widget_badge_aa
 import com.materialkolor.builder.kit.generated.resources.widget_badge_aa_large
@@ -49,9 +52,11 @@ import com.materialkolor.builder.kit.generated.resources.widget_badge_aaa
 import com.materialkolor.builder.kit.generated.resources.widget_badge_fail
 import com.materialkolor.builder.kit.generated.resources.widget_contrast_ratio
 import com.materialkolor.builder.kit.generated.resources.widget_copy
+import com.materialkolor.builder.kit.generated.resources.widget_pinned
 import com.materialkolor.builder.kit.generated.resources.widget_tone
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import org.jetbrains.compose.resources.stringResource
@@ -64,6 +69,9 @@ private val SwatchColorHeight: Dp = 72.dp
 /** The outline of a widget with keyboard focus, thick enough to read on any fill. */
 internal val WidgetFocusWidth: Dp = 2.dp
 
+/** Tags the pin badge on a pinned swatch, so a test can find it. */
+internal const val SwatchPinTag: String = "swatch-pin"
+
 private const val AAA_TEXT = 7.0
 private const val AA_TEXT = 4.5
 private const val AA_LARGE = 3.0
@@ -74,10 +82,13 @@ private const val AA_LARGE = 3.0
  * It shows the role name, the hex, the tone the role resolved to and its contrast against [onColor]
  * as a ratio and a WCAG badge. A role with no on-pair, such as outline or an on role, has no ratio to
  * rate, so it passes a null [contrast] and the contrast line stays hidden. It reads out as a button
- * named like "primary, #6750A4, tone 40".
+ * named like "primary, #6750A4, tone 40". A [pinned] role wears a pin beside its name and reads out
+ * pinned as its state. The web hears only the name, so there the ratio, the badge and the pinned
+ * state travel in it, as in "primary, #6750A4, tone 40, 6.4:1, AA, pinned" (D37, F-22).
  *
  * The copy button is a visible button, not a hover trick. It shows on a touch screen, while the
- * swatch or the button has keyboard focus, and while a mouse is over the swatch.
+ * swatch or the button has keyboard focus, and while a mouse is over the swatch. Keyboard focus rings
+ * the swatch on the panel around it, where the focus color holds 3 to 1.
  *
  * @param[name] The role name, as in "primary".
  * @param[color] The role's color.
@@ -87,6 +98,7 @@ private const val AA_LARGE = 3.0
  * @param[onCopy] Called when the copy button is pressed. The caller does the copying.
  * @param[onClick] Called when the swatch itself is pressed.
  * @param[modifier] Applied to the swatch.
+ * @param[pinned] Whether the role is pinned to a color of its own.
  */
 @Composable
 public fun SwatchTile(
@@ -98,13 +110,23 @@ public fun SwatchTile(
     onCopy: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    pinned: Boolean = false,
 ) {
     val tokens = LocalBuilderTokens.current
     val layout = LocalLayout.current
     val hex = color.hex()
     val toneText = stringResource(Res.string.widget_tone, tone.roundToInt())
     val copyLabel = stringResource(Res.string.widget_copy)
-    val semanticsName = listOf(name, hex, toneText).joinToString(", ")
+    val pinnedWord = stringResource(Res.string.widget_pinned)
+    val badge = contrast?.let(::textBadge)
+    val ratioText = contrast?.let { ratio -> stringResource(Res.string.widget_contrast_ratio, oneDecimal(ratio)) }
+    val badgeText = badge?.label()
+    val folds = LocalFoldsStateIntoName.current
+    val semanticsName = if (folds) {
+        listOfNotNull(name, hex, toneText, ratioText, badgeText, pinnedWord.takeIf { pinned })
+    } else {
+        listOf(name, hex, toneText)
+    }.joinToString(", ")
     val shape = RoundedCornerShape(tokens.radius.medium)
     val hoverSource = remember { MutableInteractionSource() }
     val tileSource = remember { MutableInteractionSource() }
@@ -120,7 +142,8 @@ public fun SwatchTile(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .widgetOutline(tileSource, shape, hovered)
+                .controlRing(tileSource, shape)
+                .widgetHairline(shape, hovered)
                 .clip(shape)
                 .background(tokens.panel)
                 .clickable(
@@ -128,7 +151,10 @@ public fun SwatchTile(
                     indication = null,
                     role = Role.Button,
                     onClick = onClick,
-                ).semantics { contentDescription = semanticsName },
+                ).semantics {
+                    contentDescription = semanticsName
+                    if (pinned) stateDescription = pinnedWord
+                },
         ) {
             Column(
                 modifier = Modifier
@@ -138,13 +164,27 @@ public fun SwatchTile(
                     .padding(tokens.spacing.medium),
                 verticalArrangement = Arrangement.spacedBy(tokens.spacing.extraSmall),
             ) {
-                BuilderText(
-                    name,
-                    style = BuilderTextStyle.Label,
-                    color = onColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(tokens.spacing.extraSmall),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    BuilderText(
+                        name,
+                        modifier = Modifier.weight(1f, fill = false),
+                        style = BuilderTextStyle.Label,
+                        color = onColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    if (pinned) {
+                        BuilderIcon(
+                            id = IconId.Pin,
+                            contentDescription = null,
+                            modifier = Modifier.testTag(SwatchPinTag),
+                            tint = onColor,
+                        )
+                    }
+                }
                 BuilderText(hex, style = BuilderTextStyle.Value, color = onColor)
             }
             Column(
@@ -159,15 +199,15 @@ public fun SwatchTile(
                 verticalArrangement = Arrangement.spacedBy(tokens.spacing.extraSmall),
             ) {
                 BuilderText(toneText, style = BuilderTextStyle.Value, emphasis = Emphasis.Secondary)
-                if (contrast != null) ContrastLine(contrast)
+                if (badge != null && ratioText != null && badgeText != null) ContrastLine(ratioText, badge, badgeText)
             }
         }
         if (showCopy) {
-            BuilderTooltip(
-                text = copyLabel,
-                modifier = Modifier.align(Alignment.BottomEnd).padding(tokens.spacing.extraSmall),
-            ) {
-                BuilderIconButton(onClick = onCopy, icon = IconId.Copy, contentDescription = copyLabel)
+            // Placed by a box of its own, since Material's tooltip wraps the modifier it is given.
+            Box(Modifier.align(Alignment.BottomEnd).padding(tokens.spacing.extraSmall)) {
+                BuilderTooltip(text = copyLabel) {
+                    BuilderIconButton(onClick = onCopy, icon = IconId.Copy, contentDescription = copyLabel)
+                }
             }
         }
     }
@@ -175,24 +215,24 @@ public fun SwatchTile(
 
 /** The ratio against the on-pair and the badge it earns, with an icon so the badge never rests on color. */
 @Composable
-private fun ContrastLine(contrast: Double) {
+private fun ContrastLine(
+    ratioText: String,
+    badge: ContrastBadge,
+    badgeText: String,
+) {
     val tokens = LocalBuilderTokens.current
-    val badge = textBadge(contrast)
     Row(
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.extraSmall),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        BuilderText(
-            stringResource(Res.string.widget_contrast_ratio, oneDecimal(contrast)),
-            style = BuilderTextStyle.Value,
-        )
+        BuilderText(ratioText, style = BuilderTextStyle.Value)
         BuilderIcon(
             id = badge.icon,
             contentDescription = null,
             tint = badge.tint(tokens),
             size = tokens.iconSize,
         )
-        BuilderText(badge.label(), style = BuilderTextStyle.Label)
+        BuilderText(badgeText, style = BuilderTextStyle.Label)
     }
 }
 
@@ -241,24 +281,28 @@ internal fun oneDecimal(value: Double): String {
 internal fun Color.hex(): String = Argb(toArgb()).toHex()
 
 /**
- * The outline every pressable widget draws in place of a skin's indication. The hairline turns
- * strong under a mouse and becomes the focus ring under keyboard focus.
- *
- * @param[atRest] Whether the hairline shows while nothing is hovering or focused.
+ * The outline a pressable widget draws in place of a skin's indication. The hairline turns strong
+ * under a mouse and gives way to a line in the focus color under keyboard focus. A widget ringed
+ * outside its edge by [controlRing] keeps [widgetHairline] instead.
  */
 @Composable
 internal fun Modifier.widgetOutline(
     interactionSource: InteractionSource,
     shape: Shape,
     hovered: Boolean,
-    atRest: Boolean = true,
+): Modifier {
+    val focused by interactionSource.collectIsFocusedAsState()
+    if (!focused) return widgetHairline(shape, hovered)
+    return border(WidgetFocusWidth, LocalBuilderTokens.current.focus, shape)
+}
+
+/** The hairline around a pressable widget, strong while a mouse is over it. */
+@Composable
+internal fun Modifier.widgetHairline(
+    shape: Shape,
+    hovered: Boolean,
 ): Modifier {
     val tokens = LocalBuilderTokens.current
-    val focused by interactionSource.collectIsFocusedAsState()
-    return when {
-        focused -> border(WidgetFocusWidth, tokens.focus, shape)
-        hovered -> border(tokens.outlineWidth, tokens.borderStrong, shape)
-        atRest -> border(tokens.outlineWidth, tokens.border, shape)
-        else -> this
-    }
+    val line = if (hovered) tokens.borderStrong else tokens.border
+    return border(tokens.outlineWidth, line, shape)
 }

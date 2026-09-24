@@ -10,15 +10,25 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.domain.model.Style
+import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.kit.icon.IconId
 import io.kotest.assertions.withClue
-import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.floats.shouldBeGreaterThan
 import kotlin.test.Test
 
-/** The skins whose headless slider ring is short of the pixel line, named as [forEachSkin] names them. */
-private val HeadlessSliderShortfalls: Set<String> = setOf("custom", "fluent")
+/**
+ * A seed and style whose Material3 primary and secondary sit far apart, so the tab ring under the
+ * primary focus layer drifts off the secondary focus colour by more than the ring tolerance.
+ */
+private val FarApartDocument: ThemeDocument = ThemeDocument(seed = Argb(0x0000FF), style = Style.Vibrant)
+
+/** How far the focus layer has to pull the ring for [FarApartDocument] to test anything. */
+private const val RingTolerance = 0.02f
 
 /**
  * Every control rings when Tab lands on it, in every skin, with enough of the ring standing out 3 to 1
@@ -27,45 +37,55 @@ private val HeadlessSliderShortfalls: Set<String> = setOf("custom", "fluent")
 @OptIn(ExperimentalTestApi::class)
 class FocusRingTest {
     @Test
-    fun iconButton_everyEmphasis_ringsWhenTabLandsOnIt() {
+    fun iconButton_everyEmphasis_ringsOnEverySide() {
         for (emphasis in Emphasis.entries) {
             withClue(emphasis.name) {
                 forEachSkin { _, skin ->
-                    tabOntoRing(skin) {
+                    val capture = tabOntoRing(skin) {
                         BuilderIconButton(
                             onClick = {},
                             icon = IconId.Copy,
                             contentDescription = "Copy",
                             emphasis = emphasis,
                         )
-                    }.shouldShowRing()
+                    }
+                    capture.shouldShowRing()
+                    capture.shouldRingEverySide()
                 }
             }
         }
     }
 
     @Test
-    fun iconButton_inATooltip_ringsWhenTabLandsOnIt() =
+    fun iconButton_inATooltip_ringsOnEverySide() =
         forEachSkin { _, skin ->
-            tabOntoRing(skin) {
+            val capture = tabOntoRing(skin) {
                 BuilderTooltip("Copy the hex") {
                     BuilderIconButton(onClick = {}, icon = IconId.Copy, contentDescription = "Copy")
                 }
-            }.shouldShowRing()
+            }
+            capture.shouldShowRing()
+            capture.shouldRingEverySide()
         }
 
     @Test
-    fun checkbox_ringsWhenTabLandsOnIt() =
+    fun checkbox_ringsOnEverySide() =
         forEachSkin { _, skin ->
-            tabOntoRing(skin) { BuilderCheckbox(checked = true, onCheckedChange = {}, label = "Show tones") }
-                .shouldShowRing()
+            val capture = tabOntoRing(skin) {
+                BuilderCheckbox(checked = true, onCheckedChange = {}, label = "Show tones")
+            }
+            capture.shouldShowRing()
+            capture.shouldRingEverySide()
         }
 
     @Test
-    fun switch_ringsWhenTabLandsOnIt() =
+    fun switch_ringsOnEverySide() =
         forEachSkin { _, skin ->
-            tabOntoRing(skin) { BuilderSwitch(checked = false, onCheckedChange = {}, label = "Dark theme") }
-                .shouldShowRing()
+            val capture = tabOntoRing(skin) {
+                BuilderSwitch(checked = false, onCheckedChange = {}, label = "Dark theme")
+            }
+            capture.shouldShowRing()
+            capture.shouldRingEverySide()
         }
 
     @Test
@@ -76,34 +96,59 @@ class FocusRingTest {
                 BuilderTabs(tabs = tabs, selected = "Dark", onSelect = {}, label = { tab -> tab })
             }
             capture.shouldShowRing()
-            capture.shouldRingEverySide(reach = with(density) { 8.dp.toPx() })
+            capture.shouldRingEverySide()
         }
 
     @Test
-    fun disclosure_collapsed_ringsWhenTabLandsOnIt() =
+    fun tabs_material3OnAFarApartSeed_ringsUnderTheFocusLayer() {
+        for ((name, skin) in ControlSkins.filter { (_, skin) -> skin.library == Library.Material3 }) {
+            withClue(name) {
+                runComposeUiTest {
+                    val tabs = listOf("Light", "Dark", "Contrast")
+                    val capture = tabOntoRing(skin, document = FarApartDocument) {
+                        BuilderTabs(tabs = tabs, selected = "Dark", onSelect = {}, label = { tab -> tab })
+                    }
+                    capture.layerDrift shouldBeGreaterThan RingTolerance
+                    capture.shouldShowRing()
+                    capture.shouldRingEverySide()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun disclosure_collapsed_ringsOnEverySide() =
         forEachSkin { _, skin ->
-            tabOntoRing(skin) {
+            val capture = tabOntoRing(skin) {
                 BuilderDisclosure(expanded = false, onExpandedChange = {}, title = "Contrast") {
                     BuilderText("Standard")
                 }
-            }.shouldShowRing()
+            }
+            capture.shouldShowRing()
+            capture.shouldRingEverySide()
         }
 
     @Test
-    fun disclosure_expanded_ringsWhenTabLandsOnIt() =
+    fun disclosure_expanded_ringsOnEverySide() =
         forEachSkin { _, skin ->
-            tabOntoRing(skin) {
+            val capture = tabOntoRing(skin) {
                 BuilderDisclosure(expanded = true, onExpandedChange = {}, title = "Contrast") {
                     BuilderText("Standard")
                 }
-            }.shouldShowRing()
+            }
+            capture.shouldShowRing()
+            capture.shouldRingEverySide()
         }
 
+    /**
+     * The thumb is small and round, so at one pixel per dp most of its ring is blended edge and too
+     * few whole pixels are left to count. It is drawn at two instead of lowering the pixel line.
+     */
     @Test
-    fun slider_ringsTheThumb_andRightStillMovesIt() =
-        forEachSkin { name, skin ->
+    fun slider_ringsTheThumbClearOfTheTrack_andRightStillMovesIt() =
+        forEachSkin { _, skin ->
             var value by mutableFloatStateOf(0.5f)
-            val capture = tabOntoRing(skin) {
+            val capture = tabOntoRing(skin, density = 2f) {
                 BuilderSlider(
                     value = value,
                     onValueChange = { next -> value = next },
@@ -111,10 +156,8 @@ class FocusRingTest {
                     modifier = Modifier.width(240.dp),
                 )
             }
-            // The headless thumb ring falls short of 100 whole pixels at 3 to 1 in Custom (69, the worst
-            // 1.96 to 1 on the accent track) and Fluent (68, the worst 2.57 to 1). Headless rings are left
-            // alone here, so those two only have to show one.
-            if (name in HeadlessSliderShortfalls) capture.pixels.shouldNotBeEmpty() else capture.shouldShowRing()
+            capture.shouldShowRing()
+            capture.shouldClearTheTrack()
             onNode(isFocused()).performKeyInput { pressKey(Key.DirectionRight) }
             waitForIdle()
             value shouldBeGreaterThan 0.5f

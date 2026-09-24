@@ -12,7 +12,10 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -67,14 +70,13 @@ import com.materialkolor.builder.engine.resolve.RampStep
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.control.ControlSkins
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
+import com.materialkolor.builder.kit.control.hasStateDescription
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.token.BuilderTokens
-import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeGreaterThan
@@ -338,29 +340,49 @@ class WidgetsSemanticsTest {
         }
 
     @Test
-    fun rampStrip_focusedStop_drawsTheFocusLineBetweenTwoPanelHalos() =
-        runComposeUiTest {
-            val ramp = ThemeResolver().resolve(WidgetDocument).ramps[KeyColor.Primary, false]
-            var tokens: BuilderTokens? = null
+    fun swatchTile_pinned_drawsThePinAndReadsOutPinned() =
+        forEachWidgetSkin { _, skin ->
+            var pinned by mutableStateOf(false)
+            var folds by mutableStateOf(false)
             setContent {
-                WidgetHarness(WidgetSkins.first().second) {
-                    tokens = LocalBuilderTokens.current
-                    RampStrip(ramp, onCopyTone = {}, Modifier.width(720.dp))
+                WidgetHarness(skin) {
+                    CompositionLocalProvider(LocalFoldsStateIntoName provides folds) { WidgetSwatch(pinned = pinned) }
                 }
             }
-            val forty = ramp.steps.first { step -> step.tone == 40 }
-            val stop = onNodeWithContentDescription("tone 40, ${forty.argb.toHex()}")
-            stop.requestFocus()
-            waitForIdle()
+            val noState = SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription)
+            onNodeWithTag(SwatchPinTag, useUnmergedTree = true).assertDoesNotExist()
+            onNodeWithContentDescription(SwatchName).assert(noState)
 
-            val colors = requireNotNull(tokens)
-            val pixels = stop.captureToImage().toPixelMap()
-            val halo = with(density) { (WidgetFocusWidth / 2).toPx() }
-            val line = with(density) { WidgetFocusWidth.toPx() }
-            val y = pixels.height / 2
-            widgetShouldMatch(pixels[(halo / 2).toInt(), y], colors.panel)
-            widgetShouldMatch(pixels[(halo + line / 2).toInt(), y], colors.focus)
-            widgetShouldMatch(pixels[(halo * 1.5f + line).toInt(), y], colors.panel)
+            pinned = true
+            waitForIdle()
+            val badge = onNodeWithTag(SwatchPinTag, useUnmergedTree = true).captureToImage().toPixelMap()
+            val inked = (0 until badge.height).sumOf { y ->
+                (0 until badge.width).count { x -> widgetMatches(badge[x, y], SwatchOnColor) }
+            }
+            withClue("pin pixels in the on color") { inked shouldBeGreaterThan 0 }
+            onNodeWithContentDescription(SwatchName).assert(hasStateDescription("pinned"))
+
+            folds = true
+            waitForIdle()
+            onNodeWithContentDescription("$SwatchName, 6.4:1, AA, pinned").assert(widgetHasRole(Role.Button))
+        }
+
+    @Test
+    fun swatchTile_flagOn_foldsTheRatioAndBadgeIntoTheNameOnlyWhenShown() =
+        forEachWidgetSkin { _, skin ->
+            var contrast by mutableStateOf<Double?>(4.49)
+            setContent {
+                WidgetHarness(skin) {
+                    CompositionLocalProvider(LocalFoldsStateIntoName provides true) {
+                        WidgetSwatch(contrast = contrast)
+                    }
+                }
+            }
+            onNodeWithContentDescription("$SwatchName, 4.4:1, AA large").assert(widgetHasRole(Role.Button))
+
+            contrast = null
+            waitForIdle()
+            onNodeWithContentDescription(SwatchName).assert(widgetHasRole(Role.Button))
         }
 
     @Test
@@ -387,17 +409,23 @@ class WidgetsSemanticsTest {
         }
 }
 
-/** Fails unless [actual] is [expected] to within rounding. */
-private fun widgetShouldMatch(
+/** Whether [actual] is [expected] to within rounding. */
+internal fun widgetMatches(
     actual: Color,
     expected: Color,
-) {
-    val close = listOf(
+): Boolean =
+    listOf(
         actual.red to expected.red,
         actual.green to expected.green,
         actual.blue to expected.blue,
     ).all { (a, b) -> abs(a - b) <= WidgetColorTolerance }
-    withClue("$actual should be $expected") { close shouldBe true }
+
+/** Fails unless [actual] is [expected] to within rounding. */
+internal fun widgetShouldMatch(
+    actual: Color,
+    expected: Color,
+) {
+    withClue("$actual should be $expected") { widgetMatches(actual, expected) shouldBe true }
 }
 
 private const val WidgetColorTolerance = 0.02f
@@ -407,6 +435,7 @@ private fun WidgetSwatch(
     onCopy: () -> Unit = {},
     onClick: () -> Unit = {},
     contrast: Double? = 6.4,
+    pinned: Boolean = false,
 ) {
     Box(Modifier.fillMaxSize()) {
         SwatchTile(
@@ -418,6 +447,7 @@ private fun WidgetSwatch(
             onCopy = onCopy,
             onClick = onClick,
             modifier = Modifier.testTag(SwatchTag).width(200.dp),
+            pinned = pinned,
         )
     }
 }
