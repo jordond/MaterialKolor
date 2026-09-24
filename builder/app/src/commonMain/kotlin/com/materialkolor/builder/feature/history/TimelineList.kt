@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -74,7 +76,8 @@ import org.jetbrains.compose.resources.stringResource
  *
  * Swatches read a light scheme from the resolver's scheme cache and never resolve a whole theme,
  * so the eight themes kept for undo stay put. Each paints a skeleton first, and a long history
- * fills in a few rows a frame, top first.
+ * fills in a few rows a frame, top first. A drag held down from before the list opened keeps
+ * moving the newest step, and its swatch waits for the step to hold still before it reads again.
  *
  * @param[timeline] The steps and where the history is among them.
  * @param[dispatcher] Where jumps, undo, redo and closing go.
@@ -211,7 +214,9 @@ private fun supportingText(
 /**
  * The scheme [document] shows as its own target sees it, a skeleton until its colors are read. The
  * row [position] places from the top waits a frame for each [SWATCHES_PER_FRAME] rows above it, so a
- * long history never reads every scheme inside one frame.
+ * long history never reads every scheme inside one frame. A swatch that already shows keeps its
+ * colors while [document] keeps changing, and reads again once it has held still for
+ * [HOLD_STILL_NANOS], so a drag never reads a scheme on every frame.
  */
 @Composable
 private fun StepSwatch(
@@ -220,8 +225,13 @@ private fun StepSwatch(
     undone: Boolean,
 ) {
     val resolver = rememberThemeResolver()
+    val probe = LocalSwatchReadProbe.current // b-509a
     val colors by produceState<SwatchColors?>(null, document, resolver) {
+        // b-509a
+        // A new document for the row cancels this wait, so a step that moves every frame is not read.
+        if (value != null) awaitHoldStill()
         repeat(1 + position / SWATCHES_PER_FRAME) { withFrameNanos { } }
+        probe?.invoke()
         value = SwatchColors.of(lightScheme(resolver, document))
     }
     val faded = if (undone) Modifier.alpha(UNDONE_SWATCH_ALPHA) else Modifier
@@ -322,6 +332,25 @@ private const val UNDONE_SWATCH_ALPHA = 0.38f
 
 /** How many swatches read their scheme in one frame. */
 private const val SWATCHES_PER_FRAME = 8
+
+// b-509a
+
+/**
+ * Told each time a swatch reads its scheme, or null, which it always is outside tests. Tests
+ * provide it to prove a drag running under the open list reads the newest step once, not per frame.
+ */
+internal val LocalSwatchReadProbe: ProvidableCompositionLocal<(() -> Unit)?> =
+    staticCompositionLocalOf { null }
+
+/** Waits out [HOLD_STILL_NANOS] of frames, the time a step holds still before its swatch reads it again. */
+private suspend fun awaitHoldStill() {
+    val start = withFrameNanos { frame -> frame }
+    var now = start
+    while (now - start < HOLD_STILL_NANOS) now = withFrameNanos { frame -> frame }
+}
+
+/** How long a swatch's step holds still before the swatch reads it again, in frame time. */
+private const val HOLD_STILL_NANOS: Long = 150_000_000L
 
 /** The frames a skin switch takes to land before focus goes back, as the page's holder waits. */
 private const val SETTLE_FRAMES = 2

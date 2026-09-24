@@ -21,6 +21,7 @@ import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.canvas.DEVICE_SCREEN_TAG
 import com.materialkolor.builder.feature.canvas.TestOwner
+import com.materialkolor.builder.feature.history.LocalSwatchReadProbe
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.kit.a11y.KitTestApi
 import com.materialkolor.builder.kit.a11y.ProvideOverlaysInTreeForTest
@@ -47,12 +48,14 @@ internal class CommandHarness(
      * [registryBuilds] hears each build of the builder's own registries, the page's and the
      * palette's, and not the one this harness keeps in [commands]. With [inTree] its overlays draw
      * in the page, the way the web draws them (D40), so Esc and the focus hand back work as they do there.
+     * [swatchReads] hears each time a History swatch reads its scheme.
      */
     fun ComposeUiTest.show(
         onTextInput: (PlatformTextInputMethodRequest) -> Unit = {},
         probe: @Composable (state: WorkspaceModel.State) -> Unit = {},
         registryBuilds: (() -> Unit)? = null, // b-315d
         inTree: Boolean = false, // b-509
+        swatchReads: (() -> Unit)? = null, // b-509a
     ) {
         graph = createGraphFactory<AppGraph.Factory>().create(platform)
         val owner = TestOwner()
@@ -65,6 +68,7 @@ internal class CommandHarness(
                 LocalViewModelStoreOwner provides owner,
                 LocalMetroViewModelFactory provides graph.metroViewModelFactory,
                 LocalRegistryBuilds provides registryBuilds, // b-315d
+                LocalSwatchReadProbe provides swatchReads, // b-509a
             ) {
                 workspace = metroViewModel()
                 InterceptPlatformTextInput(watcher) {
