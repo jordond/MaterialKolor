@@ -47,10 +47,10 @@ import com.materialkolor.builder.generated.resources.accents_remove
 import com.materialkolor.builder.generated.resources.accents_seed
 import com.materialkolor.builder.generated.resources.accents_show_on_ramp
 import com.materialkolor.builder.generated.resources.accents_threshold
-import com.materialkolor.builder.generated.resources.accents_threshold_for
 import com.materialkolor.builder.generated.resources.accents_threshold_aa
 import com.materialkolor.builder.generated.resources.accents_threshold_aa_large
 import com.materialkolor.builder.generated.resources.accents_threshold_aaa
+import com.materialkolor.builder.generated.resources.accents_threshold_for
 import com.materialkolor.builder.generated.resources.accents_tone_dark_color
 import com.materialkolor.builder.generated.resources.accents_tone_dark_container
 import com.materialkolor.builder.generated.resources.accents_tone_light_color
