@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The fine tune row with the key colors and the pinned roles. -->
+    <string name="keycolors_title">Core colors and pins</string>
+    <!-- Under the row's title while no key color or pin is set. -->
+    <string name="keycolors_summary_none">Everything follows the seed</string>
+    <!-- Under the row's title, how many key colors are set by hand. -->
+    <plurals name="keycolors_summary_set">
+        <item quantity="one">%1$d key color set</item>
+        <item quantity="other">%1$d key colors set</item>
+    </plurals>
+    <!-- Under the row's title, how many roles are pinned. -->
+    <plurals name="keycolors_summary_pins">
+        <item quantity="one">%1$d pinned role</item>
+        <item quantity="other">%1$d pinned roles</item>
+    </plurals>
+    <!-- Under the row's title when both are set. The arguments are the two counts above. -->
+    <string name="keycolors_summary_both">%1$s, %2$s</string>
+
+    <!-- The label over the six key colors. -->
+    <string name="keycolors_label">Key colors</string>
+    <!-- Each key color's field, named for its palette. -->
+    <string name="keycolors_name_primary">Primary</string>
+    <string name="keycolors_name_secondary">Secondary</string>
+    <string name="keycolors_name_tertiary">Tertiary</string>
+    <string name="keycolors_name_error">Error</string>
+    <string name="keycolors_name_neutral">Neutral</string>
+    <string name="keycolors_name_neutral_variant">Neutral variant</string>
+    <!-- Beside a key color that still comes from the seed. -->
+    <string name="keycolors_from_seed">From seed</string>
+    <!-- Opens the picker on a key color. The argument is the key color's name. -->
+    <string name="keycolors_pick">Pick %1$s</string>
+    <!-- Hands a key color back to the seed. The argument is the key color's name. -->
+    <string name="keycolors_clear">Clear %1$s</string>
+    <!-- Under a primary key color set by hand (D12). -->
+    <string name="keycolors_primary_only">This moves only the primary palette. The seed still drives the rest.</string>
+    <!-- Makes the primary key color the seed. -->
+    <string name="keycolors_use_as_seed">Use as seed</string>
+    <!-- Hands every key color back to the seed. -->
+    <string name="keycolors_reset_all">Reset all</string>
+    <!-- Under a key color field when the color had an alpha. -->
+    <string name="keycolors_note_alpha">A key color is always opaque, so the alpha was dropped</string>
+
+    <!-- The label over the pinned roles. -->
+    <string name="pins_label">Pinned roles</string>
+    <!-- While any role is pinned. -->
+    <string name="pins_notice">Pinned roles don’t follow the seed</string>
+    <!-- While no role is pinned. -->
+    <string name="pins_empty">No pins yet. Pin a role from its popover in the preview, or with Match exactly in the explainer.</string>
+    <!-- Which mode of a role is pinned. -->
+    <string name="pins_mode_light">Light</string>
+    <string name="pins_mode_dark">Dark</string>
+    <!-- One pinned mode. The arguments are the role, as the contrast readout names it, and the mode. -->
+    <string name="pins_row">%1$s, %2$s</string>
+    <!-- Lets one pinned mode be derived again. The arguments are the role and the mode. -->
+    <string name="pins_clear">Clear %1$s, %2$s</string>
+    <!-- Lets every pinned role be derived again. -->
+    <string name="pins_clear_all">Clear all</string>
+</resources>

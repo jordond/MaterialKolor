@@ -19,6 +19,7 @@ import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.history.History
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.resolve.ThemeResolver
@@ -45,6 +46,7 @@ internal class PosterHarness(
     val resolver = ThemeResolver()
     var document by mutableStateOf(document)
     var openPanel by mutableStateOf(openPanel)
+    var openFineTuneRows by mutableStateOf(emptySet<FineTuneRow>())
     private val history = History()
     private var now = 0L
 
@@ -55,8 +57,17 @@ internal class PosterHarness(
             is WorkspaceAction.EditWithReveal -> edit(action.change, EditPhase.Discrete)
             is WorkspaceAction.OpenPanel -> openPanel = action.panel
             WorkspaceAction.ClosePanel -> openPanel = null
+            is WorkspaceAction.SetFineTuneRowOpen -> setRowOpen(action.row, action.open)
             else -> Unit
         }
+    }
+
+    /** Opens or closes [row], the way the workspace keeps it per project. */
+    private fun setRowOpen(
+        row: FineTuneRow,
+        open: Boolean,
+    ) {
+        openFineTuneRows = if (open) openFineTuneRows + row else openFineTuneRows - row
     }
 
     /** How many steps undo walks back before the history runs out. */
@@ -98,6 +109,7 @@ internal fun ComposeUiTest.showSection(
             saveStatus = SaveStatus.Idle,
             openPanel = harness.openPanel,
             visibleModes = PreviewMode.Split,
+            openFineTuneRows = harness.openFineTuneRows,
         )
         BuilderTheme(
             skin = Skin(library = Library.Material3, expressive = false),

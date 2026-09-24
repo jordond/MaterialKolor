@@ -1,15 +1,28 @@
 package com.materialkolor.builder.feature.poster
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.materialkolor.builder.domain.model.KeyColor
+import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
+import com.materialkolor.builder.generated.resources.Res
+import com.materialkolor.builder.generated.resources.keycolors_summary_both
+import com.materialkolor.builder.generated.resources.keycolors_summary_none
+import com.materialkolor.builder.generated.resources.keycolors_summary_pins
+import com.materialkolor.builder.generated.resources.keycolors_summary_set
+import com.materialkolor.builder.generated.resources.keycolors_title
+import com.materialkolor.builder.kit.control.BuilderDisclosure
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
-
-// stub
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * The fine tune row "Core colors and pins", the key colors and the roles pinned to colors of their
- * own (B-305).
+ * own (F-14, F-15). The project remembers whether it is open, and its summary counts what is set.
  */
 @Composable
 internal fun CoreColorsRow(
@@ -17,4 +30,34 @@ internal fun CoreColorsRow(
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
 ) {
+    val spacing = LocalBuilderTokens.current.spacing
+    BuilderDisclosure(
+        expanded = FineTuneRow.CoreColors in context.openFineTuneRows,
+        onExpandedChange = { open ->
+            dispatcher.dispatch(WorkspaceAction.SetFineTuneRowOpen(FineTuneRow.CoreColors, open))
+        },
+        title = stringResource(Res.string.keycolors_title),
+        modifier = modifier,
+        summary = coreColorsSummary(context.document),
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
+            KeyColorRows(context, dispatcher)
+            PinnedRoles(context, dispatcher)
+        }
+    }
+}
+
+/** How many key colors are set by hand and how many roles are pinned, or that the seed has it all. */
+@Composable
+private fun coreColorsSummary(document: ThemeDocument): String {
+    val set = KeyColor.entries.count { slot -> document.keyColors[slot] != null }
+    val pinned = document.pins.size
+    val keyColors = pluralStringResource(Res.plurals.keycolors_summary_set, set, set)
+    val pins = pluralStringResource(Res.plurals.keycolors_summary_pins, pinned, pinned)
+    return when {
+        set > 0 && pinned > 0 -> stringResource(Res.string.keycolors_summary_both, keyColors, pins)
+        set > 0 -> keyColors
+        pinned > 0 -> pins
+        else -> stringResource(Res.string.keycolors_summary_none)
+    }
 }
