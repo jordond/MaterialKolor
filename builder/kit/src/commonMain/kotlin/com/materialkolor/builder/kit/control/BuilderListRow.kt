@@ -42,6 +42,8 @@ import com.materialkolor.builder.kit.skin.material.MaterialListRow
  * @param[modifier] Applied to the row.
  * @param[supporting] A quieter second line.
  * @param[icon] A glyph at the start.
+ * @param[leading] Something drawn at the start in place of [icon], such as a small swatch. A row
+ * takes one or the other, never both.
  * @param[onClick] Called when the row is pressed, or null for a row that only shows something.
  * @param[selected] Whether this is the current row, or null for a list with no current row.
  * @param[enabled] Whether a pressable row can be pressed.
@@ -53,12 +55,13 @@ public fun BuilderListRow(
     modifier: Modifier = Modifier,
     supporting: String? = null,
     icon: IconId? = null,
+    leading: (@Composable () -> Unit)? = null, // b-508
     onClick: (() -> Unit)? = null,
     selected: Boolean? = null,
     enabled: Boolean = true,
     trailing: (@Composable () -> Unit)? = null,
 ) {
-    val row = ListRowContent(headline, supporting, icon, onClick, selected, enabled, trailing)
+    val row = ListRowContent(headline, supporting, icon, leading, onClick, selected, enabled, trailing)
     when (LocalSkin.current.library) {
         Library.Material3 -> MaterialListRow(row, modifier)
         Library.Unstyled -> HeadlessListRow(row, UnstyledActionStyles.listRow, modifier)
@@ -72,11 +75,16 @@ internal class ListRowContent(
     val headline: String,
     val supporting: String?,
     val icon: IconId?,
+    val leading: (@Composable () -> Unit)?, // b-508
     val onClick: (() -> Unit)?,
     val selected: Boolean?,
     val enabled: Boolean,
     val trailing: (@Composable () -> Unit)?,
-)
+) {
+    init {
+        require(icon == null || leading == null) { "A row takes an icon or a leading slot, not both" }
+    }
+}
 
 /**
  * The input and the semantics a list row takes, the same in every skin.
@@ -151,6 +159,7 @@ internal fun HeadlessListRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (row.icon != null) BuilderIcon(row.icon, contentDescription = null, tint = colors.content)
+        row.leading?.invoke() // b-508
         Column(Modifier.weight(1f)) {
             BuilderText(row.headline, style = BuilderTextStyle.Label, color = colors.content)
             if (row.supporting != null) {

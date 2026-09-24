@@ -61,7 +61,8 @@ class ProjectSessionTimelineTest : SessionTestBase() {
         runTest {
             val (session) = session()
             booted(session)
-            session.timeline() shouldBe Timeline(cursor = 0, now = 0, start = ThemeDocument.Default, steps = emptyList())
+            val empty = Timeline(cursor = 0, now = 0, start = ThemeDocument.Default, steps = emptyList())
+            session.timeline() shouldBe empty
 
             advanceTimeBy(1_000)
             session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)

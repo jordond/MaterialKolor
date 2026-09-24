@@ -48,4 +48,5 @@ public enum class IconId {
     Keyboard,
     Help,
     ExternalLink,
+    History, // b-508
 }

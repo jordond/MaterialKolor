@@ -18,6 +18,7 @@ import com.composables.icons.lucide.ExternalLink
 import com.composables.icons.lucide.Eye
 import com.composables.icons.lucide.Folder
 import com.composables.icons.lucide.Fullscreen
+import com.composables.icons.lucide.History
 import com.composables.icons.lucide.Image
 import com.composables.icons.lucide.Info
 import com.composables.icons.lucide.Keyboard
@@ -94,5 +95,6 @@ internal object LucideIcons : BuilderIcons {
             IconId.Keyboard -> Lucide.Keyboard
             IconId.Help -> Lucide.CircleHelp
             IconId.ExternalLink -> Lucide.ExternalLink
+            IconId.History -> Lucide.History // b-508
         }
 }

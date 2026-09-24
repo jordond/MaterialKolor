@@ -58,6 +58,7 @@ private val LucideFallbacks: Set<IconId> = setOf(
     IconId.Expand,
     IconId.Keyboard,
     IconId.Help,
+    IconId.History, // b-508
 )
 
 /** Every kit file B-403 and B-403b own, the ones a Fluent swap can reach. */
