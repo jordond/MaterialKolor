@@ -66,7 +66,6 @@ public fun BuilderToggleButton(
             )
         }
         Library.Fluent -> {
-            // fluent-placeholder
             FluentToggleButton(checked, onCheckedChange, label, modifier, icon, enabled)
         }
         Library.Custom -> {
