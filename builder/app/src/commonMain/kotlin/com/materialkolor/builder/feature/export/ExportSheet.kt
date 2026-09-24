@@ -202,11 +202,12 @@ internal fun ExportSheet(
             }
         }
         // b-228aa
+        val zipLabel = if (zipShares(ready, files)) Res.string.export_share else Res.string.export_download
         ManualCopyDialog(
             visible = manualOpen,
             text = manualText,
             onDismissRequest = { manualOpen = false },
-            saveLabel = stringResource(if (zipShares(ready, files)) Res.string.export_share else Res.string.export_download),
+            saveLabel = stringResource(zipLabel),
         )
     }
 }

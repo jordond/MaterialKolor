@@ -171,4 +171,3 @@ private class CopiedText : Clipboard {
         text = clipEntry?.asAwtTransferable?.getTransferData(DataFlavor.stringFlavor) as? String
     }
 }
-
