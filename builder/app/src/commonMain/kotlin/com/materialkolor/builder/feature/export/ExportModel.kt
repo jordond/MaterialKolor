@@ -55,8 +55,12 @@ internal const val ZIP_MIME = "application/zip"
  * exception. It belongs to the document, so the sheet edits it through the workspace.
  *
  * The files come from [outcome], worked out on the thread that asks, which has to be the UI thread
- * since the resolver belongs to it. They are kept until the document, the options or the versions
- * change, so a sheet that recomposes, or opens again on the same theme, generates nothing.
+ * since the resolver belongs to it. They are kept until the document, the project name, the options
+ * or the versions change, so a sheet that recomposes, or opens again on the same theme, generates
+ * nothing.
+ *
+ * Every header and the README link back with the code Share gives, which carries the project name
+ * (F-32, D26). The package name stays out of it.
  *
  * The model never copies or saves anything itself. Browsers only allow that inside the click, so
  * the sheet calls [clipboard] and [files] straight from its click handler (R-B-302).
@@ -84,6 +88,7 @@ internal class ExportModel(
 
     init {
         session.document.mergeState { state, document -> state.copy(document = document) }
+        session.projectName.mergeState { state, name -> state.copy(projectName = name) }
         preferences.preferences.mergeState { state, prefs -> state.copy(preferences = prefs) }
     }
 
@@ -125,20 +130,21 @@ internal class ExportModel(
     /**
      * The export of [state], or what has to be fixed before there can be one.
      *
-     * The same document, options and versions give back the very same value without generating
-     * again. Call it on the UI thread.
+     * The same document, project name, options and versions give back the very same value without
+     * generating again. Call it on the UI thread.
      */
     fun outcome(state: State = this.state.value): ExportOutcome {
-        val key = Memo.Key(state.document, state.prefs, versions)
+        val key = Memo.Key(state.document, state.projectName, state.prefs, versions)
         memo?.takeIf { held -> held.key == key }?.let { held -> return held.outcome }
 
-        val outcome = exportOf(state.document, state.prefs)
+        val outcome = exportOf(state.document, state.projectName, state.prefs)
         memo = Memo(key, outcome)
         return outcome
     }
 
     private fun exportOf(
         document: ThemeDocument,
+        projectName: String,
         prefs: ExportPrefs,
     ): ExportOutcome {
         val target = ExportTarget.of(document.library, document.expressive)
@@ -151,7 +157,7 @@ internal class ExportModel(
             prefs = prefs,
             resolved = exports.resolve(targeted, prefs),
             versions = versions,
-            shareUrl = SHARE_URL_PREFIX + shareCodeOf(document, targeted),
+            shareUrl = SHARE_URL_PREFIX + shareCodeOf(document, targeted, projectName),
         )
         val files = generator.files(input)
         val themeName = targeted.themeName
@@ -179,6 +185,7 @@ internal class ExportModel(
     ) {
         data class Key(
             val document: ThemeDocument,
+            val projectName: String,
             val prefs: ExportPrefs,
             val versions: ExportVersions,
         )
@@ -186,6 +193,8 @@ internal class ExportModel(
 
     /**
      * @property[document] The document as stored. The export reads it through `forTarget`.
+     * @property[projectName] The open project's name, which the link back carries. Empty until the
+     * session has opened one.
      * @property[preferences] What this browser remembers, the export options of every target among it.
      * @property[selectedPath] The file the code view shows, or null for the first one.
      */
@@ -193,6 +202,7 @@ internal class ExportModel(
     data class State(
         val document: ThemeDocument,
         val preferences: Preferences,
+        val projectName: String = "",
         val selectedPath: String? = null,
     ) {
         /** What [document] exports to. */
@@ -314,10 +324,14 @@ private fun problemOf(
     }
 
 /**
- * The share code for the link back. A target that drops the extra colors can export a document
- * whose own extra colors would not fit in a code, so that one links to what the target sees.
+ * The share code for the link back, the same one Share gives for [projectName]. A target that drops
+ * the extra colors can export a document whose own extra colors would not fit in a code, so that one
+ * links to what the target sees, still under the project's name.
  */
 private fun shareCodeOf(
     document: ThemeDocument,
     targeted: ThemeDocument,
-): String = runCatching { ShareCodec.encode(document) }.getOrElse { ShareCodec.encode(targeted) }
+    projectName: String,
+): String =
+    runCatching { ShareCodec.encode(document, projectName) }
+        .getOrElse { ShareCodec.encode(targeted, projectName) }

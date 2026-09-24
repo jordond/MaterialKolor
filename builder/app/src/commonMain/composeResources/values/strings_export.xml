@@ -37,11 +37,8 @@
     <!-- Why nothing can be exported yet. -->
     <string name="export_blocked_package">%1$s is not a package name Kotlin accepts. Use lowercase words separated by dots, like com.example.theme.</string>
     <string name="export_blocked_theme_name">%1$s cannot be a theme name. Use a Kotlin name like AppTheme.</string>
-    <string name="export_blocked_extra_colors">Some extra colors have names the export cannot use. Rename them first.</string>
+    <string name="export_blocked_extra_colors">Some extra colors have names the export cannot use, or there are too many of them. Rename or remove them first.</string>
     <string name="export_blocked_taken">The export already uses the name %1$s. Pick another one.</string>
-
-    <!-- The file tabs above the code, read out before the file name. -->
-    <string name="export_files">Files</string>
 
     <!-- The buttons under the code. Copy turns into Copied for a moment after it worked. -->
     <string name="export_copy_file">Copy file</string>

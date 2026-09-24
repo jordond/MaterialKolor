@@ -6,18 +6,26 @@ import com.materialkolor.builder.codegen.generate
 import com.materialkolor.builder.core.data.PreferencesRepository
 import com.materialkolor.builder.core.session.ProjectSession
 import com.materialkolor.builder.core.session.SessionTestBase
+import com.materialkolor.builder.domain.capability.forTarget
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.domain.link.DecodeResult
+import com.materialkolor.builder.domain.link.ShareCodec
+import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportPrefs
+import com.materialkolor.builder.domain.persist.ExportTarget
+import com.materialkolor.builder.domain.validate.MAX_ACCENTS
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakeClipboard
 import com.materialkolor.builder.fakes.FakeFileSaver
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldNotContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,6 +39,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 private const val PACKAGE = "com.acme.ui"
+private const val PROJECT = "Ocean study"
+private const val RENAMED = "Harbor study"
 private val VERSIONS =
     ExportVersions(builder = "2.0.0", materialKolor = "6.0.0", fluent = "v0.1.0", composeUnstyled = "1.0.0")
 
@@ -148,6 +158,89 @@ class ExportModelTest : SessionTestBase() {
         }
 
     @Test
+    fun outcome_themeNameTheTargetAlreadyUses_isBlockedWithoutGenerating() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val model = exportModel(session, preferences)
+
+            session.edit(DocumentChange.SetThemeName("MaterialTheme"), EditPhase.Discrete)
+            runCurrent()
+
+            val blocked = model.outcome().shouldBeInstanceOf<ExportOutcome.Blocked>()
+            blocked.problems shouldBe listOf(ExportProblem.NameTaken("MaterialTheme"))
+            generated shouldBe 0
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun shareLink_inEveryFile_isTheCodeShareGivesWithTheProjectName() =
+        runTest {
+            val (session, preferences) = session()
+            val id = booted(session)
+            session.rename(id, PROJECT) shouldBe null
+            val model = exportModel(session, preferences)
+            model.handle(ExportAction.SetPackageName(PACKAGE))
+            runCurrent()
+
+            val ready = model.outcome().shouldBeInstanceOf<ExportOutcome.Ready>()
+            val code = linkCodeIn(ready.allText)
+
+            code shouldBe ShareCodec.encode(session.document.value, PROJECT)
+            val decoded = ShareCodec.decode(code)
+            decoded shouldBe DecodeResult.Ok(session.document.value, PROJECT)
+            decoded.toString() shouldNotContain PACKAGE
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun shareLink_afterARename_regeneratesOnceUnderTheNewName() =
+        runTest {
+            val (session, preferences) = session()
+            val id = booted(session)
+            session.rename(id, PROJECT) shouldBe null
+            val model = exportModel(session, preferences)
+
+            model.outcome()
+            session.rename(id, RENAMED) shouldBe null
+            runCurrent()
+            val ready = model.outcome().shouldBeInstanceOf<ExportOutcome.Ready>()
+            model.outcome()
+
+            generated shouldBe 2
+            val decoded = ShareCodec.decode(linkCodeIn(ready.allText)).shouldBeInstanceOf<DecodeResult.Ok>()
+            decoded.projectName shouldBe RENAMED
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun shareLink_extraColorsTooManyForACode_linksToWhatTheTargetSeesUnderTheProjectName() =
+        runTest {
+            val (session, preferences) = session()
+            val id = booted(session)
+            session.rename(id, PROJECT) shouldBe null
+            val model = exportModel(session, preferences)
+            repeat(MAX_ACCENTS + 1) { index ->
+                val accent = Accent(name = "Brand$index", seed = Argb(0xFF6A1B9A.toInt()))
+                session.edit(DocumentChange.AddAccent(accent), EditPhase.Discrete)
+            }
+            session.edit(DocumentChange.SetLibrary(Library.Fluent, expressive = false), EditPhase.Discrete)
+            runCurrent()
+
+            val ready = model.outcome().shouldBeInstanceOf<ExportOutcome.Ready>()
+            val code = linkCodeIn(ready.allText)
+
+            val document = session.document.value
+            runCatching { ShareCodec.encode(document, PROJECT) }.isFailure shouldBe true
+            val targeted = document.forTarget(ExportTarget.Fluent)
+            code shouldBe ShareCodec.encode(targeted, PROJECT)
+            val decoded = ShareCodec.decode(code).shouldBeInstanceOf<DecodeResult.Ok>()
+            decoded.projectName shouldBe PROJECT
+            decoded.document.accents shouldBe emptyList()
+            harness.clearAndJoin()
+        }
+
+    @Test
     fun expressiveOn2021_expressiveWithRainbow_warnsAndOnlyThere() =
         runTest {
             val (session, preferences) = session()
@@ -196,6 +289,14 @@ class ExportModelTest : SessionTestBase() {
                 files = FakeFileSaver(),
             ),
         )
+}
+
+/** The share code every link back in [text] carries, which has to be one and the same. */
+private fun linkCodeIn(text: String): String {
+    val link = Regex(Regex.escape(SHARE_URL_PREFIX) + "([A-Za-z0-9_-]+)")
+    val codes = link.findAll(text).map { match -> match.groupValues[1] }.toSet()
+    codes shouldHaveSize 1
+    return codes.single()
 }
 
 /**

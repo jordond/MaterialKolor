@@ -67,9 +67,7 @@ import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.widget.CodeView
 import dev.stateholder.dispatcher.Dispatcher
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 
@@ -140,13 +138,11 @@ internal fun ExportSheet(
             copied = null
         }
 
-        // The write is the first suspension, so the browser still sees the click (R-B-302).
         fun copy(
             kind: CopyKind,
             text: String,
         ) {
-            scope.launch(start = CoroutineStart.UNDISPATCHED) {
-                val result = clipboard.writeText(text)
+            scope.launchCopy(clipboard, text) { result ->
                 if (result.isSuccess) {
                     copied = kind
                     copies++
@@ -308,14 +304,7 @@ private fun ZipButton(
     BuilderButton(
         onClick = {
             if (ready == null) return@BuilderButton
-            val zip = ready.zip
-            // The save or the share is the first suspension, so the browser still sees the click (R-B-302).
-            scope.launch(start = CoroutineStart.UNDISPATCHED) {
-                val result = if (share) {
-                    files.shareFiles(listOf(zip))
-                } else {
-                    files.save(zip.name, zip.bytes, zip.mime)
-                }
+            scope.launchZip(files, ready.zip, share) { result ->
                 if (result.isSuccess) {
                     dispatcher.dispatch(ExportAction.Exported)
                 } else {
