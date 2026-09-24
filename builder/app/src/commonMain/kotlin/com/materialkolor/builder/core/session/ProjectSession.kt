@@ -104,6 +104,7 @@ internal class ProjectSession(
     private val _viewState = MutableStateFlow(ProjectViewState())
     private val _conflict = MutableStateFlow<Conflict?>(null)
     private val _saveStatus = MutableStateFlow<SaveStatus>(SaveStatus.Idle)
+    private val _generation = MutableStateFlow(0) // b-221c
 
     /** The theme being edited. */
     val document: StateFlow<ThemeDocument> = _document.asStateFlow()
@@ -122,6 +123,15 @@ internal class ProjectSession(
 
     /** Whether the open project is saved. A failure comes after the repository pruned and tried again. */
     val saveStatus: StateFlow<SaveStatus> = _saveStatus.asStateFlow()
+
+    // b-221c
+
+    /**
+     * Counts the projects this tab has shown, one more each time [open], [openShared] or [newProject]
+     * shows another, and it moves before [document] does. Saving a project opened from a link keeps
+     * its number, since it is still the same project.
+     */
+    val generation: StateFlow<Int> = _generation.asStateFlow()
 
     // b-216b
 
@@ -348,6 +358,7 @@ internal class ProjectSession(
         lastEditAt = null
         _conflict.value = null
         _saveStatus.value = SaveStatus.Idle
+        _generation.value++ // b-221c
         _document.value = document
         _viewState.value = view
         _project.value = ref

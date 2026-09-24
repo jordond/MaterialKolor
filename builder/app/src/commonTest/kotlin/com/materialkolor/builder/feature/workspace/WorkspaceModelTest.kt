@@ -2,6 +2,7 @@ package com.materialkolor.builder.feature.workspace
 
 import com.materialkolor.builder.ViewModelHarness
 import com.materialkolor.builder.core.data.PreferencesRepository
+import com.materialkolor.builder.core.session.ProjectRef
 import com.materialkolor.builder.core.session.ProjectSession
 import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.core.session.SessionTestBase
@@ -12,7 +13,9 @@ import com.materialkolor.builder.domain.edit.ChangeKind
 import com.materialkolor.builder.domain.edit.ChangeLabel
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.domain.link.ShareCodec
 import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.resolve.ThemeResolver
@@ -271,6 +274,71 @@ class WorkspaceModelTest : SessionTestBase() {
             environment.prefersDark.value = true
 
             app.state.value.isDark shouldBe true
+            harness.clearAndJoin()
+        }
+
+    // b-221c
+    @Test
+    fun pageHide_afterAnEdit_writesTheRecordBeforeAnythingElseRuns() =
+        runTest {
+            // Main only runs when asked, so a collector dispatched to it would sit until runCurrent.
+            Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+            val (session, preferences) = session()
+            val id = booted(session)
+            appModel(session, preferences)
+            runCurrent()
+            session.edit(DocumentChange.SetThemeName("HiddenTheme"), EditPhase.Discrete)
+            runCurrent()
+
+            // No advance and no runCurrent from here, so only an undispatched collector gets the write out.
+            environment.pageHides.tryEmit(Unit) shouldBe true
+
+            projects.load(id)?.document?.themeName shouldBe "HiddenTheme"
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun projectGeneration_movesOnceWithEachProjectShownAndNeverForAnEditARenameOrAFirstSave() =
+        runTest {
+            val (session, preferences) = session()
+            val first = booted(session)
+            val workspace = workspaceModel(session, preferences)
+            val seen = mutableListOf<WorkspaceModel.State>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+                workspace.state.collect { state -> seen.add(state) }
+            }
+            val start = workspace.state.value.projectGeneration
+
+            // Only the state carrying the new project's document may carry the new number, and it must.
+            suspend fun shows(
+                generation: Int,
+                document: () -> ThemeDocument,
+                open: suspend () -> Unit,
+            ) {
+                val from = seen.size
+                open()
+                settle()
+                val arrived = seen.drop(from).first { state -> state.document == document() }
+                arrived.projectGeneration shouldBe generation
+                workspace.state.value.projectGeneration shouldBe generation
+            }
+
+            workspace.edit(DocumentChange.SetThemeName("EditedTheme"), EditPhase.Discrete)
+            session.rename(first, "Renamed")
+            settle()
+            workspace.state.value.projectGeneration shouldBe start
+            val edited = session.document.value
+
+            shows(start + 1, { ThemeDocument.Default }) { session.newProject(copyCurrent = false) }
+            shows(start + 2, { edited }) { session.open(first) }
+            val shared = ThemeDocument.Default.copy(themeName = "SharedTheme")
+            shows(start + 3, { shared }) { session.openShared(ShareCodec.encode(shared)) }
+
+            // Its first save makes the shared theme a saved project, which is still the same project.
+            workspace.edit(DocumentChange.SetThemeName("SavedTheme"), EditPhase.Discrete)
+            settle()
+            session.project.value.shouldBeInstanceOf<ProjectRef.Persisted>()
+            workspace.state.value.projectGeneration shouldBe start + 3
             harness.clearAndJoin()
         }
 

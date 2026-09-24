@@ -18,7 +18,6 @@ import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.DeviceWidth
-import com.materialkolor.builder.domain.persist.ExportPrefs
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.MotionOverride
@@ -60,7 +59,9 @@ import kotlin.random.Random
 internal class WorkspaceModel(
     private val session: ProjectSession,
     private val preferences: PreferencesRepository,
-    private val clipboard: Clipboard,
+    // b-221c
+    // Where the poster's copy buttons write, straight from the click with no hop through here.
+    val clipboard: Clipboard,
     private val router: Router,
     private val resolver: ThemeResolver,
 ) : StateViewModel<WorkspaceModel.State>(
@@ -71,16 +72,24 @@ internal class WorkspaceModel(
             view = session.viewState.value,
             preferences = preferences.preferences.value,
             saveStatus = session.saveStatus.value,
+            // b-221c
+            projectGeneration = session.generation.value,
         ),
     ) {
     init {
-        session.document.mergeState { state, document -> state.withDocument(document) }
+        // b-221c
+        // The generation moves before the document does, so a new document always comes with its number.
+        session.document.mergeState { state, document ->
+            state.withDocument(document).copy(projectGeneration = session.generation.value)
+        }
         session.history.mergeState { state, history -> state.copy(history = history) }
         session.viewState.mergeState { state, view -> state.copy(view = view) }
         preferences.preferences.mergeState { state, prefs -> state.copy(preferences = prefs) }
         router.overlayPops.mergeState { state, _ -> state.copy(panel = null, pickerTarget = null) }
         session.projectName.mergeState { state, name -> state.copy(projectName = name) }
         session.saveStatus.mergeState { state, status -> state.copy(saveStatus = status) }
+        // b-221c
+        session.generation.mergeState { state, generation -> state.copy(projectGeneration = generation) }
     }
 
     /**
@@ -235,16 +244,6 @@ internal class WorkspaceModel(
         updatePreferences { prefs -> prefs.copy(dismissedHints = prefs.dismissedHints + id) }
     }
 
-    fun setExportPref(
-        target: ExportTarget,
-        update: (ExportPrefs) -> ExportPrefs,
-    ) {
-        viewModelScope.launch { preferences.updateExportPrefs(target, update) }
-    }
-
-    /** Put [text] on the clipboard. False when the platform would not take it. */
-    suspend fun copyText(text: String): Boolean = clipboard.writeText(text).isSuccess
-
     // b-308
 
     /** Show the Palettes tab with the ramp of [target] picked out, until the next tab switch. */
@@ -286,6 +285,9 @@ internal class WorkspaceModel(
      * @property[fullscreen] Whether the poster and the top bar are hidden.
      * @property[projectName] The open project's name, empty until the session has opened one.
      * @property[saveStatus] Whether the open project's latest changes are saved.
+     * @property[projectGeneration] Counts the projects this tab has shown, one more each time another
+     * opens. It changes in the same state as the document the new project brings, so anything that
+     * belongs to one project can tell a new project from an edit.
      * @property[expressiveSuggestion] Whether the top bar offers the Expressive style on the 2025
      * spec after a switch to Expressive (F-03).
      * @property[rampTarget] What the Palettes tab picks out after Show on ramp, or null. A tab
@@ -305,6 +307,8 @@ internal class WorkspaceModel(
         val fullscreen: Boolean = false,
         val projectName: String = "",
         val saveStatus: SaveStatus = SaveStatus.Idle,
+        // b-221c
+        val projectGeneration: Int = 0,
         val expressiveSuggestion: Boolean = false,
         val rampTarget: RampTarget? = null, // b-308
     ) {

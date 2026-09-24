@@ -2,9 +2,8 @@ package com.materialkolor.builder.fakes
 
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.domain.color.Argb
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 
 /**
  * An [Environment] a test can set, that remembers what the builder asked of it.
@@ -70,5 +69,15 @@ internal class FakeEnvironment(
     }
 
     // b-301
-    override val pageHides: Flow<Unit> = emptyFlow()
+    // b-221c
+
+    /** Emit on this to hide the page, as closing the tab would. */
+    override val pageHides: MutableSharedFlow<Unit> = MutableSharedFlow(extraBufferCapacity = 1)
+
+    /** Everything read out to a screen reader, oldest first. */
+    val announcements: MutableList<String> = mutableListOf()
+
+    override fun announce(message: String) {
+        announcements += message
+    }
 }

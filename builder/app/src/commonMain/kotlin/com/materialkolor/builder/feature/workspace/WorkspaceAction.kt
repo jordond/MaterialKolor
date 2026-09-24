@@ -5,8 +5,6 @@ import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.DeviceWidth
-import com.materialkolor.builder.domain.persist.ExportPrefs
-import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.MotionOverride
 import com.materialkolor.builder.domain.persist.PreviewMode
@@ -118,12 +116,6 @@ internal sealed interface WorkspaceAction {
 
     /** Close whichever panel is open. */
     data object ClosePanel : WorkspaceAction
-
-    /** Change the export options of [target] with [update]. */
-    data class SetExportPref(
-        val target: ExportTarget,
-        val update: (ExportPrefs) -> ExportPrefs,
-    ) : WorkspaceAction
 
     /** Put [text] on the clipboard and say so, naming what it was with [label]. */
     data class CopyText(

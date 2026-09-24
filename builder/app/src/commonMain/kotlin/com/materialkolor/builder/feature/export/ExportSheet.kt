@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,12 +18,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.core.platform.Clipboard
 import com.materialkolor.builder.core.platform.FileSaver
 import com.materialkolor.builder.domain.capability.Capabilities
 import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.feature.topbar.LibrarySwitcher
+import com.materialkolor.builder.feature.workspace.ManualCopyDialog
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.export_blocked_extra_colors
@@ -37,9 +37,6 @@ import com.materialkolor.builder.generated.resources.export_copy_all
 import com.materialkolor.builder.generated.resources.export_copy_file
 import com.materialkolor.builder.generated.resources.export_download
 import com.materialkolor.builder.generated.resources.export_expressive_2021
-import com.materialkolor.builder.generated.resources.export_manual_done
-import com.materialkolor.builder.generated.resources.export_manual_hint
-import com.materialkolor.builder.generated.resources.export_manual_title
 import com.materialkolor.builder.generated.resources.export_mode
 import com.materialkolor.builder.generated.resources.export_mode_dynamic
 import com.materialkolor.builder.generated.resources.export_mode_frozen
@@ -49,8 +46,8 @@ import com.materialkolor.builder.generated.resources.export_save_failed
 import com.materialkolor.builder.generated.resources.export_share
 import com.materialkolor.builder.generated.resources.export_share_failed
 import com.materialkolor.builder.generated.resources.export_title
+import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.control.BuilderButton
-import com.materialkolor.builder.kit.control.BuilderDialog
 import com.materialkolor.builder.kit.control.BuilderDisclosure
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderScrollArea
@@ -58,7 +55,6 @@ import com.materialkolor.builder.kit.control.BuilderSegmented
 import com.materialkolor.builder.kit.control.BuilderSheet
 import com.materialkolor.builder.kit.control.BuilderTabs
 import com.materialkolor.builder.kit.control.BuilderText
-import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.SheetPresentation
 import com.materialkolor.builder.kit.icon.IconId
@@ -73,9 +69,6 @@ import org.jetbrains.compose.resources.stringResource
 
 /** How long Copy shows as Copied after it worked (F-26). */
 internal const val COPIED_MILLIS = 1_200L
-
-/** How much of the window the manual copy dialog's text may take before it scrolls. */
-private const val MANUAL_COPY_HEIGHT_FRACTION = 0.5f
 
 /** What a copy button copies. */
 private enum class CopyKind {
@@ -93,10 +86,13 @@ private enum class CopyKind {
  *
  * Every copy, download and share starts inside the click, with the platform call as its first
  * suspension, and the text and the zip are ready before the click (R-B-302). A copy that worked
- * turns its button into Copied for [COPIED_MILLIS]. One the browser refused opens a dialog to copy
- * from by hand, and never says Copied. On a touch screen whose share sheet takes the zip, the zip
- * goes to the share sheet, and anywhere else it downloads. A share sheet someone closes counts as
- * done.
+ * turns its button into Copied for [COPIED_MILLIS] and reads Copied out, since a screen reader never
+ * hears a label change (AR-06). One the browser refused opens a dialog to copy from by hand, and
+ * never says Copied. On a touch screen whose share sheet takes the zip, the zip goes to the share
+ * sheet, and anywhere else it downloads. A share sheet someone closes counts as done.
+ *
+ * While the package or the theme name field holds a draft that is not valid, the sheet says what is
+ * wrong in place of the files and Copy file, Copy all and Download wait for it (R-B-309).
  *
  * @param[visible] Whether the sheet is open.
  * @param[state] The export model's state.
@@ -107,6 +103,7 @@ private enum class CopyKind {
  * @param[files] Where the zip goes.
  * @param[dispatcher] Takes the option changes.
  * @param[workspace] Takes the target switch, the theme name, closing and toasts.
+ * @param[returnFocusTo] The button that opened the sheet, which gets focus back once it closes (AR-09).
  */
 @Composable
 internal fun ExportSheet(
@@ -119,6 +116,7 @@ internal fun ExportSheet(
     dispatcher: Dispatcher<ExportAction>,
     workspace: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    returnFocusTo: FocusRequester? = null,
 ) {
     BuilderSheet(
         visible = visible,
@@ -126,8 +124,12 @@ internal fun ExportSheet(
         title = stringResource(Res.string.export_title),
         presentation = SheetPresentation.of(LocalLayout.current),
         modifier = modifier,
+        returnFocusTo = returnFocusTo,
     ) {
         val scope = rememberCoroutineScope()
+        val announcer = LocalAnnouncer.current
+        val copiedWords = stringResource(Res.string.export_copied)
+        val drafts = remember { DraftProblems() }
         var copied by remember { mutableStateOf<CopyKind?>(null) }
         var copies by remember { mutableIntStateOf(0) }
         var manualText by remember { mutableStateOf("") }
@@ -146,6 +148,7 @@ internal fun ExportSheet(
                 if (result.isSuccess) {
                     copied = kind
                     copies++
+                    announcer.announce(copiedWords)
                     dispatcher.dispatch(ExportAction.Exported)
                 } else {
                     copied = null
@@ -156,21 +159,20 @@ internal fun ExportSheet(
         }
 
         val outcome = outcomeOf(state)
-        val ready = outcome as? ExportOutcome.Ready
+        val draftProblems = drafts.all
+        val ready = (outcome as? ExportOutcome.Ready)?.takeIf { draftProblems.isEmpty() }
+        val problems = (draftProblems + (outcome as? ExportOutcome.Blocked)?.problems.orEmpty()).distinct()
         val spacing = LocalBuilderTokens.current.spacing
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-            BuilderScrollArea(Modifier.weight(1f, fill = false).fillMaxWidth()) {
-                ExportHeader(state, capabilities, dispatcher, workspace)
+            // Its fields and buttons take focus themselves, so the area is no stop of its own.
+            BuilderScrollArea(Modifier.weight(1f, fill = false).fillMaxWidth(), tabStop = false) {
+                ExportHeader(state, capabilities, dispatcher, workspace, drafts)
             }
-            when (outcome) {
-                is ExportOutcome.Ready -> {
-                    ExportFiles(outcome, state.selectedPath, dispatcher, onCopy = { text -> copy(CopyKind.File, text) })
-                }
-                is ExportOutcome.Blocked -> {
-                    outcome.problems.forEach { problem ->
-                        Notice(text = problemText(problem), icon = IconId.Error, emphasis = Emphasis.Danger)
-                    }
-                }
+            if (ready != null) {
+                ExportFiles(ready, state.selectedPath, dispatcher, onCopy = { text -> copy(CopyKind.File, text) })
+            }
+            problems.forEach { problem ->
+                Notice(text = problemText(problem), icon = IconId.Error, emphasis = Emphasis.Danger)
             }
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(spacing.small),
@@ -203,6 +205,7 @@ private fun ExportHeader(
     capabilities: Capabilities,
     dispatcher: Dispatcher<ExportAction>,
     workspace: Dispatcher<WorkspaceAction>,
+    drafts: DraftProblems,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val modes = mapOf(
@@ -216,13 +219,11 @@ private fun ExportHeader(
             horizontalArrangement = Arrangement.spacedBy(spacing.medium),
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
-            // Walking the arrows past a library would re-skin the app at every step, so only a pick switches.
             LibrarySwitcher(
                 document = state.document,
                 onSwitch = { choice, origin ->
                     workspace.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin))
                 },
-                selectOnFocus = false,
             )
             BuilderSegmented(
                 options = ExportMode.entries,
@@ -241,7 +242,7 @@ private fun ExportHeader(
             title = stringResource(Res.string.export_options),
             summary = stringResource(Res.string.export_options_summary, state.prefs.packageName),
         ) {
-            ExportOptionsForm(state, capabilities, dispatcher, workspace)
+            ExportOptionsForm(state, capabilities, dispatcher, workspace, drafts)
         }
     }
 }
@@ -318,35 +319,6 @@ private fun ZipButton(
         icon = if (share) IconId.Share else IconId.Download,
         enabled = ready != null,
     )
-}
-
-/** The text a refused copy was for, to select and copy by hand. */
-@Composable
-private fun ManualCopyDialog(
-    visible: Boolean,
-    text: String,
-    onDismissRequest: () -> Unit,
-) {
-    val layout = LocalLayout.current
-    BuilderDialog(
-        visible = visible,
-        onDismissRequest = onDismissRequest,
-        title = stringResource(Res.string.export_manual_title),
-        actions = {
-            BuilderButton(
-                onClick = onDismissRequest,
-                label = stringResource(Res.string.export_manual_done),
-                emphasis = Emphasis.Primary,
-            )
-        },
-    ) {
-        BuilderText(text = stringResource(Res.string.export_manual_hint), emphasis = Emphasis.Secondary)
-        BuilderScrollArea(Modifier.heightIn(max = layout.heightDp * MANUAL_COPY_HEIGHT_FRACTION)) {
-            SelectionContainer {
-                BuilderText(text = text, style = BuilderTextStyle.Value)
-            }
-        }
-    }
 }
 
 /** One line that needs attention, with its icon. */

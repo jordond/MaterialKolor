@@ -129,6 +129,10 @@ private object DesktopEnvironment : Environment {
     // b-301
     // A window is never hidden the way a tab is, and closing it ends the session anyway.
     override val pageHides: Flow<Unit> = emptyFlow()
+
+    // b-221c
+    // The desktop build is for development only (D2), so it reads nothing out.
+    override fun announce(message: String) = Unit
 }
 
 private fun notOnDesktop(): Result<Unit> = Result.failure(UnsupportedOperationException("Not available on desktop yet"))

@@ -2,7 +2,10 @@ package com.materialkolor.builder.feature.workspace
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import com.materialkolor.builder.LocalThemeResult
@@ -14,15 +17,17 @@ import com.materialkolor.builder.feature.canvas.CanvasDock
 import com.materialkolor.builder.feature.canvas.FullscreenExit
 import com.materialkolor.builder.feature.command.CommandHost
 import com.materialkolor.builder.feature.export.ExportHost
+import com.materialkolor.builder.feature.export.launchCopy
 import com.materialkolor.builder.feature.image.ImageHost
 import com.materialkolor.builder.feature.picker.PickerHost
 import com.materialkolor.builder.feature.poster.PosterPanel
 import com.materialkolor.builder.feature.projects.ProjectsHost
 import com.materialkolor.builder.feature.projects.ShareHost
 import com.materialkolor.builder.feature.topbar.TopBarContent
+import com.materialkolor.builder.feature.topbar.TopBarControl
+import com.materialkolor.builder.feature.topbar.rememberTopBarFocus
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.workspace_copied
-import com.materialkolor.builder.generated.resources.workspace_copy_failed
 import com.materialkolor.builder.kit.control.BuilderToastHostState
 import com.materialkolor.builder.kit.control.rememberBuilderToastHostState
 import com.materialkolor.builder.kit.shell.ToastRegion
@@ -31,7 +36,6 @@ import com.materialkolor.builder.kit.transition.RevealStyle
 import com.materialkolor.builder.kit.transition.SkinTransition
 import dev.stateholder.dispatcher.Dispatcher
 import dev.stateholder.dispatcher.rememberDispatcher
-import dev.stateholder.extensions.collectAsState
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
@@ -40,17 +44,25 @@ import org.jetbrains.compose.resources.getString
  * The workspace, wired to its model.
  *
  * Discrete changes that repaint the theme play [transition]'s reveal, and everything a drag sends
- * goes straight through, since the dispatcher drops nothing.
+ * goes straight through, since the dispatcher drops nothing. A copy from the poster writes the
+ * clipboard inside the click, then says Copied in a toast or, when the browser refused, opens the
+ * text to copy by hand (F-26).
+ *
+ * @param[state] The model's state, collected once at the root, which resolves the theme from it.
  */
 @Composable
 internal fun WorkspaceScreen(
+    // b-221c
+    state: WorkspaceModel.State,
     transition: SkinTransition,
     modifier: Modifier = Modifier,
     model: WorkspaceModel = metroViewModel(),
 ) {
-    val state by model.collectAsState()
     val scope = rememberCoroutineScope()
     val toasts = rememberBuilderToastHostState()
+    // b-221c
+    var manualCopyText by remember { mutableStateOf("") }
+    var manualCopyOpen by remember { mutableStateOf(false) }
 
     // Plays the transition's reveal out of the origin, or a crossfade without one, around the change.
     fun reveal(
@@ -84,9 +96,9 @@ internal fun WorkspaceScreen(
             is WorkspaceAction.OpenPicker -> {
                 model.openPicker(action.target)
             }
-            // B-311 opens the platform picker from here.
             WorkspaceAction.OpenImagePicker -> {
-                Unit
+                // b-221c
+                // Nothing yet. B-311 opens the platform picker from here.
             }
             is WorkspaceAction.SetPreviewTab -> {
                 model.setPreviewTab(action.tab)
@@ -128,18 +140,15 @@ internal fun WorkspaceScreen(
             WorkspaceAction.ClosePanel -> {
                 model.closePanel()
             }
-            is WorkspaceAction.SetExportPref -> {
-                model.setExportPref(action.target, action.update)
-            }
+            // b-221c
             is WorkspaceAction.CopyText -> {
-                scope.launch {
-                    val copied = model.copyText(action.text)
-                    val message = if (copied) {
-                        getString(Res.string.workspace_copied, action.label)
+                scope.launchCopy(model.clipboard, action.text) { result ->
+                    if (result.isSuccess) {
+                        toasts.show(getString(Res.string.workspace_copied, action.label))
                     } else {
-                        getString(Res.string.workspace_copy_failed)
+                        manualCopyText = action.text
+                        manualCopyOpen = true
                     }
-                    toasts.show(message)
                 }
             }
             is WorkspaceAction.ShowToast -> {
@@ -171,6 +180,8 @@ internal fun WorkspaceScreen(
         dispatcher = dispatcher,
         modifier = modifier,
     )
+    // b-221c
+    ManualCopyDialog(visible = manualCopyOpen, text = manualCopyText, onDismissRequest = { manualCopyOpen = false })
 }
 
 /**
@@ -185,11 +196,14 @@ internal fun WorkspaceScreen(
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
 ) {
+    // b-221c
+    // Share and Export hand focus back to the buttons that opened them once they close (AR-09).
+    val focus = rememberTopBarFocus()
     WorkspaceShell(
         posterColors = posterColors,
         posterCollapsed = state.preferences.posterCollapsed,
         poster = { rail -> PosterPanel(state, rail, dispatcher) },
-        topBar = { TopBarContent(state, dispatcher) },
+        topBar = { TopBarContent(state, dispatcher, focus = focus) }, // b-221c
         canvas = { contentPadding -> CanvasArea(state, contentPadding, dispatcher) },
         dock = { CanvasDock(state, dispatcher) },
         modifier = modifier,
@@ -198,9 +212,9 @@ internal fun WorkspaceScreen(
         // b-217
         fullscreenExit = { FullscreenExit(dispatcher) },
         overlays = {
-            ExportHost(state, dispatcher)
+            ExportHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.Export)) // b-221c
             ProjectsHost(state, dispatcher)
-            ShareHost(state, dispatcher)
+            ShareHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.Share)) // b-221c
             CommandHost(state, dispatcher)
             PickerHost(state, dispatcher)
             ImageHost(state, dispatcher)

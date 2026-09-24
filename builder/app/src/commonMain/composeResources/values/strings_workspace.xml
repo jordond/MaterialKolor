@@ -6,6 +6,8 @@
     <string name="workspace_redo">Redo</string>
     <!-- The toast after a copy. The argument names what was copied, such as "Primary hex". -->
     <string name="workspace_copied">Copied %1$s</string>
-    <!-- The toast when the clipboard would not take a copy. -->
-    <string name="workspace_copy_failed">Could not copy to the clipboard</string>
+    <!-- The dialog when the browser would not take a copy, from the export sheet or the poster. -->
+    <string name="workspace_manual_copy_title">Copy it yourself</string>
+    <string name="workspace_manual_copy_hint">The browser did not let the builder use the clipboard. Select the text below and copy it from there.</string>
+    <string name="workspace_manual_copy_done">Done</string>
 </resources>

@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.share_body
 import com.materialkolor.builder.generated.resources.share_copy
@@ -42,6 +43,7 @@ import org.jetbrains.compose.resources.stringResource
  * @param[onDone] Called with how a copy or share that worked went, [ShareOutcome.Copied] or
  *   [ShareOutcome.Shared].
  * @param[onDismissRequest] Called when the dialog asks to close.
+ * @param[returnFocusTo] The button that opened the dialog, which gets focus back once it closes (AR-09).
  */
 @Composable
 internal fun ShareDialog(
@@ -53,6 +55,7 @@ internal fun ShareDialog(
     onDone: (ShareOutcome) -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
+    returnFocusTo: FocusRequester? = null,
 ) {
     val scope = rememberCoroutineScope()
     var manual by remember(link, visible) { mutableStateOf(false) }
@@ -72,6 +75,7 @@ internal fun ShareDialog(
         onDismissRequest = onDismissRequest,
         title = stringResource(Res.string.share_title),
         modifier = modifier,
+        returnFocusTo = returnFocusTo,
         actions = {
             if (link != null) {
                 BuilderButton(

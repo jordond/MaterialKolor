@@ -10,7 +10,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
@@ -28,8 +27,11 @@ import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.feature.workspace.AppModel
+import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.feature.workspace.WorkspaceScreen
 import com.materialkolor.builder.feature.workspace.skinOf
+import com.materialkolor.builder.kit.a11y.Announcer
+import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
@@ -97,30 +99,28 @@ internal fun rememberSkin(document: State<ThemeDocument>): State<Skin> =
 /**
  * Dresses the workspace in the skin and colors of the open project.
  *
- * The workspace is movable content, so a library switch, which swaps the skin theme it sits in,
- * carries its state across instead of starting it over. The reveal that is playing, the toasts and
- * every scroll position survive the switch that way (F-03).
+ * The workspace state is collected once, here, and the theme result and the skin come from its own
+ * document. So no frame pairs a new document with the old colors or the old skin, and the workspace
+ * draws the state the colors were resolved from. The kit keeps the content movable across a library
+ * switch (D44), so the reveal that is playing, the toasts and every scroll position survive it (F-03).
+ *
+ * @param[probe] Drawn over the workspace with the state it was handed, for tests. Nothing by default.
  */
 @Composable
 internal fun BuilderRoot(
     graph: AppGraph,
     model: AppModel = metroViewModel(),
+    workspaceModel: WorkspaceModel = metroViewModel(),
+    probe: @Composable (state: WorkspaceModel.State) -> Unit = {},
 ) {
     val state by model.collectAsState()
-    val document = graph.session.document.collectAsState()
+    // b-221c
+    val workspace = workspaceModel.collectAsState()
+    val document = remember(workspace) { derivedStateOf { workspace.value.document } }
     val result by rememberThemeResult(document, graph.themeResolver)
     val skin by rememberSkin(document)
     val environment = graph.environment
-    val workspace = remember {
-        movableContentOf { coarsePointer: Boolean ->
-            ProvideBuilderLayout(coarsePointer = coarsePointer, modifier = Modifier.fillMaxSize()) {
-                val transition = rememberSkinTransition()
-                SkinTransitionHost(transition = transition, modifier = Modifier.fillMaxSize()) {
-                    WorkspaceScreen(transition = transition)
-                }
-            }
-        }
-    }
+    val announcer = remember(environment) { Announcer { message -> environment.announce(message) } }
 
     LaunchedEffect(model) {
         model.boot()
@@ -133,10 +133,21 @@ internal fun BuilderRoot(
         LocalThemeResult provides result,
         // b-304
         LocalThemeResolver provides graph.themeResolver,
+        // b-221c
+        LocalAnnouncer provides announcer,
     ) {
         BuilderTheme(skin = skin, result = result, isDark = state.isDark, reducedMotion = state.reducedMotion) {
             ThemeColorEffect(environment)
-            workspace(state.coarsePointer)
+            ProvideBuilderLayout(coarsePointer = state.coarsePointer, modifier = Modifier.fillMaxSize()) {
+                val transition = rememberSkinTransition()
+                SkinTransitionHost(transition = transition, modifier = Modifier.fillMaxSize()) {
+                    // Read in here, so the content the kit moves sees the same state as the colors
+                    // provided above it. Read in the root, a move can pair it with the old colors.
+                    val shown = workspace.value
+                    WorkspaceScreen(state = shown, transition = transition, model = workspaceModel)
+                    probe(shown)
+                }
+            }
         }
     }
 }
