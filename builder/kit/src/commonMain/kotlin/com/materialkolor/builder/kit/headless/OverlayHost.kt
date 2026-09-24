@@ -27,7 +27,9 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
@@ -37,16 +39,13 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalTextToolbar
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.window.PopupPositionProvider
 import com.materialkolor.builder.domain.model.Library
@@ -100,37 +99,6 @@ internal class OverlayPlacement(
     val provider: PopupPositionProvider?,
 )
 
-/**
- * The bounds of the layout an overlay opens from, in the host's coordinates.
- *
- * A closed anchor only keeps its layout, so scrolling past it writes no state. The bounds follow
- * the layout while an overlay is open on it.
- */
-internal class OverlayAnchor {
-    var bounds: IntRect by mutableStateOf(IntRect.Zero)
-        private set
-
-    private var layout: LayoutCoordinates? = null
-    private var host: OverlayHostState? = null
-
-    /** Keeps [layout], and moves [bounds] with it while an overlay follows the anchor. */
-    fun moved(layout: LayoutCoordinates) {
-        this.layout = layout
-        host?.let { measure(it) }
-    }
-
-    /** Starts following the anchor in [host] as an overlay opens on it, and stops with null. */
-    fun follow(host: OverlayHostState?) {
-        this.host = host
-        host?.let { measure(it) }
-    }
-
-    private fun measure(host: OverlayHostState) {
-        val attached = layout?.takeIf { it.isAttached } ?: return
-        bounds = host.boundsOf(attached)
-    }
-}
-
 /** One overlay in the host, drawn with the locals of the place it was opened from. */
 internal class OverlayLayer(
     val kind: OverlayKind,
@@ -167,6 +135,15 @@ internal class OverlayHostState {
     /** The host's own layout, which anchored overlays measure their anchors against. */
     var coordinates: LayoutCoordinates? = null
 
+    /** The page's focus group, which notes the child that held focus each time focus leaves the page. */
+    val page: FocusRequester = FocusRequester()
+
+    /**
+     * Every focus target one level into the page. A scroll container or a lazy list is one of them,
+     * since each brings a focus group of its own, and each notes the child in it that held focus.
+     */
+    val pageChildren: FocusRequester = FocusRequester()
+
     /** Whether focus is in the page. */
     var pageHasFocus: Boolean = false
 
@@ -196,13 +173,27 @@ internal class OverlayHostState {
         topFocusLosses++
     }
 
+    /** Notes the control in the page that holds focus, two focus groups deep, as focus leaves the page. */
+    fun savePageFocus() {
+        page.saveFocusedChild()
+        pageChildren.saveFocusedChild()
+    }
+
     /**
-     * Leads focus into the top open modal when it rests nowhere, the way the modal took it as it
-     * opened. A toast that held focus and left would otherwise leave the keyboard outside the modal.
+     * Leads focus back when it rests nowhere after a toast that held it left. With a modal open it
+     * goes into the top one, the way the modal took it as it opened, so the keyboard stays inside
+     * the modal.
+     *
+     * Otherwise it goes back to the control in the page that had it before the toast took it. That
+     * reaches a control that sits straight in the page or straight in a scroll container, a lazy list
+     * or another focus group in the page. Compose only notes the focused child where a focus
+     * requester or a focus restorer sits, while `ComposeUiFlags.isFocusRestorationEnabled` is off, so
+     * a control nested a group deeper is not found and focus stays where the toast left it.
      */
-    fun refocusModal() {
+    fun refocus() {
         if (holdsFocus()) return
-        layers.lastOrNull { layer -> layer.open && layer.kind == OverlayKind.Modal }?.focus?.enter()
+        val modal = layers.lastOrNull { layer -> layer.open && layer.kind == OverlayKind.Modal }
+        if (modal != null) modal.focus?.enter() else page.restoreFocusedChild()
     }
 
     /** [layout]'s bounds in the host, or in the root before the host has been placed. */
@@ -269,8 +260,11 @@ internal fun overlayLibrary(): Library {
  * the bounds of [content], the pane's, so they stay inside the pane's clip and filters, and a modal
  * in it clears only the pane.
  *
- * Text fields get no context menu or selection toolbar here. Foundation draws both in a popup, and
- * the rows it offers are not public, so they cannot be drawn in the page instead.
+ * Text fields get no context menu here, since foundation draws it in a popup and its rows are not
+ * public. A right press never reaches them. A touch selection gets the page's own text toolbar
+ * instead, which the root host provides and draws last, over every layer and the top slot. A
+ * [nested] host passes the toolbar of the host above it through, and one with no host above it
+ * shows none.
  */
 @Composable
 internal fun OverlayHost(
@@ -281,31 +275,42 @@ internal fun OverlayHost(
         content()
         return
     }
+    val parent = LocalOverlayHost.current
     val host = remember { OverlayHostState() }
+    val toolbar = if (nested) null else remember { PageTextToolbar() }
     LaunchedEffect(host) {
-        snapshotFlow { host.topFocusLosses }.drop(1).collect { host.refocusModal() }
+        snapshotFlow { host.topFocusLosses }.drop(1).collect { host.refocus() }
     }
     CompositionLocalProvider(
         LocalOverlayHost provides host,
         LocalTextContextMenuDropdownProvider provides NoTextContextMenu,
         LocalTextContextMenuToolbarProvider provides NoTextContextMenu,
-        LocalTextToolbar provides NoTextToolbar,
+        LocalTextToolbar provides when {
+            toolbar != null -> toolbar
+            parent != null -> LocalTextToolbar.current
+            else -> NoTextToolbar
+        },
     ) {
         Box(
             modifier = Modifier
                 .then(if (nested) Modifier.clipToBounds() else Modifier)
                 .onPlaced { coordinates -> host.coordinates = coordinates }
-                .pointerInput(Unit) { swallowSecondaryPresses() },
+                .pointerInput(Unit) { swallowSecondaryPresses() }
+                .then(if (toolbar != null) Modifier.pageTextToolbarScroll(toolbar) else Modifier),
             propagateMinConstraints = true,
         ) {
             Box(
                 modifier = Modifier
                     .onFocusChanged { state -> host.pageHasFocus = state.hasFocus }
+                    .focusRequester(host.page)
+                    .focusProperties { onExit = { host.savePageFocus() } }
                     .trapFocus { host.isUnderFocusTrap(OverlayHostState.Page) }
+                    .focusRequester(host.pageChildren)
                     .hideUnderModal(host, OverlayHostState.Page),
                 propagateMinConstraints = true,
             ) { content() }
             OverlayLayers(host, Modifier.matchParentSize())
+            if (toolbar != null) PageTextToolbarLayer(toolbar, host, Modifier.matchParentSize())
         }
     }
 }
@@ -339,6 +344,7 @@ internal fun OverlayPortal(
         stack.add(layer)
         onDispose {
             stack.remove(layer)
+            // A backstop, since a layer that leaves along with its portal may not report the focus it held.
             if (layer.kind == OverlayKind.Top && layer.hasFocus) host.topLostFocus()
         }
     }
@@ -347,20 +353,6 @@ internal fun OverlayPortal(
         anchor?.follow(host)
         onDispose { anchor?.follow(null) }
     }
-}
-
-/**
- * Keeps the layout this is composed in as an anchor for an overlay.
- *
- * It lays out as nothing, so the anchor keeps its size, the way a `Popup` does.
- */
-@Composable
-internal fun rememberOverlayAnchor(): OverlayAnchor {
-    val anchor = remember { OverlayAnchor() }
-    Layout(
-        modifier = Modifier.onGloballyPositioned { probe -> anchor.moved(probe.parentLayoutCoordinates ?: probe) },
-    ) { _, _ -> layout(0, 0) {} }
-    return anchor
 }
 
 /**
@@ -459,31 +451,3 @@ private fun Modifier.hideUnderModal(
     host: OverlayHostState,
     index: Int,
 ): Modifier = then(if (host.isUnderModal(index)) Modifier.clearAndSetSemantics {} else Modifier)
-
-/**
- * Lays [content] out where the placement puts it. A provider picks the spot from the anchor and
- * flips at the host's edges, and without one [content] covers the anchor's bounds exactly.
- */
-@Composable
-private fun AnchoredOverlay(
-    placement: OverlayPlacement,
-    content: @Composable () -> Unit,
-) {
-    Layout(content = content, modifier = Modifier.fillMaxSize()) { measurables, constraints ->
-        val window = IntSize(constraints.maxWidth, constraints.maxHeight)
-        val anchor = placement.anchor.bounds
-        val provider = placement.provider
-        val inner = if (provider == null) {
-            Constraints.fixed(anchor.width, anchor.height)
-        } else {
-            constraints.copy(minWidth = 0, minHeight = 0)
-        }
-        val placeables = measurables.map { measurable -> measurable.measure(inner) }
-        layout(window.width, window.height) {
-            for (placeable in placeables) {
-                val size = IntSize(placeable.width, placeable.height)
-                placeable.place(provider?.calculatePosition(anchor, window, layoutDirection, size) ?: anchor.topLeft)
-            }
-        }
-    }
-}

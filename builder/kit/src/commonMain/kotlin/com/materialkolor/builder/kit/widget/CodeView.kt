@@ -208,11 +208,11 @@ public fun CodeView(
                 }
             }
         }
-        // Placed by a box of its own, since Material's tooltip wraps the modifier it is given.
-        Box(Modifier.align(Alignment.TopEnd).padding(tokens.spacing.small)) {
-            BuilderTooltip(text = copyLabel) {
-                BuilderIconButton(onClick = onCopy, icon = IconId.Copy, contentDescription = copyLabel)
-            }
+        BuilderTooltip(
+            text = copyLabel,
+            modifier = Modifier.align(Alignment.TopEnd).padding(tokens.spacing.small),
+        ) {
+            BuilderIconButton(onClick = onCopy, icon = IconId.Copy, contentDescription = copyLabel)
         }
     }
 }

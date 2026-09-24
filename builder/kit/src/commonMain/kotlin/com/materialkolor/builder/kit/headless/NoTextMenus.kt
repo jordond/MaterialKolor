@@ -30,7 +30,10 @@ internal object NoTextContextMenu : TextContextMenuProvider {
     override suspend fun showTextContextMenu(dataProvider: TextContextMenuDataProvider) = Unit
 }
 
-/** A text selection toolbar that shows nothing, standing in for the web's popup. */
+/**
+ * A text selection toolbar that shows nothing, standing in for the web's popup in a pane host with no
+ * host above it to pass the page's own toolbar through.
+ */
 internal object NoTextToolbar : TextToolbar {
     override val status: TextToolbarStatus = TextToolbarStatus.Hidden
 

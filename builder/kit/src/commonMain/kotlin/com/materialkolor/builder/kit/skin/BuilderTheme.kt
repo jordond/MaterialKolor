@@ -13,6 +13,7 @@ import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.kit.headless.OverlayHost
+import com.materialkolor.builder.kit.headless.PageTextToolbarLocals
 import com.materialkolor.builder.kit.icon.BuilderIcons
 import com.materialkolor.builder.kit.icon.LocalBuilderIcons
 import com.materialkolor.builder.kit.motion.BuilderMotion
@@ -61,7 +62,13 @@ public fun BuilderTheme(
     // d44
     remember { textFieldMinSizeOptimizationOff }
     val current by rememberUpdatedState(content)
-    val builder = remember { movableContentOf { current() } }
+    val builder = remember {
+        movableContentOf {
+            // b-224
+            PageTextToolbarLocals()
+            current()
+        }
+    }
     CompositionLocalProvider(
         LocalSkin provides skin,
         LocalBuilderType provides rememberBuilderType(),

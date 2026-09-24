@@ -203,11 +203,11 @@ public fun SwatchTile(
             }
         }
         if (showCopy) {
-            // Placed by a box of its own, since Material's tooltip wraps the modifier it is given.
-            Box(Modifier.align(Alignment.BottomEnd).padding(tokens.spacing.extraSmall)) {
-                BuilderTooltip(text = copyLabel) {
-                    BuilderIconButton(onClick = onCopy, icon = IconId.Copy, contentDescription = copyLabel)
-                }
+            BuilderTooltip(
+                text = copyLabel,
+                modifier = Modifier.align(Alignment.BottomEnd).padding(tokens.spacing.extraSmall),
+            ) {
+                BuilderIconButton(onClick = onCopy, icon = IconId.Copy, contentDescription = copyLabel)
             }
         }
     }

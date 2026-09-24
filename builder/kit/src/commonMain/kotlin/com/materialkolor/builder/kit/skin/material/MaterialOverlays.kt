@@ -345,6 +345,10 @@ private fun MaterialMenuRows(
  *
  * `TooltipBox` always opens a popup, so where overlays render in the page (D40) the headless
  * tooltip draws the label in Material's inverse colours, out of the semantics tree.
+ *
+ * `TooltipBox` puts the modifier it is given on the anchor inside a box of its own, where a
+ * placement like `align` or `weight` never reaches the caller's layout. So [modifier] goes on a box
+ * around it instead, which hands its minimum size on.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -357,13 +361,14 @@ internal fun MaterialTooltip(
         HeadlessTooltip(text, materialOverlayStyle(), modifier, content)
         return
     }
-    TooltipBox(
-        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-        tooltip = { PlainTooltip { Text(text) } },
-        state = rememberTooltipState(isPersistent = true),
-        modifier = modifier,
-        content = content,
-    )
+    Box(modifier, propagateMinConstraints = true) {
+        TooltipBox(
+            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+            tooltip = { PlainTooltip { Text(text) } },
+            state = rememberTooltipState(isPersistent = true),
+            content = content,
+        )
+    }
 }
 
 /**

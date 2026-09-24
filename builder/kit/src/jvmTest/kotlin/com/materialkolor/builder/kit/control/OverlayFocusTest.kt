@@ -2,8 +2,11 @@ package com.materialkolor.builder.kit.control
 
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,7 +61,7 @@ class OverlayFocusTest {
         }
 
     @Test
-    fun toastUndo_inTree_joinsAModalsTabCycleButNotAPopovers() =
+    fun toastUndo_inTree_joinsAModalsTabCycleButNotAPopoversAndLeavesFocusInTheDialog() =
         forEachSkin { _, skin ->
             val toasts = BuilderToastHostState()
             var menu by mutableStateOf(false)
@@ -121,5 +124,94 @@ class OverlayFocusTest {
             waitForIdle()
             toasts.toasts shouldBe emptyList()
             onNode(isFocused() and hasAnyAncestor(hasOverlayPaneTitle("Export"))).assertExists()
+        }
+
+    @Test
+    fun toastHostLeavingWhileUndoHasFocus_inTree_leavesFocusInTheDialog() =
+        forEachSkin { _, skin ->
+            val toasts = BuilderToastHostState()
+            var toastHost by mutableStateOf(true)
+            setContent {
+                HostOverlays(skin, inTree = true) {
+                    Box(Modifier.fillMaxSize()) {
+                        if (toastHost) BuilderToastHost(toasts)
+                        BuilderDialog(
+                            visible = true,
+                            onDismissRequest = {},
+                            title = "Export",
+                            actions = {
+                                OverlayTestButton("cancel")
+                                OverlayTestButton("confirm")
+                            },
+                        ) { BuilderText("Kotlin") }
+                    }
+                }
+            }
+            waitForIdle()
+            toasts.show("Deleted Sunset", "Undo", ToastDuration.Indefinite) {}
+            waitForIdle()
+            val undo = onNode(hasText("Undo") and hasRole(Role.Button))
+            undo.requestFocus()
+            undo.assertIsFocused()
+            toastHost = false
+            waitForIdle()
+            undo.assertDoesNotExist()
+            onNode(isFocused() and hasAnyAncestor(hasOverlayPaneTitle("Export"))).assertExists()
+        }
+
+    @Test
+    fun toastUndo_inTree_withNoModalOpen_handsFocusBackToThePage() =
+        forEachSkin { _, skin ->
+            val toasts = BuilderToastHostState()
+            setContent {
+                HostOverlays(skin, inTree = true) {
+                    Column {
+                        OverlayTestButton("first")
+                        OverlayTestButton("second")
+                        BuilderToastHost(toasts)
+                    }
+                }
+            }
+            waitForIdle()
+            toasts.show("Deleted Sunset", "Undo", ToastDuration.Indefinite) {}
+            waitForIdle()
+            val undo = onNode(hasText("Undo") and hasRole(Role.Button))
+            onNodeWithTag("second").requestFocus()
+            onNodeWithTag("second").performKeyInput { pressKey(Key.Tab) }
+            waitForIdle()
+            undo.assertIsFocused()
+            undo.performKeyInput { pressKey(Key.Enter) }
+            waitForIdle()
+            toasts.toasts shouldBe emptyList()
+            onNodeWithTag("second").assertIsFocused()
+        }
+
+    @Test
+    fun toastUndo_inTree_withNoModalOpen_handsFocusBackToAButtonInAScrollContainer() =
+        forEachSkin { _, skin ->
+            val toasts = BuilderToastHostState()
+            setContent {
+                HostOverlays(skin, inTree = true) {
+                    Column {
+                        Column(Modifier.verticalScroll(rememberScrollState())) {
+                            OverlayTestButton("first")
+                            OverlayTestButton("second")
+                        }
+                        BuilderToastHost(toasts)
+                    }
+                }
+            }
+            waitForIdle()
+            toasts.show("Deleted Sunset", "Undo", ToastDuration.Indefinite) {}
+            waitForIdle()
+            val undo = onNode(hasText("Undo") and hasRole(Role.Button))
+            onNodeWithTag("second").requestFocus()
+            onNodeWithTag("second").performKeyInput { pressKey(Key.Tab) }
+            waitForIdle()
+            undo.assertIsFocused()
+            undo.performKeyInput { pressKey(Key.Enter) }
+            waitForIdle()
+            toasts.toasts shouldBe emptyList()
+            onNodeWithTag("second").assertIsFocused()
         }
 }
