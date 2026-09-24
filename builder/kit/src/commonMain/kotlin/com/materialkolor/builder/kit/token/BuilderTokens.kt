@@ -34,6 +34,8 @@ import com.materialkolor.builder.codegen.dsl.TokenKind
  * @property[radius] Corner radii, small through large.
  * @property[spacing] The spacing scale.
  * @property[iconSize] How big the skin draws an icon in the chrome.
+ * @property[outlineWidth] How thick a hairline outline is, around a field, a flyout or a widget at
+ *   rest. Focus rings and a skin's own border metrics keep their widths.
  */
 @Immutable
 public data class BuilderTokens(
@@ -56,6 +58,7 @@ public data class BuilderTokens(
     public val radius: BuilderRadii = BuilderRadii(),
     public val spacing: BuilderSpacing = BuilderSpacing(),
     public val iconSize: Dp = 20.dp, // b-202a
+    public val outlineWidth: Dp = 1.dp,
 )
 
 /**

@@ -162,7 +162,7 @@ public fun CodeView(
         modifier = modifier
             .clip(shape)
             .background(tokens.codeBackground)
-            .border(WidgetOutlineWidth, tokens.border, shape),
+            .border(tokens.outlineWidth, tokens.border, shape),
     ) {
         SelectionContainer {
             Box(
@@ -243,7 +243,7 @@ private fun CodeLine(
                                 .size(look.swatchSize)
                                 .clip(look.swatchShape)
                                 .background(part.color)
-                                .border(WidgetOutlineWidth, tokens.border, look.swatchShape),
+                                .border(tokens.outlineWidth, tokens.border, look.swatchShape),
                         )
                     }
                 }

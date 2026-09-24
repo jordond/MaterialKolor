@@ -33,7 +33,7 @@ import com.composeunstyled.Thumb
 import com.composeunstyled.ThumbVisibility
 import com.composeunstyled.UnstyledVerticalScrollbar
 import com.composeunstyled.rememberScrollbarState
-import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
+import com.materialkolor.builder.kit.a11y.LocalWebKeyboard
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.controlRing
@@ -50,6 +50,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * @param[state] The scroll position, hoisted so a caller can jump to a section.
  * @param[style] The skin's overlay style, for the thumb and the focus ring.
  * @param[modifier] Applied to the area.
+ * @param[tabStop] Whether the area may be a Tab stop on the web at all.
  * @param[content] What scrolls.
  */
 @Composable
@@ -57,9 +58,10 @@ internal fun HeadlessScrollArea(
     state: ScrollState,
     style: OverlayStyle,
     modifier: Modifier,
+    tabStop: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val keys = if (LocalFoldsStateIntoName.current) Modifier.scrollAreaKeys(state, style) else Modifier
+    val keys = if (tabStop && LocalWebKeyboard.current) Modifier.scrollAreaKeys(state, style) else Modifier
     Box(modifier.then(keys)) {
         Column(
             modifier = Modifier

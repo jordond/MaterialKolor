@@ -175,7 +175,7 @@ private fun RampStop(
             .then(
                 when {
                     focused -> Modifier.stopFocusRing(tokens.focus, halo = tokens.panel)
-                    hovered -> Modifier.border(WidgetOutlineWidth, tokens.borderStrong)
+                    hovered -> Modifier.border(tokens.outlineWidth, tokens.borderStrong)
                     else -> Modifier
                 },
             ).hoverable(interactionSource)

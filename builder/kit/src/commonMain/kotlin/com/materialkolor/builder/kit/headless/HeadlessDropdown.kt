@@ -40,6 +40,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
@@ -118,20 +119,7 @@ internal fun HeadlessDropdown(
     val list: @Composable () -> Unit = {
         AnimatedVisibility(visibleState = state, enter = popoverEnter(), exit = popoverExit()) {
             val focus = remember { OverlayFocus() }
-            Column(
-                modifier = Modifier
-                    .padding(tokens.spacing.small)
-                    .shadow(style.shadow, style.popoverShape)
-                    .clip(style.popoverShape)
-                    .background(style.surface)
-                    .then(if (style.border != null) Modifier.border(style.border, style.popoverShape) else Modifier)
-                    .widthIn(min = maxOf(minWidth, OverlayMetrics.menuMinWidth), max = OverlayMetrics.menuMaxWidth)
-                    .width(IntrinsicSize.Max)
-                    .heightIn(max = OverlayMetrics.menuMaxHeight)
-                    .verticalScroll(rememberScrollState())
-                    .then(focus.modifier)
-                    .padding(tokens.spacing.extraSmall),
-            ) { this.content(close) }
+            DropdownList(style, minWidth, listModifier = focus.modifier) { this.content(close) }
             LaunchedEffect(Unit) { focus.enter(initialFocus) }
         }
     }
@@ -146,6 +134,44 @@ internal fun HeadlessDropdown(
             content = list,
         )
     }
+}
+
+/**
+ * The container a dropdown's rows sit in, the open list's and a panel's drawn in place alike. It
+ * stands on the style's surface with its shadow and edge, keeps between the narrowest and widest a
+ * list gets, and scrolls past the tallest.
+ *
+ * @param[style] The skin's overlay style.
+ * @param[minWidth] The narrowest the list may be, never under the menu's own narrowest.
+ * @param[modifier] Applied to the container, outside the room it keeps for its shadow.
+ * @param[listModifier] Applied to the scrolling list inside its edge, where the open list keeps
+ * focus in.
+ * @param[content] The rows.
+ */
+@Composable
+internal fun DropdownList(
+    style: OverlayStyle,
+    minWidth: Dp = OverlayMetrics.menuMinWidth,
+    modifier: Modifier = Modifier,
+    listModifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val tokens = LocalBuilderTokens.current
+    Column(
+        modifier = modifier
+            .padding(tokens.spacing.small)
+            .shadow(style.shadow, style.popoverShape)
+            .clip(style.popoverShape)
+            .background(style.surface)
+            .then(if (style.border != null) Modifier.border(style.border, style.popoverShape) else Modifier)
+            .widthIn(min = maxOf(minWidth, OverlayMetrics.menuMinWidth), max = OverlayMetrics.menuMaxWidth)
+            .width(IntrinsicSize.Max)
+            .heightIn(max = OverlayMetrics.menuMaxHeight)
+            .verticalScroll(rememberScrollState())
+            .then(listModifier)
+            .padding(tokens.spacing.extraSmall),
+        content = content,
+    )
 }
 
 /**
@@ -212,21 +238,41 @@ internal fun HeadlessMenu(
     Box(modifier.focusRequester(trigger)) {
         anchor()
         HeadlessDropdown(expanded, onDismissRequest, style, returnFocusTo = trigger) { close ->
-            for (item in items) {
-                HeadlessDropdownItem(
-                    label = item.label,
-                    onClick = {
-                        close()
-                        item.onClick()
-                    },
-                    style = style,
-                    icon = item.icon,
-                    emphasis = item.emphasis,
-                    enabled = item.enabled,
-                    selected = item.selected,
-                )
-            }
+            HeadlessMenuRows(items, style, close)
         }
+    }
+}
+
+/** A menu drawn open where it stands, the rows of [HeadlessMenu] in its list with nothing floating. */
+@Composable
+internal fun HeadlessMenuPanel(
+    items: List<BuilderMenuItem>,
+    style: OverlayStyle,
+    modifier: Modifier,
+) {
+    DropdownList(style, modifier = modifier) { HeadlessMenuRows(items, style, close = {}) }
+}
+
+/** One row per item, each calling [close] before it runs its item. */
+@Composable
+private fun HeadlessMenuRows(
+    items: List<BuilderMenuItem>,
+    style: OverlayStyle,
+    close: () -> Unit,
+) {
+    for (item in items) {
+        HeadlessDropdownItem(
+            label = item.label,
+            onClick = {
+                close()
+                item.onClick()
+            },
+            style = style,
+            icon = item.icon,
+            emphasis = item.emphasis,
+            enabled = item.enabled,
+            selected = item.selected,
+        )
     }
 }
 
@@ -248,40 +294,29 @@ internal fun <T> HeadlessSelect(
     style: OverlayStyle,
     modifier: Modifier,
 ) {
-    val tokens = LocalBuilderTokens.current
     val density = LocalDensity.current
     val interaction = remember { MutableInteractionSource() }
     var expanded by remember { mutableStateOf(false) }
     var fieldWidth by remember { mutableIntStateOf(0) }
     val selectedRow = remember { FocusRequester() }
     val field = remember { FocusRequester() }
-    val current = optionLabel(selected)
     Box(modifier) {
-        Row(
+        SelectField(
+            label = label,
+            current = optionLabel(selected),
+            enabled = enabled,
+            style = style,
             modifier = Modifier
-                .heightIn(min = LocalLayout.current.minTouchTarget)
                 .onSizeChanged { size -> fieldWidth = size.width }
-                .focusRequester(field)
-                .background(style.field, style.itemShape)
-                .border(style.fieldBorder, style.itemShape)
+                .focusRequester(field),
+            action = Modifier
                 .overlayFeedback(interaction, style, enabled = enabled)
                 .onKeyEvent { event ->
                     val open = enabled && event.type == KeyEventType.KeyDown && event.key == Key.DirectionDown
                     if (open) expanded = true
                     open
-                }.clickable(interaction, null, enabled, role = Role.DropdownList) { expanded = !expanded }
-                .semantics { stateDescription = current }
-                .foldState(label, ControlState.Value(current), enabled)
-                .padding(horizontal = tokens.spacing.medium, vertical = tokens.spacing.extraSmall),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
-        ) {
-            Column(Modifier.weight(1f, fill = false)) {
-                BuilderText(label, style = BuilderTextStyle.Value, color = style.muted, maxLines = 1)
-                BuilderText(current, style = BuilderTextStyle.Label, color = style.content, maxLines = 1)
-            }
-            BuilderIcon(IconId.ChevronDown, contentDescription = null, tint = style.content)
-        }
+                }.clickable(interaction, null, enabled, role = Role.DropdownList) { expanded = !expanded },
+        )
         HeadlessDropdown(
             expanded = expanded,
             onDismissRequest = { expanded = false },
@@ -290,19 +325,97 @@ internal fun <T> HeadlessSelect(
             initialFocus = if (selected in options) selectedRow else null,
             returnFocusTo = field,
         ) { close ->
-            for (option in options) {
-                HeadlessDropdownItem(
-                    label = optionLabel(option),
-                    onClick = {
-                        close()
-                        onSelect(option)
-                    },
-                    style = style,
-                    modifier = if (option == selected) Modifier.focusRequester(selectedRow) else Modifier,
-                    selected = option == selected,
-                )
+            val pick = { option: T ->
+                close()
+                onSelect(option)
             }
+            HeadlessSelectRows(options, selected, optionLabel, pick, style, selectedRow)
         }
+    }
+}
+
+/**
+ * A select drawn open where it stands, its field over the list of [HeadlessSelect] with nothing
+ * floating. The field only shows the choice, so Tab goes straight to the options.
+ */
+@Composable
+internal fun <T> HeadlessSelectPanel(
+    label: String,
+    options: List<T>,
+    selected: T,
+    onSelect: (T) -> Unit,
+    optionLabel: (T) -> String,
+    style: OverlayStyle,
+    modifier: Modifier,
+) {
+    Column(modifier.width(IntrinsicSize.Max)) {
+        SelectField(
+            label = label,
+            current = optionLabel(selected),
+            enabled = true,
+            style = style,
+            modifier = Modifier.fillMaxWidth(),
+            action = Modifier.semantics(mergeDescendants = true) { role = Role.DropdownList },
+        )
+        DropdownList(style, modifier = Modifier.fillMaxWidth()) {
+            HeadlessSelectRows(options, selected, optionLabel, onSelect, style, selectedRow = null)
+        }
+    }
+}
+
+/**
+ * A select's field, its label over the choice and a chevron after them. It reads as a dropdown
+ * list whose state is the choice, and [action] makes it one.
+ */
+@Composable
+private fun SelectField(
+    label: String,
+    current: String,
+    enabled: Boolean,
+    style: OverlayStyle,
+    modifier: Modifier,
+    action: Modifier,
+) {
+    val tokens = LocalBuilderTokens.current
+    Row(
+        modifier = modifier
+            .heightIn(min = LocalLayout.current.minTouchTarget)
+            .background(style.field, style.itemShape)
+            .border(style.fieldBorder, style.itemShape)
+            .then(action)
+            .semantics { stateDescription = current }
+            .foldState(label, ControlState.Value(current), enabled)
+            .padding(horizontal = tokens.spacing.medium, vertical = tokens.spacing.extraSmall),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
+    ) {
+        Column(Modifier.weight(1f, fill = false)) {
+            BuilderText(label, style = BuilderTextStyle.Value, color = style.muted, maxLines = 1)
+            BuilderText(current, style = BuilderTextStyle.Label, color = style.content, maxLines = 1)
+        }
+        BuilderIcon(IconId.ChevronDown, contentDescription = null, tint = style.content)
+    }
+}
+
+/** One option row per option, the chosen one checked and, given [selectedRow], focused by it. */
+@Composable
+private fun <T> HeadlessSelectRows(
+    options: List<T>,
+    selected: T,
+    optionLabel: (T) -> String,
+    onChoose: (T) -> Unit,
+    style: OverlayStyle,
+    selectedRow: FocusRequester?,
+) {
+    for (option in options) {
+        val isSelected = option == selected
+        HeadlessDropdownItem(
+            label = optionLabel(option),
+            onClick = { onChoose(option) },
+            style = style,
+            modifier = if (isSelected && selectedRow != null) Modifier.focusRequester(selectedRow) else Modifier,
+            selected = isSelected,
+        )
     }
 }
 

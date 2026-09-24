@@ -58,9 +58,9 @@ import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.ListRowContent
 import com.materialkolor.builder.kit.control.foldState
+import com.materialkolor.builder.kit.control.iconButtonSemantics
 import com.materialkolor.builder.kit.control.listRowInput
 import com.materialkolor.builder.kit.control.listRowState
-import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.controlPress
@@ -164,12 +164,15 @@ internal fun MaterialIconButton(
     modifier: Modifier,
     emphasis: Emphasis,
     enabled: Boolean,
+    expanded: Boolean?,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val decorated = modifier.materialFeedback(interactionSource, IconButtonDefaults.standardShape)
-    val name = stateName(contentDescription, state = null, enabled = enabled)
+    val spoken = iconButtonSemantics(contentDescription, enabled, expanded)
+    val decorated = modifier
+        .materialFeedback(interactionSource, IconButtonDefaults.standardShape)
+        .then(spoken.state)
     val content: @Composable () -> Unit = {
-        BuilderIcon(icon, contentDescription = name, tint = LocalContentColor.current)
+        BuilderIcon(icon, contentDescription = spoken.name, tint = LocalContentColor.current)
     }
     MaterialTarget {
         when (emphasis) {

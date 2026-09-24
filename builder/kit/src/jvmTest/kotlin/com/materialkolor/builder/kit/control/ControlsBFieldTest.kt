@@ -20,6 +20,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performTextInputSelection
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
@@ -357,5 +358,44 @@ class ControlsBFieldTest {
             onNodeWithTag(Field).performKeyInput { withKeyDown(UndoModifier) { pressKey(Key.Z) } }
             editableText(Field) shouldBe "Ocean"
             bubbled shouldNotContain Key.Z
+        }
+
+    @Test
+    fun textField_draftChange_reportsEditsAndTheRevertOnly() =
+        forEverySkin { variant ->
+            val drafts = mutableListOf<String>()
+            val commits = mutableListOf<String>()
+            var name by mutableStateOf("Ocean")
+            setSkinnedContent(variant) {
+                BuilderTextField(
+                    value = name,
+                    onCommit = { text -> commits += text },
+                    label = "Project name",
+                    modifier = Modifier.testTag(Field),
+                    onDraftChange = { text -> drafts += text },
+                )
+            }
+
+            onNodeWithTag(Field).requestFocus()
+            onNodeWithTag(Field).performTextReplacement("Forest")
+            drafts shouldBe listOf("Forest")
+            commits.shouldBeEmpty()
+
+            onNodeWithTag(Field).performKeyInput { pressKey(Key.Escape) }
+            drafts shouldBe listOf("Forest", "Ocean")
+
+            onNodeWithTag(Field).performTextInputSelection(TextRange(2))
+            waitForIdle()
+            drafts shouldBe listOf("Forest", "Ocean")
+
+            name = "Dune"
+            waitForIdle()
+            editableText(Field) shouldBe "Dune"
+            drafts shouldBe listOf("Forest", "Ocean")
+
+            onNodeWithTag(Field).performTextReplacement("Pine")
+            onNodeWithTag(Field).performKeyInput { pressKey(Key.Enter) }
+            commits shouldBe listOf("Pine")
+            drafts shouldBe listOf("Forest", "Ocean", "Pine")
         }
 }
