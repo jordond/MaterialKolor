@@ -66,7 +66,6 @@ test('a pasted image seeds the theme', async ({ page }) => {
 const PHOTO_ROUTE = '/__e2e/photo-12mp.jpg';
 
 test('a dropped photo seeds the theme, another chip swaps it, and Match exactly pins primary', async ({ page }) => {
-  test.fixme(true, 'Follow-up: Match exactly in the explainer stores no pins within 10 s after a photo seed');
   await page.route(`**${PHOTO_ROUTE}`, (route) =>
     route.fulfill({ path: path.resolve(__dirname, '../fixtures/photo-12mp.jpg'), contentType: 'image/jpeg' }),
   );
@@ -87,19 +86,16 @@ test('a dropped photo seeds the theme, another chip swaps it, and Match exactly 
 
   const why = button(page, 'Why?');
   await scrollTo(page, why, poster);
-  await pressFor(page, why, onPage(page, 'Why primary differs from your seed'));
-  await scrollTo(page, button(page, 'Match exactly'), poster);
+  const explainer = onPage(page, 'Why primary differs from your seed');
+  await pressFor(page, why, explainer);
+  // b-503b
+  // Match exactly sits at the foot of the explainer, which scrolls over the poster rather than in it.
+  const match = button(page, 'Match exactly');
+  await scrollTo(page, match, explainer);
+  await press(page, match);
+  await expect(explainer).toHaveCount(0, { timeout: SEED_TIMEOUT_MS });
   const pinned = async () => Object.keys(((await storedDocument(page))?.pins ?? {}) as object).length > 0;
-  await expect
-    .poll(
-      async () => {
-        if (await pinned()) return true;
-        await press(page, button(page, 'Match exactly'));
-        return false;
-      },
-      { timeout: SEED_TIMEOUT_MS, intervals: [1_000] },
-    )
-    .toBe(true);
+  await expect.poll(pinned, { timeout: SEED_TIMEOUT_MS }).toBe(true);
 });
 
 /** Fires [type] on the page with the fixture photo, fetched through [PHOTO_ROUTE]. True when the page took it. */

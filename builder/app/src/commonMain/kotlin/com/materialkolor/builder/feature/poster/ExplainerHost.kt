@@ -52,6 +52,7 @@ import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderCheckbox
 import com.materialkolor.builder.kit.control.BuilderDialog
 import com.materialkolor.builder.kit.control.BuilderDivider
+import com.materialkolor.builder.kit.control.BuilderScrollArea
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
@@ -120,19 +121,24 @@ private fun ExplainerBody(
         val dark = ExplainerText.sentences(PrimaryFacts.of(result, isDark = true))
         (light + dark).distinct()
     }
-    Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-        Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-            HctLine(stringResource(Res.string.explainer_seed), context.document.seed)
-            HctLine(stringResource(Res.string.explainer_primary_light), result.roles[Role.Primary, false].argb)
-            HctLine(stringResource(Res.string.explainer_primary_dark), result.roles[Role.Primary, true].argb)
-            HctLine(
-                stringResource(Res.string.explainer_container_light),
-                result.roles[Role.PrimaryContainer, false].argb,
-            )
+    // b-503b
+    // The body scrolls in the height the title and Close leave, so Match exactly at its foot stays in
+    // reach in a short window. Its buttons take the focus, so the area needs no Tab stop of its own.
+    BuilderScrollArea(tabStop = false) {
+        Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+            Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+                HctLine(stringResource(Res.string.explainer_seed), context.document.seed)
+                HctLine(stringResource(Res.string.explainer_primary_light), result.roles[Role.Primary, false].argb)
+                HctLine(stringResource(Res.string.explainer_primary_dark), result.roles[Role.Primary, true].argb)
+                HctLine(
+                    stringResource(Res.string.explainer_container_light),
+                    result.roles[Role.PrimaryContainer, false].argb,
+                )
+            }
+            sentences.forEach { sentence -> BuilderText(text = sentence.text(styleName)) }
+            BuilderDivider()
+            ExplainerActions(context, dispatcher)
         }
-        sentences.forEach { sentence -> BuilderText(text = sentence.text(styleName)) }
-        BuilderDivider()
-        ExplainerActions(context, dispatcher)
     }
 }
 
