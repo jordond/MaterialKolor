@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -25,6 +26,7 @@ import com.composeunstyled.theme.Theme
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.domain.model.MotionSchemeChoice
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.ThemeDocument
@@ -155,6 +157,32 @@ class PreviewPaneTest {
 
                     pane?.fontFamily shouldNotBe chrome?.fontFamily
                     pane shouldBe Typography().bodyLarge
+                }
+            }
+        }
+    }
+
+    @Test
+    fun expressivePane_movesWithTheDocumentsMotionScheme() {
+        val expected = mapOf(
+            MotionSchemeChoice.Standard to MotionScheme.standard(),
+            MotionSchemeChoice.Expressive to MotionScheme.expressive(),
+        )
+        for ((choice, motion) in expected) {
+            withClue(choice) {
+                runComposeUiTest {
+                    val result = ThemeResolver().resolve(ThemeDocument(seed = Argb(0x1E88E5), motionScheme = choice))
+                    var seen: MotionScheme? = null
+                    setContent {
+                        Chrome(Skin(Library.Material3, expressive = true)) {
+                            PreviewPane(PaneSpec(result, isDark = false, label = "Light")) {
+                                seen = MaterialTheme.motionScheme
+                            }
+                        }
+                    }
+                    waitForIdle()
+
+                    seen shouldBe motion
                 }
             }
         }

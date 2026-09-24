@@ -10,10 +10,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.input.InputModeManager
+import androidx.compose.ui.platform.LocalInputModeManager
 import com.materialkolor.builder.domain.capability.Control
+import com.materialkolor.builder.domain.capability.ControlState
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
@@ -34,6 +41,7 @@ import com.materialkolor.builder.generated.resources.keycolors_name_secondary
 import com.materialkolor.builder.generated.resources.keycolors_name_tertiary
 import com.materialkolor.builder.generated.resources.keycolors_pick
 import com.materialkolor.builder.generated.resources.keycolors_primary_only
+import com.materialkolor.builder.generated.resources.keycolors_primary_only_fluent
 import com.materialkolor.builder.generated.resources.keycolors_reset_all
 import com.materialkolor.builder.generated.resources.keycolors_use_as_seed
 import com.materialkolor.builder.kit.control.BuilderButton
@@ -54,14 +62,18 @@ import org.jetbrains.compose.resources.stringResource
  *
  * A target that ignores a palette keeps its row on screen but takes no input there, and says why
  * once under the rows. Fluent still takes the primary, which moves its accent ramp.
+ *
+ * @param[picks] The rows' Pick buttons, where a keyboard user lands when a button they pressed goes.
  */
 @Composable
 internal fun KeyColorRows(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    picks: KeyColorPicks = remember { KeyColorPicks() },
 ) {
     val spacing = LocalBuilderTokens.current.spacing
+    val input = LocalInputModeManager.current
     val messages = rememberHexMessages(HexSubject.KeyColor)
     val primary = context.capabilities[Control.PrimaryOverride]
     val others = context.capabilities[Control.OtherOverrides]
@@ -69,12 +81,13 @@ internal fun KeyColorRows(
         InfoLabel(label = stringResource(Res.string.keycolors_label), topic = InfoTopic.KeyColors)
         KeyColor.entries.forEach { slot ->
             val state = if (slot == KeyColor.Primary) primary else others
-            KeyColorRow(context, dispatcher, slot, messages, enabled = state.usable)
+            KeyColorRow(context, dispatcher, slot, messages, enabled = state.usable, picks = picks)
         }
         others.explanation?.let { reason -> ReasonLine(reason) }
         if (!context.document.keyColors.isEmpty()) {
             BuilderButton(
                 onClick = {
+                    input.handFocusTo(picks[KeyColor.Primary])
                     dispatcher.dispatch(WorkspaceAction.Edit(DocumentChange.ResetKeyColors, EditPhase.Discrete))
                 },
                 label = stringResource(Res.string.keycolors_reset_all),
@@ -88,9 +101,11 @@ internal fun KeyColorRows(
 /**
  * One key color. The field shows the color set by hand, or the key color the scheme derived from
  * the seed while there is none, and a paste or a typed color sets it as one undo entry. Beside it
- * sit Pick and either "From seed" or the button that hands the palette back to the seed.
+ * sit Pick and either "From seed" or the button that hands the palette back to the seed. Clear
+ * hands a keyboard user's focus to Pick as it goes.
  *
  * @param[enabled] Whether the target lets this palette be set.
+ * @param[picks] Where each row's Pick button takes focus.
  */
 @Composable
 internal fun KeyColorRow(
@@ -99,9 +114,11 @@ internal fun KeyColorRow(
     slot: KeyColor,
     messages: HexMessages,
     enabled: Boolean,
+    picks: KeyColorPicks,
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
+    val input = LocalInputModeManager.current
     val stored = context.document.keyColors[slot]
     val derived = remember(context.result, slot) { context.result.ramps[slot, false].keyColor }
     val shown = stored ?: derived
@@ -128,6 +145,7 @@ internal fun KeyColorRow(
                 onClick = { dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.KeyColorOverride(slot))) },
                 icon = IconId.Eyedropper,
                 contentDescription = stringResource(Res.string.keycolors_pick, name),
+                modifier = Modifier.focusRequester(picks[slot]),
                 enabled = enabled,
             )
             if (stored == null) {
@@ -135,6 +153,7 @@ internal fun KeyColorRow(
             } else {
                 BuilderIconButton(
                     onClick = {
+                        input.handFocusTo(picks[slot])
                         val change = DocumentChange.SetKeyColor(slot, null)
                         dispatcher.dispatch(WorkspaceAction.Edit(change, EditPhase.Discrete))
                     },
@@ -145,7 +164,7 @@ internal fun KeyColorRow(
             }
         }
         if (slot == KeyColor.Primary && stored != null) {
-            PrimaryOverrideLine(context, dispatcher, stored)
+            PrimaryOverrideLine(context, dispatcher, stored, pick = picks[KeyColor.Primary])
         }
     }
 }
@@ -153,23 +172,30 @@ internal fun KeyColorRow(
 /**
  * Under a primary set by hand, the reminder that it moves only the primary palette while the seed
  * keeps the rest (D12), and Use as seed for anyone who wants that color to drive everything. Use
- * as seed makes it the seed and hands the primary back to it, as one undo entry.
+ * as seed makes it the seed and hands the primary back to it, as one undo entry, and hands a
+ * keyboard user's focus to [pick] as the line goes. Fluent takes no other palette, so there the
+ * reminder says the primary moves the accent ramp instead.
  */
 @Composable
 private fun PrimaryOverrideLine(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     primary: Argb,
+    pick: FocusRequester,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
+    val input = LocalInputModeManager.current
+    val onlyPalette = context.capabilities[Control.OtherOverrides] is ControlState.Disabled
+    val reminder = if (onlyPalette) Res.string.keycolors_primary_only_fluent else Res.string.keycolors_primary_only
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(spacing.small),
         verticalArrangement = Arrangement.spacedBy(spacing.extraSmall),
         itemVerticalAlignment = Alignment.CenterVertically,
     ) {
-        BuilderText(text = stringResource(Res.string.keycolors_primary_only), emphasis = Emphasis.Secondary)
+        BuilderText(text = stringResource(reminder), emphasis = Emphasis.Secondary)
         BuilderButton(
             onClick = {
+                input.handFocusTo(pick)
                 val document = context.document
                 val seeded = document.copy(
                     seed = primary,
@@ -201,6 +227,25 @@ internal fun ColorSwatch(
             .background(color.toColor(), shape)
             .border(tokens.outlineWidth, tokens.borderStrong, shape),
     )
+}
+
+/** The Pick button of each key color row, where the focus goes when a button beside it goes away. */
+@Stable
+internal class KeyColorPicks {
+    private val requesters = KeyColor.entries.associateWith { FocusRequester() }
+
+    /** The Pick button of the row for [slot]. */
+    operator fun get(slot: KeyColor): FocusRequester = requesters.getValue(slot)
+}
+
+/**
+ * Moves the focus to [target] ahead of a button that is about to remove itself, while the keyboard
+ * is in use, so the user carries on from somewhere close by. A button that goes while it holds the
+ * focus clears it, so this has to run before the change that removes it. A pointer leaves the focus
+ * alone.
+ */
+internal fun InputModeManager.handFocusTo(target: FocusRequester) {
+    if (inputMode == InputMode.Keyboard) target.requestFocus()
 }
 
 /** What the row for [slot] is called. */
