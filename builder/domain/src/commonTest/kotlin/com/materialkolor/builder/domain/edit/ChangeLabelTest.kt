@@ -69,6 +69,7 @@ class ChangeLabelTest {
     fun merges_bigAndStructuralChanges_neverMerge() {
         val neverMerge = listOf(
             DocumentChange.SetStyle(Style.Vibrant),
+            DocumentChange.SetContrast(ContrastLevel.High),
             DocumentChange.SetLibrary(Library.Fluent, expressive = true),
             DocumentChange.SetSeed(red, SeedSource.Preset(id = "plum")),
             DocumentChange.Replace(ThemeDocument.Default),
@@ -87,7 +88,6 @@ class ChangeLabelTest {
             DocumentChange.SetSeed(red, SeedSource.Typed),
             DocumentChange.SetKeyColor(KeyColor.Primary, red),
             DocumentChange.SetCmfSeed(red),
-            DocumentChange.SetContrast(ContrastLevel.High),
             DocumentChange.SetSpec(SpecVersion.Spec2025),
             DocumentChange.SetPlatform(SchemePlatform.Watch),
             DocumentChange.SetAmoled(true),
