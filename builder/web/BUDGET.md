@@ -34,8 +34,8 @@ The script prints the brotli version it ran with, since another version can diff
   `com.materialkolor.*` resource folder, the same fonts `index.html` lists for boot. A font added
   there adds its whole size to that one total.
 - First visit, in total. The sum of every file in `firstVisit.files` minus `firstVisit.exclude`,
-  which is everything `index.html` loads before the first complete screen. That is the page, the
-  glue, both wasm files, the builder's fonts and its string resources. Library fallback fonts the
+  which is everything `index.html` loads before the first complete screen. That is the page and
+  `boot.js`, the glue, both wasm files, the builder's fonts and its string resources. Library fallback fonts the
   page never asks for at boot are left out. The Playwright smoke holds the set to what the browser
   really fetches both ways: it fails if the page loads a file at boot that the set does not count,
   and if the set counts a file the page does not load at boot. So the change that makes a file

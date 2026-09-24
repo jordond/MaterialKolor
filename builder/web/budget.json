@@ -21,6 +21,7 @@
   "firstVisit": {
     "files": [
       "index.html",
+      "boot.js",
       "assets/*",
       "composeResources/com.materialkolor.**"
     ],

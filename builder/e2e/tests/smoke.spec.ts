@@ -26,7 +26,10 @@ for (const route of ['/', '/t/AdllOwAAAAAT']) {
     expect(own.filter((response) => response.status !== 200)).toEqual([]);
     const loaded = own.map((response) => new URL(response.url).pathname);
     expect(loaded[0]).toBe(route);
-    expect(loaded.filter((pathname) => /\.(js|wasm)$/.test(pathname) && !pathname.startsWith('/assets/'))).toEqual([]);
+    // b-501
+    // boot.js is the one script at the root. It is not hashed, so the host serves it no-cache.
+    const outside = loaded.filter((pathname) => /\.(js|wasm)$/.test(pathname) && !pathname.startsWith('/assets/'));
+    expect(outside).toEqual(['/boot.js']);
     for (const asset of [/^builder\.[0-9a-f]{16}\.js$/, /^skiko\.[0-9a-f]{16}\.wasm$/, /^MaterialKolor-builder-web\.[0-9a-f]{16}\.wasm$/]) {
       expect(loaded.some((pathname) => pathname.startsWith('/assets/') && asset.test(pathname.slice('/assets/'.length)))).toBe(true);
     }
