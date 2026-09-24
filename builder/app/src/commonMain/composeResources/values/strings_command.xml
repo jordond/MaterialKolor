@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The command palette's groups. -->
+    <string name="command_category_general">General</string>
+    <string name="command_category_history">History</string>
+    <string name="command_category_seed">Seed</string>
+    <string name="command_category_library">Library</string>
+    <string name="command_category_style">Style</string>
+    <string name="command_category_target">Target options</string>
+    <string name="command_category_preview">Preview</string>
+    <string name="command_category_vision">Color vision</string>
+    <string name="command_category_project">Project</string>
+    <string name="command_category_share">Share</string>
+    <string name="command_category_export">Export</string>
+    <string name="command_category_appearance">Appearance</string>
+    <string name="command_category_motion">Motion</string>
+
+    <!-- A command that picks one option of a setting, the setting then the option, such as "Mode, Frozen hex". -->
+    <string name="command_choice">%1$s, %2$s</string>
+    <!-- Switches the library. The argument is its name in the switcher, such as "Expressive". -->
+    <string name="command_use_library">Switch to %1$s</string>
+    <!-- Picks a palette style. The argument is its name, such as "Tonal spot". -->
+    <string name="command_use_style">Use style %1$s</string>
+    <!-- Shows one preview tab. The argument is its name, such as "Palettes". -->
+    <string name="command_show_tab">Show the %1$s tab</string>
+    <string name="command_previous_tab">Previous preview tab</string>
+    <string name="command_next_tab">Next preview tab</string>
+    <string name="command_next_preview_mode">Next preview mode</string>
+    <string name="command_next_device_width">Next device width</string>
+    <string name="command_next_appearance">Next chrome appearance</string>
+    <string name="command_copy_seed">Copy the seed hex</string>
+    <string name="command_add_image">Add an image</string>
+    <string name="command_save">Save now</string>
+    <string name="command_copy_link">Copy share link</string>
+    <string name="command_copy_all">Copy all files</string>
+    <!-- What a copy names in its "Copied …" toast. -->
+    <string name="command_link_label">share link</string>
+    <string name="command_all_files_label">all files</string>
+    <!-- Why Undo or Redo does nothing now. -->
+    <string name="command_nothing_to_undo">Nothing to undo</string>
+    <string name="command_nothing_to_redo">Nothing to redo</string>
+    <!-- The toast once Cmd or Ctrl+S has saved the project. -->
+    <string name="command_saved">Saved</string>
+
+    <!-- The switch that turns keys pressed on their own, such as Space, into shortcuts or not (WCAG 2.1.4). -->
+    <string name="command_single_keys">Single-key shortcuts</string>
+    <string name="command_single_keys_note">With these off, only shortcuts with Cmd or Ctrl, and Esc, still work.</string>
+    <!-- A note for screen reader users in the shortcut cheat sheet. -->
+    <string name="command_screen_reader_note">With a screen reader, single-key shortcuts reach the page in focus mode, also called forms mode, and not in browse mode.</string>
+    <string name="command_cheat_sheet_close">Close</string>
+
+    <!-- The cheat sheet's groups, in the order of the keyboard map. -->
+    <string name="command_group_general">General</string>
+    <string name="command_group_theme">Theme</string>
+    <string name="command_group_preview">Preview</string>
+    <string name="command_group_project">Project</string>
+
+    <!-- What each shortcut does, one row of the cheat sheet each. -->
+    <string name="command_key_palette">Command palette</string>
+    <string name="command_key_cheat_sheet">Shortcut cheat sheet</string>
+    <string name="command_key_escape">Close the top overlay or leave Inspect, else leave the focused field</string>
+    <string name="command_key_shuffle">Shuffle</string>
+    <string name="command_key_hue_lock">Toggle the hue lock</string>
+    <string name="command_key_style_lock">Toggle the style lock</string>
+    <string name="command_key_library_1">Library M3</string>
+    <string name="command_key_library_2">Library Expressive</string>
+    <string name="command_key_library_3">Library Unstyled</string>
+    <string name="command_key_library_4">Library Fluent</string>
+    <string name="command_key_library_5">Library Custom</string>
+    <string name="command_key_copy_seed">Copy the seed hex</string>
+    <string name="command_key_undo">Undo the theme, or the text inside a field</string>
+    <string name="command_key_redo">Redo the theme, or the text inside a field</string>
+    <string name="command_key_add_image">Add an image</string>
+    <string name="command_key_preview_mode">Cycle the preview mode, Light, Split and Dark</string>
+    <string name="command_key_appearance">Cycle the chrome appearance, System, Light and Dark</string>
+    <string name="command_key_previous_tab">Previous preview tab</string>
+    <string name="command_key_next_tab">Next preview tab</string>
+    <string name="command_key_inspect">Toggle Inspect</string>
+    <string name="command_key_device_width">Cycle the device width</string>
+    <string name="command_key_fullscreen">Fullscreen canvas</string>
+    <string name="command_key_poster">Collapse or expand the poster</string>
+    <string name="command_key_export">Open export</string>
+    <string name="command_key_copy_all">Copy all files</string>
+    <string name="command_key_copy_link">Copy the share link</string>
+    <string name="command_key_save">Save now</string>
+    <string name="command_key_projects">Projects</string>
+    <string name="command_key_new_project">New project</string>
+    <!-- The key name for Escape in the cheat sheet. -->
+    <string name="command_key_esc">Esc</string>
+</resources>

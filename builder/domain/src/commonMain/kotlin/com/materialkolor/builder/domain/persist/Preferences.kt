@@ -22,6 +22,8 @@ import kotlinx.serialization.Serializable
  * storage, so it only ever asks once.
  * @property[exportPrefs] The export options last used for each target. A target that has never
  * been exported starts from [ExportPrefs] as it comes, see [exportPrefsFor].
+ * @property[singleKeyShortcuts] Whether keys pressed on their own, such as Space to shuffle, run
+ * shortcuts. With it off only Cmd or Ctrl shortcuts and Esc do (WCAG 2.1.4).
  */
 @Serializable
 public data class Preferences(
@@ -47,6 +49,9 @@ public data class Preferences(
     public val persistRequested: Boolean = false,
     @SerialName("exportPrefs")
     public val exportPrefs: Map<ExportTarget, ExportPrefs> = emptyMap(),
+    // b-315
+    @SerialName("singleKeyShortcuts")
+    public val singleKeyShortcuts: Boolean = true,
 ) {
     /**
      * The export options for [target], or the defaults when it has never been exported.

@@ -21,6 +21,7 @@ class PreferencesTest {
         assertNull(prefs.lastProjectId)
         assertEquals(false, prefs.persistRequested)
         assertEquals(emptyMap(), prefs.exportPrefs)
+        assertEquals(true, prefs.singleKeyShortcuts) // b-315
     }
 
     @Test

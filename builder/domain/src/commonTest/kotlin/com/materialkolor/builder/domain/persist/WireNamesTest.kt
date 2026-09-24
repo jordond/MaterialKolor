@@ -27,6 +27,7 @@ class WireNamesTest {
                 "lastProjectId",
                 "persistRequested",
                 "exportPrefs",
+                "singleKeyShortcuts", // b-315
             ),
             ExportPrefs.serializer().descriptor to listOf(
                 "packageName",
