@@ -20,6 +20,7 @@ import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.engine.color.HctReadout
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
+import com.materialkolor.builder.generated.resources.keycolors_note_alpha
 import com.materialkolor.builder.generated.resources.poster_copied_hex
 import com.materialkolor.builder.generated.resources.poster_copied_kotlin
 import com.materialkolor.builder.generated.resources.poster_copy_hex
@@ -179,7 +180,7 @@ internal fun sourceLabel(source: SeedSource): SourceLabel =
     }
 
 /**
- * What the seed field says about text it cannot read, and about what it had to change to read a
+ * What a color field says about text it cannot read, and about what it had to change to read a
  * color, resolved once so the field can ask outside composition.
  */
 @Immutable
@@ -199,10 +200,25 @@ internal class HexMessages(
         }
 }
 
+/** What a color field is for, which the note about a dropped alpha names. */
+internal enum class HexSubject {
+    /** The seed, or the second seed Cmf takes. */
+    Seed,
+
+    /** A key color set by hand. */
+    KeyColor,
+}
+
+/** What a color field for [subject] says about text it cannot read and colors it had to change. */
 @Composable
-private fun rememberHexMessages(): HexMessages {
+internal fun rememberHexMessages(subject: HexSubject = HexSubject.Seed): HexMessages {
     val errors = InvalidReason.entries.associateWith { reason -> stringResource(errorResource(reason)) }
-    val alpha = stringResource(Res.string.poster_note_alpha)
+    val alpha = stringResource(
+        when (subject) {
+            HexSubject.Seed -> Res.string.poster_note_alpha
+            HexSubject.KeyColor -> Res.string.keycolors_note_alpha
+        },
+    )
     val clamped = stringResource(Res.string.poster_note_clamped)
     val both = stringResource(Res.string.poster_note_both)
     return remember(errors, alpha, clamped, both) { HexMessages(errors, alpha, clamped, both) }

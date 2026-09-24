@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.domain.audit.ColorRef
+import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
@@ -51,7 +52,8 @@ import kotlin.math.roundToInt
  * The slider runs from -1 to 1 and a drag snaps onto a named stop it lands near. A drag moves the
  * document every frame and lets go as one undo entry, and so does each arrow press. The field takes
  * any level typed into it. The readout rates the target's own pairs in the modes the preview shows,
- * and its badge carries an icon as well as its words.
+ * and its badge carries an icon as well as its words. A target that ignores contrast says why and
+ * takes no input.
  */
 @Composable
 internal fun ContrastSection(
@@ -65,6 +67,7 @@ internal fun ContrastSection(
     val valueText = ContrastScale.format(level)
     val stopName = ContrastStop.of(level)?.let { stop -> stringResource(stop.label) }
     val fieldError = stringResource(Res.string.contrast_field_error)
+    val state = context.capabilities[Control.Contrast]
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
         InfoLabel(label = stringResource(Res.string.contrast_label), topic = InfoTopic.Contrast)
         BuilderSlider(
@@ -85,6 +88,7 @@ internal fun ContrastSection(
             valueRange = ContrastScale.Range,
             stops = ContrastScale.Stops,
             snapDistance = ContrastScale.SNAP_DISTANCE,
+            enabled = state.usable,
             stateDescription =
                 stopName?.let { name -> stringResource(Res.string.contrast_state, valueText, name) } ?: valueText,
         )
@@ -99,7 +103,9 @@ internal fun ContrastSection(
             modifier = Modifier.fillMaxWidth(),
             error = { text -> if (ContrastScale.parse(text) == null) fieldError else null },
             supportingText = stopName,
+            enabled = state.usable,
         )
+        state.explanation?.let { reason -> ReasonLine(reason) }
         LowestPairReadout(context)
     }
 }

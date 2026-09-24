@@ -2,38 +2,19 @@ package com.materialkolor.builder.feature.poster
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.LayoutDirection
 import com.materialkolor.builder.LocalThemeResolver
+import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.capability.EffectiveSpec
-import com.materialkolor.builder.domain.color.InvalidReason
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.KeyColor
@@ -44,15 +25,6 @@ import com.materialkolor.builder.engine.resolve.SchemeInputs
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
-import com.materialkolor.builder.generated.resources.poster_hex_bad_arguments
-import com.materialkolor.builder.generated.resources.poster_hex_bad_hex
-import com.materialkolor.builder.generated.resources.poster_hex_empty
-import com.materialkolor.builder.generated.resources.poster_hex_unknown_function
-import com.materialkolor.builder.generated.resources.poster_hex_unknown_name
-import com.materialkolor.builder.generated.resources.poster_hex_unrecognized
-import com.materialkolor.builder.generated.resources.poster_note_alpha
-import com.materialkolor.builder.generated.resources.poster_note_both
-import com.materialkolor.builder.generated.resources.poster_note_clamped
 import com.materialkolor.builder.generated.resources.style_chip
 import com.materialkolor.builder.generated.resources.style_chips
 import com.materialkolor.builder.generated.resources.style_cmf_derive
@@ -95,6 +67,7 @@ import com.materialkolor.builder.generated.resources.style_tooltip_tonal_spot
 import com.materialkolor.builder.generated.resources.style_tooltip_vibrant
 import com.materialkolor.builder.kit.control.BuilderBadge
 import com.materialkolor.builder.kit.control.BuilderButton
+import com.materialkolor.builder.kit.control.BuilderChoiceGroup
 import com.materialkolor.builder.kit.control.BuilderHexField
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.Emphasis
@@ -157,6 +130,7 @@ internal fun StyleChips(
                 stringResource(styleDescription(selected)),
             ),
         )
+        context.capabilities[Control.Style].explanation?.let { reason -> ReasonLine(reason) }
         if (selected == Style.Cmf) {
             CmfSeedField(context, dispatcher)
         }
@@ -164,63 +138,32 @@ internal fun StyleChips(
 }
 
 /**
- * The ten chips as one radio group with a single tab stop. Tab lands on the chosen chip and the
- * arrows move focus around the group, wrapping at the ends.
+ * The ten chips as one radio group with a single tab stop. Tab lands on the chosen chip, and the
+ * arrows, Home and End move the focus around the group without picking, wrapping at the ends.
  */
 @Composable
 private fun StyleChipRow(
     context: PosterContext,
     lookup: StyleSchemeLookup,
-    onChoose: (style: Style, origin: Offset) -> Unit,
+    onChoose: (style: Style, origin: Offset?) -> Unit,
 ) {
-    val spacing = LocalBuilderTokens.current.spacing
     val selected = context.document.style
-    val requesters = remember { Style.entries.associateWith { FocusRequester() } }
-    var roving by remember { mutableStateOf(selected) }
-    var inGroup by remember { mutableStateOf(false) }
-    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-    val groupName = stringResource(Res.string.style_chips)
-    FlowRow(
-        modifier = Modifier
-            .semantics { contentDescription = groupName }
-            .selectableGroup()
-            .onFocusChanged { state -> inGroup = state.hasFocus }
-            .onPreviewKeyEvent { event ->
-                val step = event.rovingStep(rtl) ?: return@onPreviewKeyEvent false
-                val next = Style.entries[(Style.entries.indexOf(roving) + step).mod(Style.entries.size)]
-                roving = next
-                requesters.getValue(next).requestFocus()
-                true
-            },
-        horizontalArrangement = Arrangement.spacedBy(spacing.small),
-        verticalArrangement = Arrangement.spacedBy(spacing.small),
-    ) {
-        Style.entries.forEach { style ->
-            StyleChip(
-                context = context,
-                style = style,
-                lookup = lookup,
-                selected = style == selected,
-                onChoose = { origin -> if (style != selected) onChoose(style, origin) },
-                modifier = Modifier
-                    .focusRequester(requesters.getValue(style))
-                    .focusProperties { canFocus = style == if (inGroup) roving else selected }
-                    .onFocusChanged { state -> if (state.hasFocus) roving = style },
-            )
-        }
-    }
-}
-
-/** How far an arrow key moves along the chips, or null for any other key. */
-private fun KeyEvent.rovingStep(rtl: Boolean): Int? {
-    if (type != KeyEventType.KeyDown) return null
-    val forward = if (rtl) -1 else 1
-    return when (key) {
-        Key.DirectionRight -> forward
-        Key.DirectionLeft -> -forward
-        Key.DirectionDown -> 1
-        Key.DirectionUp -> -1
-        else -> null
+    BuilderChoiceGroup(
+        options = Style.entries,
+        selected = selected,
+        // The keys only move the focus here, so a pick that ever comes this way has no chip to reveal from.
+        onSelect = { style -> if (style != selected) onChoose(style, null) },
+        label = stringResource(Res.string.style_chips),
+        selectOnFocus = false,
+    ) { style, isSelected, optionModifier ->
+        StyleChip(
+            context = context,
+            style = style,
+            lookup = lookup,
+            selected = isSelected,
+            onChoose = { origin -> if (style != selected) onChoose(style, origin) },
+            modifier = optionModifier,
+        )
     }
 }
 
@@ -282,7 +225,8 @@ private class ChipBounds {
 
 /**
  * The second seed Cmf reads for its tertiary palette. With none set the field shows the tertiary
- * key color Cmf derived, and once one is set a button hands it back.
+ * key color Cmf derived, and once one is set a button hands it back. A target that ignores it says
+ * why and takes no input.
  */
 @Composable
 private fun CmfSeedField(
@@ -292,7 +236,8 @@ private fun CmfSeedField(
     val spacing = LocalBuilderTokens.current.spacing
     val stored = context.document.cmfTertiarySeed
     val derived = remember(context.result) { context.result.ramps[KeyColor.Tertiary, false].keyColor }
-    val messages = rememberSeedMessages()
+    val state = context.capabilities[Control.CmfSecondSeed]
+    val messages = rememberHexMessages()
     Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         BuilderHexField(
             value = stored ?: derived,
@@ -303,6 +248,7 @@ private fun CmfSeedField(
             errorMessage = messages::errorOf,
             noteMessage = messages::noteOf,
             modifier = Modifier.fillMaxWidth(),
+            enabled = state.usable,
         )
         if (stored == null) {
             BuilderText(text = stringResource(Res.string.style_cmf_derived), emphasis = Emphasis.Secondary)
@@ -313,30 +259,12 @@ private fun CmfSeedField(
                 },
                 label = stringResource(Res.string.style_cmf_derive),
                 emphasis = Emphasis.Subtle,
+                enabled = state.usable,
             )
         }
+        state.explanation?.let { reason -> ReasonLine(reason) }
     }
 }
-
-/** What the tertiary seed field says about text it cannot read, in the seed field's words. */
-@Composable
-private fun rememberSeedMessages(): HexMessages {
-    val errors = InvalidReason.entries.associateWith { reason -> stringResource(hexError(reason)) }
-    val alpha = stringResource(Res.string.poster_note_alpha)
-    val clamped = stringResource(Res.string.poster_note_clamped)
-    val both = stringResource(Res.string.poster_note_both)
-    return remember(errors, alpha, clamped, both) { HexMessages(errors, alpha, clamped, both) }
-}
-
-private fun hexError(reason: InvalidReason): StringResource =
-    when (reason) {
-        InvalidReason.Empty -> Res.string.poster_hex_empty
-        InvalidReason.BadHex -> Res.string.poster_hex_bad_hex
-        InvalidReason.BadArguments -> Res.string.poster_hex_bad_arguments
-        InvalidReason.UnknownFunction -> Res.string.poster_hex_unknown_function
-        InvalidReason.UnknownName -> Res.string.poster_hex_unknown_name
-        InvalidReason.Unrecognized -> Res.string.poster_hex_unrecognized
-    }
 
 /** What [style] is called, the way the library spells it. */
 internal fun styleName(style: Style): StringResource =

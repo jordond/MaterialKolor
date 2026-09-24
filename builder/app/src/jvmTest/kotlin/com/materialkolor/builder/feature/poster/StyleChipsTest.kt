@@ -14,6 +14,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.SchemeInputs
@@ -108,6 +109,38 @@ class StyleChipsTest {
                 .shouldBeTypeOf<WorkspaceAction.EditWithReveal>()
                 .change shouldBe
                 DocumentChange.SetStyle(Style.Neutral)
+        }
+
+    @Test
+    fun chips_homeAndEnd_jumpToTheEndsWithoutPicking() =
+        runComposeUiTest {
+            val harness = PosterHarness(ThemeDocument(seed = Seed))
+            showSection(harness) { context, dispatcher -> StyleChipsSection(context, dispatcher) }
+
+            onNode(hasContentDescription("TonalSpot,", substring = true)).requestFocus()
+            onNode(hasContentDescription("TonalSpot,", substring = true)).performKeyInput { pressKey(Key.MoveEnd) }
+            waitForIdle()
+
+            onNode(hasContentDescription("Cmf,", substring = true)).assertIsFocused()
+
+            onNode(hasContentDescription("Cmf,", substring = true)).performKeyInput { pressKey(Key.MoveHome) }
+            waitForIdle()
+
+            onNode(hasContentDescription("TonalSpot,", substring = true)).assertIsFocused()
+            harness.actions.shouldBeEmpty()
+        }
+
+    @Test
+    fun cmfField_underFluent_saysWhyAndTakesNoInput() =
+        runComposeUiTest {
+            val document = ThemeDocument(seed = Seed, style = Style.Cmf, library = Library.Fluent)
+            val harness = PosterHarness(document)
+            showSection(harness) { context, dispatcher -> StyleChipsSection(context, dispatcher) }
+
+            onNodeWithText(TERTIARY_FIELD, useUnmergedTree = true).assertExists()
+            onAllNodes(hasSetTextAction()).fetchSemanticsNodes().shouldBeEmpty()
+            onNodeWithText("Fluent builds one accent ramp", substring = true).assertExists()
+            onNodeWithText("For Fluent, the style only changes the chroma of the accent ramp.").assertExists()
         }
 
     @Test

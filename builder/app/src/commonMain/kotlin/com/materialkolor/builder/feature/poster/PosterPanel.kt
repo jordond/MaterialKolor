@@ -15,6 +15,7 @@ import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.domain.capability.Capabilities
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.resolve.ThemeResult
@@ -42,6 +43,7 @@ import dev.stateholder.dispatcher.Dispatcher
  * its panel is showing.
  * @property[visibleModes] The modes the preview shows, which the contrast readout and the style
  * chips follow.
+ * @property[openFineTuneRows] The fine tune rows open in this project.
  */
 @Immutable
 internal data class PosterContext(
@@ -54,6 +56,8 @@ internal data class PosterContext(
     // b-304
     val openPanel: Panel? = null,
     val visibleModes: PreviewMode = PreviewMode.Split,
+    // b-305
+    val openFineTuneRows: Set<FineTuneRow> = emptySet(),
 )
 
 /**
@@ -81,6 +85,8 @@ internal fun PosterPanel(
         // b-304
         state.panel,
         state.view.mode,
+        // b-305
+        state.view.openFineTuneRows,
     ) {
         PosterContext(
             document = state.document,
@@ -92,6 +98,8 @@ internal fun PosterPanel(
             // b-304
             openPanel = state.panel,
             visibleModes = state.view.mode,
+            // b-305
+            openFineTuneRows = state.view.openFineTuneRows,
         )
     }
     if (rail) {
@@ -115,7 +123,9 @@ private fun PosterContent(
     val sheet = LocalLayout.current.posterMode == PosterMode.Sheet
     // The sheet's handle already stands above its content, so the sheet starts close under it.
     val top = if (sheet) spacing.extraSmall else spacing.extraLarge
-    BuilderScrollArea(modifier.fillMaxSize()) {
+    // b-305
+    // The poster always holds controls, so the scroll area needs no tab stop of its own.
+    BuilderScrollArea(modifier.fillMaxSize(), tabStop = false) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
