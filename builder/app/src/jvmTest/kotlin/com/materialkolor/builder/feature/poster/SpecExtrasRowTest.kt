@@ -202,6 +202,9 @@ class SpecExtrasRowTest {
             onNodeWithText(AMOLED).assertDoesNotExist()
             onNodeWithText("Motion").assertDoesNotExist()
             onNodeWithText("Custom tones").assertDoesNotExist()
+            // Color animation is the only option Fluent has, so the label stands over it.
+            onNodeWithText("Target options").assertExists()
+            onNodeWithText("Animate color changes").assertExists()
         }
 
     @Test

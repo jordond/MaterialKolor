@@ -19,6 +19,8 @@ import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.history.History
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.ExportPrefs
+import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.domain.persist.PreviewMode
@@ -47,6 +49,9 @@ internal class PosterHarness(
     var document by mutableStateOf(document)
     var openPanel by mutableStateOf(openPanel)
     var openFineTuneRows by mutableStateOf(emptySet<FineTuneRow>())
+
+    // b-306b
+    var preferences by mutableStateOf(Preferences())
     private val history = History()
     private var now = 0L
 
@@ -58,6 +63,9 @@ internal class PosterHarness(
             is WorkspaceAction.OpenPanel -> openPanel = action.panel
             WorkspaceAction.ClosePanel -> openPanel = null
             is WorkspaceAction.SetFineTuneRowOpen -> setRowOpen(action.row, action.open)
+            // b-306b
+            is WorkspaceAction.SetColorAnimation -> setColorAnimation(action.target, action.on)
+            is WorkspaceAction.SetColorAnimationDuration -> setColorAnimationDuration(action.target, action.durationMs)
             else -> Unit
         }
     }
@@ -68,6 +76,32 @@ internal class PosterHarness(
         open: Boolean,
     ) {
         openFineTuneRows = if (open) openFineTuneRows + row else openFineTuneRows - row
+    }
+
+    // b-306b
+
+    /** Turns color animation on or off in the export options of [target] alone, as the workspace does. */
+    private fun setColorAnimation(
+        target: ExportTarget,
+        on: Boolean,
+    ) {
+        updateExportPrefs(target) { prefs -> prefs.copy(animate = on) }
+    }
+
+    /** Sets how long the color animation of [target] runs, as the workspace does. */
+    private fun setColorAnimationDuration(
+        target: ExportTarget,
+        durationMs: Int,
+    ) {
+        updateExportPrefs(target) { prefs -> prefs.copy(animationDurationMs = durationMs) }
+    }
+
+    /** Keeps what [block] makes of the export options of [target], the way the preferences repository does. */
+    private fun updateExportPrefs(
+        target: ExportTarget,
+        block: (ExportPrefs) -> ExportPrefs,
+    ) {
+        preferences = preferences.withExportPrefs(target, block(preferences.exportPrefsFor(target)))
     }
 
     /** How many steps undo walks back before the history runs out. */
@@ -104,7 +138,7 @@ internal fun ComposeUiTest.showSection(
             document = document,
             result = result,
             capabilities = capabilitiesOf(document),
-            preferences = Preferences(),
+            preferences = harness.preferences, // b-306b
             projectName = "",
             saveStatus = SaveStatus.Idle,
             openPanel = harness.openPanel,

@@ -6,6 +6,7 @@ import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.DeviceWidth
+import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.MotionOverride
 import com.materialkolor.builder.domain.persist.PreviewMode
@@ -165,6 +166,23 @@ internal sealed interface WorkspaceAction {
     /** Show the Palettes tab with the ramp [target] sits on picked out. */
     data class ShowOnRamp(
         val target: RampTarget,
+    ) : WorkspaceAction
+
+    // b-306b
+
+    /**
+     * Turn the exported theme's color animation on or off in the export options this browser keeps
+     * for [target]. They live outside the document, so it is no undo entry.
+     */
+    data class SetColorAnimation(
+        val target: ExportTarget,
+        val on: Boolean,
+    ) : WorkspaceAction
+
+    /** Set how long [target]'s exported color animation runs, in milliseconds. It is no undo entry either. */
+    data class SetColorAnimationDuration(
+        val target: ExportTarget,
+        val durationMs: Int,
     ) : WorkspaceAction
 }
 

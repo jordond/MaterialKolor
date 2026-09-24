@@ -18,6 +18,7 @@ import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.DeviceWidth
+import com.materialkolor.builder.domain.persist.ExportPrefs
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.MotionOverride
@@ -332,6 +333,35 @@ internal class WorkspaceModel(
         /** This state showing [document], its capabilities worked out in the same step. */
         fun withDocument(document: ThemeDocument): State =
             if (document == this.document) this else copy(document = document, capabilities = capabilitiesOf(document))
+    }
+
+    // b-306b
+
+    /**
+     * Turn color animation on or off in the export options of [target] alone. The document and its
+     * history stay as they are.
+     */
+    fun setColorAnimation(
+        target: ExportTarget,
+        on: Boolean,
+    ) {
+        updateExportPrefs(target) { prefs -> prefs.copy(animate = on) }
+    }
+
+    /** Set how long the color animation of [target] runs, in milliseconds, leaving every other target alone. */
+    fun setColorAnimationDuration(
+        target: ExportTarget,
+        durationMs: Int,
+    ) {
+        require(durationMs > 0) { "An animation runs for some time, got $durationMs ms" }
+        updateExportPrefs(target) { prefs -> prefs.copy(animationDurationMs = durationMs) }
+    }
+
+    private fun updateExportPrefs(
+        target: ExportTarget,
+        block: (ExportPrefs) -> ExportPrefs,
+    ) {
+        viewModelScope.launch { preferences.updateExportPrefs(target, block) }
     }
 }
 
