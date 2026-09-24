@@ -17,6 +17,7 @@ internal fun locationPath(): String = js("window.location.pathname")
 internal fun locationQuery(): String = js("window.location.search")
 
 // b-505
+
 /**
  * The origin of the address the page is on, `https://staging.materialkolor.com` for example, or null
  * for a page such as a local file whose origin is not a web address.
