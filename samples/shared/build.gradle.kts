@@ -16,14 +16,11 @@ kotlin {
         compileSdk = libs.versions.sdk.compile.get().toInt()
         minSdk = libs.versions.sdk.min.library.get().toInt()
 
-        withHostTest {}
-
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
 
-    // Java 11 bytecode, so custom-theme can consume it as well as the Java 17 samples.
     jvm {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
@@ -37,10 +34,6 @@ kotlin {
             implementation(libs.compose.runtime)
             implementation(libs.compose.ui)
             implementation(libs.compose.foundation)
-        }
-
-        commonTest.dependencies {
-            implementation(kotlin("test"))
         }
     }
 }

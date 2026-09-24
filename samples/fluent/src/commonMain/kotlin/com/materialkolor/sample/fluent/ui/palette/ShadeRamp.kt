@@ -29,9 +29,6 @@ import io.github.composefluent.generateShades
 /**
  * The seven [shades] side by side, darkest first.
  *
- * @param[shades] The ramp to show.
- * @param[modifier] The modifier for the ramp.
- * @param[height] How tall the ramp is.
  * @param[labelsFrom] The ramp the label colors are worked out from, or null to leave the tiles bare. Pass the ramp a
  *   fade is heading to rather than [shades] mid fade, so the contrast search runs once per seed and not every frame.
  */
@@ -65,19 +62,12 @@ internal fun ShadeRamp(
     }
 }
 
-/**
- * The ramp material-kolor-fluent generated from [seed], over the one Fluent's own `generateShades` returns.
- *
- * @param[seed] The seed both ramps start from.
- * @param[modifier] The modifier for the comparison.
- */
 @Composable
 internal fun WithoutAdapter(
     seed: Color,
     modifier: Modifier = Modifier,
 ) {
-    // generateShades is a lookup with a single entry, so every seed that is not Windows blue comes back as Windows
-    // blue. Showing it under the generated ramp is the point.
+    // generateShades is a lookup with a single entry, so every seed other than Windows blue comes back as Windows blue.
     val fallback = remember(seed) { generateShades(seed) }
 
     Column(
@@ -108,9 +98,6 @@ private fun ComparisonRow(
     }
 }
 
-/**
- * One shade, with its name and hex value in [onColor] when there is one.
- */
 @Composable
 private fun ShadeTile(
     name: String,

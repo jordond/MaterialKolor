@@ -24,10 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 
 /**
- * A single line text field with a [placeholder] while it is empty. Enter, or Done on a soft keyboard, calls
- * [onSubmit].
- *
- * [modifier] lands on the editable node itself, so a test tag or a focus requester set there reaches the field.
+ * [modifier] lands on the editable node itself, so a focus requester set there reaches the field.
  */
 @Composable
 internal fun TextField(

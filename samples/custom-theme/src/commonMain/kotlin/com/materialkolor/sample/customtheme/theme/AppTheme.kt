@@ -11,18 +11,12 @@ import androidx.compose.ui.graphics.Color
 import com.materialkolor.ktx.rememberDynamicScheme
 import com.materialkolor.ktx.rememberTonalPalette
 
-/**
- * Which theme the app shows, with [System] deferring to the platform.
- */
 public enum class AppThemeMode {
     Light,
     Dark,
     System,
     ;
 
-    /**
-     * Resolve this mode against the platform setting.
-     */
     @Composable
     @ReadOnlyComposable
     public fun isDark(): Boolean =
@@ -33,20 +27,12 @@ public enum class AppThemeMode {
         }
 }
 
-/**
- * The theme colors for the current subtree.
- */
 public val LocalAppColors: ProvidableCompositionLocal<AppColors> =
     staticCompositionLocalOf { error("No AppColors provided, wrap the content in AppTheme.") }
 
 /**
  * Generate the theme from [seed] and hand it to [content]. A new seed or mode fades the colors over instead of
  * swapping them in one frame.
- *
- * @param[seed] The color the whole theme is generated from.
- * @param[mode] Which theme to show.
- * @param[seeds] The accent seeds the theme owns on top of [seed].
- * @param[content] The themed content.
  */
 @Composable
 public fun AppTheme(
@@ -60,14 +46,6 @@ public fun AppTheme(
     CompositionLocalProvider(LocalAppColors provides colors, content = content)
 }
 
-/**
- * Generate and remember the theme colors.
- *
- * @param[seed] The color the whole theme is generated from.
- * @param[isDark] Whether to build the dark theme or the light one.
- * @param[seeds] The accent seeds the theme owns on top of [seed].
- * @return The remembered theme colors.
- */
 @Composable
 public fun rememberAppColors(
     seed: Color,

@@ -20,7 +20,6 @@ import com.materialkolor.sample.shared.state.SampleState
 import com.materialkolor.sample.shared.theme.SampleSeed
 import com.materialkolor.sample.shared.theme.ThemeMode
 import com.materialkolor.sample.shared.ui.SampleCopy
-import com.materialkolor.sample.shared.ui.SampleTags
 import com.materialkolor.sample.unstyled.theme.Spacing
 import com.materialkolor.sample.unstyled.theme.TasksType
 import com.materialkolor.sample.unstyled.theme.color
@@ -36,11 +35,7 @@ private val ModeChoices: List<Choice<ThemeMode>> = ThemeMode.entries.map { mode 
         ThemeMode.Light -> Lucide.Sun
         ThemeMode.Dark -> Lucide.Moon
     }
-    Choice(value = mode, label = SampleCopy.label(mode), testTag = SampleTags.mode(mode), icon = icon)
-}
-
-private val SeedChoices: List<Choice<SampleSeed>> = SampleSeed.entries.map { seed ->
-    Choice(value = seed, label = SampleCopy.label(seed), testTag = SampleTags.seed(seed))
+    Choice(value = mode, label = SampleCopy.label(mode), icon = icon)
 }
 
 private val SectionChoices: List<Choice<AppSection>> = AppSection.entries.map { section ->
@@ -48,12 +43,9 @@ private val SectionChoices: List<Choice<AppSection>> = AppSection.entries.map { 
         AppSection.Tasks -> Lucide.ListTodo
         AppSection.Palette -> Lucide.Palette
     }
-    Choice(value = section, label = SampleCopy.label(section), testTag = SampleTags.section(section), icon = icon)
+    Choice(value = section, label = SampleCopy.label(section), icon = icon)
 }
 
-/**
- * The top of the page. The title and the mode picker, the seed swatches, then the section tabs.
- */
 @Composable
 internal fun Header(
     state: SampleState,
@@ -61,23 +53,23 @@ internal fun Header(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Spacing.Large),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
                 text = SampleCopy.appTitle,
-                modifier = Modifier.weight(1f),
                 style = TasksType.Title,
+                modifier = Modifier.weight(1f),
             )
+
             SegmentedControl(
                 choices = ModeChoices,
                 selected = state.mode,
                 onSelect = { mode -> dispatch(SampleAction.SelectMode(mode)) },
-                label = SampleCopy.modeGroup,
             )
         }
 
@@ -90,12 +82,12 @@ internal fun Header(
                 style = TasksType.Caption,
                 color = MaterialKolorTokens.onSurfaceVariant.color,
             )
+
             SwatchPicker(
-                choices = SeedChoices,
+                values = SampleSeed.entries,
                 selected = state.seed,
                 onSelect = { seed -> dispatch(SampleAction.SelectSeed(seed)) },
                 color = { seed -> seed.color },
-                label = SampleCopy.seedGroup,
             )
         }
 

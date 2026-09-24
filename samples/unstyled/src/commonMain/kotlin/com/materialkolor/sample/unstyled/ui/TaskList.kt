@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -39,7 +38,6 @@ import com.materialkolor.sample.shared.model.TaskFilter
 import com.materialkolor.sample.shared.state.SampleAction
 import com.materialkolor.sample.shared.state.SampleState
 import com.materialkolor.sample.shared.ui.SampleCopy
-import com.materialkolor.sample.shared.ui.SampleTags
 import com.materialkolor.sample.unstyled.theme.Shapes
 import com.materialkolor.sample.unstyled.theme.Spacing
 import com.materialkolor.sample.unstyled.theme.TasksType
@@ -52,10 +50,6 @@ import com.materialkolor.sample.unstyled.ui.component.Chip
 import com.materialkolor.sample.unstyled.ui.component.IconButton
 import com.materialkolor.unstyled.MaterialKolorTokens
 
-/**
- * The card that holds the tasks the filter lets through, or the empty state, over a footer with the count left and
- * Clear done.
- */
 @Composable
 internal fun TaskList(
     state: SampleState,
@@ -64,9 +58,7 @@ internal fun TaskList(
 ) {
     val divider = MaterialKolorTokens.outlineVariant.color
     Card(
-        modifier = modifier
-            .testTag(SampleTags.TaskList)
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         val tasks = state.visibleTasks
         if (tasks.isEmpty()) {
@@ -83,7 +75,9 @@ internal fun TaskList(
                 }
             }
         }
+
         UnstyledHorizontalSeparator(color = divider)
+
         Footer(
             remaining = state.activeCount,
             canClearDone = state.canClearDone,
@@ -104,54 +98,40 @@ private fun TaskRow(
         targetValue = if (hovered) MaterialKolorTokens.surfaceContainer.color else Color.Transparent,
         label = "row",
     )
+
     Row(
+        horizontalArrangement = Arrangement.spacedBy(Spacing.Small),
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .testTag(SampleTags.taskRow(task.id))
             .fillMaxWidth()
             .hoverable(interactionSource)
             .background(container)
             .heightIn(min = 52.dp)
             .padding(horizontal = Spacing.Small),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.Small),
-        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Checkbox(
-            checked = task.isDone,
-            onCheckedChange = { onToggle() },
-            accessibilityLabel = task.title,
-            modifier = Modifier.testTag(SampleTags.taskCheck(task.id)),
-        )
+        Checkbox(checked = task.isDone, onCheckedChange = { onToggle() })
+
         Text(
             text = task.title,
-            modifier = Modifier
-                .testTag(SampleTags.taskTitle(task.id))
-                .weight(1f),
+            modifier = Modifier.weight(1f),
             color = if (task.isDone) MaterialKolorTokens.onSurfaceVariant.color else Color.Unspecified,
             textDecoration = if (task.isDone) TextDecoration.LineThrough else null,
         )
-        Chip(
-            label = SampleCopy.label(task.tag),
-            colors = task.tag.chipColors(),
-            modifier = Modifier.testTag(SampleTags.taskTag(task.id)),
-        )
-        IconButton(
-            icon = Lucide.Trash2,
-            contentDescription = SampleCopy.deleteTask(task.title),
-            onClick = onDelete,
-            modifier = Modifier.testTag(SampleTags.taskDelete(task.id)),
-        )
+
+        Chip(label = SampleCopy.label(task.tag), colors = task.tag.chipColors())
+
+        IconButton(icon = Lucide.Trash2, onClick = onDelete)
     }
 }
 
 @Composable
 private fun EmptyState(filter: TaskFilter) {
     Column(
-        modifier = Modifier
-            .testTag(SampleTags.EmptyState)
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.Large, vertical = Spacing.XXLarge),
         verticalArrangement = Arrangement.spacedBy(Spacing.Medium),
         horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.Large, vertical = Spacing.XXLarge),
     ) {
         Box(
             modifier = Modifier
@@ -167,6 +147,7 @@ private fun EmptyState(filter: TaskFilter) {
                 tint = MaterialKolorTokens.onSurfaceVariant.color,
             )
         }
+
         Text(
             text = SampleCopy.empty(filter),
             color = MaterialKolorTokens.onSurfaceVariant.color,
@@ -182,30 +163,27 @@ private fun Footer(
     onClearDone: () -> Unit,
 ) {
     Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = Spacing.Large, end = Spacing.Small, top = Spacing.Small, bottom = Spacing.Small),
-        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = SampleCopy.remaining(remaining),
-            modifier = Modifier
-                .testTag(SampleTags.Remaining)
-                .weight(1f),
+            modifier = Modifier.weight(1f),
             style = TasksType.Caption,
             color = MaterialKolorTokens.onSurfaceVariant.color,
         )
+
         Button(
             label = SampleCopy.clearDone,
             onClick = onClearDone,
-            modifier = Modifier.testTag(SampleTags.ClearDone),
             style = ButtonStyle.Quiet,
             enabled = canClearDone,
         )
     }
 }
 
-/** What the empty state shows for this filter. */
 private val TaskFilter.emptyIcon: ImageVector
     get() = when (this) {
         TaskFilter.All -> Lucide.ClipboardList

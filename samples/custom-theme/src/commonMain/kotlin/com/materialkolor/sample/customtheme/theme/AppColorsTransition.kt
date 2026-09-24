@@ -17,10 +17,6 @@ import androidx.compose.ui.graphics.lerp
  *
  * The first composition returns [target] untouched. When it changes, the colors fade from whatever is on screen to
  * the new record, so a change that lands halfway through a fade picks up from where the last one got to.
- *
- * @param[target] The colors to end up at.
- * @param[animationSpec] How the fade runs.
- * @return The colors to draw this frame.
  */
 @Composable
 public fun animateAppColors(
@@ -45,9 +41,6 @@ public fun animateAppColors(
     return lerp(start = from, stop = to, fraction = fraction)
 }
 
-/**
- * The colors [fraction] of the way from [start] to [stop], slot by slot. The ends return the records themselves.
- */
 internal fun lerp(
     start: AppColors,
     stop: AppColors,

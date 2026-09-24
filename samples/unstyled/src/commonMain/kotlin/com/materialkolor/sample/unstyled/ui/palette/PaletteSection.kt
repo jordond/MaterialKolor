@@ -22,7 +22,6 @@ import com.materialkolor.sample.unstyled.theme.TasksType
 import com.materialkolor.sample.unstyled.theme.color
 import com.materialkolor.unstyled.MaterialKolorTokens
 
-/** Each accent as its role, its on role, its container and its on container, the name written in the partner. */
 private val AccentFamilies: List<List<Swatch>> = listOf(
     accentFamily(
         role = MaterialKolorTokens.primary,
@@ -50,7 +49,6 @@ private val AccentFamilies: List<List<Swatch>> = listOf(
     ),
 )
 
-/** The surfaces from dim to bright, then the five containers from lowest to highest. */
 private val Surfaces: List<Swatch> = listOf(
     MaterialKolorTokens.surfaceDim,
     MaterialKolorTokens.surface,
@@ -62,16 +60,11 @@ private val Surfaces: List<Swatch> = listOf(
     MaterialKolorTokens.surfaceContainerHighest,
 ).map { role -> Swatch(role = role, onRole = MaterialKolorTokens.onSurface) }
 
-/** Outlines have no on role, so their names are written in the surface they sit on or its ink. */
 private val Outlines: List<Swatch> = listOf(
     Swatch(role = MaterialKolorTokens.outline, onRole = MaterialKolorTokens.surface),
     Swatch(role = MaterialKolorTokens.outlineVariant, onRole = MaterialKolorTokens.onSurface),
 )
 
-/**
- * The Palette section. Every role `material-kolor-unstyled` writes into the theme for the current seed and mode, as
- * the app reads it back through `Theme[MaterialKolorTokens.colors]`.
- */
 @Composable
 internal fun PaletteSection(
     seed: SampleSeed,
@@ -92,7 +85,6 @@ internal fun PaletteSection(
                 for (family in AccentFamilies) {
                     SwatchColumn(Modifier.weight(1f)) {
                         for ((index, swatch) in family.withIndex()) {
-                            // The role and its container get the room, their on roles a band.
                             val height = if (index % 2 == 0) 64.dp else 44.dp
                             SwatchTile(
                                 swatch = swatch,
@@ -136,21 +128,21 @@ private fun PaletteGroup(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.Small)) {
         Text(text = title, style = TasksType.Caption, color = MaterialKolorTokens.onSurfaceVariant.color)
+
         content()
     }
 }
 
-/** Stacks swatches in one rounded block, outlined so the palest of them still has an edge. */
 @Composable
 private fun SwatchColumn(
     modifier: Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
+        content = content,
         modifier = modifier
             .clip(Shapes.Card)
             .border(width = 1.dp, color = MaterialKolorTokens.outlineVariant.color, shape = Shapes.Card),
-        content = content,
     )
 }
 

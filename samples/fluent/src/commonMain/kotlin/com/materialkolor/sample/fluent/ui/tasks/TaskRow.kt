@@ -20,22 +20,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.toggleableState
-import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.fluent.theme.SampleTheme
-import com.materialkolor.sample.fluent.ui.component.IconButton
 import com.materialkolor.sample.fluent.ui.component.TagChip
 import com.materialkolor.sample.shared.model.Task
 import com.materialkolor.sample.shared.model.TaskFilter
 import com.materialkolor.sample.shared.ui.SampleCopy
-import com.materialkolor.sample.shared.ui.SampleTags
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.CheckBox
 import io.github.composefluent.component.Icon
+import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import io.github.composefluent.icons.Icons
 import io.github.composefluent.icons.regular.Checkmark
@@ -43,15 +38,6 @@ import io.github.composefluent.icons.regular.Clock
 import io.github.composefluent.icons.regular.Delete
 import io.github.composefluent.icons.regular.Edit
 
-/**
- * One task. The checkbox, the title, the tag chip and a delete button, with a soft fill on hover like a Fluent
- * list item.
- *
- * @param[task] The task to show.
- * @param[onToggle] Called when the checkbox is flipped.
- * @param[onDelete] Called when the delete button is pressed.
- * @param[modifier] The modifier for the row.
- */
 @Composable
 internal fun TaskRow(
     task: Task,
@@ -74,7 +60,6 @@ internal fun TaskRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .testTag(SampleTags.taskRow(task.id))
             .clip(FluentTheme.shapes.control)
             .background(fill)
             .hoverable(interaction)
@@ -82,41 +67,30 @@ internal fun TaskRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        // Fluent's checkbox has the checkbox role but never says whether it is ticked, so the state goes on here.
         CheckBox(
             checked = task.isDone,
-            modifier = Modifier
-                .testTag(SampleTags.taskCheck(task.id))
-                .semantics { toggleableState = ToggleableState(task.isDone) },
             onCheckStateChange = { onToggle() },
         )
         Text(
             text = task.title,
-            modifier = Modifier
-                .weight(1f)
-                .testTag(SampleTags.taskTitle(task.id)),
+            modifier = Modifier.weight(1f),
             color = titleColor,
             textDecoration = if (task.isDone) TextDecoration.LineThrough else null,
         )
-        TagChip(
-            tag = task.tag,
-            modifier = Modifier.testTag(SampleTags.taskTag(task.id)),
-        )
-        IconButton(
-            icon = Icons.Default.Delete,
-            description = SampleCopy.deleteTask(task.title),
+        TagChip(tag = task.tag)
+        SubtleButton(
             onClick = onDelete,
-            testTag = SampleTags.taskDelete(task.id),
-        )
+            iconOnly = true,
+        ) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+            )
+        }
     }
 }
 
-/**
- * What the list shows when [filter] lets no task through.
- *
- * @param[filter] The current filter, which picks the message and the icon.
- * @param[modifier] The modifier for the empty state.
- */
 @Composable
 internal fun EmptyState(
     filter: TaskFilter,
@@ -127,7 +101,6 @@ internal fun EmptyState(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .testTag(SampleTags.EmptyState)
             .padding(vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),

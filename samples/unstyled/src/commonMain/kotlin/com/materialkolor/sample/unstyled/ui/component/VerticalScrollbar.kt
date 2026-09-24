@@ -26,12 +26,6 @@ import com.materialkolor.unstyled.MaterialKolorTokens
 private const val THUMB_ALPHA = 0.32f
 private const val THUMB_ACTIVE_ALPHA = 0.6f
 
-/**
- * A thin scrollbar for [scrollState] that darkens under a pointer and while dragged. It hides while everything fits.
- *
- * @param[scrollState] The scroll it shows and drives.
- * @param[modifier] Applied to the track. Give it the height to span.
- */
 @Composable
 internal fun VerticalScrollbar(
     scrollState: ScrollState,
@@ -44,6 +38,7 @@ internal fun VerticalScrollbar(
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     val dragged by interactionSource.collectIsDraggedAsState()
+
     val alpha by animateFloatAsState(
         targetValue = if (hovered || dragged) THUMB_ACTIVE_ALPHA else THUMB_ALPHA,
         label = "thumb",

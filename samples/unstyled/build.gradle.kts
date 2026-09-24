@@ -14,10 +14,7 @@ kotlin {
     android {
         namespace = "com.materialkolor.sample.unstyled"
         compileSdk = libs.versions.sdk.compile.get().toInt()
-        // Compose Unstyled sets the floor, the same one material-kolor-unstyled publishes with.
         minSdk = 23
-
-        withHostTest {}
 
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
@@ -40,21 +37,12 @@ kotlin {
 
             implementation(project(":samples:shared"))
             implementation(project(":material-kolor-unstyled"))
-            // The adapter only has compileOnly theming on JVM and Android. This brings it in with the components.
             implementation(libs.composeUnstyled)
             implementation(libs.lucide)
         }
 
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-        }
-
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
-        }
-
-        jvmTest.dependencies {
-            implementation(project(":samples:testing"))
         }
     }
 }

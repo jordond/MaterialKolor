@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.progressSemantics
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,8 +18,7 @@ import com.materialkolor.sample.customtheme.theme.LocalAppColors
 /**
  * A thin bar filled [progress] of the way, from 0 to 1.
  *
- * The fill glides to a new value, while the semantics report the value itself so assistive tech and tests never see
- * a number in between.
+ * The fill glides to a new value instead of jumping.
  */
 @Composable
 internal fun ProgressBar(
@@ -35,7 +33,6 @@ internal fun ProgressBar(
 
     Box(
         modifier = modifier
-            .progressSemantics(value = progress)
             .fillMaxWidth()
             .height(8.dp)
             .clip(CircleShape)

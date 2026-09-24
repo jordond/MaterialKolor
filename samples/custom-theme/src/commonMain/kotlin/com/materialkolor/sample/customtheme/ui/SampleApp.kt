@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.AppColors
 import com.materialkolor.sample.customtheme.theme.AppTheme
@@ -32,14 +31,9 @@ import com.materialkolor.sample.shared.state.SampleState
 import com.materialkolor.sample.shared.state.SampleStore
 import com.materialkolor.sample.shared.state.rememberSampleStore
 import com.materialkolor.sample.shared.theme.ThemeMode
-import com.materialkolor.sample.shared.ui.SampleTags
 
 /**
  * The Tasks app on Compose Foundation alone, drawn with the components in `ui.component` and colored by [AppColors].
- *
- * The theme is generated from the store's seed and mode, so picking either one fades the whole app to the new colors.
- *
- * @param[store] Where the state comes from and where every action goes.
  */
 @Composable
 public fun SampleApp(store: SampleStore = rememberSampleStore()) {
@@ -100,9 +94,7 @@ private fun Page(
                         state = state,
                         dispatch = dispatch,
                     )
-                    AppSection.Palette -> PaletteSection(
-                        modifier = Modifier.testTag(SampleTags.Palette),
-                    )
+                    AppSection.Palette -> PaletteSection()
                 }
             }
         }
@@ -117,9 +109,7 @@ private fun Page(
     }
 }
 
-/**
- * The shared mode, in the theme's own words. The theme keeps its own enum so it does not depend on the sample.
- */
+/** The theme keeps its own enum so it does not depend on the sample. */
 private fun ThemeMode.toAppThemeMode(): AppThemeMode =
     when (this) {
         ThemeMode.System -> AppThemeMode.System
@@ -127,5 +117,4 @@ private fun ThemeMode.toAppThemeMode(): AppThemeMode =
         ThemeMode.Dark -> AppThemeMode.Dark
     }
 
-/** Selected text gets a see-through wash of the primary accent. */
 private const val SELECTION_ALPHA = 0.3f

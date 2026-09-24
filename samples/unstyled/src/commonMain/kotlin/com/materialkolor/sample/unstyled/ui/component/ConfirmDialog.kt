@@ -35,19 +35,6 @@ import com.materialkolor.unstyled.MaterialKolorTokens
 private const val SCRIM_ALPHA = 0.32f
 private const val PANEL_ENTER_SCALE = 0.94f
 
-/**
- * A dialog that asks before something happens. It fades in over a scrim and a click on the scrim or Esc dismisses
- * it.
- *
- * It opens in the nearest `DialogHost`, in the app's own layout rather than a window of its own.
- *
- * @param[visible] Whether it is up.
- * @param[title] The question, which also names the dialog.
- * @param[body] What saying yes does.
- * @param[onDismiss] Called on a click outside the panel or on Esc.
- * @param[modifier] Applied to the panel.
- * @param[actions] The buttons, laid out from the end, the confirming one last.
- */
 @Composable
 internal fun ConfirmDialog(
     visible: Boolean,
@@ -67,12 +54,14 @@ internal fun ConfirmDialog(
         },
     ) {
         Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(Spacing.XLarge),
-            contentAlignment = Alignment.Center,
         ) {
             DialogPanel(
+                enter = fadeIn() + scaleIn(initialScale = PANEL_ENTER_SCALE),
+                exit = fadeOut() + scaleOut(targetScale = PANEL_ENTER_SCALE),
                 modifier = modifier
                     .widthIn(max = 400.dp)
                     .fillMaxWidth()
@@ -80,15 +69,16 @@ internal fun ConfirmDialog(
                     .clip(Shapes.Card)
                     .background(MaterialKolorTokens.surfaceContainerHigh.color)
                     .padding(Spacing.XLarge),
-                paneTitle = title,
-                enter = fadeIn() + scaleIn(initialScale = PANEL_ENTER_SCALE),
-                exit = fadeOut() + scaleOut(targetScale = PANEL_ENTER_SCALE),
             ) {
                 Column {
                     Text(text = title, style = TasksType.Heading)
+
                     Spacer(Modifier.height(Spacing.Small))
+
                     Text(text = body, color = MaterialKolorTokens.onSurfaceVariant.color)
+
                     Spacer(Modifier.height(Spacing.XLarge))
+
                     Row(
                         modifier = Modifier.align(Alignment.End),
                         horizontalArrangement = Arrangement.spacedBy(Spacing.Small),

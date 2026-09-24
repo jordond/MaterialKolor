@@ -9,9 +9,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 
-/**
- * One line or paragraph of text in a style from [AppType] and a color from `AppColors`.
- */
 @Composable
 internal fun Text(
     text: String,
@@ -30,9 +27,6 @@ internal fun Text(
     )
 }
 
-/**
- * The small muted heading over or beside a group of controls.
- */
 @Composable
 internal fun GroupLabel(
     text: String,

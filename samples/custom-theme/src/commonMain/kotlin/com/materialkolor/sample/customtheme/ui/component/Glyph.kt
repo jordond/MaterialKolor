@@ -40,13 +40,9 @@ internal enum class Glyph(
         ),
     ),
 
-    /** A plain circle, drawn on its own because it has no corners. */
     Ring(lines = emptyList()),
 }
 
-/**
- * Draws [glyph] in [color], scaled to whatever size [modifier] gives it.
- */
 @Composable
 internal fun Icon(
     glyph: Glyph,
@@ -76,9 +72,6 @@ internal fun Icon(
     )
 }
 
-/**
- * Every line of this glyph as one path at [size], each line its own stretch of it.
- */
 private fun Glyph.toPath(size: Size): Path {
     val path = Path()
     for (line in lines) {
@@ -94,5 +87,4 @@ private fun Glyph.toPath(size: Size): Path {
 /** Stroke width as a share of the glyph's size, so a glyph keeps its weight at any size. */
 private const val STROKE_SHARE = 0.12f
 
-/** The ring's radius as a share of the glyph's size. */
 private const val RING_SHARE = 0.34f

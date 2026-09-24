@@ -15,14 +15,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 
 /**
- * What the pointer and the keyboard are doing to one control right now.
- *
  * The components pass `indication = null` and draw their own feedback from this, so hover, press and focus look the
  * same everywhere and come from the theme.
- *
- * @property[isHovered] The pointer is over the control.
- * @property[isPressed] The control is held down.
- * @property[isFocused] The control has keyboard focus.
  */
 @Immutable
 internal data class ControlState(
@@ -30,7 +24,6 @@ internal data class ControlState(
     val isPressed: Boolean,
     val isFocused: Boolean,
 ) {
-    /** How strongly to tint the control, more when pressed than when hovered. */
     val veilAlpha: Float
         get() = when {
             isPressed -> PRESSED_ALPHA
@@ -39,9 +32,6 @@ internal data class ControlState(
         }
 }
 
-/**
- * Collects the [ControlState] of whatever emits into this source.
- */
 @Composable
 internal fun InteractionSource.collectControlState(): ControlState {
     val isHovered by collectIsHoveredAsState()
@@ -58,9 +48,6 @@ internal fun Modifier.veil(
     state: ControlState,
 ): Modifier = if (state.veilAlpha > 0f) background(tint.copy(alpha = state.veilAlpha)) else this
 
-/**
- * Outlines the control in [color] while [state] has keyboard focus.
- */
 internal fun Modifier.focusRing(
     state: ControlState,
     color: Color,

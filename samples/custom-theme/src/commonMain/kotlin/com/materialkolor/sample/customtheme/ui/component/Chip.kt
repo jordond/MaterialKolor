@@ -8,9 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
-/**
- * A small read-only label on an [accent] fill, like the tag on a task.
- */
 @Composable
 internal fun Chip(
     text: String,

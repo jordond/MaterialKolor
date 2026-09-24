@@ -16,11 +16,6 @@ import io.github.composefluent.background.BackgroundSizing
 import io.github.composefluent.background.Layer
 import io.github.composefluent.component.Text
 
-/**
- * Four of the Fluent tokens that follow the accent ramp, each with the token Fluent puts on top of it.
- *
- * @param[modifier] The modifier for the grid.
- */
 @Composable
 internal fun AccentTokens(modifier: Modifier = Modifier) {
     val colors = FluentTheme.colors

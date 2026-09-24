@@ -19,9 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.composeunstyled.ProvideContentColor
 import com.composeunstyled.RadioButton
@@ -36,25 +33,13 @@ import com.materialkolor.sample.unstyled.theme.TasksType
 import com.materialkolor.sample.unstyled.theme.color
 import com.materialkolor.unstyled.MaterialKolorTokens
 
-/** A segment with the track's padding around it is as tall as a button. */
 private val SegmentHeight = ControlHeight - Spacing.XSmall * 2
 
-/**
- * A row of segments in a shared track, exactly one of them picked. It is an Unstyled radio group, so each segment is
- * a radio button that also reports `selected`.
- *
- * @param[choices] The segments, in order.
- * @param[selected] The picked value.
- * @param[onSelect] Called with the value of a segment when it is picked.
- * @param[label] What the group is called.
- * @param[modifier] Applied to the track.
- */
 @Composable
 internal fun <T> SegmentedControl(
     choices: List<Choice<T>>,
     selected: T,
     onSelect: (T) -> Unit,
-    label: String,
     modifier: Modifier = Modifier,
 ) {
     UnstyledRadioGroup(
@@ -64,7 +49,6 @@ internal fun <T> SegmentedControl(
             .clip(Shapes.Card)
             .background(MaterialKolorTokens.surfaceContainerHigh.color)
             .padding(Spacing.XSmall),
-        accessibilityLabel = label,
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.XSmall)) {
             for (choice in choices) {
@@ -79,47 +63,44 @@ private fun <T> RadioGroupScope.Segment(
     choice: Choice<T>,
     isSelected: Boolean,
 ) {
+    val shadow = MaterialKolorTokens.shadow.color
     val interactionSource = remember { MutableInteractionSource() }
-    // The picked segment is the brightest surface, so it reads as raised off the track in light and dark alike.
+    val elevation by animateDpAsState(targetValue = if (isSelected) 1.dp else 0.dp, label = "lift")
+
+    val content = if (isSelected) MaterialKolorTokens.onSurface.color else MaterialKolorTokens.onSurfaceVariant.color
     val container by animateColorAsState(
         targetValue = if (isSelected) MaterialKolorTokens.surfaceBright.color else Color.Transparent,
         label = "segment",
     )
-    val elevation by animateDpAsState(targetValue = if (isSelected) 1.dp else 0.dp, label = "lift")
-    val shadow = MaterialKolorTokens.shadow.color
-    val content = if (isSelected) MaterialKolorTokens.onSurface.color else MaterialKolorTokens.onSurfaceVariant.color
 
     ProvideContentColor(content) {
         RadioButton(
             value = choice.value,
+            interactionSource = interactionSource,
+            indication = LocalIndication.current,
             modifier = Modifier
-                .testTag(choice.testTag)
-                .semantics { selected = isSelected }
                 .height(SegmentHeight)
                 .controlFocusRing(interactionSource, Shapes.Control, offset = 0.dp)
                 .shadow(elevation = elevation, shape = Shapes.Control, ambientColor = shadow, spotColor = shadow)
                 .clip(Shapes.Control)
                 .background(container),
-            interactionSource = interactionSource,
-            indication = LocalIndication.current,
         ) {
-            // The padding goes inside, since the radio button puts its toggle after this modifier.
             Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.Tight),
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxHeight()
                     .padding(horizontal = Spacing.Medium),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.Tight),
-                verticalAlignment = Alignment.CenterVertically,
             ) {
-                val icon = choice.icon
-                if (icon != null) {
+                if (choice.icon != null) {
                     UnstyledIcon(
-                        imageVector = icon,
+                        imageVector = choice.icon,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
                         tint = if (isSelected) MaterialKolorTokens.primary.color else content,
                     )
                 }
+
                 Text(text = choice.label, style = TasksType.Label, maxLines = 1)
             }
         }

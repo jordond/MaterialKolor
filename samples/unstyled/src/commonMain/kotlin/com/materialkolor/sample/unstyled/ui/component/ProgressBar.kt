@@ -18,13 +18,6 @@ import com.materialkolor.unstyled.MaterialKolorTokens
 
 private const val PROGRESS_MILLIS = 300
 
-/**
- * A full width bar that fills in primary as [progress] grows, easing to each new value. `UnstyledProgress` gives it
- * the progress bar semantics.
- *
- * @param[progress] How far along, from 0 to 1.
- * @param[modifier] Applied to the track.
- */
 @Composable
 internal fun ProgressBar(
     progress: Float,
@@ -35,6 +28,7 @@ internal fun ProgressBar(
         animationSpec = tween(durationMillis = PROGRESS_MILLIS),
         label = "progress",
     )
+
     UnstyledProgress(
         progress = shown,
         modifier = modifier

@@ -13,7 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.AppColors
@@ -29,12 +28,7 @@ import com.materialkolor.sample.shared.model.Task
 import com.materialkolor.sample.shared.model.TaskTag
 import com.materialkolor.sample.shared.state.SampleAction
 import com.materialkolor.sample.shared.ui.SampleCopy
-import com.materialkolor.sample.shared.ui.SampleTags
 
-/**
- * One task. The checkbox, the title, the tag chip and the delete button. Finished titles are struck through and
- * muted.
- */
 @Composable
 internal fun TaskRow(
     task: Task,
@@ -50,7 +44,6 @@ internal fun TaskRow(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
-            .testTag(SampleTags.taskRow(task.id))
             .hoverable(interactionSource)
             .then(if (isHovered) Modifier.background(colors.onSurface.copy(alpha = HOVER_ALPHA)) else Modifier)
             .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -58,7 +51,6 @@ internal fun TaskRow(
         Checkbox(
             checked = task.isDone,
             onCheckedChange = { dispatch(SampleAction.ToggleTask(task.id)) },
-            modifier = Modifier.testTag(SampleTags.taskCheck(task.id)),
         )
 
         Text(
@@ -67,30 +59,25 @@ internal fun TaskRow(
             color = if (task.isDone) colors.textMuted else colors.textStrong,
             textDecoration = if (task.isDone) TextDecoration.LineThrough else null,
             maxLines = 1,
-            modifier = Modifier
-                .weight(1f)
-                .testTag(SampleTags.taskTitle(task.id)),
+            modifier = Modifier.weight(1f),
         )
 
         Chip(
             text = SampleCopy.label(task.tag),
             accent = task.tag.accent(colors),
-            modifier = Modifier.testTag(SampleTags.taskTag(task.id)),
         )
 
         IconButton(
             glyph = Glyph.Cross,
-            contentDescription = SampleCopy.deleteTask(task.title),
             onClick = { dispatch(SampleAction.DeleteTask(task.id)) },
             activeTint = colors.error,
-            modifier = Modifier.testTag(SampleTags.taskDelete(task.id)),
         )
     }
 }
 
 /**
- * The accent family each tag wears, on its chip and on its composer option. Each one is an app-owned family
- * harmonized toward the seed, so the three stay apart from each other and still belong to the theme.
+ * Each tag gets an app-owned family harmonized toward the seed, so the three stay apart from each other and still
+ * belong to the theme.
  */
 internal fun TaskTag.accent(colors: AppColors): Accent =
     when (this) {
@@ -99,5 +86,5 @@ internal fun TaskTag.accent(colors: AppColors): Accent =
         TaskTag.Errand -> Accent(container = colors.warmContainer, content = colors.onWarmContainer)
     }
 
-/** Rows light up less than controls do, since the row itself does nothing when clicked. */
+/** Rows get a fainter hover tint than controls, since clicking the row itself does nothing. */
 private const val HOVER_ALPHA = 0.04f

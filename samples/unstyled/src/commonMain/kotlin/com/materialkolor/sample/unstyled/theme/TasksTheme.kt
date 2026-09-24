@@ -21,12 +21,7 @@ private const val COLOR_TRANSITION_MILLIS = 300
  * Themes [content] with the colors `material-kolor-unstyled` generates from [seed].
  *
  * The Unstyled theme is built once. Its builder is composable and reads the seed every time it runs, so a new seed
- * regenerates the light and dark schemes and the transition spec animates every token to its new color. [isDark]
- * picks which of the two schemes applies, the way the system setting would.
- *
- * @param[seed] The color both schemes are generated from.
- * @param[isDark] Whether the dark scheme applies.
- * @param[content] The app. Text and icons in it default to `onSurface`.
+ * regenerates the light and dark schemes and the transition spec animates every token to its new color.
  */
 @Composable
 internal fun TasksTheme(
@@ -46,13 +41,9 @@ private fun tasksTheme(seed: () -> Color): ThemeComposableV2 =
         colorSchemeTransitionSpec = tween(durationMillis = COLOR_TRANSITION_MILLIS)
         dynamicColorSchemes(seedColor = seed())
         defaultTextStyle = TasksType.Body
-        // Left unset, Unstyled hands out an indication that foundation's clickable refuses at runtime.
         defaultIndication = StateLayer
     }
 
-/**
- * The color the current theme gives this MaterialKolor token. It animates while the theme changes.
- */
 internal val ThemeToken<Color>.color: Color
     @Composable
     get() = Theme[MaterialKolorTokens.colors][this]

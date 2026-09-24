@@ -14,7 +14,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import com.composeunstyled.DialogHost
 import com.composeunstyled.FocusVisibilityProvider
 import com.materialkolor.sample.shared.model.AppSection
@@ -23,7 +22,6 @@ import com.materialkolor.sample.shared.state.SampleState
 import com.materialkolor.sample.shared.state.SampleStore
 import com.materialkolor.sample.shared.state.rememberSampleStore
 import com.materialkolor.sample.shared.theme.isDark
-import com.materialkolor.sample.shared.ui.SampleTags
 import com.materialkolor.sample.unstyled.theme.ContentMaxWidth
 import com.materialkolor.sample.unstyled.theme.Spacing
 import com.materialkolor.sample.unstyled.theme.TasksTheme
@@ -33,22 +31,14 @@ import com.materialkolor.sample.unstyled.ui.palette.PaletteSection
 import com.materialkolor.unstyled.MaterialKolorTokens
 
 /**
- * The Tasks app built on Compose Unstyled and themed by `material-kolor-unstyled`.
- *
- * Every control is an Unstyled primitive painted from the MaterialKolor tokens, the way an app on the adapter would
- * draw. Picking a seed or a mode regenerates the theme and every color eases to its new value.
- *
- * Run it with `./gradlew :samples:unstyled:run`.
- *
- * @param[store] Holds the tasks, the filter, the seed and the mode. Every change goes through it.
+ * The Tasks app built on Compose Unstyled and themed by `material-kolor-unstyled`. Every control is an Unstyled
+ * primitive painted from the MaterialKolor tokens.
  */
 @Composable
 public fun UnstyledSampleApp(store: SampleStore = rememberSampleStore()) {
     val state = store.state
     TasksTheme(seed = state.seed.color, isDark = state.mode.isDark()) {
-        // A focus ring shows when the keyboard moves focus and stays hidden after a click.
         FocusVisibilityProvider(Modifier.fillMaxSize()) {
-            // The dialog opens here, in the app's own layout, instead of in a window of its own.
             DialogHost(
                 Modifier
                     .fillMaxSize()
@@ -68,7 +58,6 @@ private fun TasksPage(
 ) {
     val scrollState = rememberScrollState()
     Box(Modifier.fillMaxSize()) {
-        // Rows are few, so a plain scrolling column keeps every one of them composed.
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -85,13 +74,11 @@ private fun TasksPage(
                 Header(state = state, dispatch = dispatch)
                 when (state.section) {
                     AppSection.Tasks -> TasksSection(state = state, dispatch = dispatch)
-                    AppSection.Palette -> PaletteSection(
-                        seed = state.seed,
-                        modifier = Modifier.testTag(SampleTags.Palette),
-                    )
+                    AppSection.Palette -> PaletteSection(seed = state.seed)
                 }
             }
         }
+
         VerticalScrollbar(
             scrollState = scrollState,
             modifier = Modifier

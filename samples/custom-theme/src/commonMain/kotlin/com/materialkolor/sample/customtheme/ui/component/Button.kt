@@ -15,28 +15,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.AppColors
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 
-/**
- * How loud a [Button] is.
- */
 internal enum class ButtonStyle {
-    /** Filled with the primary accent, for the one main action in a group. */
     Primary,
-
-    /** Outlined and see-through, for everything else. */
     Quiet,
-
-    /** Filled with the error accent, for an action that removes something for good. */
     Danger,
 }
 
 /**
- * A text button in one of the [ButtonStyle] looks.
- *
  * The primary style steps through the theme's own interaction tones, `primaryRaised` on hover and `primaryPressed`
  * while held, instead of laying a tint over the fill.
  */
@@ -66,7 +55,6 @@ internal fun Button(
                 interactionSource = interactionSource,
                 indication = null,
                 enabled = enabled,
-                role = Role.Button,
                 onClick = onClick,
             ).pointerHoverIcon(if (enabled) PointerIcon.Hand else PointerIcon.Default)
             .focusRing(state = state, color = colors.focusRing, shape = shape)
@@ -80,14 +68,6 @@ internal fun Button(
     }
 }
 
-/**
- * The colors one button draws with in its current state.
- *
- * @property[container] The fill, or null for none.
- * @property[content] The label color.
- * @property[border] The outline, or null for none.
- * @property[veil] The tint laid over the fill on hover and press, or null when the fill changes on its own.
- */
 private data class ButtonLook(
     val container: Color?,
     val content: Color,

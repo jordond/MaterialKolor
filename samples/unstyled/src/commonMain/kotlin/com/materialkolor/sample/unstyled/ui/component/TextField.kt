@@ -34,17 +34,6 @@ import com.materialkolor.unstyled.MaterialKolorTokens
 
 private const val SELECTION_ALPHA = 0.32f
 
-/**
- * A single line text field that submits on Enter.
- *
- * The outline darkens under a pointer and turns primary while the field has focus, whether the focus came from a
- * click or the keyboard, since the caret alone is easy to miss.
- *
- * @param[state] Holds what is typed.
- * @param[placeholder] Shown while the field is empty.
- * @param[onSubmit] Called when Enter is pressed. The field keeps its focus.
- * @param[modifier] Applied to the editable node itself.
- */
 @Composable
 internal fun TextField(
     state: TextFieldState,
@@ -64,13 +53,6 @@ internal fun TextField(
 
     UnstyledTextField(
         state = state,
-        modifier = modifier
-            .heightIn(min = ControlHeight)
-            .hoverable(interactionSource)
-            .clip(Shapes.Control)
-            .background(MaterialKolorTokens.surfaceContainerLowest.color)
-            .border(width = if (focused) 2.dp else 1.dp, color = outline, shape = Shapes.Control)
-            .padding(horizontal = Spacing.Medium, vertical = 9.dp),
         cursorBrush = SolidColor(primary),
         selectionColors = TextSelectionColors(
             handleColor = primary,
@@ -84,8 +66,14 @@ internal fun TextField(
             imeAction = ImeAction.Done,
         ),
         interactionSource = interactionSource,
-        // Unlike Text, the field does not fall back to the content color.
         textColor = MaterialKolorTokens.onSurface.color,
+        modifier = modifier
+            .heightIn(min = ControlHeight)
+            .hoverable(interactionSource)
+            .clip(Shapes.Control)
+            .background(MaterialKolorTokens.surfaceContainerLowest.color)
+            .border(width = if (focused) 2.dp else 1.dp, color = outline, shape = Shapes.Control)
+            .padding(horizontal = Spacing.Medium, vertical = 9.dp),
     ) {
         TextInput(
             placeholder = {

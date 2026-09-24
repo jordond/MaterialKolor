@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -22,15 +21,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 
-/**
- * The section tabs, a row of labels over a hairline with the picked one underlined in the primary accent.
- *
- * @param[tabModifier] Extra modifiers for each tab, applied to the node that takes the click.
- */
 @Composable
 internal fun <T> TabStrip(
     tabs: List<T>,
@@ -38,21 +31,16 @@ internal fun <T> TabStrip(
     onSelect: (T) -> Unit,
     label: (T) -> String,
     modifier: Modifier = Modifier,
-    tabModifier: (T) -> Modifier = { Modifier },
 ) {
     val colors = LocalAppColors.current
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.selectableGroup(),
-        ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             for (tab in tabs) {
                 Tab(
                     text = label(tab),
                     isSelected = tab == selected,
                     onClick = { onSelect(tab) },
-                    modifier = tabModifier(tab),
                 )
             }
         }
@@ -71,7 +59,6 @@ private fun Tab(
     text: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val colors = LocalAppColors.current
     val interactionSource = remember { MutableInteractionSource() }
@@ -80,7 +67,7 @@ private fun Tab(
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier
+        modifier = Modifier
             .height(40.dp)
             .clip(TabShape)
             .veil(tint = colors.onSurface, state = state)
@@ -88,7 +75,6 @@ private fun Tab(
                 selected = isSelected,
                 interactionSource = interactionSource,
                 indication = null,
-                role = Role.Tab,
                 onClick = onClick,
             ).pointerHoverIcon(PointerIcon.Hand)
             .focusRing(state = state, color = colors.focusRing, shape = TabShape)

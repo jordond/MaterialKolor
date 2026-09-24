@@ -14,14 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 
-/**
- * A checkbox with a hand-drawn check mark. The box is 20dp, and the hover and press area around it is 32dp so it is
- * easy to hit.
- */
 @Composable
 internal fun Checkbox(
     checked: Boolean,
@@ -43,7 +38,6 @@ internal fun Checkbox(
                 value = checked,
                 interactionSource = interactionSource,
                 indication = null,
-                role = Role.Checkbox,
                 onValueChange = onCheckedChange,
             ).pointerHoverIcon(PointerIcon.Hand)
             .focusRing(state = state, color = colors.focusRing, shape = target),

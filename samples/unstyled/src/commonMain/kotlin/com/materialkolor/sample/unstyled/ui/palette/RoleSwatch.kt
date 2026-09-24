@@ -19,21 +19,12 @@ import com.materialkolor.sample.unstyled.theme.Spacing
 import com.materialkolor.sample.unstyled.theme.TasksType
 import com.materialkolor.sample.unstyled.theme.color
 
-/**
- * A MaterialKolor role to show, and the role its name is written in.
- *
- * @property[role] The token whose color fills the swatch.
- * @property[onRole] The token the label is written in, the role meant to sit on [role].
- */
 @Immutable
 internal data class Swatch(
     val role: ThemeToken<Color>,
     val onRole: ThemeToken<Color>,
 )
 
-/**
- * A block of the role's color with its token name over its hex value.
- */
 @Composable
 internal fun SwatchTile(
     swatch: Swatch,
@@ -42,10 +33,10 @@ internal fun SwatchTile(
     val fill = swatch.role.color
     ProvideContentColor(swatch.onRole.color) {
         Column(
+            verticalArrangement = Arrangement.SpaceBetween,
             modifier = modifier
                 .background(fill)
                 .padding(horizontal = Spacing.Medium, vertical = Spacing.Small),
-            verticalArrangement = Arrangement.SpaceBetween,
         ) {
             SwatchName(swatch)
             SwatchHex(fill)
@@ -53,9 +44,6 @@ internal fun SwatchTile(
     }
 }
 
-/**
- * A band of the role's color with its token name at the start and its hex value at the end.
- */
 @Composable
 internal fun SwatchStrip(
     swatch: Swatch,
@@ -64,10 +52,10 @@ internal fun SwatchStrip(
     val fill = swatch.role.color
     ProvideContentColor(swatch.onRole.color) {
         Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = modifier
                 .background(fill)
                 .padding(horizontal = Spacing.Large, vertical = Spacing.Medium),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
             SwatchName(swatch, Modifier.weight(1f))
             SwatchHex(fill)
@@ -94,5 +82,4 @@ private fun SwatchHex(fill: Color) {
     Text(text = fill.hex(), style = TasksType.Small, maxLines = 1)
 }
 
-/** The color as `#RRGGBB`. */
 private fun Color.hex(): String = "#" + (toArgb() and 0xFFFFFF).toString(16).padStart(6, '0').uppercase()

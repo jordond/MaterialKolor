@@ -27,10 +27,6 @@ import io.github.composefluent.component.rememberScrollbarAdapter
 
 /**
  * The Tasks app on Compose Fluent, themed from a seed color by material-kolor-fluent.
- *
- * Run it with `./gradlew :samples:fluent:run`.
- *
- * @param[store] Holds the app state. Everything the user does goes through it.
  */
 @Composable
 public fun FluentSampleApp(store: SampleStore = rememberSampleStore()) {

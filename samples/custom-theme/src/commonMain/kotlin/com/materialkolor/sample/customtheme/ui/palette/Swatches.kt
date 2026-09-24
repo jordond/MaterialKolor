@@ -32,9 +32,6 @@ internal data class AccentFamily(
     val onContainer: Color,
 )
 
-/**
- * The four Material families and the three the app owns on top, in that order.
- */
 internal fun AppColors.accentFamilies(): List<AccentFamily> =
     listOf(
         AccentFamily("primary", primary, onPrimary, primaryContainer, onPrimaryContainer),
@@ -46,17 +43,11 @@ internal fun AppColors.accentFamilies(): List<AccentFamily> =
         AccentFamily("warm", warm, onWarm, warmContainer, onWarmContainer),
     )
 
-/**
- * One named color in a [SwatchRow].
- */
 internal data class Swatch(
     val name: String,
     val color: Color,
 )
 
-/**
- * A family as two cells side by side, the accent and its container, each named in its own on-color.
- */
 @Composable
 internal fun AccentFamilyRow(family: AccentFamily) {
     val colors = LocalAppColors.current
@@ -83,9 +74,6 @@ internal fun AccentFamilyRow(family: AccentFamily) {
     }
 }
 
-/**
- * Colors that nothing is written on, as named squares.
- */
 @Composable
 internal fun SwatchRow(swatches: List<Swatch>) {
     val colors = LocalAppColors.current

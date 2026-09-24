@@ -14,17 +14,12 @@ import com.composeunstyled.focusRing
 import com.materialkolor.sample.unstyled.theme.color
 import com.materialkolor.unstyled.MaterialKolorTokens
 
-/** How faint a disabled control draws, container and label together. */
 internal const val DISABLED_ALPHA = 0.38f
 
 private const val PRESSED_SCALE = 0.96f
 
-/** Full opacity, or [DISABLED_ALPHA] when the control is disabled. */
 internal fun enabledAlpha(enabled: Boolean): Float = if (enabled) 1f else DISABLED_ALPHA
 
-/**
- * Shrinks the control a little while it is pressed and springs it back on release.
- */
 @Composable
 internal fun Modifier.pressScale(interactionSource: InteractionSource): Modifier {
     val pressed by interactionSource.collectIsPressedAsState()
@@ -36,8 +31,7 @@ internal fun Modifier.pressScale(interactionSource: InteractionSource): Modifier
 }
 
 /**
- * Draws the primary focus ring around [shape] while the control has keyboard focus. A click leaves no ring behind,
- * since the app sits in a `FocusVisibilityProvider`.
+ * A focus ring for keyboard focus only. A click leaves none, since the app sits in a `FocusVisibilityProvider`.
  *
  * @param[offset] How far the ring stands off the control, so it never sits on the control's own outline.
  */

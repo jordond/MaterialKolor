@@ -18,14 +18,8 @@ import io.github.composefluent.FluentTheme
 import io.github.composefluent.Shades
 
 /**
- * Themes [content] from [seed] and [mode] through material-kolor-fluent.
- *
  * A new seed fades from one ramp to the next. A new mode cuts straight over, because Fluent keeps light and dark
  * as a flag on one set of shades and there is nothing in between to animate.
- *
- * @param[seed] The seed the accent ramp is generated from.
- * @param[mode] Light, dark or whatever the system says.
- * @param[content] The themed content.
  */
 @Composable
 internal fun FluentSampleTheme(
@@ -58,9 +52,6 @@ internal fun FluentSampleTheme(
     }
 }
 
-/**
- * Fades a tag ramp towards [target] shade by shade, the way `animateFluentColors` fades the accent.
- */
 @Composable
 private fun animateShades(
     target: Shades,
@@ -86,11 +77,7 @@ private fun animateShades(
     )
 }
 
-/**
- * Reads the colors this sample adds on top of Fluent's, the same way `FluentTheme.colors` reads Fluent's own.
- */
 internal object SampleTheme {
-    /** The sample's extra colors for the current subtree. */
     val colors: SampleColors
         @Composable
         @ReadOnlyComposable

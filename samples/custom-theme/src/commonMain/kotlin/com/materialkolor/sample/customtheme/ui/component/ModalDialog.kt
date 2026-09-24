@@ -19,12 +19,8 @@ import androidx.compose.ui.window.Dialog
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 
 /**
- * A dialog that asks one question, with a [title], a line of [body] and the answers in [buttons].
+ * Built on the platform `Dialog`, which handles the window layer, focus, Esc and outside clicks.
  *
- * It sits on the platform `Dialog`, so it gets the window layer, focus, Esc and outside clicks for free, and draws a
- * panel from the theme on top.
- *
- * @param[modifier] Applied to the panel.
  * @param[buttons] The answers, laid out from the end, so the last one sits in the corner.
  */
 @Composable

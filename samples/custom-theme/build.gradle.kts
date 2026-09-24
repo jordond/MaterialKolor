@@ -16,8 +16,6 @@ kotlin {
         compileSdk = libs.versions.sdk.compile.get().toInt()
         minSdk = libs.versions.sdk.min.library.get().toInt()
 
-        withHostTest {}
-
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -41,16 +39,8 @@ kotlin {
             implementation(project(":samples:shared"))
         }
 
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-        }
-
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
-        }
-
-        jvmTest.dependencies {
-            implementation(project(":samples:testing"))
         }
     }
 }

@@ -11,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 import com.materialkolor.sample.customtheme.ui.component.Button
@@ -21,11 +20,8 @@ import com.materialkolor.sample.shared.model.TaskTag
 import com.materialkolor.sample.shared.model.canAddTask
 import com.materialkolor.sample.shared.state.SampleAction
 import com.materialkolor.sample.shared.ui.SampleCopy
-import com.materialkolor.sample.shared.ui.SampleTags
 
 /**
- * The row that adds a task. The field, the tag picker and the Add button.
- *
  * The text in the field is the only state the UI keeps. Everything else goes through [dispatch].
  */
 @Composable
@@ -59,8 +55,7 @@ internal fun TaskComposer(
             onSubmit = add,
             modifier = Modifier
                 .weight(1f)
-                .focusRequester(focusRequester)
-                .testTag(SampleTags.TaskInput),
+                .focusRequester(focusRequester),
         )
 
         SegmentedControl(
@@ -69,14 +64,12 @@ internal fun TaskComposer(
             onSelect = { tag -> dispatch(SampleAction.SelectComposerTag(tag)) },
             label = SampleCopy::label,
             accent = { tag -> tag.accent(colors) },
-            optionModifier = { tag -> Modifier.testTag(SampleTags.composerTag(tag)) },
         )
 
         Button(
             text = SampleCopy.add,
             onClick = add,
             enabled = canAdd,
-            modifier = Modifier.testTag(SampleTags.AddTask),
         )
     }
 }

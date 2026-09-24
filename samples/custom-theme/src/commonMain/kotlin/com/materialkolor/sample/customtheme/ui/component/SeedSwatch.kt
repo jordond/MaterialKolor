@@ -17,23 +17,15 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 
 /**
- * A round swatch of one seed [color], ringed while it is the picked seed.
- *
- * @param[color] The seed itself. It is the one color in the UI that does not come from the theme, because it is what
- *   the theme comes from.
- * @param[label] The seed's name, read out in place of the color.
+ * [color] is the one color in the UI that does not come from the theme, because it is what the theme comes from.
  */
 @Composable
 internal fun SeedSwatch(
     color: Color,
-    label: String,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -57,10 +49,8 @@ internal fun SeedSwatch(
                 selected = isSelected,
                 interactionSource = interactionSource,
                 indication = null,
-                role = Role.RadioButton,
                 onClick = onClick,
-            ).semantics { contentDescription = label }
-            .pointerHoverIcon(PointerIcon.Hand)
+            ).pointerHoverIcon(PointerIcon.Hand)
             .padding(5.dp),
     ) {
         Box(

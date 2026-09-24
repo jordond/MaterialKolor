@@ -19,11 +19,7 @@ private const val HOVERED_ALPHA = 0.08f
 private const val PRESSED_ALPHA = 0.12f
 
 /**
- * The theme's default indication. It lays the content color over a control, faintly while a pointer rests on it and
- * a little stronger while it is pressed.
- *
- * The color is read as it draws, so the layer follows the theme through every change, and a filled control that
- * provides its own content color gets a layer in that color.
+ * The theme's default indication. It lays the content color over a hovered or pressed control.
  */
 internal data object StateLayer : IndicationNodeFactory {
     override fun create(interactionSource: InteractionSource): DelegatableNode = StateLayerNode(interactionSource)

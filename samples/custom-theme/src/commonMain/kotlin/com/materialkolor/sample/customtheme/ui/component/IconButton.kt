@@ -12,22 +12,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 
-/**
- * A square button with one [Glyph] and no label, so [contentDescription] is what a screen reader says.
- *
- * @param[tint] The glyph color at rest.
- * @param[activeTint] The glyph color while hovered or pressed, to hint at what the button does.
- */
 @Composable
 internal fun IconButton(
     glyph: Glyph,
-    contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     tint: Color = LocalAppColors.current.textMuted,
@@ -47,10 +37,8 @@ internal fun IconButton(
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-                role = Role.Button,
                 onClick = onClick,
-            ).semantics { this.contentDescription = contentDescription }
-            .pointerHoverIcon(PointerIcon.Hand)
+            ).pointerHoverIcon(PointerIcon.Hand)
             .focusRing(state = state, color = colors.focusRing, shape = shape),
     ) {
         Icon(

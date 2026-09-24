@@ -14,15 +14,13 @@ two samples side by side and see exactly what each stack asks of you.
 
 - [`shared`](shared) holds everything that is not UI. The task model, the theme settings, one
   reducer, a small store and the copy every sample shows.
-- [`testing`](testing) holds one behaviour contract. Each sample runs it against its own UI, which is
-  what keeps the three apps identical.
 - Each sample owns its UI, its theme and a `Main.kt` desktop entry point.
 
 ## The app
 
 Tasks is a to-do list with a theme picker on top. It is small enough to read in one sitting and
-still touches the controls most apps need: a text field, buttons, a checkbox, segmented choices,
-tabs, a progress bar, a scrolling list, an empty state and a confirmation dialog.
+still has the controls most apps need. A text field, buttons, a checkbox, segmented choices, tabs,
+a progress bar, a scrolling list, an empty state and a confirmation dialog.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -33,7 +31,7 @@ tabs, a progress bar, a scrolling list, an empty state and a confirmation dialog
 │ 2 of 5 done                                                  │
 │ ██████████░░░░░░░░░░░░░░                                     │
 │                                                              │
-│ [ Add a task                       ]  (Personal|Work|Errand) [Add] │
+│ [ Add a task                 ]  (Personal|Work|Errand) [Add] │
 │                                                              │
 │ [ All ]  [ Active ]  [ Done ]                                │
 │ ☑  Pick a seed color            Personal              ✕      │
@@ -68,7 +66,7 @@ tabs, a progress bar, a scrolling list, an empty state and a confirmation dialog
 
 ### Palette section
 
-The one place the samples are allowed to differ in content. Each sample shows off what its theme
+The one place the samples are allowed to differ in content. Each sample shows what its theme
 module produces for the current seed and mode, so this is where the old single-screen demos live now.
 
 ### Starting state
@@ -88,7 +86,5 @@ Seed Violet, mode System, section Tasks, filter All, composer tag Personal, and 
 - Read state from the shared store and change it only by dispatching shared actions. No sample keeps
   its own copy of the task list, the filter, the seed or the mode.
 - Show the shared copy. Do not hardcode a label the shared module already has.
-- Put the shared test tags on the matching nodes, so the contract can drive every UI the same way.
 - Colors come from the theme. No literal colors in the UI code.
-- Run the contract in `jvmTest`. A behaviour change goes into `shared` and `testing` first, then into
-  all three samples in the same change.
+- A behaviour change goes into `shared` first, then into all three samples in the same change.

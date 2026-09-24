@@ -4,7 +4,7 @@ import com.materialkolor.sample.shared.model.Task
 import com.materialkolor.sample.shared.model.canAddTask
 
 /**
- * The state after [action]. Pure, so the same state and action always give the same result.
+ * Pure, so the same state and action always give the same result.
  */
 public fun SampleState.reduce(action: SampleAction): SampleState =
     when (action) {

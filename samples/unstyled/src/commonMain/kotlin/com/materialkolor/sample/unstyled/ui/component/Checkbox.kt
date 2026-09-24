@@ -28,33 +28,22 @@ import com.materialkolor.unstyled.MaterialKolorTokens
 
 private const val CHECK_ENTER_SCALE = 0.6f
 
-/**
- * A checkbox. The box is 20dp and the round area around it takes the pointer, shows the state layer and wears the
- * focus ring.
- *
- * @param[checked] Whether it is on.
- * @param[onCheckedChange] Called with the new value when it is toggled.
- * @param[accessibilityLabel] What it is called, for a checkbox that sits next to its label rather than holding it.
- * @param[modifier] Applied to the toggleable node.
- */
 @Composable
 internal fun Checkbox(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    accessibilityLabel: String,
     modifier: Modifier = Modifier,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     UnstyledCheckbox(
         checked = checked,
         onCheckedChange = onCheckedChange,
+        interactionSource = interactionSource,
+        indication = LocalIndication.current,
         modifier = modifier
             .size(36.dp)
             .controlFocusRing(interactionSource, Shapes.Round, offset = 0.dp)
             .clip(Shapes.Round),
-        interactionSource = interactionSource,
-        indication = LocalIndication.current,
-        accessibilityLabel = accessibilityLabel,
     ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Box(
@@ -69,10 +58,10 @@ internal fun Checkbox(
                     exit = fadeOut() + scaleOut(targetScale = CHECK_ENTER_SCALE),
                 ) {
                     Box(
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .fillMaxSize()
                             .background(MaterialKolorTokens.primary.color),
-                        contentAlignment = Alignment.Center,
                     ) {
                         UnstyledIcon(
                             imageVector = Lucide.Check,

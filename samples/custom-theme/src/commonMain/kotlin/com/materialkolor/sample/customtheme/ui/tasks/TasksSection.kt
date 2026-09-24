@@ -16,7 +16,6 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 import com.materialkolor.sample.customtheme.ui.component.AppShapes
@@ -32,11 +31,7 @@ import com.materialkolor.sample.shared.model.TaskFilter
 import com.materialkolor.sample.shared.state.SampleAction
 import com.materialkolor.sample.shared.state.SampleState
 import com.materialkolor.sample.shared.ui.SampleCopy
-import com.materialkolor.sample.shared.ui.SampleTags
 
-/**
- * The Tasks section. Progress on top, then the composer, the filter and the list card with its footer.
- */
 @Composable
 internal fun TasksSection(
     state: SampleState,
@@ -54,13 +49,9 @@ internal fun TasksSection(
                 text = SampleCopy.summary(done = state.doneCount, total = state.totalCount),
                 style = AppType.BodyStrong,
                 color = colors.textStrong,
-                modifier = Modifier.testTag(SampleTags.Summary),
             )
 
-            ProgressBar(
-                progress = state.progress,
-                modifier = Modifier.testTag(SampleTags.Progress),
-            )
+            ProgressBar(progress = state.progress)
         }
 
         TaskComposer(
@@ -75,7 +66,6 @@ internal fun TasksSection(
                 onSelect = { filter -> dispatch(SampleAction.SelectFilter(filter)) },
                 label = SampleCopy::label,
                 badge = { filter -> state.count(filter).toString() },
-                optionModifier = { filter -> Modifier.testTag(SampleTags.filter(filter)) },
             )
 
             TaskList(
@@ -105,8 +95,7 @@ private fun TaskList(
             .fillMaxWidth()
             .clip(AppShapes.Card)
             .background(colors.surfaceRaised)
-            .border(1.dp, colors.borderFaint, AppShapes.Card)
-            .testTag(SampleTags.TaskList),
+            .border(1.dp, colors.borderFaint, AppShapes.Card),
     ) {
         if (state.visibleTasks.isEmpty()) {
             EmptyState(filter = state.filter)
@@ -144,8 +133,7 @@ private fun EmptyState(filter: TaskFilter) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 32.dp)
-            .testTag(SampleTags.EmptyState),
+            .padding(vertical = 32.dp),
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -187,9 +175,7 @@ private fun Footer(
             text = SampleCopy.remaining(state.activeCount),
             style = AppType.Body,
             color = colors.textMuted,
-            modifier = Modifier
-                .weight(1f)
-                .testTag(SampleTags.Remaining),
+            modifier = Modifier.weight(1f),
         )
 
         Button(
@@ -197,7 +183,6 @@ private fun Footer(
             onClick = { dispatch(SampleAction.RequestClearDone) },
             style = ButtonStyle.Quiet,
             enabled = state.canClearDone,
-            modifier = Modifier.testTag(SampleTags.ClearDone),
         )
     }
 }

@@ -25,12 +25,6 @@ import io.github.composefluent.background.BackgroundSizing
 import io.github.composefluent.background.Layer
 import io.github.composefluent.component.Text
 
-/**
- * A Fluent card, the layer every section body sits on.
- *
- * @param[modifier] The modifier for the card.
- * @param[content] What the card holds, spaced 16dp apart.
- */
 @Composable
 internal fun SectionCard(
     modifier: Modifier = Modifier,
@@ -51,12 +45,6 @@ internal fun SectionCard(
     }
 }
 
-/**
- * A small muted label over a group of controls.
- *
- * @param[text] The label.
- * @param[modifier] The modifier for the label.
- */
 @Composable
 internal fun SectionLabel(
     text: String,
@@ -71,12 +59,6 @@ internal fun SectionLabel(
     )
 }
 
-/**
- * A pill showing the name of [tag] in its own accent.
- *
- * @param[tag] The tag to show.
- * @param[modifier] The modifier for the chip.
- */
 @Composable
 internal fun TagChip(
     tag: TaskTag,
@@ -101,11 +83,6 @@ internal fun TagChip(
     }
 }
 
-/**
- * A one pixel rule in Fluent's divider stroke.
- *
- * @param[modifier] The modifier for the rule.
- */
 @Composable
 internal fun Divider(modifier: Modifier = Modifier) {
     Box(

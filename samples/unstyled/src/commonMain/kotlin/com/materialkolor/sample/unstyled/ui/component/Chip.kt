@@ -18,9 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.composeunstyled.ProvideContentColor
 import com.composeunstyled.RadioButton
@@ -33,22 +30,12 @@ import com.materialkolor.sample.unstyled.theme.TasksType
 import com.materialkolor.sample.unstyled.theme.color
 import com.materialkolor.unstyled.MaterialKolorTokens
 
-/**
- * What a chip is filled with and what its label is written in.
- */
 @Immutable
 internal data class ChipColors(
     val container: Color,
     val content: Color,
 )
 
-/**
- * A small filled label.
- *
- * @param[label] What it says.
- * @param[colors] Its fill and ink.
- * @param[modifier] Applied to the chip.
- */
 @Composable
 internal fun Chip(
     label: String,
@@ -57,26 +44,16 @@ internal fun Chip(
 ) {
     Text(
         text = label,
+        style = TasksType.Small,
+        color = colors.content,
+        maxLines = 1,
         modifier = modifier
             .clip(Shapes.Pill)
             .background(colors.container)
             .padding(horizontal = Spacing.Small, vertical = Spacing.XSmall),
-        style = TasksType.Small,
-        color = colors.content,
-        maxLines = 1,
     )
 }
 
-/**
- * Chips to pick exactly one of. The picked chip is filled in its own colors and the rest are outlined. It is an
- * Unstyled radio group, so each chip is a radio button that also reports `selected`.
- *
- * @param[choices] The chips, in order.
- * @param[selected] The picked value.
- * @param[onSelect] Called with the value of a chip when it is picked.
- * @param[colors] The fill and ink of a picked chip.
- * @param[modifier] Applied to the group.
- */
 @Composable
 internal fun <T> ChoiceChips(
     choices: List<Choice<T>>,
@@ -101,24 +78,21 @@ internal fun <T> ChoiceChips(
                 ProvideContentColor(content) {
                     RadioButton(
                         value = choice.value,
+                        interactionSource = interactionSource,
+                        indication = LocalIndication.current,
                         modifier = Modifier
-                            .testTag(choice.testTag)
-                            .semantics { this.selected = isSelected }
                             .pressScale(interactionSource)
                             .controlFocusRing(interactionSource, Shapes.Control)
                             .clip(Shapes.Control)
                             .background(container)
                             .border(width = 1.dp, color = outline, shape = Shapes.Control)
                             .height(ControlHeight),
-                        interactionSource = interactionSource,
-                        indication = LocalIndication.current,
                     ) {
-                        // The padding goes inside, since the radio button puts its toggle after this modifier.
                         Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .padding(horizontal = Spacing.Medium),
-                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(text = choice.label, style = TasksType.Label, maxLines = 1)
                         }

@@ -6,13 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.progressSemantics
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.fluent.ui.component.Divider
 import com.materialkolor.sample.fluent.ui.component.LabeledButton
@@ -22,18 +20,10 @@ import com.materialkolor.sample.shared.model.TaskFilter
 import com.materialkolor.sample.shared.state.SampleAction
 import com.materialkolor.sample.shared.state.SampleState
 import com.materialkolor.sample.shared.ui.SampleCopy
-import com.materialkolor.sample.shared.ui.SampleTags
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.Text
 
-/**
- * The Tasks section. Progress, the composer, the filter, the list and the footer, on one card.
- *
- * @param[state] What to show.
- * @param[onAction] Where the section sends what the user does.
- * @param[modifier] The modifier for the section.
- */
 @Composable
 internal fun TasksSection(
     state: SampleState,
@@ -75,16 +65,11 @@ private fun Progress(state: SampleState) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = SampleCopy.summary(done = state.doneCount, total = state.totalCount),
-            modifier = Modifier.testTag(SampleTags.Summary),
             style = FluentTheme.typography.bodyStrong,
         )
-        // The bar eases towards the new ratio, while its semantics report the ratio itself straight away.
         ProgressBar(
             progress = progress,
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(SampleTags.Progress)
-                .progressSemantics(state.progress),
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -98,7 +83,6 @@ private fun FilterPicker(
         options = TaskFilter.entries,
         selected = state.filter,
         onSelect = onSelect,
-        testTag = { filter -> SampleTags.filter(filter) },
     ) { filter ->
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -122,7 +106,6 @@ private fun TaskList(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .testTag(SampleTags.TaskList)
             .animateContentSize(),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
@@ -152,15 +135,12 @@ private fun Footer(
     ) {
         Text(
             text = SampleCopy.remaining(state.activeCount),
-            modifier = Modifier
-                .weight(1f)
-                .testTag(SampleTags.Remaining),
+            modifier = Modifier.weight(1f),
             color = FluentTheme.colors.text.text.secondary,
         )
         LabeledButton(
             label = SampleCopy.clearDone,
             onClick = onClearDone,
-            testTag = SampleTags.ClearDone,
             enabled = state.canClearDone,
         )
     }

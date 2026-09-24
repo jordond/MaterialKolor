@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.materialkolor.ktx.toHex
 import com.materialkolor.sample.fluent.theme.SampleTheme
@@ -19,26 +18,16 @@ import com.materialkolor.sample.fluent.ui.component.TagChip
 import com.materialkolor.sample.shared.model.TaskTag
 import com.materialkolor.sample.shared.theme.SampleSeed
 import com.materialkolor.sample.shared.ui.SampleCopy
-import com.materialkolor.sample.shared.ui.SampleTags
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.Text
 
-/**
- * The Palette section. What material-kolor-fluent made of [seed], where Fluent puts it, and what Fluent would
- * have done on its own.
- *
- * @param[seed] The seed the theme is generated from.
- * @param[modifier] The modifier for the section.
- */
 @Composable
 internal fun PaletteSection(
     seed: SampleSeed,
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .testTag(SampleTags.Palette),
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         PaletteCard(
