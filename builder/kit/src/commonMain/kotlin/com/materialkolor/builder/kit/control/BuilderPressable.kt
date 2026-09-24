@@ -33,7 +33,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * nothing, since [label] already says what pressing it does. A card whose own text should be read
  * out is a [BuilderCard] with a click instead.
  *
- * It takes at least the layout's touch target, with [content] in the middle of it.
+ * It takes at least the layout's primary touch target, as the other kit controls do, with [content]
+ * in the middle of it.
  *
  * @param[onClick] Called when it is pressed.
  * @param[label] What pressing it does, read out as its name.
@@ -63,7 +64,7 @@ public fun BuilderPressable(
                 onClick = onClick,
             ).semantics { contentDescription = name }
             .clearAndSetSemantics { }
-            .controlTouchTarget(LocalLayout.current.minTouchTarget)
+            .controlTouchTarget(LocalLayout.current.primaryTouchTarget)
             .controlPress(interactionSource)
             .alpha(enabledAlpha(enabled))
             .controlRing(interactionSource, shape)

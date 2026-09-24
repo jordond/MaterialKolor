@@ -19,6 +19,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isShiftPressed
@@ -32,7 +34,6 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import com.composeunstyled.UnstyledSlider
-import com.composeunstyled.focusRing
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
@@ -226,9 +227,9 @@ internal fun sliderValueDescription(value: Float): String {
 }
 
 /**
- * How far the panel colored halo behind a focused thumb reaches. It fills the gap between the thumb
- * and its focus ring and runs one ring's width past it, so where the ring crosses the track it sits
- * on the panel rather than on the accent (AR-01).
+ * How far the panel colored halo around the thumb reaches. It fills the gap between the thumb and
+ * where its focus ring goes and runs one ring's width past it, so where the ring crosses the track
+ * it sits on the panel rather than on the accent (AR-01).
  */
 private val ThumbHaloWidth: Dp = FocusRingOffset + FocusRingWidth * 2
 
@@ -236,7 +237,9 @@ private val ThumbHaloWidth: Dp = FocusRingOffset + FocusRingWidth * 2
  * A slider over Compose Unstyled's, with named stops drawn on the track.
  *
  * Drags report every frame and snap to [SliderRules.stops], letting go reports once. Keys go
- * through [sliderKeys].
+ * through [sliderKeys]. The thumb always sits in its [thumbHalo], focused or not, so the ring it
+ * shows with focus covers the panel and not the track, and stands 3 to 1 from what it covers all
+ * the way round (S5 rerun).
  */
 @Composable
 internal fun HeadlessSlider(
@@ -278,7 +281,7 @@ internal fun HeadlessSlider(
             val halo = LocalBuilderTokens.current.panel
             Box(
                 Modifier
-                    .focusRing(interactions, ThumbHaloWidth, halo, style.thumbShape)
+                    .thumbHalo(ThumbHaloWidth, halo, style.thumbShape)
                     .controlRing(interactions, style.thumbShape, style.focus)
                     .size(style.thumbSize)
                     .background(style.thumb, style.thumbShape)
@@ -287,6 +290,18 @@ internal fun HeadlessSlider(
         },
     )
 }
+
+/** Fills [shape] grown by [width] on every side in [color], behind whatever the thumb draws. */
+private fun Modifier.thumbHalo(
+    width: Dp,
+    color: Color,
+    shape: Shape,
+): Modifier =
+    drawBehind {
+        val grow = width.toPx()
+        val outline = shape.createOutline(Size(size.width + grow * 2, size.height + grow * 2), layoutDirection, this)
+        translate(-grow, -grow) { drawOutline(outline, color) }
+    }
 
 /**
  * The track with its active part and a dot at each stop. Both are inset by half a thumb, since

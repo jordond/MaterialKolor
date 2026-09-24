@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.IntSize
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.persist.DeviceWidth
+import com.materialkolor.builder.kit.a11y.KitTestApi
 import com.materialkolor.builder.kit.a11y.ProvideWebFoldsForTest
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.Skin
@@ -46,6 +47,7 @@ internal val PhotoContainerLevels: Set<Role> = setOf(
  * The photo app in an expressive Material 3 pane of [spec], under the chrome, with motion frozen,
  * and with the web fold on when [webFolds] asks for it.
  */
+@OptIn(KitTestApi::class)
 @Composable
 internal fun PhotoHarness(
     spec: PaneSpec,

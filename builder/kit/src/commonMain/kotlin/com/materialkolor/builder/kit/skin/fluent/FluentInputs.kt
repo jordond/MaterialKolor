@@ -143,6 +143,7 @@ internal object FluentInputStyles {
                 padding = PaddingValues(horizontal = tokens.spacing.medium, vertical = tokens.spacing.small),
                 gap = tokens.spacing.extraSmall,
                 cursor = tokens.textStrong,
+                focusRing = tokens.focus,
             )
         }
 

@@ -13,13 +13,18 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
+import com.materialkolor.builder.kit.layout.LayoutInfo
+import com.materialkolor.builder.kit.layout.LocalLayout
 import io.kotest.assertions.withClue
+import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -72,6 +77,31 @@ class BuilderPressableTest {
             }
         }
     }
+
+    /**
+     * On a phone the primary touch target, 48 dp, stands above the least one, 44 dp, so a pressable
+     * that takes the least one would show here.
+     */
+    @Test
+    fun pressable_smallContentOnAPhone_everySkin_growsToThePrimaryTouchTarget() =
+        forEachSkin { _, skin ->
+            val phone = LayoutInfo.of(widthDp = 400.dp, heightDp = 800.dp)
+            phone.primaryTouchTarget shouldBeGreaterThan phone.minTouchTarget
+            setContent {
+                ControlsHarness(skin) {
+                    CompositionLocalProvider(LocalLayout provides phone) {
+                        BuilderPressable(
+                            onClick = {},
+                            label = PressableLabel,
+                            modifier = Modifier.testTag(PressableTag),
+                        ) { Box(Modifier.size(16.dp)) }
+                    }
+                }
+            }
+            onNodeWithTag(PressableTag)
+                .assertWidthIsEqualTo(phone.primaryTouchTarget)
+                .assertHeightIsEqualTo(phone.primaryTouchTarget)
+        }
 
     @Test
     fun pressable_everySkin_ringsOnEverySide() =

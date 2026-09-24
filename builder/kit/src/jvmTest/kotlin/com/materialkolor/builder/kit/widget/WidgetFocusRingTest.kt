@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -30,15 +32,22 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.withKeyDown
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.KeyColor
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.RampSet
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.control.contrast
+import com.materialkolor.builder.kit.control.shouldClearTheTrack
+import com.materialkolor.builder.kit.control.shouldRingAllTheWayRound
 import com.materialkolor.builder.kit.control.shouldRingEverySide
 import com.materialkolor.builder.kit.control.shouldShowRing
 import com.materialkolor.builder.kit.control.tabOntoRing
+import com.materialkolor.builder.kit.skin.headless.FocusRingOffset
+import com.materialkolor.builder.kit.skin.headless.FocusRingWidth
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
@@ -59,7 +68,7 @@ private val CopyModifierKey: Key =
 
 /**
  * The widgets ring when Tab lands on them, in every skin, with the ring standing 3 to 1 from what
- * it sits on (AR-01, S5 rows 30, 32 and 33).
+ * it sits on all the way round (AR-01, S5 rows 30, 32 and 33, and the partial rings of the rerun).
  */
 @OptIn(ExperimentalTestApi::class)
 class WidgetFocusRingTest {
@@ -74,9 +83,63 @@ class WidgetFocusRingTest {
                     tile.shouldRingEverySide()
                 }
                 runComposeUiTest {
-                    val copy = tabOntoRing(skin, presses = 2) { RingSwatch() }
+                    val copy = tabOntoRing(skin, presses = 2) { RingSwatch() }.nearFocused(CopyRingReach)
                     onNodeWithContentDescription("Copy").assertIsFocused()
                     copy.shouldShowRing()
+                    copy.shouldRingEverySide()
+                    copy.shouldRingAllTheWayRound()
+                }
+            }
+        }
+    }
+
+    /**
+     * The copy button sits on a band of the panel, so its ring lands on the panel and not on the code
+     * ground, which the focus color does not clear in every skin (S5 gap 5).
+     */
+    @Test
+    fun codeView_copyButton_ringsOnItsBandAllTheWayRound() {
+        val file = widgetGoldenColorFile()
+        forEachWidgetSkin { _, skin ->
+            val copy = tabOntoRing(skin, presses = 2) {
+                CodeView(file.lines, onCopy = {}, Modifier.size(480.dp, 200.dp))
+            }.nearFocused(CopyRingReach)
+            onNodeWithContentDescription("Copy").assertIsFocused()
+            copy.shouldShowRing()
+            copy.shouldRingEverySide()
+            copy.shouldRingAllTheWayRound()
+        }
+    }
+
+    /**
+     * The thumb sits in a panel halo, so its ring never crosses the track's colors. It is small and
+     * round, so it is drawn at two pixels per dp like the slider's thumb.
+     */
+    @Test
+    fun gamutTrack_everyChannel_ringsTheThumbAllTheWayRoundClearOfTheTrack() {
+        for (channel in HctChannel.entries) {
+            withClue(channel.name) {
+                forEachWidgetSkin { _, skin ->
+                    val capture = tabOntoRing(skin, density = 2f) { RingTrack(channel) }
+                    capture.shouldShowRing()
+                    capture.shouldRingEverySide(around = capture.ringBounds)
+                    capture.shouldRingAllTheWayRound()
+                    capture.shouldClearTheTrack()
+                }
+            }
+        }
+    }
+
+    /** The ring stands outside the chip's hairline rather than on it, chosen or not. */
+    @Test
+    fun schemeChip_chosenOrNot_ringsOutsideItsEdgeAllTheWayRound() {
+        for (selected in listOf(false, true)) {
+            withClue("selected $selected") {
+                forEachWidgetSkin { _, skin ->
+                    val capture = tabOntoRing(skin, density = 2f) { RingChip(selected) }
+                    capture.shouldShowRing()
+                    capture.shouldRingEverySide()
+                    capture.shouldRingAllTheWayRound()
                 }
             }
         }
@@ -160,6 +223,9 @@ class WidgetFocusRingTest {
 
 private const val RingSwatchName = "primary, #6750A4, tone 40"
 
+/** How far past a copy button its ring and the blend at its edge reach. */
+private val CopyRingReach: Dp = FocusRingOffset + FocusRingWidth + 1.dp
+
 /** How long a run of code has to be for the drag test to select a good part of it. */
 private const val RunLength = 12
 
@@ -174,6 +240,26 @@ private fun RingSwatch() {
         onCopy = {},
         onClick = {},
         modifier = Modifier.width(200.dp),
+    )
+}
+
+/** A picker track for [channel] at the ring document's seed. */
+@Composable
+private fun RingTrack(channel: HctChannel) {
+    val report = rememberUpdatedState<(Argb, EditPhase) -> Unit> { _, _ -> }
+    val picker = remember { PickerState(Argb(0x6750A4), report) }
+    GamutTrack(picker, channel, channel.name, Modifier.width(320.dp))
+}
+
+@Composable
+private fun RingChip(selected: Boolean) {
+    SchemeChip(
+        primary = Color(0xFF6750A4),
+        secondaryContainer = Color(0xFFE8DEF8),
+        tertiaryContainer = Color(0xFFFFD8E4),
+        selected = selected,
+        onClick = {},
+        label = "Tonal spot",
     )
 }
 

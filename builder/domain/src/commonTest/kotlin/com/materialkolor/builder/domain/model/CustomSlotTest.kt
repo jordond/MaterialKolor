@@ -124,7 +124,7 @@ class CustomSlotTest {
         CustomSlot.BorderSoft to SlotResolution.FromRamp(TonalRamp.NeutralVariant, light = 85, dark = 32),
         CustomSlot.BorderStrong to SlotResolution.FromRamp(TonalRamp.NeutralVariant, light = 55, dark = 65),
         CustomSlot.Scrim to SlotResolution.FromRole(Role.Scrim),
-        CustomSlot.FocusRing to SlotResolution.FromRamp(TonalRamp.Primary, light = 60, dark = 60),
+        CustomSlot.FocusRing to SlotResolution.FromRamp(TonalRamp.Primary, light = 50, dark = 60),
         CustomSlot.Shadow to SlotResolution.FromRamp(TonalRamp.Neutral, light = 0, dark = 0),
     )
 

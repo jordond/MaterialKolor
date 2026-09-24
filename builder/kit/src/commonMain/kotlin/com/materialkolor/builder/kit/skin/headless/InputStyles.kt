@@ -279,6 +279,9 @@ internal object CustomInputStyles {
  * @property[padding] Between the edge and the text.
  * @property[gap] Between the label, the box and the message under it.
  * @property[cursor] The caret.
+ * @property[focusRing] The ring drawn round the box under keyboard focus, beside the focused edge,
+ * for a skin whose edge runs along one side only. Null where the focused edge goes all the way round
+ * and is the ring itself.
  */
 @Immutable
 internal class FieldStyle(
@@ -293,6 +296,7 @@ internal class FieldStyle(
     val padding: PaddingValues,
     val gap: Dp,
     val cursor: Color,
+    val focusRing: Color? = null,
 )
 
 /**

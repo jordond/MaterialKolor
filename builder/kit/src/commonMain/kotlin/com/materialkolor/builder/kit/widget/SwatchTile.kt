@@ -4,9 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +35,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.engine.audit.ContrastBadge
 import com.materialkolor.builder.kit.control.BuilderIcon
@@ -55,7 +55,10 @@ import com.materialkolor.builder.kit.generated.resources.widget_copy
 import com.materialkolor.builder.kit.generated.resources.widget_pinned
 import com.materialkolor.builder.kit.generated.resources.widget_tone
 import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.skin.headless.FocusRingOffset
+import com.materialkolor.builder.kit.skin.headless.FocusRingWidth
 import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
@@ -71,6 +74,12 @@ internal val WidgetFocusWidth: Dp = 2.dp
 
 /** Tags the pin badge on a pinned swatch, so a test can find it. */
 internal const val SwatchPinTag: String = "swatch-pin"
+
+/** Tags the room a swatch keeps for its tone and contrast lines, so a test can find it. */
+internal const val SwatchReadoutTag: String = "swatch-readout"
+
+/** Tags the panel band behind a copy button, so a test can find it. */
+internal const val CopyBandTag: String = "copy-band"
 
 private const val AAA_TEXT = 7.0
 private const val AA_TEXT = 4.5
@@ -133,6 +142,9 @@ public fun SwatchTile(
     val hovered by hoverSource.collectIsHoveredAsState()
     var focusWithin by remember { mutableStateOf(false) }
     val showCopy = layout.coarsePointer || focusWithin || hovered
+    // The copy band stands in from the corner by the extra small step, and the lines keep the same
+    // step clear of it, so no skin's band covers them whether it shows or not.
+    val copyReserve = copyBandSide(layout) + tokens.spacing.extraSmall * 2
 
     Box(
         modifier = modifier
@@ -189,13 +201,14 @@ public fun SwatchTile(
             }
             Column(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .heightIn(min = layout.primaryTouchTarget)
                     .padding(
                         start = tokens.spacing.medium,
                         top = tokens.spacing.small,
                         bottom = tokens.spacing.small,
-                        end = layout.primaryTouchTarget + tokens.spacing.small,
-                    ),
+                        end = copyReserve,
+                    ).testTag(SwatchReadoutTag),
                 verticalArrangement = Arrangement.spacedBy(tokens.spacing.extraSmall),
             ) {
                 BuilderText(toneText, style = BuilderTextStyle.Value, emphasis = Emphasis.Secondary)
@@ -203,12 +216,59 @@ public fun SwatchTile(
             }
         }
         if (showCopy) {
-            BuilderTooltip(
-                text = copyLabel,
+            CopyButton(
+                label = copyLabel,
+                onCopy = onCopy,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(tokens.spacing.extraSmall),
-            ) {
-                BuilderIconButton(onClick = onCopy, icon = IconId.Copy, contentDescription = copyLabel)
-            }
+            )
+        }
+    }
+}
+
+/**
+ * How far the panel band behind a copy button reaches past the largest icon button. It covers the
+ * gap the focus ring stands off by, the ring and one ring's width more.
+ */
+private val CopyBandWidth: Dp = FocusRingOffset + FocusRingWidth * 2
+
+/** The largest icon button a skin draws, Material's and Custom's. The copy band is cut to hold it. */
+private val LargestIconButton: Dp = 40.dp
+
+/**
+ * The side of the band behind a copy button at [layout]. It holds the largest icon button a skin
+ * draws with [CopyBandWidth] all round, and the touch target, which sits inside that on every layout
+ * so far. The band is the same size in every skin, so a widget can keep room for it before it shows.
+ */
+internal fun copyBandSide(layout: LayoutInfo): Dp =
+    max(LargestIconButton + CopyBandWidth * 2, layout.primaryTouchTarget)
+
+/**
+ * A widget's copy button with its tooltip, on a band of the panel color. The band is always there,
+ * so the button's focus ring lands on the panel whatever the button sits over, a swatch's color or
+ * the code ground, and stands 3 to 1 from it all the way round (AR-01, S5 rerun). It is
+ * [copyBandSide] square in every skin, so a widget can keep that much room free of text.
+ *
+ * @param[label] The button's name and its tooltip.
+ * @param[onCopy] Called when it is pressed. The caller does the copying.
+ * @param[modifier] Applied to the band.
+ */
+@Composable
+internal fun CopyButton(
+    label: String,
+    onCopy: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val tokens = LocalBuilderTokens.current
+    val side = copyBandSide(LocalLayout.current)
+    Box(
+        modifier = modifier
+            .testTag(CopyBandTag)
+            .background(tokens.panel, RoundedCornerShape(tokens.radius.small))
+            .sizeIn(minWidth = side, minHeight = side),
+        contentAlignment = Alignment.Center,
+    ) {
+        BuilderTooltip(text = label) {
+            BuilderIconButton(onClick = onCopy, icon = IconId.Copy, contentDescription = label)
         }
     }
 }
@@ -281,22 +341,10 @@ internal fun oneDecimal(value: Double): String {
 internal fun Color.hex(): String = Argb(toArgb()).toHex()
 
 /**
- * The outline a pressable widget draws in place of a skin's indication. The hairline turns strong
- * under a mouse and gives way to a line in the focus color under keyboard focus. A widget ringed
- * outside its edge by [controlRing] keeps [widgetHairline] instead.
+ * The hairline a pressable widget draws in place of a skin's indication, strong while a mouse is
+ * over it. It stays under keyboard focus, and [controlRing] rings the widget outside it, so the ring
+ * never lies on the widget's own edge (S5 rerun).
  */
-@Composable
-internal fun Modifier.widgetOutline(
-    interactionSource: InteractionSource,
-    shape: Shape,
-    hovered: Boolean,
-): Modifier {
-    val focused by interactionSource.collectIsFocusedAsState()
-    if (!focused) return widgetHairline(shape, hovered)
-    return border(WidgetFocusWidth, LocalBuilderTokens.current.focus, shape)
-}
-
-/** The hairline around a pressable widget, strong while a mouse is over it. */
 @Composable
 internal fun Modifier.widgetHairline(
     shape: Shape,

@@ -115,7 +115,7 @@ fun rememberThemeColors(
             borderSoft = scheme.neutralVariantPalette.toneColor(if (isDark) 32 else 85),
             borderStrong = scheme.neutralVariantPalette.toneColor(if (isDark) 65 else 55),
             scrim = kolors.scrim(),
-            focusRing = scheme.primaryPalette.toneColor(60),
+            focusRing = scheme.primaryPalette.toneColor(if (isDark) 60 else 50),
             shadow = scheme.neutralPalette.toneColor(0),
             brand = brandPalette.colorFamily(
                 tone = if (isDark) 80 else 40,
