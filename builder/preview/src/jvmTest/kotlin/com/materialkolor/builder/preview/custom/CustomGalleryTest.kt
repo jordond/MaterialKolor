@@ -31,6 +31,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
@@ -205,8 +206,9 @@ class CustomGalleryTest {
     }
 
     @Test
-    fun gallery_everyControlPressedRightClickedAndLongPressed_opensNoPopupOrWindow() =
-        runComposeUiTest {
+    fun gallery_everyControlPressedHoveredFocusedRightClickedAndLongPressed_opensNoPopupOrWindow() =
+        runDesktopComposeUiTest(1280, 8000) {
+            // A window the size of the whole gallery, so the pointer reaches every card and not just the first screen.
             setContent { GalleryHarness(LightSpec, DemoAppState(), GalleryWhole) }
             waitForIdle()
 
@@ -224,6 +226,28 @@ class CustomGalleryTest {
             }
             waitForIdle()
             onAllNodes(isRoot()).assertCountEquals(1)
+
+            // Hover and focus are how a tooltip opens.
+            val interactive = onAllNodes(GalleryInteractive, useUnmergedTree = true)
+            for (index in interactive.fetchSemanticsNodes().indices) {
+                withClue("Hovered control $index") {
+                    interactive[index].performMouseInput { moveTo(center) }
+                    waitForIdle()
+                    onAllNodes(isRoot()).assertCountEquals(1)
+                }
+            }
+            // The pointer leaves, so the presses below start from a fresh pointer.
+            onRoot().performMouseInput { exit() }
+            val focusable = onAllNodes(GalleryFocusable, useUnmergedTree = true)
+            val focusables = focusable.fetchSemanticsNodes().size
+            focusables shouldBeGreaterThan 0
+            for (index in 0 until focusables) {
+                withClue("Focused control $index") {
+                    focusable[index].requestFocus()
+                    waitForIdle()
+                    onAllNodes(isRoot()).assertCountEquals(1)
+                }
+            }
 
             // A word to select, so a text field has a context menu and a text toolbar to open.
             val fields = onAllNodes(hasSetTextAction())
@@ -299,6 +323,9 @@ class CustomGalleryTest {
 /** Anything a user can press, type into or drag. */
 private val GalleryInteractive: SemanticsMatcher =
     SemanticsMatcher("is interactive") { node -> node.galleryInteractive() }
+
+/** Anything that takes keyboard focus. */
+private val GalleryFocusable: SemanticsMatcher = SemanticsMatcher.keyIsDefined(SemanticsActions.RequestFocus)
 
 private fun SemanticsNode.galleryInteractive(): Boolean =
     SemanticsActions.OnClick in config || SemanticsActions.SetText in config || SemanticsActions.SetProgress in config

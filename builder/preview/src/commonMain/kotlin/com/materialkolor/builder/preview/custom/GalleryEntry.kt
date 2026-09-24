@@ -164,7 +164,7 @@ private fun CustomCardFrame(
 internal fun Cards() {
     EnabledPair { enabled ->
         BuilderCard(
-            modifier = Modifier.weight(1f).previewRoles(CustomComponent.Card),
+            modifier = Modifier.weight(1f).previewRoles(CustomComponent.SampleCard),
             onClick = {},
             enabled = enabled,
         ) {

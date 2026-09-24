@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -15,7 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.kit.control.BuilderButton
@@ -35,6 +36,7 @@ import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.BuilderToggleButton
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.choice
@@ -63,7 +65,7 @@ internal enum class CustomComponent(
     /** A danger action, outlined and labelled in the error ink with no fill. */
     DangerAction(CustomSlot.Error),
 
-    /** Raised and outlined while off, filled with the accent while on. Chips and toggles alike. */
+    /** A toggle button, raised and outlined while off and filled with the accent while on. */
     Selectable(
         CustomSlot.SurfaceRaised,
         CustomSlot.TextStrong,
@@ -71,6 +73,9 @@ internal enum class CustomComponent(
         CustomSlot.Primary,
         CustomSlot.OnPrimary,
     ),
+
+    /** A choice or filter chip, outlined with no fill while off and filled with the accent while on. */
+    Chip(CustomSlot.TextStrong, CustomSlot.BorderStrong, CustomSlot.Primary, CustomSlot.OnPrimary),
     TextField(
         CustomSlot.SurfaceRaised,
         CustomSlot.TextStrong,
@@ -94,6 +99,9 @@ internal enum class CustomComponent(
     /** The raised panel a menu, a select's list, a dialog or a sheet opens on. */
     Overlay(CustomSlot.SurfaceRaised, CustomSlot.TextStrong, CustomSlot.TextMuted),
     Card(CustomSlot.Surface, CustomSlot.TextStrong, CustomSlot.BorderSoft),
+
+    /** A sample card, its secondary line in the muted text colour. */
+    SampleCard(CustomSlot.Surface, CustomSlot.TextStrong, CustomSlot.BorderSoft, CustomSlot.TextMuted),
     ListRow(CustomSlot.TextStrong, CustomSlot.TextMuted, CustomSlot.SurfaceRaised, CustomSlot.BorderStrong),
     Divider(CustomSlot.BorderSoft),
     Disclosure(CustomSlot.SurfaceRaised, CustomSlot.TextStrong, CustomSlot.TextMuted),
@@ -127,6 +135,15 @@ internal val Emphasis.component: CustomComponent
         Emphasis.Danger -> CustomComponent.DangerAction
     }
 
+/** The action an icon button of this emphasis stands for, and its icon. */
+private val Emphasis.iconAction: Pair<String, IconId>
+    get() = when (this) {
+        Emphasis.Primary -> "Add" to IconId.Plus
+        Emphasis.Secondary -> "Copy" to IconId.Copy
+        Emphasis.Subtle -> "More" to IconId.More
+        Emphasis.Danger -> "Delete" to IconId.Trash
+    }
+
 /** Enabled first, then disabled, the order every card shows its copies in. */
 internal val EnabledThenDisabled: List<Boolean> = listOf(true, false)
 
@@ -134,12 +151,6 @@ private const val SliderStops = 11
 private val Formats = listOf("Hex", "RGB", "HSL")
 private val Styles = listOf("Tonal", "Vivid", "Muted")
 private val Contrasts = listOf("Standard", "Medium", "High")
-private val IconActions = listOf(
-    "Add" to IconId.Plus,
-    "Copy" to IconId.Copy,
-    "More" to IconId.More,
-    "Delete" to IconId.Trash,
-)
 private val SortOrders = listOf(
     "Newest first" to IconId.ChevronDown,
     "By name" to IconId.Search,
@@ -171,11 +182,12 @@ internal fun IconButtons() {
     GalleryColumn {
         for (enabled in EnabledThenDisabled) {
             Row(horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.small)) {
-                for ((emphasis, action) in Emphasis.entries.zip(IconActions)) {
+                for (emphasis in Emphasis.entries) {
+                    val (action, icon) = emphasis.iconAction
                     BuilderIconButton(
                         onClick = {},
-                        icon = action.second,
-                        contentDescription = action.first,
+                        icon = icon,
+                        contentDescription = action,
                         modifier = Modifier.previewRoles(emphasis.component),
                         emphasis = emphasis,
                         enabled = enabled,
@@ -294,7 +306,7 @@ internal fun ChoiceChips(state: DemoAppState) {
                 selected = Styles[picked],
                 onSelect = { style -> state.choose(StyleKey, Styles.size, Styles.indexOf(style)) },
                 label = "Style",
-                modifier = Modifier.previewRoles(CustomComponent.Selectable),
+                modifier = Modifier.previewRoles(CustomComponent.Chip),
                 enabled = enabled,
             ) { style -> style }
         }
@@ -310,7 +322,7 @@ internal fun FilterChips(state: DemoAppState) {
                 selected = state.isOn(key),
                 onSelectedChange = { on -> state.setOn(key, on) },
                 label = label,
-                modifier = Modifier.previewRoles(CustomComponent.Selectable),
+                modifier = Modifier.previewRoles(CustomComponent.Chip),
                 enabled = index != 2,
             )
         }
@@ -332,7 +344,8 @@ internal fun InlineSelect(state: DemoAppState) {
                 .fillMaxWidth()
                 .previewRoles(CustomComponent.SelectField)
                 .background(tokens.panelRaised, field)
-                .border(Dp.Hairline, tokens.border, field)
+                .heightIn(min = LocalLayout.current.minTouchTarget)
+                .border(1.dp, tokens.border, field)
                 .padding(horizontal = tokens.spacing.medium, vertical = tokens.spacing.extraSmall),
             verticalAlignment = Alignment.CenterVertically,
         ) {
