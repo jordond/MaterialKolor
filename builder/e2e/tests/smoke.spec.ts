@@ -1,0 +1,109 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { expect, test, type Page } from '@playwright/test';
+import { site } from './builder';
+
+// The production site as the host serves it. It boots from the root and from a theme link, takes
+// its scripts and wasm from /assets/ whatever path it was opened on, and logs no errors doing it.
+
+/**
+ * Console errors that come from upstream code and say nothing about the site. Skia's buffer copy in
+ * Compose 1.12.1 still reads `wasmExports.memory`, which Kotlin 2.4 reports as deprecated.
+ */
+const UPSTREAM_ERRORS = [/^Accessing `memory` via `wasmExports` is deprecated/];
+
+for (const route of ['/', '/t/AdllOwAAAAAT']) {
+  test(`the site boots from ${route}`, async ({ page }) => {
+    const errors = collectErrors(page);
+    const responses = collectResponses(page);
+
+    await page.goto(site(route));
+    await expect(page.locator('#cmp_a11y_root > *').first()).toBeAttached({ timeout: 30_000 });
+    await page.waitForLoadState('networkidle');
+
+    const origin = new URL(site('/')).origin;
+    const own = responses.filter((response) => new URL(response.url).origin === origin);
+    expect(own.filter((response) => response.status !== 200)).toEqual([]);
+    const loaded = own.map((response) => new URL(response.url).pathname);
+    expect(loaded[0]).toBe(route);
+    expect(loaded.filter((pathname) => /\.(js|wasm)$/.test(pathname) && !pathname.startsWith('/assets/'))).toEqual([]);
+    for (const asset of [/^builder\.[0-9a-f]{16}\.js$/, /^skiko\.[0-9a-f]{16}\.wasm$/, /^MaterialKolor-builder-web\.[0-9a-f]{16}\.wasm$/]) {
+      expect(loaded.some((pathname) => pathname.startsWith('/assets/') && asset.test(pathname.slice('/assets/'.length)))).toBe(true);
+    }
+    expect(errors.filter((error) => !UPSTREAM_ERRORS.some((known) => known.test(error)))).toEqual([]);
+  });
+}
+
+test('everything the site loads at boot is counted as first visit by the budget', async ({ page }) => {
+  const responses = collectResponses(page);
+  await page.goto(site('/'));
+  await expect(page.locator('#cmp_a11y_root > *').first()).toBeAttached({ timeout: 30_000 });
+  await page.waitForLoadState('networkidle');
+
+  const counted = firstVisitFiles();
+  const origin = new URL(site('/')).origin;
+  const files = responses
+    .map((response) => new URL(response.url))
+    .filter((url) => url.origin === origin)
+    .map((url) => (url.pathname === '/' ? 'index.html' : url.pathname.slice(1)));
+  expect(files.filter((file) => !counted(file))).toEqual([]);
+});
+
+test('the page lists the hashed assets it boots with', async ({ page, request }) => {
+  await page.goto(site('/'));
+  const assets = JSON.parse((await page.locator('#mk-assets').textContent()) ?? '{}');
+  expect(assets.glue).toMatch(/^\/assets\/builder\.[0-9a-f]{16}\.js$/);
+  expect(assets.wasm).toHaveLength(2);
+  expect(assets.fonts.length).toBeGreaterThan(0);
+  for (const pathname of [assets.glue, ...assets.wasm, ...assets.fonts]) {
+    expect((await request.get(site(pathname))).status(), pathname).toBe(200);
+  }
+});
+
+test('the site server answers a malformed path with 400 and keeps serving', async ({ request }) => {
+  expect((await request.get(site('/%E0%A4%A'))).status()).toBe(400);
+  expect((await request.get(site('/'))).status()).toBe(200);
+});
+
+test('an asset that is not there is a 404, not the app', async ({ request }) => {
+  expect((await request.get(site('/t/builder.js'))).status()).toBe(404);
+  expect((await request.get(site('/assets/missing.wasm'))).status()).toBe(404);
+});
+
+function collectErrors(page: Page): string[] {
+  const errors: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(message.text());
+  });
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('requestfailed', (request) => errors.push(`${request.url()} ${request.failure()?.errorText}`));
+  return errors;
+}
+
+function collectResponses(page: Page): { url: string; status: number }[] {
+  const responses: { url: string; status: number }[] = [];
+  page.on('response', (response) => responses.push({ url: response.url(), status: response.status() }));
+  return responses;
+}
+
+/** Whether `budget.json` counts a site file as part of first visit, read the way `check-budget.mjs` reads it. */
+function firstVisitFiles(): (file: string) => boolean {
+  const budget = JSON.parse(readFileSync(path.resolve(__dirname, '../../web/budget.json'), 'utf8'));
+  const counted = (budget.firstVisit.files as string[]).map(globToRegExp);
+  const lazy = (budget.firstVisit.exclude as string[]).map(globToRegExp);
+  return (file) => counted.some((pattern) => pattern.test(file)) && !lazy.some((pattern) => pattern.test(file));
+}
+
+/** `*` matches within one path segment and `**` across segments, as in `check-budget.mjs`. */
+function globToRegExp(glob: string): RegExp {
+  const source = glob
+    .split(/(\*\*\/|\*\*|\*)/)
+    .map((part) => {
+      if (part === '**/') return '(?:.*/)?';
+      if (part === '**') return '.*';
+      if (part === '*') return '[^/]*';
+      return part.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+    })
+    .join('');
+  return new RegExp(`^${source}$`);
+}
