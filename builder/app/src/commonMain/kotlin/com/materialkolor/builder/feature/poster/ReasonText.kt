@@ -37,6 +37,10 @@ internal fun reasonText(reason: Reason): StringResource =
 internal val ControlState.usable: Boolean
     get() = this is ControlState.Enabled
 
+/** Whether the control has a place on the poster at all. A hidden one composes nothing. */
+internal val ControlState.shown: Boolean
+    get() = this !is ControlState.Hidden
+
 /**
  * What the poster says about the control, the note beside a working one or why it is off, or
  * null when there is nothing to say.

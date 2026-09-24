@@ -34,6 +34,7 @@ import com.composeunstyled.theme.ThemeToken
 import com.composeunstyled.theme.buildThemeV2
 import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.domain.model.MotionSchemeChoice
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.RoleEntry
@@ -89,7 +90,7 @@ public fun PreviewPane(
     ) {
         PaneLocals(ink) {
             when (skin.library) {
-                Library.Material3 -> MaterialPane(roles, skin.expressive, content)
+                Library.Material3 -> MaterialPane(roles, skin.expressive, spec.result.document.motionScheme, content)
                 Library.Unstyled -> UnstyledPane(roles, spec.isDark, ink, content)
                 Library.Fluent -> content() // stub, the Fluent theme lands with B-405
                 Library.Custom -> CompositionLocalProvider(
@@ -190,6 +191,7 @@ private fun PaneLocals(
 private fun MaterialPane(
     roles: Map<Role, RoleEntry>,
     expressive: Boolean,
+    motion: MotionSchemeChoice,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = remember(roles) { roles.toColorScheme() }
@@ -198,7 +200,13 @@ private fun MaterialPane(
     if (expressive) {
         MaterialExpressiveTheme(
             colorScheme = colorScheme,
-            motionScheme = MotionScheme.expressive(),
+            // b-306
+            // The document's motion scheme, so the preview moves the way the export will.
+            motionScheme = if (motion == MotionSchemeChoice.Standard) {
+                MotionScheme.standard()
+            } else {
+                MotionScheme.expressive()
+            },
             shapes = shapes,
             typography = typography,
             content = content,
