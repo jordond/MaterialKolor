@@ -30,7 +30,6 @@ import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.audit.ContrastPair
 import com.materialkolor.builder.domain.audit.PairKind
 import com.materialkolor.builder.domain.capability.Control
-import com.materialkolor.builder.domain.capability.ControlState
 import com.materialkolor.builder.domain.model.AccentPart
 import com.materialkolor.builder.domain.model.AccentSlot
 import com.materialkolor.builder.domain.model.KeyColor
@@ -91,7 +90,7 @@ internal fun RolesTab(
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
-    val pinsEnabled = remember(result) { capabilitiesOf(result.document)[Control.RolePins] is ControlState.Enabled }
+    val pins = remember(result) { capabilitiesOf(result.document)[Control.RolePins] }
     DataColumns(mode, filter, modifier, tabStop = false) { isDark ->
         val groups = remember(result, isDark) { swatchGroups(result, isDark) }
         for (group in groups) {
@@ -103,7 +102,7 @@ internal fun RolesTab(
                 )
                 SwatchGrid {
                     for (swatch in group.swatches) {
-                        key(swatch.target) { RolePopover(swatch, result.document, pinsEnabled, dispatcher) }
+                        key(swatch.target) { RolePopover(swatch, pins, dispatcher) }
                     }
                 }
             }
@@ -167,6 +166,7 @@ private fun roleSwatch(
         under != null -> result.roles[under, isDark].argb.toColor()
         else -> inkFor(entry.tone)
     }
+    val pin = result.document.pins[role]
     return RoleSwatch(
         name = ColorRef.OfRole(role).readoutName(result.document),
         argb = entry.argb,
@@ -174,6 +174,7 @@ private fun roleSwatch(
         tone = entry.tone,
         contrast = onPair?.let { on -> result.ratio(ColorRef.OfRole(on), ColorRef.OfRole(role), isDark) },
         target = RampTarget.OfRole(role, isDark),
+        pinned = (if (isDark) pin?.dark else pin?.light) != null,
     )
 }
 
@@ -186,7 +187,7 @@ private fun keyColorSwatch(
     val argb = result.ramps[palette, isDark].keyColor
     val tone = HctReadout.of(argb).tone
     return RoleSwatch(
-        name = palette.name.replaceFirstChar { char -> char.lowercaseChar() } + "PaletteKeyColor",
+        name = palette.swatchName,
         argb = argb,
         ink = inkFor(tone),
         tone = tone,
@@ -221,6 +222,10 @@ private fun ThemeResult.ratio(
     background: ColorRef,
     isDark: Boolean,
 ): Double = rate(ContrastPair(foreground, background, PairKind.Text), isDark).ratio
+
+/** What the key color of this palette is called in code, as in primaryPaletteKeyColor. */
+internal val KeyColor.swatchName: String
+    get() = name.replaceFirstChar { char -> char.lowercaseChar() } + "PaletteKeyColor"
 
 /** Black on a light color, white on a dark one. */
 private fun inkFor(tone: Double): Color = if (tone >= BLACK_INK_TONE) Color.Black else Color.White

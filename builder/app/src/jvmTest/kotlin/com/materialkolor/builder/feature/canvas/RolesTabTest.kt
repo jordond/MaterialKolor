@@ -1,12 +1,22 @@
 package com.materialkolor.builder.feature.canvas
 
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
@@ -24,6 +34,7 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.color.HctReadout
 import com.materialkolor.builder.engine.resolve.ThemeResult
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.comparables.shouldBeLessThan
 import io.kotest.matchers.shouldBe
@@ -101,6 +112,44 @@ class RolesTabTest {
         }
 
     @Test
+    fun pinnedRole_readsPinnedInItsModeOnly() =
+        runDesktopComposeUiTest(width = TABS_WIDE, height = TABS_HEIGHT) {
+            val result = resolvedFor(material.copy(pins = mapOf(Role.Primary to RolePin(light = Argb(0x777777)))))
+            showRoles(result, PreviewMode.Split)
+
+            onNodeWithContentDescription(tileName(result, Role.Primary, isDark = false))
+                .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "pinned"))
+            onNodeWithContentDescription(tileName(result, Role.Primary, isDark = true))
+                .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription))
+        }
+
+    @Test
+    fun columns_sitOnThePanelSurface() =
+        runDesktopComposeUiTest(width = TABS_WIDE, height = TABS_HEIGHT) {
+            val result = resolvedFor(material)
+            var panel = Color.Unspecified
+            var canvas = Color.Unspecified
+            setContent {
+                DataTabTheme(result) {
+                    panel = LocalBuilderTokens.current.panel
+                    canvas = LocalBuilderTokens.current.canvas
+                    RolesTab(result, PreviewMode.Split, filter = null, dispatcher = TabActions().dispatcher)
+                }
+            }
+            waitForIdle()
+
+            panel.toArgb() shouldNotBe canvas.toArgb()
+            val panels = onAllNodesWithTag(DATA_PANEL_TAG)
+            panels.assertCountEquals(2)
+            val frame = onRoot().captureToImage().toPixelMap()
+            for (node in panels.fetchSemanticsNodes()) {
+                val box = node.boundsInRoot
+                // Past the border and the corner, before the first heading.
+                frame[box.center.x.toInt(), box.top.toInt() + PANEL_PROBE_Y].toArgb() shouldBe panel.toArgb()
+            }
+        }
+
+    @Test
     fun groups_listTheRolesThenKeyColorsThenAccents() =
         runDesktopComposeUiTest(width = TABS_WIDE, height = TABS_HEIGHT) {
             val result = resolvedFor(material.copy(accents = listOf(Accent(name = "Brand", seed = Argb(0xB3261E)))))
@@ -155,6 +204,9 @@ class RolesTabTest {
         return Rect(node.positionInRoot, node.size.toSize())
     }
 }
+
+/** A row of a data panel inside its padding and above its content, where only the panel shows. */
+private const val PANEL_PROBE_Y = 8
 
 /** What the swatch of [role] reads out as in the mode [isDark] picks. */
 internal fun tileName(

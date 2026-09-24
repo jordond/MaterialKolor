@@ -16,12 +16,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import com.materialkolor.builder.domain.audit.ColorRef
+import com.materialkolor.builder.domain.audit.ContrastPair
 import com.materialkolor.builder.domain.audit.FluentShade
+import com.materialkolor.builder.domain.audit.PairKind
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.audit.AuditRow
 import com.materialkolor.builder.engine.audit.ContrastAudit
 import com.materialkolor.builder.engine.audit.ContrastBadge
+import com.materialkolor.builder.engine.audit.rate
 import com.materialkolor.builder.engine.color.HctReadout
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.ThemeResult
@@ -52,7 +55,8 @@ import kotlin.math.roundToInt
 
 /**
  * The Inspect card for [target]. It names the mode, then each color the element declared with its
- * hex and tone, then the ratio and badge of the first pair the audit rates. Pinned, it adds the
+ * hex and tone, then the ratio and badge of the first pair the audit rates, or of its first two
+ * colors when the audit rates none. Pinned, it adds the
  * actions for the first color.
  */
 @Composable
@@ -66,7 +70,11 @@ internal fun InspectCard(
     val refs = target.entry.roles
     val isDark = target.isDark
     val colors = remember(result, refs, isDark) { refs.map { ref -> result.inspectColor(ref, isDark) } }
-    val rated = remember(result, refs, isDark) { result.audit.firstRated(refs, isDark) }
+    // b-308b
+    val rated = remember(result, refs, isDark) {
+        result.audit.firstRated(refs, isDark)
+            ?: result.rateFirstTwo(refs, isDark)
+    }
     BuilderCard(modifier.testTag(INSPECT_CARD_TAG)) {
         BuilderText(
             text = stringResource(if (isDark) Res.string.inspect_mode_dark else Res.string.inspect_mode_light),
@@ -237,6 +245,21 @@ internal fun ContrastAudit.firstRated(
         }
     }
     return null
+}
+
+// b-308b
+
+/**
+ * The second of [refs] as text over the first, rated in the mode [isDark] picks, or null when there
+ * are fewer than two. It stands in when the audit rates none of the pairs, such as a role pair on the
+ * Custom target, so the card still shows a ratio.
+ */
+internal fun ThemeResult.rateFirstTwo(
+    refs: List<ColorRef>,
+    isDark: Boolean,
+): AuditRow? {
+    if (refs.size < 2) return null
+    return rate(ContrastPair(foreground = refs[1], background = refs[0], kind = PairKind.Text), isDark)
 }
 
 /** A ratio to one decimal, cut rather than rounded so a pair just under a line never reads as on it. */

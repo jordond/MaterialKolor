@@ -30,6 +30,30 @@
     <string name="tabs_failures_only">Failures only</string>
     <!-- The Contrast tab note when no visible pair fails. -->
     <string name="tabs_all_pass">Every pair passes AA at this contrast level</string>
+    <!-- The Contrast tab note under a mode's heading when Failures only is on and nothing in that mode fails. -->
+    <string name="tabs_mode_no_failures">Nothing fails in this mode.</string>
+    <!-- The Palettes tab heading over the ramps that are the same in both modes. -->
+    <string name="tabs_same_in_both">Same in light and dark</string>
+    <!-- The Palettes tab heading over the primary palette. -->
+    <string name="tabs_palette_primary">Primary</string>
+    <!-- The Palettes tab heading over the secondary palette. -->
+    <string name="tabs_palette_secondary">Secondary</string>
+    <!-- The Palettes tab heading over the tertiary palette. -->
+    <string name="tabs_palette_tertiary">Tertiary</string>
+    <!-- The Palettes tab heading over the neutral palette. -->
+    <string name="tabs_palette_neutral">Neutral</string>
+    <!-- The Palettes tab heading over the neutral variant palette. -->
+    <string name="tabs_palette_neutral_variant">Neutral variant</string>
+    <!-- The Palettes tab heading over the error palette. -->
+    <string name="tabs_palette_error">Error</string>
+    <!-- A marker on a ramp shared by both modes, for the light scheme. %1$s is the role, such as primary. -->
+    <string name="tabs_mark_light">%1$s light</string>
+    <!-- A marker on a ramp shared by both modes, for the dark scheme. %1$s is the role, such as primary. -->
+    <string name="tabs_mark_dark">%1$s dark</string>
+    <!-- Names what was copied in the copy toast. %1$s is the ramp, such as Primary, and %2$d the tone of the stop. -->
+    <string name="tabs_copied_tone">%1$s tone %2$d</string>
+    <!-- The label on the ramp Show on ramp picked out. %1$s is the role or accent color, such as primary. -->
+    <string name="tabs_ramp_shown">%1$s sits on this ramp</string>
     <!-- A Contrast tab row. %1$s is the color on top, %2$s the color under it, such as onPrimary on primary. -->
     <string name="tabs_pair">%1$s on %2$s</string>
     <!-- A contrast ratio. %1$s is the ratio to one decimal. -->

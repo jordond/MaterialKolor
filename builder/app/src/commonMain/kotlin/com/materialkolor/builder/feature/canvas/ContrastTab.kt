@@ -50,6 +50,7 @@ import com.materialkolor.builder.generated.resources.contrast_badge_aaa
 import com.materialkolor.builder.generated.resources.contrast_badge_fail
 import com.materialkolor.builder.generated.resources.tabs_all_pass
 import com.materialkolor.builder.generated.resources.tabs_failures_only
+import com.materialkolor.builder.generated.resources.tabs_mode_no_failures
 import com.materialkolor.builder.generated.resources.tabs_pair
 import com.materialkolor.builder.generated.resources.tabs_ratio
 import com.materialkolor.builder.kit.control.BadgeStatus
@@ -71,8 +72,9 @@ internal const val CONTRAST_ROW_TAG: String = "contrast-row"
  * shows (F-24).
  *
  * A row shows both colors, the pair's names, its WCAG 2.2 ratio and its badge, and says why a
- * failing pair fails and what to try. Failures only hides the pairs that pass. While nothing
- * visible fails the tab says every pair passes, and with the filter on that note is all it shows.
+ * failing pair fails and what to try. Failures only hides the pairs that pass, and a mode left
+ * with none says so under its name. While nothing visible fails the tab says every pair passes, and
+ * with the filter on that note is all it shows.
  *
  * @param[result] The resolved theme the canvas shows.
  * @param[mode] Which modes to show, laid out like the Roles tab.
@@ -106,9 +108,11 @@ internal fun ContrastTab(
         }
         if (!(allPass && failuresOnly)) {
             DataColumns(mode, filter, Modifier.weight(1f)) { isDark ->
-                for (row in rows) {
-                    if (row.isDark == isDark && (!failuresOnly || !row.passes)) PairRow(row, result.document)
+                val shown = rows.filter { row -> row.isDark == isDark && (!failuresOnly || !row.passes) }
+                if (failuresOnly && shown.isEmpty()) {
+                    BuilderText(stringResource(Res.string.tabs_mode_no_failures), emphasis = Emphasis.Secondary)
                 }
+                for (row in shown) PairRow(row, result.document)
             }
         }
     }

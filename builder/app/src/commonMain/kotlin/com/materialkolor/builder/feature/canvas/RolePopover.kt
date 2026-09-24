@@ -9,13 +9,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.materialkolor.builder.domain.capability.ControlState
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.edit.PinMode
-import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.mapping.toColor
+import com.materialkolor.builder.feature.poster.explanation
 import com.materialkolor.builder.feature.poster.kotlinLiteralOf
+import com.materialkolor.builder.feature.poster.reasonText
+import com.materialkolor.builder.feature.poster.usable
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.tabs_copied_hex
@@ -41,6 +44,7 @@ import org.jetbrains.compose.resources.stringResource
  * @property[tone] The tone [argb] resolved to.
  * @property[contrast] The ratio of its on-pair over it, or null when it has none.
  * @property[target] Where Show on ramp takes it, which also says what kind of swatch it is.
+ * @property[pinned] Whether it is a role the document pins in this mode.
  */
 @Immutable
 internal class RoleSwatch(
@@ -50,6 +54,7 @@ internal class RoleSwatch(
     val tone: Double,
     val contrast: Double?,
     val target: RampTarget,
+    val pinned: Boolean = false,
 )
 
 /**
@@ -57,19 +62,18 @@ internal class RoleSwatch(
  *
  * The menu copies the hex or the Kotlin literal and shows the swatch on its ramp. A role also gets
  * Pin this role, pinning the role in the swatch's mode to the color it has now, or Unpin this role
- * when that mode is already pinned. It stays disabled while the target has no role pins.
+ * when that mode is already pinned. It stays disabled while the target has no role pins, with the
+ * reason under it.
  *
  * @param[swatch] The swatch.
- * @param[document] The document the swatch was resolved from, which says what is pinned.
- * @param[pinsEnabled] Whether the target lets a role be pinned.
+ * @param[pins] How the target treats role pins.
  * @param[dispatcher] Where the menu sends what it was asked to do.
  * @param[modifier] Applied to the tile.
  */
 @Composable
 internal fun RolePopover(
     swatch: RoleSwatch,
-    document: ThemeDocument,
-    pinsEnabled: Boolean,
+    pins: ControlState,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
 ) {
@@ -94,7 +98,7 @@ internal fun RolePopover(
                 icon = IconId.Copy,
             ),
         )
-        pinItem(swatch, document, pinsEnabled, dispatcher)?.let(::add)
+        addAll(pinItems(swatch, pins, dispatcher))
         add(
             BuilderMenuItem(
                 label = stringResource(Res.string.tabs_show_on_ramp),
@@ -113,27 +117,31 @@ internal fun RolePopover(
             onCopy = { dispatcher.dispatch(copyHex) },
             onClick = { open = true },
             modifier = Modifier.fillMaxWidth(),
+            pinned = swatch.pinned,
         )
     }
 }
 
-/** Pin or Unpin for a role swatch in the swatch's mode, or null for any other swatch. */
+/**
+ * Pin or Unpin for a role swatch in the swatch's mode, then why it is off when [pins] says so, or
+ * nothing for any other swatch. The menu has no line for a note, so the reason is a row of its own
+ * that nothing can choose.
+ */
 @Composable
-private fun pinItem(
+private fun pinItems(
     swatch: RoleSwatch,
-    document: ThemeDocument,
-    pinsEnabled: Boolean,
+    pins: ControlState,
     dispatcher: Dispatcher<WorkspaceAction>,
-): BuilderMenuItem? {
-    val target = swatch.target as? RampTarget.OfRole ?: return null
+): List<BuilderMenuItem> {
+    val target = swatch.target as? RampTarget.OfRole ?: return emptyList()
     val mode = if (target.isDark) PinMode.Dark else PinMode.Light
-    val pin = document.pins[target.role]
-    val pinned = (if (target.isDark) pin?.dark else pin?.light) != null
-    val change = DocumentChange.SetPin(target.role, mode, if (pinned) null else swatch.argb)
-    return BuilderMenuItem(
-        label = stringResource(if (pinned) Res.string.tabs_unpin else Res.string.tabs_pin),
+    val change = DocumentChange.SetPin(target.role, mode, if (swatch.pinned) null else swatch.argb)
+    val pin = BuilderMenuItem(
+        label = stringResource(if (swatch.pinned) Res.string.tabs_unpin else Res.string.tabs_pin),
         onClick = { dispatcher.dispatch(WorkspaceAction.Edit(change, EditPhase.Discrete)) },
         icon = IconId.Pin,
-        enabled = pinsEnabled,
+        enabled = pins.usable,
     )
+    val reason = pins.explanation.takeUnless { pins.usable } ?: return listOf(pin)
+    return listOf(pin, BuilderMenuItem(label = stringResource(reasonText(reason)), onClick = {}, enabled = false))
 }

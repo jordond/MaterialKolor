@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
@@ -57,6 +58,27 @@ class ContrastTabTest {
 
             onAllNodesWithTag(CONTRAST_ROW_TAG).assertCountEquals(failures.size)
             onNodeWithText(ALL_PASS).assertDoesNotExist()
+        }
+
+    @Test
+    fun failuresOnly_aModeWithNone_saysSoUnderItsName() =
+        runDesktopComposeUiTest(width = TABS_WIDE, height = TABS_HEIGHT) {
+            val result = resolvedFor(failing)
+            val rows = result.audit.rows(PreviewMode.Split)
+            rows.filter { row -> !row.isDark && !row.passes }.shouldNotBeEmpty()
+            rows.filter { row -> row.isDark && !row.passes } shouldBe emptyList()
+            showContrast(result, PreviewMode.Split)
+
+            onNodeWithText(NONE_IN_MODE).assertDoesNotExist()
+            onNodeWithText("Failures only").performClick()
+            waitForIdle()
+
+            onAllNodesWithText(NONE_IN_MODE).assertCountEquals(1)
+            val dark = onNodeWithText("Dark").fetchSemanticsNode().boundsInRoot
+            val note = onNodeWithText(NONE_IN_MODE).fetchSemanticsNode().boundsInRoot
+            // In the dark column, which sits to the right of the light one, and under its name.
+            (note.left >= dark.left) shouldBe true
+            (note.top > dark.bottom) shouldBe true
         }
 
     @Test
@@ -117,5 +139,6 @@ class ContrastTabTest {
 
     private companion object {
         const val ALL_PASS = "Every pair passes AA at this contrast level"
+        const val NONE_IN_MODE = "Nothing fails in this mode."
     }
 }

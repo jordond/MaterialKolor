@@ -59,10 +59,23 @@ class RolePopoverTest {
             onNodeWithContentDescription(tileName(result, Role.Primary, isDark = false)).performClick()
             waitForIdle()
             onNodeWithText("Pin this role").assertIsNotEnabled()
+            onNodeWithText("Pins set Material roles, which Fluent does not use.").assertExists()
             onNodeWithText("Pin this role").performClick()
             waitForIdle()
 
             actions.sent.none { action -> action is WorkspaceAction.Edit } shouldBe true
+        }
+
+    @Test
+    fun pin_material_hasNoReasonRow() =
+        runDesktopComposeUiTest(width = TABS_WIDE, height = TABS_HEIGHT) {
+            val result = resolvedFor(material)
+            showRoles(result, PreviewMode.Light)
+
+            onNodeWithContentDescription(tileName(result, Role.Primary, isDark = false)).performClick()
+            waitForIdle()
+            onNodeWithText("Pin this role").assertIsEnabled()
+            onNodeWithText("Pins set Material roles, which Fluent does not use.").assertDoesNotExist()
         }
 
     @Test
