@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -166,6 +168,35 @@ class OverlayFocusTest {
                     Column {
                         OverlayTestButton("first")
                         OverlayTestButton("second")
+                        BuilderToastHost(toasts)
+                    }
+                }
+            }
+            waitForIdle()
+            toasts.show("Deleted Sunset", "Undo", ToastDuration.Indefinite) {}
+            waitForIdle()
+            val undo = onNode(hasText("Undo") and hasRole(Role.Button))
+            onNodeWithTag("second").requestFocus()
+            onNodeWithTag("second").performKeyInput { pressKey(Key.Tab) }
+            waitForIdle()
+            undo.assertIsFocused()
+            undo.performKeyInput { pressKey(Key.Enter) }
+            waitForIdle()
+            toasts.toasts shouldBe emptyList()
+            onNodeWithTag("second").assertIsFocused()
+        }
+
+    @Test
+    fun toastUndo_inTree_withNoModalOpen_handsFocusBackToAButtonInAScrollContainer() =
+        forEachSkin { _, skin ->
+            val toasts = BuilderToastHostState()
+            setContent {
+                HostOverlays(skin, inTree = true) {
+                    Column {
+                        Column(Modifier.verticalScroll(rememberScrollState())) {
+                            OverlayTestButton("first")
+                            OverlayTestButton("second")
+                        }
                         BuilderToastHost(toasts)
                     }
                 }

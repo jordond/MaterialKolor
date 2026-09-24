@@ -1,19 +1,23 @@
 import { expect, test, type CDPSession, type Locator, type Page } from '@playwright/test';
-import { openBuilder, wantHooks } from './builder';
+import { openBuilder, reloadBuilder, wantHooks } from './builder';
 
 // b-224
 // The text toolbar the kit draws in the page for a touch selection (D40). A long press on a field
 // shows it, and Paste reads the clipboard inside the tap's own user activation. Chromium only, since
 // Playwright drives the long press through a CDP session.
 //
-// Both tests are fixme for now. At a phone viewport the only editable field on the first screen is
-// the seed field in the controls sheet, which only peeks. A CDP tap on the sheet's peek button does
-// not open it, so the field's box in the mirror stays 0 by 0 and the long press has nowhere to land.
-// They can run once a route or a test hook opens the sheet, or a field sits on the first screen.
+// Foundation shows the toolbar on touch input, not at a phone width, so the tests keep the desktop
+// viewport, where the seed field sits docked on the first screen, and only turn touch on.
+//
+// The mirror cannot find the row. A long press puts up foundation's selection handles, which are
+// popups, and a popup takes the mirror over for good (D40), leaving it three nodes deep. So the row
+// is found by its pixels, the part of the page that changed above or below the field, and each
+// button by the gaps between the labels.
 
-const PASTED = '#0B6E4F';
+/** The digits the Paste test puts over the long pressed word, the hex's own digits. */
+const PASTED = '0B6E4F';
 
-test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
+test.use({ hasTouch: true });
 
 test.beforeEach(async ({ context, browserName }) => {
   test.skip(browserName !== 'chromium', 'The long press goes through a Chromium CDP session');
@@ -21,68 +25,194 @@ test.beforeEach(async ({ context, browserName }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
 });
 
-test.fixme('a long press on a field shows the toolbar and Paste puts the clipboard text in', async ({ page, context }) => {
+test('a long press on a field shows the toolbar and Paste puts the clipboard text in', async ({ page, context }) => {
   await openBuilder(page);
   await page.evaluate((text) => navigator.clipboard.writeText(text), PASTED);
   const cdp = await context.newCDPSession(page);
-  const field = await seedField(page, cdp);
-  await longPress(cdp, field);
+  const field = await seedField(page);
+  const box = await boxOf(field);
+  const tint = await themeColor(page);
 
-  const paste = page.locator('#cmp_a11y_root').getByRole('button', { name: 'Paste', exact: true });
-  await expect(paste).toBeAttached({ timeout: 10_000 });
-  await tap(cdp, paste);
+  const row = await longPressForRow(page, cdp, box);
+  expect(row.labels).toEqual(['Cut', 'Copy', 'Paste', 'Select all']);
+  await tap(cdp, row.button('Paste'));
 
-  await expect.poll(() => field.textContent(), { timeout: 10_000 }).toContain(PASTED.slice(1));
-  await expect(paste).toHaveCount(0);
+  // The new seed tints the page, and once saved it is what the field shows after a reload.
+  await expect.poll(() => themeColor(page), { timeout: 10_000 }).not.toBe(tint);
+  await page.waitForTimeout(1_500);
+  await reloadBuilder(page);
+  await expect.poll(async () => (await seedField(page)).textContent(), { timeout: 10_000 }).toContain(PASTED);
 });
 
-test.fixme('Copy from the toolbar puts the selection on the clipboard', async ({ page, context }) => {
+test('Copy from the toolbar puts the selection on the clipboard', async ({ page, context }) => {
   await openBuilder(page);
   await page.evaluate(() => navigator.clipboard.writeText(''));
   const cdp = await context.newCDPSession(page);
-  const field = await seedField(page, cdp);
-  const before = (await field.textContent()) ?? '';
-  await longPress(cdp, field);
+  const field = await seedField(page);
+  const text = (await field.textContent()) ?? '';
+  const box = await boxOf(field);
 
-  const selectAll = page.locator('#cmp_a11y_root').getByRole('button', { name: 'Select all', exact: true });
-  if (await selectAll.count()) await tap(cdp, selectAll);
-  const copy = page.locator('#cmp_a11y_root').getByRole('button', { name: 'Copy', exact: true });
-  await expect(copy).toBeAttached({ timeout: 10_000 });
-  await tap(cdp, copy);
+  const row = await longPressForRow(page, cdp, box);
+  await tap(cdp, row.button('Copy'));
 
-  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).not.toBe('');
-  expect(before).toContain(await page.evaluate(() => navigator.clipboard.readText()));
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText()), { timeout: 10_000 }).not.toBe('');
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(text).toContain(copied);
 });
 
-/**
- * The seed field, found by its box in the mirror. On a phone it sits in the controls sheet, so the
- * sheet opens first when it only peeks.
- */
-async function seedField(page: Page, cdp: CDPSession): Promise<Locator> {
-  const mirror = page.locator('#cmp_a11y_root');
-  const field = mirror.getByRole('textbox', { name: /^Seed color/ });
+interface Box {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+/** The toolbar row as it shows on screen, its labels in order and a point on each button. */
+interface Row {
+  labels: string[];
+  button(label: string): Point;
+}
+
+/** The seed field, found by its box in the mirror, docked on the first screen at a desktop width. */
+async function seedField(page: Page): Promise<Locator> {
+  const field = page.locator('#cmp_a11y_root').getByRole('textbox', { name: /^Seed color/ });
   await expect(field).toBeAttached({ timeout: 30_000 });
-  const peek = mirror.getByRole('button', { name: /^Seed and theme controls, Peek/ });
-  if (await peek.count()) await tap(cdp, peek.first());
   await expect.poll(async () => (await field.boundingBox())?.height ?? 0, { timeout: 10_000 }).toBeGreaterThan(0);
   return field;
 }
 
-/** Holds a finger on the start of [target] for longer than a long press takes. */
-async function longPress(cdp: CDPSession, target: Locator): Promise<void> {
+async function boxOf(target: Locator): Promise<Box> {
   const box = await target.boundingBox();
   if (!box) throw new Error('The field has no box');
-  const point = { x: box.x + Math.min(24, box.width / 4), y: box.y + box.height / 2 };
+  return box;
+}
+
+/** The `theme-color` the shell tints the browser with, which follows the seed. */
+async function themeColor(page: Page): Promise<string> {
+  return page.evaluate(() => document.querySelector('meta[name="theme-color"]')?.getAttribute('content') ?? '');
+}
+
+/**
+ * Holds a finger on the middle of the field's hex for longer than a long press takes, then finds the
+ * row that came up, in the pixels that changed outside the field.
+ */
+async function longPressForRow(page: Page, cdp: CDPSession, field: Box): Promise<Row> {
+  const before = await page.screenshot();
+  const point = { x: field.x + field.width / 2, y: field.y + field.height * 0.4 };
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
-  await new Promise((resolve) => setTimeout(resolve, 700));
+  await page.waitForTimeout(800);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  let row: Row | null = null;
+  await expect
+    .poll(
+      async () => {
+        row = await findRow(page, before, field);
+        return row?.labels.length ?? 0;
+      },
+      { timeout: 10_000 },
+    )
+    .toBeGreaterThan(0);
+  return row!;
+}
+
+/** Taps [point] with a finger. */
+async function tap(cdp: CDPSession, point: Point): Promise<void> {
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
+  await new Promise((resolve) => setTimeout(resolve, 60));
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
 }
 
-/** Taps the middle of [target] with a finger. */
-async function tap(cdp: CDPSession, target: Locator): Promise<void> {
-  const box = await target.boundingBox();
-  if (!box) throw new Error('The button has no box');
-  const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+/**
+ * The row in the page's pixels, or null while none shows. It compares a screenshot from before the
+ * long press with one now, in a band above and below the field that leaves out the field itself and
+ * its handles. The rows of pixels with a long run of change are the toolbar, and along its middle
+ * each run of label pixels, split at a gap wider than a space, is one button.
+ */
+async function findRow(page: Page, before: Buffer, field: Box): Promise<Row | null> {
+  const after = await page.screenshot();
+  const found = await page.evaluate(
+    async ({ beforePng, afterPng, box }) => {
+      const pixels = async (png: string) => {
+        // Decoded by hand, since the page's content policy turns a data URL fetch away.
+        const bytes = Uint8Array.from(atob(png), (char) => char.charCodeAt(0));
+        const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }));
+        const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+        const context = canvas.getContext('2d')!;
+        context.drawImage(bitmap, 0, 0);
+        return context.getImageData(0, 0, bitmap.width, bitmap.height);
+      };
+      const a = await pixels(beforePng);
+      const b = await pixels(afterPng);
+      const width = b.width;
+      const at = (image: ImageData, x: number, y: number) => (y * width + x) * 4;
+      const distance = (one: ImageData, i: number, two: ImageData, j: number) =>
+        Math.abs(one.data[i] - two.data[j]) +
+        Math.abs(one.data[i + 1] - two.data[j + 1]) +
+        Math.abs(one.data[i + 2] - two.data[j + 2]);
+      const margin = 16;
+      const inField = (x: number, y: number) =>
+        x > box.x - margin && x < box.x + box.width + margin && y > box.y - margin && y < box.y + box.height + margin;
+      const top = Math.max(0, Math.floor(box.y - 160));
+      const bottom = Math.min(b.height - 1, Math.ceil(box.y + box.height + 160));
+      const rows: number[] = [];
+      let left = width;
+      let right = 0;
+      for (let y = top; y <= bottom; y++) {
+        let changed = 0;
+        for (let x = 0; x < width; x++) {
+          if (inField(x, y)) continue;
+          if (distance(a, at(a, x, y), b, at(b, x, y)) > 30) {
+            changed++;
+            left = Math.min(left, x);
+            right = Math.max(right, x);
+          }
+        }
+        if (changed > 120) rows.push(y);
+      }
+      if (rows.length < 20) return null;
+      const middle = Math.round((rows[0] + rows[rows.length - 1]) / 2);
+      const counts = new Map<string, number>();
+      for (let x = left; x <= right; x++) {
+        const i = at(b, x, middle);
+        const key = `${b.data[i]},${b.data[i + 1]},${b.data[i + 2]}`;
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+      const surface = [...counts.entries()].sort((one, two) => two[1] - one[1])[0][0].split(',').map(Number);
+      const ink = (x: number) => {
+        for (let y = middle - 6; y <= middle + 6; y++) {
+          const i = at(b, x, y);
+          const off =
+            Math.abs(b.data[i] - surface[0]) + Math.abs(b.data[i + 1] - surface[1]) + Math.abs(b.data[i + 2] - surface[2]);
+          if (off > 90) return true;
+        }
+        return false;
+      };
+      const labels: { start: number; end: number }[] = [];
+      for (let x = left + 8; x <= right - 8; x++) {
+        if (!ink(x)) continue;
+        const last = labels[labels.length - 1];
+        if (last && x - last.end <= 14) last.end = x;
+        else labels.push({ start: x, end: x });
+      }
+      return { y: middle, centers: labels.map((label) => (label.start + label.end) / 2) };
+    },
+    { beforePng: before.toString('base64'), afterPng: after.toString('base64'), box: field },
+  );
+  if (!found || found.centers.length === 0) return null;
+  const names: Record<number, string[]> = {
+    2: ['Paste', 'Select all'],
+    3: ['Cut', 'Copy', 'Paste'],
+    4: ['Cut', 'Copy', 'Paste', 'Select all'],
+  };
+  const labels = names[found.centers.length];
+  if (!labels) throw new Error(`The row shows ${found.centers.length} labels`);
+  return {
+    labels,
+    button: (label) => ({ x: found.centers[labels.indexOf(label)], y: found.y }),
+  };
 }

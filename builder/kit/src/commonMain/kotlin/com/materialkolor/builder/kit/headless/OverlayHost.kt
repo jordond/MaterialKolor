@@ -138,6 +138,12 @@ internal class OverlayHostState {
     /** The page's focus group, which notes the child that held focus each time focus leaves the page. */
     val page: FocusRequester = FocusRequester()
 
+    /**
+     * Every focus target one level into the page. A scroll container or a lazy list is one of them,
+     * since each brings a focus group of its own, and each notes the child in it that held focus.
+     */
+    val pageChildren: FocusRequester = FocusRequester()
+
     /** Whether focus is in the page. */
     var pageHasFocus: Boolean = false
 
@@ -167,10 +173,22 @@ internal class OverlayHostState {
         topFocusLosses++
     }
 
+    /** Notes the control in the page that holds focus, two focus groups deep, as focus leaves the page. */
+    fun savePageFocus() {
+        page.saveFocusedChild()
+        pageChildren.saveFocusedChild()
+    }
+
     /**
      * Leads focus back when it rests nowhere after a toast that held it left. With a modal open it
      * goes into the top one, the way the modal took it as it opened, so the keyboard stays inside
-     * the modal. Otherwise it goes back to the part of the page that had it before the toast took it.
+     * the modal.
+     *
+     * Otherwise it goes back to the control in the page that had it before the toast took it. That
+     * reaches a control that sits straight in the page or straight in a scroll container, a lazy list
+     * or another focus group in the page. Compose only notes the focused child where a focus
+     * requester or a focus restorer sits, while `ComposeUiFlags.isFocusRestorationEnabled` is off, so
+     * a control nested a group deeper is not found and focus stays where the toast left it.
      */
     fun refocus() {
         if (holdsFocus()) return
@@ -277,15 +295,17 @@ internal fun OverlayHost(
             modifier = Modifier
                 .then(if (nested) Modifier.clipToBounds() else Modifier)
                 .onPlaced { coordinates -> host.coordinates = coordinates }
-                .pointerInput(Unit) { swallowSecondaryPresses() },
+                .pointerInput(Unit) { swallowSecondaryPresses() }
+                .then(if (toolbar != null) Modifier.pageTextToolbarScroll(toolbar) else Modifier),
             propagateMinConstraints = true,
         ) {
             Box(
                 modifier = Modifier
                     .onFocusChanged { state -> host.pageHasFocus = state.hasFocus }
                     .focusRequester(host.page)
-                    .focusProperties { onExit = { host.page.saveFocusedChild() } }
+                    .focusProperties { onExit = { host.savePageFocus() } }
                     .trapFocus { host.isUnderFocusTrap(OverlayHostState.Page) }
+                    .focusRequester(host.pageChildren)
                     .hideUnderModal(host, OverlayHostState.Page),
                 propagateMinConstraints = true,
             ) { content() }
@@ -324,6 +344,7 @@ internal fun OverlayPortal(
         stack.add(layer)
         onDispose {
             stack.remove(layer)
+            // A backstop, since a layer that leaves along with its portal may not report the focus it held.
             if (layer.kind == OverlayKind.Top && layer.hasFocus) host.topLostFocus()
         }
     }

@@ -7,8 +7,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalContext
 import androidx.compose.runtime.CompositionLocalProvider
@@ -25,7 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.platform.LocalDensity
@@ -34,7 +41,8 @@ import androidx.compose.ui.platform.TextToolbar
 import androidx.compose.ui.platform.TextToolbarStatus
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.overlayStyle
@@ -78,13 +86,54 @@ internal class TextToolbarMenu(
  * Foundation's web toolbar opens in a popup, which would take the web mirror over, so the root
  * [OverlayHost] provides this one in its place and draws its menu last, over every layer and the
  * top slot. A text field shows a menu on a touch selection with the selection's bounds and a
- * callback for each button it offers, and hides it again once the selection collapses, the field
- * blurs or a button has run.
+ * callback for each button it offers. It hides it again once the selection collapses or the field
+ * blurs, and after Cut, Copy or Paste. Select all shows it again over the whole text.
+ *
+ * A field shows its menu again each time it moves, so a scroll would drag the row along with it.
+ * A scroll in the host hides the row instead, and the menus a field shows while the scroll runs are
+ * dropped. Once the scroll settles, or the next press lands, the next menu shows again.
  */
 internal class PageTextToolbar : TextToolbar {
     /** The menu on show, or null while the toolbar is hidden. */
     var menu: TextToolbarMenu? by mutableStateOf(null)
         private set
+
+    /** Whether a scroll in the host is moving the page under the row right now. */
+    private var scrolling = false
+
+    /**
+     * Hides the row as soon as a scroll moves something in the host and keeps it hidden until the
+     * fling that ends the scroll has run out.
+     */
+    val scrollConnection: NestedScrollConnection = object : NestedScrollConnection {
+        override fun onPostScroll(
+            consumed: Offset,
+            available: Offset,
+            source: NestedScrollSource,
+        ): Offset {
+            if (consumed != Offset.Zero) {
+                scrolling = true
+                hide()
+            }
+            return Offset.Zero
+        }
+
+        override suspend fun onPostFling(
+            consumed: Velocity,
+            available: Velocity,
+        ): Velocity {
+            scrolling = false
+            return Velocity.Zero
+        }
+    }
+
+    /**
+     * Notes a new press. A fling that a press stopped never reports its end, so the press ends the
+     * scroll instead, and a drag that follows starts a new one.
+     */
+    fun pressed() {
+        scrolling = false
+    }
 
     /**
      * The locals of the skin the builder is drawn in, which the host above the skin cannot see.
@@ -109,6 +158,7 @@ internal class PageTextToolbar : TextToolbar {
         onCutRequested: (() -> Unit)?,
         onSelectAllRequested: (() -> Unit)?,
     ) {
+        if (scrolling) return
         val actions = buildMap {
             if (onCutRequested != null) put(TextToolbarAction.Cut, onCutRequested)
             if (onCopyRequested != null) put(TextToolbarAction.Copy, onCopyRequested)
@@ -140,9 +190,11 @@ internal fun PageTextToolbarLocals() {
  * Draws the menu [toolbar] shows as one row of buttons over the whole of [host].
  *
  * The row sits above the selection with a gap, or below it when there is no room above, and stays
- * inside the host. The selection's bounds come in the root's coordinates and are mapped into the
- * host's, so a field in a scaled preview pane still gets the row at its selection. The layer
- * spans the host but only the row takes presses, so the page around it stays live.
+ * inside the host. The selection's bounds come in the root's coordinates, a scaled preview pane's
+ * scale already in them, and are mapped into the host's, which only moves them when the host does
+ * not sit at the root's origin. While none of the selection lies inside the host, a field scrolled
+ * out of the page say, no row is drawn at all rather than one pinned to the host's edge. The layer
+ * spans the host but only the row takes presses, so a button in the page beside it still answers.
  *
  * Each button runs its callback straight from its own `onClick`, with no effect, dispatch,
  * snapshot hop or `launch` in between. Paste reads the browser's clipboard, which the browser only
@@ -157,18 +209,19 @@ internal fun PageTextToolbarLayer(
 ) {
     val menu = toolbar.menu ?: return
     val locals = toolbar.locals ?: return
+    // Read along with the menu, which a field shows again each time it moves.
+    val selection = host.visibleFromRoot(menu.rect) ?: return
     CompositionLocalProvider(locals) {
         val spacing = LocalBuilderTokens.current.spacing
         val gap = with(LocalDensity.current) { spacing.small.roundToPx() }
         Layout(
-            content = { TextToolbarRow(menu, overlayStyle(LocalSkin.current.library), touchTarget(host)) },
+            content = { TextToolbarRow(menu, overlayStyle(LocalSkin.current.library)) },
             modifier = modifier,
         ) { measurables, constraints ->
             val row = measurables.single().measure(constraints.copy(minWidth = 0, minHeight = 0))
             val width = constraints.maxWidth
             val height = constraints.maxHeight
             layout(width, height) {
-                val selection = host.fromRoot(menu.rect)
                 val above = selection.top.roundToInt() - gap - row.height
                 val y = if (above >= 0) above else selection.bottom.roundToInt() + gap
                 val x = selection.center.x.roundToInt() - row.width / 2
@@ -182,23 +235,29 @@ internal fun PageTextToolbarLayer(
 }
 
 /**
- * The smallest a button may be. The row only ever answers a touch, so it takes the target a coarse
- * pointer gets at the host's size.
+ * Hides [toolbar]'s row while a scroll in the host moves the page, and notes each press that lands
+ * in the host so a fling cut short by one does not keep the row hidden.
  */
-@Composable
-private fun touchTarget(host: OverlayHostState): Dp {
-    val size = host.coordinates?.size ?: IntSize.Zero
-    val layout = with(LocalDensity.current) {
-        LayoutInfo.of(size.width.toDp(), size.height.toDp(), coarsePointer = true)
+internal fun Modifier.pageTextToolbarScroll(toolbar: PageTextToolbar): Modifier =
+    nestedScroll(toolbar.scrollConnection).pointerInput(toolbar) {
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                if (event.changes.any { change -> change.changedToDownIgnoreConsumed() }) toolbar.pressed()
+            }
+        }
     }
-    return layout.minTouchTarget
-}
+
+/**
+ * The smallest a button may be. The row only ever answers a touch, and a coarse pointer gets the same
+ * target at every size.
+ */
+private val TouchTarget: Dp = LayoutInfo(widthDp = 0.dp, heightDp = 0.dp, coarsePointer = true).minTouchTarget
 
 @Composable
 private fun TextToolbarRow(
     menu: TextToolbarMenu,
     style: OverlayStyle,
-    target: Dp,
 ) {
     val tokens = LocalBuilderTokens.current
     Row(
@@ -211,7 +270,7 @@ private fun TextToolbarRow(
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.extraSmall),
     ) {
         for ((action, onClick) in menu.actions) {
-            key(action) { TextToolbarButton(label(action), onClick, style, target) }
+            key(action) { TextToolbarButton(label(action), onClick, style) }
         }
     }
 }
@@ -221,13 +280,12 @@ private fun TextToolbarButton(
     label: String,
     onClick: () -> Unit,
     style: OverlayStyle,
-    target: Dp,
 ) {
     val tokens = LocalBuilderTokens.current
     val interaction = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
-            .heightIn(min = target)
+            .sizeIn(minWidth = TouchTarget, minHeight = TouchTarget)
             .overlayFeedback(interaction, style)
             .focusProperties { canFocus = false }
             .clickable(interaction, indication = null, role = Role.Button, onClick = onClick)
@@ -247,9 +305,12 @@ private fun label(action: TextToolbarAction): String =
         TextToolbarAction.SelectAll -> stringResource(Res.string.text_toolbar_select_all)
     }
 
-/** [rect] taken from the root's coordinates into the host's, or as it is before the host is placed. */
-private fun OverlayHostState.fromRoot(rect: Rect): Rect {
-    val layout = coordinates?.takeIf { it.isAttached } ?: return rect
+/** [rect] taken from the root's coordinates into the host's, or null while none of it lies inside the host. */
+private fun OverlayHostState.visibleFromRoot(rect: Rect): Rect? {
+    val layout = coordinates?.takeIf { it.isAttached } ?: return null
     val root = layout.findRootCoordinates()
-    return Rect(layout.localPositionOf(root, rect.topLeft), layout.localPositionOf(root, rect.bottomRight))
+    val mapped = Rect(layout.localPositionOf(root, rect.topLeft), layout.localPositionOf(root, rect.bottomRight))
+    val size = layout.size
+    val inside = mapped.right >= 0f && mapped.bottom >= 0f && mapped.left <= size.width && mapped.top <= size.height
+    return if (inside) mapped else null
 }
