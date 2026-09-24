@@ -18,15 +18,15 @@
     <!-- The MaterialKolor version every export uses, such as "MaterialKolor 6.0.0". -->
     <string name="about_material_kolor_version">MaterialKolor %1$s</string>
     <string name="about_what">Grow a Material color scheme from one seed color, try it on sample screens, and take the code home to your app.</string>
-    <!-- The motion override (F-37), read out before the choice. -->
-    <string name="about_motion">Motion</string>
+    <!-- The motion override (F-37), read out before the choice. Named after F-37, so it never reads as the Extras motion scheme. -->
+    <string name="about_motion">Reduced motion</string>
     <string name="about_motion_system">System</string>
     <string name="about_motion_reduce">Reduce</string>
     <string name="about_motion_full">Full</string>
 
     <!-- Provisional until the owner signs off the wording (F-36). -->
     <string name="about_privacy_title">Privacy</string>
-    <string name="about_privacy">Your projects stay in this browser and the builder sets no cookies. When a character is missing from the builder’s own fonts, the browser may load a fallback font from fonts.gstatic.com.</string>
+    <string name="about_privacy">Your projects stay in this browser and the builder sets no cookies. When a character is missing from the builder’s own fonts, the browser may load a fallback font from fonts.gstatic.com. Visits are counted with Cloudflare Web Analytics, which sets no cookies.</string>
 
     <!-- Provisional credits and licenses, until the owner signs off the list (F-36). -->
     <string name="about_credits_title">Credits and licenses</string>
@@ -35,6 +35,8 @@
     <string name="about_font_jetbrains_mono">JetBrains Mono</string>
     <!-- What each font is licensed under, shown under its name. -->
     <string name="about_font_license">SIL Open Font License 1.1</string>
+    <!-- Shown in place of a font's license text when it could not be read, with the license's name. -->
+    <string name="about_font_license_failed">Could not load the license text of the %1$s.</string>
     <string-array name="about_libraries">
         <item>Lucide icons, ISC License, drawn through the Compose Lucide port by Composables, MIT License</item>
         <item>Material Icons, Apache License 2.0</item>

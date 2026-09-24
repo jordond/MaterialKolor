@@ -2,13 +2,22 @@ package com.materialkolor.builder.feature.about
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.hasAnyChild
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isFocused
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -22,13 +31,19 @@ import com.materialkolor.builder.BuildKonfig
 import com.materialkolor.builder.BuilderRoot
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.link.shareLink
+import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.MotionOverride
+import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FAKE_BROWSER
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.canvas.TestOwner
 import com.materialkolor.builder.feature.poster.InfoTopic
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
+import com.materialkolor.builder.kit.skin.BuilderTheme
+import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.token.ShippedFont
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
@@ -41,8 +56,27 @@ import org.jetbrains.compose.resources.getString
 import kotlin.test.Test
 
 // At 1280 the top bar runs out of room before More options, which gets no width at all.
+// TODO(b-231) Back to 1280 wide once B-231 fixes the top bar at 1280 dp.
 private const val WIDTH = 1600
 private const val HEIGHT = 800
+
+// b-314a
+/** The first line of both OFL texts, under the copyright lines. */
+private const val OFL_HEADING = "SIL OPEN FONT LICENSE Version 1.1"
+
+/** The line About opens with. */
+private val BUILDER_VERSION_LINE = "Builder ${BuildKonfig.BUILDER_VERSION}"
+
+/**
+ * The kit's switch for the web's keyboard habits. It is internal to the kit and off on the JVM, so
+ * this reaches it by name to turn it on for the whole builder.
+ */
+@Suppress("UNCHECKED_CAST")
+private val LocalWebKeyboardOfTheKit: ProvidableCompositionLocal<Boolean> =
+    Class
+        .forName("com.materialkolor.builder.kit.a11y.WebMirrorKt")
+        .getMethod("getLocalWebKeyboard")
+        .invoke(null) as ProvidableCompositionLocal<Boolean>
 
 // b-314
 @OptIn(ExperimentalTestApi::class)
@@ -61,6 +95,52 @@ class AboutHostTest {
 
             onNodeWithText("Builder ${BuildKonfig.BUILDER_VERSION}").assertExists()
             onNodeWithText("MaterialKolor ${BuildKonfig.MATERIAL_KOLOR_VERSION}").assertExists()
+        }
+
+    // b-314a
+    @Test
+    fun about_withTheWebKeyboard_listIsATabStop() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            showRoot(webKeyboard = true)
+
+            openFromMore("About")
+
+            val aboutList = hasAnyChild(hasScrollAction() and hasAnyDescendant(hasText(BUILDER_VERSION_LINE)))
+            onNode(aboutList).assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Focused))
+        }
+
+    @Test
+    fun fontLicense_opened_showsTheFullText() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            showRoot()
+            openFromMore("About")
+
+            onNodeWithText("Bricolage Grotesque").performScrollTo().performClick()
+            waitUntil { onAllNodesWithText(OFL_HEADING, substring = true).fetchSemanticsNodes().isNotEmpty() }
+
+            onNodeWithText("Copyright 2022 The Bricolage Grotesque Project Authors", substring = true).assertExists()
+        }
+
+    @Test
+    fun fontLicense_whenTheReadFails_saysSoWithTheLicenseName() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            val document = ThemeDocument.Default
+            setContent {
+                BuilderTheme(
+                    skin = Skin(library = Library.Material3, expressive = false),
+                    result = ThemeResolver().resolve(document),
+                    isDark = false,
+                    reducedMotion = true,
+                ) {
+                    FontLicense(ShippedFont.JetBrainsMono, read = { error("The fetch failed") })
+                }
+            }
+
+            onNodeWithText("JetBrains Mono").performClick()
+            waitForIdle()
+
+            onNodeWithText("Could not load the license text of the SIL Open Font License 1.1.").assertExists()
+            onNodeWithText(OFL_HEADING, substring = true).assertDoesNotExist()
         }
 
     @Test
@@ -191,8 +271,11 @@ class AboutHostTest {
         waitForIdle()
     }
 
-    /** The whole builder on fakes, booted, noting the reduced motion it draws with and every link it opens. */
-    private fun ComposeUiTest.showRoot(): AppGraph {
+    /**
+     * The whole builder on fakes, booted, noting the reduced motion it draws with and every link it
+     * opens. With [webKeyboard] it keeps to the web's keyboard habits, the way it does in a browser.
+     */
+    private fun ComposeUiTest.showRoot(webKeyboard: Boolean = false): AppGraph {
         val graph = createGraphFactory<AppGraph.Factory>().create(platform)
         val owner = TestOwner()
         val uriHandler = object : UriHandler {
@@ -205,6 +288,7 @@ class AboutHostTest {
                 LocalViewModelStoreOwner provides owner,
                 LocalMetroViewModelFactory provides graph.metroViewModelFactory,
                 LocalUriHandler provides uriHandler,
+                LocalWebKeyboardOfTheKit provides webKeyboard, // b-314a
             ) {
                 workspace = metroViewModel()
                 BuilderRoot(graph, workspaceModel = workspace, probe = { _ -> NoteReducedMotion() })

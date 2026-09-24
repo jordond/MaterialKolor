@@ -48,19 +48,27 @@ internal const val FIRST_RUN_HINT = "first-run"
 internal const val SWITCHER_PULSE_HINT = "switcher-pulse"
 
 /**
- * Whether the first visit hint shows (F-35). It waits for boot to open a project, which it only does
- * once the stored preferences are read, so a hint closed on an earlier visit never flashes. It never
- * comes back once it was closed or the first export is done.
+ * Whether the first visit hint shows (F-35). It never comes back once it was closed or the first
+ * export is done.
+ *
+ * It waits for boot to open a project, and boot reads the stored preferences before it opens one.
+ * The dismissal read here comes from the repository's flow instead, and nothing orders that flow
+ * after boot's read. A hint closed on an earlier visit stays out of sight only because the flow has
+ * caught up by then, which the test that boots over a stored dismissal checks.
  *
  * @param[projectName] The open project's name, empty until boot has opened one.
+ * @param[sessionDismissedHints] The hints closed in this tab, so a close holds for the session even
+ * when storage turns the write down.
  */
 internal fun showsFirstRunHint(
     preferences: Preferences,
     projectName: String,
+    sessionDismissedHints: Set<String>, // b-314a
 ): Boolean =
     projectName.isNotEmpty() &&
         !preferences.firstExportDone &&
-        FIRST_RUN_HINT !in preferences.dismissedHints
+        FIRST_RUN_HINT !in preferences.dismissedHints &&
+        FIRST_RUN_HINT !in sessionDismissedHints
 
 /**
  * The one hint a first visit gets, a card on the poster in the poster's ink with a close button.
@@ -75,7 +83,7 @@ internal fun FirstRunHint(
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
 ) {
-    if (!showsFirstRunHint(context.preferences, context.projectName)) return
+    if (!showsFirstRunHint(context.preferences, context.projectName, context.sessionDismissedHints)) return
     val tokens = LocalBuilderTokens.current
     val spacing = tokens.spacing
     val focusManager = LocalFocusManager.current
@@ -112,8 +120,10 @@ internal fun Modifier.switcherPulse(
     dispatcher: Dispatcher<WorkspaceAction>,
 ): Modifier {
     val preferences = state.preferences
-    val pulsing = showsFirstRunHint(preferences, state.projectName) &&
-        SWITCHER_PULSE_HINT !in preferences.dismissedHints
+    val sessionDismissed = state.sessionDismissedHints // b-314a
+    val pulsing = showsFirstRunHint(preferences, state.projectName, sessionDismissed) &&
+        SWITCHER_PULSE_HINT !in preferences.dismissedHints &&
+        SWITCHER_PULSE_HINT !in sessionDismissed
     return pulseRing(active = pulsing) { dispatcher.dispatch(WorkspaceAction.DismissHint(SWITCHER_PULSE_HINT)) }
 }
 

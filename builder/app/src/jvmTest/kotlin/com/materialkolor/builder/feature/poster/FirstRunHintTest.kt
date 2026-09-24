@@ -16,6 +16,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -72,6 +73,10 @@ private const val PULSE_DONE_MS = 1_000L
 /** Part way into the pulse, while the ring still shows. */
 private const val PULSE_MIDWAY_MS = 150L
 
+// b-314a
+/** Preferences a newer build wrote, which every write from this build is turned down over. */
+private const val NEWER_PREFS = """{"schema":999,"data":{}}"""
+
 // b-314
 @OptIn(ExperimentalTestApi::class)
 class FirstRunHintTest {
@@ -116,13 +121,32 @@ class FirstRunHintTest {
 
             showRoot { state ->
                 frames++
-                if (showsFirstRunHint(state.preferences, state.projectName)) shown += state.projectName
+                if (showsFirstRunHint(state.preferences, state.projectName, state.sessionDismissedHints)) {
+                    shown += state.projectName
+                }
             }
 
             frames shouldNotBe 0
             workspace.state.value.projectName shouldNotBe ""
             shown shouldBe emptyList()
             onNodeWithText(HINT).assertDoesNotExist()
+        }
+
+    // b-314a
+    @Test
+    fun close_whenStorageTurnsTheWriteDown_keepsTheHintShutForTheSession() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            platform.stores.seed(StorageKeys.PREFS, NEWER_PREFS)
+            showRoot()
+            onNodeWithText(HINT).assertExists()
+
+            onNodeWithContentDescription("Close the hint").performClick()
+            waitForIdle()
+
+            onNodeWithText(HINT).assertDoesNotExist()
+            workspace.state.value.sessionDismissedHints shouldContain FIRST_RUN_HINT
+            workspace.state.value.preferences.dismissedHints shouldBe emptySet()
+            platform.stores.textAt(StorageKeys.PREFS) shouldBe NEWER_PREFS
         }
 
     @Test
@@ -162,6 +186,28 @@ class FirstRunHintTest {
 
             onNodeWithText(HINT).assertDoesNotExist()
             onNodeWithText("Next on the poster").assertIsFocused()
+            harness.actions shouldContain WorkspaceAction.DismissHint(FIRST_RUN_HINT)
+        }
+
+    // b-314a
+    @Test
+    fun closeWithAClick_leavesFocusWhereItWas() =
+        runComposeUiTest {
+            val harness = PosterHarness(ThemeDocument.Default).apply { projectName = "Theme" }
+            showSection(harness) { context, dispatcher ->
+                BuilderButton(onClick = {}, label = "Before the hint")
+                FirstRunHint(context, dispatcher)
+                BuilderButton(onClick = {}, label = "Next on the poster")
+            }
+            onNodeWithText("Before the hint").requestFocus()
+            waitForIdle()
+
+            onNodeWithContentDescription("Close the hint").performClick()
+            waitForIdle()
+
+            onNodeWithText(HINT).assertDoesNotExist()
+            onNodeWithText("Before the hint").assertIsFocused()
+            onNodeWithText("Next on the poster").assertIsNotFocused()
             harness.actions shouldContain WorkspaceAction.DismissHint(FIRST_RUN_HINT)
         }
 

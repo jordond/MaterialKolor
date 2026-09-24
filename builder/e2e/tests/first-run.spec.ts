@@ -8,11 +8,12 @@ import { hook, openBuilder, reloadBuilder, wantHooks } from './builder';
 /** The hint, word for word, `about_first_run_hint`. */
 const HINT = 'Paste a color, drop an image, or press Space to shuffle. Press ? for shortcuts.';
 
-/** The poster's Shuffle button, there once the workspace has drawn. */
-const SHUFFLE = 'Shuffle';
-
-/** Long enough for boot to open the project once the workspace has drawn. */
-const BOOT_SETTLE_MS = 1_500;
+// b-314a
+/**
+ * The poster's Projects button once boot has opened a project. It reads "Projects" and the project's
+ * name, and only "Projects" before that. The hint shows in the same frame the name does.
+ */
+const NAMED_PROJECTS = '#cmp_a11y_root [aria-label^="Projects, "]';
 
 test.beforeEach(async ({ context }) => {
   await wantHooks(context);
@@ -23,6 +24,9 @@ test.describe('first run', () => {
     await openBuilder(page);
 
     await expect(onPage(page, HINT)).toHaveCount(1, { timeout: 30_000 });
+    // b-314a
+    // The boot signal the next test waits on is there beside the hint.
+    await expect(page.locator(NAMED_PROJECTS).first()).toBeAttached();
   });
 
   test('a dismissed hint is gone after a reload', async ({ page }) => {
@@ -31,8 +35,7 @@ test.describe('first run', () => {
 
     expect(await hook(page, 'addHint', 'first-run')).toBe('Done');
     await reloadBuilder(page);
-    await expect(onPage(page, SHUFFLE).first()).toBeAttached({ timeout: 30_000 });
-    await page.waitForTimeout(BOOT_SETTLE_MS);
+    await expect(page.locator(NAMED_PROJECTS).first()).toBeAttached({ timeout: 30_000 });
 
     await expect(onPage(page, HINT)).toHaveCount(0);
   });

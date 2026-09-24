@@ -243,6 +243,9 @@ internal class WorkspaceModel(
     }
 
     fun dismissHint(id: String) {
+        // b-314a
+        // The tab keeps the dismissal as well, so the hint stays shut when storage turns the write down.
+        updateState { state -> state.copy(sessionDismissedHints = state.sessionDismissedHints + id) }
         updatePreferences { prefs -> prefs.copy(dismissedHints = prefs.dismissedHints + id) }
     }
 
@@ -304,6 +307,8 @@ internal class WorkspaceModel(
      * spec after a switch to Expressive (F-03).
      * @property[rampHighlight] What the Palettes tab picks out after Show on ramp, with the project
      * it was picked in, or null. A tab switch clears it and nothing saves it.
+     * @property[sessionDismissedHints] The hints closed in this tab, kept beside the stored ones so
+     * a hint stays closed for the session when the preferences write fails.
      */
     @Immutable
     data class State(
@@ -323,6 +328,7 @@ internal class WorkspaceModel(
         val projectGeneration: Int = 0,
         val expressiveSuggestion: Boolean = false,
         val rampHighlight: RampHighlight? = null, // b-308
+        val sessionDismissedHints: Set<String> = emptySet(), // b-314a
     ) {
         /** What [document] exports to. */
         val target: ExportTarget

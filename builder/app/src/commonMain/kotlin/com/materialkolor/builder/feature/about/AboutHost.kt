@@ -35,6 +35,7 @@ import com.materialkolor.builder.generated.resources.about_details_label
 import com.materialkolor.builder.generated.resources.about_font_bricolage
 import com.materialkolor.builder.generated.resources.about_font_jetbrains_mono
 import com.materialkolor.builder.generated.resources.about_font_license
+import com.materialkolor.builder.generated.resources.about_font_license_failed
 import com.materialkolor.builder.generated.resources.about_github
 import com.materialkolor.builder.generated.resources.about_libraries
 import com.materialkolor.builder.generated.resources.about_material_kolor_version
@@ -65,6 +66,7 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * About, open while `state.panel` is [Panel.About] (F-36, F-37).
@@ -102,8 +104,10 @@ internal fun AboutHost(
     ) {
         // The dialog's body only composes while it is open, so an edit never works out a link here.
         val details = rememberReportDetails(state.document, model.browser)
-        // Every section holds a control that takes focus, so the list needs no Tab stop of its own.
-        BuilderScrollArea(Modifier.heightIn(max = layout.heightDp * ABOUT_HEIGHT_FRACTION), tabStop = false) {
+        // b-314a
+        // The intro, the privacy note, the library lines and an opened license hold no control, so
+        // the list keeps its own Tab stop for the keyboard to scroll them on the web, as Help does.
+        BuilderScrollArea(Modifier.heightIn(max = layout.heightDp * ABOUT_HEIGHT_FRACTION)) {
             Column(verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
                 AboutIntro()
                 MotionChoice(state.preferences.motion, dispatcher)
@@ -209,18 +213,41 @@ private fun Credits() {
     }
 }
 
-/** [font] under its license, the full text read only once it is opened. */
+/**
+ * [font] under its license, the full text read only once it is opened. A text that cannot be read,
+ * such as a fetch that fails on the web, leaves a short line with the license's name in its place.
+ *
+ * @param[read] Reads the full license of a font.
+ */
 @Composable
-private fun FontLicense(font: ShippedFont) {
+internal fun FontLicense(
+    font: ShippedFont,
+    read: suspend (ShippedFont) -> String = ::readFontLicense, // b-314a
+) {
     var open by rememberSaveable(font) { mutableStateOf(false) }
+    val license = stringResource(Res.string.about_font_license)
     BuilderDisclosure(
         expanded = open,
         onExpandedChange = { expanded -> open = expanded },
         title = stringResource(fontName(font)),
-        summary = stringResource(Res.string.about_font_license),
+        summary = license,
     ) {
-        val text by produceState("", font) { value = readFontLicense(font) }
-        BuilderText(text = text, style = BuilderTextStyle.Code)
+        // b-314a
+        // Null once the read failed. An error thrown in here would stop the whole UI on wasm.
+        val text by produceState<String?>("", font) {
+            value = runCatching { read(font) }
+                .onFailure { error -> if (error is CancellationException) throw error }
+                .getOrNull()
+        }
+        val loaded = text
+        if (loaded == null) {
+            BuilderText(
+                text = stringResource(Res.string.about_font_license_failed, license),
+                emphasis = Emphasis.Secondary,
+            )
+        } else {
+            BuilderText(text = loaded, style = BuilderTextStyle.Code)
+        }
     }
 }
 
