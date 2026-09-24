@@ -46,6 +46,7 @@ include(
     ":mcu-upstream",
     ":builder:shared",
     ":builder:android",
+    ":samples:shared",
     ":samples:custom-theme",
     ":samples:fluent",
 )
