@@ -1,8 +1,8 @@
 package com.materialkolor.builder.feature.topbar
 
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsNode
@@ -11,13 +11,13 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasContentDescriptionExactly
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
@@ -39,12 +39,14 @@ import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.command.InWorkspace
+import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.kit.a11y.KitTestApi
 import com.materialkolor.builder.kit.a11y.ProvideWebFoldsForTest
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.WindowClass
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import dev.zacsweers.metrox.viewmodel.metroViewModel
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.floats.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.longs.shouldBeGreaterThan
@@ -74,6 +76,8 @@ private val InSwitcher: SemanticsMatcher =
 
 @OptIn(ExperimentalTestApi::class, KitTestApi::class)
 class CompactMediumTopBarTest {
+    private lateinit var workspace: WorkspaceModel
+
     @Test
     fun at360_everySkin_fitsAndMeetsTheTouchTargets() = checkEverySkin(width = 360)
 
@@ -165,6 +169,9 @@ class CompactMediumTopBarTest {
     fun dropdown_tapOpensAndTapPicks() =
         runDesktopComposeUiTest(width = 720, height = HEIGHT) {
             val graph = showRoot(folds = false)
+            // Below 840 dp the open poster floats over the start of the bar, the dropdown with it, so a
+            // tap only reaches the dropdown once the poster is folded to its rail.
+            collapsePoster()
             val target = LibraryChoice.Fluent.takeUnless { choice ->
                 choice == LibraryChoice.of(graph.session.document.value)
             } ?: LibraryChoice.Unstyled
@@ -181,6 +188,11 @@ class CompactMediumTopBarTest {
     fun dropdown_arrowKeysAndEnterPick() =
         runDesktopComposeUiTest(width = 720, height = HEIGHT) {
             val graph = showRoot(folds = false)
+            // Material's own exposed dropdown opens in a window whose keys a JVM test cannot send, as the
+            // kit's select tests say. The web opens every skin's list in the page, focus on the chosen
+            // option, the way the headless select does here, so the keys are checked in a headless skin.
+            runOnIdle { graph.session.edit(LibraryChoice.Unstyled.change, EditPhase.Discrete) }
+            waitForIdle()
             val start = LibraryChoice.of(graph.session.document.value)
 
             val trigger = trigger()
@@ -192,13 +204,17 @@ class CompactMediumTopBarTest {
                 onAllNodes(options and named(choice)).fetchSemanticsNodes().isNotEmpty()
             }
             opened shouldBe LibraryChoice.entries.size
-            // The open menu is a window of its own, the last one to hold focus.
-            onAllNodes(isFocused()).onLast().performKeyInput { pressKey(Key.DirectionDown) }
+            // The list opens with focus on the chosen library. The trigger keeps focus in the window
+            // under the list, so the key goes to the focused option itself.
+            val focusedOption = options and isFocused()
+            onAllNodes(focusedOption and named(start)).fetchSemanticsNodes().size shouldBe 1
+            onNode(focusedOption).performKeyInput { pressKey(Key.DirectionDown) }
             waitForIdle()
-            onAllNodes(isFocused()).onLast().performKeyInput { pressKey(Key.Enter) }
+            onNode(focusedOption).performKeyInput { pressKey(Key.Enter) }
             waitForIdle()
 
-            (LibraryChoice.of(graph.session.document.value) == start) shouldBe false
+            LibraryChoice.of(graph.session.document.value) shouldBe
+                LibraryChoice.entries[(start.ordinal + 1) % LibraryChoice.entries.size]
         }
 
     /** The phone layout at 390 by 844, written to `build/screenshots` for a person to look over. */
@@ -302,6 +318,13 @@ class CompactMediumTopBarTest {
         return if (touch.width * touch.height > boundsInRoot.width * boundsInRoot.height) touch else boundsInRoot
     }
 
+    /** Folds the poster to its rail and waits for the shell to follow. */
+    private fun ComposeUiTest.collapsePoster() {
+        runOnUiThread { workspace.setPosterCollapsed(true) }
+        waitUntil { workspace.state.value.preferences.posterCollapsed }
+        waitForIdle()
+    }
+
     /** The whole builder on fakes, booted, read the way the web reads it when [folds] holds. */
     private fun ComposeUiTest.showRoot(folds: Boolean = true): AppGraph {
         val platform = FakePlatform()
@@ -312,7 +335,12 @@ class CompactMediumTopBarTest {
                 LocalViewModelStoreOwner provides owner,
                 LocalMetroViewModelFactory provides graph.metroViewModelFactory,
             ) {
-                if (folds) ProvideWebFoldsForTest { BuilderRoot(graph) } else BuilderRoot(graph)
+                workspace = metroViewModel()
+                if (folds) {
+                    ProvideWebFoldsForTest { BuilderRoot(graph, workspaceModel = workspace) }
+                } else {
+                    BuilderRoot(graph, workspaceModel = workspace)
+                }
             }
         }
         waitUntil { platform.environment.splashHidden }
