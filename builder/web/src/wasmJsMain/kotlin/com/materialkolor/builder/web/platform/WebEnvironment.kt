@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalWasmJsInterop::class)
+
 package com.materialkolor.builder.web.platform
 
 import com.materialkolor.builder.core.platform.BootSplash
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.random.Random
 
 /**
