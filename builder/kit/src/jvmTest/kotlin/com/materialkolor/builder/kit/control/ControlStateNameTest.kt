@@ -25,7 +25,6 @@ import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -69,6 +68,17 @@ class ControlStateNameTest {
             "Dark mode, switch, off, disabled"
         foldStateIntoName("Kotlin", ControlState.Selected(false), true, words, FoldedRole.Tab) shouldBe
             "Kotlin, tab, not selected"
+        foldStateIntoName("Contrast", ControlState.Value("0.50"), true, words, FoldedRole.Slider) shouldBe
+            "Contrast, slider, 0.50"
+        foldStateIntoName("Exporting", ControlState.Value("40%"), true, words, FoldedRole.ProgressBar) shouldBe
+            "Exporting, progress bar, 40%"
+        foldStateIntoName("Style", ControlState.Value("Tonal spot"), false, words, FoldedRole.PopUpButton) shouldBe
+            "Style, pop-up button, Tonal spot, disabled"
+        foldStateIntoName("Dark", ControlState.Checked(true), true, words, FoldedRole.MenuItem) shouldBe
+            "Dark, menu item, checked"
+        foldStateIntoName("Vibrant", ControlState.Selected(false), true, words, FoldedRole.Option) shouldBe
+            "Vibrant, option, not selected"
+        foldStateIntoName("Delete theme?", null, true, words, FoldedRole.Dialog) shouldBe "Delete theme?, dialog"
     }
 
     @Test
@@ -125,8 +135,8 @@ class ControlStateNameTest {
             onNode(hasContentDescriptionExactly("Tonal spot, radio, selected")).assert(isSelected())
             onNode(hasContentDescriptionExactly("Vibrant, radio, not selected")).assert(isNotSelected())
             onNode(hasContentDescriptionExactly("Grid, radio, selected")).assert(isSelected())
-            val select = if (skin.library == Library.Material3) "Scheme style" else "Scheme style, Tonal spot"
-            onNode(hasContentDescriptionExactly(select)).assert(hasRole(Role.DropdownList))
+            onNode(hasContentDescriptionExactly("Scheme style, pop-up button, Tonal spot"))
+                .assert(hasRole(Role.DropdownList))
             onNode(hasContentDescriptionExactly("Poster, Peek")).assert(hasRole(Role.Button))
         }
 
@@ -139,8 +149,12 @@ class ControlStateNameTest {
                 }
             }
 
-            onNodeWithTag(Progress).assert(hasTextExactly("Exporting, 40%")).assert(hasNoContentDescription())
-            onNodeWithTag(Slider).assert(hasTextExactly("Chroma, 0.25, disabled")).assert(hasNoContentDescription())
+            onNodeWithTag(Progress)
+                .assert(hasTextExactly("Exporting, progress bar, 40%"))
+                .assert(hasNoContentDescription())
+            onNodeWithTag(Slider)
+                .assert(hasTextExactly("Chroma, slider, 0.25, disabled"))
+                .assert(hasNoContentDescription())
             onNode(isSelectableGroup() and hasTextExactly("Scheme style")).assert(hasNoContentDescription())
             onNode(isSelectableGroup() and hasTextExactly("Layout")).assert(hasNoContentDescription())
         }

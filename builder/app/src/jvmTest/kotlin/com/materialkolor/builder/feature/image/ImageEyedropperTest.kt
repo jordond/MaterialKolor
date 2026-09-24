@@ -64,14 +64,35 @@ class ImageEyedropperTest {
         runComposeUiTest {
             val harness = PosterHarness(before, openPanel = Panel.ImageEyedropper)
             showEyedropper(harness)
-            onNodeWithText("Click any spot", substring = true).assertExists()
+            onNodeWithText("Pick any spot", substring = true).assertExists()
 
             onAllNodes(isFocused()).onLast().performKeyInput { pressKey(Key.Escape) }
             waitForIdle()
 
             harness.actions shouldBe listOf(WorkspaceAction.ClosePanel)
             harness.document shouldBe before
-            onNodeWithText("Click any spot", substring = true).assertDoesNotExist()
+            onNodeWithText("Pick any spot", substring = true).assertDoesNotExist()
+        }
+
+    // b-311d
+
+    @Test
+    fun rowLeaving_closesTheEyedropper_soNoPanelIsLeftOpen() =
+        runComposeUiTest {
+            val preset = Presets.images[0]
+            val onPreset = ThemeDocument(seed = preset.seed, seedSource = SeedSource.Preset(preset.id))
+            val harness = PosterHarness(onPreset, openPanel = Panel.ImageEyedropper)
+            showSection(harness) { context, dispatcher -> ImageCandidateRow(context, dispatcher) }
+            waitForIdle()
+            onNodeWithText("Pick any spot", substring = true).assertExists()
+
+            // A typed seed leaves the row out, and the eyedropper with it.
+            runOnUiThread { harness.document = onPreset.copy(seedSource = SeedSource.Typed) }
+            waitForIdle()
+
+            harness.actions shouldBe listOf(WorkspaceAction.ClosePanel)
+            harness.openPanel shouldBe null
+            onNodeWithText("Pick any spot", substring = true).assertDoesNotExist()
         }
 
     @Test

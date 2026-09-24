@@ -38,6 +38,12 @@ internal val TestStateWords: StateWords = StateWords(
     switch = "switch",
     radio = "radio",
     tab = "tab",
+    slider = "slider",
+    progressBar = "progress bar",
+    popUpButton = "pop-up button",
+    menuItem = "menu item",
+    option = "option",
+    dialog = "dialog",
 )
 
 /** One ink on one ground a control draws, and the least contrast the pair may have. */

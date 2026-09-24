@@ -68,21 +68,23 @@ internal class WorkspaceModel(
     private val resolver: ThemeResolver,
 ) : StateViewModel<WorkspaceModel.State>(
         State(
-            document = session.document.value,
-            capabilities = capabilitiesOf(session.document.value),
+            document = session.shown.value.document, // b-229
+            capabilities = capabilitiesOf(session.shown.value.document), // b-229
             history = session.history.value,
             view = session.viewState.value,
             preferences = preferences.preferences.value,
             saveStatus = session.saveStatus.value,
             // b-221c
-            projectGeneration = session.generation.value,
+            projectGeneration = session.shown.value.generation, // b-229
         ),
     ) {
     init {
         // b-221c
-        // The generation moves before the document does, so a new document always comes with its number.
-        session.document.mergeState { state, document ->
-            state.withDocument(document).copy(projectGeneration = session.generation.value)
+        // b-229
+        // The session publishes the document and its project's number as one value, so no state here
+        // ever pairs one project's document with another project's number, whatever order things run in.
+        session.shown.mergeState { state, shown ->
+            state.withDocument(shown.document).copy(projectGeneration = shown.generation)
         }
         session.history.mergeState { state, history -> state.copy(history = history) }
         session.viewState.mergeState { state, view -> state.copy(view = view) }
@@ -90,15 +92,6 @@ internal class WorkspaceModel(
         router.overlayPops.mergeState { state, _ -> state.copy(panel = null, pickerTarget = null) }
         session.projectName.mergeState { state, name -> state.copy(projectName = name) }
         session.saveStatus.mergeState { state, status -> state.copy(saveStatus = status) }
-        // b-221c
-        // b-221f
-        // b-306c
-        // Read with the document the session holds now, so a new number never lands beside the old document.
-        // That only holds while these collectors run after show() lets go of the thread, with the document
-        // already set. A session slice that publishes both from one StateFlow will make it hold everywhere.
-        session.generation.mergeState { state, generation ->
-            state.withDocument(session.document.value).copy(projectGeneration = generation)
-        }
     }
 
     /**
@@ -266,10 +259,16 @@ internal class WorkspaceModel(
 
     /** Read the session back into the state at once, so nothing waits on a collector. */
     private fun syncSession(expressiveSuggestion: Boolean) {
-        val document = session.document.value
+        val shown = session.shown.value // b-229
         val history = session.history.value
         updateState { state ->
-            state.withDocument(document).copy(history = history, expressiveSuggestion = expressiveSuggestion)
+            state
+                .withDocument(shown.document)
+                .copy(
+                    projectGeneration = shown.generation, // b-229
+                    history = history,
+                    expressiveSuggestion = expressiveSuggestion,
+                )
         }
     }
 
@@ -299,9 +298,8 @@ internal class WorkspaceModel(
      * @property[saveStatus] Whether the open project's latest changes are saved.
      * @property[projectGeneration] Counts the projects this tab has shown, one more each time another
      * opens. It changes in the same state as the document the new project brings, so anything that
-     * belongs to one project can tell a new project from an edit. That pairing holds only while the
-     * collectors run after the session's `show()` lets go of the thread, until a session slice
-     * publishes both from one `StateFlow`.
+     * belongs to one project can tell a new project from an edit. Both come from the session's one
+     * `shown` value, so the pair holds whatever order the collectors run in.
      * @property[expressiveSuggestion] Whether the top bar offers the Expressive style on the 2025
      * spec after a switch to Expressive (F-03).
      * @property[rampHighlight] What the Palettes tab picks out after Show on ramp, with the project

@@ -58,8 +58,11 @@ import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.foldMenuRow
+import com.materialkolor.builder.kit.control.foldOption
 import com.materialkolor.builder.kit.control.foldState
+import com.materialkolor.builder.kit.control.shownChoiceName
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
@@ -177,9 +180,10 @@ internal fun DropdownList(
 /**
  * One row of a dropdown.
  *
- * A row that knows whether it is [selected] is an option and carries a check next to its label, so
- * the selection never rests on colour alone (AR-03). A row without is a plain command. On the web
- * an option folds its state into its name, and a disabled row the disabled note (D37).
+ * A row that knows whether it is [selected] carries a check next to its label while it is the
+ * current one, so the selection never rests on colour alone (AR-03). A row without is a plain
+ * command. On the web a row folds its role word into its name, "menu item" or, for [asOption],
+ * "option", then its state and the disabled note (D37, D40).
  */
 @Composable
 internal fun HeadlessDropdownItem(
@@ -191,6 +195,7 @@ internal fun HeadlessDropdownItem(
     emphasis: Emphasis = Emphasis.Primary,
     enabled: Boolean = true,
     selected: Boolean? = null,
+    asOption: Boolean = false,
 ) {
     val tokens = LocalBuilderTokens.current
     val interaction = remember { MutableInteractionSource() }
@@ -200,13 +205,18 @@ internal fun HeadlessDropdownItem(
     } else {
         Modifier.selectable(selected, interaction, null, enabled, Role.RadioButton, onClick)
     }
+    val named = if (asOption) {
+        Modifier.foldOption(label, selected == true, enabled)
+    } else {
+        Modifier.foldMenuRow(label, selected, enabled)
+    }
     Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = LocalLayout.current.minTouchTarget)
             .overlayFeedback(interaction, style, enabled = enabled, selected = selected == true)
             .then(action)
-            .foldMenuRow(label, selected, enabled)
+            .then(named)
             .padding(horizontal = tokens.spacing.medium),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.medium),
@@ -281,7 +291,8 @@ private fun HeadlessMenuRows(
  *
  * The field reads as a dropdown list with the chosen option as its state, and each option reads as
  * a radio button that knows whether it is selected. Down and Alt+Down open the list as well as a
- * click, Enter and Space, and the list opens with focus on the chosen option.
+ * click, Enter and Space, and the list opens with focus on the chosen option. The field fills the
+ * width and height the select is given, so a click anywhere inside those bounds opens it.
  */
 @Composable
 internal fun <T> HeadlessSelect(
@@ -300,7 +311,7 @@ internal fun <T> HeadlessSelect(
     var fieldWidth by remember { mutableIntStateOf(0) }
     val selectedRow = remember { FocusRequester() }
     val field = remember { FocusRequester() }
-    Box(modifier) {
+    Box(modifier, propagateMinConstraints = true) {
         SelectField(
             label = label,
             current = optionLabel(selected),
@@ -336,7 +347,8 @@ internal fun <T> HeadlessSelect(
 
 /**
  * A select drawn open where it stands, its field over the list of [HeadlessSelect] with nothing
- * floating. The field only shows the choice, so Tab goes straight to the options.
+ * floating. The field only shows the choice, so Tab goes straight to the options. On the web it
+ * plays no role and reads as text, "Style, Vibrant" (D40).
  */
 @Composable
 internal fun <T> HeadlessSelectPanel(
@@ -348,13 +360,15 @@ internal fun <T> HeadlessSelectPanel(
     style: OverlayStyle,
     modifier: Modifier,
 ) {
+    val current = optionLabel(selected)
     Column(modifier.width(IntrinsicSize.Max)) {
+        // b-230c
         SelectField(
             label = label,
-            current = optionLabel(selected),
+            current = current,
             enabled = true,
             style = style,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.shownChoiceName(label, current).fillMaxWidth(),
             action = Modifier.semantics(mergeDescendants = true) { role = Role.DropdownList },
         )
         DropdownList(style, modifier = Modifier.fillMaxWidth()) {
@@ -364,8 +378,10 @@ internal fun <T> HeadlessSelectPanel(
 }
 
 /**
- * A select's field, its label over the choice and a chevron after them. It reads as a dropdown
- * list whose state is the choice, and [action] makes it one.
+ * A select's field, its label over the choice and a chevron after them, at the far end when the
+ * field is wider than they are. It reads as a dropdown list whose state is the choice, and [action]
+ * makes it one. On the web its name carries the role word, "Style, pop-up button, Tonal spot" (D40),
+ * unless [modifier] starts with [shownChoiceName] for a field that only shows the choice.
  */
 @Composable
 private fun SelectField(
@@ -384,16 +400,21 @@ private fun SelectField(
             .border(style.fieldBorder, style.itemShape)
             .then(action)
             .semantics { stateDescription = current }
-            .foldState(label, ControlState.Value(current), enabled)
+            .foldState(label, ControlState.Value(current), enabled, role = FoldedRole.PopUpButton)
             .padding(horizontal = tokens.spacing.medium, vertical = tokens.spacing.extraSmall),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Column(Modifier.weight(1f, fill = false)) {
             BuilderText(label, style = BuilderTextStyle.Value, color = style.muted, maxLines = 1)
             BuilderText(current, style = BuilderTextStyle.Label, color = style.content, maxLines = 1)
         }
-        BuilderIcon(IconId.ChevronDown, contentDescription = null, tint = style.content)
+        BuilderIcon(
+            id = IconId.ChevronDown,
+            contentDescription = null,
+            modifier = Modifier.padding(start = tokens.spacing.small),
+            tint = style.content,
+        )
     }
 }
 
@@ -415,6 +436,7 @@ private fun <T> HeadlessSelectRows(
             style = style,
             modifier = if (isSelected && selectedRow != null) Modifier.focusRequester(selectedRow) else Modifier,
             selected = isSelected,
+            asOption = true,
         )
     }
 }

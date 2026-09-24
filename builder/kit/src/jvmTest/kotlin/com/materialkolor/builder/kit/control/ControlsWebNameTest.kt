@@ -21,13 +21,18 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isNotSelected
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
@@ -43,14 +48,18 @@ import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** Shows [content] in [skin] the way the web does, with the fold and the web's keyboard turned on. */
+/**
+ * Shows [content] in [skin] the way the web does, with the fold and the web's keyboard turned on,
+ * and the overlays in the page when [inTree] is set.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.showFolded(
     skin: Skin,
+    inTree: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     setContent {
-        ControlsHarness(skin) {
+        HostOverlays(skin, inTree) {
             CompositionLocalProvider(
                 LocalFoldsStateIntoName provides true,
                 LocalWebKeyboard provides true,
@@ -116,7 +125,7 @@ class ControlsWebNameTest {
         }
 
     @Test
-    fun menuRows_flagOn_everySkin_foldDisabledAndSelected() =
+    fun menuRows_flagOn_everySkin_foldTheirRoleWordDisabledAndChecked() =
         forEachSkin { _, skin ->
             showFolded(skin) {
                 BuilderMenu(
@@ -132,10 +141,77 @@ class ControlsWebNameTest {
             }
             waitForIdle()
 
-            onNode(hasText("Duplicate") and hasRole(Role.Button)).assert(hasContentDescriptionExactly("Duplicate"))
-            onNode(hasText("Archive")).assert(hasContentDescriptionExactly("Archive, disabled"))
-            onNode(hasText("Dark") and isSelected()).assert(hasContentDescriptionExactly("Dark, selected"))
-            onNode(hasText("Light") and isNotSelected()).assert(hasContentDescriptionExactly("Light, not selected"))
+            onNode(hasText("Duplicate") and hasRole(Role.Button))
+                .assert(hasContentDescriptionExactly("Duplicate, menu item"))
+            onNode(hasText("Archive")).assert(hasContentDescriptionExactly("Archive, menu item, disabled"))
+            onNode(hasText("Dark") and isSelected()).assert(hasContentDescriptionExactly("Dark, menu item, checked"))
+            onNode(hasText("Light") and isNotSelected())
+                .assert(hasContentDescriptionExactly("Light, menu item, not checked"))
+        }
+
+    @Test
+    fun valueNodes_flagOn_everySkin_readTheirRoleWordBeforeTheValue() =
+        forEachSkin { _, skin ->
+            showFolded(skin) {
+                Column {
+                    BuilderSlider(0.5f, {}, "Contrast", Modifier.testTag("contrast").width(320.dp))
+                    BuilderSlider(0.25f, {}, "Chroma", Modifier.testTag("chroma").width(320.dp), enabled = false)
+                    BuilderProgress("Exporting", Modifier.testTag("exporting"), progress = 0.4f)
+                    BuilderProgress("Loading", Modifier.testTag("loading"))
+                }
+            }
+
+            onNodeWithTag("contrast").assert(hasTextExactly("Contrast, slider, 0.50"))
+            onNodeWithTag("chroma").assert(hasTextExactly("Chroma, slider, 0.25, disabled"))
+            onNodeWithTag("exporting").assert(hasTextExactly("Exporting, progress bar, 40%"))
+            onNodeWithTag("loading").assert(hasTextExactly("Loading, progress bar"))
+        }
+
+    @Test
+    fun selects_onTheWeb_everySkin_readAsPopUpButtonsOverTheirOptions() =
+        hostEachWay { skin, inTree ->
+            showFolded(skin, inTree) {
+                Column {
+                    BuilderSelect("Style", listOf("Tonal spot", "Vibrant"), "Tonal spot", {})
+                    BuilderSelect("Spec", listOf("2021"), "2021", {}, enabled = false)
+                }
+            }
+            val editable = SemanticsMatcher.keyIsDefined(SemanticsProperties.EditableText)
+            onAllNodes(editable).assertCountEquals(0)
+            onNode(hasContentDescriptionExactly("Spec, pop-up button, 2021, disabled")).assertExists()
+            val style = onNode(hasContentDescriptionExactly("Style, pop-up button, Tonal spot"))
+            style.assert(hasClickAction()).assert(hasRole(Role.DropdownList))
+
+            style.performClick()
+            waitForIdle()
+
+            onNode(hasContentDescriptionExactly("Tonal spot, option, selected")).assert(isSelected())
+            onNode(hasContentDescriptionExactly("Vibrant, option, not selected")).assert(isNotSelected())
+            onAllNodes(editable).assertCountEquals(0)
+        }
+
+    @Test
+    fun openPanels_flagOn_everySkin_readTheSelectFieldAsTextOverMenuItemsAndOptions() =
+        forEachSkin { _, skin ->
+            showFolded(skin) {
+                Column {
+                    BuilderMenuPanel(
+                        listOf(BuilderMenuItem("Duplicate", {}), BuilderMenuItem("Dark", {}, selected = true)),
+                    )
+                    BuilderSelectPanel("Style", listOf("Tonal spot", "Vibrant"), "Vibrant", {})
+                }
+            }
+
+            onNode(hasText("Duplicate")).assert(hasContentDescriptionExactly("Duplicate, menu item"))
+            onNode(hasText("Dark")).assert(hasContentDescriptionExactly("Dark, menu item, checked"))
+            onNode(hasTextExactly("Style, Vibrant"))
+                .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.Role))
+                .assert(hasNoContentDescription())
+                .assert(!hasClickAction())
+            onAllNodes(hasContentDescription("pop-up button", substring = true)).assertCountEquals(0)
+            onNode(hasContentDescriptionExactly("Tonal spot, option, not selected")).assert(isNotSelected())
+            onNode(hasContentDescriptionExactly("Vibrant, option, selected")).assert(isSelected())
+            onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.EditableText)).assertCountEquals(0)
         }
 
     @Test

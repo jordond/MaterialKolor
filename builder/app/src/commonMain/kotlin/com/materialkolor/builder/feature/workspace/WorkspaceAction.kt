@@ -216,6 +216,7 @@ internal enum class Panel {
     Explainer,
     Share,
     ImageEyedropper, // b-311b
+    Presets, // b-311d
     Help, // b-314
 }
 

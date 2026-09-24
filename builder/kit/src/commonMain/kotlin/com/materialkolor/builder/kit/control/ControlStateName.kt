@@ -6,6 +6,7 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.text
@@ -14,7 +15,13 @@ import com.materialkolor.builder.kit.a11y.LocalWebKeyboard
 import com.materialkolor.builder.kit.a11y.onWebMirror
 import com.materialkolor.builder.kit.generated.resources.Res
 import com.materialkolor.builder.kit.generated.resources.role_checkbox
+import com.materialkolor.builder.kit.generated.resources.role_dialog
+import com.materialkolor.builder.kit.generated.resources.role_menu_item
+import com.materialkolor.builder.kit.generated.resources.role_option
+import com.materialkolor.builder.kit.generated.resources.role_pop_up_button
+import com.materialkolor.builder.kit.generated.resources.role_progress_bar
 import com.materialkolor.builder.kit.generated.resources.role_radio
+import com.materialkolor.builder.kit.generated.resources.role_slider
 import com.materialkolor.builder.kit.generated.resources.role_switch
 import com.materialkolor.builder.kit.generated.resources.role_tab
 import com.materialkolor.builder.kit.generated.resources.state_checked
@@ -36,9 +43,10 @@ import org.jetbrains.compose.resources.stringResource
  * `contenteditable` and test tags. Selected, toggle state, state description and disabled never
  * reach the page. So where this is set the kit folds the state into the content description of the
  * control's merged node, and the label is read once with its state. It folds in the role's word
- * too where a click handler hides the role (P3, D40), and it names a node with no role through its
- * text, since screen readers drop an `aria-label` there ([roleLessName]). The Compose semantics
- * stay in place everywhere, for when CMP 1.13 carries them across.
+ * too where a click handler hides the role or the mirror has none for it (P3, D40), and it names a
+ * node with no role through its text, since screen readers drop an `aria-label` there
+ * ([roleLessName]). The Compose semantics stay in place everywhere, for when CMP 1.13 carries them
+ * across.
  *
  * It starts from [onWebMirror], and it is a local so a test can fold a whole tree on the JVM. The
  * web's keyboard habits outlive the fold, so they read [LocalWebKeyboard] instead.
@@ -79,7 +87,8 @@ internal sealed interface ControlState {
 
 /**
  * A role the web mirror loses. CMP 1.12.1 lets a click handler replace the role, so every clickable
- * reads as a button there (P3). While that stands the role's word travels in the name (D40).
+ * reads as a button there (P3), and it has no role at all for a slider, a progress bar or a dialog.
+ * While that stands the role's word travels in the name (D40).
  */
 internal enum class FoldedRole {
     /** A box that is ticked or not. */
@@ -93,6 +102,24 @@ internal enum class FoldedRole {
 
     /** One tab of a tab row. */
     Tab,
+
+    /** A value set along a track, a slider or a channel of the color picker. */
+    Slider,
+
+    /** A bar that shows how far along some work is. */
+    ProgressBar,
+
+    /** A select's field, which opens the list of its options. */
+    PopUpButton,
+
+    /** One row of a menu. */
+    MenuItem,
+
+    /** One row of a select's list. */
+    Option,
+
+    /** A modal pane, a dialog, a sheet or a side panel. */
+    Dialog,
 }
 
 /**
@@ -116,6 +143,12 @@ internal class StateWords(
     val switch: String,
     val radio: String,
     val tab: String,
+    val slider: String,
+    val progressBar: String,
+    val popUpButton: String,
+    val menuItem: String,
+    val option: String,
+    val dialog: String,
 ) {
     /** How [state] reads on its own, as a state description. */
     fun of(state: ControlState): String =
@@ -148,6 +181,12 @@ internal class StateWords(
             FoldedRole.Switch -> switch
             FoldedRole.Radio -> radio
             FoldedRole.Tab -> tab
+            FoldedRole.Slider -> slider
+            FoldedRole.ProgressBar -> progressBar
+            FoldedRole.PopUpButton -> popUpButton
+            FoldedRole.MenuItem -> menuItem
+            FoldedRole.Option -> option
+            FoldedRole.Dialog -> dialog
         }
 }
 
@@ -170,6 +209,12 @@ internal fun stateWords(): StateWords =
         switch = stringResource(Res.string.role_switch),
         radio = stringResource(Res.string.role_radio),
         tab = stringResource(Res.string.role_tab),
+        slider = stringResource(Res.string.role_slider),
+        progressBar = stringResource(Res.string.role_progress_bar),
+        popUpButton = stringResource(Res.string.role_pop_up_button),
+        menuItem = stringResource(Res.string.role_menu_item),
+        option = stringResource(Res.string.role_option),
+        dialog = stringResource(Res.string.role_dialog),
     )
 
 /**
@@ -239,8 +284,9 @@ internal fun Modifier.foldState(
 }
 
 /**
- * Folds a menu row's state into its name. A row that knows whether it is [selected] is an option
- * and carries that state, a plain command only the disabled note.
+ * Folds a menu row's role and state into its name, "Duplicate, menu item". A row that knows whether
+ * it is [selected] is the current one of a set and reads as checked or not, "Dark, menu item,
+ * checked", the way a menu reads a radio row. A plain command carries only the disabled note.
  *
  * The name is set whether the row is enabled or not. The web mirror never takes an `aria-label`
  * back, so a name set only while disabled would still read disabled once the row is enabled again.
@@ -250,7 +296,54 @@ internal fun Modifier.foldMenuRow(
     name: String,
     selected: Boolean?,
     enabled: Boolean,
-): Modifier = foldState(name, selected?.let { current -> ControlState.Selected(current) }, enabled)
+): Modifier {
+    val state = selected?.let { current -> ControlState.Checked(current) }
+    return foldState(name, state, enabled, role = FoldedRole.MenuItem)
+}
+
+/**
+ * Folds a select option's role and whether it is [selected] into its name, "Vibrant, option, not
+ * selected". Like [foldMenuRow] it names the row whether it is enabled or not.
+ */
+@Composable
+internal fun Modifier.foldOption(
+    name: String,
+    selected: Boolean,
+    enabled: Boolean = true,
+): Modifier = foldState(name, ControlState.Selected(selected), enabled, role = FoldedRole.Option)
+
+/**
+ * The name a select's field goes by, "Style, pop-up button, Tonal spot" where
+ * [LocalFoldsStateIntoName] is set and [label] elsewhere. Every skin's field reads the same. The
+ * field over an open panel opens nothing and reads through [shownChoiceName] instead.
+ */
+@Composable
+internal fun selectFieldName(
+    label: String,
+    current: String,
+    enabled: Boolean,
+): String = stateName(label, ControlState.Value(current), enabled, role = FoldedRole.PopUpButton)
+
+/**
+ * Names a select's field that only shows the choice, the one over an open panel, where
+ * [LocalFoldsStateIntoName] is set. It opens nothing, so there it plays no role, since the mirror
+ * writes a dropdown list as a menu and a button would do nothing. Its label and choice go in as
+ * text through [roleLessName], "Style, Vibrant", with no role word. It stays in the mirror, as the
+ * only label the options under it have. Elsewhere it adds nothing and the field keeps its own
+ * semantics.
+ *
+ * It clears the semantics of the field it lands on, so it goes first on the field, before the
+ * modifiers that set its role and state.
+ */
+@Composable
+internal fun Modifier.shownChoiceName(
+    label: String,
+    current: String,
+): Modifier {
+    if (!LocalFoldsStateIntoName.current) return this
+    val name = stateName(label, ControlState.Value(current))
+    return clearAndSetSemantics { roleLessName(name, asText = true) }
+}
 
 /**
  * Names a node that plays no role, such as a slider, a progress bar or a group of options.

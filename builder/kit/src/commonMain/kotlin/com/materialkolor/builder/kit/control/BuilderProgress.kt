@@ -61,8 +61,8 @@ public fun BuilderProgress(
 
 /**
  * Names a progress bar and, when [progress] is known, states it as a whole percentage. On the web
- * the percentage rides in the name as well (D37), and the name goes in as text, since the bar has
- * no role there (S5 answer 1).
+ * the bar has no role, so its role word and the percentage ride in the name, "Exporting, progress
+ * bar, 40%" (D37, D40), and the name goes in as text (S5 answer 1).
  */
 @Composable
 internal fun Modifier.progressLabel(
@@ -70,7 +70,7 @@ internal fun Modifier.progressLabel(
     progress: Float?,
 ): Modifier {
     val percent = progress?.let { amount -> stringResource(Res.string.progress_percent, (amount * 100).roundToInt()) }
-    val name = stateName(label, percent?.let { text -> ControlState.Value(text) })
+    val name = stateName(label, percent?.let { text -> ControlState.Value(text) }, role = FoldedRole.ProgressBar)
     val asText = LocalFoldsStateIntoName.current
     return semantics {
         roleLessName(name, asText)

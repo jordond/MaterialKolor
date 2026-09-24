@@ -202,6 +202,8 @@ private fun PresetRow(
     }
 }
 
+// b-311b
+
 /**
  * One chip per candidate, drawn the way a style chip is, from the scheme the candidate makes in the
  * document's style. The schemes resolve one per frame, so a new image never costs five in one. A
@@ -210,7 +212,7 @@ private fun PresetRow(
 @Composable
 private fun CandidateChips(
     context: PosterContext,
-    candidates: List<Argb>, // b-311b
+    candidates: List<Argb>,
     source: SeedSource,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier,
@@ -258,20 +260,22 @@ private fun CandidateChips(
  *
  * New inputs, from a style or contrast edit, keep the colors already there and overwrite them one
  * per frame, picking up after the last chip that resolved. So an edit never blanks the chips, and a
- * drag that changes the inputs every frame still walks through all of them. Other [candidates],
- * such as an undo back to an earlier image, start over from blank chips instead, since the colors
- * kept belong to another image's chips.
+ * drag that changes the inputs every frame still walks through all of them. Other [chips], such as
+ * the candidates of an earlier image an undo goes back to, start over from blank chips instead,
+ * since the colors kept belong to other chips.
+ *
+ * @param[chips] What the chips stand for, the candidates of an image or the starters.
  */
 @Composable
-private fun rememberCandidateColors(
-    candidates: List<Argb>,
+internal fun rememberCandidateColors(
+    chips: List<Any>, // b-311d
     inputs: List<SchemeInputs>,
     isDark: Boolean,
     resolver: ThemeResolver,
 ): List<CandidateColors?> {
     // b-311c
-    val colors = remember(candidates) { mutableStateListOf<CandidateColors?>() }
-    val next = remember(candidates) { NextChip() }
+    val colors = remember(chips) { mutableStateListOf<CandidateColors?>() }
+    val next = remember(chips) { NextChip() }
     LaunchedEffect(inputs, isDark, resolver) {
         while (colors.size > inputs.size) colors.removeAt(colors.lastIndex)
         while (colors.size < inputs.size) colors.add(null)
@@ -303,8 +307,10 @@ private fun Thumbnail(bitmap: ImageBitmap) {
     )
 }
 
+// b-311d
+
 /** The three colors a candidate chip is drawn in. */
-private class CandidateColors(
+internal class CandidateColors(
     val primary: Color,
     val secondaryContainer: Color,
     val tertiaryContainer: Color,

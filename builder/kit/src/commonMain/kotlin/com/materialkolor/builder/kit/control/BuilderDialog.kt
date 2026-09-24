@@ -15,11 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.semantics.paneTitle
-import androidx.compose.ui.semantics.semantics
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessModal
 import com.materialkolor.builder.kit.headless.keepTaps
+import com.materialkolor.builder.kit.headless.modalPane
+import com.materialkolor.builder.kit.headless.modalTitle
 import com.materialkolor.builder.kit.headless.overlayLibrary
 import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
@@ -48,7 +48,10 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * @param[returnFocusTo] The trigger that opened the dialog. Attach it to the trigger with
  * `Modifier.focusRequester`.
  * @param[actions] The buttons along the bottom, the confirming one last.
- * @param[content] The body.
+ * @param[content] The body. It takes at most the height the title and the actions leave, in every
+ * skin, so a picture or a list in it gets what is left and the actions stay on screen, on a phone on
+ * its side as well. A list that sits over more of the body takes `Modifier.weight(1f, fill = false)`
+ * from the body's column, so what is under it keeps its room.
  */
 @Composable
 public fun BuilderDialog(
@@ -129,13 +132,13 @@ private fun HeadlessDialog(
                 .clip(style.dialogShape)
                 .background(style.surface)
                 .then(if (style.border != null) Modifier.border(style.border, style.dialogShape) else Modifier)
-                .semantics { paneTitle = title }
+                .modalPane(title)
                 .keepTaps()
                 .padding(tokens.spacing.extraLarge),
             verticalArrangement = Arrangement.spacedBy(tokens.spacing.large),
         ) {
-            BuilderText(title, style = BuilderTextStyle.Title, color = style.content)
-            Column(content = content)
+            BuilderText(title, Modifier.modalTitle(), style = BuilderTextStyle.Title, color = style.content)
+            Column(Modifier.weight(1f, fill = false), content = content) // b-230c
             Row(
                 modifier = Modifier.align(Alignment.End),
                 horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),

@@ -58,6 +58,34 @@ class ValueNodeNameTest {
             }
         }
     }
+
+    @Test
+    fun valueNodeName_withTheSliderWord_readsItBetweenTheNameAndTheValueOnlyOnTheWeb() {
+        for (folds in listOf(true, false)) {
+            withClue("folds $folds") {
+                runComposeUiTest {
+                    setContent {
+                        CompositionLocalProvider(LocalFoldsStateIntoName provides folds) {
+                            val fold = foldsValueIntoName
+                            val slider = sliderRoleWord
+                            Box(
+                                Modifier
+                                    .size(40.dp)
+                                    .testTag(ValueTag)
+                                    .semantics { valueNodeName("Split", "50% Light", fold, roleWord = slider) },
+                            )
+                        }
+                    }
+
+                    valueNode() shouldBe ValueNode(
+                        text = if (folds) "Split, slider, 50% Light" else null,
+                        description = if (folds) null else "Split",
+                        state = "50% Light",
+                    )
+                }
+            }
+        }
+    }
 }
 
 /** What a value node says, its text, its content description and its state description. */

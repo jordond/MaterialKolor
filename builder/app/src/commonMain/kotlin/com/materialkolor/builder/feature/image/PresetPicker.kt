@@ -1,12 +1,9 @@
 package com.materialkolor.builder.feature.image
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -18,11 +15,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.ContentScale
-import com.materialkolor.builder.engine.mapping.toColor
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.PreviewMode
+import com.materialkolor.builder.engine.resolve.SchemeInputs
+import com.materialkolor.builder.feature.poster.ContrastStop
 import com.materialkolor.builder.feature.poster.PosterContext
+import com.materialkolor.builder.feature.poster.rememberThemeResolver
 import com.materialkolor.builder.feature.poster.styleName
+import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.image_menu_presets
@@ -34,6 +39,7 @@ import com.materialkolor.builder.generated.resources.image_presets_starters
 import com.materialkolor.builder.generated.resources.image_presets_starters_line
 import com.materialkolor.builder.generated.resources.image_presets_title
 import com.materialkolor.builder.generated.resources.image_starter_card
+import com.materialkolor.builder.generated.resources.image_starter_card_contrast
 import com.materialkolor.builder.generated.resources.poster_image
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderCard
@@ -45,23 +51,28 @@ import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
-import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.kit.widget.SchemeChip
 import com.materialkolor.builder.kit.widget.SchemeChipFootprint
+import com.materialkolor.builder.kit.widget.SchemeChipSkeleton
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-/** How much of the window's height the picker's list may take before it scrolls. */
-private const val PICKER_HEIGHT_FRACTION = 0.6f
+/** Tags a starter's scheme chip once it has resolved, for tests to count them. */
+internal const val STARTER_CHIP_TAG: String = "image-starter-chip"
+
+/** Tags a starter's skeleton while its scheme resolves. */
+internal const val STARTER_SKELETON_TAG: String = "image-starter-skeleton"
 
 /**
  * The Image button, which opens a menu of the two ways to seed from a picture (F-08, F-09).
  *
  * Upload image opens the platform picker. Browsers only open it inside the click, so the row's click
  * dispatches `OpenImagePicker` and the workspace starts the pick before the click returns (R-B-302).
- * Presets and starters opens [PresetPicker], and a preset or starter chosen there lands behind a
- * crossfade as one undo entry. The picker hands the focus back to this button once it closes.
+ * Presets and starters opens [PresetPicker] as `Panel.Presets`, so Back closes it, and a preset or
+ * starter chosen there lands behind a crossfade as one undo entry. The picker hands the focus back
+ * to this button once it closes.
  */
 @Composable
 internal fun ImageMenuButton(
@@ -70,7 +81,7 @@ internal fun ImageMenuButton(
     modifier: Modifier = Modifier,
 ) {
     var menu by remember { mutableStateOf(false) }
-    var picker by remember { mutableStateOf(false) }
+    val close = { dispatcher.dispatch(WorkspaceAction.ClosePanel) }
     val button = remember { FocusRequester() }
     val items = listOf(
         BuilderMenuItem(
@@ -80,7 +91,7 @@ internal fun ImageMenuButton(
         ),
         BuilderMenuItem(
             label = stringResource(Res.string.image_menu_presets),
-            onClick = { picker = true },
+            onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Presets)) }, // b-311d
             icon = IconId.Image,
         ),
     )
@@ -92,14 +103,17 @@ internal fun ImageMenuButton(
             icon = IconId.Image,
         )
     }
+    // b-311d
     PresetPicker(
-        visible = picker,
+        visible = context.openPanel == Panel.Presets,
+        document = context.result.document,
+        isDark = context.visibleModes == PreviewMode.Dark,
         onChoose = { preset ->
-            picker = false
+            close()
             // The picker is closing over wherever the card sat, so the theme crossfades in place.
             dispatcher.dispatch(WorkspaceAction.EditWithReveal(preset.change(context.document), origin = null))
         },
-        onDismissRequest = { picker = false },
+        onDismissRequest = close,
         returnFocusTo = button,
     )
 }
@@ -109,21 +123,27 @@ internal fun ImageMenuButton(
  *
  * A picture sets only the seed, to its strongest color, and the row under the seed actions then
  * offers its other colors. A starter sets the seed, the style and the contrast. Neither touches the
- * target, the overrides, the pins or the accents.
+ * target, the overrides, the pins or the accents. Each starter's card shows the scheme it makes of
+ * [document], resolved one per frame once the picker opens.
  *
+ * @param[visible] Whether the picker is open, while the workspace's panel is `Panel.Presets`.
+ * @param[document] The theme a starter's scheme is drawn from, with the starter's seed, style and
+ * contrast in place of its own.
+ * @param[isDark] Whether the starters' schemes are drawn dark.
  * @param[onChoose] Called with the preset a card chooses. The picker stays open until told otherwise.
  * @param[returnFocusTo] The button that opened the picker, which gets the focus back once it closes.
  */
 @Composable
 internal fun PresetPicker(
     visible: Boolean,
+    document: ThemeDocument,
+    isDark: Boolean,
     onChoose: (Preset) -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     returnFocusTo: FocusRequester? = null,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
-    val layout = LocalLayout.current
     BuilderDialog(
         visible = visible,
         onDismissRequest = onDismissRequest,
@@ -138,8 +158,10 @@ internal fun PresetPicker(
             )
         },
     ) {
-        // The cards take the focus themselves, so the list needs no Tab stop of its own.
-        BuilderScrollArea(Modifier.heightIn(max = layout.heightDp * PICKER_HEIGHT_FRACTION), tabStop = false) {
+        // b-311d
+        // The cards take the focus themselves, so the list needs no Tab stop of its own. It scrolls
+        // in the height the title and the buttons leave, so the buttons stay on screen.
+        BuilderScrollArea(Modifier.leaveRoomBelow(dialogButtonRoom()), tabStop = false) {
             Column(verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
                 PresetGroup(
                     title = stringResource(Res.string.image_presets_images),
@@ -155,13 +177,7 @@ internal fun PresetPicker(
                     title = stringResource(Res.string.image_presets_starters),
                     line = stringResource(Res.string.image_presets_starters_line),
                 ) {
-                    Presets.starters.forEach { starter ->
-                        val style = stringResource(styleName(starter.style))
-                        val name = stringResource(Res.string.image_starter_card, stringResource(starter.name), style)
-                        PresetCard(name, onClick = { onChoose(starter) }) {
-                            StarterSwatch(starter)
-                        }
-                    }
+                    StarterCards(document, isDark, onChoose) // b-311d
                 }
             }
         }
@@ -220,14 +236,77 @@ private fun PresetPicture(preset: Preset.Image) {
     )
 }
 
-/** The starter's seed as a swatch in the room a chip takes. */
+// b-311d
+
+/**
+ * A card for each starter, with the scheme the starter makes of [document] drawn as a chip. The
+ * schemes resolve one per frame, each a skeleton until its turn, so opening the picker never costs
+ * eight in one frame.
+ */
 @Composable
-private fun StarterSwatch(starter: Preset.Starter) {
-    val radius = LocalBuilderTokens.current.radius
-    Box(
-        Modifier
-            .size(SchemeChipFootprint)
-            .clip(RoundedCornerShape(radius.small))
-            .background(starter.seed.toColor()),
+private fun StarterCards(
+    document: ThemeDocument,
+    isDark: Boolean,
+    onChoose: (Preset) -> Unit,
+) {
+    val starters = Presets.starters
+    val resolver = rememberThemeResolver()
+    val inputs = remember(document) {
+        starters.map { starter ->
+            SchemeInputs.from(document.copy(seed = starter.seed, style = starter.style, contrast = starter.contrast))
+        }
+    }
+    val colors = rememberCandidateColors(starters, inputs, isDark, resolver)
+    starters.forEachIndexed { index, starter ->
+        val name = starterName(starter)
+        PresetCard(name, onClick = { onChoose(starter) }) {
+            StarterChip(colors.getOrNull(index), name, onClick = { onChoose(starter) })
+        }
+    }
+}
+
+/**
+ * The starter's name and style, and its contrast too when that is not Standard, such as "Ink,
+ * TonalSpot, Medium contrast".
+ */
+@Composable
+private fun starterName(starter: Preset.Starter): String {
+    val name = stringResource(starter.name)
+    val style = stringResource(styleName(starter.style))
+    val contrast = ContrastStop.of(starter.contrast)?.takeIf { stop -> stop != ContrastStop.Standard }
+    return if (contrast == null) {
+        stringResource(Res.string.image_starter_card, name, style)
+    } else {
+        stringResource(Res.string.image_starter_card_contrast, name, style, stringResource(contrast.label))
+    }
+}
+
+/**
+ * The starter's scheme as a chip in the room a chip takes, or a skeleton until [colors] resolve.
+ *
+ * The card around it is the button and already reads out its [name], so the chip takes no focus
+ * and reads as nothing. A press on it chooses the starter all the same.
+ */
+@Composable
+private fun StarterChip(
+    colors: CandidateColors?,
+    name: String,
+    onClick: () -> Unit,
+) {
+    if (colors == null) {
+        SchemeChipSkeleton(Modifier.testTag(STARTER_SKELETON_TAG))
+        return
+    }
+    SchemeChip(
+        primary = colors.primary,
+        secondaryContainer = colors.secondaryContainer,
+        tertiaryContainer = colors.tertiaryContainer,
+        selected = false,
+        onClick = onClick,
+        label = name,
+        modifier = Modifier
+            .testTag(STARTER_CHIP_TAG)
+            .focusProperties { canFocus = false }
+            .clearAndSetSemantics { },
     )
 }

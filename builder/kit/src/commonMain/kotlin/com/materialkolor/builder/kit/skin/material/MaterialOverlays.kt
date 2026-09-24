@@ -49,7 +49,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -68,6 +67,8 @@ import com.materialkolor.builder.kit.headless.HeadlessTooltip
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
 import com.materialkolor.builder.kit.headless.ReturnFocusWhenGone
 import com.materialkolor.builder.kit.headless.keepTaps
+import com.materialkolor.builder.kit.headless.modalPane
+import com.materialkolor.builder.kit.headless.modalTitle
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
@@ -183,14 +184,14 @@ internal fun MaterialDialog(
             )
         },
         modifier = modifier
-            .semantics { paneTitle = title }
+            .modalPane(title)
             .onFocusChanged { state -> focusInside.value = state.hasFocus }
             .onKeyEvent { event ->
                 val escape = event.type == KeyEventType.KeyDown && event.key == Key.Escape
                 if (escape) onDismissRequest()
                 escape
             },
-        title = { Text(title) },
+        title = { Text(title, Modifier.modalTitle()) },
         text = { Column(content = content) },
         properties = DialogProperties(animateTransition = !LocalReducedMotion.current),
     )
@@ -222,7 +223,7 @@ private fun MaterialPageDialog(
                 .animateEnterExit(enter = popoverEnter(), exit = popoverExit())
                 .padding(tokens.spacing.large)
                 .widthIn(min = OverlayMetrics.dialogMinWidth, max = OverlayMetrics.dialogMaxWidth)
-                .semantics { paneTitle = title }
+                .modalPane(title)
                 .keepTaps(),
             shape = AlertDialogDefaults.shape,
             color = AlertDialogDefaults.containerColor,
@@ -232,11 +233,16 @@ private fun MaterialPageDialog(
                 modifier = Modifier.padding(tokens.spacing.extraLarge),
                 verticalArrangement = Arrangement.spacedBy(tokens.spacing.large),
             ) {
-                Text(title, color = AlertDialogDefaults.titleContentColor, style = typography.headlineSmall)
+                Text(
+                    text = title,
+                    modifier = Modifier.modalTitle(),
+                    color = AlertDialogDefaults.titleContentColor,
+                    style = typography.headlineSmall,
+                )
                 CompositionLocalProvider(
                     LocalContentColor provides AlertDialogDefaults.textContentColor,
                     LocalTextStyle provides typography.bodyMedium,
-                ) { Column(content = content) }
+                ) { Column(Modifier.weight(1f, fill = false), content = content) } // b-230c
                 Row(
                     modifier = Modifier.align(Alignment.End),
                     horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),

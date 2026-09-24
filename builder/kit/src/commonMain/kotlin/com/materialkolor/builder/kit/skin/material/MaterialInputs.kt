@@ -198,7 +198,7 @@ internal fun MaterialSlider(
         modifier = modifier
             .sliderKeys(value, rules, enabled, isRtl, press, onValueChange, onValueChangeFinished)
             .sliderSemantics(
-                name = stateName(label, ControlState.Value(stateDescription), enabled),
+                name = stateName(label, ControlState.Value(stateDescription), enabled, role = FoldedRole.Slider),
                 nameAsText = LocalFoldsStateIntoName.current,
                 stateDescription = stateDescription,
                 value = value,

@@ -51,7 +51,8 @@ internal val SchemeChipRingGap: Dp = 2.dp // b-311a
  *
  * It reads out as a radio button named [label] with its selected state, and shows [label] as a
  * tooltip on hover and focus. The chosen chip carries a ring and a check, so the choice never rests
- * on color alone. Place it inside a selectable group so assistive technology hears the set.
+ * on color alone. Place it inside a selectable group so assistive technology hears the set. Inside
+ * something that is itself the control, the other [SchemeChip], with no click, only shows the scheme.
  *
  * @param[primary] The top half.
  * @param[secondaryContainer] The bottom left quarter.
@@ -71,13 +72,15 @@ public fun SchemeChip(
     label: String,
     modifier: Modifier = Modifier,
 ) {
-    val tokens = LocalBuilderTokens.current
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     val name = stateName(label, ControlState.Selected(selected), role = FoldedRole.Radio)
-    val ringColor = if (selected) tokens.accent else Color.Transparent
     BuilderTooltip(text = label, modifier = modifier) {
-        Box(
+        SchemeChipFace(
+            primary = primary,
+            secondaryContainer = secondaryContainer,
+            tertiaryContainer = tertiaryContainer,
+            selected = selected,
             modifier = Modifier
                 .semantics { contentDescription = name }
                 .selectable(
@@ -87,29 +90,73 @@ public fun SchemeChip(
                     role = Role.RadioButton,
                     onClick = onClick,
                 ).hoverable(interactionSource)
-                .widgetOutline(interactionSource, CircleShape, hovered)
-                .padding(WidgetFocusWidth)
-                .background(ringColor, CircleShape)
-                .padding(SchemeChipRingWidth)
-                .background(tokens.panel, CircleShape)
-                .padding(SchemeChipRingGap)
-                .size(SchemeChipDiameter),
-            contentAlignment = Alignment.Center,
-        ) {
-            Canvas(Modifier.fillMaxSize().clip(CircleShape)) {
-                val half = Size(size.width, size.height / 2f)
-                val quarter = Size(size.width / 2f, size.height / 2f)
-                drawRect(primary, size = half)
-                drawRect(secondaryContainer, topLeft = Offset(0f, size.height / 2f), size = quarter)
-                drawRect(tertiaryContainer, topLeft = Offset(size.width / 2f, size.height / 2f), size = quarter)
-            }
-            if (selected) {
-                Box(
-                    modifier = Modifier.background(tokens.accent, CircleShape).padding(SchemeChipRingGap),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    BuilderIcon(IconId.Check, contentDescription = null, tint = tokens.onAccent)
-                }
+                .widgetOutline(interactionSource, CircleShape, hovered),
+        )
+    }
+}
+
+// b-230c
+
+/**
+ * A scheme at a glance that only shows it, for a chip drawn inside something that is itself the
+ * control, such as a card that chooses a starter.
+ *
+ * It draws the circle of the other [SchemeChip] in the same room, [SchemeChipFootprint], with no
+ * ring or check. It takes no click, no focus and no hover, has no tooltip and adds nothing to the
+ * semantics, so a press on it goes to the control around it and that control names it.
+ *
+ * @param[primary] The top half.
+ * @param[secondaryContainer] The bottom left quarter.
+ * @param[tertiaryContainer] The bottom right quarter.
+ * @param[modifier] Applied to the chip.
+ */
+@Composable
+public fun SchemeChip(
+    primary: Color,
+    secondaryContainer: Color,
+    tertiaryContainer: Color,
+    modifier: Modifier = Modifier,
+) {
+    SchemeChipFace(primary, secondaryContainer, tertiaryContainer, selected = false, modifier = modifier)
+}
+
+/**
+ * The chip as it draws, the circle in its ring inside the room the focus outline takes. [modifier]
+ * goes on the outside of that room, where a pressable chip draws its outline.
+ */
+@Composable
+private fun SchemeChipFace(
+    primary: Color,
+    secondaryContainer: Color,
+    tertiaryContainer: Color,
+    selected: Boolean,
+    modifier: Modifier,
+) {
+    val tokens = LocalBuilderTokens.current
+    val ringColor = if (selected) tokens.accent else Color.Transparent
+    Box(
+        modifier = modifier
+            .padding(WidgetFocusWidth)
+            .background(ringColor, CircleShape)
+            .padding(SchemeChipRingWidth)
+            .background(tokens.panel, CircleShape)
+            .padding(SchemeChipRingGap)
+            .size(SchemeChipDiameter),
+        contentAlignment = Alignment.Center,
+    ) {
+        Canvas(Modifier.fillMaxSize().clip(CircleShape)) {
+            val half = Size(size.width, size.height / 2f)
+            val quarter = Size(size.width / 2f, size.height / 2f)
+            drawRect(primary, size = half)
+            drawRect(secondaryContainer, topLeft = Offset(0f, size.height / 2f), size = quarter)
+            drawRect(tertiaryContainer, topLeft = Offset(size.width / 2f, size.height / 2f), size = quarter)
+        }
+        if (selected) {
+            Box(
+                modifier = Modifier.background(tokens.accent, CircleShape).padding(SchemeChipRingGap),
+                contentAlignment = Alignment.Center,
+            ) {
+                BuilderIcon(IconId.Check, contentDescription = null, tint = tokens.onAccent)
             }
         }
     }
