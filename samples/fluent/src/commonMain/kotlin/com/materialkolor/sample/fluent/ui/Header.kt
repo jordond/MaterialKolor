@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -125,7 +126,12 @@ private fun SectionTabs(
     section: AppSection,
     onSelect: (AppSection) -> Unit,
 ) {
-    SelectorBar(modifier = Modifier.selectableGroup()) {
+    // Pulled back by the item padding, so the first tab lines up with the title above it.
+    SelectorBar(
+        modifier = Modifier
+            .offset(x = (-12).dp)
+            .selectableGroup(),
+    ) {
         for (option in AppSection.entries) {
             key(option) {
                 val interaction = remember { MutableInteractionSource() }

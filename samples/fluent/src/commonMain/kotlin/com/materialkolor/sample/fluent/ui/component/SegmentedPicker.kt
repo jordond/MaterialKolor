@@ -57,8 +57,7 @@ internal fun <T> SegmentedPicker(
                         .semantics {
                             this.selected = checked
                             role = Role.RadioButton
-                        }
-                        .focusStroke(
+                        }.focusStroke(
                             visible = focused,
                             color = FluentTheme.colors.stroke.focus.outer,
                             shape = FluentTheme.shapes.control,

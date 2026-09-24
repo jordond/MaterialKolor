@@ -84,14 +84,12 @@ internal fun SeedSwatch(
                 indication = null,
                 role = Role.RadioButton,
                 onClick = onClick,
-            )
-            .border(width = 2.dp, color = ring, shape = CircleShape)
+            ).border(width = 2.dp, color = ring, shape = CircleShape)
             .padding(4.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
-            }
-            .clip(CircleShape)
+            }.clip(CircleShape)
             .background(seed.color),
         contentAlignment = Alignment.Center,
     ) {
@@ -99,7 +97,7 @@ internal fun SeedSwatch(
             Icon(
                 imageVector = Icons.Filled.Checkmark,
                 contentDescription = null,
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(16.dp),
                 tint = check,
             )
         }

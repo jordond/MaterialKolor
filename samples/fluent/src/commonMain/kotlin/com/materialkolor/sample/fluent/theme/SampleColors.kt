@@ -3,6 +3,7 @@ package com.materialkolor.sample.fluent.theme
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.fluent.toFluentShades
+import com.materialkolor.ktx.ContrastThreshold
 import com.materialkolor.ktx.from
 import com.materialkolor.ktx.onTone
 import com.materialkolor.ktx.toHct
@@ -68,6 +69,7 @@ internal fun sampleColors(
     // wheel at the same chroma, so the three stay apart for every seed and move with it. Both then go through
     // toFluentShades, the same adapter step that made the accent.
     val hct = accent.base.toHct()
+
     fun turned(degrees: Double): Shades =
         TonalPalette.fromHueAndChroma((hct.hue + degrees) % FULL_TURN, hct.chroma).toFluentShades()
 
@@ -81,10 +83,16 @@ internal fun sampleColors(
 
 /**
  * The tone from this color's own ramp that reads on top of it, found by MaterialKolor's `onTone`.
+ *
+ * It asks for the AAA ratio, so small labels stay easy to read. A mid tone that nothing in the ramp reaches that
+ * ratio against gets the nearer end of the ramp instead.
  */
 internal fun Color.readableOn(): Color {
     val hct = toHct()
-    return TonalPalette.from(hct).onTone(hct.tone.roundToInt())
+    return TonalPalette.from(hct).onTone(
+        tone = hct.tone.roundToInt(),
+        threshold = ContrastThreshold.WCAG_AAA_NORMAL_TEXT,
+    )
 }
 
 // Mirrors how Fluent colors accent text. Light mode puts the dark shade on the light one, dark mode swaps them.

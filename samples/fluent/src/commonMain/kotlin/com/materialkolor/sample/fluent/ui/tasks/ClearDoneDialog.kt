@@ -69,8 +69,7 @@ internal fun ClearDoneDialog(
                     val isEscape = event.key == Key.Escape && event.type == KeyEventType.KeyDown
                     if (isEscape) onDismiss()
                     isEscape
-                }
-                .focusRequester(focusRequester)
+                }.focusRequester(focusRequester)
                 .focusable(),
         ) {
             Column(
