@@ -20,8 +20,8 @@ private const val WIDTH = 1280
 private const val HEIGHT = 800
 private const val WAIT_MILLIS = 10_000L
 
-/** One pause before the sample composes and one before each of the four steps. */
-private const val PAUSES = 5
+/** One pause before the sample composes, one before its steps and one before the live frame's. */
+private const val PAUSES = 3
 
 // pf-3
 @OptIn(ExperimentalTestApi::class)

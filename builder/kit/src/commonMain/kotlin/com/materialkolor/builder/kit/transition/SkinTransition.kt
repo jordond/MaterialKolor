@@ -20,6 +20,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import com.materialkolor.builder.kit.motion.BuilderMotion
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
@@ -218,17 +220,19 @@ public class SkinTransition internal constructor(
      * The first switch to a skin draws shadows, clips and shapes the page has not drawn yet, and the
      * old frame behind a circle for the first time, and the browser compiles a program for each
      * inside that one frame. Here the host draws the same things one step a frame under a cover of
-     * the live frame, so nothing on screen changes. The steps are [sample] as it is, the live frame
-     * and then [sample] behind the reveal's circle, and both faded the way a crossfade draws them.
+     * the live frame, so nothing on screen changes. The steps are [sample] as it is, behind the
+     * reveal's circle and faded the way a crossfade draws it, then the live frame behind the circle
+     * and faded.
      *
-     * [sample] composes off screen, out of reach of assistive tech, focus and pointers, and leaves once
-     * the warm-up ends. Nothing runs while motion is frozen. A step waits while a reveal plays, and the
-     * warm-up gives up when the host has not drawn a step within two seconds.
+     * [sample] composes off screen, out of reach of assistive tech, focus and pointers. Its steps run
+     * one frame after another and it leaves straight after them, so it lives no longer than it must.
+     * Nothing runs while motion is frozen. A step waits while a reveal plays, and the warm-up gives up
+     * when the host has not drawn a step within two seconds.
      *
      * @param[sample] A frame the builder has not drawn yet, such as the workspace in another skin, or
      * null to warm only the reveal's circle and crossfade over the live frame.
-     * @param[pause] Runs before the sample composes and before each step. The web waits there for an
-     * idle moment, so no step lands on someone's input.
+     * @param[pause] Runs before the sample composes, before its steps and before the live frame's. The
+     * web waits there for an idle moment, so no step lands on someone's input.
      */
     public suspend fun warmUp(
         sample: (@Composable () -> Unit)?,
@@ -239,16 +243,27 @@ public class SkinTransition internal constructor(
             if (sample != null) {
                 pause()
                 warmSample = sample
-            }
-            for (step in WarmStep.entries) {
-                if (step.drawsSample && sample == null) continue
                 pause()
+                val drawn = WarmStep.entries.filter { step -> step.drawsSample }.all { step -> drawWarmStep(step) }
+                letSampleGo()
+                // Recorded again empty, so the layer keeps none of the sample's own layers alive.
+                warmLayer.record(EmptyDensity, LayoutDirection.Ltr, IntSize.Zero) {}
+                if (!drawn) return
+            }
+            pause()
+            for (step in WarmStep.entries.filterNot { step -> step.drawsSample }) {
                 if (!drawWarmStep(step)) return
             }
         } finally {
-            warmSample = null
-            warmRecorded = false
+            // A cancelled warm-up leaves with its host, which releases the layer itself.
+            letSampleGo()
         }
+    }
+
+    /** Takes the sample out of composition, so the host stops drawing it. */
+    private fun letSampleGo() {
+        warmSample = null
+        warmRecorded = false
     }
 
     /**

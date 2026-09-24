@@ -255,7 +255,7 @@ private val SilentAnnouncer = Announcer { }
  *
  * The first switch compiled some forty GPU programs in one frame, which took a second on a loaded
  * machine (PB-09). This composes the workspace in Fluent off screen and has [transition] draw it
- * under the live frame a step at a time, waiting on [awaitIdle] before each step. When the page
+ * under the live frame a step at a time, waiting on [awaitIdle] before each stage. When the page
  * already shows Fluent only the reveal's own clips over the live frame are warmed.
  *
  * @param[isDark] Which mode the chrome shows, read when the sample composes.

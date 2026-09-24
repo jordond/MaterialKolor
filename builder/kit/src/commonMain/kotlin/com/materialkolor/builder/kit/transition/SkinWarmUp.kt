@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.unit.Density
 import kotlinx.coroutines.CompletableDeferred
 import kotlin.math.floor
 
@@ -32,21 +33,27 @@ private val WarmRadii = floatArrayOf(0.3f, 0.6f, 0.9f)
 /** How opaque the warm-up draws a crossfade's old frame. Any share short of one takes the same path. */
 private const val WarmFade = 0.5f
 
-/** One frame of a warm-up, in the order they run. */
+/**
+ * One frame of a warm-up, in the order they run. The sample's steps come first, one frame after
+ * another, so the sample leaves as soon as it can.
+ */
 internal enum class WarmStep(
     val drawsSample: Boolean,
 ) {
     /** The sample as it is, the frame a switch lands on. */
     Sample(drawsSample = true),
 
-    /** The live frame behind the reveal's circle, the old frame of the first switch. */
-    LiveCircle(drawsSample = false),
-
-    /** The sample behind the circle, the old frame of the first switch back. */
+    /** The sample behind the reveal's circle, the old frame of the first switch back. */
     SampleCircle(drawsSample = true),
 
-    /** The live frame and the sample faded, the old frame of a crossfade. */
-    Fade(drawsSample = false),
+    /** The sample faded, the old frame of a crossfade out of it. */
+    SampleFade(drawsSample = true),
+
+    /** The live frame behind the circle, the old frame of the first switch. */
+    LiveCircle(drawsSample = false),
+
+    /** The live frame faded, the old frame of the first crossfade. */
+    LiveFade(drawsSample = false),
 }
 
 /** A step the host has yet to draw, and what it completes once it has. */
@@ -104,15 +111,17 @@ internal fun ContentDrawScope.drawWarmUp(
         WarmStep.Sample -> {
             if (sample != null) drawLayer(sample)
         }
-        WarmStep.LiveCircle -> {
-            behindCircles(circle) { drawLayer(live) }
-        }
         WarmStep.SampleCircle -> {
             if (sample != null) behindCircles(circle) { drawLayer(sample) }
         }
-        WarmStep.Fade -> {
-            drawFaded(live)
+        WarmStep.SampleFade -> {
             if (sample != null) drawFaded(sample)
+        }
+        WarmStep.LiveCircle -> {
+            behindCircles(circle) { drawLayer(live) }
+        }
+        WarmStep.LiveFade -> {
+            drawFaded(live)
         }
     }
     val half = floor(size.width / 2f)
@@ -131,6 +140,9 @@ private inline fun DrawScope.behindCircles(
         clipPath(circlePath(circle, center, farthest * share), ClipOp.Difference) { draw() }
     }
 }
+
+/** The density the warm layer is emptied with. An empty recording draws nothing, so any will do. */
+internal val EmptyDensity: Density = Density(1f)
 
 /** Draws [layer] the way a crossfade draws the old frame, then leaves it opaque again. */
 private fun DrawScope.drawFaded(layer: GraphicsLayer) {
