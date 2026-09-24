@@ -15,10 +15,12 @@ import com.materialkolor.builder.preview.split.PaneSide
  * Where each element that declared its roles sits in the window, per pane, and which of them hold
  * keyboard focus.
  *
- * Elements only record themselves while a registry is provided, which is while Inspect is on. The
- * overlay picks the pane under the pointer and asks [hit] for the element there, and reads
- * [focused] for the card keyboard focus shows. The registry is read and written on the UI thread
- * only.
+ * Elements only record themselves while a registry is provided, which is while Inspect is on, each
+ * under a key it makes as it attaches. The overlay picks the pane under the pointer and asks
+ * [ownerAt] for the key of the element there, asks [focusedOwner] for the key of the one keyboard
+ * focus is on, and reads each key back through [entryOf] as it draws the outline and places the
+ * card. [hit] and [focused] answer the same questions with the entries themselves. The registry is
+ * read and written on the UI thread only.
  */
 @Stable
 public class InspectRegistry {

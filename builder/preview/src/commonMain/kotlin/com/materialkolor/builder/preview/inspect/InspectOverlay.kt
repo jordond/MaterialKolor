@@ -37,6 +37,7 @@ import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -94,13 +95,16 @@ public class InspectActions(
  * apart from one on the split handle, and letting go pins the card, which then offers Pin this role,
  * Show on ramp and Jump to key color for the first color. Letting go over another element moves the
  * pin and over bare canvas drops it, and a touch tap inspects and pins at once. Keyboard focus on a
- * declared element shows its card too, read only. Esc drops a pinned card first and leaves Inspect
- * after. While this layout holds focus itself and the keyboard is in use, the preview wears a focus
- * ring.
+ * declared element shows its card too, read only, and [PinKey] pins it and moves focus to its first
+ * enabled action. The element never hears that key, while Enter and Space still reach it. Esc drops
+ * a pinned card first and leaves Inspect after. While this layout holds focus itself and the
+ * keyboard is in use, the preview wears a focus ring.
  *
- * The outline and card follow their element as the preview scrolls and go when it leaves. When the
- * handle crosses one, they move to the other copy's element at its centre, or go when there is none.
- * The card is drawn in this layout's own tree, never in a popup, and kept inside it.
+ * The outline and card follow their element as the preview scrolls and go when it leaves. An element
+ * scrolled out of sight inside the preview, such as off the side of a horizontal scroll, keeps its
+ * pin but shows nothing until it scrolls back. When the handle crosses one, they move to the other
+ * copy's element at its centre, or go when there is none. The card is drawn in this layout's own
+ * tree, never in a popup, and kept inside it.
  *
  * @param[on] Whether Inspect is on for what the canvas shows.
  * @param[result] The theme the preview wears, which the card reads colors and ratings from.
@@ -142,16 +146,17 @@ public fun InspectOverlay(
                 state.width = coordinates.size.width
             }.focusRing(holdsFocus, inputModes, tokens.focus, tokens.highlightWidth)
             .inspectPointer(state, currentShown, split, layoutDirection, tokens.spacing.section, focus)
+            .onPreviewKeyEvent { event -> state.onPinKey(event, currentShown.value, inputModes) } // b-315b
             .onKeyEvent { event -> state.onEscape(event, focus, inputModes) { leave() } }
             .focusRequester(focus)
             .onFocusChanged { focusState -> holdsFocus.value = focusState.isFocused }
             .focusProperties { canFocus = state.pinned != null || holdsFocus.value }
             .focusTarget()
     }
-    if (state != null) FollowTargets(state, shown, split, layoutDirection)
+    if (state != null) FollowTargets(state, shown, split, layoutDirection, focus)
     Box(modifier.then(watch)) {
         CompositionLocalProvider(LocalInspectRegistry provides state?.registry, content = content)
-        if (state != null) InspectFindings(state, shown, result, actions)
+        if (state != null) InspectFindings(state, shown, result, actions, focus)
     }
 }
 
@@ -191,6 +196,44 @@ internal class InspectOverlayState {
 
     /** Where the card sits in this layout, or null while none shows. Only the pointer reads it. */
     var card: Rect? = null
+
+    // b-315b
+
+    /** Whether focus is on the card or inside it, so dropping the pin hands focus to the layout first. */
+    var cardHasFocus: Boolean = false
+
+    /** Whether the card's first enabled action takes focus once it shows, as it does after [PinKey]. */
+    var focusActions: Boolean by mutableStateOf(false)
+
+    /** Whether the [PinKey] press that pinned the card is still down, so its repeats and release go too. */
+    private var pinKeyDown = false
+
+    /**
+     * Pin the card of the element keyboard focus is on as [PinKey] goes down, and ask for focus on its
+     * first enabled action. The rest of that press is taken too, repeats and release alike, so the
+     * element never hears the key and never activates. Enter and Space alone pass through. Like Esc,
+     * the key tells [inputModes] the keyboard is in use.
+     */
+    fun onPinKey(
+        event: KeyEvent,
+        shown: PreviewMode,
+        inputModes: InputModeManager,
+    ): Boolean {
+        if (event.key != PinKey.key) return false
+        if (event.type == KeyEventType.KeyUp) return pinKeyDown.also { pinKeyDown = false }
+        if (event.type != KeyEventType.KeyDown) return false
+        if (!PinKey.matches(event)) {
+            pinKeyDown = false
+            return false
+        }
+        // Held down, the key repeats on the card's action that focus moved to.
+        val target = focusedTarget(shown) ?: return pinKeyDown
+        inputModes.requestInputMode(InputMode.Keyboard)
+        pinned = target
+        focusActions = true
+        pinKeyDown = true
+        return true
+    }
 
     /**
      * Drop the pinned card on Esc, or leave Inspect when none is pinned.
@@ -241,24 +284,43 @@ internal class InspectOverlayState {
     /** Whether the pinned or the hovered element has left the screen. */
     fun hasLeft(): Boolean = pinned.hasLeft() || hovered.hasLeft()
 
-    /** Drop the pinned and the hovered element once they have left the screen. */
-    fun dropLeft() {
-        if (pinned.hasLeft()) pinned = null
+    /**
+     * Drop the pinned and the hovered element once they have left the screen. Dropping the pin hands
+     * focus to the layout through [focus] first, as [unpin] says.
+     */
+    fun dropLeft(focus: FocusRequester) {
+        if (pinned.hasLeft()) unpin(focus)
         if (hovered.hasLeft()) hovered = null
     }
 
     /**
      * Keep the pinned and hovered elements on the copy shown at their centres, after the handle
      * moved to [fraction]. Once the handle crosses one, the target moves to what the other copy has
-     * at that centre, or goes when it has nothing there.
+     * at that centre, or goes when it has nothing there. Dropping the pin hands focus to the layout
+     * through [focus] first, as [unpin] says.
      */
     fun followHandle(
         shown: PreviewMode,
         fraction: Float,
         layoutDirection: LayoutDirection,
+        focus: FocusRequester,
     ) {
-        pinned = pinned?.across(shown, fraction, layoutDirection)
+        val pin = pinned
+        if (pin != null) {
+            val moved = pin.across(shown, fraction, layoutDirection)
+            if (moved == null) unpin(focus) else pinned = moved
+        }
         hovered = hovered?.across(shown, fraction, layoutDirection)
+    }
+
+    /**
+     * Drop the pinned card as its element goes rather than on Esc. An action on the card may hold
+     * focus, and would take it out of the whole tree as the card loses its actions, so Esc would then
+     * reach nothing. While the card holds focus, the layout takes it through [focus] first, as Esc does.
+     */
+    private fun unpin(focus: FocusRequester) {
+        if (cardHasFocus) focus.requestFocus()
+        pinned = null
     }
 
     private fun InspectTarget?.hasLeft(): Boolean = this != null && registry.entryOf(owner) == null
@@ -268,7 +330,10 @@ internal class InspectOverlayState {
         fraction: Float,
         layoutDirection: LayoutDirection,
     ): InspectTarget? {
-        val centre = (registry.entryOf(owner) ?: return null).bounds.center - origin
+        val bounds = (registry.entryOf(owner) ?: return null).bounds
+        // Scrolled out of sight, it has no centre to find the other copy's element at, so it stays put.
+        if (bounds.isEmpty) return this
+        val centre = bounds.center - origin
         val now = paneSideAt(centre.x, width, shown, fraction, layoutDirection)
         return if (now == side) this else targetAt(centre, shown, fraction, layoutDirection)
     }
@@ -284,14 +349,15 @@ private fun FollowTargets(
     shown: PreviewMode,
     split: SplitState,
     layoutDirection: LayoutDirection,
+    focus: FocusRequester,
 ) {
     LaunchedEffect(state) {
-        snapshotFlow { state.hasLeft() }.collect { left -> if (left) state.dropLeft() }
+        snapshotFlow { state.hasLeft() }.collect { left -> if (left) state.dropLeft(focus) }
     }
     LaunchedEffect(state, shown, split, layoutDirection) {
         snapshotFlow { split.fraction }
             .drop(1)
-            .collect { fraction -> state.followHandle(shown, fraction, layoutDirection) }
+            .collect { fraction -> state.followHandle(shown, fraction, layoutDirection, focus) }
     }
 }
 
@@ -385,7 +451,8 @@ private fun Modifier.inspectPointer(
 
 /**
  * The outline and card for the pinned element, else the hovered one, else the one keyboard focus is
- * on. A pointer hovering after focus moved wins over it, and focus moving wins over the hover.
+ * on. A pointer hovering after focus moved wins over it, and focus moving wins over the hover. Once
+ * [PinKey] pins a card, its first enabled action takes focus, or [focus] does for a card with none.
  */
 @Composable
 private fun BoxScope.InspectFindings(
@@ -393,6 +460,7 @@ private fun BoxScope.InspectFindings(
     shown: PreviewMode,
     result: ThemeResult,
     actions: InspectActions,
+    focus: FocusRequester,
 ) {
     LaunchedEffect(state) {
         snapshotFlow { state.registry.focusedOwner() }.drop(1).collect { state.hovered = null }
@@ -401,12 +469,22 @@ private fun BoxScope.InspectFindings(
     val focusedTarget = remember(state, shown) { derivedStateOf { state.focusedTarget(shown) } }
     val keyboard = LocalInputModeManager.current.inputMode == InputMode.Keyboard
     val pinned = state.pinned
-    val target = pinned ?: state.hovered ?: if (keyboard) focusedTarget.value else null
+    val hovered = state.hovered
+    val target = pinned ?: hovered ?: if (keyboard) focusedTarget.value else null
     if (target == null) return
     val tokens = LocalBuilderTokens.current
+    // b-315b
+    val firstAction = remember(state) { FocusRequester() }
+    LaunchedEffect(state, pinned, state.focusActions) {
+        if (pinned == null || !state.focusActions) return@LaunchedEffect
+        state.focusActions = false
+        if (pinned.roles.isEmpty()) focus.requestFocus() else firstAction.requestFocus()
+    }
     Spacer(
         Modifier.matchParentSize().drawBehind {
             val entry = state.registry.entryOf(target.owner) ?: return@drawBehind
+            // Scrolled out of sight, the element keeps empty bounds and gets no outline.
+            if (entry.bounds.isEmpty) return@drawBehind
             val bounds = entry.bounds.translate(-state.origin)
             drawRect(
                 color = tokens.focus,
@@ -416,16 +494,34 @@ private fun BoxScope.InspectFindings(
             )
         },
     )
-    DisposableEffect(state) { onDispose { state.card = null } }
-    Box(Modifier.placeCard(target.owner, state, tokens.spacing.small)) {
+    DisposableEffect(state) {
+        onDispose {
+            state.card = null
+            state.cardHasFocus = false
+        }
+    }
+    Box(
+        Modifier
+            .placeCard(target.owner, state, tokens.spacing.small)
+            .onFocusChanged { focusState -> state.cardHasFocus = focusState.hasFocus },
+    ) {
         // Only some skins draw a card that takes presses, so it takes them itself to keep them from the preview.
-        InspectCard(target, pinned = target == pinned, result, actions, Modifier.pointerInput(Unit) {})
+        InspectCard(
+            target = target,
+            pinned = target == pinned,
+            result = result,
+            actions = actions,
+            modifier = Modifier.pointerInput(Unit) {},
+            firstAction = firstAction,
+            pinHint = pinned == null && hovered == null,
+        )
     }
 }
 
 /**
  * Take the whole layout and place the card beside the element [owner], wherever it sits now, noting
- * where the card went so a press on it is left alone.
+ * where the card went so a press on it is left alone. While the element is out of sight, with no
+ * bounds or empty ones, the card is not placed at all.
  */
 private fun Modifier.placeCard(
     owner: Any,
@@ -438,7 +534,7 @@ private fun Modifier.placeCard(
         val height = if (constraints.hasBoundedHeight) constraints.maxHeight else placeable.height
         layout(width, height) {
             val bounds = state.registry.entryOf(owner)?.bounds
-            if (bounds == null) {
+            if (bounds == null || bounds.isEmpty) {
                 state.card = null
                 return@layout
             }

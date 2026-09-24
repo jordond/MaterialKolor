@@ -9,10 +9,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.platform.LocalInputModeManager
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.PreviewMode
+import com.materialkolor.builder.feature.poster.handFocusTo
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.generated.resources.Res
@@ -65,14 +65,14 @@ internal fun DockContent(
     val wasFullscreen = remember { mutableStateOf(state.fullscreen) }
     LaunchedEffect(state.fullscreen) {
         val ended = wasFullscreen.value && !state.fullscreen
-        if (ended && inputModes.inputMode == InputMode.Keyboard) fullscreenButton.requestFocus()
+        if (ended) inputModes.handFocusTo(fullscreenButton) // b-315b
         wasFullscreen.value = state.fullscreen
     }
     val inspectToggle = remember { FocusRequester() }
     val wasInspecting = remember { mutableStateOf(state.inspect) }
     LaunchedEffect(state.inspect) {
         val ended = wasInspecting.value && !state.inspect
-        if (ended && inputModes.inputMode == InputMode.Keyboard) inspectToggle.requestFocus()
+        if (ended) inputModes.handFocusTo(inspectToggle) // b-315b
         wasInspecting.value = state.inspect
     }
     DockRegion(modifier) {
@@ -126,7 +126,7 @@ internal fun FullscreenExit(
 ) {
     val inputModes = LocalInputModeManager.current
     val pill = remember { FocusRequester() }
-    LaunchedEffect(pill) { if (inputModes.inputMode == InputMode.Keyboard) pill.requestFocus() }
+    LaunchedEffect(pill) { inputModes.handFocusTo(pill) } // b-315b
     BuilderButton(
         onClick = { dispatcher.dispatch(WorkspaceAction.ToggleFullscreen) },
         label = stringResource(Res.string.canvas_fullscreen_exit),

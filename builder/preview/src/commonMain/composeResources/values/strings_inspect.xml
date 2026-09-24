@@ -22,4 +22,8 @@
     <string name="inspect_show_on_ramp">Show on ramp</string>
     <!-- The pinned Inspect card's action that opens the key colors on the poster. -->
     <string name="inspect_jump_to_key_color">Jump to key color</string>
+    <!-- The keys that pin the Inspect card of the element keyboard focus is on, as the card's hint names them. -->
+    <string name="inspect_pin_key">Shift+Enter</string>
+    <!-- The line on the Inspect card keyboard focus shows, saying how to pin it and reach its actions. %1$s is the keys, such as Shift+Enter. -->
+    <string name="inspect_pin_hint">Press %1$s to pin this card</string>
 </resources>

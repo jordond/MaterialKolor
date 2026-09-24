@@ -13,6 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import com.materialkolor.builder.domain.audit.ColorRef
@@ -44,6 +46,7 @@ import com.materialkolor.builder.preview.generated.resources.inspect_badge_fail
 import com.materialkolor.builder.preview.generated.resources.inspect_jump_to_key_color
 import com.materialkolor.builder.preview.generated.resources.inspect_mode_dark
 import com.materialkolor.builder.preview.generated.resources.inspect_mode_light
+import com.materialkolor.builder.preview.generated.resources.inspect_pin_hint
 import com.materialkolor.builder.preview.generated.resources.inspect_pin_role
 import com.materialkolor.builder.preview.generated.resources.inspect_ratio
 import com.materialkolor.builder.preview.generated.resources.inspect_show_on_ramp
@@ -58,7 +61,8 @@ import kotlin.math.roundToInt
 /**
  * The Inspect card for [target]. It names the mode, then each color the element declared with its
  * hex and tone, then the ratio and badge of the first pair the audit rates, or of a role and the
- * role drawn on it when the audit rates none. Pinned, it adds the actions for the first color.
+ * role drawn on it when the audit rates none. Pinned, it adds the actions for the first color, the
+ * first enabled one carrying [firstAction]. With [pinHint] it ends on a line naming [PinKey].
  */
 @Composable
 internal fun InspectCard(
@@ -66,6 +70,8 @@ internal fun InspectCard(
     pinned: Boolean,
     result: ThemeResult,
     actions: InspectActions,
+    firstAction: FocusRequester, // b-315b
+    pinHint: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val refs = target.roles // b-217d
@@ -84,7 +90,11 @@ internal fun InspectCard(
         for (color in colors) ColorLine(color)
         if (rated != null) RatingLine(rated)
         val first = refs.firstOrNull()
-        if (pinned && first != null) CardActions(first, isDark, result, actions)
+        if (pinned && first != null) CardActions(first, isDark, result, actions, firstAction)
+        if (pinHint) {
+            val key = stringResource(PinKey.name)
+            BuilderText(stringResource(Res.string.inspect_pin_hint, key), style = BuilderTextStyle.Body)
+        }
     }
 }
 
@@ -140,24 +150,31 @@ private fun RatingLine(row: AuditRow) {
     }
 }
 
-/** Pin this role, Show on ramp and Jump to key color, all for [first]. Only a role pins. */
+/**
+ * Pin this role, Show on ramp and Jump to key color, all for [first]. Only a role pins. [firstAction]
+ * goes on Pin this role while it is enabled and on Show on ramp otherwise.
+ */
 @Composable
 private fun CardActions(
     first: ColorRef,
     isDark: Boolean,
     result: ThemeResult,
     actions: InspectActions,
+    firstAction: FocusRequester,
 ) {
     val role = (first as? ColorRef.OfRole)?.role
+    val pinEnabled = role != null && actions.pinEnabled
     BuilderButton(
         onClick = { if (role != null) actions.onPin(role, isDark, result.roles[role, isDark].argb) },
         label = stringResource(Res.string.inspect_pin_role),
+        modifier = if (pinEnabled) Modifier.focusRequester(firstAction) else Modifier,
         icon = IconId.Pin,
-        enabled = role != null && actions.pinEnabled,
+        enabled = pinEnabled,
     )
     BuilderButton(
         onClick = { actions.onShowOnRamp(first, isDark) },
         label = stringResource(Res.string.inspect_show_on_ramp),
+        modifier = if (pinEnabled) Modifier else Modifier.focusRequester(firstAction),
     )
     BuilderButton(
         onClick = { actions.onJumpToKeyColor(first) },
