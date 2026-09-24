@@ -65,6 +65,7 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.floats.shouldBeLessThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
@@ -282,21 +283,33 @@ class PhotoAppTest {
 
                     val masks = memoryMasks()
                     masks.size shouldBeGreaterThanOrEqual 3
-                    // Only the memories that shrank all the way to the edge fade their titles out.
-                    val smallest = masks.values.minOf { mask -> mask.width }
-                    val titled = masks.filterValues { mask -> mask.width > smallest + 1f }
-                    titled.size shouldBeGreaterThanOrEqual 2
-                    for ((index, mask) in titled) {
+                    val inset = with(density) { SectionGap.toPx() }
+                    val whole = masks.filter { (index, mask) ->
                         val title = onNode(hasText(PhotoMemories[index].title), useUnmergedTree = true)
                             .fetchSemanticsNode()
                             .unclippedBoundsInRoot()
+                        val inside = title.left >= mask.left && title.right <= mask.right
+                        // A title that would stick out of its memory is not drawn at all.
+                        val hidden = memoryTitleAlpha(mask.width, 0f, mask.width, reach = title.width + inset) == 0f
                         withClue("${PhotoMemories[index].title} at $title in $mask") {
-                            (title.left >= mask.left && title.right <= mask.right) shouldBe true
+                            (inside || hidden) shouldBe true
+                            if (inside) title.left shouldBe (mask.left + inset plusOrMinus 1f)
                         }
+                        inside
                     }
+                    // The featured memory and the one beside it, at least, show their titles whole.
+                    whole.size shouldBeGreaterThanOrEqual 2
                 }
             }
         }
+    }
+
+    @Test
+    fun memoryTitleAlpha_fadesAsTheMemoryShrinksAndHidesATitleThatWouldNotFit() {
+        memoryTitleAlpha(size = 200f, minSize = 10f, maxSize = 200f, reach = 120f) shouldBe 1f
+        memoryTitleAlpha(size = 105f, minSize = 10f, maxSize = 200f, reach = 100f) shouldBe 0.5f
+        memoryTitleAlpha(size = 56f, minSize = 10f, maxSize = 200f, reach = 120f) shouldBe 0f
+        memoryTitleAlpha(size = 56f, minSize = 56f, maxSize = 56f, reach = 40f) shouldBe 1f
     }
 
     @Test
@@ -384,18 +397,17 @@ class PhotoAppTest {
  * its start.
  *
  * The carousel lays every memory out at the featured size and masks it down around its middle, and
- * it pins the masks edge to edge a gap apart from the start of its padding. So each mask spans
- * from the end of the one before it, a gap on, to as far past the memory's middle.
+ * it pins the masks edge to edge a gap apart, from the start of its padding to its far edge. So each
+ * mask spans from the end of the one before it, a gap on, to as far past the memory's middle.
  */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.memoryMasks(): Map<Int, Rect> {
     val feed = onNode(PhotoFeedNode).fetchSemanticsNode().boundsInRoot
     val (padding, gap) = with(density) { SectionGap.toPx() to Gap.toPx() }
-    val end = feed.right - padding
     val masks = mutableMapOf<Int, Rect>()
     var left = feed.left + padding
     for (index in PhotoMemories.indices) {
-        if (left >= end - 1f) break
+        if (left >= feed.right - 1f) break
         val memory = onNode(hasClickAction() and hasText(PhotoMemories[index].title))
             .fetchSemanticsNode()
             .unclippedBoundsInRoot()
@@ -403,8 +415,10 @@ private fun ComposeUiTest.memoryMasks(): Map<Int, Rect> {
         masks[index] = Rect(left, memory.top, right, memory.bottom)
         left = right + gap
     }
-    // The masks fill the carousel between its paddings, or the reading of them is off.
-    (masks.values.maxOf { mask -> mask.right } - end).absoluteValue shouldBeLessThan 1f
+    // The masks run out at the carousel's far edge, or the reading of them is off.
+    withClue("$masks in $feed") {
+        (masks.values.maxOf { mask -> mask.right } - feed.right).absoluteValue shouldBeLessThan 1f
+    }
     return masks
 }
 

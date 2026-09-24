@@ -176,8 +176,12 @@ private fun MemoryCarousel(
                             // the mask's start edge, and fades out as the memory shrinks.
                             val mask = info.maskRect
                             translationX = if (rtl) -mask.left else mask.left
-                            val range = info.maxSize - info.minSize
-                            alpha = if (range > 0f) ((info.size - info.minSize) / range).coerceIn(0f, 1f) else 1f
+                            alpha = memoryTitleAlpha(
+                                size = info.size,
+                                minSize = info.minSize,
+                                maxSize = info.maxSize,
+                                reach = size.width + SectionGap.toPx(),
+                            )
                         },
                     color = MaterialTheme.colorScheme.tile(memory.tint).ink,
                     style = MaterialTheme.typography.titleLarge,
@@ -185,6 +189,22 @@ private fun MemoryCarousel(
             }
         }
     }
+}
+
+/**
+ * How much of a memory's title shows. It fades out as the memory shrinks from [maxSize] toward
+ * [minSize], and it hides once the memory is narrower than the title's [reach] from the start edge,
+ * so a title never shows cut off.
+ */
+internal fun memoryTitleAlpha(
+    size: Float,
+    minSize: Float,
+    maxSize: Float,
+    reach: Float,
+): Float {
+    if (size < reach) return 0f
+    val range = maxSize - minSize
+    return if (range > 0f) ((size - minSize) / range).coerceIn(0f, 1f) else 1f
 }
 
 /** A connected row of toggle buttons that picks the view, each turning round as it turns on. */
