@@ -42,7 +42,8 @@ import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-private const val DOCS_URL = "https://docs.materialkolor.com"
+/** The docs, the one address the app keeps for them. The poster's help links build on it once they exist. */
+internal const val DOCS_URL = "https://docs.materialkolor.com" // b-303a
 private const val GITHUB_URL = "https://github.com/jordond/materialkolor"
 
 /**
