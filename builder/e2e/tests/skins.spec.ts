@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { openBuilder, pressBareCanvas, SETTLE_MS, wantHooks } from './builder';
 import {
   button,
+  focusCanvas,
   LAND_TIMEOUT_MS,
   onPage,
   openWorkspace,
@@ -54,18 +55,29 @@ test('4 switches the shell to Fluent and 1 back, with no page error and the tab 
 // on TonalSpot 2021 suggests the Expressive style on the 2025 spec, which Apply sets as one undo.
 
 test('3, 4 and 2 switch the library, and Apply takes the Expressive suggestion as one undo', async ({ page }) => {
-  test.fixme(true, 'Follow-up: after 3 and 4, a 2 pressed in the Fluent skin does not switch to Expressive within 20 s');
   await openWorkspace(page);
   const undo = page.locator('#cmp_a11y_root').getByRole('button', { name: /^Undo library change to / });
-  for (const [key, name] of [
-    ['3', 'Unstyled'],
-    ['4', 'Fluent'],
-    ['2', 'Expressive'],
-  ]) {
-    await pressKeyUntil(page, key, async () => ((await undo.first().getAttribute('aria-label')) ?? '').endsWith(name));
+  // Read without waiting, since there is no such Undo before the first switch.
+  const undoNames = async (name: string) =>
+    (await undo.evaluateAll((buttons) => buttons.map((button) => button.getAttribute('aria-label') ?? ''))).some((label) =>
+      label.endsWith(name),
+    );
+  // The web folds the dialog's role into its title, `Use the Expressive style?, dialog`.
+  const suggestion = onPage(page, /^Use the Expressive style\?/);
+  await pressKeyUntil(page, '3', () => undoNames('Unstyled'));
+  await pressKeyUntil(page, '4', () => undoNames('Fluent'));
+  // b-503a
+  // The 2 opens the suggestion with the switch, and the suggestion is modal, so the mirror hides the
+  // top bar's Undo and the tab row the canvas is focused by until it closes. The suggestion showing
+  // is what says the 2 landed, and each try waits for it as long as a switch may take to land, so
+  // no try goes looking for the tab row once the suggestion is up.
+  for (let tries = 0; tries < 3 && (await suggestion.count()) === 0; tries += 1) {
+    await focusCanvas(page);
+    await page.keyboard.press('2');
+    await suggestion.first().waitFor({ state: 'attached', timeout: LAND_TIMEOUT_MS }).catch(() => undefined);
   }
 
-  await expect(onPage(page, 'Use the Expressive style?')).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
+  await expect(suggestion).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
   await press(page, button(page, 'Apply'));
   await expect.poll(async () => pick(await storedDocument(page)), { timeout: LAND_TIMEOUT_MS }).toEqual({
     style: 'Expressive',

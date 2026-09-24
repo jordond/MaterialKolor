@@ -18,7 +18,7 @@ export default defineConfig({
     { name: 'webkit', use: { ...devices['Desktop Safari'] }, testIgnore: /smoke\.spec\.ts/ },
     // b-302
     // b-503
-    // Firefox runs the whole suite but the production smoke too. CI runs Chromium only, see builder.yml.
+    // Firefox runs the whole suite except the production smoke. CI runs Chromium only, see builder.yml.
     { name: 'firefox', use: { ...devices['Desktop Firefox'] }, testIgnore: /smoke\.spec\.ts/ },
   ],
 });

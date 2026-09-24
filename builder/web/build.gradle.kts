@@ -24,6 +24,9 @@ kotlin {
     sourceSets {
         wasmJsMain.dependencies {
             implementation(project(":builder:app"))
+            // b-503a
+            // Only for `LocalMotionFrozen`, which the entry provides from `?motion=frozen`.
+            implementation(project(":builder:kit"))
 
             implementation(libs.compose.runtime)
             implementation(libs.compose.ui)

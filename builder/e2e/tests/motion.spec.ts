@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { wantHooks } from './builder';
 import { button, focusCanvas, LAND_TIMEOUT_MS, openWorkspace } from '../fixtures/workspace';
@@ -25,15 +26,7 @@ test.beforeEach(async ({ context }) => {
   await context.addInitScript(copyFrames, CELLS);
 });
 
-/**
- * Follow-up for the app or kit, found here: on the web a switch draws the old skin, then the new one,
- * with no frame of a reveal or a crossfade in between, with motion allowed or not. Until the reveal
- * plays in a browser the two cases cannot be told apart, so both wait on it.
- */
-const NO_REVEAL_ON_WEB = 'Follow-up: a library switch on the web draws no reveal frames, so reduced motion cannot be told apart';
-
 test('under reduced motion a library switch crossfades with no reveal', async ({ page }) => {
-  test.fixme(true, NO_REVEAL_ON_WEB);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const frames = await switchLibrary(page);
 
@@ -42,7 +35,6 @@ test('under reduced motion a library switch crossfades with no reveal', async ({
 });
 
 test('with motion a library switch reveals from the switcher', async ({ page }) => {
-  test.fixme(true, NO_REVEAL_ON_WEB);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   const frames = await switchLibrary(page);
 
@@ -51,12 +43,14 @@ test('with motion a library switch reveals from the switcher', async ({ page }) 
 });
 
 test.describe('frozen motion', () => {
-  test.fixme(
-    true,
-    'Follow-up for the web shell: ?motion=frozen is not read, so LocalMotionFrozen is never on in a browser (architecture X4, MO-10)',
-  );
-
-  test('a frozen switch to each library looks the same every time', async ({ page }) => {
+  test('a frozen switch to each library looks the same every time', async ({ page }, testInfo) => {
+    // b-503a
+    // A screenshot differs by engine and system, so the baselines are kept for the ones they were
+    // made on, Chromium on macOS so far. `--update-snapshots` on another makes its own.
+    test.skip(
+      !existsSync(testInfo.snapshotPath('material3.png', { kind: 'screenshot' })),
+      'Follow-up: no frozen motion baselines for this engine and system yet',
+    );
     await openWorkspace(page, '/?motion=frozen');
     await expect(page).toHaveScreenshot('material3.png', { maxDiffPixelRatio: 0.02 });
     for (const [key, name] of [['3', 'unstyled'], ['4', 'fluent'], ['5', 'custom']]) {
