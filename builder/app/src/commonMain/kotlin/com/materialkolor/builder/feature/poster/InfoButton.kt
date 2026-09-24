@@ -37,8 +37,8 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The poster sections an info button explains (F-36).
  *
- * The docs have no builder pages yet, so a topic carries no link. Once the help pages exist each
- * one links under the top bar's `DOCS_URL`, the one docs address the app keeps.
+ * The docs have no builder pages yet, so a topic carries no link. Help lists every topic in one
+ * dialog, and once the owner settles the help pages they live under `HELP_PAGES_URL` (b-314).
  */
 internal enum class InfoTopic {
     Seed,

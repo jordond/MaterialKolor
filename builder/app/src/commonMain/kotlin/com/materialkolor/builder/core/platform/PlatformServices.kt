@@ -391,6 +391,14 @@ interface Environment {
      * Elsewhere it does nothing.
      */
     fun announce(message: String)
+
+    // b-314
+
+    /**
+     * The browser and the system it runs on, the way a bug report names them. The web gives the
+     * user agent, the desktop build the JVM and the operating system.
+     */
+    val browser: String
 }
 
 // b-214

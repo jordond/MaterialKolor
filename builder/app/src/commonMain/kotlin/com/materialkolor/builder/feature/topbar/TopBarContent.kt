@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import com.materialkolor.builder.domain.persist.Appearance
+import com.materialkolor.builder.feature.about.GITHUB_URL
+import com.materialkolor.builder.feature.poster.switcherPulse
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
@@ -42,10 +44,6 @@ import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** The docs, the one address the app keeps for them. The poster's help links build on it once they exist. */
-internal const val DOCS_URL = "https://docs.materialkolor.com" // b-303a
-private const val GITHUB_URL = "https://github.com/jordond/materialkolor"
-
 /**
  * The top bar, the library switcher on the start edge and the project's actions on the end edge.
  *
@@ -73,7 +71,7 @@ internal fun TopBarContent(
     TopBarRegion(modifier) {
         LibrarySwitcher(
             document = state.document,
-            modifier = Modifier.topBarFocus(focus, TopBarControl.Library),
+            modifier = Modifier.topBarFocus(focus, TopBarControl.Library).switcherPulse(state, dispatcher), // b-314
             onSwitch = { choice, origin ->
                 dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin))
             },
@@ -217,7 +215,7 @@ private fun overflowItems(
         listOf(
             BuilderMenuItem(
                 label = stringResource(Res.string.topbar_help),
-                onClick = { uriHandler.openUri(DOCS_URL) },
+                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Help)) }, // b-314
                 icon = IconId.Help,
             ),
             BuilderMenuItem(

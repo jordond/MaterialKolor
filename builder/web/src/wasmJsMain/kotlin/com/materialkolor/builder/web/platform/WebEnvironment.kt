@@ -14,6 +14,7 @@ import com.materialkolor.builder.web.interop.pickColorOnScreen
 import com.materialkolor.builder.web.interop.requestPersistentStorage
 import com.materialkolor.builder.web.interop.sessionStorageRead
 import com.materialkolor.builder.web.interop.sessionStorageWrite
+import com.materialkolor.builder.web.interop.userAgent
 import com.materialkolor.builder.web.interop.writeThemeColor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -84,6 +85,9 @@ internal class WebEnvironment : Environment {
 
     // b-221c
     override fun announce(message: String) = A11yLiveRegion.announce(message)
+
+    // b-314
+    override val browser: String = userAgent()
 }
 
 private const val SPLASH_FADE_MILLIS = 200

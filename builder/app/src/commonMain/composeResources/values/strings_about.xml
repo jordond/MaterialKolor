@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The one hint on a first visit, word for word from F-35. -->
+    <string name="about_first_run_hint">Paste a color, drop an image, or press Space to shuffle. Press ? for shortcuts.</string>
+    <!-- The button that closes the first visit hint for good. -->
+    <string name="about_first_run_hint_close">Close the hint</string>
+
+    <!-- The Help dialog, every info button's question and answer in one place (F-36). -->
+    <string name="about_help_title">Help</string>
+    <!-- The button that opens the builder's help pages, shown only once they exist. -->
+    <string name="about_help_pages">Open the help pages</string>
+    <string name="about_close">Close</string>
+
+    <!-- The About dialog (F-36). -->
+    <string name="about_title">About</string>
+    <!-- The builder's own version, such as "Builder 2.0.0". -->
+    <string name="about_builder_version">Builder %1$s</string>
+    <!-- The MaterialKolor version every export uses, such as "MaterialKolor 6.0.0". -->
+    <string name="about_material_kolor_version">MaterialKolor %1$s</string>
+    <string name="about_what">Grow a Material color scheme from one seed color, try it on sample screens, and take the code home to your app.</string>
+    <!-- The motion override (F-37), read out before the choice. Named after F-37, so it never reads as the Extras motion scheme. -->
+    <string name="about_motion">Reduced motion</string>
+    <string name="about_motion_system">System</string>
+    <string name="about_motion_reduce">Reduce</string>
+    <string name="about_motion_full">Full</string>
+
+    <!-- Provisional until the owner signs off the wording (F-36). -->
+    <string name="about_privacy_title">Privacy</string>
+    <string name="about_privacy">Your projects stay in this browser and the builder sets no cookies. When a character is missing from the builder’s own fonts, the browser may load a fallback font from fonts.gstatic.com. Visits are counted with Cloudflare Web Analytics, which sets no cookies.</string>
+
+    <!-- Provisional credits and licenses, until the owner signs off the list (F-36). -->
+    <string name="about_credits_title">Credits and licenses</string>
+    <string name="about_credits">Made by Jordon de Hoog and everyone who has worked on MaterialKolor. The color science is Google’s Material Color Utilities.</string>
+    <string name="about_font_bricolage">Bricolage Grotesque</string>
+    <string name="about_font_jetbrains_mono">JetBrains Mono</string>
+    <!-- What each font is licensed under, shown under its name. -->
+    <string name="about_font_license">SIL Open Font License 1.1</string>
+    <!-- Shown in place of a font's license text when it could not be read, with the license's name. -->
+    <string name="about_font_license_failed">Could not load the license text of the %1$s.</string>
+    <string-array name="about_libraries">
+        <item>Lucide icons, ISC License, drawn through the Compose Lucide port by Composables, MIT License</item>
+        <item>Material Icons, Apache License 2.0</item>
+        <item>Compose Multiplatform and AndroidX Lifecycle, Apache License 2.0</item>
+        <item>Compose Unstyled, MIT License</item>
+        <item>Compose Fluent, Apache License 2.0</item>
+        <item>MaterialKolor, MIT License</item>
+        <item>Material Color Utilities, Apache License 2.0</item>
+        <item>kmpalette, MIT License</item>
+        <item>Metro, Apache License 2.0</item>
+        <item>StateHolder, MIT License</item>
+        <item>KStore, Apache License 2.0</item>
+        <item>Kermit, Apache License 2.0</item>
+        <item>Kotlin, kotlinx.coroutines, kotlinx.serialization and kotlinx.collections.immutable, Apache License 2.0</item>
+    </string-array>
+
+    <!-- The links at the end of About. -->
+    <string name="about_github">GitHub</string>
+    <string name="about_report">Report a problem</string>
+    <string name="about_copy_details">Copy details</string>
+    <!-- What the copied text was, for the Copied toast. -->
+    <string name="about_details_label">details</string>
+</resources>

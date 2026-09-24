@@ -52,6 +52,9 @@ internal class PosterHarness(
 
     // b-306b
     var preferences by mutableStateOf(Preferences())
+
+    // b-314
+    var projectName by mutableStateOf("")
     private val history = History()
     private var now = 0L
 
@@ -66,6 +69,8 @@ internal class PosterHarness(
             // b-306b
             is WorkspaceAction.SetColorAnimation -> setColorAnimation(action.target, action.on)
             is WorkspaceAction.SetColorAnimationDuration -> setColorAnimationDuration(action.target, action.durationMs)
+            // b-314
+            is WorkspaceAction.DismissHint -> dismissHint(action.id)
             else -> Unit
         }
     }
@@ -104,6 +109,13 @@ internal class PosterHarness(
         preferences = preferences.withExportPrefs(target, block(preferences.exportPrefsFor(target)))
     }
 
+    // b-314
+
+    /** Keeps [id] closed, the way the preferences repository does. */
+    private fun dismissHint(id: String) {
+        preferences = preferences.copy(dismissedHints = preferences.dismissedHints + id)
+    }
+
     /** How many steps undo walks back before the history runs out. */
     fun undoEntries(): Int = generateSequence { history.undo() }.count()
 
@@ -139,7 +151,7 @@ internal fun ComposeUiTest.showSection(
             result = result,
             capabilities = capabilitiesOf(document),
             preferences = harness.preferences, // b-306b
-            projectName = "",
+            projectName = harness.projectName, // b-314
             saveStatus = SaveStatus.Idle,
             openPanel = harness.openPanel,
             visibleModes = PreviewMode.Split,

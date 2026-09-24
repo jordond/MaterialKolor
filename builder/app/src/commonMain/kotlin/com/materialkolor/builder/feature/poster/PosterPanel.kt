@@ -52,6 +52,7 @@ import dev.stateholder.dispatcher.Dispatcher
  * @property[visibleModes] The modes the preview shows, which the contrast readout and the style
  * chips follow.
  * @property[openFineTuneRows] The fine tune rows open in this project.
+ * @property[sessionDismissedHints] The hints closed in this tab, whether or not storage kept that.
  */
 @Immutable
 internal data class PosterContext(
@@ -66,6 +67,7 @@ internal data class PosterContext(
     val visibleModes: PreviewMode = PreviewMode.Split,
     // b-305
     val openFineTuneRows: Set<FineTuneRow> = emptySet(),
+    val sessionDismissedHints: Set<String> = emptySet(), // b-314a
 )
 
 /**
@@ -115,6 +117,7 @@ internal fun rememberPosterContext(state: WorkspaceModel.State): PosterContext {
         state.view.mode,
         // b-305
         state.view.openFineTuneRows,
+        state.sessionDismissedHints, // b-314a
     ) {
         PosterContext(
             document = state.document,
@@ -128,6 +131,7 @@ internal fun rememberPosterContext(state: WorkspaceModel.State): PosterContext {
             visibleModes = state.view.mode,
             // b-305
             openFineTuneRows = state.view.openFineTuneRows,
+            sessionDismissedHints = state.sessionDismissedHints, // b-314a
         )
     }
 }
@@ -269,6 +273,7 @@ private fun ColumnScope.DockedSections(
     PosterHeader(context, dispatcher, focus = focus)
     SeedHero(context, dispatcher, focus = focus) // b-306c
     SeedActions(context, dispatcher)
+    FirstRunHint(context, dispatcher) // b-314
     ImageCandidateRow(context, dispatcher) // b-311
     PrimaryExplainerLine(context, dispatcher, why = focus?.why)
     StyleChipsSection(context, dispatcher)
@@ -291,6 +296,7 @@ private fun ColumnScope.SheetSections(
 ) {
     SeedPeekRow(context, dispatcher)
     SeedActions(context, dispatcher, shuffle = false)
+    FirstRunHint(context, dispatcher) // b-314
     ImageCandidateRow(context, dispatcher) // b-311
     StyleChipsSection(context, dispatcher)
     ContrastSection(context, dispatcher)
