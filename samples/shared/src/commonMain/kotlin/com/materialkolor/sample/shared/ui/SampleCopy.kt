@@ -6,25 +6,16 @@ import com.materialkolor.sample.shared.model.TaskTag
 import com.materialkolor.sample.shared.theme.SampleSeed
 import com.materialkolor.sample.shared.theme.ThemeMode
 
-/** Every string the Tasks app shows, so no sample writes its own labels. */
 public object SampleCopy {
-    public val appTitle: String = "Tasks"
-
-    public val seedGroup: String = "Seed"
-
-    public val modeGroup: String = "Mode"
-
-    public val inputPlaceholder: String = "Add a task"
-
-    public val add: String = "Add"
-
-    public val clearDone: String = "Clear done"
-
-    public val dialogTitle: String = "Clear finished tasks?"
-
-    public val dialogConfirm: String = "Clear"
-
-    public val dialogCancel: String = "Keep"
+    public const val appTitle: String = "Tasks"
+    public const val seedGroup: String = "Seed"
+    public const val modeGroup: String = "Mode"
+    public const val inputPlaceholder: String = "Add a task"
+    public const val add: String = "Add"
+    public const val clearDone: String = "Clear done"
+    public const val dialogTitle: String = "Clear finished tasks?"
+    public const val dialogConfirm: String = "Clear"
+    public const val dialogCancel: String = "Keep"
 
     public fun summary(
         done: Int,
@@ -72,8 +63,5 @@ public object SampleCopy {
             TaskTag.Errand -> "Errand"
         }
 
-    /**
-     * The name of [seed], which is also the content description of its swatch.
-     */
     public fun label(seed: SampleSeed): String = seed.name
 }

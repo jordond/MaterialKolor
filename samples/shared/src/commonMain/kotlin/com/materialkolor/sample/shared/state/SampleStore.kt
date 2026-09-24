@@ -19,9 +19,6 @@ public class SampleStore(
     }
 }
 
-/**
- * @param[initial] Only the first composition reads it.
- */
 @Composable
 public fun rememberSampleStore(initial: SampleState = SampleState.Initial): SampleStore =
     remember { SampleStore(initial) }

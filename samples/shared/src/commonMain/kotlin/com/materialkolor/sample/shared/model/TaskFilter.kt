@@ -2,9 +2,7 @@ package com.materialkolor.sample.shared.model
 
 public enum class TaskFilter {
     All,
-
     Active,
-
     Done,
     ;
 

@@ -2,9 +2,6 @@ package com.materialkolor.sample.shared.model
 
 import androidx.compose.runtime.Immutable
 
-/**
- * @property[title] Already trimmed.
- */
 @Immutable
 public data class Task(
     public val id: Long,

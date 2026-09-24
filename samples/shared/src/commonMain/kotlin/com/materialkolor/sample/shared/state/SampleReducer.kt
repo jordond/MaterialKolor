@@ -3,9 +3,6 @@ package com.materialkolor.sample.shared.state
 import com.materialkolor.sample.shared.model.Task
 import com.materialkolor.sample.shared.model.canAddTask
 
-/**
- * Pure, so the same state and action always give the same result.
- */
 public fun SampleState.reduce(action: SampleAction): SampleState =
     when (action) {
         is SampleAction.AddTask -> addTask(action.title)
@@ -17,12 +14,12 @@ public fun SampleState.reduce(action: SampleAction): SampleState =
         is SampleAction.DeleteTask -> copy(tasks = tasks.filterNot { task -> task.id == action.id })
         is SampleAction.SelectFilter -> copy(filter = action.filter)
         is SampleAction.SelectComposerTag -> copy(composerTag = action.tag)
-        SampleAction.RequestClearDone -> if (canClearDone) copy(isClearDialogVisible = true) else this
-        SampleAction.ConfirmClearDone -> copy(
+        is SampleAction.RequestClearDone -> if (canClearDone) copy(isClearDialogVisible = true) else this
+        is SampleAction.ConfirmClearDone -> copy(
             tasks = tasks.filterNot { task -> task.isDone },
             isClearDialogVisible = false,
         )
-        SampleAction.DismissClearDone -> copy(isClearDialogVisible = false)
+        is SampleAction.DismissClearDone -> copy(isClearDialogVisible = false)
         is SampleAction.SelectSeed -> copy(seed = action.seed)
         is SampleAction.SelectMode -> copy(mode = action.mode)
         is SampleAction.SelectSection -> copy(section = action.section)

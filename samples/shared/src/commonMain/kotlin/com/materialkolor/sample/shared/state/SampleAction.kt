@@ -7,10 +7,6 @@ import com.materialkolor.sample.shared.theme.SampleSeed
 import com.materialkolor.sample.shared.theme.ThemeMode
 
 public sealed interface SampleAction {
-    /**
-     * Adds a task with the composer tag at the end of the list. The title is trimmed first, and a blank one is
-     * ignored.
-     */
     public data class AddTask(
         public val title: String,
     ) : SampleAction
@@ -31,7 +27,6 @@ public sealed interface SampleAction {
         public val tag: TaskTag,
     ) : SampleAction
 
-    /** Opens the dialog that asks before clearing finished tasks, if there are any. */
     public data object RequestClearDone : SampleAction
 
     public data object ConfirmClearDone : SampleAction

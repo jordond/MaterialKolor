@@ -2,10 +2,6 @@ package com.materialkolor.sample.shared.theme
 
 import androidx.compose.ui.graphics.Color
 
-/**
- * Violet is the Material baseline and the starting seed. Blue is the Windows accent. The rest are spread
- * around the hue wheel, and Slate is there to show what a nearly gray seed does.
- */
 public enum class SampleSeed(
     public val color: Color,
 ) {

@@ -6,9 +6,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 
 public enum class ThemeMode {
     System,
-
     Light,
-
     Dark,
 }
 
