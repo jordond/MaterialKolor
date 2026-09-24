@@ -11,6 +11,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.engine.resolve.CustomSlotColors
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.kit.headless.OverlayHost
 import com.materialkolor.builder.kit.headless.PageTextToolbarLocals
@@ -80,10 +81,27 @@ public fun BuilderTheme(
                 Library.Material3 -> MaterialSkinTheme(result.chrome(isDark), skin.expressive, reducedMotion, builder)
                 Library.Unstyled -> UnstyledSkinTheme(result.chrome(isDark), isDark, reducedMotion, builder)
                 Library.Fluent -> FluentSkinTheme(result.chrome(isDark), isDark, reducedMotion, builder)
-                Library.Custom -> CustomSkinTheme(result.chromeCustomSlots, isDark, reducedMotion, builder)
+                Library.Custom -> CustomSkinTheme(rememberChromeSlots(result), isDark, reducedMotion, builder)
             }
         }
     }
+}
+
+// pf-1
+
+/**
+ * The chrome's Custom slots, kept for as long as the chrome schemes stay.
+ *
+ * Every theme result works its chrome slots out again the first time they are read, but they come
+ * from the chrome schemes alone, since pins, AMOLED and custom tones stay out of them. So a drag that
+ * leaves the chrome alone, such as an accent, a custom tone or contrast below the standard level,
+ * reads every chrome role once rather than once a frame.
+ */
+@Composable
+internal fun rememberChromeSlots(result: ThemeResult): CustomSlotColors {
+    val light = result.chrome(isDark = false)
+    val dark = result.chrome(isDark = true)
+    return remember(light, dark) { result.chromeCustomSlots }
 }
 
 // d44
