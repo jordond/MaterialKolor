@@ -41,6 +41,16 @@ class ShareLinkTest {
         assertNull(shareLink(document, "Harbour"))
     }
 
+    // b-505
+    @Test
+    fun shareLink_anotherOrigin_opensThere() {
+        val document = ThemeDocument(seed = SEED)
+
+        val link = shareLink(document, "Harbour", origin = "https://staging.materialkolor.com")
+
+        assertEquals("https://staging.materialkolor.com/t/" + ShareCodec.encode(document, "Harbour"), link)
+    }
+
     private fun decode(link: String?): DecodeResult {
         val url = requireNotNull(link) { "Expected a link" }
         return ShareCodec.decode(url.removePrefix(SHARE_URL_PREFIX))

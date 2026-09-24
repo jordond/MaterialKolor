@@ -23,9 +23,11 @@ import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.domain.validate.MAX_ACCENTS
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakeClipboard
+import com.materialkolor.builder.fakes.FakeEnvironment
 import com.materialkolor.builder.fakes.FakeFileSaver
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +44,7 @@ import kotlin.test.Test
 private const val PACKAGE = "com.acme.ui"
 private const val PROJECT = "Ocean study"
 private const val RENAMED = "Harbor study"
+private const val STAGING = "https://staging.materialkolor.com"
 private val VERSIONS =
     ExportVersions(builder = "2.0.0", materialKolor = "6.0.0", fluent = "v0.1.0", composeUnstyled = "1.0.0")
 
@@ -194,6 +197,21 @@ class ExportModelTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
+    // b-505
+    @Test
+    fun shareLink_onStaging_opensOnStagingInEveryFile() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val model = exportModel(session, preferences, FakeEnvironment(siteOrigin = STAGING))
+
+            val ready = model.outcome().shouldBeInstanceOf<ExportOutcome.Ready>()
+
+            ready.allText shouldContain "$STAGING/t/"
+            ready.allText shouldNotContain SHARE_URL_PREFIX
+            harness.clearAndJoin()
+        }
+
     @Test
     fun shareLink_afterARename_regeneratesOnceUnderTheNewName() =
         runTest {
@@ -278,6 +296,7 @@ class ExportModelTest : SessionTestBase() {
     private fun exportModel(
         session: ProjectSession,
         preferences: PreferencesRepository,
+        environment: FakeEnvironment = FakeEnvironment(),
     ): ExportModel =
         harness.own(
             ExportModel(
@@ -288,6 +307,7 @@ class ExportModelTest : SessionTestBase() {
                 generator = counting,
                 clipboard = FakeClipboard(),
                 files = FakeFileSaver(),
+                environment = environment,
             ),
         )
 }

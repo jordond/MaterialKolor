@@ -13,6 +13,7 @@ import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.domain.validate.MAX_ACCENTS
 import com.materialkolor.builder.fakes.FakeClipboard
+import com.materialkolor.builder.fakes.FakeEnvironment
 import com.materialkolor.builder.fakes.FakeFileSaver
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
@@ -66,6 +67,20 @@ class ShareControllerTest : SessionTestBase() {
             val decoded = ShareCodec.decode(link.removePrefix(SHARE_URL_PREFIX)).shouldBeInstanceOf<DecodeResult.Ok>()
             decoded.projectName shouldBe "Harbour"
             decoded.document.seed shouldBe OCEAN.seed
+            harness.clearAndJoin()
+        }
+
+    // b-505
+    @Test
+    fun link_onStaging_opensOnStaging() =
+        runTest {
+            val (session, _) = session()
+            booted(session)
+            val controller = controller(session, FakeEnvironment(siteOrigin = "https://staging.materialkolor.com"))
+
+            val link = controller.link(OCEAN, "Harbour")
+
+            link shouldBe "https://staging.materialkolor.com/t/" + ShareCodec.encode(OCEAN, "Harbour")
             harness.clearAndJoin()
         }
 
@@ -196,6 +211,8 @@ class ShareControllerTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
-    private fun controller(session: ProjectSession): ShareController =
-        harness.own(ShareController(session, clipboard, files))
+    private fun controller(
+        session: ProjectSession,
+        environment: FakeEnvironment = FakeEnvironment(),
+    ): ShareController = harness.own(ShareController(session, clipboard, files, environment))
 }

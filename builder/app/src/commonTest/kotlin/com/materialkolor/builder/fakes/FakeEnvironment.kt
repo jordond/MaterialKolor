@@ -3,6 +3,7 @@ package com.materialkolor.builder.fakes
 import com.materialkolor.builder.core.platform.BootSplash
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.link.SITE_ORIGIN
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -13,6 +14,8 @@ internal class FakeEnvironment(
     override val tabId: String = "tab",
     override var eyeDropperAvailable: Boolean = false,
     override var storageAvailable: Boolean = true,
+    // b-505
+    override val siteOrigin: String = SITE_ORIGIN,
 ) : Environment {
     override val prefersDark: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val reducedMotion: MutableStateFlow<Boolean> = MutableStateFlow(false)
