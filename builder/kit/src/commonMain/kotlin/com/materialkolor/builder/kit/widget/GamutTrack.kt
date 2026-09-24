@@ -371,6 +371,10 @@ private fun CacheDrawScope.trackDrawing(
 /**
  * Draws the track, its shaded stretches and the thumb. The thumb's place and fill are read here,
  * so moving it only redraws.
+ *
+ * The thumb always sits in a halo of the panel color, [ThumbHaloReach] rim widths past its edge, so
+ * its focus ring lands on the panel and never on the track. Drawn only with focus the halo would
+ * leave the ring over the track's colors, which the focus color can match (AR-01, S5 rerun).
  */
 private fun DrawScope.drawTrack(
     drawing: TrackDrawing,
@@ -391,6 +395,7 @@ private fun DrawScope.drawTrack(
     val stroke = drawing.rim.width
     val radius = drawing.thumbRadius
     val center = Offset(drawing.xOf(channel.fractionOf(picker.valueOf(channel))), size.height / 2)
+    drawCircle(tokens.panel, radius = radius + stroke * ThumbHaloReach, center = center)
     if (focused) drawCircle(tokens.focus, radius = radius + stroke * 2, center = center, style = drawing.focusRing)
     drawCircle(Color(picker.color.value), radius = radius, center = center)
     drawCircle(tokens.textStrong, radius = radius - stroke / 2, center = center, style = drawing.rim)
@@ -445,3 +450,9 @@ private const val SampleCount: Int = 48
 
 /** How far Shift and the page keys move. */
 private const val BigStep: Double = 10.0
+
+/**
+ * How far the panel halo reaches past the thumb, in rim widths. The focus ring stands one and a half
+ * off the thumb and is one wide, and the halo runs one more past it.
+ */
+private const val ThumbHaloReach: Float = 3.5f

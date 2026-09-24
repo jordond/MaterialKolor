@@ -67,14 +67,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.codegen.dsl.Token
 import com.materialkolor.builder.codegen.dsl.TokenKind
-import com.materialkolor.builder.kit.control.BuilderIconButton
-import com.materialkolor.builder.kit.control.BuilderTooltip
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.generated.resources.Res
 import com.materialkolor.builder.kit.generated.resources.code_view_name
 import com.materialkolor.builder.kit.generated.resources.widget_copy
 import com.materialkolor.builder.kit.headless.TouchlessSelectionContainer
-import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.token.CodePalette
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
@@ -111,7 +108,8 @@ private sealed interface CodePart {
  * wears the focus ring outside its frame while it has focus. There the arrows, Page Up and Page Down
  * scroll it without a pointer, and the copy keys copy what is selected.
  *
- * The copy button sits in the top corner. Selecting text takes a part of the file, the button takes
+ * The copy button sits in the top corner on a band of the panel, so its focus ring never lands on
+ * the code ground ([CopyButton]). Selecting text takes a part of the file, the button takes
  * all of it, byte for byte. On the web a finger does not select, since the selection's handles would
  * take the page's accessibility mirror over (D45), so there the button is how a finger copies. A
  * mouse still selects. On a touch screen with a keyboard a key brings selection back and the code
@@ -212,12 +210,11 @@ public fun CodeView(
                 }
             }
         }
-        BuilderTooltip(
-            text = copyLabel,
+        CopyButton(
+            label = copyLabel,
+            onCopy = onCopy,
             modifier = Modifier.align(Alignment.TopEnd).padding(tokens.spacing.small),
-        ) {
-            BuilderIconButton(onClick = onCopy, icon = IconId.Copy, contentDescription = copyLabel)
-        }
+        )
     }
 }
 

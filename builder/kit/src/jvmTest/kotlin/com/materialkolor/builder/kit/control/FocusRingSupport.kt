@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PixelMap
@@ -40,6 +41,7 @@ import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.doubles.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
@@ -77,6 +79,7 @@ internal val RingDocument: ThemeDocument = ThemeDocument(seed = Argb(0x6750A4))
  * that colour under its own focus layer, since a ring inside a tab sits beneath it.
  * @property[focused] Where the focused node sits in the frame, in pixels.
  * @property[density] How many pixels the capture drew per dp.
+ * @property[region] Where ring pixels are looked for, in pixels, or the whole frame when null.
  */
 internal class RingCapture(
     val rings: List<Color>,
@@ -84,16 +87,28 @@ internal class RingCapture(
     val after: PixelMap,
     val focused: Rect,
     val density: Float,
+    val region: Rect? = null,
 ) {
     /** Every pixel that moved and now sits on a ring colour, whatever its contrast. */
     val candidates: List<IntOffset> = buildList {
         for (y in 0 until minOf(before.height, after.height)) {
             for (x in 0 until minOf(before.width, after.width)) {
+                if (region != null && !region.contains(Offset(x + 0.5f, y + 0.5f))) continue
                 val now = after[x, y]
                 if (moved(before[x, y], now) && rings.any { ring -> near(now, ring) }) add(IntOffset(x, y))
             }
         }
     }
+
+    /**
+     * The same capture with ring pixels looked for only within [reach] of the focused node. A tooltip
+     * that opens with focus can wear the focus colour, as Fluent's does, and this leaves it out.
+     */
+    fun nearFocused(reach: Dp): RingCapture =
+        RingCapture(rings, before, after, focused, density, focused.inflate(reach.value * density))
+
+    /** The ring colour the pixel at [point] shows, or null when it shows none. */
+    fun ringAt(point: IntOffset): Color? = rings.firstOrNull { ring -> near(after[point.x, point.y], ring) }
 
     /** The candidates at 3 to 1 or better against their unfocused colour, which is the ring. */
     val pixels: List<IntOffset> = candidates.filter { point -> ratioAt(point) >= RingContrast }
@@ -112,6 +127,18 @@ internal class RingCapture(
             return maxOf(abs(layered.red - ring.red), abs(layered.green - ring.green), abs(layered.blue - ring.blue))
         }
 
+    /** The box around every ring coloured pixel, where the ring was drawn whatever its contrast. */
+    val ringBounds: Rect
+        get() {
+            if (candidates.isEmpty()) return Rect.Zero
+            return Rect(
+                left = candidates.minOf { point -> point.x }.toFloat(),
+                top = candidates.minOf { point -> point.y }.toFloat(),
+                right = candidates.maxOf { point -> point.x } + 1f,
+                bottom = candidates.maxOf { point -> point.y } + 1f,
+            )
+        }
+
     /** How many pixels the ring drew and how many of them stand out, for a failure message. */
     val summary: String
         get() {
@@ -128,6 +155,8 @@ internal class RingCapture(
  * @param[document] The theme the skin wears, for a test that needs a seed or style far from the default.
  * @param[density] Pixels per dp. A small round control draws few whole ring pixels at 1, since the
  * edges of a curve are blended, so its test can draw at 2 instead of lowering the pixel line.
+ * @param[ringColors] The colours a ring pixel may show, for a control whose own focus outline is its
+ * ring, such as a field's. Unset, the skin's focus colour counts, with Material3's layer over it.
  */
 @OptIn(ExperimentalTestApi::class)
 internal fun ComposeUiTest.tabOntoRing(
@@ -135,6 +164,7 @@ internal fun ComposeUiTest.tabOntoRing(
     document: ThemeDocument = RingDocument,
     density: Float = 1f,
     presses: Int = 1,
+    ringColors: (@Composable () -> List<Color>)? = null,
     content: @Composable () -> Unit,
 ): RingCapture {
     require(presses >= 1) { "Tab has to be pressed at least once, got $presses" }
@@ -149,7 +179,12 @@ internal fun ComposeUiTest.tabOntoRing(
                     val layered = MaterialTheme.colorScheme.primary
                         .copy(alpha = MaterialFocusLayer)
                         .compositeOver(focus)
-                    rings = if (skin.library == Library.Material3) listOf(focus, layered) else listOf(focus)
+                    val own = ringColors?.invoke()
+                    rings = when {
+                        own != null -> own
+                        skin.library == Library.Material3 -> listOf(focus, layered)
+                        else -> listOf(focus)
+                    }
                     Column {
                         OverlayTestButton(RingStartTag)
                         Box(Modifier.testTag(RingFrameTag).background(tokens.panel).padding(8.dp)) { content() }
@@ -181,11 +216,16 @@ internal fun RingCapture.shouldShowRing(least: Int = RingPixelsNeeded) {
 }
 
 /**
- * Checks that the ring runs along all four sides of the focused node, inside it or out. Each side
- * is looked for in its middle half, within a quarter of the node's size or [reach] outside.
+ * Checks that the ring runs along all four sides of [around], inside it or out. Each side is looked
+ * for in its middle half, within a quarter of the box's size or [reach] outside. The box is the
+ * focused node unless the ring goes round only a part of it, such as a slider's thumb, whose test
+ * passes [RingCapture.ringBounds].
  */
-internal fun RingCapture.shouldRingEverySide(reach: Dp = 8.dp) {
-    val box = focused
+internal fun RingCapture.shouldRingEverySide(
+    reach: Dp = 8.dp,
+    around: Rect = focused,
+) {
+    val box = around
     val out = reach.value * density
     val middleX = (box.left + box.width / 4)..(box.right - box.width / 4)
     val middleY = (box.top + box.height / 4)..(box.bottom - box.height / 4)
@@ -200,6 +240,23 @@ internal fun RingCapture.shouldRingEverySide(reach: Dp = 8.dp) {
             pixels.filter { point -> holds(point.x + 0.5f, point.y + 0.5f) }.shouldNotBeEmpty()
         }
     }
+}
+
+/**
+ * Checks that the ring colour stands 3 to 1 from what every ring pixel covered, so no stretch of the
+ * ring lies on a ground it matches. [shouldRingEverySide] lets a side through on a handful of 3 to 1
+ * pixels, which is how the thumbs, the scheme chip and the copy buttons of the S5 rerun rang only
+ * part of the way round. Each pixel is judged by the ring colour it shows rather than its own, so a
+ * blended edge pixel on a ground the ring clears by a hair does not fail it.
+ */
+internal fun RingCapture.shouldRingAllTheWayRound() {
+    val matched = candidates.filter { point ->
+        val ring = ringAt(point) ?: return@filter false
+        contrast(ring, before[point.x, point.y]) < RingContrast
+    }
+    val first = matched.firstOrNull()
+    val where = if (first == null) "" else ", first at (${first.x}, ${first.y})"
+    withClue("$summary, ${matched.size} on a ground under 3:1$where") { matched.shouldBeEmpty() }
 }
 
 /**

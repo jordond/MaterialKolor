@@ -31,6 +31,7 @@ import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /** The diameter of the colored circle, design D. */
@@ -51,7 +52,9 @@ internal val SchemeChipRingGap: Dp = 2.dp // b-311a
  *
  * It reads out as a radio button named [label] with its selected state, and shows [label] as a
  * tooltip on hover and focus. The chosen chip carries a ring and a check, so the choice never rests
- * on color alone. Place it inside a selectable group so assistive technology hears the set. Inside
+ * on color alone. Keyboard focus rings it outside its hairline, on whatever it sits on, so the ring
+ * never lies on the chip's own edge (S5 rerun). Place it inside a selectable group so assistive
+ * technology hears the set. Inside
  * something that is itself the control, the other [SchemeChip], with no click, only shows the scheme.
  *
  * @param[primary] The top half.
@@ -90,7 +93,8 @@ public fun SchemeChip(
                     role = Role.RadioButton,
                     onClick = onClick,
                 ).hoverable(interactionSource)
-                .widgetOutline(interactionSource, CircleShape, hovered),
+                .controlRing(interactionSource, CircleShape)
+                .widgetHairline(CircleShape, hovered),
         )
     }
 }
@@ -121,8 +125,8 @@ public fun SchemeChip(
 }
 
 /**
- * The chip as it draws, the circle in its ring inside the room the focus outline takes. [modifier]
- * goes on the outside of that room, where a pressable chip draws its outline.
+ * The chip as it draws, the circle in its ring inside the room the hairline takes. [modifier] goes
+ * on the outside of that room, where a pressable chip draws its hairline and its focus ring past it.
  */
 @Composable
 private fun SchemeChipFace(
