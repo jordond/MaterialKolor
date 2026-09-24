@@ -38,6 +38,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
  * @param[supportingText] A hint under the field while there is no error.
  * @param[enabled] Whether the field takes input.
  * @param[style] The part of the builder's type the text is set in.
+ * @param[onDraftChange] Called with the draft each time someone changes its text, and with the
+ * committed text again when Esc throws the draft away. A cursor move, a commit and a new [value]
+ * from outside leave it alone. For a caller that acts on the text as it is typed, such as a search.
  */
 @Composable
 public fun BuilderTextField(
@@ -49,6 +52,7 @@ public fun BuilderTextField(
     supportingText: String? = null,
     enabled: Boolean = true,
     style: BuilderTextStyle = BuilderTextStyle.Body,
+    onDraftChange: ((String) -> Unit)? = null,
 ) {
     val draft = rememberFieldDraft(value)
     val problem = if (draft.dirty) error(draft.text) else null
@@ -67,6 +71,7 @@ public fun BuilderTextField(
             }
         },
         modifier = modifier,
+        onEdit = { text -> onDraftChange?.invoke(text) },
     )
 }
 
@@ -77,6 +82,9 @@ public fun BuilderTextField(
  * On the web the field node is named [label], with the disabled note while it is disabled (D37).
  * Material's field is otherwise nameless there, since its editable text overwrites the label, and
  * the page marks every field editable, disabled or not.
+ *
+ * [onEdit] hears the draft's text after someone changes it and after Esc reverts it, and never
+ * for a cursor move, a commit or a value from outside.
  */
 @Composable
 internal fun SkinField(
@@ -89,12 +97,15 @@ internal fun SkinField(
     enabled: Boolean,
     onCommit: () -> Unit,
     modifier: Modifier,
-    onEdit: () -> Unit = {},
+    onEdit: (String) -> Unit = {},
 ) {
-    val field = modifier.fieldCommits(draft, onCommit, onRevert = onEdit).foldState(label, null, enabled)
+    val field = modifier
+        .fieldCommits(draft, onCommit, onRevert = { onEdit(draft.text) })
+        .foldState(label, null, enabled)
     val onValueChange = { next: TextFieldValue ->
-        if (next.text != draft.text) onEdit()
+        val edited = next.text != draft.text
         draft.value = next
+        if (edited) onEdit(next.text)
     }
     val library = LocalSkin.current.library
     if (large) {

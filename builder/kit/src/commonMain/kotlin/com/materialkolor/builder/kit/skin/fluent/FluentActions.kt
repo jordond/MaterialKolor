@@ -82,8 +82,18 @@ internal fun FluentIconButton(
     modifier: Modifier,
     emphasis: Emphasis,
     enabled: Boolean,
+    expanded: Boolean?,
 ) {
-    HeadlessIconButton(onClick, icon, contentDescription, FluentActionStyles.button, modifier, emphasis, enabled)
+    HeadlessIconButton(
+        onClick,
+        icon,
+        contentDescription,
+        FluentActionStyles.button,
+        modifier,
+        emphasis,
+        enabled,
+        expanded,
+    )
 }
 
 @Composable

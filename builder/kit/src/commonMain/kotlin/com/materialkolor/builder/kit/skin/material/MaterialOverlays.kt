@@ -15,13 +15,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDefaults
@@ -36,11 +33,7 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -53,24 +46,20 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderMenuItem
 import com.materialkolor.builder.kit.control.BuilderToast
-import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.foldMenuRow
-import com.materialkolor.builder.kit.control.foldState
+import com.materialkolor.builder.kit.headless.DropdownList
 import com.materialkolor.builder.kit.headless.HeadlessDropdown
 import com.materialkolor.builder.kit.headless.HeadlessModal
 import com.materialkolor.builder.kit.headless.HeadlessTooltip
@@ -79,7 +68,6 @@ import com.materialkolor.builder.kit.headless.ReturnFocusWhenGone
 import com.materialkolor.builder.kit.headless.keepTaps
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
-import com.materialkolor.builder.kit.skin.headless.Hairline
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.popoverEnter
@@ -123,7 +111,7 @@ internal fun materialOverlayStyle(
         selected = colors.secondaryContainer,
         focus = colors.secondary,
         field = colors.surfaceContainerLow,
-        fieldBorder = BorderStroke(Hairline, colors.outline),
+        fieldBorder = BorderStroke(LocalBuilderTokens.current.outlineWidth, colors.outline),
         tooltip = colors.inverseSurface,
         tooltipContent = colors.inverseOnSurface,
         tooltipBorder = null,
@@ -286,6 +274,18 @@ internal fun MaterialMenu(
     }
 }
 
+/**
+ * Material's menu drawn open where it stands, the rows of [MaterialMenu] in Material's menu
+ * container, with nothing floating.
+ */
+@Composable
+internal fun MaterialMenuPanel(
+    items: List<BuilderMenuItem>,
+    modifier: Modifier,
+) {
+    DropdownList(materialMenuStyle(), modifier = modifier) { MaterialMenuRows(items, onDismissRequest = {}) }
+}
+
 @Composable
 private fun MaterialMenuRows(
     items: List<BuilderMenuItem>,
@@ -329,114 +329,6 @@ private fun MaterialMenuRows(
                 MenuDefaults.itemColors(textColor = error, leadingIconColor = error, trailingIconColor = error)
             } else {
                 MenuDefaults.itemColors()
-            },
-        )
-    }
-}
-
-/**
- * Material's exposed dropdown, a read only outlined field over a `DropdownMenu`.
- *
- * The field already shows the choice as its text, so on the web its name is the label alone, with
- * the disabled note while it is disabled, and the choice is read once (S5 row 10).
- *
- * Where overlays render in the page (D40) the field stays and the options open in the headless
- * dropdown in Material's menu container, as wide as the field, with focus on the chosen option.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun <T> MaterialSelect(
-    label: String,
-    options: List<T>,
-    selected: T,
-    onSelect: (T) -> Unit,
-    optionLabel: (T) -> String,
-    enabled: Boolean,
-    modifier: Modifier,
-) {
-    val inTree = LocalOverlaysInTree.current
-    val density = LocalDensity.current
-    var expanded by remember { mutableStateOf(false) }
-    var fieldWidth by remember { mutableIntStateOf(0) }
-    val field = remember { FocusRequester() }
-    val selectedRow = remember { FocusRequester() }
-    val current = optionLabel(selected)
-    val choose = { option: T ->
-        expanded = false
-        onSelect(option)
-    }
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { open -> expanded = open && enabled },
-        modifier = modifier,
-    ) {
-        OutlinedTextField(
-            value = current,
-            onValueChange = {},
-            modifier = Modifier
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled)
-                .then(
-                    if (inTree) {
-                        Modifier.focusRequester(field).onSizeChanged { size -> fieldWidth = size.width }
-                    } else {
-                        Modifier
-                    },
-                ).semantics {
-                    role = Role.DropdownList
-                    stateDescription = current
-                }.foldState(label, null, enabled),
-            enabled = enabled,
-            readOnly = true,
-            label = { Text(label) },
-            trailingIcon = { BuilderIcon(IconId.ChevronDown, contentDescription = null) },
-            singleLine = true,
-        )
-        if (inTree) {
-            HeadlessDropdown(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                style = materialMenuStyle(),
-                minWidth = with(density) { fieldWidth.toDp() },
-                initialFocus = if (selected in options) selectedRow else null,
-                returnFocusTo = field,
-            ) { close ->
-                val pick = { option: T ->
-                    close()
-                    onSelect(option)
-                }
-                MaterialSelectRows(options, selected, optionLabel, pick, selectedRow)
-            }
-        } else {
-            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                MaterialSelectRows(options, selected, optionLabel, choose, null)
-            }
-        }
-    }
-}
-
-@Composable
-private fun <T> MaterialSelectRows(
-    options: List<T>,
-    selected: T,
-    optionLabel: (T) -> String,
-    onChoose: (T) -> Unit,
-    selectedRow: FocusRequester?,
-) {
-    for (option in options) {
-        val isSelected = option == selected
-        DropdownMenuItem(
-            text = { Text(optionLabel(option)) },
-            onClick = { onChoose(option) },
-            modifier = Modifier
-                .then(if (isSelected && selectedRow != null) Modifier.focusRequester(selectedRow) else Modifier)
-                .semantics {
-                    role = Role.RadioButton
-                    this.selected = isSelected
-                }.foldState(optionLabel(option), ControlState.Selected(isSelected)),
-            trailingIcon = if (isSelected) {
-                { BuilderIcon(IconId.Check, contentDescription = null) }
-            } else {
-                null
             },
         )
     }

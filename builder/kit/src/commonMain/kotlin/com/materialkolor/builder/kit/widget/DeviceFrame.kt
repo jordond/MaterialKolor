@@ -59,14 +59,14 @@ public fun DeviceFrame(
         modifier = modifier
             .clip(frameShape)
             .background(tokens.panelRaised)
-            .border(WidgetOutlineWidth, tokens.borderStrong, frameShape)
+            .border(tokens.outlineWidth, tokens.borderStrong, frameShape)
             .padding(bezel),
     ) {
         Box(
             modifier = Modifier
                 .width(width.screenWidth)
                 .clip(screenShape)
-                .border(WidgetOutlineWidth, tokens.border, screenShape),
+                .border(tokens.outlineWidth, tokens.border, screenShape),
         ) { content() }
     }
 }

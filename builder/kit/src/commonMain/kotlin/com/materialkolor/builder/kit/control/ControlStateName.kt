@@ -10,6 +10,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
+import com.materialkolor.builder.kit.a11y.LocalWebKeyboard
+import com.materialkolor.builder.kit.a11y.onWebMirror
 import com.materialkolor.builder.kit.generated.resources.Res
 import com.materialkolor.builder.kit.generated.resources.role_checkbox
 import com.materialkolor.builder.kit.generated.resources.role_radio
@@ -29,18 +31,20 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * Whether a control's state has to travel in its accessible name (D37).
  *
- * The web mirror in CMP 1.12.1 builds each element from the merged semantics node. It turns the
- * content description into `aria-label` and the text into the element's own text, and nothing else.
- * Selected, toggle state, state description and disabled never reach the page. So on wasm the kit
- * folds the state into the content description of the control's merged node, and the label is read
- * once with its state. The Compose semantics stay in place everywhere, for when CMP 1.13 carries
- * them across.
+ * The web mirror in CMP 1.12.1 builds each element from the merged semantics node. It writes the
+ * role, the content description as `aria-label`, the text as the element's own text,
+ * `contenteditable` and test tags. Selected, toggle state, state description and disabled never
+ * reach the page. So where this is set the kit folds the state into the content description of the
+ * control's merged node, and the label is read once with its state. It folds in the role's word
+ * too where a click handler hides the role (P3, D40), and it names a node with no role through its
+ * text, since screen readers drop an `aria-label` there ([roleLessName]). The Compose semantics
+ * stay in place everywhere, for when CMP 1.13 carries them across.
+ *
+ * It starts from [onWebMirror], and it is a local so a test can fold a whole tree on the JVM. The
+ * web's keyboard habits outlive the fold, so they read [LocalWebKeyboard] instead.
  */
-internal expect val foldsStateIntoName: Boolean
-
-/** [foldsStateIntoName] as a local, so a test can fold a whole tree on the JVM. */
 internal val LocalFoldsStateIntoName: ProvidableCompositionLocal<Boolean> =
-    staticCompositionLocalOf { foldsStateIntoName }
+    staticCompositionLocalOf { onWebMirror }
 
 /** The state a control reports. */
 internal sealed interface ControlState {
@@ -59,7 +63,10 @@ internal sealed interface ControlState {
         val on: Boolean,
     ) : ControlState
 
-    /** A disclosure that opens and closes. */
+    /**
+     * Something that opens and closes, a disclosure or a button that shows and hides a panel of its
+     * own.
+     */
     data class Expanded(
         val expanded: Boolean,
     ) : ControlState

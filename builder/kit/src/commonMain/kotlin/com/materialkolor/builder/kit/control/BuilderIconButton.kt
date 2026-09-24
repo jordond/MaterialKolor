@@ -10,6 +10,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -34,6 +36,9 @@ import com.materialkolor.builder.kit.skin.material.MaterialIconButton
  * @param[modifier] Applied to the button.
  * @param[emphasis] How loudly the button speaks. Most icon buttons stay [Emphasis.Subtle].
  * @param[enabled] Whether the button can be pressed.
+ * @param[expanded] Whether the panel this button shows and hides is open, for a button that
+ * discloses one. It is read as the button's state, and on the web it travels in the name as well.
+ * Left null, the button has no state.
  */
 @Composable
 public fun BuilderIconButton(
@@ -43,10 +48,11 @@ public fun BuilderIconButton(
     modifier: Modifier = Modifier,
     emphasis: Emphasis = Emphasis.Subtle,
     enabled: Boolean = true,
+    expanded: Boolean? = null,
 ) {
     when (LocalSkin.current.library) {
         Library.Material3 -> {
-            MaterialIconButton(onClick, icon, contentDescription, modifier, emphasis, enabled)
+            MaterialIconButton(onClick, icon, contentDescription, modifier, emphasis, enabled, expanded)
         }
         Library.Unstyled -> {
             HeadlessIconButton(
@@ -57,11 +63,12 @@ public fun BuilderIconButton(
                 modifier,
                 emphasis,
                 enabled,
+                expanded,
             )
         }
         Library.Fluent -> {
             // fluent-placeholder
-            FluentIconButton(onClick, icon, contentDescription, modifier, emphasis, enabled)
+            FluentIconButton(onClick, icon, contentDescription, modifier, emphasis, enabled, expanded)
         }
         Library.Custom -> {
             HeadlessIconButton(
@@ -72,6 +79,7 @@ public fun BuilderIconButton(
                 modifier,
                 emphasis,
                 enabled,
+                expanded,
             )
         }
     }
@@ -87,9 +95,11 @@ internal fun HeadlessIconButton(
     modifier: Modifier = Modifier,
     emphasis: Emphasis = Emphasis.Subtle,
     enabled: Boolean = true,
+    expanded: Boolean? = null,
 ) {
     val colors = style.colors(emphasis)
     val interactionSource = remember { MutableInteractionSource() }
+    val spoken = iconButtonSemantics(contentDescription, enabled, expanded)
     Box(
         modifier = modifier
             .clickable(
@@ -98,7 +108,8 @@ internal fun HeadlessIconButton(
                 enabled = enabled,
                 role = Role.Button,
                 onClick = onClick,
-            ).controlTouchTarget(LocalLayout.current.primaryTouchTarget)
+            ).then(spoken.state)
+            .controlTouchTarget(LocalLayout.current.primaryTouchTarget)
             .controlPress(interactionSource)
             .alpha(enabledAlpha(enabled))
             .controlRing(interactionSource, style.iconShape)
@@ -106,6 +117,36 @@ internal fun HeadlessIconButton(
             .size(style.height),
         contentAlignment = Alignment.Center,
     ) {
-        BuilderIcon(icon, contentDescription = stateName(contentDescription, null, enabled), tint = colors.content)
+        BuilderIcon(icon, contentDescription = spoken.name, tint = colors.content)
     }
+}
+
+/**
+ * What an icon button reads out, the [name] its glyph carries and the [state] modifier that sets
+ * the button's state description.
+ */
+internal class IconButtonSemantics(
+    val name: String,
+    val state: Modifier,
+)
+
+/**
+ * The name and state of an icon button whose panel is open when [expanded] is true and closed when
+ * it is false. Left null, the name is [contentDescription] with only the disabled note folded in,
+ * and the state adds nothing.
+ */
+@Composable
+internal fun iconButtonSemantics(
+    contentDescription: String,
+    enabled: Boolean,
+    expanded: Boolean?,
+): IconButtonSemantics {
+    if (expanded == null) return IconButtonSemantics(stateName(contentDescription, null, enabled), Modifier)
+    val state = ControlState.Expanded(expanded)
+    val words = stateWords()
+    val spoken = words.of(state)
+    return IconButtonSemantics(
+        name = stateName(contentDescription, state, enabled, words),
+        state = Modifier.semantics { stateDescription = spoken },
+    )
 }
