@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.Check
@@ -44,7 +43,11 @@ import com.composeunstyled.UnstyledRadioGroup
 import com.composeunstyled.UnstyledSlider
 import com.composeunstyled.UnstyledSwitch
 import com.composeunstyled.focusRing
+import com.materialkolor.builder.kit.a11y.foldsValueIntoName
+import com.materialkolor.builder.kit.a11y.sliderRoleWord
+import com.materialkolor.builder.kit.a11y.valueNodeName
 import com.materialkolor.builder.kit.control.foldedChoiceName
+import com.materialkolor.builder.kit.control.foldedSwitchName
 import com.materialkolor.builder.kit.control.foldedToggleName
 import com.materialkolor.builder.kit.headless.InnerTextWithoutHandles
 import com.materialkolor.builder.preview.canvas.DemoAppState
@@ -139,6 +142,8 @@ private fun GalleryTextField(
 @Composable
 internal fun Sliders(state: DemoAppState) {
     val stop = state.choice(GalleryKeys.Volume, SliderStops, default = 6)
+    val folds = foldsValueIntoName
+    val roleWord = sliderRoleWord
     GalleryColumn {
         for (enabled in EnabledThenDisabled) {
             val interactions = remember { MutableInteractionSource() }
@@ -153,7 +158,7 @@ internal fun Sliders(state: DemoAppState) {
                     .fillMaxWidth()
                     .height(SliderHeight)
                     .previewRoles(enabled, UnstyledGalleryComponent.Slider)
-                    .semantics { contentDescription = "Volume" },
+                    .semantics { valueNodeName("Volume", "$stop", folds, roleWord) },
                 enabled = enabled,
                 interactionSource = interactions,
                 valueRange = 0f..(SliderStops - 1).toFloat(),
@@ -252,8 +257,8 @@ internal fun Switches(state: DemoAppState) {
 }
 
 /**
- * A switch with its label before it, the whole row one control. There is no public kit fold for a
- * switch, so on the web it reads by its label alone.
+ * A switch with its label before it, the whole row one control, whose name carries its state onto
+ * the web.
  */
 @Composable
 private fun GallerySwitch(
@@ -281,7 +286,8 @@ private fun GallerySwitch(
                 enabled = enabled,
                 role = SemanticsRole.Switch,
                 onValueChange = onChange,
-            ).galleryFocusRing(interactions, offset = true),
+            ).foldedSwitchName(label, on, enabled)
+            .galleryFocusRing(interactions, offset = true),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(label, Modifier.weight(1f), style = BodyStyle, color = tint(DashboardToken.OnSurface, enabled))

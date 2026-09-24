@@ -70,7 +70,6 @@ internal object GalleryKeys {
     const val Starred: String = "gallery.unstyled.starred"
     const val Volume: String = "gallery.unstyled.volume"
     const val Newsletter: String = "gallery.unstyled.newsletter"
-    const val Updates: String = "gallery.unstyled.updates"
     const val Wifi: String = "gallery.unstyled.wifi"
     const val Plan: String = "gallery.unstyled.plan"
     const val SortShut: String = "gallery.unstyled.sortShut"

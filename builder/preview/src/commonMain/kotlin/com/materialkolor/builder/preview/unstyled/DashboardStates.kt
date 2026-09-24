@@ -6,7 +6,7 @@ import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.semantics
 
 // A control's name and state go through the kit's public fold modifiers, `foldedExpandedName`,
-// `foldedTabName`, `foldedChoiceName` and `foldedSelectedName`, which carry the state onto the web
+// `foldedTabName`, `foldedOptionName` and `foldedSelectedName`, which carry the state onto the web
 // (D37). What they leave to the app is here.
 
 /**

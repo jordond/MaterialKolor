@@ -110,8 +110,8 @@ class DashboardStatesTest {
             onNode(tab(DashboardRange.Month)).assertName("Month, tab, not selected")
             onNode(named(DashboardDestination.Overview.label)).assertName("Overview, selected")
             onNode(named(DashboardDestination.Customers.label)).assertName("Customers, not selected")
-            onNode(menuItem(OrderFilter.All), useUnmergedTree = true).assertName("All statuses, radio, selected")
-            onNode(menuItem(OrderFilter.Paid), useUnmergedTree = true).assertName("Paid, radio, not selected")
+            onNode(menuItem(OrderFilter.All), useUnmergedTree = true).assertName("All statuses, option, selected")
+            onNode(menuItem(OrderFilter.Paid), useUnmergedTree = true).assertName("Paid, option, not selected")
         }
         runComposeUiTest {
             shutDashboard(DeviceWidth.Tablet, folds = true)
