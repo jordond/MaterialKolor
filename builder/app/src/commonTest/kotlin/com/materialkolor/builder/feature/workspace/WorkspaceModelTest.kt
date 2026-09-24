@@ -23,6 +23,7 @@ import com.materialkolor.builder.fakes.FakeClipboard
 import com.materialkolor.builder.fakes.FakeRouter
 import com.materialkolor.builder.fakes.RouterCall
 import com.materialkolor.builder.feature.picker.PickerTarget
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.Dispatchers
@@ -232,6 +233,78 @@ class WorkspaceModelTest : SessionTestBase() {
             router.calls shouldBe listOf(RouterCall.PushOverlay("Export"))
             workspace.state.value.panel shouldBe Panel.Picker
             workspace.state.value.pickerTarget shouldBe PickerTarget.Seed
+            harness.clearAndJoin()
+        }
+
+    // b-508
+    @Test
+    fun openPanel_history_carriesTheTimelineAndLeavesFullscreen() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val workspace = workspaceModel(session, preferences)
+            workspace.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            workspace.toggleFullscreen()
+            workspace.state.value.timeline shouldBe null
+
+            workspace.openPanel(Panel.History)
+
+            val opened = workspace.state.value
+            opened.fullscreen shouldBe false
+            val timeline = opened.timeline.shouldNotBeNull()
+            timeline.cursor shouldBe 1
+            timeline.steps.single().after shouldBe ThemeDocument.Default.copy(amoled = true)
+            router.calls shouldBe listOf(RouterCall.PushOverlay("History"))
+            workspace.undo()
+            workspace.state.value.timeline
+                .shouldNotBeNull()
+                .cursor shouldBe 0
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun jumpTo_movesTheCursorAndPutsTheSuggestionAway() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val workspace = workspaceModel(session, preferences)
+            workspace.edit(DocumentChange.SetLibrary(Library.Fluent, expressive = false), EditPhase.Discrete)
+            workspace.edit(DocumentChange.SetLibrary(Library.Material3, expressive = true), EditPhase.Discrete)
+            workspace.state.value.expressiveSuggestion shouldBe true
+            workspace.openPanel(Panel.History)
+
+            workspace.jumpTo(1)
+
+            val state = workspace.state.value
+            state.document.library shouldBe Library.Fluent
+            state.expressiveSuggestion shouldBe false
+            state.history.canRedo shouldBe true
+            state.panel shouldBe Panel.History
+            val timeline = state.timeline.shouldNotBeNull()
+            timeline.cursor shouldBe 1
+            timeline.steps.size shouldBe 2
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun closePanel_fromHistory_dropsTheTimeline() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val workspace = workspaceModel(session, preferences)
+            workspace.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            workspace.openPanel(Panel.History)
+            workspace.state.value.timeline.shouldNotBeNull()
+
+            workspace.closePanel()
+            workspace.edit(DocumentChange.SetContrast(ContrastLevel.High), EditPhase.Discrete)
+            workspace.state.value.timeline shouldBe null
+            workspace.openPanel(Panel.History)
+            router.back()
+            runCurrent()
+
+            workspace.state.value.panel shouldBe null
+            workspace.state.value.timeline shouldBe null
             harness.clearAndJoin()
         }
 

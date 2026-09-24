@@ -43,8 +43,8 @@ import kotlin.coroutines.EmptyCoroutineContext
  * Models read [document], [history], [project] and [viewState] and merge them as they need, and
  * nothing else holds document state. A model that tells projects apart reads [shown], which carries
  * the document with the number of the project it belongs to. Every change goes through [edit],
- * [undo] or [redo]. Every rename goes through [rename], so the record the session holds never
- * writes an old name back.
+ * [undo], [redo] or [jumpTo]. Every rename goes through [rename], so the record the session holds
+ * never writes an old name back. The History list reads the steps from [timeline] when it needs them.
  *
  * Committed edits are saved [AUTOSAVE_DELAY_MILLIS] after the last one, so a drag saves once after
  * it is released, and [SessionWrites] puts them into storage. [flush] writes whatever is waiting
@@ -76,7 +76,8 @@ import kotlin.coroutines.EmptyCoroutineContext
  * @param[colorsOf] The thumbnail and splash colors of a theme.
  * @param[sharedThemeName] What a theme from a link without a name is saved as.
  * @param[scope] The app scope, where saves run.
- * @param[now] The time in milliseconds, for merging undo steps and for the conflict window.
+ * @param[now] The time in epoch milliseconds, for merging undo steps, the time each step keeps and the
+ * conflict window.
  */
 internal class ProjectSession(
     private val projects: ProjectRepository,
@@ -228,6 +229,29 @@ internal class ProjectSession(
     /** Step forward once. Nothing happens when there is nothing to redo. */
     fun redo() {
         moveTo(steps.redo() ?: return)
+    }
+
+    // b-508
+
+    /**
+     * Move to [cursor] in the [timeline] at once, as that many undos or redos in one go (D55). It saves
+     * and counts as an edit the way Undo does. A cursor past the steps does nothing, since a click from
+     * a list that another tab's change just moved can be stale, and nor does the one the history is at.
+     */
+    fun jumpTo(cursor: Int) {
+        if (cursor !in 0..steps.size) return
+        moveTo(steps.jumpTo(cursor) ?: return)
+    }
+
+    /** The steps as they stand now, built when asked and never published on each frame of a drag. */
+    fun timeline(): Timeline {
+        val entries = steps.entries
+        return Timeline(
+            cursor = steps.cursor,
+            now = now(),
+            start = entries.firstOrNull()?.before ?: document.value,
+            steps = entries,
+        )
     }
 
     /**

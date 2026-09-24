@@ -3,6 +3,7 @@ package com.materialkolor.builder.core.session
 import com.materialkolor.builder.core.platform.StoreError
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.ChangeLabel
+import com.materialkolor.builder.domain.history.HistoryEntry
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ProjectMeta
 import com.materialkolor.builder.domain.persist.ProjectRecord
@@ -58,6 +59,30 @@ internal data class HistoryState(
     val undoLabel: ChangeLabel? = null,
     val redoLabel: ChangeLabel? = null,
 )
+
+// b-508
+
+/**
+ * Every step of the open project's history for the History list, a snapshot the session builds when
+ * asked. [HistoryState] goes out on every frame of a drag, so the steps stay out of it.
+ *
+ * @property[cursor] How many of [steps] are applied. Zero is [start].
+ * @property[now] The session clock when the snapshot was taken, in epoch milliseconds, to tell each
+ * step's age by.
+ * @property[start] The document before the oldest step, or the one showing when there are no steps.
+ * @property[steps] Every step, oldest first. The ones past [cursor] were undone and can be jumped to
+ * until the next edit drops them.
+ */
+internal data class Timeline(
+    val cursor: Int,
+    val now: Long,
+    val start: ThemeDocument,
+    val steps: List<HistoryEntry>,
+) {
+    init {
+        require(cursor in 0..steps.size) { "Cursor is 0 to ${steps.size}, got $cursor" }
+    }
+}
 
 /**
  * Another tab saved the open project while this tab was editing it. The UI offers Load theirs and
