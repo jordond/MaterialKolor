@@ -1,11 +1,19 @@
 package com.materialkolor.builder.preview.canvas
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
@@ -20,6 +28,7 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.floats.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.ints.shouldBeLessThan
+import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -89,7 +98,59 @@ class ComponentsTabTest {
             composed shouldNotContain GALLERY_CARD + "Card 19"
             composed.size shouldBeLessThan GalleryStandIns.size / 2
         }
+
+    @Test
+    fun grid_widthSweptLikeTheRail_recomposesTheCardsOnlyWhenTheColumnsChange() =
+        runDesktopComposeUiTest(1400, 900) {
+            val composed = mutableListOf<String>()
+            var wide by mutableStateOf(false)
+            setContent {
+                CompositionLocalProvider(LocalCompositionProbe provides { where -> composed += where }) {
+                    // The canvas grows by the 328 dp between the open poster and the rail, from two
+                    // columns to three.
+                    val width = animateDpAsState(
+                        targetValue = if (wide) GallerySweepStart + 328.dp else GallerySweepStart,
+                        animationSpec = tween(GallerySweepMillis, easing = LinearEasing),
+                    )
+                    Box(Modifier.layoutWidth { width.value }) { GalleryStandInGrid(cardHeight = 40.dp) }
+                }
+            }
+            waitForIdle()
+            val first = composed.count { where -> where.startsWith(GALLERY_CARD) }
+            first shouldBe GalleryStandIns.size
+            composed.clear()
+
+            mainClock.autoAdvance = false
+            wide = true
+            val frames = GallerySweepMillis / 16 + 2
+            repeat(frames) { mainClock.advanceTimeByFrame() }
+            mainClock.autoAdvance = true
+            waitForIdle()
+
+            // Before B-217c the grid called its lazy column inside a BoxWithConstraints, and with the
+            // probe beside that call it fired 19 times over this sweep. A probe in the rows' builder
+            // fires once then as now, so it cannot tell the two apart. The cards composed 12 times
+            // then as now, only those that change rows.
+            composed.count { where -> where == GALLERY_GRID } shouldBe 0
+            composed.count { where -> where.startsWith(GALLERY_CARD) } shouldBeLessThanOrEqual GalleryStandIns.size
+            val row = (5 until 8).map { index -> onNodeWithTag("Card $index").fetchSemanticsNode().boundsInRoot.top }
+            row.distinct().size shouldBe 1
+        }
 }
+
+/** Where the swept grid starts, two columns of cards. */
+private val GallerySweepStart = 800.dp
+
+/** How long the sweep takes, about the rail's panel motion. */
+private const val GallerySweepMillis = 300
+
+/** Sizes to [width] at layout time, so the width moving recomposes nothing here. */
+private fun Modifier.layoutWidth(width: () -> Dp): Modifier =
+    layout { measurable, constraints ->
+        val px = width().roundToPx()
+        val placeable = measurable.measure(constraints.copy(minWidth = px, maxWidth = px))
+        layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+    }
 
 /** The stand-in cards, each [cardHeight] tall and tagged with its title. */
 @Composable

@@ -104,12 +104,15 @@ public fun PanelRegion(
 }
 
 /**
- * Where the toasts of [state] land. Lay it over the whole shell.
+ * Where the toasts of [state] land. Lay it over the whole shell, in the shell's `overlays`.
  *
- * They stack at the bottom start beside a docked poster, and wherever the poster is a sheet they
- * rise above its peek and the dock. Every skin shares one host, which already draws each toast in
- * the skin's own dress, a `Snackbar` under Material3. Where overlays render in the page the toasts
- * keep these spots but draw over every open dialog, sheet and menu.
+ * They stack at the bottom of the canvas frame, past the poster as it is drawn, docked, as the rail
+ * or opened over the canvas, and above the dock, so they cover neither. Wherever the poster is a
+ * sheet they rise above its peek and the dock. The shell hands the region its room as it lays out,
+ * so the toasts follow the rail as it moves. Outside a shell they stack at the bottom start, or
+ * above the peek and the dock where the poster would be a sheet. Every skin shares one host, which
+ * already draws each toast in the skin's own dress, a `Snackbar` under Material3. Where overlays
+ * render in the page the toasts keep these spots but draw over every open dialog, sheet and menu.
  *
  * @param[state] The toasts to show.
  * @param[modifier] Applied to the region, which fills the space it is given without taking any
@@ -122,8 +125,11 @@ public fun ToastRegion(
 ) {
     val layout = LocalLayout.current
     val tokens = LocalBuilderTokens.current
+    val room = LocalShellRoom.current
     Box(modifier.fillMaxSize()) {
-        if (layout.posterMode == PosterMode.Sheet) {
+        if (room != null) {
+            BuilderToastHost(state, Modifier.inToastRoom(room))
+        } else if (layout.posterMode == PosterMode.Sheet) {
             BuilderToastHost(state, Modifier.padding(bottom = sheetClearance(layout, tokens)))
         } else {
             BuilderToastHost(
