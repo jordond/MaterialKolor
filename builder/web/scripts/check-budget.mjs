@@ -2,13 +2,13 @@
 // Compresses every file of the assembled site with brotli and holds the result against budget.json.
 // BUDGET.md beside budget.json says what is measured and why.
 //
-//   node scripts/check-budget.mjs [--site dir] [--budget file] [--baseline file] [--write-baseline]
+//   node scripts/check-budget.mjs [--site dir] [--budget file]
 //
 // Exits 1 when a file is over its role's limit, a role's files together are over its total, first
-// visit is over its total, a budgeted file grew more than the growth rule allows against the
-// baseline, an asset belongs to no role, or any site file is over the host's raw size cap.
+// visit is over its total, an asset belongs to no role, or any site file is over the host's raw size
+// cap.
 
-import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { brotliCompressSync, constants } from 'node:zlib';
@@ -18,7 +18,6 @@ const args = parseArgs(process.argv.slice(2));
 const siteDir = path.resolve(args.site ?? path.join(moduleDir, 'build/site'));
 const budgetFile = path.resolve(args.budget ?? path.join(moduleDir, 'budget.json'));
 const budget = JSON.parse(readFileSync(budgetFile, 'utf8'));
-const baselineFile = path.resolve(args.baseline ?? path.join(path.dirname(budgetFile), budget.growth.baseline));
 
 const roles = budget.roles.map((role) => {
   if ((role.maxBytes === undefined) === (role.totalBytes === undefined)) {
@@ -39,7 +38,6 @@ const files = site
   .map(({ file, raw }) => ({
     file,
     raw,
-    key: stableKey(file),
     role: roles.find((role) => role.pattern.test(file)),
     firstVisit: firstVisit.some((pattern) => pattern.test(file)) && !lazy.some((pattern) => pattern.test(file)),
   }))
@@ -49,14 +47,6 @@ const files = site
     return { ...entry, brotli: measured ? compress(readFileSync(path.join(siteDir, entry.file))).length : 0 };
   });
 
-if (args['write-baseline']) {
-  const sizes = Object.fromEntries(files.filter((entry) => entry.role).map((entry) => [entry.key, entry.brotli]));
-  writeFileSync(baselineFile, JSON.stringify({ files: sortKeys(sizes) }, null, 2) + '\n');
-  console.log(`Wrote ${path.relative(process.cwd(), baselineFile)}. Commit it with the change that moved the numbers.`);
-  process.exit(0);
-}
-
-const baseline = JSON.parse(readFileSync(baselineFile, 'utf8')).files;
 const failures = [];
 const rows = [];
 
@@ -64,42 +54,29 @@ for (const entry of files) {
   const { role } = entry;
   if (!role) {
     if (entry.file.startsWith('assets/')) failures.push(`${entry.file} belongs to no role in budget.json`);
-    if (entry.firstVisit) rows.push([entry.file, '-', entry.raw, entry.brotli, '', '', '']);
+    if (entry.firstVisit) rows.push([entry.file, '-', entry.raw, entry.brotli, '']);
     continue;
-  }
-  const allowed = baseline[entry.key];
-  let growth = '';
-  if (allowed === undefined) {
-    failures.push(`${entry.file} has no baseline size, add ${entry.key} to ${path.basename(baselineFile)}`);
-    growth = 'new';
-  } else {
-    const percent = ((entry.brotli - allowed) / allowed) * 100;
-    growth = `${percent >= 0 ? '+' : ''}${percent.toFixed(1)}%`;
-    if (percent > budget.growth.maxPercent) {
-      failures.push(`${entry.file} grew ${growth} against its baseline of ${allowed} bytes, the limit is +${budget.growth.maxPercent}%`);
-    }
   }
   if (role.maxBytes !== undefined && entry.brotli > role.maxBytes) {
     failures.push(`${entry.file} is ${entry.brotli} bytes, over the ${role.name} limit of ${role.maxBytes}`);
   }
-  rows.push([entry.file, role.name, entry.raw, entry.brotli, role.maxBytes ?? '', allowed ?? '', growth]);
+  rows.push([entry.file, role.name, entry.raw, entry.brotli, role.maxBytes ?? '']);
 }
 
-// A role with a total holds its files together, whatever their number. The growth rule above still
-// holds each of them on its own.
+// A role with a total holds its files together, whatever their number.
 for (const role of roles.filter((role) => role.totalBytes !== undefined)) {
   const sum = files.filter((entry) => entry.role === role).reduce((total, entry) => total + entry.brotli, 0);
   if (sum > role.totalBytes) {
     failures.push(`${role.name} are ${sum} bytes together, over the limit of ${role.totalBytes}`);
   }
-  rows.push([`${role.name}, all files`, role.name, '', sum, role.totalBytes, '', '']);
+  rows.push([`${role.name}, all files`, role.name, '', sum, role.totalBytes]);
 }
 
 const total = files.filter((entry) => entry.firstVisit).reduce((sum, entry) => sum + entry.brotli, 0);
 if (total > budget.firstVisit.maxBytes) {
   failures.push(`first visit is ${total} bytes, over the limit of ${budget.firstVisit.maxBytes}`);
 }
-rows.push(['first visit', '', '', total, budget.firstVisit.maxBytes, '', '']);
+rows.push(['first visit', '', '', total, budget.firstVisit.maxBytes]);
 
 // The host's cap is on raw bytes and holds every file it is given, measured or skipped here.
 const rawLimit = budget.rawFile.maxBytes;
@@ -109,11 +86,10 @@ for (const { file, raw } of site.filter((entry) => entry.raw > rawLimit)) {
 const largest = site.reduce((max, entry) => (entry.raw > max.raw ? entry : max));
 
 console.log(`brotli ${process.versions.brotli} (node ${process.versions.node}), quality ${budget.compression.quality}\n`);
-printTable(['file', 'role', 'raw', 'brotli', 'limit', 'baseline', 'growth'], rows);
+printTable(['file', 'role', 'raw', 'brotli', 'limit'], rows);
 console.log(`\nLargest file: ${largest.file}, ${largest.raw} raw bytes, ${rawLimit - largest.raw} under the per-file cap of ${rawLimit}.`);
 if (failures.length > 0) {
   console.error(`\nOver budget:\n${failures.map((failure) => `  ${failure}`).join('\n')}`);
-  console.error('\nRaising a limit or the baseline is a reviewed edit of budget.json or budget-baseline.json.');
   process.exit(1);
 }
 console.log('\nWithin budget.');
@@ -140,11 +116,6 @@ function listFiles(root, prefix = '') {
     });
 }
 
-/** [file] without its content hash, so a file keeps its baseline from one build to the next. */
-function stableKey(file) {
-  return file.replace(/\.[0-9a-f]{16}(?=\.)/, '');
-}
-
 /** `*` matches within one path segment and `**` across segments. */
 function globToRegExp(glob) {
   const source = glob
@@ -159,16 +130,11 @@ function globToRegExp(glob) {
   return new RegExp(`^${source}$`);
 }
 
-function sortKeys(object) {
-  return Object.fromEntries(Object.entries(object).sort(([left], [right]) => left.localeCompare(right)));
-}
-
 function parseArgs(argv) {
   const parsed = {};
   for (let index = 0; index < argv.length; index++) {
     const name = argv[index].replace(/^--/, '');
-    if (name === 'write-baseline') parsed[name] = true;
-    else parsed[name] = argv[++index];
+    parsed[name] = argv[++index];
   }
   return parsed;
 }

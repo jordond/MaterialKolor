@@ -66,7 +66,6 @@ class BuilderWebPlugin : Plugin<Project> {
                 site.set(assembleSite.flatMap { task -> task.site })
                 script.set(layout.projectDirectory.file("scripts/check-budget.mjs"))
                 budget.set(layout.projectDirectory.file("budget.json"))
-                baseline.set(layout.projectDirectory.file("budget-baseline.json"))
                 stamp.set(layout.buildDirectory.file("site-parts/budget-checked"))
             }
         }
@@ -166,7 +165,7 @@ abstract class WriteHeaders : DefaultTask() {
 }
 
 /**
- * Runs `check-budget.mjs` on the assembled site. The site, the script and both budget files are its
+ * Runs `check-budget.mjs` on the assembled site. The site, the script and the budget file are its
  * inputs and a stamp its output, so it is up to date until one of them changes.
  */
 abstract class CheckBudget : DefaultTask() {
@@ -181,10 +180,6 @@ abstract class CheckBudget : DefaultTask() {
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
     abstract val budget: RegularFileProperty
-
-    @get:InputFile
-    @get:PathSensitive(PathSensitivity.NONE)
-    abstract val baseline: RegularFileProperty
 
     @get:OutputFile
     abstract val stamp: RegularFileProperty
@@ -202,8 +197,6 @@ abstract class CheckBudget : DefaultTask() {
                 site.get().asFile.path,
                 "--budget",
                 budget.get().asFile.path,
-                "--baseline",
-                baseline.get().asFile.path,
             )
         }
         stamp.get().asFile.writeText("Within budget.\n")

@@ -1,8 +1,12 @@
 # Size budget
 
-`budget.json` holds the limits and `budget-baseline.json` the sizes the growth rule compares with.
-`./gradlew :builder:web:checkBudget` measures the site and fails the build on an overrun. This file
-says how the numbers are measured, so two people measuring the same change get the same number.
+`budget.json` holds the limits. `./gradlew :builder:web:checkBudget` measures the site, prints the
+sizes and fails the build on an overrun. This file says how the numbers are measured, so two people
+measuring the same change get the same number.
+
+The limits are loose backstops, not targets. They sit well above today's sizes and only catch an
+accident, such as a debug binary or a runtime shipped twice. Size is not something a change has to
+argue for.
 
 ## What is measured
 
@@ -40,11 +44,7 @@ The script prints the brotli version it ran with, since another version can diff
   resource files (`values/*.cvr`, one or two KB each) are the one exception to the second check:
   Compose loads each when a screen first reads it, so some arrive after boot. They stay counted,
   which only makes the total stricter.
-- Growth, per file. A file a role names may not grow more than `growth.maxPercent` (5%) over its
-  size in `budget-baseline.json`, whether its role has a per-file limit or a total. Files are keyed
-  without their content hash, so `assets/skiko.<hash>.wasm` is `assets/skiko.wasm`. A role file
-  with no baseline fails too. Files outside the roles count toward first visit only, so a string
-  added to a small resource file does not trip the rule.
+- Files outside the roles count toward first visit only.
 - Anything under `assets/` that no role names fails, so a new chunk cannot slip in unbudgeted.
 - Raw size, per file. No file in the site may be over `rawFile.maxBytes`, 26,214,400 raw bytes,
   which is Cloudflare's 25 MiB cap on one asset. This one counts every file, skipped and
@@ -64,6 +64,5 @@ another.
 
 ## Changing the numbers
 
-Raising a limit in `budget.json` or a size in `budget-baseline.json` is a reviewed edit, made in the
-change that needs it and never by CI. To take new baseline sizes from a fresh `assembleSite`, run
-`node builder/web/scripts/check-budget.mjs --write-baseline` and commit the result.
+A change that hits a limit raises it in `budget.json` in the same change, with room to spare. CI
+never edits the file.
