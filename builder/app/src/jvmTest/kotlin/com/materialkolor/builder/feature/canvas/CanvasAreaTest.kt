@@ -23,8 +23,12 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.materialkolor.builder.LocalThemeResult
 import com.materialkolor.builder.core.session.HistoryState
+import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.DeviceWidth
@@ -33,6 +37,7 @@ import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.domain.persist.ProjectViewState
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.feature.workspace.WorkspaceScreen
@@ -43,6 +48,8 @@ import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
 import dev.stateholder.dispatcher.Dispatcher
+import dev.zacsweers.metro.createGraphFactory
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.floats.shouldBeGreaterThan
@@ -209,14 +216,22 @@ class CanvasAreaTest {
     fun fullscreen_fromTheDock_hidesTheTopBarUntilTheExitPillBringsItBack() =
         runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
             val host = CanvasHost()
+            // The workspace's overlays make their own view models, so they need the app's factory.
+            val graph = createGraphFactory<AppGraph.Factory>().create(FakePlatform())
+            val owner = TestOwner()
             setContent {
-                Themed(host, frozen = true, probe = null) {
-                    WorkspaceScreen(
-                        state = host.state,
-                        posterColors = LocalThemeResult.current.poster,
-                        toasts = rememberBuilderToastHostState(),
-                        dispatcher = host.dispatcher,
-                    )
+                CompositionLocalProvider(
+                    LocalViewModelStoreOwner provides owner,
+                    LocalMetroViewModelFactory provides graph.metroViewModelFactory,
+                ) {
+                    Themed(host, frozen = true, probe = null) {
+                        WorkspaceScreen(
+                            state = host.state,
+                            posterColors = LocalThemeResult.current.poster,
+                            toasts = rememberBuilderToastHostState(),
+                            dispatcher = host.dispatcher,
+                        )
+                    }
                 }
             }
             waitForIdle()
@@ -293,6 +308,10 @@ private fun Canvas(
             CanvasDock(host.state, host.dispatcher, Modifier.align(Alignment.BottomCenter))
         }
     }
+}
+
+private class TestOwner : ViewModelStoreOwner {
+    override val viewModelStore: ViewModelStore = ViewModelStore()
 }
 
 /** The Material skin and the resolved document, laid out for the window. */
