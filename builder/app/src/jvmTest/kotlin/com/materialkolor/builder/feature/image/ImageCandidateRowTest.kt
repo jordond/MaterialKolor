@@ -79,7 +79,10 @@ class ImageCandidateRowTest {
             }
             onNodeWithContentDescription(READING).assertDoesNotExist()
             harness.undoEntries() shouldBe 1
-            val toast = harness.actions.filterIsInstance<WorkspaceAction.ShowWithdrawableToast>().single().toast
+            val toast = harness.actions
+                .filterIsInstance<WorkspaceAction.ShowWithdrawableToast>()
+                .single()
+                .toast
             toast.message shouldBe "Seed taken from photo.png"
             toast.actionLabel shouldBe "Undo"
             toast.duration shouldBe ToastDuration.Long
@@ -196,12 +199,13 @@ class ImageCandidateRowTest {
             images.drop(photo)
             waitUntil(timeoutMillis = WAIT_MILLIS) { harness.document.seedSource is SeedSource.Image }
             waitForIdle()
-            val top = (harness.document.seedSource as SeedSource.Image).candidates.first()
+            val first = harness.document.seedSource
+            val top = (first as SeedSource.Image).candidates.first()
             onNodeWithContentDescription(chipLabel(top), substring = true).requestFocus()
             waitForIdle()
 
             images.drop(other)
-            waitUntil(timeoutMillis = WAIT_MILLIS) { (harness.document.seedSource as SeedSource.Image).name == "other.png" }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.document.seedSource != first }
             waitForIdle()
 
             onNodeWithContentDescription(chipLabel(harness.document.seed), substring = true).assertIsFocused()
