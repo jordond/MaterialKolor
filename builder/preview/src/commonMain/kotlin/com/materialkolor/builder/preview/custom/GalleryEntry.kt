@@ -44,8 +44,8 @@ import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.GalleryCard
 import com.materialkolor.builder.preview.canvas.GalleryGrid
 import com.materialkolor.builder.preview.canvas.GalleryGroup
-import com.materialkolor.builder.preview.material.HiddenTextToolbar
-import com.materialkolor.builder.preview.material.swallowRightPresses
+import com.materialkolor.builder.preview.canvas.GalleryHiddenTextToolbar
+import com.materialkolor.builder.preview.canvas.gallerySwallowRightPresses
 import com.materialkolor.builder.preview.split.PaneSpec
 
 // The entry, its cards and their frame, then the samples of the Containment, Navigation and
@@ -90,7 +90,7 @@ internal fun CustomGalleryEntry(
 ) {
     CustomPaneTheme(spec.result.customSlots, spec.isDark, LocalReducedMotion.current) {
         val tokens = LocalBuilderTokens.current
-        CompositionLocalProvider(LocalTextToolbar provides HiddenTextToolbar) {
+        CompositionLocalProvider(LocalTextToolbar provides GalleryHiddenTextToolbar) {
             GalleryGrid(
                 cards = CustomCards,
                 listState = state.rememberListState("gallery.custom"),
@@ -99,7 +99,7 @@ internal fun CustomGalleryEntry(
                     .fillMaxSize()
                     .previewRoles(CustomComponent.Canvas)
                     .background(tokens.canvas)
-                    .swallowRightPresses(),
+                    .gallerySwallowRightPresses(),
                 header = { group -> CustomGroupHeader(group) },
                 card = { card, cardModifier -> CustomCardFrame(card, state, cardModifier) },
             )

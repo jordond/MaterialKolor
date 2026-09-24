@@ -60,10 +60,6 @@ internal object DashboardCopy {
     const val ColumnAmount: String = "Amount"
     const val ColumnStatus: String = "Status"
     const val OfGoal: String = "of goal"
-    const val Expanded: String = "Expanded"
-    const val Collapsed: String = "Collapsed"
-    const val Selected: String = "Selected"
-    const val NotSelected: String = "Not selected"
 }
 
 /**

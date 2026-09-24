@@ -35,15 +35,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.isSecondaryPressed
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalTextToolbar
-import androidx.compose.ui.platform.TextToolbar
-import androidx.compose.ui.platform.TextToolbarStatus
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -62,6 +55,8 @@ import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.GalleryCard
 import com.materialkolor.builder.preview.canvas.GalleryGrid
 import com.materialkolor.builder.preview.canvas.GalleryGroup
+import com.materialkolor.builder.preview.canvas.GalleryHiddenTextToolbar
+import com.materialkolor.builder.preview.canvas.gallerySwallowRightPresses
 import com.materialkolor.builder.preview.split.PaneSpec
 import androidx.compose.ui.semantics.Role as SemanticsRole
 
@@ -112,49 +107,18 @@ internal fun MaterialGalleryEntry(
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier.fillMaxSize().previewRoles(Role.Surface, Role.OnSurface)) {
-        CompositionLocalProvider(LocalTextToolbar provides HiddenTextToolbar) {
+        CompositionLocalProvider(LocalTextToolbar provides GalleryHiddenTextToolbar) {
             GalleryGrid(
                 cards = MaterialCards,
                 listState = state.rememberListState("gallery.material"),
                 gap = SectionGap,
-                modifier = Modifier.swallowRightPresses(),
+                modifier = Modifier.gallerySwallowRightPresses(),
                 header = { group -> MaterialGroupHeader(group) },
                 card = { card, cardModifier -> MaterialCardFrame(card, state, cardModifier) },
             )
         }
     }
 }
-
-/** A text toolbar that never shows, standing in for the web's, which opens in a popup (D40). */
-internal object HiddenTextToolbar : TextToolbar {
-    override val status: TextToolbarStatus = TextToolbarStatus.Hidden
-
-    override fun showMenu(
-        rect: Rect,
-        onCopyRequested: (() -> Unit)?,
-        onPasteRequested: (() -> Unit)?,
-        onCutRequested: (() -> Unit)?,
-        onSelectAllRequested: (() -> Unit)?,
-    ) = Unit
-
-    override fun hide() = Unit
-}
-
-/**
- * Consume every right-button press before anything under it sees one, so no text field opens its
- * context menu in a popup (D40).
- */
-internal fun Modifier.swallowRightPresses(): Modifier =
-    pointerInput(Unit) {
-        awaitPointerEventScope {
-            while (true) {
-                val event = awaitPointerEvent(PointerEventPass.Initial)
-                if (event.type == PointerEventType.Press && event.buttons.isSecondaryPressed) {
-                    event.changes.forEach { change -> change.consume() }
-                }
-            }
-        }
-    }
 
 /** Every card of the Material 3 gallery, in the order they show within each group. */
 internal val MaterialCards: List<GalleryCard> = listOf(

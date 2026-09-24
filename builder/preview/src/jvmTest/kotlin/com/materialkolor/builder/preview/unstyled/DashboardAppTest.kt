@@ -88,6 +88,10 @@ private val DashboardContainerLevels: Set<Role> = setOf(
 /** The dashboard's sources whose names do not start with Dashboard. */
 private val DashboardSideSources: Set<String> = setOf("AppEntry.kt", "UnstyledRoles.kt")
 
+/** What the dashboard takes from the kit, its motion and the fold modifiers that carry state onto the web. */
+private val DashboardKitImports: List<String> =
+    listOf("com.materialkolor.builder.kit.motion.", "com.materialkolor.builder.kit.control.folded")
+
 /** Compose Unstyled parts that open a window, a portal or a text field, by a word in their name. */
 private val DashboardBannedUnstyled: List<String> =
     listOf("Dialog", "Modal", "BottomSheet", "DropdownMenu", "Tooltip", "Portal", "TextField")
@@ -368,5 +372,5 @@ private fun String.isBannedOnTheDashboard(): Boolean {
     return startsWith("androidx.compose.ui.window.") ||
         "TextField" in name ||
         (startsWith("com.composeunstyled.") && DashboardBannedUnstyled.any { word -> word in name }) ||
-        (startsWith("com.materialkolor.builder.kit.") && !startsWith("com.materialkolor.builder.kit.motion."))
+        (startsWith("com.materialkolor.builder.kit.") && DashboardKitImports.none { allowed -> startsWith(allowed) })
 }
