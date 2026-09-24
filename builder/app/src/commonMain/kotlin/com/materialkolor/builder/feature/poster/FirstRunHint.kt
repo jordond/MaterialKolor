@@ -2,6 +2,9 @@ package com.materialkolor.builder.feature.poster
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,11 +21,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
@@ -75,7 +81,7 @@ internal fun showsFirstRunHint(
  * No tour follows it.
  *
  * Closing it from the keyboard hands focus on to the next control on the poster first, so focus
- * never drops out of the poster with the card.
+ * never drops out of the poster with the card. A click leaves focus where it was.
  */
 @Composable
 internal fun FirstRunHint(
@@ -88,6 +94,10 @@ internal fun FirstRunHint(
     val spacing = tokens.spacing
     val focusManager = LocalFocusManager.current
     var closeFocused by remember { mutableStateOf(false) }
+    // b-314a
+    // A mouse press would focus Close on its way to the click. While a press that starts elsewhere
+    // is down, Close turns that focus away, so the click leaves focus where it was.
+    var pressFromElsewhere by remember { mutableStateOf(false) }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -101,11 +111,20 @@ internal fun FirstRunHint(
             icon = IconId.Close,
             description = stringResource(Res.string.about_first_run_hint_close),
             onClick = {
-                // A click that left focus elsewhere keeps it there.
                 if (closeFocused) focusManager.moveFocus(FocusDirection.Next)
                 dispatcher.dispatch(WorkspaceAction.DismissHint(FIRST_RUN_HINT))
             },
-            buttonModifier = Modifier.onFocusChanged { focusState -> closeFocused = focusState.isFocused },
+            buttonModifier = Modifier
+                .onFocusChanged { focusState -> closeFocused = focusState.isFocused }
+                .focusProperties { canFocus = !pressFromElsewhere } // b-314a
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                        pressFromElsewhere = !closeFocused
+                        waitForUpOrCancellation(PointerEventPass.Initial)
+                        pressFromElsewhere = false
+                    }
+                },
         )
     }
 }

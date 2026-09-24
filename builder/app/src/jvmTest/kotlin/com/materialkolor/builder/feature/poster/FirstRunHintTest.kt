@@ -18,12 +18,14 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -202,7 +204,9 @@ class FirstRunHintTest {
             onNodeWithText("Before the hint").requestFocus()
             waitForIdle()
 
-            onNodeWithContentDescription("Close the hint").performClick()
+            // A mouse click, as on the desktop and the web. A touch would put the test in touch mode,
+            // which clears focus by itself.
+            onNodeWithContentDescription("Close the hint").performMouseInput { click() }
             waitForIdle()
 
             onNodeWithText(HINT).assertDoesNotExist()

@@ -1,8 +1,10 @@
 package com.materialkolor.builder.feature.about
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -40,6 +42,7 @@ import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.canvas.TestOwner
 import com.materialkolor.builder.feature.poster.InfoTopic
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
+import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
@@ -132,7 +135,9 @@ class AboutHostTest {
                     isDark = false,
                     reducedMotion = true,
                 ) {
-                    FontLicense(ShippedFont.JetBrainsMono, read = { error("The fetch failed") })
+                    ProvideBuilderLayout(modifier = Modifier.fillMaxSize()) {
+                        FontLicense(ShippedFont.JetBrainsMono, read = { error("The fetch failed") })
+                    }
                 }
             }
 
