@@ -69,7 +69,7 @@ private fun ringsFor(dark: Boolean): (@Composable () -> List<Color>)? {
 
 /** Tabs onto [content] in the Fluent skin, light and dark, and checks the ring every way the S5 probe does. */
 @OptIn(ExperimentalTestApi::class)
-private fun ringsInBothModes(
+internal fun ringsInBothModes(
     clue: String,
     content: @Composable () -> Unit,
 ) {
@@ -86,7 +86,7 @@ private fun ringsInBothModes(
 }
 
 @OptIn(ExperimentalTestApi::class, KitTestApi::class)
-private fun ComposeUiTest.showFluentFolded(content: @Composable () -> Unit) {
+internal fun ComposeUiTest.showFluentFolded(content: @Composable () -> Unit) {
     setContent {
         ControlsHarness(Fluent) {
             ProvideWebFoldsForTest { Column { content() } }

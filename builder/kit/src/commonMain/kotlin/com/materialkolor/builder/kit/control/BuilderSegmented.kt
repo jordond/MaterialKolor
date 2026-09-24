@@ -99,7 +99,6 @@ public fun <T> BuilderSegmented(
             )
         }
         Library.Fluent -> {
-            // fluent-placeholder
             FluentSegmented(
                 options,
                 selected,

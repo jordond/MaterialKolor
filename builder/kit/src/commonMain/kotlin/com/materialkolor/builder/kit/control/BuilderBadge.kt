@@ -61,7 +61,7 @@ public fun BuilderBadge(
     when (LocalSkin.current.library) {
         Library.Material3 -> MaterialBadge(label, modifier, status, icon)
         Library.Unstyled -> HeadlessBadge(label, UnstyledActionStyles.badge, modifier, status, icon)
-        Library.Fluent -> FluentBadge(label, modifier, status, icon) // fluent-placeholder
+        Library.Fluent -> FluentBadge(label, modifier, status, icon)
         Library.Custom -> HeadlessBadge(label, CustomActionStyles.badge, modifier, status, icon)
     }
 }

@@ -100,7 +100,7 @@ class SkinThemesScreenshotTest {
         runComposeUiTest { checkSheets(Skin(Library.Custom, expressive = false), "custom", LucideIcons, 18.dp) }
 
     @Test
-    fun fluentPlaceholder_bothModes_renderTheSheetOnFlooredChrome() =
+    fun fluent_bothModes_renderTheSheetOnFlooredChromeInFluentColours() =
         runComposeUiTest { checkSheets(Skin(Library.Fluent, expressive = false), "fluent", FluentIcons, 16.dp) }
 
     @Test

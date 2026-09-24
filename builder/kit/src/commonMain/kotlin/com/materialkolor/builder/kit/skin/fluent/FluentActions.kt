@@ -6,10 +6,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
@@ -34,24 +37,24 @@ import com.materialkolor.builder.kit.control.HeadlessCard
 import com.materialkolor.builder.kit.control.HeadlessChoiceChips
 import com.materialkolor.builder.kit.control.HeadlessDivider
 import com.materialkolor.builder.kit.control.HeadlessFilterChip
-import com.materialkolor.builder.kit.control.HeadlessIconButton
 import com.materialkolor.builder.kit.control.HeadlessListRow
 import com.materialkolor.builder.kit.control.HeadlessProgress
-import com.materialkolor.builder.kit.control.HeadlessSegmented
 import com.materialkolor.builder.kit.control.ListRowContent
 import com.materialkolor.builder.kit.control.foldState
+import com.materialkolor.builder.kit.control.iconButtonSemantics
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
+import com.materialkolor.builder.kit.skin.headless.ActionColors
 import com.materialkolor.builder.kit.skin.headless.ActionMetrics
 import com.materialkolor.builder.kit.skin.headless.ActionStyles
 import com.materialkolor.builder.kit.skin.headless.actionStyles
 import com.materialkolor.builder.kit.skin.headless.controlPress
 import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.skin.headless.controlTouchTarget
-import com.materialkolor.builder.kit.skin.headless.rememberActionStyles
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import io.github.composefluent.Colors
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.LocalContentColor
 import io.github.composefluent.background.BackgroundSizing
@@ -62,12 +65,11 @@ import io.github.composefluent.component.ToggleButton
 import io.github.composefluent.scheme.VisualStateScheme
 import io.github.composefluent.scheme.collectVisualState
 
-// fluent-placeholder
-
 /*
- * The Fluent actions. The button and the toggle button are Fluent's own, with the builder's press
- * scale, focus ring and touch target laid over them the way the Material ones have. The rest are
- * still the headless layer in a Fluent style set until B-403b swaps in the Fluent components.
+ * The Fluent actions. The buttons, the icon button and the toggle button are Fluent's own, with the
+ * builder's press scale, focus ring and touch target laid over them the way the Material ones have.
+ * Chips, badges, cards, rows, dividers and the progress bar have no Fluent component that fits the
+ * kit, so they stay the headless layer drawn in Fluent's own colours and metrics.
  */
 
 /**
@@ -135,23 +137,34 @@ private val FluentControlHeight = 32.dp
 /** The room Fluent's button keeps either side of its label. */
 private val FluentButtonPadding = 12.dp
 
-/** The Fluent style set, four dp corners, 32 dp controls and a filled, outlined secondary button. */
+/**
+ * The Fluent style set for the actions Fluent has no component for, four dp corners, 32 dp controls
+ * and Fluent's own fills. Fluent's inks and fills are translucent, so each is laid over the panel it
+ * sits on, the way the tokens are.
+ */
 private val FluentActionStyles: ActionStyles
-    @Composable get() = rememberActionStyles(::fluentActionStyles)
+    @Composable get() {
+        val tokens = LocalBuilderTokens.current
+        val colors = FluentTheme.colors
+        return remember(tokens, colors) { fluentActionStyles(tokens, colors) }
+    }
 
-private fun fluentActionStyles(tokens: BuilderTokens): ActionStyles {
+private fun fluentActionStyles(
+    tokens: BuilderTokens,
+    colors: Colors,
+): ActionStyles {
     val corner = RoundedCornerShape(4.dp)
-    return actionStyles(
+    val styles = actionStyles(
         tokens = tokens,
         metrics = ActionMetrics(
             controlShape = corner,
             iconButtonShape = corner,
             chipShape = corner,
-            cardShape = RoundedCornerShape(tokens.radius.small),
+            cardShape = RoundedCornerShape(FluentCardRadius),
             rowShape = corner,
             badgeShape = RoundedCornerShape(percent = 50),
             barShape = RoundedCornerShape(percent = 50),
-            controlHeight = 32.dp,
+            controlHeight = FluentControlHeight,
             chipHeight = 28.dp,
             badgeHeight = 20.dp,
             barHeight = 3.dp,
@@ -161,7 +174,40 @@ private fun fluentActionStyles(tokens: BuilderTokens): ActionStyles {
             borderedSecondary = true,
         ),
     )
+    val panel = tokens.panel
+
+    fun Color.onPanel(): Color = compositeOver(panel)
+    val control = ActionColors(colors.control.default.onPanel(), tokens.textStrong, tokens.borderStrong)
+    return styles.copy(
+        chip = styles.chip.copy(off = control),
+        card = styles.card.copy(
+            colors = ActionColors(
+                container = colors.background.card.default
+                    .onPanel(),
+                content = tokens.textStrong,
+                border = colors.stroke.card.default
+                    .onPanel(),
+            ),
+        ),
+        badge = styles.badge.copy(
+            neutral = ActionColors(colors.controlSolid.default, tokens.textStrong, tokens.borderStrong),
+        ),
+        divider = styles.divider.copy(
+            color = colors.stroke.divider.default
+                .onPanel(),
+        ),
+        progress = styles.progress.copy(
+            track = colors.controlStrong.default.onPanel(),
+            indicator = colors.fillAccent.default,
+        ),
+        listRow = styles.listRow.copy(
+            selected = styles.listRow.selected.copy(container = colors.subtleFill.secondary.onPanel()),
+        ),
+    )
 }
+
+/** How round Fluent draws a card, its overlay corner. */
+private val FluentCardRadius = 8.dp
 
 /**
  * Fluent's `Button`, `AccentButton` and `SubtleButton`, drawn from the same Fluent layer and colours.
@@ -181,10 +227,9 @@ internal fun FluentButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val colors = fluentButtonColors(emphasis).schemeFor(interactionSource.collectVisualState(disabled = !enabled))
-    val effects = LocalBuilderMotion.current.effects<Color>()
-    val fill by animateColorAsState(colors.fillColor, effects, label = "fill")
-    val ink by animateColorAsState(colors.contentColor, effects, label = "ink")
-    Layer(
+    FluentButtonLayer(
+        colors = colors,
+        emphasis = emphasis,
         modifier = modifier
             .clickable(
                 interactionSource = interactionSource,
@@ -195,15 +240,6 @@ internal fun FluentButton(
             ).foldState(label, null, enabled)
             .fluentFeedback(interactionSource)
             .defaultMinSize(minHeight = FluentControlHeight),
-        shape = FluentTheme.shapes.control,
-        color = fill,
-        contentColor = ink,
-        border = BorderStroke(LocalBuilderTokens.current.outlineWidth, colors.borderBrush),
-        backgroundSizing = if (emphasis == Emphasis.Secondary) {
-            BackgroundSizing.InnerBorderEdge
-        } else {
-            BackgroundSizing.OuterBorderEdge
-        },
     ) {
         Row(
             modifier = Modifier.padding(horizontal = FluentButtonPadding),
@@ -215,6 +251,11 @@ internal fun FluentButton(
     }
 }
 
+/**
+ * Fluent's icon only button, a square of the same Fluent layer and colours as [FluentButton], with
+ * the press on the layer for the same reason. The glyph carries the name, with the open or closed
+ * state of a panel it shows folded in.
+ */
 @Composable
 internal fun FluentIconButton(
     onClick: () -> Unit,
@@ -225,15 +266,55 @@ internal fun FluentIconButton(
     enabled: Boolean,
     expanded: Boolean?,
 ) {
-    HeadlessIconButton(
-        onClick,
-        icon,
-        contentDescription,
-        FluentActionStyles.button,
-        modifier,
-        emphasis,
-        enabled,
-        expanded,
+    val interactionSource = remember { MutableInteractionSource() }
+    val colors = fluentButtonColors(emphasis).schemeFor(interactionSource.collectVisualState(disabled = !enabled))
+    val spoken = iconButtonSemantics(contentDescription, enabled, expanded)
+    FluentButtonLayer(
+        colors = colors,
+        emphasis = emphasis,
+        modifier = modifier
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = enabled,
+                role = Role.Button,
+                onClick = onClick,
+            ).then(spoken.state)
+            .fluentFeedback(interactionSource)
+            .size(FluentControlHeight),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            BuilderIcon(icon, contentDescription = spoken.name, tint = LocalContentColor.current)
+        }
+    }
+}
+
+/**
+ * Fluent's button fill and outline round [content], in [colors] for its visual state.
+ */
+@Composable
+private fun FluentButtonLayer(
+    colors: ButtonColor,
+    emphasis: Emphasis,
+    modifier: Modifier,
+    content: @Composable () -> Unit,
+) {
+    val effects = LocalBuilderMotion.current.effects<Color>()
+    val fill by animateColorAsState(colors.fillColor, effects, label = "fill")
+    val ink by animateColorAsState(colors.contentColor, effects, label = "ink")
+    Layer(
+        modifier = modifier,
+        shape = FluentTheme.shapes.control,
+        color = fill,
+        contentColor = ink,
+        border = BorderStroke(LocalBuilderTokens.current.outlineWidth, colors.borderBrush),
+        // Fluent's Button stops the fill inside the outline unless accentButton is set, and only Secondary has one.
+        backgroundSizing = if (emphasis == Emphasis.Secondary) {
+            BackgroundSizing.InnerBorderEdge
+        } else {
+            BackgroundSizing.OuterBorderEdge
+        },
+        content = content,
     )
 }
 
@@ -266,32 +347,6 @@ internal fun FluentToggleButton(
     ) {
         FluentLabel(label, if (checked) IconId.Check else icon)
     }
-}
-
-@Composable
-internal fun <T> FluentSegmented(
-    options: List<T>,
-    selected: T,
-    onSelect: (T) -> Unit,
-    label: String,
-    modifier: Modifier,
-    enabled: Boolean,
-    optionIcon: (T) -> IconId?,
-    selectOnFocus: Boolean,
-    optionLabel: (T) -> String,
-) {
-    HeadlessSegmented(
-        options = options,
-        selected = selected,
-        onSelect = onSelect,
-        label = label,
-        style = FluentActionStyles.segmented,
-        modifier = modifier,
-        enabled = enabled,
-        optionIcon = optionIcon,
-        selectOnFocus = selectOnFocus,
-        optionLabel = optionLabel,
-    )
 }
 
 @Composable

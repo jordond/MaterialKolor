@@ -67,7 +67,6 @@ public fun BuilderIconButton(
             )
         }
         Library.Fluent -> {
-            // fluent-placeholder
             FluentIconButton(onClick, icon, contentDescription, modifier, emphasis, enabled, expanded)
         }
         Library.Custom -> {
