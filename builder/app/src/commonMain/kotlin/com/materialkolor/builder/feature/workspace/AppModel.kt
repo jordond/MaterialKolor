@@ -3,6 +3,7 @@ package com.materialkolor.builder.feature.workspace
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.materialkolor.builder.core.data.PreferencesRepository
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.Router
@@ -18,6 +19,8 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * What the root needs to dress the builder, the chrome's appearance and its motion, and the boot
@@ -54,6 +57,12 @@ internal class AppModel(
         environment.prefersDark.mergeState { state, dark -> state.copy(systemDark = dark) }
         environment.reducedMotion.mergeState { state, reduced -> state.copy(systemReducedMotion = reduced) }
         environment.coarsePointer.mergeState { state, coarse -> state.copy(coarsePointer = coarse) }
+        // b-221c
+        // Undispatched, since a hidden page may never run another task and the autosave waiting
+        // would be lost with the tab.
+        viewModelScope.launch(Dispatchers.Unconfined) {
+            environment.pageHides.collect { session.flush() }
+        }
     }
 
     /**
@@ -71,7 +80,7 @@ internal class AppModel(
         updateState { state -> state.copy(bootNotice = notice) }
     }
 
-    /** Write whatever is waiting to be saved, when the app goes to the background. */
+    /** Write whatever is waiting to be saved, when the app goes to the background or the page hides. */
     fun flush() {
         session.flush()
     }

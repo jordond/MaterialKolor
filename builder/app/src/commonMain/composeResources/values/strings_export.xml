@@ -48,9 +48,4 @@
     <string name="export_share">Share files</string>
     <string name="export_save_failed">Could not save the zip</string>
     <string name="export_share_failed">Could not share the zip</string>
-
-    <!-- The dialog when the browser would not take a copy. -->
-    <string name="export_manual_title">Copy it yourself</string>
-    <string name="export_manual_hint">The browser did not let the builder use the clipboard. Select the text below and copy it from there.</string>
-    <string name="export_manual_done">Done</string>
 </resources>

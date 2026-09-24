@@ -55,16 +55,17 @@ private const val GITHUB_URL = "https://github.com/jordond/materialkolor"
  *
  * A library switch goes through the reveal from the switcher as one undo entry. What has to outlive
  * a skin switch, the open menu and which control has focus, is held here, outside the skin's own
- * top bar region. The Expressive suggestion is the model's, raised with the switch it follows, and
- * shows once the skin has caught up with the document, so it first draws in the new skin.
+ * top bar region, and [focus] comes from the workspace, which hands Share and Export focus back when
+ * their panels close. The Expressive suggestion is the model's, raised with the switch it follows.
+ * It shows once the skin has caught up with the document, so it first draws in the new skin.
  */
 @Composable
 internal fun TopBarContent(
     state: WorkspaceModel.State,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    focus: TopBarFocus = rememberTopBarFocus(),
 ) {
-    val focus = rememberTopBarFocus()
     var menuOpen by remember { mutableStateOf(false) }
     val compact = LocalLayout.current.windowClass == WindowClass.Compact
     val items = overflowItems(state, dispatcher, compact, LocalUriHandler.current)
@@ -133,8 +134,8 @@ internal fun TopBarContent(
         }
     }
 
-    // The workspace can hear of a switch a frame before the root swaps the skin, so the suggestion
-    // waits for the skin the document asks for and never opens in the one being left.
+    // A library switch can still reach this a composition before the kit moves it into the new
+    // skin, so the suggestion waits for the skin the document asks for.
     val inDocumentSkin = LocalSkin.current == skinOf(state.document)
     ExpressiveSuggestion(
         visible = state.expressiveSuggestion && inDocumentSkin,
@@ -185,7 +186,7 @@ private fun overflowItems(
         BuilderMenuItem(
             label = stringResource(appearanceLabel(option)),
             onClick = { dispatcher.dispatch(WorkspaceAction.SetAppearance(option)) },
-            icon = if (option == appearance) IconId.Check else null,
+            selected = option == appearance,
         )
     }
     val phoneItems = if (compact) {

@@ -4,6 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.codegen.validate.ReservedNameClash
 import com.materialkolor.builder.codegen.validate.ReservedNames
@@ -52,6 +58,23 @@ import org.jetbrains.compose.resources.stringResource
 /** The animation lengths offered, in milliseconds. A length stored from elsewhere joins them. */
 private val DURATIONS_MS = listOf(150, 300, 500, 1000)
 
+/**
+ * What is wrong with the package and theme name drafts right now, for the sheet to hold the export
+ * back on (R-B-309). A draft that is fine is in the export already, so only a wrong one is kept.
+ */
+@Stable
+internal class DraftProblems {
+    /** What is wrong with the package draft, or null when nothing is. */
+    var packageName: ExportProblem? by mutableStateOf(null)
+
+    /** What is wrong with the theme name draft, or null when nothing is. */
+    var themeName: ExportProblem? by mutableStateOf(null)
+
+    /** Every problem a draft has, the package first. */
+    val all: List<ExportProblem>
+        get() = listOfNotNull(packageName, themeName)
+}
+
 /** Whether an export writes a multiplatform project or an Android one. */
 private enum class ProjectKind {
     Multiplatform,
@@ -63,11 +86,14 @@ private enum class ProjectKind {
  *
  * Contrast levels only matter to a frozen export, which writes every color out, and color animation
  * only to a dynamic one. The wallpaper colors branch is for an Android only Material 3 theme. The
- * package and the theme name keep a draft that is not valid to themselves and say what is wrong
- * under the field. The theme name goes to the document, so it travels with the project and its
- * share link, while every other option stays in this browser under the target.
+ * package and the theme name go out as they are typed, so the export is always built from what the
+ * fields show. A draft that is not valid stays in its field, says what is wrong under it and lands
+ * in [drafts], which holds the export back (R-B-309). The theme name goes to the document, so it
+ * travels with the project and its share link, while every other option stays in this browser under
+ * the target.
  *
  * @param[capabilities] How each control shows up for the document's target.
+ * @param[drafts] Where the package and theme name fields say what is wrong with their drafts.
  */
 @Composable
 internal fun ExportOptionsForm(
@@ -75,6 +101,7 @@ internal fun ExportOptionsForm(
     capabilities: Capabilities,
     dispatcher: Dispatcher<ExportAction>,
     workspace: Dispatcher<WorkspaceAction>,
+    drafts: DraftProblems,
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
@@ -82,9 +109,10 @@ internal fun ExportOptionsForm(
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
         PackageField(
             packageName = prefs.packageName,
-            onCommit = { name -> dispatcher.dispatch(ExportAction.SetPackageName(name)) },
+            onChange = { name -> dispatcher.dispatch(ExportAction.SetPackageName(name)) },
+            onProblem = { problem -> drafts.packageName = problem },
         )
-        ThemeNameField(state, workspace)
+        ThemeNameField(state, workspace, onProblem = { problem -> drafts.themeName = problem })
         if (capabilities[Control.KmpOrAndroid].shown) {
             val names = mapOf(
                 ProjectKind.Multiplatform to stringResource(Res.string.export_project_multiplatform),
@@ -140,16 +168,18 @@ internal fun ExportOptionsForm(
 @Composable
 private fun PackageField(
     packageName: String,
-    onCommit: (String) -> Unit,
+    onChange: (String) -> Unit,
+    onProblem: (ExportProblem?) -> Unit,
 ) {
     val invalid = stringResource(Res.string.export_package_invalid)
-    BuilderTextField(
+    LiveField(
         value = packageName,
-        onCommit = onCommit,
+        onChange = onChange,
+        onProblem = onProblem,
         label = stringResource(Res.string.export_package),
-        error = { draft -> if (validatePackageName(draft).isEmpty()) null else invalid },
+        problemOf = { draft -> if (validatePackageName(draft).isEmpty()) null else ExportProblem.PackageName(draft) },
+        errorOf = { invalid },
         supportingText = stringResource(Res.string.export_package_hint),
-        modifier = Modifier.fillMaxWidth(),
     )
 }
 
@@ -158,24 +188,79 @@ private fun PackageField(
 private fun ThemeNameField(
     state: ExportModel.State,
     workspace: Dispatcher<WorkspaceAction>,
+    onProblem: (ExportProblem?) -> Unit,
 ) {
     val invalid = stringResource(Res.string.export_theme_name_invalid)
     val taken = stringResource(Res.string.export_theme_name_taken)
     val targeted = state.document.forTarget(state.target)
-    BuilderTextField(
+    LiveField(
         value = state.document.themeName,
-        onCommit = { name ->
+        onChange = { name ->
             workspace.dispatch(WorkspaceAction.Edit(DocumentChange.SetThemeName(name), EditPhase.Discrete))
         },
+        onProblem = onProblem,
         label = stringResource(Res.string.export_theme_name),
-        error = { draft ->
+        problemOf = { draft ->
             when {
-                validateThemeName(draft).isNotEmpty() -> invalid
-                targeted.takesReservedName(draft) -> taken
+                validateThemeName(draft).isNotEmpty() -> ExportProblem.ThemeName(draft)
+                targeted.takesReservedName(draft) -> ExportProblem.NameTaken(draft)
                 else -> null
             }
         },
+        errorOf = { problem -> if (problem is ExportProblem.NameTaken) taken else invalid },
+    )
+}
+
+/**
+ * A text field that hands over every valid draft as it is typed. A draft [problemOf] finds fault
+ * with stays in the field and goes to [onProblem], and Esc puts the committed text back and clears
+ * it. Theme name edits that close together fold into one undo step, so typing is not an undo step
+ * per key.
+ *
+ * While drafts are going out the field keeps the text it started from as its committed value, so
+ * the drafts coming back as [value] never move the cursor or undo a newer keystroke. Once Enter,
+ * leaving the field or Esc settles on a text, the field follows [value] again as soon as [value]
+ * has caught up with it.
+ */
+@Composable
+private fun LiveField(
+    value: String,
+    onChange: (String) -> Unit,
+    onProblem: (ExportProblem?) -> Unit,
+    label: String,
+    problemOf: (String) -> ExportProblem?,
+    errorOf: (ExportProblem) -> String,
+    supportingText: String? = null,
+) {
+    var startedFrom by remember { mutableStateOf<String?>(null) }
+    var settlingOn by remember { mutableStateOf<String?>(null) }
+    SideEffect {
+        if (settlingOn != null && settlingOn == value) {
+            startedFrom = null
+            settlingOn = null
+        }
+    }
+    BuilderTextField(
+        value = settlingOn ?: startedFrom ?: value,
+        // The drafts went out as they were typed, so a commit only has to settle on the last one.
+        onCommit = { text ->
+            if (startedFrom == null) onChange(text) else settlingOn = text
+        },
+        label = label,
         modifier = Modifier.fillMaxWidth(),
+        error = { draft -> problemOf(draft)?.let(errorOf) },
+        supportingText = supportingText,
+        onDraftChange = { draft ->
+            val problem = problemOf(draft)
+            onProblem(problem)
+            if (problem == null) {
+                val start = startedFrom ?: value
+                startedFrom = start
+                // Esc, or typing back to the start, settles on it. Anything else keeps drafting.
+                settlingOn = draft.takeIf { draft == start }
+                onChange(draft)
+            }
+        },
     )
 }
 

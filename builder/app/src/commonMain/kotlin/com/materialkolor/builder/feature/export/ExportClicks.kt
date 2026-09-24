@@ -8,17 +8,17 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 
 /**
- * What Copy file and Copy all do when clicked. Writes [text] to [clipboard], then hands
- * [onResult] what the clipboard said.
+ * What Copy file, Copy all and the poster's copy buttons do when clicked. Writes [text] to
+ * [clipboard], then hands [onResult] what the clipboard said.
  *
  * Browsers only let a page write the clipboard inside the click, so the write is the first
- * suspension and it starts before this returns (R-B-302). Call it straight from `onClick`, with
- * no hop through the model before it.
+ * suspension and it starts before this returns (R-B-302). Call it straight from `onClick`, or from
+ * a dispatcher that runs its block in the click, with no hop through the model before it.
  */
 internal fun CoroutineScope.launchCopy(
     clipboard: Clipboard,
     text: String,
-    onResult: (Result<Unit>) -> Unit,
+    onResult: suspend (Result<Unit>) -> Unit,
 ) {
     launch(start = CoroutineStart.UNDISPATCHED) {
         onResult(clipboard.writeText(text))

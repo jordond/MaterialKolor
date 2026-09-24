@@ -382,6 +382,15 @@ interface Environment {
      * run, so the wiring collects on `Dispatchers.Unconfined`.
      */
     val pageHides: Flow<Unit>
+
+    // b-221c
+
+    /**
+     * Read [message] out to a screen reader once, without moving focus. The web writes it into the
+     * page's own live region, since the Compose semantics mirror never reads a live region out (D40).
+     * Elsewhere it does nothing.
+     */
+    fun announce(message: String)
 }
 
 // b-214

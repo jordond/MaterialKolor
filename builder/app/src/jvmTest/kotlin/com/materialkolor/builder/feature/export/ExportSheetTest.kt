@@ -1,11 +1,21 @@
 package com.materialkolor.builder.feature.export
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.dsl.Language
@@ -19,6 +29,8 @@ import com.materialkolor.builder.fakes.FakeClipboard
 import com.materialkolor.builder.fakes.FakeFileSaver
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.capabilitiesOf
+import com.materialkolor.builder.kit.a11y.Announcer
+import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
@@ -39,6 +51,7 @@ private val ZIP = OutgoingFile(name = "AppTheme.zip", bytes = byteArrayOf(1, 2, 
 class ExportSheetTest {
     private val clipboard = FakeClipboard()
     private val exported = mutableListOf<ExportAction>()
+    private val announced = mutableListOf<String>()
 
     @Test
     fun copyAll_whenTheClipboardRefuses_opensTheManualDialogAndNeverSaysCopied() =
@@ -54,6 +67,64 @@ class ExportSheetTest {
             onNodeWithText("Copied").assertDoesNotExist()
             clipboard.texts shouldBe emptyList()
             exported shouldBe emptyList()
+            announced shouldBe emptyList()
+        }
+
+    // b-221c
+    @Test
+    fun copy_eachTimeItWorks_readsCopiedOutOnce() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            showSheet(FakeFileSaver(), coarsePointer = false)
+
+            onNodeWithText("Copy file").performClick()
+            waitForIdle()
+            onNodeWithText("Copy all").performClick()
+            waitForIdle()
+
+            announced shouldBe listOf("Copied", "Copied")
+        }
+
+    @Test
+    fun invalidPackageDraft_holdsBackEveryExportUntilEsc() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            showSheet(FakeFileSaver(), coarsePointer = false)
+
+            onNodeWithText("Package name").performTextReplacement("Not A Package")
+            waitForIdle()
+
+            exportButtons().forEach { button -> button.assertIsNotEnabled() }
+            onAllNodesWithText("Not A Package is not a package name", substring = true).assertCountEquals(1)
+            onNodeWithText("Package name").performKeyInput { pressKey(Key.Escape) }
+            waitForIdle()
+            exportButtons().forEach { button -> button.assertIsEnabled() }
+            onAllNodesWithText("is not a package name", substring = true).assertCountEquals(0)
+        }
+
+    @Test
+    fun invalidThemeNameDraft_holdsBackEveryExportUntilEsc() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            showSheet(FakeFileSaver(), coarsePointer = false)
+
+            onNodeWithText("Theme name").performTextReplacement("1 bad")
+            waitForIdle()
+
+            exportButtons().forEach { button -> button.assertIsNotEnabled() }
+            onAllNodesWithText("1 bad cannot be a theme name", substring = true).assertCountEquals(1)
+            onNodeWithText("Theme name").performKeyInput { pressKey(Key.Escape) }
+            waitForIdle()
+            exportButtons().forEach { button -> button.assertIsEnabled() }
+        }
+
+    @Test
+    fun validPackageDraft_goesOutAsItIsTyped() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            showSheet(FakeFileSaver(), coarsePointer = false)
+
+            onNodeWithText("Package name").performTextReplacement("com.typed")
+            waitForIdle()
+
+            exported shouldBe listOf(ExportAction.SetPackageName("com.typed"))
+            exportButtons().forEach { button -> button.assertIsEnabled() }
         }
 
     @Test
@@ -159,6 +230,9 @@ class ExportSheetTest {
      */
     private fun idleScope(): CoroutineScope = CoroutineScope(StandardTestDispatcher())
 
+    private fun ComposeUiTest.exportButtons(): List<SemanticsNodeInteraction> =
+        listOf("Copy file", "Copy all", "Download zip").map { label -> onNodeWithText(label) }
+
     private fun ComposeUiTest.showSheet(
         files: FakeFileSaver,
         coarsePointer: Boolean,
@@ -185,16 +259,18 @@ class ExportSheetTest {
                 reducedMotion = true,
             ) {
                 ProvideBuilderLayout(coarsePointer = coarsePointer, modifier = Modifier.fillMaxSize()) {
-                    ExportSheet(
-                        visible = true,
-                        state = state,
-                        capabilities = capabilitiesOf(document),
-                        outcomeOf = { ready },
-                        clipboard = clipboard,
-                        files = files,
-                        dispatcher = rememberDispatcher<ExportAction> { action -> exported += action },
-                        workspace = rememberDispatcher<WorkspaceAction> {},
-                    )
+                    CompositionLocalProvider(LocalAnnouncer provides Announcer { message -> announced += message }) {
+                        ExportSheet(
+                            visible = true,
+                            state = state,
+                            capabilities = capabilitiesOf(document),
+                            outcomeOf = { ready },
+                            clipboard = clipboard,
+                            files = files,
+                            dispatcher = rememberDispatcher<ExportAction> { action -> exported += action },
+                            workspace = rememberDispatcher<WorkspaceAction> {},
+                        )
+                    }
                 }
             }
         }

@@ -3,6 +3,7 @@ package com.materialkolor.builder.web.platform
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.persist.StorageKeys
+import com.materialkolor.builder.web.interop.A11yLiveRegion
 import com.materialkolor.builder.web.interop.fadeOutSplash
 import com.materialkolor.builder.web.interop.localStorageWorks
 import com.materialkolor.builder.web.interop.localStorageWrite
@@ -80,6 +81,9 @@ internal class WebEnvironment : Environment {
     override fun readTabProject(): String? = sessionStorageRead(TAB_PROJECT_KEY)
 
     override fun writeTabProject(id: String?) = sessionStorageWrite(TAB_PROJECT_KEY, id)
+
+    // b-221c
+    override fun announce(message: String) = A11yLiveRegion.announce(message)
 }
 
 private const val SPLASH_FADE_MILLIS = 200

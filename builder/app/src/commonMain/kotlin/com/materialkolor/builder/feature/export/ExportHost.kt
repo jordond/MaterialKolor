@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
@@ -18,12 +19,15 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
  *
  * Closing it closes the panel, which drops the history entry opening it added, so Back closes it
  * too. The files are only generated while the sheet shows.
+ *
+ * @param[returnFocusTo] The button that opened the sheet, which gets focus back once it closes (AR-09).
  */
 @Composable
 internal fun ExportHost(
     state: WorkspaceModel.State,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    returnFocusTo: FocusRequester? = null,
 ) {
     val model: ExportModel = metroViewModel()
     val export by model.collectAsState()
@@ -39,5 +43,6 @@ internal fun ExportHost(
         dispatcher = actions,
         workspace = dispatcher,
         modifier = modifier,
+        returnFocusTo = returnFocusTo,
     )
 }

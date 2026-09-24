@@ -157,4 +157,7 @@ private object TestEnvironment : Environment {
 
     // b-301
     override val pageHides: Flow<Unit> = emptyFlow()
+
+    // b-221c
+    override fun announce(message: String) = Unit
 }

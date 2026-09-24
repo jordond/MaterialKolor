@@ -3,6 +3,7 @@ package com.materialkolor.builder.feature.projects
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.feature.share.ShareController
 import com.materialkolor.builder.feature.share.ShareDialog
@@ -20,12 +21,15 @@ import org.jetbrains.compose.resources.stringResource
  * The share dialog, open while `state.panel` is [Panel.Share], with the link to the theme as it is
  * now. A copy that lands closes it with a toast, a share that lands closes it quietly. The link is
  * only worked out while the dialog is open.
+ *
+ * @param[returnFocusTo] The button that opened the dialog, which gets focus back once it closes (AR-09).
  */
 @Composable
 internal fun ShareHost(
     state: WorkspaceModel.State,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    returnFocusTo: FocusRequester? = null,
     controller: ShareController = metroViewModel(),
 ) {
     val visible = state.panel == Panel.Share
@@ -46,6 +50,7 @@ internal fun ShareHost(
         },
         onDismissRequest = { dispatcher.dispatch(WorkspaceAction.ClosePanel) },
         modifier = modifier,
+        returnFocusTo = returnFocusTo,
     )
 }
 
