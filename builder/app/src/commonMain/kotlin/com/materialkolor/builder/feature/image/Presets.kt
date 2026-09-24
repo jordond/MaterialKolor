@@ -153,6 +153,10 @@ internal object Presets {
 
     init {
         require(all.map { preset -> preset.id }.toSet().size == all.size) { "Every preset needs an id of its own" }
+        // b-311d
+        require(starters.all { starter -> starter.contrast in ContrastLevel.Stops }) {
+            "Every starter's contrast sits on a named stop, so its card can name it"
+        }
     }
 
     /** The preset [id] names, or null for one this build does not know. */
