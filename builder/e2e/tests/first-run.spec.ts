@@ -1,5 +1,21 @@
 import { expect, test, type Page } from '@playwright/test';
 import { hook, openBuilder, reloadBuilder, wantHooks } from './builder';
+import {
+  A11Y,
+  boxOf,
+  button,
+  dragSplit,
+  focusCanvas,
+  LAND_TIMEOUT_MS,
+  labelled,
+  openWorkspace,
+  press,
+  pressFor,
+  primaryKey,
+  seedText,
+  SPLIT_HANDLE,
+  typeSeed,
+} from '../fixtures/workspace';
 
 // b-314
 // The one hint a first visit gets (F-35), read from the page's accessibility tree. A dismissal kept
@@ -39,6 +55,64 @@ test.describe('first run', () => {
 
     await expect(onPage(page, HINT)).toHaveCount(0);
   });
+});
+
+// b-503
+// The whole first run (flow 5.1). A typed seed, a drag of the split, Inspect over the app's floating
+// button, three shuffles and two undos, then Theme.kt copied from Export, which retires the hint.
+
+test('the first run, from a typed seed to a copied Theme.kt, retires the hint for good', async ({
+  page,
+  context,
+  browserName,
+}) => {
+  if (browserName === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await openWorkspace(page);
+  await expect(onPage(page, HINT)).toHaveCount(1, { timeout: 30_000 });
+
+  await typeSeed(page, '#0B6E4F');
+  const handle = page.locator(A11Y).getByText(SPLIT_HANDLE);
+  const split = await handle.first().textContent();
+  await dragSplit(page, -200);
+  await expect.poll(() => handle.first().textContent()).not.toBe(split);
+
+  await focusCanvas(page);
+  const readout = page.locator(A11Y).getByText(/onPrimaryContainer/);
+  await expect(readout).toHaveCount(0);
+  await page.keyboard.press('i');
+  await expect(labelled(page, 'Inspect, checked')).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
+  const fab = await boxOf(button(page, 'New trip'));
+  await page.mouse.move(fab.x + fab.width / 2, fab.y + fab.height / 2);
+  await expect(readout.first()).toBeAttached({ timeout: LAND_TIMEOUT_MS });
+  await page.keyboard.press('i');
+  await expect(labelled(page, 'Inspect, not checked')).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
+
+  const seeds = [await seedText(page)];
+  for (let shuffle = 0; shuffle < 3; shuffle++) {
+    await page.keyboard.press('Space');
+    await expect.poll(() => seedText(page), { timeout: LAND_TIMEOUT_MS }).not.toBe(seeds.at(-1));
+    seeds.push(await seedText(page));
+  }
+  const primary = await primaryKey(page);
+  await page.keyboard.press(`${primary}+z`);
+  await expect.poll(() => seedText(page), { timeout: LAND_TIMEOUT_MS }).toBe(seeds[2]);
+  await page.keyboard.press(`${primary}+z`);
+  await expect.poll(() => seedText(page), { timeout: LAND_TIMEOUT_MS }).toBe(seeds[1]);
+
+  await page.keyboard.press('e');
+  await expect(onPage(page, 'Export code, dialog')).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
+  await pressFor(page, labelled(page, 'Theme.kt, tab, not selected'), labelled(page, 'Theme.kt, tab, selected'));
+  await pressFor(page, button(page, 'Copy file'), onPage(page, 'Copied'));
+  if (browserName === 'chromium') {
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('package com.example.theme');
+  }
+  await press(page, button(page, 'Close'));
+  await expect(onPage(page, 'Export code, dialog')).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
+
+  await expect(onPage(page, HINT)).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
+  await reloadBuilder(page);
+  await expect(page.locator(NAMED_PROJECTS).first()).toBeAttached({ timeout: 30_000 });
+  await expect(onPage(page, HINT)).toHaveCount(0);
 });
 
 /** Whatever in the page's accessibility tree holds [text]. */
