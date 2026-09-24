@@ -49,7 +49,7 @@ internal fun Composer(
     val input = rememberTextFieldState()
     val focusRequester = remember { FocusRequester() }
     val canAdd = canAddTask(input.text.toString())
-    val add = {
+    val add: () -> Unit = {
         val title = input.text.toString()
         if (canAddTask(title)) {
             onAdd(title)

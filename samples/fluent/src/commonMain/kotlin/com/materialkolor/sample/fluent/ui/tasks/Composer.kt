@@ -55,7 +55,7 @@ internal fun Composer(
     var title by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
     val canAdd = canAddTask(title)
-    val submit = {
+    val submit: () -> Unit = {
         if (canAdd) {
             onAdd(title)
             title = ""
