@@ -3,7 +3,6 @@ package com.materialkolor.builder.feature.about
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalUriHandler
@@ -42,6 +41,8 @@ import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.canvas.TestOwner
 import com.materialkolor.builder.feature.poster.InfoTopic
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
+import com.materialkolor.builder.kit.a11y.KitTestApi
+import com.materialkolor.builder.kit.a11y.ProvideWebKeyboardForTest
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.skin.BuilderTheme
@@ -71,19 +72,8 @@ private const val OFL_HEADING = "SIL OPEN FONT LICENSE Version 1.1"
 /** The line About opens with. */
 private val BUILDER_VERSION_LINE = "Builder ${BuildKonfig.BUILDER_VERSION}"
 
-/**
- * The kit's switch for the web's keyboard habits. It is internal to the kit and off on the JVM, so
- * this reaches it by name to turn it on for the whole builder.
- */
-@Suppress("UNCHECKED_CAST")
-private val LocalWebKeyboardOfTheKit: ProvidableCompositionLocal<Boolean> =
-    Class
-        .forName("com.materialkolor.builder.kit.a11y.WebMirrorKt")
-        .getMethod("getLocalWebKeyboard")
-        .invoke(null) as ProvidableCompositionLocal<Boolean>
-
 // b-314
-@OptIn(ExperimentalTestApi::class)
+@OptIn(ExperimentalTestApi::class, KitTestApi::class)
 class AboutHostTest {
     private val platform = FakePlatform()
     private val opened = mutableListOf<String>()
@@ -294,15 +284,24 @@ class AboutHostTest {
                 LocalViewModelStoreOwner provides owner,
                 LocalMetroViewModelFactory provides graph.metroViewModelFactory,
                 LocalUriHandler provides uriHandler,
-                LocalWebKeyboardOfTheKit provides webKeyboard, // b-314a
             ) {
                 workspace = metroViewModel()
-                BuilderRoot(graph, workspaceModel = workspace, probe = { _ -> NoteReducedMotion() })
+                // b-314a
+                if (webKeyboard) {
+                    ProvideWebKeyboardForTest { Root(graph) }
+                } else {
+                    Root(graph)
+                }
             }
         }
         waitUntil { platform.environment.splashHidden }
         waitForIdle()
         return graph
+    }
+
+    @Composable
+    private fun Root(graph: AppGraph) {
+        BuilderRoot(graph, workspaceModel = workspace, probe = { _ -> NoteReducedMotion() })
     }
 
     @Composable
