@@ -215,6 +215,7 @@ private data class EndReachShape(
         val bounds = when (val outline = shape.createOutline(size, layoutDirection, density)) {
             is Outline.Rounded -> outline.roundRect
             is Outline.Rectangle -> RoundRect(outline.rect, CornerRadius.Zero)
+            // Every skin's options are rounded rectangles, so no option takes this path and loses its reach.
             is Outline.Generic -> return outline
         }
         val ltr = layoutDirection == LayoutDirection.Ltr

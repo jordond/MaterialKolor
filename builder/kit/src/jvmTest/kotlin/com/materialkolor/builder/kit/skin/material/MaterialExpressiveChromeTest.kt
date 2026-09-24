@@ -269,8 +269,7 @@ class MaterialExpressiveChromeTest {
                             }
                         }
                     }
-                    // The loop settles its start once the clock passes the phase it rests on.
-                    mainClock.advanceTimeBy(1_000)
+                    mainClock.advanceTimeByFrame()
                     val first = onNodeWithTag(BarTag).captureToImage().toPixelMap()
                     mainClock.advanceTimeBy(350)
                     val later = onNodeWithTag(BarTag).captureToImage().toPixelMap()
@@ -294,6 +293,12 @@ class MaterialExpressiveChromeTest {
                     .callArguments("LoadingIndicator")
                     .filterNot { arguments ->
                         "progress" in arguments
+                    }.shouldBeEmpty()
+                // A wavy bar only with its wave held still, since a moving wave runs Material's own clock.
+                text
+                    .callArguments("LinearWavyProgressIndicator")
+                    .filterNot { arguments ->
+                        "waveSpeed = 0.dp" in arguments
                     }.shouldBeEmpty()
             }
         }

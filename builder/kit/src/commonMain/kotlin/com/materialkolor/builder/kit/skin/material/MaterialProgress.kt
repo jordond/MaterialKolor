@@ -1,20 +1,26 @@
 package com.materialkolor.builder.kit.skin.material
 
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.progressLabel
 import com.materialkolor.builder.kit.control.rememberSweepPhase
 import com.materialkolor.builder.kit.control.sweepSpan
@@ -22,8 +28,7 @@ import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.headless.ActionSweep
 
 /**
- * Material's linear bar, or in the expressive flavour Material's loading indicator
- * ([ExpressiveProgress]).
+ * Material's linear bar, or in the expressive flavour Material's wavy one ([ExpressiveProgress]).
  *
  * Material's own indeterminate bar runs a clock of its own, which ignores frozen motion, reduced
  * motion and a hidden tab (MO-10). So the indeterminate bar is Material's determinate one held at
@@ -60,28 +65,93 @@ internal fun MaterialProgress(
 }
 
 /**
- * Material's expressive loading indicator, a shape that morphs as the work goes on, in the middle of
- * the width the bar is given.
+ * Material's expressive bar, the wavy one, whose wave rises while the work is under way.
  *
- * Only the overload that takes its progress is called. The one without runs an endless clock of its
- * own, which ignores frozen motion, reduced motion and a hidden tab like the linear bar's (MO-10).
- * While nobody can tell how far along the work is, the shape follows the same sweep as the linear
- * bar instead, from [rememberSweepPhase], and still reads as a bar with no amount.
+ * The wave stands still. A moving wave runs a clock of Material's own, which ignores frozen motion,
+ * reduced motion and a hidden tab like the linear bar's (MO-10). Material's bar also reads its amount
+ * inside its semantics, so an amount that moved every frame would rebuild them every frame. While
+ * nobody can tell how far along the work is, the bar is drawn here instead, the sweep from
+ * [rememberSweepPhase] between two stretches of track, in Material's strokes and gaps, under
+ * semantics that stay fixed as a bar with no amount.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ExpressiveProgress(
     labelled: Modifier,
     progress: Float?,
 ) {
     if (progress != null) {
-        LoadingIndicator(progress = { progress }, modifier = labelled)
+        LinearWavyProgressIndicator(progress = { progress }, modifier = labelled, waveSpeed = 0.dp)
         return
     }
     val phase = rememberSweepPhase(ActionSweep)
-    LoadingIndicator(
-        progress = { phase.value },
-        modifier = labelled.semantics { progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate },
+    val sweep = ExpressiveSweep(
+        color = WavyProgressIndicatorDefaults.indicatorColor,
+        trackColor = WavyProgressIndicatorDefaults.trackColor,
+        stroke = WavyProgressIndicatorDefaults.linearIndicatorStroke,
+        trackStroke = WavyProgressIndicatorDefaults.linearTrackStroke,
+        gap = WavyProgressIndicatorDefaults.LinearIndicatorTrackGapSize,
+    )
+    Spacer(
+        labelled
+            .semantics { progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate }
+            .height(WavyProgressIndicatorDefaults.LinearContainerHeight)
+            .drawBehind { drawExpressiveSweep(phase.value, sweep) },
+    )
+}
+
+/** How Material's expressive bar draws, its line and its track and the gap between them. */
+private class ExpressiveSweep(
+    val color: Color,
+    val trackColor: Color,
+    val stroke: Stroke,
+    val trackStroke: Stroke,
+    val gap: Dp,
+)
+
+/**
+ * Draws the sweep at [phase] the way Material draws its expressive bar with no wave, the line with a
+ * gap on either side and the track over the rest of the width.
+ */
+private fun DrawScope.drawExpressiveSweep(
+    phase: Float,
+    sweep: ExpressiveSweep,
+) {
+    val span = sweepSpan(phase, ActionSweep.fraction)
+    val start = span.start.coerceIn(0f, 1f) * size.width
+    val end = span.endInclusive.coerceIn(0f, 1f) * size.width
+    if (end <= start) {
+        drawStretch(0f, size.width, sweep.trackColor, sweep.trackStroke)
+        return
+    }
+    val gap = sweep.gap.toPx()
+    drawStretch(0f, start - gap, sweep.trackColor, sweep.trackStroke)
+    drawStretch(start, end, sweep.color, sweep.stroke)
+    drawStretch(end + gap, size.width, sweep.trackColor, sweep.trackStroke)
+}
+
+/**
+ * Draws a line across the middle from [from] to [to], measured from the reading start, with its
+ * caps inside that stretch. A stretch too short for its caps is left out.
+ */
+private fun DrawScope.drawStretch(
+    from: Float,
+    to: Float,
+    color: Color,
+    stroke: Stroke,
+) {
+    // A round cap reaches half the stroke past each end, so pull the ends in to keep it in the stretch.
+    val cap = if (stroke.cap == StrokeCap.Butt) 0f else stroke.width / 2
+    val first = from + cap
+    val last = to - cap
+    if (last < first) return
+    val ltr = layoutDirection == LayoutDirection.Ltr
+    val y = size.height / 2
+    drawLine(
+        color = color,
+        start = Offset(if (ltr) first else size.width - first, y),
+        end = Offset(if (ltr) last else size.width - last, y),
+        strokeWidth = stroke.width,
+        cap = stroke.cap,
     )
 }
 
