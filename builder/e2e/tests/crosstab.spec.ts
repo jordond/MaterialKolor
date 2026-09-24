@@ -7,7 +7,6 @@ import {
   onPage,
   openWorkspace,
   press,
-  scrollTo,
   seedText,
   storedProjects,
   typeSeed,
@@ -41,12 +40,13 @@ test('an edit in one tab lands in the other as a step its Undo takes back', asyn
 
 test('an edit in one tab offers the other the latest while it drags, and Load latest takes it', async ({ context }) => {
   const { writer, reader } = await twoTabs(context.newPage.bind(context));
-  // The reader holds the contrast slider and keeps it moving. Each step is an edit that saves
+  // The reader holds the seed picker's hue and keeps it moving. Each step is an edit that saves
   // nothing until it lets go, so the writer's save lands in a tab that edited in the last 2 s
   // however busy the machine, and the writer never hears from the reader.
-  const slider = onPage(reader, /^Contrast level, slider/);
-  await scrollTo(reader, slider, onPage(reader, /^Seed and theme controls/));
-  const track = await boxOf(slider);
+  // b-507
+  // Contrast is four choices now (D53), so the seed picker is the control that keeps editing while held.
+  await press(reader, button(reader, 'Pick'));
+  const track = await boxOf(onPage(reader, /^Hue, slider/));
   const middle = { x: track.x + track.width / 2, y: track.y + track.height / 2 };
   await reader.mouse.move(middle.x, middle.y);
   await reader.mouse.down();
@@ -66,6 +66,8 @@ test('an edit in one tab offers the other the latest while it drags, and Load la
     await moving;
     await reader.mouse.up();
   }
+  await press(reader, button(reader, 'Done'));
+  await expect(button(reader, 'Done')).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
   expect(await seedText(reader)).not.toBe('#0B6E4F');
   await expect(button(reader, 'Keep mine')).toHaveCount(1);
   await press(reader, button(reader, 'Load latest'));

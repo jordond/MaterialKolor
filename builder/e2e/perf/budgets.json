@@ -7,7 +7,7 @@
     { "id": "PB-03a", "what": "First Compose frame on broadband", "unit": "ms", "max": 2000 },
     { "id": "PB-03b", "what": "First Compose frame at 9 Mbps and 60 ms RTT", "unit": "ms", "max": 5000 },
     { "id": "PB-04", "what": "First Compose frame on a repeat visit at 9 Mbps and 60 ms RTT", "unit": "ms", "max": 1000 },
-    { "id": "PB-05", "what": "Contrast slider drag, p95 of the work in each frame", "unit": "ms", "max": 8 },
+    { "id": "PB-05", "what": "Seed picker drag, p95 of the work in each frame", "unit": "ms", "max": 8 },
     { "id": "PB-06a", "what": "A 12 MP photo dropped to its seed candidates", "unit": "ms", "max": 150 },
     { "id": "PB-06b", "what": "A 12 MP photo dropped to its thumbnail", "unit": "ms", "max": 100 },
     { "id": "PB-07", "what": "JS and wasm heap after the scripted run, desktop Chromium", "unit": "bytes", "max": 200000000 },
