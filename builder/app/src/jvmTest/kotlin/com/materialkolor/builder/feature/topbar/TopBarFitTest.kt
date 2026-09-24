@@ -120,7 +120,7 @@ class TopBarFitTest {
             onAllNodes(hasText("Fluent") and InSwitcher).fetchSemanticsNodes().size shouldBe 1
         }
 
-    // b-509a
+    // b-509
     @Test
     fun switcher_fluentAt1280BesideHistory_fitsWholeOrFallsBackToTheDropdown() =
         runDesktopComposeUiTest(width = 1280, height = HEIGHT) {

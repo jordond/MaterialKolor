@@ -55,7 +55,7 @@ internal class CommandHarness(
         probe: @Composable (state: WorkspaceModel.State) -> Unit = {},
         registryBuilds: (() -> Unit)? = null, // b-315d
         inTree: Boolean = false, // b-509
-        swatchReads: (() -> Unit)? = null, // b-509a
+        swatchReads: (() -> Unit)? = null, // b-509
     ) {
         graph = createGraphFactory<AppGraph.Factory>().create(platform)
         val owner = TestOwner()
@@ -68,7 +68,7 @@ internal class CommandHarness(
                 LocalViewModelStoreOwner provides owner,
                 LocalMetroViewModelFactory provides graph.metroViewModelFactory,
                 LocalRegistryBuilds provides registryBuilds, // b-315d
-                LocalSwatchReadProbe provides swatchReads, // b-509a
+                LocalSwatchReadProbe provides swatchReads, // b-509
             ) {
                 workspace = metroViewModel()
                 InterceptPlatformTextInput(watcher) {

@@ -98,7 +98,7 @@ class TimelineTest {
             focusedRow().assertIsSelected().assert(hasText("Start"))
         }
 
-    // b-509a
+    // b-509
     @Test
     fun timeline_popupJumpOntoFluent_staysOpenWithFocusOnTheCurrentStep() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
@@ -124,7 +124,7 @@ class TimelineTest {
             focusedRow().assertIsSelected().assert(hasText("Library change to Fluent"))
         }
 
-    // b-509a
+    // b-509
     @Test
     fun timeline_dragRunningWhileOpen_readsTheNewestSwatchOnceItHoldsStill() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {

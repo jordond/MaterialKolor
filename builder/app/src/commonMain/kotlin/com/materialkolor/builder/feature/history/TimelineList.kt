@@ -225,10 +225,9 @@ private fun StepSwatch(
     undone: Boolean,
 ) {
     val resolver = rememberThemeResolver()
-    val probe = LocalSwatchReadProbe.current // b-509a
+    val probe = LocalSwatchReadProbe.current
     val colors by produceState<SwatchColors?>(null, document, resolver) {
-        // b-509a
-        // A new document for the row cancels this wait, so a step that moves every frame is not read.
+        // A new document for the row starts this over, so a step that moves on every frame is not read.
         if (value != null) awaitHoldStill()
         repeat(1 + position / SWATCHES_PER_FRAME) { withFrameNanos { } }
         probe?.invoke()
@@ -332,8 +331,6 @@ private const val UNDONE_SWATCH_ALPHA = 0.38f
 
 /** How many swatches read their scheme in one frame. */
 private const val SWATCHES_PER_FRAME = 8
-
-// b-509a
 
 /**
  * Told each time a swatch reads its scheme, or null, which it always is outside tests. Tests

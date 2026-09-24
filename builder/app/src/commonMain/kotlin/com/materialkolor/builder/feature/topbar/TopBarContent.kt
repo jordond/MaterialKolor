@@ -5,8 +5,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -70,7 +72,8 @@ import org.jetbrains.compose.resources.stringResource
  *
  * The History list opens in a popover under the History button, or under the overflow button once
  * History has moved there (D57). It stays open while someone jumps between steps and hands focus
- * back to whatever opened it, the page itself when the H key did.
+ * back to whatever opened it, the page itself when the H key did. A jump can switch the skin, whose
+ * top bar draws its buttons somewhere new, so both buttons move there with the list still open.
  *
  * A library switch goes through the reveal from the switcher as one undo entry. What has to outlive
  * a skin switch, the open menu and which control has focus, is held here, outside the skin's own
@@ -109,23 +112,9 @@ internal fun TopBarContent(
     val onSwitch = { choice: LibraryChoice, origin: Offset ->
         dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin))
     }
-    val actions: @Composable () -> Unit = {
-        TopBarIconButton(
-            control = TopBarControl.Share,
-            focus = focus,
-            icon = IconId.Share,
-            description = stringResource(Res.string.topbar_share),
-            onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Share)) },
-        )
-        BuilderButton(
-            onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Export)) },
-            label = stringResource(Res.string.topbar_export),
-            modifier = Modifier.topBarFocus(focus, TopBarControl.Export),
-            emphasis = Emphasis.Primary,
-            icon = IconId.Export,
-        )
-        // b-509
-        // The list hangs from More once History has moved into it, with More kept in one place either way.
+    // b-509
+    // The list hangs from More once History has moved into it, with More kept in one place either way.
+    val moreButton = rememberMovable {
         HistoryPopover(
             expanded = state.panel == Panel.History && TopBarControl.History in overflowed,
             timeline = state.timeline,
@@ -146,6 +135,44 @@ internal fun TopBarContent(
                 )
             }
         }
+    }
+    // b-509
+    val historyButton = rememberMovable {
+        HistoryPopover(
+            expanded = state.panel == Panel.History,
+            timeline = state.timeline,
+            dispatcher = dispatcher,
+            currentRow = currentRow,
+        ) {
+            TopBarIconButton(
+                control = TopBarControl.History,
+                focus = focus,
+                icon = IconId.History,
+                description = stringResource(Res.string.history_title),
+                tooltip = stringResource(
+                    Res.string.history_tooltip,
+                    Shortcut.History.text(LocalAppleKeys.current),
+                ),
+                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.History)) },
+            )
+        }
+    }
+    val actions: @Composable () -> Unit = {
+        TopBarIconButton(
+            control = TopBarControl.Share,
+            focus = focus,
+            icon = IconId.Share,
+            description = stringResource(Res.string.topbar_share),
+            onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Share)) },
+        )
+        BuilderButton(
+            onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Export)) },
+            label = stringResource(Res.string.topbar_export),
+            modifier = Modifier.topBarFocus(focus, TopBarControl.Export),
+            emphasis = Emphasis.Primary,
+            icon = IconId.Export,
+        )
+        moreButton() // b-509
     }
 
     if (windowClass == WindowClass.Compact) {
@@ -210,27 +237,7 @@ internal fun TopBarContent(
                     onClick = { dispatcher.dispatch(WorkspaceAction.Redo) },
                 )
             }
-            // b-509
-            if (TopBarControl.History !in overflowed) {
-                HistoryPopover(
-                    expanded = state.panel == Panel.History,
-                    timeline = state.timeline,
-                    dispatcher = dispatcher,
-                    currentRow = currentRow,
-                ) {
-                    TopBarIconButton(
-                        control = TopBarControl.History,
-                        focus = focus,
-                        icon = IconId.History,
-                        description = stringResource(Res.string.history_title),
-                        tooltip = stringResource(
-                            Res.string.history_tooltip,
-                            Shortcut.History.text(LocalAppleKeys.current),
-                        ),
-                        onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.History)) },
-                    )
-                }
-            }
+            if (TopBarControl.History !in overflowed) historyButton() // b-509
             actions()
         }
     }
@@ -295,6 +302,20 @@ private fun HistoryPopover(
     ) {
         if (timeline != null) TimelineList(timeline, dispatcher, currentRow)
     }
+}
+
+// b-509
+
+/**
+ * [content] as movable content, so wherever the skin's top bar draws it next it moves there with all
+ * it holds rather than starting over. An open History list stays open that way, and on the desktop,
+ * where its popover is a window of its own, no window closes while a skin switch measures the page,
+ * which crashes the scene. It always draws the latest [content].
+ */
+@Composable
+private fun rememberMovable(content: @Composable () -> Unit): @Composable () -> Unit {
+    val latest by rememberUpdatedState(content)
+    return remember { movableContentOf { latest() } }
 }
 
 /**
