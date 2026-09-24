@@ -66,6 +66,30 @@ internal fun Modifier.withoutSelectionHandles(enabled: Boolean = overlaysInTree)
         }
 }
 
+// b-228b
+
+/**
+ * Holds the inner text of a single line field the kit does not draw, such as a preview's Material3
+ * sample field, so foundation puts up no touch selection handles on it where overlays render in the
+ * page (D45). Anywhere else it only holds the text.
+ *
+ * Build the field from its parts, a foundation field inside a decoration box, and hand this the
+ * inner text the decoration box is given. It goes on nothing bigger, and a multi-line field is out
+ * of its reach, since a handle on an upper line has its foot inside the text. The caret and the
+ * selection highlight each lose their bottom pixel.
+ *
+ * It leans on two foundation internals, and the b-228 e2e tests in `text-toolbar.spec.ts` trip
+ * when either moves. Drop it when CMP fixes the single-owner listener, together with the in-page
+ * overlays.
+ *
+ * @param[innerTextField] The inner text a decoration box is given.
+ */
+@Composable
+public fun InnerTextWithoutHandles(innerTextField: @Composable () -> Unit) {
+    val inTree = LocalOverlaysInTree.current
+    Box(Modifier.withoutSelectionHandles(inTree), propagateMinConstraints = true) { innerTextField() }
+}
+
 /**
  * A selection container that leaves a finger out where overlays render in the page (D45), for text
  * over several lines, which [withoutSelectionHandles] cannot reach.

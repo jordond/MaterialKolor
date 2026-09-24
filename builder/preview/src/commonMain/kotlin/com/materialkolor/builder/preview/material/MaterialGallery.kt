@@ -33,7 +33,6 @@ import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.SegmentedButton
@@ -46,7 +45,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -201,13 +199,13 @@ internal fun ExtendedFab(state: DemoAppState) {
 @Composable
 internal fun FilledTextFields(state: DemoAppState) {
     TextFieldPair(state) { enabled, value, onValueChange, label ->
-        TextField(
+        // b-228b
+        SampleTextField(
             value = value,
             onValueChange = onValueChange,
+            label = label,
             modifier = Modifier.fillMaxWidth().previewRoles(enabled, GalleryComponent.TextField),
             enabled = enabled,
-            label = { Text(label) },
-            singleLine = true,
         )
     }
 }
@@ -215,13 +213,13 @@ internal fun FilledTextFields(state: DemoAppState) {
 @Composable
 internal fun OutlinedTextFields(state: DemoAppState) {
     TextFieldPair(state) { enabled, value, onValueChange, label ->
-        OutlinedTextField(
+        // b-228b
+        SampleOutlinedTextField(
             value = value,
             onValueChange = onValueChange,
+            label = label,
             modifier = Modifier.fillMaxWidth().previewRoles(enabled, MaterialComponent.OutlinedTextField),
             enabled = enabled,
-            label = { Text(label) },
-            singleLine = true,
         )
     }
 }

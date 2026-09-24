@@ -165,6 +165,25 @@ class SelectionHandlesTest {
             onAllNodes(isSelectionHandle()).fetchSemanticsNodes().size shouldBeGreaterThan 0
         }
 
+    // b-228b
+    @Test
+    fun innerTextWithoutHandles_inTree_takesALongPressWithNoHandleAndShowsTheRow() =
+        forEachSkin { _, skin ->
+            setContent { Host(skin, inTree = true) { FieldFromParts() } }
+            longPressField()
+            onAllNodes(isPopup()).assertCountEquals(0)
+            onAllNodes(isSelectionHandle()).assertCountEquals(0)
+            onNodeWithText("Copy").assertExists()
+        }
+
+    @Test
+    fun innerTextWithoutHandles_inWindows_letsTheHandlesUp() =
+        forEachSkin { _, skin ->
+            setContent { Host(skin, inTree = false) { FieldFromParts() } }
+            longPressField()
+            onAllNodes(isSelectionHandle()).fetchSemanticsNodes().size shouldBeGreaterThan 0
+        }
+
     @Test
     fun modifierOff_letsTheHandlesUp_andOn_keepsThemDown() {
         for (enabled in listOf(false, true)) {
@@ -199,6 +218,19 @@ private const val TwoLines = "val primary = Color(0xFF6750A4)\nval onPrimary = C
 private fun Code() {
     val file = remember { widgetGoldenColorFile() }
     CodeView(file.lines, onCopy = {}, Tagged.size(480.dp, 200.dp))
+}
+
+/** A single line field the kit does not draw, built from its parts the way a preview sample field is. */
+@Composable
+private fun FieldFromParts() {
+    var value by remember { mutableStateOf(TextFieldValue("Deep ocean")) }
+    BasicTextField(
+        value = value,
+        onValueChange = { next -> value = next },
+        modifier = Tagged.fillMaxWidth().padding(24.dp),
+        singleLine = true,
+        decorationBox = { text -> InnerTextWithoutHandles(text) },
+    )
 }
 
 @Composable
