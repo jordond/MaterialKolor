@@ -3,6 +3,7 @@ package com.materialkolor.builder.feature.picker
 import com.materialkolor.builder.ViewModelHarness
 import com.materialkolor.builder.core.session.ProjectSession
 import com.materialkolor.builder.core.session.SessionTestBase
+import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
@@ -18,6 +19,7 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakeClipboard
 import com.materialkolor.builder.fakes.FakeRouter
+import com.materialkolor.builder.feature.poster.usable
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
@@ -237,6 +239,29 @@ class PickerSessionTest : SessionTestBase() {
 
             workspace.state.value.document shouldBe before.document
             workspace.state.value.history shouldBe before.history
+            harness.clearAndJoin()
+        }
+
+    // b-307a
+    @Test
+    fun controlTurningUnusableMidSession_restoresTheValueAndCloses() =
+        runTest {
+            val workspace = workspace()
+            workspace.startFrom(Stored)
+
+            workspace.open(PickerTarget.CmfSeed)
+            workspace.send(picker.pick(Red))
+            workspace.state.value.document.cmfTertiarySeed shouldBe Red
+            workspace.edit(DocumentChange.SetStyle(Style.TonalSpot), EditPhase.Discrete)
+            val cmfSeed = workspace.state.value.capabilities[Control.CmfSecondSeed]
+            cmfSeed.usable shouldBe false
+            workspace.sync()
+
+            workspace.state.value.document.cmfTertiarySeed shouldBe Stored.cmfTertiarySeed
+            workspace.state.value.document.style shouldBe Style.TonalSpot
+            workspace.state.value.panel shouldBe null
+            workspace.state.value.pickerTarget shouldBe null
+            picker.target shouldBe null
             harness.clearAndJoin()
         }
 

@@ -43,7 +43,7 @@
     <string name="topbar_change_key_color">key color change</string>
     <string name="topbar_change_reset_key_colors">key color reset</string>
     <string name="topbar_change_style">style change</string>
-    <string name="topbar_change_cmf_seed">second seed change</string>
+    <string name="topbar_change_cmf_seed">tertiary seed change</string>
     <string name="topbar_change_contrast">contrast change</string>
     <string name="topbar_change_spec">spec change</string>
     <string name="topbar_change_platform">platform change</string>

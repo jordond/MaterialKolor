@@ -155,7 +155,7 @@ class StyleChipsTest {
             waitForIdle()
             onAllNodes(hasSetTextAction()).fetchSemanticsNodes() shouldHaveSize 1
             onNodeWithText(TERTIARY_FIELD, useUnmergedTree = true).assertExists()
-            onNodeWithText("Derived from your seed until you type one").assertExists()
+            onNodeWithText("Derived from your seed until you type or pick one").assertExists()
         }
 
     @Test
