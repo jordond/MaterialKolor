@@ -14,6 +14,9 @@ import kotlinx.serialization.Serializable
  * @property[before] The document as it was before the step.
  * @property[after] The document as the step left it.
  * @property[label] What the undo and redo buttons say about the step.
+ * @property[at] When the step last changed, in epoch milliseconds from the session clock. A step
+ * that took several edits, a drag or quick typing, carries its latest one. Steps saved before the
+ * history kept times read back without one.
  */
 @Serializable
 public data class HistoryEntry(
@@ -23,4 +26,6 @@ public data class HistoryEntry(
     public val after: ThemeDocument,
     @SerialName("label")
     public val label: ChangeLabel,
+    @SerialName("at")
+    public val at: Long? = null,
 )

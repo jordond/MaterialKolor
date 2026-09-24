@@ -159,7 +159,11 @@ private fun SubcomposeMeasureScope.fitsSegmented(
         )
     }
     val natural = probe.maxOfOrNull { measurable ->
-        measurable.measure(constraints.copy(maxWidth = Constraints.Infinity)).width
+        // b-509
+        // A row that shares its width out evenly, as Fluent's does, needs its widest option's room for
+        // every option. Its intrinsic width counts that, and a measure with no end to the room does not.
+        val shared = measurable.maxIntrinsicWidth(constraints.maxHeight)
+        maxOf(shared, measurable.measure(constraints.copy(maxWidth = Constraints.Infinity)).width)
     } ?: 0
     return !constraints.hasBoundedWidth || natural <= constraints.maxWidth
 }

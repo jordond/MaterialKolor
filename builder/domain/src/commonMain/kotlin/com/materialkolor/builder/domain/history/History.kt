@@ -15,8 +15,15 @@ import com.materialkolor.builder.domain.model.ThemeDocument
  * them. A step that ends where it started, such as a picker that was opened and then cancelled,
  * leaves nothing behind.
  *
+ * The steps form one line with a [cursor] in it (D55). The steps before the cursor are applied and
+ * can be undone, and the ones after it were undone and can be redone. Undo and redo move the cursor
+ * by one, and [jumpTo] moves it straight to any step, as that many undos or redos in one go. A jump
+ * is not a step of its own. Nothing after the cursor is lost until the next real edit, which drops
+ * it the same way it drops what could be redone.
+ *
  * The history never reads a clock. Whoever records an edit says when it happened, which keeps the
- * merge window testable and the class free of anything platform specific.
+ * merge window testable and the class free of anything platform specific. Each step keeps that time
+ * as [HistoryEntry.at].
  *
  * @param[entries] Steps to start from, oldest first, usually what [persisted] handed out last time.
  */
@@ -32,7 +39,7 @@ public class History(
     private var parked: List<HistoryEntry>? = null
 
     // The oldest step the open one pushed out at capacity, handed back if the open step comes to nothing.
-    // Undo and redo clear it only as a guard. They clear last too, so the next record pushes and sets it anew.
+    // Undo, redo and a jump clear it only as a guard. They clear last too, so the next record pushes and sets it anew.
     private var trimmed: HistoryEntry? = null
 
     /** Whether there is a step to undo. */
@@ -51,6 +58,23 @@ public class History(
     public val redoLabel: ChangeLabel?
         get() = undone.lastOrNull()?.label
 
+    // b-508
+
+    /**
+     * Every step, oldest first. The applied ones come first and the undone ones follow in the order
+     * they were made, so the step at index `i` is the one [jumpTo] of `i + 1` lands after.
+     */
+    public val entries: List<HistoryEntry>
+        get() = done + undone.asReversed()
+
+    /** How many of [entries] are applied. Zero is the document before the oldest step. */
+    public val cursor: Int
+        get() = done.size
+
+    /** How many steps there are, applied and undone together. It never passes [CAPACITY]. */
+    public val size: Int
+        get() = done.size + undone.size
+
     /**
      * Records that [change] took the document from [before] to [after].
      *
@@ -62,6 +86,8 @@ public class History(
      * Recording a real change throws away what could have been redone. An edit that changes nothing
      * leaves the redo steps where they are, and so does a drag that ends where it began. A release
      * always closes the drag of its key, even for a change that never merges otherwise.
+     *
+     * A new step takes [now] as its [HistoryEntry.at], and a step an edit folds into moves up to it.
      *
      * @param[now] When the edit happened, in milliseconds on whatever clock the caller keeps.
      */
@@ -103,6 +129,29 @@ public class History(
         return entry.after
     }
 
+    // b-508
+
+    /**
+     * Puts the cursor [cursor] steps in and returns the document to show there, or null when it sits
+     * there already, and then nothing changes.
+     *
+     * It walks the steps over one by one, the way that many undos or redos would, and like them it
+     * closes the open step, so the next edit starts a new one however soon it comes. Zero lands on
+     * the document before the oldest step and [size] on the newest step.
+     *
+     * @throws[IllegalArgumentException] when [cursor] is not between zero and [size].
+     */
+    public fun jumpTo(cursor: Int): ThemeDocument? {
+        require(cursor in 0..size) { "Cursor is 0 to $size, got $cursor" }
+        if (cursor == this.cursor) return null
+        while (done.size > cursor) undone.addLast(done.removeLast())
+        while (done.size < cursor) done.addLast(undone.removeLast())
+        last = null
+        parked = null
+        trimmed = null
+        return done.lastOrNull()?.after ?: undone.last().before
+    }
+
     /**
      * The newest steps worth keeping across a reload, oldest first.
      *
@@ -142,7 +191,7 @@ public class History(
         phase: EditPhase,
         now: Long,
     ) {
-        val entry = done.removeLast().copy(after = after, label = change.label)
+        val entry = done.removeLast().copy(after = after, label = change.label, at = now) // b-508
         if (entry.after == entry.before) {
             last = null
             parked?.let(undone::addAll) // b-307
@@ -168,7 +217,7 @@ public class History(
         // A drag keeps what could be redone aside until it lands somewhere new.
         parked = undone.toList().takeIf { phase == EditPhase.Dragging && it.isNotEmpty() }
         undone.clear()
-        done.addLast(HistoryEntry(before = before, after = after, label = change.label))
+        done.addLast(HistoryEntry(before = before, after = after, label = change.label, at = now)) // b-508
         // The done steps never pass capacity before a push, so at most one goes.
         trimmed = if (done.size > CAPACITY) done.removeFirst() else null
         last = LastRecord(change.coalesceKey, change.merges, phase, now)

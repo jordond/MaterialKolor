@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 /**
  * The Material3 set, the Rounded Material Icons drawn from path data kept in this file.
  *
- * The data is hand copied so kit does not pull in the whole extended icon pack for 41 glyphs. Each
+ * The data is hand copied so kit does not pull in the whole extended icon pack for 42 glyphs. Each
  * glyph is built the first time it is asked for and kept after that, on the UI thread only.
  */
 internal object MaterialIcons : BuilderIcons {
@@ -461,5 +461,18 @@ private fun glyph(id: IconId): MaterialGlyph =
                 "s1 -0.45 1 -1V4c0 -0.55 -0.45 -1 -1 -1h-5c-0.55 0 -1 0.45 -1 1Z",
             ),
             autoMirror = true,
+        )
+        // b-508
+        // Rounded.History
+        IconId.History -> MaterialGlyph(
+            path(
+                "M13.26 3C8.17 2.86 4 6.95 4 12H2.21c-0.45 0 -0.67 0.54 -0.35 0.85l2.79 2.8c0.2 0.2 0.51 0.2 0.71 0",
+                "l2.79 -2.8c0.31 -0.31 0.09 -0.85 -0.36 -0.85H6c0 -3.9 3.18 -7.05 7.1 -7c3.7 0.05 6.85 3.17 6.9 6.87",
+                "c0.05 3.91 -3.11 7.13 -7 7.13c-1.61 0 -3.1 -0.55 -4.28 -1.48c-0.4 -0.31 -0.96 -0.28 -1.32 0.08",
+                "c-0.42 0.42 -0.39 1.13 0.08 1.49C9 20.29 10.91 21 13 21c5.05 0 9.14 -4.17 9 -9.26",
+                "c-0.13 -4.69 -4.05 -8.61 -8.74 -8.74ZM12.75 8c-0.41 0 -0.75 0.34 -0.75 0.75v3.68",
+                "c0 0.35 0.19 0.68 0.49 0.86l3.12 1.85c0.36 0.21 0.82 0.09 1.03 -0.26",
+                "c0.21 -0.36 0.09 -0.82 -0.26 -1.03l-2.88 -1.71v-3.4c0 -0.4 -0.34 -0.74 -0.75 -0.74Z",
+            ),
         )
     }

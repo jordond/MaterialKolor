@@ -21,14 +21,17 @@ import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.canvas.DEVICE_SCREEN_TAG
 import com.materialkolor.builder.feature.canvas.TestOwner
+import com.materialkolor.builder.feature.history.LocalSwatchReadProbe
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
+import com.materialkolor.builder.kit.a11y.KitTestApi
+import com.materialkolor.builder.kit.a11y.ProvideOverlaysInTreeForTest
 import dev.stateholder.dispatcher.rememberDispatcher
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 /** The whole builder on fakes, booted, with the command registry of every composition in [commands]. */
-@OptIn(ExperimentalTestApi::class)
+@OptIn(ExperimentalTestApi::class, KitTestApi::class)
 internal class CommandHarness(
     val platform: FakePlatform = FakePlatform(),
 ) {
@@ -43,12 +46,16 @@ internal class CommandHarness(
      * Boots the builder. [onTextInput] hears each text input session a field starts, after the
      * shortcuts have counted it, so a test can drive the session as an input method would.
      * [registryBuilds] hears each build of the builder's own registries, the page's and the
-     * palette's, and not the one this harness keeps in [commands].
+     * palette's, and not the one this harness keeps in [commands]. With [inTree] its overlays draw
+     * in the page, the way the web draws them (D40), so Esc and the focus hand back work as they do there.
+     * [swatchReads] hears each time a History swatch reads its scheme.
      */
     fun ComposeUiTest.show(
         onTextInput: (PlatformTextInputMethodRequest) -> Unit = {},
         probe: @Composable (state: WorkspaceModel.State) -> Unit = {},
         registryBuilds: (() -> Unit)? = null, // b-315d
+        inTree: Boolean = false, // b-509
+        swatchReads: (() -> Unit)? = null, // b-509
     ) {
         graph = createGraphFactory<AppGraph.Factory>().create(platform)
         val owner = TestOwner()
@@ -61,15 +68,19 @@ internal class CommandHarness(
                 LocalViewModelStoreOwner provides owner,
                 LocalMetroViewModelFactory provides graph.metroViewModelFactory,
                 LocalRegistryBuilds provides registryBuilds, // b-315d
+                LocalSwatchReadProbe provides swatchReads, // b-509
             ) {
                 workspace = metroViewModel()
                 InterceptPlatformTextInput(watcher) {
-                    BuilderRoot(graph, workspaceModel = workspace) { state ->
-                        CompositionLocalProvider(LocalRegistryBuilds provides null) {
-                            commands = actionRegistry(state, rememberDispatcher { })
+                    val root = @Composable {
+                        BuilderRoot(graph, workspaceModel = workspace) { state ->
+                            CompositionLocalProvider(LocalRegistryBuilds provides null) {
+                                commands = actionRegistry(state, rememberDispatcher { })
+                            }
+                            probe(state)
                         }
-                        probe(state)
                     }
+                    if (inTree) ProvideOverlaysInTreeForTest(root) else root() // b-509
                 }
             }
         }

@@ -35,6 +35,7 @@ test('the top bar names every action', async ({ page }) => {
     'Command palette',
     /^Undo(, disabled)?$/,
     /^Redo(, disabled)?$/,
+    /^History$/, // b-509
     'Share',
     'Export code',
     'More options',

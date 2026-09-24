@@ -19,6 +19,7 @@ internal enum class TopBarControl {
     Commands,
     Undo,
     Redo,
+    History, // b-509
     Share,
     Export,
     More,

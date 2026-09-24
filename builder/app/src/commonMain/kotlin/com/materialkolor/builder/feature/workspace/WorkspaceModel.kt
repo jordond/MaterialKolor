@@ -10,6 +10,7 @@ import com.materialkolor.builder.core.platform.Router
 import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.core.session.ProjectSession
 import com.materialkolor.builder.core.session.SaveStatus
+import com.materialkolor.builder.core.session.Timeline
 import com.materialkolor.builder.di.AppScope
 import com.materialkolor.builder.domain.capability.Capabilities
 import com.materialkolor.builder.domain.capability.EffectiveSpec
@@ -85,12 +86,12 @@ internal class WorkspaceModel(
         // The session publishes the document and its project's number as one value, so no state here
         // ever pairs one project's document with another project's number, whatever order things run in.
         session.shown.mergeState { state, shown ->
-            state.withDocument(shown.document).copy(projectGeneration = shown.generation)
+            state.withDocument(shown.document).copy(projectGeneration = shown.generation).withTimeline() // b-508
         }
-        session.history.mergeState { state, history -> state.copy(history = history) }
+        session.history.mergeState { state, history -> state.copy(history = history).withTimeline() } // b-508
         session.viewState.mergeState { state, view -> state.copy(view = view) }
         preferences.preferences.mergeState { state, prefs -> state.copy(preferences = prefs) }
-        router.overlayPops.mergeState { state, _ -> state.copy(panel = null, pickerTarget = null) }
+        router.overlayPops.mergeState { state, _ -> state.copy(panel = null, pickerTarget = null, timeline = null) }
         session.projectName.mergeState { state, name -> state.copy(projectName = name) }
         session.saveStatus.mergeState { state, status -> state.copy(saveStatus = status) }
     }
@@ -127,6 +128,14 @@ internal class WorkspaceModel(
     /** Step forward once. */
     fun redo() {
         session.redo()
+        syncSession(expressiveSuggestion = false)
+    }
+
+    // b-508
+
+    /** Move straight to the step [cursor] of the history, and put the Expressive suggestion away as Undo does. */
+    fun jumpTo(cursor: Int) {
+        session.jumpTo(cursor)
         syncSession(expressiveSuggestion = false)
     }
 
@@ -206,12 +215,22 @@ internal class WorkspaceModel(
         updateState { state -> state.copy(fullscreen = !state.fullscreen) }
     }
 
-    /** Open [panel], adding a history entry only when nothing else was open. */
+    /**
+     * Open [panel], adding a history entry only when nothing else was open. History hangs from the top
+     * bar, which fullscreen hides, so opening it leaves fullscreen first.
+     */
     fun openPanel(panel: Panel) {
         val open = state.value.panel
         if (open == panel) return
         if (open == null) router.pushOverlay(panel.name)
-        updateState { state -> state.copy(panel = panel, pickerTarget = null) }
+        updateState { state ->
+            state
+                .copy(
+                    panel = panel,
+                    pickerTarget = null,
+                    fullscreen = state.fullscreen && panel != Panel.History, // b-508
+                ).withTimeline()
+        }
     }
 
     /** Open the picker on [target]. */
@@ -223,7 +242,7 @@ internal class WorkspaceModel(
     /** Close the open panel and drop the history entry it added. */
     fun closePanel() {
         if (state.value.panel == null) return
-        updateState { state -> state.copy(panel = null, pickerTarget = null) }
+        updateState { state -> state.copy(panel = null, pickerTarget = null, timeline = null) }
         router.popOverlay()
     }
 
@@ -299,9 +318,22 @@ internal class WorkspaceModel(
                     projectGeneration = shown.generation, // b-229
                     history = history,
                     expressiveSuggestion = expressiveSuggestion,
-                )
+                ).withTimeline() // b-508
         }
     }
+
+    // b-508
+
+    /**
+     * This state with the session's steps while the History list is open, and without them once it is
+     * not, so nothing builds the list while no one can see it.
+     */
+    private fun State.withTimeline(): State =
+        when {
+            panel == Panel.History -> copy(timeline = session.timeline())
+            timeline != null -> copy(timeline = null)
+            else -> this
+        }
 
     private fun updateView(block: (ProjectViewState) -> ProjectViewState) {
         session.updateView(block)
@@ -341,6 +373,9 @@ internal class WorkspaceModel(
      * @property[grayscaleHeld] Whether B is held, which shows the canvas in grayscale over [vision].
      * @property[posterOverCanvas] Whether the poster is open over the canvas from the narrow Medium
      * rail. Every session starts with it shut and nothing saves it.
+     * @property[timeline] Every step of the history and where the document sits among them, while
+     * [panel] is the History list, or null while it is not. It follows the history, the document and
+     * the panel, and nothing builds it while the list is closed.
      */
     @Immutable
     data class State(
@@ -365,6 +400,7 @@ internal class WorkspaceModel(
         val visionMenuOpen: Boolean = false,
         val grayscaleHeld: Boolean = false,
         val posterOverCanvas: Boolean = false, // b-406g
+        val timeline: Timeline? = null, // b-508
     ) {
         /** What [document] exports to. */
         val target: ExportTarget

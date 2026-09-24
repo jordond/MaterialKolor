@@ -48,7 +48,8 @@ class PersistFixtures(
     fun entry(index: Int): HistoryEntry {
         val kind = ChangeKind.entries[index % ChangeKind.entries.size]
         val label = if (index % 2 == 0) ChangeLabel(kind) else ChangeLabel(kind, detail = kind.name)
-        return HistoryEntry(before = arb.nextDocument(), after = arb.nextDocument(), label = label)
+        val at = 1_758_000_000_000L + index // b-508
+        return HistoryEntry(before = arb.nextDocument(), after = arb.nextDocument(), label = label, at = at)
     }
 
     fun viewState(): ProjectViewState =

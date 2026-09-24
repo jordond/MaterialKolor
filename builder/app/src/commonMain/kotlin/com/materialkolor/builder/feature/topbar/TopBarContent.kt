@@ -5,24 +5,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.platform.testTag
+import com.materialkolor.builder.core.session.Timeline
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.feature.about.GITHUB_URL
 import com.materialkolor.builder.feature.command.LocalAppleKeys
+import com.materialkolor.builder.feature.command.LocalShortcutFocus
 import com.materialkolor.builder.feature.command.Shortcut
+import com.materialkolor.builder.feature.history.TimelineList
 import com.materialkolor.builder.feature.poster.switcherPulse
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.feature.workspace.skinOf
 import com.materialkolor.builder.generated.resources.Res
+import com.materialkolor.builder.generated.resources.history_title
+import com.materialkolor.builder.generated.resources.history_tooltip
 import com.materialkolor.builder.generated.resources.topbar_about
 import com.materialkolor.builder.generated.resources.topbar_appearance_dark
 import com.materialkolor.builder.generated.resources.topbar_appearance_light
@@ -39,6 +47,7 @@ import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderIconButton
 import com.materialkolor.builder.kit.control.BuilderMenu
 import com.materialkolor.builder.kit.control.BuilderMenuItem
+import com.materialkolor.builder.kit.control.BuilderPopover
 import com.materialkolor.builder.kit.control.BuilderTooltip
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
@@ -53,12 +62,18 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The top bar, the library switcher on the start edge and the project's actions on the end edge.
  *
- * On a wide window it holds the switcher, the command palette, undo, redo, Share, Export code and
- * the overflow menu. The actions always get their full width, and the switcher takes what is left,
- * segmented where the window is wide and the row fits, a dropdown otherwise. A Medium window keeps
- * the dropdown's name whole, moving the command palette, then redo, then undo into the overflow
- * until it fits. Phones show the mark and the project's name with Share, Export and the overflow,
- * which holds the command palette, undo and redo, and the libraries in a row of chips under the bar.
+ * On a wide window it holds the switcher, the command palette, undo, redo, History, Share, Export
+ * code and the overflow menu. The actions always get their full width, and the switcher takes what
+ * is left, segmented where the window is wide and the row fits, a dropdown otherwise. A Medium
+ * window keeps the dropdown's name whole, moving History, then the command palette, then redo, then
+ * undo into the overflow until it fits. Phones show the mark and the project's name with Share,
+ * Export and the overflow, which holds History, the command palette, undo and redo, and the
+ * libraries in a row of chips under the bar.
+ *
+ * The History list opens in a popover under the History button, or under the overflow button once
+ * History has moved there (D57). It stays open while someone jumps between steps and hands focus
+ * back to whatever opened it, the page itself when the H key did. A jump can switch the skin, whose
+ * top bar draws its buttons somewhere new, so both buttons move there with the list still open.
  *
  * A library switch goes through the reveal from the switcher as one undo entry. What has to outlive
  * a skin switch, the open menu and which control has focus, is held here, outside the skin's own
@@ -74,6 +89,7 @@ internal fun TopBarContent(
     focus: TopBarFocus = rememberTopBarFocus(),
 ) {
     var menuOpen by remember { mutableStateOf(false) }
+    val currentRow = remember { FocusRequester() } // b-509
     val windowClass = LocalLayout.current.windowClass
     // b-406
     val fit = remember { MediumBarFit() }
@@ -96,6 +112,51 @@ internal fun TopBarContent(
     val onSwitch = { choice: LibraryChoice, origin: Offset ->
         dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin))
     }
+    // b-509
+    // The list hangs from More once History has moved into it, with More kept in one place either way.
+    val moreButton = rememberMovable {
+        HistoryPopover(
+            expanded = state.panel == Panel.History && TopBarControl.History in overflowed,
+            timeline = state.timeline,
+            dispatcher = dispatcher,
+            currentRow = currentRow,
+        ) {
+            BuilderMenu(
+                expanded = menuOpen,
+                onDismissRequest = { menuOpen = false },
+                items = items,
+            ) {
+                TopBarIconButton(
+                    control = TopBarControl.More,
+                    focus = focus,
+                    icon = IconId.More,
+                    description = stringResource(Res.string.topbar_more),
+                    onClick = { menuOpen = true },
+                )
+            }
+        }
+    }
+    // b-509
+    val historyButton = rememberMovable {
+        HistoryPopover(
+            expanded = state.panel == Panel.History,
+            timeline = state.timeline,
+            dispatcher = dispatcher,
+            currentRow = currentRow,
+        ) {
+            TopBarIconButton(
+                control = TopBarControl.History,
+                focus = focus,
+                icon = IconId.History,
+                description = stringResource(Res.string.history_title),
+                tooltip = stringResource(
+                    Res.string.history_tooltip,
+                    Shortcut.History.text(LocalAppleKeys.current),
+                ),
+                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.History)) },
+            )
+        }
+    }
     val actions: @Composable () -> Unit = {
         TopBarIconButton(
             control = TopBarControl.Share,
@@ -111,19 +172,7 @@ internal fun TopBarContent(
             emphasis = Emphasis.Primary,
             icon = IconId.Export,
         )
-        BuilderMenu(
-            expanded = menuOpen,
-            onDismissRequest = { menuOpen = false },
-            items = items,
-        ) {
-            TopBarIconButton(
-                control = TopBarControl.More,
-                focus = focus,
-                icon = IconId.More,
-                description = stringResource(Res.string.topbar_more),
-                onClick = { menuOpen = true },
-            )
-        }
+        moreButton() // b-509
     }
 
     if (windowClass == WindowClass.Compact) {
@@ -188,6 +237,7 @@ internal fun TopBarContent(
                     onClick = { dispatcher.dispatch(WorkspaceAction.Redo) },
                 )
             }
+            if (TopBarControl.History !in overflowed) historyButton() // b-509
             actions()
         }
     }
@@ -228,9 +278,49 @@ private fun TopBarIconButton(
     }
 }
 
+// b-509
+
+/**
+ * The History list in a popover under [anchor], open while [expanded] holds. Focus starts on the
+ * step the theme is at, through [currentRow], and goes back to the anchor once the list closes, or
+ * to the page when the H key opened it (AR-09).
+ */
+@Composable
+private fun HistoryPopover(
+    expanded: Boolean,
+    timeline: Timeline?,
+    dispatcher: Dispatcher<WorkspaceAction>,
+    currentRow: FocusRequester,
+    anchor: @Composable () -> Unit,
+) {
+    BuilderPopover(
+        expanded = expanded,
+        onDismissRequest = { dispatcher.dispatch(WorkspaceAction.ClosePanel) },
+        initialFocus = currentRow,
+        returnFocusTo = LocalShortcutFocus.current?.returnFocusFor(Panel.History, otherwise = null),
+        anchor = anchor,
+    ) {
+        if (timeline != null) TimelineList(timeline, dispatcher, currentRow)
+    }
+}
+
+// b-509
+
+/**
+ * [content] as movable content, so wherever the skin's top bar draws it next it moves there with all
+ * it holds rather than starting over. An open History list stays open that way, and on the desktop,
+ * where its popover is a window of its own, no window closes while a skin switch measures the page,
+ * which crashes the scene. It always draws the latest [content].
+ */
+@Composable
+private fun rememberMovable(content: @Composable () -> Unit): @Composable () -> Unit {
+    val latest by rememberUpdatedState(content)
+    return remember { movableContentOf { latest() } }
+}
+
 /**
  * The overflow menu, the chrome's appearance, Help, the shortcuts, About and GitHub. Whichever of
- * the command palette, undo and redo the bar has moved in come first, all three on a phone.
+ * History, the command palette, undo and redo the bar has moved in come first, all four on a phone.
  */
 @Composable
 private fun overflowItems(
@@ -274,6 +364,16 @@ private fun overflowItems(
                     onClick = { dispatcher.dispatch(WorkspaceAction.Redo) },
                     icon = IconId.Redo,
                     enabled = state.history.canRedo,
+                ),
+            )
+        }
+        // b-509
+        if (TopBarControl.History in overflowed) {
+            add(
+                BuilderMenuItem(
+                    label = stringResource(Res.string.history_title),
+                    onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.History)) },
+                    icon = IconId.History,
                 ),
             )
         }

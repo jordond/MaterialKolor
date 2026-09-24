@@ -27,10 +27,11 @@ import kotlinx.coroutines.launch
 
 /**
  * The top bar buttons a Medium window moves into the overflow menu when the library dropdown needs
- * their room, in the order they go. Undo is the last to leave, since it gets the most use.
+ * their room, in the order they go. History goes first, since its list opens under the overflow
+ * button just as well, and Undo is the last to leave, since it gets the most use.
  */
 internal val MediumOverflowOrder: List<TopBarControl> =
-    listOf(TopBarControl.Commands, TopBarControl.Redo, TopBarControl.Undo)
+    listOf(TopBarControl.History, TopBarControl.Commands, TopBarControl.Redo, TopBarControl.Undo) // b-509
 
 /**
  * How many of [MediumOverflowOrder] the Medium top bar has moved into its overflow menu, so the

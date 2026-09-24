@@ -369,7 +369,7 @@ internal fun MaterialListRow(
         },
         leadingContent = row.icon?.let { id ->
             { BuilderIcon(id, contentDescription = null, tint = LocalContentColor.current) }
-        },
+        } ?: row.leading, // b-508
         trailingContent = if (current || row.trailing != null) {
             {
                 Row(

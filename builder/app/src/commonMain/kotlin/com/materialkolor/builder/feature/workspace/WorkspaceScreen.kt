@@ -119,6 +119,10 @@ internal fun WorkspaceScreen(
             WorkspaceAction.Redo -> {
                 model.redo()
             }
+            // b-508
+            is WorkspaceAction.JumpTo -> {
+                model.jumpTo(action.cursor)
+            }
             // A shuffle crossfades wherever it was pressed (MO-02).
             is WorkspaceAction.Shuffle -> {
                 model.drawShuffle()?.let { shuffle -> reveal(origin = null) { model.applyShuffle(shuffle) } }

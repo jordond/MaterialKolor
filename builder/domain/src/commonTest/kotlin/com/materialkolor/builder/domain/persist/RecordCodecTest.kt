@@ -33,6 +33,24 @@ class RecordCodecTest {
         assertRoundTrip(HistoryRecord.Codec, HistoryRecord())
     }
 
+    // b-508
+    @Test
+    fun historyRecord_schemaZeroWithoutTimes_decodesWithNullTimes() {
+        // A history the way builds before step times saved it, with no "at" on any step.
+        val text = """{"schema":0,"data":{"entries":[""" +
+            """{"before":{"seed":"#6750A4","themeName":"Plum"},"after":{"seed":"#6750A4","themeName":"Plum",""" +
+            """"amoled":true},"label":{"kind":"Amoled","detail":null}},""" +
+            """{"before":{"seed":"#6750A4","themeName":"Plum","amoled":true},"after":{"seed":"#1565C0",""" +
+            """"themeName":"Plum","amoled":true},"label":{"kind":"Seed","detail":"#1565C0"}}]}}"""
+
+        val entries = assertOk(HistoryRecord.Codec.decode(text)).entries
+
+        assertEquals(listOf(null, null), entries.map { entry -> entry.at })
+        assertEquals(listOf(ChangeKind.Amoled, ChangeKind.Seed), entries.map { entry -> entry.label.kind })
+        assertEquals(entries.first().after, entries.last().before)
+        assertEquals("Plum", entries.last().after.themeName)
+    }
+
     @Test
     fun projectViewState_filledState_survivesARoundTrip() {
         assertRoundTrip(ProjectViewState.Codec, fixtures.viewState())

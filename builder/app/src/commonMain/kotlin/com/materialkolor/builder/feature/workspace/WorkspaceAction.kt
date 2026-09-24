@@ -42,6 +42,16 @@ internal sealed interface WorkspaceAction {
     /** Step forward once. */
     data object Redo : WorkspaceAction
 
+    // b-508
+
+    /**
+     * Move straight to the step [cursor] of the history, as that many undos or redos in one go. Zero
+     * is the document before the oldest step. A jump is not a step of its own (D55).
+     */
+    data class JumpTo(
+        val cursor: Int,
+    ) : WorkspaceAction
+
     /** Draw a new seed, and a new style when the style is not locked. */
     data class Shuffle(
         val origin: Offset?,
@@ -230,6 +240,7 @@ internal enum class Panel {
     ImageEyedropper, // b-311b
     Presets, // b-311d
     Help, // b-314
+    History, // b-508
 }
 
 /**

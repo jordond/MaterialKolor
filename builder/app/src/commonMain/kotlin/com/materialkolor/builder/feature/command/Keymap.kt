@@ -113,7 +113,8 @@ internal enum class ShortcutGroup {
  *
  * The held B works the dock straight from the keys, so no registry command runs it and [inRegistry]
  * is false for it. The export sheet takes C and Shift+C for its own copies, since
- * the page never hears a key pressed inside it.
+ * the page never hears a key pressed inside it. The History list takes Undo, Redo and H for the
+ * same reason.
  */
 internal enum class Shortcut(
     val group: ShortcutGroup,
@@ -148,6 +149,7 @@ internal enum class Shortcut(
             Chord(physical(Key.Y, "Y"), primary = true),
         ),
     ),
+    History(ShortcutGroup.Theme, listOf(Chord(physical(Key.H, "H")))), // b-509
 
     // Only Cmd or Ctrl+O fires in a field, never P on its own.
     Projects(
