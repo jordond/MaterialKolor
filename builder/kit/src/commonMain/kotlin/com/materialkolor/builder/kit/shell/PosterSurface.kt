@@ -21,6 +21,8 @@ import com.materialkolor.builder.kit.skin.StatusColors
 import com.materialkolor.builder.kit.skin.builderCodePalette
 import com.materialkolor.builder.kit.skin.custom.BuilderIdentity
 import com.materialkolor.builder.kit.skin.custom.LocalBuilderIdentity
+import com.materialkolor.builder.kit.skin.fluent.FluentPosterInk
+import com.materialkolor.builder.kit.skin.fluent.LocalFluentPosterInk
 import com.materialkolor.builder.kit.skin.fluent.rememberFluentTypography
 import com.materialkolor.builder.kit.skin.headless.ScrimAlpha
 import com.materialkolor.builder.kit.skin.unstyled.UnstyledIndication
@@ -369,10 +371,12 @@ private fun PosterPaint.slot(slot: CustomSlot): Color =
 /**
  * Fluent's theme over colours built from the poster's ramp, in Fluent's own type.
  *
- * Fluent's text is black or white whatever the shades, so the dark flag follows the poster's ink
- * rather than the chrome. That puts Fluent's own text on the side that reads on the seed, dark on a
- * light seed and light on a dark one. Fluent's content colour is the ink, so a Fluent `Text` that
- * takes its colour from there reads like the builder's own.
+ * Fluent's text is black or white whatever the shades, and on a mid tone seed neither reads at 4.5
+ * to 1. So the Fluent controls here draw their labels, glyphs and strokes in the poster's ink, which
+ * they find through [LocalFluentPosterInk], the way the Material and Unstyled ones find it in their
+ * roles. The dark flag still follows the ink rather than the chrome, so the tints Fluent lays on the
+ * seed lean the way the ink does. Fluent's content colour is the ink, so a Fluent `Text` that takes
+ * its colour from there reads like the builder's own.
  */
 @OptIn(ExperimentalFluentApi::class)
 @Composable
@@ -383,8 +387,12 @@ private fun FluentPoster(
     content: @Composable () -> Unit,
 ) {
     val colors = remember(poster) { Colors(poster.ramp.toFluentShades(), darkMode = !poster.isLight) }
+    val ink = remember(paint) { FluentPosterInk(ink = paint.ink, page = paint.page) }
     FluentThemeConfiguration(colors = colors, typography = rememberFluentTypography()) {
-        CompositionLocalProvider(FluentContentColor provides paint.ink) {
+        CompositionLocalProvider(
+            FluentContentColor provides paint.ink,
+            LocalFluentPosterInk provides ink,
+        ) {
             ProvidePosterTokens(tokens, content)
         }
     }

@@ -121,7 +121,8 @@ internal object FluentInputStyles {
     /**
      * Fluent's text box, a control fill with the strong line along the bottom that turns to a
      * thicker accent line while it has focus. The edge all round keeps the strong stroke, which
-     * carries the 3 to 1 boundary Fluent's own faint outline would not.
+     * carries the 3 to 1 boundary Fluent's own faint outline would not. On the poster the accent
+     * line is the poster's ink.
      */
     val field: FieldStyle
         @Composable @ReadOnlyComposable
@@ -133,7 +134,7 @@ internal object FluentInputStyles {
                 container = colors.control.default.compositeOver(tokens.panel),
                 outline = tokens.borderStrong,
                 outlineWidth = 1.dp,
-                active = colors.fillAccent.default,
+                active = LocalFluentPosterInk.current?.ink ?: colors.fillAccent.default,
                 error = tokens.danger,
                 activeWidth = 2.dp,
                 activeAsUnderline = true,
