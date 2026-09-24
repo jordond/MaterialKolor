@@ -66,7 +66,9 @@ internal fun ContrastSection(
             selected = selected,
             onSelect = { stop ->
                 if (stop != selected) {
-                    dispatcher.dispatch(WorkspaceAction.Edit(DocumentChange.SetContrast(stop.level), EditPhase.Discrete))
+                    dispatcher.dispatch(
+                        WorkspaceAction.Edit(DocumentChange.SetContrast(stop.level), EditPhase.Discrete),
+                    )
                 }
             },
             label = stringResource(Res.string.contrast_level),
