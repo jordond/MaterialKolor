@@ -1,8 +1,6 @@
 package com.materialkolor.builder.kit.shell
 
-import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -14,19 +12,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.semantics.paneTitle
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.zIndex
@@ -35,20 +31,13 @@ import com.materialkolor.builder.kit.control.BottomSheetDetent
 import com.materialkolor.builder.kit.control.BottomSheetState
 import com.materialkolor.builder.kit.control.rememberBottomSheetState
 import com.materialkolor.builder.kit.generated.resources.Res
-import com.materialkolor.builder.kit.generated.resources.sheet_detent_full
-import com.materialkolor.builder.kit.generated.resources.sheet_detent_half
-import com.materialkolor.builder.kit.generated.resources.sheet_detent_peek
 import com.materialkolor.builder.kit.generated.resources.shell_poster_label
 import com.materialkolor.builder.kit.headless.HeadlessBottomSheet
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.PosterMode
 import com.materialkolor.builder.kit.layout.ShortHeightBreakpoint
-import com.materialkolor.builder.kit.motion.LocalBuilderMotion
-import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
-import com.materialkolor.builder.kit.skin.headless.OverlayStyle
-import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import org.jetbrains.compose.resources.stringResource
@@ -130,7 +119,8 @@ internal fun sheetClearance(
  * covers none of it. The canvas and the dock keep their state across the switch, while the poster
  * and the top bar leave and start over when they come back.
  * @param[fullscreenExit] The floating pill that leaves fullscreen, shown only while [fullscreen].
- * @param[overlays] Drawn over everything else, such as toasts, panels and the command palette.
+ * @param[overlays] Drawn over everything else, such as toasts, panels and the command palette. A
+ * `ToastRegion` in it stacks its toasts in the canvas frame, past the poster and above the dock.
  */
 @Composable
 public fun WorkspaceShell(
@@ -151,15 +141,16 @@ public fun WorkspaceShell(
     val mode = LocalLayout.current.posterMode
     // b-217
     val exit = if (fullscreen) fullscreenExit else null
+    val room = remember { ShellRoom() }
     Box(modifier.fillMaxSize().background(LocalBuilderTokens.current.panel)) {
         when (mode) {
-            PosterMode.Sheet -> SheetShell(posterColors, sheetState, poster, topBar, canvas, dock, exit)
+            PosterMode.Sheet -> SheetShell(posterColors, sheetState, poster, topBar, canvas, dock, exit, room)
             PosterMode.Rail72,
             PosterMode.Docked320,
             PosterMode.Docked400,
-            -> DockedShell(posterColors, mode, posterCollapsed, poster, topBar, canvas, dock, exit)
+            -> DockedShell(posterColors, mode, posterCollapsed, poster, topBar, canvas, dock, exit, room)
         }
-        overlays()
+        CompositionLocalProvider(LocalShellRoom provides room, content = overlays)
     }
 }
 
@@ -167,6 +158,10 @@ public fun WorkspaceShell(
  * The phone layout, the canvas under the top bar and the poster in a sheet over both. With a
  * [fullscreenExit] the exit takes the top bar's place and the canvas the rest of the window, with
  * only the dock floating over it.
+ *
+ * Nothing that takes focus stays in the Tab order wholly under the sheet (WCAG 2.4.11). At Half the
+ * canvas leaves it, and the dock too where the sheet covers it, and at Full the top bar goes as
+ * well. They come back as the sheet sinks to Peek.
  */
 @Composable
 private fun SheetShell(
@@ -177,6 +172,7 @@ private fun SheetShell(
     canvas: @Composable (contentPadding: PaddingValues) -> Unit,
     dock: @Composable () -> Unit,
     fullscreenExit: (@Composable () -> Unit)?,
+    room: ShellRoom,
 ) {
     val tokens = LocalBuilderTokens.current
     val layout = LocalLayout.current
@@ -187,9 +183,24 @@ private fun SheetShell(
         // b-217
         bottom = if (fullscreen) tokens.spacing.large + ShellMetrics.dockHeight else sheetClearance(layout, tokens),
     )
+    // The frame stands a margin off the bottom edge in fullscreen, and on the edge otherwise.
+    val toastBottom = clearance.calculateBottomPadding() + if (fullscreen) tokens.spacing.medium else 0.dp
+    val sheetOver = { detent: BottomSheetDetent -> !fullscreen && sheetState.targetDetent >= detent }
+    // Half stops halfway up, or higher where the peek is taller than that.
+    val dockCoveredFrom = if (sheetClearance(layout, tokens) <= maxOf(layout.heightDp / 2, peek)) {
+        BottomSheetDetent.Half
+    } else {
+        BottomSheetDetent.Full
+    }
     ShellLayout(
         start = { 0.dp },
-        topBar = { if (fullscreenExit == null) topBar() else FullscreenExitStrip(fullscreenExit) }, // b-217
+        toasts = ToastInsets(start = { 0.dp }, end = 0.dp, bottom = toastBottom),
+        room = room,
+        topBar = {
+            Box(Modifier.skipTabWhile { sheetOver(BottomSheetDetent.Full) }) {
+                if (fullscreenExit == null) topBar() else FullscreenExitStrip(fullscreenExit) // b-217
+            }
+        },
         poster = {
             if (!fullscreen) { // b-217
                 PosterSurface(posterColors) {
@@ -219,9 +230,16 @@ private fun SheetShell(
                 } else {
                     RoundedCornerShape(topStart = tokens.radius.large, topEnd = tokens.radius.large)
                 },
-                canvas = { canvas(clearance) },
+                canvas = { Box(Modifier.skipTabWhile { sheetOver(BottomSheetDetent.Half) }) { canvas(clearance) } },
             ) {
-                Box(Modifier.align(Alignment.BottomCenter).padding(bottom = peek + tokens.spacing.large)) { dock() }
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = peek + tokens.spacing.large)
+                        .skipTabWhile { sheetOver(dockCoveredFrom) },
+                ) {
+                    dock()
+                }
             }
         },
     )
@@ -243,6 +261,7 @@ private fun DockedShell(
     canvas: @Composable (contentPadding: PaddingValues) -> Unit,
     dock: @Composable () -> Unit,
     fullscreenExit: (@Composable () -> Unit)?,
+    room: ShellRoom,
 ) {
     val tokens = LocalBuilderTokens.current
     val margin = tokens.spacing.medium
@@ -260,6 +279,12 @@ private fun DockedShell(
     val fullscreen = fullscreenExit != null
     ShellLayout(
         start = { if (fullscreen) 0.dp else roomWidth() + margin * 2 }, // b-217
+        toasts = ToastInsets(
+            start = { if (fullscreen) margin else posterWidth() + margin * 2 },
+            end = margin,
+            bottom = margin + tokens.spacing.large + ShellMetrics.dockHeight,
+        ),
+        room = room,
         topBar = { if (fullscreenExit == null) topBar() else FullscreenExitStrip(fullscreenExit) }, // b-217
         poster = {
             if (!fullscreen) { // b-217
@@ -316,11 +341,14 @@ private fun FullscreenExitStrip(exit: @Composable () -> Unit) {
  * Tab follows the order children are placed in, so this is what puts the poster between the top
  * bar and the canvas for keyboard users. The poster still draws over the canvas through its own
  * `zIndex`. The top bar and the canvas stand [start] in from the start edge, read at layout time so
- * the rail animating only lays out again, and the canvas takes the height the top bar leaves.
+ * the rail animating only lays out again, and the canvas takes the height the top bar leaves. The
+ * toast room, [toasts] in from the edges and below the top bar, goes to [room] as it measures.
  */
 @Composable
 private fun ShellLayout(
     start: () -> Dp,
+    toasts: ToastInsets,
+    room: ShellRoom,
     topBar: @Composable () -> Unit,
     poster: @Composable () -> Unit,
     canvas: @Composable () -> Unit,
@@ -336,41 +364,19 @@ private fun ShellLayout(
         val barHeight = bar.maxOfOrNull { placeable -> placeable.height } ?: 0
         val panel = posters.map { measurable -> measurable.measure(Constraints(maxWidth = width, maxHeight = height)) }
         val frame = Constraints.fixed(width - x, (height - barHeight).coerceAtLeast(0))
-        val room = canvases.map { measurable -> measurable.measure(frame) }
+        val frames = canvases.map { measurable -> measurable.measure(frame) }
+        val toastStart = toasts.start().roundToPx().coerceIn(0, width)
+        room.toasts = IntRect(
+            left = toastStart,
+            top = barHeight,
+            right = (width - toasts.end.roundToPx()).coerceAtLeast(toastStart),
+            bottom = (height - toasts.bottom.roundToPx()).coerceAtLeast(barHeight),
+        )
         layout(width, height) {
             bar.forEach { placeable -> placeable.placeRelative(x, 0) }
             panel.forEach { placeable -> placeable.placeRelative(0, 0) }
-            room.forEach { placeable -> placeable.placeRelative(x, barHeight) }
+            frames.forEach { placeable -> placeable.placeRelative(x, barHeight) }
         }
-    }
-}
-
-/**
- * The poster's own frame, the seed page with design D's corners, lifted when it floats.
- *
- * With a [contentWidth] the content is laid out at that width whatever the frame's, so an opening
- * panel is revealed by the frame rather than squeezed by it. Without one it fills the frame.
- */
-@Composable
-private fun PosterPanel(
-    modifier: Modifier,
-    floating: Boolean,
-    contentWidth: Dp?,
-    content: @Composable () -> Unit,
-) {
-    val tokens = LocalBuilderTokens.current
-    val style = posterOverlayStyle(tokens)
-    val shape = RoundedCornerShape(tokens.radius.large)
-    val label = stringResource(Res.string.shell_poster_label)
-    Box(
-        modifier = modifier
-            .then(if (floating) Modifier.shadow(style.shadow, shape) else Modifier)
-            .clip(shape)
-            .background(style.surface)
-            .semantics { paneTitle = label },
-    ) {
-        val sized = if (contentWidth == null) Modifier.fillMaxWidth() else Modifier.revealWidth(contentWidth)
-        Box(sized.fillMaxHeight()) { content() }
     }
 }
 
@@ -388,64 +394,5 @@ private fun CanvasFrame(
     ) {
         Box(Modifier.widthIn(max = LocalLayout.current.canvasMaxWidth).fillMaxSize()) { canvas() }
         floating()
-    }
-}
-
-/**
- * The poster's overlay dress, the same in every skin since the poster is content. It is the Custom
- * dress with its soft shadow and large corners, standing on the page rather than a raised surface.
- * Read it inside [PosterSurface], so its colours are the poster's.
- */
-private fun posterOverlayStyle(tokens: BuilderTokens): OverlayStyle =
-    customOverlayStyle(tokens.copy(panelRaised = tokens.panel))
-
-/** The rail opens with the panel arrival motion and closes with the exit, and snaps under reduced motion (MO-05). */
-@Composable
-private fun posterSpec(opening: Boolean): AnimationSpec<Float> {
-    val motion = LocalBuilderMotion.current
-    return when {
-        LocalReducedMotion.current -> snap()
-        opening -> motion.panelEnter()
-        else -> motion.panelExit()
-    }
-}
-
-/**
- * Sizes to [width] at layout time, so the rail animating open or shut only lays out again and
- * never recomposes the poster.
- */
-private fun Modifier.layoutWidth(width: () -> Dp): Modifier =
-    layout { measurable, constraints ->
-        val px = width().roundToPx().coerceIn(constraints.minWidth, constraints.maxWidth)
-        val placeable = measurable.measure(constraints.copy(minWidth = px, maxWidth = px))
-        layout(placeable.width, placeable.height) { placeable.place(0, 0) }
-    }
-
-/**
- * Lays the content out at [width] even while the space it is given is narrower, its start edge on
- * the start edge. Whatever sticks out past the end is for the parent to clip.
- */
-private fun Modifier.revealWidth(width: Dp): Modifier =
-    layout { measurable, constraints ->
-        val px = width.roundToPx()
-        val placeable = measurable.measure(constraints.copy(minWidth = px, maxWidth = px))
-        val shown = px.coerceIn(constraints.minWidth, constraints.maxWidth)
-        layout(shown, placeable.height) { placeable.placeRelative(0, 0) }
-    }
-
-/** The kit's names for the detents, remembered on the three names like the public sheet's. */
-@Composable
-private fun posterDetentNames(): (BottomSheetDetent) -> String {
-    val peek = stringResource(Res.string.sheet_detent_peek)
-    val half = stringResource(Res.string.sheet_detent_half)
-    val full = stringResource(Res.string.sheet_detent_full)
-    return remember(peek, half, full) {
-        { detent: BottomSheetDetent ->
-            when (detent) {
-                BottomSheetDetent.Peek -> peek
-                BottomSheetDetent.Half -> half
-                BottomSheetDetent.Full -> full
-            }
-        }
     }
 }

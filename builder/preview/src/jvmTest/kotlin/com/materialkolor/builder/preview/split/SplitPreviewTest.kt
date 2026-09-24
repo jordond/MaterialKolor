@@ -29,7 +29,9 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertRangeInfoEquals
@@ -310,6 +312,8 @@ class SplitPreviewTest {
             }
             val handle = onNodeWithContentDescription("Split")
             handle.assert(hasStateDescription("50% Light"))
+            // Off the web the value stays out of the name, which only the web's text carries.
+            handle.assert(!SemanticsMatcher.keyIsDefined(SemanticsProperties.Text))
             handle.assertRangeInfoEquals(ProgressBarRangeInfo(current = 0.5f, range = 0f..1f))
 
             handle.performSemanticsAction(SemanticsActions.SetProgress) { setProgress -> setProgress(0.3f) }

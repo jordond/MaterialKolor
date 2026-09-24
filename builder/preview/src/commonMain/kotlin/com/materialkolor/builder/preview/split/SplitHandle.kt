@@ -30,14 +30,14 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
+import com.materialkolor.builder.kit.a11y.foldsValueIntoName
+import com.materialkolor.builder.kit.a11y.valueNodeName
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.preview.generated.resources.Res
@@ -54,8 +54,9 @@ import kotlin.math.roundToInt
  * places it reads [split], so a drag touches placement and drawing and nothing else. A drag moves it,
  * each arrow key moves it by five percent, Home and End send it to either edge, and a double click
  * or Enter puts it back in the middle. Assistive tech sees a slider that says how much of the start
- * copy shows. Its words load in composition and the percentage goes in inside the semantics block,
- * so a drag still recomposes nothing.
+ * copy shows, and on the web, which drops both, a node whose text says it, "Split, 50% Light". Its
+ * words load in composition and the percentage goes in inside the semantics block, so a drag still
+ * recomposes nothing.
  *
  * @param[split] Where the handle sits.
  * @param[orientation] Horizontal for side by side, vertical for top and bottom.
@@ -76,6 +77,7 @@ internal fun SplitHandle(
     val horizontal = orientation == Orientation.Horizontal
     val label = stringResource(Res.string.split_handle_label)
     val stateFormat = stringResource(Res.string.split_handle_state)
+    val folds = foldsValueIntoName
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
     val dragState = rememberDraggableState { delta ->
@@ -93,8 +95,8 @@ internal fun SplitHandle(
                 }.then(span)
                 .semantics {
                     val fraction = split.fraction
-                    contentDescription = label
-                    stateDescription = stateFormat.fillIn(percent = (fraction * 100).roundToInt(), label = startLabel)
+                    val value = stateFormat.fillIn(percent = (fraction * 100).roundToInt(), label = startLabel)
+                    valueNodeName(label, value, folds)
                     progressBarRangeInfo = ProgressBarRangeInfo(current = fraction, range = 0f..1f)
                     setProgress(label) { target ->
                         split.fraction = target

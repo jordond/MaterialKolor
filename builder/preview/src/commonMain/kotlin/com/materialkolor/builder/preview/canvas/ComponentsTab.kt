@@ -1,7 +1,6 @@
 package com.materialkolor.builder.preview.canvas
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,9 +10,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.model.Library
@@ -30,6 +34,9 @@ private val MinCardWidth = 280.dp
 
 /** What each gallery card tells [LocalCompositionProbe] as it composes, followed by its title. */
 internal const val GALLERY_CARD: String = "GalleryCard/"
+
+/** What a gallery grid tells [LocalCompositionProbe] each time it composes. */
+internal const val GALLERY_GRID: String = "GalleryGrid"
 
 /**
  * The Components tab, a curated gallery of the library [LocalSkin] names.
@@ -87,6 +94,11 @@ internal class GalleryCard(
  * place. A lazy grid has no such mirror. Every card takes an equal share of its row and none gets
  * narrower than 280 dp unless the pane itself is.
  *
+ * It measures its room itself rather than through `BoxWithConstraints`, and the lazy column reads
+ * the column count as it builds its rows. So a canvas that changes width every frame, as it does
+ * while the poster rail opens or shuts, only lays the grid out again, and the rows are rebuilt
+ * only when the count changes.
+ *
  * @param[cards] The cards, in the order they show within each group.
  * @param[listState] Where the gallery is scrolled to.
  * @param[gap] The space around the grid and between its cards.
@@ -107,30 +119,55 @@ internal fun GalleryGrid(
         val byGroup = cards.groupBy { shown -> shown.group }
         GalleryGroup.entries.mapNotNull { group -> byGroup[group]?.let { members -> group to members } }
     }
-    BoxWithConstraints(modifier) {
-        val columns = ((maxWidth - gap) / (MinCardWidth + gap)).toInt().coerceAtLeast(1)
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(gap),
-            verticalArrangement = Arrangement.spacedBy(gap),
-        ) {
-            for ((group, members) in groups) {
-                item(key = "group.${group.name}", contentType = "header") { header(group) }
-                for (row in members.chunked(columns)) {
-                    item(key = "cards.${row.first().title}", contentType = "cards") {
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(gap)) {
-                            for (shown in row) {
-                                key(shown.title) { GalleryCell(shown, card, Modifier.weight(1f)) }
-                            }
-                            repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+    LocalCompositionProbe.current?.invoke(GALLERY_GRID)
+    val room = remember { GalleryRoom() }
+    LazyColumn(
+        state = listState,
+        modifier = modifier.measureColumns(room, gap).fillMaxSize(),
+        contentPadding = PaddingValues(gap),
+        verticalArrangement = Arrangement.spacedBy(gap),
+    ) {
+        // Read here, as the lazy column builds its rows, so a new count rebuilds them without a recomposition.
+        val columns = room.columns
+        for ((group, members) in groups) {
+            item(key = "group.${group.name}", contentType = "header") { header(group) }
+            for (row in members.chunked(columns)) {
+                item(key = "cards.${row.first().title}", contentType = "cards") {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(gap)) {
+                        for (shown in row) {
+                            key(shown.title) { GalleryCell(shown, card, Modifier.weight(1f)) }
                         }
+                        repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
                     }
                 }
             }
         }
     }
 }
+
+/** How many columns of cards the grid's room fits, noted as the grid measures. */
+@Stable
+private class GalleryRoom {
+    var columns: Int by mutableIntStateOf(1)
+}
+
+/**
+ * Notes in [room] how many columns fit the widest the grid may be, [gap] around and between them,
+ * and otherwise measures as it would. The count only changes, and so only reaches its readers, when
+ * a card would drop under 280 dp or a new one fits.
+ */
+private fun Modifier.measureColumns(
+    room: GalleryRoom,
+    gap: Dp,
+): Modifier =
+    layout { measurable, constraints ->
+        if (constraints.hasBoundedWidth) {
+            val width = constraints.maxWidth.toDp()
+            room.columns = ((width - gap) / (MinCardWidth + gap)).toInt().coerceAtLeast(1)
+        }
+        val placeable = measurable.measure(constraints)
+        layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+    }
 
 @Composable
 private fun GalleryCell(
