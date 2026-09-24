@@ -183,6 +183,7 @@ class CompactMediumTopBarTest {
         }
 
     // b-406g
+
     /**
      * The keys the kit's own select tests drive. The list opens on the chosen library, Tab walks the
      * options and Enter picks. The kit's lists move focus with Tab, since Compose maps no arrow key to
@@ -215,6 +216,7 @@ class CompactMediumTopBarTest {
         }
 
     // b-406g
+
     /** Material's own exposed dropdown, opened in a desktop window of its own, still picks by tap. */
     @Test
     fun dropdown_inADesktopWindow_tapPicks() =
@@ -307,6 +309,7 @@ class CompactMediumTopBarTest {
     }
 
     // b-406g
+
     /**
      * Waits for the document to reach [choice]. A pick from the dropdown lands once its menu has left,
      * which an idle wait does not always cover while a desktop window closes.

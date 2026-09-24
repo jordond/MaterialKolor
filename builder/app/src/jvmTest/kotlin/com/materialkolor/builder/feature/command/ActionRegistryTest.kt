@@ -91,6 +91,7 @@ class ActionRegistryTest {
         }
 
     // b-406
+
     /**
      * The Medium bar moves Commands, Redo and Undo into the overflow when the library dropdown needs
      * their room, so the top bar's commands and the libraries are found wherever each width puts them.

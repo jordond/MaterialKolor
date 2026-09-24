@@ -89,7 +89,8 @@ class PosterRailSessionTest {
         }
     }
 
-    private fun button(name: String): SemanticsMatcher = (hasText(name) or hasContentDescription(name)) and hasClickAction()
+    private fun button(name: String): SemanticsMatcher =
+        (hasText(name) or hasContentDescription(name)) and hasClickAction()
 
     private fun ComposeUiTest.shows(name: String): Boolean = onAllNodes(button(name)).fetchSemanticsNodes().isNotEmpty()
 

@@ -283,7 +283,8 @@ internal fun WorkspaceScreen(
         // b-221f
         // b-311
         poster = { rail ->
-            CompositionLocalProvider(LocalPosterSheetState provides sheetState) { // b-406
+            CompositionLocalProvider(LocalPosterSheetState provides sheetState) {
+                // b-406
                 ProvideImageSeeds(state) { PosterPanel(state, rail, dispatcher, focus = posterFocus) }
             }
         },

@@ -50,6 +50,7 @@ internal class SwitcherFormState {
     var segmented: Boolean? by mutableStateOf(null)
 
     // b-406
+
     /** The top bar buttons the bar has moved into its overflow menu, all three on a phone. */
     var overflowed: Set<TopBarControl> by mutableStateOf(emptySet())
 }
