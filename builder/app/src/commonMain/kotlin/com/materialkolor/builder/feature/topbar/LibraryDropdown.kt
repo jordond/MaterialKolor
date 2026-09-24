@@ -6,7 +6,10 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.SubcomposeLayout
@@ -17,6 +20,7 @@ import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.BuilderType
 import com.materialkolor.builder.kit.token.LocalBuilderType
+import kotlinx.coroutines.launch
 
 // b-406
 
@@ -82,7 +86,7 @@ internal class MediumBarFit {
  * It measures every library's trigger off screen and out of the accessibility tree, and asks [fit]
  * for room for the widest, so a switch never moves the bar's buttons. Which one is widest is only
  * worked out again when the skin, the type or the names change. The form goes to [LocalSwitcherForm]
- * for the command registry.
+ * for the command registry. A pick reaches [onSwitch] once the menu it came from has left.
  *
  * @param[selected] The library the document is on.
  * @param[fit] Which top bar buttons have made room for it.
@@ -104,6 +108,20 @@ internal fun LibraryDropdown(
     val shownMoved = fit.moved
     val widest = remember { WidestTrigger() }
     if (report != null) SideEffect { report.segmented = false }
+    // b-406g
+    // The pick waits for the menu to finish leaving. On desktop Material's menu is a window of its
+    // own, and a skin switch that closes it while the bar is being measured crashes the scene. The
+    // reveal's snapshot then shows the bar without the menu over it too.
+    val scope = rememberCoroutineScope()
+    val switch by rememberUpdatedState(onSwitch)
+    val pick: (LibraryChoice, Offset) -> Unit = remember(scope) {
+        { choice, origin ->
+            scope.launch {
+                awaitMenuExit()
+                switch(choice, origin)
+            }
+        }
+    }
     SubcomposeLayout(modifier) { constraints ->
         val loose = constraints.copy(minWidth = 0, minHeight = 0)
         val key = TriggerKey(skin, type, labels, density, fontScale)
@@ -116,7 +134,7 @@ internal fun LibraryDropdown(
         val shown = subcompose(TriggerSlot.Shown) {
             LibrarySwitcher(
                 selected = selected,
-                onSwitch = onSwitch,
+                onSwitch = pick, // b-406g
                 modifier = switcherModifier,
                 segmented = false,
             )
@@ -149,6 +167,18 @@ private fun SubcomposeMeasureScope.naturalWidth(
     // Bounded, since a row gives a weighted label no room at all when its own room has no end.
     val room = Constraints(maxWidth = PROBE_MAX_WIDTH)
     return probe.maxOfOrNull { measurable -> measurable.measure(room).width } ?: 0
+}
+
+// b-406g
+
+/** How long a menu takes to leave, in frame time, with room to spare for Material's springs. */
+private const val MENU_EXIT_NANOS: Long = 250_000_000L
+
+/** Waits out [MENU_EXIT_NANOS] of frames, so the menu a pick came from is gone. */
+private suspend fun awaitMenuExit() {
+    val start = withFrameNanos { frame -> frame }
+    var now = start
+    while (now - start < MENU_EXIT_NANOS) now = withFrameNanos { frame -> frame }
 }
 
 /** The room a trigger is measured in to find its own width, far more than any window gives it. */

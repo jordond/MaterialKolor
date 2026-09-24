@@ -179,8 +179,14 @@ class CompactMediumTopBarTest {
             LibraryChoice.of(graph.session.document.value) shouldBe target
         }
 
+    // b-406g
+    /**
+     * The keys the kit's own select tests drive. The list opens on the chosen library, Tab walks the
+     * options and Enter picks. The kit's lists move focus with Tab, since Compose maps no arrow key to
+     * a focus move on the desktop or the web.
+     */
     @Test
-    fun dropdown_arrowKeysAndEnterPick() =
+    fun dropdown_enterOpensOnTheChosenAndTabThenEnterPicks() =
         runDesktopComposeUiTest(width = 720, height = HEIGHT) {
             val graph = showRoot(folds = false, inTree = true)
             val start = LibraryChoice.of(graph.session.document.value)
@@ -194,10 +200,9 @@ class CompactMediumTopBarTest {
                 onAllNodes(options and named(choice)).fetchSemanticsNodes().isNotEmpty()
             }
             opened shouldBe LibraryChoice.entries.size
-            // The list opens in the page with focus on the chosen library, as it does on the web.
             val focusedOption = options and isFocused()
             onAllNodes(focusedOption and named(start)).fetchSemanticsNodes().size shouldBe 1
-            onNode(focusedOption).performKeyInput { pressKey(Key.DirectionDown) }
+            onNode(focusedOption).performKeyInput { pressKey(Key.Tab) }
             waitForIdle()
             onNode(focusedOption).performKeyInput { pressKey(Key.Enter) }
             waitForIdle()
