@@ -399,6 +399,40 @@ the theme regenerates when the button sets a new one. Light is the base, dark is
 `ColorScheme.Dark` override, so `AppTheme { }` follows the system and
 `AppTheme(colorScheme = ColorScheme.Dark) { }` pins one.
 
+`dynamicColorSchemes` owns the `ColorScheme.Dark` override. Unstyled keeps one override per color
+scheme and each `colorScheme(ColorScheme.Dark) { }` replaces the one before it, so a dark block of
+your own in the same theme would either drop the dark tokens or be dropped by them. Put dark-only
+settings in the trailing `dark` block instead. It runs inside the same override, after the tokens.
+
+```kotlin
+val AppTheme = buildThemeV2 {
+    defaultContentColor = Color(0xFF1D1B20)
+    dynamicColorSchemes(seedColor = ThemeSettings.seedColor) {
+        defaultContentColor = Color(0xFFE6E0E9)
+    }
+}
+```
+
+For a scheme of your own, write the override yourself and call `dynamicColors` inside it.
+
+```kotlin
+val Sepia = ColorScheme("sepia")
+
+val AppTheme = buildThemeV2 {
+    dynamicColorSchemes(seedColor = ThemeSettings.seedColor)
+    colorScheme(Sepia) {
+        dynamicColors(rememberDynamicScheme(seedColor = Color(0xFF704214), isDark = false))
+    }
+}
+```
+
+Set `defaultIndication` on the builder. Left unset, Unstyled falls back to an indication that
+foundation's `clickable` rejects, and the first plain `clickable` throws. Setting it only reaches
+`LocalIndication`, though. `UnstyledButton`, `UnstyledCheckbox`, `UnstyledSwitch`, the radio group
+and the tab group all default their `indication` parameter to `null`, so pass
+`LocalIndication.current` to each of them, or wrap them in your own components that do. The
+[`samples/unstyled`](samples/unstyled) components show one way.
+
 The adapter never animates. Set `colorSchemeTransitionSpec` on the builder, as above, and Unstyled
 animates every color token whenever it changes, whether the seed moved or the scheme flipped
 between light and dark.
