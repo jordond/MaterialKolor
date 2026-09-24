@@ -28,8 +28,8 @@ import io.github.composefluent.background.Layer
 import io.github.composefluent.component.Text
 
 // The entry, its cards and their frame, and the parts every card shares. FluentGallery.kt keeps
-// the Actions, Inputs and Selection samples, and GalleryPanels.kt the Containment, Navigation and
-// Feedback ones.
+// the Actions and Inputs samples, GallerySelection.kt the Selection ones, and GalleryPanels.kt the
+// Containment, Navigation and Feedback ones.
 
 /** The space around the grid and between its cards. */
 internal val GalleryGap = 16.dp
