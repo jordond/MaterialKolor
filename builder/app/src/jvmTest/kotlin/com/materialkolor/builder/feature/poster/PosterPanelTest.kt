@@ -280,7 +280,11 @@ class PosterPanelTest {
             onNodeWithText("Image").performClick()
             waitForIdle()
 
-            actions shouldBe listOf(WorkspaceAction.OpenPicker(PickerTarget.Seed), WorkspaceAction.OpenImagePicker)
+            // b-307
+            // Pick also carries its own button, for the picker to hand focus back to.
+            val pick = actions.first() as WorkspaceAction.OpenPicker
+            listOf(pick.copy(returnFocusTo = null)) + actions.drop(1) shouldBe
+                listOf(WorkspaceAction.OpenPicker(PickerTarget.Seed), WorkspaceAction.OpenImagePicker)
         }
 
     @Test

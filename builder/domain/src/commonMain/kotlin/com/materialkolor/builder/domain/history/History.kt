@@ -26,6 +26,10 @@ public class History(
     private val undone = ArrayDeque<HistoryEntry>()
     private var last: LastRecord? = null
 
+    // b-307
+    // What could be redone before the open drag started, handed back if the drag ends where it began.
+    private var parked: List<HistoryEntry>? = null
+
     /** Whether there is a step to undo. */
     public val canUndo: Boolean
         get() = done.isNotEmpty()
@@ -51,7 +55,8 @@ public class History(
      * most [MERGE_WINDOW_MILLIS] before [now]. Edits that never merge always start their own step.
      *
      * Recording a real change throws away what could have been redone. An edit that changes nothing
-     * leaves the redo steps where they are.
+     * leaves the redo steps where they are, and so does a drag that ends where it began. A release
+     * always closes the drag of its key, even for a change that never merges otherwise.
      *
      * @param[now] When the edit happened, in milliseconds on whatever clock the caller keeps.
      */
@@ -76,6 +81,7 @@ public class History(
         val entry = done.removeLastOrNull() ?: return null
         undone.addLast(entry)
         last = null
+        parked = null // b-307
         return entry.before
     }
 
@@ -86,6 +92,7 @@ public class History(
         val entry = undone.removeLastOrNull() ?: return null
         done.addLast(entry)
         last = null
+        parked = null // b-307
         return entry.after
     }
 
@@ -102,7 +109,12 @@ public class History(
         now: Long,
     ): Boolean {
         val previous = last ?: return false
-        if (!change.merges || !previous.merges || previous.coalesceKey != change.coalesceKey) return false
+        if (previous.coalesceKey != change.coalesceKey) return false
+        // b-307
+        // A release closes its drag even when the change never merges, so a preset seed put back
+        // after a drag leaves no second step.
+        if (phase == EditPhase.Released && previous.phase == EditPhase.Dragging) return true
+        if (!change.merges || !previous.merges) return false
         return when (phase) {
             EditPhase.Dragging -> {
                 previous.phase == EditPhase.Dragging
@@ -125,10 +137,13 @@ public class History(
         val entry = done.removeLast().copy(after = after, label = change.label)
         if (entry.after == entry.before) {
             last = null
+            parked?.let(undone::addAll) // b-307
+            parked = null
             return
         }
         done.addLast(entry)
         last = LastRecord(change.coalesceKey, change.merges, phase, now)
+        if (phase != EditPhase.Dragging) parked = null // b-307
     }
 
     private fun push(
@@ -139,6 +154,9 @@ public class History(
         now: Long,
     ) {
         if (after == before) return
+        // b-307
+        // A drag keeps what could be redone aside until it lands somewhere new.
+        parked = undone.toList().takeIf { phase == EditPhase.Dragging && it.isNotEmpty() }
         undone.clear()
         done.addLast(HistoryEntry(before = before, after = after, label = change.label))
         while (done.size > CAPACITY) done.removeFirst()

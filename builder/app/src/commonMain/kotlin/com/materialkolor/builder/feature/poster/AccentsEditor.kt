@@ -31,6 +31,7 @@ import com.materialkolor.builder.engine.audit.rate
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.feature.canvas.RampTarget
 import com.materialkolor.builder.feature.picker.PickerTarget
+import com.materialkolor.builder.feature.picker.pickButtonFocus
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.accents_add
@@ -217,10 +218,13 @@ private fun AccentRow(
                 modifier = Modifier.weight(1f),
                 enabled = enabled,
             )
+            // b-307
+            val pick = remember { FocusRequester() }
             BuilderIconButton(
-                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.Accent(index))) },
+                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.Accent(index), pick)) },
                 icon = IconId.Eyedropper,
                 contentDescription = stringResource(Res.string.accents_pick, accent.name),
+                modifier = pickButtonFocus(pick),
                 enabled = enabled,
             )
         }

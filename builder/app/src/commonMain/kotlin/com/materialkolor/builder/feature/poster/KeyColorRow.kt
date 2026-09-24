@@ -15,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalInputModeManager
 import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.capability.ControlState
@@ -26,6 +25,7 @@ import com.materialkolor.builder.domain.model.KeyColor
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.feature.picker.PickerTarget
+import com.materialkolor.builder.feature.picker.pickButtonFocus
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.keycolors_clear
@@ -140,10 +140,13 @@ internal fun KeyColorRow(
                 enabled = enabled,
             )
             BuilderIconButton(
-                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.KeyColorOverride(slot))) },
+                onClick = {
+                    // b-307
+                    dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.KeyColorOverride(slot), picks[slot]))
+                },
                 icon = IconId.Eyedropper,
                 contentDescription = stringResource(Res.string.keycolors_pick, name),
-                modifier = Modifier.focusRequester(picks[slot]),
+                modifier = pickButtonFocus(picks[slot]),
                 enabled = enabled,
             )
             if (stored == null) {
