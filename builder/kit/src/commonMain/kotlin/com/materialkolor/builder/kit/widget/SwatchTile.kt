@@ -61,9 +61,6 @@ import kotlin.math.roundToInt
 /** How tall the colored part of a swatch is. */
 private val SwatchColorHeight: Dp = 72.dp
 
-/** The outline of a widget at rest and while hovered. */
-internal val WidgetOutlineWidth: Dp = 1.dp
-
 /** The outline of a widget with keyboard focus, thick enough to read on any fill. */
 internal val WidgetFocusWidth: Dp = 2.dp
 
@@ -260,8 +257,8 @@ internal fun Modifier.widgetOutline(
     val focused by interactionSource.collectIsFocusedAsState()
     return when {
         focused -> border(WidgetFocusWidth, tokens.focus, shape)
-        hovered -> border(WidgetOutlineWidth, tokens.borderStrong, shape)
-        atRest -> border(WidgetOutlineWidth, tokens.border, shape)
+        hovered -> border(tokens.outlineWidth, tokens.borderStrong, shape)
+        atRest -> border(tokens.outlineWidth, tokens.border, shape)
         else -> this
     }
 }

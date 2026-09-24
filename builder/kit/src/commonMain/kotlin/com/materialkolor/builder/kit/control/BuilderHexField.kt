@@ -87,7 +87,7 @@ public fun BuilderHexField(
         enabled = enabled,
         onCommit = { commitDraft(tidy = true) },
         modifier = modifier,
-        onEdit = { committedNotes = emptySet() },
+        onEdit = { _ -> committedNotes = emptySet() },
     )
 }
 

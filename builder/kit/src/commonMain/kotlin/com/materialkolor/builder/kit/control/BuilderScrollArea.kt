@@ -17,13 +17,17 @@ import com.materialkolor.builder.kit.skin.LocalSkin
  *
  * @param[modifier] Applied to the area. Give it a bounded height.
  * @param[state] The scroll position, hoisted so a caller can jump to a section.
+ * @param[tabStop] Whether the area may take Tab on the web. Pass false when what scrolls already
+ * holds a control that takes focus, the way Chromium leaves such a scroller out of the Tab order.
+ * Focus moving into the content scrolls the area to it.
  * @param[content] What scrolls.
  */
 @Composable
 public fun BuilderScrollArea(
     modifier: Modifier = Modifier,
     state: ScrollState = rememberScrollState(),
+    tabStop: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    HeadlessScrollArea(state, overlayStyle(LocalSkin.current.library), modifier, content)
+    HeadlessScrollArea(state, overlayStyle(LocalSkin.current.library), modifier, tabStop, content)
 }

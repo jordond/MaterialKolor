@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.LayoutDirection
+import com.materialkolor.builder.kit.a11y.LocalWebKeyboard
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
@@ -50,6 +51,7 @@ internal fun <T> MaterialSegmented(
     val focus = rememberRadioGroupFocus(options.size, selectedIndex)
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val folds = LocalFoldsStateIntoName.current
+    val writingOrder = LocalWebKeyboard.current
     MaterialTarget {
         SingleChoiceSegmentedButtonRow(modifier.semantics { roleLessName(label, folds) }) {
             options.forEachIndexed { index, value ->
@@ -58,7 +60,7 @@ internal fun <T> MaterialSegmented(
                     val shape = SegmentedButtonDefaults.itemShape(index, options.size)
                     val glyph = optionIcon(value)
                     val isSelected = index == selectedIndex
-                    InWritingOrder(keep = folds) {
+                    InWritingOrder(keep = writingOrder) {
                         SegmentedButton(
                             selected = isSelected,
                             onClick = { onSelect(value) },

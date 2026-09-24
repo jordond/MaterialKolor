@@ -34,6 +34,7 @@ import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.kit.a11y.LocalWebKeyboard
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.skin.Skin
 import io.kotest.matchers.collections.shouldContainExactly
@@ -42,7 +43,7 @@ import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** Shows [content] in [skin] with the web's fold turned on. */
+/** Shows [content] in [skin] the way the web does, with the fold and the web's keyboard turned on. */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.showFolded(
     skin: Skin,
@@ -50,7 +51,11 @@ private fun ComposeUiTest.showFolded(
 ) {
     setContent {
         ControlsHarness(skin) {
-            CompositionLocalProvider(LocalFoldsStateIntoName provides true, content = content)
+            CompositionLocalProvider(
+                LocalFoldsStateIntoName provides true,
+                LocalWebKeyboard provides true,
+                content = content,
+            )
         }
     }
 }

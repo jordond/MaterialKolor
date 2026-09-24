@@ -102,9 +102,6 @@ internal const val UnstyledHighlightAlpha: Float = 0.06f
 /** How strongly Unstyled's ink veils a selected row, and a plain clickable while it is pressed. */
 internal const val UnstyledSelectedAlpha: Float = 0.1f
 
-/** The width of a hairline border. */
-internal val Hairline: Dp = 1.dp
-
 /**
  * The sizes every skin gives its overlays alike.
  *
@@ -148,7 +145,7 @@ internal object OverlayMetrics {
 
 /** Unstyled keeps to hairlines and small corners, and floats nothing. */
 internal fun unstyledOverlayStyle(tokens: BuilderTokens): OverlayStyle {
-    val hairline = BorderStroke(Hairline, tokens.border)
+    val hairline = BorderStroke(tokens.outlineWidth, tokens.border)
     return OverlayStyle(
         surface = tokens.panel,
         content = tokens.textStrong,
@@ -164,7 +161,7 @@ internal fun unstyledOverlayStyle(tokens: BuilderTokens): OverlayStyle {
         selected = tokens.textStrong.copy(alpha = UnstyledSelectedAlpha),
         focus = tokens.focus,
         field = tokens.panel,
-        fieldBorder = BorderStroke(Hairline, tokens.borderStrong),
+        fieldBorder = BorderStroke(tokens.outlineWidth, tokens.borderStrong),
         tooltip = tokens.textStrong,
         tooltipContent = tokens.panel,
         tooltipBorder = null,
@@ -192,7 +189,7 @@ internal fun customOverlayStyle(tokens: BuilderTokens): OverlayStyle =
         selected = tokens.accent.copy(alpha = 0.16f),
         focus = tokens.focus,
         field = tokens.panelRaised,
-        fieldBorder = BorderStroke(Hairline, tokens.border),
+        fieldBorder = BorderStroke(tokens.outlineWidth, tokens.border),
         tooltip = tokens.textStrong,
         tooltipContent = tokens.panel,
         tooltipBorder = null,

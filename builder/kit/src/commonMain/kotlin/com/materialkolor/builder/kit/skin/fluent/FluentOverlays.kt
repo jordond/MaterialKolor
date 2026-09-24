@@ -3,7 +3,6 @@ package com.materialkolor.builder.kit.skin.fluent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.kit.skin.headless.Hairline
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.token.BuilderTokens
 
@@ -16,7 +15,7 @@ import com.materialkolor.builder.kit.token.BuilderTokens
  * the same grey rather than inverting. B-403 swaps these for the real Fluent components.
  */
 internal fun fluentOverlayStyle(tokens: BuilderTokens): OverlayStyle {
-    val hairline = BorderStroke(Hairline, tokens.border)
+    val hairline = BorderStroke(tokens.outlineWidth, tokens.border)
     return OverlayStyle(
         surface = tokens.panelRaised,
         content = tokens.textStrong,
@@ -32,7 +31,7 @@ internal fun fluentOverlayStyle(tokens: BuilderTokens): OverlayStyle {
         selected = tokens.textStrong.copy(alpha = 0.09f),
         focus = tokens.focus,
         field = tokens.panel,
-        fieldBorder = BorderStroke(Hairline, tokens.border),
+        fieldBorder = BorderStroke(tokens.outlineWidth, tokens.border),
         tooltip = tokens.panelRaised,
         tooltipContent = tokens.textStrong,
         tooltipBorder = hairline,
