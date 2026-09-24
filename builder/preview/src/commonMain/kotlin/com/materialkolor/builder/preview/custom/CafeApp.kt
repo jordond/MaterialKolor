@@ -97,6 +97,7 @@ private fun CafePhone(
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val orderOpen = state.isOn(PhoneOrderKey)
+    val focus = rememberOrderFocus()
     Column(modifier.fillMaxWidth()) {
         LazyColumn(
             state = state.rememberListState(if (orderOpen) "cafe.phone.order" else "cafe.phone.menu"),
@@ -105,9 +106,9 @@ private fun CafePhone(
             verticalArrangement = Arrangement.spacedBy(spacing.medium),
         ) {
             if (orderOpen) {
-                orderHead(state)
+                orderHead(state, focus)
                 orderLines(state)
-                item(key = "actions") { OrderActions(state, colors) }
+                item(key = "actions") { OrderActions(state, colors, focus) }
             } else {
                 item(key = "stamps") { StampCard(colors) }
                 item(key = "categories") { CategoryChips(state) }

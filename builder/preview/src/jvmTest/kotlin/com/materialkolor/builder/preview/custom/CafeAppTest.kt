@@ -10,8 +10,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
@@ -22,6 +25,9 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -207,7 +213,7 @@ class CafeAppTest {
             state.quantity(coldBrew) shouldBe 0
             onAllNodesWithText(coldBrew.name).assertCountEquals(1)
 
-            onAllNodes(isToggleable() and hasContentDescription(CafeCopy.Favourite))[0].performClick()
+            onNode(isToggleable() and hasContentDescription(CafeCopy.favourite(flatWhite.name))).performClick()
             waitForIdle()
             state.isFavourite(flatWhite) shouldBe false
 
@@ -221,6 +227,55 @@ class CafeAppTest {
             onNode(hasContentDescription(CafeCopy.Dismiss)).performClick()
             waitForIdle()
             onAllNodesWithText(CafeCopy.Placed).assertCountEquals(0)
+        }
+
+    @Test
+    fun placeOrderByKey_inOneCopyOfASplit_focusesThatCopysDismissThenTheOrderType() =
+        runComposeUiTest {
+            val state = DemoAppState().apply { pick(OrderType.DineIn) }
+            setContent { CafeSplitHarness(state, SplitState(0f), Modifier.size(840.dp, 760.dp)) }
+            val placeOrder = onAllNodes(hasClickAction() and hasText(CafeCopy.PlaceOrder))
+            val dismiss = { onAllNodes(hasClickAction() and hasContentDescription(CafeCopy.Dismiss)) }
+            placeOrder.assertCountEquals(2)
+
+            placeOrder[1].requestFocus().performKeyInput { pressKey(Key.Enter) }
+            waitForIdle()
+            state.isOn(PlacedKey) shouldBe true
+            dismiss().assertCountEquals(2)
+            dismiss()[1].assertIsFocused()
+            dismiss()[0].assertIsNotFocused()
+
+            dismiss()[1].performKeyInput { pressKey(Key.Enter) }
+            waitForIdle()
+            state.isOn(PlacedKey) shouldBe false
+            val dineIn = onAllNodes(hasClickAction() and hasText(OrderType.DineIn.label))
+            dineIn[1].assertIsFocused()
+            dineIn[0].assertIsNotFocused()
+        }
+
+    @Test
+    fun clearByKey_emptiesTheOrderAndFocusesTheOrderType() =
+        runComposeUiTest {
+            val state = DemoAppState()
+            setContent { CafeHarness(LightSpec, state, DeviceWidth.Tablet, Modifier.size(840.dp, 900.dp)) }
+            state.orderLines().shouldNotBeEmpty()
+
+            onNode(hasClickAction() and hasText(CafeCopy.Clear)).requestFocus().performKeyInput { pressKey(Key.Enter) }
+            waitForIdle()
+            state.orderLines().shouldBeEmpty()
+            onNode(hasClickAction() and hasText(OrderType.PickUp.label)).assertIsFocused()
+        }
+
+    @Test
+    fun placeOrderByPointer_leavesFocusWhereItWas() =
+        runComposeUiTest {
+            val state = DemoAppState()
+            setContent { CafeHarness(LightSpec, state, DeviceWidth.Tablet, Modifier.size(840.dp, 900.dp)) }
+
+            onNode(hasClickAction() and hasText(CafeCopy.PlaceOrder)).performClick()
+            waitForIdle()
+            state.isOn(PlacedKey) shouldBe true
+            onNode(hasContentDescription(CafeCopy.Dismiss)).assertIsNotFocused()
         }
 
     @Test

@@ -124,6 +124,7 @@ internal val CafePopupImports: List<String> = listOf(
     "com.materialkolor.builder.kit.control.BuilderSidePanel",
     "com.materialkolor.builder.kit.control.BuilderBottomSheet",
     "com.materialkolor.builder.kit.control.BuilderToastHost",
+    "com.materialkolor.builder.kit.control.BuilderSelect",
 )
 
 /**

@@ -26,13 +26,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.Heart
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Stamp
+import com.composeunstyled.focusRing
 import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderCard
@@ -41,6 +41,7 @@ import com.materialkolor.builder.kit.control.BuilderListRow
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.foldedToggleName
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
@@ -52,6 +53,7 @@ import com.materialkolor.builder.preview.inspect.previewRoles
 private val ThumbSize = 48.dp
 private val BannerGlyphSize = 36.dp
 private val HeartSize = 28.dp
+private val HeartRingOffset = 2.dp
 private val DotSize = 10.dp
 private val StampSize = 12.dp
 
@@ -291,6 +293,8 @@ private fun CafeTag(
 /**
  * The heart that marks a favourite, filled with the Love accent while on and a muted outline while
  * off. The kit has no heart, so the app draws it and rings it in the focus slot while it has focus.
+ * The ring stands off the disc like a kit control's, so it never fades into a filled heart. The
+ * heart is named for its drink, and the kit carries its role and state onto the web.
  */
 @Composable
 private fun FavouriteToggle(
@@ -318,15 +322,20 @@ private fun FavouriteToggle(
                 indication = null,
                 role = Role.Checkbox,
             ) { on -> state.setFavourite(item, on) }
-            .semantics { contentDescription = CafeCopy.Favourite }
+            .foldedToggleName(CafeCopy.favourite(item.name), favourite)
             .size(LocalLayout.current.minTouchTarget.coerceAtLeast(HeartSize)),
         contentAlignment = Alignment.Center,
     ) {
         Box(
             modifier = Modifier
-                .size(HeartSize)
-                .background(if (favourite) mark.fill.color else Color.Transparent, CircleShape)
-                .then(if (focused) Modifier.border(tokens.highlightWidth, ring.color, CircleShape) else Modifier),
+                .focusRing(
+                    interactionSource = interaction,
+                    width = tokens.highlightWidth,
+                    color = ring.color,
+                    shape = CircleShape,
+                    offset = HeartRingOffset,
+                ).size(HeartSize)
+                .background(if (favourite) mark.fill.color else Color.Transparent, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             CafeGlyph(Lucide.Heart, if (favourite) mark.ink.color else muted.color, tokens.spacing.large)

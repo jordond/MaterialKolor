@@ -21,7 +21,6 @@ internal object CafeCopy {
     const val Menu = "Menu"
     const val Category = "Category"
     const val Add = "Add"
-    const val Favourite = "Favourite"
     const val SoldOut = "Sold out"
     const val YourOrder = "Your order"
     const val OrderType = "Order type"
@@ -44,6 +43,9 @@ internal object CafeCopy {
 
     /** A count of items in the order, one item or several. */
     fun items(count: Int): String = if (count == 1) "1 item" else "$count items"
+
+    /** What the heart of the drink [name] reads out. */
+    fun favourite(name: String): String = "Favourite $name"
 
     /** What the remove button of an order line reads out. */
     fun removeOne(name: String): String = "Remove one $name"
