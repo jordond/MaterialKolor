@@ -41,12 +41,15 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalTextToolbar
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.window.PopupPositionProvider
 import com.materialkolor.builder.domain.model.Library
@@ -426,10 +429,37 @@ private fun OverlayLayerContent(
         }
         CompositionLocalProvider(context) {
             CompositionLocalProvider(LocalOverlayLayer provides layer) {
-                val placement = layer.placement
-                if (placement == null) layer.content() else AnchoredOverlay(placement, layer.content)
+                // b-315e
+                LayerComposition {
+                    val placement = layer.placement
+                    if (placement == null) layer.content() else AnchoredOverlay(placement, layer.content)
+                }
             }
         }
+    }
+}
+
+// b-315e
+
+/**
+ * Composes a layer's [content] in a composition of its own, made as the layer is first measured,
+ * and lays it out the way a box lays out its children.
+ *
+ * The content holds the page's lambdas, which the page updates as it recomposes. The page sits in
+ * subcompositions of its own, `ProvideBuilderLayout` first among them, and those recompose after
+ * the host's composition in a frame. So in the frame the host first drew a layer the page could
+ * update a lambda the layer had just drawn but Compose had not applied yet. Compose drops that
+ * invalidation and the lambda forgets where it was drawn, so the layer kept what it first drew. A
+ * menu opened while its labels were still loading on the web kept its blank rows. A composition
+ * made at measure is applied as it composes, so every update after it lands.
+ */
+@Composable
+private fun LayerComposition(content: @Composable () -> Unit) {
+    SubcomposeLayout { constraints ->
+        val placeables = subcompose(Unit, content).map { measurable -> measurable.measure(constraints) }
+        val width = constraints.constrainWidth(placeables.maxOfOrNull { placeable -> placeable.width } ?: 0)
+        val height = constraints.constrainHeight(placeables.maxOfOrNull { placeable -> placeable.height } ?: 0)
+        layout(width, height) { placeables.forEach { placeable -> placeable.place(0, 0) } }
     }
 }
 
