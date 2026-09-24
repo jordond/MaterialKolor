@@ -1,0 +1,18 @@
+{
+  "name": "materialkolor-builder-worker",
+  "private": true,
+  "description": "The Cloudflare Worker in front of the MaterialKolor builder site, per-theme link previews for /t/ and /og/.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
+    "@cloudflare/workers-types": "^5.20260924.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.0",
+    "wrangler": "^4.138.0"
+  }
+}

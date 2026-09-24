@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "materialkolor-builder",
+  "main": "src/index.ts",
+  // Held at the date the test pool's workerd supports, so wrangler dev and vitest agree.
+  "compatibility_date": "2026-08-15",
+  "assets": {
+    // `./gradlew :builder:web:assembleSite` writes it.
+    "directory": "../web/build/site",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    // Only link previews run code, everything else is served straight from the site.
+    "run_worker_first": ["/t/*", "/og/*"]
+  },
+  // The glyph atlas the theme card draws its text with, imported as bytes.
+  "rules": [{ "type": "Data", "globs": ["**/*.bin"] }],
+  // Placeholder. The owner confirms the zone and the custom domain at B-505 deploy time.
+  "routes": [{ "pattern": "materialkolor.com", "custom_domain": true }],
+  "env": {
+    "staging": {
+      // Placeholder, confirmed at B-505 like the production domain.
+      "routes": [{ "pattern": "staging.materialkolor.com", "custom_domain": true }]
+    }
+  }
+}

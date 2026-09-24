@@ -152,6 +152,14 @@ jobs:
       - name: Assemble the site and check its budget
         run: ./gradlew :builder:web:assembleSite :builder:web:checkBudget
 
+      # b-502
+      - name: Upload the site for the Worker tests
+        uses: actions/upload-artifact@v7
+        with:
+          name: site
+          path: builder/web/build/site
+          if-no-files-found: error
+
       - name: Install Playwright
         working-directory: builder/e2e
         run: |
@@ -169,6 +177,37 @@ jobs:
           name: playwright-report
           path: builder/e2e/playwright-report
           if-no-files-found: ignore
+
+  # b-502
+  # The Worker's tests run in workerd against the site the Site job assembled. No deploy, no
+  # secrets, nothing that could ask for a Cloudflare login.
+  worker:
+    name: "Worker"
+    needs: site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download the site
+        uses: actions/download-artifact@v8
+        with:
+          name: site
+          path: builder/web/build/site
+
+      - name: setup-node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: builder/worker/package-lock.json
+
+      - name: Worker tests
+        working-directory: builder/worker
+        run: |
+          npm ci
+          npm run typecheck
+          npm test
 
   # Screenshot baselines come only from this job. Run it by hand with `record` to get them as an
   # artifact to commit. A module with no committed baselines yet is compared rather than verified,
