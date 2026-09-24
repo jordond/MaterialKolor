@@ -48,6 +48,9 @@ import kotlin.test.Test
 import io.github.composefluent.LocalContentColor as FluentContentColor
 
 private const val ShellTextRatio = 4.5
+
+/** What a glyph or a stroke that is not text has to reach on its ground, WCAG's non-text contrast. */
+private const val ShellGlyphRatio = 3.0
 private const val ShellClickTag = "shell-click"
 
 /** Ten hues at five tones, mid tones included, where ink sits closest to the floor. */
@@ -59,11 +62,12 @@ private val ShellSeeds: List<Argb> = buildList {
     }
 }
 
-/** One ink a skin draws on the poster and the ground it stands on. */
+/** One ink a skin draws on the poster, the ground it stands on and the ratio it has to reach there. */
 private class ShellInk(
     val name: String,
     val ink: Color,
     val ground: Color,
+    val floor: Double = ShellTextRatio,
 )
 
 @OptIn(ExperimentalTestApi::class)
@@ -132,7 +136,8 @@ class PosterSurfaceTest {
      * Fluent on the poster takes its shades from the seed's own ramp and its dark flag from the
      * ink, and every Fluent control there draws its labels, glyphs and strokes in the ink. Fluent's
      * own black or white text reaches only about 4.35 to 1 on a mid tone seed, so each control's
-     * resting ink has to hold 4.5 on the ground it stands on, in the light chrome and the dark.
+     * resting label has to hold 4.5 on the ground it stands on, in the light chrome and the dark.
+     * A glyph that is not text, such as the switch's thumb on Fluent's tinted track, holds 3.
      */
     @Test
     fun posterSurface_fluent_drawsEveryControlInTheInkInBothModes() {
@@ -165,10 +170,10 @@ class PosterSurfaceTest {
                         }
                         misses += inks.mapNotNull { pair ->
                             val ratio = pair.ink.contrastRatio(pair.ground)
-                            if (ratio < ShellTextRatio) "${next.toHex()} ${pair.name} ${"%.2f".format(ratio)}" else null
+                            if (ratio < pair.floor) "${next.toHex()} ${pair.name} ${"%.2f".format(ratio)}" else null
                         }
                     }
-                    misses.shouldBeEmpty()
+                    withClue(misses.joinToString("\n")) { misses.shouldBeEmpty() }
                 }
             }
         }
@@ -259,7 +264,8 @@ private fun shellInks(
 
 /**
  * The resting ink of every Fluent control on the poster, each on the ground it stands on. A fill
- * Fluent lays on the seed is laid over it first, since Fluent's fills are translucent.
+ * Fluent lays on the seed is laid over it first, since Fluent's fills are translucent. Labels are
+ * held to the text ratio and the glyphs, fills and strokes to the non-text one.
  */
 @Composable
 private fun fluentControlInks(seed: Color): List<ShellInk> {
@@ -271,19 +277,19 @@ private fun fluentControlInks(seed: Color): List<ShellInk> {
             val look = fluentButtonColors(emphasis).schemeFor(rest)
             add(ShellInk("$emphasis button label", look.contentColor, look.fillColor.onSeed()))
             if (emphasis == Emphasis.Primary || emphasis == Emphasis.Danger) {
-                add(ShellInk("$emphasis button fill", look.fillColor.onSeed(), seed))
+                add(ShellInk("$emphasis button fill", look.fillColor.onSeed(), seed, ShellGlyphRatio))
             }
         }
         for (on in listOf(false, true)) {
             val switch = fluentSwitchStyles(on).schemeFor(rest)
             add(ShellInk("switch label, on $on", switch.labelColor, seed))
-            add(ShellInk("switch thumb, on $on", switch.controlColor, switch.fillColor.onSeed()))
+            add(ShellInk("switch thumb, on $on", switch.controlColor, switch.fillColor.onSeed(), ShellGlyphRatio))
             val box = fluentCheckboxColors(on).schemeFor(rest)
             add(ShellInk("checkbox label, on $on", box.labelTextColor, seed))
             if (on) {
-                add(ShellInk("checkbox check", box.contentColor, box.fillColor.onSeed()))
+                add(ShellInk("checkbox check", box.contentColor, box.fillColor.onSeed(), ShellGlyphRatio))
             } else {
-                add(ShellInk("checkbox box", box.borderColor, seed))
+                add(ShellInk("checkbox box", box.borderColor, seed, ShellGlyphRatio))
             }
             val tab = fluentTabColors(on).schemeFor(rest)
             add(ShellInk("tab label, selected $on", tab.contentColor, tab.fillColor.onSeed()))
