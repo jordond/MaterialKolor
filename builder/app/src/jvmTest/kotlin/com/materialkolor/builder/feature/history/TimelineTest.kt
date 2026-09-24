@@ -16,6 +16,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isFocused
+import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
@@ -37,8 +38,8 @@ import kotlin.test.Test
 private const val WIDTH = 1280
 private const val HEIGHT = 800
 
-/** How many frames in a row the drag under the open list moves the seed. */
-private const val DRAG_FRAMES = 30
+/** How many times the drag under the open list moves the seed, one move every other frame. */
+private const val DRAG_MOVES = 20
 
 // b-509
 
@@ -112,6 +113,8 @@ class TimelineTest {
             waitForIdle()
 
             keys { pressKey(Key.H) }
+            // The page's root and the list's own window.
+            onAllNodes(isRoot()).fetchSemanticsNodes().size shouldBe 2
             focusedRow().assertIsSelected().assert(hasText("Start"))
             // A popup window hears keys through its own root, so they go to the row holding focus.
             focusedRow().performKeyInput { pressKey(Key.DirectionUp) }
@@ -134,7 +137,7 @@ class TimelineTest {
                 show(
                     inTree = true,
                     swatchReads = { reads++ },
-                    probe = { _ -> DragEveryFrame(dragging) },
+                    probe = { _ -> DragEveryOtherFrame(dragging) },
                 )
             }
             // A drag held down on the seed while H opens the list. A press outside the list closes it
@@ -148,7 +151,7 @@ class TimelineTest {
             runOnIdle { dragging.value = true }
             waitForIdle()
 
-            harness.graph.session.document.value.seed shouldBe seedChange(DRAG_FRAMES).argb
+            harness.graph.session.document.value.seed shouldBe seedChange(DRAG_MOVES).argb
             harness.workspace.state.value.panel shouldBe Panel.History
             reads shouldBe filled + 1
         }
@@ -157,14 +160,17 @@ class TimelineTest {
         with(harness) { show(inTree = true) }
     }
 
-    /** Once [dragging] turns on, moves the seed one more notch on each of [DRAG_FRAMES] frames. */
+    /**
+     * Once [dragging] turns on, moves the seed one more notch every other frame, [DRAG_MOVES] times,
+     * the way a pointer moves under a display that draws twice as often.
+     */
     @Composable
-    private fun DragEveryFrame(dragging: MutableState<Boolean>) {
+    private fun DragEveryOtherFrame(dragging: MutableState<Boolean>) {
         if (!dragging.value) return
         LaunchedEffect(Unit) {
-            repeat(DRAG_FRAMES) { frame ->
-                withFrameNanos { }
-                harness.workspace.edit(seedChange(frame + 1), EditPhase.Dragging)
+            repeat(DRAG_MOVES) { move ->
+                repeat(2) { withFrameNanos { } }
+                harness.workspace.edit(seedChange(move + 1), EditPhase.Dragging)
             }
         }
     }
