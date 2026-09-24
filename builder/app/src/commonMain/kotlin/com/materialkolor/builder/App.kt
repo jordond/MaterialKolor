@@ -274,7 +274,8 @@ private fun FluentWarmUpEffect(
         val sample: (@Composable () -> Unit)? = if (skin.library == Library.Fluent) {
             null
         } else {
-            { FluentWorkspaceSample(workspace.value, isDark()) }
+            // No ramp highlight, since the palettes tab asks for focus when it shows one.
+            { FluentWorkspaceSample(workspace.value.copy(rampHighlight = null), isDark()) }
         }
         transition.warmUp(sample, awaitIdle)
     }
@@ -285,7 +286,8 @@ private fun FluentWarmUpEffect(
  * dock, without the panels and toasts over them.
  *
  * Every action goes to a dispatcher that drops it and every announcement to one that says nothing,
- * and the focus holders are its own, so nothing here reaches the live workspace.
+ * and the focus holders are its own, so nothing here reaches the live workspace. The caller hands it
+ * a state with no ramp highlight, because the palettes tab moves focus to a highlighted ramp.
  */
 @Composable
 private fun FluentWorkspaceSample(
