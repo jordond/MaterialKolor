@@ -38,8 +38,11 @@ test.describe('environment', () => {
     );
     expect(themeColor?.toLowerCase()).toBe('#1a73e8');
 
-    await hook(page, 'writeSplashColors', '#000000,#ffffff');
-    expect(await page.evaluate(() => localStorage.getItem('mk:splash'))).toBe('{"light":-16777216,"dark":-1}');
+    // b-501b
+    await hook(page, 'writeSplash', '#000000,#ffffff,#d9653b,Dark');
+    expect(await page.evaluate(() => localStorage.getItem('mk:splash'))).toBe(
+      '{"light":-16777216,"dark":-1,"seed":-2529989,"appearance":"dark"}',
+    );
 
     // b-501
     // The boot splash goes after the first frame. Once it has, there is nothing to do.

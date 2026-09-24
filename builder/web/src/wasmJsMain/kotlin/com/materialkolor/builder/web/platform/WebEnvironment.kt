@@ -1,5 +1,6 @@
 package com.materialkolor.builder.web.platform
 
+import com.materialkolor.builder.core.platform.BootSplash
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.persist.StorageKeys
@@ -61,19 +62,14 @@ internal class WebEnvironment : Environment {
 
     override fun setThemeColor(argb: Argb) = writeThemeColor(argb.toHex())
 
+    // b-501b
+
     /**
-     * Keep [light] and [dark] under `mk:splash` for `boot.js`, which paints them before any code
-     * loads.
-     *
-     * The text is plain JSON, `{"light":-16777216,"dark":-1}` for black and white. Each value is the
-     * color as a signed 32 bit ARGB integer, so an opaque color is negative, and `value & 0xFFFFFF`
-     * is its RGB. A full or blocked storage just means the next boot shows the default splash.
+     * Keep [splash] under `mk:splash` as [BootSplash.toJson] for `boot.js`, which paints it before
+     * any code loads. A full or blocked storage just means the next boot shows the default splash.
      */
-    override fun writeSplashColors(
-        light: Argb,
-        dark: Argb,
-    ) {
-        localStorageWrite(StorageKeys.SPLASH, """{"light":${light.value},"dark":${dark.value}}""")
+    override fun writeSplash(splash: BootSplash) {
+        localStorageWrite(StorageKeys.SPLASH, splash.toJson())
     }
 
     override suspend fun requestPersist(): Boolean = requestPersistentStorage()

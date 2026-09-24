@@ -16,9 +16,13 @@ const BLUE_LINK = '/t/ARpz6A';
 const LIGHT = 0xff102030 | 0;
 const DARK = 0xff405060 | 0;
 const BLUE = 0xff1a73e8 | 0;
+// b-501b
+const DEFAULT_SEED = 0xffd9653b | 0;
 
 test.describe('splash', () => {
-  test('paints the stored chrome for each scheme and a neutral poster with no seed', async ({ page }) => {
+  // b-501b
+  // An mk:splash from before the seed and the appearance were stored still paints.
+  test('paints an older mk:splash, chrome only, for each scheme with a neutral poster', async ({ page }) => {
     await storeSplash(page, { light: LIGHT, dark: DARK });
     await holdGlue(page);
     await page.emulateMedia({ colorScheme: 'light' });
@@ -41,6 +45,37 @@ test.describe('splash', () => {
 
     await page.goto(site(DEFAULT_LINK), { waitUntil: 'domcontentloaded' });
     expect(await splash(page)).toMatchObject({ chrome: rgb(LIGHT), poster: 'rgb(217, 101, 59)', hex: '"#D9653B"' });
+  });
+
+  // b-501b
+  test('paints a forced appearance whatever the page scheme, with the stored seed', async ({ page }) => {
+    await storeSplash(page, { light: LIGHT, dark: DARK, seed: BLUE, appearance: 'dark' });
+    await holdGlue(page);
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto(site('/'), { waitUntil: 'domcontentloaded' });
+    expect(await splash(page)).toMatchObject({ chrome: rgb(DARK), poster: rgb(BLUE), hex: '"#1A73E8"' });
+    expect(await themeColors(page)).toEqual([hex(DARK), hex(DARK)]);
+
+    await storeSplash(page, { light: LIGHT, dark: DARK, seed: BLUE, appearance: 'light' });
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    expect((await splash(page)).chrome).toBe(rgb(LIGHT));
+    expect(await themeColors(page)).toEqual([hex(LIGHT), hex(LIGHT)]);
+  });
+
+  test('follows the page scheme when the appearance is system or anything else', async ({ page }) => {
+    await holdGlue(page);
+    // Each stored value is added after the last, so it is the one the next load reads.
+    for (const appearance of ['system', 'sepia', 42, null]) {
+      await storeSplash(page, { light: LIGHT, dark: DARK, seed: BLUE, appearance });
+      await page.emulateMedia({ colorScheme: 'light' });
+      await page.goto(site('/'), { waitUntil: 'domcontentloaded' });
+      expect((await splash(page)).chrome, String(appearance)).toBe(rgb(LIGHT));
+      expect(await themeColors(page)).toEqual([hex(LIGHT), hex(DARK)]);
+
+      await page.emulateMedia({ colorScheme: 'dark' });
+      expect((await splash(page)).chrome, String(appearance)).toBe(rgb(DARK));
+    }
   });
 
   test('paints the default seed on a first visit', async ({ page }) => {
@@ -69,6 +104,8 @@ test.describe('splash', () => {
     await expect.poll(() => page.evaluate(() => localStorage.getItem('mk:splash')), { timeout: 30_000 }).not.toBeNull();
     const written = JSON.parse((await page.evaluate(() => localStorage.getItem('mk:splash')))!);
     expect({ light, dark }).toEqual({ light: rgb(written.light), dark: rgb(written.dark) });
+    // b-501b
+    expect({ seed: written.seed, appearance: written.appearance }).toEqual({ seed: DEFAULT_SEED, appearance: 'system' });
 
     await expect(page.locator('#splash')).toHaveCount(0, { timeout: 30_000 });
     expect(await page.evaluate(() => document.querySelector('h1'))).toBeNull();
@@ -180,6 +217,145 @@ test.describe('error overlay', () => {
     await expect(page.getByRole('alertdialog')).toBeVisible();
   });
 });
+
+// b-501b
+test.describe('head', () => {
+  const origin = 'https://materialkolor.com';
+  const description =
+    'Build a Compose color theme from one seed color or a photo. Preview it in Material 3, Expressive, Unstyled and ' +
+    'Fluent, then export code that compiles.';
+  const imageAlt = 'MaterialKolor Builder, with the seed color #D9653B and six colors of the theme it makes';
+  /** A selector for one tag, the attribute that carries its value, and the value. */
+  const tags: [string, string, string][] = [
+    ['meta[name="description"]', 'content', description],
+    ['link[rel="canonical"]', 'href', `${origin}/`],
+    ['meta[name="color-scheme"]', 'content', 'light dark'],
+    ['meta[name="theme-color"][media="(prefers-color-scheme: light)"]', 'content', '#fff8f6'],
+    ['meta[name="theme-color"][media="(prefers-color-scheme: dark)"]', 'content', '#1a110f'],
+    ['meta[property="og:type"]', 'content', 'website'],
+    ['meta[property="og:site_name"]', 'content', 'MaterialKolor'],
+    ['meta[property="og:title"]', 'content', 'MaterialKolor Builder'],
+    ['meta[property="og:description"]', 'content', description],
+    ['meta[property="og:url"]', 'content', `${origin}/`],
+    ['meta[property="og:image"]', 'content', `${origin}/og-default.png`],
+    ['meta[property="og:image:width"]', 'content', '1200'],
+    ['meta[property="og:image:height"]', 'content', '630'],
+    ['meta[property="og:image:alt"]', 'content', imageAlt],
+    ['meta[name="twitter:card"]', 'content', 'summary_large_image'],
+    ['meta[name="twitter:image"]', 'content', `${origin}/og-default.png`],
+    ['meta[name="twitter:image:alt"]', 'content', imageAlt],
+    ['link[rel="manifest"]', 'href', '/manifest.webmanifest'],
+    ['link[rel="icon"][sizes="32x32"]', 'href', '/favicon-32x32.png'],
+    ['link[rel="icon"][sizes="16x16"]', 'href', '/favicon-16x16.png'],
+    ['link[rel="apple-touch-icon"]', 'href', '/apple-touch-icon.png'],
+  ];
+
+  test.describe('as a crawler reads it', () => {
+    // No script runs, so the tags are as the host serves them and boot.js has tinted nothing.
+    test.use({ javaScriptEnabled: false });
+
+    test('carries each tag once with its value', async ({ page }) => {
+      await page.goto(site('/'));
+      for (const [selector, attribute, value] of tags) {
+        await expect(page.locator(selector), selector).toHaveCount(1);
+        expect(await page.locator(selector).getAttribute(attribute), selector).toBe(value);
+      }
+      for (const property of ['og:title', 'og:description', 'og:image', 'og:url']) {
+        await expect(page.locator(`meta[property="${property}"]`), property).toHaveCount(1);
+      }
+      await expect(page.locator('meta[name="theme-color"]')).toHaveCount(2);
+      await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
+
+      const data = page.locator('script[type="application/ld+json"]');
+      await expect(data).toHaveCount(1);
+      expect(JSON.parse((await data.textContent()) ?? '{}')).toMatchObject({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'MaterialKolor Builder',
+        description,
+        url: `${origin}/`,
+        image: `${origin}/og-default.png`,
+      });
+    });
+  });
+
+  test('the card, the manifest and every icon resolve with their types', async ({ request }) => {
+    const card = await request.get(site('/og-default.png'));
+    expect(card.status()).toBe(200);
+    expect(card.headers()['content-type']).toBe('image/png');
+    expect(pngSize(await card.body())).toEqual({ width: 1200, height: 630 });
+
+    const manifestResponse = await request.get(site('/manifest.webmanifest'));
+    expect(manifestResponse.status()).toBe(200);
+    expect(manifestResponse.headers()['content-type']).toBe('application/manifest+json');
+    const manifest = await manifestResponse.json();
+    expect(manifest).toMatchObject({
+      name: 'MaterialKolor Builder',
+      short_name: 'MaterialKolor',
+      start_url: '/',
+      scope: '/',
+      display: 'standalone',
+      background_color: '#fff8f6',
+      theme_color: '#fff8f6',
+    });
+    expect(manifest.icons.map((icon: { sizes: string }) => icon.sizes)).toEqual(['192x192', '512x512']);
+    for (const icon of manifest.icons as { src: string; sizes: string; type: string }[]) {
+      const response = await request.get(site(icon.src));
+      expect(response.status(), icon.src).toBe(200);
+      expect(response.headers()['content-type'], icon.src).toBe(icon.type);
+      const { width, height } = pngSize(await response.body());
+      expect(`${width}x${height}`, icon.src).toBe(icon.sizes);
+    }
+
+    for (const [path, type] of [
+      ['/favicon.ico', 'image/x-icon'],
+      ['/favicon-16x16.png', 'image/png'],
+      ['/favicon-32x32.png', 'image/png'],
+      ['/apple-touch-icon.png', 'image/png'],
+    ]) {
+      const response = await request.get(site(path));
+      expect(response.status(), path).toBe(200);
+      expect(response.headers()['content-type'], path).toBe(type);
+    }
+  });
+
+  test('robots.txt lets every crawler in on production', async ({ request }) => {
+    const response = await request.get(site('/robots.txt'));
+    expect(response.status()).toBe(200);
+    expect(await response.text()).toBe('User-agent: *\nAllow: /\n');
+  });
+
+  test('the page boots with no content security policy violation', async ({ page }) => {
+    await page.addInitScript(() => {
+      const violations: string[] = [];
+      (window as unknown as { mkViolations: string[] }).mkViolations = violations;
+      document.addEventListener('securitypolicyviolation', (event) => {
+        violations.push(`${event.violatedDirective} ${event.blockedURI}`);
+      });
+    });
+    const response = await page.goto(site('/'));
+    expect(response?.headers()['content-security-policy']).toContain("script-src 'self'");
+    await expect(page.locator('#splash')).toHaveCount(0, { timeout: 30_000 });
+    expect(await page.evaluate(() => (window as unknown as { mkViolations: string[] }).mkViolations)).toEqual([]);
+  });
+});
+
+/** The width and height a PNG's header gives. */
+function pngSize(bytes: Buffer): { width: number; height: number } {
+  return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
+}
+
+/** The content of each theme-color tag, in page order. */
+async function themeColors(page: Page): Promise<string[]> {
+  return page.evaluate(() =>
+    Array.from(document.querySelectorAll('meta[name="theme-color"]'), (tag) => tag.getAttribute('content') ?? ''),
+  );
+}
+
+/** The hex boot.js writes for a signed ARGB color. */
+function hex(argb: number): string {
+  return '#' + (argb & 0xffffff).toString(16).toUpperCase().padStart(6, '0');
+}
 
 /** What the splash shows, as computed colors and the poster's hex as a CSS string. */
 async function splash(page: Page): Promise<{ chrome: string; poster: string; canvas: string; hex: string }> {

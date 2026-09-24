@@ -3,6 +3,7 @@ package com.materialkolor.builder.core.platform
 import androidx.compose.ui.graphics.ImageBitmap
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.Route
+import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.QuarantineReason
 import com.materialkolor.builder.domain.persist.RecordCodec
 import com.materialkolor.builder.domain.persist.StorageKey
@@ -348,11 +349,10 @@ interface Environment {
     /** Tint the browser chrome, the `theme-color` meta tag on the web. */
     fun setThemeColor(argb: Argb)
 
-    /** Remember the splash colors so the next boot paints them before any code loads. */
-    fun writeSplashColors(
-        light: Argb,
-        dark: Argb,
-    )
+    // b-501b
+
+    /** Remember [splash] so the next boot paints it before any code loads. */
+    fun writeSplash(splash: BootSplash)
 
     /** An id for this tab, fresh on every load, so autosave can tell its own writes apart. */
     val tabId: String
@@ -415,6 +415,40 @@ interface Environment {
      * so a banner there leaves its Reload out.
      */
     val canReload: Boolean
+}
+
+// b-501b
+
+/**
+ * What the next boot's splash paints before any code loads, the chrome, the poster and whether the
+ * chrome is dark.
+ *
+ * @property[light] The chrome surface in light mode.
+ * @property[dark] The chrome surface in dark mode.
+ * @property[seed] The open theme's seed, for the poster and its hex.
+ * @property[appearance] Whether the chrome is always light, always dark or follows the system.
+ */
+data class BootSplash(
+    val light: Argb,
+    val dark: Argb,
+    val seed: Argb,
+    val appearance: Appearance,
+) {
+    /**
+     * The text `boot.js` reads from `mk:splash`, plain JSON such as
+     * `{"light":-1,"dark":-16777216,"seed":-2529989,"appearance":"system"}`.
+     *
+     * Each color is a signed 32 bit ARGB integer, so an opaque one is negative and `value & 0xFFFFFF`
+     * is its RGB. The appearance is `light`, `dark` or `system`.
+     */
+    fun toJson(): String {
+        val mode = when (appearance) {
+            Appearance.System -> "system"
+            Appearance.Light -> "light"
+            Appearance.Dark -> "dark"
+        }
+        return """{"light":${light.value},"dark":${dark.value},"seed":${seed.value},"appearance":"$mode"}"""
+    }
 }
 
 // b-214

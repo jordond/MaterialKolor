@@ -1,0 +1,15 @@
+{
+  "id": "/",
+  "name": "MaterialKolor Builder",
+  "short_name": "MaterialKolor",
+  "description": "Build a Compose color theme from one seed color or a photo. Preview it in Material 3, Expressive, Unstyled and Fluent, then export code that compiles.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fff8f6",
+  "theme_color": "#fff8f6",
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

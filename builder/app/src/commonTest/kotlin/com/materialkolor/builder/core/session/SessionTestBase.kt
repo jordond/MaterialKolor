@@ -70,7 +70,12 @@ abstract class SessionTestBase {
     }
 
     private fun colorsOf(document: ThemeDocument): SessionColors =
-        SessionColors(List(4) { document.seed }, splashLight = document.seed, splashDark = DARK_SPLASH)
+        SessionColors(
+            List(4) { document.seed },
+            splashLight = document.seed,
+            splashDark = DARK_SPLASH,
+            splashSeed = document.seed,
+        )
 
     internal companion object {
         const val TAB = "this-tab"

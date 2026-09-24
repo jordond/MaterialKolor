@@ -91,11 +91,14 @@ internal sealed interface SaveStatus {
  * @property[previewColors] The four colors of the drawer thumbnail.
  * @property[splashLight] The chrome surface in light mode, for the next boot's splash.
  * @property[splashDark] The chrome surface in dark mode, for the next boot's splash.
+ * @property[splashSeed] The theme's seed, for the poster on the next boot's splash.
  */
 internal data class SessionColors(
     val previewColors: List<Argb>,
     val splashLight: Argb,
     val splashDark: Argb,
+    // b-501b
+    val splashSeed: Argb,
 ) {
     init {
         require(previewColors.size == ProjectMeta.PREVIEW_COLORS) {
