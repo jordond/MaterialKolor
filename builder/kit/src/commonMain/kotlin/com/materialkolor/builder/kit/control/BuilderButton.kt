@@ -57,7 +57,7 @@ public fun BuilderButton(
             icon,
             enabled,
         )
-        Library.Fluent -> FluentButton(onClick, label, modifier, emphasis, icon, enabled) // fluent-placeholder
+        Library.Fluent -> FluentButton(onClick, label, modifier, emphasis, icon, enabled)
         Library.Custom -> HeadlessButton(onClick, label, CustomActionStyles.button, modifier, emphasis, icon, enabled)
     }
 }

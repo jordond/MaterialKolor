@@ -5,13 +5,11 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.vector.ImageVector
 
-// fluent-placeholder
-
 /**
  * One icon set, the glyph a skin draws for each [IconId].
  *
- * Material3 draws the rounded Material icons, and Unstyled and Custom draw Lucide. Fluent draws
- * Lucide too until the Fluent System Icons join the kit.
+ * Material3 draws the rounded Material icons, Fluent the Fluent System Icons, and Unstyled and
+ * Custom draw Lucide.
  */
 @Immutable
 public interface BuilderIcons {

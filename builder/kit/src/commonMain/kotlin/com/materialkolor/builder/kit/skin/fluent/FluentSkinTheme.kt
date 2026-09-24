@@ -1,31 +1,46 @@
 package com.materialkolor.builder.kit.skin.fluent
 
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.icon.FluentIcons
+import com.materialkolor.builder.kit.motion.BuilderDurations
+import com.materialkolor.builder.kit.motion.BuilderMotion
+import com.materialkolor.builder.kit.motion.PressScale
+import com.materialkolor.builder.kit.motion.reducedBuilderMotion
 import com.materialkolor.builder.kit.skin.ProvideSkinLocals
 import com.materialkolor.builder.kit.skin.StatusColors
 import com.materialkolor.builder.kit.skin.builderCodePalette
-import com.materialkolor.builder.kit.skin.builderMotion
-import com.materialkolor.builder.kit.skin.headless.ScrimAlpha
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.dynamiccolor.DynamicScheme
+import com.materialkolor.fluent.toFluentColors
 import com.materialkolor.ktx.toneColor
-import com.materialkolor.palettes.TonalPalette
-
-// fluent-placeholder
+import io.github.composefluent.Colors
+import io.github.composefluent.ExperimentalFluentApi
+import io.github.composefluent.FluentThemeConfiguration
+import io.github.composefluent.animation.FluentDuration
+import io.github.composefluent.animation.FluentEasing
+import io.github.composefluent.component.ContentDialogHostState
 
 /**
- * The Fluent skin, for now a stand in drawn the way Windows draws its chrome.
+ * The Fluent skin, Fluent's theme over the chrome scheme.
  *
- * Fluent is not a kit dependency yet, so this lays Windows greys under the accent the chrome's
- * primary ramp gives, at the tones Windows puts its accent on. B-403 replaces it with a real
- * `FluentTheme`.
+ * Fluent takes only its accent from [scheme], through the primary ramp, and keeps the Windows greys
+ * for everything else, which is what Fluent is. The builder tokens are read back out of the same
+ * Fluent colours, so a builder widget and a Fluent component beside it agree. Acrylic popups stay
+ * off since every overlay draws in the page.
+ *
+ * It sets the theme with `FluentThemeConfiguration`, the part of `FluentTheme` that only provides
+ * the theme. `FluentTheme` also puts a dialog host and an acrylic backdrop round the whole builder
+ * and, on desktop, swaps in a text context menu built against an older Compose that crashes on a
+ * right click in any field.
  *
  * @param[scheme] The chrome scheme for the current mode.
- * @param[isDark] Which set of greys and accent tones to use.
- * @param[reducedMotion] Whether to provide the reduced motion set instead of the builder tweens.
+ * @param[isDark] Which set of greys to use.
+ * @param[reducedMotion] Whether to provide the reduced motion set instead of the Fluent one.
  * @param[content] The builder.
  */
 @Composable
@@ -35,87 +50,125 @@ internal fun FluentSkinTheme(
     reducedMotion: Boolean,
     content: @Composable () -> Unit,
 ) {
-    val tokens = remember(scheme, isDark) { fluentTokens(scheme, isDark) }
-    val motion = remember(reducedMotion) { builderMotion(reducedMotion) }
-    ProvideSkinLocals(tokens, motion, FluentIcons, content)
+    val colors = remember(scheme) { scheme.toFluentColors() }
+    val tokens = remember(colors, scheme, isDark) { fluentTokens(colors, scheme, isDark) }
+    val motion = remember(reducedMotion) { if (reducedMotion) reducedBuilderMotion() else FluentBuilderMotion() }
+    FluentChrome(colors) {
+        ProvideSkinLocals(tokens, motion, FluentIcons, content)
+    }
 }
 
-/** The Windows greys have no hue at all, unlike a scheme's neutrals. */
-private val WindowsGrey = TonalPalette.fromHueAndChroma(hue = 0.0, chroma = 0.0)
+@OptIn(ExperimentalFluentApi::class)
+@Composable
+private fun FluentChrome(
+    colors: Colors,
+    content: @Composable () -> Unit,
+) {
+    // The builder never asks Fluent for a dialog, so this host stays empty.
+    val dialogs = remember { ContentDialogHostState() }
+    FluentThemeConfiguration(
+        colors = colors,
+        useAcrylicPopup = false,
+        contentDialogHostState = dialogs,
+        content = content,
+    )
+}
 
-private fun fluentTokens(
+/**
+ * The builder tokens off Fluent's own colour groups.
+ *
+ * Most Fluent inks and fills are translucent, drawn over Mica. The tokens are laid over the ground
+ * they sit on here so they come out solid, the way every other skin's are.
+ */
+internal fun fluentTokens(
+    colors: Colors,
     scheme: DynamicScheme,
     isDark: Boolean,
 ): BuilderTokens {
-    val tones = if (isDark) FluentTones.Dark else FluentTones.Light
     val status = StatusColors.of(isDark)
-    val textStrong = WindowsGrey.toneColor(tones.textStrong)
-    val textMuted = WindowsGrey.toneColor(tones.textMuted)
-    val accent = scheme.primaryPalette.toneColor(tones.accent)
-    val canvas = WindowsGrey.toneColor(tones.canvas)
+    val background = colors.background
+    val stroke = colors.stroke
+    val ink = colors.text.text
+    val canvas = background.solid.base
+    val panel = background.layer.default.compositeOver(canvas)
+    val textStrong = ink.primary.compositeOver(panel)
+    val textMuted = ink.secondary.compositeOver(panel)
+    val accent = colors.fillAccent.default
+    val codeTone = if (isDark) DarkCodeTone else LightCodeTone
     return BuilderTokens(
         canvas = canvas,
-        panel = WindowsGrey.toneColor(tones.panel),
-        panelRaised = WindowsGrey.toneColor(tones.panelRaised),
-        border = WindowsGrey.toneColor(tones.border),
-        borderStrong = WindowsGrey.toneColor(tones.borderStrong),
+        panel = panel,
+        panelRaised = background.solid.quaternary,
+        border = stroke.divider.default.compositeOver(panel),
+        borderStrong = stroke.controlStrong.default.compositeOver(panel),
         textStrong = textStrong,
         textMuted = textMuted,
         accent = accent,
-        onAccent = scheme.primaryPalette.toneColor(tones.onAccent),
-        focus = textStrong,
-        codeBackground = WindowsGrey.toneColor(tones.codeBackground),
+        onAccent = colors.text.onAccent.primary,
+        focus = stroke.focus.outer.compositeOver(panel),
+        codeBackground = background.solid.secondary,
         codePalette = builderCodePalette(
             plain = textStrong,
             muted = textMuted,
             primary = accent,
-            secondary = scheme.secondaryPalette.toneColor(tones.accent),
-            tertiary = scheme.tertiaryPalette.toneColor(tones.accent),
+            secondary = scheme.secondaryPalette.toneColor(codeTone),
+            tertiary = scheme.tertiaryPalette.toneColor(codeTone),
             status = status,
         ),
         success = status.success,
         warning = status.warning,
-        danger = scheme.errorPalette.toneColor(tones.accent),
-        scrim = canvas.copy(alpha = ScrimAlpha),
+        danger = colors.system.critical,
+        scrim = background.smoke.default,
         iconSize = 16.dp,
     )
 }
 
-/** The tones Windows draws each part of its chrome at, per mode. */
-private enum class FluentTones(
-    val canvas: Int,
-    val panel: Int,
-    val panelRaised: Int,
-    val border: Int,
-    val borderStrong: Int,
-    val textStrong: Int,
-    val textMuted: Int,
-    val accent: Int,
-    val onAccent: Int,
-    val codeBackground: Int,
-) {
-    Light(
-        canvas = 95,
-        panel = 100,
-        panelRaised = 98,
-        border = 85,
-        borderStrong = 40,
-        textStrong = 10,
-        textMuted = 40,
-        accent = 40,
-        onAccent = 100,
-        codeBackground = 96,
-    ),
-    Dark(
-        canvas = 10,
-        panel = 16,
-        panelRaised = 22,
-        border = 34,
-        borderStrong = 70,
-        textStrong = 98,
-        textMuted = 72,
-        accent = 80,
-        onAccent = 20,
-        codeBackground = 8,
-    ),
+/** The tones the code viewer draws the secondary and tertiary ramps at, where Fluent puts its accent. */
+private const val LightCodeTone = 40
+private const val DarkCodeTone = 80
+
+/**
+ * How long the reveal out of the library switcher takes in Fluent, halfway between Fluent's medium
+ * and long steps. None of Fluent's own steps land inside the reveal's 400 to 450 ms band.
+ */
+private const val FluentRevealMillis = 417
+
+/**
+ * Fluent's own timings and curves for everything that moves.
+ *
+ * The durations stay the builder's, the same as Material's, so a test or a screenshot run reads
+ * one set for every skin. Each spec takes a Fluent step and the curve Fluent's own components use
+ * for that kind of move.
+ */
+private class FluentBuilderMotion : BuilderMotion {
+    override val durations: BuilderDurations = BuilderDurations()
+
+    override val pressScale: Float = PressScale
+
+    override fun <T> spatial(): FiniteAnimationSpec<T> =
+        tween(FluentDuration.ShortDuration, easing = FluentEasing.PointToPointEasing)
+
+    override fun <T> effects(): FiniteAnimationSpec<T> =
+        tween(FluentDuration.QuickDuration, easing = FluentEasing.FastInvokeEasing)
+
+    override fun <T> slide(): FiniteAnimationSpec<T> =
+        tween(FluentDuration.MediumDuration, easing = FluentEasing.PointToPointEasing)
+
+    override fun <T> reveal(): FiniteAnimationSpec<T> =
+        tween(FluentRevealMillis, easing = FluentEasing.FastInvokeEasing)
+
+    override fun <T> panelEnter(): FiniteAnimationSpec<T> =
+        tween(FluentDuration.MediumDuration, easing = FluentEasing.FastInvokeEasing)
+
+    override fun <T> panelExit(): FiniteAnimationSpec<T> =
+        tween(FluentDuration.ShortDuration, easing = FluentEasing.FastDismissEasing)
+
+    override fun <T> popover(): FiniteAnimationSpec<T> =
+        tween(FluentDuration.ShortDuration, easing = FluentEasing.FastInvokeEasing)
+
+    override fun <T> press(): FiniteAnimationSpec<T> =
+        tween(FluentDuration.QuickDuration, easing = FluentEasing.FastInvokeEasing)
+
+    override fun <T> crossfade(): FiniteAnimationSpec<T> =
+        tween(FluentDuration.ShortDuration, easing = FluentEasing.FadeInFadeOutEasing)
 }
