@@ -35,6 +35,7 @@ import com.materialkolor.builder.feature.workspace.skinOf
 import com.materialkolor.builder.kit.a11y.Announcer
 import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
+import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
@@ -52,12 +53,19 @@ import kotlinx.coroutines.flow.map
  * The builder, on whatever platform [platform] describes.
  *
  * This is the one public entry point. The web shell and the desktop window both call it and hand
- * over their own services.
+ * over their own services. [motionFrozen] holds every animation still, for the browser tests'
+ * screenshots, and is never a person's setting.
  */
 @Composable
-fun BuilderApp(platform: PlatformServices) {
+fun BuilderApp(
+    platform: PlatformServices,
+    motionFrozen: Boolean = false,
+) {
     val graph = remember(platform) { createGraphFactory<AppGraph.Factory>().create(platform) }
-    CompositionLocalProvider(LocalMetroViewModelFactory provides graph.metroViewModelFactory) {
+    CompositionLocalProvider(
+        LocalMetroViewModelFactory provides graph.metroViewModelFactory,
+        LocalMotionFrozen provides motionFrozen,
+    ) {
         BuilderRoot(graph)
     }
 }

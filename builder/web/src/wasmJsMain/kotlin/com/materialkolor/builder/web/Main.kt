@@ -1,10 +1,8 @@
 package com.materialkolor.builder.web
 
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import com.materialkolor.builder.BuilderApp
-import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.web.interop.A11yLiveRegion
 import com.materialkolor.builder.web.interop.FocusRepair
 import com.materialkolor.builder.web.interop.MirrorRoot
@@ -25,7 +23,7 @@ fun main() {
     // Read once at boot, before the router can rewrite the address, and never a setting.
     val frozen = motionFrozen(locationQuery(), browserIsAutomated())
     ComposeViewport(VIEWPORT_ID) {
-        CompositionLocalProvider(LocalMotionFrozen provides frozen) { BuilderApp(BrowserPlatform) }
+        BuilderApp(BrowserPlatform, motionFrozen = frozen)
     }
 
     // b-220
