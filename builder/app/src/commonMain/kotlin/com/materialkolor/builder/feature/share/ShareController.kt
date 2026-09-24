@@ -9,8 +9,8 @@ import com.materialkolor.builder.di.AppScope
 import com.materialkolor.builder.domain.link.shareLink
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.generated.resources.Res
+import com.materialkolor.builder.generated.resources.banners_newer_version
 import com.materialkolor.builder.generated.resources.share_invalid
-import com.materialkolor.builder.generated.resources.share_newer_version
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
@@ -98,6 +98,6 @@ internal enum class ShareOutcome {
  */
 internal suspend fun sharedNoticeText(notice: BootNotice): String =
     when (notice) {
-        BootNotice.NewerVersion -> getString(Res.string.share_newer_version)
+        BootNotice.NewerVersion -> getString(Res.string.banners_newer_version)
         BootNotice.InvalidLink, BootNotice.UnknownPath -> getString(Res.string.share_invalid)
     }

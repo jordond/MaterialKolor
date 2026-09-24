@@ -189,56 +189,6 @@ class ProjectsDrawerTest {
         }
 
     @Test
-    fun conflictBanner_eachButton_settlesTheClashItsOwnWay() =
-        runComposeUiTest {
-            showBanners(ProjectsModel.State(conflict = true))
-
-            onNodeWithText("Load latest").performClick()
-            waitForIdle()
-            onNodeWithText("Keep mine").performClick()
-            waitForIdle()
-
-            actions shouldBe listOf(
-                ProjectsAction.ResolveConflict(keepMine = false),
-                ProjectsAction.ResolveConflict(keepMine = true),
-            )
-        }
-
-    @Test
-    fun saveBanner_savesOnceAndGoesOnceTheThemeIsSaved() =
-        runComposeUiTest {
-            var state by mutableStateOf(ProjectsModel.State(open = ProjectRef.Transient("code")))
-            setContent {
-                Themed {
-                    ProjectBanners(
-                        state = state,
-                        onAction = { action ->
-                            actions += action
-                            val saved = ProjectRef.Persisted("p1")
-                            if (action == ProjectsAction.SaveShared) state = state.copy(open = saved)
-                        },
-                    )
-                }
-            }
-            waitForIdle()
-            onNodeWithText("This theme isn’t in your projects yet").assertExists()
-
-            onNodeWithText("Save to my projects").performClick()
-            waitForIdle()
-
-            actions shouldBe listOf(ProjectsAction.SaveShared)
-            onAllNodes(hasText("Save to my projects")).assertCountEquals(0)
-        }
-
-    @Test
-    fun newerDataBanner_asksForAReload() =
-        runComposeUiTest {
-            showBanners(ProjectsModel.State(newerData = true))
-
-            onNode(hasText("A newer version of the builder", substring = true)).assertExists()
-        }
-
-    @Test
     fun undoToast_showsAndItsUndoHandsBackThatDeletion() =
         runComposeUiTest {
             val deleted = DeletedProject(
@@ -300,15 +250,6 @@ class ProjectsDrawerTest {
         onNodeWithText("Rename").performClick()
         waitForIdle()
         onNode(hasSetTextAction() and hasText(name)).assertExists()
-    }
-
-    private fun ComposeUiTest.showBanners(state: ProjectsModel.State) {
-        setContent {
-            Themed {
-                ProjectBanners(state = state, onAction = { action -> actions += action })
-            }
-        }
-        waitForIdle()
     }
 
     /** The search is the only text field until a rename opens one. */
