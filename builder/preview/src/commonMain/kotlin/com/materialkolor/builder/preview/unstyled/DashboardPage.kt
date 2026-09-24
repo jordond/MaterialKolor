@@ -71,12 +71,14 @@ private const val GridLines = 4
  * The table's rows are items of the page's own lazy list, so a long table only composes what shows.
  *
  * @param[state] What the app remembers, shared by both copies.
+ * @param[focus] Where focus goes in this copy as the status menu opens and closes.
  * @param[phone] Whether the page is on a phone, which puts the page actions on it and tightens it.
  * @param[modifier] Applied to the page.
  */
 @Composable
 internal fun DashboardPage(
     state: DemoAppState,
+    focus: DashboardFocus,
     phone: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -96,7 +98,7 @@ internal fun DashboardPage(
         item(key = "alert") { PayoutAlert(phone, Modifier.padding(bottom = SectionGap)) }
         item(key = "metrics") { MetricCards(report.metrics, range, Modifier.padding(bottom = SectionGap)) }
         item(key = "chart") { RevenueChart(report.chart, Modifier.padding(bottom = PageGap)) }
-        item(key = "orders") { OrdersTitle(state, filter, Modifier.padding(bottom = Gap)) }
+        item(key = "orders") { OrdersTitle(state, focus, filter, Modifier.padding(bottom = Gap)) }
         item(key = "orders.header") { TableHeader() }
         items(orders, key = { order -> order.id }) { order -> OrderRow(order, last = order === orders.last()) }
     }
@@ -142,6 +144,7 @@ private fun RangeTabs(
                         key = entry,
                         modifier = Modifier
                             .previewRoles(if (selected) UnstyledComponent.SelectedTab else UnstyledComponent.Tab)
+                            .foldState(entry.label, selectedWord(selected))
                             .focusRing(interactions, 2.dp, DashboardToken.Primary.color, ControlShape)
                             .clip(ControlShape)
                             .background(container?.color ?: Color.Transparent),
@@ -312,8 +315,8 @@ private fun RevenueChart(
                 style = HeadingStyle,
                 color = DashboardToken.OnSurface.color,
             )
-            LegendEntry(DashboardCopy.ChartCurrent, current, muted)
-            LegendEntry(DashboardCopy.ChartPrevious, previous, muted)
+            LegendEntry(DashboardCopy.ChartCurrent, DashboardToken.Primary, muted)
+            LegendEntry(DashboardCopy.ChartPrevious, DashboardToken.Secondary, muted)
         }
         Canvas(
             Modifier
@@ -338,14 +341,21 @@ private fun RevenueChart(
     }
 }
 
+/** A legend's dot, painted from [token] and declaring its role, and its label. */
 @Composable
 private fun LegendEntry(
     label: String,
-    color: Color,
+    token: DashboardToken,
     textColor: Color,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(LegendDot).clip(CircleShape).background(color))
+        Box(
+            Modifier
+                .size(LegendDot)
+                .previewRoles(token.role)
+                .clip(CircleShape)
+                .background(token.color),
+        )
         Text(label, style = SmallStyle, color = textColor)
     }
 }

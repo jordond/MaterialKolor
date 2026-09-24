@@ -1,24 +1,17 @@
 package com.materialkolor.builder.preview.unstyled
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.click
-import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
@@ -35,7 +28,6 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.model.Library
@@ -54,7 +46,6 @@ import com.materialkolor.builder.preview.inspect.INSPECT_CARD_TAG
 import com.materialkolor.builder.preview.inspect.Inspecting
 import com.materialkolor.builder.preview.inspect.OnCard
 import com.materialkolor.builder.preview.inspect.PreviewRoles
-import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.split.SplitPreview
 import com.materialkolor.builder.preview.split.SplitState
 import io.github.takahirom.roborazzi.captureRoboImage
@@ -68,7 +59,6 @@ import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.test.Test
-import androidx.compose.ui.semantics.Role as SemanticsRole
 
 /**
  * Where B-213's recording job writes the baselines. Nothing is written unless a Roborazzi task
@@ -78,13 +68,6 @@ private const val DashboardScreenshotDir = "src/jvmTest/screenshots/dashboard"
 
 /** Where the dashboard's sources live, from the module the tests run in. */
 private const val DashboardSourceDir = "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled"
-
-/** The frame the dock shows each device in, the kit's screen widths at the height of a first screen. */
-private val DashboardFrames: Map<DeviceWidth, IntSize> = mapOf(
-    DeviceWidth.Phone to IntSize(412, 900),
-    DeviceWidth.Tablet to IntSize(840, 900),
-    DeviceWidth.Desktop to IntSize(1280, 800),
-)
 
 /** The four families F-20 wants on every screen. */
 private val DashboardFamilies: Map<String, Set<Role>> = mapOf(
@@ -115,32 +98,26 @@ private val DashboardBannedUnstyled: List<String> =
  */
 private val DashboardEndlessMotion: List<String> = listOf("rememberInfinite", "infiniteRepeat")
 
-/** The order status button, which is the only dropdown on the page. */
-private val StatusButton: SemanticsMatcher =
-    hasClickAction() and SemanticsMatcher.expectValue(SemanticsProperties.Role, SemanticsRole.DropdownList)
-
-/** The pick of the status menu that keeps [filter], in any copy. */
-private fun menuItem(filter: OrderFilter): SemanticsMatcher =
-    SemanticsMatcher.expectValue(SemanticsProperties.Role, SemanticsRole.RadioButton) and
-        hasAnyDescendant(hasText(filter.label))
-
 @OptIn(ExperimentalTestApi::class)
 class DashboardAppTest {
     @Test
     fun controls_everyDeviceWidth_declareTheirOwnRoles() {
+        // A phone's token panel takes the page out of the semantics tree, so each width goes twice.
         for ((width, frame) in DashboardFrames) {
-            withClue(width) {
-                runComposeUiTest {
-                    tallDashboard(width, frame)
+            for (drawer in listOf(true, false)) {
+                withClue("$width, drawer $drawer") {
+                    runComposeUiTest {
+                        tallDashboard(width, frame, drawer)
 
-                    // Unmerged, since a merged node also carries the roles its children declared.
-                    val controls = onAllNodes(hasClickAction() or hasSetTextAction(), useUnmergedTree = true)
-                        .fetchSemanticsNodes()
-                    controls.shouldNotBeEmpty()
-                    controls
-                        .filter { node -> PreviewRoles !in node.config }
-                        .map { node -> node.config.toString() }
-                        .shouldBeEmpty()
+                        // Unmerged, since a merged node also carries the roles its children declared.
+                        val controls = onAllNodes(hasClickAction() or hasSetTextAction(), useUnmergedTree = true)
+                            .fetchSemanticsNodes()
+                        controls.shouldNotBeEmpty()
+                        controls
+                            .filter { node -> PreviewRoles !in node.config }
+                            .map { node -> node.config.toString() }
+                            .shouldBeEmpty()
+                    }
                 }
             }
         }
@@ -150,18 +127,21 @@ class DashboardAppTest {
     fun tokenPanel_everyDeviceWidth_listsEveryRoleTheScreenDeclares() {
         val listed = DashboardToken.entries.map { entry -> entry.role }.toSet()
         for ((width, frame) in DashboardFrames) {
-            withClue(width) {
-                runComposeUiTest {
-                    tallDashboard(width, frame)
+            for (drawer in listOf(true, false)) {
+                withClue("$width, drawer $drawer") {
+                    runComposeUiTest {
+                        tallDashboard(width, frame, drawer)
 
-                    val declared = onAllNodes(SemanticsMatcher.keyIsDefined(PreviewRoles), useUnmergedTree = true)
-                        .fetchSemanticsNodes()
-                        .flatMap { node -> node.config[PreviewRoles] }
-                        .filterIsInstance<ColorRef.OfRole>()
-                        .map { ref -> ref.role }
-                        .toSet()
-                    (declared - listed).shouldBeEmpty()
-                    onAllNodesWithText(DashboardToken.Scrim.token.name).fetchSemanticsNodes().shouldNotBeEmpty()
+                        val declared = onAllNodes(SemanticsMatcher.keyIsDefined(PreviewRoles), useUnmergedTree = true)
+                            .fetchSemanticsNodes()
+                            .flatMap { node -> node.config[PreviewRoles] }
+                            .filterIsInstance<ColorRef.OfRole>()
+                            .map { ref -> ref.role }
+                            .toSet()
+                        (declared - listed).shouldBeEmpty()
+                        val scrimName = onAllNodesWithText(DashboardToken.Scrim.token.name).fetchSemanticsNodes()
+                        if (drawer) scrimName.shouldNotBeEmpty() else scrimName.shouldBeEmpty()
+                    }
                 }
             }
         }
@@ -372,13 +352,6 @@ class DashboardAppTest {
     }
 }
 
-/** Every panel open, so the menu, the token panel and a phone's navigation are on screen too. */
-private fun DemoAppState.openEverything() {
-    setOn(DashboardDrawerSwitch, true)
-    setOn(DashboardMenuSwitch, true)
-    setOn(DashboardNavSwitch, true)
-}
-
 /** Everything the dashboard keeps in [DemoAppState], to tell whether anything changed. */
 private fun DemoAppState.dashboardSnapshot(): List<Any> {
     val picks = listOf(
@@ -396,40 +369,4 @@ private fun String.isBannedOnTheDashboard(): Boolean {
         "TextField" in name ||
         (startsWith("com.composeunstyled.") && DashboardBannedUnstyled.any { word -> word in name }) ||
         (startsWith("com.materialkolor.builder.kit.") && !startsWith("com.materialkolor.builder.kit.motion."))
-}
-
-/** The dashboard for [width] with every panel open, in a frame tall enough that every lazy item composes. */
-@OptIn(ExperimentalTestApi::class)
-private fun ComposeUiTest.tallDashboard(
-    width: DeviceWidth,
-    frame: IntSize,
-) {
-    val state = DemoAppState()
-    state.openEverything()
-    setContent {
-        DashboardHarness(
-            spec = LightSpec,
-            state = state,
-            width = width,
-            // Wider than the window on desktop, and tall enough for the whole page.
-            modifier = Modifier
-                .wrapContentSize(Alignment.TopStart, unbounded = true)
-                .requiredSize(frame.width.dp, 2400.dp),
-        )
-    }
-}
-
-/** The dashboard in an Unstyled pane of [spec], under the Unstyled chrome, with motion frozen. */
-@Composable
-private fun DashboardHarness(
-    spec: PaneSpec,
-    state: DemoAppState,
-    width: DeviceWidth,
-    modifier: Modifier,
-) {
-    CompositionLocalProvider(LocalMotionFrozen provides true) {
-        Chrome(Skin(Library.Unstyled, expressive = false)) {
-            PreviewPane(spec, modifier) { UnstyledAppEntry(spec, state, width) }
-        }
-    }
 }

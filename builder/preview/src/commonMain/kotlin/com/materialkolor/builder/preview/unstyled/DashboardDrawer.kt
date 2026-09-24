@@ -26,6 +26,7 @@ import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.X
 import com.composeunstyled.Text
 import com.composeunstyled.UnstyledVerticalSeparator
+import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.preview.canvas.DemoAppState
 
 private val SwatchSize = 24.dp
@@ -36,19 +37,22 @@ private val SwatchShape = RoundedCornerShape(6.dp)
  * screen reads, by name and with a swatch of its color in the pane's mode.
  *
  * The panel is part of the app's layout, docked beside the page on a tablet or desktop and laid
- * over it on a phone. Its close button and the top bar's toggle both put it away, and the app
- * leaves Back to the builder.
+ * over it on a phone. Its close button and the top bar's toggle both put it away, and focus goes
+ * back to the toggle if the panel held it. The app leaves Back to the builder.
  *
  * @param[state] What the app remembers, shared by both copies.
+ * @param[focus] Where focus goes in this copy as the panel opens and closes.
  * @param[modifier] Applied to the panel. Size it here.
  */
 @Composable
 internal fun TokenPanel(
     state: DemoAppState,
+    focus: DashboardFocus,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier
+            .tracksFocus(focus, DashboardArea.TokenPanel)
             .previewRoles(UnstyledComponent.Drawer)
             .background(DashboardToken.SurfaceContainerLow.color),
     ) {
@@ -72,8 +76,9 @@ internal fun TokenPanel(
                 DashboardIconButton(
                     icon = Lucide.X,
                     label = DashboardCopy.CloseTokens,
-                    onClick = { state.setOn(DashboardDrawerSwitch, false) },
+                    onClick = { focus.closeTokenPanel(state) },
                     tooltip = Overhang.BelowEnd,
+                    focusRequester = focus.drawerClose,
                     on = DashboardToken.SurfaceContainerLow,
                 )
             }
@@ -95,7 +100,16 @@ internal fun TokenPanel(
     }
 }
 
-/** A token's swatch and name. The swatch declares the token's role, so Inspect names it too. */
+/** Puts the token panel away, and hands focus back to the top bar's toggle if the panel held it. */
+internal fun DashboardFocus.closeTokenPanel(state: DemoAppState) {
+    state.setOn(DashboardDrawerSwitch, false)
+    handBack(DashboardArea.TokenPanel, drawerToggle)
+}
+
+/**
+ * A token's swatch and name. The swatch declares the token's role and its border's, so Inspect
+ * names them too.
+ */
 @Composable
 private fun TokenRow(entry: DashboardToken) {
     Row(
@@ -106,7 +120,7 @@ private fun TokenRow(entry: DashboardToken) {
         Box(
             Modifier
                 .size(SwatchSize)
-                .previewRoles(entry.role)
+                .previewRoles(*listOf(entry.role, Role.OutlineVariant).distinct().toTypedArray())
                 .clip(SwatchShape)
                 .background(entry.color)
                 .border(1.dp, DashboardToken.OutlineVariant.color, SwatchShape),
