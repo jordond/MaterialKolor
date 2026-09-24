@@ -112,6 +112,7 @@ private fun TaskList(
         }
 
         Divider()
+
         Footer(
             state = state,
             dispatch = dispatch,

@@ -53,13 +53,16 @@ internal fun SeedSwatch(
         },
         label = "SeedSwatchRing",
     )
+
     val scale by animateFloatAsState(
         targetValue = if (pressed) PRESSED_SCALE else 1f,
         label = "SeedSwatchScale",
     )
+
     val check = remember(seed) { seed.color.readableOn() }
 
     Box(
+        contentAlignment = Alignment.Center,
         modifier = modifier
             .size(32.dp)
             .clickable(
@@ -73,7 +76,6 @@ internal fun SeedSwatch(
                 scaleY = scale
             }.clip(CircleShape)
             .background(seed.color),
-        contentAlignment = Alignment.Center,
     ) {
         if (selected) {
             Icon(

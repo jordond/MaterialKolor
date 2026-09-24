@@ -28,6 +28,7 @@ internal fun LabeledButton(
                 modifier = Modifier.size(16.dp),
             )
         }
+
         Text(text = label)
     }
 

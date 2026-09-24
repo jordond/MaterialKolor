@@ -14,11 +14,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 
-/**
- * The few small marks the app needs, drawn as strokes so there is no icon library to pull in.
- *
- * Each line is a list of points given as shares of the glyph's width and height, so a glyph scales to any size.
- */
 internal enum class Glyph(
     val lines: List<List<Offset>>,
 ) {
@@ -49,10 +44,7 @@ internal fun Icon(
     color: Color,
     modifier: Modifier = Modifier,
 ) {
-    // The color moves on every frame of a seed or mode fade, so it is read while drawing rather than captured below.
-    // That way the path and stroke are only built again for a new glyph or a new size.
     val currentColor by rememberUpdatedState(color)
-
     Spacer(
         modifier = modifier.drawWithCache {
             val stroke = Stroke(
@@ -84,7 +76,5 @@ private fun Glyph.toPath(size: Size): Path {
     return path
 }
 
-/** Stroke width as a share of the glyph's size, so a glyph keeps its weight at any size. */
 private const val STROKE_SHARE = 0.12f
-
 private const val RING_SHARE = 0.34f

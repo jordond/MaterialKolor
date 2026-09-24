@@ -82,6 +82,7 @@ private fun LabeledGroup(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         GroupLabel(text = label)
+
         content()
     }
 }

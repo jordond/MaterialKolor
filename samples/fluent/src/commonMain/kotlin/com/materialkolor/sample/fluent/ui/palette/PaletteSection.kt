@@ -78,6 +78,7 @@ private fun PaletteCard(
                 color = FluentTheme.colors.text.text.secondary,
             )
         }
+
         content()
     }
 }
@@ -94,6 +95,7 @@ private fun TagRamps() {
                     tag = tag,
                     modifier = Modifier.width(88.dp),
                 )
+
                 ShadeRamp(
                     shades = SampleTheme.colors.shades(tag),
                     height = 24.dp,

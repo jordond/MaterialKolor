@@ -31,16 +31,16 @@ internal fun SectionCard(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Layer(
-        modifier = modifier.fillMaxWidth(),
         shape = FluentTheme.shapes.overlay,
         color = FluentTheme.colors.background.card.default,
         border = BorderStroke(width = 1.dp, color = FluentTheme.colors.stroke.card.default),
         backgroundSizing = BackgroundSizing.InnerBorderEdge,
+        modifier = modifier.fillMaxWidth(),
     ) {
         Column(
-            modifier = Modifier.padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             content = content,
+            modifier = Modifier.padding(24.dp),
         )
     }
 }
@@ -52,10 +52,10 @@ internal fun SectionLabel(
 ) {
     Text(
         text = text,
-        modifier = modifier,
         style = FluentTheme.typography.caption,
         color = FluentTheme.colors.text.text.secondary,
         fontWeight = FontWeight.SemiBold,
+        modifier = modifier,
     )
 }
 
@@ -67,12 +67,12 @@ internal fun TagChip(
     val tint = SampleTheme.colors.tint(tag)
 
     Box(
+        contentAlignment = Alignment.Center,
         modifier = modifier
             .widthIn(min = 72.dp)
             .clip(CircleShape)
             .background(tint.container)
             .padding(horizontal = 12.dp, vertical = 4.dp),
-        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = SampleCopy.label(tag),

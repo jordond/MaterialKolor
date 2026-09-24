@@ -21,9 +21,6 @@ import com.materialkolor.sample.customtheme.ui.component.AppShapes
 import com.materialkolor.sample.customtheme.ui.component.AppType
 import com.materialkolor.sample.customtheme.ui.component.Text
 
-/**
- * One accent family, flattened out of [AppColors] so the palette can loop over the seven of them.
- */
 internal data class AccentFamily(
     val name: String,
     val color: Color,

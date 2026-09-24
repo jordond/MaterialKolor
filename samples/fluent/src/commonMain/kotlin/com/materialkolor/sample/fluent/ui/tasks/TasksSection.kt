@@ -44,10 +44,7 @@ internal fun TasksSection(
             onSelect = { filter -> onAction(SampleAction.SelectFilter(filter)) },
         )
 
-        TaskList(
-            state = state,
-            onAction = onAction,
-        )
+        TaskList(state = state, onAction = onAction)
 
         Divider()
 
@@ -67,6 +64,7 @@ private fun Progress(state: SampleState) {
             text = SampleCopy.summary(done = state.doneCount, total = state.totalCount),
             style = FluentTheme.typography.bodyStrong,
         )
+
         ProgressBar(
             progress = progress,
             modifier = Modifier.fillMaxWidth(),
@@ -89,6 +87,7 @@ private fun FilterPicker(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(text = SampleCopy.label(filter))
+
             Text(
                 text = state.count(filter).toString(),
                 style = FluentTheme.typography.caption,
@@ -104,14 +103,15 @@ private fun TaskList(
     onAction: (SampleAction) -> Unit,
 ) {
     Column(
+        verticalArrangement = Arrangement.spacedBy(2.dp),
         modifier = Modifier
             .fillMaxWidth()
             .animateContentSize(),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         if (state.visibleTasks.isEmpty()) {
             EmptyState(filter = state.filter)
         }
+
         for (task in state.visibleTasks) {
             key(task.id) {
                 TaskRow(
@@ -130,14 +130,15 @@ private fun Footer(
     onClearDone: () -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Text(
             text = SampleCopy.remaining(state.activeCount),
-            modifier = Modifier.weight(1f),
             color = FluentTheme.colors.text.text.secondary,
+            modifier = Modifier.weight(1f),
         )
+
         LabeledButton(
             label = SampleCopy.clearDone,
             onClick = onClearDone,

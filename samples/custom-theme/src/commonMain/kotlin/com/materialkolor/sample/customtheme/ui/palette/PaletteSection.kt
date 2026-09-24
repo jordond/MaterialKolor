@@ -9,9 +9,6 @@ import com.materialkolor.sample.customtheme.theme.AppColors
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 import com.materialkolor.sample.customtheme.ui.component.GroupLabel
 
-/**
- * Every slot [AppColors] generates for the current seed and mode, grouped the way the app uses them.
- */
 @Composable
 internal fun PaletteSection(modifier: Modifier = Modifier) {
     val colors = LocalAppColors.current

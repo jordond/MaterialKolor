@@ -18,7 +18,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.materialkolor.sample.customtheme.theme.AppColors
 import com.materialkolor.sample.customtheme.theme.AppTheme
 import com.materialkolor.sample.customtheme.theme.AppThemeMode
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
@@ -32,9 +31,6 @@ import com.materialkolor.sample.shared.state.SampleStore
 import com.materialkolor.sample.shared.state.rememberSampleStore
 import com.materialkolor.sample.shared.theme.ThemeMode
 
-/**
- * The Tasks app on Compose Foundation alone, drawn with the components in `ui.component` and colored by [AppColors].
- */
 @Composable
 public fun SampleApp(store: SampleStore = rememberSampleStore()) {
     val state = store.state
@@ -109,7 +105,6 @@ private fun Page(
     }
 }
 
-/** The theme keeps its own enum so it does not depend on the sample. */
 private fun ThemeMode.toAppThemeMode(): AppThemeMode =
     when (this) {
         ThemeMode.System -> AppThemeMode.System

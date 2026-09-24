@@ -75,10 +75,6 @@ internal fun TaskRow(
     }
 }
 
-/**
- * Each tag gets an app-owned family harmonized toward the seed, so the three stay apart from each other and still
- * belong to the theme.
- */
 internal fun TaskTag.accent(colors: AppColors): Accent =
     when (this) {
         TaskTag.Personal -> Accent(container = colors.loveContainer, content = colors.onLoveContainer)
@@ -86,5 +82,4 @@ internal fun TaskTag.accent(colors: AppColors): Accent =
         TaskTag.Errand -> Accent(container = colors.warmContainer, content = colors.onWarmContainer)
     }
 
-/** Rows get a fainter hover tint than controls, since clicking the row itself does nothing. */
 private const val HOVER_ALPHA = 0.04f

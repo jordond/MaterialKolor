@@ -15,11 +15,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 
-/**
- * A thin bar filled [progress] of the way, from 0 to 1.
- *
- * The fill glides to a new value instead of jumping.
- */
 @Composable
 internal fun ProgressBar(
     progress: Float,

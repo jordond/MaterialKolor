@@ -19,9 +19,6 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 
-/**
- * @param[accent] The colors of the picked option. Defaults to the primary container.
- */
 @Composable
 internal fun <T> SegmentedControl(
     options: List<T>,

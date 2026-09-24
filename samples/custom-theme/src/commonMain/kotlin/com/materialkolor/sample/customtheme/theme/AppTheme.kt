@@ -30,10 +30,6 @@ public enum class AppThemeMode {
 public val LocalAppColors: ProvidableCompositionLocal<AppColors> =
     staticCompositionLocalOf { error("No AppColors provided, wrap the content in AppTheme.") }
 
-/**
- * Generate the theme from [seed] and hand it to [content]. A new seed or mode fades the colors over instead of
- * swapping them in one frame.
- */
 @Composable
 public fun AppTheme(
     seed: Color,

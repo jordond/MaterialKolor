@@ -20,9 +20,6 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 
-/**
- * [color] is the one color in the UI that does not come from the theme, because it is what the theme comes from.
- */
 @Composable
 internal fun SeedSwatch(
     color: Color,

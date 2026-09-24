@@ -21,9 +21,6 @@ import com.materialkolor.sample.shared.model.canAddTask
 import com.materialkolor.sample.shared.state.SampleAction
 import com.materialkolor.sample.shared.ui.SampleCopy
 
-/**
- * The text in the field is the only state the UI keeps. Everything else goes through [dispatch].
- */
 @Composable
 internal fun TaskComposer(
     composerTag: TaskTag,

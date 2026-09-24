@@ -20,8 +20,8 @@ internal actual fun PageScrollbar(
     val colors = LocalAppColors.current
 
     VerticalScrollbar(
-        adapter = rememberScrollbarAdapter(state),
         modifier = modifier,
+        adapter = rememberScrollbarAdapter(state),
         style = ScrollbarStyle(
             minimalHeight = 32.dp,
             thickness = 8.dp,

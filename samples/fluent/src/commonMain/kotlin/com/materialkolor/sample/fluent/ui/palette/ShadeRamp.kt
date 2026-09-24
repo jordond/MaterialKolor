@@ -30,7 +30,7 @@ import io.github.composefluent.generateShades
  * The seven [shades] side by side, darkest first.
  *
  * @param[labelsFrom] The ramp the label colors are worked out from, or null to leave the tiles bare. Pass the ramp a
- *   fade is heading to rather than [shades] mid fade, so the contrast search runs once per seed and not every frame.
+ * fade is heading to rather than [shades] mid-fade, so the contrast search runs once per seed and not every frame.
  */
 @Composable
 internal fun ShadeRamp(
@@ -39,8 +39,6 @@ internal fun ShadeRamp(
     height: Dp = 96.dp,
     labelsFrom: Shades? = null,
 ) {
-    // Each slot keeps its tone from seed to seed, so a label picked for the target ramp reads on its tile all
-    // through a fade.
     val onColors = remember(labelsFrom) { labelsFrom?.named()?.map { (_, color) -> color.readableOn() } }
 
     Row(
@@ -67,7 +65,6 @@ internal fun WithoutAdapter(
     seed: Color,
     modifier: Modifier = Modifier,
 ) {
-    // generateShades is a lookup with a single entry, so every seed other than Windows blue comes back as Windows blue.
     val fallback = remember(seed) { generateShades(seed) }
 
     Column(
@@ -75,6 +72,7 @@ internal fun WithoutAdapter(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         ComparisonRow(label = "rememberFluentColors", shades = FluentTheme.colors.shades)
+
         ComparisonRow(label = "generateShades", shades = fallback)
     }
 }
@@ -91,6 +89,7 @@ private fun ComparisonRow(
             style = FluentTheme.typography.caption,
             color = FluentTheme.colors.text.text.secondary,
         )
+
         ShadeRamp(
             shades = shades,
             height = 32.dp,
@@ -106,10 +105,10 @@ private fun ShadeTile(
     modifier: Modifier = Modifier,
 ) {
     Box(
+        contentAlignment = Alignment.BottomStart,
         modifier = modifier
             .background(color)
             .padding(8.dp),
-        contentAlignment = Alignment.BottomStart,
     ) {
         if (onColor != null) {
             Column {
@@ -119,6 +118,7 @@ private fun ShadeTile(
                     color = onColor,
                     fontWeight = FontWeight.SemiBold,
                 )
+
                 Text(
                     text = color.toHex(),
                     style = FluentTheme.typography.caption,

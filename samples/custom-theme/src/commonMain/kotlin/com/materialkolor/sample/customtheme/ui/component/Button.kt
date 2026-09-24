@@ -25,10 +25,6 @@ internal enum class ButtonStyle {
     Danger,
 }
 
-/**
- * The primary style steps through the theme's own interaction tones, `primaryRaised` on hover and `primaryPressed`
- * while held, instead of laying a tint over the fill.
- */
 @Composable
 internal fun Button(
     text: String,
@@ -116,5 +112,4 @@ private fun buttonLook(
     }
 }
 
-/** Disabled labels fade back so the control reads as unavailable, not just muted. */
 private const val DISABLED_ALPHA = 0.6f

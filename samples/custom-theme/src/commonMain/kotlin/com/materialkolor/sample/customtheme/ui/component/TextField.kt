@@ -23,9 +23,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 
-/**
- * [modifier] lands on the editable node itself, so a focus requester set there reaches the field.
- */
 @Composable
 internal fun TextField(
     state: TextFieldState,
@@ -44,10 +41,10 @@ internal fun TextField(
     val shape = AppShapes.Control
 
     BasicTextField(
-        state = state,
         modifier = modifier
             .height(ControlHeight)
             .hoverable(interactionSource),
+        state = state,
         textStyle = AppType.Body.copy(color = colors.textStrong),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         onKeyboardAction = { onSubmit() },

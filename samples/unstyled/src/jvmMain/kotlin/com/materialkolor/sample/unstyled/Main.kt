@@ -9,6 +9,9 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.materialkolor.sample.unstyled.ui.UnstyledSampleApp
 
+/**
+ * Run it with `./gradlew :samples:unstyled:run`.
+ */
 public fun main() {
     application {
         val state = rememberWindowState(

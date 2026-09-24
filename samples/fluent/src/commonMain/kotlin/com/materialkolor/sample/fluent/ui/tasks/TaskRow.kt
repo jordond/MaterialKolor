@@ -58,26 +58,29 @@ internal fun TaskRow(
     )
 
     Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = modifier
             .fillMaxWidth()
             .clip(FluentTheme.shapes.control)
             .background(fill)
             .hoverable(interaction)
             .padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         CheckBox(
             checked = task.isDone,
             onCheckStateChange = { onToggle() },
         )
+
         Text(
             text = task.title,
-            modifier = Modifier.weight(1f),
             color = titleColor,
             textDecoration = if (task.isDone) TextDecoration.LineThrough else null,
+            modifier = Modifier.weight(1f),
         )
+
         TagChip(tag = task.tag)
+
         SubtleButton(
             onClick = onDelete,
             iconOnly = true,
@@ -99,18 +102,18 @@ internal fun EmptyState(
     val tint = SampleTheme.colors.accentTint
 
     Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
                 .background(tint.container),
-            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = filter.emptyIcon(),
@@ -119,6 +122,7 @@ internal fun EmptyState(
                 tint = tint.content,
             )
         }
+
         Text(
             text = SampleCopy.empty(filter),
             color = FluentTheme.colors.text.text.secondary,

@@ -30,18 +30,19 @@ internal fun Header(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
                 text = SampleCopy.appTitle,
                 modifier = Modifier.weight(1f),
                 style = FluentTheme.typography.title,
             )
+
             ModePicker(
                 mode = state.mode,
                 onSelect = { mode -> onAction(SampleAction.SelectMode(mode)) },
@@ -70,6 +71,7 @@ private fun ModePicker(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         SectionLabel(text = SampleCopy.modeGroup)
+
         SegmentedPicker(
             options = ThemeMode.entries,
             selected = mode,
@@ -89,6 +91,7 @@ private fun SeedPicker(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         SectionLabel(text = SampleCopy.seedGroup)
+
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             for (option in SampleSeed.entries) {
                 SeedSwatch(
@@ -106,7 +109,6 @@ private fun SectionTabs(
     section: AppSection,
     onSelect: (AppSection) -> Unit,
 ) {
-    // Pulled back by the item padding, so the first tab lines up with the title above it.
     SelectorBar(modifier = Modifier.offset(x = (-12).dp)) {
         for (option in AppSection.entries) {
             SelectorBarItem(

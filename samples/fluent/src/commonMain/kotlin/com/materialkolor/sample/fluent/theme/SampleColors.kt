@@ -18,11 +18,6 @@ internal data class Tint(
     val content: Color,
 )
 
-/**
- * The colors this sample needs that Fluent does not have, one ramp per task tag.
- *
- * @property[accentTarget] The accent ramp a seed fade is heading to. Once the fade settles it matches [accent].
- */
 @Immutable
 internal class SampleColors(
     private val accent: Shades,

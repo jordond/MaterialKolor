@@ -9,9 +9,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/**
- * Each style sets size, weight and line height only, and the color comes from `AppColors` where the text is drawn.
- */
 internal object AppType {
     val Title: TextStyle = TextStyle(
         fontSize = 28.sp,
@@ -47,15 +44,11 @@ internal object AppType {
 }
 
 internal object AppShapes {
-    /** Pieces that sit inside another control, like a segmented option, a chip or an icon button. */
     val Inner: RoundedCornerShape = RoundedCornerShape(8.dp)
-
     val Control: RoundedCornerShape = RoundedCornerShape(10.dp)
-
     val Card: RoundedCornerShape = RoundedCornerShape(12.dp)
 }
 
-/** The height every control shares, so a field, a picker and a button line up in one row. */
 internal val ControlHeight: Dp = 36.dp
 
 @Immutable

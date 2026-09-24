@@ -18,11 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 
-/**
- * Built on the platform `Dialog`, which handles the window layer, focus, Esc and outside clicks.
- *
- * @param[buttons] The answers, laid out from the end, so the last one sits in the corner.
- */
 @Composable
 internal fun ModalDialog(
     title: String,
@@ -71,5 +66,4 @@ internal fun ModalDialog(
     }
 }
 
-/** Enough scrim to push the page back without hiding it. */
 private const val SCRIM_ALPHA = 0.4f

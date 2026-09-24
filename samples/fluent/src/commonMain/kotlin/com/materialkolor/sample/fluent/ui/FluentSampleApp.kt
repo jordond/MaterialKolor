@@ -25,9 +25,6 @@ import io.github.composefluent.background.Mica
 import io.github.composefluent.component.ScrollbarContainer
 import io.github.composefluent.component.rememberScrollbarAdapter
 
-/**
- * The Tasks app on Compose Fluent, themed from a seed color by material-kolor-fluent.
- */
 @Composable
 public fun FluentSampleApp(store: SampleStore = rememberSampleStore()) {
     val state = store.state
@@ -52,22 +49,23 @@ private fun SampleWindow(store: SampleStore) {
             modifier = Modifier.fillMaxSize(),
         ) {
             Box(
+                contentAlignment = Alignment.TopCenter,
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
                     .padding(24.dp),
-                contentAlignment = Alignment.TopCenter,
             ) {
                 Column(
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
                     modifier = Modifier
                         .widthIn(max = 720.dp)
                         .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
                     Header(
                         state = state,
                         onAction = onAction,
                     )
+
                     when (state.section) {
                         AppSection.Tasks -> TasksSection(state = state, onAction = onAction)
                         AppSection.Palette -> PaletteSection(seed = state.seed)

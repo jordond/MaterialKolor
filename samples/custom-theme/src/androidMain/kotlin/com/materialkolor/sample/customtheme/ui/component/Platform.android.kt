@@ -12,5 +12,4 @@ internal actual fun PageScrollbar(
     modifier: Modifier,
 ) = Unit
 
-// Android dims behind a dialog with the window's own scrim, so there is nothing to pass it.
 internal actual fun dialogProperties(scrim: Color): DialogProperties = DialogProperties(usePlatformDefaultWidth = false)

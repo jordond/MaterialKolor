@@ -17,10 +17,6 @@ import com.materialkolor.sample.shared.theme.isDark
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.Shades
 
-/**
- * A new seed fades from one ramp to the next. A new mode cuts straight over, because Fluent keeps light and dark
- * as a flag on one set of shades and there is nothing in between to animate.
- */
 @Composable
 internal fun FluentSampleTheme(
     seed: SampleSeed,

@@ -125,16 +125,12 @@ internal fun AppPalettes.toColors(scheme: DynamicScheme): AppColors {
     )
 }
 
-/**
- * The tone each slot is cut at, once for light and once for dark.
- */
 private class ThemeTones(
     isDark: Boolean,
 ) {
     val accent = if (isDark) 80 else 40
     val container = if (isDark) 30 else 90
 
-    // Both interaction tones stay dark enough in light mode for the onPrimary role to read on them.
     val pressed = if (isDark) 70 else 32
     val raised = if (isDark) 88 else 46
 

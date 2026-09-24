@@ -14,10 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 
-/**
- * The components pass `indication = null` and draw their own feedback from this, so hover, press and focus look the
- * same everywhere and come from the theme.
- */
 @Immutable
 internal data class ControlState(
     val isHovered: Boolean,
@@ -40,9 +36,6 @@ internal fun InteractionSource.collectControlState(): ControlState {
     return ControlState(isHovered = isHovered, isPressed = isPressed, isFocused = isFocused)
 }
 
-/**
- * Paints a see-through layer of [tint] over the background while [state] is hovered or pressed.
- */
 internal fun Modifier.veil(
     tint: Color,
     state: ControlState,

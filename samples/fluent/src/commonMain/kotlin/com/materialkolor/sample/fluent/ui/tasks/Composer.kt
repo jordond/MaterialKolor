@@ -32,10 +32,6 @@ import io.github.composefluent.component.TextField
 import io.github.composefluent.icons.Icons
 import io.github.composefluent.icons.regular.Add
 
-/**
- * The typed text is the only state the UI keeps. Add and Enter keep the focus in the field, so the next task can be
- * typed straight away.
- */
 @Composable
 internal fun Composer(
     tag: TaskTag,
@@ -55,20 +51,20 @@ internal fun Composer(
     }
 
     Row(
-        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier.fillMaxWidth(),
     ) {
         TextField(
             value = title,
             onValueChange = { value -> title = value },
-            modifier = Modifier
-                .weight(1f)
-                .focusRequester(focusRequester),
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { submit() }),
             placeholder = { Text(text = SampleCopy.inputPlaceholder) },
+            modifier = Modifier
+                .weight(1f)
+                .focusRequester(focusRequester),
         )
 
         SegmentedPicker(
