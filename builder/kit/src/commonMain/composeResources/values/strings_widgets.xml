@@ -3,6 +3,9 @@
     <!-- The copy button on a swatch and on the code viewer, and the action a ramp stop reads out. -->
     <string name="widget_copy">Copy</string>
 
+    <!-- B-228a. What a line of text to select and copy by hand is called when read out. -->
+    <string name="selectable_text_name">Text to copy</string>
+
     <!-- The HCT tone a color sits at, as in "primary, #6750A4, tone 40". -->
     <string name="widget_tone">tone %1$d</string>
 
