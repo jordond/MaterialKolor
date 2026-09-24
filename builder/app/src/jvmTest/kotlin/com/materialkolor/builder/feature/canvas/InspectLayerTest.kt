@@ -8,6 +8,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
@@ -205,6 +206,30 @@ class InspectLayerTest {
             host.actions shouldContain WorkspaceAction.SetInspect(on = false)
             host.state.inspect shouldBe false
             onNodeWithTag(INSPECT_CARD_TAG).assertDoesNotExist()
+        }
+
+    @Test
+    fun esc_afterACardActionTookFocus_unpinsThenLeaves() =
+        runDesktopComposeUiTest(width = WIDE, height = HEIGHT) {
+            val host = inspecting()
+            setContent { Canvas(host) }
+            waitForIdle()
+            onNodeWithContentDescription(NEW_TRIP).performMouseInput { click() }
+            waitForIdle()
+
+            onNode(OnCard and hasText(PIN_ROLE)).performMouseInput { click() }
+            waitForIdle()
+            onNode(OnCard and hasText(PIN_ROLE) and isFocused()).assertExists()
+
+            onRoot().performKeyInput { pressKey(Key.Escape) }
+            waitForIdle()
+            onNode(OnCard and hasText(PIN_ROLE)).assertDoesNotExist()
+            host.state.inspect shouldBe true
+
+            onRoot().performKeyInput { pressKey(Key.Escape) }
+            waitForIdle()
+            host.actions.last() shouldBe WorkspaceAction.SetInspect(on = false)
+            host.state.inspect shouldBe false
         }
 
     /** A canvas host at the default view with Inspect on. */

@@ -130,7 +130,7 @@ public fun InspectOverlay(
         Modifier
             .onGloballyPositioned { coordinates -> state.origin = coordinates.positionInWindow() }
             .inspectPointer(state, currentShown, split, layoutDirection, tokens.spacing.section, focus)
-            .onKeyEvent { event -> state.onEscape(event) { leave() } }
+            .onKeyEvent { event -> state.onEscape(event, focus) { leave() } }
             .focusRequester(focus)
             .onFocusChanged { focusState -> state.holdsFocus = focusState.isFocused }
             .focusProperties { canFocus = state.pinned != null || state.holdsFocus }
@@ -169,13 +169,25 @@ internal class InspectOverlayState {
     /** Where the card sits in this layout, or null while none shows. Only the pointer reads it. */
     var card: Rect? = null
 
-    /** Drop the pinned card on Esc, or leave Inspect when none is pinned. */
+    /**
+     * Drop the pinned card on Esc, or leave Inspect when none is pinned.
+     *
+     * Dropping the card takes focus to the layout through [focus] first. An action on the card may
+     * hold focus, and when the card loses its actions focus would leave the whole tree with them, so
+     * the next Esc would reach nothing.
+     */
     fun onEscape(
         event: KeyEvent,
+        focus: FocusRequester,
         leave: () -> Unit,
     ): Boolean {
         if (event.type != KeyEventType.KeyDown || event.key != Key.Escape) return false
-        if (pinned != null) pinned = null else leave()
+        if (pinned != null) {
+            focus.requestFocus()
+            pinned = null
+        } else {
+            leave()
+        }
         return true
     }
 }
@@ -335,7 +347,8 @@ private fun BoxScope.InspectFindings(
     )
     DisposableEffect(state) { onDispose { state.card = null } }
     Box(Modifier.placeCard(target.entry.bounds, state, tokens.spacing.small)) {
-        InspectCard(target, pinned = target == pinned, result, actions)
+        // Only some skins draw a card that takes presses, so it takes them itself to keep them from the preview.
+        InspectCard(target, pinned = target == pinned, result, actions, Modifier.pointerInput(Unit) {})
     }
 }
 
