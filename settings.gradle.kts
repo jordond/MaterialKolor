@@ -44,11 +44,13 @@ include(
     ":mcu-upstream",
     ":builder:shared",
     ":builder:android",
+)
+
+include(
     ":samples:custom-theme",
     ":samples:fluent",
 )
 
-// Builder v2, new modules beside the old app until the cutover
 include(
     ":builder:domain",
     ":builder:codegen",
