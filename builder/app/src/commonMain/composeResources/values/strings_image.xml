@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Over the whole window while files are dragged over it. -->
+    <string name="image_drop">Drop to pull colors from this image</string>
+
+    <!-- The toast once an image has set the seed. The argument is the file name. -->
+    <string name="image_seeded_named">Seed taken from %1$s</string>
+    <!-- The same toast for an image with no file name, a pasted screenshot for example. -->
+    <string name="image_seeded">Seed taken from the image</string>
+    <string name="image_undo">Undo</string>
+    <!-- The toast for a file that is not an image, or one too big to read. -->
+    <string name="image_unsupported">That file couldn’t be read as an image, so the theme stays as it was</string>
+
+    <!-- The candidate row under the seed actions. -->
+    <string name="image_candidates">Colors from the image</string>
+    <!-- One candidate chip. The arguments are its hex and its color name. -->
+    <string name="image_chip">%1$s, %2$s</string>
+    <!-- Read out for the skeleton chips while an image is read. -->
+    <string name="image_reading">Pulling colors from the image</string>
+    <string name="image_mostly_gray">This image is mostly gray, so its colors are quiet</string>
+    <!-- After a reload the image itself is gone and only its colors are left. -->
+    <string name="image_add_again">Add the image again</string>
+</resources>

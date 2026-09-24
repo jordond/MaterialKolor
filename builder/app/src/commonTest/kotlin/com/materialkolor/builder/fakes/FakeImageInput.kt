@@ -3,6 +3,7 @@ package com.materialkolor.builder.fakes
 import com.materialkolor.builder.core.platform.DecodedImage
 import com.materialkolor.builder.core.platform.ImageHandle
 import com.materialkolor.builder.core.platform.ImageInput
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +37,15 @@ internal class FakeImageInput : ImageInput {
         return picked
     }
 
-    override suspend fun decode(handle: ImageHandle): DecodedImage? = decoded[handle]
+    // b-311
+
+    /** Holds every decode until it completes, when a test sets it. Null lets decodes through at once. */
+    var decodeGate: CompletableDeferred<Unit>? = null
+
+    override suspend fun decode(handle: ImageHandle): DecodedImage? {
+        decodeGate?.await()
+        return decoded[handle]
+    }
 
     /** Drop [handle] on the builder. It waits for a collector if there is none yet. */
     fun drop(handle: ImageHandle) {

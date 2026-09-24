@@ -22,7 +22,6 @@ import androidx.compose.ui.focus.focusRequester
 import com.materialkolor.builder.LocalThemeResult
 import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.domain.capability.Capabilities
-import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.Preferences
@@ -270,9 +269,7 @@ private fun ColumnScope.DockedSections(
     PosterHeader(context, dispatcher, focus = focus)
     SeedHero(context, dispatcher, focus = focus) // b-306c
     SeedActions(context, dispatcher)
-    if (context.document.seedSource is SeedSource.Image) {
-        ImageCandidateRow(context, dispatcher)
-    }
+    ImageCandidateRow(context, dispatcher) // b-311
     PrimaryExplainerLine(context, dispatcher, why = focus?.why)
     StyleChipsSection(context, dispatcher)
     ContrastSection(context, dispatcher)
@@ -294,9 +291,7 @@ private fun ColumnScope.SheetSections(
 ) {
     SeedPeekRow(context, dispatcher)
     SeedActions(context, dispatcher, shuffle = false)
-    if (context.document.seedSource is SeedSource.Image) {
-        ImageCandidateRow(context, dispatcher)
-    }
+    ImageCandidateRow(context, dispatcher) // b-311
     StyleChipsSection(context, dispatcher)
     ContrastSection(context, dispatcher)
     PrimaryExplainerLine(context, dispatcher, why = focus?.why)

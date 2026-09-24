@@ -190,6 +190,17 @@ internal sealed interface WorkspaceAction {
         val target: ExportTarget,
         val durationMs: Int,
     ) : WorkspaceAction
+
+    // b-311a
+
+    /**
+     * Show [toast] and hand [onShown] a way to take it back before its time is up, for a toast that
+     * only holds while something else does, such as an Undo for the edit still on top.
+     */
+    data class ShowWithdrawableToast(
+        val toast: ShowToast,
+        val onShown: (withdraw: () -> Unit) -> Unit,
+    ) : WorkspaceAction
 }
 
 /**
