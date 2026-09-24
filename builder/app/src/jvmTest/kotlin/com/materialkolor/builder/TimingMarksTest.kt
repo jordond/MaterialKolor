@@ -44,7 +44,7 @@ class TimingMarksTest {
         }
 
     @Test
-    fun edit_marksAResolveForTheNewThemeResult() =
+    fun edit_marksTheStartAndEndOfOneResolve() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             showRoot()
             val before = resolves()
@@ -53,6 +53,10 @@ class TimingMarksTest {
             waitForIdle()
 
             resolves() shouldBe before + 1
+            platform.environment.marks
+                .filter { mark -> mark in RESOLVE_MARKS }
+                .chunked(2)
+                .distinct() shouldBe listOf(RESOLVE_MARKS)
         }
 
     @Test
@@ -103,5 +107,6 @@ class TimingMarksTest {
 
     private companion object {
         val IMAGE_MARKS = listOf(TimingMarks.THUMBNAIL, TimingMarks.EXTRACT)
+        val RESOLVE_MARKS = listOf(TimingMarks.RESOLVE_START, TimingMarks.RESOLVE)
     }
 }

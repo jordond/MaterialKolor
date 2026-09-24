@@ -447,7 +447,10 @@ object TimingMarks {
     /** The first frame is up and the splash is on its way out. */
     const val FIRST_FRAME: String = "mk:first-frame"
 
-    /** A new theme result was resolved and composed. */
+    /** The root starts to resolve a theme result. */
+    const val RESOLVE_START: String = "mk:resolve-start"
+
+    /** The root has resolved a theme result, so the time since [RESOLVE_START] is what it took. */
     const val RESOLVE: String = "mk:resolve"
 
     /** An image the user brought in has its thumbnail. */

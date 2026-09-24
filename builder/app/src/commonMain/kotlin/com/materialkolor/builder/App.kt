@@ -80,16 +80,25 @@ internal val LocalThemeResolver: ProvidableCompositionLocal<ThemeResolver?> = st
 /**
  * The one theme result per frame, derived from the collected [document] as its own target sees it
  * (D35). A setting the target turns off never reaches the chrome or the preview.
+ *
+ * @param[environment] Marks each resolve's start and end for the perf run. None by default.
  */
 @Composable
 internal fun rememberThemeResult(
     document: State<ThemeDocument>,
     resolver: ThemeResolver,
+    // b-504
+    environment: Environment? = null,
 ): State<ThemeResult> =
-    remember(document, resolver) {
+    remember(document, resolver, environment) {
         derivedStateOf {
             val stored = document.value
-            resolver.resolve(stored.forTarget(ExportTarget.of(stored.library, stored.expressive)))
+            // b-504
+            environment?.mark(TimingMarks.RESOLVE_START)
+            resolver
+                .resolve(stored.forTarget(ExportTarget.of(stored.library, stored.expressive)))
+                // b-504
+                .also { environment?.mark(TimingMarks.RESOLVE) }
         }
     }
 
@@ -122,9 +131,10 @@ internal fun BuilderRoot(
     // b-221c
     val workspace = workspaceModel.collectAsState()
     val document = remember(workspace) { derivedStateOf { workspace.value.document } }
-    val result by rememberThemeResult(document, graph.themeResolver)
-    val skin by rememberSkin(document)
+    // b-504
     val environment = graph.environment
+    val result by rememberThemeResult(document, graph.themeResolver, environment)
+    val skin by rememberSkin(document)
     val announcer = remember(environment) { Announcer { message -> environment.announce(message) } }
 
     LaunchedEffect(model) {
@@ -136,7 +146,7 @@ internal fun BuilderRoot(
     }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { model.flush() }
     // b-504
-    TimingMarkEffects(environment, result)
+    ImageMarkEffects(environment)
 
     CompositionLocalProvider(
         LocalThemeResult provides result,
@@ -171,17 +181,15 @@ private fun ThemeColorEffect(environment: Environment) {
 // b-504
 
 /**
- * Leaves the perf run's timing marks, one for each new theme result and two for each image the user
- * brings in, when its thumbnail is in and when its candidates are. The image model is the one the
- * workspace reads, since each owner keeps one of a kind.
+ * Leaves the perf run's two timing marks for each image the user brings in, when its thumbnail is in
+ * and when its candidates are. The image model is the one the workspace reads, since each owner keeps
+ * one of a kind.
  */
 @Composable
-private fun TimingMarkEffects(
+private fun ImageMarkEffects(
     environment: Environment,
-    result: ThemeResult,
     images: ImageSeedModel = metroViewModel(),
 ) {
-    LaunchedEffect(environment, result) { environment.mark(TimingMarks.RESOLVE) }
     LaunchedEffect(environment, images) {
         images.state
             .map { state -> state.arriving?.thumbnail }
