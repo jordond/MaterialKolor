@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
@@ -172,7 +173,9 @@ class ContrastExplainerTest {
 
             val onPrimary = expected.onPrimaryLight.toHex()
             onNodeWithText("Pins primary ${Seed.toHex()} and onPrimary $onPrimary in light mode").assertExists()
-            onNodeWithText("Match exactly").performClick()
+            // b-503b
+            // The explainer scrolls, and Match exactly sits at its foot.
+            onNodeWithText("Match exactly").performScrollTo().performClick()
             waitForIdle()
 
             harness.document.pins[Role.Primary]?.light shouldBe Seed

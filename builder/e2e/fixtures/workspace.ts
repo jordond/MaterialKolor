@@ -212,7 +212,9 @@ export async function scrollTo(page: Page, target: Locator, over: Locator): Prom
         await page.mouse.wheel(0, 120);
         return false;
       },
-      { timeout: LAND_TIMEOUT_MS, intervals: [100] },
+      // b-503b
+      // WebKit moves the mirror only once a scroll settles, so each turn waits for that.
+      { timeout: LAND_TIMEOUT_MS, intervals: [500] },
     )
     .toBe(true);
 }
