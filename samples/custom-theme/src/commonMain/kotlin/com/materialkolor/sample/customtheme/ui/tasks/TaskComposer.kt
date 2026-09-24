@@ -39,7 +39,7 @@ internal fun TaskComposer(
     val focusRequester = remember { FocusRequester() }
     val canAdd = canAddTask(field.text.toString())
 
-    val add = {
+    val add: () -> Unit = {
         val title = field.text.toString()
         if (canAddTask(title)) {
             dispatch(SampleAction.AddTask(title))
