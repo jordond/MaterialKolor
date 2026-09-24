@@ -8,9 +8,11 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -81,6 +83,22 @@ class AccentsEditorTest {
             harness.document.accents.map { accent -> accent.name } shouldBe listOf("accent1", "accent2")
             onNodeWithText("Extra color 2 name").assertExists()
             harness.undoEntries() shouldBe 1
+        }
+
+    @Test
+    fun add_byKeyboard_handsFocusToTheNewName() =
+        runComposeUiTest {
+            val harness = PosterHarness(Plain)
+            showSection(harness) { context, dispatcher -> AccentsEditor(context, dispatcher) }
+
+            // The eighth turns Add off under the focus, which has to land on the new name all the same.
+            repeat(MAX_ACCENTS) { index ->
+                pressByKeyboard(onNodeWithText(ADD))
+                onNode(hasText("Extra color ${index + 1} name") and hasSetTextAction()).assertIsFocused()
+            }
+
+            harness.document.accents.size shouldBe MAX_ACCENTS
+            onNodeWithText(ADD).assertIsNotEnabled()
         }
 
     @Test
@@ -197,6 +215,36 @@ class AccentsEditorTest {
         }
 
     @Test
+    fun harmonize_flipsThatColorAsOneEntry() =
+        runComposeUiTest {
+            val harness = PosterHarness(Plain.copy(accents = listOf(Brand, Status)))
+            showSection(harness) { context, dispatcher -> AccentsEditor(context, dispatcher) }
+
+            onNodeWithText("Harmonize brand with seed").performClick()
+            waitForIdle()
+
+            val flipped = Brand.copy(harmonize = !Brand.harmonize)
+            harness.actions shouldBe listOf(
+                WorkspaceAction.Edit(DocumentChange.UpdateAccent(0, flipped), EditPhase.Discrete),
+            )
+            harness.document.accents shouldBe listOf(flipped, Status)
+            harness.undoEntries() shouldBe 1
+        }
+
+    @Test
+    fun rowControls_readOutWithTheColorsName() =
+        runComposeUiTest {
+            val harness = PosterHarness(Plain.copy(accents = listOf(Brand, Status)))
+            showSection(harness) { context, dispatcher -> AccentsEditor(context, dispatcher) }
+
+            onNodeWithText("Harmonize brand with seed").assertExists()
+            onNodeWithText("Harmonize status with seed").assertExists()
+            onNodeWithContentDescription("brand on colors clear").assertExists()
+            onNodeWithContentDescription("status on colors clear").assertExists()
+            onAllNodesWithText("On colors clear").assertCountEquals(2)
+        }
+
+    @Test
     fun pickAndShowOnRamp_askTheWorkspace() =
         runComposeUiTest {
             val harness = PosterHarness(Plain.copy(accents = listOf(Brand)))
@@ -218,7 +266,7 @@ class AccentsEditorTest {
             val harness = PosterHarness(Plain.copy(library = Library.Fluent, accents = listOf(Brand)))
             showSection(harness) { context, dispatcher -> AccentsEditor(context, dispatcher) }
 
-            onNodeWithText("Fluent has no place for extra accents yet.").assertExists()
+            onNodeWithText("Fluent has no place for extra colors yet.").assertExists()
             onNodeWithText(FIRST_NAME).assertIsNotEnabled()
             onNodeWithText("Remove brand").assertIsNotEnabled()
             onNodeWithText(ADD).assertIsNotEnabled()

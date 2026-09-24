@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
@@ -46,6 +47,7 @@ import com.materialkolor.builder.generated.resources.accents_remove
 import com.materialkolor.builder.generated.resources.accents_seed
 import com.materialkolor.builder.generated.resources.accents_show_on_ramp
 import com.materialkolor.builder.generated.resources.accents_threshold
+import com.materialkolor.builder.generated.resources.accents_threshold_for
 import com.materialkolor.builder.generated.resources.accents_threshold_aa
 import com.materialkolor.builder.generated.resources.accents_threshold_aa_large
 import com.materialkolor.builder.generated.resources.accents_threshold_aaa
@@ -91,8 +93,9 @@ private const val MAX_ACCENT_TONE = 100
  * It lists the document as stored, since the theme the target resolves has no extra colors at all
  * on a target that takes none (D35). There the list stays on screen without input and says why. Add
  * appends the first free `accentN`, a little further round the hue circle from the seed for each
- * one already there, and stays, turned off, once the theme holds as many as an export takes.
- * Remove hands a keyboard user's focus to the next name field, else the one before, else Add.
+ * one already there, and stays, turned off, once the theme holds as many as an export takes. Add
+ * hands a keyboard user's focus to the new color's name field once its row is there, and Remove to
+ * the next name field, else the one before, else Add.
  */
 @Composable
 internal fun AccentsEditor(
@@ -111,6 +114,13 @@ internal fun AccentsEditor(
     val messages = remember(names, hex) { AccentRowMessages(names, hex) }
     val full = accents.size >= MAX_ACCENTS
     val reason = state.explanation
+    // The new row only composes after the change lands, so the focus waits for the list to grow.
+    // Moving it there also keeps it on the page when the eighth Add turns its own button off.
+    LaunchedEffect(accents.size) {
+        val added = focus.added
+        focus.added = null
+        if (added != null && added < accents.size) input.handFocusTo(focus.name(added))
+    }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.large)) {
         InfoLabel(label = stringResource(Res.string.accents_label), topic = InfoTopic.Accents)
         when {
@@ -146,6 +156,7 @@ internal fun AccentsEditor(
         }
         BuilderButton(
             onClick = {
+                focus.added = accents.size
                 val change = DocumentChange.AddAccent(newAccent(context.document))
                 dispatcher.dispatch(WorkspaceAction.Edit(change, EditPhase.Discrete))
             },
@@ -161,8 +172,9 @@ internal fun AccentsEditor(
 }
 
 /**
- * One extra color, from its name down to Remove. Every change is one undo entry, and a tone drag
- * moves the preview every frame and lets go as one.
+ * One extra color, from its name down to Remove. Each change lands in the undo history, and changes
+ * to the same color that follow close on each other fold into one step. A tone drag moves the
+ * preview every frame and lets go as one.
  *
  * @param[name] Where the name field takes focus.
  * @param[onRemove] Runs before the color goes, to hand the focus on.
@@ -215,7 +227,7 @@ private fun AccentRow(
         BuilderSwitch(
             checked = accent.harmonize,
             onCheckedChange = { on -> update(accent.copy(harmonize = on)) },
-            label = stringResource(Res.string.accents_harmonize),
+            label = stringResource(Res.string.accents_harmonize, accent.name),
             enabled = enabled,
         )
         FamilyColors(context.result, index, context.visibleModes)
@@ -380,7 +392,10 @@ private class PendingAccent {
     var accent: Accent? = null
 }
 
-/** The contrast the extra color's on colors have to clear. */
+/**
+ * The contrast the extra color's on colors have to clear. The group is read out with the color's
+ * name, so each row's choice is told apart from the others.
+ */
 @Composable
 private fun ThresholdChoice(
     accent: Accent,
@@ -389,6 +404,7 @@ private fun ThresholdChoice(
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val label = stringResource(Res.string.accents_threshold)
+    val groupLabel = stringResource(Res.string.accents_threshold_for, accent.name)
     val names = Thresholds.associateWith { threshold -> stringResource(thresholdName(threshold)) }
     Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         BuilderText(text = label, style = BuilderTextStyle.SectionLabel)
@@ -396,7 +412,7 @@ private fun ThresholdChoice(
             options = Thresholds,
             selected = accent.threshold,
             onSelect = { threshold -> if (threshold != accent.threshold) onSelect(threshold) },
-            label = label,
+            label = groupLabel,
             enabled = enabled,
             optionLabel = { threshold -> names.getValue(threshold) },
         )
@@ -411,13 +427,16 @@ private fun thresholdName(threshold: OnColorThreshold): StringResource =
         OnColorThreshold.Aaa -> Res.string.accents_threshold_aaa
     }
 
-/** Where the focus goes when a Remove button takes its row with it. */
+/** Where the focus goes when Add brings in a row or a Remove button takes its row with it. */
 @Stable
 private class AccentFocus {
     private val names = mutableMapOf<Int, FocusRequester>()
 
     /** The Add button. */
     val add = FocusRequester()
+
+    /** The place of the color Add has just asked for, until the list grows and its name takes the focus. */
+    var added: Int? = null
 
     /** The name field of the row at [index]. */
     fun name(index: Int): FocusRequester = names.getOrPut(index) { FocusRequester() }

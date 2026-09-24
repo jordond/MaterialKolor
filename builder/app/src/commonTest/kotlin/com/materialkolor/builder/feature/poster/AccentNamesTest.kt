@@ -2,6 +2,7 @@ package com.materialkolor.builder.feature.poster
 
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Accent
+import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.hct.Hct
 import io.kotest.matchers.doubles.plusOrMinus
@@ -11,6 +12,10 @@ import kotlin.test.Test
 private val Seed = Argb(0x6750A4)
 
 private val Plain = ThemeDocument(seed = Seed)
+
+/** An Unstyled theme with an extra color for each of [names], in order. */
+private fun unstyled(vararg names: String): ThemeDocument =
+    Plain.copy(library = Library.Unstyled, accents = names.map { name -> accent(name) })
 
 private fun accent(name: String): Accent = Accent(name = name, seed = Argb(0x00897B))
 
@@ -26,6 +31,24 @@ class AccentNamesTest {
 
         accentNameProblems(document, index = 0, name = "status") shouldBe listOf(AccentNameProblem.Duplicate)
         accentNameProblems(document, index = 0, name = "Status") shouldBe listOf(AccentNameProblem.CaseClash)
+    }
+
+    @Test
+    fun problems_unstyledFlattenedName_landsOnTheOneBeingRenamed() {
+        // Unstyled writes brand's on color as the token onBrand, which a color named onBrand overwrites.
+        val taken = listOf(AccentNameProblem.Taken)
+
+        accentNameProblems(unstyled("brand", "status"), index = 1, name = "onBrand") shouldBe taken
+        accentNameProblems(unstyled("status", "brand"), index = 0, name = "onBrand") shouldBe taken
+        accentNameProblems(unstyled("onBrand", "status"), index = 1, name = "brand") shouldBe taken
+        accentNameProblems(unstyled("status", "onBrand"), index = 0, name = "brand") shouldBe taken
+    }
+
+    @Test
+    fun problems_flattenedNameOutsideUnstyled_isFine() {
+        val document = Plain.copy(accents = listOf(accent("status"), accent("brand")))
+
+        accentNameProblems(document, index = 0, name = "onBrand") shouldBe emptyList()
     }
 
     @Test
