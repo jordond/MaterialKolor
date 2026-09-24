@@ -5,6 +5,7 @@ package com.materialkolor.builder.web.platform
 import com.materialkolor.builder.web.interop.A11yLiveRegion
 import com.materialkolor.builder.web.interop.nextFrame
 import kotlinx.browser.document
+import kotlinx.browser.window
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.Promise
 import kotlin.test.Test
@@ -21,5 +22,11 @@ class WebEnvironmentTest {
             assertEquals("Copied Theme.kt", region?.textContent)
             null
         }
+    }
+
+    // b-505
+    @Test
+    fun siteOriginIsThePagesOwn() {
+        assertEquals(window.location.origin, WebEnvironment().siteOrigin)
     }
 }

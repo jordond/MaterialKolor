@@ -264,3 +264,204 @@ jobs:
           name: screenshot-comparison
           path: builder/*/build/outputs/roborazzi
           if-no-files-found: ignore
+
+  # b-505
+  # Whether the Cloudflare secrets are set. Until the owner adds CLOUDFLARE_API_TOKEN and
+  # CLOUDFLARE_ACCOUNT_ID, Preview and Staging skip instead of failing. A job's `if` cannot read
+  # secrets, so this job reads them and hands on the answer.
+  cloudflare:
+    name: "Cloudflare secrets"
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.secrets.outputs.ready }}
+    steps:
+      - name: Check the Cloudflare secrets
+        id: secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice title=No Cloudflare secrets::CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not set, so Preview and Staging skip."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # b-505
+  # A version of the staging Worker for each pull request from this repository, built as the staging
+  # site, and a comment on the pull request with its preview URL. Uploading a version deploys nothing,
+  # so staging keeps serving what it served. Pull requests from forks get no secrets and skip.
+  preview:
+    name: "Preview"
+    needs: [ cloudflare, site, worker ]
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && needs.cloudflare.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: setup-java
+        uses: actions/setup-java@v6
+        with:
+          java-version: 25
+          distribution: temurin
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Assemble the staging site
+        run: ./gradlew :builder:web:assembleSite -Psite.env=staging
+
+      - name: setup-node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: builder/worker/package-lock.json
+
+      - name: Upload a preview version
+        id: upload
+        working-directory: builder/worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.json
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          npm ci
+          npx wrangler versions upload --env staging \
+            --preview-alias "pr-$PR" --tag "pr-$PR" --message "Pull request #$PR at ${SHA:0:7}"
+          jq -r 'select(.type == "version-upload") | "url=\(.preview_url // "")", "alias=\(.preview_alias_url // "")"' \
+            "$WRANGLER_OUTPUT_FILE_PATH" >> "$GITHUB_OUTPUT"
+
+      # One comment per pull request, edited on each push.
+      - name: Comment the preview URL
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          PREVIEW_URL: ${{ steps.upload.outputs.url }}
+          ALIAS_URL: ${{ steps.upload.outputs.alias }}
+        run: |
+          set -o pipefail
+          if [ -z "$PREVIEW_URL" ]; then
+            echo "::error title=No preview URL::wrangler gave no preview URL. Preview URLs come on with the first staging deploy, so run the Builder workflow by hand on feat/builder-v2 once, and check that the account has a workers.dev subdomain."
+            exit 1
+          fi
+          marker='<!-- builder-preview -->'
+          body=$(printf '%s\n%s' "$marker" "**Builder preview** of ${SHA:0:7}, built as the staging site: $PREVIEW_URL")
+          if [ -n "$ALIAS_URL" ]; then
+            body=$(printf '%s\n\n%s' "$body" "The latest push of this pull request is always at $ALIAS_URL")
+          fi
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | tail -n 1)
+          if [ -n "$id" ]; then
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -f body="$body" > /dev/null
+          else
+            gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -f body="$body" > /dev/null
+          fi
+
+  # b-505
+  # Deploys staging.materialkolor.com, the only home of the new builder until 6.0 is stable, from a
+  # push to next or feat/builder-v2 or a run by hand, once every other job passed. Production keeps
+  # the old builder until the cutover (B-506), and nothing here deploys it. Never on a builder/* tag,
+  # which would also run the old builder-release.yml.
+  staging:
+    name: "Staging"
+    needs: [ cloudflare, test, compile-check, site, worker, screenshots ]
+    if: >-
+      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.record))
+      && (github.ref == 'refs/heads/next' || github.ref == 'refs/heads/feat/builder-v2')
+      && needs.cloudflare.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    # One deploy at a time across both branches, and never cut off halfway.
+    concurrency:
+      group: builder-staging
+      cancel-in-progress: false
+    env:
+      STAGING_ORIGIN: https://staging.materialkolor.com
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: setup-java
+        uses: actions/setup-java@v6
+        with:
+          java-version: 25
+          distribution: temurin
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Assemble the staging site
+        run: ./gradlew :builder:web:assembleSite -Psite.env=staging
+
+      - name: setup-node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: builder/worker/package-lock.json
+
+      - name: Deploy staging
+        working-directory: builder/worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          REF: ${{ github.ref_name }}
+        run: |
+          npm ci
+          npx wrangler deploy --env staging --message "$REF at ${GITHUB_SHA:0:7}"
+
+      # V-07. The wasm has to reach browsers brotli-compressed and cached for good. A GET rather
+      # than a HEAD, since the edge only compresses a response that has a body. The first request
+      # to a new custom domain can fail while its certificate is issued, so each one retries.
+      - name: Check the deployed headers
+        run: |
+          set -o pipefail
+          fetch() {
+            curl -sS --fail --retry 6 --retry-delay 20 --retry-all-errors -o /dev/null -D - \
+              -H 'Accept-Encoding: br' "$1" | tr -d '\r'
+          }
+          failed=0
+          for wasm in builder/web/build/site/assets/*.wasm; do
+            url="$STAGING_ORIGIN/assets/$(basename "$wasm")"
+            if ! headers=$(fetch "$url"); then
+              echo "::error title=Staging unreachable::$url did not answer. Check the staging.materialkolor.com custom domain of the Worker materialkolor-builder-staging."
+              exit 1
+            fi
+            echo "$url"
+            echo "$headers"
+            if ! grep -qix 'content-encoding: br' <<< "$headers"; then
+              echo "::error title=Wasm not brotli-compressed::$url came back without content-encoding br. Check that the materialkolor.com zone compresses application/wasm with brotli, under Rules, Compression Rules."
+              failed=1
+            fi
+            if ! grep -qix 'cache-control: public, max-age=31536000, immutable' <<< "$headers"; then
+              echo "::error title=Wasm not immutable::$url came back without the immutable Cache-Control. Check the /assets/* rule in the _headers that writeHeaders writes."
+              failed=1
+            fi
+          done
+          # The page comes from the site's _headers and a theme page from the Worker.
+          for path in / /t/AdllOwAAAAAT; do
+            if ! headers=$(fetch "$STAGING_ORIGIN$path"); then
+              echo "::error title=Staging unreachable::$STAGING_ORIGIN$path did not answer."
+              exit 1
+            fi
+            if ! grep -qix 'x-robots-tag: noindex' <<< "$headers"; then
+              echo "::error title=Staging is indexable::$STAGING_ORIGIN$path came back without X-Robots-Tag noindex. Check the staging _headers and ROBOTS_TAG in wrangler.jsonc."
+              failed=1
+            fi
+          done
+          exit "$failed"

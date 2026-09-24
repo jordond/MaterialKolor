@@ -15,12 +15,20 @@
   // The glyph atlas the theme card draws its text with, imported as bytes. Wrangler has the same
   // rule built in, and fallthrough false marks this one final so it stops warning about the shadow.
   "rules": [{ "type": "Data", "globs": ["**/*.bin"], "fallthrough": false }],
-  // Placeholder. The owner confirms the zone and the custom domain at B-505 deploy time.
+  // Production. Nothing deploys it until the cutover (B-506), the old builder keeps the domain until then.
   "routes": [{ "pattern": "materialkolor.com", "custom_domain": true }],
+  // b-505
+  // The account comes from CLOUDFLARE_ACCOUNT_ID in CI, so it is never named here.
   "env": {
+    // The Worker `materialkolor-builder-staging`, which builder.yml deploys from a staging site build.
     "staging": {
-      // Placeholder, confirmed at B-505 like the production domain.
-      "routes": [{ "pattern": "staging.materialkolor.com", "custom_domain": true }]
+      "routes": [{ "pattern": "staging.materialkolor.com", "custom_domain": true }],
+      // Only the custom domain serves the deployed version. Every pull request uploads a version of
+      // its own, and its preview URL on workers.dev is what the pull request links to.
+      "workers_dev": false,
+      "preview_urls": true,
+      // Vars are not inherited, so production has none. Worker responses skip `_headers`, see headers.ts.
+      "vars": { "ROBOTS_TAG": "noindex" }
     }
   }
 }

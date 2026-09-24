@@ -31,3 +31,16 @@ export function withSiteHeaders(
   headers.set('Cache-Control', cacheControl);
   return new Response(body, { status, headers });
 }
+
+// b-505
+/**
+ * [response] with an `X-Robots-Tag` of [tag], or as it is when there is no tag. Staging sets one in
+ * wrangler.jsonc, since the noindex rule in its `_headers` never reaches a response built here.
+ */
+export function withRobotsTag(response: Response, tag: string | undefined): Response {
+  if (tag === undefined) return response;
+  // A copy, since a response out of the Cache API keeps its headers fixed.
+  const tagged = new Response(response.body, response);
+  tagged.headers.set('X-Robots-Tag', tag);
+  return tagged;
+}

@@ -13,6 +13,7 @@ import com.materialkolor.builder.codegen.validate.ReservedNames
 import com.materialkolor.builder.codegen.zipArchive
 import com.materialkolor.builder.core.data.PreferencesRepository
 import com.materialkolor.builder.core.platform.Clipboard
+import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.FileSaver
 import com.materialkolor.builder.core.platform.OutgoingFile
 import com.materialkolor.builder.core.session.ProjectSession
@@ -77,6 +78,8 @@ internal class ExportModel(
     private val generator: ExportGenerator,
     val clipboard: Clipboard,
     val files: FileSaver,
+    // b-505
+    private val environment: Environment,
 ) : StateViewModel<ExportModel.State>(
         State(document = session.document.value, preferences = preferences.preferences.value),
     ) {
@@ -149,7 +152,8 @@ internal class ExportModel(
         val problems = problemsOf(targeted, prefs)
         if (problems.isNotEmpty()) return ExportOutcome.Blocked(problems)
         // Only accents that do not fit stop a link, and the checks above turn those down first.
-        val link = shareLink(document, projectName) ?: return ExportOutcome.Blocked(listOf(ExportProblem.ExtraColors))
+        val link = shareLink(document, projectName, environment.siteOrigin)
+            ?: return ExportOutcome.Blocked(listOf(ExportProblem.ExtraColors))
 
         val input = ExportInput(
             document = document,

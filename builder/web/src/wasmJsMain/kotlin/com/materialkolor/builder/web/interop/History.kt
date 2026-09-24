@@ -16,6 +16,14 @@ internal fun locationPath(): String = js("window.location.pathname")
 /** The query of the address the page is on, with its leading `?`, or empty. */
 internal fun locationQuery(): String = js("window.location.search")
 
+// b-505
+
+/**
+ * The origin of the address the page is on, `https://staging.materialkolor.com` for example, or null
+ * for a page such as a local file whose origin is not a web address.
+ */
+internal fun locationOrigin(): String? = js("/^https?:/.test(window.location.origin) ? window.location.origin : null")
+
 /** Swap the address for [url] without adding an entry. False when the browser refused. */
 internal fun historyReplaceUrl(url: String): Boolean =
     js(

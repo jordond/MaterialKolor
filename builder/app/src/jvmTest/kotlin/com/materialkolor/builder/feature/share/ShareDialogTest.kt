@@ -21,6 +21,7 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakeClipboard
+import com.materialkolor.builder.fakes.FakeEnvironment
 import com.materialkolor.builder.fakes.FakeFileSaver
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
@@ -193,7 +194,7 @@ class ShareDialogTest : SessionTestBase() {
     fun copyClick_writesTheClipboardBeforeTheClickReturns() =
         runTest {
             val clipboard = FakeClipboard()
-            val controller = ShareController(session().first, clipboard, FakeFileSaver())
+            val controller = ShareController(session().first, clipboard, FakeFileSaver(), FakeEnvironment())
             val outcomes = mutableListOf<ShareOutcome>()
 
             idleScope().launchSend(LINK, controller::copy) { outcome -> outcomes += outcome }
@@ -207,7 +208,7 @@ class ShareDialogTest : SessionTestBase() {
         runTest {
             val clipboard = FakeClipboard()
             val files = FakeFileSaver(canShareLink = true)
-            val controller = ShareController(session().first, clipboard, files)
+            val controller = ShareController(session().first, clipboard, files, FakeEnvironment())
 
             idleScope().launchSend(LINK, call = { url -> controller.share(url, "Harbour") }, onOutcome = {})
 

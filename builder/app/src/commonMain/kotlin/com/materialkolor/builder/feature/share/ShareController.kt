@@ -2,6 +2,7 @@ package com.materialkolor.builder.feature.share
 
 import androidx.lifecycle.ViewModel
 import com.materialkolor.builder.core.platform.Clipboard
+import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.FileSaver
 import com.materialkolor.builder.core.session.BootNotice
 import com.materialkolor.builder.core.session.ProjectSession
@@ -37,6 +38,8 @@ internal class ShareController(
     private val session: ProjectSession,
     private val clipboard: Clipboard,
     private val files: FileSaver,
+    // b-505
+    private val environment: Environment,
 ) : ViewModel() {
     /** Whether a share goes to the share sheet here rather than the clipboard. */
     val sharesToSheet: Boolean
@@ -46,7 +49,7 @@ internal class ShareController(
     fun link(
         document: ThemeDocument,
         projectName: String,
-    ): String? = shareLink(document, projectName)
+    ): String? = shareLink(document, projectName, environment.siteOrigin)
 
     /** Put [url] on the clipboard. Copied only when the clipboard really took it. */
     suspend fun copy(url: String): ShareOutcome =

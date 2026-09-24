@@ -11,7 +11,8 @@ import dev.zacsweers.metrox.viewmodel.ViewModelKey
 
 /**
  * What About needs beyond the workspace. Everything it changes goes through the workspace's
- * dispatcher, so all it reads here is the [browser] a problem report names.
+ * dispatcher, so all it reads here is what a problem report names, the [browser] and the
+ * [siteOrigin] its theme link opens on.
  */
 @Stable
 @Inject
@@ -22,4 +23,9 @@ internal class AboutModel(
 ) : ViewModel() {
     /** The browser and the system it runs on. */
     val browser: String = environment.browser
+
+    // b-505
+
+    /** Where the theme link in a report opens. */
+    val siteOrigin: String = environment.siteOrigin
 }

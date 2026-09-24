@@ -3,6 +3,7 @@ package com.materialkolor.builder.core.platform
 import androidx.compose.ui.graphics.ImageBitmap
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.Route
+import com.materialkolor.builder.domain.link.SITE_ORIGIN
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.QuarantineReason
 import com.materialkolor.builder.domain.persist.RecordCodec
@@ -415,6 +416,15 @@ interface Environment {
      * so a banner there leaves its Reload out.
      */
     val canReload: Boolean
+
+    // b-505
+
+    /**
+     * Where share links and the links in exports open. The web gives the page's own origin, so a
+     * link made on staging opens on staging. The desktop build has no page and links to [SITE_ORIGIN].
+     */
+    val siteOrigin: String
+        get() = SITE_ORIGIN
 }
 
 // b-501b

@@ -3,11 +3,13 @@ package com.materialkolor.builder.web.platform
 import com.materialkolor.builder.core.platform.BootSplash
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.link.SITE_ORIGIN
 import com.materialkolor.builder.domain.persist.StorageKeys
 import com.materialkolor.builder.web.interop.A11yLiveRegion
 import com.materialkolor.builder.web.interop.fadeOutSplash
 import com.materialkolor.builder.web.interop.localStorageWorks
 import com.materialkolor.builder.web.interop.localStorageWrite
+import com.materialkolor.builder.web.interop.locationOrigin
 import com.materialkolor.builder.web.interop.mediaQueryState
 import com.materialkolor.builder.web.interop.onPageHide
 import com.materialkolor.builder.web.interop.pageHasEyeDropper
@@ -90,6 +92,10 @@ internal class WebEnvironment : Environment {
 
     // b-314ba
     override val canReload: Boolean = true
+
+    // b-505
+    // The page's own origin, as the Worker does for link previews, so each deploy links to itself.
+    override val siteOrigin: String = locationOrigin() ?: SITE_ORIGIN
 }
 
 // b-314b

@@ -103,7 +103,7 @@ internal fun AboutHost(
         },
     ) {
         // The dialog's body only composes while it is open, so an edit never works out a link here.
-        val details = rememberReportDetails(state.document, model.browser)
+        val details = rememberReportDetails(state.document, model.browser, model.siteOrigin)
         // b-314a
         // The intro, the privacy note, the library lines and an opened license hold no control, so
         // the list keeps its own Tab stop for the keyboard to scroll them on the web, as Help does.
@@ -121,18 +121,19 @@ internal fun AboutHost(
     }
 }
 
-/** The report details for [document] in [browser], its link worked out once per document. */
+/** The report details for [document] in [browser], its link on [origin] worked out once per document. */
 @Composable
 private fun rememberReportDetails(
     document: ThemeDocument,
     browser: String,
+    origin: String,
 ): ReportDetails =
-    remember(document, browser) {
+    remember(document, browser, origin) {
         ReportDetails(
             builderVersion = BuildKonfig.BUILDER_VERSION,
             materialKolorVersion = BuildKonfig.MATERIAL_KOLOR_VERSION,
             browser = browser,
-            themeLink = shareLink(document, projectName = ""),
+            themeLink = shareLink(document, projectName = "", origin = origin),
         )
     }
 
