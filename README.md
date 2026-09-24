@@ -16,7 +16,8 @@ A Compose Multiplatform library for creating dynamic Material Design 3 color pal
 color.
 
 Check out [MaterialKolor Builder](https://materialkolor.com) to see MaterialKolor in action and
-generate your own color schemes. It can export to MaterialKolor code, or plain Material 3 code.
+generate your own color schemes. It exports code for Material 3, Compose Unstyled and Compose Fluent,
+or plain MaterialKolor.
 
 The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com)
 

@@ -15,7 +15,7 @@
   // The glyph atlas the theme card draws its text with, imported as bytes. Wrangler has the same
   // rule built in, and fallthrough false marks this one final so it stops warning about the shadow.
   "rules": [{ "type": "Data", "globs": ["**/*.bin"], "fallthrough": false }],
-  // Production. Nothing deploys it until the cutover (B-506), the old builder keeps the domain until then.
+  // Production, which builder.yml deploys from a builder/<version> tag.
   "routes": [{ "pattern": "materialkolor.com", "custom_domain": true }],
   // b-505
   // The account comes from CLOUDFLARE_ACCOUNT_ID in CI, so it is never named here.

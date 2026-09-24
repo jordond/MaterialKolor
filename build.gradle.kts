@@ -12,7 +12,6 @@ plugins {
     alias(libs.plugins.dokka)
 
     // Builder
-    alias(libs.plugins.android.application) apply false
     alias(libs.plugins.buildKonfig) apply false
     alias(libs.plugins.compose.hot.reload) apply false
     alias(libs.plugins.kotlinx.serialization) apply false

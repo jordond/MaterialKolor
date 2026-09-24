@@ -216,6 +216,20 @@ test.describe('error overlay', () => {
     });
     await expect(page.getByRole('alertdialog')).toBeVisible();
   });
+
+  // A dev server that has no such file answers with the page, which the browser refuses to run.
+  test('shows when the glue fails to load', async ({ page }) => {
+    await page.route(GLUE, (route) =>
+      route.fulfill({
+        contentType: 'text/html',
+        headers: { 'X-Content-Type-Options': 'nosniff' },
+        body: '<!doctype html>',
+      }),
+    );
+    await page.goto(site('/'), { waitUntil: 'domcontentloaded' });
+
+    await expect(page.getByRole('alertdialog', { name: 'Something went wrong' })).toBeVisible();
+  });
 });
 
 // b-501b

@@ -140,8 +140,6 @@ rm -rf material-color-utilities/build/generated/mcu
 ./gradlew verifyMcuAndroid
 ./gradlew verifyMcuApple
 ./gradlew verifyMcuPublication
-./gradlew -Pmaterialkolor.useLocal=true :builder:shared:jvmTest :builder:shared:testAndroidHostTest
-./gradlew -Pmaterialkolor.useLocal=true :builder:shared:composeCompatibilityBrowserDistribution
 python3 -B -m unittest discover -s .github/tests -v
 ```
 

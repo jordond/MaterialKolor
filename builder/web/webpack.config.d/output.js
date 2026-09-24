@@ -2,8 +2,9 @@
 // /assets/ where the host caches them for a year. The page loads them from there whatever path it
 // was opened on, /t/<code> included.
 //
-// Development keeps plain names at the root so the dev server and the dev index.html agree.
-if (config.mode === 'production') {
+// Development and both dev servers keep plain names at the root, so the server and the source
+// index.html agree. Only run tasks set devServer, and it is set before this file runs.
+if (config.mode === 'production' && !config.devServer) {
   config.output = config.output || {};
   config.output.publicPath = '/assets/';
   config.output.filename = (pathData) =>

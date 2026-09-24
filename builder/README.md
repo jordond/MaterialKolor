@@ -1,46 +1,80 @@
 # MaterialKolor Builder
 
-The Compose Multiplatform app behind [materialkolor.com](https://materialkolor.com) — an
-interactive playground for generating and exporting Material 3 color schemes with
-[MaterialKolor](https://github.com/jordond/MaterialKolor).
+The Compose Multiplatform app behind [materialkolor.com](https://materialkolor.com). Pick a seed color, tune the
+scheme, preview it in Material 3, Compose Unstyled or Compose Fluent, and export the code. It ships on the web as
+wasm, and the same app runs on the desktop for development. It always builds against the MaterialKolor modules in
+this repo.
 
-It lives in this repo as two Gradle modules:
+## Modules
 
-- `:builder:shared` — the Compose Multiplatform app (Android, iOS, JVM/desktop, Web/wasmJs + JS).
-- `:builder:android` — the thin Android application wrapper around `:builder:shared`.
+| Module                  | What it holds                                                                         |
+|-------------------------|---------------------------------------------------------------------------------------|
+| `:builder:domain`       | The theme document, edits and undo history, the share code. Plain Kotlin, no Compose. |
+| `:builder:codegen`      | Turns a theme into exported code for each target, checked against goldens.            |
+| `:builder:engine`       | Generates the color schemes with `material-kolor-core`, and picks seeds from images.  |
+| `:builder:kit`          | The design system: components, icons and the skins for each UI library.               |
+| `:builder:preview`      | The sample screens a theme is previewed on.                                           |
+| `:builder:app`          | Features, state and the platform interfaces, plus the desktop entry point.            |
+| `:builder:web`          | The wasm entry point, browser interop and the site assembly.                          |
+| `builder/worker`        | The Cloudflare Worker that serves the site and draws link previews for `/t/` links.   |
+| `builder/e2e`           | Playwright tests and the perf run, against the assembled site.                        |
+| `builder/codegen-check` | A standalone Gradle build that compiles every exported golden.                        |
 
 ## Running
 
 ```bash
-# Web (wasmJs) in the browser
-./gradlew :builder:shared:wasmJsBrowserRun
+# Desktop
+./gradlew :builder:app:run
 
-# Desktop (JVM)
-./gradlew :builder:shared:run
+# Desktop with Compose Hot Reload
+./gradlew :builder:app:hotRunJvm
 
-# Android (installs the debug app on a connected device/emulator)
-./gradlew :builder:android:installDebug
+# Web, with the webpack dev server
+./gradlew :builder:web:wasmJsBrowserDevelopmentRun
+
+# Web, the optimized build on the webpack dev server
+./gradlew :builder:web:wasmJsBrowserProductionRun
 ```
 
-iOS runs from the Xcode project under `ios/`.
-
-## MaterialKolor source: local vs published
-
-By default the builder depends on the **local** `:material-kolor` and
-`:material-color-utilities` modules in this repo, so changes to the library are picked up
-immediately. To build against the **published** `com.materialkolor` artifacts instead, set
-the `materialkolor.useLocal` Gradle property to `false`:
+To run the site the way it ships, assemble it and serve it through the Worker:
 
 ```bash
-./gradlew :builder:shared:compileKotlinJvm -Pmaterialkolor.useLocal=false
+./gradlew :builder:web:assembleSite
+cd builder/worker && npm ci && npm run dev
 ```
 
-## Building release artifacts
-
-The `scripts/build` helper produces versioned artifacts under `dist/`:
+## Testing
 
 ```bash
-./scripts/build web 1.0.4
-./scripts/build android 1.0.4
-./scripts/build desktop 1.0.4
+# Unit tests
+./gradlew :builder:domain:jvmTest :builder:codegen:jvmTest :builder:engine:jvmTest
+
+# Browser tests, after assembleSite
+cd builder/e2e && npm ci && npx playwright install chromium && npm test
+
+# Worker tests, after assembleSite
+cd builder/worker && npm ci && npm test
 ```
+
+The codegen goldens live in `builder/codegen/src/jvmTest/resources/golden`. Rewrite them with
+`./gradlew :builder:codegen:jvmTest -Pgolden.update=true`, then review the diff. To check that every golden still
+compiles, run `./gradlew :builder:codegen:writeCompileFixtures` and then
+`./gradlew -p builder/codegen-check compileKotlinJvm`.
+
+Screenshot baselines only come from CI. Dispatch the Builder workflow with `record` checked and commit the PNGs it
+uploads.
+
+`./gradlew :builder:web:checkBudget` measures the assembled site against `builder/web/budget.json`. See
+`builder/web/BUDGET.md` for how the numbers are measured.
+
+## Deploys
+
+Everything deploys from the Builder workflow (`.github/workflows/builder.yml`) to Cloudflare Workers.
+
+- **Pull requests** from this repo upload a preview version of the staging Worker and comment its URL on the pull
+  request. The comment updates on every push.
+- **Staging** at [staging.materialkolor.com](https://staging.materialkolor.com) deploys on every push to `next`.
+  It is built with `-Psite.env=staging`, so it is never indexed and its share links stay on staging.
+- **Production** at [materialkolor.com](https://materialkolor.com) deploys from a `builder/<version>` tag. The tag
+  must match `builder-version` in `gradle/libs.versions.toml`, and the MaterialKolor version the exports pin
+  (`materialKolorExport`) must already be on Maven Central.

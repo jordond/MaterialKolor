@@ -22,24 +22,18 @@
     {
       "groupName": "Builder dependencies",
       "matchPackageNames": [
-        "io.ktor{/,}**",
         "io.github.xxfast{/,}**",
         "co.touchlab:kermit{/,}**",
         "dev.jordond.stateholder{/,}**",
-        "com.mohamedrejeb.calf{/,}**",
-        "dev.snipme:highlights{/,}**",
-        "br.com.devsrsouza.compose.icons{/,}**",
-        "com.github.skydoves:colorpicker-compose{/,}**",
         "com.codingfeline.buildkonfig{/,}**",
         "org.jetbrains.compose.hot-reload{/,}**",
-        "org.jetbrains.compose.material3.adaptive{/,}**",
         "org.jetbrains.androidx.lifecycle{/,}**",
-        "androidx.activity{/,}**",
-        "androidx.core{/,}**",
-        "org.jetbrains.kotlinx:kotlinx-datetime{/,}**",
         "org.jetbrains.kotlinx:kotlinx-collections-immutable{/,}**",
         "org.jetbrains.kotlinx:kotlinx-browser{/,}**",
-        "org.jetbrains.kotlinx:kotlinx-coroutines-guava{/,}**"
+        "dev.zacsweers.metro{/,}**",
+        "com.composables:icons-lucide{/,}**",
+        "io.github.vinceglb{/,}**",
+        "io.github.takahirom.roborazzi{/,}**"
       ]
     }
   ]

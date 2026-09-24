@@ -42,12 +42,14 @@
   }
 
   const assets = JSON.parse(document.getElementById('mk-assets').textContent);
-  catchErrors(assets.glue.split('/').pop());
+  const report = catchErrors(assets.glue.split('/').pop());
   paintSplash();
   window.addEventListener('keydown', keepBrowserShortcuts, true);
 
   const glue = document.createElement('script');
   glue.src = assets.glue;
+  // A script that fails to load fires error on its own tag, which never reaches the window.
+  glue.addEventListener('error', () => report(null, 'Could not load ' + assets.glue));
   document.head.appendChild(glue);
 
   /** Whether this browser has WasmGC, legacy exception handling and WebGL 2. */
@@ -170,9 +172,10 @@
   }
 
   /**
-   * Shows the error overlay on the first uncaught error or rejection (F-38). The details say what
-   * failed, where, in which browser and which build. They leave out the address, since a share code
-   * can carry a project name.
+   * Shows the error overlay on the first uncaught error or rejection (F-38), and returns the function
+   * that shows it for an error the window never hears of. The details say what failed, where, in
+   * which browser and which build. They leave out the address, since a share code can carry a
+   * project name.
    */
   function catchErrors(build) {
     let shown = false;
@@ -190,6 +193,7 @@
       show(event.error, event.message);
     });
     window.addEventListener('unhandledrejection', (event) => show(event.reason, 'Unhandled rejection'));
+    return show;
   }
 
   function describe(error, fallback, build) {
