@@ -38,7 +38,7 @@ class BuilderWebPlugin : Plugin<Project> {
             val rewriteIndexHtml = tasks.register<RewriteIndexHtml>("rewriteIndexHtml") {
                 group = SITE_GROUP
                 // b-501
-                description = "Fills the asset list in index.html that boot.js preloads and boots from."
+                description = "Fills the asset list in index.html that boot.js boots from."
                 dependsOn(DISTRIBUTION_TASK)
                 distribution.set(distributionDirectory())
                 index.set(layout.buildDirectory.file("site-parts/index.html"))
@@ -84,8 +84,8 @@ class BuilderWebPlugin : Plugin<Project> {
  * Fills the `#mk-assets` placeholder in the distribution's `index.html` with the hashed glue and
  * wasm under `/assets/` and the fonts the first frame asks for.
  *
- * `boot.js` reads the list to preload those files and then load the glue, so the placeholder has to
- * come before the tag that loads `boot.js`. The dev page runs on the placeholder's own value.
+ * `boot.js` reads the list to load the glue, so the placeholder has to come before the tag that loads
+ * `boot.js`. The dev page runs on the placeholder's own value.
  */
 abstract class RewriteIndexHtml : DefaultTask() {
     @get:InputDirectory

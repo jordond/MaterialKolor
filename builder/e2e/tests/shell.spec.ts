@@ -1,9 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { site } from './builder';
 
-// The static shell around the app. boot.js checks the browser, starts the downloads and colors the
-// splash before any app code loads. index.html carries the splash, the unsupported page and the
-// error overlay.
+// The static shell around the app. boot.js checks the browser and colors the splash before any app
+// code loads. index.html carries the splash, the unsupported page and the error overlay.
 
 /** The glue, the script boot.js adds last. Holding it keeps the page on the splash. */
 const GLUE = /\/assets\/builder\.[0-9a-f]{16}\.js$/;
@@ -42,6 +41,12 @@ test.describe('splash', () => {
 
     await page.goto(site(DEFAULT_LINK), { waitUntil: 'domcontentloaded' });
     expect(await splash(page)).toMatchObject({ chrome: rgb(LIGHT), poster: 'rgb(217, 101, 59)', hex: '"#D9653B"' });
+  });
+
+  test('paints the default seed on a first visit', async ({ page }) => {
+    await holdGlue(page);
+    await page.goto(site('/'), { waitUntil: 'domcontentloaded' });
+    expect(await splash(page)).toMatchObject({ poster: 'rgb(217, 101, 59)', hex: '"#D9653B"' });
   });
 
   test('paints the seed of a theme link with no storage', async ({ page }) => {
@@ -117,18 +122,17 @@ test.describe('unsupported browsers', () => {
   }
 });
 
-test('each file boot.js preloads is fetched once', async ({ page }) => {
+test('boot adds no preload and fetches the glue, each wasm file and each font once', async ({ page }) => {
   const requests = collectRequests(page);
   await page.goto(site('/'));
   await expect(page.locator('#splash')).toHaveCount(0, { timeout: 30_000 });
   await settle(requests);
 
+  expect(await page.locator('link[rel="preload"]').count()).toBe(0);
   const assets = JSON.parse((await page.locator('#mk-assets').textContent()) ?? '{}');
+  expect(assets.wasm).toHaveLength(2);
+  expect(assets.fonts.length).toBeGreaterThan(0);
   const expected: string[] = [assets.glue, ...assets.wasm, ...assets.fonts];
-  const preloaded = await page
-    .locator('link[rel="preload"]')
-    .evaluateAll((links) => links.map((link) => new URL((link as HTMLLinkElement).href).pathname));
-  expect(preloaded.sort()).toEqual([...expected].sort());
   for (const pathname of expected) {
     expect(requests.filter((request) => request === pathname), pathname).toHaveLength(1);
   }

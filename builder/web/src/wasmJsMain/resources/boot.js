@@ -1,7 +1,8 @@
 // Runs in the head, before the body is parsed and before anything paints. It checks the browser can
-// run the builder, starts the downloads, colors the splash and loads the app. It reads mk:splash and
-// the address and never writes storage. Kept to plain ES2015 so an old browser still reaches the
-// unsupported page.
+// run the builder, colors the splash and loads the app. It reads mk:splash and the address and never
+// writes storage. Kept to plain ES2015 so an old browser still reaches the unsupported page. It adds
+// no preloads. WebKit fetches an as=fetch preload with an Origin header and the real request without
+// one, so each file would download twice there, and the glue's tag goes in during this same task.
 (() => {
   // What the default document writes to mk:splash, and its seed, for a first visit. The shell spec
   // holds the two colors to what the app writes.
@@ -33,11 +34,6 @@
 
   const assets = JSON.parse(document.getElementById('mk-assets').textContent);
   catchErrors(assets.glue.split('/').pop());
-
-  preload(assets.glue, 'script');
-  assets.wasm.forEach((href) => preload(href, 'fetch'));
-  assets.fonts.forEach((href) => preload(href, 'fetch'));
-
   paintSplash();
 
   const glue = document.createElement('script');
@@ -56,16 +52,6 @@
     } catch (error) {
       return false;
     }
-  }
-
-  /** Starts [href] downloading now, in the mode its real request uses so that request picks it up. */
-  function preload(href, as) {
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.as = as;
-    if (as === 'fetch') link.crossOrigin = 'anonymous';
-    link.href = href;
-    document.head.appendChild(link);
   }
 
   /**
