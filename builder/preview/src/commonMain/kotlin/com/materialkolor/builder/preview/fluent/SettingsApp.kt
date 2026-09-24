@@ -1,14 +1,5 @@
 package com.materialkolor.builder.preview.fluent
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -47,8 +38,6 @@ import com.materialkolor.builder.kit.control.foldedExpandedName
 import com.materialkolor.builder.kit.control.foldedSelectedName
 import com.materialkolor.builder.kit.control.foldedSwitchName
 import com.materialkolor.builder.kit.control.foldedToggleName
-import com.materialkolor.builder.kit.motion.LocalBuilderMotion
-import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.split.PaneSpec
 import io.github.composefluent.FluentTheme
@@ -201,7 +190,7 @@ private fun SettingsPage(
     Column(Modifier.fillMaxSize().padding(top = if (phone) 48.dp else 0.dp)) {
         PageHeader(state, phone)
         if (phone) {
-            PanelMotion(legendShown, horizontal = false) {
+            PanelMotion(legendShown) {
                 ShadeMapping(spec, Modifier.fillMaxWidth().heightIn(max = 420.dp).padding(horizontal = 16.dp))
             }
             SettingsList(state, phone, Modifier.weight(1f).fillMaxWidth())
@@ -315,7 +304,7 @@ private fun SettingsGroup(
                 )
             },
         )
-        PanelMotion(open, horizontal = false) {
+        PanelMotion(open) {
             Column {
                 for (setting in group.settings) {
                     ExpanderItemSeparator()
@@ -380,29 +369,4 @@ private fun SettingSwitch(
             interactionSource = interaction,
         )
     }
-}
-
-/**
- * Shows or hides a panel with the skin's panel motion, growing along the width when [horizontal]
- * and along the height otherwise. Under frozen motion it shows or hides at once.
- */
-@Composable
-private fun PanelMotion(
-    visible: Boolean,
-    horizontal: Boolean,
-    content: @Composable () -> Unit,
-) {
-    val frozen = LocalMotionFrozen.current
-    val motion = LocalBuilderMotion.current
-    val enter = when {
-        frozen -> EnterTransition.None
-        horizontal -> expandHorizontally(motion.panelEnter()) + fadeIn(motion.panelEnter())
-        else -> expandVertically(motion.panelEnter()) + fadeIn(motion.panelEnter())
-    }
-    val exit = when {
-        frozen -> ExitTransition.None
-        horizontal -> shrinkHorizontally(motion.panelExit()) + fadeOut(motion.panelExit())
-        else -> shrinkVertically(motion.panelExit()) + fadeOut(motion.panelExit())
-    }
-    AnimatedVisibility(visible = visible, enter = enter, exit = exit) { content() }
 }
