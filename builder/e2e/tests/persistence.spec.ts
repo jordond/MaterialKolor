@@ -44,7 +44,6 @@ test('an edit is saved, and a reload brings back the seed and the undo that reve
 });
 
 test('Projects renames, duplicates, switches and deletes, and the toast undoes the delete', async ({ page }) => {
-  test.fixme(true, 'Follow-up: a step of the Projects panel times out on Chromium, app or spec not yet told apart');
   await openWorkspace(page);
   await expect.poll(async () => (await storedProjects(page)).length).toBe(1);
   const [original] = await storedProjects(page);
@@ -63,6 +62,10 @@ test('Projects renames, duplicates, switches and deletes, and the toast undoes t
   const copy = (await storedProjects(page)).find((project) => project.id !== original.id)!;
 
   await pressFor(page, labelled(page, `${copy.name}, radio, not selected`), labelled(page, `Projects, ${copy.name}`));
+  // b-503b
+  // Opening a project closes the panel, so the delete opens it again.
+  await expect(onPage(page, PROJECTS_DIALOG)).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
+  await pressKeyFor(page, 'p', onPage(page, PROJECTS_DIALOG));
 
   await pressFor(page, button(page, `More for ${copy.name}`), menuItem(page, 'Delete'));
   await press(page, menuItem(page, 'Delete'));
