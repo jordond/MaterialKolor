@@ -30,6 +30,7 @@ import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.control.stateWords
 import com.materialkolor.builder.kit.icon.IconId
@@ -137,7 +138,7 @@ internal fun HeadlessSwitch(
                 role = Role.Switch,
                 onValueChange = onCheckedChange,
             ).semantics { stateDescription = words.of(state) }
-            .foldState(label, state, enabled, words)
+            .foldState(label, state, enabled, words, FoldedRole.Switch)
             .alpha(enabledAlpha(enabled)),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -202,7 +203,7 @@ internal fun HeadlessCheckbox(
                 role = Role.Checkbox,
                 onValueChange = onCheckedChange,
             ).semantics { stateDescription = words.of(state) }
-            .foldState(label, state, enabled, words)
+            .foldState(label, state, enabled, words, FoldedRole.Checkbox)
             .alpha(enabledAlpha(enabled)),
         horizontalArrangement = Arrangement.spacedBy(style.labelGap),
         verticalAlignment = Alignment.CenterVertically,

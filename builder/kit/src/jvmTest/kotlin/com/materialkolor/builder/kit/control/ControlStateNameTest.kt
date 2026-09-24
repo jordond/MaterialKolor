@@ -18,28 +18,45 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasStateDescription
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isNotSelected
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
+import com.materialkolor.builder.domain.model.Library
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
+/** A kit's worth of state words in English, for the plain functions. */
+internal val TestStateWords: StateWords = StateWords(
+    selected = "Selected",
+    notSelected = "Not selected",
+    checked = "Checked",
+    notChecked = "Not checked",
+    on = "On",
+    off = "Off",
+    expanded = "Expanded",
+    collapsed = "Collapsed",
+    disabled = "Disabled",
+    checkbox = "checkbox",
+    switch = "switch",
+    radio = "radio",
+    tab = "tab",
+)
+
+/** Matches a node with no content description at all. */
+internal fun hasNoContentDescription(): SemanticsMatcher =
+    SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription)
+
+/** Matches a node whose content descriptions are exactly [names]. */
+internal fun hasContentDescriptionExactly(vararg names: String): SemanticsMatcher =
+    SemanticsMatcher.expectValue(SemanticsProperties.ContentDescription, names.toList())
+
 @OptIn(ExperimentalTestApi::class)
 class ControlStateNameTest {
-    private val words = StateWords(
-        selected = "Selected",
-        notSelected = "Not selected",
-        checked = "Checked",
-        notChecked = "Not checked",
-        on = "On",
-        off = "Off",
-        expanded = "Expanded",
-        collapsed = "Collapsed",
-        disabled = "Disabled",
-    )
+    private val words = TestStateWords
 
     @Test
     fun plainClickable_everySkin_composesAndClicks() =
@@ -68,11 +85,24 @@ class ControlStateNameTest {
     }
 
     @Test
+    fun foldStateIntoName_withRole_putsTheRoleWordBeforeTheState() {
+        foldStateIntoName("Include dark scheme", ControlState.Checked(true), true, words, FoldedRole.Checkbox) shouldBe
+            "Include dark scheme, checkbox, checked"
+        foldStateIntoName("Tonal spot", ControlState.Selected(true), true, words, FoldedRole.Radio) shouldBe
+            "Tonal spot, radio, selected"
+        foldStateIntoName("Dark mode", ControlState.Switched(false), false, words, FoldedRole.Switch) shouldBe
+            "Dark mode, switch, off, disabled"
+        foldStateIntoName("Kotlin", ControlState.Selected(false), true, words, FoldedRole.Tab) shouldBe
+            "Kotlin, tab, not selected"
+    }
+
+    @Test
     fun stateWords_readAloneKeepTheirCapital() {
         words.of(ControlState.Checked(false)) shouldBe "Not checked"
         words.of(ControlState.Expanded(true)) shouldBe "Expanded"
         words.afterName(ControlState.Checked(false)) shouldBe "not checked"
         words.afterName(ControlState.Value("Medium")) shouldBe "Medium"
+        words.roleWord(FoldedRole.Radio) shouldBe "radio"
     }
 
     @Test
@@ -91,6 +121,8 @@ class ControlStateNameTest {
             onNode(hasText("Dark") and hasRole(Role.Tab)).assert(hasNoContentDescription())
             onNode(hasText("Tonal spot") and isSelectable()).assert(hasNoContentDescription())
             onNode(hasContentDescription("Poster") and hasRole(Role.Button)).assert(hasStateDescription("Peek"))
+            onNode(isSelectableGroup() and hasContentDescriptionExactly("Scheme style")).assertExists()
+            onNode(isSelectableGroup() and hasContentDescriptionExactly("Layout")).assertExists()
         }
 
     @Test
@@ -104,24 +136,38 @@ class ControlStateNameTest {
 
             onNodeWithTag(Chip).assert(hasContentDescriptionExactly("Pins, selected"))
             onNodeWithTag(Switch)
-                .assert(hasContentDescriptionExactly("AMOLED black, off, disabled"))
+                .assert(hasContentDescriptionExactly("AMOLED black, switch, off, disabled"))
                 .assert(hasStateDescription("Off"))
-            onNodeWithTag(Checkbox).assert(hasContentDescriptionExactly("Show pins, checked"))
+            onNodeWithTag(Checkbox).assert(hasContentDescriptionExactly("Show pins, checkbox, checked"))
             onNodeWithTag(Toggle).assert(hasContentDescriptionExactly("Bold, not checked"))
             onNode(hasContentDescriptionExactly("Colours, Seed and roles, collapsed"))
                 .assert(hasStateDescription("Collapsed"))
             onNodeWithTag(Row).assert(hasContentDescriptionExactly("Poster theme, selected"))
-            onNodeWithTag(Progress).assert(hasContentDescriptionExactly("Exporting, 40%"))
-            onNodeWithTag(Slider).assert(hasContentDescriptionExactly("Chroma, 0.25, disabled"))
-            onNode(hasContentDescriptionExactly("Dark, selected")).assert(hasRole(Role.Tab)).assert(isSelected())
-            onNode(hasContentDescriptionExactly("Light, not selected"))
+            onNode(hasContentDescriptionExactly("Dark, tab, selected")).assert(hasRole(Role.Tab)).assert(isSelected())
+            onNode(hasContentDescriptionExactly("Light, tab, not selected"))
                 .assert(hasRole(Role.Tab))
                 .assert(isNotSelected())
-            onNode(hasContentDescriptionExactly("Tonal spot, selected")).assert(isSelected())
-            onNode(hasContentDescriptionExactly("Vibrant, not selected")).assert(isNotSelected())
-            onNode(hasContentDescriptionExactly("Grid, selected")).assert(isSelected())
-            onNode(hasContentDescriptionExactly("Scheme style, Tonal spot")).assert(hasRole(Role.DropdownList))
+            onNode(hasContentDescriptionExactly("Tonal spot, radio, selected")).assert(isSelected())
+            onNode(hasContentDescriptionExactly("Vibrant, radio, not selected")).assert(isNotSelected())
+            onNode(hasContentDescriptionExactly("Grid, radio, selected")).assert(isSelected())
+            val select = if (skin.library == Library.Material3) "Scheme style" else "Scheme style, Tonal spot"
+            onNode(hasContentDescriptionExactly(select)).assert(hasRole(Role.DropdownList))
             onNode(hasContentDescriptionExactly("Poster, Peek")).assert(hasRole(Role.Button))
+        }
+
+    @Test
+    fun flagOn_everySkin_foldsRoleLessNamesIntoText() =
+        forEachSkin { _, skin ->
+            setContent {
+                ControlsHarness(skin) {
+                    CompositionLocalProvider(LocalFoldsStateIntoName provides true) { StatefulControls() }
+                }
+            }
+
+            onNodeWithTag(Progress).assert(hasTextExactly("Exporting, 40%")).assert(hasNoContentDescription())
+            onNodeWithTag(Slider).assert(hasTextExactly("Chroma, 0.25, disabled")).assert(hasNoContentDescription())
+            onNode(isSelectableGroup() and hasTextExactly("Scheme style")).assert(hasNoContentDescription())
+            onNode(isSelectableGroup() and hasTextExactly("Layout")).assert(hasNoContentDescription())
         }
 
     /** One of every stateful control, each in a state worth reading. */
@@ -152,11 +198,8 @@ class ControlStateNameTest {
         }
     }
 
-    private fun hasNoContentDescription(): SemanticsMatcher =
-        SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription)
-
-    private fun hasContentDescriptionExactly(vararg names: String): SemanticsMatcher =
-        SemanticsMatcher.expectValue(SemanticsProperties.ContentDescription, names.toList())
+    private fun isSelectableGroup(): SemanticsMatcher =
+        SemanticsMatcher.keyIsDefined(SemanticsProperties.SelectableGroup)
 
     private companion object {
         const val Plain = "plain"

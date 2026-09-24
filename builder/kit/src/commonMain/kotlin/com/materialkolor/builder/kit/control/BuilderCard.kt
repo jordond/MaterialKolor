@@ -3,6 +3,7 @@ package com.materialkolor.builder.kit.control
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.FluentCard
@@ -75,12 +78,31 @@ internal fun HeadlessCard(
             .alpha(enabledAlpha(enabled))
             .controlRing(interactionSource, style.shape)
     }
-    Column(
+    Box(
         modifier = modifier
             .then(pressable)
-            .actionSurface(style.colors, style.shape, style.borderWidth)
-            .padding(style.padding),
-        verticalArrangement = Arrangement.spacedBy(style.gap),
-        content = content,
-    )
+            .actionSurface(style.colors, style.shape, style.borderWidth),
+        propagateMinConstraints = true,
+    ) {
+        Column(
+            modifier = Modifier.padding(style.padding),
+            verticalArrangement = Arrangement.spacedBy(style.gap),
+            content = content,
+        )
+        if (onClick != null) CardDisabledNote(enabled)
+    }
+}
+
+/**
+ * On the web, the disabled word as the last text of a pressable card while it is disabled.
+ *
+ * A card takes its name from the text inside it, and a content description would replace that
+ * name, so the note joins it as text instead. It draws nothing and sits outside the card's own
+ * column, so nothing on screen moves.
+ */
+@Composable
+internal fun CardDisabledNote(enabled: Boolean) {
+    if (enabled || !LocalFoldsStateIntoName.current) return
+    val note = stateWords().disabledAfterName
+    Box(Modifier.semantics { text = AnnotatedString(note) })
 }

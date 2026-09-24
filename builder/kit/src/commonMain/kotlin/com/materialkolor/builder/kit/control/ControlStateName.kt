@@ -5,9 +5,16 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
 import com.materialkolor.builder.kit.generated.resources.Res
+import com.materialkolor.builder.kit.generated.resources.role_checkbox
+import com.materialkolor.builder.kit.generated.resources.role_radio
+import com.materialkolor.builder.kit.generated.resources.role_switch
+import com.materialkolor.builder.kit.generated.resources.role_tab
 import com.materialkolor.builder.kit.generated.resources.state_checked
 import com.materialkolor.builder.kit.generated.resources.state_collapsed
 import com.materialkolor.builder.kit.generated.resources.state_disabled
@@ -64,7 +71,26 @@ internal sealed interface ControlState {
 }
 
 /**
- * The kit's state words for the current locale, as they stand alone.
+ * A role the web mirror loses. CMP 1.12.1 lets a click handler replace the role, so every clickable
+ * reads as a button there (P3). While that stands the role's word travels in the name (D40).
+ */
+internal enum class FoldedRole {
+    /** A box that is ticked or not. */
+    Checkbox,
+
+    /** A switch that is on or off. */
+    Switch,
+
+    /** One option of a single choice, a choice chip, a segment or a scheme chip. */
+    Radio,
+
+    /** One tab of a tab row. */
+    Tab,
+}
+
+/**
+ * The kit's state words for the current locale, as they stand alone, and its role words, as they
+ * read after a name.
  *
  * Resolved in composition, so the semantics blocks and other plain functions take them as a value.
  */
@@ -79,6 +105,10 @@ internal class StateWords(
     val expanded: String,
     val collapsed: String,
     val disabled: String,
+    val checkbox: String,
+    val switch: String,
+    val radio: String,
+    val tab: String,
 ) {
     /** How [state] reads on its own, as a state description. */
     fun of(state: ControlState): String =
@@ -103,6 +133,15 @@ internal class StateWords(
 
     /** The disabled word as it reads after a name. */
     val disabledAfterName: String get() = disabled.lowerFirst()
+
+    /** How [role] reads after a name. Role words are written that way already, so they keep their case. */
+    fun roleWord(role: FoldedRole): String =
+        when (role) {
+            FoldedRole.Checkbox -> checkbox
+            FoldedRole.Switch -> switch
+            FoldedRole.Radio -> radio
+            FoldedRole.Tab -> tab
+        }
 }
 
 private fun String.lowerFirst(): String = replaceFirstChar { char -> char.lowercaseChar() }
@@ -120,20 +159,27 @@ internal fun stateWords(): StateWords =
         expanded = stringResource(Res.string.state_expanded),
         collapsed = stringResource(Res.string.state_collapsed),
         disabled = stringResource(Res.string.state_disabled),
+        checkbox = stringResource(Res.string.role_checkbox),
+        switch = stringResource(Res.string.role_switch),
+        radio = stringResource(Res.string.role_radio),
+        tab = stringResource(Res.string.role_tab),
     )
 
 /**
- * [name] followed by [state] and, when the control is disabled, the disabled word, "Tonal spot, selected"
- * or "Dark mode, off, disabled". Blank parts are left out.
+ * [name] followed by the word for [role], then [state] and, when the control is disabled, the
+ * disabled word, "Tonal spot, radio, selected" or "Dark mode, off, disabled". Blank parts are left
+ * out.
  */
 internal fun foldStateIntoName(
     name: String,
     state: ControlState?,
     enabled: Boolean,
     words: StateWords,
+    role: FoldedRole? = null,
 ): String =
     listOfNotNull(
         name,
+        role?.let(words::roleWord),
         state?.let(words::afterName),
         if (enabled) null else words.disabledAfterName,
     ).filter { part -> part.isNotBlank() }
@@ -145,7 +191,7 @@ internal fun foldStateIntoName(
  *
  * For a control that already sets its own content description on the node that merges it. A
  * control that loaded [words] for its own state description passes them in, so they load once.
- * Left null, they load only when the fold is on.
+ * Left null, they load only when the fold is on. A control whose [role] the web loses names it too.
  */
 @Composable
 internal fun stateName(
@@ -153,9 +199,10 @@ internal fun stateName(
     state: ControlState?,
     enabled: Boolean = true,
     words: StateWords? = null,
+    role: FoldedRole? = null,
 ): String =
     if (LocalFoldsStateIntoName.current) {
-        foldStateIntoName(name, state, enabled, words ?: stateWords())
+        foldStateIntoName(name, state, enabled, words ?: stateWords(), role)
     } else {
         name
     }
@@ -169,6 +216,7 @@ internal fun stateName(
  * @param[enabled] Whether the control takes input.
  * @param[words] The state words, for a control that already loaded them for its own state
  * description. Left null, they load only when the fold is on.
+ * @param[role] The role the web loses for this control (P3), or null for one it keeps.
  */
 @Composable
 internal fun Modifier.foldState(
@@ -176,8 +224,45 @@ internal fun Modifier.foldState(
     state: ControlState?,
     enabled: Boolean = true,
     words: StateWords? = null,
+    role: FoldedRole? = null,
 ): Modifier {
     if (!LocalFoldsStateIntoName.current) return this
-    val folded = foldStateIntoName(name, state, enabled, words ?: stateWords())
+    val folded = foldStateIntoName(name, state, enabled, words ?: stateWords(), role)
     return semantics { contentDescription = folded }
+}
+
+/**
+ * Folds the disabled note into the name of a control with no other state, and only while it is
+ * disabled, so an enabled control keeps the name its text gives it.
+ */
+@Composable
+internal fun Modifier.foldDisabled(
+    name: String,
+    enabled: Boolean,
+): Modifier = if (enabled) this else foldState(name, state = null, enabled = false)
+
+/**
+ * Folds a menu row's state into its name. A row that knows whether it is [selected] is an option
+ * and always carries that state, a plain command only the disabled note.
+ */
+@Composable
+internal fun Modifier.foldMenuRow(
+    name: String,
+    selected: Boolean?,
+    enabled: Boolean,
+): Modifier =
+    if (selected == null) foldDisabled(name, enabled) else foldState(name, ControlState.Selected(selected), enabled)
+
+/**
+ * Names a node that plays no role, such as a slider, a progress bar or a group of options.
+ *
+ * Where [asText] is set, on the web, the name goes in as text. The mirror keeps an `aria-label` on
+ * a plain element, but ARIA forbids a name there and screen readers drop it, while both keep text
+ * (S5 answer 1). Elsewhere it stays the content description.
+ */
+internal fun SemanticsPropertyReceiver.roleLessName(
+    name: String,
+    asText: Boolean,
+) {
+    if (asText) text = AnnotatedString(name) else contentDescription = name
 }
