@@ -42,7 +42,8 @@ public enum class BadgeStatus {
  * The colour always comes with [label] and an optional [icon], so the status never rests on colour
  * alone (AR-03). The label and the icon read out as one.
  *
- * @param[label] The status in words, never blank.
+ * @param[label] The status in words. A blank label draws nothing, since the colour must never stand
+ * alone.
  * @param[modifier] Applied to the badge.
  * @param[status] What the badge reports.
  * @param[icon] A glyph before the label.
@@ -54,7 +55,9 @@ public fun BuilderBadge(
     status: BadgeStatus = BadgeStatus.Neutral,
     icon: IconId? = null,
 ) {
-    require(label.isNotBlank()) { "A badge needs words beside its colour" }
+    // Strings from resources read as blank for the first frame on the web while they load, so a
+    // blank label draws nothing rather than failing the frame.
+    if (label.isBlank()) return
     when (LocalSkin.current.library) {
         Library.Material3 -> MaterialBadge(label, modifier, status, icon)
         Library.Unstyled -> HeadlessBadge(label, UnstyledActionStyles.badge, modifier, status, icon)
