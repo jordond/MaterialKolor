@@ -27,7 +27,8 @@
     ],
     "exclude": [
       "composeResources/**/files/OFL-*.txt",
-      "composeResources/**/drawable/preset_*.webp"
+      "composeResources/**/drawable/preset_*.webp",
+      "composeResources/**/font/Selawik_*"
     ],
     "maxBytes": 8000000
   },
