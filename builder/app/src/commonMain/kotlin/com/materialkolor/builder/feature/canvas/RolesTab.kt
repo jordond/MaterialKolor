@@ -59,7 +59,10 @@ import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** The narrowest a swatch gets before its grid drops a column. */
+/**
+ * The narrowest a swatch gets before its grid drops a column. Wide enough for a role name such as
+ * onSecondaryContainer and its hex and tone readout on one line at the default text size.
+ */
 private val SwatchMinWidth: Dp = 152.dp
 
 /** The tone at and above which a swatch with no on-pair is inked black rather than white. */
@@ -183,7 +186,7 @@ private fun keyColorSwatch(
     val argb = result.ramps[palette, isDark].keyColor
     val tone = HctReadout.of(argb).tone
     return RoleSwatch(
-        name = palette.name.replaceFirstChar { char -> char.lowercaseChar() } + "KeyColor",
+        name = palette.name.replaceFirstChar { char -> char.lowercaseChar() } + "PaletteKeyColor",
         argb = argb,
         ink = inkFor(tone),
         tone = tone,

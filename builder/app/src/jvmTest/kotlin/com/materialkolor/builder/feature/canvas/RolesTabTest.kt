@@ -111,7 +111,7 @@ class RolesTabTest {
             }
             val key = result.ramps[KeyColor.Primary, false].keyColor
             val keyTone = HctReadout.of(key).tone.roundToInt()
-            onNodeWithContentDescription("primaryKeyColor, ${key.toHex()}, tone $keyTone").assertExists()
+            onNodeWithContentDescription("primaryPaletteKeyColor, ${key.toHex()}, tone $keyTone").assertExists()
             val brand = result.accents.families[0][AccentPart.Container, false]
             val brandTone = HctReadout.of(brand).tone.roundToInt()
             onNodeWithContentDescription("Brand container, ${brand.toHex()}, tone $brandTone").assertExists()

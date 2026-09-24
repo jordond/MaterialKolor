@@ -3,8 +3,8 @@ package com.materialkolor.builder.feature.canvas
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -83,9 +83,9 @@ class ContrastTabTest {
             showContrast(result, PreviewMode.Light)
 
             val row = hasTestTag(CONTRAST_ROW_TAG) and
-                hasContentDescription("onPrimary on primary", substring = true) and
-                hasContentDescription("Under 3 to 1, so text is hard to read at any size.", substring = true) and
-                hasContentDescription("Try another pinned color, or unpin the role.", substring = true)
+                hasText("onPrimary on primary", substring = true) and
+                hasText("Under 3 to 1, so text is hard to read at any size.", substring = true) and
+                hasText("Try another pinned color, or unpin the role.", substring = true)
             onAllNodes(row).assertCountEquals(1)
             onNodeWithText(ALL_PASS).assertDoesNotExist()
         }
@@ -97,8 +97,8 @@ class ContrastTabTest {
             showContrast(result, PreviewMode.Split)
 
             onAllNodesWithTag(CONTRAST_ROW_TAG).assertCountEquals(4)
-            onAllNodes(hasContentDescription("onAccentPrimary on primary", substring = true)).assertCountEquals(2)
-            onAllNodes(hasContentDescription("onAccentSecondary on primary", substring = true)).assertCountEquals(2)
+            onAllNodes(hasText("onAccentPrimary on primary", substring = true)).assertCountEquals(2)
+            onAllNodes(hasText("onAccentSecondary on primary", substring = true)).assertCountEquals(2)
         }
 
     @Test

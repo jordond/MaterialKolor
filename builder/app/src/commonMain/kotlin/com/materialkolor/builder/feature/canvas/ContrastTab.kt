@@ -21,8 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.PreviewMode
@@ -140,7 +141,8 @@ private fun PairRow(
         modifier = Modifier
             .fillMaxWidth()
             .clearAndSetSemantics {
-                contentDescription = description
+                // A row has no role, so the web mirror would drop a name. Its text is read instead (S5).
+                text = AnnotatedString(description)
                 testTag = CONTRAST_ROW_TAG
             }.padding(vertical = spacing.small),
         verticalArrangement = Arrangement.spacedBy(spacing.extraSmall),
