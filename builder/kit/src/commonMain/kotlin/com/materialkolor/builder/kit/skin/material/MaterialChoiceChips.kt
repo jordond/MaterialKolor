@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.LayoutDirection
@@ -22,7 +21,10 @@ import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.FoldedRole
+import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.control.foldState
+import com.materialkolor.builder.kit.control.roleLessName
 import com.materialkolor.builder.kit.headless.radioGroupOption
 import com.materialkolor.builder.kit.headless.rememberRadioGroupFocus
 import com.materialkolor.builder.kit.icon.IconId
@@ -44,17 +46,19 @@ internal fun <T> MaterialChoiceChips(
     modifier: Modifier,
     enabled: Boolean,
     optionIcon: (T) -> IconId?,
+    selectOnFocus: Boolean,
     optionLabel: (T) -> String,
 ) {
     val selectedIndex = options.indexOf(selected)
     val focus = rememberRadioGroupFocus(options.size, selectedIndex)
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val spacing = LocalBuilderTokens.current.spacing.small
+    val asText = LocalFoldsStateIntoName.current
     MaterialTarget {
         FlowRow(
             modifier = modifier
                 .selectableGroup()
-                .semantics { contentDescription = label },
+                .semantics { roleLessName(label, asText) },
             horizontalArrangement = Arrangement.spacedBy(spacing),
             verticalArrangement = Arrangement.spacedBy(spacing),
             itemVerticalAlignment = Alignment.CenterVertically,
@@ -77,9 +81,14 @@ internal fun <T> MaterialChoiceChips(
                         },
                         modifier = Modifier
                             .semantics { role = Role.RadioButton }
-                            .radioGroupOption(focus, index, selectedIndex, rtl) { target -> onSelect(options[target]) }
-                            .foldState(optionLabel(value), ControlState.Selected(isSelected), enabled)
-                            .materialFeedback(interactionSource, FilterChipDefaults.shape),
+                            .radioGroupOption(focus, index, selectedIndex, rtl, selectOnFocus) { target ->
+                                onSelect(options[target])
+                            }.foldState(
+                                name = optionLabel(value),
+                                state = ControlState.Selected(isSelected),
+                                enabled = enabled,
+                                role = FoldedRole.Radio,
+                            ).materialFeedback(interactionSource, FilterChipDefaults.shape),
                         enabled = enabled,
                         leadingIcon = glyph?.let { id ->
                             { BuilderIcon(id, contentDescription = null, tint = LocalContentColor.current) }

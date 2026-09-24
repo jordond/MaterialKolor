@@ -23,7 +23,8 @@ import com.materialkolor.builder.kit.skin.material.MaterialSlider
  * swallows an arrow press next to it.
  *
  * The slider sets set-progress and speaks [stateDescription]. On the web the value follows the name
- * as well, until the CMP mirror learns slider semantics (AR-10, D37).
+ * as well, until the CMP mirror learns slider semantics (AR-10, D37). The slider has no role there,
+ * so the name and value go in as text, which assistive tech keeps where it drops a name (S5).
  *
  * @param[value] Where the thumb is.
  * @param[onValueChange] Called with every new value, snapped when a drag lands near a stop.

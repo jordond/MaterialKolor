@@ -57,6 +57,7 @@ import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.foldMenuRow
 import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -80,7 +81,8 @@ import kotlin.math.max
  * row has already moved it somewhere else.
  *
  * @param[expanded] Whether the list is open.
- * @param[onDismissRequest] Called when the list asks to close.
+ * @param[onDismissRequest] Called when the list asks to close. It must set [expanded] to false,
+ * since the list stays open until it does.
  * @param[style] The skin's overlay style.
  * @param[minWidth] The narrowest the list may be, the anchor's width for a select.
  * @param[initialFocus] The row that takes focus when the list opens, the selected option for a select.
@@ -150,7 +152,8 @@ internal fun HeadlessDropdown(
  * One row of a dropdown.
  *
  * A row that knows whether it is [selected] is an option and carries a check next to its label, so
- * the selection never rests on colour alone (AR-03). A row without is a plain command.
+ * the selection never rests on colour alone (AR-03). A row without is a plain command. On the web
+ * an option folds its state into its name, and a disabled row the disabled note (D37).
  */
 @Composable
 internal fun HeadlessDropdownItem(
@@ -171,14 +174,13 @@ internal fun HeadlessDropdownItem(
     } else {
         Modifier.selectable(selected, interaction, null, enabled, Role.RadioButton, onClick)
     }
-    val folded = if (selected == null) Modifier else Modifier.foldState(label, ControlState.Selected(selected), enabled)
     Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = LocalLayout.current.minTouchTarget)
             .overlayFeedback(interaction, style, enabled = enabled, selected = selected == true)
             .then(action)
-            .then(folded)
+            .foldMenuRow(label, selected, enabled)
             .padding(horizontal = tokens.spacing.medium),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.medium),
@@ -221,6 +223,7 @@ internal fun HeadlessMenu(
                     icon = item.icon,
                     emphasis = item.emphasis,
                     enabled = item.enabled,
+                    selected = item.selected,
                 )
             }
         }

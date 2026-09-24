@@ -37,7 +37,6 @@ import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
@@ -46,6 +45,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.max
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
+import com.materialkolor.builder.kit.control.roleLessName
 import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.token.BuilderTokens
@@ -133,7 +134,7 @@ internal object GamutLimit {
  * and [EditPhase.Released] once when it lets go. The arrows move one and ten with Shift, Page Up and
  * Page Down move ten, Home and End jump to the ends, and each of those reports
  * [EditPhase.Discrete]. The track reads out as a slider named [label], its value folded into the
- * name on the web (D37).
+ * name on the web (D37), where the name goes in as text since the track has no role there (S5).
  */
 @Composable
 internal fun GamutTrack(
@@ -147,6 +148,7 @@ internal fun GamutTrack(
     val shown = picker.shownOf(channel)
     val valueText = shown.toString()
     val name = stateName(label, ControlState.Value(valueText))
+    val asText = LocalFoldsStateIntoName.current
     var focused by remember { mutableStateOf(false) }
     Box(
         modifier
@@ -161,7 +163,7 @@ internal fun GamutTrack(
                 true
             }.focusable()
             .semantics {
-                contentDescription = name
+                roleLessName(name, asText)
                 stateDescription = valueText
                 progressBarRangeInfo = ProgressBarRangeInfo(
                     current = shown.toFloat(),

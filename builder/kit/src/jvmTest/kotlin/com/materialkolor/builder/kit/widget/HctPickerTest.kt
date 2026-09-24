@@ -16,6 +16,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -115,16 +116,21 @@ private class PickerReports(
     val phases: MutableList<EditPhase> = mutableListOf()
 }
 
-/** Shows an unstyled picker at [start] that is handed back every color it reports. */
+/** A track as the web reads it, named by its text since it has no role there. */
+private fun pickerTrackText(name: String): SemanticsMatcher =
+    hasText(name) and SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)
+
+/** Shows a picker at [start], unstyled unless [skin] says otherwise, that is handed back every color it reports. */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.pickerShow(
     start: Argb = PickerSeed,
     direction: LayoutDirection = LayoutDirection.Ltr,
     foldsState: Boolean = false,
+    skin: Skin = PickerUnstyled,
 ): PickerReports {
     val reports = PickerReports(start)
     setContent {
-        PickerHarness(PickerUnstyled) {
+        PickerHarness(skin) {
             CompositionLocalProvider(
                 LocalLayoutDirection provides direction,
                 LocalFoldsStateIntoName provides foldsState,
@@ -313,17 +319,17 @@ class HctPickerTest {
         }
 
     @Test
-    fun tracks_foldsStateIntoName_carryTheirValueInTheName() =
-        runComposeUiTest {
+    fun tracks_foldsStateIntoName_everySkin_carryTheirValueInTheirText() =
+        pickerForEachSkin { _, skin ->
             // The seed #6750A4 sits at hue 298.98.
-            pickerShow(foldsState = true)
-            val hue = onNode(pickerTrack("Hue, 299"))
-            hue.assertExists()
+            pickerShow(foldsState = true, skin = skin)
+            val hue = onNode(pickerTrackText("Hue, 299"))
+            hue.assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription))
             hue.requestFocus()
 
             hue.performKeyInput { pressKey(Key.DirectionRight) }
 
-            onNode(pickerTrack("Hue, 300")).assertExists()
+            onNode(pickerTrackText("Hue, 300")).assertExists()
         }
 
     @Test

@@ -34,6 +34,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * choice never rests on colour alone (AR-03). The row wraps onto more lines when it runs out of
  * width.
  *
+ * Where every choice costs something, such as a reskin and an undo entry, turn [selectOnFocus] off.
+ * The arrow keys then only move the focus, and Enter or Space chooses the focused chip.
+ *
  * Use [BuilderFilterChip] instead where several chips can be on together.
  *
  * @param[options] What there is to choose from.
@@ -43,6 +46,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * @param[modifier] Applied to the group.
  * @param[enabled] Whether the choice can change.
  * @param[optionIcon] A glyph for an option while it is not chosen, or null for a label alone.
+ * @param[selectOnFocus] Whether the arrow keys choose as they move, or only move the focus.
  * @param[optionLabel] The label of an option.
  */
 @Composable
@@ -54,11 +58,22 @@ public fun <T> BuilderChoiceChips(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     optionIcon: (T) -> IconId? = { null },
+    selectOnFocus: Boolean = true,
     optionLabel: (T) -> String,
 ) {
     when (LocalSkin.current.library) {
         Library.Material3 -> {
-            MaterialChoiceChips(options, selected, onSelect, label, modifier, enabled, optionIcon, optionLabel)
+            MaterialChoiceChips(
+                options,
+                selected,
+                onSelect,
+                label,
+                modifier,
+                enabled,
+                optionIcon,
+                selectOnFocus,
+                optionLabel,
+            )
         }
         Library.Unstyled -> {
             HeadlessChoiceChips(
@@ -70,12 +85,23 @@ public fun <T> BuilderChoiceChips(
                 modifier,
                 enabled,
                 optionIcon,
+                selectOnFocus,
                 optionLabel,
             )
         }
         Library.Fluent -> {
             // fluent-placeholder
-            FluentChoiceChips(options, selected, onSelect, label, modifier, enabled, optionIcon, optionLabel)
+            FluentChoiceChips(
+                options,
+                selected,
+                onSelect,
+                label,
+                modifier,
+                enabled,
+                optionIcon,
+                selectOnFocus,
+                optionLabel,
+            )
         }
         Library.Custom -> {
             HeadlessChoiceChips(
@@ -87,6 +113,7 @@ public fun <T> BuilderChoiceChips(
                 modifier,
                 enabled,
                 optionIcon,
+                selectOnFocus,
                 optionLabel,
             )
         }
@@ -104,6 +131,7 @@ internal fun <T> HeadlessChoiceChips(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     optionIcon: (T) -> IconId? = { null },
+    selectOnFocus: Boolean = true,
     optionLabel: (T) -> String,
 ) {
     val target = LocalLayout.current.primaryTouchTarget
@@ -115,11 +143,12 @@ internal fun <T> HeadlessChoiceChips(
         spacing = LocalBuilderTokens.current.spacing.small,
         modifier = modifier.alpha(enabledAlpha(enabled)),
         enabled = enabled,
+        selectOnFocus = selectOnFocus,
     ) { value, isSelected, interactionSource ->
         val colors = style.colors(isSelected)
         Row(
             modifier = Modifier
-                .foldState(optionLabel(value), ControlState.Selected(isSelected), enabled)
+                .foldState(optionLabel(value), ControlState.Selected(isSelected), enabled, role = FoldedRole.Radio)
                 .controlTouchTarget(target)
                 .controlPress(interactionSource)
                 .controlRing(interactionSource, style.shape)

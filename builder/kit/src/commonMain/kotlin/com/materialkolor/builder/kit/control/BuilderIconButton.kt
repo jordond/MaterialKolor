@@ -106,6 +106,6 @@ internal fun HeadlessIconButton(
             .size(style.height),
         contentAlignment = Alignment.Center,
     ) {
-        BuilderIcon(icon, contentDescription = contentDescription, tint = colors.content)
+        BuilderIcon(icon, contentDescription = stateName(contentDescription, null, enabled), tint = colors.content)
     }
 }

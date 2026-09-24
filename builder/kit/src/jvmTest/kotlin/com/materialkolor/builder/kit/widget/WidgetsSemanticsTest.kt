@@ -208,10 +208,10 @@ class WidgetsSemanticsTest {
                 }
             }
 
-            onNodeWithContentDescription("Tonal spot, selected")
+            onNodeWithContentDescription("Tonal spot, radio, selected")
                 .assert(widgetHasRole(Role.RadioButton))
                 .assertIsSelected()
-            onNodeWithContentDescription("Vibrant, not selected")
+            onNodeWithContentDescription("Vibrant, radio, not selected")
                 .assert(widgetHasRole(Role.RadioButton))
                 .assertIsNotSelected()
         }

@@ -107,6 +107,7 @@ internal fun <T> FluentSegmented(
     modifier: Modifier,
     enabled: Boolean,
     optionIcon: (T) -> IconId?,
+    selectOnFocus: Boolean,
     optionLabel: (T) -> String,
 ) {
     HeadlessSegmented(
@@ -118,6 +119,7 @@ internal fun <T> FluentSegmented(
         modifier = modifier,
         enabled = enabled,
         optionIcon = optionIcon,
+        selectOnFocus = selectOnFocus,
         optionLabel = optionLabel,
     )
 }
@@ -143,6 +145,7 @@ internal fun <T> FluentChoiceChips(
     modifier: Modifier,
     enabled: Boolean,
     optionIcon: (T) -> IconId?,
+    selectOnFocus: Boolean,
     optionLabel: (T) -> String,
 ) {
     HeadlessChoiceChips(
@@ -154,6 +157,7 @@ internal fun <T> FluentChoiceChips(
         modifier = modifier,
         enabled = enabled,
         optionIcon = optionIcon,
+        selectOnFocus = selectOnFocus,
         optionLabel = optionLabel,
     )
 }

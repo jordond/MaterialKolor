@@ -69,6 +69,7 @@ import com.materialkolor.builder.kit.control.BuilderMenuItem
 import com.materialkolor.builder.kit.control.BuilderToast
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.foldMenuRow
 import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.headless.HeadlessDropdown
 import com.materialkolor.builder.kit.headless.HeadlessModal
@@ -92,7 +93,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * sheet with three detents and the scroll area. Where overlays render in the page (D40) it also
  * dresses the headless tooltip that stands in for `PlainTooltip`, and through [materialMenuStyle]
  * the menu and the select's list that stand in for `DropdownMenu`. The dialog there draws Material's
- * own dialog container and only takes the veil from here.
+ * own dialog container over the headless modal, whose veil reads `tokens.scrim` directly rather
+ * than anything from here.
  *
  * @param[surface] The container colour.
  * @param[popoverShape] The shape of a popover, a tooltip and a toast.
@@ -293,13 +295,18 @@ private fun MaterialMenuRows(
         val icon = item.icon
         val danger = item.emphasis == Emphasis.Danger
         val error = MaterialTheme.colorScheme.error
+        val selected = item.selected
         DropdownMenuItem(
             text = { Text(item.label) },
             onClick = {
                 onDismissRequest()
                 item.onClick()
             },
-            modifier = Modifier.semantics { role = Role.Button },
+            modifier = Modifier
+                .semantics {
+                    role = if (selected == null) Role.Button else Role.RadioButton
+                    if (selected != null) this.selected = selected
+                }.foldMenuRow(item.label, selected, item.enabled),
             leadingIcon = if (icon == null) {
                 null
             } else {
@@ -311,6 +318,11 @@ private fun MaterialMenuRows(
                         tint = if (danger) error else Color.Unspecified,
                     )
                 }
+            },
+            trailingIcon = if (selected == true) {
+                { BuilderIcon(IconId.Check, contentDescription = null) }
+            } else {
+                null
             },
             enabled = item.enabled,
             colors = if (danger) {
@@ -324,6 +336,9 @@ private fun MaterialMenuRows(
 
 /**
  * Material's exposed dropdown, a read only outlined field over a `DropdownMenu`.
+ *
+ * The field already shows the choice as its text, so on the web its name is the label alone, with
+ * the disabled note while it is disabled, and the choice is read once (S5 row 10).
  *
  * Where overlays render in the page (D40) the field stays and the options open in the headless
  * dropdown in Material's menu container, as wide as the field, with focus on the chosen option.
@@ -369,7 +384,7 @@ internal fun <T> MaterialSelect(
                 ).semantics {
                     role = Role.DropdownList
                     stateDescription = current
-                }.foldState(label, ControlState.Value(current), enabled),
+                }.foldState(label, null, enabled),
             enabled = enabled,
             readOnly = true,
             label = { Text(label) },

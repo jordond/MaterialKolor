@@ -13,7 +13,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.LayoutDirection
@@ -62,7 +61,8 @@ public fun BuilderProgress(
 
 /**
  * Names a progress bar and, when [progress] is known, states it as a whole percentage. On the web
- * the percentage rides in the name as well (D37).
+ * the percentage rides in the name as well (D37), and the name goes in as text, since the bar has
+ * no role there (S5 answer 1).
  */
 @Composable
 internal fun Modifier.progressLabel(
@@ -71,8 +71,9 @@ internal fun Modifier.progressLabel(
 ): Modifier {
     val percent = progress?.let { amount -> stringResource(Res.string.progress_percent, (amount * 100).roundToInt()) }
     val name = stateName(label, percent?.let { text -> ControlState.Value(text) })
+    val asText = LocalFoldsStateIntoName.current
     return semantics {
-        contentDescription = name
+        roleLessName(name, asText)
         if (percent != null) stateDescription = percent
     }
 }
