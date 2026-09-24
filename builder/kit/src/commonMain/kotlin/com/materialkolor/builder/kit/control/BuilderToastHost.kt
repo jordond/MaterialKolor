@@ -43,7 +43,7 @@ import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.headless.OverlayTopSlot
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
+import com.materialkolor.builder.kit.skin.fluent.FluentToast
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
@@ -157,8 +157,9 @@ public fun rememberBuilderToastHostState(): BuilderToastHostState = remember { B
  * toast goes by itself after its duration, and its action closes it. The countdown waits while the
  * pointer rests on a toast or focus is inside it, and picks up with the time it had left (WCAG
  * 2.2.1), so a keyboard user on Undo never loses the toast under them. Material3 draws each toast
- * as a `Snackbar`, the other skins as a headless toast. Where overlays render in the page (D40) the
- * stack is drawn in the overlay host's top slot over the space it is given, so a toast raised from
+ * as a `Snackbar`, Fluent as an `InfoBar` and the other skins as a headless toast. Where overlays
+ * render in the page (D40) the stack is drawn in the overlay host's top slot over the space it is
+ * given, so a toast raised from
  * inside a dialog or a sheet shows over its veil rather than under it, and its action joins the
  * dialog's Tab cycle. When a toast goes with focus on its action, focus goes back into the dialog.
  *
@@ -236,8 +237,8 @@ private fun ToastEntry(
         when (library) {
             Library.Material3 -> MaterialToast(toast, onAction, holds)
             Library.Unstyled -> HeadlessToast(toast, onAction, unstyledOverlayStyle(tokens), holds)
-            // fluent-placeholder
-            Library.Fluent -> HeadlessToast(toast, onAction, fluentOverlayStyle(tokens), holds)
+            // b-404
+            Library.Fluent -> FluentToast(toast.message, toast.actionLabel, onAction, holds)
             Library.Custom -> HeadlessToast(toast, onAction, customOverlayStyle(tokens), holds)
         }
     }

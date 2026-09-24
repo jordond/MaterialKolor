@@ -118,7 +118,7 @@ pyftsubset "$work_dir/jetbrains.ttf" \
     --name-legacy \
     --notdef-outline
 
-# B-404
+# b-404
 # Selawik stands in for Segoe UI on the Fluent skin (architecture 6.11). It ships as static faces,
 # and Fluent's type scale only sets Regular and SemiBold, so those two are cut to the same Latin
 # range. The release is a tag with a zip, pinned by its checksum.
