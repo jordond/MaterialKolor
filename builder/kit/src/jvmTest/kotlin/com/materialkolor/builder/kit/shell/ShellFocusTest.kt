@@ -213,7 +213,8 @@ class ShellFocusTest {
                         }
                     }
                     waitForIdle()
-                    shellTabFrom(ShellPosterTag) shouldBe listOf(ShellPosterTag, ShellCanvasTag, ShellDockTag, ShellTopBarTag)
+                    shellTabFrom(ShellPosterTag) shouldBe
+                        listOf(ShellPosterTag, ShellCanvasTag, ShellDockTag, ShellTopBarTag)
 
                     onNodeWithTag(ShellDockTag, useUnmergedTree = true).requestFocus()
                     waitForIdle()
