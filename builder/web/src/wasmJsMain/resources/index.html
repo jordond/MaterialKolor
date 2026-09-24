@@ -86,7 +86,8 @@
 
       /*
         The splash. boot.js sets --mk-light, --mk-dark and, when the seed is known, --mk-seed. It adds
-        mk-light or mk-dark to the page when the app's appearance is not the system's.
+        mk-light or mk-dark to the page when the app's appearance is not the system's, and
+        mk-motion-frozen for ?motion=frozen.
       */
       #splash {
         --mk-chrome: var(--mk-light, #fff8f6);
@@ -157,10 +158,63 @@
         content: var(--mk-hex, "");
       }
 
+      /*
+        The seed bloom, one seed becoming a palette. Tints of the seed, the seed and shades of it, or
+        neutral ones when no seed is known. Sized by the canvas so the row fits a 320 px phone.
+      */
       .mk-canvas {
+        --mk-tone: var(--mk-seed, color-mix(in srgb, var(--mk-ink) 40%, var(--mk-chrome)));
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
         flex: 1;
+        container-type: inline-size;
         border-radius: 28px;
         background: var(--mk-block);
+      }
+
+      .mk-swatches {
+        display: flex;
+        gap: clamp(8px, 2.5cqi, 16px);
+      }
+
+      .mk-swatches span {
+        width: clamp(28px, 12cqi, 64px);
+        aspect-ratio: 1;
+        border-radius: 32%;
+        background: var(--mk-tone);
+      }
+
+      .mk-swatches span:nth-child(1) {
+        background: color-mix(in oklch, var(--mk-tone) 25%, white);
+      }
+
+      .mk-swatches span:nth-child(2) {
+        --mk-step: 1;
+        background: color-mix(in oklch, var(--mk-tone) 60%, white);
+      }
+
+      .mk-swatches span:nth-child(3) {
+        --mk-step: 2;
+      }
+
+      .mk-swatches span:nth-child(4) {
+        --mk-step: 3;
+        background: color-mix(in oklch, var(--mk-tone) 65%, black);
+      }
+
+      .mk-swatches span:nth-child(5) {
+        --mk-step: 4;
+        background: color-mix(in oklch, var(--mk-tone) 30%, black);
+      }
+
+      .mk-caption {
+        margin: 0;
+        color: var(--mk-ink);
+        opacity: 0.7;
+        font-size: 14px;
       }
 
       @media (max-width: 600px) {
@@ -173,15 +227,39 @@
         }
       }
 
+      /*
+        Each swatch rises and scales in 90 ms after the one before, and the hex settles onto the poster
+        once. Only transform and opacity move, so the compositor runs it while the main thread
+        compiles the app. Reduced motion and ?motion=frozen hold it all still.
+      */
       @media (prefers-reduced-motion: no-preference) {
-        .mk-canvas {
-          animation: mk-pulse 1.2s ease-in-out infinite alternate;
+        html:not(.mk-motion-frozen) .mk-swatches span {
+          animation: mk-bloom 1.6s cubic-bezier(0.4, 0, 0.2, 1) calc(var(--mk-step, 0) * 90ms) infinite both;
+        }
+
+        html:not(.mk-motion-frozen) .mk-poster::after {
+          animation: mk-settle 0.6s cubic-bezier(0.2, 0, 0, 1) 0.1s both;
         }
       }
 
-      @keyframes mk-pulse {
-        to {
-          opacity: 0.6;
+      @keyframes mk-bloom {
+        0%,
+        100% {
+          opacity: 0.4;
+          transform: translateY(25%) scale(0.6);
+        }
+
+        40%,
+        65% {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      @keyframes mk-settle {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
         }
       }
 
@@ -289,7 +367,10 @@
         <div class="mk-bar">MaterialKolor Builder</div>
         <div class="mk-work">
           <div class="mk-poster"></div>
-          <div class="mk-canvas"></div>
+          <div class="mk-canvas">
+            <div class="mk-swatches"><span></span><span></span><span></span><span></span><span></span></div>
+            <p class="mk-caption">Loading the builder</p>
+          </div>
         </div>
       </div>
     </div>
