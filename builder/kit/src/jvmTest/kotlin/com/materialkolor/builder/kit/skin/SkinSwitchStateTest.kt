@@ -109,7 +109,7 @@ class SkinSwitchStateTest {
         }
 
     @Test
-    fun openMenuAndSelectAcrossASkinSwap_inWindows_closeWithTheSwap() =
+    fun openMenuAndSelectAcrossASkinSwap_inWindows_closeTheSelectAndReopenTheMenuInTheNewSkin() =
         runComposeUiTest {
             var skin by mutableStateOf(Skin(Library.Material3, expressive = false))
             var menu by mutableStateOf(false)
@@ -128,14 +128,16 @@ class SkinSwitchStateTest {
                 }
             }
             waitForIdle()
-            onNodeWithTag("style").performClick()
-            waitForIdle()
-            onAllNodes(isPopup()).assertCountEquals(1)
-            menu = true
-            waitForIdle()
-            onAllNodes(isPopup()).assertCountEquals(2)
             for (library in listOf(Library.Custom, Library.Material3)) {
                 withClue(library.name) {
+                    menu = false
+                    waitForIdle()
+                    onNodeWithTag("style").performClick()
+                    waitForIdle()
+                    onAllNodes(isPopup()).assertCountEquals(1)
+                    menu = true
+                    waitForIdle()
+                    onAllNodes(isPopup()).assertCountEquals(2)
                     skin = Skin(library, expressive = false)
                     waitForIdle()
                     menu shouldBe true
