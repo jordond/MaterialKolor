@@ -46,6 +46,7 @@ import com.composeunstyled.UnstyledProgress
 import com.composeunstyled.UnstyledTabGroup
 import com.composeunstyled.focusRing
 import com.materialkolor.builder.domain.model.Role
+import com.materialkolor.builder.kit.control.foldedTabName
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.choice
 import com.materialkolor.builder.preview.canvas.choose
@@ -144,7 +145,7 @@ private fun RangeTabs(
                         key = entry,
                         modifier = Modifier
                             .previewRoles(if (selected) UnstyledComponent.SelectedTab else UnstyledComponent.Tab)
-                            .foldState(entry.label, selectedWord(selected))
+                            .foldedTabName(entry.label, selected)
                             .focusRing(interactions, 2.dp, DashboardToken.Primary.color, ControlShape)
                             .clip(ControlShape)
                             .background(container?.color ?: Color.Transparent),

@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.persist.DeviceWidth
+import com.materialkolor.builder.kit.a11y.KitTestApi
+import com.materialkolor.builder.kit.a11y.ProvideWebFoldsForTest
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.preview.Chrome
@@ -43,7 +45,7 @@ internal fun menuItem(filter: OrderFilter): SemanticsMatcher =
     SemanticsMatcher.expectValue(SemanticsProperties.Role, SemanticsRole.RadioButton) and
         hasAnyDescendant(hasText(filter.label))
 
-/** The icon button named [label], which on the JVM goes by its label alone. */
+/** The icon button named [label], which off the web goes by its label alone. */
 internal fun iconButton(label: String): SemanticsMatcher = hasClickAction() and hasContentDescription(label)
 
 /** Every panel open, so the menu, a phone's navigation and, when [drawer], the token panel are on screen too. */
@@ -80,8 +82,9 @@ internal fun ComposeUiTest.tallDashboard(
 
 /**
  * The dashboard in an Unstyled pane of [spec], under the Unstyled chrome, with motion frozen. With
- * [folds] it folds state into names as it does on the web.
+ * [folds] the kit's fold modifiers fold state into names as they do on the web.
  */
+@OptIn(KitTestApi::class)
 @Composable
 internal fun DashboardHarness(
     spec: PaneSpec,
@@ -90,12 +93,13 @@ internal fun DashboardHarness(
     modifier: Modifier,
     folds: Boolean = false,
 ) {
-    CompositionLocalProvider(
-        LocalMotionFrozen provides true,
-        LocalDashboardFoldsState provides folds,
-    ) {
+    CompositionLocalProvider(LocalMotionFrozen provides true) {
         Chrome(Skin(Library.Unstyled, expressive = false)) {
-            PreviewPane(spec, modifier) { UnstyledAppEntry(spec, state, width) }
+            if (folds) {
+                ProvideWebFoldsForTest { PreviewPane(spec, modifier) { UnstyledAppEntry(spec, state, width) } }
+            } else {
+                PreviewPane(spec, modifier) { UnstyledAppEntry(spec, state, width) }
+            }
         }
     }
 }

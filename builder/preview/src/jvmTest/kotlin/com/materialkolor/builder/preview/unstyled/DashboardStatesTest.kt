@@ -35,6 +35,10 @@ import androidx.compose.ui.semantics.Role as SemanticsRole
 private fun tab(range: DashboardRange): SemanticsMatcher =
     SemanticsMatcher.expectValue(SemanticsProperties.Role, SemanticsRole.Tab) and hasText(range.label)
 
+/** The kit's state words for a panel that is shut and one that is open, as a state description. */
+private const val COLLAPSED = "Collapsed"
+private const val EXPANDED = "Expanded"
+
 /** A clickable whose name starts with [name], with or without a state folded in after it. */
 private fun named(name: String): SemanticsMatcher = hasClickAction() and hasContentDescription(name, substring = true)
 
@@ -45,36 +49,37 @@ class DashboardStatesTest {
         runComposeUiTest {
             val state = shutDashboard(DeviceWidth.Phone, folds = false)
             val navigation = onNode(iconButton(DashboardCopy.Navigation))
-            navigation.assert(hasStateDescription(DashboardCopy.Collapsed))
+            navigation.assert(hasStateDescription(COLLAPSED))
             navigation.performSemanticsAction(SemanticsActions.Expand)
             waitForIdle()
             state.isOn(DashboardNavSwitch) shouldBe true
-            navigation.assert(hasStateDescription(DashboardCopy.Expanded))
+            navigation.assert(hasStateDescription(EXPANDED))
             navigation.assert(hasContentDescriptionExactly(DashboardCopy.Navigation))
 
             val status = onNode(StatusButton)
-            status.assert(hasStateDescription(DashboardCopy.Collapsed))
+            status.assert(hasStateDescription(COLLAPSED))
             status.performSemanticsAction(SemanticsActions.Expand)
             waitForIdle()
             state.isOn(DashboardMenuSwitch) shouldBe true
-            status.assert(hasStateDescription(DashboardCopy.Expanded))
+            status.assert(hasStateDescription(EXPANDED))
             status.performSemanticsAction(SemanticsActions.Collapse)
             waitForIdle()
             state.isOn(DashboardMenuSwitch) shouldBe false
-            status.assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription))
+            status.assertName(OrderFilter.All.label)
         }
 
     @Test
-    fun picks_offTheWeb_reportSelectedAndKeepTheirTextAsTheName() =
+    fun picks_offTheWeb_reportSelectedAndGoByTheirTextAlone() =
         runComposeUiTest {
             val state = shutDashboard(DeviceWidth.Desktop, folds = false)
             state.setOn(DashboardMenuSwitch, true)
             waitForIdle()
-            val plainName = SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription)
-            onNode(tab(DashboardRange.Week)).assert(isSelected()).assert(plainName)
+            onNode(tab(DashboardRange.Week)).assert(isSelected()).assertName(DashboardRange.Week.label)
             val overview = onNode(hasClickAction() and hasText(DashboardDestination.Overview.label))
-            overview.assert(isSelected()).assert(plainName)
-            onNode(menuItem(OrderFilter.All), useUnmergedTree = true).assert(isSelected()).assert(plainName)
+            overview.assert(isSelected()).assertName(DashboardDestination.Overview.label)
+            onNode(menuItem(OrderFilter.All), useUnmergedTree = true)
+                .assert(isSelected())
+                .assertName(OrderFilter.All.label)
         }
 
     @Test
@@ -101,12 +106,12 @@ class DashboardStatesTest {
             val state = shutDashboard(DeviceWidth.Desktop, folds = true)
             state.setOn(DashboardMenuSwitch, true)
             waitForIdle()
-            onNode(tab(DashboardRange.Week)).assertName("Week, selected")
-            onNode(tab(DashboardRange.Month)).assertName("Month, not selected")
+            onNode(tab(DashboardRange.Week)).assertName("Week, tab, selected")
+            onNode(tab(DashboardRange.Month)).assertName("Month, tab, not selected")
             onNode(named(DashboardDestination.Overview.label)).assertName("Overview, selected")
             onNode(named(DashboardDestination.Customers.label)).assertName("Customers, not selected")
-            onNode(menuItem(OrderFilter.All), useUnmergedTree = true).assertName("All statuses, selected")
-            onNode(menuItem(OrderFilter.Paid), useUnmergedTree = true).assertName("Paid, not selected")
+            onNode(menuItem(OrderFilter.All), useUnmergedTree = true).assertName("All statuses, radio, selected")
+            onNode(menuItem(OrderFilter.Paid), useUnmergedTree = true).assertName("Paid, radio, not selected")
         }
         runComposeUiTest {
             shutDashboard(DeviceWidth.Tablet, folds = true)

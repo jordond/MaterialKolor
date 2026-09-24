@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -32,6 +31,7 @@ import com.composeunstyled.UnstyledHorizontalSeparator
 import com.composeunstyled.UnstyledIcon
 import com.composeunstyled.UnstyledVerticalSeparator
 import com.composeunstyled.focusRing
+import com.materialkolor.builder.kit.control.foldedSelectedName
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.choice
 import com.materialkolor.builder.preview.canvas.choose
@@ -179,16 +179,10 @@ private fun NavItem(
     val interactions = remember { MutableInteractionSource() }
     val visibility = tooltipVisibility(interactions)
     val content = if (selected) DashboardToken.OnSecondaryContainer.color else DashboardToken.OnSurfaceVariant.color
-    val word = selectedWord(selected)
-    val bounds: Modifier
-    val name: Modifier
-    if (compact) {
-        val spoken = stateName(destination.label, word)
-        bounds = Modifier.size(RailItemWidth, NavItemHeight)
-        name = Modifier.semantics { contentDescription = spoken }
+    val bounds = if (compact) {
+        Modifier.size(RailItemWidth, NavItemHeight)
     } else {
-        bounds = Modifier.fillMaxWidth().height(NavItemHeight)
-        name = Modifier.foldState(destination.label, word)
+        Modifier.fillMaxWidth().height(NavItemHeight)
     }
     Box(visibility.onEscape) {
         UnstyledButton(
@@ -197,7 +191,7 @@ private fun NavItem(
                 .then(bounds)
                 .previewRoles(if (selected) UnstyledComponent.SelectedNavItem else UnstyledComponent.NavItem)
                 .semantics { this.selected = selected }
-                .then(name)
+                .foldedSelectedName(destination.label, selected)
                 .focusRing(interactions, 2.dp, DashboardToken.Primary.color, ControlShape)
                 .clip(ControlShape)
                 .background(if (selected) DashboardToken.SecondaryContainer.color else Color.Transparent),

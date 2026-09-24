@@ -43,6 +43,8 @@ import com.composeunstyled.UnstyledButton
 import com.composeunstyled.UnstyledHorizontalSeparator
 import com.composeunstyled.UnstyledIcon
 import com.composeunstyled.focusRing
+import com.materialkolor.builder.kit.control.foldedChoiceName
+import com.materialkolor.builder.kit.control.foldedExpandedName
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.choose
 import androidx.compose.ui.semantics.Role as SemanticsRole
@@ -95,8 +97,8 @@ internal fun OrdersTitle(
                 onClick = toggle,
                 modifier = Modifier
                     .focusRequester(focus.statusButton)
-                    .expandedSemantics(open) { toggle(false) }
-                    .foldState(filter.label, expandedWord(open)),
+                    .foldedExpandedName(filter.label, open)
+                    .expandActions(open) { toggle(false) },
                 icon = Lucide.Filter,
                 role = SemanticsRole.DropdownList,
             )
@@ -147,7 +149,7 @@ private fun StatusMenu(
                     .height(MenuItemHeight)
                     .previewRoles(if (selected) UnstyledComponent.SelectedMenuItem else UnstyledComponent.MenuItem)
                     .semantics { this.selected = selected }
-                    .foldState(option.label, selectedWord(selected))
+                    .foldedChoiceName(option.label, selected)
                     .focusRing(interactions, 2.dp, DashboardToken.Primary.color, ControlShape)
                     .clip(ControlShape)
                     .background(if (selected) DashboardToken.SecondaryContainer.color else Color.Transparent),

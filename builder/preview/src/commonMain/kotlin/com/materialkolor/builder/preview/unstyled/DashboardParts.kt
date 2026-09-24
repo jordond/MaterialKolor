@@ -49,6 +49,7 @@ import com.composeunstyled.UnstyledIcon
 import com.composeunstyled.collectIsFocusVisibleAsState
 import com.composeunstyled.focusRing
 import com.materialkolor.builder.domain.model.Role
+import com.materialkolor.builder.kit.control.foldedExpandedName
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import androidx.compose.ui.semantics.Role as SemanticsRole
@@ -215,8 +216,11 @@ internal fun DashboardIconButton(
     } else {
         Modifier.previewRoles(on.role, Role.OnSurfaceVariant)
     }
-    val name = if (expanded == null) label else stateName(label, expandedWord(expanded))
-    val state = if (expanded == null) Modifier else Modifier.expandedSemantics(expanded) { onClick(false) }
+    val named = if (expanded == null) {
+        Modifier.semantics { contentDescription = label }
+    } else {
+        Modifier.foldedExpandedName(label, expanded).expandActions(expanded) { onClick(false) }
+    }
     Box(modifier.then(visibility.onEscape)) {
         UnstyledButton(
             onClick = { onClick(keyboard) },
@@ -224,8 +228,7 @@ internal fun DashboardIconButton(
                 .size(IconButtonSize)
                 .then(if (focusRequester == null) Modifier else Modifier.focusRequester(focusRequester))
                 .then(roles)
-                .semantics { contentDescription = name }
-                .then(state)
+                .then(named)
                 .focusRing(interactions, FocusRingWidth, DashboardToken.Primary.color, ControlShape)
                 .clip(ControlShape)
                 .background(if (toggled) DashboardToken.SecondaryContainer.color else Color.Transparent),
