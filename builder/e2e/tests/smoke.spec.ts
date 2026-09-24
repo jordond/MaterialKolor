@@ -41,6 +41,8 @@ test('the budget counts as first visit exactly what the site loads at boot', asy
   await page.goto(site('/'));
   await expect(page.locator('#cmp_a11y_root > *').first()).toBeAttached({ timeout: 30_000 });
   await page.waitForLoadState('networkidle');
+  // Fonts and strings are asked for after the first frame, which can be after networkidle.
+  await settle(responses);
 
   const counted = firstVisitFiles();
   const origin = new URL(site('/')).origin;
@@ -51,7 +53,9 @@ test('the budget counts as first visit exactly what the site loads at boot', asy
   expect(fetched.filter((file) => !counted(file)), 'loaded at boot but not counted').toEqual([]);
   const root = process.env.MK_E2E_SITE_DIR;
   if (!root) throw new Error('MK_E2E_SITE_DIR is not set, the global setup did not run');
-  const unfetched = siteFiles(root).filter((file) => counted(file) && !fetched.includes(file));
+  // String files load when a screen first reads them, so some load later than boot. They stay
+  // counted, which only makes the total stricter, and only this direction skips them.
+  const unfetched = siteFiles(root).filter((file) => counted(file) && !LAZY_STRINGS.test(file) && !fetched.includes(file));
   expect(unfetched, 'counted but not loaded at boot').toEqual([]);
 });
 
@@ -75,6 +79,23 @@ test('an asset that is not there is a 404, not the app', async ({ request }) => 
   expect((await request.get(site('/t/builder.js'))).status()).toBe(404);
   expect((await request.get(site('/assets/missing.wasm'))).status()).toBe(404);
 });
+
+/** Compose string resource files, which load on first use rather than at boot. */
+const LAZY_STRINGS = /^composeResources\/[^/]+\/values\/[^/]+\.cvr$/;
+
+/** Waits until no new response has arrived for two seconds, or fifteen seconds have passed. */
+async function settle(responses: unknown[]): Promise<void> {
+  const deadline = Date.now() + 15_000;
+  let seen = responses.length;
+  let quietSince = Date.now();
+  while (Date.now() < deadline && Date.now() - quietSince < 2_000) {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    if (responses.length !== seen) {
+      seen = responses.length;
+      quietSince = Date.now();
+    }
+  }
+}
 
 function collectErrors(page: Page): string[] {
   const errors: string[] = [];

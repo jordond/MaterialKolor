@@ -36,7 +36,10 @@ The script prints the brotli version it ran with, since another version can diff
   really fetches both ways: it fails if the page loads a file at boot that the set does not count,
   and if the set counts a file the page does not load at boot. So the change that makes a file
   lazy also moves it into `firstVisit.exclude` and, for a font, out of the initial fonts role and
-  the boot list. Until it does, the file counts toward first visit and the smoke fails.
+  the boot list. Until it does, the file counts toward first visit and the smoke fails. String
+  resource files (`values/*.cvr`, one or two KB each) are the one exception to the second check:
+  Compose loads each when a screen first reads it, so some arrive after boot. They stay counted,
+  which only makes the total stricter.
 - Growth, per file. A file a role names may not grow more than `growth.maxPercent` (5%) over its
   size in `budget-baseline.json`, whether its role has a per-file limit or a total. Files are keyed
   without their content hash, so `assets/skiko.<hash>.wasm` is `assets/skiko.wasm`. A role file
