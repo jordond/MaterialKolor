@@ -10,11 +10,18 @@ two samples side by side and see exactly what each stack asks of you.
 | [`fluent`](fluent) | [Compose Fluent](https://github.com/compose-fluent/compose-fluent-ui) | `material-kolor-fluent` | `./gradlew :samples:fluent:run` |
 | [`unstyled`](unstyled) | [Compose Unstyled](https://composeunstyled.com) | `material-kolor-unstyled` | `./gradlew :samples:unstyled:run` |
 
+| `custom-theme` | `fluent` | `unstyled` |
+|---|---|---|
+| ![custom-theme sample](screenshots/images/custom-theme.png) | ![fluent sample](screenshots/images/fluent.png) | ![unstyled sample](screenshots/images/unstyled.png) |
+
 ## Modules
 
 - [`shared`](shared) holds everything that is not UI. The task model, the theme settings, one
   reducer, a small store and the copy every sample shows.
 - Each sample owns its UI, its theme and a `Main.kt` desktop entry point.
+- [`screenshots`](screenshots) renders both tabs of every sample in light and dark, full page, into
+  `samples/screenshots/build/screenshots`, and refreshes the three shots above in
+  [`screenshots/images`](screenshots/images). Run it with `./gradlew screenshots`.
 
 ## The app
 
