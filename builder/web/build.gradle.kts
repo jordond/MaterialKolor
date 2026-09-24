@@ -1,11 +1,13 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 // The site shell. It is the one module that talks to the browser, so it has a single target and
-// skips the builder convention, which would add a JVM target it has no use for.
+// skips the builder convention, which would add a JVM target it has no use for. The web convention
+// only adds the site tasks, `assembleSite` and `checkBudget` among them.
 plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
+    id("materialkolor.builder.web")
 }
 
 kotlin {
@@ -25,7 +27,7 @@ kotlin {
 
             implementation(libs.compose.runtime)
             implementation(libs.compose.ui)
-            implementation(libs.kstore.storage)
+            implementation(libs.compose.resources)
             implementation(libs.kotlinx.browser)
             implementation(libs.kermit)
         }
