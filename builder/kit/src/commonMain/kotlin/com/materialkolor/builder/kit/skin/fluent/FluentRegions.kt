@@ -1,9 +1,7 @@
 package com.materialkolor.builder.kit.skin.fluent
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -14,11 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -31,7 +30,6 @@ import io.github.composefluent.background.BackgroundSizing
 import io.github.composefluent.background.ElevationDefaults
 import io.github.composefluent.background.Layer
 import io.github.composefluent.background.elevation
-import io.github.composefluent.component.CommandBar
 import io.github.composefluent.component.CommandBarDefaults
 import io.github.composefluent.component.InfoBar
 import io.github.composefluent.component.InfoBarDefaults
@@ -39,11 +37,13 @@ import io.github.composefluent.component.InfoBarSeverity
 import io.github.composefluent.component.Text
 
 /**
- * Fluent's header, a `CommandBar` across the top of the workspace on the workspace ground.
+ * Fluent's header, a command bar across the top of the workspace on the workspace ground.
  *
- * The bar takes the header's full height, and its contents go in as one item as wide as the bar,
- * so a weighted child still takes the room that is left. The library switcher inside is the kit's
- * Fluent segmented control, which draws its own frame so the focus ring is never clipped.
+ * It is the bar's own frame, a clear `Layer` with the bar's padding and Fluent's ink, rather than
+ * Fluent's `CommandBar`. That one keeps its overflow button composed off screen even when nothing
+ * overflows, a nameless button that a screen reader and the page's mirror still find, and the
+ * overflow opens as a popup (D40). The library switcher inside is the kit's Fluent segmented
+ * control, which draws its own frame so its focus ring is never clipped.
  */
 @Composable
 internal fun FluentTopBarRegion(
@@ -51,19 +51,24 @@ internal fun FluentTopBarRegion(
     content: @Composable RowScope.() -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
-    Box(
+    Layer(
         modifier = modifier
             .fillMaxWidth()
-            .height(ShellMetrics.topBarHeight)
-            .background(tokens.panel)
-            .padding(horizontal = tokens.spacing.small),
+            .height(ShellMetrics.topBarHeight),
+        shape = RectangleShape,
+        color = tokens.panel,
+        border = null,
     ) {
-        FluentCommands(Modifier.fillMaxSize(), fill = true, content = content)
+        FluentCommands(
+            modifier = Modifier.fillMaxSize().padding(horizontal = tokens.spacing.small),
+            gap = tokens.spacing.small,
+            content = content,
+        )
     }
 }
 
 /**
- * Fluent's dock, a `CommandBar` on a `Layer` in the flyout's dress, floating on the flyout's
+ * Fluent's dock, a command bar on a `Layer` in the flyout's dress, floating on the flyout's
  * shadow. It is as tall as Fluent's standard bar, or taller where the touch targets need it.
  */
 @Composable
@@ -85,7 +90,7 @@ internal fun FluentDockRegion(
         backgroundSizing = BackgroundSizing.InnerBorderEdge,
         elevation = ElevationDefaults.flyout,
     ) {
-        FluentCommands(Modifier.height(height), fill = false, content = content)
+        FluentCommands(Modifier.height(height), gap = tokens.spacing.extraSmall, content = content)
     }
 }
 
@@ -175,34 +180,23 @@ internal fun FluentToast(
 }
 
 /**
- * A `CommandBar` holding [content] as its one item, so the bar never has anything to move into
- * its overflow. The overflow is a popup, which the builder never opens (D40), so the bar is also
- * held closed. With [fill] the row takes the bar's whole width, and otherwise it wraps its tools.
+ * A row laid out the way a `CommandBar` lays out its commands, centred in the bar's height behind
+ * the bar's side padding, [gap] apart. Nothing in it ever moves to an overflow, so a narrow window
+ * squeezes the tools rather than hiding them.
  */
 @Composable
 private fun FluentCommands(
     modifier: Modifier,
-    fill: Boolean,
+    gap: Dp,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val spacing = LocalBuilderTokens.current.spacing
-    val row by rememberUpdatedState(content)
-    CommandBar(
-        expanded = false,
-        onExpandedChanged = {},
-        modifier = modifier,
-    ) {
-        item(key = CommandRowKey) {
-            Row(
-                modifier = if (fill) Modifier.fillMaxWidth() else Modifier,
-                horizontalArrangement = Arrangement.spacedBy(if (fill) spacing.small else spacing.extraSmall),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                row()
-            }
-        }
-    }
+    Row(
+        modifier = modifier.padding(horizontal = CommandBarPadding),
+        horizontalArrangement = Arrangement.spacedBy(gap),
+        verticalAlignment = Alignment.CenterVertically,
+        content = content,
+    )
 }
 
-/** The key of the one item every Fluent command bar here holds. */
-private const val CommandRowKey = "commands"
+/** How far a `CommandBar` insets its commands from its ends. */
+private val CommandBarPadding = 8.dp

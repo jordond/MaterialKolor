@@ -64,8 +64,8 @@ class ShellScreenshotTest {
     }
 
     /**
-     * Fluent's own regions with something in them, the header's `CommandBar` with the library
-     * switcher, the dock's `CommandBar` on its `Layer` and a toast as an `InfoBar`, in light and dark.
+     * Fluent's own regions with something in them, the header's command bar with the library
+     * switcher, the dock's command bar on its `Layer` and a toast as an `InfoBar`, in light and dark.
      */
     @Test
     fun fluentShell_lightAndDark_rendersItsRegionsAtPhoneAndDesktopWidths() {

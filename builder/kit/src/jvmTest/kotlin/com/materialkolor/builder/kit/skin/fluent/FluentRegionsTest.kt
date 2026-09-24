@@ -42,9 +42,9 @@ private const val DockTools = 12
 @OptIn(ExperimentalTestApi::class)
 class FluentRegionsTest {
     /**
-     * The header is a `CommandBar`, which keeps an overflow button of its own ready. The contents
-     * are one item as wide as the bar, so that button never shows, never takes focus and is never
-     * read, and a weighted spacer still pushes the last control to the far end.
+     * Fluent's own `CommandBar` keeps a nameless overflow button composed off screen, which a
+     * screen reader would still find. The header is laid out as the bar is without it, so the only
+     * controls in it are the ones it was given, and a weighted spacer pushes the last to the far end.
      */
     @Test
     fun topBar_holdsItsControlsOnlyAndLetsAWeightedChildFillTheRest() =

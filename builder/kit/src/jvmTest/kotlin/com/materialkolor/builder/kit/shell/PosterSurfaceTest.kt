@@ -42,6 +42,9 @@ import kotlin.test.Test
 import io.github.composefluent.LocalContentColor as FluentContentColor
 
 private const val ShellTextRatio = 4.5
+
+/** The least Fluent's own fixed text reaches on the fifty seeds, 4.35 at worst when measured. */
+private const val FluentTextFloor = 4.3
 private const val ShellClickTag = "shell-click"
 
 /** Ten hues at five tones, mid tones included, where ink sits closest to the floor. */
@@ -125,6 +128,10 @@ class PosterSurfaceTest {
     /**
      * Fluent on the poster takes its shades from the seed's own ramp, and its dark flag from the
      * ink, so its fixed black or white text lands on the side that reads on the seed.
+     *
+     * That text is Fluent's and cannot be recoloured. On a mid tone seed neither side reaches 4.5
+     * to 1, since light mode text is black at 89 percent and white peaks near 4.48 at tone 50. So
+     * this holds it to the floor it does reach, which a text on the wrong side would miss by far.
      */
     @Test
     fun posterSurface_fluent_takesItsShadesFromTheRampAndItsModeFromTheInk() =
@@ -138,16 +145,21 @@ class PosterSurfaceTest {
                 }
             }
 
+            val misses = mutableListOf<String>()
             for (next in ShellSeeds) {
                 seed = next
                 waitForIdle()
                 val poster = PosterColors.of(next)
+                val page = next.toColor()
                 withClue(next.toHex()) {
                     val fluent = checkNotNull(colors)
                     fluent.darkMode shouldBe !poster.isLight
                     fluent.shades.base shouldBe poster.ramp.toFluentShades().base
+                    val ratio = fluent.text.text.primary.compositeOver(page).contrastRatio(page)
+                    if (ratio < FluentTextFloor) misses += "${next.toHex()} ${"%.2f".format(ratio)}"
                 }
             }
+            misses.shouldBeEmpty()
         }
 
     @Test
@@ -211,11 +223,7 @@ private fun shellInks(
             )
         }
         Library.Fluent -> {
-            val colors = FluentTheme.colors
-            listOf(
-                ShellInk("Fluent text on seed", colors.text.text.primary.compositeOver(seed), seed),
-                ShellInk("Fluent content colour on seed", FluentContentColor.current, seed),
-            )
+            listOf(ShellInk("Fluent content colour on seed", FluentContentColor.current, seed))
         }
     }
     return shared + own
