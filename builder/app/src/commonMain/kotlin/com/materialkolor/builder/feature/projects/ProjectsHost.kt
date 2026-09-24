@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import com.materialkolor.builder.core.data.DeletedProject
 import com.materialkolor.builder.feature.share.SharedLinkBanner
 import com.materialkolor.builder.feature.workspace.Panel
@@ -45,12 +46,16 @@ import org.jetbrains.compose.resources.stringResource
  * Opening or starting a project closes the drawer. A delete raises an undo toast through
  * [dispatcher], up for the kit's [ToastDuration.Long] and paused while it is hovered or focused, and
  * anything storage turns down raises a toast of its own.
+ *
+ * @param[returnFocusTo] The Projects button that opened the drawer, which gets focus back once it
+ * closes (AR-09).
  */
 @Composable
 internal fun ProjectsHost(
     state: WorkspaceModel.State,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    returnFocusTo: FocusRequester? = null, // b-221f
     model: ProjectsModel = metroViewModel(),
 ) {
     val projects by model.collectAsState()
@@ -68,6 +73,7 @@ internal fun ProjectsHost(
         },
         onGetLink = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Share)) },
         onDismissRequest = { dispatcher.dispatch(WorkspaceAction.ClosePanel) },
+        returnFocusTo = returnFocusTo, // b-221f
     )
     ProjectBanners(projects, model::handle, modifier)
     projects.lastDeletion?.let { deleted ->

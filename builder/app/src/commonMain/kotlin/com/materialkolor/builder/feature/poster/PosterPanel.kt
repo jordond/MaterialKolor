@@ -7,9 +7,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import com.materialkolor.builder.LocalThemeResult
 import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.domain.capability.Capabilities
@@ -66,6 +73,9 @@ internal data class PosterContext(
  *
  * The shell already stands it inside `PosterSurface`, so everything here reads the poster's ink
  * from the surrounding tokens and only the shapes follow the skin.
+ *
+ * @param[focus] The buttons that open a panel over the workspace, which the panel hands focus back
+ * to once it closes (AR-09).
  */
 @Composable
 internal fun PosterPanel(
@@ -73,9 +83,26 @@ internal fun PosterPanel(
     rail: Boolean,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    focus: PosterFocus? = null, // b-221f
 ) {
+    val context = rememberPosterContext(state) // b-221f
+    if (rail) {
+        PosterRail(context, dispatcher, modifier, focus)
+    } else {
+        PosterContent(context, dispatcher, focus, modifier)
+    }
+}
+
+// b-221f
+
+/**
+ * What the poster reads from [state] this frame, with the theme resolved at the root. The poster
+ * and the panels it opens over the workspace, such as the explainer, gather it the same way.
+ */
+@Composable
+internal fun rememberPosterContext(state: WorkspaceModel.State): PosterContext {
     val result = LocalThemeResult.current
-    val context = remember(
+    return remember(
         state.document,
         result,
         state.capabilities,
@@ -102,11 +129,46 @@ internal fun PosterPanel(
             openFineTuneRows = state.view.openFineTuneRows,
         )
     }
-    if (rail) {
-        PosterRail(context, dispatcher, modifier)
-    } else {
-        PosterContent(context, dispatcher, modifier)
+}
+
+/**
+ * The poster buttons that open a panel over the workspace, which get focus back once the panel has
+ * gone (AR-09). The workspace holds it, since the panels sit over the poster rather than in it.
+ */
+@Stable
+internal class PosterFocus {
+    /** The Projects button, in the header or on the rail, whichever the poster shows. */
+    val projects: PanelTrigger = PanelTrigger()
+
+    /** The explainer line's Why button. */
+    val why: PanelTrigger = PanelTrigger()
+}
+
+/**
+ * A button that opens a panel. It only offers focus while the button is on screen, so a panel
+ * opened without it, over a collapsed poster or from the command palette, focuses nothing.
+ */
+@Stable
+internal class PanelTrigger {
+    internal val requester = FocusRequester()
+
+    /** How many buttons stand for this trigger, more than one while the rail and the poster swap. */
+    internal var buttons by mutableIntStateOf(0)
+
+    /** Where the panel hands focus back, or null while no button is on screen. */
+    val returnFocusTo: FocusRequester?
+        get() = requester.takeIf { buttons > 0 }
+}
+
+/** The modifier for [trigger]'s button, which counts it as on screen while it is composed. */
+@Composable
+internal fun triggerFocus(trigger: PanelTrigger?): Modifier {
+    if (trigger == null) return Modifier
+    DisposableEffect(trigger) {
+        trigger.buttons++
+        onDispose { trigger.buttons-- }
     }
+    return Modifier.focusRequester(trigger.requester)
 }
 
 /**
@@ -117,6 +179,7 @@ internal fun PosterPanel(
 private fun PosterContent(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
+    focus: PosterFocus?,
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
@@ -133,9 +196,9 @@ private fun PosterContent(
             verticalArrangement = Arrangement.spacedBy(spacing.extraLarge),
         ) {
             if (sheet) {
-                SheetSections(context, dispatcher)
+                SheetSections(context, dispatcher, focus)
             } else {
-                DockedSections(context, dispatcher)
+                DockedSections(context, dispatcher, focus)
             }
         }
     }
@@ -146,14 +209,15 @@ private fun PosterContent(
 private fun ColumnScope.DockedSections(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
+    focus: PosterFocus?,
 ) {
-    PosterHeader(context, dispatcher)
+    PosterHeader(context, dispatcher, focus = focus)
     SeedHero(context, dispatcher)
     SeedActions(context, dispatcher)
     if (context.document.seedSource is SeedSource.Image) {
         ImageCandidateRow(context, dispatcher)
     }
-    PrimaryExplainerLine(context, dispatcher)
+    PrimaryExplainerLine(context, dispatcher, why = focus?.why)
     StyleChipsSection(context, dispatcher)
     ContrastSection(context, dispatcher)
     CoreColorsRow(context, dispatcher)
@@ -170,6 +234,7 @@ private fun ColumnScope.DockedSections(
 private fun ColumnScope.SheetSections(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
+    focus: PosterFocus?,
 ) {
     SeedPeekRow(context, dispatcher)
     SeedActions(context, dispatcher, shuffle = false)
@@ -178,9 +243,9 @@ private fun ColumnScope.SheetSections(
     }
     StyleChipsSection(context, dispatcher)
     ContrastSection(context, dispatcher)
-    PrimaryExplainerLine(context, dispatcher)
+    PrimaryExplainerLine(context, dispatcher, why = focus?.why)
     CoreColorsRow(context, dispatcher)
     SpecExtrasRow(context, dispatcher)
     SeedHero(context, dispatcher)
-    PosterHeader(context, dispatcher)
+    PosterHeader(context, dispatcher, focus = focus)
 }

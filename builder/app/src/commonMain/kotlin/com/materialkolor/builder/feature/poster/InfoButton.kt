@@ -100,7 +100,7 @@ internal fun InfoLabel(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             BuilderText(text = label, style = BuilderTextStyle.SectionLabel, maxLines = 1)
-            InfoButton(topic = topic, onClick = { open = !open })
+            InfoButton(topic = topic, expanded = open, onClick = { open = !open })
         }
         if (open) {
             InfoNote(topic)
@@ -109,15 +109,18 @@ internal fun InfoLabel(
 }
 
 /**
- * The glyph that opens [topic]'s explanation. It reads out as the question it answers.
+ * The glyph that opens [topic]'s explanation. It reads out as the question it answers, and as
+ * expanded or collapsed with the explanation (D37).
  *
  * @param[topic] What it explains.
+ * @param[expanded] Whether the explanation is showing.
  * @param[onClick] Called when it is pressed, to show or hide the explanation.
  * @param[modifier] Applied to the button.
  */
 @Composable
 internal fun InfoButton(
     topic: InfoTopic,
+    expanded: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -126,6 +129,7 @@ internal fun InfoButton(
         description = stringResource(topic.question),
         onClick = onClick,
         modifier = modifier,
+        expanded = expanded,
     )
 }
 
