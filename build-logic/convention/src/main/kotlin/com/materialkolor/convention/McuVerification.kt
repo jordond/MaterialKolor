@@ -31,7 +31,12 @@ internal fun Project.registerMcuVerificationTasks() {
         dependsOn(":material-color-utilities:verifyMcuParserAgreement")
 
         // The samples are not published, so the module loop below never reaches them.
-        dependsOn(":samples:custom-theme:jvmTest")
+        dependsOn(
+            ":samples:shared:jvmTest",
+            ":samples:custom-theme:jvmTest",
+            ":samples:fluent:jvmTest",
+            ":samples:unstyled:jvmTest",
+        )
         for (module in mcuLibraryModules) {
             dependsOn(":${module.name}:jvmTest")
         }

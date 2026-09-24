@@ -38,6 +38,7 @@ kotlin {
             implementation(libs.compose.foundation)
 
             implementation(project(":material-kolor-core"))
+            implementation(project(":samples:shared"))
         }
 
         commonTest.dependencies {
@@ -51,6 +52,7 @@ kotlin {
         jvmTest.dependencies {
             implementation(libs.compose.ui.test)
             implementation(compose.desktop.currentOs)
+            implementation(project(":samples:testing"))
         }
     }
 }
