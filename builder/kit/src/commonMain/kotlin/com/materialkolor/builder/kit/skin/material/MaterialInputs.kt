@@ -3,12 +3,14 @@ package com.materialkolor.builder.kit.skin.material
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -18,9 +20,11 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
@@ -33,6 +37,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -47,6 +52,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BuilderText
@@ -69,13 +75,16 @@ import com.materialkolor.builder.kit.headless.sliderSemantics
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.skin.headless.FieldStyle
+import com.materialkolor.builder.kit.skin.headless.FocusRingOffset
+import com.materialkolor.builder.kit.skin.headless.FocusRingWidth
+import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 import com.materialkolor.builder.kit.skin.headless.heroFieldStyle
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
  * A Material3 switch with its label. The row is the target and carries the switch role, so the
- * switch itself takes no clicks.
+ * switch itself takes no clicks. The row wears the focus ring and Material's own focus layer.
  */
 @Composable
 internal fun MaterialSwitch(
@@ -86,13 +95,21 @@ internal fun MaterialSwitch(
     enabled: Boolean,
 ) {
     val tokens = LocalBuilderTokens.current
+    val interactions = remember { MutableInteractionSource() }
     val words = stateWords()
     val state = ControlState.Switched(checked)
     Row(
         modifier = modifier
             .heightIn(min = LocalLayout.current.primaryTouchTarget)
-            .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onCheckedChange)
-            .semantics { stateDescription = words.of(state) }
+            .controlRing(interactions, RoundedCornerShape(tokens.radius.small))
+            .toggleable(
+                value = checked,
+                interactionSource = interactions,
+                indication = ripple(),
+                enabled = enabled,
+                role = Role.Switch,
+                onValueChange = onCheckedChange,
+            ).semantics { stateDescription = words.of(state) }
             .foldState(label, state, enabled, words, FoldedRole.Switch),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -109,7 +126,10 @@ internal fun MaterialSwitch(
     }
 }
 
-/** A Material3 checkbox with its label, the row being the target. */
+/**
+ * A Material3 checkbox with its label, the row being the target. The row wears the focus ring and
+ * Material's own focus layer.
+ */
 @Composable
 internal fun MaterialCheckbox(
     checked: Boolean,
@@ -119,13 +139,21 @@ internal fun MaterialCheckbox(
     enabled: Boolean,
 ) {
     val tokens = LocalBuilderTokens.current
+    val interactions = remember { MutableInteractionSource() }
     val words = stateWords()
     val state = ControlState.Checked(checked)
     Row(
         modifier = modifier
             .heightIn(min = LocalLayout.current.primaryTouchTarget)
-            .toggleable(value = checked, enabled = enabled, role = Role.Checkbox, onValueChange = onCheckedChange)
-            .semantics { stateDescription = words.of(state) }
+            .controlRing(interactions, RoundedCornerShape(tokens.radius.small))
+            .toggleable(
+                value = checked,
+                interactionSource = interactions,
+                indication = ripple(),
+                enabled = enabled,
+                role = Role.Checkbox,
+                onValueChange = onCheckedChange,
+            ).semantics { stateDescription = words.of(state) }
             .foldState(label, state, enabled, words, FoldedRole.Checkbox),
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.extraSmall),
         verticalAlignment = Alignment.CenterVertically,
@@ -141,7 +169,8 @@ internal fun MaterialCheckbox(
 
 /**
  * The Material3 slider, with the builder's keys and snapping laid over it. Material draws no named
- * stops, so they only show through the snap.
+ * stops, so they only show through the snap. Material shows focus only by narrowing the thumb, so
+ * the thumb wears the focus ring as well.
  */
 @Composable
 internal fun MaterialSlider(
@@ -156,6 +185,7 @@ internal fun MaterialSlider(
 ) {
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val press = remember { SliderKeyPress() }
+    val interactions = remember { MutableInteractionSource() }
     Slider(
         value = value,
         onValueChange = { raw -> onValueChange(rules.snap(raw)) },
@@ -172,8 +202,16 @@ internal fun MaterialSlider(
                 onValueChangeFinished = onValueChangeFinished,
             ),
         enabled = enabled,
-        valueRange = rules.range,
         onValueChangeFinished = onValueChangeFinished,
+        interactionSource = interactions,
+        thumb = {
+            SliderDefaults.Thumb(
+                interactionSource = interactions,
+                modifier = Modifier.controlRing(interactions, CircleShape),
+                enabled = enabled,
+            )
+        },
+        valueRange = rules.range,
     )
 }
 
@@ -218,13 +256,22 @@ internal fun materialHeroFieldStyle(): FieldStyle =
         shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
     )
 
+/** How tall Material's primary tab indicator is, so the focus ring can stay clear of it. */
+private val TabIndicatorHeight: Dp = 3.dp
+
+/**
+ * How far inside the tab its focus ring sits. The row clips at the tab's edge, so the ring goes
+ * inside, a ring's offset clear of the indicator along the bottom.
+ */
+private val TabRingInset: Dp = TabIndicatorHeight + FocusRingOffset + FocusRingWidth
+
 /**
  * A Material3 primary tab row that scrolls sideways (spec section 7), with roving focus, which
  * Material leaves out.
  *
  * Only the selected tab can take focus from Tab, so Tab enters and leaves the row in one step. The
  * arrow keys select the next or previous tab, wrapping at the ends, and move focus with it. The row
- * scrolls the selected tab into view.
+ * scrolls the selected tab into view. The focused tab wears the focus ring inside its own edge.
  */
 @Composable
 internal fun <T> MaterialTabs(
@@ -236,6 +283,7 @@ internal fun <T> MaterialTabs(
 ) {
     val selectedIndex = tabs.indexOf(selected)
     val requesters = remember(tabs.size) { List(tabs.size) { FocusRequester() } }
+    val sources = remember(tabs.size) { List(tabs.size) { MutableInteractionSource() } }
     val roving = remember { mutableIntStateOf(selectedIndex) }
     SideEffect { roving.intValue = selectedIndex }
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
@@ -262,10 +310,12 @@ internal fun <T> MaterialTabs(
                 selected = index == selectedIndex,
                 onClick = { onSelect(tab) },
                 modifier = Modifier
+                    .controlRing(sources[index], RectangleShape, offset = -TabRingInset)
                     .focusRequester(requesters[index])
                     .focusProperties { canFocus = index == roving.intValue }
                     .foldState(label(tab), ControlState.Selected(index == selectedIndex), role = FoldedRole.Tab),
                 text = { Text(label(tab), maxLines = 1) },
+                interactionSource = sources[index],
             )
         }
     }
@@ -273,7 +323,8 @@ internal fun <T> MaterialTabs(
 
 /**
  * A disclosure row as a Material3 list item, since Material has no disclosure of its own. The item
- * is a button that speaks its state, with expand and collapse actions while it is enabled.
+ * is a button that speaks its state, with expand and collapse actions while it is enabled. It wears
+ * the focus ring square, like a Material list row.
  */
 @Composable
 internal fun MaterialDisclosure(
@@ -289,12 +340,19 @@ internal fun MaterialDisclosure(
     val state = ControlState.Expanded(expanded)
     val words = stateWords()
     val spoken = words.of(state)
+    val interactions = remember { MutableInteractionSource() }
     Column(modifier) {
         ListItem(
             headlineContent = { Text(title) },
             modifier = Modifier
                 .heightIn(min = LocalLayout.current.primaryTouchTarget)
-                .clickable(enabled = enabled, role = Role.Button) { onExpandedChange(!expanded) }
+                .controlRing(interactions, RectangleShape)
+                .clickable(
+                    interactionSource = interactions,
+                    indication = ripple(),
+                    enabled = enabled,
+                    role = Role.Button,
+                ) { onExpandedChange(!expanded) }
                 .semantics {
                     stateDescription = spoken
                     if (!enabled) return@semantics

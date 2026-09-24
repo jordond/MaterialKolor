@@ -54,20 +54,22 @@ internal fun Modifier.controlPress(
 
 /**
  * Draws the focus ring in [color] around [shape] while the control has keyboard focus (AR-01). It
- * stands [FocusRingOffset] off the control.
+ * stands [offset] off the control, [FocusRingOffset] unless the control asks for less. A negative
+ * offset draws the ring inside the control, for one whose parent clips at its edge.
  */
 @Composable
 internal fun Modifier.controlRing(
     interactionSource: InteractionSource,
     shape: Shape,
     color: Color = LocalBuilderTokens.current.focus,
+    offset: Dp = FocusRingOffset,
 ): Modifier =
     focusRing(
         interactionSource = interactionSource,
         width = FocusRingWidth,
         color = color,
         shape = shape,
-        offset = FocusRingOffset,
+        offset = offset,
     )
 
 /**
