@@ -5,6 +5,7 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -16,14 +17,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
@@ -72,9 +85,6 @@ internal fun <T> panelMotion(): FiniteAnimationSpec<T> =
 
 /** Where a floating part sits against the box it belongs to. */
 internal enum class Overhang {
-    /** Centered under the box. Align it to the bottom center. */
-    Below,
-
     /** Under the box, lined up with its start edge. Align it to the bottom start. */
     BelowStart,
 
@@ -101,7 +111,6 @@ internal fun Modifier.overhang(
         val space = gap.roundToPx()
         layout(0, 0) {
             when (overhang) {
-                Overhang.Below -> placeable.placeRelative(-placeable.width / 2, space)
                 Overhang.BelowStart -> placeable.placeRelative(0, space)
                 Overhang.BelowEnd -> placeable.placeRelative(-placeable.width, space)
                 Overhang.After -> placeable.placeRelative(space, -placeable.height / 2)
@@ -128,10 +137,42 @@ internal fun DashboardTooltip(
     )
 }
 
+/**
+ * Whether a control's tooltip shows, and the key handler that hides it.
+ *
+ * @property[shown] True while a pointer rests on the control or the keyboard brings focus to it,
+ * until Esc hides it.
+ * @property[onEscape] Hides the tooltip on Esc until the pointer and focus have both left (WCAG
+ * 1.4.13). Put it on the control or on a box around it.
+ */
+internal class TooltipVisibility(
+    val shown: Boolean,
+    val onEscape: Modifier,
+)
+
+/** The [TooltipVisibility] of the control that reports to [interactions]. */
+@Composable
+internal fun tooltipVisibility(interactions: InteractionSource): TooltipVisibility {
+    val hovered by interactions.collectIsHoveredAsState()
+    val focused by interactions.collectIsFocusVisibleAsState()
+    val wanted = hovered || focused
+    // Like hover, this belongs to one copy of a split and not to the app's state.
+    var hidden by remember { mutableStateOf(false) }
+    LaunchedEffect(wanted) { if (!wanted) hidden = false }
+    val shown = wanted && !hidden
+    return TooltipVisibility(
+        shown = shown,
+        onEscape = Modifier.onKeyEvent { event ->
+            val escape = shown && event.type == KeyEventType.KeyDown && event.key == Key.Escape
+            if (escape) hidden = true
+            escape
+        },
+    )
+}
+
 /** Where in its box a part floating [this] way is aligned. */
 internal val Overhang.alignment: Alignment
     get() = when (this) {
-        Overhang.Below -> Alignment.BottomCenter
         Overhang.BelowStart -> Alignment.BottomStart
         Overhang.BelowEnd -> Alignment.BottomEnd
         Overhang.After -> Alignment.CenterEnd
@@ -139,40 +180,52 @@ internal val Overhang.alignment: Alignment
 
 /**
  * An icon with no label of its own, so [label] shows as a tooltip while a pointer rests on it or
- * the keyboard brings focus to it.
+ * the keyboard brings focus to it. Esc hides the tooltip, and so does opening what the button
+ * shows, since that opens where the tooltip would be.
  *
  * @param[icon] What the button shows.
- * @param[label] What it does, its content description and its tooltip.
- * @param[onClick] Called on a press.
+ * @param[label] What it does, its name and its tooltip.
+ * @param[onClick] Called on a press, told whether it came from the keyboard, so what the button
+ * opens can take focus.
  * @param[tooltip] Where the tooltip shows.
  * @param[modifier] Applied to the box around the button and its tooltip.
  * @param[toggled] Whether what the button opens is open.
+ * @param[expanded] Whether the panel the button shows is open, or null for a button that shows no
+ * panel of its own.
+ * @param[focusRequester] Moves focus to the button.
  * @param[on] What the button sits on, which shows through it when not toggled.
  */
 @Composable
 internal fun DashboardIconButton(
     icon: ImageVector,
     label: String,
-    onClick: () -> Unit,
+    onClick: (keyboard: Boolean) -> Unit,
     tooltip: Overhang,
     modifier: Modifier = Modifier,
     toggled: Boolean = false,
+    expanded: Boolean? = null,
+    focusRequester: FocusRequester? = null,
     on: DashboardToken = DashboardToken.Surface,
 ) {
     val interactions = remember { MutableInteractionSource() }
-    val hovered by interactions.collectIsHoveredAsState()
-    val focused by interactions.collectIsFocusVisibleAsState()
+    val keyboard by interactions.collectIsFocusVisibleAsState()
+    val visibility = tooltipVisibility(interactions)
     val roles = if (toggled) {
         Modifier.previewRoles(UnstyledComponent.ToggledIconButton)
     } else {
         Modifier.previewRoles(on.role, Role.OnSurfaceVariant)
     }
-    Box(modifier) {
+    val name = if (expanded == null) label else stateName(label, expandedWord(expanded))
+    val state = if (expanded == null) Modifier else Modifier.expandedSemantics(expanded) { onClick(false) }
+    Box(modifier.then(visibility.onEscape)) {
         UnstyledButton(
-            onClick = onClick,
+            onClick = { onClick(keyboard) },
             modifier = Modifier
                 .size(IconButtonSize)
+                .then(if (focusRequester == null) Modifier else Modifier.focusRequester(focusRequester))
                 .then(roles)
+                .semantics { contentDescription = name }
+                .then(state)
                 .focusRing(interactions, FocusRingWidth, DashboardToken.Primary.color, ControlShape)
                 .clip(ControlShape)
                 .background(if (toggled) DashboardToken.SecondaryContainer.color else Color.Transparent),
@@ -180,12 +233,12 @@ internal fun DashboardIconButton(
         ) {
             UnstyledIcon(
                 imageVector = icon,
-                contentDescription = label,
+                contentDescription = null,
                 modifier = Modifier.size(IconSize),
                 tint = (if (toggled) DashboardToken.OnSecondaryContainer else DashboardToken.OnSurfaceVariant).color,
             )
         }
-        if (hovered || focused) {
+        if (visibility.shown && expanded != true) {
             DashboardTooltip(label, Modifier.align(tooltip.alignment).overhang(tooltip, TooltipGap))
         }
     }
@@ -210,7 +263,8 @@ internal enum class ButtonStyle(
  *
  * @param[label] What it says.
  * @param[style] How it is painted.
- * @param[onClick] Called on a press.
+ * @param[onClick] Called on a press, told whether it came from the keyboard, so what the button
+ * opens can take focus.
  * @param[modifier] Applied to the button.
  * @param[icon] Shown before the label, if given.
  * @param[role] What assistive tech calls it.
@@ -219,12 +273,13 @@ internal enum class ButtonStyle(
 internal fun DashboardButton(
     label: String,
     style: ButtonStyle,
-    onClick: () -> Unit,
+    onClick: (keyboard: Boolean) -> Unit,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     role: SemanticsRole = SemanticsRole.Button,
 ) {
     val interactions = remember { MutableInteractionSource() }
+    val keyboard by interactions.collectIsFocusVisibleAsState()
     val (container, content) = when (style) {
         ButtonStyle.Filled -> DashboardToken.Primary.color to DashboardToken.OnPrimary.color
         ButtonStyle.Outlined -> Color.Transparent to DashboardToken.OnSurface.color
@@ -236,7 +291,7 @@ internal fun DashboardButton(
         Modifier
     }
     UnstyledButton(
-        onClick = onClick,
+        onClick = { onClick(keyboard) },
         modifier = modifier
             .height(ControlHeight)
             .previewRoles(style.component)

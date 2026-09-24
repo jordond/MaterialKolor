@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -26,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.semantics.selected
@@ -58,15 +60,27 @@ private val TableBottom = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12
  * pick or a second press.
  *
  * The menu is part of this item's layout, so it pushes the table down while open rather than
- * floating over it, and it lies where Inspect and assistive tech look for it.
+ * floating over it, and it lies where Inspect and assistive tech look for it. The button scrolls
+ * the page so the open menu shows whole, an open from the keyboard puts focus on the first pick,
+ * and a pick hands focus back to the button.
  */
 @Composable
 internal fun OrdersTitle(
     state: DemoAppState,
+    focus: DashboardFocus,
     filter: OrderFilter,
     modifier: Modifier = Modifier,
 ) {
     val open = state.isOn(DashboardMenuSwitch)
+    val toggle = { keyboard: Boolean ->
+        state.setOn(DashboardMenuSwitch, !open)
+        if (open) {
+            focus.handBack(DashboardArea.StatusMenu, focus.statusButton)
+        } else {
+            focus.revealStatusMenu()
+            if (keyboard) focus.moveTo(focus.firstStatus)
+        }
+    }
     Column(modifier.fillMaxWidth()) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -78,7 +92,11 @@ internal fun OrdersTitle(
             DashboardButton(
                 label = filter.label,
                 style = ButtonStyle.Outlined,
-                onClick = { state.setOn(DashboardMenuSwitch, !open) },
+                onClick = toggle,
+                modifier = Modifier
+                    .focusRequester(focus.statusButton)
+                    .expandedSemantics(open) { toggle(false) }
+                    .foldState(filter.label, expandedWord(open)),
                 icon = Lucide.Filter,
                 role = SemanticsRole.DropdownList,
             )
@@ -89,9 +107,10 @@ internal fun OrdersTitle(
             enter = fadeIn(panelMotion()) + expandVertically(panelMotion()),
             exit = fadeOut(panelMotion()) + shrinkVertically(panelMotion()),
         ) {
-            StatusMenu(filter, Modifier.padding(top = MenuGap)) { picked ->
+            StatusMenu(filter, focus, Modifier.padding(top = MenuGap)) { picked ->
                 state.choose(DashboardFilterChoice, OrderFilter.entries.size, picked.ordinal)
                 state.setOn(DashboardMenuSwitch, false)
+                focus.handBack(DashboardArea.StatusMenu, focus.statusButton)
             }
         }
     }
@@ -100,11 +119,14 @@ internal fun OrdersTitle(
 @Composable
 private fun StatusMenu(
     current: OrderFilter,
+    focus: DashboardFocus,
     modifier: Modifier,
     onPick: (OrderFilter) -> Unit,
 ) {
     Column(
         modifier = modifier
+            .bringIntoViewRequester(focus.statusMenu)
+            .tracksFocus(focus, DashboardArea.StatusMenu)
             .width(MenuWidth)
             .previewRoles(UnstyledComponent.Menu)
             .clip(CardShape)
@@ -120,10 +142,12 @@ private fun StatusMenu(
             UnstyledButton(
                 onClick = { onPick(option) },
                 modifier = Modifier
+                    .then(if (option.ordinal == 0) Modifier.focusRequester(focus.firstStatus) else Modifier)
                     .fillMaxWidth()
                     .height(MenuItemHeight)
                     .previewRoles(if (selected) UnstyledComponent.SelectedMenuItem else UnstyledComponent.MenuItem)
                     .semantics { this.selected = selected }
+                    .foldState(option.label, selectedWord(selected))
                     .focusRing(interactions, 2.dp, DashboardToken.Primary.color, ControlShape)
                     .clip(ControlShape)
                     .background(if (selected) DashboardToken.SecondaryContainer.color else Color.Transparent),
