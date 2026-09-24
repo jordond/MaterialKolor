@@ -76,6 +76,7 @@ private const val PULSE_DONE_MS = 1_000L
 private const val PULSE_MIDWAY_MS = 150L
 
 // b-314a
+
 /** Preferences a newer build wrote, which every write from this build is turned down over. */
 private const val NEWER_PREFS = """{"schema":999,"data":{}}"""
 

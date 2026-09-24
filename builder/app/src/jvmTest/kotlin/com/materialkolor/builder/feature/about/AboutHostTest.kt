@@ -64,6 +64,7 @@ private const val WIDTH = 1600
 private const val HEIGHT = 800
 
 // b-314a
+
 /** The first line of both OFL texts, under the copyright lines. */
 private const val OFL_HEADING = "SIL OPEN FONT LICENSE Version 1.1"
 
