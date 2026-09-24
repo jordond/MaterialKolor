@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -129,7 +130,8 @@ private fun <T> TabListScope<T>.UnderlineTab(choice: Choice<T>) {
                             topLeft = Offset(x = 0f, y = size.height - height),
                             size = Size(width = size.width, height = height),
                         )
-                    }.padding(horizontal = Spacing.Large, vertical = Spacing.Medium),
+                    }.height(44.dp)
+                    .padding(horizontal = Spacing.Large),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.Small),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -175,7 +177,8 @@ private fun <T> TabListScope<T>.PillTab(choice: Choice<T>) {
                 modifier = Modifier
                     .background(container, Shapes.Pill)
                     .border(width = 1.dp, color = outline, shape = Shapes.Pill)
-                    .padding(horizontal = Spacing.Large, vertical = 6.dp),
+                    .height(32.dp)
+                    .padding(horizontal = Spacing.Large),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

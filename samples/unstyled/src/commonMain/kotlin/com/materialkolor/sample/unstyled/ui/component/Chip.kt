@@ -7,11 +7,14 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -23,6 +26,7 @@ import com.composeunstyled.ProvideContentColor
 import com.composeunstyled.RadioButton
 import com.composeunstyled.Text
 import com.composeunstyled.UnstyledRadioGroup
+import com.materialkolor.sample.unstyled.theme.ControlHeight
 import com.materialkolor.sample.unstyled.theme.Shapes
 import com.materialkolor.sample.unstyled.theme.Spacing
 import com.materialkolor.sample.unstyled.theme.TasksType
@@ -105,12 +109,14 @@ internal fun <T> ChoiceChips(
                             .clip(Shapes.Control)
                             .background(container)
                             .border(width = 1.dp, color = outline, shape = Shapes.Control)
-                            // Twenty of label and twenty of padding, as tall as the field and the button beside it.
-                            .padding(horizontal = Spacing.Medium, vertical = 10.dp),
+                            .height(ControlHeight)
+                            .padding(horizontal = Spacing.Medium),
                         interactionSource = interactionSource,
                         indication = LocalIndication.current,
                     ) {
-                        Text(text = choice.label, style = TasksType.Label, maxLines = 1)
+                        Row(modifier = Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = choice.label, style = TasksType.Label, maxLines = 1)
+                        }
                     }
                 }
             }
