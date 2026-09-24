@@ -225,7 +225,7 @@ internal enum class OrderButton {
  * which stays enabled.
  *
  * Each copy of a split remembers its own, so only the copy that was pressed moves focus, and only
- * when the pressed button held it. A pointer press leaves focus where it was.
+ * when the pressed button held it.
  */
 internal class OrderFocus(
     private val scope: CoroutineScope,

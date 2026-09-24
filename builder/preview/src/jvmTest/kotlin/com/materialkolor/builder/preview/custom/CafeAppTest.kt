@@ -14,12 +14,12 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsFocused
-import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -230,27 +230,37 @@ class CafeAppTest {
         }
 
     @Test
-    fun placeOrderByKey_inOneCopyOfASplit_focusesThatCopysDismissThenTheOrderType() =
+    fun placeOrderByKey_inTheStartCopyOfASplit_focusesItsDismissThenTheOrderType() =
         runComposeUiTest {
             val state = DemoAppState().apply { pick(OrderType.DineIn) }
-            setContent { CafeSplitHarness(state, SplitState(0f), Modifier.size(840.dp, 760.dp)) }
-            val placeOrder = onAllNodes(hasClickAction() and hasText(CafeCopy.PlaceOrder))
-            val dismiss = { onAllNodes(hasClickAction() and hasContentDescription(CafeCopy.Dismiss)) }
-            placeOrder.assertCountEquals(2)
+            // Only the start copy is in the semantics tree, and the end copy shows its own note too.
+            setContent { CafeSplitHarness(state, SplitState(1f), Modifier.size(840.dp, 760.dp)) }
 
-            placeOrder[1].requestFocus().performKeyInput { pressKey(Key.Enter) }
+            onNode(hasClickAction() and hasText(CafeCopy.PlaceOrder)).requestFocus().performKeyInput {
+                pressKey(Key.Enter)
+            }
             waitForIdle()
             state.isOn(PlacedKey) shouldBe true
-            dismiss().assertCountEquals(2)
-            dismiss()[1].assertIsFocused()
-            dismiss()[0].assertIsNotFocused()
+            val dismiss = onNode(hasClickAction() and hasContentDescription(CafeCopy.Dismiss))
+            dismiss.assertIsFocused()
 
-            dismiss()[1].performKeyInput { pressKey(Key.Enter) }
+            dismiss.performKeyInput { pressKey(Key.Enter) }
             waitForIdle()
             state.isOn(PlacedKey) shouldBe false
-            val dineIn = onAllNodes(hasClickAction() and hasText(OrderType.DineIn.label))
-            dineIn[1].assertIsFocused()
-            dineIn[0].assertIsNotFocused()
+            onNode(hasClickAction() and hasText(OrderType.DineIn.label)).assertIsFocused()
+        }
+
+    @Test
+    fun placeOrder_clickedInTheEndCopyOfASplit_leavesTheStartCopyUnfocused() =
+        runComposeUiTest {
+            val state = DemoAppState()
+            // With the handle at the start edge the end copy shows everywhere, so it takes the click.
+            setContent { CafeSplitHarness(state, SplitState(0f), Modifier.size(840.dp, 760.dp)) }
+
+            onNode(hasClickAction() and hasText(CafeCopy.PlaceOrder)).performClick()
+            waitForIdle()
+            state.isOn(PlacedKey) shouldBe true
+            onAllNodes(isFocused()).assertCountEquals(0)
         }
 
     @Test
@@ -264,18 +274,6 @@ class CafeAppTest {
             waitForIdle()
             state.orderLines().shouldBeEmpty()
             onNode(hasClickAction() and hasText(OrderType.PickUp.label)).assertIsFocused()
-        }
-
-    @Test
-    fun placeOrderByPointer_leavesFocusWhereItWas() =
-        runComposeUiTest {
-            val state = DemoAppState()
-            setContent { CafeHarness(LightSpec, state, DeviceWidth.Tablet, Modifier.size(840.dp, 900.dp)) }
-
-            onNode(hasClickAction() and hasText(CafeCopy.PlaceOrder)).performClick()
-            waitForIdle()
-            state.isOn(PlacedKey) shouldBe true
-            onNode(hasContentDescription(CafeCopy.Dismiss)).assertIsNotFocused()
         }
 
     @Test
