@@ -126,7 +126,7 @@ internal fun MaterialGalleryEntry(
 }
 
 /** A text toolbar that never shows, standing in for the web's, which opens in a popup (D40). */
-private object HiddenTextToolbar : TextToolbar {
+internal object HiddenTextToolbar : TextToolbar {
     override val status: TextToolbarStatus = TextToolbarStatus.Hidden
 
     override fun showMenu(
@@ -144,7 +144,7 @@ private object HiddenTextToolbar : TextToolbar {
  * Consume every right-button press before anything under it sees one, so no text field opens its
  * context menu in a popup (D40).
  */
-private fun Modifier.swallowRightPresses(): Modifier =
+internal fun Modifier.swallowRightPresses(): Modifier =
     pointerInput(Unit) {
         awaitPointerEventScope {
             while (true) {
