@@ -72,12 +72,17 @@ internal fun suggestsExpressiveStyle(document: ThemeDocument): Boolean =
  *
  * [onSwitch] gets the new choice and where the reveal should grow from, the press that picked it
  * or the middle of the switcher after a keyboard pick. Picking the current choice does nothing.
+ *
+ * With [selectOnFocus] off, the arrow keys on the segmented row only move focus and Space or Enter
+ * picks, so walking past a library does not re-skin the app at every step.
  */
 @Composable
 internal fun LibrarySwitcher(
     document: ThemeDocument,
     onSwitch: (choice: LibraryChoice, origin: Offset) -> Unit,
     modifier: Modifier = Modifier,
+    // b-309
+    selectOnFocus: Boolean = true,
 ) {
     val origin = remember { RevealOrigin() }
     val selected = LibraryChoice.of(document)
@@ -95,6 +100,7 @@ internal fun LibrarySwitcher(
                 onSelect = onSelect,
                 label = label,
                 modifier = tracked,
+                selectOnFocus = selectOnFocus, // b-309
                 optionLabel = { choice -> names.getValue(choice) },
             )
         }
