@@ -52,6 +52,8 @@ internal val UnderAnOverlay: SemanticsMatcher =
 /**
  * The layer compose-fluent lays under a compact or open navigation menu, which swallows a click so
  * it never reaches the page. It is no control of its own and declares nothing, the pages on it do.
+ * The app keeps it out of the Tab order, so it never takes focus, though compose-fluent 0.1.0 still
+ * leaves its click action in the tree.
  */
 internal val NavigationShield: SemanticsMatcher =
     hasClickAction() and hasAnyDescendant(hasContentDescription(FluentPage.Home.label))

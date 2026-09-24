@@ -2,80 +2,29 @@ package com.materialkolor.builder.kit.skin.fluent
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.kit.headless.CheckboxStyle
 import com.materialkolor.builder.kit.headless.HeadlessField
 import com.materialkolor.builder.kit.headless.HeadlessSlider
 import com.materialkolor.builder.kit.headless.SliderRules
 import com.materialkolor.builder.kit.headless.SliderStyle
-import com.materialkolor.builder.kit.headless.SwitchStyle
-import com.materialkolor.builder.kit.headless.TabsStyle
 import com.materialkolor.builder.kit.skin.headless.FieldStyle
 import com.materialkolor.builder.kit.skin.headless.heroFieldStyle
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.github.composefluent.FluentTheme
 
 /**
- * The Fluent inputs' colours and metrics.
- *
- * The switch, the checkbox and the tabs are Fluent's own, so their styles here are the colours those
- * components show at rest, which the contrast checks read. The field and the slider stay the
- * headless ones in Fluent's look. Fluent's inks and fills are translucent, so each is laid over the
- * panel it sits on, the way the tokens are.
+ * The Fluent inputs' colours and metrics for the parts that stay headless, the field and the slider
+ * in Fluent's look. The switch, the checkbox and the tabs are Fluent's own, and the contrast checks
+ * read their colours straight from Fluent's colour sets. Fluent's inks and fills are translucent, so
+ * each is laid over the panel it sits on, the way the tokens are.
  */
 internal object FluentInputStyles {
-    val switch: SwitchStyle
-        @Composable @ReadOnlyComposable
-        get() {
-            val tokens = LocalBuilderTokens.current
-            val colors = FluentTheme.colors
-            val panel = tokens.panel
-            return SwitchStyle(
-                trackWidth = 40.dp,
-                trackHeight = 20.dp,
-                thumbSize = 12.dp,
-                trackShape = CircleShape,
-                thumbShape = CircleShape,
-                outlineWidth = 1.dp,
-                trackOn = colors.fillAccent.default,
-                trackOff = colors.controlAlt.secondary.compositeOver(panel),
-                outlineOff = colors.controlStrong.default.compositeOver(panel),
-                thumbOn = colors.text.onAccent.primary,
-                thumbOff = colors.text.text.secondary
-                    .compositeOver(panel),
-                labelGap = 12.dp,
-                focus = tokens.focus,
-                focusShape = FluentTheme.shapes.control,
-            )
-        }
-
-    val checkbox: CheckboxStyle
-        @Composable @ReadOnlyComposable
-        get() {
-            val tokens = LocalBuilderTokens.current
-            val colors = FluentTheme.colors
-            return CheckboxStyle(
-                boxSize = 20.dp,
-                checkSize = 12.dp,
-                boxShape = FluentTheme.shapes.control,
-                outlineWidth = 1.dp,
-                outline = colors.controlStrong.default.compositeOver(tokens.panel),
-                checkedFill = colors.fillAccent.default,
-                checkInk = colors.text.onAccent.primary,
-                labelGap = 8.dp,
-                focus = tokens.focus,
-                focusShape = FluentTheme.shapes.control,
-            )
-        }
-
     val slider: SliderStyle
         @Composable @ReadOnlyComposable
         get() = LocalBuilderTokens.current.let { tokens ->
@@ -91,29 +40,6 @@ internal object FluentInputStyles {
                 thumbOutlineWidth = 5.dp,
                 stopSize = 2.dp,
                 stop = tokens.panel,
-                focus = tokens.focus,
-            )
-        }
-
-    val tabs: TabsStyle
-        @Composable @ReadOnlyComposable
-        get() {
-            val tokens = LocalBuilderTokens.current
-            val ink = FluentTheme.colors.text.text.primary
-                .compositeOver(tokens.panel)
-            return TabsStyle(
-                container = Color.Transparent,
-                containerShape = RoundedCornerShape(0.dp),
-                containerPadding = 0.dp,
-                tabShape = FluentTheme.shapes.control,
-                tabPadding = PaddingValues(horizontal = 12.dp),
-                gap = 0.dp,
-                selectedContainer = Color.Transparent,
-                selectedInk = ink,
-                ink = ink,
-                indicator = FluentTheme.colors.fillAccent.default,
-                indicatorHeight = 3.dp,
-                indicatorWidth = 16.dp,
                 focus = tokens.focus,
             )
         }

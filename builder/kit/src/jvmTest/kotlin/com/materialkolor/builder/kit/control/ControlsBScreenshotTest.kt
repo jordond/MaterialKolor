@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -28,12 +29,16 @@ import com.materialkolor.builder.kit.headless.SwitchStyle
 import com.materialkolor.builder.kit.headless.TabsStyle
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.FluentInputStyles
+import com.materialkolor.builder.kit.skin.fluent.fluentCheckboxColors
+import com.materialkolor.builder.kit.skin.fluent.fluentSwitchStyles
+import com.materialkolor.builder.kit.skin.fluent.fluentTabColors
 import com.materialkolor.builder.kit.skin.headless.CustomInputStyles
 import com.materialkolor.builder.kit.skin.headless.FieldStyle
 import com.materialkolor.builder.kit.skin.headless.UnstyledInputStyles
 import com.materialkolor.builder.kit.skin.material.materialHeroFieldStyle
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import io.github.composefluent.scheme.VisualState
 import io.github.takahirom.roborazzi.captureRoboImage
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -67,7 +72,10 @@ class ControlsBScreenshotTest {
     fun fluentPlaceholder_bothModes_drawEveryInputReadably() = checkSheets(SkinVariant.Fluent)
 }
 
-/** The headless styles a skin drew its inputs with, null where the skin draws natively. */
+/**
+ * The headless styles a skin drew its inputs with, null where the skin draws natively, and the
+ * pairs a skin's own components show at rest where the check can read them off the library.
+ */
 private class SeenStyles(
     val tokens: BuilderTokens,
     val switch: SwitchStyle?,
@@ -76,6 +84,7 @@ private class SeenStyles(
     val tabs: TabsStyle?,
     val field: FieldStyle?,
     val hero: FieldStyle,
+    val native: List<InkPair> = emptyList(),
 )
 
 @OptIn(ExperimentalTestApi::class)
@@ -125,12 +134,13 @@ private fun seenStyles(): SeenStyles {
         Library.Fluent -> {
             SeenStyles(
                 tokens = tokens,
-                switch = FluentInputStyles.switch,
-                checkbox = FluentInputStyles.checkbox,
+                switch = null,
+                checkbox = null,
                 slider = FluentInputStyles.slider,
-                tabs = FluentInputStyles.tabs,
+                tabs = null,
                 field = FluentInputStyles.field,
                 hero = FluentInputStyles.hero,
+                native = fluentInkPairs(tokens.panel),
             )
         }
         Library.Custom -> {
@@ -145,6 +155,36 @@ private fun seenStyles(): SeenStyles {
             )
         }
     }
+}
+
+/**
+ * The pairs Fluent's own switch, checkbox and tabs show at rest, read off the colour sets those
+ * controls draw from. Fluent's inks and fills are translucent, so each is laid over the [panel].
+ */
+@Composable
+private fun fluentInkPairs(panel: Color): List<InkPair> {
+    fun Color.onPanel(): Color = compositeOver(panel)
+    val rest = VisualState.Default
+    val switchOff = fluentSwitchStyles(checked = false).schemeFor(rest)
+    val switchOn = fluentSwitchStyles(checked = true).schemeFor(rest)
+    val boxOff = fluentCheckboxColors(checked = false).schemeFor(rest)
+    val boxOn = fluentCheckboxColors(checked = true).schemeFor(rest)
+    val tab = fluentTabColors(selected = false).schemeFor(rest)
+    val selectedTab = fluentTabColors(selected = true).schemeFor(rest)
+    val edgeOff = (switchOff.borderBrush as SolidColor).value
+    val tabGround = tab.fillColor.onPanel()
+    val selectedGround = selectedTab.fillColor.compositeOver(tabGround)
+    return listOf(
+        InkPair("switch edge off", edgeOff.onPanel(), panel, 3.0),
+        InkPair("switch thumb off", switchOff.controlColor.onPanel(), switchOff.fillColor.onPanel(), 3.0),
+        InkPair("switch track on", switchOn.fillColor.onPanel(), panel, 3.0),
+        InkPair("switch thumb on", switchOn.controlColor.onPanel(), switchOn.fillColor.onPanel(), 3.0),
+        InkPair("checkbox edge", boxOff.borderColor.onPanel(), panel, 3.0),
+        InkPair("checkbox fill", boxOn.fillColor.onPanel(), panel, 3.0),
+        InkPair("checkbox check", boxOn.contentColor.onPanel(), boxOn.fillColor.onPanel(), 3.0),
+        InkPair("tab label", tab.contentColor.onPanel(), tabGround, 4.5),
+        InkPair("selected tab label", selectedTab.contentColor.onPanel(), selectedGround, 4.5),
+    )
 }
 
 /**
@@ -191,6 +231,7 @@ private fun SeenStyles.inkPairs(): List<InkPair> {
             add(InkPair("field text", tokens.textStrong, style.container.onPanel(), 4.5))
             add(InkPair("field focus edge", style.active, panel, 3.0))
         }
+        addAll(native)
     }
 }
 
