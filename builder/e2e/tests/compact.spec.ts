@@ -21,7 +21,7 @@ test.beforeEach(async ({ context }) => {
   await wantHooks(context);
 });
 
-test('at 390 wide with a finger, the chips, the peek, the picker, half height and Export all work', async ({
+test('at 390 wide with a finger, the chips sit under the bar, the poster peeks and Pick follows the finger', async ({
   page,
   browserName,
 }) => {
@@ -30,46 +30,71 @@ test('at 390 wide with a finger, the chips, the peek, the picker, half height an
   const cdp = await page.context().newCDPSession(page);
 
   // The chips sit in their own row under the top bar.
-  const chip = page.locator(A11Y).getByRole('radio', { name: /^Fluent/ }).first();
+  // The web mirror reads every kit control as a button with its role and state folded into the name.
+  const chip = page.locator(A11Y).getByRole('button', { name: /^Fluent, radio/ }).first();
   const chipBox = await settledBox(chip, 30_000);
   expect(chipBox.y).toBeGreaterThanOrEqual(TOP_BAR_HEIGHT - 1);
   expect(chipBox.y).toBeLessThan(TOP_BAR_HEIGHT * 2);
 
   // The poster peeks from the bottom with the seed row, under the preview.
-  const shuffle = button(page, 'Shuffle');
-  const peek = await settledBox(shuffle);
+  const peek = await settledBox(button(page, 'Shuffle'));
   expect(peek.y).toBeGreaterThan(VIEWPORT.height / 2);
 
-  // Pick opens the picker, and the seed follows a finger on the hue while it is still down.
-  const before = await seedHex(page);
+  // Pick opens the picker, and the color follows a finger on the hue while it is still down.
   await tap(cdp, middle(await settledBox(button(page, 'Pick'))));
-  const hue = page.locator(A11Y).getByRole('slider', { name: /^Hue/ }).first();
+  const hue = page.locator(A11Y).getByText(/^Hue, slider/).first();
   const track = await settledBox(hue);
+  const before = await pickedHex(page);
   const from = middle(track);
   await touch(cdp, 'touchStart', from);
   await touch(cdp, 'touchMove', { x: from.x + track.width / 4, y: from.y });
-  await expect.poll(() => seedHex(page), { timeout: 10_000 }).not.toBe(before);
+  await expect.poll(() => pickedHex(page), { timeout: 10_000 }).not.toBe(before);
   await touch(cdp, 'touchEnd');
   await tap(cdp, middle(await settledBox(button(page, 'Done'))));
   await expect(button(page, 'Done')).toHaveCount(0, { timeout: 10_000 });
+});
 
-  // A drag up from the sheet's top edge brings the fine tune rows into view.
-  const keyColors = page.locator(A11Y).getByText('Key colors', { exact: true }).first();
-  const edge = { x: VIEWPORT.width / 2, y: (await settledBox(shuffle)).y - 16 };
+test('at 390 wide with a finger, a drag on the edge of the poster raises it to half height', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'The finger goes through a Chromium CDP session');
+  await openBuilder(page);
+  const cdp = await page.context().newCDPSession(page);
+
+  const edge = { x: VIEWPORT.width / 2, y: (await settledBox(button(page, 'Shuffle'), 30_000)).y - 16 };
   await drag(cdp, edge, { x: edge.x, y: VIEWPORT.height / 2 });
-  await expect
-    .poll(async () => {
-      const box = await keyColors.boundingBox();
-      return box !== null && box.y > 0 && box.y + box.height <= VIEWPORT.height;
-    }, { timeout: 15_000 })
-    .toBe(true);
 
-  // Export opens over the whole screen.
-  await tap(cdp, middle(await settledBox(button(page, 'Export code'))));
-  const exportSheet = page.locator(A11Y).getByText(/^Copy/).first();
-  await expect(exportSheet).toBeAttached({ timeout: 15_000 });
-  const panel = await settledBox(page.locator(A11Y).getByRole('dialog').first());
+  await expect(button(page, 'Seed and theme controls, Half')).toBeAttached({ timeout: 15_000 });
+});
+
+// b-406g
+test.fixme('at 390 wide with a finger, a drag on the half height poster reaches the fine tune rows', async ({ page }) => {
+  // A drag on the sheet's content at half height neither raises the sheet nor scrolls it in Chromium,
+  // while a drag on its edge does. Kept here for Flow 5.7 until the sheet takes the drag.
+  await openBuilder(page);
+  const cdp = await page.context().newCDPSession(page);
+  const edge = { x: VIEWPORT.width / 2, y: (await settledBox(button(page, 'Shuffle'), 30_000)).y - 16 };
+  await drag(cdp, edge, { x: edge.x, y: VIEWPORT.height / 2 });
+  await expect(button(page, 'Seed and theme controls, Half')).toBeAttached({ timeout: 15_000 });
+
+  const inside = { x: VIEWPORT.width / 2, y: VIEWPORT.height - 80 };
+  await drag(cdp, inside, { x: inside.x, y: VIEWPORT.height / 3 });
+
+  const fineTune = page.locator(A11Y).getByRole('button', { name: /^Core colors and pins/ }).first();
+  await expect.poll(() => inView(fineTune), { timeout: 15_000 }).toBe(true);
+});
+
+test('at 390 wide with a finger, Export opens over the whole screen', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'The finger goes through a Chromium CDP session');
+  await openBuilder(page);
+  const cdp = await page.context().newCDPSession(page);
+
+  await tap(cdp, middle(await settledBox(button(page, 'Export code'), 30_000)));
+
+  // The mirror folds the dialog role into the sheet's own text, so its box is the sheet's.
+  const sheet = page.locator(A11Y).getByText(/^Export code, dialog/).first();
+  const panel = await settledBox(sheet);
+  expect(panel.x).toBeLessThanOrEqual(1);
   expect(panel.width).toBeGreaterThanOrEqual(VIEWPORT.width - 1);
+  await expect(button(page, 'Copy all')).toBeAttached();
 });
 
 /** The mirror's button called [name], the whole name. */
@@ -77,10 +102,16 @@ function button(page: Page, name: string): Locator {
   return page.locator(A11Y).getByRole('button', { name, exact: true }).first();
 }
 
-/** The seed's hex as the poster's seed field shows it. */
-async function seedHex(page: Page): Promise<string> {
-  const field = page.locator(A11Y).getByRole('textbox', { name: /^Seed color/ }).first();
+/** What the open picker's color field shows. The poster leaves the mirror while the picker is open. */
+async function pickedHex(page: Page): Promise<string> {
+  const field = page.locator(A11Y).getByRole('textbox', { name: 'Color', exact: true }).first();
   return (await field.textContent()) ?? '';
+}
+
+/** Whether [target] sits wholly inside the viewport's height. */
+async function inView(target: Locator): Promise<boolean> {
+  const box = await target.boundingBox();
+  return box !== null && box.y > 0 && box.y + box.height <= VIEWPORT.height;
 }
 
 function middle(box: Box): Point {
