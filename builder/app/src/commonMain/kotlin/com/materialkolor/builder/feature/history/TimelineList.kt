@@ -139,6 +139,7 @@ internal fun TimelineList(
                     headline = headline,
                     supporting = entry?.let { step -> supportingText(step, timeline.now, undone) },
                     document = entry?.after ?: timeline.start,
+                    origin = entry?.before ?: timeline.start, // b-509b
                     position = count - index,
                     current = current,
                     undone = undone,
@@ -172,6 +173,7 @@ private fun TimelineRow(
     headline: String,
     supporting: String?,
     document: ThemeDocument,
+    origin: ThemeDocument,
     position: Int,
     current: Boolean,
     undone: Boolean,
@@ -183,7 +185,7 @@ private fun TimelineRow(
         headline = headline,
         modifier = modifier,
         supporting = supporting,
-        leading = { StepSwatch(document, position, undone) },
+        leading = { StepSwatch(document, origin, position, undone) },
         onClick = onClick,
         selected = current,
         trailing = if (current) {
@@ -216,23 +218,29 @@ private fun supportingText(
  * The scheme [document] shows as its own target sees it, a skeleton until its colors are read. The
  * row [position] places from the top waits a frame for each [SWATCHES_PER_FRAME] rows above it, so a
  * long history never reads every scheme inside one frame. A swatch that already shows keeps its
- * colors while [document] keeps changing, and reads again once it has held still for
- * [HOLD_STILL_NANOS], so a drag never reads a scheme on every frame.
+ * colors while [document] keeps changing from the same [origin], as a drag folding into its step
+ * does, and reads again once it has held still for [HOLD_STILL_NANOS], so a drag never reads a
+ * scheme on every frame. A row that shows a step from another [origin] now, as every row does once
+ * the oldest step drops at capacity, starts over and never shows the last step's colors.
  */
 @Composable
 private fun StepSwatch(
     document: ThemeDocument,
+    origin: ThemeDocument,
     position: Int,
     undone: Boolean,
 ) {
     val resolver = rememberThemeResolver()
     val probe = LocalSwatchReadProbe.current
-    val colors by produceState<SwatchColors?>(null, document, resolver) {
-        // A new document for the row starts this over, so a step that moves on every frame is not read.
-        if (value != null) awaitHoldStill()
-        repeat(1 + position / SWATCHES_PER_FRAME) { withFrameNanos { } }
-        probe?.invoke()
-        value = SwatchColors.of(lightScheme(resolver, document))
+    // b-509b
+    val colors by key(origin) {
+        produceState<SwatchColors?>(null, document, resolver) {
+            // A new document for the row starts this over, so a step that moves on every frame is not read.
+            if (value != null) awaitHoldStill()
+            repeat(1 + position / SWATCHES_PER_FRAME) { withFrameNanos { } }
+            probe?.invoke()
+            value = SwatchColors.of(lightScheme(resolver, document))
+        }
     }
     val faded = if (undone) Modifier.alpha(UNDONE_SWATCH_ALPHA) else Modifier
     val shown = colors

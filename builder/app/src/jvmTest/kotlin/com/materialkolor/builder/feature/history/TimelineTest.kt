@@ -23,6 +23,7 @@ import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.domain.history.History
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.Style
@@ -32,6 +33,7 @@ import com.materialkolor.builder.feature.command.keys
 import com.materialkolor.builder.feature.topbar.LibraryChoice
 import com.materialkolor.builder.feature.workspace.Panel
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
@@ -49,6 +51,9 @@ private const val TIGHT_WIDTH = 600
 
 /** The frames a jump across a library switch takes to land in every part of the page, with room to spare. */
 private const val SWITCH_FRAMES = 4
+
+/** Frames enough for a row's swatch to read its new step, and well short of a swatch's hold-still wait. */
+private const val SHIFT_FRAMES = 6
 
 // b-509
 
@@ -167,6 +172,27 @@ class TimelineTest {
             reads shouldBe filled + 1
         }
 
+    // b-509b
+    @Test
+    fun timeline_rowTakingAnotherStepAtCapacity_readsItsSwatchWithoutWaitingToHoldStill() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            var reads = 0
+            with(harness) { show(inTree = true, swatchReads = { reads++ }) }
+            // A full history, so the next step drops the oldest and every row then shows another step.
+            runOnUiThread {
+                repeat(History.CAPACITY) { step -> harness.workspace.edit(styleChange(step), EditPhase.Discrete) }
+            }
+            waitForIdle()
+            keys { pressKey(Key.H) }
+            val filled = reads
+
+            mainClock.autoAdvance = false
+            runOnUiThread { harness.workspace.edit(styleChange(History.CAPACITY), EditPhase.Discrete) }
+            repeat(SHIFT_FRAMES) { mainClock.advanceTimeByFrame() }
+
+            reads shouldBeGreaterThan filled
+        }
+
     private fun ComposeUiTest.boot() {
         with(harness) { show(inTree = true) }
     }
@@ -245,6 +271,9 @@ class TimelineTest {
             }
         }
     }
+
+    private fun styleChange(step: Int): DocumentChange.SetStyle =
+        DocumentChange.SetStyle(if (step % 2 == 0) Style.Vibrant else Style.Rainbow)
 
     private fun seedChange(notch: Int): DocumentChange.SetSeed =
         DocumentChange.SetSeed(Argb(0x3366CC + notch * 0x010101), SeedSource.Picked)
