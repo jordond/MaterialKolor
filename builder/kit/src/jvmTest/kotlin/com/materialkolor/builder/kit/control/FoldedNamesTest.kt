@@ -10,9 +10,13 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.isNotSelected
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.skin.Skin
@@ -76,6 +80,22 @@ private fun AppDrawnControls() {
                 .foldedMenuItemName("Dark", checked = true, enabled = false)
                 .size(48.dp),
         )
+        Box(
+            Modifier
+                .testTag("destination")
+                .clickable(interactionSource = null, indication = null) {}
+                .semantics { selected = true }
+                .foldedSelectedName("Reports", selected = true)
+                .size(48.dp),
+        )
+        Box(
+            Modifier
+                .testTag("elsewhere")
+                .clickable(interactionSource = null, indication = null, enabled = false) {}
+                .semantics { selected = false }
+                .foldedSelectedName("Orders", selected = false, enabled = false)
+                .size(48.dp),
+        )
     }
 }
 
@@ -94,6 +114,8 @@ class FoldedNamesTest {
             onNodeWithTag("option").assert(hasContentDescriptionExactly("Weekly, option, selected"))
             onNodeWithTag("command").assert(hasContentDescriptionExactly("Duplicate, menu item"))
             onNodeWithTag("current").assert(hasContentDescriptionExactly("Dark, menu item, checked, disabled"))
+            onNodeWithTag("destination").assert(hasContentDescriptionExactly("Reports, selected")).assert(isSelected())
+            onNodeWithTag("elsewhere").assert(hasContentDescriptionExactly("Orders, not selected, disabled"))
         }
 
     @Test
@@ -109,5 +131,7 @@ class FoldedNamesTest {
             onNodeWithTag("option").assert(hasContentDescriptionExactly("Weekly"))
             onNodeWithTag("command").assert(hasContentDescriptionExactly("Duplicate"))
             onNodeWithTag("current").assert(hasContentDescriptionExactly("Dark"))
+            onNodeWithTag("destination").assert(hasContentDescriptionExactly("Reports")).assert(isSelected())
+            onNodeWithTag("elsewhere").assert(hasContentDescriptionExactly("Orders")).assert(isNotSelected())
         }
 }

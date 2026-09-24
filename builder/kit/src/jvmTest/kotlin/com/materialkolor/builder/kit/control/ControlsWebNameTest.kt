@@ -25,6 +25,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasTextExactly
@@ -179,7 +180,7 @@ class ControlsWebNameTest {
             onAllNodes(editable).assertCountEquals(0)
             onNode(hasContentDescriptionExactly("Spec, pop-up button, 2021, disabled")).assertExists()
             val style = onNode(hasContentDescriptionExactly("Style, pop-up button, Tonal spot"))
-            style.assert(hasClickAction())
+            style.assert(hasClickAction()).assert(hasRole(Role.DropdownList))
 
             style.performClick()
             waitForIdle()
@@ -190,7 +191,7 @@ class ControlsWebNameTest {
         }
 
     @Test
-    fun openPanels_flagOn_everySkin_readTheirRowsAsMenuItemsAndOptions() =
+    fun openPanels_flagOn_everySkin_readTheSelectFieldAsTextOverMenuItemsAndOptions() =
         forEachSkin { _, skin ->
             showFolded(skin) {
                 Column {
@@ -203,7 +204,11 @@ class ControlsWebNameTest {
 
             onNode(hasText("Duplicate")).assert(hasContentDescriptionExactly("Duplicate, menu item"))
             onNode(hasText("Dark")).assert(hasContentDescriptionExactly("Dark, menu item, checked"))
-            onNode(hasContentDescriptionExactly("Style, pop-up button, Vibrant")).assertExists()
+            onNode(hasTextExactly("Style, Vibrant"))
+                .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.Role))
+                .assert(hasNoContentDescription())
+                .assert(!hasClickAction())
+            onAllNodes(hasContentDescription("pop-up button", substring = true)).assertCountEquals(0)
             onNode(hasContentDescriptionExactly("Tonal spot, option, not selected")).assert(isNotSelected())
             onNode(hasContentDescriptionExactly("Vibrant, option, selected")).assert(isSelected())
             onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.EditableText)).assertCountEquals(0)

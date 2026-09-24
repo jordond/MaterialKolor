@@ -62,6 +62,7 @@ import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.foldMenuRow
 import com.materialkolor.builder.kit.control.foldOption
 import com.materialkolor.builder.kit.control.foldState
+import com.materialkolor.builder.kit.control.shownChoiceName
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
@@ -346,7 +347,8 @@ internal fun <T> HeadlessSelect(
 
 /**
  * A select drawn open where it stands, its field over the list of [HeadlessSelect] with nothing
- * floating. The field only shows the choice, so Tab goes straight to the options.
+ * floating. The field only shows the choice, so Tab goes straight to the options. On the web it
+ * plays no role and reads as text, "Style, Vibrant" (D40).
  */
 @Composable
 internal fun <T> HeadlessSelectPanel(
@@ -358,13 +360,15 @@ internal fun <T> HeadlessSelectPanel(
     style: OverlayStyle,
     modifier: Modifier,
 ) {
+    val current = optionLabel(selected)
     Column(modifier.width(IntrinsicSize.Max)) {
+        // b-230c
         SelectField(
             label = label,
-            current = optionLabel(selected),
+            current = current,
             enabled = true,
             style = style,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.shownChoiceName(label, current).fillMaxWidth(),
             action = Modifier.semantics(mergeDescendants = true) { role = Role.DropdownList },
         )
         DropdownList(style, modifier = Modifier.fillMaxWidth()) {
@@ -376,7 +380,8 @@ internal fun <T> HeadlessSelectPanel(
 /**
  * A select's field, its label over the choice and a chevron after them, at the far end when the
  * field is wider than they are. It reads as a dropdown list whose state is the choice, and [action]
- * makes it one. On the web its name carries the role word, "Style, pop-up button, Tonal spot" (D40).
+ * makes it one. On the web its name carries the role word, "Style, pop-up button, Tonal spot" (D40),
+ * unless [modifier] starts with [shownChoiceName] for a field that only shows the choice.
  */
 @Composable
 private fun SelectField(

@@ -242,7 +242,7 @@ private fun MaterialPageDialog(
                 CompositionLocalProvider(
                     LocalContentColor provides AlertDialogDefaults.textContentColor,
                     LocalTextStyle provides typography.bodyMedium,
-                ) { Column(content = content) }
+                ) { Column(Modifier.weight(1f, fill = false), content = content) } // b-230c
                 Row(
                     modifier = Modifier.align(Alignment.End),
                     horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),

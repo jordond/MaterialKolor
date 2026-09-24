@@ -34,6 +34,7 @@ import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.control.foldOption
 import com.materialkolor.builder.kit.control.selectFieldName
+import com.materialkolor.builder.kit.control.shownChoiceName
 import com.materialkolor.builder.kit.headless.DropdownList
 import com.materialkolor.builder.kit.headless.HeadlessDropdown
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
@@ -136,6 +137,7 @@ internal fun <T> MaterialSelectPanel(
             modifier = Modifier
                 .fillMaxWidth()
                 .focusProperties { canFocus = false },
+            opens = false, // b-230c
         )
         DropdownList(materialMenuStyle(), modifier = Modifier.fillMaxWidth()) {
             MaterialSelectRows(options, selected, optionLabel, onSelect, selectedRow = null)
@@ -151,10 +153,12 @@ internal fun <T> MaterialSelectPanel(
  * alone and not the menu box around it, which would drop the tap that opens the menu.
  *
  * It reads as a dropdown list whose state is the choice. On the web the mirror would read the text
- * field inside as an editable text box, so there the field's own semantics are cleared and it reads
- * as a button named by [selectFieldName], with the disabled note while it is disabled (S5 row 10).
- * The menu anchor comes in [modifier], outside what is cleared, so its click and role stay. The
- * text field and its handle lever (D45) are left as they are.
+ * field inside as an editable text box, so there the field's own semantics are cleared. A field
+ * that [opens] its menu is named by [selectFieldName], with the disabled note while it is disabled
+ * (S5 row 10). The menu anchor comes in [modifier], outside what is cleared, so its click and its
+ * dropdown list role stay, and the mirror reads the two as a button (P3). A field over an open panel
+ * only shows the choice and reads as text through [shownChoiceName]. The text field and its handle
+ * lever (D45) are left as they are.
  */
 @Composable
 private fun MaterialChoiceField(
@@ -162,20 +166,27 @@ private fun MaterialChoiceField(
     label: String,
     modifier: Modifier,
     enabled: Boolean = true,
+    opens: Boolean = true,
 ) {
     var shown by remember { mutableStateOf(TextFieldValue(current)) }
-    val name = selectFieldName(label, current, enabled)
-    val named = if (LocalFoldsStateIntoName.current) {
-        Modifier.clearAndSetSemantics {
-            role = Role.Button
-            contentDescription = name
-            stateDescription = current
-            if (!enabled) disabled()
+    // b-230c
+    val named = when {
+        !LocalFoldsStateIntoName.current -> {
+            Modifier.semantics {
+                role = Role.DropdownList
+                stateDescription = current
+            }
         }
-    } else {
-        Modifier.semantics {
-            role = Role.DropdownList
-            stateDescription = current
+        opens -> {
+            val name = selectFieldName(label, current, enabled)
+            Modifier.clearAndSetSemantics {
+                contentDescription = name
+                stateDescription = current
+                if (!enabled) disabled()
+            }
+        }
+        else -> {
+            Modifier.shownChoiceName(label, current)
         }
     }
     MaterialOutlinedField(
