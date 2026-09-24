@@ -26,8 +26,12 @@ import kotlin.test.Test
 private const val SkeletonTag = "skeleton"
 private const val ChipTag = "chip"
 
-/** Half a pulse, where the skeleton sits furthest from where it started. */
-private const val HalfPulseMillis = 600L
+/**
+ * A quarter pulse, where the skeleton reaches the strong border. The pulse starts halfway between
+ * its two tones and comes back down the way it went up, so half a pulse lands on the tone it
+ * started from.
+ */
+private const val QuarterPulseMillis = 300L // b-311c
 
 @OptIn(ExperimentalTestApi::class)
 class SchemeChipSkeletonTest {
@@ -62,7 +66,7 @@ class SchemeChipSkeletonTest {
     @Test
     fun schemeChipSkeleton_everySkin_pulses() =
         forEachWidgetSkin { _, skin ->
-            val (first, later) = centerAcrossHalfAPulse(skin, reducedMotion = false)
+            val (first, later) = centerAcrossAQuarterPulse(skin, reducedMotion = false)
 
             later shouldNotBe first
         }
@@ -70,15 +74,15 @@ class SchemeChipSkeletonTest {
     @Test
     fun schemeChipSkeleton_everySkinUnderReducedMotion_holdsStill() =
         forEachWidgetSkin { _, skin ->
-            val (first, later) = centerAcrossHalfAPulse(skin, reducedMotion = true)
+            val (first, later) = centerAcrossAQuarterPulse(skin, reducedMotion = true)
 
             later shouldBe first
         }
 }
 
-/** The skeleton's center color on a running clock, first and half a pulse later. */
+/** The skeleton's center color on a running clock, first and a quarter pulse later. */
 @OptIn(ExperimentalTestApi::class)
-private fun ComposeUiTest.centerAcrossHalfAPulse(
+private fun ComposeUiTest.centerAcrossAQuarterPulse(
     skin: Skin,
     reducedMotion: Boolean,
 ): Pair<Color, Color> {
@@ -86,7 +90,7 @@ private fun ComposeUiTest.centerAcrossHalfAPulse(
     setContent { RunningHarness(skin, reducedMotion) { SchemeChipSkeleton(Modifier.testTag(SkeletonTag)) } }
     mainClock.advanceTimeByFrame()
     val first = skeletonCenter()
-    mainClock.advanceTimeBy(HalfPulseMillis)
+    mainClock.advanceTimeBy(QuarterPulseMillis)
     return first to skeletonCenter()
 }
 

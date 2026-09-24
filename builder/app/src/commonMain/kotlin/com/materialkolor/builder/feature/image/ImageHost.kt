@@ -103,7 +103,8 @@ private suspend fun dispatchResult(
             val before = workspace()
             val made = result.change.apply(before.document)
             // A seed that changes nothing makes no undo entry, and an Undo would take another one.
-            val seedUndo = if (made == before.document) null else SeedUndo(made, before.project)
+            // b-311c
+            val seedUndo = if (made == before.document) null else SeedUndo(before.document, made, before.project)
             if (seedUndo != null) {
                 undo.current?.end()
                 undo.current = seedUndo

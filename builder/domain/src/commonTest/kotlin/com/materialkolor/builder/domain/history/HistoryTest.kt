@@ -200,6 +200,22 @@ class HistoryTest {
         assertEquals(ChangeLabel(ChangeKind.Preset, detail = "plum"), session.history.undoLabel)
     }
 
+    // b-311c
+    @Test
+    fun history_imageSeedPutBackAfterADrag_leavesNoEntry() {
+        val session = Session()
+        val image = SeedSource.Image("photo.png", listOf(red, blue))
+        session.edit(DocumentChange.SetSeed(red, image), at = 0)
+
+        session.edit(DocumentChange.SetSeed(blue, SeedSource.Picked), EditPhase.Dragging, at = 10_000)
+        session.edit(DocumentChange.SetSeed(red, SeedSource.Picked), EditPhase.Dragging, at = 10_016)
+        session.edit(DocumentChange.SetSeed(red, image), EditPhase.Released, at = 10_032)
+
+        assertEquals(1, session.history.persisted().size)
+        assertEquals(image, session.document.seedSource)
+        assertEquals(ThemeDocument.Default, session.history.undo())
+    }
+
     @Test
     fun history_releaseThatNeverMerges_closesTheDragItEnds() {
         val session = Session()
@@ -436,6 +452,24 @@ class HistoryTest {
 
         assertEquals(1, session.history.persisted().size)
         assertEquals(ThemeDocument.Default, session.history.undo())
+    }
+
+    // b-311c
+    @Test
+    fun history_seedEditRightAfterAnImageSeed_isItsOwnStep() {
+        listOf(SeedSource.Typed, SeedSource.Shuffled, SeedSource.Eyedropper).forEach { next ->
+            val session = Session()
+            val image = SeedSource.Image("photo.png", listOf(blue, red))
+
+            session.edit(DocumentChange.SetSeed(blue, image), at = 0)
+            val seeded = session.document
+            session.edit(DocumentChange.SetSeed(red, next), at = 100)
+            session.edit(DocumentChange.SetSeed(blue, next), at = 200)
+
+            assertEquals(2, session.history.persisted().size, "after $next")
+            assertEquals(seeded, session.history.undo(), "after $next")
+            assertEquals(ThemeDocument.Default, session.history.undo(), "after $next")
+        }
     }
 
     private fun contrast(hundredths: Int): DocumentChange = DocumentChange.SetContrast(ContrastLevel(hundredths))

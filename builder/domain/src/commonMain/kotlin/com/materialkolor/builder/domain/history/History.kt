@@ -116,7 +116,7 @@ public class History(
         // A release closes its drag even when the change never merges, so a preset seed put back
         // after a drag leaves no second step.
         if (phase == EditPhase.Released && previous.phase == EditPhase.Dragging) return true
-        if (!change.merges || !previous.merges || change.startsNewImage(before)) return false // b-311a
+        if (!change.merges || !previous.merges || change.crossesAnImage(before)) return false // b-311a b-311c
         return when (phase) {
             EditPhase.Dragging -> {
                 previous.phase == EditPhase.Dragging
@@ -188,12 +188,16 @@ public class History(
     }
 }
 
-// b-311a
+// b-311a b-311c
 
 /**
- * Whether this sets the seed from an image [before] had no seed from. A new image is always its own
- * step, the way a preset is, so undoing it never takes an earlier seed edit with it. Swapping to
- * another of the same image's colors is still a seed edit like any other and folds as one.
+ * Whether this sets the seed from a new image, or from anything else over a seed [before] took from
+ * an image. An image seed is always its own step both ways, the way a preset is. Undoing it never
+ * takes an earlier seed edit with it, and a seed typed, shuffled or lifted right after it never
+ * vanishes into it. Swapping to another of the same image's colors is still a seed edit like any
+ * other and folds as one.
  */
-private fun DocumentChange.startsNewImage(before: ThemeDocument): Boolean =
-    this is DocumentChange.SetSeed && source is SeedSource.Image && source != before.seedSource
+private fun DocumentChange.crossesAnImage(before: ThemeDocument): Boolean =
+    this is DocumentChange.SetSeed &&
+        source != before.seedSource &&
+        (source is SeedSource.Image || before.seedSource is SeedSource.Image)
