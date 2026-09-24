@@ -46,6 +46,24 @@ class LoopPhaseTest {
         }
 
     @Test
+    fun loopPhase_fromAClockAtZero_walksFromTheFirstFrames() =
+        runComposeUiTest {
+            mainClock.autoAdvance = false
+            var phase: State<Float>? = null
+            setContent {
+                phase = rememberLoopPhase(periodMillis = 1_000, frozenPhase = 0.7f)
+            }
+
+            // The clock has run for less than the 700 ms the loop picks up from.
+            mainClock.advanceTimeByFrame()
+            mainClock.advanceTimeBy(100)
+            val walked = assertNotNull(phase).value
+
+            assertTrue(walked > 0.75f, "expected the phase to walk on from 0.7, got $walked")
+            assertTrue(walked < 0.9f, "expected the phase to walk on from 0.7, got $walked")
+        }
+
+    @Test
     fun loopPhase_whileRunning_walksWithTheClock() =
         runComposeUiTest {
             mainClock.autoAdvance = false

@@ -42,11 +42,15 @@ public fun rememberLoopPhase(
         if (!visible) return@LaunchedEffect
 
         val period = periodMillis * NanosPerMilli
-        var startNanos = -1L
+        // Null until the first frame. The start itself can be below zero, when the clock has run for
+        // less than the phase the loop picks up from.
+        var startNanos: Long? = null
         while (true) {
             withFrameNanos { frameNanos ->
-                if (startNanos < 0) startNanos = frameNanos - (phase.floatValue * period).toLong()
-                phase.floatValue = ((frameNanos - startNanos) % period) / period.toFloat()
+                val start = startNanos ?: (frameNanos - (phase.floatValue * period).toLong()).also { first ->
+                    startNanos = first
+                }
+                phase.floatValue = ((frameNanos - start) % period) / period.toFloat()
             }
         }
     }

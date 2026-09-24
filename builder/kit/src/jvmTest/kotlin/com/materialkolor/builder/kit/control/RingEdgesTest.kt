@@ -6,15 +6,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.poster.PosterColors
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.shell.PosterSurface
+import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
+import com.materialkolor.builder.kit.skin.headless.FocusRingOffset
+import com.materialkolor.builder.kit.skin.headless.SegmentedStyle
+import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
+import io.kotest.matchers.floats.plusOrMinus
+import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 /** A light seed and a dark one, so the hero's ring is held to 3 to 1 on both kinds of poster. */
@@ -100,6 +110,27 @@ class RingEdgesTest {
             capture.shouldCoverEverySide()
         }
 
+    /**
+     * A tooltip with no room above its anchor opens below it, the other branch of its placement, and
+     * there too it keeps clear of the anchor's ring, so the ring's bottom shows whole over the bubble.
+     */
+    @Test
+    fun tooltip_atTheTopOfThePage_everySkin_opensBelowAndLeavesTheAnchorRingWhole() =
+        forEachSkin { _, skin ->
+            val overlays = PageOverlays()
+            val whole = tabOntoRing(skin) {
+                InThePage(overlays, bubbleBelow = true) {
+                    BuilderTooltip("Copy the hex") {
+                        BuilderIconButton(onClick = {}, icon = IconId.Copy, contentDescription = "Copy")
+                    }
+                }
+            }
+            whole.shouldShowABubbleBelow(overlays)
+            val capture = whole.nearFocused(RingReach)
+            capture.shouldShowRing()
+            capture.shouldCoverEverySide()
+        }
+
     /** The sheet clips to its rounded top, and the handle's ring stands in from its sides (gap E). */
     @Test
     fun bottomSheet_handle_everySkin_ringsOnEverySideInsideTheSheet() =
@@ -140,4 +171,72 @@ class RingEdgesTest {
             }
         }
     }
+
+    /**
+     * An end option's ring stands the style's end offset off its rounded end alone. Its straight top
+     * and bottom run in line with a middle option's ring, and its other end stands where a middle
+     * option's does (R-B-230d).
+     */
+    @Test
+    fun segmented_endOption_headlessSkins_ringsFurtherOffTheRoundedEndOnly() {
+        val options = listOf("Hex", "RGB", "HSL")
+        for (library in listOf(Library.Unstyled, Library.Custom)) {
+            withClue(library.name) {
+                val skin = Skin(library, expressive = false)
+                var extra = 0f
+                val middle = segmentRing(skin, options, focused = "RGB") { style ->
+                    extra = style.endRingOffset.value - FocusRingOffset.value
+                }
+                val first = segmentRing(skin, options, focused = "Hex") { _ -> }
+                val last = segmentRing(skin, options, focused = "HSL") { _ -> }
+                for ((name, end) in listOf("first" to first, "last" to last)) {
+                    withClue(name) {
+                        end.reach().top shouldBe (middle.reach().top plusOrMinus 1f)
+                        end.reach().bottom shouldBe (middle.reach().bottom plusOrMinus 1f)
+                    }
+                }
+                first.reach().left shouldBe (middle.reach().left + extra plusOrMinus 1f)
+                first.reach().right shouldBe (middle.reach().right plusOrMinus 1f)
+                last.reach().right shouldBe (middle.reach().right + extra plusOrMinus 1f)
+                last.reach().left shouldBe (middle.reach().left plusOrMinus 1f)
+            }
+        }
+    }
 }
+
+/**
+ * Tabs onto [focused], the chosen option of a segmented row of [options] in [skin], in a test of its
+ * own, handing [style] the row's segmented style.
+ */
+@OptIn(ExperimentalTestApi::class)
+private fun segmentRing(
+    skin: Skin,
+    options: List<String>,
+    focused: String,
+    style: (SegmentedStyle) -> Unit,
+): RingCapture {
+    var capture: RingCapture? = null
+    runComposeUiTest {
+        capture = tabOntoRing(skin) {
+            val styles = if (skin.library == Library.Custom) CustomActionStyles else UnstyledActionStyles
+            style(styles.segmented)
+            BuilderSegmented(
+                options = options,
+                selected = focused,
+                onSelect = {},
+                label = "Format",
+                optionLabel = { option -> option },
+            )
+        }
+    }
+    return checkNotNull(capture)
+}
+
+/** How far the ring reaches past each side of the focused node, in pixels, at one pixel per dp. */
+private fun RingCapture.reach(): Rect =
+    Rect(
+        left = focused.left - ringBounds.left,
+        top = focused.top - ringBounds.top,
+        right = ringBounds.right - focused.right,
+        bottom = ringBounds.bottom - focused.bottom,
+    )

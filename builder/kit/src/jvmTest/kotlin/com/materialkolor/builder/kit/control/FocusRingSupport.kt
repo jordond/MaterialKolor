@@ -225,22 +225,53 @@ internal fun RingCapture.shouldRingEverySide(
     reach: Dp = 8.dp,
     around: Rect = focused,
 ) {
-    val box = around
-    val out = reach.value * density
-    val middleX = (box.left + box.width / 4)..(box.right - box.width / 4)
-    val middleY = (box.top + box.height / 4)..(box.bottom - box.height / 4)
+    val bands = sideBands(reach, around)
     val sides = mapOf<String, (Float, Float) -> Boolean>(
-        "left" to { x, y -> x in (box.left - out)..(box.left + box.width / 4) && y in middleY },
-        "right" to { x, y -> x in (box.right - box.width / 4)..(box.right + out) && y in middleY },
-        "top" to { x, y -> y in (box.top - out)..(box.top + box.height / 4) && x in middleX },
-        "bottom" to { x, y -> y in (box.bottom - box.height / 4)..(box.bottom + out) && x in middleX },
+        "left" to { x, y -> x in bands.left && y in bands.middleY },
+        "right" to { x, y -> x in bands.right && y in bands.middleY },
+        "top" to { x, y -> y in bands.top && x in bands.middleX },
+        "bottom" to { x, y -> y in bands.bottom && x in bands.middleX },
     )
     for ((side, holds) in sides) {
-        withClue("$side side of $box") {
+        withClue("$side side of $around") {
             pixels.filter { point -> holds(point.x + 0.5f, point.y + 0.5f) }.shouldNotBeEmpty()
         }
     }
 }
+
+/**
+ * Where a side of [box] is looked for, in pixels. Each side is looked for along its middle half,
+ * from [out] outside the box to a quarter of the box inside it. [shouldRingEverySide] and
+ * [sideCoverage] both read a side here, so the two always judge the same stretch of ring.
+ */
+internal class SideBands(
+    box: Rect,
+    out: Float,
+) {
+    /** The middle half of the top and the bottom, from left to right. */
+    val middleX: ClosedFloatingPointRange<Float> = (box.left + box.width / 4)..(box.right - box.width / 4)
+
+    /** The middle half of the left and the right side, from top to bottom. */
+    val middleY: ClosedFloatingPointRange<Float> = (box.top + box.height / 4)..(box.bottom - box.height / 4)
+
+    /** How far across the left side reaches. */
+    val left: ClosedFloatingPointRange<Float> = (box.left - out)..(box.left + box.width / 4)
+
+    /** How far across the right side reaches. */
+    val right: ClosedFloatingPointRange<Float> = (box.right - box.width / 4)..(box.right + out)
+
+    /** How far down the top reaches. */
+    val top: ClosedFloatingPointRange<Float> = (box.top - out)..(box.top + box.height / 4)
+
+    /** How far down the bottom reaches. */
+    val bottom: ClosedFloatingPointRange<Float> = (box.bottom - box.height / 4)..(box.bottom + out)
+}
+
+/** The bands each side of [around] is looked for in, reaching [reach] outside it. */
+internal fun RingCapture.sideBands(
+    reach: Dp,
+    around: Rect,
+): SideBands = SideBands(around, reach.value * density)
 
 /**
  * Checks that the ring colour stands 3 to 1 from what every ring pixel covered, so no stretch of the
