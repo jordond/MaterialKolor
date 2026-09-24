@@ -1,12 +1,15 @@
 package com.materialkolor.builder.kit.transition
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.TargetBasedAnimation
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MonotonicFrameClock
+import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -25,6 +28,7 @@ import com.materialkolor.builder.kit.motion.LocalTabVisible
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -38,6 +42,15 @@ private val CaptureTimeout = 100.milliseconds
 
 /** The longest a reveal holds the old frame while the app waits on a skin font (architecture 6.11). */
 private val FontWaitTimeout = 300.milliseconds
+
+// b-503a
+
+/**
+ * The most one frame moves a reveal on. A browser can take hundreds of milliseconds to compose a new
+ * skin, a frame or two after the change, and timed from the clock alone the reveal would be over by
+ * the frame after it.
+ */
+private val MaxFrameStep = 50.milliseconds
 
 /**
  * What the reveal draws the old frame from (spike S4).
@@ -105,14 +118,12 @@ public class SkinTransition internal constructor(
     internal var bitmap: ImageBitmap? by mutableStateOf(null)
 
     /** Zero while the old frame covers everything, one once it is gone. Only draw reads it. */
-    internal val progress: Animatable<Float, AnimationVector1D> = Animatable(1f)
+    internal val progress: MutableFloatState = mutableFloatStateOf(1f) // b-503a
 
     private val switching = Mutex()
 
-    // b-503a
-
-    /** Counts reveals, so one whose animation has not started yet can tell a newer one took over. */
-    private var generation: Int = 0
+    /** The reveal's animation while it plays, which the next reveal cuts short. */
+    private var playing: Job? = null // b-503a
 
     /**
      * Applies [change] behind a reveal in the given [style].
@@ -124,10 +135,8 @@ public class SkinTransition internal constructor(
      * is still running snaps that one to its end first. Under reduced motion either style becomes the
      * short crossfade.
      *
-     * The old frame covers everything for one more frame after the change, while the new UI composes
-     * under it, and the animation starts on the frame after that. A skin switch can take the browser
-     * hundreds of milliseconds to compose, and an animation timed from that frame would be over by
-     * the time the next one drew.
+     * The animation moves on by the time between frames, but by no more than 50 ms a frame, so the
+     * long frame in which the new UI composes costs it one step rather than the whole reveal.
      *
      * Returns once the reveal has finished or been cut short by the next one. Cancelling the caller
      * after the change has applied does not stop the reveal, since the animation belongs to the host.
@@ -144,8 +153,8 @@ public class SkinTransition internal constructor(
         change: () -> Unit,
     ) {
         val animation = switching.withLock {
-            progress.snapTo(1f)
-            val turn = ++generation // b-503a
+            playing?.cancel() // b-503a
+            progress.value = 1f
             val environment = environment()
             if (environment.frozen || !environment.tabVisible) {
                 change()
@@ -166,24 +175,43 @@ public class SkinTransition internal constructor(
             val shown = if (environment.reduced) RevealStyle.Crossfade else style
             this.style = shown
             change()
-            progress.snapTo(0f)
+            progress.value = 0f
 
             val spec = when (shown) {
                 is RevealStyle.Circle -> environment.motion.reveal<Float>()
                 RevealStyle.Crossfade -> environment.motion.crossfade<Float>()
             }
-            scope.launch(start = CoroutineStart.UNDISPATCHED) {
-                try {
-                    // b-503a
-                    // A newer reveal snaps this one to its end, which cancels nothing while it waits here.
-                    nextFrame()
-                    if (turn == generation) progress.animateTo(targetValue = 1f, animationSpec = spec)
-                } finally {
-                    if (bitmap === image) bitmap = null
-                }
-            }
+            scope
+                .launch(start = CoroutineStart.UNDISPATCHED) {
+                    try {
+                        play(spec)
+                    } finally {
+                        if (bitmap === image) bitmap = null
+                    }
+                }.also { job -> playing = job }
         }
         animation.join()
+    }
+
+    // b-503a
+
+    /**
+     * Moves [progress] from zero to one on [spec], a frame at a time, each frame by the time since the
+     * last one but never by more than [MaxFrameStep]. The first frame is the start, as it is for any
+     * Compose animation.
+     */
+    private suspend fun play(spec: FiniteAnimationSpec<Float>) {
+        val animation = TargetBasedAnimation(spec, Float.VectorConverter, initialValue = 0f, targetValue = 1f)
+        val step = MaxFrameStep.inWholeNanoseconds
+        var played = 0L
+        var last = -1L
+        while (played < animation.durationNanos) {
+            nextFrame { now ->
+                if (last >= 0) played += (now - last).coerceIn(0L, step)
+                last = now
+                progress.value = animation.getValueFromNanos(played)
+            }
+        }
     }
 
     /**
@@ -215,12 +243,12 @@ public class SkinTransition internal constructor(
 
     /**
      * Suspends until the next frame starts, on the clock the host animates with, and runs [onFrame]
-     * in it. The caller's own context only has to carry a clock when the transition's scope somehow
-     * lacks one.
+     * in it with the frame's time. The caller's own context only has to carry a clock when the
+     * transition's scope somehow lacks one.
      */
-    private suspend fun nextFrame(onFrame: () -> Unit = {}) {
+    private suspend fun nextFrame(onFrame: (frameNanos: Long) -> Unit) {
         val clock = scope.coroutineContext[MonotonicFrameClock]
-        if (clock != null) clock.withFrameNanos { onFrame() } else withFrameNanos { onFrame() }
+        if (clock != null) clock.withFrameNanos(onFrame) else withFrameNanos(onFrame)
     }
 }
 
