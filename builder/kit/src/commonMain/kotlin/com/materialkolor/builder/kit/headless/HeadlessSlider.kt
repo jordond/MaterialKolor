@@ -32,13 +32,17 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import com.composeunstyled.UnstyledSlider
+import com.composeunstyled.focusRing
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.control.roleLessName
 import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.skin.headless.FocusRingOffset
+import com.materialkolor.builder.kit.skin.headless.FocusRingWidth
 import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.skin.headless.enabledAlpha
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -220,6 +224,13 @@ internal fun sliderValueDescription(value: Float): String {
 }
 
 /**
+ * How far the panel colored halo behind a focused thumb reaches. It fills the gap between the thumb
+ * and its focus ring and runs one ring's width past it, so where the ring crosses the track it sits
+ * on the panel rather than on the accent (AR-01).
+ */
+private val ThumbHaloWidth: Dp = FocusRingOffset + FocusRingWidth * 2
+
+/**
  * A slider over Compose Unstyled's, with named stops drawn on the track.
  *
  * Drags report every frame and snap to [SliderRules.stops], letting go reports once. Keys go
@@ -262,8 +273,10 @@ internal fun HeadlessSlider(
         onValueChangeFinished = onValueChangeFinished,
         track = { state -> SliderTrack(state.fraction, rules, style) },
         thumb = {
+            val halo = LocalBuilderTokens.current.panel
             Box(
                 Modifier
+                    .focusRing(interactions, ThumbHaloWidth, halo, style.thumbShape)
                     .controlRing(interactions, style.thumbShape, style.focus)
                     .size(style.thumbSize)
                     .background(style.thumb, style.thumbShape)

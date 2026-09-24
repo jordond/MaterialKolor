@@ -3,9 +3,9 @@ package com.materialkolor.builder.kit.widget
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.FocusInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,11 +27,19 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.key.Key
@@ -48,6 +56,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.focused
+import androidx.compose.ui.semantics.requestFocus
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -65,6 +75,7 @@ import com.materialkolor.builder.kit.generated.resources.Res
 import com.materialkolor.builder.kit.generated.resources.code_view_name
 import com.materialkolor.builder.kit.generated.resources.widget_copy
 import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.token.CodePalette
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderType
@@ -75,7 +86,7 @@ import org.jetbrains.compose.resources.stringResource
 /** Tags the swatch before a color literal, so a test can count them. */
 internal const val CodeSwatchTag: String = "code-swatch"
 
-/** Tags the scroll area, so a test can focus it and press keys. */
+/** Tags the code area, the one focus stop of the lines, so a test can focus it and press keys. */
 internal const val CodeScrollTag: String = "code-scroll"
 
 /** One run of a line, either text or the swatch of the color literal that follows. */
@@ -96,8 +107,9 @@ private sealed interface CodePart {
  * Each kind of token takes its color from the skin's code palette, and a small swatch sits before
  * every color literal. Lines are numbered, the text can be selected, long lines scroll sideways and
  * only the lines on screen are composed, so a 400 line file scrolls smoothly. Give it a bounded
- * height, since it scrolls its own lines. The scroll area takes keyboard focus and shows the focus
- * ring, so the arrows, Page Up and Page Down scroll it without a pointer.
+ * height, since it scrolls its own lines. The code area is one focus stop, the selection's own, and
+ * wears the focus ring outside its frame while it has focus. There the arrows, Page Up and Page Down
+ * scroll it without a pointer, and the copy keys copy what is selected.
  *
  * The copy button sits in the top corner. Selecting text takes a part of the file, the button takes
  * all of it, byte for byte.
@@ -155,23 +167,32 @@ public fun CodeView(
     }
     val listState = rememberLazyListState()
     val sideways = rememberScrollState()
-    val scrollSource = remember { MutableInteractionSource() }
+    val codeFocus = remember { CodeFocus() }
     val scope = rememberCoroutineScope()
 
     Box(
         modifier = modifier
+            .controlRing(codeFocus.interactions, shape)
             .clip(shape)
             .background(tokens.codeBackground)
             .border(tokens.outlineWidth, tokens.border, shape),
     ) {
-        SelectionContainer {
+        // The selection is its own focus target and asks for focus when a drag starts, so it is the
+        // one stop. The scroll keys and the focus flag go on its modifier, ahead of that target.
+        SelectionContainer(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag(CodeScrollTag)
+                .semantics {
+                    focused = codeFocus.focused
+                    requestFocus { codeFocus.requester.requestFocus(FocusDirection.Enter) }
+                }.focusRequester(codeFocus.requester)
+                .onFocusChanged { state -> codeFocus.update(state.isFocused) }
+                .onKeyEvent { event -> scope.scrollOnKey(event, listState, sideways) },
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .testTag(CodeScrollTag)
-                    .widgetOutline(scrollSource, shape, hovered = false, atRest = false)
-                    .onKeyEvent { event -> scope.scrollOnKey(event, listState, sideways) }
-                    .focusable(interactionSource = scrollSource)
                     .horizontalScroll(sideways),
             ) {
                 LazyColumn(
@@ -187,11 +208,38 @@ public fun CodeView(
                 }
             }
         }
-        BuilderTooltip(
-            text = copyLabel,
-            modifier = Modifier.align(Alignment.TopEnd).padding(tokens.spacing.small),
-        ) {
-            BuilderIconButton(onClick = onCopy, icon = IconId.Copy, contentDescription = copyLabel)
+        // Placed by a box of its own, since Material's tooltip wraps the modifier it is given.
+        Box(Modifier.align(Alignment.TopEnd).padding(tokens.spacing.small)) {
+            BuilderTooltip(text = copyLabel) {
+                BuilderIconButton(onClick = onCopy, icon = IconId.Copy, contentDescription = copyLabel)
+            }
+        }
+    }
+}
+
+/**
+ * The focus of the code area, which the selection's own focus target holds. That target sends no
+ * focus interactions and reports no focus, so this turns its focus changes into the interactions
+ * [controlRing] listens for, and gives the area a focused state and a focus request to report.
+ */
+@Stable
+private class CodeFocus {
+    val interactions: MutableInteractionSource = MutableInteractionSource()
+    val requester: FocusRequester = FocusRequester()
+    var focused: Boolean by mutableStateOf(false)
+        private set
+    private var held: FocusInteraction.Focus? = null
+
+    fun update(isFocused: Boolean) {
+        focused = isFocused
+        val focus = held
+        if (isFocused && focus == null) {
+            val next = FocusInteraction.Focus()
+            held = next
+            interactions.tryEmit(next)
+        } else if (!isFocused && focus != null) {
+            held = null
+            interactions.tryEmit(FocusInteraction.Unfocus(focus))
         }
     }
 }

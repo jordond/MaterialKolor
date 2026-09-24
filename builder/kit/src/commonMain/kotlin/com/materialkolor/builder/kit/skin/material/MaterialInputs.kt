@@ -23,6 +23,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -33,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
@@ -84,7 +86,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
  * A Material3 switch with its label. The row is the target and carries the switch role, so the
- * switch itself takes no clicks. The row wears the focus ring and Material's own focus layer.
+ * switch itself takes no clicks. The row wears the focus ring and Material's own focus layer, clipped
+ * to the ring's corners so the ripple and the layer stay inside it.
  */
 @Composable
 internal fun MaterialSwitch(
@@ -98,10 +101,12 @@ internal fun MaterialSwitch(
     val interactions = remember { MutableInteractionSource() }
     val words = stateWords()
     val state = ControlState.Switched(checked)
+    val shape = RoundedCornerShape(tokens.radius.small)
     Row(
         modifier = modifier
             .heightIn(min = LocalLayout.current.primaryTouchTarget)
-            .controlRing(interactions, RoundedCornerShape(tokens.radius.small))
+            .controlRing(interactions, shape)
+            .clip(shape)
             .toggleable(
                 value = checked,
                 interactionSource = interactions,
@@ -128,7 +133,7 @@ internal fun MaterialSwitch(
 
 /**
  * A Material3 checkbox with its label, the row being the target. The row wears the focus ring and
- * Material's own focus layer.
+ * Material's own focus layer, clipped to the ring's corners like the switch.
  */
 @Composable
 internal fun MaterialCheckbox(
@@ -142,10 +147,12 @@ internal fun MaterialCheckbox(
     val interactions = remember { MutableInteractionSource() }
     val words = stateWords()
     val state = ControlState.Checked(checked)
+    val shape = RoundedCornerShape(tokens.radius.small)
     Row(
         modifier = modifier
             .heightIn(min = LocalLayout.current.primaryTouchTarget)
-            .controlRing(interactions, RoundedCornerShape(tokens.radius.small))
+            .controlRing(interactions, shape)
+            .clip(shape)
             .toggleable(
                 value = checked,
                 interactionSource = interactions,
@@ -256,7 +263,10 @@ internal fun materialHeroFieldStyle(): FieldStyle =
         shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
     )
 
-/** How tall Material's primary tab indicator is, so the focus ring can stay clear of it. */
+/**
+ * How tall the primary tab indicator is. The row is handed this height, so the focus ring's clearance
+ * above the indicator cannot drift from what Material draws.
+ */
 private val TabIndicatorHeight: Dp = 3.dp
 
 /**
@@ -304,6 +314,13 @@ internal fun <T> MaterialTabs(
                 if (event.type == KeyEventType.KeyDown) moveTo(target)
                 true
             },
+        indicator = {
+            TabRowDefaults.PrimaryIndicator(
+                modifier = Modifier.tabIndicatorOffset(selectedIndex, matchContentSize = true),
+                width = Dp.Unspecified,
+                height = TabIndicatorHeight,
+            )
+        },
     ) {
         tabs.forEachIndexed { index, tab ->
             Tab(

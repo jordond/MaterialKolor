@@ -46,6 +46,7 @@ import com.materialkolor.builder.kit.generated.resources.widget_key_color
 import com.materialkolor.builder.kit.generated.resources.widget_tone
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.ktx.contrastRatio
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
@@ -63,6 +64,44 @@ private const val LIGHT_TONE = 50
 
 /** The whole tonal range, 0 to 100. */
 private const val TONE_RANGE = 100f
+
+/** The least contrast a stop's focus line needs against the stop and against its halo (WCAG 2.4.13). */
+private const val FOCUS_CONTRAST = 3.0
+
+/**
+ * The two colors a focused stop's ring is drawn in.
+ *
+ * @property[line] The ring itself.
+ * @property[halo] The thin bands on both sides of it.
+ */
+@Immutable
+internal data class StopRing(
+    val line: Color,
+    val halo: Color,
+)
+
+/**
+ * The ring for a focused stop in [stop]. It is [focus] between [panel] halos where the focus color
+ * clears 3 to 1 on the stop and on the panel. On a stop too close to it, the line is whichever of
+ * the ramp's [darkest] and [lightest] stops stands further from the stop, and the other one is the
+ * halo, since the two ends of a ramp always stand well apart.
+ */
+internal fun stopRing(
+    stop: Color,
+    focus: Color,
+    panel: Color,
+    darkest: Color,
+    lightest: Color,
+): StopRing {
+    if (focus.contrastRatio(stop) >= FOCUS_CONTRAST && focus.contrastRatio(panel) >= FOCUS_CONTRAST) {
+        return StopRing(line = focus, halo = panel)
+    }
+    return if (darkest.contrastRatio(stop) >= lightest.contrastRatio(stop)) {
+        StopRing(line = darkest, halo = lightest)
+    } else {
+        StopRing(line = lightest, halo = darkest)
+    }
+}
 
 /**
  * A tone on a ramp that something picked, labeled on the strip.
@@ -143,7 +182,8 @@ private fun RampStops(
                     for (step in row) {
                         RampStop(
                             step = step,
-                            ink = if (step.tone >= LIGHT_TONE) darkInk else lightInk,
+                            darkest = darkInk,
+                            lightest = lightInk,
                             labeled = labeled,
                             onClick = { onCopyTone(step) },
                             modifier = Modifier.weight(1f).heightIn(min = target),
@@ -159,7 +199,8 @@ private fun RampStops(
 @Composable
 private fun RampStop(
     step: RampStep,
-    ink: Color,
+    darkest: Color,
+    lightest: Color,
     labeled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier,
@@ -169,12 +210,14 @@ private fun RampStop(
     val hovered by interactionSource.collectIsHoveredAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val name = listOf(stringResource(Res.string.widget_tone, step.tone), step.argb.toHex()).joinToString(", ")
+    val color = step.argb.toColor()
+    val ink = if (step.tone >= LIGHT_TONE) darkest else lightest
     Box(
         modifier = modifier
-            .background(step.argb.toColor())
+            .background(color)
             .then(
                 when {
-                    focused -> Modifier.stopFocusRing(tokens.focus, halo = tokens.panel)
+                    focused -> Modifier.stopFocusRing(stopRing(color, tokens.focus, tokens.panel, darkest, lightest))
                     hovered -> Modifier.border(tokens.outlineWidth, tokens.borderStrong)
                     else -> Modifier
                 },
@@ -193,17 +236,14 @@ private fun RampStop(
 }
 
 /**
- * The focus ring of a stop, a [focus] line with a [halo] on both sides the way the strip's ticks are
- * drawn, so the ring still reads on a stop whose color sits close to the focus color.
+ * The focus ring of a stop, a line with a halo on both sides the way the strip's ticks are drawn,
+ * inside the stop since the stops are clipped together.
  */
-private fun Modifier.stopFocusRing(
-    focus: Color,
-    halo: Color,
-): Modifier {
+private fun Modifier.stopFocusRing(ring: StopRing): Modifier {
     val haloWidth = WidgetFocusWidth / 2
-    return border(haloWidth, halo)
-        .border(haloWidth + WidgetFocusWidth, focus)
-        .border(haloWidth * 2 + WidgetFocusWidth, halo)
+    return border(haloWidth, ring.halo)
+        .border(haloWidth + WidgetFocusWidth, ring.line)
+        .border(haloWidth * 2 + WidgetFocusWidth, ring.halo)
 }
 
 /** [count] split into groups of at most [size], rounded up. */

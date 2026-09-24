@@ -17,4 +17,7 @@
 
     <!-- The marker on a tonal ramp where the palette's key color sits. -->
     <string name="widget_key_color">key color</string>
+
+    <!-- B-222b. The state of a swatch whose role is pinned, as in "primary, #6750A4, tone 40, pinned". -->
+    <string name="widget_pinned">pinned</string>
 </resources>
