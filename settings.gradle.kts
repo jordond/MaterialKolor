@@ -50,6 +50,7 @@ include(
     ":samples:testing",
     ":samples:custom-theme",
     ":samples:fluent",
+    ":samples:unstyled",
 )
 
 include(":mcu-source-transformer")
