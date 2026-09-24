@@ -95,7 +95,10 @@ class ShortcutsTest {
 
             onAllNodes(isRoot()).onFirst().performKeyInput { pressKey(Key.C) }
 
-            platform.clipboard.texts shouldBe listOf(harness.graph.session.document.value.seed.toHex())
+            platform.clipboard.texts shouldBe listOf(
+                harness.graph.session.document.value.seed
+                    .toHex(),
+            )
         }
 
     @Test

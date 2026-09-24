@@ -64,7 +64,10 @@ class ActionRegistryTest {
             val shortcuts = harness.commands.mapNotNull { command -> command.shortcut }
 
             shortcuts.sorted() shouldBe Shortcut.entries.sorted()
-            harness.commands.map { command -> command.id }.distinct().size shouldBe harness.commands.size
+            harness.commands
+                .map { command -> command.id }
+                .distinct()
+                .size shouldBe harness.commands.size
         }
 
     @Test

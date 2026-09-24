@@ -144,6 +144,7 @@ internal enum class Shortcut(
             Chord(physical(Key.Y, "Y"), primary = true),
         ),
     ),
+
     // Only Cmd or Ctrl+O fires in a field, never P on its own.
     Projects(
         ShortcutGroup.Project,

@@ -77,9 +77,9 @@ import com.materialkolor.builder.generated.resources.command_single_keys
 import com.materialkolor.builder.generated.resources.command_use_library
 import com.materialkolor.builder.generated.resources.command_use_style
 import com.materialkolor.builder.generated.resources.export_animate
+import com.materialkolor.builder.generated.resources.export_copy_all
 import com.materialkolor.builder.generated.resources.export_download
 import com.materialkolor.builder.generated.resources.export_dynamic_color
-import com.materialkolor.builder.generated.resources.export_copy_all
 import com.materialkolor.builder.generated.resources.export_mode
 import com.materialkolor.builder.generated.resources.export_mode_dynamic
 import com.materialkolor.builder.generated.resources.export_mode_frozen

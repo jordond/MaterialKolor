@@ -10,9 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import com.materialkolor.builder.domain.persist.Appearance
+import com.materialkolor.builder.feature.about.GITHUB_URL
 import com.materialkolor.builder.feature.command.LocalAppleKeys
 import com.materialkolor.builder.feature.command.Shortcut
-import com.materialkolor.builder.feature.about.GITHUB_URL
 import com.materialkolor.builder.feature.poster.switcherPulse
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
