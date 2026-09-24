@@ -16,8 +16,10 @@ import com.materialkolor.builder.domain.capability.Capabilities
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Preferences
+import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.feature.image.ImageCandidateRow
+import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.kit.control.BuilderScrollArea
@@ -36,6 +38,10 @@ import dev.stateholder.dispatcher.Dispatcher
  * @property[preferences] What this browser remembers, the shuffle locks among it.
  * @property[projectName] The open project's name, empty until the session has opened one.
  * @property[saveStatus] Whether the open project's latest changes are saved.
+ * @property[openPanel] The panel open over the workspace, which tells the explainer line whether
+ * its panel is showing.
+ * @property[visibleModes] The modes the preview shows, which the contrast readout and the style
+ * chips follow.
  */
 @Immutable
 internal data class PosterContext(
@@ -45,6 +51,9 @@ internal data class PosterContext(
     val preferences: Preferences,
     val projectName: String,
     val saveStatus: SaveStatus,
+    // b-304
+    val openPanel: Panel? = null,
+    val visibleModes: PreviewMode = PreviewMode.Split,
 )
 
 /**
@@ -69,6 +78,9 @@ internal fun PosterPanel(
         state.preferences,
         state.projectName,
         state.saveStatus,
+        // b-304
+        state.panel,
+        state.view.mode,
     ) {
         PosterContext(
             document = state.document,
@@ -77,6 +89,9 @@ internal fun PosterPanel(
             preferences = state.preferences,
             projectName = state.projectName,
             saveStatus = state.saveStatus,
+            // b-304
+            openPanel = state.panel,
+            visibleModes = state.view.mode,
         )
     }
     if (rail) {
