@@ -60,6 +60,9 @@ import kotlin.test.Test
 
 private const val HEIGHT = 800
 
+/** How long a dropdown pick may take to reach the document, its menu's exit included. */
+private const val PICK_TIMEOUT_MS = 5_000L
+
 /** What the switcher calls each library, as `strings_topbar.xml` has them. */
 private val NAMES = mapOf(
     LibraryChoice.M3 to "M3",
@@ -174,7 +177,7 @@ class CompactMediumTopBarTest {
             trigger().performClick()
             waitForIdle()
             option(NAMES.getValue(target)).performClick()
-            waitForIdle()
+            awaitLibrary(graph, target)
 
             LibraryChoice.of(graph.session.document.value) shouldBe target
         }
@@ -205,10 +208,10 @@ class CompactMediumTopBarTest {
             onNode(focusedOption).performKeyInput { pressKey(Key.Tab) }
             waitForIdle()
             onNode(focusedOption).performKeyInput { pressKey(Key.Enter) }
-            waitForIdle()
+            val next = LibraryChoice.entries[(start.ordinal + 1) % LibraryChoice.entries.size]
+            awaitLibrary(graph, next)
 
-            LibraryChoice.of(graph.session.document.value) shouldBe
-                LibraryChoice.entries[(start.ordinal + 1) % LibraryChoice.entries.size]
+            LibraryChoice.of(graph.session.document.value) shouldBe next
         }
 
     // b-406g
@@ -224,7 +227,7 @@ class CompactMediumTopBarTest {
             trigger().performClick()
             waitForIdle()
             option(NAMES.getValue(target)).performClick()
-            waitForIdle()
+            awaitLibrary(graph, target)
 
             LibraryChoice.of(graph.session.document.value) shouldBe target
         }
@@ -301,6 +304,19 @@ class CompactMediumTopBarTest {
         val switcher = onNodeWithTag(LIBRARY_SWITCHER_TAG).fetchSemanticsNode().size.width / density.density
         val names = onAllNodes(hasClickAction() and InBar).fetchSemanticsNodes().map { node -> node.name() }
         return "$names beside a switcher $switcher dp wide"
+    }
+
+    // b-406g
+    /**
+     * Waits for the document to reach [choice]. A pick from the dropdown lands once its menu has left,
+     * which an idle wait does not always cover while a desktop window closes.
+     */
+    private fun ComposeUiTest.awaitLibrary(
+        graph: AppGraph,
+        choice: LibraryChoice,
+    ) {
+        waitUntil(timeoutMillis = PICK_TIMEOUT_MS) { LibraryChoice.of(graph.session.document.value) == choice }
+        waitForIdle()
     }
 
     /** The open dropdown's option called [name]. */
