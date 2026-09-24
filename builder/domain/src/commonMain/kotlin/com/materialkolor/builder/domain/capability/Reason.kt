@@ -33,7 +33,7 @@ public enum class Reason(
     /** R6. The Unstyled adapter has no AMOLED switch yet. It arrives with F-56. */
     UnstyledNoAmoled(key = "reason_unstyled_no_amoled"),
 
-    /** R8. Fluent has no place for extra accents in v1. */
+    /** R8. Fluent has no place for extra colors in v1. */
     FluentNoAccents(key = "reason_fluent_no_accents"),
 
     /**
