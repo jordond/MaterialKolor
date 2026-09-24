@@ -29,8 +29,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.paneTitle
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -93,7 +91,7 @@ internal fun HeadlessDrawer(
                     .clip(shape)
                     .background(style.surface)
                     .then(if (style.border != null && !fullWidth) Modifier.border(style.border, shape) else Modifier)
-                    .semantics { paneTitle = title }
+                    .modalPane(title)
                     .keepTaps(),
             ) {
                 HeadlessPanelHeader(title, closeLabel, onDismissRequest, style)
@@ -134,7 +132,7 @@ internal fun HeadlessPanelHeader(
     ) {
         BuilderText(
             text = title,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).modalTitle(),
             style = BuilderTextStyle.Title,
             color = style.content,
             maxLines = 1,

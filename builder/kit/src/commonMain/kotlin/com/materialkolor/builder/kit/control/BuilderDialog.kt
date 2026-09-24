@@ -15,11 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.semantics.paneTitle
-import androidx.compose.ui.semantics.semantics
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessModal
 import com.materialkolor.builder.kit.headless.keepTaps
+import com.materialkolor.builder.kit.headless.modalPane
+import com.materialkolor.builder.kit.headless.modalTitle
 import com.materialkolor.builder.kit.headless.overlayLibrary
 import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
@@ -129,12 +129,12 @@ private fun HeadlessDialog(
                 .clip(style.dialogShape)
                 .background(style.surface)
                 .then(if (style.border != null) Modifier.border(style.border, style.dialogShape) else Modifier)
-                .semantics { paneTitle = title }
+                .modalPane(title)
                 .keepTaps()
                 .padding(tokens.spacing.extraLarge),
             verticalArrangement = Arrangement.spacedBy(tokens.spacing.large),
         ) {
-            BuilderText(title, style = BuilderTextStyle.Title, color = style.content)
+            BuilderText(title, Modifier.modalTitle(), style = BuilderTextStyle.Title, color = style.content)
             Column(content = content)
             Row(
                 modifier = Modifier.align(Alignment.End),

@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.max
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.control.roleLessName
 import com.materialkolor.builder.kit.control.stateName
@@ -133,8 +134,9 @@ internal object GamutLimit {
  * when that number changes. A drag reports [EditPhase.Dragging] for every change
  * and [EditPhase.Released] once when it lets go. The arrows move one and ten with Shift, Page Up and
  * Page Down move ten, Home and End jump to the ends, and each of those reports
- * [EditPhase.Discrete]. The track reads out as a slider named [label], its value folded into the
- * name on the web (D37), where the name goes in as text since the track has no role there (S5).
+ * [EditPhase.Discrete]. The track reads out as a slider named [label]. On the web it has no role,
+ * so its role word and value fold into the name, "Hue, slider, 299" (D37, D40), and the name goes
+ * in as text (S5).
  */
 @Composable
 internal fun GamutTrack(
@@ -147,7 +149,7 @@ internal fun GamutTrack(
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val shown = picker.shownOf(channel)
     val valueText = shown.toString()
-    val name = stateName(label, ControlState.Value(valueText))
+    val name = stateName(label, ControlState.Value(valueText), role = FoldedRole.Slider)
     val asText = LocalFoldsStateIntoName.current
     var focused by remember { mutableStateOf(false) }
     Box(

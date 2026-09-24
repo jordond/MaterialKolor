@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import com.composeunstyled.UnstyledSlider
 import com.composeunstyled.focusRing
 import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.control.roleLessName
 import com.materialkolor.builder.kit.control.stateName
@@ -186,7 +187,8 @@ internal fun Modifier.sliderKeys(
 /**
  * The slider's name, spoken value and set-progress action. On the web [name] carries the value and
  * the disabled state too, from [stateName], since the mirror drops both (AR-10, D37). The slider
- * has no role there, so with [nameAsText] the name goes in as text (S5 answer 1).
+ * has no role there, so [name] carries the slider's role word as well, "Contrast, slider, 0.50"
+ * (D40), and with [nameAsText] it goes in as text (S5 answer 1).
  *
  * Set-progress replaces the one the slider underneath brings, since this modifier sits outside it
  * and the outer one wins. Like the keys it never snaps to a stop. It clamps the target into the
@@ -258,7 +260,7 @@ internal fun HeadlessSlider(
             .heightIn(min = LocalLayout.current.primaryTouchTarget)
             .sliderKeys(value, rules, enabled, isRtl, press, onValueChange, onValueChangeFinished)
             .sliderSemantics(
-                name = stateName(label, ControlState.Value(stateDescription), enabled),
+                name = stateName(label, ControlState.Value(stateDescription), enabled, role = FoldedRole.Slider),
                 nameAsText = LocalFoldsStateIntoName.current,
                 stateDescription = stateDescription,
                 value = value,
