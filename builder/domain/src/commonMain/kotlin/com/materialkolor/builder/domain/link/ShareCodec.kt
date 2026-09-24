@@ -62,10 +62,11 @@ public sealed interface DecodeResult {
  * The writing is canonical. Sections are written only when they differ from the defaults, always
  * in the same order, and pins and custom tones go out in code order, so equal documents give equal
  * codes. Reading is just as strict and refuses anything the writer would never produce, which
- * means a code that reads cleanly always writes back to itself.
+ * means a code that reads cleanly writes back to itself. The one exception is a contrast between
+ * the four named levels, which older codes can carry and which reads as the nearest level (D53).
  *
- * A document that passes [validateAccents] comes back from its code unchanged apart from its seed
- * source. The writer refuses more than [MAX_ACCENTS] accents or an accent name over
+ * A document that passes [validateAccents] and holds a named contrast level comes back from its
+ * code unchanged apart from its seed source. The writer refuses more than [MAX_ACCENTS] accents or an accent name over
  * [MAX_ACCENT_NAME_BYTES] UTF-8 bytes, because the reader would refuse them too. The project name is
  * the one field cut to fit rather than refused.
  *
@@ -130,7 +131,8 @@ public object ShareCodec {
     }
 
     /**
-     * The theme [code] carries. Never throws, whatever the text.
+     * The theme [code] carries, with a contrast between the named levels moved onto the nearest
+     * one. Never throws, whatever the text.
      */
     public fun decode(code: String): DecodeResult {
         val bytes = Base64Url.decode(code) ?: return DecodeResult.Corrupt
@@ -391,7 +393,7 @@ private fun ByteReader.document(): DecodeResult.Ok? {
             keyColors = keyColors,
             style = style,
             cmfTertiarySeed = cmfTertiarySeed,
-            contrast = ContrastLevel(contrast),
+            contrast = ContrastLevel(contrast).snapped(),
             spec = spec,
             platform = platform,
             amoled = scheme has AMOLED_FLAG,

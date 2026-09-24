@@ -1,5 +1,6 @@
 package com.materialkolor.builder.domain.persist
 
+import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.history.History
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -40,6 +41,16 @@ class ProjectRecordTest {
         val history = History(assertOk(HistoryRecord.Codec.decode(HistoryRecord.Codec.encode(record))).entries)
 
         assertEquals(record.entries, history.persisted())
+    }
+
+    @Test
+    fun projectRecord_contrastBetweenTheNamedLevels_readsBackAtTheNearestOne() {
+        val record = fixtures.project()
+        val stored = record.copy(document = record.document.copy(contrast = ContrastLevel(30)))
+
+        val read = assertOk(ProjectRecord.Codec.decode(ProjectRecord.Codec.encode(stored)))
+
+        assertEquals(stored.copy(document = stored.document.copy(contrast = ContrastLevel.Medium)), read)
     }
 
     @Test

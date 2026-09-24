@@ -63,8 +63,8 @@ class DocumentArb(
     /** An opaque color. */
     fun nextArgb(): Argb = Argb(random.nextInt())
 
-    /** A contrast level anywhere in range. */
-    fun nextContrast(): ContrastLevel = ContrastLevel(random.nextInt(from = -100, until = 101))
+    /** One of the four contrast levels a document holds (D53). */
+    fun nextContrast(): ContrastLevel = ContrastLevel.Stops.random(random)
 
     private fun nextArgbOrNull(): Argb? = if (random.nextBoolean()) nextArgb() else null
 

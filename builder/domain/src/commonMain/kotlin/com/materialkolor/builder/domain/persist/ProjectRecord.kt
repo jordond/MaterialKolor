@@ -32,8 +32,9 @@ public data class ProjectRecord(
     public val writerTab: String,
 ) {
     public companion object {
-        /** Reads and writes a [ProjectRecord]. */
-        public val Codec: RecordCodec<ProjectRecord> = RecordCodec(serializer(), Migrations.None)
+        /** Reads and writes a [ProjectRecord], reading its contrast at the nearest named level. */
+        public val Codec: RecordCodec<ProjectRecord> =
+            RecordCodec(serializer(), Migrations.None) { record -> record.copy(document = record.document.snapped()) }
     }
 }
 
@@ -114,8 +115,15 @@ public data class HistoryRecord(
     }
 
     public companion object {
-        /** Reads and writes a [HistoryRecord]. */
-        public val Codec: RecordCodec<HistoryRecord> = RecordCodec(serializer(), Migrations.None)
+        /** Reads and writes a [HistoryRecord], reading each step's contrast at the nearest named level. */
+        public val Codec: RecordCodec<HistoryRecord> =
+            RecordCodec(serializer(), Migrations.None) { record ->
+                HistoryRecord(
+                    record.entries.map { entry ->
+                        entry.copy(before = entry.before.snapped(), after = entry.after.snapped())
+                    },
+                )
+            }
     }
 }
 
@@ -233,3 +241,6 @@ public enum class FineTuneRow {
     @SerialName("SpecExtras")
     SpecExtras,
 }
+
+/** This document with its contrast on the nearest named level (D53). */
+private fun ThemeDocument.snapped(): ThemeDocument = copy(contrast = contrast.snapped())

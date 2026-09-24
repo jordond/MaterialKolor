@@ -173,7 +173,11 @@ public sealed interface DocumentChange {
     /**
      * Sets how much contrast the scheme is generated with.
      *
-     * @property[level] The new contrast.
+     * Every control that sends this picks one of the four named levels, and links and saved
+     * projects move a level in between onto the nearest one as they are read, so a document only
+     * ever holds a named level (D53).
+     *
+     * @property[level] The new contrast, one of [ContrastLevel.Stops].
      */
     public data class SetContrast(
         public val level: ContrastLevel,

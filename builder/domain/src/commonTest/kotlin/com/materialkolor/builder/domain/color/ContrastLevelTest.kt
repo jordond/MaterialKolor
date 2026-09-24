@@ -23,6 +23,26 @@ class ContrastLevelTest {
     }
 
     @Test
+    fun contrastLevel_nearest_snapsToTheClosestNamedLevelWithTiesTowardStandard() {
+        val cases =
+            mapOf(
+                0.25 to ContrastLevel.Standard,
+                0.75 to ContrastLevel.Medium,
+                -0.5 to ContrastLevel.Standard,
+                0.2 to ContrastLevel.Standard,
+                0.3 to ContrastLevel.Medium,
+                -0.51 to ContrastLevel.Reduced,
+                0.76 to ContrastLevel.High,
+                1.5 to ContrastLevel.High,
+                -3.0 to ContrastLevel.Reduced,
+            )
+
+        cases.forEach { (value, level) -> assertEquals(level, ContrastLevel.nearest(value), "$value") }
+        assertEquals(ContrastLevel.Standard, ContrastLevel(-37).snapped())
+        ContrastLevel.Stops.forEach { level -> assertEquals(level, level.snapped()) }
+    }
+
+    @Test
     fun contrastLevel_valueAboveTheRange_isRejected() {
         assertFailsWith<IllegalArgumentException> { ContrastLevel(101) }
     }

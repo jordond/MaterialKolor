@@ -27,10 +27,12 @@ class ShareVectorsTest {
         assertTrue(vectors.any { vector -> vector.code.length == 12 })
     }
 
+    /** A vector with a contrast between the named levels, such as -37, opens at the nearest one (D53). */
     @Test
     fun shareVectors_everyCode_decodesToItsDocument() {
         vectors.forEach { vector ->
-            val expected = DecodeResult.Ok(vector.document, vector.projectName)
+            val document = vector.document.copy(contrast = vector.document.contrast.snapped())
+            val expected = DecodeResult.Ok(document, vector.projectName)
             assertEquals(expected, ShareCodec.decode(vector.code), vector.label)
         }
     }

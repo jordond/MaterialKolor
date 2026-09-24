@@ -83,19 +83,20 @@ class LegacyQueryTest {
     }
 
     @Test
-    fun parse_contrast_readsAnyDoubleClampedToHundredths() {
+    fun parse_contrast_readsAnyDoubleAtTheNearestNamedLevel() {
         val cases =
             mapOf(
-                "-1.0" to -100,
-                "0.5" to 50,
-                "1" to 100,
-                "0" to 0,
-                "0.333" to 33,
-                "2.5" to 100,
-                "-7" to -100,
+                "-1.0" to ContrastLevel.Reduced,
+                "0.5" to ContrastLevel.Medium,
+                "1" to ContrastLevel.High,
+                "0" to ContrastLevel.Standard,
+                "0.333" to ContrastLevel.Medium,
+                "0.25" to ContrastLevel.Standard,
+                "2.5" to ContrastLevel.High,
+                "-7" to ContrastLevel.Reduced,
             )
-        cases.forEach { (value, hundredths) ->
-            assertEquals(ContrastLevel(hundredths), LegacyQuery.parse("contrast=$value").document.contrast, value)
+        cases.forEach { (value, level) ->
+            assertEquals(level, LegacyQuery.parse("contrast=$value").document.contrast, value)
         }
     }
 

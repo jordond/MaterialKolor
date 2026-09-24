@@ -70,7 +70,9 @@ class ShareVectorsWriter {
                 vectors.forEach { vector ->
                     val code = ShareCodec.encode(vector.document, vector.projectName)
                     val decoded = ShareCodec.decode(code)
-                    check(decoded == DecodeResult.Ok(vector.document, vector.projectName)) { vector.label }
+                    // A contrast between the named levels reads as the nearest one (D53).
+                    val opened = vector.document.copy(contrast = vector.document.contrast.snapped())
+                    check(decoded == DecodeResult.Ok(opened, vector.projectName)) { vector.label }
                     val entry =
                         buildJsonObject {
                             put("label", vector.label)
