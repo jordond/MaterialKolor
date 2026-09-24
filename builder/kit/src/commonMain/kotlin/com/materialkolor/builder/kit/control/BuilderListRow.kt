@@ -62,7 +62,7 @@ public fun BuilderListRow(
     when (LocalSkin.current.library) {
         Library.Material3 -> MaterialListRow(row, modifier)
         Library.Unstyled -> HeadlessListRow(row, UnstyledActionStyles.listRow, modifier)
-        Library.Fluent -> FluentListRow(row, modifier) // fluent-placeholder
+        Library.Fluent -> FluentListRow(row, modifier)
         Library.Custom -> HeadlessListRow(row, CustomActionStyles.listRow, modifier)
     }
 }

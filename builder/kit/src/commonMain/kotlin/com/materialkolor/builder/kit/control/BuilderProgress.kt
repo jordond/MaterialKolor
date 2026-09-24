@@ -54,7 +54,7 @@ public fun BuilderProgress(
     when (LocalSkin.current.library) {
         Library.Material3 -> MaterialProgress(label, modifier, amount)
         Library.Unstyled -> HeadlessProgress(label, UnstyledActionStyles.progress, modifier, amount)
-        Library.Fluent -> FluentProgress(label, modifier, amount) // fluent-placeholder
+        Library.Fluent -> FluentProgress(label, modifier, amount)
         Library.Custom -> HeadlessProgress(label, CustomActionStyles.progress, modifier, amount)
     }
 }

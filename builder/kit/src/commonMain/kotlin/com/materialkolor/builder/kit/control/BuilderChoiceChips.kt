@@ -90,7 +90,6 @@ public fun <T> BuilderChoiceChips(
             )
         }
         Library.Fluent -> {
-            // fluent-placeholder
             FluentChoiceChips(
                 options,
                 selected,

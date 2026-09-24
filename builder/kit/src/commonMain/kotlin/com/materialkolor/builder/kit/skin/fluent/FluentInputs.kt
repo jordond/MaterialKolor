@@ -7,17 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.headless.CheckboxStyle
-import com.materialkolor.builder.kit.headless.DisclosureStyle
-import com.materialkolor.builder.kit.headless.HeadlessCheckbox
-import com.materialkolor.builder.kit.headless.HeadlessDisclosure
 import com.materialkolor.builder.kit.headless.HeadlessField
 import com.materialkolor.builder.kit.headless.HeadlessSlider
-import com.materialkolor.builder.kit.headless.HeadlessSwitch
-import com.materialkolor.builder.kit.headless.HeadlessTabs
 import com.materialkolor.builder.kit.headless.SliderRules
 import com.materialkolor.builder.kit.headless.SliderStyle
 import com.materialkolor.builder.kit.headless.SwitchStyle
@@ -25,49 +21,58 @@ import com.materialkolor.builder.kit.headless.TabsStyle
 import com.materialkolor.builder.kit.skin.headless.FieldStyle
 import com.materialkolor.builder.kit.skin.headless.heroFieldStyle
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
-
-// fluent-placeholder
+import io.github.composefluent.FluentTheme
 
 /**
- * The Fluent skin's inputs until B-403 swaps in Fluent's own. Each one is the headless input
- * drawn the way WinUI draws it, small corners, a thin edge and the accent on whatever is on.
+ * The Fluent inputs' colours and metrics.
+ *
+ * The switch, the checkbox and the tabs are Fluent's own, so their styles here are the colours those
+ * components show at rest, which the contrast checks read. The field and the slider stay the
+ * headless ones in Fluent's look. Fluent's inks and fills are translucent, so each is laid over the
+ * panel it sits on, the way the tokens are.
  */
 internal object FluentInputStyles {
     val switch: SwitchStyle
         @Composable @ReadOnlyComposable
-        get() = LocalBuilderTokens.current.let { tokens ->
-            SwitchStyle(
+        get() {
+            val tokens = LocalBuilderTokens.current
+            val colors = FluentTheme.colors
+            val panel = tokens.panel
+            return SwitchStyle(
                 trackWidth = 40.dp,
                 trackHeight = 20.dp,
                 thumbSize = 12.dp,
                 trackShape = CircleShape,
                 thumbShape = CircleShape,
                 outlineWidth = 1.dp,
-                trackOn = tokens.accent,
-                trackOff = tokens.panel,
-                outlineOff = tokens.textMuted,
-                thumbOn = tokens.onAccent,
-                thumbOff = tokens.textMuted,
-                labelGap = tokens.spacing.medium,
+                trackOn = colors.fillAccent.default,
+                trackOff = colors.controlAlt.secondary.compositeOver(panel),
+                outlineOff = colors.controlStrong.default.compositeOver(panel),
+                thumbOn = colors.text.onAccent.primary,
+                thumbOff = colors.text.text.secondary
+                    .compositeOver(panel),
+                labelGap = 12.dp,
                 focus = tokens.focus,
-                focusShape = RoundedCornerShape(4.dp),
+                focusShape = FluentTheme.shapes.control,
             )
         }
 
     val checkbox: CheckboxStyle
         @Composable @ReadOnlyComposable
-        get() = LocalBuilderTokens.current.let { tokens ->
-            CheckboxStyle(
+        get() {
+            val tokens = LocalBuilderTokens.current
+            val colors = FluentTheme.colors
+            return CheckboxStyle(
                 boxSize = 20.dp,
-                checkSize = 14.dp,
-                boxShape = RoundedCornerShape(4.dp),
+                checkSize = 12.dp,
+                boxShape = FluentTheme.shapes.control,
                 outlineWidth = 1.dp,
-                outline = tokens.textMuted,
-                checkedFill = tokens.accent,
-                checkInk = tokens.onAccent,
-                labelGap = tokens.spacing.small,
+                outline = colors.controlStrong.default.compositeOver(tokens.panel),
+                checkedFill = colors.fillAccent.default,
+                checkInk = colors.text.onAccent.primary,
+                labelGap = 8.dp,
                 focus = tokens.focus,
-                focusShape = RoundedCornerShape(4.dp),
+                focusShape = FluentTheme.shapes.control,
             )
         }
 
@@ -92,51 +97,43 @@ internal object FluentInputStyles {
 
     val tabs: TabsStyle
         @Composable @ReadOnlyComposable
-        get() = LocalBuilderTokens.current.let { tokens ->
-            TabsStyle(
+        get() {
+            val tokens = LocalBuilderTokens.current
+            val ink = FluentTheme.colors.text.text.primary
+                .compositeOver(tokens.panel)
+            return TabsStyle(
                 container = Color.Transparent,
                 containerShape = RoundedCornerShape(0.dp),
                 containerPadding = 0.dp,
-                tabShape = RoundedCornerShape(4.dp),
-                tabPadding = PaddingValues(horizontal = tokens.spacing.medium, vertical = tokens.spacing.small),
-                gap = tokens.spacing.extraSmall,
+                tabShape = FluentTheme.shapes.control,
+                tabPadding = PaddingValues(horizontal = 12.dp),
+                gap = 0.dp,
                 selectedContainer = Color.Transparent,
-                selectedInk = tokens.textStrong,
-                ink = tokens.textMuted,
-                indicator = tokens.accent,
+                selectedInk = ink,
+                ink = ink,
+                indicator = FluentTheme.colors.fillAccent.default,
                 indicatorHeight = 3.dp,
                 indicatorWidth = 16.dp,
                 focus = tokens.focus,
             )
         }
 
-    val disclosure: DisclosureStyle
-        @Composable @ReadOnlyComposable
-        get() = LocalBuilderTokens.current.let { tokens ->
-            DisclosureStyle(
-                container = tokens.panelRaised,
-                shape = RoundedCornerShape(4.dp),
-                outline = tokens.border,
-                outlineWidth = 1.dp,
-                headerPadding = PaddingValues(horizontal = tokens.spacing.large, vertical = tokens.spacing.small),
-                contentPadding = PaddingValues(
-                    start = tokens.spacing.large,
-                    end = tokens.spacing.large,
-                    bottom = tokens.spacing.medium,
-                ),
-                focus = tokens.focus,
-            )
-        }
-
+    /**
+     * Fluent's text box, a control fill with the strong line along the bottom that turns to a
+     * thicker accent line while it has focus. The edge all round keeps the strong stroke, which
+     * carries the 3 to 1 boundary Fluent's own faint outline would not.
+     */
     val field: FieldStyle
         @Composable @ReadOnlyComposable
-        get() = LocalBuilderTokens.current.let { tokens ->
-            FieldStyle(
-                shape = RoundedCornerShape(4.dp),
-                container = tokens.panelRaised,
+        get() {
+            val tokens = LocalBuilderTokens.current
+            val colors = FluentTheme.colors
+            return FieldStyle(
+                shape = FluentTheme.shapes.control,
+                container = colors.control.default.compositeOver(tokens.panel),
                 outline = tokens.borderStrong,
                 outlineWidth = 1.dp,
-                active = tokens.accent,
+                active = colors.fillAccent.default,
                 error = tokens.danger,
                 activeWidth = 2.dp,
                 activeAsUnderline = true,
@@ -149,34 +146,11 @@ internal object FluentInputStyles {
 
     val hero: FieldStyle
         @Composable @ReadOnlyComposable
-        get() = heroFieldStyle(LocalBuilderTokens.current, underline = 2.dp, shape = RoundedCornerShape(4.dp))
+        get() = heroFieldStyle(LocalBuilderTokens.current, underline = 2.dp, shape = FluentTheme.shapes.control)
 }
 
 // fluent-placeholder
-@Composable
-internal fun FluentSwitch(
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    label: String,
-    modifier: Modifier,
-    enabled: Boolean,
-) {
-    HeadlessSwitch(checked, onCheckedChange, label, FluentInputStyles.switch, modifier, enabled)
-}
-
-// fluent-placeholder
-@Composable
-internal fun FluentCheckbox(
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    label: String,
-    modifier: Modifier,
-    enabled: Boolean,
-) {
-    HeadlessCheckbox(checked, onCheckedChange, label, FluentInputStyles.checkbox, modifier, enabled)
-}
-
-// fluent-placeholder
+// The slider stays headless, since Fluent's own opens a popup while it drags, and keeps its first style.
 @Composable
 internal fun FluentSlider(
     value: Float,
@@ -201,7 +175,10 @@ internal fun FluentSlider(
     )
 }
 
-// fluent-placeholder
+/**
+ * The headless field in Fluent's text box look. Fluent's own text field bakes in its decoration,
+ * with no room for the kit's clip that keeps touch selection handles off the web (D45).
+ */
 @Composable
 internal fun FluentField(
     value: TextFieldValue,
@@ -226,40 +203,5 @@ internal fun FluentField(
         onDone = onDone,
         style = FluentInputStyles.field,
         modifier = modifier,
-    )
-}
-
-// fluent-placeholder
-@Composable
-internal fun <T> FluentTabs(
-    tabs: List<T>,
-    selected: T,
-    onSelect: (T) -> Unit,
-    label: (T) -> String,
-    modifier: Modifier,
-) {
-    HeadlessTabs(tabs, selected, onSelect, label, FluentInputStyles.tabs, modifier)
-}
-
-// fluent-placeholder
-@Composable
-internal fun FluentDisclosure(
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    title: String,
-    modifier: Modifier,
-    summary: String?,
-    enabled: Boolean,
-    content: @Composable () -> Unit,
-) {
-    HeadlessDisclosure(
-        expanded = expanded,
-        onExpandedChange = onExpandedChange,
-        title = title,
-        style = FluentInputStyles.disclosure,
-        modifier = modifier,
-        summary = summary,
-        enabled = enabled,
-        content = content,
     )
 }

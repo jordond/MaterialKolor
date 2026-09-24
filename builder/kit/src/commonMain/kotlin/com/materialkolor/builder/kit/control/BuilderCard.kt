@@ -49,7 +49,7 @@ public fun BuilderCard(
     when (LocalSkin.current.library) {
         Library.Material3 -> MaterialCard(modifier, onClick, enabled, content)
         Library.Unstyled -> HeadlessCard(UnstyledActionStyles.card, modifier, onClick, enabled, content)
-        Library.Fluent -> FluentCard(modifier, onClick, enabled, content) // fluent-placeholder
+        Library.Fluent -> FluentCard(modifier, onClick, enabled, content)
         Library.Custom -> HeadlessCard(CustomActionStyles.card, modifier, onClick, enabled, content)
     }
 }

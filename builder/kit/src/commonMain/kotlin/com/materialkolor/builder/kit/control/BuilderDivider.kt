@@ -29,7 +29,7 @@ public fun BuilderDivider(
     when (LocalSkin.current.library) {
         Library.Material3 -> MaterialDivider(modifier, orientation)
         Library.Unstyled -> HeadlessDivider(UnstyledActionStyles.divider, modifier, orientation)
-        Library.Fluent -> FluentDivider(modifier, orientation) // fluent-placeholder
+        Library.Fluent -> FluentDivider(modifier, orientation)
         Library.Custom -> HeadlessDivider(CustomActionStyles.divider, modifier, orientation)
     }
 }

@@ -62,7 +62,6 @@ public fun BuilderFilterChip(
             HeadlessFilterChip(selected, onSelectedChange, label, UnstyledActionStyles.chip, modifier, icon, enabled)
         }
         Library.Fluent -> {
-            // fluent-placeholder
             FluentFilterChip(selected, onSelectedChange, label, modifier, icon, enabled)
         }
         Library.Custom -> {
