@@ -66,19 +66,26 @@ test('at 390 wide with a finger, a drag on the edge of the poster raises it to h
 });
 
 // b-406g
-test.fixme('at 390 wide with a finger, a drag on the half height poster reaches the fine tune rows', async ({ page }) => {
-  // A drag on the sheet's content at half height neither raises the sheet nor scrolls it in Chromium,
-  // while a drag on its edge does. Kept here for Flow 5.7 until the sheet takes the drag.
+test('at 390 wide with a finger, a drag on the half height poster reaches the fine tune rows', async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== 'chromium', 'The finger goes through a Chromium CDP session');
   await openBuilder(page);
   const cdp = await page.context().newCDPSession(page);
   const edge = { x: VIEWPORT.width / 2, y: (await settledBox(button(page, 'Shuffle'), 30_000)).y - 16 };
   await drag(cdp, edge, { x: edge.x, y: VIEWPORT.height / 2 });
   await expect(button(page, 'Seed and theme controls, Half')).toBeAttached({ timeout: 15_000 });
 
+  // A drag on the content raises the sheet to full before the content scrolls. The browser takes
+  // over a drag the page reports as scrolled nowhere, so the sheet reports its own rise as scrolled.
   const inside = { x: VIEWPORT.width / 2, y: VIEWPORT.height - 80 };
   await drag(cdp, inside, { x: inside.x, y: VIEWPORT.height / 3 });
+  await expect(button(page, 'Seed and theme controls, Full')).toBeAttached({ timeout: 15_000 });
 
+  // The next drag scrolls the content up to the fine tune rows.
   const fineTune = page.locator(A11Y).getByRole('button', { name: /^Core colors and pins/ }).first();
+  await drag(cdp, inside, { x: inside.x, y: VIEWPORT.height / 3 });
   await expect.poll(() => inView(fineTune), { timeout: 15_000 }).toBe(true);
 });
 

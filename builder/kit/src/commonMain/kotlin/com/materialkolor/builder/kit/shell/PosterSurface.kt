@@ -387,7 +387,7 @@ private fun FluentPoster(
     content: @Composable () -> Unit,
 ) {
     val colors = remember(poster) { Colors(poster.ramp.toFluentShades(), darkMode = !poster.isLight) }
-    val ink = remember(paint) { FluentPosterInk(ink = paint.ink, page = paint.page) }
+    val ink = remember(paint) { FluentPosterInk(ink = paint.ink, page = paint.page, outline = paint.outline) }
     FluentThemeConfiguration(colors = colors, typography = rememberFluentTypography()) {
         CompositionLocalProvider(
             FluentContentColor provides paint.ink,

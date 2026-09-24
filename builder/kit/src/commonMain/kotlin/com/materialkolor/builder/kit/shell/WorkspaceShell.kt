@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInRoot
@@ -200,6 +201,7 @@ private fun SheetShell(
         if (cover.dockUnder(sheetState, BottomSheetDetent.Half)) BottomSheetDetent.Half else BottomSheetDetent.Full
     }
     val handle = remember { FocusRequester() }
+    val moves = remember(sheetState) { SheetMoveReport(sheetState) } // b-406g
     LaunchedEffect(sheetState, fullscreen) {
         if (fullscreen) return@LaunchedEffect
         var resting = sheetState.targetDetent
@@ -237,7 +239,8 @@ private fun SheetShell(
                             .zIndex(1f)
                             .fillMaxSize()
                             .onPlaced { coordinates -> cover.sheetTop = coordinates.positionInRoot().y }
-                            .focusRequester(handle),
+                            .focusRequester(handle)
+                            .nestedScroll(moves),
                     ) {
                         poster(false)
                     }

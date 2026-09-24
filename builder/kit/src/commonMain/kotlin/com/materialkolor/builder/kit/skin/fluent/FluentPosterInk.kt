@@ -23,15 +23,18 @@ import io.github.composefluent.scheme.VisualStateScheme
  * [ink], the way the Material and Unstyled controls there reach the ink through their poster roles.
  * An accent fill takes the ink as well, with [page] on it, the way Material's primary does. Fills
  * that only tint the ground stay Fluent's own, and a disabled control dims its ink the way the
- * headless controls dim.
+ * headless controls dim. A card's edge and a divider take [outline], the poster's own line the
+ * other skins draw them in there, rather than Fluent's faint strokes.
  *
  * @property[ink] The poster's ink, which holds 4.5 to 1 on the seed.
  * @property[page] The exact seed.
+ * @property[outline] The poster's outline, for the edges that are not a control's.
  */
 @Immutable
 internal class FluentPosterInk(
     val ink: Color,
     val page: Color,
+    val outline: Color,
 ) {
     /** A label, a glyph or a stroke. */
     fun line(enabled: Boolean): Color = if (enabled) ink else ink.copy(alpha = DisabledAlpha)
