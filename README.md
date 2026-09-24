@@ -40,6 +40,7 @@ The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com
     - [Color Temperature](#color-temperature)
 - [Generating from an Image](#generating-from-an-image)
     - [Palette module](#palette-module)
+- [Samples](#samples)
 - [License](#license)
     - [Changes from original source](#changes-from-original-source)
 
@@ -352,7 +353,8 @@ fun AppTheme(seed: Color, isDark: Boolean, content: @Composable () -> Unit) {
 
 [`samples/custom-theme`](samples/custom-theme) is a working version of that. Seven accent families
 instead of three, pressed and raised states, three surface steps, a border ramp and five decorative
-category colors, all from one seed plus eight accent seeds.
+category colors, all from one seed plus eight accent seeds. It builds the [Tasks sample](#samples)
+on Compose Foundation alone, and its Palette tab shows every color the theme generates.
 
 Run it with `./gradlew :samples:custom-theme:run`.
 
@@ -435,6 +437,9 @@ The adapter publishes android, jvm, js, wasmJs, iosArm64 and iosSimulatorArm64, 
 Unstyled has no macOS native target. Android minSdk 23 and Java 17 bytecode both come from Unstyled.
 Core keeps its own floor.
 
+[`samples/unstyled`](samples/unstyled) builds the [Tasks sample](#samples) on Compose Unstyled with
+this adapter. Run it with `./gradlew :samples:unstyled:run`.
+
 ## Compose Fluent
 
 `material-kolor-fluent` gives [Compose Fluent](https://github.com/Compose-Fluent/compose-fluent-ui)
@@ -515,9 +520,9 @@ to go and are left alone.
 A seed with little chroma gives a Fluent theme with little chroma. A grey seed produces seven
 greys, which is the ramp working rather than a fault.
 
-`samples/fluent` is a worked example. Run it with `./gradlew :samples:fluent:run` to switch seeds,
-flip light and dark, and see the generated ramp beside the single blue Fluent falls back to on its
-own.
+[`samples/fluent`](samples/fluent) builds the [Tasks sample](#samples) on Fluent components. Run it
+with `./gradlew :samples:fluent:run` to switch seeds, flip light and dark, and see the generated ramp
+beside the single blue Fluent falls back to on its own.
 
 Platforms: JVM, Android, iOS, JS and Wasm. No macOS native target, Java 17 bytecode from Fluent,
 and the Android floor is core's own 21.
@@ -661,6 +666,20 @@ fun DynamicTheme(image: ImageBitmap, content: @Composable () -> Unit) {
 `Palette.seedColorOrNull()` are there for when you want to score a palette you generated yourself,
 and `rememberPainterThemeColor()` starts from a `Painter`. For base64 strings, network URLs and
 files, add the matching kmpalette extension artifact and pass its loader.
+
+## Samples
+
+The [samples](samples) are one small app, Tasks, built three times. A to-do list with a seed picker
+and a light and dark switch on top. The behaviour, the copy and the data live in one shared module,
+so the three differ only in their UI stack and in how they turn a seed into a theme.
+
+| Sample | UI | Theme from | Run it |
+|---|---|---|---|
+| [`custom-theme`](samples/custom-theme) | Compose Foundation | `material-kolor-core` tonal ramps | `./gradlew :samples:custom-theme:run` |
+| [`fluent`](samples/fluent) | Compose Fluent | `material-kolor-fluent` | `./gradlew :samples:fluent:run` |
+| [`unstyled`](samples/unstyled) | Compose Unstyled | `material-kolor-unstyled` | `./gradlew :samples:unstyled:run` |
+
+[`samples/README.md`](samples/README.md) has the full spec.
 
 ## License
 
