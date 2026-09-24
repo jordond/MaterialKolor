@@ -72,6 +72,7 @@ import com.materialkolor.builder.kit.generated.resources.Res
 import com.materialkolor.builder.kit.generated.resources.code_view_name
 import com.materialkolor.builder.kit.generated.resources.widget_copy
 import com.materialkolor.builder.kit.headless.TouchlessSelectionContainer
+import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.token.CodePalette
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
@@ -109,7 +110,8 @@ private sealed interface CodePart {
  * scroll it without a pointer, and the copy keys copy what is selected.
  *
  * The copy button sits in the top corner on a band of the panel, so its focus ring never lands on
- * the code ground ([CopyButton]). Selecting text takes a part of the file, the button takes
+ * the code ground ([CopyButton]). The lines run on past their end by the band's width, so scrolling
+ * sideways to the end brings the last of every line out from under it. Selecting text takes a part of the file, the button takes
  * all of it, byte for byte. On the web a finger does not select, since the selection's handles would
  * take the page's accessibility mirror over (D45), so there the button is how a finger copies. A
  * mouse still selects. On a touch screen with a keyboard a key brings selection back and the code
@@ -148,6 +150,9 @@ public fun CodeView(
         }
     }
     val gutterWidth = charWidth * lines.size.toString().length
+    // The lines run on past their end by the copy band and the gap either side of it, so scrolled
+    // all the way over the end of every line clears the band.
+    val copyReserve = copyBandSide(LocalLayout.current) + tokens.spacing.small * 2
     val codeWidth = remember(lines, charWidth, swatchSize, gap) {
         val widest = lines.maxOfOrNull { line ->
             val chars = line.sumOf { token -> token.text.length }
@@ -199,7 +204,7 @@ public fun CodeView(
             ) {
                 LazyColumn(
                     modifier = listName
-                        .width(gutterWidth + tokens.spacing.medium + codeWidth + tokens.spacing.medium * 2)
+                        .width(gutterWidth + tokens.spacing.medium * 2 + codeWidth + copyReserve)
                         .fillMaxHeight(),
                     state = listState,
                     contentPadding = PaddingValues(vertical = tokens.spacing.medium),

@@ -141,7 +141,7 @@ class CustomDynamicTest {
             "scrim = kolors.scrim(),",
             "primaryPressed = scheme.primaryPalette.toneColor(if (isDark) 70 else 32),",
             "textStrong = scheme.neutralVariantPalette.toneColor(if (isDark) 90 else 10),",
-            "focusRing = scheme.primaryPalette.toneColor(60),",
+            "focusRing = scheme.primaryPalette.toneColor(if (isDark) 60 else 50),",
             "shadow = scheme.neutralPalette.toneColor(0),",
             "return remember(scheme) {",
         ).forEach { line -> assertTrue(line in colors, "$line in $colors") }

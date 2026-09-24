@@ -165,7 +165,7 @@ class CustomSlotColorsTest {
                 CustomSlot.BorderSoft -> neutralVariant.toneColor(tone(85, 32))
                 CustomSlot.BorderStrong -> neutralVariant.toneColor(tone(55, 65))
                 CustomSlot.Scrim -> kolors.scrim()
-                CustomSlot.FocusRing -> primary.toneColor(60)
+                CustomSlot.FocusRing -> primary.toneColor(tone(50, 60))
                 CustomSlot.Shadow -> kolors.shadow()
             }
             argb(color)

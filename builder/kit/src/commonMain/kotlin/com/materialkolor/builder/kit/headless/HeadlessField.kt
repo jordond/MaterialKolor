@@ -2,6 +2,7 @@ package com.materialkolor.builder.kit.headless
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -46,6 +47,7 @@ import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.FieldStyle
+import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
@@ -218,7 +220,7 @@ internal fun HeadlessField(
                 Box(
                     modifier = Modifier
                         .heightIn(min = LocalLayout.current.primaryTouchTarget)
-                        .fieldBox(style, edge),
+                        .fieldBox(style, edge, interactions),
                     contentAlignment = Alignment.CenterStart,
                 ) {
                     // b-228a
@@ -236,12 +238,20 @@ internal fun HeadlessField(
     )
 }
 
-/** The box around the text, with the focused or error edge drawn around it or under it. */
+/**
+ * The box around the text, with the focused or error edge drawn around it or under it. A style with
+ * a [FieldStyle.focusRing] also rings the box under keyboard focus, the way the other controls do,
+ * since an edge under the text marks one side only.
+ */
+@Composable
 private fun Modifier.fieldBox(
     style: FieldStyle,
     edge: Color?,
+    interactions: InteractionSource,
 ): Modifier {
-    val box = background(style.container, style.shape)
+    val ring = style.focusRing
+    val ringed = if (ring == null) this else controlRing(interactions, style.shape, ring)
+    val box = ringed.background(style.container, style.shape)
     val outlined = when {
         edge == null -> {
             box.border(style.outlineWidth, style.outline, style.shape)

@@ -176,7 +176,7 @@ class FocusRingTest {
      * from what lies beside it (owner ruling on S5 gap 4). Material3 draws it in primary and Custom
      * in its accent, 2 dp over a 1 dp resting edge. Where it covers that edge it stands less, so only
      * its 3 to 1 pixels count, and those run along every side. Fluent underlines a focused field
-     * instead, which rings one side only, and is left out.
+     * instead, which marks one side only, so it rings the box as well and has a test of its own.
      */
     @Test
     fun field_ownFocusOutline_ringsOnEverySide() {
@@ -194,6 +194,31 @@ class FocusRingTest {
                     capture.shouldShowRing()
                     capture.shouldRingEverySide(around = capture.ringBounds)
                     capture.shouldClearTheTrack()
+                }
+            }
+        }
+    }
+
+    /**
+     * Fluent's underline marks the bottom side only, so its field draws the focus ring round the box
+     * beside it, in the focus colour like every other Fluent control (S5 gap 4).
+     */
+    @Test
+    fun field_fluent_ringsBesideItsUnderlineAllTheWayRound() {
+        for ((name, skin) in ControlSkins.filter { (_, skin) -> skin.library == Library.Fluent }) {
+            withClue(name) {
+                runComposeUiTest {
+                    val capture = tabOntoRing(skin) {
+                        BuilderTextField(
+                            value = "Ocean",
+                            onCommit = {},
+                            label = "Project name",
+                            modifier = Modifier.width(280.dp),
+                        )
+                    }
+                    capture.shouldShowRing()
+                    capture.shouldRingEverySide(around = capture.ringBounds)
+                    capture.shouldRingAllTheWayRound()
                 }
             }
         }
