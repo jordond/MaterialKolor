@@ -1,5 +1,6 @@
 package com.materialkolor.builder.feature.workspace
 
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
@@ -117,10 +118,16 @@ internal sealed interface WorkspaceAction {
     /** Close whichever panel is open. */
     data object ClosePanel : WorkspaceAction
 
-    /** Put [text] on the clipboard and say so, naming what it was with [label]. */
+    /**
+     * Put [text] on the clipboard and say so, naming what it was with [label].
+     *
+     * @property[returnFocusTo] The button that asked, which gets focus back once the manual copy
+     * dialog a refused copy opens has closed (AR-09), or null for none.
+     */
     data class CopyText(
         val text: String,
         val label: String,
+        val returnFocusTo: FocusRequester? = null, // b-221f
     ) : WorkspaceAction
 
     /**

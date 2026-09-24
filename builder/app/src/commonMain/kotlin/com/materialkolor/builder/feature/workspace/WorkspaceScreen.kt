@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import com.materialkolor.builder.LocalThemeResult
 import com.materialkolor.builder.domain.edit.EditPhase
@@ -20,7 +21,10 @@ import com.materialkolor.builder.feature.export.ExportHost
 import com.materialkolor.builder.feature.export.launchCopy
 import com.materialkolor.builder.feature.image.ImageHost
 import com.materialkolor.builder.feature.picker.PickerHost
+import com.materialkolor.builder.feature.poster.ExplainerHost
+import com.materialkolor.builder.feature.poster.PosterFocus
 import com.materialkolor.builder.feature.poster.PosterPanel
+import com.materialkolor.builder.feature.poster.shareReturn
 import com.materialkolor.builder.feature.projects.ProjectsHost
 import com.materialkolor.builder.feature.projects.ShareHost
 import com.materialkolor.builder.feature.topbar.TopBarContent
@@ -63,6 +67,7 @@ internal fun WorkspaceScreen(
     // b-221c
     var manualCopyText by remember { mutableStateOf("") }
     var manualCopyOpen by remember { mutableStateOf(false) }
+    var manualCopyFrom by remember { mutableStateOf<FocusRequester?>(null) } // b-221f
 
     // Plays the transition's reveal out of the origin, or a crossfade without one, around the change.
     fun reveal(
@@ -147,6 +152,7 @@ internal fun WorkspaceScreen(
                         toasts.show(getString(Res.string.workspace_copied, action.label))
                     } else {
                         manualCopyText = action.text
+                        manualCopyFrom = action.returnFocusTo // b-221f
                         manualCopyOpen = true
                     }
                 }
@@ -173,20 +179,32 @@ internal fun WorkspaceScreen(
         }
     }
 
+    // b-306c
+    // Held here, so the manual copy dialog asks nothing of a copy button that has left the screen.
+    val posterFocus = remember { PosterFocus() }
     WorkspaceScreen(
         state = state,
         posterColors = LocalThemeResult.current.poster,
         toasts = toasts,
         dispatcher = dispatcher,
         modifier = modifier,
+        posterFocus = posterFocus, // b-306c
     )
     // b-221c
-    ManualCopyDialog(visible = manualCopyOpen, text = manualCopyText, onDismissRequest = { manualCopyOpen = false })
+    ManualCopyDialog(
+        visible = manualCopyOpen,
+        text = manualCopyText,
+        onDismissRequest = { manualCopyOpen = false },
+        returnFocusTo = posterFocus.returnFocusFor(manualCopyFrom), // b-306c
+    )
 }
 
 /**
  * The workspace laid out by the shell, the poster, the top bar, the canvas with its dock, and the
  * panels and toasts over them.
+ *
+ * @param[posterFocus] The poster buttons that Projects, the explainer and the manual copy dialog
+ * hand focus back to once they close (AR-09).
  */
 @Composable
 internal fun WorkspaceScreen(
@@ -195,6 +213,7 @@ internal fun WorkspaceScreen(
     toasts: BuilderToastHostState,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    posterFocus: PosterFocus = remember { PosterFocus() }, // b-306c
 ) {
     // b-221c
     // Share and Export hand focus back to the buttons that opened them once they close (AR-09).
@@ -202,7 +221,7 @@ internal fun WorkspaceScreen(
     WorkspaceShell(
         posterColors = posterColors,
         posterCollapsed = state.preferences.posterCollapsed,
-        poster = { rail -> PosterPanel(state, rail, dispatcher) },
+        poster = { rail -> PosterPanel(state, rail, dispatcher, focus = posterFocus) }, // b-221f
         topBar = { TopBarContent(state, dispatcher, focus = focus) }, // b-221c
         canvas = { contentPadding -> CanvasArea(state, contentPadding, dispatcher) },
         dock = { CanvasDock(state, dispatcher) },
@@ -213,8 +232,11 @@ internal fun WorkspaceScreen(
         fullscreenExit = { FullscreenExit(dispatcher) },
         overlays = {
             ExportHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.Export)) // b-221c
-            ProjectsHost(state, dispatcher)
-            ShareHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.Share)) // b-221c
+            ProjectsHost(state, dispatcher, returnFocusTo = posterFocus.projects.returnFocusTo) // b-221f
+            ExplainerHost(state, dispatcher, returnFocusTo = posterFocus.why.returnFocusTo) // b-221f
+            // b-306c
+            val shareReturn = posterFocus.shareReturn(state.panel, focus.requester(TopBarControl.Share))
+            ShareHost(state, dispatcher, returnFocusTo = shareReturn)
             CommandHost(state, dispatcher)
             PickerHost(state, dispatcher)
             ImageHost(state, dispatcher)

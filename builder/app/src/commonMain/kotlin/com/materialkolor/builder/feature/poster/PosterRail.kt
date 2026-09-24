@@ -13,8 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
@@ -30,12 +28,15 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The poster shrunk to its 72 dp strip, the seed swatch, Shuffle, Projects and the button that
  * opens the poster again (F-66). The workspace remembers the choice in the browser's preferences.
+ *
+ * @param[focus] Where the projects drawer hands focus back once it closes (AR-09).
  */
 @Composable
 internal fun PosterRail(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    focus: PosterFocus? = null, // b-221f
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     Column(
@@ -49,6 +50,7 @@ internal fun PosterRail(
             icon = IconId.Folder,
             description = stringResource(Res.string.poster_projects),
             onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Projects)) },
+            buttonModifier = triggerFocus(focus?.projects), // b-221f
         )
         PosterIconButton(
             icon = IconId.Expand,
@@ -57,9 +59,6 @@ internal fun PosterRail(
         )
     }
 }
-
-/** The seed swatch's ring. It mirrors the kit's outline width until kit publishes a stroke token (B-221b). */
-private val SwatchRingWidth: Dp = 1.dp
 
 /**
  * The seed on the rail and in the sheet's seed row. The poster is already the seed, so the swatch
@@ -77,7 +76,7 @@ internal fun SeedSwatch(
     Box(
         modifier = modifier
             .size(LocalLayout.current.primaryTouchTarget)
-            .border(SwatchRingWidth, tokens.borderStrong, RoundedCornerShape(tokens.radius.small))
+            .border(tokens.outlineWidth, tokens.borderStrong, RoundedCornerShape(tokens.radius.small))
             .then(if (description == null) Modifier else Modifier.semantics { contentDescription = description }),
     )
 }

@@ -42,12 +42,15 @@ import org.jetbrains.compose.resources.stringResource
  * project's name and whether it is saved.
  *
  * The phone sheet has no rail to collapse to, so it shows no collapse button (D38).
+ *
+ * @param[focus] Where the projects drawer hands focus back once it closes (AR-09).
  */
 @Composable
 internal fun PosterHeader(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    focus: PosterFocus? = null, // b-221f
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val collapsible = LocalLayout.current.posterMode != PosterMode.Sheet
@@ -71,7 +74,11 @@ internal fun PosterHeader(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ProjectsButton(context.projectName, dispatcher, Modifier.weight(1f, fill = false))
+            ProjectsButton(
+                projectName = context.projectName,
+                dispatcher = dispatcher,
+                modifier = Modifier.weight(1f, fill = false).then(triggerFocus(focus?.projects)), // b-221f
+            )
             val badge = saveBadgeOf(context.saveStatus)
             BuilderBadge(label = stringResource(badge.label), status = badge.status, icon = badge.icon)
         }
@@ -124,6 +131,12 @@ internal fun saveBadgeOf(status: SaveStatus): SaveBadge =
 /**
  * An icon button under a tooltip, for the header and the rail. The tooltip repeats what it does
  * unless [tooltip] says more, such as why it is turned off.
+ *
+ * @param[modifier] Applied to the tooltip around the button.
+ * @param[expanded] Whether the panel the button shows and hides is open, or null for a button that
+ * discloses nothing (D37).
+ * @param[buttonModifier] Applied to the button itself, such as the requester a panel hands focus
+ * back to.
  */
 @Composable
 internal fun PosterIconButton(
@@ -134,14 +147,19 @@ internal fun PosterIconButton(
     emphasis: Emphasis = Emphasis.Subtle,
     enabled: Boolean = true,
     tooltip: String = description,
+    // b-221f
+    expanded: Boolean? = null,
+    buttonModifier: Modifier = Modifier,
 ) {
     BuilderTooltip(text = tooltip, modifier = modifier) {
         BuilderIconButton(
             onClick = onClick,
             icon = icon,
             contentDescription = description,
+            modifier = buttonModifier,
             emphasis = emphasis,
             enabled = enabled,
+            expanded = expanded,
         )
     }
 }

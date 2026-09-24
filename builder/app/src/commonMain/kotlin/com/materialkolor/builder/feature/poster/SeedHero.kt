@@ -63,12 +63,16 @@ import kotlin.math.roundToInt
  *
  * The field shows the seed as stored, not as the target sees it. A commit lands as a typed seed,
  * one keystroke folding into the next in the history.
+ *
+ * @param[focus] Holds the copy buttons, which a refused copy's manual copy dialog hands focus back
+ * to while the hero still shows them (AR-09).
  */
 @Composable
 internal fun SeedHero(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    focus: PosterFocus? = null, // b-306c
 ) {
     val seed = context.document.seed
     val spacing = LocalBuilderTokens.current.spacing
@@ -76,6 +80,15 @@ internal fun SeedHero(
     val hct = remember(seed) { HctReadout.of(seed).rounded() }
     val hexLabel = stringResource(Res.string.poster_copied_hex)
     val kotlinLabel = stringResource(Res.string.poster_copied_kotlin)
+    // b-221f
+    // A refused copy opens the manual copy dialog, which hands focus back to the button pressed.
+    // b-306c
+    // The workspace's triggers count the buttons on screen, so the dialog asks nothing of a hero
+    // that left while it was open. Without them the hero keeps its own.
+    val own = remember { PosterFocus() }
+    val triggers = focus ?: own
+    val copyHex = triggers.copyHex
+    val copyKotlin = triggers.copyKotlin
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         InfoLabel(label = stringResource(Res.string.poster_seed), topic = InfoTopic.Seed)
         BuilderHexField(
@@ -111,14 +124,19 @@ internal fun SeedHero(
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
             BuilderButton(
-                onClick = { dispatcher.dispatch(WorkspaceAction.CopyText(seed.toHex(), hexLabel)) },
+                onClick = { dispatcher.dispatch(WorkspaceAction.CopyText(seed.toHex(), hexLabel, copyHex.requester)) },
                 label = stringResource(Res.string.poster_copy_hex),
+                modifier = triggerFocus(copyHex), // b-306c
                 emphasis = Emphasis.Subtle,
                 icon = IconId.Copy,
             )
             BuilderButton(
-                onClick = { dispatcher.dispatch(WorkspaceAction.CopyText(kotlinLiteralOf(seed), kotlinLabel)) },
+                onClick = {
+                    val copy = WorkspaceAction.CopyText(kotlinLiteralOf(seed), kotlinLabel, copyKotlin.requester)
+                    dispatcher.dispatch(copy)
+                },
                 label = stringResource(Res.string.poster_copy_kotlin),
+                modifier = triggerFocus(copyKotlin), // b-306c
                 emphasis = Emphasis.Subtle,
                 icon = IconId.Copy,
             )

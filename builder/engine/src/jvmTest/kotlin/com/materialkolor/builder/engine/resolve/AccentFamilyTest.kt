@@ -105,6 +105,16 @@ class AccentFamilyTest {
         assertEquals(AccentFamily.of(green, themeSeed).light, second.light)
     }
 
+    @Test
+    fun steps_layTheRampOutAtEveryRampTone() {
+        val family = AccentFamily.of(brand, themeSeed)
+
+        assertEquals(RampSet.Tones, family.steps.map { step -> step.tone })
+        for (step in family.steps) assertEquals(Argb(family.palette.tone(step.tone)), step.argb)
+        val color = family.steps.first { step -> step.tone == 40 }
+        assertEquals(family.light.color, color.argb)
+    }
+
     private fun hueDistance(
         first: Double,
         second: Double,

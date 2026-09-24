@@ -43,6 +43,15 @@ public class AccentFamily internal constructor(
     public val light: AccentColors,
     public val dark: AccentColors,
 ) {
+    // b-308b
+
+    /**
+     * The family's ramp at every tone in [RampSet.Tones], darkest first, laid out like a scheme
+     * palette's steps. Both modes cut from this one ramp.
+     */
+    public val steps: ImmutableList<RampStep> =
+        RampSet.Tones.map { tone -> RampStep(tone, Argb(palette.tone(tone))) }.toImmutableList()
+
     /** The family in the mode [isDark] picks. */
     public fun mode(isDark: Boolean): AccentColors = if (isDark) dark else light
 

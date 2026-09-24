@@ -29,6 +29,7 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.shuffle.Shuffle
 import com.materialkolor.builder.engine.shuffle.ShuffleResult
 import com.materialkolor.builder.engine.shuffle.shuffleLocks
+import com.materialkolor.builder.feature.canvas.RampHighlight
 import com.materialkolor.builder.feature.canvas.RampTarget
 import com.materialkolor.builder.feature.canvas.VisionSimulation
 import com.materialkolor.builder.feature.picker.PickerTarget
@@ -89,7 +90,14 @@ internal class WorkspaceModel(
         session.projectName.mergeState { state, name -> state.copy(projectName = name) }
         session.saveStatus.mergeState { state, status -> state.copy(saveStatus = status) }
         // b-221c
-        session.generation.mergeState { state, generation -> state.copy(projectGeneration = generation) }
+        // b-221f
+        // b-306c
+        // Read with the document the session holds now, so a new number never lands beside the old document.
+        // That only holds while these collectors run after show() lets go of the thread, with the document
+        // already set. A session slice that publishes both from one StateFlow will make it hold everywhere.
+        session.generation.mergeState { state, generation ->
+            state.withDocument(session.document.value).copy(projectGeneration = generation)
+        }
     }
 
     /**
@@ -156,7 +164,7 @@ internal class WorkspaceModel(
 
     fun setPreviewTab(tab: PreviewTab) {
         updateView { view -> view.copy(tab = tab) }
-        updateState { state -> state.copy(rampTarget = null) } // b-308
+        updateState { state -> state.copy(rampHighlight = null) } // b-308
     }
 
     /** Only the preview's mode moves. The chrome keeps its appearance (F-04). */
@@ -246,10 +254,13 @@ internal class WorkspaceModel(
 
     // b-308
 
-    /** Show the Palettes tab with the ramp of [target] picked out, until the next tab switch. */
+    /**
+     * Show the Palettes tab with the ramp of [target] picked out, until the next tab switch. The
+     * target keeps the project it was picked in, so the tab can drop it once another one opens.
+     */
     fun showOnRamp(target: RampTarget) {
         updateView { view -> view.copy(tab = PreviewTab.Palettes) }
-        updateState { state -> state.copy(rampTarget = target) }
+        updateState { state -> state.copy(rampHighlight = RampHighlight(target, state.projectGeneration)) }
     }
 
     /** Read the session back into the state at once, so nothing waits on a collector. */
@@ -287,11 +298,13 @@ internal class WorkspaceModel(
      * @property[saveStatus] Whether the open project's latest changes are saved.
      * @property[projectGeneration] Counts the projects this tab has shown, one more each time another
      * opens. It changes in the same state as the document the new project brings, so anything that
-     * belongs to one project can tell a new project from an edit.
+     * belongs to one project can tell a new project from an edit. That pairing holds only while the
+     * collectors run after the session's `show()` lets go of the thread, until a session slice
+     * publishes both from one `StateFlow`.
      * @property[expressiveSuggestion] Whether the top bar offers the Expressive style on the 2025
      * spec after a switch to Expressive (F-03).
-     * @property[rampTarget] What the Palettes tab picks out after Show on ramp, or null. A tab
-     * switch clears it and nothing saves it.
+     * @property[rampHighlight] What the Palettes tab picks out after Show on ramp, with the project
+     * it was picked in, or null. A tab switch clears it and nothing saves it.
      */
     @Immutable
     data class State(
@@ -310,7 +323,7 @@ internal class WorkspaceModel(
         // b-221c
         val projectGeneration: Int = 0,
         val expressiveSuggestion: Boolean = false,
-        val rampTarget: RampTarget? = null, // b-308
+        val rampHighlight: RampHighlight? = null, // b-308
     ) {
         /** What [document] exports to. */
         val target: ExportTarget
