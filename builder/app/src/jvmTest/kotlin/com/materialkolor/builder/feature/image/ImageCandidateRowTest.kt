@@ -2,16 +2,22 @@ package com.materialkolor.builder.feature.image
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.lifecycle.ViewModelStore
 import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.ThemeDocument
@@ -23,8 +29,10 @@ import com.materialkolor.builder.feature.poster.showSection
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.kit.control.ToastDuration
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.extensions.collectAsState
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.CompletableDeferred
 import kotlin.test.Test
@@ -43,6 +51,9 @@ class ImageCandidateRowTest {
     private val model = ImageSeedModel(images, FakePasteInput())
     private val store = ViewModelStore().apply { put("images", model) }
     private val photo = FakeImageHandle("photo.png")
+
+    /** The tone a chip shows until its colors resolve, read from the skin the row is drawn in. */
+    private var placeholder = Color.Unspecified
 
     @Test
     fun droppedImage_showsSkeletonChipsFirst_thenAChipPerCandidate_andSeedsAsOneEntry() =
@@ -68,7 +79,7 @@ class ImageCandidateRowTest {
             }
             onNodeWithContentDescription(READING).assertDoesNotExist()
             harness.undoEntries() shouldBe 1
-            val toast = harness.actions.filterIsInstance<WorkspaceAction.ShowToast>().single()
+            val toast = harness.actions.filterIsInstance<WorkspaceAction.ShowWithdrawableToast>().single().toast
             toast.message shouldBe "Seed taken from photo.png"
             toast.actionLabel shouldBe "Undo"
             toast.duration shouldBe ToastDuration.Long
@@ -159,9 +170,96 @@ class ImageCandidateRowTest {
             store.clear()
         }
 
+    // b-311a
+
+    @Test
+    fun dropOverlay_staysAwayWhileThePickerIsOpen() =
+        runComposeUiTest {
+            val harness = PosterHarness(ThemeDocument(seed = Seed))
+            showRow(harness, picking = true)
+
+            images.dragging.value = true
+            waitForIdle()
+
+            onNodeWithText(DROP).assertDoesNotExist()
+            store.clear()
+        }
+
+    @Test
+    fun focusOnAChip_comesBackToTheChipsWhenTheNextImageLands() =
+        runComposeUiTest {
+            val other = FakeImageHandle("other.png")
+            images.decoded[photo] = decodedOf(QuadrantColors)
+            images.decoded[other] = decodedOf(QuadrantColors)
+            val harness = PosterHarness(ThemeDocument(seed = Seed))
+            showRow(harness)
+            images.drop(photo)
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.document.seedSource is SeedSource.Image }
+            waitForIdle()
+            val top = (harness.document.seedSource as SeedSource.Image).candidates.first()
+            onNodeWithContentDescription(chipLabel(top), substring = true).requestFocus()
+            waitForIdle()
+
+            images.drop(other)
+            waitUntil(timeoutMillis = WAIT_MILLIS) { (harness.document.seedSource as SeedSource.Image).name == "other.png" }
+            waitForIdle()
+
+            onNodeWithContentDescription(chipLabel(harness.document.seed), substring = true).assertIsFocused()
+            store.clear()
+        }
+
+    @Test
+    fun focusOnAddTheImageAgain_movesToTheChipsWhenTheImageLands() =
+        runComposeUiTest {
+            images.decoded[photo] = decodedOf(QuadrantColors)
+            val reloaded = SeedSource.Image("photo.png", listOf(Seed))
+            val harness = PosterHarness(ThemeDocument(seed = Seed, seedSource = reloaded))
+            showRow(harness)
+            onNodeWithText(ADD_AGAIN).requestFocus()
+            waitForIdle()
+
+            images.drop(photo)
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.document.seedSource != reloaded }
+            waitForIdle()
+
+            onNodeWithContentDescription(chipLabel(harness.document.seed), substring = true).assertIsFocused()
+            store.clear()
+        }
+
+    @Test
+    fun contrastEdit_keepsTheChipsColoredWhileTheyResolveAgain() =
+        runComposeUiTest {
+            images.decoded[photo] = decodedOf(QuadrantColors)
+            val harness = PosterHarness(ThemeDocument(seed = Seed))
+            showRow(harness)
+            images.drop(photo)
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.document.seedSource is SeedSource.Image }
+            waitForIdle()
+            val candidates = (harness.document.seedSource as SeedSource.Image).candidates
+
+            mainClock.autoAdvance = false
+            harness.document = harness.document.copy(contrast = ContrastLevel.High)
+            mainClock.advanceTimeByFrame()
+
+            // One frame on only the first chip has resolved again, and the rest keep what they had.
+            candidates.drop(1).forEach { candidate -> chipTop(candidate) shouldNotBe placeholder }
+            mainClock.autoAdvance = true
+            store.clear()
+        }
+
+    /** The color across the top half of [candidate]'s chip, its primary once resolved. */
+    private fun ComposeUiTest.chipTop(candidate: Argb): Color {
+        val pixels = onNodeWithContentDescription(chipLabel(candidate), substring = true).captureToImage().toPixelMap()
+        return pixels[pixels.width / 2, pixels.height * 3 / 10]
+    }
+
     /** The candidate row on the poster, fed by the model, with the host that sends its results. */
-    private fun ComposeUiTest.showRow(harness: PosterHarness) {
+    private fun ComposeUiTest.showRow(
+        harness: PosterHarness,
+        picking: Boolean = false,
+    ) {
         showSection(harness) { context, dispatcher ->
+            placeholder = LocalBuilderTokens.current.border
             val seeds by model.collectAsState()
             // Frozen, so the skeleton's pulse holds still and the test can go idle.
             CompositionLocalProvider(LocalImageSeeds provides seeds, LocalMotionFrozen provides true) {
@@ -170,9 +268,9 @@ class ImageCandidateRowTest {
             ImageHostContent(
                 model = model,
                 dispatcher = dispatcher,
-                picking = false,
+                picking = picking,
                 project = 0,
-                seedSource = context.document.seedSource,
+                document = context.document,
             )
         }
     }

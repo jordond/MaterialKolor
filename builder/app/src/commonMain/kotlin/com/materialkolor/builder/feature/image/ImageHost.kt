@@ -5,9 +5,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import com.materialkolor.builder.domain.model.SeedSource
+import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
@@ -41,7 +42,7 @@ internal fun ImageHost(
         dispatcher = dispatcher,
         picking = state.panel == Panel.Picker,
         project = state.projectGeneration,
-        seedSource = state.document.seedSource,
+        document = state.document,
         modifier = modifier,
     )
 }
@@ -49,9 +50,13 @@ internal fun ImageHost(
 /**
  * [ImageHost] with what it reads of the workspace passed in.
  *
+ * The Undo on a seed's toast only ever undoes that seed. It does nothing once the document has
+ * moved on, and the toast goes as soon as it does. A seed that changes nothing, such as the same
+ * image landing twice, makes no undo entry and so offers no Undo.
+ *
  * @param[picking] Whether the color picker is open, which leaves drops and pastes alone.
  * @param[project] The open project's generation, so a new project drops the image in memory.
- * @param[seedSource] Where the document's seed came from, which tells the skeleton when to go.
+ * @param[document] The open document, which tells the skeleton when to go and the Undo when to stop.
  */
 @Composable
 internal fun ImageHostContent(
@@ -59,44 +64,87 @@ internal fun ImageHostContent(
     dispatcher: Dispatcher<WorkspaceAction>,
     picking: Boolean,
     project: Int,
-    seedSource: SeedSource,
+    document: ThemeDocument,
     modifier: Modifier = Modifier,
 ) {
-    SideEffect { model.follow(picking, project) }
+    val undo = remember { UndoSlot() }
+    SideEffect {
+        model.follow(picking, project)
+        undo.current?.follow(document, project)
+    }
     val seeds by model.collectAsState()
     val arriving = seeds.arriving
+    val seedSource = document.seedSource
     LaunchedEffect(arriving, seedSource) {
         if (arriving?.lands != null && arriving.lands == seedSource) model.landed(arriving)
     }
-    val current by rememberUpdatedState(dispatcher)
+    val workspace by rememberUpdatedState(Workspace(dispatcher, document, project))
     LaunchedEffect(model) {
-        model.results.collect { result -> current.dispatchResult(result) }
+        model.results.collect { result -> dispatchResult(result, undo) { workspace } }
     }
     val dragging by model.images.dragging.collectAsState()
-    if (dragging) DropOverlay(modifier)
+    // b-311a
+    // The picker owns the window while it is open, and a drop then goes nowhere.
+    if (dragging && !picking) DropOverlay(modifier)
 }
 
-/** Sends the workspace what [result] asks for, the seed and its undo toast or the error toast. */
-private suspend fun Dispatcher<WorkspaceAction>.dispatchResult(result: ImageSeedResult) {
+/**
+ * Sends the workspace what [result] asks for, the seed and its undo toast or the error toast. The
+ * seed's Undo goes in [undo], and [workspace] reads the workspace as it is by the time it acts.
+ */
+private suspend fun dispatchResult(
+    result: ImageSeedResult,
+    undo: UndoSlot,
+    workspace: () -> Workspace,
+) {
+    val dispatcher = workspace().dispatcher
     when (result) {
         is ImageSeedResult.Seeded -> {
-            dispatch(WorkspaceAction.EditWithReveal(result.change, origin = null))
+            val before = workspace()
+            val made = result.change.apply(before.document)
+            // A seed that changes nothing makes no undo entry, and an Undo would take another one.
+            val seedUndo = if (made == before.document) null else SeedUndo(made, before.project)
+            if (seedUndo != null) {
+                undo.current?.end()
+                undo.current = seedUndo
+            }
+            dispatcher.dispatch(WorkspaceAction.EditWithReveal(result.change, origin = null))
             val name = result.source.name
             val message = if (name.isBlank()) {
                 getString(Res.string.image_seeded)
             } else {
                 getString(Res.string.image_seeded_named, name)
             }
+            if (seedUndo == null) {
+                dispatcher.dispatch(WorkspaceAction.ShowToast(message))
+                return
+            }
             val toast = WorkspaceAction.ShowToast(
                 message = message,
                 actionLabel = getString(Res.string.image_undo),
                 duration = ToastDuration.Long,
-                onAction = { dispatch(WorkspaceAction.Undo) },
+                onAction = {
+                    val now = workspace()
+                    if (seedUndo.holds(now.document, now.project)) now.dispatcher.dispatch(WorkspaceAction.Undo)
+                    seedUndo.end()
+                },
             )
-            dispatch(toast)
+            dispatcher.dispatch(WorkspaceAction.ShowWithdrawableToast(toast, onShown = seedUndo::shown))
         }
         ImageSeedResult.Unsupported -> {
-            dispatch(WorkspaceAction.ShowToast(getString(Res.string.image_unsupported)))
+            dispatcher.dispatch(WorkspaceAction.ShowToast(getString(Res.string.image_unsupported)))
         }
     }
+}
+
+/** What the host reads of the workspace, kept current for the collector and the toast's Undo. */
+private class Workspace(
+    val dispatcher: Dispatcher<WorkspaceAction>,
+    val document: ThemeDocument,
+    val project: Int,
+)
+
+/** The Undo of the newest seed's toast, or null once there is none. */
+private class UndoSlot {
+    var current: SeedUndo? = null
 }

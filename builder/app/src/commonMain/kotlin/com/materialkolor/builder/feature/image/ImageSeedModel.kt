@@ -5,6 +5,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.materialkolor.builder.core.platform.DecodedImage
 import com.materialkolor.builder.core.platform.ImageHandle
 import com.materialkolor.builder.core.platform.ImageInput
 import com.materialkolor.builder.core.platform.Paste
@@ -69,33 +70,48 @@ internal class ImageSeedModel(
         }
         viewModelScope.launch {
             pastes.pastes.collect { paste ->
-                if (paste is Paste.Files && !picking) paste.files.forEach(::take)
+                if (paste is Paste.Files && !picking) take(paste.files)
             }
         }
     }
 
     /** Pull colors from [handle], cancelling whatever image came before it. */
     fun take(handle: ImageHandle) {
-        job?.cancel()
-        val name = handle.name ?: ""
-        val arriving = ArrivingImage(id = ++arrivals, name = name)
-        updateState { state -> state.copy(arriving = arriving) }
-        job = viewModelScope.launch { read(handle, arriving) }
+        take(listOf(handle))
     }
 
     /**
-     * Keep up with the workspace. While [picking] the color picker is open and drops and pastes are
-     * left alone. A new [project] drops the newest image and stops the one on its way.
+     * Pull colors from the last of [handles] that reads as an image, cancelling whatever image came
+     * before them. Several files come from one paste, and a file that is not an image among them
+     * never costs the seed the others could give.
+     */
+    private fun take(handles: List<ImageHandle>) {
+        val last = handles.lastOrNull() ?: return
+        job?.cancel()
+        val arriving = ArrivingImage(id = ++arrivals, name = last.name ?: "")
+        updateState { state -> state.copy(arriving = arriving) }
+        job = viewModelScope.launch { read(handles, arriving) }
+    }
+
+    /**
+     * Keep up with the workspace. While [picking] the color picker is open and owns the seed, so
+     * drops and pastes are left alone and an image still on its way is stopped before it lands in
+     * the picker's edit. A new [project] drops the newest image and stops the one on its way.
      */
     fun follow(
         picking: Boolean,
         project: Int,
     ) {
+        val opened = picking && !this.picking
         this.picking = picking
-        if (project == this.project) return
-        this.project = project
-        job?.cancel()
-        updateState { State() }
+        if (project != this.project) {
+            this.project = project
+            job?.cancel()
+            updateState { State() }
+        } else if (opened) {
+            job?.cancel()
+            updateState { state -> state.copy(arriving = null) }
+        }
     }
 
     /** The document now shows [arriving]'s seed, so its skeleton can go. */
@@ -104,21 +120,20 @@ internal class ImageSeedModel(
     }
 
     private suspend fun read(
-        handle: ImageHandle,
+        handles: List<ImageHandle>,
         arriving: ArrivingImage,
     ) {
-        val decoded = images.decode(handle)
-        if (decoded == null) {
+        val (handle, decoded) = decodeLast(handles) ?: run {
             updateState { state -> state.copy(arriving = null) }
             emitted.send(ImageSeedResult.Unsupported)
             return
         }
-        val shown = arriving.copy(thumbnail = decoded.thumbnail)
+        val shown = arriving.copy(name = handle.name ?: "", thumbnail = decoded.thumbnail)
         updateState { state -> state.copy(arriving = shown) }
         yield()
         val seeds = SeedExtractor.extract(PixelSample(decoded.pixels, decoded.width, decoded.height))
         yield()
-        val source = SeedSource.Image(arriving.name, seeds.candidates)
+        val source = SeedSource.Image(shown.name, seeds.candidates)
         val newest = NewestImage(
             source = source,
             thumbnail = decoded.thumbnail,
@@ -133,6 +148,15 @@ internal class ImageSeedModel(
         // skeleton still goes.
         delay(LANDING_TIMEOUT_MILLIS)
         landed(landing)
+    }
+
+    /** The last of [handles] that decodes, with its image, or null when none of them does. */
+    private suspend fun decodeLast(handles: List<ImageHandle>): Pair<ImageHandle, DecodedImage>? {
+        for (handle in handles.asReversed()) {
+            val decoded = images.decode(handle) ?: continue
+            return handle to decoded
+        }
+        return null
     }
 
     /**
@@ -159,7 +183,8 @@ internal class ImageSeedModel(
  * An image on its way to a seed.
  *
  * @property[id] Tells one arrival from the next, even for the same file.
- * @property[name] The file name, empty when the platform gave none.
+ * @property[name] The file name, empty when the platform gave none. Among several pasted files it is
+ * the last one's until one of them has decoded.
  * @property[thumbnail] The image at up to 256 px, once it has decoded.
  * @property[lands] The seed source it sets, once its candidates are known.
  */

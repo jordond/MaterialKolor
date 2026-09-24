@@ -2,33 +2,29 @@ package com.materialkolor.builder.feature.image
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ColorNames
 import com.materialkolor.builder.domain.edit.DocumentChange
@@ -51,22 +47,12 @@ import com.materialkolor.builder.kit.control.BuilderChoiceGroup
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
-import com.materialkolor.builder.kit.motion.rememberLoopPhase
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.widget.SchemeChip
+import com.materialkolor.builder.kit.widget.SchemeChipFootprint
+import com.materialkolor.builder.kit.widget.SchemeChipSkeleton
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.stringResource
-import kotlin.math.abs
-
-/**
- * How much room a scheme chip takes with its ring and focus outline, which the thumbnail and the
- * skeleton chips match so nothing moves when the real chips come in. The kit keeps the chip's own
- * sizes to itself.
- */
-private val ChipSize: Dp = 58.dp
-
-/** How long one pulse of a skeleton takes. */
-private const val SHIMMER_PERIOD_MILLIS = 1_200
 
 /**
  * The image under the seed actions and the colors it offered (F-08).
@@ -76,6 +62,9 @@ private const val SHIMMER_PERIOD_MILLIS = 1_200
  * candidate, and a chip click swaps the seed for that candidate. The image itself only shows while
  * it is still in memory, so after a reload the row offers to add it again instead. Any other seed
  * leaves the row out.
+ *
+ * The skeleton takes the row's place, focus and all, so when the focus was in the row as an image
+ * came in, the chips take it back once they land.
  */
 @Composable
 internal fun ImageCandidateRow(
@@ -86,13 +75,19 @@ internal fun ImageCandidateRow(
     val seeds = LocalImageSeeds.current
     val arriving = seeds.arriving
     val source = context.document.seedSource
+    // b-311a
+    // Read as an image starts, before its skeleton replaces the row and the focus goes with it.
+    val focus = remember { RowFocus() }
+    val refocus = remember(arriving?.id) { arriving != null && (focus.inRow || focus.owed) }
+    SideEffect { focus.owed = refocus }
+    val rowModifier = modifier.onFocusChanged { state -> focus.inRow = state.hasFocus }
     when {
         arriving != null && arriving.lands != source -> {
-            ArrivingRow(arriving, modifier)
+            ArrivingRow(arriving, rowModifier)
         }
         source is SeedSource.Image -> {
             val newest = seeds.newest?.takeIf { newest -> newest.source == source }
-            CandidateRow(context, source, newest, dispatcher, modifier)
+            CandidateRow(context, source, newest, dispatcher, rowModifier, refocus)
         }
     }
 }
@@ -103,28 +98,28 @@ private fun ArrivingRow(
     arriving: ArrivingImage,
     modifier: Modifier,
 ) {
-    val tokens = LocalBuilderTokens.current
+    val spacing = LocalBuilderTokens.current.spacing
     val reading = stringResource(Res.string.image_reading)
-    val phase = rememberLoopPhase(SHIMMER_PERIOD_MILLIS)
     Column(
         modifier = modifier.clearAndSetSemantics { contentDescription = reading },
-        verticalArrangement = Arrangement.spacedBy(tokens.spacing.medium),
+        verticalArrangement = Arrangement.spacedBy(spacing.medium),
     ) {
         val thumbnail = arriving.thumbnail
         if (thumbnail == null) {
-            Skeleton(RoundedCornerShape(tokens.radius.small), phase)
+            SchemeChipSkeleton()
         } else {
             Thumbnail(thumbnail)
         }
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small)) {
-            repeat(SeedExtractor.MAX_CANDIDATES) { Skeleton(CircleShape, phase) }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
+            repeat(SeedExtractor.MAX_CANDIDATES) { SchemeChipSkeleton() }
         }
     }
 }
 
 /**
  * The image when it is still in memory, or a button to add it again, over the candidate chips,
- * with a line saying so when the image is mostly gray.
+ * with a line saying so when the image is mostly gray. With [refocus] the chips take the focus as
+ * they come in, since it left with the row the image replaced.
  */
 @Composable
 private fun CandidateRow(
@@ -133,8 +128,11 @@ private fun CandidateRow(
     newest: NewestImage?,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier,
+    refocus: Boolean,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
+    val chips = remember { FocusRequester() }
+    if (refocus) LaunchedEffect(Unit) { chips.requestFocus() }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
         if (newest == null) {
             BuilderButton(
@@ -146,7 +144,7 @@ private fun CandidateRow(
         } else {
             Thumbnail(newest.thumbnail)
         }
-        CandidateChips(context, source, dispatcher)
+        CandidateChips(context, source, dispatcher, Modifier.focusRequester(chips))
         if (newest?.mostlyGray == true) {
             BuilderText(text = stringResource(Res.string.image_mostly_gray), emphasis = Emphasis.Secondary)
         }
@@ -162,6 +160,7 @@ private fun CandidateChips(
     context: PosterContext,
     source: SeedSource.Image,
     dispatcher: Dispatcher<WorkspaceAction>,
+    modifier: Modifier,
 ) {
     val resolver = rememberThemeResolver()
     val isDark = context.visibleModes == PreviewMode.Dark
@@ -181,6 +180,7 @@ private fun CandidateChips(
         // The keys only move the focus here, so a pick that ever comes this way has no chip to reveal from.
         onSelect = { candidate -> if (candidate != selected) choose(candidate, null) },
         label = stringResource(Res.string.image_candidates),
+        modifier = modifier,
         selectOnFocus = false,
     ) { candidate, isSelected, optionModifier ->
         val placeholder = LocalBuilderTokens.current.border
@@ -200,8 +200,12 @@ private fun CandidateChips(
 }
 
 /**
- * The colors of a chip for each of [inputs], null until its scheme has resolved. One resolves per
- * frame, starting once the chips are first drawn.
+ * The colors of a chip for each of [inputs], null until its scheme has first resolved. One resolves
+ * per frame, starting once the chips are first drawn.
+ *
+ * New inputs, from a style or contrast edit, keep the colors already there and overwrite them one
+ * per frame, picking up after the last chip that resolved. So an edit never blanks the chips, and a
+ * drag that changes the inputs every frame still walks through all of them.
  */
 @Composable
 private fun rememberCandidateColors(
@@ -209,24 +213,27 @@ private fun rememberCandidateColors(
     isDark: Boolean,
     resolver: ThemeResolver,
 ): List<CandidateColors?> {
-    val colors = remember(inputs, isDark, resolver) {
-        List<CandidateColors?>(inputs.size) { null }.toMutableStateList()
-    }
-    LaunchedEffect(colors) {
-        inputs.forEachIndexed { index, input ->
-            if (index > 0) withFrameNanos { }
-            val scheme = resolver.scheme(input, isDark)
+    val colors = remember { mutableStateListOf<CandidateColors?>() }
+    val next = remember { NextChip() }
+    LaunchedEffect(inputs, isDark, resolver) {
+        while (colors.size > inputs.size) colors.removeAt(colors.lastIndex)
+        while (colors.size < inputs.size) colors.add(null)
+        repeat(inputs.size) { step ->
+            if (step > 0) withFrameNanos { }
+            val index = next.index % inputs.size
+            val scheme = resolver.scheme(inputs[index], isDark)
             colors[index] = CandidateColors(
                 primary = Color(scheme.primary),
                 secondaryContainer = Color(scheme.secondaryContainer),
                 tertiaryContainer = Color(scheme.tertiaryContainer),
             )
+            next.index = index + 1
         }
     }
     return colors
 }
 
-/** The image as it came in, at the size of a chip. */
+/** The image as it came in, in the room a chip takes. */
 @Composable
 private fun Thumbnail(bitmap: ImageBitmap) {
     val radius = LocalBuilderTokens.current.radius
@@ -235,22 +242,7 @@ private fun Thumbnail(bitmap: ImageBitmap) {
         // The seed's source line already names the file.
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        modifier = Modifier.size(ChipSize).clip(RoundedCornerShape(radius.small)),
-    )
-}
-
-/** A chip sized placeholder that pulses between two border tones, redrawn without recomposing. */
-@Composable
-private fun Skeleton(
-    shape: Shape,
-    phase: State<Float>,
-) {
-    val tokens = LocalBuilderTokens.current
-    Box(
-        Modifier.size(ChipSize).clip(shape).drawBehind {
-            val pulse = 1f - abs(phase.value * 2f - 1f)
-            drawRect(lerp(tokens.border, tokens.borderStrong, pulse))
-        },
+        modifier = Modifier.size(SchemeChipFootprint).clip(RoundedCornerShape(radius.small)),
     )
 }
 
@@ -260,6 +252,20 @@ private class CandidateColors(
     val secondaryContainer: Color,
     val tertiaryContainer: Color,
 )
+
+/** Which chip resolves its colors next, kept across new inputs so no chip waits for long. */
+private class NextChip {
+    var index: Int = 0
+}
+
+/**
+ * Whether the focus is in the row, and whether an image that replaced the row took it along, so
+ * the chips owe it back.
+ */
+private class RowFocus {
+    var inRow: Boolean = false
+    var owed: Boolean = false
+}
 
 /** Where a chip sits in the root, which a pick reveals from. Only a pick reads it. */
 private class ChipBounds {

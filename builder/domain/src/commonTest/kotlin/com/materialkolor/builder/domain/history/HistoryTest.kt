@@ -376,6 +376,35 @@ class HistoryTest {
         assertEquals(2, session.history.persisted().size)
     }
 
+    // b-311a
+
+    @Test
+    fun history_newImageSeedRightAfterASeedEdit_isItsOwnStep() {
+        val session = Session()
+        val image = SeedSource.Image("photo.png", listOf(blue, red))
+
+        session.edit(DocumentChange.SetSeed(red, SeedSource.Typed), at = 0)
+        val typed = session.document
+        session.edit(DocumentChange.SetSeed(blue, image), at = 100)
+        session.edit(DocumentChange.SetSeed(red, SeedSource.Image("other.png", listOf(red))), at = 200)
+
+        assertEquals(3, session.history.persisted().size)
+        assertEquals(image, session.history.undo()?.seedSource)
+        assertEquals(typed, session.history.undo())
+    }
+
+    @Test
+    fun history_chipSwapWithinOneImage_stillFoldsIntoTheImageSeed() {
+        val session = Session()
+        val image = SeedSource.Image("photo.png", listOf(blue, red))
+
+        session.edit(DocumentChange.SetSeed(blue, image), at = 0)
+        session.edit(DocumentChange.SetSeed(red, image), at = 100)
+
+        assertEquals(1, session.history.persisted().size)
+        assertEquals(ThemeDocument.Default, session.history.undo())
+    }
+
     private fun contrast(hundredths: Int): DocumentChange = DocumentChange.SetContrast(ContrastLevel(hundredths))
 
     /**

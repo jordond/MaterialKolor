@@ -2,15 +2,19 @@ package com.materialkolor.builder.feature.image
 
 import com.materialkolor.builder.ViewModelHarness
 import com.materialkolor.builder.core.platform.Paste
+import com.materialkolor.builder.core.session.SessionTestBase
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.history.History
 import com.materialkolor.builder.domain.model.SeedSource
-import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.fakes.FakeClipboard
 import com.materialkolor.builder.fakes.FakeImageHandle
 import com.materialkolor.builder.fakes.FakeImageInput
 import com.materialkolor.builder.fakes.FakePasteInput
+import com.materialkolor.builder.fakes.FakeRouter
+import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
@@ -33,7 +37,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ImageSeedModelTest {
+class ImageSeedModelTest : SessionTestBase() {
     private val harness = ViewModelHarness()
     private val images = FakeImageInput()
     private val pastes = FakePasteInput()
@@ -104,53 +108,55 @@ class ImageSeedModelTest {
             harness.clearAndJoin()
         }
 
+    // b-311a
+    // Through the workspace model, where the host's reveal lands each seed, on the session's clock.
+
     @Test
-    fun topCandidate_isOneUndoEntry_andAChipSwapPastTheMergeWindowIsOneMore() =
+    fun imageSeed_rightAfterATypedSeed_isStillItsOwnUndoEntry() =
         runTest {
             images.decoded[photo] = decodedOf(QuadrantColors)
+            val workspace = workspace()
             val (_, results) = model()
+            workspace.edit(DocumentChange.SetSeed(TYPED, SeedSource.Typed), EditPhase.Discrete)
+            val typed = workspace.state.value.document
+
             images.drop(photo)
             runCurrent()
             val seeded = results.single().shouldBeInstanceOf<ImageSeedResult.Seeded>()
-            val history = History()
+            workspace.land(seeded)
 
-            // A typed seed first, then the image a full merge window later, so the image is its own entry.
-            val start = record(history, ThemeDocument.Default, DocumentChange.SetSeed(TYPED, SeedSource.Typed), 0)
-            val top = record(history, start, seeded.change, MERGE_WINDOW_MILLIS + 1)
-            // The chip swap steps the clock past the merge window again.
-            val chip = seeded.source.candidates[1]
-            val swapped = record(
-                history,
-                top,
-                DocumentChange.SetSeed(chip, seeded.source),
-                2 * (MERGE_WINDOW_MILLIS + 1),
-            )
-
-            swapped.seed shouldBe chip
-            swapped.seedSource shouldBe seeded.source
-            history.undo() shouldBe top
-            history.undo() shouldBe start
+            workspace.state.value.document.seed shouldBe seeded.top
+            workspace.undo()
+            workspace.state.value.document shouldBe typed
             harness.clearAndJoin()
         }
 
     @Test
-    fun chipSwap_insideTheMergeWindow_foldsIntoTheImageSeed() =
+    fun chipSwap_insideTheMergeWindow_foldsIntoTheImageSeed_andPastItIsOneMore() =
         runTest {
             images.decoded[photo] = decodedOf(QuadrantColors)
+            val workspace = workspace()
+            val start = workspace.state.value.document
             val (_, results) = model()
             images.drop(photo)
             runCurrent()
             val seeded = results.single().shouldBeInstanceOf<ImageSeedResult.Seeded>()
-            val history = History()
-            val start = ThemeDocument(seed = TYPED)
+            workspace.land(seeded)
+            val top = workspace.state.value.document
+            val (second, third) = seeded.source.candidates.drop(1)
 
-            val top = record(history, start, seeded.change, 0)
-            val chip = seeded.source.candidates[1]
-            record(history, top, DocumentChange.SetSeed(chip, seeded.source), MERGE_WINDOW_MILLIS - 1)
+            // A moment later, so it folds, then a full merge window on, so it does not.
+            advanceTimeBy(MERGE_WINDOW_MILLIS - 1)
+            workspace.edit(DocumentChange.SetSeed(second, seeded.source), EditPhase.Discrete)
+            advanceTimeBy(MERGE_WINDOW_MILLIS + 1)
+            workspace.edit(DocumentChange.SetSeed(third, seeded.source), EditPhase.Discrete)
 
-            // Seed edits a moment apart fold into one, the way two typed seeds do.
-            history.undo() shouldBe start
-            history.undo().shouldBeNull()
+            workspace.state.value.document.seedSource shouldBe seeded.source
+            workspace.undo()
+            workspace.state.value.document.seed shouldBe second
+            workspace.undo()
+            workspace.state.value.document shouldBe start
+            top.seed shouldBe seeded.top
             harness.clearAndJoin()
         }
 
@@ -299,6 +305,67 @@ class ImageSeedModelTest {
             harness.clearAndJoin()
         }
 
+    // b-311a
+
+    @Test
+    fun pickerOpening_stopsTheImageOnItsWay() =
+        runTest {
+            val gate = CompletableDeferred<Unit>()
+            images.decodeGate = gate
+            images.decoded[photo] = decodedOf(QuadrantColors)
+            val (model, results) = model()
+            images.drop(photo)
+            runCurrent()
+
+            model.follow(picking = true, project = 0)
+            model.state.value.arriving
+                .shouldBeNull()
+            gate.complete(Unit)
+            runCurrent()
+            advanceTimeBy(LANDING_TIMEOUT_MILLIS + 1)
+
+            results.shouldBeEmpty()
+            model.state.value.newest
+                .shouldBeNull()
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun projectSwitch_stopsTheImageOnItsWay() =
+        runTest {
+            val gate = CompletableDeferred<Unit>()
+            images.decodeGate = gate
+            images.decoded[photo] = decodedOf(QuadrantColors)
+            val (model, results) = model()
+            images.drop(photo)
+            runCurrent()
+
+            model.follow(picking = false, project = 1)
+            gate.complete(Unit)
+            runCurrent()
+            advanceTimeBy(LANDING_TIMEOUT_MILLIS + 1)
+
+            results.shouldBeEmpty()
+            model.state.value shouldBe ImageSeedModel.State()
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun severalPastedFiles_seedFromTheLastThatReadsAsAnImage() =
+        runTest {
+            images.decoded[photo] = decodedOf(QuadrantColors)
+            val (_, results) = model()
+
+            pastes.paste(Paste.Files(listOf(FakeImageHandle("first.png"), photo, FakeImageHandle("notes.txt"))))
+            runCurrent()
+
+            results
+                .single()
+                .shouldBeInstanceOf<ImageSeedResult.Seeded>()
+                .source.name shouldBe "photo.png"
+            harness.clearAndJoin()
+        }
+
     /** A model on the fakes, with every result it sends collected as it comes. */
     private fun TestScope.model(): Pair<ImageSeedModel, List<ImageSeedResult>> {
         val model = harness.own(ImageSeedModel(images, pastes))
@@ -309,16 +376,16 @@ class ImageSeedModelTest {
         return model to results
     }
 
-    /** Records [change] on [before] at [now] and returns the document it makes. */
-    private fun record(
-        history: History,
-        before: ThemeDocument,
-        change: DocumentChange,
-        now: Long,
-    ): ThemeDocument {
-        val after = change.apply(before)
-        history.record(before, after, change, EditPhase.Discrete, now)
-        return after
+    /** A workspace on a booted session, which edits on the test's clock. */
+    private suspend fun TestScope.workspace(): WorkspaceModel {
+        val (session, preferences) = session()
+        booted(session)
+        return harness.own(WorkspaceModel(session, preferences, FakeClipboard(), FakeRouter(), ThemeResolver()))
+    }
+
+    /** Lands [seeded] the way the host's reveal does once its crossfade is under way. */
+    private fun WorkspaceModel.land(seeded: ImageSeedResult.Seeded) {
+        edit(seeded.change, EditPhase.Discrete)
     }
 
     private companion object {

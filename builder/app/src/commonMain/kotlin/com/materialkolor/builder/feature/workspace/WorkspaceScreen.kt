@@ -189,6 +189,12 @@ internal fun WorkspaceScreen(
             is WorkspaceAction.SetColorAnimationDuration -> {
                 model.setColorAnimationDuration(action.target, action.durationMs)
             }
+            // b-311a
+            is WorkspaceAction.ShowWithdrawableToast -> {
+                val toast = action.toast
+                val shown = toasts.show(toast.message, toast.actionLabel, toast.duration, toast.onAction)
+                action.onShown { toasts.dismiss(shown) }
+            }
         }
     }
 
