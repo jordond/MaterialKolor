@@ -109,13 +109,17 @@ internal enum class ShortcutGroup {
  * The keyboard map (spec section 6), each shortcut with the chords that press it.
  *
  * Shortcuts marked [inFields] fire while a text field has focus. The rest stay out of the way of
- * typing, and every single key, Space included, can be turned off in the cheat sheet. V, the held B
- * and the keys of the export sheet are not here yet.
+ * typing, and every single key, Space included, can be turned off in the cheat sheet.
+ *
+ * V and the held B work the dock straight from the keys, so no registry command runs them and
+ * [inRegistry] is false for both. The export sheet takes C and Shift+C for its own copies, since
+ * the page never hears a key pressed inside it.
  */
 internal enum class Shortcut(
     val group: ShortcutGroup,
     val chords: List<Chord>,
     val inFields: Boolean = false,
+    val inRegistry: Boolean = true, // b-315c
 ) {
     Palette(ShortcutGroup.General, listOf(Chord(physical(Key.K, "K"), primary = true)), inFields = true),
     CheatSheet(ShortcutGroup.General, listOf(Chord(ChordKey.Typed('?', Key.Slash, usShift = true)))),
@@ -157,6 +161,10 @@ internal enum class Shortcut(
     DeviceWidth(ShortcutGroup.Preview, listOf(Chord(physical(Key.W, "W")))),
     Fullscreen(ShortcutGroup.Preview, listOf(Chord(physical(Key.F, "F")))),
     Poster(ShortcutGroup.Preview, listOf(Chord(physical(Key.Backslash, "\\"), primary = true)), inFields = true),
+
+    // b-315c
+    VisionMenu(ShortcutGroup.Preview, listOf(Chord(physical(Key.V, "V"))), inRegistry = false),
+    Grayscale(ShortcutGroup.Preview, listOf(Chord(physical(Key.B, "B"))), inRegistry = false),
     ;
 
     /** The chords written out for this platform, "P, Ctrl+O" say. */

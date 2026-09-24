@@ -45,6 +45,12 @@ internal enum class VisionSimulation {
     Achromatopsia,
 }
 
+// b-315c
+
+/** What the canvas shows for this simulation, grayscale while B is [held] (F-25). */
+internal fun VisionSimulation.whileHeld(held: Boolean): VisionSimulation =
+    if (held) VisionSimulation.Achromatopsia else this
+
 /**
  * The preview and its tabs (F-19), the active tab kept clear of [contentPadding].
  *
@@ -64,7 +70,7 @@ internal fun CanvasArea(
     val preview = rememberPreviewSplit(state.view.mode, state.view.splitFraction) { fraction ->
         dispatcher.dispatch(WorkspaceAction.SetSplitFraction(fraction))
     }
-    val specs = rememberPaneSpecs(state.vision)
+    val specs = rememberPaneSpecs(state.vision.whileHeld(state.grayscaleHeld)) // b-315c
     val compact = LocalLayout.current.windowClass == WindowClass.Compact
     Column(modifier.fillMaxSize()) {
         CanvasTabs(

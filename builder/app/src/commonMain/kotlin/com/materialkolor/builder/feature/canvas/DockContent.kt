@@ -102,6 +102,10 @@ internal fun DockContent(
         VisionMenu(
             vision = state.vision,
             onPick = { vision -> dispatcher.dispatch(WorkspaceAction.SetVision(vision)) },
+            // b-315c
+            open = state.visionMenuOpen,
+            onOpenChange = { open -> dispatcher.dispatch(WorkspaceAction.SetVisionMenuOpen(open)) },
+            held = state.grayscaleHeld,
         )
         if (!state.fullscreen) {
             BuilderIconButton(

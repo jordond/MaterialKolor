@@ -363,6 +363,9 @@ class ShortcutsTest {
         after.panel shouldBe null
         after.inspect shouldBe false
         after.fullscreen shouldBe false
+        // b-315c
+        after.visionMenuOpen shouldBe false
+        after.grayscaleHeld shouldBe false
         platform.clipboard.texts shouldBe emptyList()
         onAllNodes(hasContentDescription("Fullscreen")).fetchSemanticsNodes().size shouldBe 1
     }
@@ -387,6 +390,9 @@ private val SINGLE_KEYS = listOf(
     Key.U,
     Key.W,
     Key.F,
+    // b-315c
+    Key.V,
+    Key.B,
 )
 
 private val SHIFTED_KEYS = listOf(Key.L, Key.D, Key.C, Key.N, Key.Slash)

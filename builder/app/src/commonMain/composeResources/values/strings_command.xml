@@ -67,7 +67,8 @@
     <string name="command_key_library_3">Library Unstyled</string>
     <string name="command_key_library_4">Library Fluent</string>
     <string name="command_key_library_5">Library Custom</string>
-    <string name="command_key_copy_seed">Copy the seed hex</string>
+    <!-- b-315c -->
+    <string name="command_key_copy_seed">Copy the seed hex, or the open file in export</string>
     <string name="command_key_undo">Undo the theme, or the text inside a field</string>
     <string name="command_key_redo">Redo the theme, or the text inside a field</string>
     <string name="command_key_add_image">Add an image</string>
@@ -87,4 +88,13 @@
     <string name="command_key_new_project">New project</string>
     <!-- The key name for Escape in the cheat sheet. -->
     <string name="command_key_esc">Esc</string>
+
+    <!-- b-315c -->
+    <string name="command_key_vision_menu">Open the Vision menu</string>
+    <string name="command_key_grayscale">Grayscale preview while held</string>
+    <!-- The toast once a color pasted outside any field sets the seed. The argument is its hex, such as "#6750A4". -->
+    <string name="command_pasted_seed">Seed set to %1$s</string>
+    <!-- The toast once a share link or code is pasted outside any field, with an Open action. -->
+    <string name="command_pasted_link">Open the shared theme?</string>
+    <string name="command_pasted_open">Open</string>
 </resources>

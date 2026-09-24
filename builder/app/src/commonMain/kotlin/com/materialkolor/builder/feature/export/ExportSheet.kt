@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +26,8 @@ import com.materialkolor.builder.core.platform.Clipboard
 import com.materialkolor.builder.core.platform.FileSaver
 import com.materialkolor.builder.domain.capability.Capabilities
 import com.materialkolor.builder.domain.persist.ExportMode
+import com.materialkolor.builder.feature.command.Shortcut
+import com.materialkolor.builder.feature.command.rememberPanelShortcuts
 import com.materialkolor.builder.feature.topbar.LibrarySwitcher
 import com.materialkolor.builder.feature.workspace.ManualCopyDialog
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
@@ -92,6 +95,9 @@ private enum class CopyKind {
  * never says Copied. On a touch screen whose share sheet takes the zip, the zip goes to the share
  * sheet, and anywhere else it downloads. A share sheet someone closes counts as done.
  *
+ * C and Shift+C copy here as Copy file and Copy all do, from inside the key press, while no text
+ * field in the sheet takes input.
+ *
  * While the package or the theme name field holds a draft that is not valid, the sheet says what is
  * wrong in place of the files and Copy file, Copy all and Download wait for it (R-B-309).
  *
@@ -119,12 +125,13 @@ internal fun ExportSheet(
     modifier: Modifier = Modifier,
     returnFocusTo: FocusRequester? = null,
 ) {
+    val keys = rememberPanelShortcuts() // b-315c
     BuilderSheet(
         visible = visible,
         onDismissRequest = { workspace.dispatch(WorkspaceAction.ClosePanel) },
         title = stringResource(Res.string.export_title),
         presentation = SheetPresentation.of(LocalLayout.current),
-        modifier = modifier,
+        modifier = modifier.then(keys.modifier), // b-315c
         returnFocusTo = returnFocusTo,
     ) {
         val scope = rememberCoroutineScope()
@@ -163,6 +170,26 @@ internal fun ExportSheet(
         val draftProblems = drafts.all
         val ready = (outcome as? ExportOutcome.Ready)?.takeIf { draftProblems.isEmpty() }
         val problems = (draftProblems + (outcome as? ExportOutcome.Blocked)?.problems.orEmpty()).distinct()
+        // b-315c
+        // C copies the file picked and Shift+C every file, as Copy file and Copy all do.
+        val picked = ready?.fileAt(state.selectedPath)
+        SideEffect {
+            keys.onShortcut = { shortcut ->
+                when {
+                    shortcut == Shortcut.CopySeed && picked != null -> {
+                        copy(CopyKind.File, picked.text)
+                        true
+                    }
+                    shortcut == Shortcut.CopyAll && ready != null -> {
+                        copy(CopyKind.All, ready.allText)
+                        true
+                    }
+                    else -> {
+                        false
+                    }
+                }
+            }
+        }
         val spacing = LocalBuilderTokens.current.spacing
         // b-221f
         // The sheet clips at its edge, so the body stands 4 dp in, a focus ring's offset plus its width,

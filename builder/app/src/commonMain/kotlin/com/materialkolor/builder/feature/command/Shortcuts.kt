@@ -5,6 +5,8 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,6 +14,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -36,6 +40,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.InterceptPlatformTextInput
 import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.PlatformTextInputInterceptor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -52,6 +57,7 @@ import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 /**
@@ -68,6 +74,11 @@ internal class ShortcutsModel(
 ) : ViewModel() {
     /** Whether this runs on an Apple system, where the shortcuts take Cmd. */
     val apple: Boolean = isApple(environment.browser)
+
+    // b-315c
+
+    /** Emits when the page goes out of sight, which lets go of a held B whose release never comes. */
+    val pageHides: Flow<Unit> = environment.pageHides
 
     /** Turn the single-key shortcuts on or off, in every tab of this browser. */
     fun setSingleKeys(on: Boolean) {
@@ -99,6 +110,9 @@ internal class ShortcutFocus {
 
     /** How many text input sessions have opened below the holder so far. */
     internal var sessionStarts: Int = 0
+
+    /** Whether single keys are on, kept here for the keys a panel takes itself. */
+    internal var singleKeys: Boolean = true // b-315c
 
     private var fromKeys = false
 
@@ -168,7 +182,55 @@ internal fun ShortcutScope(
         }
     }
     InterceptPlatformTextInput(interceptor) {
-        CompositionLocalProvider(LocalAppleKeys provides model.apple, content = content)
+        CompositionLocalProvider(
+            LocalAppleKeys provides model.apple,
+            LocalShortcutFocus provides focus, // b-315c
+            content = content,
+        )
+    }
+}
+
+// b-315c
+
+/** The page's [ShortcutFocus], for the panels that take keys of their own, or null outside the page. */
+internal val LocalShortcutFocus: ProvidableCompositionLocal<ShortcutFocus?> = staticCompositionLocalOf { null }
+
+/**
+ * The keys a panel takes itself, since the page under it never hears a key pressed inside it. Put
+ * [PanelShortcuts.modifier] on the panel and set [PanelShortcuts.onShortcut].
+ *
+ * The page's rules hold here too. Nothing fires while a text field in the panel takes input, no
+ * single key fires with single keys off, and Cmd or Ctrl with V, C, X or A is always left alone. A
+ * panel drawn outside the page takes no keys.
+ */
+@Composable
+internal fun rememberPanelShortcuts(): PanelShortcuts {
+    val focus = LocalShortcutFocus.current
+    val apple = LocalAppleKeys.current
+    val inputModes = LocalInputModeManager.current
+    return remember(focus, apple, inputModes) { PanelShortcuts(focus, apple, inputModes) }
+}
+
+/** What [rememberPanelShortcuts] gives a panel. */
+@Stable
+internal class PanelShortcuts(
+    private val focus: ShortcutFocus?,
+    private val apple: Boolean,
+    private val inputModes: InputModeManager,
+) {
+    /** Runs the shortcut pressed and says whether it did anything. Set it as the panel composes. */
+    var onShortcut: (Shortcut) -> Boolean = { false }
+
+    /** Goes on the panel, around everything that takes focus in it. */
+    val modifier: Modifier = if (focus == null) Modifier else Modifier.onKeyEvent(::onKey)
+
+    private fun onKey(event: KeyEvent): Boolean {
+        val focus = focus ?: return false
+        if (event.type != KeyEventType.KeyDown) return false
+        val (shortcut, chord) = Shortcut.match(event, apple, focus.singleKeys) ?: return false
+        if (focus.typing && !shortcut.firesInFields(chord)) return false
+        inputModes.useKeyboard()
+        return onShortcut(shortcut)
     }
 }
 
@@ -184,6 +246,10 @@ internal fun ShortcutScope(
  *
  * A shortcut whose command cannot run toasts the reason once per press, all but Undo and Redo, which
  * stay quiet with nothing to undo or redo as they do in any editor.
+ *
+ * V opens the dock's Vision menu, and B shows the canvas in grayscale for as long as it is held. The
+ * key's repeats change nothing, and B lets go when it comes up, when the holder or the window loses
+ * focus and when the page goes out of sight, since the release may never reach the page then.
  */
 @Composable
 internal fun rememberShortcuts(
@@ -198,6 +264,39 @@ internal fun rememberShortcuts(
     val inputModes = LocalInputModeManager.current
     val scope = rememberCoroutineScope()
     ClaimFocusWhenNowhere(focus, state.panel)
+    // b-315c
+    val singleKeys = state.preferences.singleKeyShortcuts
+    SideEffect { focus.singleKeys = singleKeys }
+    val grayscale = remember { HeldKey() }
+
+    fun letGoOfGrayscale() {
+        if (!grayscale.down) return
+        grayscale.down = false
+        dispatcher.dispatch(WorkspaceAction.HoldGrayscale(held = false))
+    }
+
+    LaunchedEffect(model) { model.pageHides.collect { letGoOfGrayscale() } }
+    val window = LocalWindowInfo.current
+    LaunchedEffect(window) {
+        snapshotFlow { window.isWindowFocused }.collect { focused -> if (!focused) letGoOfGrayscale() }
+    }
+
+    // V and B work the dock straight away, with no command behind them and no focus to claim after.
+    fun dockKey(shortcut: Shortcut) {
+        when (shortcut) {
+            Shortcut.VisionMenu -> {
+                dispatcher.dispatch(WorkspaceAction.SetVisionMenuOpen(open = true))
+            }
+            Shortcut.Grayscale -> {
+                if (grayscale.down) return
+                grayscale.down = true
+                dispatcher.dispatch(WorkspaceAction.HoldGrayscale(held = true))
+            }
+            else -> {
+                Unit
+            }
+        }
+    }
 
     // After a shortcut, focus that the shortcut left nowhere goes to the holder.
     fun claimIfNowhere() {
@@ -230,12 +329,21 @@ internal fun rememberShortcuts(
         event: KeyEvent,
         preview: Boolean,
     ): Boolean {
+        // b-315c
+        // B lets go on its way down, whatever holds focus by then, and leaves the key to it.
+        if (event.type == KeyEventType.KeyUp && event.key == Key.B && preview) letGoOfGrayscale()
         if (event.type != KeyEventType.KeyDown) return false
         if (event.key == Key.Escape && !event.anyModifier()) return !preview && escape()
         val singleKeys = latestState.preferences.singleKeyShortcuts
         val (shortcut, chord) = Shortcut.match(event, model.apple, singleKeys) ?: return false
         if (preview != shortcut.firesInFields(chord)) return false
         if (focus.typing && !shortcut.firesInFields(chord)) return false
+        // b-315c
+        if (!shortcut.inRegistry) {
+            inputModes.useKeyboard()
+            dockKey(shortcut)
+            return true
+        }
         val command = latestCommands.firstOrNull { command -> command.shortcut == shortcut } ?: return false
         inputModes.useKeyboard()
         when (val commandState = command.state) {
@@ -260,6 +368,7 @@ internal fun rememberShortcuts(
                 focus.pageHasFocus = focusState.hasFocus
                 focus.holderFocused = focusState.isFocused
                 if (!focusState.isFocused) focus.armed = false
+                if (!focusState.isFocused) letGoOfGrayscale() // b-315c
             }.focusProperties { canFocus = focus.armed }
             .focusRequester(focus.holder)
             .focusTarget()
@@ -295,6 +404,11 @@ private fun ClaimFocusWhenNowhere(
 }
 
 private const val SETTLE_FRAMES = 2
+
+/** Whether a held key is down, known at once rather than a recomposition later. */
+private class HeldKey {
+    var down: Boolean = false
+}
 
 /** The shortcuts that say nothing when their command cannot run, since an empty history is no news. */
 private val QUIET_WHEN_DISABLED = setOf(Shortcut.Undo, Shortcut.Redo)
