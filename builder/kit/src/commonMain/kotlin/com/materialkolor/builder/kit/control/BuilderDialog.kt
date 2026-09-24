@@ -48,7 +48,10 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * @param[returnFocusTo] The trigger that opened the dialog. Attach it to the trigger with
  * `Modifier.focusRequester`.
  * @param[actions] The buttons along the bottom, the confirming one last.
- * @param[content] The body.
+ * @param[content] The body. It takes at most the height the title and the actions leave, in every
+ * skin, so a picture or a list in it gets what is left and the actions stay on screen, on a phone on
+ * its side as well. A list that sits over more of the body takes `Modifier.weight(1f, fill = false)`
+ * from the body's column, so what is under it keeps its room.
  */
 @Composable
 public fun BuilderDialog(
@@ -135,7 +138,7 @@ private fun HeadlessDialog(
             verticalArrangement = Arrangement.spacedBy(tokens.spacing.large),
         ) {
             BuilderText(title, Modifier.modalTitle(), style = BuilderTextStyle.Title, color = style.content)
-            Column(content = content)
+            Column(Modifier.weight(1f, fill = false), content = content) // b-230c
             Row(
                 modifier = Modifier.align(Alignment.End),
                 horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),

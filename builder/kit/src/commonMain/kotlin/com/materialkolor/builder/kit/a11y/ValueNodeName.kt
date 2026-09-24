@@ -6,6 +6,9 @@ import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.stateDescription
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.control.roleLessName
+import com.materialkolor.builder.kit.generated.resources.Res
+import com.materialkolor.builder.kit.generated.resources.role_slider
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Whether a node that plays no role carries its value in its name here. Read it in composition and
@@ -20,12 +23,21 @@ public val foldsValueIntoName: Boolean
     get() = LocalFoldsStateIntoName.current
 
 /**
+ * The kit's word for a slider as it reads after a name, "slider", in the current locale. Read it in
+ * composition and hand it to [valueNodeName] for a node that works as a slider, so it reads the way
+ * the kit's own sliders do on the web.
+ */
+public val sliderRoleWord: String
+    @Composable
+    get() = stringResource(Res.string.role_slider)
+
+/**
  * Names a node that plays no role but holds a value, such as the handle between the two copies of
  * a split preview.
  *
- * Where [folds] holds, on the web, the name and the value go in as one text, "Split, 50% Light".
- * Elsewhere [name] is the content description. The value is the state description everywhere, for
- * when the web mirror carries it across.
+ * Where [folds] holds, on the web, the name, the role word and the value go in as one text, "Split,
+ * slider, 50% Light". Elsewhere [name] is the content description. The value is the state
+ * description everywhere, for when the web mirror carries it across.
  *
  * Call it in a semantics block, so a value that moves with a drag is written there and nothing
  * recomposes.
@@ -33,13 +45,20 @@ public val foldsValueIntoName: Boolean
  * @param[name] What the node is, such as "Split".
  * @param[value] What it holds now, such as "50% Light".
  * @param[folds] [foldsValueIntoName], read in composition.
+ * @param[roleWord] The word for what the node works as, such as [sliderRoleWord], read on the web
+ * between the name and the value. Left null, the node names no role.
  */
 public fun SemanticsPropertyReceiver.valueNodeName(
     name: String,
     value: String,
     folds: Boolean,
+    roleWord: String? = null,
 ) {
-    val named = if (folds) listOf(name, value).filter { part -> part.isNotBlank() }.joinToString(", ") else name
+    val named = if (folds) {
+        listOfNotNull(name, roleWord, value).filter { part -> part.isNotBlank() }.joinToString(", ")
+    } else {
+        name
+    }
     roleLessName(named, asText = folds)
     stateDescription = value
 }

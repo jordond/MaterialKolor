@@ -104,11 +104,28 @@ public fun Modifier.foldedMenuItemName(
     return foldedName(name, FoldedRole.MenuItem, state, enabled)
 }
 
+/**
+ * Names a control an app draws for itself that is the current one of a set or not, without being a
+ * tab or an option, such as a button that leads to one destination of a dashboard. Put it after the
+ * control's own `selected`, which reports the state off the web. On the web whether it is the
+ * current one travels in the name, with no role word, "Reports, selected".
+ *
+ * @param[name] What the control shows, read out as its name.
+ * @param[selected] Whether it is the current one.
+ * @param[enabled] Whether it takes input. On the web a disabled control says so in its name.
+ */
+@Composable
+public fun Modifier.foldedSelectedName(
+    name: String,
+    selected: Boolean,
+    enabled: Boolean = true,
+): Modifier = foldedName(name, role = null, ControlState.Selected(selected), enabled)
+
 /** [name] as the content description, with [role] and [state] folded in on the web. */
 @Composable
 private fun Modifier.foldedName(
     name: String,
-    role: FoldedRole,
+    role: FoldedRole?,
     state: ControlState?,
     enabled: Boolean,
 ): Modifier {

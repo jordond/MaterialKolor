@@ -6,6 +6,7 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.text
@@ -313,8 +314,8 @@ internal fun Modifier.foldOption(
 
 /**
  * The name a select's field goes by, "Style, pop-up button, Tonal spot" where
- * [LocalFoldsStateIntoName] is set and [label] elsewhere. Every skin's field and the field over an
- * open panel read the same.
+ * [LocalFoldsStateIntoName] is set and [label] elsewhere. Every skin's field reads the same. The
+ * field over an open panel opens nothing and reads through [shownChoiceName] instead.
  */
 @Composable
 internal fun selectFieldName(
@@ -322,6 +323,27 @@ internal fun selectFieldName(
     current: String,
     enabled: Boolean,
 ): String = stateName(label, ControlState.Value(current), enabled, role = FoldedRole.PopUpButton)
+
+/**
+ * Names a select's field that only shows the choice, the one over an open panel, where
+ * [LocalFoldsStateIntoName] is set. It opens nothing, so there it plays no role, since the mirror
+ * writes a dropdown list as a menu and a button would do nothing. Its label and choice go in as
+ * text through [roleLessName], "Style, Vibrant", with no role word. It stays in the mirror, as the
+ * only label the options under it have. Elsewhere it adds nothing and the field keeps its own
+ * semantics.
+ *
+ * It clears the semantics of the field it lands on, so it goes first on the field, before the
+ * modifiers that set its role and state.
+ */
+@Composable
+internal fun Modifier.shownChoiceName(
+    label: String,
+    current: String,
+): Modifier {
+    if (!LocalFoldsStateIntoName.current) return this
+    val name = stateName(label, ControlState.Value(current))
+    return clearAndSetSemantics { roleLessName(name, asText = true) }
+}
 
 /**
  * Names a node that plays no role, such as a slider, a progress bar or a group of options.
