@@ -16,11 +16,7 @@ export async function themeCard(
 ): Promise<Response> {
   const url = new URL(request.url);
   const theme = code === null ? null : decodeShareCode(code);
-  if (theme === null) {
-    // Not cached for good, a code newer than this Worker may read after the next deploy.
-    const fallback = await env.ASSETS.fetch(new URL(DEFAULT_CARD, url));
-    return withSiteHeaders(bodyFor(request, fallback), fallback.headers, NO_CACHE, fallback.status);
-  }
+  if (theme === null) return defaultCard(request, env);
   // Keyed by the path alone, so a query string cannot make the Worker draw the same card again.
   const key = new Request(`${url.origin}${url.pathname}`);
   const cache = caches.default;
@@ -29,6 +25,13 @@ export async function themeCard(
   const card = withSiteHeaders(await renderCard(theme), new Headers({ 'Content-Type': 'image/png' }), IMMUTABLE);
   context.waitUntil(cache.put(key, card.clone()));
   return withBody(request, card);
+}
+
+/** The site's default card, for a code that does not read or a card that fails to draw. */
+export async function defaultCard(request: Request, env: Env): Promise<Response> {
+  // Not cached for good, a code newer than this Worker may read after the next deploy.
+  const fallback = await env.ASSETS.fetch(new URL(DEFAULT_CARD, request.url));
+  return withSiteHeaders(bodyFor(request, fallback), fallback.headers, NO_CACHE, fallback.status);
 }
 
 /** The card for [theme] as PNG bytes. */

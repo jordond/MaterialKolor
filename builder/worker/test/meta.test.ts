@@ -15,9 +15,10 @@ describe('/t/<code>', () => {
     const meta = await metaOf(response);
     const theme = decodeShareCode(vector.code)!;
     const card = `${ORIGIN}/og/${vector.code}.png`;
-    expect(meta.get('og:title')).toEqual([
-      vector.projectName === null ? 'MaterialKolor Builder' : `${vector.projectName}, a MaterialKolor theme`,
-    ]);
+    const title = vector.projectName === null ? 'MaterialKolor Builder' : `${vector.projectName}, a MaterialKolor theme`;
+    expect(meta.get('title')).toEqual([title]);
+    expect(meta.get('og:title')).toEqual([title]);
+    expect(meta.get('description')).toEqual([themeDescription(theme)]);
     expect(meta.get('og:description')).toEqual([themeDescription(theme)]);
     expect(meta.get('og:description')![0]).toContain(vector.seedHex);
     expect(meta.get('og:url')).toEqual([`${ORIGIN}/t/${vector.code}`]);
@@ -37,10 +38,27 @@ describe('/t/<code>', () => {
   });
 
   it('escapes a project name that tries to leave its attribute', async () => {
+    // The page title holds the same name as plain text, where a quote is harmless, so this looks
+    // for the attribute it would add rather than the characters.
     const name = [...new TextEncoder().encode('x" onload="alert(1)')];
     const html = await (await SELF.fetch(`${ORIGIN}/t/${namedCode(name)}`)).text();
-    expect(html).not.toContain('x" onload=');
+    let injected = false;
+    const found = () => {
+      injected = true;
+    };
+    await new HTMLRewriter().on('[onload]', { element: found }).transform(new Response(html)).text();
+    expect(injected).toBe(false);
     expect(html).toContain('og:title');
+  });
+
+  it('escapes a project name that tries to leave the page title', async () => {
+    // The meta attributes hold the same name, where a bracket is harmless, so this reads the title alone.
+    const name = [...new TextEncoder().encode('</title><script>alert(1)</script>')];
+    const html = await (await SELF.fetch(`${ORIGIN}/t/${namedCode(name)}`)).text();
+    const title = /<title>([\s\S]*?)<\/title>/.exec(html)?.[1] ?? '';
+    expect(title).toContain('&lt;/title');
+    expect(title).toContain('&lt;script');
+    expect(title).toContain(', a MaterialKolor theme');
   });
 
   it.each([...BAD_CODES, ['missing', ''], ['not base64url', 'Adll%21'], ['nested', 'AdllOwAAAAAT/x']])(
@@ -80,11 +98,17 @@ describe('site headers', () => {
   });
 });
 
-/** Every meta tag's content by its property or name, and the canonical link, in page order. */
+/** Every meta tag's content by its property or name, the canonical link and the title, in page order. */
 async function metaOf(response: Response): Promise<Map<string, string[]>> {
   const found = new Map<string, string[]>();
   const add = (key: string, value: string) => found.set(key, [...(found.get(key) ?? []), value]);
+  let title = '';
   await new HTMLRewriter()
+    .on('head > title', {
+      text(chunk) {
+        title += chunk.text;
+      },
+    })
     .on('meta', {
       element(element) {
         const key = element.getAttribute('property') ?? element.getAttribute('name');
@@ -98,5 +122,6 @@ async function metaOf(response: Response): Promise<Map<string, string[]>> {
     })
     .transform(response)
     .text();
+  add('title', title);
   return found;
 }

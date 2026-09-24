@@ -2,7 +2,7 @@
 // and a way to spell codes the builder would never write.
 import { expect } from 'vitest';
 import json from '../../fixtures/share-codes.json';
-import { crc8, VERSION } from '../src/code';
+import { crc8, THEME_NAME_ALLOWANCE_BYTES, VERSION } from '../src/code';
 import { CONTENT_SECURITY_POLICY } from '../src/headers';
 
 /** The headers every Worker response carries, with [cacheControl] for its route. */
@@ -56,10 +56,49 @@ export function namedCode(name: readonly number[]): string {
   return codeOf([VERSION, 0xd9, 0x65, 0x3b, 0, 0, 0, 0x10, name.length, ...name]);
 }
 
+// Every custom slot code, the gaps left by retired slots skipped.
+const CUSTOM_SLOTS = [...range(18), ...range(11).map((slot) => slot + 30), 46, 47, 48];
+
+/**
+ * The longest code the builder writes, every section present and at its cap, with a theme name of
+ * [themeNameBytes]. Spelled out by hand here so it checks the sum behind `MAX_CODE_LENGTH`.
+ */
+export function longestCode(themeNameBytes: number = THEME_NAME_ALLOWANCE_BYTES): string {
+  // Every flag set, a seed, a distinct 24 byte name, tones off the defaults and threshold 1.
+  const accents = range(8).flatMap((index) => [
+    ...[0x07, 0x10, 0x20, 0x30],
+    ...[24, ...Array<number>(23).fill(0x61), 0x61 + index],
+    ...[41, 90, 80, 30, 1],
+  ]);
+  const pins = range(48).flatMap((role) => [role, 0x03, 1, 2, 3, 4, 5, 6]);
+  const options = [0x07, 0, ...varint(themeNameBytes), ...Array<number>(themeNameBytes).fill(0x54), 32];
+  return codeOf([
+    ...[VERSION, 0xd9, 0x65, 0x3b, 0, 0, 0, 0x3f],
+    ...[0x3f, ...Array<number>(18).fill(0x11)],
+    ...[0x22, 0x33, 0x44],
+    ...[8, ...accents],
+    ...[48, ...pins],
+    ...[48, ...Array<number>(48).fill(0x62)],
+    ...options,
+    ...CUSTOM_SLOTS.flatMap((slot) => [slot, 50, 0xff]),
+  ]);
+}
+
+function range(count: number): number[] {
+  return Array.from({ length: count }, (_, index) => index);
+}
+
+function varint(value: number): number[] {
+  const bytes: number[] = [];
+  for (; value >= 0x80; value >>>= 7) bytes.push((value & 0x7f) | 0x80);
+  return [...bytes, value];
+}
+
 /** The code the builder writes for the default theme, and some the builder would never read. */
 export const DEFAULT_CODE = 'AdllOwAAAAAT';
 export const BAD_CODES: readonly [string, string][] = [
   ['corrupt', 'AdllOwAAAAAU'],
   ['truncated', 'AdllOwAAAA'],
   ['newer version', codeOf([VERSION + 1, 0xd9, 0x65, 0x3b, 0, 0, 0, 0])],
+  ['over the length cap', longestCode(THEME_NAME_ALLOWANCE_BYTES + 1)],
 ];

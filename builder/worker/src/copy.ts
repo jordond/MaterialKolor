@@ -14,7 +14,7 @@ export function targetName(theme: SharedTheme): string {
   return theme.library === 'Material3' && theme.expressive ? 'Material 3 Expressive' : LIBRARY_NAMES[theme.library];
 }
 
-/** The `og:title`, or null when the theme has no project name and the page keeps its own. */
+/** The page title and `og:title`, or null when the theme has no project name and the page keeps its own. */
 export function themeTitle(theme: SharedTheme): string | null {
   return theme.projectName === null ? null : `${theme.projectName}, a MaterialKolor theme`;
 }

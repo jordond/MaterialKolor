@@ -12,8 +12,9 @@
     // Only link previews run code, everything else is served straight from the site.
     "run_worker_first": ["/t/*", "/og/*"]
   },
-  // The glyph atlas the theme card draws its text with, imported as bytes.
-  "rules": [{ "type": "Data", "globs": ["**/*.bin"] }],
+  // The glyph atlas the theme card draws its text with, imported as bytes. Wrangler has the same
+  // rule built in, and fallthrough false marks this one final so it stops warning about the shadow.
+  "rules": [{ "type": "Data", "globs": ["**/*.bin"], "fallthrough": false }],
   // Placeholder. The owner confirms the zone and the custom domain at B-505 deploy time.
   "routes": [{ "pattern": "materialkolor.com", "custom_domain": true }],
   "env": {
