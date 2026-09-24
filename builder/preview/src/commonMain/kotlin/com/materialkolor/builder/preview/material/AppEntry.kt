@@ -1,7 +1,5 @@
 package com.materialkolor.builder.preview.material
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.domain.persist.DeviceWidth
@@ -11,10 +9,11 @@ import com.materialkolor.builder.preview.split.PaneSpec
 /**
  * The Material 3 sample app, the Trips travel app, or the photo app when expressive.
  *
- * The app lays itself out for [deviceWidth] and fills whatever size it is given. A phone shows the
- * trip list and then the open trip, a tablet or desktop shows them side by side next to a rail.
- * Scaling the frame to fit the pane, down to 0.6, and scrolling past that belong to the canvas,
- * not the app.
+ * The app lays itself out for [deviceWidth] and fills whatever size it is given. On a phone Trips
+ * shows the trip list and then the open trip, and on a tablet or desktop it shows them side by side
+ * next to a rail. The photo app keeps one feed at every width, above a bottom bar on a phone and
+ * beside a wide rail elsewhere. Scaling the frame to fit the pane, down to 0.6, and scrolling past
+ * that belong to the canvas, not the app.
  *
  * @param[spec] The pane the app is drawn in.
  * @param[state] What the app remembers, shared by both copies.
@@ -31,7 +30,7 @@ internal fun MaterialAppEntry(
     modifier: Modifier = Modifier,
 ) {
     if (expressive) {
-        Box(modifier.fillMaxSize()) // stub, the Expressive photo app lands with B-402
+        PhotoApp(state, deviceWidth, modifier)
     } else {
         TripsApp(state, deviceWidth, modifier)
     }
