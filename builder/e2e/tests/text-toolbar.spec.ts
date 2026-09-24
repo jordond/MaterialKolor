@@ -85,19 +85,22 @@ test('the mirror keeps the page through a long press and hears the paste after i
 });
 
 // b-228a
-// D45 reaches the text the builder shows for copying by hand too. A share link and a refused copy's
-// hex sit in read only fields, where a long press brings up Copy with no handles, and the export
-// code takes no selection from a finger at all. Each keeps the mirror through a long press.
+// D45 reaches the text the builder shows for copying by hand too. A refused copy's hex sits in a read
+// only field, where a long press brings up Copy with no handles, and the export code takes no
+// selection from a finger at all. Each keeps the mirror through a long press.
+// b-228aa
+// The share link wraps like the export code, so a phone shows all of it, and a finger copies it
+// with Copy link or Share rather than by selecting.
 
-test('a long press on the share link keeps the mirror and shows Copy', async ({ page, context }) => {
+test('a long press on the share link keeps the mirror', async ({ page, context }) => {
   await openBuilder(page);
   const cdp = await context.newCDPSession(page);
-  await openBy(page, mirrorButton(page, 'Share'), mirrorButton(page, 'Copy link'));
-  const link = await copyField(page);
+  const link = page.locator('#cmp_a11y_root').getByLabel('Share link', { exact: true });
+  await openBy(page, mirrorButton(page, 'Share'), link);
+  const box = await boxOf(link);
   const before = await settledMirror(page);
 
-  const row = await longPressForRow(page, cdp, link, { readOnly: true });
-  expect(row.labels).toEqual(['Copy', 'Select all']);
+  await longPressAt(page, cdp, { x: box.x + 24, y: box.y + box.height / 2 });
   const after = await settledMirror(page);
   console.log(`b-228a mirror nodes in the share dialog: before ${before}, after the long press ${after}`);
   expect(after).toBeGreaterThan(before * 0.8);
@@ -131,13 +134,18 @@ test('a long press on the export code keeps the mirror', async ({ page, context 
   const box = await boxOf(code);
   const before = await settledMirror(page);
 
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: box.x + 120, y: box.y + 44 }] });
-  await page.waitForTimeout(800);
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await longPressAt(page, cdp, { x: box.x + 120, y: box.y + 44 });
   const after = await settledMirror(page);
   console.log(`b-228a mirror nodes on the export sheet: before ${before}, after the long press ${after}`);
   expect(after).toBeGreaterThan(before * 0.8);
 });
+
+/** Holds a finger at [at] past the long press timeout, then lifts it. */
+async function longPressAt(page: Page, cdp: CDPSession, at: { x: number; y: number }): Promise<void> {
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [at] });
+  await page.waitForTimeout(800);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+}
 
 /** The button named [name] in the mirror, the whole name when it is a string. */
 function mirrorButton(page: Page, name: string | RegExp): Locator {

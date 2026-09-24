@@ -114,7 +114,8 @@ private sealed interface CodePart {
  * The copy button sits in the top corner. Selecting text takes a part of the file, the button takes
  * all of it, byte for byte. On the web a finger does not select, since the selection's handles would
  * take the page's accessibility mirror over (D45), so there the button is how a finger copies. A
- * mouse and the keys still select.
+ * mouse still selects. On a touch screen with a keyboard a key brings selection back and the code
+ * area keeps its focus. No key selects on its own, so a keyboard copies all of it with the button.
  *
  * On the web the list of lines goes by [label], since the page reads it as a list and a list with
  * no name is announced as nothing but a list (S5 row 33).

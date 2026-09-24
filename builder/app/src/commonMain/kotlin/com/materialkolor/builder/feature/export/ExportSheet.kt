@@ -201,7 +201,13 @@ internal fun ExportSheet(
                 ZipButton(ready, files, dispatcher, workspace)
             }
         }
-        ManualCopyDialog(visible = manualOpen, text = manualText, onDismissRequest = { manualOpen = false })
+        // b-228aa
+        ManualCopyDialog(
+            visible = manualOpen,
+            text = manualText,
+            onDismissRequest = { manualOpen = false },
+            saveLabel = stringResource(if (zipShares(ready, files)) Res.string.export_share else Res.string.export_download),
+        )
     }
 }
 
@@ -306,9 +312,7 @@ private fun ZipButton(
     workspace: Dispatcher<WorkspaceAction>,
 ) {
     val scope = rememberCoroutineScope()
-    val coarse = LocalLayout.current.coarsePointer
-    val shareable = remember(ready, files) { ready != null && files.canShare(listOf(ready.zip)) }
-    val share = coarse && shareable
+    val share = zipShares(ready, files) // b-228aa
     BuilderButton(
         onClick = {
             if (ready == null) return@BuilderButton
@@ -326,6 +330,22 @@ private fun ZipButton(
         icon = if (share) IconId.Share else IconId.Download,
         enabled = ready != null,
     )
+}
+
+// b-228aa
+
+/**
+ * Whether the zip goes to the share sheet rather than a download, as on a touch screen whose sheet
+ * takes it. Settled before any click, and read by both the zip button and the manual copy hint.
+ */
+@Composable
+private fun zipShares(
+    ready: ExportOutcome.Ready?,
+    files: FileSaver,
+): Boolean {
+    val coarse = LocalLayout.current.coarsePointer
+    val shareable = remember(ready, files) { ready != null && files.canShare(listOf(ready.zip)) }
+    return coarse && shareable
 }
 
 /** One line that needs attention, with its icon. */

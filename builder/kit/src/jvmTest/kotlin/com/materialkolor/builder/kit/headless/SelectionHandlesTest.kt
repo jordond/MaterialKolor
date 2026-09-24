@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.control.BuilderHexField
 import com.materialkolor.builder.kit.control.BuilderSelect
 import com.materialkolor.builder.kit.control.BuilderTextField
@@ -94,17 +95,25 @@ class SelectionHandlesTest {
             onAllNodes(isSelectionHandle()).fetchSemanticsNodes().size shouldBeGreaterThan 0
         }
 
+    // b-228aa
+    // Foundation keeps the handles down until the finger lifts, and a lift on the field is a click
+    // that opens the select and drops the selection. So the finger slides off the field first.
     @Test
     fun select_inTree_takesALongPressWithNoHandle() =
         forEachSkin { _, skin ->
-            setContent {
-                Host(skin, inTree = true) {
-                    BuilderSelect("Mode", listOf("Ocean", "Forest"), "Ocean", {}, modifier = Tagged)
-                }
-            }
-            longPressField()
+            setContent { Host(skin, inTree = true) { Select() } }
+            longPressAndSlideOff()
             onAllNodes(isPopup()).assertCountEquals(0)
             onAllNodes(isSelectionHandle()).assertCountEquals(0)
+        }
+
+    @Test
+    fun materialSelect_inWindows_putsUpTheHandles() =
+        forEachSkin { _, skin ->
+            if (skin.library != Library.Material3) return@forEachSkin
+            setContent { Host(skin, inTree = false) { Select() } }
+            longPressAndSlideOff()
+            onAllNodes(isSelectionHandle()).fetchSemanticsNodes().size shouldBeGreaterThan 0
         }
 
     @Test
@@ -193,6 +202,11 @@ private fun Code() {
 }
 
 @Composable
+private fun Select() {
+    BuilderSelect("Mode", listOf("Ocean", "Forest"), "Ocean", {}, modifier = Tagged)
+}
+
+@Composable
 private fun HeroField() {
     BuilderHexField(
         value = Argb(0x0B6E4F),
@@ -218,6 +232,22 @@ private fun isSelectionHandle(): SemanticsMatcher =
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.longPressField(start: Dp = 24.dp) {
     onNodeWithTag(FieldTag).performTouchInput { longClick(Offset(start.toPx(), centerY)) }
+    waitForIdle()
+}
+
+/**
+ * Long presses the field's text, then slides the finger off the field before it lifts, so the lift
+ * is no click on the field.
+ */
+@OptIn(ExperimentalTestApi::class)
+private fun ComposeUiTest.longPressAndSlideOff(start: Dp = 24.dp) {
+    onNodeWithTag(FieldTag).performTouchInput {
+        down(Offset(start.toPx(), centerY))
+        advanceEventTime(viewConfiguration.longPressTimeoutMillis * 2)
+        move()
+        moveBy(Offset(0f, height * 2f))
+        up()
+    }
     waitForIdle()
 }
 

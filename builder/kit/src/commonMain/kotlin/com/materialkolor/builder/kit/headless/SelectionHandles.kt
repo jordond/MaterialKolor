@@ -4,12 +4,20 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -31,10 +39,13 @@ import com.materialkolor.builder.kit.layout.LocalLayout
  * anyone can see, but puts every handle's foot outside. A long press still selects a word, a drag
  * widens it, and the page's text toolbar still shows over it.
  *
- * This is public API that leans on two foundation internals, the handle visibility test in
+ * It is built on public API but leans on two foundation internals, the handle visibility test in
  * `CoreTextField` and the handle position `TextFieldSelectionManager` hands it. The b-228 e2e test
  * in `text-toolbar.spec.ts` trips when either moves. Drop it when CMP fixes the single-owner
  * listener, together with the in-page overlays.
+ *
+ * The clip costs the text its bottom pixel, so while the field has focus the caret and the
+ * selection highlight each lose their bottom pixel too.
  *
  * Goes on the box that holds a field's inner text, never on the field as a whole, since the clip
  * has to meet the text's own bottom edge. A multi-line field is out of its reach, since a handle on
@@ -61,9 +72,14 @@ internal fun Modifier.withoutSelectionHandles(enabled: Boolean = overlaysInTree)
  *
  * Foundation's selection container puts up both of its handle popups once a finger has selected in
  * it, and a popup takes the web mirror over for good. So while the last pointer over [content] was a
- * finger or a pen, the content shows without the container, and a mouse brings the container back.
- * Before any pointer comes by, a coarse pointer counts as a finger. Either way the area stays one
- * focus stop, so the keys that scroll it still reach it.
+ * finger or a pen, the content shows without the container, and a mouse or a key brings the
+ * container back. Before any pointer comes by, a coarse pointer counts as a finger. Either way the
+ * area stays one focus stop, so the keys that scroll it still reach it.
+ *
+ * The swap puts the focus target on another node, so focus held when the input changes is asked for
+ * again on the new one. A key brings the container back with focus kept, and its copy keys copy what
+ * a mouse selected. Foundation's container has no keys that select, so a keyboard alone copies the
+ * whole text with the caller's copy button.
  *
  * A finger loses selecting the text with a long press, and still scrolls. Drop this with
  * [withoutSelectionHandles].
@@ -80,22 +96,49 @@ internal fun TouchlessSelectionContainer(
     content: @Composable () -> Unit,
 ) {
     val coarse = LocalLayout.current.coarsePointer
-    var touch by remember { mutableStateOf(coarse) }
-    val watched = modifier.pointerInput(Unit) {
-        awaitPointerEventScope {
-            while (true) {
-                val type = awaitPointerEvent(PointerEventPass.Initial).changes.firstOrNull()?.type
-                if (type == PointerType.Mouse) {
-                    touch = false
-                } else if (type == PointerType.Touch || type == PointerType.Stylus || type == PointerType.Eraser) {
-                    touch = true
+    val input = remember { LastInput(coarse) }
+    val requester = remember { FocusRequester() }
+    val touchless = enabled && input.touch
+    // Read while composing the swap, before the old focus target leaves, so a focus that moved on by
+    // itself, as with Tab, is not pulled back.
+    val refocus = remember(touchless) { input.focused }
+    LaunchedEffect(touchless) {
+        if (refocus) requester.requestFocus()
+    }
+    val watched = modifier
+        .focusRequester(requester)
+        .onFocusChanged { state -> input.focused = state.hasFocus }
+        .onPreviewKeyEvent { event ->
+            if (event.type == KeyEventType.KeyDown) input.touch = false
+            false
+        }.pointerInput(Unit) {
+            awaitPointerEventScope {
+                while (true) {
+                    val type = awaitPointerEvent(PointerEventPass.Initial).changes.firstOrNull()?.type
+                    if (type == PointerType.Mouse) {
+                        input.touch = false
+                    } else if (type == PointerType.Touch || type == PointerType.Stylus || type == PointerType.Eraser) {
+                        input.touch = true
+                    }
                 }
             }
         }
-    }
-    if (enabled && touch) {
+    if (touchless) {
         Box(watched.focusable(), propagateMinConstraints = true) { content() }
     } else {
         SelectionContainer(watched, content)
     }
+}
+
+/**
+ * What [TouchlessSelectionContainer] knows of the input that last came its way, whether it was a
+ * finger or a pen, and whether its area holds focus. The focus is a plain field, since only the
+ * swap reads it.
+ */
+@Stable
+private class LastInput(
+    touch: Boolean,
+) {
+    var touch: Boolean by mutableStateOf(touch)
+    var focused: Boolean = false
 }

@@ -2,13 +2,19 @@ package com.materialkolor.builder.feature.share
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import androidx.compose.ui.text.TextLayoutResult
 import com.materialkolor.builder.core.session.BootNotice
 import com.materialkolor.builder.core.session.SessionTestBase
 import com.materialkolor.builder.domain.model.Library
@@ -20,6 +26,8 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.floats.shouldBeLessThanOrEqual
+import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -27,6 +35,15 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
 private const val LINK = "https://materialkolor.com/t/AQAAAAAAAAA"
+
+/** A share link as long as a theme with a few custom colors makes it. */
+private const val LONG_LINK =
+    "https://materialkolor.com/t/AdllOwAAABALQnVybnQgT3JhbmdlIHdpdGggYSBsb25nIG5hbWUgdGhhdCBnb2VzIG9uIHBhc3QgdGhlIGVkZ2U"
+
+/** A phone held upright. */
+private const val PHONE_WIDTH = 360
+
+private const val PHONE_HEIGHT = 780
 
 @OptIn(ExperimentalTestApi::class)
 class ShareDialogTest : SessionTestBase() {
@@ -86,6 +103,24 @@ class ShareDialogTest : SessionTestBase() {
 
             onNodeWithText("This theme can’t be put in a link").assertExists()
             onAllNodes(hasText("Copy link")).assertCountEquals(0)
+        }
+
+    // b-228aa
+    @Test
+    fun link_onAPhone_wrapsSoAllOfItShows() =
+        runDesktopComposeUiTest(width = PHONE_WIDTH, height = PHONE_HEIGHT) {
+            showDialog(link = LONG_LINK)
+
+            val link = onNode(hasText(LONG_LINK))
+            link.assertIsDisplayed()
+            val layouts = mutableListOf<TextLayoutResult>()
+            link.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action -> action(layouts) }
+            val layout = layouts.single()
+            layout.lineCount shouldBeGreaterThan 1
+            layout.hasVisualOverflow shouldBe false
+            layout.getLineEnd(layout.lineCount - 1) shouldBe LONG_LINK.length
+            link.fetchSemanticsNode().boundsInRoot.right shouldBeLessThanOrEqual PHONE_WIDTH.toFloat()
+            onNode(hasContentDescription("Share link")).assertExists()
         }
 
     @Test

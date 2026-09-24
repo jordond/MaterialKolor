@@ -14,7 +14,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
-import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.control.get
 import com.materialkolor.builder.kit.control.ink
 import com.materialkolor.builder.kit.generated.resources.Res
@@ -37,13 +36,17 @@ import org.jetbrains.compose.resources.stringResource
  * toolbar with Copy and Select all. On the web it puts up no selection handles, since a handle would
  * take the page's accessibility mirror over (D45).
  *
- * Text over several lines shows in a selection container, where on the web a finger does not select
- * (D45) and a mouse and the keys still do.
+ * Text over several lines, or a line passed with [singleLine] off, wraps inside a selection
+ * container. On the web a finger does not select there (D45), so the caller gives a finger a button
+ * that copies. A mouse selects and the copy keys copy what it selected, but no key selects there on
+ * its own.
  *
  * @param[text] The text to show.
  * @param[modifier] Applied to the text.
  * @param[style] How the text is set.
- * @param[label] What the text is, the name its field goes by.
+ * @param[label] What the text is, the name it goes by.
+ * @param[singleLine] Whether the text shows in the one line field, by default when it holds no line
+ *   break. Turn it off so a long line such as a link wraps on a narrow screen rather than scrolls.
  */
 @Composable
 public fun SelectableText(
@@ -51,9 +54,11 @@ public fun SelectableText(
     modifier: Modifier = Modifier,
     style: BuilderTextStyle = BuilderTextStyle.Body,
     label: String = stringResource(Res.string.selectable_text_name),
+    singleLine: Boolean = text.none { char -> char == '\n' || char == '\r' },
 ) {
-    if (text.any { char -> char == '\n' || char == '\r' }) {
-        TouchlessSelectionContainer(modifier) { BuilderText(text = text, style = style) }
+    val named = modifier.semantics { contentDescription = label }
+    if (!singleLine) {
+        TouchlessSelectionContainer(named) { BuilderText(text = text, style = style) }
         return
     }
     val ink = Emphasis.Primary.ink(LocalBuilderTokens.current)
@@ -62,7 +67,7 @@ public fun SelectableText(
     BasicTextField(
         value = shown.copy(text = text),
         onValueChange = { next -> shown = next },
-        modifier = modifier.foldState(label, null).semantics { contentDescription = label },
+        modifier = named,
         readOnly = true,
         textStyle = LocalBuilderType.current[style].merge(color = ink),
         singleLine = true,

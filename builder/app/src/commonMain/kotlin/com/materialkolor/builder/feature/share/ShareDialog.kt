@@ -11,6 +11,7 @@ import androidx.compose.ui.focus.FocusRequester
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.share_body
 import com.materialkolor.builder.generated.resources.share_copy
+import com.materialkolor.builder.generated.resources.share_link_name
 import com.materialkolor.builder.generated.resources.share_manual
 import com.materialkolor.builder.generated.resources.share_send
 import com.materialkolor.builder.generated.resources.share_title
@@ -100,7 +101,14 @@ internal fun ShareDialog(
         } else {
             BuilderText(text = stringResource(Res.string.share_body))
             // b-228a
-            SelectableText(text = link, style = BuilderTextStyle.Code)
+            // b-228aa
+            // Wrapped, so a phone shows the whole link. A finger copies with Copy link or Share.
+            SelectableText(
+                text = link,
+                style = BuilderTextStyle.Code,
+                label = stringResource(Res.string.share_link_name),
+                singleLine = false,
+            )
         }
         if (manual) {
             BuilderText(text = stringResource(Res.string.share_manual), emphasis = Emphasis.Danger)
