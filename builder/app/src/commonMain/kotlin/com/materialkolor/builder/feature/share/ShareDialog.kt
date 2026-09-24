@@ -13,6 +13,8 @@ import com.materialkolor.builder.generated.resources.share_body
 import com.materialkolor.builder.generated.resources.share_copy
 import com.materialkolor.builder.generated.resources.share_link_name
 import com.materialkolor.builder.generated.resources.share_manual
+import com.materialkolor.builder.generated.resources.share_manual_touch_again
+import com.materialkolor.builder.generated.resources.share_manual_touch_instead
 import com.materialkolor.builder.generated.resources.share_send
 import com.materialkolor.builder.generated.resources.share_title
 import com.materialkolor.builder.generated.resources.share_unavailable
@@ -22,6 +24,7 @@ import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.widget.SelectableText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -34,7 +37,8 @@ import org.jetbrains.compose.resources.stringResource
  * On a touch screen with a share sheet Share comes first and Copy link sits beside it, elsewhere
  * Copy link is the one action. Each starts its platform call inside the click, undispatched, so the
  * browser still counts the click as the user's. When the clipboard or the sheet turns the link down
- * the dialog stays open and says to copy it by hand, and it never claims a copy that did not land.
+ * the dialog stays open and says to copy it by hand, or on a touch screen which button to try, and
+ * it never claims a copy that did not land.
  *
  * @param[visible] Whether the dialog is open.
  * @param[link] The link to share, or null when the theme cannot be put in one.
@@ -59,14 +63,15 @@ internal fun ShareDialog(
     returnFocusTo: FocusRequester? = null,
 ) {
     val scope = rememberCoroutineScope()
-    var manual by remember(link, visible) { mutableStateOf(false) }
+    // The copy or share that failed, while the dialog says so.
+    var failed by remember(link, visible) { mutableStateOf<ShareOutcome?>(null) }
 
     fun send(call: suspend (String) -> ShareOutcome) {
         val url = link ?: return
         scope.launchSend(url, call) { outcome ->
             when (outcome) {
                 ShareOutcome.Copied, ShareOutcome.Shared -> onDone(outcome)
-                ShareOutcome.CopyFailed, ShareOutcome.ShareFailed -> manual = true
+                ShareOutcome.CopyFailed, ShareOutcome.ShareFailed -> failed = outcome
             }
         }
     }
@@ -110,9 +115,31 @@ internal fun ShareDialog(
                 singleLine = false,
             )
         }
-        if (manual) {
-            BuilderText(text = stringResource(Res.string.share_manual), emphasis = Emphasis.Danger)
+        failed?.let { outcome ->
+            BuilderText(text = manualText(outcome, sharesToSheet), emphasis = Emphasis.Danger)
         }
+    }
+}
+
+// b-228b
+
+/**
+ * What the dialog says when [outcome], a copy or share, did not land. With a mouse that is to copy
+ * the link by hand. A finger on the web cannot select the wrapped link (D45), so on a touch screen
+ * it sends the finger to the other button when there are two, or back to Copy link.
+ */
+@Composable
+private fun manualText(
+    outcome: ShareOutcome,
+    sharesToSheet: Boolean,
+): String {
+    // Only the web reports a coarse pointer, so this is a finger on the web.
+    if (!LocalLayout.current.coarsePointer) return stringResource(Res.string.share_manual)
+    val copy = stringResource(Res.string.share_copy)
+    return when {
+        outcome == ShareOutcome.ShareFailed -> stringResource(Res.string.share_manual_touch_instead, copy)
+        sharesToSheet -> stringResource(Res.string.share_manual_touch_instead, stringResource(Res.string.share_send))
+        else -> stringResource(Res.string.share_manual_touch_again, copy)
     }
 }
 

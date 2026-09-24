@@ -75,6 +75,44 @@ class ShareDialogTest : SessionTestBase() {
             done.shouldBeEmpty()
         }
 
+    // b-228b
+    @Test
+    fun copy_thatFailsOnATouchScreen_withoutASheet_sendsAFingerBackToCopy() =
+        runComposeUiTest {
+            showDialog(copyOutcome = ShareOutcome.CopyFailed, coarsePointer = true)
+
+            onNodeWithText("Copy link").performClick()
+            waitForIdle()
+
+            onNode(hasText("Try Copy link again", substring = true)).assertExists()
+            onAllNodes(hasText("copy it yourself", substring = true)).assertCountEquals(0)
+            done.shouldBeEmpty()
+        }
+
+    @Test
+    fun copy_thatFailsOnATouchScreen_withASheet_sendsAFingerToShare() =
+        runComposeUiTest {
+            showDialog(copyOutcome = ShareOutcome.CopyFailed, sharesToSheet = true, coarsePointer = true)
+
+            onNodeWithText("Copy link").performClick()
+            waitForIdle()
+
+            onNode(hasText("Try Share instead", substring = true)).assertExists()
+            onAllNodes(hasText("copy it yourself", substring = true)).assertCountEquals(0)
+        }
+
+    @Test
+    fun share_thatFailsOnATouchScreen_sendsAFingerToCopy() =
+        runComposeUiTest {
+            showDialog(sharesToSheet = true, shareOutcome = ShareOutcome.ShareFailed, coarsePointer = true)
+
+            onNodeWithText("Share").performClick()
+            waitForIdle()
+
+            onNode(hasText("Try Copy link instead", substring = true)).assertExists()
+            done.shouldBeEmpty()
+        }
+
     @Test
     fun dialog_withoutAShareSheet_offersOnlyCopy() =
         runComposeUiTest {
@@ -167,6 +205,8 @@ class ShareDialogTest : SessionTestBase() {
         copyOutcome: ShareOutcome = ShareOutcome.Copied,
         sharesToSheet: Boolean = false,
         link: String? = LINK,
+        shareOutcome: ShareOutcome = ShareOutcome.Shared,
+        coarsePointer: Boolean = false,
     ) {
         setContent {
             BuilderTheme(
@@ -175,7 +215,7 @@ class ShareDialogTest : SessionTestBase() {
                 isDark = false,
                 reducedMotion = true,
             ) {
-                ProvideBuilderLayout(modifier = Modifier.fillMaxSize()) {
+                ProvideBuilderLayout(coarsePointer = coarsePointer, modifier = Modifier.fillMaxSize()) {
                     ShareDialog(
                         visible = true,
                         link = link,
@@ -184,7 +224,7 @@ class ShareDialogTest : SessionTestBase() {
                             copied += url
                             copyOutcome
                         },
-                        share = { ShareOutcome.Shared },
+                        share = { shareOutcome },
                         onDone = { outcome -> done += outcome },
                         onDismissRequest = {},
                     )

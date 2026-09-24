@@ -98,6 +98,10 @@ private val GalleryPopupImports: List<String> = listOf(
     "androidx.compose.material3.TimePickerDialog",
     "androidx.compose.material3.TooltipBox",
     "androidx.compose.material3.ModalBottomSheet",
+    // b-228b
+    // Their touch selection handles are popups too, so the gallery draws them from their parts (D45).
+    "androidx.compose.material3.TextField",
+    "androidx.compose.material3.OutlinedTextField",
 )
 
 /** The sources every gallery card is drawn from. */
@@ -106,6 +110,7 @@ private val GallerySources: List<String> = listOf(
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/GalleryEntry.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/MaterialGallery.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/GalleryFeedback.kt",
+    "src/commonMain/kotlin/com/materialkolor/builder/preview/material/SampleFields.kt", // b-228b
 )
 
 @OptIn(ExperimentalTestApi::class)

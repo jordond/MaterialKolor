@@ -26,7 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -271,17 +270,19 @@ private fun NoteCard(state: DemoAppState) {
         modifier = Modifier.fillMaxWidth().previewRoles(Role.SurfaceContainerLowest, Role.OnSurface),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
     ) {
-        OutlinedTextField(
+        // b-228b
+        // One line, since on a field over several lines a long press on the web would put up selection
+        // handles, popups that take the accessibility mirror over (D45).
+        SampleOutlinedTextField(
             value = state.text,
             onValueChange = { text -> state.text = text },
+            label = "Note for the group",
             // b-227
             modifier = Modifier
                 .padding(SectionGap)
                 .fillMaxWidth()
                 .tabMovesFocus(LocalFocusManager.current)
                 .previewRoles(MaterialComponent.OutlinedTextField),
-            label = { Text("Note for the group") },
-            minLines = 2,
         )
     }
 }
