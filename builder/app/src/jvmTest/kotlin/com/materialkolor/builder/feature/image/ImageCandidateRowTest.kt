@@ -1,9 +1,15 @@
 package com.materialkolor.builder.feature.image
 
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
@@ -11,10 +17,14 @@ import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStore
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
@@ -44,6 +54,7 @@ private const val ADD_AGAIN = "Add the image again"
 private const val DROP = "Drop to pull colors from this image"
 private const val MOSTLY_GRAY = "This image is mostly gray, so its colors are quiet"
 private const val WAIT_MILLIS = 5_000L
+private const val ELSEWHERE = "elsewhere" // b-311c
 
 @OptIn(ExperimentalTestApi::class)
 class ImageCandidateRowTest {
@@ -251,6 +262,93 @@ class ImageCandidateRowTest {
             store.clear()
         }
 
+    // b-311c
+
+    @Test
+    fun focusTabbedAwayWhileAnImageDecodes_staysWhereTheUserPutIt() =
+        runComposeUiTest {
+            val other = FakeImageHandle("other.png")
+            images.decoded[photo] = decodedOf(QuadrantColors)
+            images.decoded[other] = decodedOf(QuadrantColors)
+            val harness = PosterHarness(ThemeDocument(seed = Seed))
+            showRow(harness, elsewhere = true)
+            val first = seedAndFocusAChip(harness)
+            val gate = CompletableDeferred<Unit>()
+            images.decodeGate = gate
+
+            images.drop(other)
+            waitUntil(timeoutMillis = WAIT_MILLIS) { model.state.value.arriving != null }
+            waitForIdle()
+            onNodeWithContentDescription(READING).assertIsFocused()
+            onNodeWithContentDescription(READING).performKeyInput { pressKey(Key.Tab) }
+            waitForIdle()
+            onNodeWithTag(ELSEWHERE).assertIsFocused()
+            gate.complete(Unit)
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.document.seedSource != first }
+            waitForIdle()
+
+            onNodeWithTag(ELSEWHERE).assertIsFocused()
+            store.clear()
+        }
+
+    @Test
+    fun focusInTheRow_comesBackToItWhenTheImageNeverLands() =
+        runComposeUiTest {
+            images.decoded[photo] = decodedOf(QuadrantColors)
+            val harness = PosterHarness(ThemeDocument(seed = Seed))
+            showRow(harness)
+            val first = seedAndFocusAChip(harness)
+            val gate = CompletableDeferred<Unit>()
+            images.decodeGate = gate
+
+            images.drop(FakeImageHandle("notes.txt"))
+            waitUntil(timeoutMillis = WAIT_MILLIS) { model.state.value.arriving != null }
+            waitForIdle()
+            onNodeWithContentDescription(READING).assertIsFocused()
+            gate.complete(Unit)
+            waitUntil(timeoutMillis = WAIT_MILLIS) { model.state.value.arriving == null }
+            waitForIdle()
+
+            harness.document.seedSource shouldBe first
+            onNodeWithContentDescription(chipLabel(harness.document.seed), substring = true).assertIsFocused()
+            store.clear()
+        }
+
+    @Test
+    fun undoBackToAnEarlierImage_blanksTheChipsInsteadOfShowingTheOtherImagesColors() =
+        runComposeUiTest {
+            val earlier = imageOf("earlier.png", 0xFFD32F2F, 0xFF388E3C, 0xFF1976D2)
+            val later = imageOf("later.png", 0xFFF57C00, 0xFF7B1FA2, 0xFF00796B)
+            val harness = PosterHarness(ThemeDocument(seed = later.candidates.first(), seedSource = later))
+            showRow(harness)
+            waitForIdle()
+
+            mainClock.autoAdvance = false
+            harness.document = ThemeDocument(seed = earlier.candidates.first(), seedSource = earlier)
+            mainClock.advanceTimeByFrame()
+
+            // One frame on only the first chip has resolved, and the rest wait blank.
+            earlier.candidates.drop(1).forEach { candidate -> chipTop(candidate) shouldBe placeholder }
+            mainClock.autoAdvance = true
+            store.clear()
+        }
+
+    /** Drops [photo], waits for its seed and puts the focus on the chosen chip. Returns its source. */
+    private fun ComposeUiTest.seedAndFocusAChip(harness: PosterHarness): SeedSource {
+        images.drop(photo)
+        waitUntil(timeoutMillis = WAIT_MILLIS) { harness.document.seedSource is SeedSource.Image }
+        waitForIdle()
+        onNodeWithContentDescription(chipLabel(harness.document.seed), substring = true).requestFocus()
+        waitForIdle()
+        return harness.document.seedSource
+    }
+
+    /** An image seed from [name] with [candidates], as a reload leaves it. */
+    private fun imageOf(
+        name: String,
+        vararg candidates: Long,
+    ): SeedSource.Image = SeedSource.Image(name, candidates.map { argb -> Argb(argb.toInt()) })
+
     /** The color across the top half of [candidate]'s chip, its primary once resolved. */
     private fun ComposeUiTest.chipTop(candidate: Argb): Color {
         val pixels = onNodeWithContentDescription(chipLabel(candidate), substring = true).captureToImage().toPixelMap()
@@ -261,6 +359,7 @@ class ImageCandidateRowTest {
     private fun ComposeUiTest.showRow(
         harness: PosterHarness,
         picking: Boolean = false,
+        elsewhere: Boolean = false, // b-311c
     ) {
         showSection(harness) { context, dispatcher ->
             placeholder = LocalBuilderTokens.current.border
@@ -269,6 +368,9 @@ class ImageCandidateRowTest {
             CompositionLocalProvider(LocalImageSeeds provides seeds, LocalMotionFrozen provides true) {
                 ImageCandidateRow(context, dispatcher)
             }
+            // b-311c
+            // Somewhere else to put the focus, after the row.
+            if (elsewhere) Box(Modifier.size(1.dp).testTag(ELSEWHERE).focusable())
             ImageHostContent(
                 model = model,
                 dispatcher = dispatcher,

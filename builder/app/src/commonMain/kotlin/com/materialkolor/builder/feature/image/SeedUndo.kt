@@ -8,16 +8,18 @@ import com.materialkolor.builder.domain.model.ThemeDocument
  * The toast stays up for ten seconds, and in that time the document can move on through another
  * edit, a newer image or a project switch. An Undo then would step back over something else, so
  * it only holds while the document is still the one the seed made, in the project it made it in.
- * Once the seed has landed and the document moves on, the toast is taken back.
+ * The toast is taken back as soon as the document is neither the one the seed started from nor the
+ * one it made, even when no frame ever showed the seed landing.
  *
+ * @property[before] The document the seed starts from.
  * @property[made] The document the seed makes.
  * @property[project] The generation of the project it lands in.
  */
 internal class SeedUndo(
+    private val before: ThemeDocument, // b-311c
     private val made: ThemeDocument,
     private val project: Int,
 ) {
-    private var landed = false
     private var over = false
     private var withdraw: (() -> Unit)? = null
 
@@ -32,7 +34,11 @@ internal class SeedUndo(
         project: Int,
     ): Boolean = !over && document == made && project == this.project
 
-    /** Keeps up with the workspace, and ends once the seed has landed and [document] moved on. */
+    /**
+     * Keeps up with the workspace, and ends once [document] is neither the one the seed started
+     * from nor the one it made, so a later pass back through the seed's document never brings the
+     * Undo back.
+     */
     fun follow(
         document: ThemeDocument,
         project: Int,
@@ -40,8 +46,7 @@ internal class SeedUndo(
         when {
             over -> Unit
             project != this.project -> end()
-            document == made -> landed = true
-            landed -> end()
+            document != before && document != made -> end() // b-311c
         }
     }
 

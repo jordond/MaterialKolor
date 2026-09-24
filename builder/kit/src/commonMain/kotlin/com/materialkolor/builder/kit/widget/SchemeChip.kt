@@ -34,13 +34,13 @@ import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /** The diameter of the colored circle, design D. */
-internal val SchemeChipDiameter: Dp = 46.dp
+internal val SchemeChipDiameter: Dp = 46.dp // b-311a
 
 /** The width of the ring around a chosen chip. */
-internal val SchemeChipRingWidth: Dp = 2.dp
+internal val SchemeChipRingWidth: Dp = 2.dp // b-311a
 
 /** The gap between the circle and its ring. */
-internal val SchemeChipRingGap: Dp = 2.dp
+internal val SchemeChipRingGap: Dp = 2.dp // b-311a
 
 /**
  * A scheme at a glance, for the style picker, the seed candidates and the project list.

@@ -1,6 +1,7 @@
 package com.materialkolor.builder.feature.image
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -8,7 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
@@ -63,8 +64,9 @@ import org.jetbrains.compose.resources.stringResource
  * it is still in memory, so after a reload the row offers to add it again instead. Any other seed
  * leaves the row out.
  *
- * The skeleton takes the row's place, focus and all, so when the focus was in the row as an image
- * came in, the chips take it back once they land.
+ * The skeleton takes the row's place, so when the focus was in the row as an image came in, the
+ * skeleton takes it over. When the image lands the chips take it back, and when it never does the
+ * row it replaced takes it back, but only while the skeleton still has it.
  */
 @Composable
 internal fun ImageCandidateRow(
@@ -73,17 +75,22 @@ internal fun ImageCandidateRow(
     modifier: Modifier = Modifier,
 ) {
     val seeds = LocalImageSeeds.current
-    val arriving = seeds.arriving
     val source = context.document.seedSource
-    // b-311a
-    // Read as an image starts, before its skeleton replaces the row and the focus goes with it.
+    val arriving = seeds.arriving?.takeIf { arriving -> arriving.lands != source }
+    // b-311a b-311c
+    // Read in the frame the row changes over, before what it showed leaves and the focus goes with it.
     val focus = remember { RowFocus() }
-    val refocus = remember(arriving?.id) { arriving != null && (focus.inRow || focus.owed) }
-    SideEffect { focus.owed = refocus }
+    val shows = when {
+        arriving != null -> RowContent.Arriving
+        source is SeedSource.Image -> RowContent.Candidates
+        else -> RowContent.None
+    }
+    val refocus = remember(shows, arriving?.id) { focus.handOver() }
     val rowModifier = modifier.onFocusChanged { state -> focus.inRow = state.hasFocus }
     when {
-        arriving != null && arriving.lands != source -> {
-            ArrivingRow(arriving, rowModifier)
+        arriving != null -> {
+            // A fresh skeleton for each image, so the focus it takes over is its own.
+            key(arriving.id) { ArrivingRow(arriving, rowModifier, refocus) }
         }
         source is SeedSource.Image -> {
             val newest = seeds.newest?.takeIf { newest -> newest.source == source }
@@ -92,16 +99,26 @@ internal fun ImageCandidateRow(
     }
 }
 
-/** The thumbnail, or a skeleton for it until the image decodes, and a skeleton for each chip. */
+/**
+ * The thumbnail, or a skeleton for it until the image decodes, and a skeleton for each chip. With
+ * [refocus] the whole of it takes the focus, which the row it replaced had.
+ */
 @Composable
 private fun ArrivingRow(
     arriving: ArrivingImage,
     modifier: Modifier,
+    refocus: Boolean,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val reading = stringResource(Res.string.image_reading)
+    // b-311c
+    val column = remember { FocusRequester() }
+    if (refocus) LaunchedEffect(Unit) { column.requestFocus() }
     Column(
-        modifier = modifier.clearAndSetSemantics { contentDescription = reading },
+        modifier = modifier
+            .focusRequester(column)
+            .focusable(enabled = refocus)
+            .clearAndSetSemantics { contentDescription = reading },
         verticalArrangement = Arrangement.spacedBy(spacing.medium),
     ) {
         val thumbnail = arriving.thumbnail
@@ -119,7 +136,7 @@ private fun ArrivingRow(
 /**
  * The image when it is still in memory, or a button to add it again, over the candidate chips,
  * with a line saying so when the image is mostly gray. With [refocus] the chips take the focus as
- * they come in, since it left with the row the image replaced.
+ * they come in, since the skeleton they replaced still had it.
  */
 @Composable
 private fun CandidateRow(
@@ -168,7 +185,7 @@ private fun CandidateChips(
     val inputs = remember(source.candidates, base) {
         source.candidates.map { candidate -> SchemeInputs.from(base.copy(seed = candidate)) }
     }
-    val colors = rememberCandidateColors(inputs, isDark, resolver)
+    val colors = rememberCandidateColors(source.candidates, inputs, isDark, resolver) // b-311c
     val selected = context.document.seed
     val choose = { candidate: Argb, origin: Rect? ->
         val change = DocumentChange.SetSeed(candidate, source)
@@ -205,16 +222,20 @@ private fun CandidateChips(
  *
  * New inputs, from a style or contrast edit, keep the colors already there and overwrite them one
  * per frame, picking up after the last chip that resolved. So an edit never blanks the chips, and a
- * drag that changes the inputs every frame still walks through all of them.
+ * drag that changes the inputs every frame still walks through all of them. Other [candidates],
+ * such as an undo back to an earlier image, start over from blank chips instead, since the colors
+ * kept belong to another image's chips.
  */
 @Composable
 private fun rememberCandidateColors(
+    candidates: List<Argb>,
     inputs: List<SchemeInputs>,
     isDark: Boolean,
     resolver: ThemeResolver,
 ): List<CandidateColors?> {
-    val colors = remember { mutableStateListOf<CandidateColors?>() }
-    val next = remember { NextChip() }
+    // b-311c
+    val colors = remember(candidates) { mutableStateListOf<CandidateColors?>() }
+    val next = remember(candidates) { NextChip() }
     LaunchedEffect(inputs, isDark, resolver) {
         while (colors.size > inputs.size) colors.removeAt(colors.lastIndex)
         while (colors.size < inputs.size) colors.add(null)
@@ -258,13 +279,24 @@ private class NextChip {
     var index: Int = 0
 }
 
-/**
- * Whether the focus is in the row, and whether an image that replaced the row took it along, so
- * the chips owe it back.
- */
+/** Whether the focus is in the row, in whatever it shows right now. */
 private class RowFocus {
     var inRow: Boolean = false
-    var owed: Boolean = false
+
+    /**
+     * Whether the focus was in the row as it changed over to show something else, which starts the
+     * next thing it shows afresh. Its own focus events say soon enough whether it has the focus.
+     */
+    fun handOver(): Boolean = inRow.also { inRow = false } // b-311c
+}
+
+// b-311c
+
+/** What the row shows, whose change hands the focus over. */
+private enum class RowContent {
+    Arriving,
+    Candidates,
+    None,
 }
 
 /** Where a chip sits in the root, which a pick reveals from. Only a pick reads it. */
