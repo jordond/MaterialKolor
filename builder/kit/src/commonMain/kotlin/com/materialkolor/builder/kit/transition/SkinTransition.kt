@@ -43,6 +43,9 @@ private val CaptureTimeout = 100.milliseconds
 /** The longest a reveal holds the old frame while the app waits on a skin font (architecture 6.11). */
 private val FontWaitTimeout = 300.milliseconds
 
+/** How long a warm-up step waits for the host to draw it before the warm-up gives up. */
+private val WarmUpTimeout = 2000.milliseconds // pf-3
+
 // b-503a
 
 /**
@@ -107,7 +110,20 @@ public class SkinTransition internal constructor(
     internal val snapshot: GraphicsLayer,
     private val scope: CoroutineScope,
     private val environment: () -> RevealEnvironment,
+    // pf-3
+    internal val warmLayer: GraphicsLayer,
 ) {
+    // pf-3
+
+    /** What the host composes off screen while a warm-up runs, null otherwise. */
+    internal var warmSample: (@Composable () -> Unit)? by mutableStateOf(null)
+
+    /** The warm-up step the host draws next, while a warm-up waits for it. */
+    internal var warmPass: WarmPass? by mutableStateOf(null)
+
+    /** Whether [warmLayer] holds the sample. Its node sets it from draw, so it is a plain field. */
+    internal var warmRecorded: Boolean = false
+
     /** Set while a reveal waits for the host to record the old frame. The host completes it from draw. */
     internal var pendingCapture: CompletableDeferred<Unit>? by mutableStateOf(null)
 
@@ -191,6 +207,66 @@ public class SkinTransition internal constructor(
                 }.also { job -> playing = job }
         }
         animation.join()
+    }
+
+    // pf-3
+
+    /**
+     * Draws once, under the live frame, what the first reveals will draw, so the browser has its GPU
+     * programs ready before anyone switches.
+     *
+     * The first switch to a skin draws shadows, clips and shapes the page has not drawn yet, and the
+     * old frame behind a circle for the first time, and the browser compiles a program for each
+     * inside that one frame. Here the host draws the same things one step a frame under a cover of
+     * the live frame, so nothing on screen changes. The steps are [sample] as it is, the live frame
+     * and then [sample] behind the reveal's circle, and both faded the way a crossfade draws them.
+     *
+     * [sample] composes off screen, out of reach of assistive tech, focus and pointers, and leaves once
+     * the warm-up ends. Nothing runs while motion is frozen. A step waits while a reveal plays, and the
+     * warm-up gives up when the host has not drawn a step within two seconds.
+     *
+     * @param[sample] A frame the builder has not drawn yet, such as the workspace in another skin, or
+     * null to warm only the reveal's circle and crossfade over the live frame.
+     * @param[pause] Runs before the sample composes and before each step. The web waits there for an
+     * idle moment, so no step lands on someone's input.
+     */
+    public suspend fun warmUp(
+        sample: (@Composable () -> Unit)?,
+        pause: suspend () -> Unit = {},
+    ) {
+        if (environment().frozen) return
+        try {
+            if (sample != null) {
+                pause()
+                warmSample = sample
+            }
+            for (step in WarmStep.entries) {
+                if (step.drawsSample && sample == null) continue
+                pause()
+                if (!drawWarmStep(step)) return
+            }
+        } finally {
+            warmSample = null
+            warmRecorded = false
+        }
+    }
+
+    /**
+     * Asks the host to draw [step] under the live frame and waits for the frame after it, so nothing
+     * after this runs inside a draw. False when the host did not draw it within the timeout.
+     */
+    private suspend fun drawWarmStep(step: WarmStep): Boolean {
+        val drawn = CompletableDeferred<Unit>()
+        warmPass = WarmPass(step, drawn)
+        try {
+            finishesWithin(WarmUpTimeout) {
+                drawn.await()
+                nextFrame {}
+            }
+            return drawn.isCompleted
+        } finally {
+            warmPass = null
+        }
     }
 
     // b-503a
@@ -295,6 +371,7 @@ internal data class RevealEnvironment(
 @Composable
 public fun rememberSkinTransition(mode: SnapshotMode = SnapshotMode.Layer): SkinTransition {
     val snapshot = rememberGraphicsLayer()
+    val warmLayer = rememberGraphicsLayer() // pf-3
     val scope = rememberCoroutineScope()
     val environment = rememberUpdatedState(
         RevealEnvironment(
@@ -305,7 +382,7 @@ public fun rememberSkinTransition(mode: SnapshotMode = SnapshotMode.Layer): Skin
             tabVisible = LocalTabVisible.current,
         ),
     )
-    return remember(snapshot, scope) {
-        SkinTransition(snapshot = snapshot, scope = scope, environment = { environment.value })
+    return remember(snapshot, warmLayer, scope) {
+        SkinTransition(snapshot = snapshot, scope = scope, environment = { environment.value }, warmLayer = warmLayer)
     }
 }

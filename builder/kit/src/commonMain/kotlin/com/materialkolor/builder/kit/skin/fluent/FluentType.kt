@@ -1,7 +1,9 @@
 package com.materialkolor.builder.kit.skin.fluent
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -36,11 +38,22 @@ internal fun fluentFontFamily(): FontFamily =
         Font(Res.font.Selawik_Semibold, FontWeight.SemiBold),
     )
 
-/** Fluent's own type scale set in Selawik. */
+// pf-3
+
+/**
+ * The face Fluent's type scale takes in place of Selawik, or null to use Selawik.
+ *
+ * Only the warm-up sets it, so composing Fluent ahead of the first switch fetches nothing.
+ */
+internal val LocalFluentStandInFace: ProvidableCompositionLocal<FontFamily?> = staticCompositionLocalOf { null }
+
+/** Fluent's own type scale set in Selawik, or in [LocalFluentStandInFace] when a warm-up sets one. */
 @Composable
 internal fun rememberFluentTypography(): Typography {
-    val face = fluentFontFamily()
     val scale = FluentTheme.typography
+    // pf-3
+    val standIn = LocalFluentStandInFace.current
+    val face = standIn ?: fluentFontFamily()
     return remember(face, scale) { scale.inFace(face) }
 }
 

@@ -6,6 +6,7 @@ import com.materialkolor.builder.BuilderApp
 import com.materialkolor.builder.web.interop.A11yLiveRegion
 import com.materialkolor.builder.web.interop.FocusRepair
 import com.materialkolor.builder.web.interop.MirrorRoot
+import com.materialkolor.builder.web.interop.awaitIdle
 import com.materialkolor.builder.web.interop.browserIsAutomated
 import com.materialkolor.builder.web.interop.locationQuery
 import com.materialkolor.builder.web.interop.motionFrozen
@@ -23,7 +24,7 @@ fun main() {
     // Read once at boot, before the router can rewrite the address, and never a setting.
     val frozen = motionFrozen(locationQuery(), browserIsAutomated())
     ComposeViewport(VIEWPORT_ID) {
-        BuilderApp(BrowserPlatform, motionFrozen = frozen)
+        BuilderApp(BrowserPlatform, motionFrozen = frozen, awaitIdle = ::awaitIdle) // pf-3
     }
 
     // b-220
