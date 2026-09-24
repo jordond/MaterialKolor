@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -150,6 +151,13 @@ internal fun HeadlessBottomSheet(
     }
 }
 
+/**
+ * The grab handle across the top of the sheet, a button that steps through the detents.
+ *
+ * It takes a press across the sheet's whole width, while its highlight and focus ring stand in from
+ * the sides by the sheet's corner radius. The sheet clips to its rounded top, which would cut a ring
+ * drawn out to its edges on the left and right (S5 row 28).
+ */
 @Composable
 private fun SheetHandle(
     state: BottomSheetState,
@@ -189,10 +197,10 @@ private fun SheetHandle(
                 stateDescription = spoken
                 if (higher != null) expand { moveTo(higher) }
                 if (lower != null) collapse { moveTo(lower) }
-            }.overlayFeedback(interaction, style, shape = RectangleShape)
-            .clickable(interaction, null, role = Role.Button) {
+            }.clickable(interaction, null, role = Role.Button) {
                 moveTo(higher ?: BottomSheetDetent.Peek)
-            },
+            }.padding(horizontal = style.panelRadius)
+            .overlayFeedback(interaction, style, shape = RectangleShape),
         contentAlignment = Alignment.Center,
     ) {
         Box(

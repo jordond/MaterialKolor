@@ -35,6 +35,8 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.skin.headless.FocusRingOffset
+import com.materialkolor.builder.kit.skin.headless.FocusRingWidth
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.isOverlayShown
@@ -51,6 +53,9 @@ import kotlin.math.max
  * pointer can move onto the label without it going away (WCAG 1.4.13). Esc hides it until the
  * pointer and focus have both left, and it never takes focus itself. Drawn in the page, the label
  * stays out of the semantics tree, since [content] already carries the name.
+ *
+ * The label keeps clear of the anchor's focus ring, and far enough off it that its own shadow falls
+ * short of the ring too, so a focused anchor rings whole under it (S5 rows 23, 30, 31 and 33).
  *
  * @param[text] The label.
  * @param[style] The skin's overlay style.
@@ -98,7 +103,8 @@ private fun TooltipPopup(
     if (!state.isOverlayShown(visible)) return
     val host = inTreeOverlayHost()
     val tokens = LocalBuilderTokens.current
-    val gap = with(LocalDensity.current) { tokens.spacing.extraSmall.roundToPx() }
+    val clearance = maxOf(tokens.spacing.extraSmall, FocusRingOffset + FocusRingWidth + style.shadow)
+    val gap = with(LocalDensity.current) { clearance.roundToPx() }
     val provider = remember(gap) { TooltipPositionProvider(gap) }
     // In the page the anchor already carries the name, so the bubble stays out of the semantics tree.
     val quiet = if (host != null) Modifier.clearAndSetSemantics {} else Modifier

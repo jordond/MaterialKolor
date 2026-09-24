@@ -44,6 +44,8 @@ import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
+import com.materialkolor.builder.kit.skin.headless.FocusRingOffset
+import com.materialkolor.builder.kit.skin.headless.FocusRingWidth
 import com.materialkolor.builder.kit.skin.headless.controlRing
 
 /**
@@ -51,7 +53,8 @@ import com.materialkolor.builder.kit.skin.headless.controlRing
  *
  * @property[container] The fill behind the whole row.
  * @property[containerShape] The row's corners.
- * @property[containerPadding] Between the row's edge and the tabs.
+ * @property[containerPadding] Between the row's edge and the tabs. At the ends the row keeps at least
+ * the focus ring's reach, so the first and last tab ring whole.
  * @property[tabShape] Each tab's corners.
  * @property[tabPadding] Between a tab's edge and its label.
  * @property[gap] Between tabs.
@@ -87,6 +90,9 @@ internal class TabsStyle(
  * Focus roves. Only the selected tab sits in the Tab order, the arrow keys move focus along the row
  * in reading order and wrap at the ends, Home and End jump, and focusing a tab selects it and
  * scrolls it into view. Each tab has the tab role and its selected state.
+ *
+ * The row clips where it scrolls, so its ends sit inside the scroll and keep the focus ring's reach
+ * free. The first and last tab then ring on every side, as the others do (S5 row 9).
  */
 @Composable
 internal fun <T> HeadlessTabs(
@@ -111,10 +117,12 @@ internal fun <T> HeadlessTabs(
             modifier = Modifier
                 .tabArrows(tabs.size, focused, requesters, isRtl)
                 .background(style.container, style.containerShape)
-                .padding(style.containerPadding),
+                .padding(vertical = style.containerPadding),
         ) {
             Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = maxOf(style.containerPadding, TabRingReach)),
                 horizontalArrangement = Arrangement.spacedBy(style.gap),
             ) {
                 tabs.forEachIndexed { index, tab ->
@@ -141,6 +149,9 @@ internal fun <T> HeadlessTabs(
         }
     }
 }
+
+/** How far a tab's focus ring reaches past the tab, which the ends of the row keep free. */
+private val TabRingReach: Dp = FocusRingOffset + FocusRingWidth
 
 /**
  * Left and Right, read before Compose Unstyled's tab list sees them, which maps Left to the

@@ -68,7 +68,13 @@ internal data class SelectableStyle(
     fun colors(selected: Boolean): ActionColors = if (selected) on else off
 }
 
-/** The frame around a segmented control and the look of each option inside it. */
+/**
+ * The frame around a segmented control and the look of each option inside it.
+ *
+ * @property[endRingOffset] How far the focus ring stands off the first and the last option. Where
+ * an end option is as round as the frame's end, a ring at the usual offset follows the frame's own
+ * outline and cannot be told from it, so the frame's inset takes it just outside (S5 rows 8 and 35).
+ */
 @Immutable
 internal data class SegmentedStyle(
     val shape: Shape,
@@ -76,6 +82,7 @@ internal data class SegmentedStyle(
     val borderWidth: Dp,
     val colors: ActionColors,
     val option: SelectableStyle,
+    val endRingOffset: Dp = FocusRingOffset,
 )
 
 /** A badge, one set of colours per [BadgeStatus]. */
@@ -238,7 +245,7 @@ private fun unstyledActionStyles(tokens: BuilderTokens): ActionStyles {
 
 private fun customActionStyles(tokens: BuilderTokens): ActionStyles {
     val pill = RoundedCornerShape(percent = 50)
-    return actionStyles(
+    val styles = actionStyles(
         tokens = tokens,
         metrics = ActionMetrics(
             controlShape = pill,
@@ -258,6 +265,8 @@ private fun customActionStyles(tokens: BuilderTokens): ActionStyles {
             borderedSecondary = false,
         ),
     )
+    // The pill options end as round as the pill frame, so the end rings stand outside the frame.
+    return styles.copy(segmented = styles.segmented.copy(endRingOffset = styles.segmented.inset))
 }
 
 /**

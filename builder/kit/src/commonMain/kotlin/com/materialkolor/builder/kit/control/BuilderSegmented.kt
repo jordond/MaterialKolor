@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessRadioGroup
 import com.materialkolor.builder.kit.icon.IconId
@@ -16,6 +17,7 @@ import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.FluentSegmented
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
+import com.materialkolor.builder.kit.skin.headless.FocusRingOffset
 import com.materialkolor.builder.kit.skin.headless.SegmentedStyle
 import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.headless.actionSurface
@@ -153,7 +155,7 @@ internal fun <T> HeadlessSegmented(
                 .foldState(optionLabel(value), ControlState.Selected(isSelected), enabled, role = FoldedRole.Radio)
                 .controlTouchTarget(target)
                 .controlPress(interactionSource)
-                .controlRing(interactionSource, option.shape)
+                .controlRing(interactionSource, option.shape, offset = segmentRingOffset(options, value, style))
                 .actionSurface(colors, option.shape, option.borderWidth)
                 .heightIn(min = option.height)
                 .padding(horizontal = option.horizontalPadding),
@@ -166,3 +168,15 @@ internal fun <T> HeadlessSegmented(
         }
     }
 }
+
+// b-230d
+
+/**
+ * How far the focus ring stands off [value], the style's [SegmentedStyle.endRingOffset] at either end
+ * of the row and the usual offset between them.
+ */
+private fun <T> segmentRingOffset(
+    options: List<T>,
+    value: T,
+    style: SegmentedStyle,
+): Dp = if (value == options.first() || value == options.last()) style.endRingOffset else FocusRingOffset

@@ -25,6 +25,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -156,7 +157,9 @@ internal fun <T> MaterialSelectPanel(
  * field inside as an editable text box, so there the field's own semantics are cleared. A field
  * that [opens] its menu is named by [selectFieldName], with the disabled note while it is disabled
  * (S5 row 10). The menu anchor comes in [modifier], outside what is cleared, so its click and its
- * dropdown list role stay, and the mirror reads the two as a button (P3). A field over an open panel
+ * dropdown list role stay, and the mirror reads the two as a button (P3). A disabled anchor adds
+ * neither, so the disabled field sets them itself, a click that does nothing, and still reads as a
+ * button the way the headless select's does rather than as a bare group. A field over an open panel
  * only shows the choice and reads as text through [shownChoiceName]. The text field and its handle
  * lever (D45) are left as they are.
  */
@@ -182,7 +185,11 @@ private fun MaterialChoiceField(
             Modifier.clearAndSetSemantics {
                 contentDescription = name
                 stateDescription = current
-                if (!enabled) disabled()
+                if (!enabled) {
+                    disabled()
+                    role = Role.DropdownList
+                    onClick { false }
+                }
             }
         }
         else -> {
