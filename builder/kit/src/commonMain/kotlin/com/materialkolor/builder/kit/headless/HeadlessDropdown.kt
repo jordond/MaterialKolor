@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
@@ -39,6 +40,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -80,9 +82,10 @@ import kotlin.math.max
  *
  * It opens in a focusable popup, or as a popover in the overlay host, so Esc and a click outside
  * both call [onDismissRequest], and focus lands on [initialFocus], or else on the first row, or else
- * on the list itself when every row is disabled. The arrows and Tab walk the rows. In the host focus
- * goes back to [returnFocusTo] once the list has gone, since no popup window hands it back, unless a
- * row has already moved it somewhere else.
+ * on the list itself when every row is disabled. Down and Up walk the rows the way Tab and Shift+Tab
+ * do, wrapping at the ends, Home and End jump to the first and last, and Enter or Space picks. In the
+ * host focus goes back to [returnFocusTo] once the list has gone, since no popup window hands it
+ * back, unless a row has already moved it somewhere else.
  *
  * @param[expanded] Whether the list is open.
  * @param[onDismissRequest] Called when the list asks to close. It must set [expanded] to false,
@@ -122,7 +125,7 @@ internal fun HeadlessDropdown(
     val list: @Composable () -> Unit = {
         AnimatedVisibility(visibleState = state, enter = popoverEnter(), exit = popoverExit()) {
             val focus = remember { OverlayFocus() }
-            DropdownList(style, minWidth, listModifier = focus.modifier) { this.content(close) }
+            DropdownList(style, minWidth, listModifier = rowKeys().then(focus.modifier)) { this.content(close) }
             LaunchedEffect(Unit) { focus.enter(initialFocus) }
         }
     }
@@ -137,6 +140,31 @@ internal fun HeadlessDropdown(
             content = list,
         )
     }
+}
+
+/**
+ * Moves focus through an open list's rows with the arrow keys. Neither the desktop nor the web moves
+ * focus on an arrow key by itself, only on Tab, so Down and Up step the way Tab and Shift+Tab do and
+ * wrap the same way. Home and End enter the list from its top or its bottom, which lands on the first
+ * or the last row that takes focus. It goes on the list outside its [OverlayFocus], so the requester
+ * reaches the list's own focus target.
+ */
+@Composable
+private fun rowKeys(): Modifier {
+    val focusManager = LocalFocusManager.current
+    val list = remember { FocusRequester() }
+    return Modifier
+        .onKeyEvent { event ->
+            if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
+            when (event.key) {
+                Key.DirectionDown -> focusManager.moveFocus(FocusDirection.Next)
+                Key.DirectionUp -> focusManager.moveFocus(FocusDirection.Previous)
+                Key.MoveHome -> list.requestFocus(FocusDirection.Down)
+                Key.MoveEnd -> list.requestFocus(FocusDirection.Up)
+                else -> return@onKeyEvent false
+            }
+            true
+        }.focusRequester(list)
 }
 
 /**
