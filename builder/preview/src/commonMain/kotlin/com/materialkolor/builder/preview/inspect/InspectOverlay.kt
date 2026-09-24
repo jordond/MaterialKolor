@@ -10,6 +10,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
@@ -25,8 +27,11 @@ import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -43,7 +48,6 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
@@ -57,8 +61,6 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.preview.split.PaneSide
 import com.materialkolor.builder.preview.split.SplitState
 import kotlinx.coroutines.flow.drop
-import kotlin.math.max
-import kotlin.math.roundToInt
 
 /** Tags the Inspect card, for tests to find what it shows. */
 public const val INSPECT_CARD_TAG: String = "inspect-card"
@@ -93,8 +95,11 @@ public class InspectActions(
  * Show on ramp and Jump to key color for the first color. Letting go over another element moves the
  * pin and over bare canvas drops it, and a touch tap inspects and pins at once. Keyboard focus on a
  * declared element shows its card too, read only. Esc drops a pinned card first and leaves Inspect
- * after.
+ * after. While this layout holds focus itself and the keyboard is in use, the preview wears a focus
+ * ring.
  *
+ * The outline and card follow their element as the preview scrolls and go when it leaves. When the
+ * handle crosses one, they move to the other copy's element at its centre, or go when there is none.
  * The card is drawn in this layout's own tree, never in a popup, and kept inside it.
  *
  * @param[on] Whether Inspect is on for what the canvas shows.
@@ -119,8 +124,12 @@ public fun InspectOverlay(
     content: @Composable () -> Unit,
 ) {
     val state = remember(on, shown, scene) { if (on) InspectOverlayState() else null }
+    // Whether this layout holds focus itself, as it does after a pointer pins a card, so Esc reaches
+    // it. It outlives the state, which a new mode or tab replaces while the focus stays put.
+    val holdsFocus = remember(on) { mutableStateOf(false) }
     val tokens = LocalBuilderTokens.current
     val layoutDirection = LocalLayoutDirection.current
+    val inputModes = LocalInputModeManager.current
     val currentShown = rememberUpdatedState(shown)
     val leave by rememberUpdatedState(actions.onLeave)
     val focus = remember { FocusRequester() }
@@ -128,24 +137,38 @@ public fun InspectOverlay(
         Modifier
     } else {
         Modifier
-            .onGloballyPositioned { coordinates -> state.origin = coordinates.positionInWindow() }
+            .onGloballyPositioned { coordinates ->
+                state.origin = coordinates.positionInWindow()
+                state.width = coordinates.size.width
+            }.focusRing(holdsFocus, inputModes, tokens.focus, tokens.highlightWidth)
             .inspectPointer(state, currentShown, split, layoutDirection, tokens.spacing.section, focus)
-            .onKeyEvent { event -> state.onEscape(event, focus) { leave() } }
+            .onKeyEvent { event -> state.onEscape(event, focus, inputModes) { leave() } }
             .focusRequester(focus)
-            .onFocusChanged { focusState -> state.holdsFocus = focusState.isFocused }
-            .focusProperties { canFocus = state.pinned != null || state.holdsFocus }
+            .onFocusChanged { focusState -> holdsFocus.value = focusState.isFocused }
+            .focusProperties { canFocus = state.pinned != null || holdsFocus.value }
             .focusTarget()
     }
+    if (state != null) FollowTargets(state, shown, split, layoutDirection)
     Box(modifier.then(watch)) {
         CompositionLocalProvider(LocalInspectRegistry provides state?.registry, content = content)
         if (state != null) InspectFindings(state, shown, result, actions)
     }
 }
 
-/** One element under Inspect and the mode of the copy it sits in. */
+/**
+ * One element under Inspect and the mode of the copy it sits in.
+ *
+ * @property[owner] The element's key in the registry. The outline and card read where it sits from
+ * there as they are drawn and placed, so they follow it while the preview scrolls.
+ * @property[side] The copy of the split it sits in.
+ * @property[roles] The colors it declared.
+ * @property[isDark] Whether that copy wears the dark scheme.
+ */
 @Immutable
 internal data class InspectTarget(
-    val entry: InspectEntry,
+    val owner: Any,
+    val side: PaneSide,
+    val roles: List<ColorRef>,
     val isDark: Boolean,
 )
 
@@ -163,8 +186,8 @@ internal class InspectOverlayState {
     /** Where this layout's top start corner sits in the window, the space the registry keeps. */
     var origin: Offset by mutableStateOf(Offset.Zero)
 
-    /** Whether this layout holds focus itself, as it does after a pointer pins a card, so Esc reaches it. */
-    var holdsFocus: Boolean by mutableStateOf(false)
+    /** How wide this layout is, for finding the copy a point falls in away from the pointer. */
+    var width: Int = 0
 
     /** Where the card sits in this layout, or null while none shows. Only the pointer reads it. */
     var card: Rect? = null
@@ -172,16 +195,20 @@ internal class InspectOverlayState {
     /**
      * Drop the pinned card on Esc, or leave Inspect when none is pinned.
      *
-     * Dropping the card takes focus to the layout through [focus] first. An action on the card may
-     * hold focus, and when the card loses its actions focus would leave the whole tree with them, so
-     * the next Esc would reach nothing.
+     * Compose counts only focus keys such as Tab as keyboard use, so Esc first tells [inputModes]
+     * the keyboard is in use, and focus then moves the way it would after Tab. Dropping the card
+     * takes focus to the layout through [focus] first. An action on the card may hold focus, and
+     * when the card loses its actions focus would leave the whole tree with them, so the next Esc
+     * would reach nothing.
      */
     fun onEscape(
         event: KeyEvent,
         focus: FocusRequester,
+        inputModes: InputModeManager,
         leave: () -> Unit,
     ): Boolean {
         if (event.type != KeyEventType.KeyDown || event.key != Key.Escape) return false
+        inputModes.requestInputMode(InputMode.Keyboard)
         if (pinned != null) {
             focus.requestFocus()
             pinned = null
@@ -190,7 +217,106 @@ internal class InspectOverlayState {
         }
         return true
     }
+
+    /** The element at [position] in this layout and the mode of the copy it sits in, or null for none. */
+    fun targetAt(
+        position: Offset,
+        shown: PreviewMode,
+        fraction: Float,
+        layoutDirection: LayoutDirection,
+    ): InspectTarget? {
+        val side = paneSideAt(position.x, width, shown, fraction, layoutDirection)
+        val owner = registry.ownerAt(side, position + origin) ?: return null
+        val entry = registry.entryOf(owner) ?: return null
+        return InspectTarget(owner, side, entry.roles, isDark(side, shown))
+    }
+
+    /** The element keyboard focus is on, for the card it shows, or null when focus is on none. */
+    fun focusedTarget(shown: PreviewMode): InspectTarget? {
+        val owner = registry.focusedOwner() ?: return null
+        val entry = registry.entryOf(owner) ?: return null
+        return InspectTarget(owner, entry.side, entry.roles, isDark(entry.side, shown))
+    }
+
+    /** Whether the pinned or the hovered element has left the screen. */
+    fun hasLeft(): Boolean = pinned.hasLeft() || hovered.hasLeft()
+
+    /** Drop the pinned and the hovered element once they have left the screen. */
+    fun dropLeft() {
+        if (pinned.hasLeft()) pinned = null
+        if (hovered.hasLeft()) hovered = null
+    }
+
+    /**
+     * Keep the pinned and hovered elements on the copy shown at their centres, after the handle
+     * moved to [fraction]. Once the handle crosses one, the target moves to what the other copy has
+     * at that centre, or goes when it has nothing there.
+     */
+    fun followHandle(
+        shown: PreviewMode,
+        fraction: Float,
+        layoutDirection: LayoutDirection,
+    ) {
+        pinned = pinned?.across(shown, fraction, layoutDirection)
+        hovered = hovered?.across(shown, fraction, layoutDirection)
+    }
+
+    private fun InspectTarget?.hasLeft(): Boolean = this != null && registry.entryOf(owner) == null
+
+    private fun InspectTarget.across(
+        shown: PreviewMode,
+        fraction: Float,
+        layoutDirection: LayoutDirection,
+    ): InspectTarget? {
+        val centre = (registry.entryOf(owner) ?: return null).bounds.center - origin
+        val now = paneSideAt(centre.x, width, shown, fraction, layoutDirection)
+        return if (now == side) this else targetAt(centre, shown, fraction, layoutDirection)
+    }
 }
+
+/**
+ * Drop what Inspect found once its element leaves, and keep it on the copy the handle shows as the
+ * handle moves.
+ */
+@Composable
+private fun FollowTargets(
+    state: InspectOverlayState,
+    shown: PreviewMode,
+    split: SplitState,
+    layoutDirection: LayoutDirection,
+) {
+    LaunchedEffect(state) {
+        snapshotFlow { state.hasLeft() }.collect { left -> if (left) state.dropLeft() }
+    }
+    LaunchedEffect(state, shown, split, layoutDirection) {
+        snapshotFlow { split.fraction }
+            .drop(1)
+            .collect { fraction -> state.followHandle(shown, fraction, layoutDirection) }
+    }
+}
+
+/**
+ * Ring the preview in [color] while this layout holds focus itself and the keyboard is in use, so a
+ * keyboard user sees where Esc goes. A pointer pin takes the focus too but draws no ring.
+ */
+private fun Modifier.focusRing(
+    holdsFocus: State<Boolean>,
+    inputModes: InputModeManager,
+    color: Color,
+    width: Dp,
+): Modifier =
+    drawWithContent {
+        drawContent()
+        if (holdsFocus.value && inputModes.inputMode == InputMode.Keyboard) {
+            val stroke = width.toPx()
+            drawRect(
+                color = color,
+                topLeft = Offset(stroke / 2, stroke / 2),
+                size = Size(size.width - stroke, size.height - stroke),
+                style = Stroke(stroke),
+            )
+        }
+    }
 
 /** What a press over the overlay turned out to be, until every pointer is up again. */
 private enum class Press {
@@ -217,7 +343,7 @@ private fun Modifier.inspectPointer(
         val thickness = handleThickness.roundToPx()
         awaitPointerEventScope {
             fun targetAt(position: Offset): InspectTarget? =
-                inspectAt(state, position, size.width, shown.value, split.fraction, layoutDirection)
+                state.targetAt(position, shown.value, split.fraction, layoutDirection)
 
             var press: Press? = null
             var last: Offset? = null
@@ -242,7 +368,7 @@ private fun Modifier.inspectPointer(
                         press = null
                     }
                     press != null || overCard -> {
-                        Unit
+                        // Hover holds still through a press and over the card.
                     }
                     event.type == PointerEventType.Exit -> {
                         state.hovered = null
@@ -256,63 +382,6 @@ private fun Modifier.inspectPointer(
             }
         }
     }
-
-/** The element at [position] in this layout and the mode of the copy it sits in, or null for none. */
-private fun inspectAt(
-    state: InspectOverlayState,
-    position: Offset,
-    width: Int,
-    shown: PreviewMode,
-    fraction: Float,
-    layoutDirection: LayoutDirection,
-): InspectTarget? {
-    val side = paneSideAt(position.x, width, shown, fraction, layoutDirection)
-    val entry = state.registry.hit(side, position + state.origin) ?: return null
-    return InspectTarget(entry, isDark(side, shown))
-}
-
-/**
- * The copy of the preview at [x] across a layout [width] wide. The start copy runs from the start
- * edge to the handle at [fraction] and the end copy on past it. One copy alone is the start copy.
- */
-internal fun paneSideAt(
-    x: Float,
-    width: Int,
-    shown: PreviewMode,
-    fraction: Float,
-    layoutDirection: LayoutDirection,
-): PaneSide {
-    if (shown != PreviewMode.Split) return PaneSide.Start
-    val end = if (layoutDirection == LayoutDirection.Ltr) x >= width * fraction else x < width * (1f - fraction)
-    return if (end) PaneSide.End else PaneSide.Start
-}
-
-/** Whether a copy on [side] wears the dark scheme while the canvas shows [shown]. A split is light then dark. */
-internal fun isDark(
-    side: PaneSide,
-    shown: PreviewMode,
-): Boolean =
-    when (shown) {
-        PreviewMode.Light -> false
-        PreviewMode.Split -> side == PaneSide.End
-        PreviewMode.Dark -> true
-    }
-
-/**
- * Whether [x] falls in the split handle's strip, [thickness] wide and centred on [fraction] of
- * [width] from the start edge, the way the handle places itself.
- */
-private fun onHandle(
-    x: Float,
-    width: Int,
-    fraction: Float,
-    thickness: Int,
-    layoutDirection: LayoutDirection,
-): Boolean {
-    val along = if (layoutDirection == LayoutDirection.Ltr) x else width - x
-    val start = (width * fraction - thickness / 2f).roundToInt().coerceIn(0, max(0, width - thickness))
-    return along >= start && along < start + thickness
-}
 
 /**
  * The outline and card for the pinned element, else the hovered one, else the one keyboard focus is
@@ -328,15 +397,17 @@ private fun BoxScope.InspectFindings(
     LaunchedEffect(state) {
         snapshotFlow { state.registry.focusedOwner() }.drop(1).collect { state.hovered = null }
     }
+    // Derived, so the card recomposes when focus moves to another element but not as that one moves.
+    val focusedTarget = remember(state, shown) { derivedStateOf { state.focusedTarget(shown) } }
     val keyboard = LocalInputModeManager.current.inputMode == InputMode.Keyboard
-    val focused = if (keyboard) state.registry.focused else null
     val pinned = state.pinned
-    val target = pinned ?: state.hovered ?: focused?.let { entry -> InspectTarget(entry, isDark(entry.side, shown)) }
+    val target = pinned ?: state.hovered ?: if (keyboard) focusedTarget.value else null
     if (target == null) return
     val tokens = LocalBuilderTokens.current
     Spacer(
         Modifier.matchParentSize().drawBehind {
-            val bounds = target.entry.bounds.translate(-state.origin)
+            val entry = state.registry.entryOf(target.owner) ?: return@drawBehind
+            val bounds = entry.bounds.translate(-state.origin)
             drawRect(
                 color = tokens.focus,
                 topLeft = bounds.topLeft,
@@ -346,18 +417,18 @@ private fun BoxScope.InspectFindings(
         },
     )
     DisposableEffect(state) { onDispose { state.card = null } }
-    Box(Modifier.placeCard(target.entry.bounds, state, tokens.spacing.small)) {
+    Box(Modifier.placeCard(target.owner, state, tokens.spacing.small)) {
         // Only some skins draw a card that takes presses, so it takes them itself to keep them from the preview.
         InspectCard(target, pinned = target == pinned, result, actions, Modifier.pointerInput(Unit) {})
     }
 }
 
 /**
- * Take the whole layout and place the card beside [bounds], a window rect, noting where it went so
- * a press on it is left alone.
+ * Take the whole layout and place the card beside the element [owner], wherever it sits now, noting
+ * where the card went so a press on it is left alone.
  */
 private fun Modifier.placeCard(
-    bounds: Rect,
+    owner: Any,
     state: InspectOverlayState,
     gap: Dp,
 ): Modifier =
@@ -366,43 +437,14 @@ private fun Modifier.placeCard(
         val width = if (constraints.hasBoundedWidth) constraints.maxWidth else placeable.width
         val height = if (constraints.hasBoundedHeight) constraints.maxHeight else placeable.height
         layout(width, height) {
+            val bounds = state.registry.entryOf(owner)?.bounds
+            if (bounds == null) {
+                state.card = null
+                return@layout
+            }
             val card = IntSize(placeable.width, placeable.height)
             val spot = cardSpot(bounds.translate(-state.origin), card, IntSize(width, height), gap.roundToPx())
             state.card = IntRect(spot, card).toRect()
             placeable.place(spot)
         }
     }
-
-/**
- * Where a [card] goes beside an [element] in a layout of size [room], both in its own space.
- *
- * It sits [gap] past the side with more room, level with the element's top, or on the other side
- * when that one is too narrow. With no room on either side it goes below, or above when below is too
- * short. It is then held inside the room.
- */
-internal fun cardSpot(
-    element: Rect,
-    card: IntSize,
-    room: IntSize,
-    gap: Int,
-): IntOffset {
-    val after = element.right + gap
-    val before = element.left - gap - card.width
-    val fitsAfter = after + card.width <= room.width
-    val fitsBefore = before >= 0f
-    val x: Float
-    val y: Float
-    if (fitsAfter || fitsBefore) {
-        val moreAfter = room.width - element.right >= element.left
-        x = if (fitsAfter && (moreAfter || !fitsBefore)) after else before
-        y = element.top
-    } else {
-        val below = element.bottom + gap
-        x = element.left
-        y = if (below + card.height <= room.height) below else element.top - gap - card.height
-    }
-    return IntOffset(
-        x.roundToInt().coerceIn(0, max(0, room.width - card.width)),
-        y.roundToInt().coerceIn(0, max(0, room.height - card.height)),
-    )
-}

@@ -9,6 +9,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.platform.LocalInputModeManager
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
@@ -45,8 +47,10 @@ import org.jetbrains.compose.resources.stringResource
  * Vision and Fullscreen (F-19).
  *
  * A phone has no device width, its preview is always a phone (F-46), and its mode switch drops the
- * glyphs to fit. Fullscreen leaves through the floating exit instead of the dock, and when it ends
- * focus comes back to the Fullscreen button, since the exit that held it is gone.
+ * glyphs to fit. Fullscreen leaves through the floating exit instead of the dock. While the keyboard
+ * is in use, focus comes back to the Fullscreen button when fullscreen ends, since the exit that held
+ * it is gone, and to the Inspect toggle when Inspect ends, since the preview that held it lets go. A
+ * pointer leaves the focus alone.
  */
 @Composable
 internal fun DockContent(
@@ -56,11 +60,20 @@ internal fun DockContent(
 ) {
     val compact = LocalLayout.current.windowClass == WindowClass.Compact
     val modes = PreviewMode.entries.associateWith { mode -> stringResource(mode.title) }
+    val inputModes = LocalInputModeManager.current
     val fullscreenButton = remember { FocusRequester() }
     val wasFullscreen = remember { mutableStateOf(state.fullscreen) }
     LaunchedEffect(state.fullscreen) {
-        if (wasFullscreen.value && !state.fullscreen) fullscreenButton.requestFocus()
+        val ended = wasFullscreen.value && !state.fullscreen
+        if (ended && inputModes.inputMode == InputMode.Keyboard) fullscreenButton.requestFocus()
         wasFullscreen.value = state.fullscreen
+    }
+    val inspectToggle = remember { FocusRequester() }
+    val wasInspecting = remember { mutableStateOf(state.inspect) }
+    LaunchedEffect(state.inspect) {
+        val ended = wasInspecting.value && !state.inspect
+        if (ended && inputModes.inputMode == InputMode.Keyboard) inspectToggle.requestFocus()
+        wasInspecting.value = state.inspect
     }
     DockRegion(modifier) {
         BuilderSegmented(
@@ -83,6 +96,7 @@ internal fun DockContent(
             checked = state.inspect,
             onCheckedChange = { on -> dispatcher.dispatch(WorkspaceAction.SetInspect(on)) },
             label = stringResource(Res.string.canvas_inspect),
+            modifier = Modifier.focusRequester(inspectToggle),
             icon = IconId.Inspect,
         )
         VisionMenu(
@@ -101,16 +115,18 @@ internal fun DockContent(
 }
 
 /**
- * The floating pill that leaves fullscreen and brings the poster and the top bar back (F-19). It
- * takes focus as it arrives, since the Fullscreen button that had it is gone.
+ * The floating pill that leaves fullscreen and brings the poster and the top bar back (F-19). While
+ * the keyboard is in use it takes focus as it arrives, since the Fullscreen button that had it is
+ * gone.
  */
 @Composable
 internal fun FullscreenExit(
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
 ) {
+    val inputModes = LocalInputModeManager.current
     val pill = remember { FocusRequester() }
-    LaunchedEffect(pill) { pill.requestFocus() }
+    LaunchedEffect(pill) { if (inputModes.inputMode == InputMode.Keyboard) pill.requestFocus() }
     BuilderButton(
         onClick = { dispatcher.dispatch(WorkspaceAction.ToggleFullscreen) },
         label = stringResource(Res.string.canvas_fullscreen_exit),
