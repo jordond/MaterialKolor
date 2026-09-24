@@ -8,6 +8,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlin.jvm.JvmInline
+import kotlin.math.abs
 
 /**
  * How much contrast a scheme is generated with, held in hundredths so it stays exact.
@@ -15,6 +16,10 @@ import kotlin.jvm.JvmInline
  * The engine takes contrast as a double between -1.0 and 1.0. Storing that double would let a
  * saved theme drift when it is written and read back, so the document keeps whole hundredths and
  * [toDouble] does the division on the way into the engine.
+ *
+ * A document only ever holds one of the four named [Stops] (D53). Links and saved projects written
+ * before that can carry a level in between, and [snapped] moves them onto the nearest one as they
+ * are read.
  *
  * @property[hundredths] The level in hundredths, from -100 to 100.
  */
@@ -32,6 +37,11 @@ public value class ContrastLevel(
      */
     public fun toDouble(): Double = hundredths / 100.0
 
+    /**
+     * The named level nearest this one, which is this one when it already is a named level.
+     */
+    public fun snapped(): ContrastLevel = nearest(toDouble())
+
     override fun toString(): String = "ContrastLevel($hundredths)"
 
     public companion object {
@@ -41,14 +51,25 @@ public value class ContrastLevel(
         /** The level every scheme uses until someone asks for another. */
         public val Standard: ContrastLevel = ContrastLevel(0)
 
-        /** Halfway to [High], the middle stop the contrast slider snaps to. */
+        /** Halfway to [High]. */
         public val Medium: ContrastLevel = ContrastLevel(50)
 
         /** The most contrast the engine offers. */
         public val High: ContrastLevel = ContrastLevel(100)
 
-        /** The four stops the contrast control offers, in slider order. */
+        /** The four levels the contrast control offers, from least to most. */
         public val Stops: List<ContrastLevel> = listOf(Reduced, Standard, Medium, High)
+
+        /**
+         * The named level nearest [value], the one a link or a project with a level in between
+         * opens at. A value halfway between two levels goes to the one nearer [Standard], so 0.25
+         * and -0.5 open at Standard and 0.75 at Medium. A value past either end goes to that end.
+         */
+        public fun nearest(value: Double): ContrastLevel =
+            Stops.minWith(
+                compareBy<ContrastLevel> { level -> abs(level.toDouble() - value) }
+                    .thenBy { level -> abs(level.hundredths) },
+            )
     }
 }
 

@@ -1,7 +1,7 @@
 import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from '@playwright/test';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { pressBareCanvas } from '../tests/builder';
+import { clickMiddle, pressBareCanvas } from '../tests/builder';
 import { servePerfSite, type PerfSite } from './serve-compressed';
 
 // b-504
@@ -110,10 +110,18 @@ test('a broadband visit, then seed changes, drags, a library switch and a photo'
   });
 
   await measure(['PB-05'], async () => {
-    const slider = page.locator(A11Y).getByText(/^Contrast level, slider, /);
-    await scrollPosterTo(page, slider);
-    const frames = await dragAcross(page, slider, 0.8);
-    take('PB-05', p95(frames.work), framesNote(frames));
+    // b-507
+    // Contrast is four choices now (D53), so the drag that changes the whole theme every frame is
+    // the seed picker's. Its hue moves the seed on each step, and Esc cancels the picker after.
+    const pick = page.locator(A11Y).getByRole('button', { name: 'Pick', exact: true });
+    await expect(pick).toHaveCount(1, { timeout: 10_000 });
+    await clickMiddle(page, pick);
+    const frames = await dragAcross(page, page.locator(A11Y).getByText(/^Hue, slider, /), 0.8);
+    await page.keyboard.press('Escape');
+    await expect(page.locator(A11Y).getByRole('button', { name: 'Done', exact: true })).toHaveCount(0, {
+      timeout: 10_000,
+    });
+    take('PB-05', p95(frames.work), `The seed picker's hue track. ${framesNote(frames)}`);
   });
 
   await measure(['PB-11a', 'PB-11b'], async () => {
@@ -180,11 +188,15 @@ test('a broadband visit, then seed changes, drags, a library switch and a photo'
   });
 
   await measure(['PB-07'], async () => {
+    // b-507
+    // A forced collection first, so the reading is what stays alive rather than how long ago the
+    // last collection ran. Without it the same build read anywhere from 34 to 105 MB.
+    await cdp.send('HeapProfiler.collectGarbage');
     const heap = (await cdp.send('Runtime.getHeapUsage')) as { usedSize: number; backingStorageSize?: number };
     take(
       'PB-07',
       heap.usedSize + (heap.backingStorageSize ?? 0),
-      'Used JS heap, which holds the wasm GC objects, plus array buffer storage, which holds Skia memory. Desktop, not mobile.',
+      'Used JS heap after a forced collection, which holds the wasm GC objects, plus array buffer storage, which holds Skia memory. Desktop, not mobile.',
     );
   });
   await context.close();
@@ -257,15 +269,6 @@ async function dragAcross(page: Page, target: Locator, share: number): Promise<F
   const frames = await stopFrames(page);
   await page.mouse.up();
   return frames;
-}
-
-/** Scroll the poster until [target] is on screen with a size. */
-async function scrollPosterTo(page: Page, target: Locator): Promise<void> {
-  await page.mouse.move(200, 400);
-  for (let turn = 0; turn < 8 && ((await target.boundingBox())?.height ?? 0) === 0; turn++) {
-    await page.mouse.wheel(0, 300);
-    await page.waitForTimeout(300);
-  }
 }
 
 /** Press [key] on the bare canvas and record frames until [REVEAL_MS] after Undo names a library switch. */

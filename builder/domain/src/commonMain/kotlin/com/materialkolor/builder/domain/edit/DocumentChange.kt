@@ -45,7 +45,7 @@ public sealed interface DocumentChange {
      * Whether this change may fold into the one before it at all.
      *
      * A few edits are big enough that undoing them should always be its own step. A style, a
-     * library and a preset each repaint the whole theme, a whole new document is a different theme
+     * contrast level, a library and a preset each repaint the whole theme, a whole new document is a different theme
      * altogether, and adding, removing or clearing things is a structural step nobody expects to
      * vanish into its neighbor.
      */
@@ -61,7 +61,7 @@ public sealed interface DocumentChange {
             is ClearPins -> false
             is SetKeyColor -> true
             is SetCmfSeed -> true
-            is SetContrast -> true
+            is SetContrast -> false
             is SetSpec -> true
             is SetPlatform -> true
             is SetAmoled -> true
@@ -173,7 +173,11 @@ public sealed interface DocumentChange {
     /**
      * Sets how much contrast the scheme is generated with.
      *
-     * @property[level] The new contrast.
+     * Every control that sends this picks one of the four named levels, and links and saved
+     * projects move a level in between onto the nearest one as they are read, so a document only
+     * ever holds a named level (D53).
+     *
+     * @property[level] The new contrast, one of [ContrastLevel.Stops].
      */
     public data class SetContrast(
         public val level: ContrastLevel,

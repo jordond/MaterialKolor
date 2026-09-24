@@ -1,8 +1,9 @@
 package com.materialkolor.builder.domain.history
 
-import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.domain.model.CustomSlot
+import com.materialkolor.builder.domain.model.CustomTone
 import com.materialkolor.builder.domain.model.ThemeDocument
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,11 +23,20 @@ class HistoryCapacityTest {
     @Test
     fun history_cancelledDragAtCapacity_keepsTheOldestStep() {
         val session = Session.full()
-        val start = session.document.contrast
+        val start = session.document.customTones[CustomSlot.Primary]
 
-        session.edit(DocumentChange.SetContrast(ContrastLevel(50)), EditPhase.Dragging, at = END)
-        session.edit(DocumentChange.SetContrast(ContrastLevel(80)), EditPhase.Dragging, at = END + 16)
-        session.edit(DocumentChange.SetContrast(start), EditPhase.Released, at = END + 32)
+        session.edit(
+            DocumentChange.SetCustomTone(CustomSlot.Primary, CustomTone(light = 50)),
+            EditPhase.Dragging,
+            at = END,
+        )
+        session.edit(
+            DocumentChange.SetCustomTone(CustomSlot.Primary, CustomTone(light = 80)),
+            EditPhase.Dragging,
+            at =
+                END + 16,
+        )
+        session.edit(DocumentChange.SetCustomTone(CustomSlot.Primary, start), EditPhase.Released, at = END + 32)
 
         val (undone, shown) = session.undoAll()
         assertEquals(History.CAPACITY, undone)
@@ -50,8 +60,17 @@ class HistoryCapacityTest {
     fun history_dragThatLandsAtCapacity_stillPushesTheOldestOut() {
         val session = Session.full()
 
-        session.edit(DocumentChange.SetContrast(ContrastLevel(50)), EditPhase.Dragging, at = END)
-        session.edit(DocumentChange.SetContrast(ContrastLevel(80)), EditPhase.Released, at = END + 16)
+        session.edit(
+            DocumentChange.SetCustomTone(CustomSlot.Primary, CustomTone(light = 50)),
+            EditPhase.Dragging,
+            at = END,
+        )
+        session.edit(
+            DocumentChange.SetCustomTone(CustomSlot.Primary, CustomTone(light = 80)),
+            EditPhase.Released,
+            at =
+                END + 16,
+        )
 
         val (undone, shown) = session.undoAll()
         assertEquals(History.CAPACITY, undone)

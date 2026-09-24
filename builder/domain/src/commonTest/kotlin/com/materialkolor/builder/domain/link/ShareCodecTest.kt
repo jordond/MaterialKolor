@@ -2,6 +2,7 @@ package com.materialkolor.builder.domain.link
 
 import com.materialkolor.builder.domain.DocumentArb
 import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.CustomTone
@@ -42,6 +43,17 @@ class ShareCodecTest {
             val code = ShareCodec.encode(document, projectName = "Acme")
             val decoded = ShareCodec.decode(code) as DecodeResult.Ok
             assertEquals(code, ShareCodec.encode(decoded.document, decoded.projectName))
+        }
+    }
+
+    @Test
+    fun decode_contrastBetweenTheNamedLevels_opensAtTheNearestOne() {
+        val cases = mapOf(30 to ContrastLevel.Medium, 20 to ContrastLevel.Standard)
+
+        cases.forEach { (hundredths, level) ->
+            val code = ShareCodec.encode(ThemeDocument.Default.copy(contrast = ContrastLevel(hundredths)))
+            val opened = ThemeDocument.Default.copy(contrast = level)
+            assertEquals(DecodeResult.Ok(opened, null), ShareCodec.decode(code), code)
         }
     }
 

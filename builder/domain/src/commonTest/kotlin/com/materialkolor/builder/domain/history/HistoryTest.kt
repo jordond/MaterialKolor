@@ -6,6 +6,8 @@ import com.materialkolor.builder.domain.edit.ChangeKind
 import com.materialkolor.builder.domain.edit.ChangeLabel
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.domain.model.CustomSlot
+import com.materialkolor.builder.domain.model.CustomTone
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.Style
@@ -21,23 +23,23 @@ class HistoryTest {
     fun history_dragSequence_makesOneEntry() {
         val session = Session()
 
-        (1..20).forEach { step -> session.edit(contrast(step * 5), EditPhase.Dragging, at = step * 16L) }
-        session.edit(contrast(100), EditPhase.Released, at = 400)
+        (1..20).forEach { step -> session.edit(tone(step * 5), EditPhase.Dragging, at = step * 16L) }
+        session.edit(tone(100), EditPhase.Released, at = 400)
 
         assertEquals(1, session.history.persisted().size)
-        assertEquals(ContrastLevel.High, session.document.contrast)
+        assertEquals(CustomTone(light = 100), session.document.primaryTone)
         assertEquals(ThemeDocument.Default, session.history.undo())
         assertFalse(session.history.canUndo)
-        assertEquals(ContrastLevel.High, session.history.redo()?.contrast)
+        assertEquals(CustomTone(light = 100), session.history.redo()?.primaryTone)
     }
 
     @Test
     fun history_longDrag_ignoresTheMergeWindow() {
         val session = Session()
 
-        session.edit(contrast(10), EditPhase.Dragging, at = 0)
-        session.edit(contrast(20), EditPhase.Dragging, at = 5_000)
-        session.edit(contrast(30), EditPhase.Released, at = 10_000)
+        session.edit(tone(10), EditPhase.Dragging, at = 0)
+        session.edit(tone(20), EditPhase.Dragging, at = 5_000)
+        session.edit(tone(30), EditPhase.Released, at = 10_000)
 
         assertEquals(1, session.history.persisted().size)
     }
@@ -46,10 +48,10 @@ class HistoryTest {
     fun history_dragAfterRelease_startsANewEntry() {
         val session = Session()
 
-        session.edit(contrast(10), EditPhase.Dragging, at = 0)
-        session.edit(contrast(20), EditPhase.Released, at = 100)
-        session.edit(contrast(30), EditPhase.Dragging, at = 200)
-        session.edit(contrast(40), EditPhase.Released, at = 300)
+        session.edit(tone(10), EditPhase.Dragging, at = 0)
+        session.edit(tone(20), EditPhase.Released, at = 100)
+        session.edit(tone(30), EditPhase.Dragging, at = 200)
+        session.edit(tone(40), EditPhase.Released, at = 300)
 
         assertEquals(2, session.history.persisted().size)
     }
@@ -102,9 +104,9 @@ class HistoryTest {
     fun history_discreteAfterADrag_doesNotMergeIntoIt() {
         val session = Session()
 
-        session.edit(contrast(10), EditPhase.Dragging, at = 0)
-        session.edit(contrast(20), EditPhase.Released, at = 10)
-        session.edit(contrast(30), at = 20)
+        session.edit(tone(10), EditPhase.Dragging, at = 0)
+        session.edit(tone(20), EditPhase.Released, at = 10)
+        session.edit(tone(30), at = 20)
 
         assertEquals(2, session.history.persisted().size)
     }
@@ -118,6 +120,17 @@ class HistoryTest {
 
         assertEquals(2, session.history.persisted().size)
         assertEquals(ChangeLabel(ChangeKind.Style, detail = "Rainbow"), session.history.undoLabel)
+    }
+
+    @Test
+    fun history_contrastWithinTheWindow_neverMerges() {
+        val session = Session()
+
+        session.edit(DocumentChange.SetContrast(ContrastLevel.Medium), at = 0)
+        session.edit(DocumentChange.SetContrast(ContrastLevel.High), at = 1)
+
+        assertEquals(2, session.history.persisted().size)
+        assertEquals(ContrastLevel.Medium, session.history.undo()?.contrast)
     }
 
     @Test
@@ -179,9 +192,9 @@ class HistoryTest {
     fun history_cancelledDrag_leavesNoEntry() {
         val session = Session()
 
-        session.edit(contrast(30), EditPhase.Dragging, at = 0)
-        session.edit(contrast(60), EditPhase.Dragging, at = 16)
-        session.edit(contrast(0), EditPhase.Released, at = 32)
+        session.edit(tone(30), EditPhase.Dragging, at = 0)
+        session.edit(tone(60), EditPhase.Dragging, at = 16)
+        session.edit(tone(0), EditPhase.Released, at = 32)
 
         assertFalse(session.history.canUndo)
     }
@@ -233,9 +246,9 @@ class HistoryTest {
         session.edit(DocumentChange.SetAmoled(true), at = 0)
         session.undo()
 
-        session.edit(contrast(30), EditPhase.Dragging, at = 10_000)
+        session.edit(tone(30), EditPhase.Dragging, at = 10_000)
         assertFalse(session.history.canRedo)
-        session.edit(contrast(0), EditPhase.Released, at = 10_016)
+        session.edit(tone(0), EditPhase.Released, at = 10_016)
 
         assertTrue(session.history.canRedo)
         assertEquals(ChangeLabel(ChangeKind.Amoled), session.history.redoLabel)
@@ -248,8 +261,8 @@ class HistoryTest {
         session.edit(DocumentChange.SetAmoled(true), at = 0)
         session.undo()
 
-        session.edit(contrast(30), EditPhase.Dragging, at = 10_000)
-        session.edit(contrast(40), EditPhase.Released, at = 10_016)
+        session.edit(tone(30), EditPhase.Dragging, at = 10_000)
+        session.edit(tone(40), EditPhase.Released, at = 10_016)
 
         assertFalse(session.history.canRedo)
     }
@@ -261,10 +274,10 @@ class HistoryTest {
         session.edit(DocumentChange.SetAmoled(true), at = 0)
         session.undo()
 
-        session.edit(contrast(30), EditPhase.Dragging, at = 10_000)
-        session.edit(contrast(0), EditPhase.Dragging, at = 10_016)
-        session.edit(contrast(20), EditPhase.Dragging, at = 10_032)
-        session.edit(contrast(40), EditPhase.Released, at = 10_048)
+        session.edit(tone(30), EditPhase.Dragging, at = 10_000)
+        session.edit(tone(0), EditPhase.Dragging, at = 10_016)
+        session.edit(tone(20), EditPhase.Dragging, at = 10_032)
+        session.edit(tone(40), EditPhase.Released, at = 10_048)
 
         assertFalse(session.history.canRedo)
         assertNull(session.history.redoLabel)
@@ -278,12 +291,12 @@ class HistoryTest {
         session.edit(DocumentChange.SetAmoled(true), at = 0)
         session.undo()
 
-        session.edit(contrast(30), EditPhase.Dragging, at = 10_000)
+        session.edit(tone(30), EditPhase.Dragging, at = 10_000)
         session.undo()
-        session.edit(contrast(50), EditPhase.Dragging, at = 10_016)
-        session.edit(contrast(0), EditPhase.Released, at = 10_032)
+        session.edit(tone(50), EditPhase.Dragging, at = 10_016)
+        session.edit(tone(0), EditPhase.Released, at = 10_032)
 
-        assertEquals(ContrastLevel(30), session.history.redo()?.contrast)
+        assertEquals(CustomTone(light = 30), session.history.redo()?.primaryTone)
         assertFalse(session.history.canRedo)
     }
 
@@ -456,7 +469,15 @@ class HistoryTest {
         }
     }
 
-    private fun contrast(hundredths: Int): DocumentChange = DocumentChange.SetContrast(ContrastLevel(hundredths))
+    /**
+     * The primary slot's light tone, the change a drag example uses. Zero takes the tone away again,
+     * which is where the default document starts.
+     */
+    private fun tone(light: Int): DocumentChange =
+        DocumentChange.SetCustomTone(CustomSlot.Primary, if (light == 0) null else CustomTone(light = light))
+
+    private val ThemeDocument.primaryTone: CustomTone?
+        get() = customTones[CustomSlot.Primary]
 
     /**
      * A document being edited, the way the builder drives the history, so each test only has to say

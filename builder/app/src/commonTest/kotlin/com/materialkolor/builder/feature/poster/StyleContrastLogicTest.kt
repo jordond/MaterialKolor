@@ -38,50 +38,11 @@ class StyleContrastLogicTest {
     }
 
     @Test
-    fun contrastScale_stops_areTheFourNamedLevelsInSliderOrder() {
-        ContrastScale.Stops shouldBe listOf(-1f, 0f, 0.5f, 1f)
-        ContrastScale.SNAP_DISTANCE shouldBe 0.04f
-        ContrastScale.Stops.map { stop -> ContrastStop.of(ContrastScale.levelOf(stop)) } shouldBe ContrastStop.entries
-    }
-
-    @Test
-    fun contrastScale_snap_neverReachesTwoStopsAtOnce() {
-        ContrastScale.Stops.zipWithNext().forEach { (lower, upper) ->
-            (upper - lower > 2 * ContrastScale.SNAP_DISTANCE) shouldBe true
-        }
-    }
-
-    @Test
-    fun contrastScale_levelOf_roundsToHundredthsAndStaysInRange() {
-        ContrastScale.levelOf(0.537f) shouldBe ContrastLevel(54)
-        ContrastScale.levelOf(-0.004f) shouldBe ContrastLevel.Standard
-        ContrastScale.levelOf(1.2f) shouldBe ContrastLevel.High
-        ContrastScale.levelOf(-1.2f) shouldBe ContrastLevel.Reduced
-    }
-
-    @Test
-    fun contrastScale_parse_takesAnyLevelFromMinusOneToOne() {
-        ContrastScale.parse("0.3") shouldBe ContrastLevel(30)
-        ContrastScale.parse(" -0,75 ") shouldBe ContrastLevel(-75)
-        ContrastScale.parse("1") shouldBe ContrastLevel.High
-        ContrastScale.parse("0.333") shouldBe ContrastLevel(33)
-        ContrastScale.parse("1.5") shouldBe null
-        ContrastScale.parse("high") shouldBe null
-        ContrastScale.parse("") shouldBe null
-    }
-
-    @Test
-    fun contrastScale_format_showsTwoDecimals() {
-        ContrastScale.format(ContrastLevel.Reduced) shouldBe "-1.00"
-        ContrastScale.format(ContrastLevel.Standard) shouldBe "0.00"
-        ContrastScale.format(ContrastLevel(-5)) shouldBe "-0.05"
-        ContrastScale.format(ContrastLevel.Medium) shouldBe "0.50"
-    }
-
-    @Test
-    fun contrastStop_of_namesOnlyALevelRightOnAStop() {
+    fun contrastStop_of_namesTheNearestLevel() {
+        ContrastStop.entries.map { stop -> stop.level } shouldBe ContrastLevel.Stops
         ContrastStop.of(ContrastLevel.Medium) shouldBe ContrastStop.Medium
-        ContrastStop.of(ContrastLevel(49)) shouldBe null
+        ContrastStop.of(ContrastLevel(49)) shouldBe ContrastStop.Medium
+        ContrastStop.of(ContrastLevel(25)) shouldBe ContrastStop.Standard
     }
 
     @Test

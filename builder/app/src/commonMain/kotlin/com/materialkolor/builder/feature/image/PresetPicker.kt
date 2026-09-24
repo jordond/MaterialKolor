@@ -273,7 +273,7 @@ private fun StarterCards(
 private fun starterName(starter: Preset.Starter): String {
     val name = stringResource(starter.name)
     val style = stringResource(styleName(starter.style))
-    val contrast = ContrastStop.of(starter.contrast)?.takeIf { stop -> stop != ContrastStop.Standard }
+    val contrast = ContrastStop.of(starter.contrast).takeIf { stop -> stop != ContrastStop.Standard }
     return if (contrast == null) {
         stringResource(Res.string.image_starter_card, name, style)
     } else {

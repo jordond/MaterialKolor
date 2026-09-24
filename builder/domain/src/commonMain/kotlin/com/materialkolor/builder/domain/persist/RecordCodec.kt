@@ -11,10 +11,14 @@ import kotlinx.serialization.KSerializer
  *
  * Each record type carries its codec as `Codec` on its companion, for example
  * [ProjectRecord.Codec] and [Preferences.Codec].
+ *
+ * @param[settle] What a record that read cleanly passes through before it is handed out, such as
+ * moving a contrast between the named levels onto the nearest one (D53).
  */
 public class RecordCodec<T> internal constructor(
     private val serializer: KSerializer<T>,
     private val migrations: Migrations,
+    private val settle: (T) -> T = { value -> value },
 ) {
     /** The schema this builder writes the record in. */
     public val schema: Int
@@ -28,5 +32,9 @@ public class RecordCodec<T> internal constructor(
     /**
      * The record stored as [text], or why it could not be read. This never throws.
      */
-    public fun decode(text: String): DecodeOutcome<T> = decodeEnvelope(text, serializer, migrations)
+    public fun decode(text: String): DecodeOutcome<T> =
+        when (val outcome = decodeEnvelope(text, serializer, migrations)) {
+            is DecodeOutcome.Ok -> DecodeOutcome.Ok(settle(outcome.value))
+            is DecodeOutcome.Quarantine -> outcome
+        }
 }

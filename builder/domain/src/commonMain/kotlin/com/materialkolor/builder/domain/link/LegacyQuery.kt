@@ -8,7 +8,6 @@ import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
-import kotlin.math.roundToInt
 
 /**
  * The preview an old link asked for. Only dark is ever asked for, see [LegacyImport.previewMode].
@@ -163,12 +162,12 @@ private fun String.legacyColor(): Argb? {
 }
 
 /**
- * Any double the old builder could have written, clamped into range and kept to whole hundredths.
+ * Any double the old builder could have written, at the named level nearest it (D53).
  */
 private fun String.legacyContrast(): ContrastLevel? {
     val value = toDoubleOrNull() ?: return null
     if (value.isNaN()) return null
-    return ContrastLevel((value.coerceIn(-1.0, 1.0) * 100).roundToInt())
+    return ContrastLevel.nearest(value)
 }
 
 private fun String.legacySpec(): SpecVersion? = SpecVersion.entries.firstOrNull { spec -> spec.legacyName == this }
