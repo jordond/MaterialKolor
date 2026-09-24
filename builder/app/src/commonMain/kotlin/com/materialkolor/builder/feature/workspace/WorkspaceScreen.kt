@@ -11,6 +11,7 @@ import com.materialkolor.builder.engine.poster.PosterColors
 import com.materialkolor.builder.feature.about.AboutHost
 import com.materialkolor.builder.feature.canvas.CanvasArea
 import com.materialkolor.builder.feature.canvas.CanvasDock
+import com.materialkolor.builder.feature.canvas.FullscreenExit
 import com.materialkolor.builder.feature.command.CommandHost
 import com.materialkolor.builder.feature.export.ExportHost
 import com.materialkolor.builder.feature.image.ImageHost
@@ -90,8 +91,15 @@ internal fun WorkspaceScreen(
             is WorkspaceAction.SetPreviewTab -> {
                 model.setPreviewTab(action.tab)
             }
+            // b-217aa
+            // The dock's switch only slides the handle (MO-03). A switch with an origin still reveals.
             is WorkspaceAction.SetPreviewMode -> {
-                reveal(action.origin) { model.setPreviewMode(action.mode) }
+                val origin = action.origin
+                if (origin == null) {
+                    model.setPreviewMode(action.mode)
+                } else {
+                    reveal(origin) { model.setPreviewMode(action.mode) }
+                }
             }
             is WorkspaceAction.SetSplitFraction -> {
                 model.setSplitFraction(action.fraction)
@@ -181,6 +189,10 @@ internal fun WorkspaceScreen(
         canvas = { contentPadding -> CanvasArea(state, contentPadding, dispatcher) },
         dock = { CanvasDock(state, dispatcher) },
         modifier = modifier,
+        // b-217
+        fullscreen = state.fullscreen,
+        // b-217
+        fullscreenExit = { FullscreenExit(dispatcher) },
         overlays = {
             ExportHost(state, dispatcher)
             // b-310

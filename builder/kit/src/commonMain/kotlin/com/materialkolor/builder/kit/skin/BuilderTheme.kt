@@ -1,5 +1,7 @@
 package com.materialkolor.builder.kit.skin
 
+import androidx.compose.foundation.ComposeFoundationFlags
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -56,6 +58,8 @@ public fun BuilderTheme(
     reducedMotion: Boolean,
     content: @Composable () -> Unit,
 ) {
+    // d44
+    remember { textFieldMinSizeOptimizationOff }
     val current by rememberUpdatedState(content)
     val builder = remember { movableContentOf { current() } }
     CompositionLocalProvider(
@@ -74,6 +78,18 @@ public fun BuilderTheme(
         }
     }
 }
+
+// d44
+
+/**
+ * Turns the text field min-size optimisation off, once and before any builder content composes
+ * (D44). In CMP 1.12.1 a skin switch that moves [BuilderTheme]'s content in the same frame it
+ * re-styles a text field in a lazy list crashes the scene, since the field's size node reads a
+ * composition local while detached. Drop it when CMP fixes it.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+private val textFieldMinSizeOptimizationOff: Unit =
+    run { ComposeFoundationFlags.isBasicTextFieldMinSizeOptimizationEnabled = false }
 
 /** Hands a skin's tokens, motion and icons to [content]. */
 @Composable
