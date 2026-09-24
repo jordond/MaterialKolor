@@ -285,7 +285,8 @@ private fun GallerySlider(
                 } else {
                     disabled()
                 }
-            }.focusable(enabled, interactions)
+            }
+            // Ahead of the focus target, so the keys it hears reach it.
             .onKeyEvent { event ->
                 val step = when (event.key) {
                     Key.DirectionRight, Key.DirectionUp -> 1
@@ -295,7 +296,7 @@ private fun GallerySlider(
                 val handled = enabled && step != 0 && event.type == KeyEventType.KeyDown
                 if (handled) onStop(stop + step)
                 handled
-            },
+            }.focusable(enabled, interactions),
     ) {
         key(stop) {
             BasicSlider(
