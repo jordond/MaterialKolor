@@ -16,13 +16,19 @@
 
     <!--
         The role a control plays, read on the web after its name and before its state, "Include dark
-        scheme, checkbox, checked", while the page reads every clickable as a button. Written as they
-        read there, so their case is kept.
+        scheme, checkbox, checked", while the page reads every clickable as a button and a node with
+        no role as plain text. Written as they read there, so their case is kept.
     -->
     <string name="role_checkbox">checkbox</string>
     <string name="role_switch">switch</string>
     <string name="role_radio">radio</string>
     <string name="role_tab">tab</string>
+    <string name="role_slider">slider</string>
+    <string name="role_progress_bar">progress bar</string>
+    <string name="role_pop_up_button">pop-up button</string>
+    <string name="role_menu_item">menu item</string>
+    <string name="role_option">option</string>
+    <string name="role_dialog">dialog</string>
 
     <!-- What the code viewer's list of lines is called when read out. -->
     <string name="code_view_name">Code</string>

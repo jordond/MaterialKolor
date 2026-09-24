@@ -22,7 +22,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * @property[enabled] False to show the row without letting anyone choose it.
  * @property[selected] Whether the row is the current one of a set, such as the chosen appearance,
  * or null for a plain command. A row that knows carries a check while it is the current one and
- * reads out as selected or not.
+ * reads out as selected or not, and on the web as a menu item that is checked or not.
  */
 public class BuilderMenuItem(
     public val label: String,
@@ -37,8 +37,9 @@ public class BuilderMenuItem(
  * A list of commands that opens under [anchor].
  *
  * Esc and a click outside close it, focus starts on the first row, and each row reads as a button,
- * or as an option that is selected or not when its item says so. Material3 draws its own
- * `DropdownMenu`, the other skins the headless dropdown.
+ * or as an option that is selected or not when its item says so. On the web, where every row reads
+ * as a button, the menu item word travels in its name, "Duplicate, menu item" (D40). Material3
+ * draws its own `DropdownMenu`, the other skins the headless dropdown.
  *
  * @param[expanded] Whether the menu is open.
  * @param[onDismissRequest] Called when the menu asks to close, including after a row is chosen.

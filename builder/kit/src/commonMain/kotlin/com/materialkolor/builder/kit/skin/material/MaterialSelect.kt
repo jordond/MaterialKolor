@@ -22,14 +22,18 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.input.TextFieldValue
 import com.materialkolor.builder.kit.control.BuilderIcon
-import com.materialkolor.builder.kit.control.ControlState
-import com.materialkolor.builder.kit.control.foldState
+import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
+import com.materialkolor.builder.kit.control.foldOption
+import com.materialkolor.builder.kit.control.selectFieldName
 import com.materialkolor.builder.kit.headless.DropdownList
 import com.materialkolor.builder.kit.headless.HeadlessDropdown
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
@@ -38,8 +42,8 @@ import com.materialkolor.builder.kit.icon.IconId
 /**
  * Material's exposed dropdown, a read only outlined field over a `DropdownMenu`.
  *
- * The field already shows the choice as its text, so on the web its name is the label alone, with
- * the disabled note while it is disabled, and the choice is read once (S5 row 10).
+ * On the web the field reads as a button named like every skin's select field, "Style, pop-up
+ * button, Tonal spot", rather than as an editable text box (S5 row 10, [MaterialChoiceField]).
  *
  * Where overlays render in the page (D40) the field stays and the options open in the headless
  * dropdown in Material's menu container, as wide as the field, with focus on the chosen option.
@@ -83,10 +87,7 @@ internal fun <T> MaterialSelect(
                     } else {
                         Modifier
                     },
-                ).semantics {
-                    role = Role.DropdownList
-                    stateDescription = current
-                }.foldState(label, null, enabled),
+                ),
             enabled = enabled,
         )
         if (inTree) {
@@ -134,11 +135,7 @@ internal fun <T> MaterialSelectPanel(
             label = label,
             modifier = Modifier
                 .fillMaxWidth()
-                .focusProperties { canFocus = false }
-                .semantics {
-                    role = Role.DropdownList
-                    stateDescription = current
-                }.foldState(label, null),
+                .focusProperties { canFocus = false },
         )
         DropdownList(materialMenuStyle(), modifier = Modifier.fillMaxWidth()) {
             MaterialSelectRows(options, selected, optionLabel, onSelect, selectedRow = null)
@@ -152,6 +149,12 @@ internal fun <T> MaterialSelectPanel(
  * The choice in Material's read only outlined field with its chevron. The field keeps its own
  * selection, as `OutlinedTextField` does for text, so a tap that moves the caret recomposes the field
  * alone and not the menu box around it, which would drop the tap that opens the menu.
+ *
+ * It reads as a dropdown list whose state is the choice. On the web the mirror would read the text
+ * field inside as an editable text box, so there the field's own semantics are cleared and it reads
+ * as a button named by [selectFieldName], with the disabled note while it is disabled (S5 row 10).
+ * The menu anchor comes in [modifier], outside what is cleared, so its click and role stay. The
+ * text field and its handle lever (D45) are left as they are.
  */
 @Composable
 private fun MaterialChoiceField(
@@ -161,11 +164,25 @@ private fun MaterialChoiceField(
     enabled: Boolean = true,
 ) {
     var shown by remember { mutableStateOf(TextFieldValue(current)) }
+    val name = selectFieldName(label, current, enabled)
+    val named = if (LocalFoldsStateIntoName.current) {
+        Modifier.clearAndSetSemantics {
+            role = Role.Button
+            contentDescription = name
+            stateDescription = current
+            if (!enabled) disabled()
+        }
+    } else {
+        Modifier.semantics {
+            role = Role.DropdownList
+            stateDescription = current
+        }
+    }
     MaterialOutlinedField(
         value = shown.copy(text = current),
         onValueChange = { next -> shown = next },
         label = label,
-        modifier = modifier,
+        modifier = modifier.then(named),
         enabled = enabled,
         readOnly = true,
         trailingIcon = { BuilderIcon(IconId.ChevronDown, contentDescription = null) },
@@ -190,7 +207,7 @@ private fun <T> MaterialSelectRows(
                 .semantics {
                     role = Role.RadioButton
                     this.selected = isSelected
-                }.foldState(optionLabel(option), ControlState.Selected(isSelected)),
+                }.foldOption(optionLabel(option), isSelected),
             trailingIcon = if (isSelected) {
                 { BuilderIcon(IconId.Check, contentDescription = null) }
             } else {

@@ -27,8 +27,15 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.paneTitle
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.materialkolor.builder.kit.control.FoldedRole
+import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
+import com.materialkolor.builder.kit.control.roleLessName
+import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.skin.headless.isOverlayShown
 import com.materialkolor.builder.kit.skin.headless.rememberOverlayVisibility
 import com.materialkolor.builder.kit.skin.headless.scrimEnter
@@ -152,3 +159,28 @@ internal fun ReturnFocusWhenGone(
         }
     }
 }
+
+/**
+ * Names a modal pane, a dialog, a sheet or a side panel, by its [title], which is its pane title.
+ *
+ * The web mirror in CMP 1.12.1 carries neither the pane title nor a dialog role, so there the pane
+ * also reads its title with the dialog's role word as its text, "Delete theme?, dialog" (D37, D40),
+ * and [modalTitle] keeps the title the pane shows from being read twice. Drop both once CMP mirrors
+ * `dialog` and `paneTitle`, and recheck that on the CMP 1.13 bump.
+ */
+@Composable
+internal fun Modifier.modalPane(title: String): Modifier {
+    val folds = LocalFoldsStateIntoName.current
+    val spoken = stateName(title, state = null, role = FoldedRole.Dialog)
+    return semantics {
+        paneTitle = title
+        if (folds) roleLessName(spoken, asText = true)
+    }
+}
+
+/**
+ * Keeps the title a modal pane shows out of the web mirror, where [modalPane] reads it with the
+ * role word already. Elsewhere it adds nothing.
+ */
+@Composable
+internal fun Modifier.modalTitle(): Modifier = if (LocalFoldsStateIntoName.current) clearAndSetSemantics { } else this

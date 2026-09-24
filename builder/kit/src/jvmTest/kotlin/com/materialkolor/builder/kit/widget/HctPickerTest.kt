@@ -318,13 +318,13 @@ class HctPickerTest {
         pickerForEachSkin { _, skin ->
             // The seed #6750A4 sits at hue 298.98.
             pickerShow(foldsState = true, skin = skin)
-            val hue = onNode(pickerTrackText("Hue, 299"))
+            val hue = onNode(pickerTrackText("Hue, slider, 299"))
             hue.assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription))
             hue.requestFocus()
 
             hue.performKeyInput { pressKey(Key.DirectionRight) }
 
-            onNode(pickerTrackText("Hue, 300")).assertExists()
+            onNode(pickerTrackText("Hue, slider, 300")).assertExists()
         }
 
     @Test

@@ -15,9 +15,10 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * A field showing one choice out of [options], opening a list of all of them.
  *
  * The field reads as a dropdown list whose state is the chosen option, and each option reads as a
- * radio button that knows whether it is selected. The chosen option also carries a check, so the
- * choice never rests on colour alone. Material3 draws its exposed dropdown, the other skins the
- * headless select.
+ * radio button that knows whether it is selected. On the web the field reads as a button named
+ * "Style, pop-up button, Tonal spot" and each option as "Vibrant, option, not selected" (D40). The
+ * chosen option also carries a check, so the choice never rests on colour alone. The field fills
+ * the width it is given. Material3 draws its exposed dropdown, the other skins the headless select.
  *
  * @param[label] What is being chosen.
  * @param[options] Every choice, in the order the list shows them.
