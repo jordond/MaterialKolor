@@ -44,7 +44,7 @@ class LibrarySymbolsTest {
         val imported = importedNames()
         val missing = librarySymbols()
             .filter { it.isImportable && !it.packageName.startsWith("com.materialkolor") }
-            .filterNot { it.qualifiedName in imported }
+            .filterNot { it.qualifiedName in imported || it.qualifiedName in AndroidOnly }
 
         assertEquals(emptyList(), missing, "No source in the repo imports these, so their packages are unverified")
     }
@@ -122,10 +122,11 @@ class LibrarySymbolsTest {
             }
     }
 
-    /** Every name imported by the library, its samples, the old builder and the README. */
+    /** Every name imported by the library, its samples, the builder and the README. */
     private fun importedNames(): Set<String> {
         val roots = listOf("material-kolor-core", "material-kolor-material3", "material-kolor-unstyled")
-            .plus(listOf("material-kolor-fluent", "material-kolor-palette", "samples", "builder/shared"))
+            .plus(listOf("material-kolor-fluent", "material-kolor-palette", "samples"))
+            .plus(listOf("builder/app", "builder/kit", "builder/preview"))
             .map { File(root, it) }
 
         val sources = roots.flatMap { dir ->
@@ -143,6 +144,16 @@ class LibrarySymbolsTest {
     }
 
     private companion object {
+        /**
+         * Android only names no source here imports since the old builder left. The compile check
+         * (`builder/codegen-check`, `compileAndroidMain` in CI) builds exported code that uses them.
+         */
+        val AndroidOnly = setOf(
+            "android.os.Build",
+            "androidx.compose.material3.dynamicDarkColorScheme",
+            "androidx.compose.material3.dynamicLightColorScheme",
+            "androidx.compose.ui.platform.LocalContext",
+        )
         val ParameterLine = Regex("""^ {4}(?:(?:private )?val )?(\w+): (.+?)(?: = (.+?))?,$""")
         val ImportLine = Regex("""^import ([\w.]+)$""")
     }
