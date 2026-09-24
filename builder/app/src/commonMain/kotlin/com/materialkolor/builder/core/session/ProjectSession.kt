@@ -263,6 +263,17 @@ internal class ProjectSession(
             error
         }
 
+    // b-310
+
+    /**
+     * Save a project opened from a link now rather than on its first edit, for "Save to my
+     * projects", along with anything else waiting. A project that is saved already only flushes.
+     */
+    fun saveTransient(): Job {
+        if (_project.value is ProjectRef.Transient) commit(_document.value)
+        return flush()
+    }
+
     /** Change how the preview is set up, saved once the changes stop. */
     fun updateView(block: (ProjectViewState) -> ProjectViewState) {
         val state = _viewState.updateAndGet(block)
