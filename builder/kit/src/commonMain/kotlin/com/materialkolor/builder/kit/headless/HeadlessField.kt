@@ -141,17 +141,22 @@ internal fun rememberFieldDraft(committed: String): FieldDraft {
 /**
  * Enter commits, Esc reverts, and leaving the field commits. Enter and Esc are left to the input
  * method while it is composing, and Esc on a clean field is left for whatever sits around it.
+ *
+ * Enter also calls [onSubmit] once the commit is done, clean draft or not. Leaving the field never
+ * does.
  */
 internal fun Modifier.fieldCommits(
     draft: FieldDraft,
     onCommit: () -> Unit,
     onRevert: () -> Unit,
+    onSubmit: (() -> Unit)? = null, // b-315a
 ): Modifier =
     onPreviewKeyEvent { event ->
         if (event.type != KeyEventType.KeyDown || draft.composing) return@onPreviewKeyEvent false
         when (event.key) {
             Key.Enter, Key.NumPadEnter -> {
                 onCommit()
+                onSubmit?.invoke() // b-315a
                 true
             }
             Key.Escape -> {

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The command palette's title, also read out as its name. -->
+    <string name="palette_title">Command palette</string>
+    <!-- The palette's search field. -->
+    <string name="palette_query">Search commands, or paste a color or a link</string>
+    <!-- Where the rows go while nothing matches the search. -->
+    <string name="palette_nothing">Nothing matches</string>
+    <string name="palette_close">Close</string>
+    <!-- The line under a row, its group then its keys, such as "Seed · Space". -->
+    <string name="palette_row_keys">%1$s · %2$s</string>
+
+    <!-- A row for text the palette understands. The argument is the color as #RRGGBB. -->
+    <string name="palette_set_seed">Set seed to %1$s</string>
+    <string name="palette_open_shared">Open shared theme</string>
+
+    <!-- A row that shows a role on its ramp. The argument is the role, such as primaryContainer. -->
+    <string name="palette_show_on_ramp">Show %1$s on ramp</string>
+    <!-- A row that opens the poster at one of its sections. The argument is the section, such as Contrast. -->
+    <string name="palette_go_to">Go to %1$s</string>
+    <!-- The groups of the rows above. -->
+    <string name="palette_category_roles">Roles</string>
+    <string name="palette_category_poster">Poster</string>
+
+    <!-- Other words a search finds a command by, split at the commas. None is shown. -->
+    <string name="palette_words_shuffle">random, surprise me, new seed</string>
+    <string name="palette_words_undo">back, revert</string>
+    <string name="palette_words_copy_seed">hex, color code</string>
+    <string name="palette_words_image">photo, picture, upload</string>
+    <string name="palette_words_inspect">element, hover, what is this</string>
+    <string name="palette_words_fullscreen">zen, maximize, hide the poster</string>
+    <string name="palette_words_export">code, kotlin, files, download</string>
+    <string name="palette_words_share">link, url, send</string>
+    <string name="palette_words_projects">open, saved themes, load</string>
+    <string name="palette_words_appearance">dark mode, light mode, chrome</string>
+    <string name="palette_words_motion">animation, reduce motion</string>
+    <string name="palette_words_vision">color blindness, colour blind, simulate</string>
+    <string name="palette_words_device">size, phone, tablet, desktop, width</string>
+    <string name="palette_words_keys">keyboard, hotkeys, accessibility</string>
+    <string name="palette_words_accents">accents, custom colors</string>
+    <string name="palette_words_pins">pins, pinned</string>
+</resources>

@@ -159,11 +159,17 @@ class ShortcutsTest {
 
             keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.S) } }
             waitUntil { named("Saved") }
-            keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.K) } }
-            harness.workspace.state.value.panel shouldBe Panel.Palette
             keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.O) } }
-
             harness.workspace.state.value.panel shouldBe Panel.Projects
+            // b-315a
+            // An open panel owns the keyboard, so the field takes focus again before Ctrl+K.
+            runOnUiThread { harness.workspace.closePanel() }
+            waitForIdle()
+            onAllNodes(hasSetTextAction()).onFirst().requestFocus()
+            waitForIdle()
+            keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.K) } }
+
+            harness.workspace.state.value.panel shouldBe Panel.Palette
         }
 
     @Test
