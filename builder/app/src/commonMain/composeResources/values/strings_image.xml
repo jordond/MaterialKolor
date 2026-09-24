@@ -20,4 +20,39 @@
     <string name="image_mostly_gray">This image is mostly gray, so its colors are quiet</string>
     <!-- After a reload the image itself is gone and only its colors are left. -->
     <string name="image_add_again">Add the image again</string>
+
+    <!-- b-311b -->
+    <!-- The menu the Image button opens. -->
+    <string name="image_menu_upload">Upload image</string>
+    <string name="image_menu_presets">Presets and starters</string>
+
+    <!-- The preset picker. The title and the two groups in it. -->
+    <string name="image_presets_title">Presets and starters</string>
+    <string name="image_presets_images">Images</string>
+    <string name="image_presets_images_line">An image sets the seed to its strongest color, and the chips under it offer the rest.</string>
+    <string name="image_presets_starters">Starters</string>
+    <string name="image_presets_starters_line">A starter sets the seed, the style and the contrast. Everything else stays as it is.</string>
+    <string name="image_presets_close">Close</string>
+    <!-- One starter card. The arguments are its name and its style. -->
+    <string name="image_starter_card">%1$s, %2$s</string>
+    <!-- The old builder never named its pictures. -->
+    <string name="image_preset_1">Image 1</string>
+    <string name="image_preset_2">Image 2</string>
+    <string name="image_preset_3">Image 3</string>
+    <string name="image_preset_4">Image 4</string>
+    <string name="image_preset_5">Image 5</string>
+    <string name="image_starter_baseline">Baseline</string>
+    <string name="image_starter_ocean">Ocean</string>
+    <string name="image_starter_forest">Forest</string>
+    <string name="image_starter_sunset">Sunset</string>
+    <string name="image_starter_blossom">Blossom</string>
+    <string name="image_starter_sand">Sand</string>
+    <string name="image_starter_ink">Ink</string>
+    <string name="image_starter_mono">Mono</string>
+
+    <!-- The image eyedropper, opened from the picture in the candidate row. -->
+    <string name="image_eyedropper_open">Pick a color from the image</string>
+    <string name="image_eyedropper_title">Pick a color from the image</string>
+    <string name="image_eyedropper_line">Click any spot to make its exact color the seed. With a keyboard, the color chips under the image do the same.</string>
+    <string name="image_eyedropper_cancel">Cancel</string>
 </resources>

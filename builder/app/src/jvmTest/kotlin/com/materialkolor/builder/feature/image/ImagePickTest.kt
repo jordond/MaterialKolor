@@ -29,14 +29,17 @@ private const val WAIT_MILLIS = 5_000L
 class ImagePickTest {
     private val platform = FakePlatform()
 
+    // b-311b
     @Test
-    fun imageButton_opensThePickerBeforeTheClickReturns() =
+    fun uploadImage_opensThePickerBeforeTheClickReturns() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             showRoot()
+            onNodeWithText("Image").performClick()
+            waitForIdle()
             // No frame and no task runs after the click, so only a pick started inside it counts.
             mainClock.autoAdvance = false
 
-            onNodeWithText("Image").performClick()
+            onNodeWithText(UPLOAD).performClick()
 
             platform.images.picks shouldBe 1
         }
@@ -51,6 +54,7 @@ class ImagePickTest {
             val before = graph.session.document.value
 
             onNodeWithText("Image").performClick()
+            onNodeWithText(UPLOAD).performClick() // b-311b
             waitUntil(timeoutMillis = WAIT_MILLIS) { graph.session.document.value.seedSource is SeedSource.Image }
             waitForIdle()
 
@@ -99,5 +103,6 @@ class ImagePickTest {
 
     private companion object {
         const val UNSUPPORTED = "That file couldn’t be read as an image, so the theme stays as it was"
+        const val UPLOAD = "Upload image" // b-311b
     }
 }
