@@ -78,9 +78,11 @@ internal fun Modifier.withoutSelectionHandles(enabled: Boolean = overlaysInTree)
  * of its reach, since a handle on an upper line has its foot inside the text. The caret and the
  * selection highlight each lose their bottom pixel.
  *
- * It leans on two foundation internals, and the b-228 e2e tests in `text-toolbar.spec.ts` trip
- * when either moves. Drop it when CMP fixes the single-owner listener, together with the in-page
- * overlays.
+ * It leans on the same two foundation internals as [withoutSelectionHandles], the handle visibility
+ * test in `CoreTextField` and the handle position `TextFieldSelectionManager` hands it. The b-228b
+ * e2e cases in `sample-fields.spec.ts`, a long press on the gallery's filled and outlined text fields
+ * and on the Trips note, trip when either moves, as do the b-228 cases in `text-toolbar.spec.ts`.
+ * Drop it when CMP fixes the single-owner listener, together with the in-page overlays.
  *
  * @param[innerTextField] The inner text a decoration box is given.
  */

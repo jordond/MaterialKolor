@@ -25,6 +25,7 @@ import com.materialkolor.builder.fakes.FakeFileSaver
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.floats.shouldBeLessThanOrEqual
 import io.kotest.matchers.ints.shouldBeGreaterThan
@@ -112,6 +113,33 @@ class ShareDialogTest : SessionTestBase() {
             onNode(hasText("Try Copy link instead", substring = true)).assertExists()
             done.shouldBeEmpty()
         }
+
+    // b-228c
+    @Test
+    fun copyAndShare_thatBothFailOnATouchScreen_sendAFingerBackToCopy() {
+        for (copyFirst in listOf(true, false)) {
+            withClue(if (copyFirst) "Copy link first" else "Share first") {
+                runComposeUiTest {
+                    showDialog(
+                        copyOutcome = ShareOutcome.CopyFailed,
+                        sharesToSheet = true,
+                        shareOutcome = ShareOutcome.ShareFailed,
+                        coarsePointer = true,
+                    )
+
+                    val order = if (copyFirst) listOf("Copy link", "Share") else listOf("Share", "Copy link")
+                    for (button in order) {
+                        onNodeWithText(button).performClick()
+                        waitForIdle()
+                    }
+
+                    onNode(hasText("Try Copy link again", substring = true)).assertExists()
+                    onAllNodes(hasText("instead", substring = true)).assertCountEquals(0)
+                    done.shouldBeEmpty()
+                }
+            }
+        }
+    }
 
     @Test
     fun dialog_withoutAShareSheet_offersOnlyCopy() =

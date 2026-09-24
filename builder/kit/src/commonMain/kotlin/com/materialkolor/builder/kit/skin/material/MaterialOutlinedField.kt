@@ -2,7 +2,6 @@ package com.materialkolor.builder.kit.skin.material
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
@@ -26,8 +25,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.sp
-import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
-import com.materialkolor.builder.kit.headless.withoutSelectionHandles
+import com.materialkolor.builder.kit.headless.InnerTextWithoutHandles
 
 // b-228a
 
@@ -59,7 +57,6 @@ internal fun MaterialOutlinedField(
     val interactions = remember { MutableInteractionSource() }
     val focused by interactions.collectIsFocusedAsState()
     val colors = OutlinedTextFieldDefaults.colors()
-    val inTree = LocalOverlaysInTree.current
     val textColor = textStyle.color.takeOrElse { colors.textColor(enabled, isError, focused) }
     // The label sits across the outline, so the field gives it half its line above the box.
     val labelLine = MaterialTheme.typography.bodySmall.lineHeight
@@ -86,11 +83,7 @@ internal fun MaterialOutlinedField(
             decorationBox = { innerTextField ->
                 OutlinedTextFieldDefaults.DecorationBox(
                     value = value.text,
-                    innerTextField = {
-                        Box(Modifier.withoutSelectionHandles(inTree), propagateMinConstraints = true) {
-                            innerTextField()
-                        }
-                    },
+                    innerTextField = { InnerTextWithoutHandles(innerTextField) },
                     enabled = enabled,
                     singleLine = true,
                     visualTransformation = VisualTransformation.None,
