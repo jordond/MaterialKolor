@@ -172,8 +172,7 @@ class ExpressiveGalleryTest {
             ExpressiveCards
                 .filterNot { card ->
                     expressiveFrame(card.title).expressiveDescendants().any { node -> PreviewRoles in node.config }
-                }
-                .map { card -> card.title }
+                }.map { card -> card.title }
                 .shouldBeEmpty()
         }
 
