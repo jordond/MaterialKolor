@@ -1,12 +1,11 @@
 package com.materialkolor.builder.feature.image
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -22,7 +21,6 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -40,7 +38,6 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -57,10 +54,10 @@ import com.materialkolor.builder.generated.resources.image_eyedropper_line
 import com.materialkolor.builder.generated.resources.image_eyedropper_open
 import com.materialkolor.builder.generated.resources.image_eyedropper_title
 import com.materialkolor.builder.kit.control.BuilderButton
+import com.materialkolor.builder.kit.control.BuilderCard
 import com.materialkolor.builder.kit.control.BuilderDialog
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.Emphasis
-import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.widget.SchemeChipFootprint
 import dev.stateholder.dispatcher.Dispatcher
@@ -73,9 +70,6 @@ internal const val EYEDROPPER_PICTURE_TAG: String = "image-eyedropper-picture"
 /** How wide the loupe is, before it rounds down to whole cells. */
 private val LoupeDiameter = 112.dp
 
-/** How much of the window's height the picture may take, so a tall one leaves room for the buttons. */
-private const val PICTURE_HEIGHT_FRACTION = 0.6f
-
 /** How many of the picture's pixels the loupe spans across, an odd count so one sits in the middle. */
 private const val LOUPE_PIXELS = 11
 
@@ -83,9 +77,10 @@ private const val LOUPE_PIXELS = 11
 private const val OPAQUE: Int = 0xFF shl 24
 
 /**
- * The picture in the candidate row, in the room a chip takes, as a button that opens the image
- * eyedropper over [detail]. The eyedropper is open while [openPanel] is `Panel.ImageEyedropper`,
- * and it hands the focus back here once it closes.
+ * The picture in the candidate row, in the room a chip takes, on a card that opens the image
+ * eyedropper over [detail]. The card presses, rings and reads out the way the kit's other controls
+ * do. The eyedropper is open while [openPanel] is `Panel.ImageEyedropper`, and it hands the focus
+ * back here once it closes.
  *
  * @param[thumbnail] The picture the row shows.
  * @param[detail] The same picture at the most pixels there are of it, which the eyedropper shows.
@@ -99,23 +94,21 @@ internal fun EyedropperThumbnail(
     openPanel: Panel?,
     dispatcher: Dispatcher<WorkspaceAction>,
 ) {
-    val tokens = LocalBuilderTokens.current
-    val shape = RoundedCornerShape(tokens.radius.small)
-    val label = stringResource(Res.string.image_eyedropper_open)
+    val radius = LocalBuilderTokens.current.radius
     val focus = remember { FocusRequester() }
-    var focused by remember { mutableStateOf(false) }
-    Image(
-        bitmap = thumbnail,
-        contentDescription = label,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .size(SchemeChipFootprint)
-            .focusRequester(focus)
-            .onFocusChanged { state -> focused = state.isFocused }
-            .clip(shape)
-            .then(if (focused) Modifier.border(tokens.highlightWidth, tokens.focus, shape) else Modifier)
-            .clickable(role = Role.Button) { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.ImageEyedropper)) },
-    )
+    // b-311d
+    BuilderCard(
+        modifier = Modifier.focusRequester(focus),
+        onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.ImageEyedropper)) },
+    ) {
+        Image(
+            bitmap = thumbnail,
+            // The card has no text of its own, so the picture names it.
+            contentDescription = stringResource(Res.string.image_eyedropper_open),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(SchemeChipFootprint).clip(RoundedCornerShape(radius.small)),
+        )
+    }
     ImageEyedropper(
         visible = openPanel == Panel.ImageEyedropper,
         picture = detail,
@@ -168,17 +161,25 @@ internal fun ImageEyedropper(
             )
         },
     ) {
-        BuilderText(text = stringResource(Res.string.image_eyedropper_line), emphasis = Emphasis.Secondary)
-        PixelPicker(picture) { pixel ->
-            dispatcher.dispatch(WorkspaceAction.EditWithReveal(DocumentChange.SetSeed(pixel, source), origin = null))
-            close()
+        // b-311d
+        // The picture takes the height the line and the buttons leave, so the buttons stay on screen.
+        Column(
+            modifier = Modifier.leaveRoomBelow(dialogButtonRoom()),
+            verticalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.medium),
+        ) {
+            BuilderText(text = stringResource(Res.string.image_eyedropper_line), emphasis = Emphasis.Secondary)
+            PixelPicker(picture) { pixel ->
+                val change = DocumentChange.SetSeed(pixel, source)
+                dispatcher.dispatch(WorkspaceAction.EditWithReveal(change, origin = null))
+                close()
+            }
         }
     }
 }
 
 /**
- * [picture] as wide as the dialog lets it be, with a loupe over the spot under the pointer. A click
- * hands [onPick] the pixel under it.
+ * [picture] as wide as the dialog lets it be, and no taller than the height it is offered, with a
+ * loupe over the spot under the pointer. A click hands [onPick] the pixel under it.
  */
 @Composable
 private fun PixelPicker(
@@ -186,12 +187,10 @@ private fun PixelPicker(
     onPick: (pixel: Argb) -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
-    val maxHeight = LocalLayout.current.heightDp * PICTURE_HEIGHT_FRACTION
     var aim by remember(picture) { mutableStateOf<Offset?>(null) }
     val pick by rememberUpdatedState(onPick)
     Box(
         modifier = Modifier
-            .heightIn(max = maxHeight)
             .aspectRatio(picture.width.toFloat() / picture.height)
             .testTag(EYEDROPPER_PICTURE_TAG)
             // Pointer only. The chips are the way in for a keyboard or a screen reader.

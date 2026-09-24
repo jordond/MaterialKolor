@@ -2,6 +2,9 @@ package com.materialkolor.builder.feature.image
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -70,7 +73,7 @@ class PresetPickerTest {
             val harness = PosterHarness(busy)
             showButton(harness)
 
-            choose("Ink, TonalSpot")
+            choose("Ink, TonalSpot, Medium contrast")
 
             harness.actions
                 .filterIsInstance<WorkspaceAction.EditWithReveal>()
@@ -129,7 +132,7 @@ class PresetPickerTest {
             waitForIdle()
 
             harness.openPanel shouldBe Panel.ImageEyedropper
-            onNodeWithText("Click any spot", substring = true).assertExists()
+            onNodeWithText("Pick any spot", substring = true).assertExists()
         }
 
     @Test
@@ -142,15 +145,56 @@ class PresetPickerTest {
             onNodeWithContentDescription(EYEDROPPER).assertDoesNotExist()
         }
 
+    // b-311d
+
+    @Test
+    fun presets_openAsAPanel_andBackClosesThem_handingTheFocusBackToImage() =
+        runComposeUiTest {
+            val harness = PosterHarness(busy)
+            showButton(harness)
+
+            openPresets()
+            harness.openPanel shouldBe Panel.Presets
+            harness.actions shouldBe listOf(WorkspaceAction.OpenPanel(Panel.Presets))
+
+            // Back reaches the workspace as the router's pop, which closes whatever panel is open.
+            runOnUiThread { harness.dispatch(WorkspaceAction.ClosePanel) }
+            waitForIdle()
+
+            harness.openPanel shouldBe null
+            onNodeWithText(PRESETS).assertDoesNotExist()
+            onNodeWithText("Image").assertIsFocused()
+            harness.document shouldBe busy
+        }
+
+    @Test
+    fun starterCards_drawEveryStartersScheme_andNameAContrastOffStandard() =
+        runComposeUiTest {
+            val harness = PosterHarness(busy)
+            showButton(harness)
+
+            openPresets()
+
+            onAllNodesWithTag(STARTER_CHIP_TAG, useUnmergedTree = true).assertCountEquals(Presets.starters.size)
+            onAllNodesWithTag(STARTER_SKELETON_TAG, useUnmergedTree = true).assertCountEquals(0)
+            Presets.starters.size shouldBe 8
+            onNodeWithText("Ink, TonalSpot, Medium contrast").assertExists()
+            onNodeWithText("Baseline, TonalSpot").assertExists()
+        }
+
+    private fun ComposeUiTest.openPresets() {
+        onNodeWithText("Image").performClick()
+        onNodeWithText(PRESETS).performClick()
+        waitForIdle()
+    }
+
     private fun ComposeUiTest.showButton(harness: PosterHarness) {
         showSection(harness) { context, dispatcher -> ImageMenuButton(context, dispatcher) }
     }
 
     /** Opens the picker from the Image menu and chooses the card named [name]. */
     private fun ComposeUiTest.choose(name: String) {
-        onNodeWithText("Image").performClick()
-        onNodeWithText(PRESETS).performClick()
-        waitForIdle()
+        openPresets()
         onNodeWithText(name).performScrollTo().performClick()
         waitForIdle()
     }
