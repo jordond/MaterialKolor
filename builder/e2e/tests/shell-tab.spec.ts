@@ -79,6 +79,21 @@ test('one Tab from the Filled field lands in the Outlined one', async ({ page })
     .toBe(true);
 });
 
+// b-227
+// The Trips note is the one multi-line field in the sample apps. On its own it would type Tab as a
+// character, so the preview moves focus on Tab and Shift+Tab instead.
+for (const key of ['Tab', 'Shift+Tab']) {
+  test(`${key} leaves the Trips note without typing into it`, async ({ page }) => {
+    const note = await typeInTripsNote(page);
+
+    await press(page, key);
+    await expect(page.locator(BACKING_FIELD)).toHaveCount(0);
+    await typeSettled(page, 'x');
+
+    await expect(note).toHaveText('note');
+  });
+}
+
 /** Opens the gallery, clicks into its text field [nth] of `FIELDS` and types `start` there. */
 async function typeInField(page: Page, nth: number): Promise<Locator> {
   await openBuilder(page);
@@ -99,6 +114,30 @@ async function typeInField(page: Page, nth: number): Promise<Locator> {
   await typeSettled(page, 'start');
   await expect(start).toHaveText('start');
   return start;
+}
+
+/** Opens the App tab, scrolls the open trip to its note, clicks into the note and types `note` there. */
+async function typeInTripsNote(page: Page): Promise<Locator> {
+  await openBuilder(page);
+  await expect(page.locator('#cmp_a11y_root > *').first()).toBeAttached({ timeout: 30_000 });
+  const tab = (await page.locator('#cmp_a11y_root [aria-label^="App, tab"]').boundingBox())!;
+  await page.mouse.click(tab.x + tab.width / 2, tab.y + tab.height / 2);
+  // The note closes the open trip's pane, so scrolling that pane well past it only stops at its end.
+  const checkIn = page.locator('#cmp_a11y_root [role="button"]').filter({ hasText: /^Check in$/ });
+  const pane = (await checkIn.boundingBox())!;
+  await page.mouse.move(pane.x + pane.width / 2, pane.y + pane.height / 2);
+  for (const _ of [1, 2, 3]) {
+    await page.mouse.wheel(0, 400);
+    await page.waitForTimeout(SETTLE_MS);
+  }
+  // The note is the only text field in the app, and like the gallery's its label is its text.
+  const note = page.locator(FIELDS).first();
+  await expect.poll(async () => (await note.boundingBox())?.height ?? 0, { timeout: 15_000 }).toBeGreaterThan(0);
+  const box = (await note.boundingBox())!;
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await typeSettled(page, 'note');
+  await expect(note).toHaveText('note');
+  return note;
 }
 
 /** Whether the centre of [inner] lies inside [outer]. */
