@@ -233,6 +233,37 @@ class ProjectRepositoryTest {
         }
 
     @Test
+    fun delete_recordANewerBuildSaved_isTurnedDownAndWritesNothing() =
+        runTest {
+            val record = created()
+            repository.saveHistory(record.id, HISTORY)
+            stores.seed(StorageKeys.project(record.id), NEWER_RECORD)
+            val texts = stores.keys.associateWith { key -> stores.textAt(key) }
+
+            repository.delete(record.id) shouldBe Deletion.NewerBuild
+
+            stores.keys.associateWith { key -> stores.textAt(key) } shouldBe texts
+            stores.textAt(StorageKeys.project(record.id)) shouldBe NEWER_RECORD
+            listedIds() shouldBe listOf(record.id)
+        }
+
+    // b-310aa
+    @Test
+    fun delete_onlyTheHistoryFromANewerBuild_isTurnedDownAndWritesNothing() =
+        runTest {
+            val record = created()
+            stores.seed(StorageKeys.history(record.id), NEWER_HISTORY)
+            val texts = stores.keys.associateWith { key -> stores.textAt(key) }
+
+            repository.fromNewerBuild(record.id) shouldBe true
+            repository.delete(record.id) shouldBe Deletion.NewerBuild
+
+            stores.keys.associateWith { key -> stores.textAt(key) } shouldBe texts
+            repository.load(record.id) shouldBe record
+            listedIds() shouldBe listOf(record.id)
+        }
+
+    @Test
     fun delete_notListed_returnsNotListed() =
         runTest {
             repository.delete("missing") shouldBe Deletion.NotListed
@@ -355,6 +386,11 @@ private const val TAB = "this-tab"
 private const val START = 1_700_000_000_000
 
 private const val MINUTE = 60_000L
+
+/** A project record from a build whose schema this one does not know yet. */
+private const val NEWER_RECORD = """{"schema":999,"data":{"id":"p1"}}"""
+
+private const val NEWER_HISTORY = """{"schema":999,"data":{"entries":[]}}"""
 
 private val DOCUMENT = ThemeDocument(seed = DEFAULT_SEED)
 

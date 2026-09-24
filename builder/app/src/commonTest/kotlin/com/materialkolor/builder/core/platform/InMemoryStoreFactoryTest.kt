@@ -86,6 +86,43 @@ class InMemoryStoreFactoryTest {
             factory.keys shouldBe setOf(StorageKeys.PREFS)
         }
 
+    // b-310aa
+    @Test
+    fun fromNewerBuild_eachKindOfRecord_isTrueOnlyForANewerSchemaAndOnlyReads() =
+        runTest {
+            val reported = mutableListOf<Quarantined>()
+            backgroundScope.launch { factory.quarantined.toList(reported) }
+
+            store.fromNewerBuild() shouldBe false
+            store.update { prefs -> prefs.copy(hueLock = true) } shouldBe null
+            store.fromNewerBuild() shouldBe false
+            factory.seed(StorageKeys.PREFS, BROKEN)
+            store.fromNewerBuild() shouldBe false
+            factory.textAt(StorageKeys.PREFS) shouldBe BROKEN
+            factory.seed(StorageKeys.PREFS, NEWER)
+            store.fromNewerBuild() shouldBe true
+            runCurrent()
+
+            factory.keys shouldBe setOf(StorageKeys.PREFS)
+            reported shouldBe emptyList()
+        }
+
+    // b-310aa
+    @Test
+    fun update_overNewerSchemaText_neverRunsItsBlock() =
+        runTest {
+            factory.seed(StorageKeys.PREFS, NEWER)
+            var ran = false
+
+            val error = store.update { prefs ->
+                ran = true
+                prefs
+            }
+
+            error shouldBe StoreError.Unavailable
+            ran shouldBe false
+        }
+
     // b-301a
     @Test
     fun update_overNewerSchemaText_isRefusedAndLeavesTheText() =

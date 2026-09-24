@@ -5,9 +5,13 @@ import com.materialkolor.builder.core.session.BootNotice
 import com.materialkolor.builder.core.session.ProjectRef
 import com.materialkolor.builder.core.session.ProjectSession
 import com.materialkolor.builder.core.session.SessionTestBase
+import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.DecodeResult
+import com.materialkolor.builder.domain.link.SHARE_URL_PREFIX
 import com.materialkolor.builder.domain.link.ShareCodec
+import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.persist.ExportTarget
+import com.materialkolor.builder.domain.validate.MAX_ACCENTS
 import com.materialkolor.builder.fakes.FakeClipboard
 import com.materialkolor.builder.fakes.FakeFileSaver
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -59,9 +63,20 @@ class ShareControllerTest : SessionTestBase() {
 
             link shouldBe "https://materialkolor.com/t/" + ShareCodec.encode(OCEAN, "Harbour")
             link shouldNotContain "example"
-            val decoded = ShareCodec.decode(link.removePrefix(SHARE_LINK_BASE)).shouldBeInstanceOf<DecodeResult.Ok>()
+            val decoded = ShareCodec.decode(link.removePrefix(SHARE_URL_PREFIX)).shouldBeInstanceOf<DecodeResult.Ok>()
             decoded.projectName shouldBe "Harbour"
             decoded.document.seed shouldBe OCEAN.seed
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun link_withNineAccents_isNull() =
+        runTest {
+            val (session, _) = session()
+            val controller = controller(session)
+            val accents = List(MAX_ACCENTS + 1) { index -> Accent(name = "accent$index", seed = Argb(index)) }
+
+            controller.link(OCEAN.copy(accents = accents), "Harbour").shouldBeNull()
             harness.clearAndJoin()
         }
 

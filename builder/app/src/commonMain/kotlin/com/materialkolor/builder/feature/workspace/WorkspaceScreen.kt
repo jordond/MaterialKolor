@@ -143,7 +143,7 @@ internal fun WorkspaceScreen(
                 }
             }
             is WorkspaceAction.ShowToast -> {
-                toasts.show(action.message)
+                toasts.show(action.message, action.actionLabel, action.duration, action.onAction)
             }
             is WorkspaceAction.SetAppearance -> {
                 model.setAppearance(action.appearance)
@@ -195,8 +195,7 @@ internal fun WorkspaceScreen(
         fullscreenExit = { FullscreenExit(dispatcher) },
         overlays = {
             ExportHost(state, dispatcher)
-            // b-310
-            ProjectsHost(state, dispatcher, toasts)
+            ProjectsHost(state, dispatcher)
             ShareHost(state, dispatcher)
             CommandHost(state, dispatcher)
             PickerHost(state, dispatcher)

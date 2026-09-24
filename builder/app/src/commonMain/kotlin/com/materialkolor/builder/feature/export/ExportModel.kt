@@ -19,7 +19,7 @@ import com.materialkolor.builder.core.session.ProjectSession
 import com.materialkolor.builder.di.AppScope
 import com.materialkolor.builder.domain.capability.EffectiveSpec
 import com.materialkolor.builder.domain.capability.forTarget
-import com.materialkolor.builder.domain.link.ShareCodec
+import com.materialkolor.builder.domain.link.shareLink
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportPrefs
@@ -40,9 +40,6 @@ import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.launch
 
-/** Where a share code opens its theme, and where every export header links back to. */
-internal const val SHARE_URL_PREFIX = "https://materialkolor.com/t/"
-
 /** The media type of the downloaded zip. */
 internal const val ZIP_MIME = "application/zip"
 
@@ -59,8 +56,8 @@ internal const val ZIP_MIME = "application/zip"
  * or the versions change, so a sheet that recomposes, or opens again on the same theme, generates
  * nothing.
  *
- * Every header and the README link back with the code Share gives, which carries the project name
- * (F-32, D26). The package name stays out of it.
+ * Every header and the README link back with the link Share gives, [shareLink], which carries the
+ * project name (F-32, D26). The package name stays out of it.
  *
  * The model never copies or saves anything itself. Browsers only allow that inside the click, so
  * the sheet calls [clipboard] and [files] straight from its click handler (R-B-302).
@@ -151,13 +148,15 @@ internal class ExportModel(
         val targeted = document.forTarget(target)
         val problems = problemsOf(targeted, prefs)
         if (problems.isNotEmpty()) return ExportOutcome.Blocked(problems)
+        // Only accents that do not fit stop a link, and the checks above turn those down first.
+        val link = shareLink(document, projectName) ?: return ExportOutcome.Blocked(listOf(ExportProblem.ExtraColors))
 
         val input = ExportInput(
             document = document,
             prefs = prefs,
             resolved = exports.resolve(targeted, prefs),
             versions = versions,
-            shareUrl = SHARE_URL_PREFIX + shareCodeOf(document, targeted, projectName),
+            shareUrl = link,
         )
         val files = generator.files(input)
         val themeName = targeted.themeName
@@ -322,16 +321,3 @@ private fun problemOf(
         // An export has no project name to check.
         is ValidationError.ProjectNameTooLong -> null
     }
-
-/**
- * The share code for the link back, the same one Share gives for [projectName]. A target that drops
- * the extra colors can export a document whose own extra colors would not fit in a code, so that one
- * links to what the target sees, still under the project's name.
- */
-private fun shareCodeOf(
-    document: ThemeDocument,
-    targeted: ThemeDocument,
-    projectName: String,
-): String =
-    runCatching { ShareCodec.encode(document, projectName) }
-        .getOrElse { ShareCodec.encode(targeted, projectName) }

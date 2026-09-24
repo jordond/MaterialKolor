@@ -1,5 +1,7 @@
 package com.materialkolor.builder.feature.projects
 
+import com.materialkolor.builder.core.data.DeletedProject
+
 /**
  * Everything the projects drawer and its banners can ask of [ProjectsModel].
  */
@@ -26,13 +28,15 @@ internal sealed interface ProjectsAction {
         val name: String,
     ) : ProjectsAction
 
-    /** Delete the project [id], with an undo for [UNDO_WINDOW_MILLIS]. */
+    /** Delete the project [id], with an undo in a toast. */
     data class Delete(
         val id: String,
     ) : ProjectsAction
 
-    /** Bring back the project deleted last, while its undo is still up. */
-    data object UndoDelete : ProjectsAction
+    /** Bring back [deleted], from the undo toast its delete raised, even when others were deleted since. */
+    data class UndoDelete(
+        val deleted: DeletedProject,
+    ) : ProjectsAction
 
     /** Narrow the list to the projects whose name holds [query]. */
     data class Search(

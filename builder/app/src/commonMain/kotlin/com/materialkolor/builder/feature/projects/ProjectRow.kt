@@ -17,6 +17,12 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
 import com.materialkolor.builder.domain.persist.ExportTarget
@@ -62,8 +68,9 @@ import org.jetbrains.compose.resources.stringResource
  *
  * The thumbnail is the row's radio, named by the project, so a screen reader hears the list as one
  * choice with the open project chosen. The name opens the project too for a pointer, without a
- * second stop for the keyboard. Rename swaps the name for a field, which commits on Enter or when
- * it loses focus and gives up on Esc.
+ * second stop for the keyboard. Rename swaps the name for a field. Enter or leaving the field closes
+ * it and saves a new name, while an unchanged or blank one keeps the old name. Esc closes it and
+ * keeps the old name whatever was typed.
  *
  * @param[meta] The project.
  * @param[open] Whether it is the open project.
@@ -150,6 +157,14 @@ private fun RenameField(
         modifier = Modifier
             .fillMaxWidth()
             .focusRequester(focus)
+            // The field sees Enter and Esc after this, so Enter still saves a new name and Esc still
+            // throws the draft away before the field goes.
+            .onPreviewKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown && event.key in CLOSE_KEYS) onRenamingChange(false)
+                false
+            }
+            // An Esc the field had nothing to throw away stops here, so the drawer stays open.
+            .onKeyEvent { event -> event.type == KeyEventType.KeyDown && event.key == Key.Escape }
             .onFocusChanged { state ->
                 if (focused && !state.hasFocus) onRenamingChange(false)
                 focused = state.hasFocus
@@ -158,6 +173,9 @@ private fun RenameField(
     )
     LaunchedEffect(focus) { focus.requestFocus() }
 }
+
+/** The keys that close the rename field. */
+private val CLOSE_KEYS: Set<Key> = setOf(Key.Enter, Key.NumPadEnter, Key.Escape)
 
 @Composable
 private fun RowMenu(

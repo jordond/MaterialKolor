@@ -161,6 +161,13 @@ class InMemoryStoreFactory(
             return if (refused) StoreError.Unavailable else null
         }
 
+        // b-310aa
+        override suspend fun fromNewerBuild(): Boolean {
+            val text = texts.value[key] ?: return false
+            val outcome = codec.decode(text)
+            return outcome is DecodeOutcome.Quarantine && outcome.reason == QuarantineReason.NewerSchema
+        }
+
         override suspend fun delete(): StoreError? {
             deleteFailures.takeFirst()?.let { error -> return error }
             texts.update { stored -> stored - key }

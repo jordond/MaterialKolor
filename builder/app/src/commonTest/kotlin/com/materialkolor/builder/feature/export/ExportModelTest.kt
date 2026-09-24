@@ -11,6 +11,7 @@ import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.link.DecodeResult
+import com.materialkolor.builder.domain.link.SHARE_URL_PREFIX
 import com.materialkolor.builder.domain.link.ShareCodec
 import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.Library

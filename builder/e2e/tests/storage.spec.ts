@@ -1,8 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 import { hook, openBuilder, wantHooks } from './builder';
 
-// The storage behind the builder, driven through the shell's test hooks while the app is still a
-// placeholder. The router and the page around it have their own specs.
+// The storage behind the builder, driven through the shell's test hooks. What storage turns up is
+// told to the user, so those checks read the page's accessibility tree. The router and the page
+// around it have their own specs.
 
 test.beforeEach(async ({ context }) => {
   await wantHooks(context);
@@ -52,14 +53,13 @@ test.describe('storage', () => {
     expect(await hook(page, 'addHint', 'room')).toBe('Done');
   });
 
-  test('an unreadable record is set aside and reported once', async ({ page }) => {
+  test('an unreadable record is set aside and the user is told once', async ({ page }) => {
     await openBuilder(page);
-    await hook(page, 'watchQuarantine');
     await page.evaluate(() => localStorage.setItem('mk:prefs', 'not json'));
 
     expect(await hook(page, 'readHints')).toBe('');
     expect(await hook(page, 'readHints')).toBe('');
-    await expect.poll(() => hook(page, 'quarantined')).toBe('mk:prefs Unreadable');
+    await expect(onPage(page, SET_ASIDE)).toHaveCount(1);
     const holders = await page.evaluate(() =>
       Object.keys(localStorage).filter((key) => localStorage.getItem(key) === 'not json'),
     );
@@ -67,13 +67,15 @@ test.describe('storage', () => {
     expect(holders[0]).toMatch(/^mk:quarantine:/);
   });
 
-  test("a newer build's index from another tab stays as it is and refuses writes", async ({ context }) => {
+  test("a newer build's index from another tab stays as it is, refuses writes and asks for a reload", async ({
+    context,
+  }) => {
     const newer = '{"schema":999,"data":{"projects":[],"from":"a newer build"}}';
     const older = await context.newPage();
     const other = await context.newPage();
     await openBuilder(older);
     await openBuilder(other);
-    await hook(older, 'watchQuarantine');
+    await expect(onPage(older, NEWER_DATA)).toHaveCount(0);
 
     await other.evaluate((text) => localStorage.setItem('mk:index', text), newer);
     await expect.poll(() => hook(older, 'externalChanges')).toContain('Index');
@@ -81,13 +83,24 @@ test.describe('storage', () => {
     expect(await hook(older, 'readIndex')).toBe('0');
     expect(await hook(older, 'touchIndex')).toBe('Unavailable');
     expect(await hook(older, 'readIndex')).toBe('0');
-    expect(await hook(older, 'quarantined')).toBe('mk:index NewerSchema');
+    await expect(onPage(older, NEWER_DATA)).toHaveCount(1);
     expect(await older.evaluate(() => localStorage.getItem('mk:index'))).toBe(newer);
     expect(await older.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith('mk:quarantine:')))).toEqual(
       [],
     );
   });
 });
+
+/** The toast that says unreadable data was moved aside, `projects_problem_set_aside`. */
+const SET_ASIDE = 'couldn’t be read, so it was set aside';
+
+/** The banner that asks for a reload once a newer build saved data here, `projects_newer_data` (D41). */
+const NEWER_DATA = 'A newer version of the builder saved some of your work here';
+
+/** Whatever in the page's accessibility tree holds [text]. */
+function onPage(page: Page, text: string) {
+  return page.locator('#cmp_a11y_root').getByText(text);
+}
 
 /** Fill localStorage until not even a few characters fit, and return how many filler keys it took. */
 async function fillStorage(page: Page): Promise<number> {

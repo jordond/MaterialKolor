@@ -36,16 +36,14 @@ internal fun Router.exposeToE2e() {
 /**
  * Hang hooks for the preferences and project index records on the page when a spec opened it.
  *
- * Each quarantine report reaches one collector, so the hooks only collect them once a spec asks with
- * `watchQuarantine`. Reports wait until then.
+ * Quarantine reports are left to the app, their one collector. A spec reads what the user sees
+ * instead, the newer data banner or the set aside toast.
  */
 internal fun StoreFactory.exposeToE2e() {
     if (!e2eHooksWanted()) return
     val prefs = create(StorageKeys.PREFS, Preferences.Codec, Preferences())
     val index = create(StorageKeys.INDEX, ProjectIndex.Codec, ProjectIndex())
     val external = mutableListOf<String>()
-    val quarantine = mutableListOf<String>()
-    var watching = false
     var seen = ""
     hookScope.launch { externalChanges.collect { key -> external += key.toString() } }
     hookScope.launch { prefs.data.collect { value -> seen = value.dismissedHints.sorted().joinToString(",") } }
@@ -85,13 +83,6 @@ internal fun StoreFactory.exposeToE2e() {
         outcome
     }
     exposeE2eHook("externalChanges") { external.joinToString(",") }
-    exposeE2eAction("watchQuarantine") {
-        if (!watching) {
-            watching = true
-            hookScope.launch { quarantined.collect { report -> quarantine += "${report.key} ${report.reason}" } }
-        }
-    }
-    exposeE2eHook("quarantined") { quarantine.joinToString(",") }
 }
 
 /** Hang the environment's hooks on the page when a spec opened it. */
