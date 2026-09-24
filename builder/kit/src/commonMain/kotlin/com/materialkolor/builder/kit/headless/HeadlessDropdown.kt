@@ -21,6 +21,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -76,6 +77,16 @@ import com.materialkolor.builder.kit.skin.headless.popoverExit
 import com.materialkolor.builder.kit.skin.headless.rememberOverlayVisibility
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import kotlin.math.max
+
+/**
+ * Whether a menu or a select opened here comes up in a window of its own, as it does on the desktop,
+ * rather than in the page the way the web draws it (D40). A pick that changes the skin waits for such
+ * a window to close first, and anywhere else it can act at once.
+ */
+public val menusOpenAsWindows: Boolean
+    @Composable
+    @ReadOnlyComposable
+    get() = !LocalOverlaysInTree.current
 
 /**
  * A popover list anchored under whatever it shares a parent with.
