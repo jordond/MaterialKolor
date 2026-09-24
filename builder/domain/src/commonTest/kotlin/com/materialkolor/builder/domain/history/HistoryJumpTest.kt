@@ -141,8 +141,9 @@ class HistoryJumpTest {
 
         assertEquals(1, session.history.size)
         assertEquals(1, session.history.cursor)
-        assertEquals(ThemeDocument.Default, session.history.entries.single().before)
-        assertTrue(session.history.entries.single().after.amoled)
+        val step = session.history.entries.single()
+        assertEquals(ThemeDocument.Default, step.before)
+        assertTrue(step.after.amoled)
     }
 
     @Test

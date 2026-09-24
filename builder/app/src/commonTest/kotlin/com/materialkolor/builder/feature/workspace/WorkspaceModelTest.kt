@@ -294,7 +294,8 @@ class WorkspaceModelTest : SessionTestBase() {
             val workspace = workspaceModel(session, preferences)
             workspace.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
             workspace.openPanel(Panel.History)
-            workspace.state.value.timeline.shouldNotBeNull()
+            workspace.state.value.timeline
+                .shouldNotBeNull()
 
             workspace.closePanel()
             workspace.edit(DocumentChange.SetContrast(ContrastLevel.High), EditPhase.Discrete)
