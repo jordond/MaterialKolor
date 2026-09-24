@@ -102,11 +102,17 @@ test('a broadband visit, then seed changes, drags, a library switch and a photo'
     }
     const durations = resolveDurations(await marks(page), since);
     if (durations.length === 0) throw new Error('No mk:resolve-start and mk:resolve pair came');
-    take('S3', p95(durations), `${durations.length} resolves over ${SEED_CHANGES} shuffles of the seed.`);
+    take(
+      'S3',
+      p95(durations),
+      `${durations.length} resolves over ${SEED_CHANGES} shuffles of the seed. The page clock ticks in 0.1 ms steps.`,
+    );
   });
 
   await measure(['PB-05'], async () => {
-    const frames = await dragAcross(page, page.locator(A11Y).getByText(/^Contrast level, slider, /), 0.8);
+    const slider = page.locator(A11Y).getByText(/^Contrast level, slider, /);
+    await scrollPosterTo(page, slider);
+    const frames = await dragAcross(page, slider, 0.8);
     take('PB-05', p95(frames.work), framesNote(frames));
   });
 
@@ -121,15 +127,19 @@ test('a broadband visit, then seed changes, drags, a library switch and a photo'
   });
 
   await measure(['PB-09'], async () => {
-    await pressBareCanvas(page);
-    await page.evaluate(() => window.__mkPerf!.start());
-    await page.keyboard.press('4');
-    await page.waitForTimeout(REVEAL_MS);
-    const frames = await stopFrames(page);
-    await pressBareCanvas(page);
-    await page.keyboard.press('1');
-    await page.waitForTimeout(REVEAL_MS);
-    take('PB-09', fps(frames.frames), `Fluent, key 4, over ${REVEAL_MS} ms. ${framesNote(frames)}`);
+    // The first switch to Fluent also loads its face and builds its skin, so it is timed on its own
+    // and the reveal is timed on the second.
+    const first = await switchLibrary(page, '4', 'Fluent');
+    await switchLibrary(page, '1', 'M3');
+    const frames = await switchLibrary(page, '4', 'Fluent');
+    await switchLibrary(page, '1', 'M3');
+    const firstWorst = Math.max(0, ...intervalsOf(first.frames)).toFixed(1);
+    take(
+      'PB-09',
+      fps(frames.busy),
+      `The second switch to Fluent, key 4, frames with work until ${REVEAL_MS} ms after it landed. ` +
+        `${framesNote(frames)} The first switch's worst frame took ${firstWorst} ms.`,
+    );
   });
 
   await measure(['PB-06a', 'PB-06b'], async () => {
@@ -194,6 +204,8 @@ declare global {
 interface Frames {
   frames: number[];
   work: number[];
+  /** When each frame with work ran. */
+  busy: number[];
 }
 
 interface Visit {
@@ -247,6 +259,33 @@ async function dragAcross(page: Page, target: Locator, share: number): Promise<F
   return frames;
 }
 
+/** Scroll the poster until [target] is on screen with a size. */
+async function scrollPosterTo(page: Page, target: Locator): Promise<void> {
+  await page.mouse.move(200, 400);
+  for (let turn = 0; turn < 8 && ((await target.boundingBox())?.height ?? 0) === 0; turn++) {
+    await page.mouse.wheel(0, 300);
+    await page.waitForTimeout(300);
+  }
+}
+
+/**
+ * Press [key] on the bare canvas and record frames until [REVEAL_MS] after the top bar's library
+ * button names [library].
+ */
+async function switchLibrary(page: Page, key: string, library: string): Promise<Frames> {
+  await pressBareCanvas(page);
+  await page.evaluate(() => window.__mkPerf!.start());
+  await page.keyboard.press(key);
+  const button = page.locator(A11Y).getByRole('button', { name: `Library, pop-up button, ${library}`, exact: true });
+  await expect(button).toHaveCount(1, { timeout: 10_000 });
+  await page.waitForTimeout(REVEAL_MS);
+  return stopFrames(page);
+}
+
+function intervalsOf(times: number[]): number[] {
+  return times.slice(1).map((time, index) => time - times[index]);
+}
+
 async function stopFrames(page: Page): Promise<Frames> {
   return page.evaluate(() => window.__mkPerf!.stop());
 }
@@ -285,7 +324,7 @@ function fps(frames: number[]): number | null {
 }
 
 function framesNote({ frames, work }: Frames): string {
-  const intervals = frames.slice(1).map((time, index) => time - frames[index]);
+  const intervals = intervalsOf(frames);
   const worst = intervals.length > 0 ? Math.max(...intervals).toFixed(1) : 'none';
   return `${work.length} frames with work, frame interval p95 ${p95(intervals)?.toFixed(1) ?? 'none'} ms, worst ${worst} ms.`;
 }
@@ -299,7 +338,8 @@ async function measure(ids: string[], block: () => Promise<void>): Promise<void>
   try {
     await block();
   } catch (error) {
-    const reason = `Not measured, ${String((error as Error).message ?? error).split('\n')[0]}`;
+    const message = String((error as Error).message ?? error).replace(/\u001b\[[0-9;]*m/g, '');
+    const reason = `Not measured, ${message.split('\n')[0]}`;
     for (const id of ids) if (!taken.has(id)) take(id, null, reason);
   }
 }
@@ -390,7 +430,7 @@ function instrument(): void {
     },
     stop: () => {
       recording = false;
-      return { frames, work: [...work.values()] };
+      return { frames, work: [...work.values()], busy: [...work.keys()] };
     },
   };
 }
