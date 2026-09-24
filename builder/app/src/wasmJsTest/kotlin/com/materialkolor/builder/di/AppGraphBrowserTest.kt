@@ -160,4 +160,7 @@ private object TestEnvironment : Environment {
 
     // b-221c
     override fun announce(message: String) = Unit
+
+    // b-314
+    override val browser: String = "TestBrowser/1.0"
 }

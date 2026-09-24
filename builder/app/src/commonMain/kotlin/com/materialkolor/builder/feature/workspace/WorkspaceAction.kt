@@ -216,6 +216,7 @@ internal enum class Panel {
     Explainer,
     Share,
     ImageEyedropper, // b-311b
+    Help, // b-314
 }
 
 /**

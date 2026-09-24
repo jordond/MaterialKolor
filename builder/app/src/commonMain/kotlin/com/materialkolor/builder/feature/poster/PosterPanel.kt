@@ -269,6 +269,7 @@ private fun ColumnScope.DockedSections(
     PosterHeader(context, dispatcher, focus = focus)
     SeedHero(context, dispatcher, focus = focus) // b-306c
     SeedActions(context, dispatcher)
+    FirstRunHint(context, dispatcher) // b-314
     ImageCandidateRow(context, dispatcher) // b-311
     PrimaryExplainerLine(context, dispatcher, why = focus?.why)
     StyleChipsSection(context, dispatcher)
@@ -291,6 +292,7 @@ private fun ColumnScope.SheetSections(
 ) {
     SeedPeekRow(context, dispatcher)
     SeedActions(context, dispatcher, shuffle = false)
+    FirstRunHint(context, dispatcher) // b-314
     ImageCandidateRow(context, dispatcher) // b-311
     StyleChipsSection(context, dispatcher)
     ContrastSection(context, dispatcher)

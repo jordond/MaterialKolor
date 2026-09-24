@@ -133,6 +133,11 @@ private object DesktopEnvironment : Environment {
     // b-221c
     // The desktop build is for development only (D2), so it reads nothing out.
     override fun announce(message: String) = Unit
+
+    // b-314
+    override val browser: String =
+        "Java ${System.getProperty("java.version")} (${System.getProperty("java.vm.name")}), " +
+            "${System.getProperty("os.name")} ${System.getProperty("os.version")} ${System.getProperty("os.arch")}"
 }
 
 private fun notOnDesktop(): Result<Unit> = Result.failure(UnsupportedOperationException("Not available on desktop yet"))

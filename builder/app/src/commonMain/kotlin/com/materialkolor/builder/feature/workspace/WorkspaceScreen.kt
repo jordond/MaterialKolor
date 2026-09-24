@@ -13,6 +13,7 @@ import com.materialkolor.builder.LocalThemeResult
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.engine.poster.PosterColors
 import com.materialkolor.builder.feature.about.AboutHost
+import com.materialkolor.builder.feature.about.HelpHost
 import com.materialkolor.builder.feature.canvas.CanvasArea
 import com.materialkolor.builder.feature.canvas.CanvasDock
 import com.materialkolor.builder.feature.canvas.FullscreenExit
@@ -264,7 +265,9 @@ internal fun WorkspaceScreen(
             CommandHost(state, dispatcher)
             PickerHost(state, dispatcher, returnFocusTo = pickerFrom) // b-307
             ImageHost(state, dispatcher)
-            AboutHost(state, dispatcher)
+            // b-314
+            AboutHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.More))
+            HelpHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.More))
             ToastRegion(toasts)
         },
     )

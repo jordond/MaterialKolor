@@ -89,4 +89,10 @@ internal class FakeEnvironment(
     override fun announce(message: String) {
         announcements += message
     }
+
+    // b-314
+    override val browser: String = FAKE_BROWSER
 }
+
+/** What every [FakeEnvironment] says it runs in. */
+internal const val FAKE_BROWSER: String = "FakeBrowser/1.0 (Test OS)"
