@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import { wantHooks } from './builder';
 import {
   boxOf,
@@ -7,6 +7,8 @@ import {
   onPage,
   openWorkspace,
   press,
+  scrollTo,
+  seedField,
   seedText,
   storedProjects,
   typeSeed,
@@ -21,6 +23,12 @@ import {
 
 /** `projects_conflict`, word for word. */
 const CONFLICT = 'This project changed in another tab';
+
+/** The fine tune row that holds the extra colors, collapsed until it is pressed. */
+const TARGET_ROW = /^Spec, platform, extra colors and target options, .+, collapsed$/;
+
+/** The first extra color's light tone slider, which the mirror writes as text. */
+const TONE_SLIDER = /light color tone, slider/;
 
 test.beforeEach(async ({ context }) => {
   await wantHooks(context);
@@ -40,13 +48,22 @@ test('an edit in one tab lands in the other as a step its Undo takes back', asyn
 
 test('an edit in one tab offers the other the latest while it drags, and Load latest takes it', async ({ context }) => {
   const { writer, reader } = await twoTabs(context.newPage.bind(context));
-  // The reader holds the seed picker's hue and keeps it moving. Each step is an edit that saves
-  // nothing until it lets go, so the writer's save lands in a tab that edited in the last 2 s
+  // The reader holds an extra color's tone slider and keeps it moving. Each step is an edit that
+  // saves nothing until it lets go, so the writer's save lands in a tab that edited in the last 2 s
   // however busy the machine, and the writer never hears from the reader.
   // b-507
-  // Contrast is four choices now (D53), so the seed picker is the control that keeps editing while held.
-  await press(reader, button(reader, 'Pick'));
-  const track = await boxOf(onPage(reader, /^Hue, slider/));
+  // Contrast is four choices now (D53). The seed picker's drag stops once the other tab takes the
+  // keys, its save then comes in as an undo step, so the writer adds the extra color and the reader
+  // takes it in before it holds the slider.
+  await openTargetRow(writer);
+  await scrollTo(writer, button(writer, 'Add extra color'), poster(writer));
+  await press(writer, button(writer, 'Add extra color'));
+  await scrollBackUp(writer);
+  await openTargetRow(reader);
+  const slider = onPage(reader, TONE_SLIDER);
+  await expect(slider.first()).toBeAttached({ timeout: LAND_TIMEOUT_MS });
+  await scrollTo(reader, slider, poster(reader));
+  const track = await boxOf(slider);
   const middle = { x: track.x + track.width / 2, y: track.y + track.height / 2 };
   await reader.mouse.move(middle.x, middle.y);
   await reader.mouse.down();
@@ -66,14 +83,40 @@ test('an edit in one tab offers the other the latest while it drags, and Load la
     await moving;
     await reader.mouse.up();
   }
-  await press(reader, button(reader, 'Done'));
-  await expect(button(reader, 'Done')).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
   expect(await seedText(reader)).not.toBe('#0B6E4F');
   await expect(button(reader, 'Keep mine')).toHaveCount(1);
   await press(reader, button(reader, 'Load latest'));
   await expect.poll(() => seedText(reader), { timeout: LAND_TIMEOUT_MS }).toBe('#0B6E4F');
   await expect(onPage(reader, CONFLICT)).toHaveCount(0);
 });
+
+/** The poster's scrolling pane, named by its group label. */
+function poster(page: Page): Locator {
+  return onPage(page, /^Seed and theme controls/);
+}
+
+/** Scrolls the poster to the row that holds the extra colors and opens it. */
+async function openTargetRow(page: Page): Promise<void> {
+  await scrollTo(page, button(page, TARGET_ROW), poster(page));
+  await press(page, button(page, TARGET_ROW));
+}
+
+/** Scrolls the poster back up until the seed field is on screen, for [typeSeed]. */
+async function scrollBackUp(page: Page): Promise<void> {
+  const area = await boxOf(poster(page));
+  await page.mouse.move(area.x + area.width / 2, area.y + area.height / 2);
+  await expect
+    .poll(
+      async () => {
+        const box = await seedField(page).boundingBox();
+        if (box !== null && box.height > 0 && box.y >= area.y) return true;
+        await page.mouse.wheel(0, -240);
+        return false;
+      },
+      { timeout: LAND_TIMEOUT_MS, intervals: [500] },
+    )
+    .toBe(true);
+}
 
 /** Opens the same project in two tabs, the writer first, once it is stored. */
 async function twoTabs(newPage: () => Promise<Page>): Promise<{ writer: Page; reader: Page }> {
