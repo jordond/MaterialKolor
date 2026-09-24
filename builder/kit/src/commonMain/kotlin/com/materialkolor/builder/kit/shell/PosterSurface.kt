@@ -60,7 +60,11 @@ public fun PosterSurface(
     content: @Composable () -> Unit,
 ) {
     val outer = LocalBuilderTokens.current
-    val paint = remember(poster) { PosterPaint(poster) }
+    // pf-1
+    // Every theme result brings a poster of its own, but the poster follows the seed alone. A new
+    // paint re-themes the poster, which recomposes every control on it, so it is kept while the seed
+    // stays and an edit that leaves the seed alone never re-themes the poster.
+    val paint = remember(poster.seed) { PosterPaint(poster) }
     val tokens = remember(paint, outer) { paint.builderTokens(outer) }
     when (LocalSkin.current.library) {
         Library.Material3 -> MaterialPoster(paint, tokens, content)
@@ -386,7 +390,7 @@ private fun FluentPoster(
     tokens: BuilderTokens,
     content: @Composable () -> Unit,
 ) {
-    val colors = remember(poster) { Colors(poster.ramp.toFluentShades(), darkMode = !poster.isLight) }
+    val colors = remember(poster.seed) { Colors(poster.ramp.toFluentShades(), darkMode = !poster.isLight) } // pf-1
     val ink = remember(paint) { FluentPosterInk(ink = paint.ink, page = paint.page, outline = paint.outline) }
     FluentThemeConfiguration(colors = colors, typography = rememberFluentTypography()) {
         CompositionLocalProvider(

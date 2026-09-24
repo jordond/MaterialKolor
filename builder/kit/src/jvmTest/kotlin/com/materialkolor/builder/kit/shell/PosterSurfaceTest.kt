@@ -195,6 +195,30 @@ class PosterSurfaceTest {
             label shouldBe fluentLabel
         }
 
+    // pf-1
+    @Test
+    fun posterSurface_newPosterOnTheSameSeed_recomposesNothingUnderIt() {
+        for ((name, skin) in ShellSkins) {
+            withClue(name) {
+                runComposeUiTest {
+                    var poster by mutableStateOf(ShellPosterColors)
+                    val count = CompositionCount()
+                    setContent {
+                        ShellHarness(skin) { PosterSurface(poster) { Counted(count) } }
+                    }
+                    waitForIdle()
+                    val before = count.value
+
+                    // Each theme result works its poster out again, so a drag hands over a new one every frame.
+                    poster = PosterColors.of(ShellPosterColors.seed)
+                    waitForIdle()
+
+                    count.value shouldBe before
+                }
+            }
+        }
+    }
+
     @Test
     fun posterSurface_unstyled_givesAPlainClickableAnIndication() =
         runComposeUiTest {
@@ -211,6 +235,19 @@ class PosterSurfaceTest {
 
             clicks shouldBe 1
         }
+}
+
+// pf-1
+
+/** How many times [Counted] ran. */
+private class CompositionCount {
+    var value: Int = 0
+}
+
+/** Counts its own runs. Its one argument never changes, so it only runs again when a theme above it forces it. */
+@Composable
+private fun Counted(count: CompositionCount) {
+    count.value++
 }
 
 /** Every ink on ground pair [skin] draws on the poster, from its own theme as well as the builder tokens. */
