@@ -16,8 +16,6 @@ kotlin {
         compileSdk = libs.versions.sdk.compile.get().toInt()
         minSdk = libs.versions.sdk.min.library.get().toInt()
 
-        withHostTest {}
-
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
@@ -39,18 +37,10 @@ kotlin {
 
             implementation(project(":material-kolor-fluent"))
             implementation(libs.fluent)
-        }
-
-        commonTest.dependencies {
-            implementation(kotlin("test"))
+            implementation(project(":samples:shared"))
         }
 
         jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-        }
-
-        jvmTest.dependencies {
-            implementation(libs.compose.ui.test)
             implementation(compose.desktop.currentOs)
         }
     }

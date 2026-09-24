@@ -1,3 +1,9 @@
+public final class com/materialkolor/unstyled/ComposableSingletons$ThemeBuilderKt {
+	public static final field INSTANCE Lcom/materialkolor/unstyled/ComposableSingletons$ThemeBuilderKt;
+	public fun <init> ()V
+	public final fun getLambda$-989824339$MaterialKolor_material_kolor_unstyled ()Lkotlin/jvm/functions/Function3;
+}
+
 public final class com/materialkolor/unstyled/MaterialKolorTokens {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/materialkolor/unstyled/MaterialKolorTokens;
@@ -69,8 +75,10 @@ public final class com/materialkolor/unstyled/MaterialKolorTokens {
 }
 
 public final class com/materialkolor/unstyled/ThemeBuilderKt {
-	public static final fun dynamicColorSchemes-_U98hJc (Lcom/composeunstyled/theme/ThemeBuilderV2;JLandroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lcom/materialkolor/PaletteStyle;DLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/dynamiccolor/DynamicScheme$Platform;Lcom/composeunstyled/theme/ThemeProperty;Landroidx/compose/runtime/Composer;III)V
+	public static final fun dynamicColorSchemes-Cq0o3ZI (Lcom/composeunstyled/theme/ThemeBuilderV2;JLandroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lcom/materialkolor/PaletteStyle;DLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/dynamiccolor/DynamicScheme$Platform;Lcom/composeunstyled/theme/ThemeProperty;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
+	public static final fun dynamicColors (Lcom/composeunstyled/theme/ColorSchemedThemeBuilder;Lcom/materialkolor/dynamiccolor/DynamicScheme;Lcom/composeunstyled/theme/ThemeProperty;)V
 	public static final fun dynamicColors (Lcom/composeunstyled/theme/ThemeBuilder;Lcom/materialkolor/dynamiccolor/DynamicScheme;Lcom/composeunstyled/theme/ThemeProperty;)V
+	public static synthetic fun dynamicColors$default (Lcom/composeunstyled/theme/ColorSchemedThemeBuilder;Lcom/materialkolor/dynamiccolor/DynamicScheme;Lcom/composeunstyled/theme/ThemeProperty;ILjava/lang/Object;)V
 	public static synthetic fun dynamicColors$default (Lcom/composeunstyled/theme/ThemeBuilder;Lcom/materialkolor/dynamiccolor/DynamicScheme;Lcom/composeunstyled/theme/ThemeProperty;ILjava/lang/Object;)V
 }
 
