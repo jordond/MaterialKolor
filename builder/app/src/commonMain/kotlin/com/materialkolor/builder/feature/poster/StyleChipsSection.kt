@@ -2,7 +2,7 @@ package com.materialkolor.builder.feature.poster
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -26,8 +26,11 @@ import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.resolve.SchemeInputs
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.feature.picker.PickerTarget
+import com.materialkolor.builder.feature.picker.pickButtonFocus
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
+import com.materialkolor.builder.generated.resources.picker_pick_cmf
 import com.materialkolor.builder.generated.resources.style_chip
 import com.materialkolor.builder.generated.resources.style_chips
 import com.materialkolor.builder.generated.resources.style_cmf_derive
@@ -72,8 +75,10 @@ import com.materialkolor.builder.kit.control.BuilderBadge
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderChoiceGroup
 import com.materialkolor.builder.kit.control.BuilderHexField
+import com.materialkolor.builder.kit.control.BuilderIconButton
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.widget.SchemeChip
 import com.materialkolor.dynamiccolor.DynamicScheme
@@ -243,18 +248,32 @@ private fun CmfSeedField(
     val messages = rememberHexMessages()
     val input = LocalInputModeManager.current
     val field = remember { FocusRequester() }
+    val pick = remember { FocusRequester() } // b-307
     Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-        BuilderHexField(
-            value = stored ?: derived,
-            onCommit = { argb, _ ->
-                dispatcher.dispatch(WorkspaceAction.Edit(DocumentChange.SetCmfSeed(argb), EditPhase.Discrete))
-            },
-            label = stringResource(Res.string.style_cmf_field),
-            errorMessage = messages::errorOf,
-            noteMessage = messages::noteOf,
-            modifier = Modifier.fillMaxWidth().focusRequester(field),
-            enabled = state.usable,
-        )
+        // b-307
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            BuilderHexField(
+                value = stored ?: derived,
+                onCommit = { argb, _ ->
+                    dispatcher.dispatch(WorkspaceAction.Edit(DocumentChange.SetCmfSeed(argb), EditPhase.Discrete))
+                },
+                label = stringResource(Res.string.style_cmf_field),
+                errorMessage = messages::errorOf,
+                noteMessage = messages::noteOf,
+                modifier = Modifier.weight(1f).focusRequester(field),
+                enabled = state.usable,
+            )
+            BuilderIconButton(
+                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.CmfSeed, pick)) },
+                icon = IconId.Eyedropper,
+                contentDescription = stringResource(Res.string.picker_pick_cmf),
+                modifier = pickButtonFocus(pick),
+                enabled = state.usable,
+            )
+        }
         if (stored == null) {
             BuilderText(text = stringResource(Res.string.style_cmf_derived), emphasis = Emphasis.Secondary)
         } else {

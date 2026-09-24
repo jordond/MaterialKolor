@@ -53,9 +53,15 @@ internal sealed interface WorkspaceAction {
         val on: Boolean,
     ) : WorkspaceAction
 
-    /** Open the color picker on [target]. */
+    /**
+     * Open the color picker on [target].
+     *
+     * @property[returnFocusTo] The Pick button that asked, which gets focus back once the picker
+     * closes (AR-09), or null for none.
+     */
     data class OpenPicker(
         val target: PickerTarget,
+        val returnFocusTo: FocusRequester? = null, // b-307
     ) : WorkspaceAction
 
     /** Ask for an image to take a seed from. */

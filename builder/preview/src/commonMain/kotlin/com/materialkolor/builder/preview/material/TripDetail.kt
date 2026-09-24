@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,6 +46,7 @@ import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.MapPin
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.preview.canvas.DemoAppState
+import com.materialkolor.builder.preview.canvas.tabMovesFocus
 import androidx.compose.ui.semantics.Role as SemanticsRole
 
 private val SceneHeight = 184.dp
@@ -272,7 +274,12 @@ private fun NoteCard(state: DemoAppState) {
         OutlinedTextField(
             value = state.text,
             onValueChange = { text -> state.text = text },
-            modifier = Modifier.padding(SectionGap).fillMaxWidth().previewRoles(MaterialComponent.OutlinedTextField),
+            // b-227
+            modifier = Modifier
+                .padding(SectionGap)
+                .fillMaxWidth()
+                .tabMovesFocus(LocalFocusManager.current)
+                .previewRoles(MaterialComponent.OutlinedTextField),
             label = { Text("Note for the group") },
             minLines = 2,
         )

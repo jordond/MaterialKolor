@@ -73,6 +73,7 @@ internal fun WorkspaceScreen(
     var manualCopyText by remember { mutableStateOf("") }
     var manualCopyOpen by remember { mutableStateOf(false) }
     var manualCopyFrom by remember { mutableStateOf<FocusRequester?>(null) } // b-221f
+    var pickerFrom by remember { mutableStateOf<FocusRequester?>(null) } // b-307
 
     // Plays the transition's reveal out of the origin, or a crossfade without one, around the change.
     fun reveal(
@@ -104,6 +105,7 @@ internal fun WorkspaceScreen(
                 model.setLock(action.lock, action.on)
             }
             is WorkspaceAction.OpenPicker -> {
+                pickerFrom = action.returnFocusTo // b-307
                 model.openPicker(action.target)
             }
             WorkspaceAction.OpenImagePicker -> {
@@ -200,6 +202,7 @@ internal fun WorkspaceScreen(
         dispatcher = dispatcher,
         modifier = modifier,
         posterFocus = posterFocus, // b-306c
+        pickerFrom = pickerFrom, // b-307
     )
     // b-221c
     ManualCopyDialog(
@@ -216,6 +219,7 @@ internal fun WorkspaceScreen(
  *
  * @param[posterFocus] The poster buttons that Projects, the explainer and the manual copy dialog
  * hand focus back to once they close (AR-09).
+ * @param[pickerFrom] The Pick button that opened the picker last, which it hands focus back to.
  */
 @Composable
 internal fun WorkspaceScreen(
@@ -225,6 +229,7 @@ internal fun WorkspaceScreen(
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
     posterFocus: PosterFocus = remember { PosterFocus() }, // b-306c
+    pickerFrom: FocusRequester? = null, // b-307
 ) {
     // b-221c
     // Share and Export hand focus back to the buttons that opened them once they close (AR-09).
@@ -251,7 +256,7 @@ internal fun WorkspaceScreen(
             val shareReturn = posterFocus.shareReturn(state.panel, focus.requester(TopBarControl.Share))
             ShareHost(state, dispatcher, returnFocusTo = shareReturn)
             CommandHost(state, dispatcher)
-            PickerHost(state, dispatcher)
+            PickerHost(state, dispatcher, returnFocusTo = pickerFrom) // b-307
             ImageHost(state, dispatcher)
             AboutHost(state, dispatcher)
             ToastRegion(toasts)
