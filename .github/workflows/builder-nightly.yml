@@ -1,0 +1,105 @@
+name: Builder nightly
+
+# b-504
+# The perf run against the budgets in spec 8.2, once a night on feat/builder-v2 and on next. It only
+# reports, it never fails a branch over a slow number. PB-01 is gated in the Builder workflow by
+# checkBudget instead.
+#
+# A schedule only fires from the default branch, so the nightly run starts once this file reaches
+# main. Until then run it by hand. Either way each job checks its branch out by name, whatever branch
+# the run started from.
+on:
+  schedule:
+    - cron: '23 5 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: builder-nightly
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  perf:
+    name: "Perf on ${{ matrix.ref }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ref: feat/builder-v2
+            slug: feat-builder-v2
+          - ref: next
+            slug: next
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ matrix.ref }}
+          submodules: recursive
+
+      # A branch the perf run has not reached yet has nothing to run.
+      - name: Check for the perf run
+        id: has-perf
+        env:
+          REF: ${{ matrix.ref }}
+        run: |
+          if [ -f builder/e2e/perf/perf.spec.ts ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice title=No perf run::$REF has no builder/e2e/perf yet, so it is skipped."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: setup-java
+        if: steps.has-perf.outputs.present == 'true'
+        uses: actions/setup-java@v6
+        with:
+          java-version: 25
+          distribution: temurin
+
+      - name: Setup Gradle
+        if: steps.has-perf.outputs.present == 'true'
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: setup-node
+        if: steps.has-perf.outputs.present == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: builder/e2e/package-lock.json
+
+      # The production site with no analytics token, so the beacon never loads during the run.
+      - name: Assemble the site
+        if: steps.has-perf.outputs.present == 'true'
+        run: ./gradlew :builder:web:assembleSite
+
+      - name: Install Playwright
+        if: steps.has-perf.outputs.present == 'true'
+        working-directory: builder/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Perf run
+        if: steps.has-perf.outputs.present == 'true'
+        working-directory: builder/e2e
+        run: npm run perf
+
+      - name: Summarize the report
+        if: always() && steps.has-perf.outputs.present == 'true'
+        working-directory: builder/e2e
+        run: |
+          if [ -f perf/report/summary.md ]; then
+            cat perf/report/summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload the report
+        if: always() && steps.has-perf.outputs.present == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: perf-report-${{ matrix.slug }}
+          path: builder/e2e/perf/report
+          if-no-files-found: warn
