@@ -34,6 +34,7 @@ import com.materialkolor.builder.generated.resources.extras_motion_expressive
 import com.materialkolor.builder.generated.resources.extras_motion_label
 import com.materialkolor.builder.generated.resources.extras_motion_standard
 import com.materialkolor.builder.generated.resources.extras_title
+import com.materialkolor.builder.generated.resources.history_title
 import com.materialkolor.builder.generated.resources.poster_all_locked
 import com.materialkolor.builder.generated.resources.poster_copied_hex
 import com.materialkolor.builder.generated.resources.poster_copy_hex
@@ -139,6 +140,16 @@ internal fun historyCommands(
         shortcut = Shortcut.Redo,
         disabledBecause = nothingToRedo.takeUnless { state.history.canRedo },
     ) { dispatcher.dispatch(WorkspaceAction.Redo) }
+    // b-509
+    // The list always opens, with only Start in it before the first change.
+    val history = stringResource(Res.string.history_title)
+    list.add(
+        id = "history",
+        category = CommandCategory.History,
+        label = history,
+        site = topBarSite(list, history, TopBarControl.History),
+        shortcut = Shortcut.History,
+    ) { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.History)) }
 }
 
 /** A top bar button that phones, and a Medium bar short of room, move into the overflow menu. */

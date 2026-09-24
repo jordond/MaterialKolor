@@ -71,6 +71,9 @@
     <string name="command_key_copy_seed">Copy the seed hex, or the open file in export</string>
     <string name="command_key_undo">Undo the theme, or the text inside a field</string>
     <string name="command_key_redo">Redo the theme, or the text inside a field</string>
+    <!-- b-509 -->
+    <!-- Opens the History list, the steps of this session to travel between. -->
+    <string name="command_key_history">Show the history of changes</string>
     <string name="command_key_add_image">Add an image</string>
     <string name="command_key_preview_mode">Cycle the preview mode, Light, Split and Dark</string>
     <string name="command_key_appearance">Cycle the chrome appearance, System, Light and Dark</string>

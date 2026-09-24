@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- b-509 -->
+    <!-- The top bar button, its overflow menu item and its palette command, which open the list of every change made this session. -->
+    <string name="history_title">History</string>
+    <!-- The tooltip over the History button, with its shortcut, such as "H". -->
+    <string name="history_tooltip">History (%1$s)</string>
+    <!-- The bottom row of the History list, the theme as it was before the oldest change kept. -->
+    <string name="history_start">Start</string>
+    <!-- A badge on the History row the theme is at now. -->
+    <string name="history_current">Current</string>
+    <!-- The second line of a History row that was undone and has no time, such as a change saved by an older version. -->
+    <string name="history_undone">Undone</string>
+    <!-- The second line of a History row that was undone. The argument is how long ago it was made, such as "2 minutes ago". -->
+    <string name="history_undone_age">%1$s, undone</string>
+    <!-- The note under the History list while some changes are undone. -->
+    <string name="history_future_hint">Your next change clears the undone steps.</string>
+    <!-- The note under the History list before any change is made. -->
+    <string name="history_empty">Your changes show up here as you make them.</string>
+    <!-- Read out to assistive technology after a jump in the History list. The argument names the step, such as "Style change". -->
+    <string name="history_now_at">Now at %1$s</string>
+</resources>

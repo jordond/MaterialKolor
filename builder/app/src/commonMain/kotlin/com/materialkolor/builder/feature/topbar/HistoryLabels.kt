@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.domain.edit.ChangeKind
 import com.materialkolor.builder.domain.edit.ChangeLabel
+import com.materialkolor.builder.domain.history.HistoryEntry
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.generated.resources.Res
@@ -61,6 +62,20 @@ internal fun redoText(
     val label = history.redoLabel ?: return stringResource(Res.string.workspace_redo)
     val choice = label.detail?.let { detail -> redoneChoice(detail, document) }
     return stringResource(Res.string.topbar_redo_change, changeText(label, choice))
+}
+
+// b-509
+
+/**
+ * What the History list calls the step [entry], such as "Library change to Fluent". The value named
+ * is the one the step landed on, read from its own result and never from the document on screen, so
+ * a step reads the same wherever the history is. The first letter goes upper case to start the
+ * line, which is right for English and may not be for every language a translation brings.
+ */
+@Composable
+internal fun stepText(entry: HistoryEntry): String {
+    val choice = entry.label.detail?.let { detail -> undoneChoice(detail, entry.after) }
+    return changeText(entry.label, choice).replaceFirstChar { it.titlecase() }
 }
 
 /**

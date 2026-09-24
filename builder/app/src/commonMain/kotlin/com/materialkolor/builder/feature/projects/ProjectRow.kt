@@ -224,8 +224,9 @@ private fun RowMenu(
     }
 }
 
+// b-509
 @Composable
-private fun ageText(age: ProjectAge): String =
+internal fun ageText(age: ProjectAge): String =
     when (age) {
         ProjectAge.JustNow -> stringResource(Res.string.projects_updated_now)
         is ProjectAge.Minutes -> pluralStringResource(Res.plurals.projects_updated_minutes, age.count, age.count)

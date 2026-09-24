@@ -29,6 +29,7 @@ import com.materialkolor.builder.generated.resources.command_key_escape
 import com.materialkolor.builder.generated.resources.command_key_export
 import com.materialkolor.builder.generated.resources.command_key_fullscreen
 import com.materialkolor.builder.generated.resources.command_key_grayscale
+import com.materialkolor.builder.generated.resources.command_key_history
 import com.materialkolor.builder.generated.resources.command_key_hue_lock
 import com.materialkolor.builder.generated.resources.command_key_inspect
 import com.materialkolor.builder.generated.resources.command_key_library_1
@@ -189,6 +190,7 @@ internal fun shortcutLabel(shortcut: Shortcut): StringResource =
         Shortcut.Save -> Res.string.command_key_save
         Shortcut.Undo -> Res.string.command_key_undo
         Shortcut.Redo -> Res.string.command_key_redo
+        Shortcut.History -> Res.string.command_key_history // b-509
         Shortcut.Projects -> Res.string.command_key_projects
         Shortcut.NewProject -> Res.string.command_key_new_project
         Shortcut.Inspect -> Res.string.command_key_inspect
