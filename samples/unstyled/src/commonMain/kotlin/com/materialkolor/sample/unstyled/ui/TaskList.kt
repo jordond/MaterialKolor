@@ -1,5 +1,6 @@
 package com.materialkolor.sample.unstyled.ui
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -99,12 +100,16 @@ private fun TaskRow(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
+    val container by animateColorAsState(
+        targetValue = if (hovered) MaterialKolorTokens.surfaceContainer.color else Color.Transparent,
+        label = "row",
+    )
     Row(
         modifier = Modifier
             .testTag(SampleTags.taskRow(task.id))
             .fillMaxWidth()
             .hoverable(interactionSource)
-            .background(if (hovered) MaterialKolorTokens.surfaceContainer.color else Color.Transparent)
+            .background(container)
             .heightIn(min = 52.dp)
             .padding(horizontal = Spacing.Small),
         horizontalArrangement = Arrangement.spacedBy(Spacing.Small),

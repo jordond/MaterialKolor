@@ -11,6 +11,10 @@ import androidx.compose.ui.unit.dp
  */
 internal object Spacing {
     val XSmall: Dp = 4.dp
+
+    /** Between [XSmall] and [Small], for a label and what sits beside it inside a control, or a row of chips. */
+    val Tight: Dp = 6.dp
+
     val Small: Dp = 8.dp
     val Medium: Dp = 12.dp
     val Large: Dp = 16.dp

@@ -86,7 +86,7 @@ internal fun <T> ChoiceChips(
     modifier: Modifier = Modifier,
 ) {
     UnstyledRadioGroup(value = selected, onValueChange = onSelect, modifier = modifier) {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.Tight)) {
             for (choice in choices) {
                 val isSelected = choice.value == selected
                 val picked = colors(choice.value)

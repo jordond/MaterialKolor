@@ -179,7 +179,7 @@ private fun <T> TabListScope<T>.PillTab(choice: Choice<T>) {
                     .border(width = 1.dp, color = outline, shape = Shapes.Pill)
                     .height(32.dp)
                     .padding(horizontal = Spacing.Large),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.Tight),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(text = choice.label, style = TasksType.Label, maxLines = 1)

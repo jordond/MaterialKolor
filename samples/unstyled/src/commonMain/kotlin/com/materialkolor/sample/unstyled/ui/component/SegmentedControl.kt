@@ -108,7 +108,7 @@ private fun <T> RadioGroupScope.Segment(
                 modifier = Modifier
                     .fillMaxHeight()
                     .padding(horizontal = Spacing.Medium),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.Tight),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 val icon = choice.icon

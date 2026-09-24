@@ -54,8 +54,8 @@ internal fun Composer(
         if (canAddTask(title)) {
             onAdd(title)
             input.clearText()
-            focusRequester.requestFocus()
         }
+        focusRequester.requestFocus()
     }
 
     Row(
