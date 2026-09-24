@@ -54,18 +54,23 @@ test('4 switches the shell to Fluent and 1 back, with no page error and the tab 
 // on TonalSpot 2021 suggests the Expressive style on the 2025 spec, which Apply sets as one undo.
 
 test('3, 4 and 2 switch the library, and Apply takes the Expressive suggestion as one undo', async ({ page }) => {
-  test.fixme(true, 'Follow-up: after 3 and 4, a 2 pressed in the Fluent skin does not switch to Expressive within 20 s');
   await openWorkspace(page);
   const undo = page.locator('#cmp_a11y_root').getByRole('button', { name: /^Undo library change to / });
-  for (const [key, name] of [
-    ['3', 'Unstyled'],
-    ['4', 'Fluent'],
-    ['2', 'Expressive'],
-  ]) {
-    await pressKeyUntil(page, key, async () => ((await undo.first().getAttribute('aria-label')) ?? '').endsWith(name));
-  }
+  // Read without waiting, since there is no such Undo before the first switch.
+  const undoNames = async (name: string) =>
+    (await undo.evaluateAll((buttons) => buttons.map((button) => button.getAttribute('aria-label') ?? ''))).some((label) =>
+      label.endsWith(name),
+    );
+  // The web folds the dialog's role into its title, `Use the Expressive style?, dialog`.
+  const suggestion = onPage(page, /^Use the Expressive style\?/);
+  await pressKeyUntil(page, '3', () => undoNames('Unstyled'));
+  await pressKeyUntil(page, '4', () => undoNames('Fluent'));
+  // b-503a
+  // The 2 opens the suggestion with the switch, and the suggestion is modal, so the mirror hides the
+  // top bar's Undo until it closes. The suggestion showing is what says the 2 landed.
+  await pressKeyUntil(page, '2', async () => (await suggestion.count()) > 0);
 
-  await expect(onPage(page, 'Use the Expressive style?')).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
+  await expect(suggestion).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
   await press(page, button(page, 'Apply'));
   await expect.poll(async () => pick(await storedDocument(page)), { timeout: LAND_TIMEOUT_MS }).toEqual({
     style: 'Expressive',
