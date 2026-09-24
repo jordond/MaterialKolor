@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The fine tune row with the spec, the platform, the extra colors and the target options. -->
+    <string name="extras_title">Spec, platform, extra colors and target options</string>
+    <!-- Under the row's title. The arguments are the spec the scheme is built with and the extra color count below. -->
+    <string name="extras_summary">%1$s spec, %2$s</string>
+    <!-- Under the row's title, how many extra colors the theme has. -->
+    <plurals name="extras_summary_colors">
+        <item quantity="one">%1$d extra color</item>
+        <item quantity="other">%1$d extra colors</item>
+    </plurals>
+    <!-- Under the row's title while the theme has no extra colors. -->
+    <string name="extras_summary_no_colors">no extra colors</string>
+
+    <!-- The label over the spec choice, also read out for it. -->
+    <string name="extras_spec_label">Spec</string>
+    <!-- The specs, by the year each came out. -->
+    <string name="extras_spec_2021">2021</string>
+    <string name="extras_spec_2025">2025</string>
+    <string name="extras_spec_2026">2026</string>
+    <!-- Under the spec choice while the style has no 2025 form. -->
+    <string name="extras_spec_classic_only">This style only exists in the 2021 spec</string>
+    <!-- Under the line above while the theme asked for 2025. -->
+    <string name="extras_spec_comes_back">Your 2025 spec comes back as soon as you pick a style that has it.</string>
+    <!-- The label over the platform choice, also read out for it. -->
+    <string name="extras_platform_label">Platform</string>
+    <!-- The platforms a scheme can be tuned for. -->
+    <string name="extras_platform_phone">Phone</string>
+    <string name="extras_platform_watch">Watch</string>
+
+    <!-- The label over the options only some export targets have. -->
+    <string name="extras_targets_label">Target options</string>
+    <!-- The switch that drops dark surfaces to pure black. -->
+    <string name="extras_amoled">AMOLED dark mode</string>
+    <!-- The label over the motion scheme choice, also read out for it. -->
+    <string name="extras_motion_label">Motion</string>
+    <!-- The two motion schemes. -->
+    <string name="extras_motion_standard">Standard</string>
+    <string name="extras_motion_expressive">Expressive</string>
+
+    <!-- The label over the Custom target's tone table. -->
+    <string name="extras_tones_label">Custom tones</string>
+    <!-- Under the tone table's label. -->
+    <string name="extras_tones_note">These slots are cut from a palette by tone. The others follow their roles.</string>
+    <!-- Each slot's light and dark tone slider. The argument is the slot, the way it is named in code. -->
+    <string name="extras_tone_light">%1$s light tone</string>
+    <string name="extras_tone_dark">%1$s dark tone</string>
+    <!-- Beside each slider, the tone it holds. -->
+    <string name="extras_tone_value_light">Light %1$d</string>
+    <string name="extras_tone_value_dark">Dark %1$d</string>
+    <!-- Puts a slot back on its own tones. The argument is the slot. -->
+    <string name="extras_tone_reset">Reset %1$s</string>
+</resources>

@@ -3,6 +3,7 @@ package com.materialkolor.builder.feature.poster
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.domain.model.KeyColor
 import com.materialkolor.builder.domain.model.ThemeDocument
@@ -41,8 +42,10 @@ internal fun CoreColorsRow(
         summary = coreColorsSummary(context.document),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
-            KeyColorRows(context, dispatcher)
-            PinnedRoles(context, dispatcher)
+            // b-306
+            val picks = remember { KeyColorPicks() }
+            KeyColorRows(context, dispatcher, picks = picks)
+            PinnedRoles(context, dispatcher, picks = picks)
         }
     }
 }

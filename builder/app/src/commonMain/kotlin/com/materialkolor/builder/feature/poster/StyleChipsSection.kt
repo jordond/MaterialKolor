@@ -7,11 +7,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalInputModeManager
 import com.materialkolor.builder.LocalThemeResolver
 import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.capability.EffectiveSpec
@@ -225,8 +228,8 @@ private class ChipBounds {
 
 /**
  * The second seed Cmf reads for its tertiary palette. With none set the field shows the tertiary
- * key color Cmf derived, and once one is set a button hands it back. A target that ignores it says
- * why and takes no input.
+ * key color Cmf derived, and once one is set a button hands it back, and a keyboard user's focus
+ * with it to the field. A target that ignores it says why and takes no input.
  */
 @Composable
 private fun CmfSeedField(
@@ -238,6 +241,8 @@ private fun CmfSeedField(
     val derived = remember(context.result) { context.result.ramps[KeyColor.Tertiary, false].keyColor }
     val state = context.capabilities[Control.CmfSecondSeed]
     val messages = rememberHexMessages()
+    val input = LocalInputModeManager.current
+    val field = remember { FocusRequester() }
     Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         BuilderHexField(
             value = stored ?: derived,
@@ -247,7 +252,7 @@ private fun CmfSeedField(
             label = stringResource(Res.string.style_cmf_field),
             errorMessage = messages::errorOf,
             noteMessage = messages::noteOf,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().focusRequester(field),
             enabled = state.usable,
         )
         if (stored == null) {
@@ -255,6 +260,7 @@ private fun CmfSeedField(
         } else {
             BuilderButton(
                 onClick = {
+                    input.handFocusTo(field)
                     dispatcher.dispatch(WorkspaceAction.Edit(DocumentChange.SetCmfSeed(null), EditPhase.Discrete))
                 },
                 label = stringResource(Res.string.style_cmf_derive),

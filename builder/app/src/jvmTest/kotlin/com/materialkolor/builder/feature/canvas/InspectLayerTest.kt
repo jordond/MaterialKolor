@@ -35,7 +35,6 @@ import com.materialkolor.builder.domain.edit.PinMode
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.persist.FineTuneRow
-import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.domain.persist.ProjectViewState
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.resolve.ThemeResult
@@ -132,7 +131,9 @@ class InspectLayerTest {
 
             onNode(OnCard and hasText("Show on ramp")).performClick()
             waitForIdle()
-            host.actions.last() shouldBe WorkspaceAction.SetPreviewTab(PreviewTab.Palettes)
+            // b-308b
+            host.actions.last() shouldBe
+                WorkspaceAction.ShowOnRamp(RampTarget.OfRole(Role.PrimaryContainer, isDark = false))
             host.state.inspect shouldBe true
         }
 

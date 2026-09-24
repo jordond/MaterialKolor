@@ -81,6 +81,9 @@ internal fun CanvasArea(
                 componentsState = componentsState,
                 // b-308
                 dispatcher = dispatcher,
+                // b-308b
+                rampHighlight = state.rampHighlight,
+                generation = state.projectGeneration,
                 deviceWidth = if (compact) DeviceWidth.Phone else state.view.deviceWidth,
             )
         }

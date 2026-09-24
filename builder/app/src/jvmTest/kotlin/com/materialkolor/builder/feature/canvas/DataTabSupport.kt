@@ -37,10 +37,11 @@ internal class TabActions {
     val dispatcher = Dispatcher<WorkspaceAction> { action -> sent += action }
 }
 
-/** [content] in the Material skin over [result], laid out for the window, with motion frozen. */
+/** [content] in [skin] over [result], laid out for the window, with motion frozen. */
 @Composable
 internal fun DataTabTheme(
     result: ThemeResult,
+    skin: Skin = Skin(Library.Material3, expressive = false), // b-308ba
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(
@@ -48,7 +49,7 @@ internal fun DataTabTheme(
         LocalThemeResult provides result,
     ) {
         BuilderTheme(
-            skin = Skin(Library.Material3, expressive = false),
+            skin = skin,
             result = result,
             isDark = false,
             reducedMotion = false,

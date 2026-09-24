@@ -111,7 +111,8 @@ internal fun CanvasTabs(
  *
  * App and Components wipe light over dark with the split handle, or show one copy in Light and
  * Dark. The data tabs lay their own light and dark columns out for [mode] and send what they are
- * asked to do through [dispatcher].
+ * asked to do through [dispatcher]. Palettes picks out [rampHighlight] while it belongs to the
+ * project [generation] counts.
  */
 @Composable
 internal fun CanvasTabBody(
@@ -123,6 +124,8 @@ internal fun CanvasTabBody(
     componentsState: DemoAppState,
     deviceWidth: DeviceWidth,
     dispatcher: Dispatcher<WorkspaceAction>,
+    rampHighlight: RampHighlight?,
+    generation: Int,
     modifier: Modifier = Modifier,
 ) {
     val probe = LocalCanvasProbe.current
@@ -146,7 +149,7 @@ internal fun CanvasTabBody(
         }
         PreviewTab.Palettes -> {
             probe?.invoke(PreviewTab.Palettes)
-            PalettesTab(result, mode, specs.filter, modifier)
+            PalettesTab(result, mode, specs.filter, rampHighlight, generation, dispatcher, modifier)
         }
         PreviewTab.Contrast -> {
             probe?.invoke(PreviewTab.Contrast)

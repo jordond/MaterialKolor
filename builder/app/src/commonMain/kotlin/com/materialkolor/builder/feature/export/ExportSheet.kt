@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -163,7 +164,13 @@ internal fun ExportSheet(
         val ready = (outcome as? ExportOutcome.Ready)?.takeIf { draftProblems.isEmpty() }
         val problems = (draftProblems + (outcome as? ExportOutcome.Blocked)?.problems.orEmpty()).distinct()
         val spacing = LocalBuilderTokens.current.spacing
-        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+        // b-221f
+        // The sheet clips at its edge, so the body stands 4 dp in, a focus ring's offset plus its width,
+        // and the code view's ring shows on all four sides.
+        Column(
+            modifier = Modifier.fillMaxSize().padding(horizontal = spacing.extraSmall),
+            verticalArrangement = Arrangement.spacedBy(spacing.medium),
+        ) {
             // Its fields and buttons take focus themselves, so the area is no stop of its own.
             BuilderScrollArea(Modifier.weight(1f, fill = false).fillMaxWidth(), tabStop = false) {
                 ExportHeader(state, capabilities, dispatcher, workspace, drafts)

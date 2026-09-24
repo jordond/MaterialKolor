@@ -14,6 +14,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
@@ -226,7 +227,10 @@ class PosterPanelTest {
             onNodeWithText("Copy Kotlin").performClick()
             waitForIdle()
 
-            actions shouldBe listOf(
+            // b-221f
+            // Each copy also carries its own button, for the manual copy dialog to hand focus back to.
+            val copies = actions.map { action -> (action as WorkspaceAction.CopyText).copy(returnFocusTo = null) }
+            copies shouldBe listOf(
                 WorkspaceAction.CopyText("#6750A4", "seed hex"),
                 WorkspaceAction.CopyText("Color(0xFF6750A4)", "seed as Kotlin"),
             )
@@ -396,6 +400,20 @@ class PosterPanelTest {
 
             onNodeWithText("The one color every palette grows from", substring = true).assertExists()
             onNodeWithText("Read more in the docs").assertDoesNotExist()
+        }
+
+    // b-221f
+    @Test
+    fun infoButton_seed_readsCollapsedThenExpandedOnceOpened() =
+        runComposeUiTest {
+            showPoster()
+            val info = onNodeWithContentDescription("What is the seed?")
+            info.assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Collapsed"))
+
+            info.performClick()
+            waitForIdle()
+
+            info.assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Expanded"))
         }
 
     /**

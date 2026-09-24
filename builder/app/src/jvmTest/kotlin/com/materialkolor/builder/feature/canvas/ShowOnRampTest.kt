@@ -9,6 +9,7 @@ import com.materialkolor.builder.fakes.FakeClipboard
 import com.materialkolor.builder.fakes.FakeRouter
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -48,13 +49,33 @@ class ShowOnRampTest : SessionTestBase() {
             runCurrent()
 
             workspace.state.value.view.tab shouldBe PreviewTab.Palettes
-            workspace.state.value.rampTarget shouldBe target
+            workspace.state.value.rampHighlight shouldBe RampHighlight(target, workspace.state.value.projectGeneration)
 
             workspace.setPreviewTab(PreviewTab.Roles)
             runCurrent()
 
             workspace.state.value.view.tab shouldBe PreviewTab.Roles
-            workspace.state.value.rampTarget shouldBe null
+            workspace.state.value.rampHighlight shouldBe null
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun showOnRamp_thenAnotherProject_leavesTheTargetOnTheOldGeneration() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val workspace = harness.own(
+                WorkspaceModel(session, preferences, FakeClipboard(), FakeRouter(), ThemeResolver()),
+            )
+            val picked = workspace.state.value.projectGeneration
+
+            workspace.showOnRamp(RampTarget.OfRole(Role.Primary, isDark = false))
+            session.newProject(copyCurrent = false)
+            settle()
+
+            val state = workspace.state.value
+            state.rampHighlight?.generation shouldBe picked
+            state.projectGeneration shouldNotBe picked
             harness.clearAndJoin()
         }
 }
