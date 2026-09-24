@@ -180,7 +180,7 @@ private fun Footer(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .background(colors.surfaceSunken)
+            .background(colors.surface)
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Text(

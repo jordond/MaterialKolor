@@ -127,6 +127,6 @@ private fun FamilyCell(
         color = foreground,
         modifier = modifier
             .background(background)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
     )
 }
