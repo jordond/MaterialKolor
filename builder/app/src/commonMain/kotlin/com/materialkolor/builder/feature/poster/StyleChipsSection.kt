@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -90,7 +91,6 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.widget.SchemeChip
 import com.materialkolor.dynamiccolor.DynamicScheme
 import dev.stateholder.dispatcher.Dispatcher
-import kotlinx.coroutines.yield
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -102,7 +102,7 @@ internal typealias StyleSchemeLookup = (inputs: SchemeInputs, isDark: Boolean) -
 
 // pf-1
 
-/** What the chips wait on between one chip and the next as they catch up, a `yield` in the app. */
+/** What the chips wait on before each chip as they catch up, the next frame in the app. */
 internal typealias ChipPause = suspend () -> Unit
 
 /**
@@ -110,8 +110,8 @@ internal typealias ChipPause = suspend () -> Unit
  *
  * Each chip asks the shared resolver for its own scheme, so the chips share the cache the open theme
  * sits in and the current style's chip costs nothing. They all draw at once the first time. After
- * that a change to the scheme brings them up to date one chip at a time between frames, so a drag
- * that moves the seed or the contrast every frame never generates ten schemes inside one (PB-05). A
+ * that a change to the scheme brings them up to date one chip a frame, so a drag that moves the
+ * seed or the contrast every frame never generates ten schemes inside one (PB-05). A
  * click or Enter picks a style behind a reveal from the chip, as one undo entry. The arrow keys walk
  * the chips without picking one, and hover and focus only bring up the chip's tooltip, so the rest
  * of the app keeps the style it has. Picking Cmf brings up its tertiary seed.
@@ -134,7 +134,7 @@ internal fun rememberThemeResolver(): ThemeResolver = LocalThemeResolver.current
 /**
  * [StyleChipsSection] with the scheme lookup passed in.
  *
- * @param[pause] What the chips wait on between one chip and the next as they catch up.
+ * @param[pause] What the chips wait on before each chip as they catch up.
  */
 @Composable
 internal fun StyleChips(
@@ -142,7 +142,7 @@ internal fun StyleChips(
     dispatcher: Dispatcher<WorkspaceAction>,
     lookup: StyleSchemeLookup,
     modifier: Modifier = Modifier,
-    pause: ChipPause = { yield() }, // pf-1
+    pause: ChipPause = NextFrame, // pf-1
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val selected = context.document.style
@@ -277,9 +277,12 @@ private fun rememberChipShelf(
  * chip inside the frame that brings it (PB-05).
  *
  * Each chip remembers what it was drawn from. [catchUp] draws again every chip the document has moved
- * on from, the one left waiting longest first, and pauses after each. A drag that moves the scheme
- * every frame starts a new catch up every frame, so the chips take turns and each is at most a few
- * frames behind, and all of them are current again once the drag stops.
+ * on from, the one left waiting longest first, and pauses before each. A drag that moves the scheme
+ * every frame starts a new catch up every frame, so the chips take turns, each a few frames behind at
+ * most, and all of them are current again about ten frames after the drag stops.
+ *
+ * The pause is a frame rather than a `yield`, since on the web Compose runs a yielded effect again
+ * inside the same frame.
  */
 @Stable
 private class ChipShelf(
@@ -300,7 +303,7 @@ private class ChipShelf(
     /** The colours [style]'s chip shows now. */
     operator fun get(style: Style): ChipColors = shown.getValue(style).value
 
-    /** Draws again every chip [document] in the mode [isDark] picks has moved on from, pausing after each. */
+    /** Draws again every chip [document] in the mode [isDark] picks has moved on from, pausing before each. */
     suspend fun catchUp(
         document: ThemeDocument,
         isDark: Boolean,
@@ -312,8 +315,8 @@ private class ChipShelf(
             .filter { (style, key) -> drawnFrom[style] != key }
             .sortedBy { (style, _) -> drawnAt.getValue(style) }
         for ((style, key) in behind) {
-            shown.getValue(style).value = draw(style, key, lookup)
             pause()
+            shown.getValue(style).value = draw(style, key, lookup)
         }
     }
 
@@ -327,6 +330,9 @@ private class ChipShelf(
         return ChipColors.of(lookup(key.inputs, key.isDark))
     }
 }
+
+/** Waits for the next frame, so a catch up draws one chip a frame. */
+private val NextFrame: ChipPause = { withFrameNanos {} }
 
 /**
  * What one chip is drawn from.
