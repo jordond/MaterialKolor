@@ -1,12 +1,5 @@
 package com.materialkolor.builder.preview.fluent
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -36,8 +29,6 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.foldedExpandedName
 import com.materialkolor.builder.kit.control.foldedSelectedName
 import com.materialkolor.builder.kit.control.foldedTabName
-import com.materialkolor.builder.kit.motion.LocalBuilderMotion
-import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.choice
 import com.materialkolor.builder.preview.canvas.choose
@@ -165,7 +156,7 @@ private fun GalleryExpander(
                 )
             },
         )
-        GalleryPanelMotion(open) {
+        PanelMotion(open) {
             Column {
                 for ((heading, detail) in rows) {
                     ExpanderItemSeparator()
@@ -390,27 +381,3 @@ private fun Modifier.progressSemantics(label: String): Modifier =
         contentDescription = label
         progressBarRangeInfo = ProgressBarRangeInfo(DemoProgress, 0f..1f)
     }
-
-/**
- * Shows or hides an expander's rows with the skin's panel motion, growing along the height. Under
- * frozen motion they show or hide at once.
- */
-@Composable
-private fun GalleryPanelMotion(
-    visible: Boolean,
-    content: @Composable () -> Unit,
-) {
-    val frozen = LocalMotionFrozen.current
-    val motion = LocalBuilderMotion.current
-    val enter = if (frozen) {
-        EnterTransition.None
-    } else {
-        expandVertically(motion.panelEnter()) + fadeIn(motion.panelEnter())
-    }
-    val exit = if (frozen) {
-        ExitTransition.None
-    } else {
-        shrinkVertically(motion.panelExit()) + fadeOut(motion.panelExit())
-    }
-    AnimatedVisibility(visible = visible, enter = enter, exit = exit) { content() }
-}
