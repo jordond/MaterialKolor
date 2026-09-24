@@ -25,9 +25,9 @@ import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.isRoot
-import androidx.compose.ui.test.isSelectable
-import androidx.compose.ui.test.isSelected
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performSemanticsAction
@@ -273,9 +273,9 @@ class ExpressiveGalleryTest {
             onNode(hasClickAction() and hasText("Bus")).performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
             state.choice("gallery.transport", 3) shouldBe 0
-            onAllNodes(isSelectable() and hasAnyDescendant(hasText("Bus")), useUnmergedTree = true)
+            onAllNodes(isToggleable() and hasAnyDescendant(hasText("Bus")), useUnmergedTree = true)
                 .assertCountEquals(2)
-                .assertAll(isSelected())
+                .assertAll(isOn())
         }
 
     @Test
