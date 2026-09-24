@@ -129,10 +129,10 @@ test('a broadband visit, then seed changes, drags, a library switch and a photo'
   await measure(['PB-09'], async () => {
     // The first switch to Fluent also loads its face and builds its skin, so it is timed on its own
     // and the reveal is timed on the second.
-    const first = await switchLibrary(page, '4', 'Fluent');
-    await switchLibrary(page, '1', 'M3');
-    const frames = await switchLibrary(page, '4', 'Fluent');
-    await switchLibrary(page, '1', 'M3');
+    const first = await switchLibrary(page, '4');
+    await switchLibrary(page, '1');
+    const frames = await switchLibrary(page, '4');
+    await switchLibrary(page, '1');
     const firstWorst = Math.max(0, ...intervalsOf(first.frames)).toFixed(1);
     take(
       'PB-09',
@@ -268,16 +268,13 @@ async function scrollPosterTo(page: Page, target: Locator): Promise<void> {
   }
 }
 
-/**
- * Press [key] on the bare canvas and record frames until [REVEAL_MS] after the top bar's library
- * button names [library].
- */
-async function switchLibrary(page: Page, key: string, library: string): Promise<Frames> {
+/** Press [key] on the bare canvas and record frames until [REVEAL_MS] after Undo names a library switch. */
+async function switchLibrary(page: Page, key: string): Promise<Frames> {
   await pressBareCanvas(page);
   await page.evaluate(() => window.__mkPerf!.start());
   await page.keyboard.press(key);
-  const button = page.locator(A11Y).getByRole('button', { name: `Library, pop-up button, ${library}`, exact: true });
-  await expect(button).toHaveCount(1, { timeout: 10_000 });
+  const undo = page.locator(A11Y).getByRole('button', { name: /^Undo library change/ });
+  await expect(undo).toHaveCount(1, { timeout: 10_000 });
   await page.waitForTimeout(REVEAL_MS);
   return stopFrames(page);
 }
