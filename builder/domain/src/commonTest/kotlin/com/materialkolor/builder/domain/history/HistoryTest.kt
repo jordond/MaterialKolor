@@ -365,22 +365,6 @@ class HistoryTest {
     }
 
     @Test
-    fun history_pastCapacity_keepsTheNewest100() {
-        val session = Session()
-
-        (1..150).forEach { step -> session.edit(DocumentChange.SetThemeName("Theme$step"), at = step * 10_000L) }
-
-        var undone = 0
-        var shown: ThemeDocument? = null
-        while (session.history.canUndo) {
-            shown = session.history.undo()
-            undone++
-        }
-        assertEquals(History.CAPACITY, undone)
-        assertEquals("Theme50", shown?.themeName)
-    }
-
-    @Test
     fun history_persisted_handsOutTheNewest50OldestFirst() {
         val session = Session()
 

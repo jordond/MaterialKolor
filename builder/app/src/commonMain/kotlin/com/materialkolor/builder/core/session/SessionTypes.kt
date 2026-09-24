@@ -3,8 +3,15 @@ package com.materialkolor.builder.core.session
 import com.materialkolor.builder.core.platform.StoreError
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.ChangeLabel
+import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ProjectMeta
 import com.materialkolor.builder.domain.persist.ProjectRecord
+import kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 /**
  * The open project.
@@ -24,6 +31,20 @@ internal sealed interface ProjectRef {
         val fromCode: String,
     ) : ProjectRef
 }
+
+/**
+ * The document showing and the number of the project it belongs to, published as one value so no
+ * reader ever pairs one project's document with another project's number.
+ *
+ * @property[document] The theme being edited.
+ * @property[generation] Counts the projects this tab has shown. It moves by one each time `open`,
+ * `openShared` or `newProject` shows another, in the same value as the document that project brings.
+ * Saving a project opened from a link keeps its number, since it is still the same project.
+ */
+internal data class ShownDocument(
+    val document: ThemeDocument,
+    val generation: Int,
+)
 
 /**
  * What the undo and redo buttons can do.
@@ -85,3 +106,26 @@ internal data class SessionColors(
 
 /** How recent an edit in this tab has to be for another tab's save to raise a [Conflict]. */
 internal const val CONFLICT_WINDOW_MILLIS: Long = 2_000
+
+/**
+ * This flow seen through [transform], read and collected straight from it with no scope and no
+ * dispatch in between, so its value always agrees with the value it came from.
+ */
+internal fun <T, R> StateFlow<T>.derived(transform: (T) -> R): StateFlow<R> = DerivedStateFlow(this, transform)
+
+@OptIn(ExperimentalForInheritanceCoroutinesApi::class)
+private class DerivedStateFlow<T, R>(
+    private val source: StateFlow<T>,
+    private val transform: (T) -> R,
+) : StateFlow<R> {
+    override val value: R
+        get() = transform(source.value)
+
+    override val replayCache: List<R>
+        get() = listOf(value)
+
+    override suspend fun collect(collector: FlowCollector<R>): Nothing {
+        source.map(transform).distinctUntilChanged().collect(collector)
+        awaitCancellation()
+    }
+}

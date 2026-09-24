@@ -94,6 +94,41 @@ class ProjectRepositoryTest {
         }
 
     @Test
+    fun saveViewStateAndHistory_afterDelete_writeNothing() =
+        runTest {
+            val record = created()
+            deletedProject(record.id)
+
+            repository.saveViewState(record.id, VIEW) shouldBe null
+            repository.saveHistory(record.id, HISTORY) shouldBe null
+
+            stores.keys shouldBe setOf(StorageKeys.INDEX)
+        }
+
+    @Test
+    fun saveViewState_deleteLandsWhileItWrites_takesTheKeyBackOut() =
+        runTest {
+            val record = created()
+            stores.beforeNextUpdate(StorageKeys.view(record.id)) { deletedProject(record.id) }
+
+            repository.saveViewState(record.id, VIEW) shouldBe null
+
+            listedIds() shouldBe emptyList()
+            stores.keys shouldBe setOf(StorageKeys.INDEX)
+        }
+
+    @Test
+    fun saveHistory_deleteLandsWhileItWrites_takesTheKeyBackOut() =
+        runTest {
+            val record = created()
+            stores.beforeNextUpdate(StorageKeys.history(record.id)) { deletedProject(record.id) }
+
+            repository.saveHistory(record.id, HISTORY) shouldBe null
+
+            stores.keys shouldBe setOf(StorageKeys.INDEX)
+        }
+
+    @Test
     fun rename_listedProject_renamesTheRecordAndItsListing() =
         runTest {
             val record = created("Before")

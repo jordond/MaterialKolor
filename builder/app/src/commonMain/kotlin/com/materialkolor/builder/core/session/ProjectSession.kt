@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -42,15 +41,17 @@ import kotlin.coroutines.EmptyCoroutineContext
  * The one owner of the open project, its document and its undo history.
  *
  * Models read [document], [history], [project] and [viewState] and merge them as they need, and
- * nothing else holds document state. Every change goes through [edit], [undo] or [redo]. Every
- * rename goes through [rename], so the record the session holds never writes an old name back.
+ * nothing else holds document state. A model that tells projects apart reads [shown], which carries
+ * the document with the number of the project it belongs to. Every change goes through [edit],
+ * [undo] or [redo]. Every rename goes through [rename], so the record the session holds never
+ * writes an old name back.
  *
  * Committed edits are saved [AUTOSAVE_DELAY_MILLIS] after the last one, so a drag saves once after
- * it is released. [flush] writes whatever is waiting straight away, on lifecycle STOP and on
- * `pagehide`. A project opened from a link stays [ProjectRef.Transient] and unsaved until the first
- * edit, which saves it under the link's project name or [sharedThemeName]. Each project keeps its
- * own waiting save, so one that did not land survives opening another project and goes out again
- * on the next flush.
+ * it is released, and [SessionWrites] puts them into storage. [flush] writes whatever is waiting
+ * straight away, on lifecycle STOP and on `pagehide`. A project opened from a link stays
+ * [ProjectRef.Transient] and unsaved until the first edit, which saves it under the link's project
+ * name or [sharedThemeName]. Each project keeps its own waiting save, so one that did not land
+ * survives opening another project and goes out again on the next flush.
  *
  * When another tab saves the open project, its document comes in as an undo step, so Undo brings
  * this tab's back. If this tab edited in the last [CONFLICT_WINDOW_MILLIS] a [Conflict] comes up
@@ -90,24 +91,37 @@ internal class ProjectSession(
         OpenProject(id = null, name = "", held = null, EmptyCoroutineContext, scope.coroutineContext[Job]),
     )
     private val writeLock = Mutex()
-    private val autosave = Autosave(scope, keyOf = { save -> save.project }, write = ::write)
-    private val viewAutosave = Autosave(scope, keyOf = { pending -> pending.project }, write = ::writeView)
     private var steps = History()
     private var lastEditAt: Long? = null
 
-    /** The number of the newest save handed to autosave. Only the UI thread reads or writes it. */
-    private var newestSave = 0L
+    // The document last handed to autosave, or the one the project opened with, and when the edit
+    // that made it happened. Only the UI thread reads or writes them.
+    private var committed = ThemeDocument.Default
+    private var committedEditAt: Long? = null
 
-    private val _document = MutableStateFlow(ThemeDocument.Default)
+    private val _shown = MutableStateFlow(ShownDocument(ThemeDocument.Default, generation = 0))
     private val _history = MutableStateFlow(HistoryState())
     private val _project = MutableStateFlow<ProjectRef>(ProjectRef.Transient(ShareCodec.encode(ThemeDocument.Default)))
     private val _viewState = MutableStateFlow(ProjectViewState())
     private val _conflict = MutableStateFlow<Conflict?>(null)
-    private val _saveStatus = MutableStateFlow<SaveStatus>(SaveStatus.Idle)
-    private val _generation = MutableStateFlow(0) // b-221c
 
-    /** The theme being edited. */
-    val document: StateFlow<ThemeDocument> = _document.asStateFlow()
+    private val writes = SessionWrites(
+        projects = projects,
+        tabId = environment.tabId,
+        lock = writeLock,
+        showing = { current.value },
+        conflicted = { _conflict.value != null },
+        viewState = { _viewState.value },
+        materialized = ::materialized,
+    )
+    private val autosave = Autosave(scope, keyOf = { save -> save.project }, write = writes::write)
+    private val viewAutosave = Autosave(scope, keyOf = { pending -> pending.project }, write = writes::writeView)
+
+    /** The theme being edited, with the number of the project it belongs to. */
+    val shown: StateFlow<ShownDocument> = _shown.asStateFlow()
+
+    /** The theme being edited. It is [shown] without the number. */
+    val document: StateFlow<ThemeDocument> = _shown.derived { shown -> shown.document }
 
     /** What undo and redo can do right now. */
     val history: StateFlow<HistoryState> = _history.asStateFlow()
@@ -122,16 +136,7 @@ internal class ProjectSession(
     val conflict: StateFlow<Conflict?> = _conflict.asStateFlow()
 
     /** Whether the open project is saved. A failure comes after the repository pruned and tried again. */
-    val saveStatus: StateFlow<SaveStatus> = _saveStatus.asStateFlow()
-
-    // b-221c
-
-    /**
-     * Counts the projects this tab has shown, one more each time [open], [openShared] or [newProject]
-     * shows another, and it moves before [document] does. Saving a project opened from a link keeps
-     * its number, since it is still the same project.
-     */
-    val generation: StateFlow<Int> = _generation.asStateFlow()
+    val saveStatus: StateFlow<SaveStatus> = writes.status
 
     // b-216b
 
@@ -172,19 +177,26 @@ internal class ProjectSession(
     /**
      * Make [change] to the document and record it for undo.
      *
-     * A [EditPhase.Dragging] step only moves the document. The save waits for the release.
+     * A [EditPhase.Dragging] step only moves the document. The save waits for the release. A release
+     * that lands back on the document last committed, a cancelled picker or a slider dragged back to
+     * its start, saves nothing and does not count as an edit. A project opened from a link stays
+     * unsaved through it.
      */
     fun edit(
         change: DocumentChange,
         phase: EditPhase,
     ) {
-        val before = _document.value
+        val before = document.value
         val after = change.apply(before)
         val time = now()
         steps.record(before, after, change, phase, time)
-        lastEditAt = time
-        _document.value = after
+        showDocument(after)
         publishHistory()
+        if (phase == EditPhase.Released && after == committed) {
+            lastEditAt = committedEditAt
+            return
+        }
+        lastEditAt = time
         if (phase == EditPhase.Dragging || (phase == EditPhase.Discrete && after == before)) return
         commit(after)
     }
@@ -244,7 +256,7 @@ internal class ProjectSession(
      * from the defaults or, with [copyCurrent], from this one.
      */
     suspend fun newProject(copyCurrent: Boolean) {
-        val document = if (copyCurrent) _document.value else ThemeDocument.Default
+        val document = if (copyCurrent) this.document.value else ThemeDocument.Default
         val view = if (copyCurrent) _viewState.value else ProjectViewState()
         flushAll()
         startNew(document, view)
@@ -280,7 +292,7 @@ internal class ProjectSession(
      * projects", along with anything else waiting. A project that is saved already only flushes.
      */
     fun saveTransient(): Job {
-        if (_project.value is ProjectRef.Transient) commit(_document.value)
+        if (_project.value is ProjectRef.Transient) commit(document.value)
         return flush()
     }
 
@@ -300,7 +312,7 @@ internal class ProjectSession(
         _conflict.value = null
         if (keepMine) {
             open.held.value = conflict.theirs
-            commit(_document.value)
+            commit(document.value)
         } else {
             adopt(open, conflict.theirs)
         }
@@ -326,18 +338,24 @@ internal class ProjectSession(
 
     private fun moveTo(document: ThemeDocument) {
         lastEditAt = now()
-        _document.value = document
+        showDocument(document)
         publishHistory()
         commit(document)
     }
 
     /** Write the splash colors of [document] and schedule its save. */
     private fun commit(document: ThemeDocument) {
+        committed = document
+        committedEditAt = lastEditAt
         val colors = colorsOf(document)
         environment.writeSplashColors(colors.splashLight, colors.splashDark)
-        _saveStatus.value = SaveStatus.Pending
-        newestSave++
-        autosave.schedule(PendingSave(current.value, newestSave, document, HistoryRecord(steps.persisted()), colors))
+        val sequence = writes.nextSave()
+        autosave.schedule(PendingSave(current.value, sequence, document, HistoryRecord(steps.persisted()), colors))
+    }
+
+    /** Show [document] in place of the one showing, in the same project. */
+    private fun showDocument(document: ThemeDocument) {
+        _shown.update { shown -> shown.copy(document = document) }
     }
 
     private fun publishHistory() {
@@ -356,10 +374,12 @@ internal class ProjectSession(
         current.value = open
         this.steps = steps
         lastEditAt = null
+        committed = document
+        committedEditAt = null
         _conflict.value = null
-        _saveStatus.value = SaveStatus.Idle
-        _generation.value++ // b-221c
-        _document.value = document
+        writes.resetStatus(SaveStatus.Idle)
+        // The number and the document move in one value, so no reader sees one without the other.
+        _shown.update { shown -> ShownDocument(document, shown.generation + 1) }
         _viewState.value = view
         _project.value = ref
         publishHistory()
@@ -394,7 +414,7 @@ internal class ProjectSession(
                 val open = openHere(id = null, name, held = null)
                 val code = runCatching { ShareCodec.encode(document, name) }.getOrDefault("")
                 show(open, ProjectRef.Transient(code), document, History(), view, colors)
-                _saveStatus.value = SaveStatus.Failed(creation.error)
+                writes.resetStatus(SaveStatus.Failed(creation.error))
             }
         }
     }
@@ -416,7 +436,7 @@ internal class ProjectSession(
         val held = open.held.value
         if (held != null && incoming.revision <= held.revision) return
         open.name.value = incoming.name
-        if (incoming.document == _document.value) {
+        if (incoming.document == document.value) {
             open.held.value = incoming
             _conflict.value = null
             return
@@ -432,95 +452,29 @@ internal class ProjectSession(
         open: OpenProject,
         theirs: ProjectRecord,
     ) {
-        val mine = _document.value
+        val mine = document.value
         open.held.value = theirs
         open.name.value = theirs.name
         steps.record(mine, theirs.document, DocumentChange.Replace(theirs.document), EditPhase.Discrete, now())
-        _document.value = theirs.document
+        showDocument(theirs.document)
         publishHistory()
         commit(theirs.document)
     }
 
-    private suspend fun write(save: PendingSave): Boolean {
-        if (_conflict.value != null && current.value === save.project) return false
-        val error = writeLock.withLock { persist(save) }
-        withContext(save.project.context) { report(save, error) }
-        return error == null
-    }
-
     /**
-     * Show how [save] went. It runs on the thread that edits, so it cannot cover the Pending of a
-     * newer save, and only the newest save of the open project reports.
+     * Take the id a project from a link got on its first save. While it is still showing, it becomes
+     * the tab's project and other tabs' saves to it are watched.
      */
-    private fun report(
-        save: PendingSave,
-        error: StoreError?,
+    private suspend fun materialized(
+        open: OpenProject,
+        id: String,
     ) {
-        if (current.value !== save.project || save.sequence != newestSave) return
-        _saveStatus.value = if (error != null) SaveStatus.Failed(error) else SaveStatus.Idle
-    }
-
-    private suspend fun persist(save: PendingSave): StoreError? {
-        val id = save.project.id.value ?: return materialize(save)
-        saveRecord(id, save)?.let { error -> return error }
-        return saveHistory(id, save)
-    }
-
-    /** Save a transient project for the first time, under the name it was opened with. */
-    private suspend fun materialize(save: PendingSave): StoreError? {
-        val open = save.project
-        val creation = projects.create(open.name.value, save.document, save.colors.previewColors)
-        val record = when (creation) {
-            is Creation.Created -> creation.record
-            is Creation.Failed -> return creation.error
+        if (current.value === open) {
+            _project.value = ProjectRef.Persisted(id)
+            environment.writeTabProject(id)
+            watch(open, id)
         }
-        open.id.value = record.id
-        open.held.value = record
-        val showing = current.value === open
-        val view = if (showing) _viewState.value else ProjectViewState()
-        if (view != ProjectViewState()) projects.saveViewState(record.id, view)
-        if (showing) {
-            _project.value = ProjectRef.Persisted(record.id)
-            environment.writeTabProject(record.id)
-            watch(open, record.id)
-        }
-        rememberLastProject(record.id)
-        return saveHistory(record.id, save)
-    }
-
-    private suspend fun saveRecord(
-        id: String,
-        save: PendingSave,
-    ): StoreError? {
-        val open = save.project
-        val name = open.name.value
-        val held = open.held.value
-        if (held != null && held.document == save.document && held.name == name) return null
-        val record = held?.copy(name = name, document = save.document)
-            ?: ProjectRecord(id, name, save.document, revision = 0, writerTab = environment.tabId)
-        val error = projects.save(record, save.colors.previewColors)
-        if (error == null) {
-            val saved = record.copy(revision = record.revision + 1)
-            open.held.update { latest -> if (latest === held) saved else latest }
-        }
-        return error
-    }
-
-    private suspend fun saveHistory(
-        id: String,
-        save: PendingSave,
-    ): StoreError? {
-        val open = save.project
-        if (open.savedHistory.value == save.history) return null
-        val error = projects.saveHistory(id, save.history)
-        if (error == null) open.savedHistory.value = save.history
-        return error
-    }
-
-    private suspend fun writeView(pending: PendingView): Boolean {
-        // A transient project has nowhere to keep its view yet. Its first save writes it.
-        val id = pending.project.id.value ?: return true
-        return projects.saveViewState(id, pending.state) == null
+        rememberLastProject(id)
     }
 
     private suspend fun rememberLastProject(id: String) {
