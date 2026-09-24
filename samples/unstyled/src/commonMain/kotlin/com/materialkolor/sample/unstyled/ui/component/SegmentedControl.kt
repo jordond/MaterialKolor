@@ -99,13 +99,15 @@ private fun <T> RadioGroupScope.Segment(
                 .controlFocusRing(interactionSource, Shapes.Control, offset = 0.dp)
                 .shadow(elevation = elevation, shape = Shapes.Control, ambientColor = shadow, spotColor = shadow)
                 .clip(Shapes.Control)
-                .background(container)
-                .padding(horizontal = Spacing.Medium),
+                .background(container),
             interactionSource = interactionSource,
             indication = LocalIndication.current,
         ) {
+            // The padding goes inside, since the radio button puts its toggle after this modifier.
             Row(
-                modifier = Modifier.fillMaxHeight(),
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(horizontal = Spacing.Medium),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

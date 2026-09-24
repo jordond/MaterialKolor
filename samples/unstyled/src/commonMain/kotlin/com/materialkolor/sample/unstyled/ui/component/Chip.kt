@@ -109,12 +109,17 @@ internal fun <T> ChoiceChips(
                             .clip(Shapes.Control)
                             .background(container)
                             .border(width = 1.dp, color = outline, shape = Shapes.Control)
-                            .height(ControlHeight)
-                            .padding(horizontal = Spacing.Medium),
+                            .height(ControlHeight),
                         interactionSource = interactionSource,
                         indication = LocalIndication.current,
                     ) {
-                        Row(modifier = Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
+                        // The padding goes inside, since the radio button puts its toggle after this modifier.
+                        Row(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(horizontal = Spacing.Medium),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
                             Text(text = choice.label, style = TasksType.Label, maxLines = 1)
                         }
                     }
