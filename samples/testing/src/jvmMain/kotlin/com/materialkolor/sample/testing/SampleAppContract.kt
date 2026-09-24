@@ -55,6 +55,7 @@ public abstract class SampleAppContract {
     @Composable
     protected abstract fun Content()
 
+    /** The five README tasks, two of them done, with the counts and progress to match. */
     @Test
     public fun startingState_showsTheReadmeTasks() {
         runSampleTest {
@@ -74,6 +75,7 @@ public abstract class SampleAppContract {
         }
     }
 
+    /** Add stays disabled and Enter adds nothing while the field is blank or only spaces. */
     @Test
     public fun addTask_isDisabledUntilTheFieldHasText() {
         runSampleTest {
@@ -97,6 +99,7 @@ public abstract class SampleAppContract {
         }
     }
 
+    /** Add puts the task at the end of the list and empties the field. */
     @Test
     public fun addTask_withTheButtonAppendsAndClearsTheField() {
         runSampleTest {
@@ -112,6 +115,7 @@ public abstract class SampleAppContract {
         }
     }
 
+    /** Enter in the field does the same as Add. */
     @Test
     public fun addTask_withTheImeActionAppendsAndClearsTheField() {
         runSampleTest {
@@ -129,6 +133,7 @@ public abstract class SampleAppContract {
         }
     }
 
+    /** A new task gets the tag picked in the composer. */
     @Test
     public fun addTask_usesTheSelectedComposerTag() {
         runSampleTest {
@@ -148,6 +153,7 @@ public abstract class SampleAppContract {
         }
     }
 
+    /** The checkbox flips the task, and the summary, remaining count and progress follow. */
     @Test
     public fun toggleTask_flipsTheCheckAndTheCounts() {
         runSampleTest {
@@ -170,6 +176,7 @@ public abstract class SampleAppContract {
         }
     }
 
+    /** Each filter shows its tasks and hides the rest. */
     @Test
     public fun filters_showOnlyTheMatchingRows() {
         runSampleTest {
@@ -186,6 +193,7 @@ public abstract class SampleAppContract {
         }
     }
 
+    /** The empty state shows its filter's message only while the filter matches nothing. */
     @Test
     public fun emptyState_showsWhenTheFilterMatchesNothing() {
         runSampleTest {
@@ -203,6 +211,7 @@ public abstract class SampleAppContract {
         }
     }
 
+    /** The delete button, named after its task, removes that row. */
     @Test
     public fun deleteTask_removesTheRow() {
         runSampleTest {
@@ -219,6 +228,7 @@ public abstract class SampleAppContract {
         }
     }
 
+    /** Clear done asks first. Keep changes nothing, Clear removes the finished tasks. */
     @Test
     public fun clearDone_asksFirstAndThenClears() {
         runSampleTest {
@@ -251,6 +261,7 @@ public abstract class SampleAppContract {
         }
     }
 
+    /** Every seed swatch is named, and picking one moves the selection to it. */
     @Test
     public fun seed_movesTheSelection() {
         runSampleTest {
@@ -267,6 +278,7 @@ public abstract class SampleAppContract {
         }
     }
 
+    /** Picking a mode moves the selection to it. */
     @Test
     public fun mode_movesTheSelection() {
         runSampleTest {
@@ -282,6 +294,7 @@ public abstract class SampleAppContract {
         }
     }
 
+    /** The tabs switch between the task list and the palette. */
     @Test
     public fun section_switchesBetweenTasksAndPalette() {
         runSampleTest {
