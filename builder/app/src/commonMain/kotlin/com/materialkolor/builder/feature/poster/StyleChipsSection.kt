@@ -4,7 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -23,6 +29,7 @@ import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.KeyColor
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
+import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.resolve.SchemeInputs
 import com.materialkolor.builder.engine.resolve.ThemeResolver
@@ -83,6 +90,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.widget.SchemeChip
 import com.materialkolor.dynamiccolor.DynamicScheme
 import dev.stateholder.dispatcher.Dispatcher
+import kotlinx.coroutines.yield
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -92,14 +100,21 @@ import org.jetbrains.compose.resources.stringResource
  */
 internal typealias StyleSchemeLookup = (inputs: SchemeInputs, isDark: Boolean) -> DynamicScheme
 
+// pf-1
+
+/** What the chips wait on between one chip and the next as they catch up, a `yield` in the app. */
+internal typealias ChipPause = suspend () -> Unit
+
 /**
  * The palette style chips, each a small picture of what that style makes of the seed (F-11).
  *
- * Each chip asks the shared resolver for its own scheme only once it is drawn, so the chips share
- * the cache the open theme sits in and the current style's chip costs nothing. A click or Enter
- * picks a style behind a reveal from the chip, as one undo entry. The arrow keys walk the chips
- * without picking one, and hover and focus only bring up the chip's tooltip, so the rest of the
- * app keeps the style it has. Picking Cmf brings up its tertiary seed.
+ * Each chip asks the shared resolver for its own scheme, so the chips share the cache the open theme
+ * sits in and the current style's chip costs nothing. They all draw at once the first time. After
+ * that a change to the scheme brings them up to date one chip at a time between frames, so a drag
+ * that moves the seed or the contrast every frame never generates ten schemes inside one (PB-05). A
+ * click or Enter picks a style behind a reveal from the chip, as one undo entry. The arrow keys walk
+ * the chips without picking one, and hover and focus only bring up the chip's tooltip, so the rest
+ * of the app keeps the style it has. Picking Cmf brings up its tertiary seed.
  */
 @Composable
 internal fun StyleChipsSection(
@@ -116,19 +131,27 @@ internal fun StyleChipsSection(
 @Composable
 internal fun rememberThemeResolver(): ThemeResolver = LocalThemeResolver.current ?: remember { ThemeResolver() }
 
-/** [StyleChipsSection] with the scheme lookup passed in. */
+/**
+ * [StyleChipsSection] with the scheme lookup passed in.
+ *
+ * @param[pause] What the chips wait on between one chip and the next as they catch up.
+ */
 @Composable
 internal fun StyleChips(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     lookup: StyleSchemeLookup,
     modifier: Modifier = Modifier,
+    pause: ChipPause = { yield() }, // pf-1
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val selected = context.document.style
+    // pf-1
+    val isDark = context.visibleModes == PreviewMode.Dark
+    val shelf = rememberChipShelf(context.result.document, isDark, lookup, pause)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
         InfoLabel(label = stringResource(Res.string.style_label), topic = InfoTopic.Style)
-        StyleChipRow(context, lookup) { style, origin ->
+        StyleChipRow(selected, shelf) { style, origin ->
             dispatcher.dispatch(WorkspaceAction.EditWithReveal(DocumentChange.SetStyle(style), origin))
         }
         BuilderText(
@@ -148,14 +171,16 @@ internal fun StyleChips(
 /**
  * The ten chips as one radio group with a single tab stop. Tab lands on the chosen chip, and the
  * arrows, Home and End move the focus around the group without picking, wrapping at the ends.
+ *
+ * It reads nothing of the document but the style, so a drag leaves it alone and only a chip whose
+ * colours [shelf] brought up to date draws again.
  */
 @Composable
 private fun StyleChipRow(
-    context: PosterContext,
-    lookup: StyleSchemeLookup,
+    selected: Style,
+    shelf: ChipShelf,
     onChoose: (style: Style, origin: Offset?) -> Unit,
 ) {
-    val selected = context.document.style
     BuilderChoiceGroup(
         options = Style.entries,
         selected = selected,
@@ -165,9 +190,8 @@ private fun StyleChipRow(
         selectOnFocus = false,
     ) { style, isSelected, optionModifier ->
         StyleChip(
-            context = context,
             style = style,
-            lookup = lookup,
+            shelf = shelf,
             selected = isSelected,
             onChoose = { origin -> if (style != selected) onChoose(style, origin) },
             modifier = optionModifier,
@@ -177,21 +201,18 @@ private fun StyleChipRow(
 
 /**
  * One chip, drawn from the scheme [style] makes of the document's seed in the mode the preview
- * shows, with the specs the style runs in under it.
+ * shows, as [shelf] has it now, with the specs the style runs in under it.
  */
 @Composable
 private fun StyleChip(
-    context: PosterContext,
     style: Style,
-    lookup: StyleSchemeLookup,
+    shelf: ChipShelf,
     selected: Boolean,
     onChoose: (origin: Offset) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
-    val isDark = context.visibleModes == PreviewMode.Dark
-    val inputs = SchemeInputs.from(context.result.document.copy(style = style))
-    val colors = remember(inputs, isDark) { ChipColors.of(lookup(inputs, isDark)) }
+    val colors = shelf[style] // pf-1
     val bounds = remember { ChipBounds() }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -229,6 +250,101 @@ private class ChipColors(
 /** Where a chip sits in the root, which a pick reveals from. Only a pick reads it. */
 private class ChipBounds {
     var rect: Rect = Rect.Zero
+}
+
+// pf-1
+
+/**
+ * The chip colours of [document] in the mode [isDark] picks, drawn all at once the first time and
+ * brought up to date one chip per [pause] after that.
+ */
+@Composable
+private fun rememberChipShelf(
+    document: ThemeDocument,
+    isDark: Boolean,
+    lookup: StyleSchemeLookup,
+    pause: ChipPause,
+): ChipShelf {
+    val shelf = remember { ChipShelf(document, isDark, lookup) }
+    val currentLookup by rememberUpdatedState(lookup)
+    val currentPause by rememberUpdatedState(pause)
+    LaunchedEffect(shelf, document, isDark) { shelf.catchUp(document, isDark, currentLookup, currentPause) }
+    return shelf
+}
+
+/**
+ * The colours each style chip shows, kept apart from the document so a change to it never draws a
+ * chip inside the frame that brings it (PB-05).
+ *
+ * Each chip remembers what it was drawn from. [catchUp] draws again every chip the document has moved
+ * on from, the one left waiting longest first, and pauses after each. A drag that moves the scheme
+ * every frame starts a new catch up every frame, so the chips take turns and each is at most a few
+ * frames behind, and all of them are current again once the drag stops.
+ */
+@Stable
+private class ChipShelf(
+    document: ThemeDocument,
+    isDark: Boolean,
+    lookup: StyleSchemeLookup,
+) {
+    /** What each chip was last drawn from. Only the catch up reads it. */
+    private val drawnFrom = mutableMapOf<Style, ChipKey>()
+
+    /** When each chip was last drawn, counted in draws, so the longest waiting goes first. */
+    private val drawnAt = mutableMapOf<Style, Int>()
+    private var draws = 0
+
+    private val shown: Map<Style, MutableState<ChipColors>> =
+        Style.entries.associateWith { style -> mutableStateOf(draw(style, ChipKey.of(document, style, isDark), lookup)) }
+
+    /** The colours [style]'s chip shows now. */
+    operator fun get(style: Style): ChipColors = shown.getValue(style).value
+
+    /** Draws again every chip [document] in the mode [isDark] picks has moved on from, pausing after each. */
+    suspend fun catchUp(
+        document: ThemeDocument,
+        isDark: Boolean,
+        lookup: StyleSchemeLookup,
+        pause: ChipPause,
+    ) {
+        val behind = Style.entries
+            .map { style -> style to ChipKey.of(document, style, isDark) }
+            .filter { (style, key) -> drawnFrom[style] != key }
+            .sortedBy { (style, _) -> drawnAt.getValue(style) }
+        for ((style, key) in behind) {
+            shown.getValue(style).value = draw(style, key, lookup)
+            pause()
+        }
+    }
+
+    private fun draw(
+        style: Style,
+        key: ChipKey,
+        lookup: StyleSchemeLookup,
+    ): ChipColors {
+        drawnFrom[style] = key
+        drawnAt[style] = draws++
+        return ChipColors.of(lookup(key.inputs, key.isDark))
+    }
+}
+
+/**
+ * What one chip is drawn from.
+ *
+ * @property[inputs] The scheme inputs its style makes of the document.
+ * @property[isDark] The mode the preview shows.
+ */
+private data class ChipKey(
+    val inputs: SchemeInputs,
+    val isDark: Boolean,
+) {
+    companion object {
+        fun of(
+            document: ThemeDocument,
+            style: Style,
+            isDark: Boolean,
+        ): ChipKey = ChipKey(SchemeInputs.from(document.copy(style = style)), isDark)
+    }
 }
 
 /**
