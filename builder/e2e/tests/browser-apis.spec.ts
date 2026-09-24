@@ -51,15 +51,20 @@ test.describe('clipboard', () => {
 
 test.describe('download', () => {
   test('a download carries the bytes and revokes its URL 30 s later', async ({ page }, testInfo) => {
+    // b-227
+    // The installed clock runs with real time until it is paused, so the 30 s start at the click and a
+    // busy machine can spend over a second of them before the test jumps ahead. The wrapper notes the
+    // page's clock when the URL is made, and the test pauses the clock a second short of the revoke
+    // counted from there, however long the download took.
     await page.clock.install();
     await page.addInitScript(() => {
-      const urls = { created: [] as string[], revoked: [] as string[] };
+      const urls = { created: [] as { url: string; at: number }[], revoked: [] as string[] };
       (window as any).__urls = urls;
       const create = URL.createObjectURL.bind(URL);
       const revoke = URL.revokeObjectURL.bind(URL);
       URL.createObjectURL = (object: Blob | MediaSource) => {
         const url = create(object);
-        urls.created.push(url);
+        urls.created.push({ url, at: Date.now() });
         return url;
       };
       URL.revokeObjectURL = (url: string) => {
@@ -78,13 +83,16 @@ test.describe('download', () => {
     expect([...bytes]).toEqual(Array.from({ length: 256 }, (_, value) => value));
     await expect.poll(() => hook(page, 'outcome', 'save')).toBe('Done');
 
-    const created = await page.evaluate((from) => (window as any).__urls.created.slice(from) as string[], before);
+    const created = await page.evaluate(
+      (from) => (window as any).__urls.created.slice(from) as { url: string; at: number }[],
+      before,
+    );
     expect(created).toHaveLength(1);
     const revoked = () => page.evaluate(() => (window as any).__urls.revoked as string[]);
-    await page.clock.fastForward(29_000);
-    expect(await revoked()).not.toContain(created[0]);
-    await page.clock.fastForward(2_000);
-    await expect.poll(revoked).toContain(created[0]);
+    await page.clock.pauseAt(created[0].at + 29_000);
+    expect(await revoked()).not.toContain(created[0].url);
+    await page.clock.runFor(2_000);
+    expect(await revoked()).toContain(created[0].url);
     console.log(`[S9] ${testInfo.project.name} Blob download with the URL revoked 30 s later: saved`);
   });
 });
