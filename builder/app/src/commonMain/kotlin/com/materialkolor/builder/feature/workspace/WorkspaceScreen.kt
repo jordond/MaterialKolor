@@ -183,7 +183,8 @@ internal fun WorkspaceScreen(
         modifier = modifier,
         overlays = {
             ExportHost(state, dispatcher)
-            ProjectsHost(state, dispatcher)
+            // b-310
+            ProjectsHost(state, dispatcher, toasts)
             ShareHost(state, dispatcher)
             CommandHost(state, dispatcher)
             PickerHost(state, dispatcher)

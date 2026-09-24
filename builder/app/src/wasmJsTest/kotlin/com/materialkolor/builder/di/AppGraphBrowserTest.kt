@@ -103,6 +103,15 @@ private object TestFileSaver : FileSaver {
 
     // b-302a
     override fun canShare(files: List<OutgoingFile>): Boolean = false
+
+    // b-310
+    override val canShareLink: Boolean = false
+
+    // b-310
+    override suspend fun shareLink(
+        url: String,
+        title: String,
+    ): Result<Unit> = Result.failure(UnsupportedOperationException("No share sheet in the test browser"))
 }
 
 private object TestImageInput : ImageInput {

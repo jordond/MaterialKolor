@@ -66,6 +66,15 @@ private object DesktopFileSaver : FileSaver {
 
     // b-302a
     override fun canShare(files: List<OutgoingFile>): Boolean = false
+
+    // b-310
+    override val canShareLink: Boolean = false
+
+    // b-310
+    override suspend fun shareLink(
+        url: String,
+        title: String,
+    ): Result<Unit> = notOnDesktop()
 }
 
 private object DesktopImageInput : ImageInput {

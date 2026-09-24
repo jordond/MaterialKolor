@@ -76,3 +76,55 @@ private fun startShare(files: JsArray<File>): Promise<JsString?> =
         }
     }""",
     )
+
+// b-310
+
+/**
+ * Whether a link is worth handing to the share sheet rather than the clipboard, which is when the
+ * page has `navigator.share` and the main pointer is a finger. Desktop browsers with Web Share get
+ * the clipboard, since their share sheet is a detour there.
+ */
+internal fun pageCanShareLink(): Boolean =
+    js(
+        """{
+        if (typeof navigator.share !== 'function') return false;
+        try {
+            return window.matchMedia('(pointer: coarse)').matches;
+        } catch (error) {
+            return false;
+        }
+    }""",
+    )
+
+// b-310
+
+/**
+ * Hand the link [url] called [title] to the share sheet. Returns why it did not go, or null when it
+ * did or when the user closed the sheet.
+ *
+ * The sheet opens before the first suspension, like [shareBrowserFiles], so a caller that starts
+ * this undispatched from a click opens it inside the click.
+ */
+internal suspend fun shareBrowserLink(
+    url: String,
+    title: String,
+): String? = startLinkShare(url, title).await<JsString?>()?.toString()
+
+private fun startLinkShare(
+    url: String,
+    title: String,
+): Promise<JsString?> =
+    js(
+        """{
+        const reason = (error) => String((error && (error.name || error.message)) || error || 'Refused');
+        try {
+            if (typeof navigator.share !== 'function') return Promise.resolve('NotSupportedError');
+            return navigator.share({ url, title }).then(
+                () => null,
+                (error) => (error && error.name === 'AbortError' ? null : reason(error)),
+            );
+        } catch (error) {
+            return Promise.resolve(reason(error));
+        }
+    }""",
+    )

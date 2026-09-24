@@ -197,6 +197,28 @@ interface FileSaver {
      * sheet the user dismisses counts as success, with no toast and no fallback to [save].
      */
     suspend fun shareFiles(files: List<OutgoingFile>): Result<Unit>
+
+    // b-310
+
+    /**
+     * Whether a share link goes to the share sheet here rather than the clipboard, on a touch
+     * screen whose browser has one. Read it in the click, before anything suspends.
+     */
+    val canShareLink: Boolean
+
+    // b-310
+
+    /**
+     * Hand the link [url] called [title] to the share sheet.
+     *
+     * It needs user activation the way [shareFiles] does, so start it from the click with
+     * `scope.launch(start = CoroutineStart.UNDISPATCHED)` and make it the first suspension. A share
+     * sheet the user dismisses counts as success.
+     */
+    suspend fun shareLink(
+        url: String,
+        title: String,
+    ): Result<Unit>
 }
 
 /**

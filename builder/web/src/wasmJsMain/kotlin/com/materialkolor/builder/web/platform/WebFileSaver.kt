@@ -6,7 +6,9 @@ import com.materialkolor.builder.web.interop.browserFile
 import com.materialkolor.builder.web.interop.downloadBytes
 import com.materialkolor.builder.web.interop.pageCanShare
 import com.materialkolor.builder.web.interop.pageCanShareFiles
+import com.materialkolor.builder.web.interop.pageCanShareLink
 import com.materialkolor.builder.web.interop.shareBrowserFiles
+import com.materialkolor.builder.web.interop.shareBrowserLink
 import com.materialkolor.builder.web.interop.shareProbe
 import org.khronos.webgl.toInt8Array
 
@@ -39,6 +41,20 @@ internal object WebFileSaver : FileSaver {
         val shared = files.map { file -> browserFile(file.bytes.toInt8Array(), file.name, file.mime) }
         return outcome(shareBrowserFiles(shared))
     }
+
+    // b-310
+
+    /** Asked each time, since a convertible can swap its finger for a mouse while the page is open. */
+    override val canShareLink: Boolean
+        get() = pageCanShareLink()
+
+    // b-310
+
+    /** Open the share sheet with the link, or fail when the page has none. A dismissed sheet is success. */
+    override suspend fun shareLink(
+        url: String,
+        title: String,
+    ): Result<Unit> = outcome(shareBrowserLink(url, title))
 }
 
 // Long enough for Safari to finish reading a large zip, short enough not to hold it for the session.
