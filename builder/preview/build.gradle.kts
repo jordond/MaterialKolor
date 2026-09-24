@@ -24,6 +24,10 @@ kotlin {
             implementation(libs.composeUnstyled)
             implementation(libs.composeUnstyled.theming)
             implementation(libs.lucide)
+
+            // b-405
+            implementation(project(":material-kolor-fluent"))
+            implementation(libs.fluent)
         }
 
         jvmTest.dependencies {
