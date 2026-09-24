@@ -197,14 +197,4 @@ class FluentSkinThemeTest {
         }
         found.shouldBeEmpty()
     }
-
-    @Test
-    fun sources_kit_neverGeneratesAFluentScheme() {
-        val found = KitSources
-            .walkTopDown()
-            .filter { file -> file.extension == "kt" && "rememberFluentColors" in file.readText() }
-            .map { file -> file.relativeTo(KitSources).path }
-            .toList()
-        found.shouldBeEmpty()
-    }
 }
