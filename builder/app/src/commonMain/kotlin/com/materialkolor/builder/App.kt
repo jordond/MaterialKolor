@@ -19,6 +19,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.PlatformServices
+import com.materialkolor.builder.core.platform.TimingMarks
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.capability.forTarget
 import com.materialkolor.builder.domain.color.Argb
@@ -26,6 +27,7 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.resolve.ThemeResult
+import com.materialkolor.builder.feature.image.ImageSeedModel
 import com.materialkolor.builder.feature.workspace.AppModel
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.feature.workspace.WorkspaceScreen
@@ -42,6 +44,9 @@ import dev.stateholder.extensions.collectAsState
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 
 /**
  * The builder, on whatever platform [platform] describes.
@@ -126,8 +131,12 @@ internal fun BuilderRoot(
         model.boot()
         withFrameNanos {}
         environment.hideSplash()
+        // b-504
+        environment.mark(TimingMarks.FIRST_FRAME)
     }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { model.flush() }
+    // b-504
+    TimingMarkEffects(environment, result)
 
     CompositionLocalProvider(
         LocalThemeResult provides result,
@@ -157,4 +166,34 @@ internal fun BuilderRoot(
 private fun ThemeColorEffect(environment: Environment) {
     val surface = Argb(LocalBuilderTokens.current.panel.toArgb())
     LaunchedEffect(environment, surface) { environment.setThemeColor(surface) }
+}
+
+// b-504
+
+/**
+ * Leaves the perf run's timing marks, one for each new theme result and two for each image the user
+ * brings in, when its thumbnail is in and when its candidates are. The image model is the one the
+ * workspace reads, since each owner keeps one of a kind.
+ */
+@Composable
+private fun TimingMarkEffects(
+    environment: Environment,
+    result: ThemeResult,
+    images: ImageSeedModel = metroViewModel(),
+) {
+    LaunchedEffect(environment, result) { environment.mark(TimingMarks.RESOLVE) }
+    LaunchedEffect(environment, images) {
+        images.state
+            .map { state -> state.arriving?.thumbnail }
+            .distinctUntilChanged()
+            .filterNotNull()
+            .collect { environment.mark(TimingMarks.THUMBNAIL) }
+    }
+    LaunchedEffect(environment, images) {
+        images.state
+            .map { state -> state.newest }
+            .distinctUntilChanged()
+            .filterNotNull()
+            .collect { environment.mark(TimingMarks.EXTRACT) }
+    }
 }

@@ -49,6 +49,13 @@ class BuilderWebPlugin : Plugin<Project> {
             // b-505
             val siteEnvironment = providers.gradleProperty("site.env").orElse("production")
 
+            // b-504
+            // Public, since the beacon sends it from every page. Empty leaves analytics out of the site.
+            val siteAnalyticsToken = providers
+                .gradleProperty("builder.analyticsToken")
+                .orElse(providers.environmentVariable("CF_WEB_ANALYTICS_TOKEN"))
+                .orElse("")
+
             val writeHeaders = tasks.register<WriteHeaders>("writeHeaders") {
                 group = SITE_GROUP
                 // b-501b
@@ -66,6 +73,8 @@ class BuilderWebPlugin : Plugin<Project> {
                 host.set(writeHeaders.flatMap { task -> task.outputDirectory })
                 // b-505
                 origin.set(siteEnvironment.map(::siteOrigin))
+                // b-504
+                analyticsToken.set(siteAnalyticsToken)
                 site.set(layout.buildDirectory.dir("site"))
             }
 
@@ -244,6 +253,12 @@ abstract class AssembleSite : DefaultTask() {
     @get:Input
     abstract val origin: Property<String>
 
+    // b-504
+
+    /** The Cloudflare Web Analytics token the page reads from `#mk-config`, empty for none. */
+    @get:Input
+    abstract val analyticsToken: Property<String>
+
     @get:OutputDirectory
     abstract val site: DirectoryProperty
 
@@ -266,8 +281,23 @@ abstract class AssembleSite : DefaultTask() {
         // b-505
         // Every page and card URL in the head of index.html starts with the production origin.
         output.resolve("index.html").writeText(index.get().asFile.readText().replace(PRODUCTION_ORIGIN, origin.get()))
+        // b-504
+        addConfig(output.resolve("index.html"))
         host.get().asFile.listFiles().orEmpty().forEach { file -> file.copyTo(output.resolve(file.name)) }
         if (origin.get() != PRODUCTION_ORIGIN) checkNoProductionOrigin(output)
+    }
+
+    // b-504
+    // The page's own settings go in ahead of boot.js, and only when there is one to give, so a site
+    // built with no token has no #mk-config and never loads the beacon.
+    private fun addConfig(page: File) {
+        val token = analyticsToken.get().trim()
+        if (token.isEmpty()) return
+        if (!ANALYTICS_TOKEN.matches(token)) {
+            throw GradleException("builder.analyticsToken has to be letters, digits, '-' or '_'")
+        }
+        val config = "<script type=\"application/json\" id=\"mk-config\">{\"analyticsToken\":\"$token\"}</script>"
+        page.writeText(page.readText().replace(BOOT_TAG, config + BOOT_TAG))
     }
 
     // b-505
@@ -308,6 +338,8 @@ private const val BUILDER_RESOURCES = "com.materialkolor."
 
 // b-501
 private const val BOOT_TAG = "<script src=\"/boot.js\"></script>"
+// b-504
+private val ANALYTICS_TOKEN = Regex("[A-Za-z0-9_-]+")
 private val ASSETS_ELEMENT = Regex("""<script type="application/json" id="mk-assets">[^<]*</script>""")
 
 /** A name webpack gave a content hash, matching `webpack.config.d/output.js`. */

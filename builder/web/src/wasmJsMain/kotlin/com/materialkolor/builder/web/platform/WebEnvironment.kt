@@ -2,10 +2,12 @@ package com.materialkolor.builder.web.platform
 
 import com.materialkolor.builder.core.platform.BootSplash
 import com.materialkolor.builder.core.platform.Environment
+import com.materialkolor.builder.core.platform.TimingMarks
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.SITE_ORIGIN
 import com.materialkolor.builder.domain.persist.StorageKeys
 import com.materialkolor.builder.web.interop.A11yLiveRegion
+import com.materialkolor.builder.web.interop.Analytics
 import com.materialkolor.builder.web.interop.fadeOutSplash
 import com.materialkolor.builder.web.interop.localStorageWorks
 import com.materialkolor.builder.web.interop.localStorageWrite
@@ -96,7 +98,26 @@ internal class WebEnvironment : Environment {
     // b-505
     // The page's own origin, as the Worker does for link previews, so each deploy links to itself.
     override val siteOrigin: String = locationOrigin() ?: SITE_ORIGIN
+
+    // b-504
+    // Analytics waits for the first frame, so only the builder's own files are on the critical
+    // path (PB-10).
+    override fun mark(name: String) {
+        performanceMark(name)
+        if (name == TimingMarks.FIRST_FRAME) Analytics.load()
+    }
 }
+
+// b-504
+// Only the newest mark of each name stays in the buffer, so the resolves of a long session do not
+// pile up there. A PerformanceObserver still sees every one, which is how the perf run reads them.
+private fun performanceMark(name: String): Unit =
+    js(
+        """{
+        performance.clearMarks(name);
+        performance.mark(name);
+    }""",
+    )
 
 // b-314b
 // Goes through history like a click on a link would, so back returns to the page it left.
