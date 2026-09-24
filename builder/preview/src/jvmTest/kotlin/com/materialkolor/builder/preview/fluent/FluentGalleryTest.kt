@@ -275,7 +275,9 @@ class FluentGalleryTest {
 
             for (name in listOf("Bold", "Email me updates", "Express", "Wi-Fi", "Week", "Shared", "Photos", "Sent")) {
                 withClue(name) {
-                    onNode(named(name) and hasClickAction() and isEnabled(), useUnmergedTree = true).performClick()
+                    // Through the action, since some sit past the edge of the test window.
+                    onNode(named(name) and hasClickAction() and isEnabled(), useUnmergedTree = true)
+                        .performSemanticsAction(SemanticsActions.OnClick)
                     waitForIdle()
                 }
             }
@@ -295,10 +297,10 @@ class FluentGalleryTest {
 
             // Delete waits for the box, and puts it back.
             onNode(hasText("Delete") and hasClickAction()).assert(isNotEnabled())
-            onNode(named("I understand"), useUnmergedTree = true).performClick()
+            onNode(named("I understand"), useUnmergedTree = true).performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
             state.isChecked(FluentGalleryKeys.Understood) shouldBe true
-            onNode(hasText("Delete") and hasClickAction() and isEnabled()).performClick()
+            onNode(hasText("Delete") and hasClickAction() and isEnabled()).performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
             state.isChecked(FluentGalleryKeys.Understood) shouldBe false
         }

@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
@@ -24,6 +25,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -31,7 +33,10 @@ import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.audit.FluentShade
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.PreviewMode
+import com.materialkolor.builder.kit.a11y.KitTestApi
+import com.materialkolor.builder.kit.a11y.ProvideWebFoldsForTest
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
+import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.inspect.INSPECT_CARD_TAG
@@ -73,6 +78,17 @@ private val SettingsBannedWords: List<String> = listOf(
     // Stems, so the architecture scan does not read this list as an endless animation.
     "rememberInfinite",
     "infiniteRepeat",
+)
+
+/** What the web mirror hears from one control of each kind, with the app as it first shows on a tablet. */
+private val SettingsWebNames: List<String> = listOf(
+    "Transparency effects, switch, on",
+    "Show badges on taskbar apps, switch, on",
+    "Accent color, collapsed",
+    "Taskbar behaviors, collapsed",
+    "Personalization, selected",
+    "Home, not selected",
+    "Accent shades, checkbox, not checked",
 )
 
 /** The switch of a setting that starts on. */
@@ -247,6 +263,39 @@ class SettingsAppTest {
             onNode(OnCard and hasText("onAccentPrimary", substring = true)).assertExists()
             onNode(OnCard and hasText("primary", substring = true)).assertExists()
             state.fluentSnapshot() shouldBe before
+        }
+
+    @OptIn(KitTestApi::class)
+    @Test
+    fun names_onTheWeb_foldTheStateOfEveryKindOfControl() =
+        runComposeUiTest {
+            val state = DemoAppState()
+            setContent {
+                CompositionLocalProvider(LocalMotionFrozen provides true) {
+                    Chrome(FluentSkin) {
+                        ProvideWebFoldsForTest {
+                            PreviewPane(FluentLightSpec, Modifier.size(840.dp, 900.dp)) {
+                                FluentAppEntry(FluentLightSpec, state, DeviceWidth.Tablet)
+                            }
+                        }
+                    }
+                }
+            }
+            waitForIdle()
+
+            for (name in SettingsWebNames) withClue(name) { onNode(hasContentDescription(name)).assertExists() }
+
+            onNode(hasContentDescription("Accent color, collapsed")).performSemanticsAction(SemanticsActions.OnClick)
+            onNode(hasContentDescription("Transparency effects, switch, on"))
+                .performSemanticsAction(SemanticsActions.OnClick)
+            waitForIdle()
+            for (name in listOf(
+                "Accent color, expanded",
+                "Show accent color on Start and taskbar, switch, off",
+                "Transparency effects, switch, off",
+            )) {
+                withClue(name) { onNode(hasContentDescription(name)).assertExists() }
+            }
         }
 
     @Test
