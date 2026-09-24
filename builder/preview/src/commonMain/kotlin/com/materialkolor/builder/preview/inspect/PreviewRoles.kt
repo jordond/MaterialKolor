@@ -11,6 +11,7 @@ import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.ObserverModifierNode
 import androidx.compose.ui.node.SemanticsModifierNode
+import androidx.compose.ui.node.UnplacedAwareModifierNode
 import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.platform.InspectorInfo
@@ -71,6 +72,15 @@ private class PreviewRolesNode(
     private var registry: InspectRegistry? = null
     private var coordinates: LayoutCoordinates? = null
 
+    /**
+     * This element's key in the registry, made as the node attaches and dropped as it detaches. A
+     * lazy list hands a node it no longer needs to another item, so the node itself would carry a pin
+     * from one item over to the next. A fresh key makes each stay in the tree a new element. A node
+     * the list keeps off screen without placing it gets a fresh key too, since it may come back as
+     * another item.
+     */
+    private var key: Any? = null
+
     /** Whether focus is on this element or inside it, kept while Inspect is off for when it comes on. */
     private var focused = false
 
@@ -78,11 +88,13 @@ private class PreviewRolesNode(
     private var positions: PositionNode? = null
 
     override fun onAttach() {
+        key = Any()
         onObservedReadsChanged()
     }
 
     override fun onDetach() {
-        registry?.remove(this)
+        key?.let { key -> registry?.remove(key) }
+        key = null
         registry = null
         coordinates = null
         focused = false
@@ -90,16 +102,18 @@ private class PreviewRolesNode(
 
     override fun onFocusEvent(focusState: FocusState) {
         focused = focusState.hasFocus
-        registry?.focus(this, focused)
+        val key = key ?: return
+        registry?.focus(key, focused)
     }
 
     override fun onObservedReadsChanged() {
         var current: InspectRegistry? = null
         observeReads { current = currentValueOf(LocalInspectRegistry) }
+        val key = key ?: return
         if (current !== registry) {
-            registry?.remove(this)
+            registry?.remove(key)
             registry = current
-            current?.focus(this, focused)
+            current?.focus(key, focused)
         }
         val placed = positions
         if (current == null) {
@@ -127,17 +141,38 @@ private class PreviewRolesNode(
     /** Write where this element is into the registry, if Inspect is on and it has been placed. */
     private fun record() {
         val registry = registry ?: return
+        val key = key ?: return
         val coordinates = coordinates?.takeIf { placed -> placed.isAttached } ?: return
-        registry.record(this, InspectEntry(currentValueOf(LocalPaneSide), refs, coordinates.boundsInWindow()))
+        registry.record(key, InspectEntry(currentValueOf(LocalPaneSide), refs, coordinates.boundsInWindow()))
     }
 
-    /** Passes each placement of the element on while Inspect is on. */
+    /**
+     * Forget this element once it is no longer placed, as happens to a lazy list's item the list
+     * keeps around off screen. Its last bounds would otherwise stay in the registry, and an outline or
+     * pin on it would stay where it was. It records itself again under a fresh key once it is placed.
+     */
+    private fun unplaced() {
+        val old = key ?: return
+        val key = Any()
+        this.key = key
+        coordinates = null
+        val registry = registry ?: return
+        registry.remove(old)
+        if (focused) registry.focus(key, focused = true)
+    }
+
+    /** Passes each placement of the element on while Inspect is on, and the moment it stops being placed. */
     private inner class PositionNode :
         Modifier.Node(),
-        GlobalPositionAwareModifierNode {
+        GlobalPositionAwareModifierNode,
+        UnplacedAwareModifierNode {
         override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
             this@PreviewRolesNode.coordinates = coordinates
             record()
+        }
+
+        override fun onUnplaced() {
+            unplaced()
         }
     }
 }
