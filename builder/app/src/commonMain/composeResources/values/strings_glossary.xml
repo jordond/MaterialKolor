@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The info button beside each poster section, read out and shown as its tooltip. -->
+    <string name="glossary_seed_question">What is the seed?</string>
+    <string name="glossary_style_question">What is a style?</string>
+    <string name="glossary_spec_question">What is the spec?</string>
+    <string name="glossary_contrast_question">What does contrast change?</string>
+    <string name="glossary_key_colors_question">What are key colors?</string>
+    <string name="glossary_pins_question">What is a pin?</string>
+    <string name="glossary_accents_question">What are extra colors?</string>
+    <string name="glossary_targets_question">What are target options?</string>
+
+    <!-- The short explanation an info button opens. -->
+    <string name="glossary_seed">The one color every palette grows from. Change it and the whole theme follows.</string>
+    <string name="glossary_style">How the palettes are drawn from the seed, from calm and muted to loud and playful.</string>
+    <string name="glossary_spec">Which version of the Material color rules builds the scheme. The 2025 spec is the one Expressive themes use.</string>
+    <string name="glossary_contrast">How far apart text and its background sit. A higher level makes every pair easier to read.</string>
+    <string name="glossary_key_colors">The color each palette is built from. They come from the seed until you set one yourself.</string>
+    <string name="glossary_pins">A pin holds one role at a color of your own, whatever the seed does.</string>
+    <string name="glossary_accents">Color families beyond primary, secondary and tertiary, each with its own tones and roles.</string>
+    <string name="glossary_targets">What the export is written for. Some options only exist for some targets, so they show up when they apply.</string>
+
+    <!-- The link under each explanation. -->
+    <string name="glossary_docs">Read more in the docs</string>
+</resources>

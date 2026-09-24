@@ -1,0 +1,19 @@
+package com.materialkolor.builder.feature.poster
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.materialkolor.builder.feature.workspace.WorkspaceAction
+import dev.stateholder.dispatcher.Dispatcher
+
+// stub
+
+/**
+ * The fine tune row "Spec, platform, extra colors and target options" (B-306).
+ */
+@Composable
+internal fun SpecExtrasRow(
+    context: PosterContext,
+    dispatcher: Dispatcher<WorkspaceAction>,
+    modifier: Modifier = Modifier,
+) {
+}

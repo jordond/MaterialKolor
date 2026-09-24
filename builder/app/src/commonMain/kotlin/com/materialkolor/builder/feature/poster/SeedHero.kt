@@ -1,0 +1,225 @@
+package com.materialkolor.builder.feature.poster
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.color.ColorNames
+import com.materialkolor.builder.domain.color.InvalidReason
+import com.materialkolor.builder.domain.color.ParseNote
+import com.materialkolor.builder.domain.edit.DocumentChange
+import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.domain.model.SeedSource
+import com.materialkolor.builder.feature.workspace.WorkspaceAction
+import com.materialkolor.builder.generated.resources.Res
+import com.materialkolor.builder.generated.resources.poster_copied_hex
+import com.materialkolor.builder.generated.resources.poster_copied_kotlin
+import com.materialkolor.builder.generated.resources.poster_copy_hex
+import com.materialkolor.builder.generated.resources.poster_copy_kotlin
+import com.materialkolor.builder.generated.resources.poster_hct
+import com.materialkolor.builder.generated.resources.poster_hex_bad_arguments
+import com.materialkolor.builder.generated.resources.poster_hex_bad_hex
+import com.materialkolor.builder.generated.resources.poster_hex_empty
+import com.materialkolor.builder.generated.resources.poster_hex_unknown_function
+import com.materialkolor.builder.generated.resources.poster_hex_unknown_name
+import com.materialkolor.builder.generated.resources.poster_hex_unrecognized
+import com.materialkolor.builder.generated.resources.poster_note_alpha
+import com.materialkolor.builder.generated.resources.poster_note_both
+import com.materialkolor.builder.generated.resources.poster_note_clamped
+import com.materialkolor.builder.generated.resources.poster_seed
+import com.materialkolor.builder.generated.resources.poster_seed_field
+import com.materialkolor.builder.generated.resources.poster_source_eyedropper
+import com.materialkolor.builder.generated.resources.poster_source_image
+import com.materialkolor.builder.generated.resources.poster_source_image_named
+import com.materialkolor.builder.generated.resources.poster_source_picked
+import com.materialkolor.builder.generated.resources.poster_source_preset
+import com.materialkolor.builder.generated.resources.poster_source_shuffled
+import com.materialkolor.builder.generated.resources.poster_source_typed
+import com.materialkolor.builder.kit.control.BuilderBadge
+import com.materialkolor.builder.kit.control.BuilderButton
+import com.materialkolor.builder.kit.control.BuilderHexField
+import com.materialkolor.builder.kit.control.BuilderText
+import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.hct.Hct
+import dev.stateholder.dispatcher.Dispatcher
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
+
+/**
+ * The seed as the poster's headline (F-05). The hex is a real field that edits in place, and under
+ * it sit the seed's name, where it came from, its HCT readout and the two copy buttons.
+ *
+ * The field shows the seed as stored, not as the target sees it. A commit lands as a typed seed,
+ * one keystroke folding into the next in the history.
+ */
+@Composable
+internal fun SeedHero(
+    context: PosterContext,
+    dispatcher: Dispatcher<WorkspaceAction>,
+    modifier: Modifier = Modifier,
+) {
+    val seed = context.document.seed
+    val spacing = LocalBuilderTokens.current.spacing
+    val messages = rememberHexMessages()
+    val hct = remember(seed) { HctReadout.of(seed) }
+    val hexLabel = stringResource(Res.string.poster_copied_hex)
+    val kotlinLabel = stringResource(Res.string.poster_copied_kotlin)
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+        InfoLabel(label = stringResource(Res.string.poster_seed), topic = InfoTopic.Seed)
+        BuilderHexField(
+            value = seed,
+            onCommit = { argb, _ ->
+                val change = DocumentChange.SetSeed(argb, SeedSource.Typed)
+                dispatcher.dispatch(WorkspaceAction.Edit(change, EditPhase.Discrete))
+            },
+            label = stringResource(Res.string.poster_seed_field),
+            errorMessage = messages::errorOf,
+            noteMessage = messages::noteOf,
+            modifier = Modifier.fillMaxWidth(),
+            large = true,
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            BuilderText(
+                text = remember(seed) { ColorNames.nameOf(seed) },
+                modifier = Modifier.weight(1f, fill = false),
+                style = BuilderTextStyle.Title,
+                maxLines = 1,
+            )
+            BuilderBadge(label = sourceLabel(context.document.seedSource).text())
+        }
+        BuilderText(
+            text = stringResource(Res.string.poster_hct, hct.hue, hct.chroma, hct.tone),
+            style = BuilderTextStyle.Value,
+        )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+            verticalArrangement = Arrangement.spacedBy(spacing.small),
+        ) {
+            BuilderButton(
+                onClick = { dispatcher.dispatch(WorkspaceAction.CopyText(seed.toHex(), hexLabel)) },
+                label = stringResource(Res.string.poster_copy_hex),
+                emphasis = Emphasis.Subtle,
+                icon = IconId.Copy,
+            )
+            BuilderButton(
+                onClick = { dispatcher.dispatch(WorkspaceAction.CopyText(kotlinLiteralOf(seed), kotlinLabel)) },
+                label = stringResource(Res.string.poster_copy_kotlin),
+                emphasis = Emphasis.Subtle,
+                icon = IconId.Copy,
+            )
+        }
+    }
+}
+
+/** [argb] as a Compose color literal, `Color(0xFF6750A4)`. */
+internal fun kotlinLiteralOf(argb: Argb): String = "Color(0xFF${argb.toHex().removePrefix("#")})"
+
+/**
+ * A seed's hue, chroma and tone, each rounded for the readout. A hue that rounds up to a full turn
+ * reads as 0.
+ */
+@Immutable
+internal data class HctReadout(
+    val hue: Int,
+    val chroma: Int,
+    val tone: Int,
+) {
+    companion object {
+        fun of(argb: Argb): HctReadout {
+            val hct = Hct.fromInt(argb.value)
+            return of(hct.hue, hct.chroma, hct.tone)
+        }
+
+        fun of(
+            hue: Double,
+            chroma: Double,
+            tone: Double,
+        ): HctReadout = HctReadout(hue.roundToInt() % FULL_TURN, chroma.roundToInt(), tone.roundToInt())
+
+        private const val FULL_TURN = 360
+    }
+}
+
+/**
+ * The words for where a seed came from, one string and the argument it takes, if any.
+ *
+ * @property[resource] The string to show.
+ * @property[argument] What fills its placeholder, or null when it has none.
+ */
+@Immutable
+internal data class SourceLabel(
+    val resource: StringResource,
+    val argument: String? = null,
+) {
+    @Composable
+    fun text(): String = if (argument == null) stringResource(resource) else stringResource(resource, argument)
+}
+
+/** Where [source] says the seed came from. An image names its file when it has one. */
+internal fun sourceLabel(source: SeedSource): SourceLabel =
+    when (source) {
+        SeedSource.Typed -> SourceLabel(Res.string.poster_source_typed)
+        SeedSource.Picked -> SourceLabel(Res.string.poster_source_picked)
+        SeedSource.Eyedropper -> SourceLabel(Res.string.poster_source_eyedropper)
+        SeedSource.Shuffled -> SourceLabel(Res.string.poster_source_shuffled)
+        is SeedSource.Preset -> SourceLabel(Res.string.poster_source_preset)
+        is SeedSource.Image -> if (source.name.isBlank()) {
+            SourceLabel(Res.string.poster_source_image)
+        } else {
+            SourceLabel(Res.string.poster_source_image_named, source.name)
+        }
+    }
+
+/**
+ * What the seed field says about text it cannot read, and about what it had to change to read a
+ * color, resolved once so the field can ask outside composition.
+ */
+@Immutable
+internal class HexMessages(
+    private val errors: Map<InvalidReason, String>,
+    private val alpha: String,
+    private val clamped: String,
+    private val both: String,
+) {
+    fun errorOf(reason: InvalidReason): String = errors.getValue(reason)
+
+    fun noteOf(notes: Set<ParseNote>): String =
+        when {
+            ParseNote.AlphaDropped in notes && ParseNote.Clamped in notes -> both
+            ParseNote.AlphaDropped in notes -> alpha
+            else -> clamped
+        }
+}
+
+@Composable
+private fun rememberHexMessages(): HexMessages {
+    val errors = InvalidReason.entries.associateWith { reason -> stringResource(errorResource(reason)) }
+    val alpha = stringResource(Res.string.poster_note_alpha)
+    val clamped = stringResource(Res.string.poster_note_clamped)
+    val both = stringResource(Res.string.poster_note_both)
+    return remember(errors, alpha, clamped, both) { HexMessages(errors, alpha, clamped, both) }
+}
+
+private fun errorResource(reason: InvalidReason): StringResource =
+    when (reason) {
+        InvalidReason.Empty -> Res.string.poster_hex_empty
+        InvalidReason.BadHex -> Res.string.poster_hex_bad_hex
+        InvalidReason.BadArguments -> Res.string.poster_hex_bad_arguments
+        InvalidReason.UnknownFunction -> Res.string.poster_hex_unknown_function
+        InvalidReason.UnknownName -> Res.string.poster_hex_unknown_name
+        InvalidReason.Unrecognized -> Res.string.poster_hex_unrecognized
+    }
