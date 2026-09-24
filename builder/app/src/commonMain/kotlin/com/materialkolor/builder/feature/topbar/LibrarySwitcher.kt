@@ -84,8 +84,23 @@ internal fun LibrarySwitcher(
     modifier: Modifier = Modifier,
     segmented: Boolean = LocalLayout.current.windowClass == WindowClass.Expanded, // b-231
 ) {
+    LibrarySwitcher(
+        selected = LibraryChoice.of(document),
+        onSwitch = onSwitch,
+        modifier = modifier,
+        segmented = segmented,
+    )
+}
+
+/** The library switcher on [selected], for callers that hold the choice rather than the document. */
+@Composable
+internal fun LibrarySwitcher(
+    selected: LibraryChoice,
+    onSwitch: (choice: LibraryChoice, origin: Offset) -> Unit,
+    modifier: Modifier = Modifier,
+    segmented: Boolean = LocalLayout.current.windowClass == WindowClass.Expanded,
+) {
     val origin = remember { RevealOrigin() }
-    val selected = LibraryChoice.of(document)
     val label = stringResource(Res.string.topbar_library)
     val names = LibraryChoice.entries.associateWith { choice -> libraryName(choice) }
     val onSelect = { choice: LibraryChoice ->

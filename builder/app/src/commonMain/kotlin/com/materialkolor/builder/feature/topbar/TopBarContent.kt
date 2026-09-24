@@ -76,7 +76,7 @@ internal fun TopBarContent(
         // The actions take their full width first, since a row measures its weighted child last, and
         // the switcher gets what is left, so More options is never squeezed.
         FittedLibrarySwitcher(
-            document = state.document,
+            selected = LibraryChoice.of(state.document),
             modifier = Modifier.weight(1f),
             switcherModifier = Modifier
                 .testTag(LIBRARY_SWITCHER_TAG)
@@ -85,6 +85,7 @@ internal fun TopBarContent(
             onSwitch = { choice, origin ->
                 dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin))
             },
+            onRefit = { focus.restoreAfterRefit(TopBarControl.Library) },
         )
         if (!compact) {
             TopBarIconButton(

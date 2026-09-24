@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.semantics.SemanticsActions
@@ -31,8 +33,11 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.materialkolor.builder.BuilderRoot
 import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.di.AppGraph
+import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.domain.persist.ProjectViewState
@@ -49,6 +54,7 @@ import com.materialkolor.builder.kit.skin.BuilderTheme
 import dev.stateholder.dispatcher.rememberDispatcher
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -58,6 +64,12 @@ private const val HEIGHT = 800
 
 /** Wide enough for the segmented switcher in every skin. */
 private const val ROOMY_WIDTH = 1600
+
+/** Room for the segmented switcher in every skin. */
+private val ROW_ROOM: Dp = 1400.dp
+
+/** Room for the dropdown only. */
+private val DROPDOWN_ROOM: Dp = 720.dp
 
 /** The names the segmented switcher shows, one per library. */
 private val LIBRARY_NAMES = listOf("M3", "Expressive", "Unstyled", "Fluent", "Custom")
@@ -89,7 +101,7 @@ class TopBarFitTest {
     @Test
     fun switcher_inAWideWindowWithoutRoomForTheRow_isTheDropdown() =
         runDesktopComposeUiTest(width = ROOMY_WIDTH, height = HEIGHT) {
-            showBar(barWidth = 720.dp)
+            showBar(barWidth = DROPDOWN_ROOM)
 
             segmentedShown() shouldBe false
             onAllNodes(hasTestTag(LIBRARY_SWITCHER_TAG)).fetchSemanticsNodes().size shouldBe 1
@@ -100,7 +112,7 @@ class TopBarFitTest {
     @Test
     fun switcher_inAWideWindowWithRoomForTheRow_isSegmented() =
         runDesktopComposeUiTest(width = ROOMY_WIDTH, height = HEIGHT) {
-            showBar(barWidth = 1400.dp)
+            showBar(barWidth = ROW_ROOM)
 
             segmentedShown() shouldBe true
             // Only the row that shows names the libraries, not the one measured beside it.
@@ -119,8 +131,64 @@ class TopBarFitTest {
             waitForIdle()
 
             graph.session.document.value.library shouldBe Library.Fluent
-            val focused = onAllNodes(isFocused() and (InSwitcher or hasTestTag(LIBRARY_SWITCHER_TAG)))
-            focused.fetchSemanticsNodes().size shouldBe 1
+            switcherFocused() shouldBe true
+        }
+
+    @Test
+    fun switcher_focusedAcrossTheFitBoundary_keepsFocusInEachForm() =
+        runDesktopComposeUiTest(width = ROOMY_WIDTH, height = HEIGHT) {
+            val barWidth = showBar(barWidth = ROW_ROOM)
+            onNodeWithText("M3").requestFocus()
+            waitForIdle()
+            switcherFocused() shouldBe true
+
+            barWidth.value = DROPDOWN_ROOM
+            waitForIdle()
+            segmentedShown() shouldBe false
+            switcherFocused() shouldBe true
+
+            barWidth.value = ROW_ROOM
+            waitForIdle()
+            segmentedShown() shouldBe true
+            switcherFocused() shouldBe true
+        }
+
+    @Test
+    fun switcher_unfocusedAcrossTheFitBoundary_takesNoFocus() =
+        runDesktopComposeUiTest(width = ROOMY_WIDTH, height = HEIGHT) {
+            val barWidth = showBar(barWidth = ROW_ROOM)
+            val share = hasContentDescription("Share") and hasClickAction() and InBar
+            onNode(share).requestFocus()
+            waitForIdle()
+
+            listOf(DROPDOWN_ROOM, ROW_ROOM).forEach { width ->
+                barWidth.value = width
+                waitForIdle()
+                switcherFocused() shouldBe false
+                onAllNodes(share and isFocused()).fetchSemanticsNodes().size shouldBe 1
+            }
+        }
+
+    @Test
+    fun switcher_acrossASeedDrag_doesNotMeasureTheRowAgain() =
+        runDesktopComposeUiTest(width = ROOMY_WIDTH, height = HEIGHT) {
+            var checks = 0
+            val graph = showRoot(fitProbe = { checks++ })
+            val booted = checks
+            booted shouldBeGreaterThan 0
+
+            listOf(0x3366CC, 0x4477DD, 0x5588EE).forEach { seed ->
+                runOnIdle { graph.session.edit(seedChange(seed), EditPhase.Dragging) }
+                waitForIdle()
+            }
+            runOnIdle { graph.session.edit(seedChange(0x6699FF), EditPhase.Released) }
+            waitForIdle()
+            checks shouldBe booted
+
+            // A library switch moves the skin, which can change the row's width, so it measures again.
+            runOnIdle { graph.session.edit(LibraryChoice.Fluent.change, EditPhase.Discrete) }
+            waitForIdle()
+            checks shouldBeGreaterThan booted
         }
 
     /** Boots the builder [width] wide and checks the top bar in each library's skin. */
@@ -179,6 +247,12 @@ class TopBarFitTest {
         return switcher.map { node -> "Library" to node.boundsInRoot } + actions + export
     }
 
+    /** Whether the switcher, in either form, holds keyboard focus. */
+    private fun ComposeUiTest.switcherFocused(): Boolean =
+        onAllNodes(isFocused() and (InSwitcher or hasTestTag(LIBRARY_SWITCHER_TAG))).fetchSemanticsNodes().size == 1
+
+    private fun seedChange(rgb: Int): DocumentChange = DocumentChange.SetSeed(Argb(rgb), SeedSource.Typed)
+
     /** Whether the switcher shows as the segmented row, which names every library at once. */
     private fun ComposeUiTest.segmentedShown(): Boolean =
         LIBRARY_NAMES.all { name ->
@@ -210,8 +284,12 @@ class TopBarFitTest {
     private fun Rect.containsRect(other: Rect): Boolean =
         other.left >= left && other.top >= top && other.right <= right && other.bottom <= bottom
 
-    /** The top bar alone, [barWidth] wide, in a window wide enough to ask for the segmented row. */
-    private fun ComposeUiTest.showBar(barWidth: Dp) {
+    /**
+     * The top bar alone, [barWidth] wide, in a window wide enough to ask for the segmented row. Set
+     * the width it hands back to resize the bar.
+     */
+    private fun ComposeUiTest.showBar(barWidth: Dp): MutableState<Dp> {
+        val width = mutableStateOf(barWidth)
         val document = ThemeDocument.Default
         val state = WorkspaceModel.State(
             document = document,
@@ -229,17 +307,21 @@ class TopBarFitTest {
                 reducedMotion = true,
             ) {
                 ProvideBuilderLayout(modifier = Modifier.fillMaxSize()) {
-                    Box(Modifier.width(barWidth)) {
+                    Box(Modifier.width(width.value)) {
                         TopBarContent(state = state, dispatcher = dispatcher)
                     }
                 }
             }
         }
         waitForIdle()
+        return width
     }
 
-    /** The whole builder on fakes, booted, with its graph so a test can switch libraries. */
-    private fun ComposeUiTest.showRoot(): AppGraph {
+    /**
+     * The whole builder on fakes, booted, with its graph so a test can switch libraries. [fitProbe]
+     * hears each time the switcher measures its segmented row.
+     */
+    private fun ComposeUiTest.showRoot(fitProbe: (() -> Unit)? = null): AppGraph {
         val platform = FakePlatform()
         val graph = createGraphFactory<AppGraph.Factory>().create(platform)
         val owner = TestOwner()
@@ -247,6 +329,7 @@ class TopBarFitTest {
             CompositionLocalProvider(
                 LocalViewModelStoreOwner provides owner,
                 LocalMetroViewModelFactory provides graph.metroViewModelFactory,
+                LocalSwitcherFitProbe provides fitProbe,
             ) {
                 BuilderRoot(graph)
             }

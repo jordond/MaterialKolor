@@ -10,8 +10,8 @@ const A11Y = '#cmp_a11y_root';
 /** The top bar's height, `ShellMetrics.topBarHeight`, in CSS pixels at a device scale of one. */
 const TOP_BAR_HEIGHT = 64;
 
-/** How long a click takes to show, a few frames on a slow runner. */
-const SETTLE_MS = 300;
+/** The More options menu's first item, which shows once a click has opened the menu. */
+const FIRST_MORE_ITEM = 'Use the system appearance';
 
 test.use({ viewport: { width: 1280, height: 800 } });
 
@@ -24,9 +24,9 @@ test.describe('top bar', () => {
     await openBuilder(page);
     await expect(item(page, 'Help')).toHaveCount(0);
 
-    await clickTopBarButton(page, 'More options');
+    await clickTopBarButton(page, 'More options', FIRST_MORE_ITEM);
 
-    await expect(item(page, 'Help').first()).toBeAttached({ timeout: 15_000 });
+    await expect(item(page, 'Help').first()).toBeAttached();
     await expect(item(page, 'About').first()).toBeAttached();
   });
 });
@@ -39,9 +39,9 @@ function item(page: Page, text: string) {
 
 /**
  * Clicks the middle of the button called [name] in the top bar, not the one in the preview's sample
- * app, once Compose has given it a size.
+ * app, once Compose has given it a size. Then waits for [opens], the first item of what it opens.
  */
-async function clickTopBarButton(page: Page, name: string): Promise<void> {
+async function clickTopBarButton(page: Page, name: string, opens: string): Promise<void> {
   const buttons = page.locator(A11Y).getByRole('button', { name, exact: true });
   await expect
     .poll(async () => {
@@ -51,7 +51,7 @@ async function clickTopBarButton(page: Page, name: string): Promise<void> {
     .toBeGreaterThan(0);
   const box = (await inTopBar(buttons.all()))!;
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-  await page.waitForTimeout(SETTLE_MS);
+  await expect(item(page, opens).first()).toBeAttached({ timeout: 15_000 });
 }
 
 type Box = { x: number; y: number; width: number; height: number };
