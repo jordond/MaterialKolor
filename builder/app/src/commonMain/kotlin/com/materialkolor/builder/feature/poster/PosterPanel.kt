@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -46,8 +48,8 @@ import dev.stateholder.dispatcher.Dispatcher
  * @property[preferences] What this browser remembers, the shuffle locks among it.
  * @property[projectName] The open project's name, empty until the session has opened one.
  * @property[saveStatus] Whether the open project's latest changes are saved.
- * @property[openPanel] The panel open over the workspace, which tells the explainer line whether
- * its panel is showing.
+ * @property[openPanel] The panel open over the workspace, which tells the explainer dialog whether
+ * it shows.
  * @property[visibleModes] The modes the preview shows, which the contrast readout and the style
  * chips follow.
  * @property[openFineTuneRows] The fine tune rows open in this project.
@@ -132,8 +134,8 @@ internal fun rememberPosterContext(state: WorkspaceModel.State): PosterContext {
 }
 
 /**
- * The poster buttons that open a panel over the workspace, which get focus back once the panel has
- * gone (AR-09). The workspace holds it, since the panels sit over the poster rather than in it.
+ * The poster buttons that open a panel or a dialog over the workspace, which get focus back once it
+ * has gone (AR-09). The workspace holds it, since those sit over the poster rather than in it.
  */
 @Stable
 internal class PosterFocus {
@@ -142,10 +144,64 @@ internal class PosterFocus {
 
     /** The explainer line's Why button. */
     val why: PanelTrigger = PanelTrigger()
+
+    // b-306c
+
+    /** The hero's Copy hex button, which a refused copy's manual copy dialog hands focus back to. */
+    val copyHex: PanelTrigger = PanelTrigger()
+
+    /** The hero's Copy Kotlin button, which a refused copy's manual copy dialog hands focus back to. */
+    val copyKotlin: PanelTrigger = PanelTrigger()
+
+    /**
+     * Where a dialog that [opener] opened hands focus back. A copy button's requester only counts
+     * while the hero shows it, so a poster that turned into the rail meanwhile gets no request.
+     * Anything else comes back as it is.
+     */
+    fun returnFocusFor(opener: FocusRequester?): FocusRequester? =
+        when (opener) {
+            copyHex.requester -> copyHex.returnFocusTo
+            copyKotlin.requester -> copyKotlin.returnFocusTo
+            else -> opener
+        }
+}
+
+// b-306c
+
+/**
+ * Where the share dialog hands focus back once it closes (AR-09). Opened from the projects
+ * drawer's Get a link it goes back to the Projects button that opened the drawer, since the dialog
+ * took the drawer's place, and otherwise to [shareButton] in the top bar.
+ *
+ * @param[panel] The panel open now, whose changes say what the dialog replaced.
+ */
+@Composable
+internal fun PosterFocus.shareReturn(
+    panel: Panel?,
+    shareButton: FocusRequester?,
+): FocusRequester? {
+    val opener = remember(this) { ShareOpener() }
+    SideEffect { opener.saw(panel) }
+    return if (opener.fromProjects) projects.returnFocusTo else shareButton
+}
+
+/** Whether the share dialog replaced the projects drawer, worked out from the panels seen in turn. */
+@Stable
+private class ShareOpener {
+    var fromProjects by mutableStateOf(false)
+        private set
+
+    private var last: Panel? = null
+
+    /** Takes in the panel a frame showed. Only the move onto Share changes the answer. */
+    fun saw(panel: Panel?) {
+        if (panel == Panel.Share && last != Panel.Share) fromProjects = last == Panel.Projects
+        last = panel
+    }
 }
 
 /**
- * A button that opens a panel. It only offers focus while the button is on screen, so a panel
+ * A button that opens a panel or a dialog. It offers no focus while no button stands for it, so one
  * opened without it, over a collapsed poster or from the command palette, focuses nothing.
  */
 @Stable
@@ -155,7 +211,7 @@ internal class PanelTrigger {
     /** How many buttons stand for this trigger, more than one while the rail and the poster swap. */
     internal var buttons by mutableIntStateOf(0)
 
-    /** Where the panel hands focus back, or null while no button is on screen. */
+    /** Where the panel hands focus back, or null while no button stands for it. */
     val returnFocusTo: FocusRequester?
         get() = requester.takeIf { buttons > 0 }
 }
@@ -212,7 +268,7 @@ private fun ColumnScope.DockedSections(
     focus: PosterFocus?,
 ) {
     PosterHeader(context, dispatcher, focus = focus)
-    SeedHero(context, dispatcher)
+    SeedHero(context, dispatcher, focus = focus) // b-306c
     SeedActions(context, dispatcher)
     if (context.document.seedSource is SeedSource.Image) {
         ImageCandidateRow(context, dispatcher)
@@ -246,6 +302,6 @@ private fun ColumnScope.SheetSections(
     PrimaryExplainerLine(context, dispatcher, why = focus?.why)
     CoreColorsRow(context, dispatcher)
     SpecExtrasRow(context, dispatcher)
-    SeedHero(context, dispatcher)
+    SeedHero(context, dispatcher, focus = focus) // b-306c
     PosterHeader(context, dispatcher, focus = focus)
 }
