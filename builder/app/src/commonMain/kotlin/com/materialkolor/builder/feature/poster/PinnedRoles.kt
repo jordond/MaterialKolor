@@ -5,15 +5,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalInputModeManager
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.edit.PinMode
+import com.materialkolor.builder.domain.model.KeyColor
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.ThemeDocument
@@ -42,18 +47,27 @@ import org.jetbrains.compose.resources.stringResource
  * The roles pinned to colors of their own, one row per pinned mode with its clear, then Clear all
  * (F-15). It lists the document as stored, so a target that ignores pins still shows them, says
  * why in place of the notice and lets none of them go.
+ *
+ * A clear hands a keyboard user's focus to the next pin's clear, or the previous one at the end of
+ * the list. With the list gone it goes to the last key color's Pick in [picks].
+ *
+ * @param[picks] The key color rows' Pick buttons, when they stand above the list.
  */
 @Composable
 internal fun PinnedRoles(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    picks: KeyColorPicks? = null,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
+    val input = LocalInputModeManager.current
     val state = context.capabilities[Control.RolePins]
     val document = context.document
     val pinned = remember(document.pins) { PinnedMode.of(document.pins) }
+    val clears = remember { PinClears() }
     val reason = state.explanation
+    val afterList = picks?.get(KeyColor.entries.last())
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         InfoLabel(label = stringResource(Res.string.pins_label), topic = InfoTopic.Pins)
         when {
@@ -61,10 +75,29 @@ internal fun PinnedRoles(
             pinned.isNotEmpty() -> BuilderText(text = stringResource(Res.string.pins_notice))
             else -> BuilderText(text = stringResource(Res.string.pins_empty), emphasis = Emphasis.Secondary)
         }
-        pinned.forEach { pin -> PinRow(pin, document, enabled = state.usable, dispatcher = dispatcher) }
+        pinned.forEachIndexed { index, pin ->
+            // Keyed so a row that stays keeps its button, and the focus handed to it, when one above goes.
+            key(pin.role, pin.mode) {
+                val next = pinned.getOrNull(index + 1) ?: pinned.getOrNull(index - 1)
+                PinRow(
+                    pin = pin,
+                    document = document,
+                    enabled = state.usable,
+                    dispatcher = dispatcher,
+                    clear = clears[pin],
+                    onClear = {
+                        val target = next?.let { other -> clears[other] } ?: afterList
+                        target?.let { focus -> input.handFocusTo(focus) }
+                    },
+                )
+            }
+        }
         if (pinned.isNotEmpty()) {
             BuilderButton(
-                onClick = { dispatcher.dispatch(WorkspaceAction.Edit(DocumentChange.ClearPins, EditPhase.Discrete)) },
+                onClick = {
+                    afterList?.let { focus -> input.handFocusTo(focus) }
+                    dispatcher.dispatch(WorkspaceAction.Edit(DocumentChange.ClearPins, EditPhase.Discrete))
+                },
                 label = stringResource(Res.string.pins_clear_all),
                 emphasis = Emphasis.Subtle,
                 enabled = state.usable,
@@ -73,13 +106,18 @@ internal fun PinnedRoles(
     }
 }
 
-/** One pinned mode, the role as the contrast readout names it, the mode, the color and its clear. */
+/**
+ * One pinned mode, the role as the contrast readout names it, the mode, the color and its clear.
+ * The clear takes focus through [clear] and calls [onClear] before it lets the pin go.
+ */
 @Composable
 private fun PinRow(
     pin: PinnedMode,
     document: ThemeDocument,
     enabled: Boolean,
     dispatcher: Dispatcher<WorkspaceAction>,
+    clear: FocusRequester,
+    onClear: () -> Unit,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val role = ColorRef.OfRole(pin.role).readoutName(document)
@@ -96,11 +134,13 @@ private fun PinRow(
         BuilderText(text = pin.argb.toHex(), style = BuilderTextStyle.Value)
         BuilderIconButton(
             onClick = {
+                onClear()
                 val change = DocumentChange.SetPin(pin.role, pin.mode, null)
                 dispatcher.dispatch(WorkspaceAction.Edit(change, EditPhase.Discrete))
             },
             icon = IconId.Close,
             contentDescription = stringResource(Res.string.pins_clear, role, mode),
+            modifier = Modifier.focusRequester(clear),
             enabled = enabled,
         )
     }
@@ -130,6 +170,14 @@ internal data class PinnedMode(
                 )
             }
     }
+}
+
+/** The clear button of each pinned mode, kept for as long as the list is on screen. */
+private class PinClears {
+    private val requesters = mutableMapOf<Pair<Role, PinMode>, FocusRequester>()
+
+    /** The clear button of [pin]. */
+    operator fun get(pin: PinnedMode): FocusRequester = requesters.getOrPut(pin.role to pin.mode) { FocusRequester() }
 }
 
 /** What the list calls this mode. */

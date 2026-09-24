@@ -2,9 +2,11 @@ package com.materialkolor.builder.feature.poster
 
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -28,6 +30,7 @@ import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.feature.picker.PickerTarget
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
 
 private val Seed = Argb(0x6750A4)
@@ -48,6 +51,8 @@ private const val NOTICE = "Pinned roles don’t follow the seed"
 private const val ONE_RAMP = "Fluent builds one accent ramp from the primary palette"
 
 private const val NO_ROLES = "Pins set Material roles, which Fluent does not use."
+
+private const val ACCENT_RAMP = "This moves the accent ramp, the only palette Fluent takes."
 
 @OptIn(ExperimentalTestApi::class)
 class CoreColorsRowTest {
@@ -95,6 +100,20 @@ class CoreColorsRowTest {
 
             val pick = WorkspaceAction.OpenPicker(PickerTarget.KeyColorOverride(KeyColor.Tertiary))
             harness.actions shouldBe listOf(pick)
+        }
+
+    @Test
+    fun keyColor_unsetNonPrimary_showsTheKeyColorTheSchemeDerived() =
+        runComposeUiTest {
+            val harness = PosterHarness(Plain)
+            showSection(harness) { context, dispatcher -> KeyColorRows(context, dispatcher) }
+            val derived = harness.resolver
+                .resolve(Plain)
+                .ramps[KeyColor.Tertiary, false]
+                .keyColor
+
+            derived shouldNotBe Seed
+            onAllNodes(hasSetTextAction())[KeyColor.Tertiary.ordinal].assert(hasText(derived.toHex()))
         }
 
     @Test
@@ -232,6 +251,8 @@ class CoreColorsRowTest {
             onNodeWithText("Clear all").assertIsNotEnabled()
             onNodeWithContentDescription("Pick Primary").assertIsEnabled()
             onNodeWithText("Use as seed").assertIsEnabled()
+            onNodeWithText(ACCENT_RAMP).assertExists()
+            onNodeWithText("The seed still drives the rest", substring = true).assertDoesNotExist()
 
             onNodeWithContentDescription("Clear Primary").performClick()
             waitForIdle()

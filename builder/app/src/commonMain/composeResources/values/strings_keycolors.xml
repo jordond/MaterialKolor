@@ -34,6 +34,8 @@
     <string name="keycolors_clear">Clear %1$s</string>
     <!-- Under a primary key color set by hand (D12). -->
     <string name="keycolors_primary_only">This moves only the primary palette. The seed still drives the rest.</string>
+    <!-- The same line for Fluent, which takes no palette but the primary. -->
+    <string name="keycolors_primary_only_fluent">This moves the accent ramp, the only palette Fluent takes.</string>
     <!-- Makes the primary key color the seed. -->
     <string name="keycolors_use_as_seed">Use as seed</string>
     <!-- Hands every key color back to the seed. -->
