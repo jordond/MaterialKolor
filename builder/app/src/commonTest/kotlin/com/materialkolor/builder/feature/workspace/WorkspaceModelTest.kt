@@ -29,6 +29,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
@@ -343,33 +345,62 @@ class WorkspaceModelTest : SessionTestBase() {
         }
 
     // b-221f
+    // b-229
     @Test
-    fun projectGeneration_neverPairsTheNewNumberWithTheOldDocument() =
+    fun projectGeneration_standardMain_neverPairsADocumentWithAnotherProjectsNumber() =
         runTest {
             // The model's collectors run once the session lets go of the thread, as they do on the page.
-            Dispatchers.setMain(StandardTestDispatcher(testScheduler))
-            val (session, preferences) = session()
-            val first = booted(session)
-            val workspace = workspaceModel(session, preferences)
-            runCurrent()
-            val seen = mutableListOf<WorkspaceModel.State>()
-            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { workspace.state.collect(seen::add) }
-            workspace.edit(DocumentChange.SetThemeName("EditedTheme"), EditPhase.Discrete)
-            settle()
-            val edited = session.document.value
-            val start = workspace.state.value.projectGeneration
-
-            session.newProject(copyCurrent = false)
-            settle()
-            session.open(first)
-            settle()
-
-            val numbered = seen.groupBy({ state -> state.projectGeneration }) { state -> state.document }
-            numbered.getValue(start + 1).distinct() shouldBe listOf(ThemeDocument.Default)
-            numbered.getValue(start + 2).distinct() shouldBe listOf(edited)
-            workspace.state.value.projectGeneration shouldBe start + 2
-            harness.clearAndJoin()
+            projectsNeverMix(StandardTestDispatcher(testScheduler))
         }
+
+    // b-229
+    @Test
+    fun projectGeneration_unconfinedMain_neverPairsADocumentWithAnotherProjectsNumber() =
+        runTest {
+            // The model's collectors run inside the session's own update, before show() returns.
+            projectsNeverMix(UnconfinedTestDispatcher(testScheduler))
+        }
+
+    // b-229
+
+    /**
+     * Show three more projects with [main] as the model's dispatcher and check that every state the
+     * model emits pairs a document only with the number of the project it belongs to, in order.
+     */
+    private suspend fun TestScope.projectsNeverMix(main: TestDispatcher) {
+        Dispatchers.setMain(main)
+        val (session, preferences) = session()
+        val first = booted(session)
+        val workspace = workspaceModel(session, preferences)
+        runCurrent()
+        workspace.edit(DocumentChange.SetThemeName("EditedTheme"), EditPhase.Discrete)
+        settle()
+        val edited = session.document.value
+        val start = workspace.state.value.projectGeneration
+        val seen = mutableListOf<Pair<Int, ThemeDocument>>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            workspace.state.collect { state ->
+                val pair = state.projectGeneration to state.document
+                if (seen.lastOrNull() != pair) seen.add(pair)
+            }
+        }
+        val shared = ThemeDocument.Default.copy(themeName = "SharedTheme")
+
+        session.newProject(copyCurrent = false)
+        settle()
+        session.open(first)
+        settle()
+        session.openShared(ShareCodec.encode(shared))
+        settle()
+
+        seen shouldBe listOf(
+            start to edited,
+            start + 1 to ThemeDocument.Default,
+            start + 2 to edited,
+            start + 3 to shared,
+        )
+        harness.clearAndJoin()
+    }
 
     private fun appModel(
         session: ProjectSession,

@@ -31,6 +31,9 @@ public class History(
     // What could be redone before the open drag started, handed back if the drag ends where it began.
     private var parked: List<HistoryEntry>? = null
 
+    // The oldest step the open one pushed out at capacity, handed back if the open step comes to nothing.
+    private var trimmed: HistoryEntry? = null
+
     /** Whether there is a step to undo. */
     public val canUndo: Boolean
         get() = done.isNotEmpty()
@@ -83,6 +86,7 @@ public class History(
         undone.addLast(entry)
         last = null
         parked = null // b-307
+        trimmed = null
         return entry.before
     }
 
@@ -94,6 +98,7 @@ public class History(
         done.addLast(entry)
         last = null
         parked = null // b-307
+        trimmed = null
         return entry.after
     }
 
@@ -141,6 +146,8 @@ public class History(
             last = null
             parked?.let(undone::addAll) // b-307
             parked = null
+            trimmed?.let(done::addFirst)
+            trimmed = null
             return
         }
         done.addLast(entry)
@@ -161,7 +168,8 @@ public class History(
         parked = undone.toList().takeIf { phase == EditPhase.Dragging && it.isNotEmpty() }
         undone.clear()
         done.addLast(HistoryEntry(before = before, after = after, label = change.label))
-        while (done.size > CAPACITY) done.removeFirst()
+        // The done steps never pass capacity before a push, so at most one goes.
+        trimmed = if (done.size > CAPACITY) done.removeFirst() else null
         last = LastRecord(change.coalesceKey, change.merges, phase, now)
     }
 
@@ -177,7 +185,10 @@ public class History(
     )
 
     public companion object {
-        /** How many steps the history holds in memory. */
+        /**
+         * How many steps the history holds in memory. A new step past it pushes the oldest out, and a
+         * step that comes to nothing, such as a cancelled picker, brings it back.
+         */
         public const val CAPACITY: Int = 100
 
         /** How many of the newest steps [persisted] hands out. */

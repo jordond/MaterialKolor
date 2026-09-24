@@ -196,13 +196,14 @@ internal class ProjectRepository(
      * Save [history] as the undo history of project [id].
      *
      * Only the [HISTORIES_KEPT] most recently updated projects keep theirs, so this drops the others.
-     * The history of [id] itself stays, since it is the project being worked on.
+     * The history of [id] itself stays, since it is the project being worked on. Like [save] it only
+     * writes for a project the drawer lists, so a deleted project gets no history back.
      */
     suspend fun saveHistory(
         id: String,
         history: HistoryRecord,
     ): StoreError? {
-        val error = write(id) { historyStore(id).update { history } }
+        val error = writeListed(id, historyStore(id)) { store -> store.update { history } }
         pruneHistories(keep = id)
         return error
     }
@@ -210,11 +211,16 @@ internal class ProjectRepository(
     /** How the preview of project [id] was left, or the defaults when it never was. */
     suspend fun viewState(id: String): ProjectViewState = viewStore(id).get()
 
-    /** Remember [state] as how the preview of project [id] was left. */
+    /**
+     * Remember [state] as how the preview of project [id] was left.
+     *
+     * Like [save] it only writes for a project the drawer lists, so a view change that comes in after
+     * the project was deleted leaves no view state behind.
+     */
     suspend fun saveViewState(
         id: String,
         state: ProjectViewState,
-    ): StoreError? = write(id) { viewStore(id).update { state } }
+    ): StoreError? = writeListed(id, viewStore(id)) { store -> store.update { state } }
 
     /**
      * The project [id] each time another tab saves it. A delete in another tab shows up in [index]
@@ -274,6 +280,24 @@ internal class ProjectRepository(
         if (error != StoreError.QuotaExceeded) return error
         pruneHistories(keep = id)
         return attempt()
+    }
+
+    /**
+     * Run [attempt] on [store], one of the keys of project [id], only while the drawer lists [id].
+     *
+     * An unlisted project is dropped, writes nothing and returns null. When the delete lands while
+     * the write is under way, the key is taken back out, so it never outlives its project.
+     */
+    private suspend fun <T> writeListed(
+        id: String,
+        store: Store<T>,
+        attempt: suspend (Store<T>) -> StoreError?,
+    ): StoreError? {
+        if (meta(id) == null) return null
+        val error = write(id) { attempt(store) }
+        if (meta(id) != null) return error
+        store.delete()
+        return null
     }
 
     private suspend fun pruneHistories(keep: String) {
