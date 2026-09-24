@@ -99,10 +99,14 @@ internal fun HeadlessCard(
  * A card takes its name from the text inside it, and a content description would replace that
  * name, so the note joins it as text instead. It draws nothing and sits outside the card's own
  * column, so nothing on screen moves.
+ *
+ * The note stays in place, empty, while the card is enabled. The web mirror only writes a card's
+ * text when it has some, so a card with no text of its own would keep reading disabled if the note
+ * left.
  */
 @Composable
 internal fun CardDisabledNote(enabled: Boolean) {
-    if (enabled || !LocalFoldsStateIntoName.current) return
-    val note = stateWords().disabledAfterName
+    if (!LocalFoldsStateIntoName.current) return
+    val note = if (enabled) "" else stateWords().disabledAfterName
     Box(Modifier.semantics { text = AnnotatedString(note) })
 }

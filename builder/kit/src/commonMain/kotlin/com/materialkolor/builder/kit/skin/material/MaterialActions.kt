@@ -57,7 +57,6 @@ import com.materialkolor.builder.kit.control.CardDisabledNote
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.ListRowContent
-import com.materialkolor.builder.kit.control.foldDisabled
 import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.control.listRowInput
 import com.materialkolor.builder.kit.control.listRowState
@@ -126,7 +125,7 @@ internal fun MaterialButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val decorated = modifier
-        .foldDisabled(label, enabled)
+        .foldState(label, null, enabled)
         .materialFeedback(interactionSource, ButtonDefaults.shape)
     val content: @Composable RowScope.() -> Unit = { MaterialLabel(label, icon) }
     MaterialTarget {

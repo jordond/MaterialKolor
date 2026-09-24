@@ -232,26 +232,18 @@ internal fun Modifier.foldState(
 }
 
 /**
- * Folds the disabled note into the name of a control with no other state, and only while it is
- * disabled, so an enabled control keeps the name its text gives it.
- */
-@Composable
-internal fun Modifier.foldDisabled(
-    name: String,
-    enabled: Boolean,
-): Modifier = if (enabled) this else foldState(name, state = null, enabled = false)
-
-/**
  * Folds a menu row's state into its name. A row that knows whether it is [selected] is an option
- * and always carries that state, a plain command only the disabled note.
+ * and carries that state, a plain command only the disabled note.
+ *
+ * The name is set whether the row is enabled or not. The web mirror never takes an `aria-label`
+ * back, so a name set only while disabled would still read disabled once the row is enabled again.
  */
 @Composable
 internal fun Modifier.foldMenuRow(
     name: String,
     selected: Boolean?,
     enabled: Boolean,
-): Modifier =
-    if (selected == null) foldDisabled(name, enabled) else foldState(name, ControlState.Selected(selected), enabled)
+): Modifier = foldState(name, selected?.let { current -> ControlState.Selected(current) }, enabled)
 
 /**
  * Names a node that plays no role, such as a slider, a progress bar or a group of options.

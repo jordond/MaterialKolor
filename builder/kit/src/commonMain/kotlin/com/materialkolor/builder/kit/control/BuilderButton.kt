@@ -83,7 +83,7 @@ internal fun HeadlessButton(
                 enabled = enabled,
                 role = Role.Button,
                 onClick = onClick,
-            ).foldDisabled(label, enabled)
+            ).foldState(label, null, enabled)
             .controlTouchTarget(LocalLayout.current.primaryTouchTarget)
             .controlPress(interactionSource)
             .alpha(enabledAlpha(enabled))

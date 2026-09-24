@@ -192,8 +192,9 @@ internal class RadioGroupFocus internal constructor(
     internal var requestedIndex: Int = NoRequest
 
     /**
-     * The option a key moved the focus to without choosing it, or [NoRequest]. It can take focus
-     * besides the chosen one until focus leaves it for somewhere outside the group.
+     * The option a key moved the focus to without choosing it, or [NoRequest]. It stands in for the
+     * chosen one as the group's only stop until focus leaves it for somewhere outside the group, so
+     * Tab and Shift+Tab leave the group from it rather than land on the chosen one.
      */
     internal var focusedIndex: Int by mutableIntStateOf(NoRequest)
 
@@ -229,11 +230,11 @@ internal fun rememberRadioGroupFocus(
 /**
  * Makes the option at [index] a stop of the roving focus in [focus].
  *
- * Only the chosen option, or the first when nothing is chosen, can take focus from Tab. Left and
- * right follow the reading direction, up and down always go back and forth, and Home and End jump
- * to either end. With [selectOnFocus] a key hands [onMove] the index of the option it moved to, and
- * the focus follows once that option is chosen. Without it a key moves only the focus, and the
- * option's own Enter and Space choose it.
+ * One option at a time can take focus from Tab, the one a key moved the focus to, or else the
+ * chosen option, or the first when nothing is chosen. Left and right follow the reading direction,
+ * up and down always go back and forth, and Home and End jump to either end. With [selectOnFocus] a
+ * key hands [onMove] the index of the option it moved to, and the focus follows once that option is
+ * chosen. Without it a key moves only the focus, and the option's own Enter and Space choose it.
  */
 internal fun Modifier.radioGroupOption(
     focus: RadioGroupFocus,
@@ -246,8 +247,10 @@ internal fun Modifier.radioGroupOption(
     val count = focus.requesters.size
     val tabStop = if (selectedIndex in 0 until count) selectedIndex else 0
     return focusRequester(focus.requesters[index])
-        .focusProperties { canFocus = index == tabStop || index == focus.focusedIndex }
-        .onFocusChanged { state ->
+        .focusProperties {
+            val stop = focus.focusedIndex.takeIf { focused -> focused != RadioGroupFocus.NoRequest } ?: tabStop
+            canFocus = index == stop
+        }.onFocusChanged { state ->
             if (!state.isFocused && focus.focusedIndex == index) focus.focusedIndex = RadioGroupFocus.NoRequest
         }.onKeyEvent { event ->
             val target = rovingTarget(event.key, index, count, rtl, upDown = true, homeEnd = true)

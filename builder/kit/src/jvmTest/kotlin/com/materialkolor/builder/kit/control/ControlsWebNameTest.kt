@@ -78,11 +78,36 @@ class ControlsWebNameTest {
             }
 
             onNodeWithTag("export").assert(hasContentDescriptionExactly("Export, disabled"))
-            onNodeWithTag("share").assert(hasNoContentDescription())
+            onNodeWithTag("share").assert(hasContentDescriptionExactly("Share"))
             onNodeWithTag("undo").assert(hasContentDescriptionExactly("Undo, disabled"))
             onNodeWithTag("redo").assert(hasContentDescriptionExactly("Redo"))
             onNodeWithTag("ocean").assert(hasText("Ocean card")).assert(hasLastText("disabled"))
-            onNodeWithTag("forest").assert(hasLastText("Forest card"))
+            onNodeWithTag("forest").assert(hasText("Forest card")).assert(!hasText("disabled"))
+        }
+
+    @Test
+    fun actions_flagOn_everySkin_dropTheDisabledNoteOnceEnabledAgain() =
+        forEachSkin { _, skin ->
+            var enabled by mutableStateOf(true)
+            showFolded(skin) {
+                Column {
+                    BuilderButton({}, "Share", Modifier.testTag("share"), enabled = enabled)
+                    BuilderCard(Modifier.testTag("ocean"), onClick = {}, enabled = enabled) {
+                        BuilderText("Ocean card")
+                    }
+                }
+            }
+            val share = onNodeWithTag("share").assert(hasContentDescriptionExactly("Share"))
+
+            enabled = false
+            waitForIdle()
+            share.assert(hasContentDescriptionExactly("Share, disabled"))
+            onNodeWithTag("ocean").assert(hasLastText("disabled"))
+
+            enabled = true
+            waitForIdle()
+            share.assert(hasContentDescriptionExactly("Share"))
+            onNodeWithTag("ocean").assert(hasText("Ocean card")).assert(!hasText("disabled"))
         }
 
     @Test
@@ -102,7 +127,7 @@ class ControlsWebNameTest {
             }
             waitForIdle()
 
-            onNode(hasText("Duplicate") and hasRole(Role.Button)).assert(hasNoContentDescription())
+            onNode(hasText("Duplicate") and hasRole(Role.Button)).assert(hasContentDescriptionExactly("Duplicate"))
             onNode(hasText("Archive")).assert(hasContentDescriptionExactly("Archive, disabled"))
             onNode(hasText("Dark") and isSelected()).assert(hasContentDescriptionExactly("Dark, selected"))
             onNode(hasText("Light") and isNotSelected()).assert(hasContentDescriptionExactly("Light, not selected"))
