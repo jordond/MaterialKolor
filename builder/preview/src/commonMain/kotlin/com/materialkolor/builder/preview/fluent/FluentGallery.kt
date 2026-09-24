@@ -170,7 +170,13 @@ internal fun TextBoxes(state: DemoAppState) {
             placeholder = "Your name",
             enabled = true,
         )
-        GalleryTextBox(value = "ana@example.com", onValueChange = {}, header = "Email", placeholder = "", enabled = false)
+        GalleryTextBox(
+            value = "ana@example.com",
+            onValueChange = {},
+            header = "Email",
+            placeholder = "",
+            enabled = false,
+        )
     }
 }
 

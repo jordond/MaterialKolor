@@ -209,10 +209,15 @@ class FluentGalleryTest {
 
             // Delete waits for the box, and puts it back.
             onNode(hasText("Delete") and hasClickAction()).assert(isNotEnabled())
-            onNode(galleryNamed("I understand"), useUnmergedTree = true).performSemanticsAction(SemanticsActions.OnClick)
+            onNode(
+                galleryNamed("I understand"),
+                useUnmergedTree = true,
+            ).performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
             state.isChecked(FluentGalleryKeys.Understood) shouldBe true
-            onNode(hasText("Delete") and hasClickAction() and isEnabled()).performSemanticsAction(SemanticsActions.OnClick)
+            onNode(
+                hasText("Delete") and hasClickAction() and isEnabled(),
+            ).performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
             state.isChecked(FluentGalleryKeys.Understood) shouldBe false
         }
@@ -235,7 +240,10 @@ class FluentGalleryTest {
             waitForIdle()
             state.choice(FluentGalleryKeys.Volume, 11, default = 6) shouldBe 4
 
-            val disabled = onNode(galleryNamed("Volume") and isNotEnabled(), useUnmergedTree = true).fetchSemanticsNode()
+            val disabled = onNode(
+                galleryNamed("Volume") and isNotEnabled(),
+                useUnmergedTree = true,
+            ).fetchSemanticsNode()
             (SemanticsActions.SetProgress in disabled.config) shouldBe false
             disabled.config[SemanticsProperties.ProgressBarRangeInfo].current shouldBe 4f
         }
@@ -283,7 +291,10 @@ class FluentGalleryTest {
             onNode(galleryNamed("Shipping details, expanded"), useUnmergedTree = true).assertExists()
             onNodeWithText("12 Harbour Street").assertExists()
 
-            onNode(galleryNamed("Wi-Fi, switch, off"), useUnmergedTree = true).performSemanticsAction(SemanticsActions.OnClick)
+            onNode(
+                galleryNamed("Wi-Fi, switch, off"),
+                useUnmergedTree = true,
+            ).performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
             onNode(galleryNamed("Wi-Fi, switch, on"), useUnmergedTree = true).assertExists()
         }
@@ -294,7 +305,8 @@ class FluentGalleryTest {
             setContent { GalleryHarness(FluentLightSpec, DemoAppState(), GalleryWhole) }
             waitForIdle()
 
-            val labels = listOf("Bold", "Email me updates", "Standard", "Wi-Fi", "Day", "Shipping details", "Recent", "Inbox")
+            val labels =
+                listOf("Bold", "Email me updates", "Standard", "Wi-Fi", "Day", "Shipping details", "Recent", "Inbox")
             for (name in labels) {
                 withClue(name) {
                     onAllNodes(galleryNamed(name), useUnmergedTree = true).fetchSemanticsNodes().shouldNotBeEmpty()

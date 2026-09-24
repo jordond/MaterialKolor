@@ -172,7 +172,11 @@ class FluentGalleryPopupTest {
                 lines
                     .filter { line -> GalleryEndlessMotion.any { stem -> stem in line } }
                     .shouldBeEmpty()
-                EndlessProgress.findAll(text).map { match -> match.value }.toList().shouldBeEmpty()
+                EndlessProgress
+                    .findAll(text)
+                    .map { match -> match.value }
+                    .toList()
+                    .shouldBeEmpty()
                 // Only the theme, never the one that adds a host and a backdrop round the screen.
                 ("FluentTheme(" in text) shouldBe false
                 ("SliderDefaults.Thumb" in text) shouldBe false

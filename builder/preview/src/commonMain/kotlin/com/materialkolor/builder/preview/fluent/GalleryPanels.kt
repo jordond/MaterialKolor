@@ -79,7 +79,11 @@ private const val DemoProgress = 0.6f
 
 private val Folders = listOf("Recent", "Shared", "Favorites")
 private val TabLabels = listOf("Home", "Photos", "Music")
-private val Mailboxes = listOf("Inbox" to Icons.Regular.Mail, "Sent" to Icons.Regular.Send, "Archive" to Icons.Regular.Folder)
+private val Mailboxes = listOf(
+    "Inbox" to Icons.Regular.Mail,
+    "Sent" to Icons.Regular.Send,
+    "Archive" to Icons.Regular.Folder,
+)
 
 /** A clickable Fluent card and its disabled copy, sharing the row. */
 @Composable
@@ -398,9 +402,15 @@ private fun GalleryPanelMotion(
 ) {
     val frozen = LocalMotionFrozen.current
     val motion = LocalBuilderMotion.current
-    AnimatedVisibility(
-        visible = visible,
-        enter = if (frozen) EnterTransition.None else expandVertically(motion.panelEnter()) + fadeIn(motion.panelEnter()),
-        exit = if (frozen) ExitTransition.None else shrinkVertically(motion.panelExit()) + fadeOut(motion.panelExit()),
-    ) { content() }
+    val enter = if (frozen) {
+        EnterTransition.None
+    } else {
+        expandVertically(motion.panelEnter()) + fadeIn(motion.panelEnter())
+    }
+    val exit = if (frozen) {
+        ExitTransition.None
+    } else {
+        shrinkVertically(motion.panelExit()) + fadeOut(motion.panelExit())
+    }
+    AnimatedVisibility(visible = visible, enter = enter, exit = exit) { content() }
 }
