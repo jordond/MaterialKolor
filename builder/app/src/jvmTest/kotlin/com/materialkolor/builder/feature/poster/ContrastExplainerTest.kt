@@ -1,19 +1,10 @@
 package com.materialkolor.builder.feature.poster
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performSemanticsAction
-import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.pressKey
-import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
@@ -29,7 +20,6 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import dev.stateholder.dispatcher.Dispatcher
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -59,51 +49,19 @@ class ContrastExplainerTest {
         }
 
     @Test
-    fun contrastSlider_drag_movesThenLetsGoAsOneUndoEntry() =
+    fun contrastLevel_pick_isOneDiscreteEditAndOneUndoEntry() =
         runComposeUiTest {
             val harness = PosterHarness(ThemeDocument(seed = Seed))
             showSection(harness) { context, dispatcher -> ContrastSection(context, dispatcher) }
 
-            onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.SetProgress))
-                .performSemanticsAction(SemanticsActions.SetProgress) { setProgress -> setProgress(0.5f) }
+            onNodeWithText("High").performClick()
             waitForIdle()
 
             harness.actions shouldBe listOf(
-                WorkspaceAction.Edit(DocumentChange.SetContrast(ContrastLevel.Medium), EditPhase.Dragging),
-                WorkspaceAction.Edit(DocumentChange.SetContrast(ContrastLevel.Medium), EditPhase.Released),
+                WorkspaceAction.Edit(DocumentChange.SetContrast(ContrastLevel.High), EditPhase.Discrete),
             )
+            harness.document.contrast shouldBe ContrastLevel.High
             harness.undoEntries() shouldBe 1
-        }
-
-    @Test
-    fun contrastField_typedLevel_landsAsIs() =
-        runComposeUiTest {
-            val harness = PosterHarness(ThemeDocument(seed = Seed))
-            showSection(harness) { context, dispatcher -> ContrastSection(context, dispatcher) }
-
-            onNode(hasSetTextAction()).requestFocus()
-            onNode(hasSetTextAction()).performTextReplacement("0.37")
-            onNode(hasSetTextAction()).performKeyInput { pressKey(Key.Enter) }
-            waitForIdle()
-
-            harness.actions shouldBe listOf(
-                WorkspaceAction.Edit(DocumentChange.SetContrast(ContrastLevel(37)), EditPhase.Discrete),
-            )
-        }
-
-    @Test
-    fun contrastField_outOfRange_saysSoAndNeverEdits() =
-        runComposeUiTest {
-            val harness = PosterHarness(ThemeDocument(seed = Seed))
-            showSection(harness) { context, dispatcher -> ContrastSection(context, dispatcher) }
-
-            onNode(hasSetTextAction()).requestFocus()
-            onNode(hasSetTextAction()).performTextReplacement("1.7")
-            onNode(hasSetTextAction()).performKeyInput { pressKey(Key.Enter) }
-            waitForIdle()
-
-            harness.actions.shouldBeEmpty()
-            onNodeWithText("Type a number from -1 to 1", useUnmergedTree = true).assertExists()
         }
 
     @Test

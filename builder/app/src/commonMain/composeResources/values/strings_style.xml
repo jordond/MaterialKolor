@@ -61,20 +61,14 @@
 
     <!-- The label above the contrast control. -->
     <string name="contrast_label">Contrast</string>
-    <!-- The contrast slider, read out as its name. -->
-    <string name="contrast_slider">Contrast level</string>
-    <!-- The typed contrast field. -->
-    <string name="contrast_field">Contrast level, -1 to 1</string>
-    <!-- Under the typed field when the text is not a level. -->
-    <string name="contrast_field_error">Type a number from -1 to 1</string>
-    <!-- The four named contrast stops. -->
+    <!-- The choice of contrast level, read out as its name. -->
+    <string name="contrast_level">Contrast level</string>
+    <!-- The four named contrast levels, one option each. -->
     <string name="contrast_reduced">Reduced</string>
     <string name="contrast_standard">Standard</string>
     <string name="contrast_medium">Medium</string>
     <string name="contrast_high">High</string>
-    <!-- How the slider reads out on a named stop. The first argument is the level, the second the stop's name. -->
-    <string name="contrast_state">%1$s, %2$s</string>
-    <!-- The readout under the slider. The arguments are the text role, the role it sits on and the ratio. -->
+    <!-- The readout under the choice. The arguments are the text role, the role it sits on and the ratio. -->
     <string name="contrast_lowest_light">Lowest in light, %1$s on %2$s at %3$s to 1</string>
     <string name="contrast_lowest_dark">Lowest in dark, %1$s on %2$s at %3$s to 1</string>
     <!-- The badge beside the readout. -->
