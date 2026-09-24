@@ -36,6 +36,8 @@ import com.materialkolor.builder.codegen.dsl.TokenKind
  * @property[iconSize] How big the skin draws an icon in the chrome.
  * @property[outlineWidth] How thick a hairline outline is, around a field, a flyout or a widget at
  *   rest. Focus rings and a skin's own border metrics keep their widths.
+ * @property[highlightWidth] The width of an outline that picks something out, such as the picked
+ *   ramp.
  */
 @Immutable
 public data class BuilderTokens(
@@ -59,6 +61,7 @@ public data class BuilderTokens(
     public val spacing: BuilderSpacing = BuilderSpacing(),
     public val iconSize: Dp = 20.dp, // b-202a
     public val outlineWidth: Dp = 1.dp,
+    public val highlightWidth: Dp = 2.dp, // b-308ba
 )
 
 /**
