@@ -1,22 +1,17 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { openBuilder, wantHooks } from './builder';
-import {
-  A11Y,
-  button,
-  focusCanvas,
-  LAND_TIMEOUT_MS,
-  labelled,
-  onPage,
-  openWorkspace,
-  seedText,
-} from '../fixtures/workspace';
+import { button, labelled, openWorkspace, press, seedText, storedProjects } from '../fixtures/workspace';
 
 // b-503
-// Opening a shared link (flow 5.6, F-32). A link opens a project of its own, the same link again
-// opens that project rather than a copy, and a link from the old builder keeps its dark preview.
+// Opening a shared link (flow 5.6, F-32). A link opens as a theme that is not in the projects until
+// it is saved, the same link again then opens that project rather than a copy, and a link from the
+// old builder keeps its dark preview.
 
 /** The typed seed share code, #6750A4 on TonalSpot. */
 const LINK = '/t/AWdQpAAAAABw';
+
+/** The banner button that keeps a theme opened from a link, `share_transient_save`. */
+const SAVE = 'Save to my projects';
 
 /** An old builder link, as the spec writes it. */
 const LEGACY = '/?color_seed=FF6750A4&dark_mode=true&style=Vibrant';
@@ -25,15 +20,19 @@ test.beforeEach(async ({ context }) => {
   await wantHooks(context);
 });
 
-test('the same link twice opens one project', async ({ page }) => {
+test('a saved link opened again opens that project, not a copy', async ({ page }) => {
   await openWorkspace(page, LINK);
   await expect.poll(() => seedText(page)).toBe('#6750A4');
-  const first = await projectRows(page);
+  const before = await storedProjects(page);
+  await press(page, button(page, SAVE));
+  await expect.poll(async () => (await storedProjects(page)).length).toBe(before.length + 1);
+  const saved = await storedProjects(page);
 
   await openWorkspace(page, LINK);
   await expect.poll(() => seedText(page)).toBe('#6750A4');
 
-  expect(await projectRows(page)).toEqual(first);
+  await expect(button(page, SAVE)).toHaveCount(0);
+  expect((await storedProjects(page)).map((project) => project.id).sort()).toEqual(saved.map((project) => project.id).sort());
   expect(await page.evaluate(() => location.pathname)).toBe('/');
 });
 
@@ -45,18 +44,3 @@ test('an old builder link opens its seed and style and keeps the dark preview', 
   await expect(labelled(page, 'Dark, radio, selected')).toHaveCount(1);
   expect(await page.evaluate(() => location.pathname + location.search)).toBe('/');
 });
-
-/** The names of the projects the Projects panel lists, opened with P and closed again with Esc. */
-async function projectRows(page: Page): Promise<string[]> {
-  await focusCanvas(page);
-  await page.keyboard.press('p');
-  await expect(onPage(page, /^Projects, dialog/)).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
-  const more = page.locator(A11Y).getByRole('button', { name: /^More for / });
-  await expect(more.first()).toBeAttached();
-  const names = (await more.evaluateAll((rows) => rows.map((row) => row.getAttribute('aria-label') ?? ''))).map((label) =>
-    label.replace(/^More for /, ''),
-  );
-  await page.keyboard.press('Escape');
-  await expect(button(page, 'New project')).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
-  return names;
-}

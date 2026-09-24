@@ -99,6 +99,32 @@ export async function focusCanvas(page: Page): Promise<void> {
     )
     .toBe('CANVAS');
   await expect(page.locator('.compose-backing-field')).toHaveCount(0);
+  // Compose takes the press on its next frame, so the frame after that has it.
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+}
+
+/**
+ * Presses [key] on the canvas until [landed] says it has. A key that arrives while a skin reveal
+ * runs, or before Compose has taken the press that focused the canvas, can go unheard, so each try
+ * focuses the canvas again. Only for keys that do the same thing when pressed twice.
+ */
+export async function pressKeyUntil(page: Page, key: string, landed: () => Promise<boolean>): Promise<void> {
+  await expect
+    .poll(
+      async () => {
+        if (await landed()) return true;
+        await focusCanvas(page);
+        await page.keyboard.press(key);
+        return false;
+      },
+      { timeout: LAND_TIMEOUT_MS * 2, intervals: [1_000] },
+    )
+    .toBe(true);
+}
+
+/** Presses [key] on the canvas until [shows] is in the mirror. */
+export async function pressKeyFor(page: Page, key: string, shows: Locator): Promise<void> {
+  await pressKeyUntil(page, key, async () => (await shows.count()) > 0);
 }
 
 /** `Meta` when the page's user agent names an Apple system, where it takes Cmd, else `Control`. */
@@ -162,7 +188,14 @@ export async function storedDocument(page: Page): Promise<Record<string, unknown
 export async function typeInto(page: Page, field: Locator, text: string): Promise<void> {
   await press(page, field);
   await expect(page.locator('.compose-backing-field')).toBeFocused({ timeout: LAND_TIMEOUT_MS });
-  await page.keyboard.press(`${await primaryKey(page)}+a`);
+  // Select all is Cmd or Ctrl by the host system in Compose, not by the page's user agent, so the
+  // old text goes a key at a time from wherever the press left the caret.
+  const old = ((await field.first().textContent()) ?? '').length;
+  for (let key = 0; key < old; key++) {
+    await page.keyboard.press('Delete');
+    await page.keyboard.press('Backspace');
+  }
+  await expect.poll(async () => (await field.first().textContent())?.trim(), { timeout: LAND_TIMEOUT_MS }).toBe('');
   await page.keyboard.type(text);
   await expect.poll(async () => (await field.first().textContent())?.trim(), { timeout: LAND_TIMEOUT_MS }).toBe(text);
 }

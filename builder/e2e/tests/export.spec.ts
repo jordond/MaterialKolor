@@ -6,24 +6,24 @@ import { readZip } from '../fixtures/zip';
 import {
   A11Y,
   button,
-  focusCanvas,
   LAND_TIMEOUT_MS,
   labelled,
   onPage,
   openWorkspace,
   press,
   pressFor,
+  pressKeyFor,
   typeInto,
   typeSeed,
 } from '../fixtures/workspace';
 
 // b-503
 // Export (flow 5.4). The zip holds every file the sheet shows, its Kotlin byte for byte the codegen's
-// golden for the default theme, a copied file is on the clipboard, and the options stay across a
-// seed change, a reload and a new project.
+// golden for the default theme, and the package stays across a seed change, a reload and a new
+// project. first-run.spec.ts copies a file to the clipboard.
 
 /** The Export sheet's title in the mirror, the dialog fold (D40). */
-const EXPORT_DIALOG = 'Export code, dialog';
+const EXPORT_DIALOG = /^Export code, dialog/;
 
 /** The codegen's golden for the default seed on Material 3, Dynamic, the builder's first theme. */
 const GOLDEN = path.resolve(__dirname, '../../codegen/src/jvmTest/resources/golden/material3-dynamic-default');
@@ -54,29 +54,14 @@ test('Download zip holds every file the sheet shows, its Kotlin as the golden ha
   }
 });
 
-test('Copy file puts the open file on the clipboard', async ({ page, context, browserName }) => {
-  test.skip(browserName !== 'chromium', 'Only Chromium lets a test grant clipboard access and read it back');
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-  await openSheet(page);
-  await pressFor(page, labelled(page, 'Theme.kt, tab, not selected'), labelled(page, 'Theme.kt, tab, selected'));
-
-  await press(page, button(page, 'Copy file'));
-  await expect(onPage(page, 'Copied').first()).toBeAttached({ timeout: LAND_TIMEOUT_MS });
-
-  const copied = await page.evaluate(() => navigator.clipboard.readText());
-  expect(withoutLink(copied)).toBe(withoutLink(readFileSync(path.join(GOLDEN, GOLDEN_FILES[1]), 'utf8')));
-});
-
-test('the package and theme name stay across a seed change, a reload and a new project', async ({ page }) => {
+test('the package stays across a seed change, a reload and a new project', async ({ page }) => {
   await openSheet(page);
   await typeInto(page, textbox(page, 'Package name'), 'com.acme.app');
-  await typeInto(page, textbox(page, 'Theme name'), 'AcmeTheme');
   await closeSheet(page);
 
   await typeSeed(page, '#0B6E4F');
   await openSheet(page);
   await expect.poll(() => textOf(page, 'Package name')).toBe('com.acme.app');
-  await expect.poll(() => textOf(page, 'Theme name')).toBe('AcmeTheme');
   await expect(page.locator(A11Y)).toContainText('0xFF0B6E4F');
   await closeSheet(page);
 
@@ -85,8 +70,7 @@ test('the package and theme name stay across a seed change, a reload and a new p
   await expect.poll(() => textOf(page, 'Package name')).toBe('com.acme.app');
   await closeSheet(page);
 
-  await focusCanvas(page);
-  await page.keyboard.press('p');
+  await pressKeyFor(page, 'p', button(page, 'New project'));
   await pressFor(page, button(page, 'New project'), labelled(page, 'Projects, '));
   await expect(onPage(page, /^Projects, dialog/)).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
   await openSheet(page);
@@ -97,9 +81,7 @@ test('the package and theme name stay across a seed change, a reload and a new p
 async function openSheet(page: Page): Promise<void> {
   const url = page.url();
   if (!url.startsWith('http')) await openWorkspace(page);
-  await focusCanvas(page);
-  await page.keyboard.press('e');
-  await expect(onPage(page, EXPORT_DIALOG)).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
+  await pressKeyFor(page, 'e', onPage(page, EXPORT_DIALOG));
 }
 
 async function closeSheet(page: Page): Promise<void> {

@@ -79,16 +79,26 @@ test('a dropped photo seeds the theme, another chip swaps it, and Match exactly 
   const chips = page.locator('#cmp_a11y_root').getByRole('button', { name: /^#[0-9A-F]{6}, .*not selected$/ });
   await expect.poll(() => chips.count(), { timeout: SEED_TIMEOUT_MS }).toBeGreaterThan(0);
   const chosen = ((await chips.first().getAttribute('aria-label')) ?? '').slice(0, 7);
+  const poster = onPage(page, 'Seed and theme controls');
+  await scrollTo(page, chips.first(), poster);
   await press(page, chips.first());
   await expect.poll(() => seedText(page), { timeout: SEED_TIMEOUT_MS }).toBe(chosen);
 
   const why = button(page, 'Why?');
-  await scrollTo(page, why, onPage(page, 'Seed and theme controls'));
+  await scrollTo(page, why, poster);
   await pressFor(page, why, onPage(page, 'Why primary differs from your seed'));
-  await press(page, button(page, 'Match exactly'));
+  await scrollTo(page, button(page, 'Match exactly'), poster);
+  const pinned = async () => Object.keys(((await storedDocument(page))?.pins ?? {}) as object).length > 0;
   await expect
-    .poll(async () => Object.keys(((await storedDocument(page))?.pins ?? {}) as object).length, { timeout: SEED_TIMEOUT_MS })
-    .toBeGreaterThan(0);
+    .poll(
+      async () => {
+        if (await pinned()) return true;
+        await press(page, button(page, 'Match exactly'));
+        return false;
+      },
+      { timeout: SEED_TIMEOUT_MS, intervals: [1_000] },
+    )
+    .toBe(true);
 });
 
 /** Fires [type] on the page with the fixture photo, fetched through [PHOTO_ROUTE]. True when the page took it. */
