@@ -35,8 +35,9 @@ internal sealed interface PastedText {
  *
  * A color wins over everything else, so text that reads both ways sets the seed. A link counts on
  * any host as long as its path is `/t/<code>`, whether the code still reads or not, since opening it
- * says what is wrong. A bare code only counts when it reads, or comes from a newer builder, and a
- * style name wins over it. Links of the old builder are ignored. A style matches its enum name or [styleNames], the names the chips
+ * says what is wrong. A bare code that reads counts at any length. One that only looks like it comes
+ * from a newer builder counts after a style name, and only when it looks like a real code. Links of
+ * the old builder are ignored. A style matches its enum name or [styleNames], the names the chips
  * show, with case, spaces, dashes and underscores ignored.
  */
 internal fun classify(
@@ -47,8 +48,10 @@ internal fun classify(
     if (trimmed.isEmpty()) return null
     (ColorInput.parse(trimmed) as? ParseResult.Ok)?.let { ok -> return PastedText.Color(ok.argb) }
     linkCodeOf(trimmed)?.let { code -> return PastedText.Share(code) }
+    val decoded = bareDecode(trimmed)
+    if (decoded is DecodeResult.Ok) return PastedText.Share(trimmed)
     styleOf(trimmed, styleNames)?.let { style -> return PastedText.Style(style) }
-    bareCodeOf(trimmed)?.let { code -> return PastedText.Share(code) }
+    if (decoded == DecodeResult.UnknownVersion && looksLikeACode(trimmed)) return PastedText.Share(trimmed)
     return null
 }
 
@@ -59,21 +62,21 @@ private fun linkCodeOf(text: String): String? {
     return (route as? Route.Theme)?.code
 }
 
-/**
- * [text] as a bare share code. Almost any word decodes as a code from a newer builder, so a code
- * also has to be as long as the shortest real one and carry a digit or a capital, which the
- * bytes of a real code always do.
- */
-private fun bareCodeOf(text: String): String? {
-    if (text.length < MIN_BARE_CODE_LENGTH || '/' in text || text.any { char -> char.isWhitespace() }) return null
-    if (text.none { char -> char.isDigit() || char.isUpperCase() }) return null
-    return when (ShareCodec.decode(text)) {
-        is DecodeResult.Ok, DecodeResult.UnknownVersion -> text
-        DecodeResult.Corrupt -> null
-    }
+/** [text] read as a bare share code, or null when it cannot be one, having a slash or a space. */
+private fun bareDecode(text: String): DecodeResult? {
+    if ('/' in text || text.any { char -> char.isWhitespace() }) return null
+    return ShareCodec.decode(text)
 }
 
-private const val MIN_BARE_CODE_LENGTH = 16
+/**
+ * Whether [text], which reads as a code from a newer builder, looks like a real code. Almost any word
+ * reads that way, so it also has to be as long as a code with a few sections and carry a digit or a
+ * capital, which the bytes of a real code always do.
+ */
+private fun looksLikeACode(text: String): Boolean =
+    text.length >= MIN_NEWER_CODE_LENGTH && text.any { char -> char.isDigit() || char.isUpperCase() }
+
+private const val MIN_NEWER_CODE_LENGTH = 16
 
 /** The path of [text] when it is a URL or starts with one, or null for a bare word. */
 private fun pathOf(text: String): String? {

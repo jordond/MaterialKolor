@@ -177,9 +177,13 @@ internal fun ShortcutScope(
  *
  * Keys arrive as they bubble up from the focused control, so a control that takes a key, a button
  * taking Space say, keeps it. Undo and Redo wait the same way, so a field keeps its own text undo.
- * Only Cmd or Ctrl with K, S, O and \, which fire in fields, are taken on the way down. Single keys and Space never fire while a text field below takes input,
- * and Cmd or Ctrl with V, C, X or A is always left alone. Esc leaves Inspect, or else moves focus
- * out of a field to the holder, once overlays and Inspect have had their turn.
+ * Only Cmd or Ctrl with K, S, O and \, which fire in fields, are taken on the way down. Single keys
+ * and Space never fire while a text field below takes input, and Cmd or Ctrl with V, C, X or A is
+ * always left alone. Esc leaves Inspect, or else moves focus out of a field to the holder, once
+ * overlays and Inspect have had their turn.
+ *
+ * A shortcut whose command cannot run toasts the reason once per press, all but Undo and Redo, which
+ * stay quiet with nothing to undo or redo as they do in any editor.
  */
 @Composable
 internal fun rememberShortcuts(
@@ -239,7 +243,10 @@ internal fun rememberShortcuts(
                 focus.runFromKeys(command.run)
                 claimIfNowhere()
             }
-            is CommandState.Disabled -> dispatcher.dispatch(WorkspaceAction.ShowToast(commandState.reason))
+            is CommandState.Disabled -> {
+                val reason = commandState.reason
+                if (shortcut !in QUIET_WHEN_DISABLED) dispatcher.dispatch(WorkspaceAction.ShowToast(reason))
+            }
         }
         return true
     }
@@ -289,10 +296,16 @@ private fun ClaimFocusWhenNowhere(
 
 private const val SETTLE_FRAMES = 2
 
+/** The shortcuts that say nothing when their command cannot run, since an empty history is no news. */
+private val QUIET_WHEN_DISABLED = setOf(Shortcut.Undo, Shortcut.Redo)
+
 /**
  * Gives the holder focus after a press that no control consumed, so a click on the bare canvas
  * leaves a text field. A press that opened a text field keeps it, and so does one while [inspecting],
  * since Inspect pins on a press.
+ *
+ * The field the press left closes its input session a few frames later, and on the desktop focus
+ * can go with it, so for a few frames more the holder takes focus back whenever the page lost it.
  */
 private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.claimUnclaimedPresses(
     focus: ShortcutFocus,
@@ -311,9 +324,17 @@ private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.claimUnc
         if (claimed || inspecting()) return@awaitEachGesture
         scope.launch {
             repeat(SETTLE_FRAMES) { withFrameNanos { } }
-            if (focus.sessionStarts == sessionsBefore) focus.focusHolder()
+            if (focus.sessionStarts != sessionsBefore) return@launch
+            focus.focusHolder()
+            repeat(RECLAIM_FRAMES) {
+                withFrameNanos { }
+                if (focus.sessionStarts != sessionsBefore) return@launch
+                if (!focus.pageHasFocus) focus.focusHolder()
+            }
         }
     }
 }
+
+private const val RECLAIM_FRAMES = 8
 
 private fun KeyEvent.anyModifier(): Boolean = isCtrlPressed || isMetaPressed || isAltPressed || isShiftPressed

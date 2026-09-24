@@ -1,17 +1,22 @@
 package com.materialkolor.builder.feature.command
 
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.PlatformTextInputMethodRequest
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.KeyInjectionScope
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -24,23 +29,26 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.test.withKeyDown
+import androidx.compose.ui.text.input.SetComposingTextCommand
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.domain.persist.DeviceWidth
+import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
+import com.materialkolor.builder.feature.canvas.DEVICE_SCREEN_TAG
 import com.materialkolor.builder.feature.topbar.LibraryChoice
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.ShuffleLock
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 private const val WIDTH = 1280
 private const val HEIGHT = 800
 
 // b-315
-@OptIn(ExperimentalTestApi::class)
+@OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
 class ShortcutsTest {
     private val harness = CommandHarness()
     private val platform = harness.platform
@@ -54,23 +62,6 @@ class ShortcutsTest {
             keys { pressKey(Key.Spacebar) }
 
             seed() shouldNotBe seed
-        }
-
-    @Test
-    fun space_withEverythingLocked_showsTheHint() =
-        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            boot()
-            runOnUiThread {
-                harness.workspace.setLock(ShuffleLock.Seed, true)
-                harness.workspace.setLock(ShuffleLock.Style, true)
-            }
-            waitForIdle()
-            val seed = seed()
-
-            keys { pressKey(Key.Spacebar) }
-
-            seed() shouldBe seed
-            named("The seed and the style are both locked, so Shuffle has nothing to change") shouldBe true
         }
 
     @Test
@@ -157,7 +148,7 @@ class ShortcutsTest {
         }
 
     @Test
-    fun ctrlKAndCtrlS_fireInsideAField() =
+    fun ctrlSKAndO_fireInsideAField() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             boot()
             onAllNodes(hasSetTextAction()).onFirst().requestFocus()
@@ -166,8 +157,10 @@ class ShortcutsTest {
             keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.S) } }
             waitUntil { named("Saved") }
             keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.K) } }
-
             harness.workspace.state.value.panel shouldBe Panel.Palette
+            keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.O) } }
+
+            harness.workspace.state.value.panel shouldBe Panel.Projects
         }
 
     @Test
@@ -203,19 +196,93 @@ class ShortcutsTest {
         }
 
     @Test
-    @Ignore("B-315 open: the test has not found a bare spot to press on the JVM yet")
+    fun space_onAFocusedPreviewButton_pressesItAndNeverShuffles() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            val seed = seed()
+            onAllNodes(hasClickAction() and hasText("Past")).onFirst().requestFocus()
+            waitForIdle()
+
+            keys { pressKey(Key.Spacebar) }
+
+            seed() shouldBe seed
+            onAllNodes(hasText("No past trips yet")).fetchSemanticsNodes().size shouldNotBe 0
+        }
+
+    @Test
     fun space_afterABareCanvasClickLeavesTheSeedField_shuffles() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             boot()
-            onAllNodes(hasSetTextAction()).onFirst().requestFocus()
+            // A phone leaves bare canvas on both sides of its frame.
+            runOnUiThread {
+                harness.workspace.setDeviceWidth(DeviceWidth.Phone)
+                harness.workspace.setPreviewMode(PreviewMode.Light)
+            }
+            waitForIdle()
+            val field = onAllNodes(hasSetTextAction()).onFirst()
+            field.requestFocus()
             waitForIdle()
             val seed = seed()
+            // Halfway from the phone's right edge to the window's, with nothing under it but the canvas.
+            val screen = onAllNodesWithTag(DEVICE_SCREEN_TAG).onFirst().fetchSemanticsNode().boundsInRoot
+            val bare = Offset((screen.right + WIDTH) / 2f, HEIGHT / 2f)
 
-            onAllNodes(isRoot()).onFirst().performMouseInput { click(Offset(WIDTH - 2f, HEIGHT - 2f)) }
+            onAllNodes(isRoot()).onFirst().performMouseInput { click(bare) }
             waitForIdle()
+            field.assertIsNotFocused()
             keys { pressKey(Key.Spacebar) }
 
             seed() shouldNotBe seed
+        }
+
+    @Test
+    fun singleKeys_whileAnInputMethodComposesInTheSeedField_changeNothing() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            // The field's own text input session, driven the way an input method drives it.
+            var session: PlatformTextInputMethodRequest? = null
+            with(harness) { show(onTextInput = { request -> session = request }) }
+            onAllNodes(hasSetTextAction()).onFirst().requestFocus()
+            waitUntil { session != null }
+
+            typeEverySingleKeyChangesNothing {
+                val request = checkNotNull(session)
+                runOnUiThread { request.onEditCommand(listOf(SetComposingTextCommand("ka", 1))) }
+                waitForIdle()
+                request.value().composition shouldNotBe null
+            }
+        }
+
+    @Test
+    fun ctrlZAndCtrlY_withNothingToUndoOrRedo_sayNothing() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            harness.graph.session.history.value.canUndo shouldBe false
+
+            keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.Z) } }
+            keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.Y) } }
+
+            named("Nothing to undo") shouldBe false
+            named("Nothing to redo") shouldBe false
+        }
+
+    @Test
+    fun space_withEverythingLocked_toastsTheReasonOncePerPress() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            runOnUiThread {
+                harness.workspace.setLock(ShuffleLock.Seed, true)
+                harness.workspace.setLock(ShuffleLock.Style, true)
+            }
+            waitForIdle()
+            val hint = hasText("The seed and the style are both locked, so Shuffle has nothing to change")
+            // The poster says it under its buttons all along.
+            val before = onAllNodes(hint, useUnmergedTree = true).fetchSemanticsNodes().size
+            val seed = seed()
+
+            keys { pressKey(Key.Spacebar) }
+
+            seed() shouldBe seed
+            onAllNodes(hint, useUnmergedTree = true).fetchSemanticsNodes().size shouldBe before + 1
         }
 
     @Test
@@ -270,13 +337,17 @@ class ShortcutsTest {
 
     private fun seed() = harness.graph.session.document.value.seed
 
-    /** Every single key and Space, typed into the focused field, leaves the workspace as it was. */
-    private fun ComposeUiTest.typeEverySingleKeyChangesNothing() {
+    /**
+     * Every single key and Space, typed into the focused field with [beforeEach] run ahead of each,
+     * leaves the workspace as it was.
+     */
+    private fun ComposeUiTest.typeEverySingleKeyChangesNothing(beforeEach: () -> Unit = {}) {
         val before = harness.workspace.state.value
         val presses: List<KeyInjectionScope.() -> Unit> =
             SINGLE_KEYS.map { key -> fun KeyInjectionScope.() = pressKey(key) } +
                 SHIFTED_KEYS.map { key -> fun KeyInjectionScope.() = withKeyDown(Key.ShiftLeft) { pressKey(key) } }
         presses.forEach { press ->
+            beforeEach()
             onAllNodes(isFocused()).onLast().performKeyInput(press)
             waitForIdle()
         }

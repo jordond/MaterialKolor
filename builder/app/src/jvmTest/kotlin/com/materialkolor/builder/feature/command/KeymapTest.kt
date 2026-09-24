@@ -60,7 +60,10 @@ class KeymapTest {
                 apple: Boolean = false,
                 singleKeys: Boolean = true,
                 press: KeyInjectionScope.() -> Unit,
-            ): Shortcut? = captured(press).firstNotNullOfOrNull { event -> Shortcut.match(event, apple, singleKeys) }?.first
+            ): Shortcut? =
+                captured(press)
+                    .firstNotNullOfOrNull { event -> Shortcut.match(event, apple, singleKeys) }
+                    ?.first
 
             matched { withKeyDown(Key.CtrlLeft) { pressKey(Key.K) } } shouldBe Shortcut.Palette
             matched(apple = true) { withKeyDown(Key.MetaLeft) { pressKey(Key.K) } } shouldBe Shortcut.Palette
@@ -70,7 +73,8 @@ class KeymapTest {
             matched { withKeyDown(Key.ShiftLeft) { pressKey(Key.Slash) } } shouldBe Shortcut.CheatSheet
             matched { pressKey(Key.LeftBracket) } shouldBe Shortcut.PreviousTab
             matched { withKeyDown(Key.CtrlLeft) { pressKey(Key.Y) } } shouldBe Shortcut.Redo
-            matched { withKeyDown(Key.CtrlLeft) { withKeyDown(Key.ShiftLeft) { pressKey(Key.Z) } } } shouldBe Shortcut.Redo
+            val ctrlShiftZ = matched { withKeyDown(Key.CtrlLeft) { withKeyDown(Key.ShiftLeft) { pressKey(Key.Z) } } }
+            ctrlShiftZ shouldBe Shortcut.Redo
             matched { withKeyDown(Key.CtrlLeft) { pressKey(Key.L) } } shouldBe null
             matched(singleKeys = false) { pressKey(Key.Spacebar) } shouldBe null
             matched(singleKeys = false) { withKeyDown(Key.CtrlLeft) { pressKey(Key.S) } } shouldBe Shortcut.Save

@@ -109,8 +109,14 @@ internal fun CheatSheet(
                         onCheckedChange = onSingleKeysChange,
                         label = stringResource(Res.string.command_single_keys),
                     )
-                    BuilderText(text = stringResource(Res.string.command_single_keys_note), emphasis = Emphasis.Secondary)
-                    BuilderText(text = stringResource(Res.string.command_screen_reader_note), emphasis = Emphasis.Secondary)
+                    BuilderText(
+                        text = stringResource(Res.string.command_single_keys_note),
+                        emphasis = Emphasis.Secondary,
+                    )
+                    BuilderText(
+                        text = stringResource(Res.string.command_screen_reader_note),
+                        emphasis = Emphasis.Secondary,
+                    )
                 }
                 ShortcutGroup.entries.forEach { group ->
                     Column(verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {

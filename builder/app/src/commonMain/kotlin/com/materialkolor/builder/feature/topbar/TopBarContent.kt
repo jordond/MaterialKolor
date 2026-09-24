@@ -86,7 +86,10 @@ internal fun TopBarContent(
                 icon = IconId.Command,
                 description = stringResource(Res.string.topbar_commands),
                 // b-315
-                tooltip = stringResource(Res.string.topbar_commands_tooltip, Shortcut.Palette.text(LocalAppleKeys.current)),
+                tooltip = stringResource(
+                    Res.string.topbar_commands_tooltip,
+                    Shortcut.Palette.text(LocalAppleKeys.current),
+                ),
                 onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Palette)) },
             )
             TopBarIconButton(

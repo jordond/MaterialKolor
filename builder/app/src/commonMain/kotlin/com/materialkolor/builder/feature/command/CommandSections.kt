@@ -1,6 +1,7 @@
 package com.materialkolor.builder.feature.command
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.UriHandler
 import com.materialkolor.builder.domain.capability.Control
@@ -134,9 +135,12 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 // The registry's sections, one per part of the builder, each adding its commands in the order the
-// palette lists them.
+// palette lists them. None restarts on its own, since a section that did would add its commands a
+// second time to the list the registry already handed out. A state one reads rebuilds the whole
+// registry instead.
 
 @Composable
+@NonRestartableComposable
 internal fun generalCommands(
     list: CommandList,
     state: WorkspaceModel.State,
@@ -180,6 +184,7 @@ internal fun generalCommands(
 }
 
 @Composable
+@NonRestartableComposable
 internal fun historyCommands(
     list: CommandList,
     state: WorkspaceModel.State,
@@ -220,6 +225,7 @@ private fun topBarSite(
     }
 
 @Composable
+@NonRestartableComposable
 internal fun seedCommands(
     list: CommandList,
     state: WorkspaceModel.State,
@@ -274,6 +280,7 @@ private fun lockName(lock: ShuffleLock): StringResource =
     }
 
 @Composable
+@NonRestartableComposable
 internal fun libraryAndStyleCommands(
     list: CommandList,
     state: WorkspaceModel.State,
@@ -303,11 +310,12 @@ internal fun libraryAndStyleCommands(
     Style.entries.forEach { style ->
         val name = stringResource(styleName(style))
         val selected = style == state.document.style
+        val chip = stringResource(Res.string.style_chip, name, stringResource(styleTooltip(style)))
         list.add(
             id = "style.${style.name}",
             category = CommandCategory.Style,
             label = stringResource(Res.string.command_use_style, name),
-            site = ControlSite.Direct(Region.Poster, stringResource(Res.string.style_chip, name, stringResource(styleTooltip(style)))),
+            site = ControlSite.Direct(Region.Poster, chip),
             control = styleState,
             selected = selected,
         ) {
@@ -336,6 +344,7 @@ private fun libraryName(choice: LibraryChoice): StringResource =
     }
 
 @Composable
+@NonRestartableComposable
 internal fun targetCommands(
     list: CommandList,
     state: WorkspaceModel.State,
@@ -378,6 +387,7 @@ private fun motionSchemeName(choice: MotionSchemeChoice): StringResource =
     }
 
 @Composable
+@NonRestartableComposable
 internal fun previewCommands(
     list: CommandList,
     state: WorkspaceModel.State,
@@ -472,6 +482,7 @@ internal fun previewCommands(
 
 /** The device widths, which phones never get, since their preview is always a phone (F-46). */
 @Composable
+@NonRestartableComposable
 private fun deviceWidthCommands(
     list: CommandList,
     state: WorkspaceModel.State,
@@ -504,6 +515,7 @@ private fun deviceWidthCommands(
 }
 
 @Composable
+@NonRestartableComposable
 private fun visionCommands(
     list: CommandList,
     state: WorkspaceModel.State,
@@ -523,6 +535,7 @@ private fun visionCommands(
 }
 
 @Composable
+@NonRestartableComposable
 internal fun projectCommands(
     list: CommandList,
     projectName: String,
@@ -533,7 +546,11 @@ internal fun projectCommands(
 ) {
     val projects = stringResource(Res.string.poster_projects)
     // The poster's button reads the project's name once it has one.
-    val projectsName = if (projectName.isBlank()) projects else stringResource(Res.string.poster_projects_named, projectName)
+    val projectsName = if (projectName.isBlank()) {
+        projects
+    } else {
+        stringResource(Res.string.poster_projects_named, projectName)
+    }
     val projectsSite = ControlSite.Direct(Region.Poster, projectsName)
     list.add("projects", CommandCategory.Project, projects, projectsSite, shortcut = Shortcut.Projects) {
         dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Projects))
@@ -553,6 +570,7 @@ internal fun projectCommands(
 }
 
 @Composable
+@NonRestartableComposable
 internal fun exportCommands(
     list: CommandList,
     state: WorkspaceModel.State,
@@ -582,7 +600,9 @@ internal fun exportCommands(
     val options = stringResource(Res.string.export_options)
     val modeLabel = stringResource(Res.string.export_mode)
     ExportMode.entries.forEach { mode ->
-        val name = stringResource(if (mode == ExportMode.Dynamic) Res.string.export_mode_dynamic else Res.string.export_mode_frozen)
+        val name = stringResource(
+            if (mode == ExportMode.Dynamic) Res.string.export_mode_dynamic else Res.string.export_mode_frozen,
+        )
         list.add(
             id = "export.mode.${mode.name}",
             category = CommandCategory.Export,
@@ -626,9 +646,8 @@ internal fun exportCommands(
     ) { export.handle(ExportAction.SetAnimate(!prefs.animate)) }
     val variantsLabel = stringResource(Res.string.export_variants)
     FrozenVariants.entries.forEach { variants ->
-        val name = stringResource(
-            if (variants == FrozenVariants.StandardOnly) Res.string.export_variants_standard else Res.string.export_variants_all,
-        )
+        val standard = variants == FrozenVariants.StandardOnly
+        val name = stringResource(if (standard) Res.string.export_variants_standard else Res.string.export_variants_all)
         list.add(
             id = "export.variants.${variants.name}",
             category = CommandCategory.Export,
@@ -654,6 +673,7 @@ internal fun exportCommands(
 private val MATERIAL3_TARGETS = setOf(ExportTarget.Material3, ExportTarget.Material3Expressive)
 
 @Composable
+@NonRestartableComposable
 internal fun appearanceCommands(
     list: CommandList,
     state: WorkspaceModel.State,
