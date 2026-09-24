@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
@@ -207,11 +208,12 @@ class SplitPreviewTest {
         }
 
     @Test
-    fun drag_acrossTheWholeRange_sweepsTheHandleWithoutRecomposingEitherCopy() =
+    fun drag_acrossTheWholeRange_sweepsTheHandleWithoutRecomposingOrRedrawingEitherCopy() =
         runComposeUiTest {
             val split = SplitState()
             val compositions = mutableMapOf<String, Int>()
             val count = { where: String -> compositions[where] = (compositions[where] ?: 0) + 1 }
+            val draws = mutableMapOf<String, Int>()
             setContent {
                 Chrome {
                     CompositionLocalProvider(LocalCompositionProbe provides count) {
@@ -222,13 +224,14 @@ class SplitPreviewTest {
                             modifier = Modifier.padding(100.dp).size(400.dp, 300.dp).testTag(SPLIT),
                         ) { spec ->
                             count(spec.label)
-                            Box(Modifier.fillMaxSize())
+                            Box(Modifier.fillMaxSize().drawBehind { draws[spec.label] = (draws[spec.label] ?: 0) + 1 })
                         }
                     }
                 }
             }
             waitForIdle()
             val before = compositions.toMap()
+            val drawnBefore = draws.toMap()
 
             val step = onNodeWithTag(SPLIT).fetchSemanticsNode().size.width / 30f
             val samples = mutableListOf(split.fraction)
@@ -250,6 +253,8 @@ class SplitPreviewTest {
             samples.distinct() shouldHaveAtLeastSize 30
             before.keys shouldBe setOf("Light", "Dark", SPLIT_PREVIEW, "PreviewPane/Light", "PreviewPane/Dark")
             compositions shouldBe before
+            drawnBefore.keys shouldBe setOf("Light", "Dark")
+            draws shouldBe drawnBefore
         }
 
     @Test
@@ -344,6 +349,17 @@ class SplitPreviewTest {
         SplitShape(0.25f).rect(size, LayoutDirection.Rtl, density) shouldBe Rect(0f, 0f, 150f, 100f)
         SplitShape(0.25f, Orientation.Vertical).rect(size, LayoutDirection.Rtl, density) shouldBe
             Rect(0f, 25f, 200f, 100f)
+    }
+
+    @Test
+    fun splitShape_fractionBetweenPixels_putsTheEdgeOnAWholePixel() {
+        val size = Size(201f, 101f)
+        val density = Density(1f)
+
+        SplitShape(0.3f).rect(size, LayoutDirection.Ltr, density) shouldBe Rect(60f, 0f, 201f, 101f)
+        SplitShape(0.3f).rect(size, LayoutDirection.Rtl, density) shouldBe Rect(0f, 0f, 141f, 101f)
+        SplitShape(0.3f, Orientation.Vertical).rect(size, LayoutDirection.Ltr, density) shouldBe
+            Rect(0f, 30f, 201f, 101f)
     }
 
     private fun SplitShape.rect(
