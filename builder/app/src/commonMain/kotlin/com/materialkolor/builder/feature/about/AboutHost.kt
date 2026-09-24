@@ -36,6 +36,8 @@ import com.materialkolor.builder.generated.resources.about_font_bricolage
 import com.materialkolor.builder.generated.resources.about_font_jetbrains_mono
 import com.materialkolor.builder.generated.resources.about_font_license
 import com.materialkolor.builder.generated.resources.about_font_license_failed
+import com.materialkolor.builder.generated.resources.about_font_selawik
+import com.materialkolor.builder.generated.resources.about_font_selawik_renamed
 import com.materialkolor.builder.generated.resources.about_github
 import com.materialkolor.builder.generated.resources.about_libraries
 import com.materialkolor.builder.generated.resources.about_material_kolor_version
@@ -231,7 +233,7 @@ internal fun FontLicense(
         expanded = open,
         onExpandedChange = { expanded -> open = expanded },
         title = stringResource(fontName(font)),
-        summary = license,
+        summary = fontSummary(font, license), // b-404a
     ) {
         // b-314a
         // Null once the read failed. An error thrown in here would stop the whole UI on wasm.
@@ -256,6 +258,25 @@ private fun fontName(font: ShippedFont): StringResource =
     when (font) {
         ShippedFont.BricolageGrotesque -> Res.string.about_font_bricolage
         ShippedFont.JetBrainsMono -> Res.string.about_font_jetbrains_mono
+        ShippedFont.Selawik -> Res.string.about_font_selawik // b-404a
+    }
+
+// b-404a
+
+/**
+ * What stands under [font]'s name, the [license] and, for a subset that ships under another name,
+ * that name and why.
+ */
+@Composable
+private fun fontSummary(
+    font: ShippedFont,
+    license: String,
+): String =
+    when (font) {
+        ShippedFont.BricolageGrotesque,
+        ShippedFont.JetBrainsMono,
+        -> license
+        ShippedFont.Selawik -> stringResource(Res.string.about_font_selawik_renamed, license)
     }
 
 /**
