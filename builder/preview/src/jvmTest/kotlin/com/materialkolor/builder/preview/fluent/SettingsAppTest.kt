@@ -11,7 +11,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
@@ -19,6 +24,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithTag
@@ -48,6 +54,7 @@ import com.materialkolor.builder.preview.split.SplitState
 import io.github.takahirom.roborazzi.captureRoboImage
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
@@ -119,7 +126,10 @@ class SettingsAppTest {
                     }
 
                     onNode(hasContentDescription(FluentSetting.Flashing.title), useUnmergedTree = true).assertExists()
-                    // Unmerged, since a merged node also carries the roles its children declared.
+                    // Unmerged, since a merged node also carries the roles its children declared. The
+                    // navigation layer of compose-fluent 0.1.0 keeps its click action. It wraps the nav
+                    // items, so nothing outside it can clear its semantics and keep theirs. The app
+                    // keeps it out of focus, which the Tab test below checks.
                     val controls = onAllNodes(hasClickAction() or hasSetTextAction(), useUnmergedTree = true)
                         .fetchSemanticsNodes()
                         .filterNot { node -> (NavigationShield or ScrollbarArrow or UnderAnOverlay).matches(node) }
@@ -200,6 +210,36 @@ class SettingsAppTest {
                         }
                         onRoot().captureRoboImage("$FluentScreenshotDir/app-${width.name}-${mode.label}.png")
                     }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun tab_backThroughTheTabletRailAndThePhoneMenu_stopsOnEveryPageButNeverTheLibraryLayer() {
+        for (width in listOf(DeviceWidth.Tablet, DeviceWidth.Phone)) {
+            withClue(width) {
+                runComposeUiTest {
+                    val frame = FluentFrames.getValue(width)
+                    val state = DemoAppState().apply { setOn(FluentMenuSwitch, true) }
+                    lateinit var focus: FocusManager
+                    setContent {
+                        focus = LocalFocusManager.current
+                        FluentHarness(FluentLightSpec, state, width, Modifier.size(frame.width.dp, frame.height.dp))
+                    }
+                    waitForIdle()
+
+                    // The rail and the menu come last, so going back from the end reaches them first.
+                    val stops = List(FluentPage.entries.size + 4) {
+                        runOnIdle { focus.moveFocus(FocusDirection.Previous) }
+                        waitForIdle()
+                        onAllNodes(isFocused(), useUnmergedTree = true).fetchSemanticsNodes().single()
+                    }
+
+                    stops.filter { node -> NavigationShield.matches(node) }.map { node -> "${node.config}" }.shouldBeEmpty()
+                    stops
+                        .mapNotNull { node -> node.config.getOrNull(SemanticsProperties.ContentDescription) }
+                        .flatten() shouldContainAll FluentPage.entries.map { page -> page.label }
                 }
             }
         }

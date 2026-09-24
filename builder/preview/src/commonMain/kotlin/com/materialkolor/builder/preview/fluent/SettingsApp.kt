@@ -2,6 +2,7 @@ package com.materialkolor.builder.preview.fluent
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
@@ -108,7 +110,10 @@ internal fun SettingsApp(
                     }
                 }
             },
-            modifier = Modifier.fillMaxSize(),
+            // The library lays a clickable layer round the tablet's rail and the phone's open menu to
+            // swallow a click, which would be a Tab stop with no name. Nothing in the view takes focus
+            // unless it sits in a focus group, and only the app's own parts do.
+            modifier = Modifier.fillMaxSize().focusProperties { canFocus = false },
             displayMode = when (deviceWidth) {
                 DeviceWidth.Phone -> NavigationDisplayMode.LeftCollapsed
                 DeviceWidth.Tablet -> NavigationDisplayMode.LeftCompact
@@ -125,13 +130,15 @@ internal fun SettingsApp(
 
 /**
  * The menu button of the phone's collapsed navigation, which opens the menu over the page. The
- * library's button keeps its clickable inside, so a layer over it takes its place.
+ * library's button keeps its clickable inside, so a layer over it takes its place, in a focus group
+ * so the navigation view's fence leaves it a Tab stop.
  */
 @Composable
 private fun MenuButton(state: DemoAppState) {
     val open = state.isOn(FluentMenuSwitch)
     val interaction = remember { MutableInteractionSource() }
     FluentOverlaid(
+        modifier = Modifier.focusGroup(),
         control = Modifier
             .fluentNeutralRoles()
             .clickable(
@@ -147,7 +154,10 @@ private fun MenuButton(state: DemoAppState) {
     }
 }
 
-/** One page of the navigation, the library's own item under a layer that names it and picks it. */
+/**
+ * One page of the navigation, the library's own item under a layer that names it and picks it, in a
+ * focus group so the navigation view's fence leaves it a Tab stop.
+ */
 @Composable
 private fun NavigationMenuItemScope.PageItem(
     page: FluentPage,
@@ -157,6 +167,7 @@ private fun NavigationMenuItemScope.PageItem(
     val selected = state.fluentPage() == page
     val interaction = remember { MutableInteractionSource() }
     FluentOverlaid(
+        modifier = Modifier.focusGroup(),
         control = Modifier
             .fluentAccentRoles()
             .selectable(
@@ -186,8 +197,9 @@ private fun SettingsPage(
     phone: Boolean,
 ) {
     val legendShown = state.isOn(FluentShadesSwitch)
-    // The phone's menu button and title sit over the top of the page.
-    Column(Modifier.fillMaxSize().padding(top = if (phone) 48.dp else 0.dp)) {
+    // The phone's menu button and title sit over the top of the page. A focus group keeps the page's
+    // controls out of the navigation view's fence.
+    Column(Modifier.fillMaxSize().focusGroup().padding(top = if (phone) 48.dp else 0.dp)) {
         PageHeader(state, phone)
         if (phone) {
             PanelMotion(legendShown) {
