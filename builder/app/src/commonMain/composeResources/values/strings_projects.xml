@@ -100,6 +100,5 @@
     <string name="share_unavailable">This theme can’t be put in a link</string>
 
     <!-- Notices when a pasted link can't be opened. -->
-    <string name="share_newer_version">Made with a newer version. Reload to update.</string>
     <string name="share_invalid">That link doesn’t open a theme</string>
 </resources>

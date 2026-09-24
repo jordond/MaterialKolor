@@ -407,6 +407,14 @@ interface Environment {
      * there with `location.assign`. The desktop build has no page to load, so it does nothing.
      */
     fun reload(path: String)
+
+    // b-314ba
+
+    /**
+     * Whether [reload] loads anything here. The web does, and the desktop build has no page to load,
+     * so a banner there leaves its Reload out.
+     */
+    val canReload: Boolean
 }
 
 // b-214

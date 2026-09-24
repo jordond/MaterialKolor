@@ -101,6 +101,11 @@ internal class FakeEnvironment(
     override fun reload(path: String) {
         reloads += path
     }
+
+    // b-314ba
+
+    /** Whether a reload loads anything, true as on the web. */
+    override var canReload: Boolean = true
 }
 
 /** What every [FakeEnvironment] says it runs in. */

@@ -2,6 +2,7 @@ package com.materialkolor.builder.feature.workspace
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -20,18 +21,25 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.materialkolor.builder.BuilderRoot
+import com.materialkolor.builder.core.session.ProjectRef
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.link.RoutePath
 import com.materialkolor.builder.domain.link.ShareCodec
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.Appearance
+import com.materialkolor.builder.domain.persist.MotionOverride
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.fakes.FakeRouter
+import com.materialkolor.builder.feature.projects.ProjectsModel
+import com.materialkolor.builder.kit.a11y.Announcer
+import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
@@ -118,6 +126,25 @@ private val CASES = listOf(
         WorkspaceBanner.NewerData,
         NEWER_DATA,
         listOf("Reload" to BannerAction.ReloadHome),
+        absent = listOf("Dismiss"), // b-314ba
+    ),
+)
+
+// b-314ba
+
+/** The banners that ask for a reload, where a reload does nothing. */
+private val NO_RELOAD_CASES = listOf(
+    BannerCase(
+        WorkspaceBanner.NewerVersion,
+        NEWER_VERSION,
+        listOf("Dismiss" to BannerAction.DismissBootNotice),
+        absent = listOf("Reload"),
+    ),
+    BannerCase(
+        WorkspaceBanner.NewerData,
+        NEWER_DATA,
+        listOf("Dismiss" to BannerAction.DismissNewerData),
+        absent = listOf("Reload"),
     ),
 )
 
@@ -131,27 +158,14 @@ class WorkspaceBannersTest {
     @Test
     fun eachBanner_saysItsMessageAndItsButtonsAskForTheirActions() =
         runComposeUiTest {
-            var shown by mutableStateOf(emptyList<WorkspaceBanner>())
-            val actions = mutableListOf<BannerAction>()
-            setContent {
-                Themed { BannerStack(banners = shown, onAction = { action -> actions += action }) }
-            }
-            CASES.forEach { case ->
-                withClue(case.banner.name) {
-                    shown = listOf(case.banner)
-                    actions.clear()
-                    waitForIdle()
+            assertCases(CASES, canReload = true)
+        }
 
-                    onNodeWithText(case.message).assertExists()
-                    case.absent.forEach { label -> onAllNodes(hasText(label)).assertCountEquals(0) }
-                    case.buttons.forEach { (label, _) ->
-                        button(label).performClick()
-                        waitForIdle()
-                    }
-
-                    actions shouldBe case.buttons.map { (_, action) -> action }
-                }
-            }
+    // b-314ba
+    @Test
+    fun withoutReload_theNewerBannersSayTheirTextAndOfferDismissOnly() =
+        runComposeUiTest {
+            assertCases(NO_RELOAD_CASES, canReload = false)
         }
 
     @Test
@@ -166,7 +180,7 @@ class WorkspaceBannersTest {
                 WorkspaceBanner.NewerData,
             )
             setContent {
-                Themed { BannerStack(banners = banners, onAction = {}) }
+                Themed { BannerStack(banners = banners, canReload = true, onAction = {}) }
             }
             waitForIdle()
 
@@ -188,7 +202,7 @@ class WorkspaceBannersTest {
                 Themed {
                     Box(Modifier.fillMaxSize()) {
                         BuilderButton(onClick = {}, label = "Elsewhere", modifier = Modifier.focusRequester(focus))
-                        BannerStack(banners = shown, onAction = {})
+                        BannerStack(banners = shown, canReload = true, onAction = {})
                     }
                 }
             }
@@ -201,6 +215,105 @@ class WorkspaceBannersTest {
 
             onNodeWithText(CONFLICT).assertExists()
             onNodeWithText("Elsewhere").assertIsFocused()
+        }
+
+    // b-314ba
+    @Test
+    fun aBannerShowingUp_isReadOutOnceInTheOrderItCame() =
+        runComposeUiTest {
+            var shown by mutableStateOf(emptyList<WorkspaceBanner>())
+            var inset by mutableStateOf(0.dp)
+            val announced = mutableListOf<String>()
+            setContent {
+                Themed {
+                    CompositionLocalProvider(LocalAnnouncer provides Announcer { message -> announced += message }) {
+                        BannerStack(
+                            banners = shown,
+                            canReload = true,
+                            onAction = {},
+                            modifier = Modifier.padding(inset),
+                        )
+                    }
+                }
+            }
+            waitForIdle()
+
+            shown = listOf(WorkspaceBanner.Conflict)
+            waitForIdle()
+            shown = listOf(WorkspaceBanner.Conflict, WorkspaceBanner.StorageFull)
+            waitForIdle()
+            announced shouldBe listOf(CONFLICT, STORAGE_FULL)
+
+            // A recomposition and a move in the stack read nothing new.
+            inset = 1.dp
+            waitForIdle()
+            shown = listOf(WorkspaceBanner.StorageFull, WorkspaceBanner.Conflict)
+            waitForIdle()
+            announced shouldBe listOf(CONFLICT, STORAGE_FULL)
+
+            // A banner that goes and comes back is read out again.
+            shown = listOf(WorkspaceBanner.StorageFull)
+            waitForIdle()
+            shown = listOf(WorkspaceBanner.Conflict, WorkspaceBanner.StorageFull)
+            waitForIdle()
+            announced shouldBe listOf(CONFLICT, STORAGE_FULL, CONFLICT)
+        }
+
+    // b-314ba
+    @Test
+    fun conflictBanner_eachButton_settlesTheClashItsOwnWay() =
+        runComposeUiTest {
+            val actions = mutableListOf<BannerAction>()
+            showBanners(ProjectsModel.State(conflict = true), actions)
+
+            onNodeWithText("Load latest").performClick()
+            waitForIdle()
+            onNodeWithText("Keep mine").performClick()
+            waitForIdle()
+
+            actions shouldBe listOf(
+                BannerAction.ResolveConflict(keepMine = false),
+                BannerAction.ResolveConflict(keepMine = true),
+            )
+        }
+
+    // b-314ba
+    @Test
+    fun saveBanner_savesOnceAndGoesOnceTheThemeIsSaved() =
+        runComposeUiTest {
+            var projects by mutableStateOf(ProjectsModel.State(open = ProjectRef.Transient("code")))
+            val actions = mutableListOf<BannerAction>()
+            setContent {
+                Themed {
+                    WorkspaceBanners(
+                        app = appState(),
+                        projects = projects,
+                        onAction = { action ->
+                            actions += action
+                            val saved = ProjectRef.Persisted("p1")
+                            if (action == BannerAction.SaveTheme) projects = projects.copy(open = saved)
+                        },
+                    )
+                }
+            }
+            waitForIdle()
+            onNodeWithText(UNSAVED_THEME).assertExists()
+
+            onNodeWithText("Save to my projects").performClick()
+            waitForIdle()
+
+            actions shouldBe listOf(BannerAction.SaveTheme)
+            onAllNodes(hasText("Save to my projects")).assertCountEquals(0)
+        }
+
+    // b-314ba
+    @Test
+    fun newerDataBanner_asksForAReload() =
+        runComposeUiTest {
+            showBanners(ProjectsModel.State(newerData = true))
+
+            onNode(hasText("A newer version of the builder", substring = true)).assertExists()
+            onNodeWithText("Reload").assertExists()
         }
 
     @Test
@@ -243,6 +356,49 @@ class WorkspaceBannersTest {
     private fun ComposeUiTest.button(label: String) =
         if (label == "Close") onNodeWithContentDescription(label) else onNodeWithText(label)
 
+    // b-314ba
+
+    /** Shows each of [cases] alone and checks what it says, what it leaves out and what its buttons ask for. */
+    private fun ComposeUiTest.assertCases(
+        cases: List<BannerCase>,
+        canReload: Boolean,
+    ) {
+        var shown by mutableStateOf(emptyList<WorkspaceBanner>())
+        val actions = mutableListOf<BannerAction>()
+        setContent {
+            Themed { BannerStack(banners = shown, canReload = canReload, onAction = { action -> actions += action }) }
+        }
+        cases.forEach { case ->
+            withClue(case.banner.name) {
+                shown = listOf(case.banner)
+                actions.clear()
+                waitForIdle()
+
+                onNodeWithText(case.message).assertExists()
+                case.absent.forEach { label -> onAllNodes(hasText(label)).assertCountEquals(0) }
+                case.buttons.forEach { (label, _) ->
+                    button(label).performClick()
+                    waitForIdle()
+                }
+
+                actions shouldBe case.buttons.map { (_, action) -> action }
+            }
+        }
+    }
+
+    /** Shows the stack [projects] raises beside an app with nothing to say, through [WorkspaceBanners]. */
+    private fun ComposeUiTest.showBanners(
+        projects: ProjectsModel.State,
+        actions: MutableList<BannerAction> = mutableListOf(),
+    ) {
+        setContent {
+            Themed {
+                WorkspaceBanners(app = appState(), projects = projects, onAction = { action -> actions += action })
+            }
+        }
+        waitForIdle()
+    }
+
     private fun ComposeUiTest.showRoot(platform: FakePlatform) {
         val graph = createGraphFactory<AppGraph.Factory>().create(platform)
         val owner = TestOwner()
@@ -261,6 +417,19 @@ class WorkspaceBannersTest {
         override val viewModelStore: ViewModelStore = ViewModelStore()
     }
 }
+
+// b-314ba
+
+/** An app state with nothing to say, on a platform where a reload works. */
+private fun appState(): AppModel.State =
+    AppModel.State(
+        appearance = Appearance.System,
+        motion = MotionOverride.System,
+        systemDark = false,
+        systemReducedMotion = false,
+        coarsePointer = false,
+        canReload = true,
+    )
 
 @Composable
 private fun Themed(content: @Composable () -> Unit) {

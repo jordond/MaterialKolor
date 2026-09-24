@@ -204,15 +204,73 @@ class AppModelTest : SessionTestBase() {
         )
         val projects = ProjectsModel.State(open = ProjectRef.Transient("code"), conflict = true, newerData = true)
 
+        // b-314ba
+        // The storage full banner keeps the unsaved theme's away, so the rest stack without it.
         workspaceBanners(app, projects) shouldBe listOf(
             WorkspaceBanner.Conflict,
             WorkspaceBanner.NewerVersion,
             WorkspaceBanner.StorageFull,
             WorkspaceBanner.StorageUnavailable,
+            WorkspaceBanner.NewerData,
+        )
+        workspaceBanners(app.copy(storageFull = false), projects) shouldBe listOf(
+            WorkspaceBanner.Conflict,
+            WorkspaceBanner.NewerVersion,
+            WorkspaceBanner.StorageUnavailable,
             WorkspaceBanner.UnsavedTheme,
             WorkspaceBanner.NewerData,
         )
     }
+
+    // b-314ba
+
+    @Test
+    fun storageFull_hidesTheUnsavedThemeUntilASaveLands() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val app = appModel(session, preferences, FakeRouter())
+            val transient = ProjectsModel.State(open = ProjectRef.Transient("code"))
+            bannersOf(app, transient) shouldBe listOf(WorkspaceBanner.UnsavedTheme)
+            stores.failNextUpdates(count = 2, StoreError.QuotaExceeded)
+
+            session.edit(DocumentChange.SetThemeName("Full"), EditPhase.Discrete)
+            settle()
+            bannersOf(app, transient) shouldBe listOf(WorkspaceBanner.StorageFull)
+
+            session.edit(DocumentChange.SetThemeName("Fits"), EditPhase.Discrete)
+            settle()
+
+            bannersOf(app, transient) shouldBe listOf(WorkspaceBanner.UnsavedTheme)
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun canReload_followsThePlatform() =
+        runTest {
+            val (session, preferences) = session()
+            appModel(session, preferences, FakeRouter()).state.value.canReload shouldBe true
+
+            environment.canReload = false
+
+            appModel(session, preferences, FakeRouter()).state.value.canReload shouldBe false
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun newerData_dismissedWhereAReloadDoesNothing_staysAwayForTheSession() =
+        runTest {
+            environment.canReload = false
+            val (session, preferences) = session()
+            val app = appModel(session, preferences, FakeRouter())
+            val newer = ProjectsModel.State(open = ProjectRef.Persisted("p1"), newerData = true)
+            bannersOf(app, newer) shouldBe listOf(WorkspaceBanner.NewerData)
+
+            app.dismissNewerData()
+
+            bannersOf(app, newer).shouldBeEmpty()
+            harness.clearAndJoin()
+        }
 
     /** What the stack shows for [app] beside a projects model with nothing to say by default. */
     private fun bannersOf(

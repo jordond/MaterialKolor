@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
@@ -34,6 +35,11 @@ import com.materialkolor.builder.generated.resources.banners_start_from_defaults
 import com.materialkolor.builder.generated.resources.banners_storage_full
 import com.materialkolor.builder.generated.resources.banners_storage_full_projects
 import com.materialkolor.builder.generated.resources.banners_unknown_path
+import com.materialkolor.builder.generated.resources.projects_conflict
+import com.materialkolor.builder.generated.resources.projects_newer_data
+import com.materialkolor.builder.generated.resources.projects_storage_unavailable
+import com.materialkolor.builder.generated.resources.share_transient
+import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
@@ -66,12 +72,10 @@ internal fun WorkspaceBanners(
 ) {
     val appState by app.collectAsState()
     val projectsState by projects.collectAsState()
-    val drawerOpen = state.panel == Panel.Projects
-    val banners = remember(appState, projectsState, drawerOpen) {
-        workspaceBanners(appState, projectsState, drawerOpen)
-    }
-    BannerStack(
-        banners = banners,
+    WorkspaceBanners(
+        app = appState,
+        projects = projectsState,
+        drawerOpen = state.panel == Panel.Projects, // b-314ba
         onAction = { action ->
             when (action) {
                 is BannerAction.ResolveConflict -> {
@@ -102,10 +106,34 @@ internal fun WorkspaceBanners(
                 BannerAction.ReloadHome -> {
                     app.reloadHome()
                 }
+                // b-314ba
+                BannerAction.DismissNewerData -> {
+                    app.dismissNewerData()
+                }
             }
         },
         modifier = modifier,
     )
+}
+
+// b-314ba
+
+/**
+ * The banners [app] and [projects] raise, drawn as one stack, with every button handing what it
+ * asks for to [onAction].
+ *
+ * @param[drawerOpen] Whether the projects drawer is open, which says itself that storage is missing.
+ */
+@Composable
+internal fun WorkspaceBanners(
+    app: AppModel.State,
+    projects: ProjectsModel.State,
+    onAction: (BannerAction) -> Unit,
+    modifier: Modifier = Modifier,
+    drawerOpen: Boolean = false,
+) {
+    val banners = remember(app, projects, drawerOpen) { workspaceBanners(app, projects, drawerOpen) }
+    BannerStack(banners = banners, canReload = app.canReload, onAction = onAction, modifier = modifier)
 }
 
 /**
@@ -172,12 +200,18 @@ internal sealed interface BannerAction {
 
     /** Load the builder again at `/`, for a newer build to pick up its data. */
     data object ReloadHome : BannerAction
+
+    // b-314ba
+
+    /** Put the banner about a newer build's data away, where a reload does nothing. */
+    data object DismissNewerData : BannerAction
 }
 
 /**
  * The banners [app] and [projects] raise, in the order they stack. A clash with another tab comes
  * first, then the boot notice, then storage, then a theme that is not saved yet, then data a newer
- * build saved. Without storage there is nowhere to save the theme, so that banner stays away.
+ * build saved. Without storage there is nowhere to save the theme, and with storage full a save would
+ * fail the same way, so that banner stays away while the storage full one offers a way out.
  *
  * @param[drawerOpen] Whether the projects drawer is open. It says itself that storage is missing, so
  * the stack leaves that banner to it.
@@ -194,8 +228,9 @@ internal fun workspaceBanners(
         if (app.storageUnavailable && !app.storageUnavailableDismissed && !drawerOpen) {
             add(WorkspaceBanner.StorageUnavailable)
         }
-        if (projects.transient && projects.storageAvailable) add(WorkspaceBanner.UnsavedTheme)
-        if (projects.newerData) add(WorkspaceBanner.NewerData)
+        // b-314ba
+        if (projects.transient && projects.storageAvailable && !app.storageFull) add(WorkspaceBanner.UnsavedTheme)
+        if (projects.newerData && !app.newerDataDismissed) add(WorkspaceBanner.NewerData)
     }
 
 private fun bootBanner(app: AppModel.State): WorkspaceBanner? {
@@ -210,11 +245,16 @@ private fun bootBanner(app: AppModel.State): WorkspaceBanner? {
 
 /**
  * Draws [banners] from the top down, below the top bar. A banner that shows up leaves focus where
- * it is, and a screen reader reads the stack as one group, in order.
+ * it is and is read out once through [LocalAnnouncer], and a screen reader reads the stack as one
+ * group, in order.
+ *
+ * @param[canReload] Whether Reload does anything here. Without it the banners that would ask for
+ * one offer Dismiss only.
  */
 @Composable
 internal fun BannerStack(
     banners: List<WorkspaceBanner>,
+    canReload: Boolean, // b-314ba
     onAction: (BannerAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -232,15 +272,49 @@ internal fun BannerStack(
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
             banners.forEach { banner ->
-                key(banner) { Banner(banner, onAction) }
+                key(banner) {
+                    // b-314ba
+                    AnnounceOnce(stringResource(messageOf(banner)))
+                    Banner(banner, canReload, onAction)
+                }
             }
         }
     }
 }
 
+// b-314ba
+
+/**
+ * Reads [message] out once through [LocalAnnouncer] as its banner shows up. A recomposition or a
+ * move in the stack says nothing more, and a banner that goes and comes back is read out again. An
+ * empty message is one the resources have not loaded yet.
+ */
+@Composable
+private fun AnnounceOnce(message: String) {
+    val announcer = LocalAnnouncer.current
+    LaunchedEffect(message) {
+        if (message.isNotEmpty()) announcer.announce(message)
+    }
+}
+
+/** What [banner] says, the text it is read out with. */
+private fun messageOf(banner: WorkspaceBanner): StringResource =
+    when (banner) {
+        WorkspaceBanner.Conflict -> Res.string.projects_conflict
+        WorkspaceBanner.InvalidLink -> Res.string.banners_invalid_link
+        WorkspaceBanner.InvalidLinkDefaults -> Res.string.banners_invalid_link_defaults
+        WorkspaceBanner.UnknownPath -> Res.string.banners_unknown_path
+        WorkspaceBanner.NewerVersion -> Res.string.banners_newer_version
+        WorkspaceBanner.StorageFull -> Res.string.banners_storage_full
+        WorkspaceBanner.StorageUnavailable -> Res.string.projects_storage_unavailable
+        WorkspaceBanner.UnsavedTheme -> Res.string.share_transient
+        WorkspaceBanner.NewerData -> Res.string.projects_newer_data
+    }
+
 @Composable
 private fun Banner(
     banner: WorkspaceBanner,
+    canReload: Boolean, // b-314ba
     onAction: (BannerAction) -> Unit,
 ) {
     when (banner) {
@@ -248,7 +322,7 @@ private fun Banner(
             ConflictBanner(onResolve = { keepMine -> onAction(BannerAction.ResolveConflict(keepMine)) })
         }
         WorkspaceBanner.InvalidLink -> {
-            BootNoticeBanner(Res.string.banners_invalid_link, onAction) {
+            BootNoticeBanner(messageOf(banner), onAction) {
                 BuilderButton(
                     onClick = { onAction(BannerAction.StartFromDefaults) },
                     label = stringResource(Res.string.banners_start_from_defaults),
@@ -256,18 +330,21 @@ private fun Banner(
             }
         }
         WorkspaceBanner.InvalidLinkDefaults -> {
-            BootNoticeBanner(Res.string.banners_invalid_link_defaults, onAction)
+            BootNoticeBanner(messageOf(banner), onAction)
         }
         WorkspaceBanner.UnknownPath -> {
-            BootNoticeBanner(Res.string.banners_unknown_path, onAction)
+            BootNoticeBanner(messageOf(banner), onAction)
         }
         WorkspaceBanner.NewerVersion -> {
-            BootNoticeBanner(Res.string.banners_newer_version, onAction, icon = IconId.Info) {
-                BuilderButton(
-                    onClick = { onAction(BannerAction.ReloadLink) },
-                    label = stringResource(Res.string.banners_reload),
-                    emphasis = Emphasis.Primary,
-                )
+            BootNoticeBanner(messageOf(banner), onAction, icon = IconId.Info) {
+                // b-314ba
+                if (canReload) {
+                    BuilderButton(
+                        onClick = { onAction(BannerAction.ReloadLink) },
+                        label = stringResource(Res.string.banners_reload),
+                        emphasis = Emphasis.Primary,
+                    )
+                }
             }
         }
         WorkspaceBanner.StorageFull -> {
@@ -283,7 +360,12 @@ private fun Banner(
             SharedLinkBanner(onSave = { onAction(BannerAction.SaveTheme) })
         }
         WorkspaceBanner.NewerData -> {
-            NewerDataBanner(onReload = { onAction(BannerAction.ReloadHome) })
+            // b-314ba
+            if (canReload) {
+                NewerDataBanner(onReload = { onAction(BannerAction.ReloadHome) })
+            } else {
+                NewerDataBanner(onDismiss = { onAction(BannerAction.DismissNewerData) })
+            }
         }
     }
 }

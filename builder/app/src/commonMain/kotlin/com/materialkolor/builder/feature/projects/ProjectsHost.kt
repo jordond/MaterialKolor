@@ -7,11 +7,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import com.materialkolor.builder.core.data.DeletedProject
-import com.materialkolor.builder.feature.workspace.BannerAction
-import com.materialkolor.builder.feature.workspace.BannerStack
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
-import com.materialkolor.builder.feature.workspace.WorkspaceBanner
 import com.materialkolor.builder.feature.workspace.WorkspaceBanners
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.generated.resources.Res
@@ -80,41 +77,6 @@ internal fun ProjectsHost(
             model.handle(ProjectsAction.ProblemShown)
         }
     }
-}
-
-// b-314b
-
-/**
- * The banners [state] raises by itself, a clash with another tab, a theme that is not saved yet and
- * data a newer build saved, in the same stack and order as [WorkspaceBanners]. The workspace draws
- * the whole stack through that one, so these never show twice.
- *
- * @param[onReload] What the newer data banner's Reload does.
- */
-@Composable
-internal fun ProjectBanners(
-    state: ProjectsModel.State,
-    onAction: (ProjectsAction) -> Unit,
-    modifier: Modifier = Modifier,
-    onReload: () -> Unit = {},
-) {
-    val banners = listOfNotNull(
-        WorkspaceBanner.Conflict.takeIf { state.conflict },
-        WorkspaceBanner.UnsavedTheme.takeIf { state.transient && state.storageAvailable },
-        WorkspaceBanner.NewerData.takeIf { state.newerData },
-    )
-    BannerStack(
-        banners = banners,
-        onAction = { action ->
-            when (action) {
-                is BannerAction.ResolveConflict -> onAction(ProjectsAction.ResolveConflict(action.keepMine))
-                BannerAction.SaveTheme -> onAction(ProjectsAction.SaveShared)
-                BannerAction.ReloadHome -> onReload()
-                else -> Unit
-            }
-        },
-        modifier = modifier,
-    )
 }
 
 /**

@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.banners_close
+import com.materialkolor.builder.generated.resources.banners_dismiss
 import com.materialkolor.builder.generated.resources.banners_reload
 import com.materialkolor.builder.generated.resources.projects_conflict
 import com.materialkolor.builder.generated.resources.projects_conflict_keep
@@ -82,23 +83,37 @@ internal fun StorageUnavailableBanner(
 /**
  * A newer version of the builder saved some of the data here, and this one leaves it alone until a
  * reload picks it up (D41). Reload loads the builder again at `/`.
+ *
+ * @param[onReload] What Reload does, or null where a reload does nothing and the button stays out.
+ * @param[onDismiss] Puts the banner away from a Dismiss button, or null for a banner without one.
  */
 @Composable
 internal fun NewerDataBanner(
-    onReload: () -> Unit, // b-314b
     modifier: Modifier = Modifier,
+    onReload: (() -> Unit)? = null, // b-314b
+    onDismiss: (() -> Unit)? = null, // b-314ba
 ) {
     ProjectBanner(
         icon = IconId.Info,
         message = stringResource(Res.string.projects_newer_data),
         modifier = modifier,
     ) {
+        // b-314ba
+        if (onDismiss != null) {
+            BuilderButton(
+                onClick = onDismiss,
+                label = stringResource(Res.string.banners_dismiss),
+                emphasis = Emphasis.Subtle,
+            )
+        }
         // b-314b
-        BuilderButton(
-            onClick = onReload,
-            label = stringResource(Res.string.banners_reload),
-            emphasis = Emphasis.Primary,
-        )
+        if (onReload != null) {
+            BuilderButton(
+                onClick = onReload,
+                label = stringResource(Res.string.banners_reload),
+                emphasis = Emphasis.Primary,
+            )
+        }
     }
 }
 

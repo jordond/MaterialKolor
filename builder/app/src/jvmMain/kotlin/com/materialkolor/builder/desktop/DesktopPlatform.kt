@@ -142,6 +142,9 @@ private object DesktopEnvironment : Environment {
     // b-314b
     // A window has no page to load again, and its build is the only one there is.
     override fun reload(path: String) = Unit
+
+    // b-314ba
+    override val canReload: Boolean = false
 }
 
 private fun notOnDesktop(): Result<Unit> = Result.failure(UnsupportedOperationException("Not available on desktop yet"))

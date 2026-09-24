@@ -91,6 +91,9 @@ internal class WebEnvironment : Environment {
 
     // b-314b
     override fun reload(path: String) = assignLocation(path)
+
+    // b-314ba
+    override val canReload: Boolean = true
 }
 
 // b-314b

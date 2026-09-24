@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
  * It also keeps what the banners above the workspace say for the whole session (F-38). Why the
  * address did not open what it asked for, until it is dismissed. A full storage, from the save that
  * failed after the repository made room until a save lands. No storage at all, until its banner is
- * closed.
+ * closed. Where a reload does nothing, data a newer build saved, until its banner is dismissed.
  */
 @Stable
 @Inject
@@ -55,6 +55,7 @@ internal class AppModel(
             systemReducedMotion = environment.reducedMotion.value,
             coarsePointer = environment.coarsePointer.value,
             storageUnavailable = !environment.storageAvailable, // b-314b
+            canReload = environment.canReload, // b-314ba
         ),
     ) {
     private var booted = false
@@ -106,6 +107,13 @@ internal class AppModel(
         updateState { state -> state.copy(storageUnavailableDismissed = true) }
     }
 
+    // b-314ba
+
+    /** Put the banner about a newer build's data away for the rest of the session. */
+    fun dismissNewerData() {
+        updateState { state -> state.copy(newerDataDismissed = true) }
+    }
+
     /**
      * Load the address the page opened on again, the link a newer build wrote for example, so a
      * newer build can read it. The address bar says `/` by now (D15), so the path comes from the
@@ -137,6 +145,9 @@ internal class AppModel(
      *   save lands or another project opens.
      * @property[storageUnavailable] Whether nothing saved here outlives the session.
      * @property[storageUnavailableDismissed] Whether the banner saying so was closed this session.
+     * @property[canReload] Whether loading the page again does anything here, as it does on the web.
+     * @property[newerDataDismissed] Whether the banner about a newer build's data was dismissed this
+     *   session.
      */
     @Immutable
     data class State(
@@ -151,6 +162,9 @@ internal class AppModel(
         val storageFull: Boolean = false,
         val storageUnavailable: Boolean = false,
         val storageUnavailableDismissed: Boolean = false,
+        // b-314ba
+        val canReload: Boolean = false,
+        val newerDataDismissed: Boolean = false,
     ) {
         /** Whether the chrome is dark, following the system live when [appearance] says so. */
         val isDark: Boolean
