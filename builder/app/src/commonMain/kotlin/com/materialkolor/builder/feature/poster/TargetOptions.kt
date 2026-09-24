@@ -27,8 +27,9 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The options only some export targets have (F-18), AMOLED dark, the motion scheme and the export's
- * color animation. Each shows only for the targets that have it, and the label over them goes too
- * when none of them does.
+ * color animation. Each shows only for the targets that have it, and color animation only while the
+ * target's export runs dynamic. The label over them goes too when none of them shows, and it asks
+ * [showsColorAnimation] the same as the option does, so it never stands over nothing.
  */
 @Composable
 internal fun TargetOptions(
@@ -39,8 +40,8 @@ internal fun TargetOptions(
     val spacing = LocalBuilderTokens.current.spacing
     val amoled = context.capabilities[Control.AmoledDark]
     val motion = context.capabilities[Control.MotionScheme]
-    val animation = context.capabilities[Control.ColorAnimation]
-    if (!amoled.shown && !motion.shown && !animation.shown) return
+    val animation = context.showsColorAnimation()
+    if (!amoled.shown && !motion.shown && !animation) return
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
         InfoLabel(label = stringResource(Res.string.extras_targets_label), topic = InfoTopic.Targets)
         if (amoled.shown) AmoledOption(context, dispatcher, amoled)

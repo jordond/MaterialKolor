@@ -175,6 +175,13 @@ internal fun WorkspaceScreen(
             is WorkspaceAction.ShowOnRamp -> {
                 model.showOnRamp(action.target)
             }
+            // b-306b
+            is WorkspaceAction.SetColorAnimation -> {
+                model.setColorAnimation(action.target, action.on)
+            }
+            is WorkspaceAction.SetColorAnimationDuration -> {
+                model.setColorAnimationDuration(action.target, action.durationMs)
+            }
         }
     }
 
