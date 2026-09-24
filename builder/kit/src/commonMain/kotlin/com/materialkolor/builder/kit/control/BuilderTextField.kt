@@ -41,6 +41,10 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
  * @param[onDraftChange] Called with the draft each time someone changes its text, and with the
  * committed text again when Esc throws the draft away. A cursor move, a commit and a new [value]
  * from outside leave it alone. For a caller that acts on the text as it is typed, such as a search.
+ * @param[onSubmit] Called with the draft each time Enter is pressed, after [onCommit] when the draft
+ * commits, and also when it is clean or has an error. Never while an input method is composing and
+ * never when focus leaves the field. For a caller that acts on Enter, such as a search that runs
+ * its top result from inside the key press.
  */
 @Composable
 public fun BuilderTextField(
@@ -53,6 +57,7 @@ public fun BuilderTextField(
     enabled: Boolean = true,
     style: BuilderTextStyle = BuilderTextStyle.Body,
     onDraftChange: ((String) -> Unit)? = null,
+    onSubmit: ((String) -> Unit)? = null, // b-315a
 ) {
     val draft = rememberFieldDraft(value)
     val problem = if (draft.dirty) error(draft.text) else null
@@ -72,6 +77,7 @@ public fun BuilderTextField(
         },
         modifier = modifier,
         onEdit = { text -> onDraftChange?.invoke(text) },
+        onSubmit = onSubmit?.let { submit -> { submit(draft.text) } }, // b-315a
     )
 }
 
@@ -84,7 +90,7 @@ public fun BuilderTextField(
  * the page marks every field editable, disabled or not.
  *
  * [onEdit] hears the draft's text after someone changes it and after Esc reverts it, and never
- * for a cursor move, a commit or a value from outside.
+ * for a cursor move, a commit or a value from outside. [onSubmit] hears Enter, see `fieldCommits`.
  */
 @Composable
 internal fun SkinField(
@@ -98,9 +104,10 @@ internal fun SkinField(
     onCommit: () -> Unit,
     modifier: Modifier,
     onEdit: (String) -> Unit = {},
+    onSubmit: (() -> Unit)? = null, // b-315a
 ) {
     val field = modifier
-        .fieldCommits(draft, onCommit, onRevert = { onEdit(draft.text) })
+        .fieldCommits(draft, onCommit, onRevert = { onEdit(draft.text) }, onSubmit = onSubmit)
         .foldState(label, null, enabled)
     val onValueChange = { next: TextFieldValue ->
         val edited = next.text != draft.text

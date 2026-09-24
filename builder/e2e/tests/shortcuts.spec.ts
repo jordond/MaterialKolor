@@ -40,7 +40,9 @@ test('l typed in the seed field sets no lock', async ({ page }) => {
 
   await clickMiddle(page, field);
   await page.keyboard.type('l');
-  await page.waitForTimeout(SETTLE_MS);
+  // b-315a
+  // The l showing in the field says the key has been handled, the page's shortcuts included.
+  await expect.poll(() => seedText(page), { timeout: 10_000 }).toContain('l');
   expect(await lockState(page)).toBe(unlocked);
 
   // The same key on the page does set it, so the check above can tell the two apart.
@@ -61,8 +63,9 @@ test('? opens the cheat sheet, and while it is open single keys and Space stay i
 
   await page.keyboard.press('l');
   await page.keyboard.press('Space');
-  await page.waitForTimeout(SETTLE_MS);
-  // Focus stayed in the dialog, so it is still open and Esc still reaches it.
+  // b-315a
+  // Focus stayed in the dialog, so it is still open and Esc still reaches it. Esc closing it also
+  // says the two keys before it have been handled.
   await expect(note).toHaveCount(1);
   await page.keyboard.press('Escape');
   await expect(note).toHaveCount(0, { timeout: 10_000 });
@@ -83,15 +86,23 @@ test('Cmd or Ctrl with K, S and O belong to the page, and K opens the palette pa
     window.addEventListener('keydown', (event) => seen.push(`${event.key.toLowerCase()} ${event.defaultPrevented}`));
   });
 
+  await page.keyboard.press(`${primary}+s`);
   await page.keyboard.press(`${primary}+k`);
   await expect.poll(() => openOverlay(page), { timeout: 10_000 }).toBe('Palette');
-  await page.keyboard.press(`${primary}+s`);
+  // b-315a
+  // The palette owns the keyboard while it is open, so Esc closes it first, and its search field
+  // leaving says focus is on its way back to the page.
+  await page.keyboard.press('Escape');
+  await expect(page.locator(A11Y).getByRole('textbox', { name: /^Search commands/ })).toHaveCount(0, {
+    timeout: 10_000,
+  });
   await page.keyboard.press(`${primary}+o`);
+  await expect(page.locator(A11Y).getByText(/^Projects, dialog/)).toHaveCount(1, { timeout: 10_000 });
 
   const seen = await page.evaluate(() =>
     (window as unknown as { __mkKeys: string[] }).__mkKeys.filter((entry) => /^[kso] /.test(entry)),
   );
-  expect(seen).toEqual(['k true', 's true', 'o true']);
+  expect(seen).toEqual(['s true', 'k true', 'o true']);
 });
 
 /** The seed field, once the page has drawn it. */

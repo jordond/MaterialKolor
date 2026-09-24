@@ -1,0 +1,380 @@
+package com.materialkolor.builder.feature.command
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.PlatformTextInputMethodRequest
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsNotFocused
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.requestFocus
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import androidx.compose.ui.test.withKeyDown
+import androidx.compose.ui.text.input.SetComposingTextCommand
+import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.edit.DocumentChange
+import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.domain.link.ShareCodec
+import com.materialkolor.builder.domain.model.Role
+import com.materialkolor.builder.domain.model.Style
+import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.FineTuneRow
+import com.materialkolor.builder.domain.persist.MotionOverride
+import com.materialkolor.builder.domain.persist.PreviewTab
+import com.materialkolor.builder.feature.canvas.RampTarget
+import com.materialkolor.builder.feature.workspace.Panel
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
+import org.jetbrains.compose.resources.stringResource
+import kotlin.test.Test
+
+private const val WIDTH = 1280
+private const val HEIGHT = 800
+
+// b-315a
+@OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
+class CommandPaletteTest {
+    private val harness = CommandHarness()
+    private val platform = harness.platform
+    private var categories: Map<CommandCategory, String> = emptyMap()
+
+    @Test
+    fun everyCommand_listsWithItsCategoryAndKeys_andADisabledOneWithItsReason() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            openPalette()
+            val apple = isApple(platform.environment.browser)
+
+            val missing = harness.commands.filter { command ->
+                val category = categories.getValue(command.category)
+                val keys = command.shortcut?.text(apple)
+                val supporting = when (val state = command.state) {
+                    is CommandState.Disabled -> state.reason
+                    CommandState.Enabled -> if (keys == null) category else "$category · $keys"
+                }
+                row(command.label, supporting).fetchSemanticsNodes().isEmpty()
+            }
+
+            missing.map { command -> command.id } shouldBe emptyList()
+            harness.command("undo").state shouldBe CommandState.Disabled("Nothing to undo")
+            onNode(rowMatcher(harness.command("undo").label, "Nothing to undo")).assertIsNotEnabled()
+        }
+
+    @Test
+    fun aRunCommand_leadsTheNextEmptySearch() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            openPalette()
+            val copy = harness.command("copySeed").label
+            rowLabels().first() shouldNotBe copy
+
+            onNode(rowMatcher(copy)).performScrollTo().performClick()
+            waitForIdle()
+            harness.workspace.state.value.panel shouldBe null
+            platform.clipboard.texts.size shouldBe 1
+            openPalette()
+
+            rowLabels().first() shouldBe copy
+        }
+
+    @Test
+    fun tsp_findsTonalSpotFirst_andEnterUsesIt() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            runOnUiThread { harness.workspace.edit(DocumentChange.SetStyle(Style.Vibrant), EditPhase.Discrete) }
+            openPalette()
+
+            search("tsp")
+            rowLabels().first() shouldBe "Use style TonalSpot"
+            enter()
+
+            waitUntil { harness.graph.session.document.value.style == Style.TonalSpot }
+            harness.workspace.state.value.panel shouldBe null
+        }
+
+    @Test
+    fun aColor_leadsWithSetSeed() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            openPalette()
+
+            search("#0B6E4F")
+            rowLabels().first() shouldBe "Set seed to #0B6E4F"
+            enter()
+
+            waitUntil { harness.graph.session.document.value.seed == Argb(0x0B6E4F) }
+        }
+
+    @Test
+    fun aShareLink_leadsWithOpenSharedTheme() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            val shared = ThemeDocument.Default.copy(seed = Argb(0x8A2BE2))
+            val code = ShareCodec.encode(shared, projectName = "Shared")
+            openPalette()
+
+            search("https://materialkolor.com/t/$code")
+            rowLabels().first() shouldBe "Open shared theme"
+            enter()
+
+            waitUntil { harness.graph.session.document.value.seed == Argb(0x8A2BE2) }
+        }
+
+    @Test
+    fun aStyleName_leadsWithThatStyle() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            openPalette()
+
+            search("vibrant")
+            rowLabels().first() shouldBe "Use style Vibrant"
+            enter()
+
+            waitUntil { harness.graph.session.document.value.style == Style.Vibrant }
+        }
+
+    @Test
+    fun aRoleName_showsItOnItsRamp() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            openPalette()
+
+            search("primary container")
+            rowLabels().first() shouldBe "Show primaryContainer on ramp"
+            enter()
+
+            val state = harness.workspace.state.value
+            state.view.tab shouldBe PreviewTab.Palettes
+            state.rampHighlight?.target shouldBe RampTarget.OfRole(Role.PrimaryContainer, isDark = false)
+        }
+
+    @Test
+    fun aSectionName_opensThePosterAtIt() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            runOnUiThread { harness.workspace.setPosterCollapsed(true) }
+            waitUntil { harness.workspace.state.value.preferences.posterCollapsed }
+            openPalette()
+
+            search("key colors")
+            rowLabels().first() shouldBe "Go to Key colors"
+            enter()
+
+            waitUntil { !harness.workspace.state.value.preferences.posterCollapsed }
+            harness.workspace.state.value.view.openFineTuneRows shouldContain FineTuneRow.CoreColors
+        }
+
+    @Test
+    fun motionRows_markTheCurrentOne_andSetTheOverride() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            openPalette()
+            val system = harness.command("motion.${MotionOverride.System.name}").label
+            val reduce = harness.command("motion.${MotionOverride.Reduce.name}").label
+
+            onNode(rowMatcher(system)).assertIsSelected()
+            onNode(rowMatcher(reduce)).assertIsNotSelected()
+            onNode(rowMatcher(reduce)).performScrollTo().performClick()
+
+            waitUntil { harness.workspace.state.value.preferences.motion == MotionOverride.Reduce }
+        }
+
+    @Test
+    fun enterOnCopyShareLink_writesBeforeTheKeyHandlerReturns() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            openPalette()
+            search("copy share link")
+            rowLabels().first() shouldBe "Copy share link"
+            // No frame and no task runs after the key, so only a write started inside it lands.
+            mainClock.autoAdvance = false
+
+            field().performKeyInput { pressKey(Key.Enter) }
+
+            platform.clipboard.texts.size shouldBe 1
+            platform.clipboard.texts.single() shouldContain "/t/"
+        }
+
+    @Test
+    fun saveNow_stillSaysSaved_afterThePaletteHasGone() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            openPalette()
+            search("save now")
+            rowLabels().first() shouldBe harness.command("save").label
+
+            enter()
+
+            harness.workspace.state.value.panel shouldBe null
+            waitUntil { named("Saved") }
+        }
+
+    @Test
+    fun enterWhileAnInputMethodComposes_runsNothing() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            var session: PlatformTextInputMethodRequest? = null
+            with(harness) { show(onTextInput = { request -> session = request }, probe = { categories() }) }
+            session = null
+            openPalette()
+            search("copy share lin")
+            waitUntil { session != null }
+            val request = checkNotNull(session)
+            runOnUiThread { request.onEditCommand(listOf(SetComposingTextCommand("k", 1))) }
+            waitForIdle()
+            request.value().composition shouldNotBe null
+            rowLabels().first() shouldBe "Copy share link"
+
+            field().performKeyInput { pressKey(Key.Enter) }
+            waitForIdle()
+
+            platform.clipboard.texts shouldBe emptyList()
+            harness.workspace.state.value.panel shouldBe Panel.Palette
+        }
+
+    @Test
+    fun esc_throwsTheSearchAway_thenCloses() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            openPalette()
+            search("zzz")
+            rowLabels() shouldBe emptyList()
+
+            field().performKeyInput { pressKey(Key.Escape) }
+            waitForIdle()
+            harness.workspace.state.value.panel shouldBe Panel.Palette
+            rowLabels().first() shouldBe harness.commands.first().label
+            field().performKeyInput { pressKey(Key.Escape) }
+            waitForIdle()
+
+            harness.workspace.state.value.panel shouldBe null
+        }
+
+    @Test
+    fun downAndUp_moveBetweenTheFieldAndTheRows() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            openPalette()
+            search("shuffle")
+            val shuffle = harness.command("shuffle").label
+
+            field().performKeyInput { pressKey(Key.DirectionDown) }
+            waitForIdle()
+            onNode(rowMatcher(shuffle)).assertIsFocused()
+            onNode(rowMatcher(shuffle)).performKeyInput { pressKey(Key.DirectionUp) }
+            waitForIdle()
+
+            field().assertIsFocused()
+        }
+
+    @Test
+    fun closing_handsFocusBackToCommands_whenItsButtonOpenedIt() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            val commands = onNode(
+                hasClickAction() and hasContentDescription("Command palette") and !InPalette,
+            )
+            commands.performClick()
+            waitForIdle()
+            harness.workspace.state.value.panel shouldBe Panel.Palette
+
+            field().performKeyInput { pressKey(Key.Escape) }
+            waitForIdle()
+
+            harness.workspace.state.value.panel shouldBe null
+            commands.assertIsFocused()
+        }
+
+    @Test
+    fun closing_handsFocusBackToThePage_whenCtrlKOpenedIt() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.K) } }
+            harness.workspace.state.value.panel shouldBe Panel.Palette
+
+            field().performKeyInput { pressKey(Key.Escape) }
+            waitForIdle()
+            harness.workspace.state.value.panel shouldBe null
+            onNode(hasClickAction() and hasContentDescription("Command palette")).assertIsNotFocused()
+            val seed = harness.graph.session.document.value.seed
+            keys { pressKey(Key.Spacebar) }
+
+            harness.graph.session.document.value.seed shouldNotBe seed
+        }
+
+    private fun ComposeUiTest.boot() {
+        with(harness) { show(probe = { categories() }) }
+    }
+
+    @Composable
+    private fun categories() {
+        categories = CommandCategory.entries.associateWith { category -> stringResource(category.title) }
+    }
+
+    private fun ComposeUiTest.openPalette() {
+        runOnUiThread { harness.workspace.openPanel(Panel.Palette) }
+        waitForIdle()
+    }
+
+    private fun ComposeUiTest.field(): SemanticsNodeInteraction = onNode(hasSetTextAction() and InPalette)
+
+    private fun ComposeUiTest.search(text: String) {
+        field().requestFocus()
+        field().performTextInput(text)
+        waitForIdle()
+    }
+
+    private fun ComposeUiTest.enter() {
+        field().performKeyInput { pressKey(Key.Enter) }
+        waitForIdle()
+    }
+
+    /** The palette's rows, top first, by their labels. */
+    private fun ComposeUiTest.rowLabels(): List<String> =
+        onAllNodes(PaletteRow)
+            .fetchSemanticsNodes()
+            .sortedBy { node -> node.positionInRoot.y }
+            .map { node ->
+                node.config[SemanticsProperties.Text]
+                    .first()
+                    .text
+            }
+
+    private fun ComposeUiTest.row(
+        label: String,
+        supporting: String,
+    ) = onAllNodes(rowMatcher(label, supporting))
+
+    private fun rowMatcher(
+        label: String,
+        supporting: String? = null,
+    ): SemanticsMatcher {
+        val labelled = PaletteRow and hasText(label)
+        return if (supporting == null) labelled else labelled and hasText(supporting)
+    }
+}
+
+private val InPalette: SemanticsMatcher = hasAnyAncestor(
+    SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "Command palette"),
+)
+
+private val PaletteRow: SemanticsMatcher =
+    hasClickAction() and InPalette and !hasSetTextAction() and !hasText("Close")

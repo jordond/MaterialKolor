@@ -25,6 +25,14 @@ internal fun CommandHost(
     returnFocusTo: (Panel) -> FocusRequester? = { null },
     shortcuts: ShortcutsModel = metroViewModel(),
 ) {
+    // b-315a
+    CommandPalette(
+        visible = state.panel == Panel.Palette,
+        state = state,
+        dispatcher = dispatcher,
+        modifier = modifier,
+        returnFocusTo = returnFocusTo(Panel.Palette),
+    )
     CheatSheet(
         visible = state.panel == Panel.CheatSheet,
         singleKeys = state.preferences.singleKeyShortcuts,
