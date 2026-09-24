@@ -1,15 +1,10 @@
 package com.materialkolor.builder.kit.control
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -33,78 +28,13 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.requestFocus
-import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.InvalidReason
 import com.materialkolor.builder.domain.color.ParseNote
-import com.materialkolor.builder.domain.model.Library
-import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.engine.resolve.ThemeResolver
-import com.materialkolor.builder.kit.layout.LayoutInfo
-import com.materialkolor.builder.kit.layout.LocalLayout
-import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
-
-/** The five skin variants every input is checked in. */
-internal enum class SkinVariant(
-    val skin: Skin,
-) {
-    Material3(Skin(Library.Material3, expressive = false)),
-    Expressive(Skin(Library.Material3, expressive = true)),
-    Unstyled(Skin(Library.Unstyled, expressive = false)),
-    Custom(Skin(Library.Custom, expressive = false)),
-    Fluent(Skin(Library.Fluent, expressive = false)),
-}
-
-private val Document = ThemeDocument(seed = Argb(0x6750A4))
-
-/** A desktop window with a mouse, where the touch target is at its smallest. */
-private val Desktop = LayoutInfo.of(1280.dp, 800.dp)
-
-/** Draws [content] on a panel of [variant], with motion frozen and a desktop layout. */
-@OptIn(ExperimentalTestApi::class)
-internal fun ComposeUiTest.setSkinnedContent(
-    variant: SkinVariant,
-    isDark: Boolean = false,
-    content: @Composable () -> Unit,
-) {
-    setContent {
-        SkinnedPanel(variant, isDark, content)
-    }
-}
-
-/** A panel of [variant] with motion frozen and a desktop layout. */
-@Composable
-internal fun SkinnedPanel(
-    variant: SkinVariant,
-    isDark: Boolean,
-    content: @Composable () -> Unit,
-) {
-    val result = remember { ThemeResolver().resolve(Document) }
-    CompositionLocalProvider(LocalMotionFrozen provides true, LocalLayout provides Desktop) {
-        BuilderTheme(variant.skin, result, isDark, reducedMotion = false) {
-            Box(Modifier.background(LocalBuilderTokens.current.panel).padding(16.dp)) {
-                content()
-            }
-        }
-    }
-}
-
-/** Runs [block] in a fresh composition for each skin variant, naming the variant on failure. */
-@OptIn(ExperimentalTestApi::class)
-internal fun forEverySkin(block: ComposeUiTest.(SkinVariant) -> Unit) {
-    for (variant in SkinVariant.entries) {
-        runComposeUiTest {
-            withClue(variant.name) { block(variant) }
-        }
-    }
-}
 
 /** What the seed field says under itself in these tests, standing in for the app's own copy. */
 internal fun inputErrorMessage(reason: InvalidReason): String =
@@ -146,9 +76,6 @@ internal fun InputHexField(
         enabled = enabled,
     )
 }
-
-internal fun hasStateDescription(state: String): SemanticsMatcher =
-    SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, state)
 
 private const val On = "on"
 private const val Off = "off"

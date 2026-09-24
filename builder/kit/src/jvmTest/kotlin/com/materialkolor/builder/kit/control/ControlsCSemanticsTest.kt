@@ -2,15 +2,11 @@ package com.materialkolor.builder.kit.control
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,7 +20,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
@@ -57,58 +52,15 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LayoutInfo
-import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
-import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.headless.PanelEdge
 import com.materialkolor.builder.kit.skin.headless.panelEnter
 import com.materialkolor.builder.kit.skin.headless.popoverEnter
-import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
-
-/** Every skin the controls dispatch to, named for the screenshots. */
-internal val ControlSkins: List<Pair<String, Skin>> = listOf(
-    "material3" to Skin(Library.Material3, expressive = false),
-    "expressive" to Skin(Library.Material3, expressive = true),
-    "unstyled" to Skin(Library.Unstyled, expressive = false),
-    "custom" to Skin(Library.Custom, expressive = false),
-    "fluent" to Skin(Library.Fluent, expressive = false),
-)
-
-/** Runs [block] once per skin in a fresh test, with the skin's name as the clue. */
-@OptIn(ExperimentalTestApi::class)
-internal fun forEachSkin(block: suspend ComposeUiTest.(name: String, skin: Skin) -> Unit) {
-    for ((name, skin) in ControlSkins) {
-        withClue(name) { runComposeUiTest { block(name, skin) } }
-    }
-}
-
-/** A skin over a resolved document, a measured layout and frozen motion. */
-@Composable
-internal fun ControlsHarness(
-    skin: Skin,
-    isDark: Boolean = false,
-    content: @Composable () -> Unit,
-) {
-    val result = remember { ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4))) }
-    CompositionLocalProvider(LocalMotionFrozen provides true) {
-        BuilderTheme(skin, result, isDark, reducedMotion = false) {
-            ProvideBuilderLayout(modifier = Modifier.fillMaxSize()) { content() }
-        }
-    }
-}
-
-internal fun hasOverlayPaneTitle(title: String): SemanticsMatcher =
-    SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, title)
-
-@Composable
-internal fun OverlayTestButton(tag: String) {
-    Box(Modifier.testTag(tag).size(40.dp).clickable(interactionSource = null, indication = null) {})
-}
 
 @OptIn(ExperimentalTestApi::class)
 class ControlsCSemanticsTest {

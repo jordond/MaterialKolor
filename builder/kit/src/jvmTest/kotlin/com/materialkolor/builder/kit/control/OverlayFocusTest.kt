@@ -17,14 +17,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.withKeyDown
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -33,8 +34,6 @@ class OverlayFocusTest {
     @Test
     fun dialogWithAFieldAskingForFocus_eachWay_leavesFocusOnTheFieldBelowAButton() =
         hostEachWay { skin, inTree ->
-            // Material3 in windows keeps its own AlertDialog, which moves focus to the first action.
-            if (!inTree && skin.library == Library.Material3) return@hostEachWay
             var open by mutableStateOf(false)
             setContent {
                 HostOverlays(skin, inTree) {
@@ -112,5 +111,15 @@ class OverlayFocusTest {
             waitForIdle()
             delete.assertIsFocused()
             menu shouldBe true
+
+            delete.performKeyInput { pressKey(Key.Escape) }
+            waitForIdle()
+            menu shouldBe false
+            undo.requestFocus()
+            undo.assertIsFocused()
+            undo.performKeyInput { pressKey(Key.Enter) }
+            waitForIdle()
+            toasts.toasts shouldBe emptyList()
+            onNode(isFocused() and hasAnyAncestor(hasOverlayPaneTitle("Export"))).assertExists()
         }
 }

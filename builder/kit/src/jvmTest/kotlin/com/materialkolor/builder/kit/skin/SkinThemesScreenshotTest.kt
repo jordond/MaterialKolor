@@ -18,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -44,6 +43,8 @@ import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.InkPair
+import com.materialkolor.builder.kit.control.shortfalls
 import com.materialkolor.builder.kit.icon.BuilderIcons
 import com.materialkolor.builder.kit.icon.FluentIcons
 import com.materialkolor.builder.kit.icon.IconId
@@ -163,14 +164,6 @@ private class Seen(
     val durations: BuilderDurations,
 )
 
-/** One ink on one ground, and the least contrast the pair may have. */
-private class InkPair(
-    val name: String,
-    val ink: Color,
-    val ground: Color,
-    val minimum: Double,
-)
-
 /**
  * Every ink the builder draws as text or as a mark, on every ground it draws it on.
  *
@@ -227,10 +220,7 @@ private fun ComposeUiTest.checkSheets(
         sheet.durations shouldBe BuilderDurations()
         sheet.tokens.iconSize shouldBe iconSize
         val mode = if (dark) "dark" else "light"
-        for (pair in sheet.tokens.inkPairs()) {
-            val ratio = contrast(pair.ink, pair.ground)
-            if (ratio < pair.minimum) unreadable += "$mode ${pair.name} ${"%.2f".format(ratio)} < ${pair.minimum}"
-        }
+        unreadable += sheet.tokens.inkPairs().shortfalls(mode)
         onNodeWithTag(SheetTag).assertExists()
         onNodeWithText(SeedHex).assertExists()
         onNodeWithContentDescription(IconId.Undo.name).assertExists()
@@ -238,16 +228,6 @@ private fun ComposeUiTest.checkSheets(
         onNodeWithTag(SheetTag).captureRoboImage("$ScreenshotDir/$name-$mode.png")
     }
     unreadable.shouldBeEmpty()
-}
-
-/** The WCAG contrast ratio of two opaque colours. */
-private fun contrast(
-    a: Color,
-    b: Color,
-): Double {
-    val lighter = maxOf(a.luminance(), b.luminance())
-    val darker = minOf(a.luminance(), b.luminance())
-    return (lighter + 0.05) / (darker + 0.05)
 }
 
 /** Every token, every text style and every icon of the surrounding skin on one panel. */

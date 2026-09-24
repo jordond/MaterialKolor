@@ -11,15 +11,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalContext
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -48,6 +51,7 @@ import androidx.compose.ui.unit.round
 import androidx.compose.ui.window.PopupPositionProvider
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.skin.LocalSkin
+import kotlinx.coroutines.flow.drop
 
 /**
  * Whether overlays draw inside the page rather than in a popup or dialog window of their own (D40).
@@ -55,8 +59,8 @@ import com.materialkolor.builder.kit.skin.LocalSkin
  * The web accessibility mirror in CMP 1.12.1 follows a single semantics owner. Every `Popup` and
  * `Dialog` brings an owner of its own and takes the whole mirror over, and once it closes the mirror
  * stays frozen on it for the rest of the session. So on wasm every kit overlay renders into the
- * [OverlayHost] at the root of the builder. The switch stays so the windows can come back once CMP
- * fixes the listener.
+ * nearest [OverlayHost] above it, the builder's at the root or a preview pane's own. The switch stays
+ * so the windows can come back once CMP fixes the listener.
  */
 internal expect val overlaysInTree: Boolean
 
@@ -144,7 +148,14 @@ internal class OverlayLayer(
 
     /** Whether focus is inside the layer. */
     var hasFocus: Boolean = false
+
+    /** The panel drawn in the layer that takes focus as it opens, which the host can lead focus back into. */
+    var focus: OverlayFocus? = null
 }
+
+/** The layer the overlay drawn here sits in, so its [OverlayFocus] can offer itself to the host. */
+internal val LocalOverlayLayer: ProvidableCompositionLocal<OverlayLayer?> =
+    staticCompositionLocalOf { null }
 
 /** The overlays open over the page, in the order they opened, the last one on top. */
 internal class OverlayHostState {
@@ -175,6 +186,24 @@ internal class OverlayHostState {
 
     /** Whether focus rests in the page or in a layer, rather than nowhere after a layer left with it. */
     fun holdsFocus(): Boolean = pageHasFocus || layers.any { it.hasFocus } || top.any { it.hasFocus }
+
+    /** Goes up each time focus leaves the top slot, so the host can look where it went once it settles. */
+    var topFocusLosses: Int by mutableIntStateOf(0)
+        private set
+
+    /** Notes that focus left the top slot, a toast's Undo that closed the toast under it included. */
+    fun topLostFocus() {
+        topFocusLosses++
+    }
+
+    /**
+     * Leads focus into the top open modal when it rests nowhere, the way the modal took it as it
+     * opened. A toast that held focus and left would otherwise leave the keyboard outside the modal.
+     */
+    fun refocusModal() {
+        if (holdsFocus()) return
+        layers.lastOrNull { layer -> layer.open && layer.kind == OverlayKind.Modal }?.focus?.enter()
+    }
 
     /** [layout]'s bounds in the host, or in the root before the host has been placed. */
     fun boundsOf(layout: LayoutCoordinates): IntRect {
@@ -214,7 +243,8 @@ internal fun currentOverlayHost(): OverlayHostState? =
  * its content again while it is being measured. A window closed there crashes the desktop scene,
  * which is still laying the window out. So where overlays open windows the library
  * follows the skin one composition late, and the old window closes in a composition of its own.
- * In the page the library follows the skin at once.
+ * On desktop that means the control draws one frame in the old library after a switch. In the page
+ * the library follows the skin at once.
  */
 @Composable
 internal fun overlayLibrary(): Library {
@@ -252,6 +282,9 @@ internal fun OverlayHost(
         return
     }
     val host = remember { OverlayHostState() }
+    LaunchedEffect(host) {
+        snapshotFlow { host.topFocusLosses }.drop(1).collect { host.refocusModal() }
+    }
     CompositionLocalProvider(
         LocalOverlayHost provides host,
         LocalTextContextMenuDropdownProvider provides NoTextContextMenu,
@@ -304,7 +337,10 @@ internal fun OverlayPortal(
     DisposableEffect(host, layer) {
         val stack = if (layer.kind == OverlayKind.Top) host.top else host.layers
         stack.add(layer)
-        onDispose { stack.remove(layer) }
+        onDispose {
+            stack.remove(layer)
+            if (layer.kind == OverlayKind.Top && layer.hasFocus) host.topLostFocus()
+        }
     }
     val anchor = placement?.anchor
     DisposableEffect(host, anchor) {
@@ -358,16 +394,21 @@ private fun OverlayLayers(
 ) {
     host.layers.forEachIndexed { index, layer ->
         key(layer) {
-            OverlayLayerContent(layer, modifier.trapFocus { host.isUnderFocusTrap(index) }.hideUnderModal(host, index))
+            OverlayLayerContent(
+                host,
+                layer,
+                modifier.trapFocus { host.isUnderFocusTrap(index) }.hideUnderModal(host, index),
+            )
         }
     }
     for (layer in host.top) {
-        key(layer) { OverlayLayerContent(layer, modifier.trapFocus { host.isTopUnderFocusTrap() }) }
+        key(layer) { OverlayLayerContent(host, layer, modifier.trapFocus { host.isTopUnderFocusTrap() }) }
     }
 }
 
 @Composable
 private fun OverlayLayerContent(
+    host: OverlayHostState,
     layer: OverlayLayer,
     modifier: Modifier,
 ) {
@@ -375,16 +416,21 @@ private fun OverlayLayerContent(
     val dismiss = layer.onDismissRequest
     Box(
         modifier = Modifier
-            .onFocusChanged { state -> layer.hasFocus = state.hasFocus }
-            .then(modifier)
+            .onFocusChanged { state ->
+                val letGo = layer.hasFocus && !state.hasFocus
+                layer.hasFocus = state.hasFocus
+                if (letGo && layer.kind == OverlayKind.Top) host.topLostFocus()
+            }.then(modifier)
             .then(if (dismiss != null) Modifier.dismissOnEscape(layer) else Modifier),
     ) {
         if (dismiss != null) {
             Box(Modifier.fillMaxSize().pointerInput(layer) { awaitEachGesture { dismissOnPress(layer) } })
         }
         CompositionLocalProvider(context) {
-            val placement = layer.placement
-            if (placement == null) layer.content() else AnchoredOverlay(placement, layer.content)
+            CompositionLocalProvider(LocalOverlayLayer provides layer) {
+                val placement = layer.placement
+                if (placement == null) layer.content() else AnchoredOverlay(placement, layer.content)
+            }
         }
     }
 }

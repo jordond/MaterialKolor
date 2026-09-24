@@ -29,31 +29,6 @@ import com.materialkolor.builder.domain.model.Library
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** A kit's worth of state words in English, for the plain functions. */
-internal val TestStateWords: StateWords = StateWords(
-    selected = "Selected",
-    notSelected = "Not selected",
-    checked = "Checked",
-    notChecked = "Not checked",
-    on = "On",
-    off = "Off",
-    expanded = "Expanded",
-    collapsed = "Collapsed",
-    disabled = "Disabled",
-    checkbox = "checkbox",
-    switch = "switch",
-    radio = "radio",
-    tab = "tab",
-)
-
-/** Matches a node with no content description at all. */
-internal fun hasNoContentDescription(): SemanticsMatcher =
-    SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription)
-
-/** Matches a node whose content descriptions are exactly [names]. */
-internal fun hasContentDescriptionExactly(vararg names: String): SemanticsMatcher =
-    SemanticsMatcher.expectValue(SemanticsProperties.ContentDescription, names.toList())
-
 @OptIn(ExperimentalTestApi::class)
 class ControlStateNameTest {
     private val words = TestStateWords

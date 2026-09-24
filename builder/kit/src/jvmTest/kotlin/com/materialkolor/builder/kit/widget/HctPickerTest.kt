@@ -39,6 +39,7 @@ import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.kit.control.ControlSkins
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
@@ -62,13 +63,7 @@ internal val PickerSeed: Argb = Argb(0x6750A4)
 internal val PickerWidth: Dp = 440.dp
 
 /** Every skin the picker is drawn in, named for the screenshots. */
-internal val PickerSkins: List<Pair<String, Skin>> = listOf(
-    "material3" to Skin(Library.Material3, expressive = false),
-    "expressive" to Skin(Library.Material3, expressive = true),
-    "unstyled" to Skin(Library.Unstyled, expressive = false),
-    "custom" to Skin(Library.Custom, expressive = false),
-    "fluent" to Skin(Library.Fluent, expressive = false),
-)
+internal val PickerSkins: List<Pair<String, Skin>> = ControlSkins
 
 /** Runs [block] once per skin in a fresh test, with the skin's name as the clue. */
 @OptIn(ExperimentalTestApi::class)
