@@ -238,6 +238,39 @@ class HistoryTest {
         assertFalse(session.history.canRedo)
     }
 
+    // b-307a
+    @Test
+    fun history_dragThroughTheStartThatLandsElsewhere_throwsAwayRedo() {
+        val session = Session()
+        session.edit(DocumentChange.SetAmoled(true), at = 0)
+        session.undo()
+
+        session.edit(contrast(30), EditPhase.Dragging, at = 10_000)
+        session.edit(contrast(0), EditPhase.Dragging, at = 10_016)
+        session.edit(contrast(20), EditPhase.Dragging, at = 10_032)
+        session.edit(contrast(40), EditPhase.Released, at = 10_048)
+
+        assertFalse(session.history.canRedo)
+        assertNull(session.history.redoLabel)
+        assertEquals(1, session.history.persisted().size)
+        assertEquals(ThemeDocument.Default, session.history.undo())
+    }
+
+    @Test
+    fun history_undoMidDrag_dropsTheRedoStepsTheDragSetAside() {
+        val session = Session()
+        session.edit(DocumentChange.SetAmoled(true), at = 0)
+        session.undo()
+
+        session.edit(contrast(30), EditPhase.Dragging, at = 10_000)
+        session.undo()
+        session.edit(contrast(50), EditPhase.Dragging, at = 10_016)
+        session.edit(contrast(0), EditPhase.Released, at = 10_032)
+
+        assertEquals(ContrastLevel(30), session.history.redo()?.contrast)
+        assertFalse(session.history.canRedo)
+    }
+
     @Test
     fun history_mergedEditsBackToTheStart_leaveNoEntry() {
         val session = Session()

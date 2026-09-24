@@ -256,6 +256,7 @@ class AccentsEditorTest {
 
             // b-307
             val pick = harness.actions.first() as WorkspaceAction.OpenPicker
+            pick.returnFocusTo shouldNotBe null
             listOf(pick.copy(returnFocusTo = null)) + harness.actions.drop(1) shouldBe listOf(
                 WorkspaceAction.OpenPicker(PickerTarget.Accent(0)),
                 WorkspaceAction.ShowOnRamp(RampTarget.OfAccent(AccentSlot(0, AccentPart.Color), isDark = false)),

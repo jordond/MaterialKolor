@@ -61,6 +61,7 @@ import dev.stateholder.dispatcher.rememberDispatcher
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
 
 /** The seed field's pause before it commits (F-05). */
@@ -283,6 +284,7 @@ class PosterPanelTest {
             // b-307
             // Pick also carries its own button, for the picker to hand focus back to.
             val pick = actions.first() as WorkspaceAction.OpenPicker
+            pick.returnFocusTo shouldNotBe null
             listOf(pick.copy(returnFocusTo = null)) + actions.drop(1) shouldBe
                 listOf(WorkspaceAction.OpenPicker(PickerTarget.Seed), WorkspaceAction.OpenImagePicker)
         }

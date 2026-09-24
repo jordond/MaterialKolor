@@ -32,6 +32,11 @@ import org.jetbrains.compose.resources.stringResource
  * the document, the history and the capabilities in step. Whatever closes the picker other than
  * Done puts the value back, see [PickerSession].
  *
+ * A switch to another project does not close it. The picker stays open and starts a fresh session
+ * on the new project's value, and the old value is not put back since that document is gone. No
+ * path in the UI switches projects with the picker open today, as every switch starts from
+ * Projects or Share and opening either one closes the picker first.
+ *
  * @param[returnFocusTo] The Pick button that opened the picker, which gets focus back once it closes
  * while it is still on screen (AR-09).
  */
