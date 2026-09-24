@@ -443,7 +443,7 @@ private fun OverlayLayerContent(
 
 /**
  * Composes a layer's [content] in a composition of its own, made as the layer is first measured,
- * and lays it out the way a box lays out its children.
+ * and lays it out the way a box lays out its children, each at the top start.
  *
  * The content holds the page's lambdas, which the page updates as it recomposes. The page sits in
  * subcompositions of its own, `ProvideBuilderLayout` first among them, and those recompose after
@@ -459,7 +459,7 @@ private fun LayerComposition(content: @Composable () -> Unit) {
         val placeables = subcompose(Unit, content).map { measurable -> measurable.measure(constraints) }
         val width = constraints.constrainWidth(placeables.maxOfOrNull { placeable -> placeable.width } ?: 0)
         val height = constraints.constrainHeight(placeables.maxOfOrNull { placeable -> placeable.height } ?: 0)
-        layout(width, height) { placeables.forEach { placeable -> placeable.place(0, 0) } }
+        layout(width, height) { placeables.forEach { placeable -> placeable.placeRelative(0, 0) } }
     }
 }
 
