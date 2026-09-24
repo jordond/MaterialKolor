@@ -82,7 +82,12 @@ class BuilderRootTest {
             waitForIdle()
             runOnUiThread { workspace.undo() }
             waitForIdle()
-            runOnUiThread { workspace.edit(DocumentChange.SetLibrary(Library.Fluent, expressive = false), EditPhase.Discrete) }
+            runOnUiThread {
+                workspace.edit(
+                    DocumentChange.SetLibrary(Library.Fluent, expressive = false),
+                    EditPhase.Discrete,
+                )
+            }
             waitForIdle()
             runOnUiThread { scope.launch { graph.session.newProject(copyCurrent = false) } }
             waitForIdle()

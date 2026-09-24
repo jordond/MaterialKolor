@@ -304,7 +304,9 @@ class WorkspaceModelTest : SessionTestBase() {
             val first = booted(session)
             val workspace = workspaceModel(session, preferences)
             val seen = mutableListOf<WorkspaceModel.State>()
-            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { workspace.state.collect { state -> seen += state } }
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+                workspace.state.collect { state -> seen.add(state) }
+            }
             val start = workspace.state.value.projectGeneration
 
             // Only the state carrying the new project's document may carry the new number, and it must.
