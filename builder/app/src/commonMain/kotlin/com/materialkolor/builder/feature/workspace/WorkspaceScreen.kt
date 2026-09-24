@@ -12,7 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import com.materialkolor.builder.LocalThemeResult
+import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.engine.poster.PosterColors
 import com.materialkolor.builder.feature.about.AboutHost
 import com.materialkolor.builder.feature.about.HelpHost
@@ -51,6 +53,7 @@ import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.shell.ToastRegion
 import com.materialkolor.builder.kit.shell.WorkspaceShell
+import com.materialkolor.builder.kit.skin.fluent.preloadFluentFace
 import com.materialkolor.builder.kit.transition.RevealStyle
 import com.materialkolor.builder.kit.transition.SkinTransition
 import dev.stateholder.dispatcher.Dispatcher
@@ -95,9 +98,10 @@ internal fun WorkspaceScreen(
     // Plays the transition's reveal out of the origin, or a crossfade without one, around the change.
     fun reveal(
         origin: Offset?,
+        awaitBeforeReveal: suspend () -> Unit = NoFontWait, // b-404a
         change: () -> Unit,
     ) {
-        scope.launch { transition.reveal(revealFrom(origin), change = change) }
+        scope.launch { transition.reveal(revealFrom(origin), awaitBeforeReveal, change) }
     }
 
     val dispatcher = rememberDispatcher<WorkspaceAction> { action ->
@@ -106,7 +110,8 @@ internal fun WorkspaceScreen(
                 model.edit(action.change, action.phase)
             }
             is WorkspaceAction.EditWithReveal -> {
-                reveal(action.origin) { model.edit(action.change, EditPhase.Discrete) }
+                // b-404a
+                reveal(action.origin, fontWaitFor(action.change)) { model.edit(action.change, EditPhase.Discrete) }
             }
             WorkspaceAction.Undo -> {
                 model.undo()
@@ -332,6 +337,32 @@ private fun revealFrom(origin: Offset?): RevealStyle =
         RevealStyle.Crossfade
     } else {
         RevealStyle.Circle(origin)
+    }
+
+// b-404a
+
+/** What a reveal waits on when the change brings in no face the page has not fetched. */
+private val NoFontWait: suspend () -> Unit = {}
+
+/**
+ * What the reveal round [change] waits on before it captures the old frame.
+ *
+ * A change that lands the library on Fluent waits on [fluentFace], so the new frame comes in set in
+ * Selawik rather than the fallback face. Every other change waits on nothing.
+ *
+ * @param[fluentFace] Fetches Fluent's face, [preloadFluentFace] outside tests.
+ */
+internal fun fontWaitFor(
+    change: DocumentChange,
+    fluentFace: suspend () -> Unit = ::preloadFluentFace,
+): suspend () -> Unit = if (change.landsOnFluent()) fluentFace else NoFontWait
+
+/** Whether [this] leaves the document in Fluent, a switch to it or a whole document that uses it. */
+private fun DocumentChange.landsOnFluent(): Boolean =
+    when (this) {
+        is DocumentChange.SetLibrary -> library == Library.Fluent
+        is DocumentChange.Replace -> document.library == Library.Fluent
+        else -> false
     }
 
 // b-311
