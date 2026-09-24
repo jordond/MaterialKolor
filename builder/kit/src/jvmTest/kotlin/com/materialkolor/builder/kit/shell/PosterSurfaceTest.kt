@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
@@ -27,14 +28,18 @@ import com.materialkolor.builder.engine.poster.PosterColors
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.custom.LocalBuilderIdentity
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.fluent.toFluentShades
 import com.materialkolor.hct.Hct
 import com.materialkolor.ktx.contrastRatio
 import com.materialkolor.unstyled.MaterialKolorTokens
+import io.github.composefluent.Colors
+import io.github.composefluent.FluentTheme
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
+import io.github.composefluent.LocalContentColor as FluentContentColor
 
 private const val ShellTextRatio = 4.5
 private const val ShellClickTag = "shell-click"
@@ -117,6 +122,34 @@ class PosterSurfaceTest {
         }
     }
 
+    /**
+     * Fluent on the poster takes its shades from the seed's own ramp, and its dark flag from the
+     * ink, so its fixed black or white text lands on the side that reads on the seed.
+     */
+    @Test
+    fun posterSurface_fluent_takesItsShadesFromTheRampAndItsModeFromTheInk() =
+        runComposeUiTest {
+            var seed by mutableStateOf(ShellSeeds.first())
+            var colors: Colors? = null
+            setContent {
+                ShellHarness(Skin(Library.Fluent, expressive = false)) {
+                    val poster = remember(seed) { PosterColors.of(seed) }
+                    PosterSurface(poster) { colors = FluentTheme.colors }
+                }
+            }
+
+            for (next in ShellSeeds) {
+                seed = next
+                waitForIdle()
+                val poster = PosterColors.of(next)
+                withClue(next.toHex()) {
+                    val fluent = checkNotNull(colors)
+                    fluent.darkMode shouldBe !poster.isLight
+                    fluent.shades.base shouldBe poster.ramp.toFluentShades().base
+                }
+            }
+        }
+
     @Test
     fun posterSurface_unstyled_givesAPlainClickableAnIndication() =
         runComposeUiTest {
@@ -178,7 +211,11 @@ private fun shellInks(
             )
         }
         Library.Fluent -> {
-            emptyList()
+            val colors = FluentTheme.colors
+            listOf(
+                ShellInk("Fluent text on seed", colors.text.text.primary.compositeOver(seed), seed),
+                ShellInk("Fluent content colour on seed", FluentContentColor.current, seed),
+            )
         }
     }
     return shared + own
