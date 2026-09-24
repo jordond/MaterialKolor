@@ -281,12 +281,16 @@ class WorkspaceModelTest : SessionTestBase() {
     @Test
     fun pageHide_afterAnEdit_writesTheRecordBeforeAnythingElseRuns() =
         runTest {
+            // Main only runs when asked, so a collector dispatched to it would sit until runCurrent.
+            Dispatchers.setMain(StandardTestDispatcher(testScheduler))
             val (session, preferences) = session()
             val id = booted(session)
             appModel(session, preferences)
+            runCurrent()
             session.edit(DocumentChange.SetThemeName("HiddenTheme"), EditPhase.Discrete)
+            runCurrent()
 
-            // No advance and no runCurrent, so only an undispatched collector gets the write out.
+            // No advance and no runCurrent from here, so only an undispatched collector gets the write out.
             environment.pageHides.tryEmit(Unit) shouldBe true
 
             projects.load(id)?.document?.themeName shouldBe "HiddenTheme"

@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.codegen.validate.ReservedNameClash
@@ -221,6 +223,11 @@ private fun ThemeNameField(
  * the drafts coming back as [value] never move the cursor or undo a newer keystroke. Once Enter,
  * leaving the field or Esc settles on a text, the field follows [value] again as soon as [value]
  * has caught up with it.
+ *
+ * A problem only lasts as long as the draft behind it. A new [value] that arrives while nothing is
+ * going out replaces the draft, and the field leaving composition takes its draft along, so both
+ * clear it. Otherwise a collapsed Options or a target switch would hold the export back under a
+ * notice the field no longer shows.
  */
 @Composable
 private fun LiveField(
@@ -234,7 +241,15 @@ private fun LiveField(
 ) {
     var startedFrom by remember { mutableStateOf<String?>(null) }
     var settlingOn by remember { mutableStateOf<String?>(null) }
+    var lastValue by remember { mutableStateOf(value) }
+    val currentOnProblem by rememberUpdatedState(onProblem)
+    DisposableEffect(Unit) {
+        onDispose { currentOnProblem(null) }
+    }
     SideEffect {
+        // Nothing is going out, so this value is not a draft coming back and the field shows it now.
+        if (startedFrom == null && value != lastValue) onProblem(null)
+        lastValue = value
         if (settlingOn != null && settlingOn == value) {
             startedFrom = null
             settlingOn = null

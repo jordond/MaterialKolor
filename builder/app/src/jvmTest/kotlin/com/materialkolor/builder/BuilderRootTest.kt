@@ -7,8 +7,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.isFocused
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -26,6 +28,7 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.canvas.TestOwner
+import com.materialkolor.builder.feature.poster.kotlinLiteralOf
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import dev.zacsweers.metro.createGraphFactory
@@ -133,6 +136,35 @@ class BuilderRootTest {
             escapeFromTheOverlay()
 
             onNodeWithContentDescription("Share").assertIsFocused()
+        }
+
+    // b-221ca
+    @Test
+    fun posterCopy_writesTheClipboardBeforeTheClickReturns() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            val graph = showRoot()
+            // No frame and no task runs after the click, so only a write started inside it lands.
+            mainClock.autoAdvance = false
+
+            onNodeWithText("Copy Kotlin").performClick()
+
+            platform.clipboard.texts shouldBe listOf(kotlinLiteralOf(graph.session.document.value.seed))
+        }
+
+    @Test
+    fun posterCopy_whenTheClipboardRefuses_opensTheManualDialogAndNeverSaysCopied() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            platform.clipboard.failure = IllegalStateException("No user activation")
+            val graph = showRoot()
+
+            onNodeWithText("Copy Kotlin").performClick()
+            waitForIdle()
+
+            onNodeWithText("Copy it yourself").assertExists()
+            onNodeWithText(kotlinLiteralOf(graph.session.document.value.seed)).assertExists()
+            onAllNodesWithText("Copied", substring = true).assertCountEquals(0)
+            platform.environment.announcements.filter { message -> "Copied" in message } shouldBe emptyList()
+            platform.clipboard.texts shouldBe emptyList()
         }
 
     private fun ComposeUiTest.escapeFromTheOverlay() {

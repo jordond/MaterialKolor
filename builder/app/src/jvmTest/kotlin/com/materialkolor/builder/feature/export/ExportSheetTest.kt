@@ -2,6 +2,9 @@ package com.materialkolor.builder.feature.export
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
@@ -10,6 +13,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -23,6 +27,8 @@ import com.materialkolor.builder.codegen.dsl.Token
 import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.core.platform.OutgoingFile
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.ExportPrefs
+import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakeClipboard
@@ -113,6 +119,44 @@ class ExportSheetTest {
             onNodeWithText("Theme name").performKeyInput { pressKey(Key.Escape) }
             waitForIdle()
             exportButtons().forEach { button -> button.assertIsEnabled() }
+        }
+
+    // b-221ca
+    @Test
+    fun invalidPackageDraft_collapsingOptions_letsTheExportThrough() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            showSheet(FakeFileSaver(), coarsePointer = false)
+            onNodeWithText("Package name").performTextReplacement("Not A Package")
+            waitForIdle()
+            exportButtons().forEach { button -> button.assertIsNotEnabled() }
+
+            onNodeWithText("Options").performClick()
+            waitForIdle()
+
+            onNodeWithText("Package name").assertDoesNotExist()
+            exportButtons().forEach { button -> button.assertIsEnabled() }
+            onAllNodesWithText("is not a package name", substring = true).assertCountEquals(0)
+        }
+
+    @Test
+    fun invalidPackageDraft_targetSwitch_followsTheNewTargetsSavedPackage() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            val fluent = ExportPrefs(packageName = "com.fluent.theme")
+            showSheet(
+                files = FakeFileSaver(),
+                coarsePointer = false,
+                preferences = Preferences(exportPrefs = mapOf(ExportTarget.Fluent to fluent)),
+            )
+            onNodeWithText("Package name").performTextReplacement("Not A Package")
+            waitForIdle()
+            exportButtons().forEach { button -> button.assertIsNotEnabled() }
+
+            onNodeWithText("Fluent").performClick()
+            waitForIdle()
+
+            onNodeWithText("Package name").assertTextContains("com.fluent.theme")
+            exportButtons().forEach { button -> button.assertIsEnabled() }
+            onAllNodesWithText("is not a package name", substring = true).assertCountEquals(0)
         }
 
     @Test
@@ -233,12 +277,14 @@ class ExportSheetTest {
     private fun ComposeUiTest.exportButtons(): List<SemanticsNodeInteraction> =
         listOf("Copy file", "Copy all", "Download zip").map { label -> onNodeWithText(label) }
 
+    /** Shows the sheet on the default document. A target switch from its header moves the document. */
     private fun ComposeUiTest.showSheet(
         files: FakeFileSaver,
         coarsePointer: Boolean,
+        preferences: Preferences = Preferences(),
     ) {
         val document = ThemeDocument.Default
-        val state = ExportModel.State(document = document, preferences = Preferences())
+        var state by mutableStateOf(ExportModel.State(document = document, preferences = preferences))
         val ready = ExportOutcome.Ready(
             files = listOf(
                 GeneratedFile(
@@ -263,12 +309,16 @@ class ExportSheetTest {
                         ExportSheet(
                             visible = true,
                             state = state,
-                            capabilities = capabilitiesOf(document),
+                            capabilities = capabilitiesOf(state.document),
                             outcomeOf = { ready },
                             clipboard = clipboard,
                             files = files,
                             dispatcher = rememberDispatcher<ExportAction> { action -> exported += action },
-                            workspace = rememberDispatcher<WorkspaceAction> {},
+                            workspace = rememberDispatcher<WorkspaceAction> { action ->
+                                if (action is WorkspaceAction.EditWithReveal) {
+                                    state = state.copy(document = action.change.apply(state.document))
+                                }
+                            },
                         )
                     }
                 }
