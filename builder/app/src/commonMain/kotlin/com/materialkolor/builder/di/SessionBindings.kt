@@ -73,7 +73,7 @@ internal object SessionBindings {
             // The thumbnail and the splash show the theme as its own target sees it (D35).
             colorsOf = { document ->
                 val target = ExportTarget.of(document.library, document.expressive)
-                resolver.resolve(document.forTarget(target)).sessionColors()
+                resolver.resolve(document.forTarget(target)).sessionColors(document.seed)
             },
             sharedThemeName = { getString(Res.string.shared_theme_name) },
             scope = scope,
@@ -87,9 +87,11 @@ internal object SessionBindings {
  */
 private val PREVIEW_ROLES: List<Role> = listOf(Role.Primary, Role.Secondary, Role.Tertiary, Role.SurfaceVariant)
 
-private fun ThemeResult.sessionColors(): SessionColors =
+// b-501b
+private fun ThemeResult.sessionColors(seed: Argb): SessionColors =
     SessionColors(
         previewColors = PREVIEW_ROLES.map { role -> roles[role, false].argb },
         splashLight = Argb(chrome(isDark = false).surface),
         splashDark = Argb(chrome(isDark = true).surface),
+        splashSeed = seed,
     )

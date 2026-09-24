@@ -30,7 +30,8 @@ import javax.inject.Inject
  * `/assets/`, where one `_headers` rule marks them immutable, and keeps `index.html`, `boot.js` and
  * `composeResources/` at the root. `checkBudget` holds the result against `budget.json`.
  *
- * `-Psite.env=staging` adds a noindex header and a robots file that turns every crawler away.
+ * `-Psite.env=staging` adds a noindex header and turns every crawler away in `robots.txt`, which
+ * lets them all in on production.
  */
 class BuilderWebPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -46,7 +47,8 @@ class BuilderWebPlugin : Plugin<Project> {
 
             val writeHeaders = tasks.register<WriteHeaders>("writeHeaders") {
                 group = SITE_GROUP
-                description = "Writes the host's _headers file, and robots.txt on staging."
+                // b-501b
+                description = "Writes the host's _headers and robots.txt files."
                 environment.set(providers.gradleProperty("site.env").orElse("production"))
                 outputDirectory.set(layout.buildDirectory.dir("site-parts/host"))
             }
@@ -153,7 +155,10 @@ abstract class WriteHeaders : DefaultTask() {
         directory.deleteRecursively()
         directory.mkdirs()
         directory.resolve("_headers").writeText(headers(staging))
-        if (staging) directory.resolve("robots.txt").writeText("User-agent: *\nDisallow: /\n")
+        // b-501b
+        // Production lets every crawler in. There is no sitemap yet, so robots.txt names none.
+        val robots = if (staging) "User-agent: *\nDisallow: /\n" else "User-agent: *\nAllow: /\n"
+        directory.resolve("robots.txt").writeText(robots)
     }
 
     private fun headers(staging: Boolean): String =

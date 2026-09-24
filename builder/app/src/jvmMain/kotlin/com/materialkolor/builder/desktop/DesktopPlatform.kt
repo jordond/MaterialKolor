@@ -1,5 +1,6 @@
 package com.materialkolor.builder.desktop
 
+import com.materialkolor.builder.core.platform.BootSplash
 import com.materialkolor.builder.core.platform.Clipboard
 import com.materialkolor.builder.core.platform.DecodedImage
 import com.materialkolor.builder.core.platform.Environment
@@ -108,10 +109,8 @@ private object DesktopEnvironment : Environment {
 
     override fun setThemeColor(argb: Argb) = Unit
 
-    override fun writeSplashColors(
-        light: Argb,
-        dark: Argb,
-    ) = Unit
+    // b-501b
+    override fun writeSplash(splash: BootSplash) = Unit
 
     override suspend fun requestPersist(): Boolean = false
 

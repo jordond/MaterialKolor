@@ -55,9 +55,11 @@
   }
 
   /**
-   * Colors the splash. The chrome comes from mk:splash, one color per scheme that the stylesheet
-   * picks between. The poster takes the seed of a theme link, else the seed mk:splash keeps, else
-   * stays neutral. With no mk:splash at all the default document's colors stand in.
+   * Colors the splash. The chrome comes from mk:splash, one color per scheme. The stylesheet picks
+   * between them by the system's scheme, unless mk:splash says the app is always light or always
+   * dark. The poster takes the seed of a theme link, else the seed mk:splash keeps, else stays
+   * neutral. With no mk:splash at all the default document's colors stand in. An older mk:splash
+   * without a seed or an appearance still paints its chrome.
    */
   function paintSplash() {
     const stored = readSplash();
@@ -65,12 +67,29 @@
     const dark = stored ? color(stored.dark) : null;
     const storedSeed = stored ? color(stored.seed) : DEFAULT_SEED;
     const seed = linkSeed !== null ? linkSeed : storedSeed;
-    root.style.setProperty('--mk-light', hex(light !== null ? light : DEFAULT_LIGHT));
-    root.style.setProperty('--mk-dark', hex(dark !== null ? dark : DEFAULT_DARK));
+    const forced = stored && (stored.appearance === 'light' || stored.appearance === 'dark') ? stored.appearance : null;
+    const lightHex = hex(light !== null ? light : DEFAULT_LIGHT);
+    const darkHex = hex(dark !== null ? dark : DEFAULT_DARK);
+    root.style.setProperty('--mk-light', lightHex);
+    root.style.setProperty('--mk-dark', darkHex);
+    if (forced) root.classList.add('mk-' + forced);
+    paintThemeColor(lightHex, darkHex, forced);
     if (seed === null) return;
     root.style.setProperty('--mk-seed', hex(seed));
     root.style.setProperty('--mk-seed-ink', luminance(seed) > 0.179 ? '#000' : '#fff');
     root.style.setProperty('--mk-hex', JSON.stringify(hex(seed)));
+  }
+
+  /**
+   * Tints the browser's own chrome to match the splash until the app sets it. Each theme-color tag
+   * gets the color of its scheme, or both get the forced one.
+   */
+  function paintThemeColor(light, dark, forced) {
+    const tags = document.querySelectorAll('meta[name="theme-color"]');
+    for (let i = 0; i < tags.length; i++) {
+      const isDark = forced ? forced === 'dark' : /dark/.test(tags[i].getAttribute('media') || '');
+      tags[i].setAttribute('content', isDark ? dark : light);
+    }
   }
 
   /** mk:splash as an object, an empty one when it holds something else, or null when it is not there. */

@@ -1,5 +1,6 @@
 package com.materialkolor.builder.core.session
 
+import com.materialkolor.builder.core.platform.BootSplash
 import com.materialkolor.builder.core.platform.StoreError
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ColorNames
@@ -12,6 +13,7 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
@@ -174,14 +176,14 @@ class ProjectSessionTest : SessionTestBase() {
                 advanceTimeBy(AUTOSAVE_DELAY_MILLIS * 2)
             }
             projects.load(id).shouldNotBeNull().revision shouldBe 1
-            environment.splashColors.size shouldBe 1
+            environment.splashes.size shouldBe 1
 
             session.edit(DocumentChange.SetSeed(OCEAN.seed, SeedSource.Picked), EditPhase.Released)
             settle()
 
             projects.load(id).shouldNotBeNull().revision shouldBe 2
             projects.loadHistory(id).entries.size shouldBe 1
-            environment.splashColors.last() shouldBe (OCEAN.seed to DARK_SPLASH)
+            environment.splashes.last() shouldBe BootSplash(OCEAN.seed, DARK_SPLASH, OCEAN.seed, Appearance.System)
         }
 
     @Test

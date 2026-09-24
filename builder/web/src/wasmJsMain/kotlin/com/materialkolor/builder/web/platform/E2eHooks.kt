@@ -1,9 +1,11 @@
 package com.materialkolor.builder.web.platform
 
+import com.materialkolor.builder.core.platform.BootSplash
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.Router
 import com.materialkolor.builder.core.platform.StoreFactory
 import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.domain.persist.ProjectIndex
 import com.materialkolor.builder.domain.persist.StorageKeys
@@ -100,9 +102,12 @@ internal fun Environment.exposeToE2e() {
     exposeE2eHook("pageHides") { hides.toString() }
     exposeE2eAction("hideSplash") { hideSplash() }
     exposeE2eAction("setThemeColor") { hex -> setThemeColor(Argb.fromHex(hex)) }
-    exposeE2eAction("writeSplashColors") { hexes ->
-        val (light, dark) = hexes.split(",").map(Argb::fromHex)
-        writeSplashColors(light, dark)
+    // b-501b
+    // Light, dark and seed hexes, then an appearance, `#000000,#ffffff,#d9653b,Dark`.
+    exposeE2eAction("writeSplash") { text ->
+        val parts = text.split(",")
+        val (light, dark, seed) = parts.take(3).map(Argb::fromHex)
+        writeSplash(BootSplash(light, dark, seed, Appearance.valueOf(parts[3])))
     }
     exposeE2eHook("readTabProject") { readTabProject().orEmpty() }
     exposeE2eAction("writeTabProject") { id -> writeTabProject(id.ifEmpty { null }) }

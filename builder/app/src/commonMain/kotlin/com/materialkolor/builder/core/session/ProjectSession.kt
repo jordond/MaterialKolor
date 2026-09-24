@@ -3,6 +3,7 @@ package com.materialkolor.builder.core.session
 import com.materialkolor.builder.core.data.Creation
 import com.materialkolor.builder.core.data.PreferencesRepository
 import com.materialkolor.builder.core.data.ProjectRepository
+import com.materialkolor.builder.core.platform.BootSplash
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.StoreError
 import com.materialkolor.builder.domain.color.ColorNames
@@ -115,6 +116,24 @@ internal class ProjectSession(
     )
     private val autosave = Autosave(scope, keyOf = { save -> save.project }, write = writes::write)
     private val viewAutosave = Autosave(scope, keyOf = { pending -> pending.project }, write = writes::writeView)
+
+    // b-501b
+    // The splash last written, so a change of appearance can write it again. The UI thread writes it
+    // and the app scope reads it, and on the web both are the one thread.
+    private var splash: BootSplash? = null
+
+    init {
+        // b-501b
+        // A reload right after the appearance changes paints the new one, with no edit in between.
+        scope.launch {
+            preferences.preferences.collect { prefs ->
+                val last = splash
+                if (last != null && last.appearance != prefs.appearance) {
+                    writeSplash(last.copy(appearance = prefs.appearance))
+                }
+            }
+        }
+    }
 
     /** The theme being edited, with the number of the project it belongs to. */
     val shown: StateFlow<ShownDocument> = _shown.asStateFlow()
@@ -348,9 +367,22 @@ internal class ProjectSession(
         committed = document
         committedEditAt = lastEditAt
         val colors = colorsOf(document)
-        environment.writeSplashColors(colors.splashLight, colors.splashDark)
+        writeSplash(colors)
         val sequence = writes.nextSave()
         autosave.schedule(PendingSave(current.value, sequence, document, HistoryRecord(steps.persisted()), colors))
+    }
+
+    // b-501b
+
+    /** Keep [colors] for the next boot's splash, with the seed and the chrome's appearance. */
+    private fun writeSplash(colors: SessionColors) {
+        val appearance = preferences.preferences.value.appearance
+        writeSplash(BootSplash(colors.splashLight, colors.splashDark, colors.splashSeed, appearance))
+    }
+
+    private fun writeSplash(next: BootSplash) {
+        splash = next
+        environment.writeSplash(next)
     }
 
     /** Show [document] in place of the one showing, in the same project. */
@@ -383,7 +415,7 @@ internal class ProjectSession(
         _viewState.value = view
         _project.value = ref
         publishHistory()
-        environment.writeSplashColors(colors.splashLight, colors.splashDark)
+        writeSplash(colors)
         environment.writeTabProject(open.id.value)
         open.id.value?.let { id -> watch(open, id) }
     }

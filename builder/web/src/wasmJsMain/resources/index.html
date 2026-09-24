@@ -5,6 +5,61 @@
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MaterialKolor Builder</title>
+    <!--
+      What search engines and link previews read. The host rewrites og:title, og:description,
+      og:image, twitter:image, theme-color and the canonical link for a theme link, so each of them
+      is one tag. The app sets both theme-color tags to its chrome once it runs.
+    -->
+    <meta
+      name="description"
+      content="Build a Compose color theme from one seed color or a photo. Preview it in Material 3, Expressive, Unstyled and Fluent, then export code that compiles."
+    />
+    <link rel="canonical" href="https://materialkolor.com/" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fff8f6" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1a110f" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MaterialKolor" />
+    <meta property="og:title" content="MaterialKolor Builder" />
+    <meta
+      property="og:description"
+      content="Build a Compose color theme from one seed color or a photo. Preview it in Material 3, Expressive, Unstyled and Fluent, then export code that compiles."
+    />
+    <meta property="og:url" content="https://materialkolor.com/" />
+    <meta property="og:image" content="https://materialkolor.com/og-default.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="MaterialKolor Builder, with the seed color #D9653B and six colors of the theme it makes"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://materialkolor.com/og-default.png" />
+    <meta
+      name="twitter:image:alt"
+      content="MaterialKolor Builder, with the seed color #D9653B and six colors of the theme it makes"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "MaterialKolor Builder",
+        "description": "Build a Compose color theme from one seed color or a photo. Preview it in Material 3, Expressive, Unstyled and Fluent, then export code that compiles.",
+        "url": "https://materialkolor.com/",
+        "image": "https://materialkolor.com/og-default.png",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires WebAssembly GC and WebGL 2",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "author": { "@type": "Person", "name": "Jordon de Hoog" },
+        "sameAs": "https://github.com/jordond/MaterialKolor"
+      }
+    </script>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <!-- The site build fills this with the hashed glue, wasm and fonts. boot.js reads it. -->
     <script type="application/json" id="mk-assets">{"glue":"/builder.js","wasm":[],"fonts":[]}</script>
     <script src="/boot.js"></script>
@@ -28,7 +83,10 @@
         white-space: nowrap;
       }
 
-      /* The splash. boot.js sets --mk-light, --mk-dark and, when the seed is known, --mk-seed. */
+      /*
+        The splash. boot.js sets --mk-light, --mk-dark and, when the seed is known, --mk-seed. It adds
+        mk-light or mk-dark to the page when the app's appearance is not the system's.
+      */
       #splash {
         --mk-chrome: var(--mk-light, #fff8f6);
         --mk-ink: #201a18;
@@ -44,10 +102,15 @@
       }
 
       @media (prefers-color-scheme: dark) {
-        #splash {
+        html:not(.mk-light) #splash {
           --mk-chrome: var(--mk-dark, #1a110f);
           --mk-ink: #f1dfda;
         }
+      }
+
+      .mk-dark #splash {
+        --mk-chrome: var(--mk-dark, #1a110f);
+        --mk-ink: #f1dfda;
       }
 
       .mk-skeleton {

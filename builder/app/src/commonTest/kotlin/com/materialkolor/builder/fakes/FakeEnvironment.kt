@@ -1,5 +1,6 @@
 package com.materialkolor.builder.fakes
 
+import com.materialkolor.builder.core.platform.BootSplash
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.domain.color.Argb
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,8 +35,10 @@ internal class FakeEnvironment(
     /** Every browser chrome tint, oldest first. */
     val themeColors: MutableList<Argb> = mutableListOf()
 
-    /** Every pair of splash colors written, light then dark, oldest first. */
-    val splashColors: MutableList<Pair<Argb, Argb>> = mutableListOf()
+    // b-501b
+
+    /** Every splash written, oldest first. */
+    val splashes: MutableList<BootSplash> = mutableListOf()
 
     // b-307
 
@@ -56,11 +59,8 @@ internal class FakeEnvironment(
         themeColors += argb
     }
 
-    override fun writeSplashColors(
-        light: Argb,
-        dark: Argb,
-    ) {
-        splashColors += light to dark
+    override fun writeSplash(splash: BootSplash) {
+        splashes += splash
     }
 
     override suspend fun requestPersist(): Boolean {

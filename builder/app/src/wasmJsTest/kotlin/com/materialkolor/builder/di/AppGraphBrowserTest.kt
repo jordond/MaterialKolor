@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
+import com.materialkolor.builder.core.platform.BootSplash
 import com.materialkolor.builder.core.platform.Clipboard
 import com.materialkolor.builder.core.platform.DecodedImage
 import com.materialkolor.builder.core.platform.Environment
@@ -143,10 +144,8 @@ private object TestEnvironment : Environment {
 
     override fun setThemeColor(argb: Argb) = Unit
 
-    override fun writeSplashColors(
-        light: Argb,
-        dark: Argb,
-    ) = Unit
+    // b-501b
+    override fun writeSplash(splash: BootSplash) = Unit
 
     override suspend fun requestPersist(): Boolean = false
 
