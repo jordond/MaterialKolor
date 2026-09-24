@@ -100,7 +100,9 @@ internal fun FluentPosterInk.checkboxes(
     }
 
 /** Fluent's selector bar item on the poster. */
-internal fun FluentPosterInk.tabs(fluent: VisualStateScheme<SelectorBarItemColor>): VisualStateScheme<SelectorBarItemColor> =
+internal fun FluentPosterInk.tabs(
+    fluent: VisualStateScheme<SelectorBarItemColor>,
+): VisualStateScheme<SelectorBarItemColor> =
     fluent.eachState { look, enabled ->
         look.copy(contentColor = line(enabled), indicatorColor = accent(look.indicatorColor))
     }
