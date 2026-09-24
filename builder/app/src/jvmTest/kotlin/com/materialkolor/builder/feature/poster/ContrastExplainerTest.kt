@@ -1,5 +1,6 @@
 package com.materialkolor.builder.feature.poster
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -26,6 +27,7 @@ import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
+import dev.stateholder.dispatcher.Dispatcher
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
@@ -107,7 +109,7 @@ class ContrastExplainerTest {
     fun explainerLine_calmerPrimary_saysSoAndOpensThePanel() =
         runComposeUiTest {
             val harness = PosterHarness(ThemeDocument(seed = Seed))
-            showSection(harness) { context, dispatcher -> PrimaryExplainerLine(context, dispatcher) }
+            showSection(harness) { context, dispatcher -> LineAndExplainer(context, dispatcher) }
 
             onNodeWithText("Primary is a calmer take on your seed.").assertExists()
             onNodeWithText("Why?").performClick()
@@ -126,7 +128,7 @@ class ContrastExplainerTest {
         runComposeUiTest {
             val pinned = DocumentChange.SetPin(Role.Primary, PinMode.Light, Seed)
             val harness = PosterHarness(pinned.apply(ThemeDocument(seed = Seed)))
-            showSection(harness) { context, dispatcher -> PrimaryExplainerLine(context, dispatcher) }
+            showSection(harness) { context, dispatcher -> LineAndExplainer(context, dispatcher) }
 
             onNodeWithText("Why?").assertDoesNotExist()
         }
@@ -135,7 +137,7 @@ class ContrastExplainerTest {
     fun keepChroma_switchesToFidelityAsOneUndoEntry() =
         runComposeUiTest {
             val harness = PosterHarness(ThemeDocument(seed = Seed), openPanel = Panel.Explainer)
-            showSection(harness) { context, dispatcher -> PrimaryExplainerLine(context, dispatcher) }
+            showSection(harness) { context, dispatcher -> LineAndExplainer(context, dispatcher) }
 
             onNodeWithText("Keep chroma").performClick()
             waitForIdle()
@@ -150,7 +152,7 @@ class ContrastExplainerTest {
     fun useAsPrimaryOverride_setsThePrimaryKeyColorAsOneUndoEntry() =
         runComposeUiTest {
             val harness = PosterHarness(ThemeDocument(seed = Seed), openPanel = Panel.Explainer)
-            showSection(harness) { context, dispatcher -> PrimaryExplainerLine(context, dispatcher) }
+            showSection(harness) { context, dispatcher -> LineAndExplainer(context, dispatcher) }
 
             onNodeWithText("Use as primary override").performClick()
             waitForIdle()
@@ -166,7 +168,7 @@ class ContrastExplainerTest {
         runComposeUiTest {
             val harness = PosterHarness(ThemeDocument(seed = Seed), openPanel = Panel.Explainer)
             val expected = MatchExactly.of(ThemeResolver().resolve(harness.document), Seed, pinDark = false)
-            showSection(harness) { context, dispatcher -> PrimaryExplainerLine(context, dispatcher) }
+            showSection(harness) { context, dispatcher -> LineAndExplainer(context, dispatcher) }
 
             val onPrimary = expected.onPrimaryLight.toHex()
             onNodeWithText("Pins primary ${Seed.toHex()} and onPrimary $onPrimary in light mode").assertExists()
@@ -190,9 +192,21 @@ class ContrastExplainerTest {
             passed.warns shouldBe false
             warned shouldNotBe null
             val harness = PosterHarness(ThemeDocument(seed = warned!!), openPanel = Panel.Explainer)
-            showSection(harness) { context, dispatcher -> PrimaryExplainerLine(context, dispatcher) }
+            showSection(harness) { context, dispatcher -> LineAndExplainer(context, dispatcher) }
 
             onNodeWithText("Below 4.5 to 1", useUnmergedTree = true).assertExists()
             onNodeWithText("Small text on primary will be hard to read.").assertExists()
         }
+}
+
+// b-221f
+
+/** The explainer line with the explainer the workspace hosts over it, as the two sit on screen. */
+@Composable
+private fun LineAndExplainer(
+    context: PosterContext,
+    dispatcher: Dispatcher<WorkspaceAction>,
+) {
+    PrimaryExplainerLine(context, dispatcher)
+    ExplainerDialog(context, dispatcher)
 }

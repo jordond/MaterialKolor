@@ -150,7 +150,8 @@ internal class ProjectsModel(
                     if (state.value.openId == id) moveOffDeleted(id)
                 }
                 Deletion.NotListed -> {
-                    Unit
+                    // b-221f
+                    // The list no longer holds it, so nothing was removed and there is nothing to undo or report.
                 }
                 Deletion.NewerBuild -> {
                     report(ProjectsProblem.NotDeletedNewer)

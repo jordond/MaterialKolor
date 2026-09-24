@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import com.materialkolor.builder.LocalThemeResult
 import com.materialkolor.builder.domain.edit.EditPhase
@@ -20,6 +21,8 @@ import com.materialkolor.builder.feature.export.ExportHost
 import com.materialkolor.builder.feature.export.launchCopy
 import com.materialkolor.builder.feature.image.ImageHost
 import com.materialkolor.builder.feature.picker.PickerHost
+import com.materialkolor.builder.feature.poster.ExplainerHost
+import com.materialkolor.builder.feature.poster.PosterFocus
 import com.materialkolor.builder.feature.poster.PosterPanel
 import com.materialkolor.builder.feature.projects.ProjectsHost
 import com.materialkolor.builder.feature.projects.ShareHost
@@ -63,6 +66,7 @@ internal fun WorkspaceScreen(
     // b-221c
     var manualCopyText by remember { mutableStateOf("") }
     var manualCopyOpen by remember { mutableStateOf(false) }
+    var manualCopyFrom by remember { mutableStateOf<FocusRequester?>(null) } // b-221f
 
     // Plays the transition's reveal out of the origin, or a crossfade without one, around the change.
     fun reveal(
@@ -147,6 +151,7 @@ internal fun WorkspaceScreen(
                         toasts.show(getString(Res.string.workspace_copied, action.label))
                     } else {
                         manualCopyText = action.text
+                        manualCopyFrom = action.returnFocusTo // b-221f
                         manualCopyOpen = true
                     }
                 }
@@ -181,7 +186,12 @@ internal fun WorkspaceScreen(
         modifier = modifier,
     )
     // b-221c
-    ManualCopyDialog(visible = manualCopyOpen, text = manualCopyText, onDismissRequest = { manualCopyOpen = false })
+    ManualCopyDialog(
+        visible = manualCopyOpen,
+        text = manualCopyText,
+        onDismissRequest = { manualCopyOpen = false },
+        returnFocusTo = manualCopyFrom, // b-221f
+    )
 }
 
 /**
@@ -199,10 +209,13 @@ internal fun WorkspaceScreen(
     // b-221c
     // Share and Export hand focus back to the buttons that opened them once they close (AR-09).
     val focus = rememberTopBarFocus()
+    // b-221f
+    // Projects and the explainer hand focus back to the poster buttons that opened them (AR-09).
+    val posterFocus = remember { PosterFocus() }
     WorkspaceShell(
         posterColors = posterColors,
         posterCollapsed = state.preferences.posterCollapsed,
-        poster = { rail -> PosterPanel(state, rail, dispatcher) },
+        poster = { rail -> PosterPanel(state, rail, dispatcher, focus = posterFocus) }, // b-221f
         topBar = { TopBarContent(state, dispatcher, focus = focus) }, // b-221c
         canvas = { contentPadding -> CanvasArea(state, contentPadding, dispatcher) },
         dock = { CanvasDock(state, dispatcher) },
@@ -213,7 +226,8 @@ internal fun WorkspaceScreen(
         fullscreenExit = { FullscreenExit(dispatcher) },
         overlays = {
             ExportHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.Export)) // b-221c
-            ProjectsHost(state, dispatcher)
+            ProjectsHost(state, dispatcher, returnFocusTo = posterFocus.projects.returnFocusTo) // b-221f
+            ExplainerHost(state, dispatcher, returnFocusTo = posterFocus.why.returnFocusTo) // b-221f
             ShareHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.Share)) // b-221c
             CommandHost(state, dispatcher)
             PickerHost(state, dispatcher)

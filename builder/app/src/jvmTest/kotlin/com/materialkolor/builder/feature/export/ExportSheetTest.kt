@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -159,6 +160,57 @@ class ExportSheetTest {
             onAllNodesWithText("is not a package name", substring = true).assertCountEquals(0)
         }
 
+    // b-221f
+    @Test
+    fun packageDraft_escBeforeItsEchoes_neverMovesTheText() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            val echoes = mutableListOf<() -> Unit>()
+            showSheet(FakeFileSaver(), coarsePointer = false, echoes = echoes)
+            val start = packageText()
+
+            onNodeWithText("Package name").performTextReplacement("com.typed")
+            waitForIdle()
+            onNodeWithText("Package name").performKeyInput { pressKey(Key.Escape) }
+            waitForIdle()
+            packageText() shouldBe start
+
+            // The echoes land late and one at a time, the typed package first.
+            val shown = echoes.map { echo ->
+                runOnIdle { echo() }
+                waitForIdle()
+                packageText()
+            }
+            shown shouldBe listOf(start, start)
+            exported shouldBe listOf(ExportAction.SetPackageName("com.typed"), ExportAction.SetPackageName(start))
+        }
+
+    @Test
+    fun validThenInvalidPackageDraft_targetSwitch_followsTheNewTargetsSavedPackage() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            val fluent = ExportPrefs(packageName = "com.fluent.theme")
+            val echoes = mutableListOf<() -> Unit>()
+            showSheet(
+                files = FakeFileSaver(),
+                coarsePointer = false,
+                preferences = Preferences(exportPrefs = mapOf(ExportTarget.Fluent to fluent)),
+                echoes = echoes,
+            )
+            onNodeWithText("Package name").performTextReplacement("com.typed")
+            waitForIdle()
+            runOnIdle { echoes.forEach { echo -> echo() } }
+            waitForIdle()
+            onNodeWithText("Package name").performTextReplacement("Not A Package")
+            waitForIdle()
+            exportButtons().forEach { button -> button.assertIsNotEnabled() }
+
+            onNodeWithText("Fluent").performClick()
+            waitForIdle()
+
+            packageText() shouldBe "com.fluent.theme"
+            exportButtons().forEach { button -> button.assertIsEnabled() }
+            onAllNodesWithText("is not a package name", substring = true).assertCountEquals(0)
+        }
+
     @Test
     fun validPackageDraft_goesOutAsItIsTyped() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
@@ -274,14 +326,22 @@ class ExportSheetTest {
      */
     private fun idleScope(): CoroutineScope = CoroutineScope(StandardTestDispatcher())
 
+    private fun ComposeUiTest.packageText(): String =
+        onNodeWithText("Package name").fetchSemanticsNode().config[SemanticsProperties.EditableText].text
+
     private fun ComposeUiTest.exportButtons(): List<SemanticsNodeInteraction> =
         listOf("Copy file", "Copy all", "Download zip").map { label -> onNodeWithText(label) }
 
-    /** Shows the sheet on the default document. A target switch from its header moves the document. */
+    /**
+     * Shows the sheet on the default document. A target switch from its header moves the document.
+     * With [echoes] each package sent waits there to come back as the saved package until a test
+     * runs it, and without it nothing comes back.
+     */
     private fun ComposeUiTest.showSheet(
         files: FakeFileSaver,
         coarsePointer: Boolean,
         preferences: Preferences = Preferences(),
+        echoes: MutableList<() -> Unit>? = null, // b-221f
     ) {
         val document = ThemeDocument.Default
         var state by mutableStateOf(ExportModel.State(document = document, preferences = preferences))
@@ -313,7 +373,19 @@ class ExportSheetTest {
                             outcomeOf = { ready },
                             clipboard = clipboard,
                             files = files,
-                            dispatcher = rememberDispatcher<ExportAction> { action -> exported += action },
+                            dispatcher = rememberDispatcher<ExportAction> { action ->
+                                exported += action
+                                // b-221f
+                                if (action is ExportAction.SetPackageName && echoes != null) {
+                                    val target = state.target
+                                    echoes += {
+                                        val prefs = state.preferences.exportPrefsFor(target)
+                                        val saved = prefs.copy(packageName = action.packageName)
+                                        val preferences = state.preferences.withExportPrefs(target, saved)
+                                        state = state.copy(preferences = preferences)
+                                    }
+                                }
+                            },
                             workspace = rememberDispatcher<WorkspaceAction> { action ->
                                 if (action is WorkspaceAction.EditWithReveal) {
                                     state = state.copy(document = action.change.apply(state.document))

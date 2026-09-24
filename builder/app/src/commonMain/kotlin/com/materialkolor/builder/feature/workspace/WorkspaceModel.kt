@@ -90,7 +90,11 @@ internal class WorkspaceModel(
         session.projectName.mergeState { state, name -> state.copy(projectName = name) }
         session.saveStatus.mergeState { state, status -> state.copy(saveStatus = status) }
         // b-221c
-        session.generation.mergeState { state, generation -> state.copy(projectGeneration = generation) }
+        // b-221f
+        // Read with the document the session holds now, so a new number never lands beside the old document.
+        session.generation.mergeState { state, generation ->
+            state.withDocument(session.document.value).copy(projectGeneration = generation)
+        }
     }
 
     /**

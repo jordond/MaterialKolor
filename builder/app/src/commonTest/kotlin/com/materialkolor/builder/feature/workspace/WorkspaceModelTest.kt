@@ -342,6 +342,35 @@ class WorkspaceModelTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
+    // b-221f
+    @Test
+    fun projectGeneration_neverPairsTheNewNumberWithTheOldDocument() =
+        runTest {
+            // The model's collectors run once the session lets go of the thread, as they do on the page.
+            Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+            val (session, preferences) = session()
+            val first = booted(session)
+            val workspace = workspaceModel(session, preferences)
+            runCurrent()
+            val seen = mutableListOf<WorkspaceModel.State>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { workspace.state.collect(seen::add) }
+            workspace.edit(DocumentChange.SetThemeName("EditedTheme"), EditPhase.Discrete)
+            settle()
+            val edited = session.document.value
+            val start = workspace.state.value.projectGeneration
+
+            session.newProject(copyCurrent = false)
+            settle()
+            session.open(first)
+            settle()
+
+            val numbered = seen.groupBy({ state -> state.projectGeneration }) { state -> state.document }
+            numbered.getValue(start + 1).distinct() shouldBe listOf(ThemeDocument.Default)
+            numbered.getValue(start + 2).distinct() shouldBe listOf(edited)
+            workspace.state.value.projectGeneration shouldBe start + 2
+            harness.clearAndJoin()
+        }
+
     private fun appModel(
         session: ProjectSession,
         preferences: PreferencesRepository,
