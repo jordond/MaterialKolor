@@ -8,9 +8,9 @@ import com.materialkolor.builder.core.session.SessionTestBase
 import com.materialkolor.builder.domain.color.ColorNames
 import com.materialkolor.builder.domain.link.ShareCodec
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.StorageKeys
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -45,50 +45,80 @@ class ProjectsModelTest : SessionTestBase() {
     }
 
     @Test
-    fun delete_thenUndoWithinEightSeconds_restoresTheProject() =
+    fun delete_thenUndo_restoresTheProjectWhereItWasListed() =
         runTest {
             val (session, preferences) = session()
-            val first = booted(session)
-            session.newProject(copyCurrent = false)
+            booted(session)
+            repeat(2) { session.newProject(copyCurrent = false) }
             val model = model(session, preferences)
             runCurrent()
+            val listed = listedIds()
+            val shown = model.state.value.projects
 
-            model.handle(ProjectsAction.Delete(first))
+            model.handle(ProjectsAction.Delete(listed[1]))
             runCurrent()
-            listedIds() shouldNotContain first
-            model.state.value.pendingDeletion
+            listedIds() shouldBe listed - listed[1]
+            val deleted = model.state.value.lastDeletion
                 .shouldNotBeNull()
-                .meta.id shouldBe first
+            deleted.meta.id shouldBe listed[1]
 
-            advanceTimeBy(UNDO_WINDOW_MILLIS - 1)
-            model.handle(ProjectsAction.UndoDelete)
+            // Long after any toast would have gone, the model still holds the deletion.
+            advanceTimeBy(UNDO_LONG_AFTER_MILLIS)
+            model.state.value.lastDeletion shouldBe deleted
+            model.handle(ProjectsAction.UndoDelete(deleted))
             runCurrent()
 
-            listedIds() shouldContain first
-            projects.load(first).shouldNotBeNull()
-            model.state.value.pendingDeletion
+            listedIds() shouldBe listed
+            model.state.value.projects shouldBe shown
+            projects.load(listed[1]).shouldNotBeNull()
+            model.state.value.lastDeletion
                 .shouldBeNull()
             harness.clearAndJoin()
         }
 
     @Test
-    fun delete_undoAfterEightSeconds_leavesTheProjectDeleted() =
+    fun undo_ofADeletionThatIsNoLongerTheLast_stillRestoresIt() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            repeat(2) { session.newProject(copyCurrent = false) }
+            val model = model(session, preferences)
+            runCurrent()
+            val listed = listedIds()
+
+            model.handle(ProjectsAction.Delete(listed[0]))
+            runCurrent()
+            val first = model.state.value.lastDeletion
+                .shouldNotBeNull()
+            model.handle(ProjectsAction.Delete(listed[1]))
+            runCurrent()
+            val second = model.state.value.lastDeletion
+                .shouldNotBeNull()
+            model.handle(ProjectsAction.UndoDelete(first))
+            runCurrent()
+
+            listedIds() shouldBe listOf(listed[0], listed[2])
+            model.state.value.lastDeletion shouldBe second
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun delete_aProjectANewerBuildSaved_keepsItAndSaysSo() =
         runTest {
             val (session, preferences) = session()
             val first = booted(session)
             session.newProject(copyCurrent = false)
             val model = model(session, preferences)
             runCurrent()
+            stores.seed(StorageKeys.project(first), NEWER_TEXT)
 
             model.handle(ProjectsAction.Delete(first))
             runCurrent()
-            advanceTimeBy(UNDO_WINDOW_MILLIS + 1)
-            model.state.value.pendingDeletion
-                .shouldBeNull()
-            model.handle(ProjectsAction.UndoDelete)
-            runCurrent()
 
-            listedIds() shouldNotContain first
+            listedIds() shouldContain first
+            model.state.value.lastDeletion
+                .shouldBeNull()
+            model.state.value.problem shouldBe ProjectsProblem.NotDeletedNewer
             harness.clearAndJoin()
         }
 
@@ -109,6 +139,82 @@ class ProjectsModelTest : SessionTestBase() {
 
             session.project.value shouldBe ProjectRef.Persisted(first)
             listedIds() shouldBe listOf(first)
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun duplicate_aSavedProject_listsTheCopyUnderItsName() =
+        runTest {
+            val (session, preferences) = session()
+            val first = booted(session)
+            val model = model(session, preferences)
+            runCurrent()
+
+            model.handle(ProjectsAction.Duplicate(first, "  Harbour copy  "))
+            runCurrent()
+
+            val copy = model.state.value.projects
+                .single { meta -> meta.id != first }
+            copy.name shouldBe "Harbour copy"
+            projects
+                .load(copy.id)
+                .shouldNotBeNull()
+                .document shouldBe session.document.value
+            model.state.value.problem
+                .shouldBeNull()
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun duplicate_aProjectThatIsGone_saysItCouldNotBeCopied() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val model = model(session, preferences)
+            runCurrent()
+
+            model.handle(ProjectsAction.Duplicate("gone", "Gone copy"))
+            runCurrent()
+
+            model.state.value.problem shouldBe ProjectsProblem.NotDuplicated
+            model.state.value.projects shouldHaveSize 1
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun quarantined_aRecordFromANewerBuild_raisesTheReloadBanner() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val model = model(session, preferences)
+            runCurrent()
+            model.state.value.newerData shouldBe false
+
+            stores.seed(StorageKeys.project("newer"), NEWER_TEXT)
+            projects.load("newer").shouldBeNull()
+            runCurrent()
+
+            model.state.value.newerData shouldBe true
+            model.state.value.problem
+                .shouldBeNull()
+            stores.textAt(StorageKeys.project("newer")) shouldBe NEWER_TEXT
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun quarantined_unreadableText_saysItWasSetAside() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val model = model(session, preferences)
+            runCurrent()
+
+            stores.seed(StorageKeys.project("broken"), "{ broken")
+            projects.load("broken").shouldBeNull()
+            runCurrent()
+
+            model.state.value.problem shouldBe ProjectsProblem.SetAside
+            model.state.value.newerData shouldBe false
             harness.clearAndJoin()
         }
 
@@ -210,7 +316,7 @@ class ProjectsModelTest : SessionTestBase() {
         }
 
     @Test
-    fun saveShared_aThemeFromALink_savesItToTheDrawer() =
+    fun saveShared_aThemeFromALink_savesItToTheDrawerOnce() =
         runTest {
             val (session, preferences) = session()
             booted(session)
@@ -221,11 +327,15 @@ class ProjectsModelTest : SessionTestBase() {
 
             model.handle(ProjectsAction.SaveShared)
             runCurrent()
+            session.flush().join()
+            runCurrent()
 
             model.state.value.transient shouldBe false
             model.state.value.projects
                 .map { meta -> meta.name }
-                .shouldContain("Harbour")
+                .filter { name -> name == "Harbour" }
+                .shouldHaveSize(1)
+            model.state.value.projects shouldHaveSize 2
             harness.clearAndJoin()
         }
 
@@ -246,7 +356,7 @@ class ProjectsModelTest : SessionTestBase() {
     private fun model(
         session: ProjectSession,
         preferences: PreferencesRepository,
-    ): ProjectsModel = harness.own(ProjectsModel(session, projects, preferences, environment, StoppedClock))
+    ): ProjectsModel = harness.own(ProjectsModel(session, projects, preferences, environment, StoppedClock, stores))
 
     private suspend fun listedIds(): List<String> =
         projects.index
@@ -258,3 +368,9 @@ class ProjectsModelTest : SessionTestBase() {
         override fun now(): Instant = Instant.fromEpochMilliseconds(0)
     }
 }
+
+/** Far longer than the kit keeps an undo toast up. */
+private const val UNDO_LONG_AFTER_MILLIS: Long = 60_000
+
+/** Text a newer build saved, which this one leaves where it is. */
+private const val NEWER_TEXT = """{"schema":999,"data":{}}"""

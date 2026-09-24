@@ -24,7 +24,8 @@ import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 /**
- * The saved projects, the preferences and the session that edits the open project.
+ * The saved projects, the preferences and the session that edits the open project. The projects and
+ * the session tell the time by the graph's [Clock], so a test clock holds both still.
  */
 @BindingContainer
 @ContributesTo(AppScope::class)
@@ -34,11 +35,12 @@ internal object SessionBindings {
     fun provideProjectRepository(
         stores: StoreFactory,
         environment: Environment,
+        clock: Clock,
     ): ProjectRepository =
         ProjectRepository(
             stores = stores,
             tabId = environment.tabId,
-            now = ::epochMillis,
+            now = { clock.now().toEpochMilliseconds() },
             newId = { Uuid.random().toString() },
         )
 
@@ -61,6 +63,7 @@ internal object SessionBindings {
         environment: Environment,
         resolver: ThemeResolver,
         scope: CoroutineScope,
+        clock: Clock,
     ): ProjectSession =
         ProjectSession(
             projects = projects,
@@ -74,7 +77,7 @@ internal object SessionBindings {
             },
             sharedThemeName = { getString(Res.string.shared_theme_name) },
             scope = scope,
-            now = ::epochMillis,
+            now = { clock.now().toEpochMilliseconds() },
         )
 }
 
@@ -90,5 +93,3 @@ private fun ThemeResult.sessionColors(): SessionColors =
         splashLight = Argb(chrome(isDark = false).surface),
         splashDark = Argb(chrome(isDark = true).surface),
     )
-
-private fun epochMillis(): Long = Clock.System.now().toEpochMilliseconds()

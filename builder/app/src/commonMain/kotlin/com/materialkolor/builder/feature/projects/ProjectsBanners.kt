@@ -12,6 +12,7 @@ import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.projects_conflict
 import com.materialkolor.builder.generated.resources.projects_conflict_keep
 import com.materialkolor.builder.generated.resources.projects_conflict_load
+import com.materialkolor.builder.generated.resources.projects_newer_data
 import com.materialkolor.builder.generated.resources.projects_storage_share
 import com.materialkolor.builder.generated.resources.projects_storage_unavailable
 import com.materialkolor.builder.kit.control.BuilderButton
@@ -72,14 +73,28 @@ internal fun StorageUnavailableBanner(
 }
 
 /**
- * A card with an [icon] and a [message], and its [actions] lined up at the end below them.
+ * A newer version of the builder saved some of the data here, and this one leaves it alone until a
+ * reload picks it up (D41). The platform has no way to reload from here, so the banner only says so.
+ */
+@Composable
+internal fun NewerDataBanner(modifier: Modifier = Modifier) {
+    ProjectBanner(
+        icon = IconId.Info,
+        message = stringResource(Res.string.projects_newer_data),
+        modifier = modifier,
+    )
+}
+
+/**
+ * A card with an [icon] and a [message], and its [actions], when it has any, lined up at the end
+ * below them.
  */
 @Composable
 internal fun ProjectBanner(
     icon: IconId,
     message: String,
     modifier: Modifier = Modifier,
-    actions: @Composable RowScope.() -> Unit,
+    actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     BuilderCard(modifier = modifier) {
@@ -91,12 +106,14 @@ internal fun ProjectBanner(
                 BuilderIcon(icon, contentDescription = null)
                 BuilderText(text = message, modifier = Modifier.weight(1f))
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(spacing.small, Alignment.End),
-                verticalAlignment = Alignment.CenterVertically,
-                content = actions,
-            )
+            if (actions != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(spacing.small, Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically,
+                    content = actions,
+                )
+            }
         }
     }
 }

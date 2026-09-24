@@ -3,6 +3,7 @@ package com.materialkolor.builder.feature.projects
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.feature.share.ShareController
 import com.materialkolor.builder.feature.share.ShareDialog
 import com.materialkolor.builder.feature.share.ShareOutcome
@@ -17,7 +18,8 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The share dialog, open while `state.panel` is [Panel.Share], with the link to the theme as it is
- * now. A copy that lands closes it with a toast, a share that lands closes it quietly.
+ * now. A copy that lands closes it with a toast, a share that lands closes it quietly. The link is
+ * only worked out while the dialog is open.
  */
 @Composable
 internal fun ShareHost(
@@ -26,12 +28,14 @@ internal fun ShareHost(
     modifier: Modifier = Modifier,
     controller: ShareController = metroViewModel(),
 ) {
-    val link = remember(controller, state.document, state.projectName) {
-        controller.link(state.document, state.projectName)
-    }
+    val visible = state.panel == Panel.Share
+    // Worked out only while the dialog is open, so a drag with it closed encodes nothing. A closing
+    // dialog keeps the link it showed.
+    val shown = remember(controller) { ShownLink(controller) }
+    val link = if (visible) shown.of(state.document, state.projectName) else shown.link
     val copied = stringResource(Res.string.share_copied)
     ShareDialog(
-        visible = state.panel == Panel.Share,
+        visible = visible,
         link = link,
         sharesToSheet = controller.sharesToSheet,
         copy = controller::copy,
@@ -43,4 +47,29 @@ internal fun ShareHost(
         onDismissRequest = { dispatcher.dispatch(WorkspaceAction.ClosePanel) },
         modifier = modifier,
     )
+}
+
+/**
+ * The link the dialog shows, worked out again only when the theme or its name changes.
+ */
+private class ShownLink(
+    private val controller: ShareController,
+) {
+    private var document: ThemeDocument? = null
+    private var projectName: String? = null
+
+    /** The last link worked out, or null when there is none yet or the theme would not fit. */
+    var link: String? = null
+        private set
+
+    fun of(
+        document: ThemeDocument,
+        projectName: String,
+    ): String? {
+        if (document == this.document && projectName == this.projectName) return link
+        this.document = document
+        this.projectName = projectName
+        link = controller.link(document, projectName)
+        return link
+    }
 }

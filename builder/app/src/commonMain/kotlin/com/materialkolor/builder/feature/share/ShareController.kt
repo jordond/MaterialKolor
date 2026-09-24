@@ -6,7 +6,7 @@ import com.materialkolor.builder.core.platform.FileSaver
 import com.materialkolor.builder.core.session.BootNotice
 import com.materialkolor.builder.core.session.ProjectSession
 import com.materialkolor.builder.di.AppScope
-import com.materialkolor.builder.domain.link.ShareCodec
+import com.materialkolor.builder.domain.link.shareLink
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.share_invalid
@@ -20,10 +20,11 @@ import org.jetbrains.compose.resources.getString
 /**
  * Share links, out and in (F-32).
  *
- * A link carries every field of the document, target included, and the project name. The package
- * name and the preview mode stay behind, since neither is part of the document. Going out, the link
- * lands on the clipboard, or in the share sheet on a touch screen that has one. Coming in,
- * [openShared] opens the theme a pasted or opened link carries.
+ * A link carries every field of the document, target included, and the project name, built the
+ * same way as the link every export points back with ([shareLink]). The package name and the
+ * preview mode stay behind, since neither is part of the document. Going out, the link lands on the
+ * clipboard, or in the share sheet on a touch screen that has one. Coming in, [openShared] opens the
+ * theme a pasted or opened link carries.
  *
  * Browsers only copy and share inside a click, so [copy] and [share] make the platform call their
  * first suspension. Build the link before the click with [link], ask [sharesToSheet] in the click,
@@ -45,7 +46,7 @@ internal class ShareController(
     fun link(
         document: ThemeDocument,
         projectName: String,
-    ): String? = runCatching { ShareCodec.encode(document, projectName) }.map(::shareUrl).getOrNull()
+    ): String? = shareLink(document, projectName)
 
     /** Put [url] on the clipboard. Copied only when the clipboard really took it. */
     suspend fun copy(url: String): ShareOutcome =
@@ -90,12 +91,6 @@ internal enum class ShareOutcome {
     /** The share sheet would not open, so the link has to be copied by hand. */
     ShareFailed,
 }
-
-/** Where every share link points. */
-internal const val SHARE_LINK_BASE: String = "https://materialkolor.com/t/"
-
-/** The share link for [code]. */
-internal fun shareUrl(code: String): String = SHARE_LINK_BASE + code
 
 /**
  * What to tell the user when [ShareController.openShared] could not open a code, for a toast. A

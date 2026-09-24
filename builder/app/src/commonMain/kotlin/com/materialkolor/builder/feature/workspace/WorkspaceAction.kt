@@ -13,6 +13,7 @@ import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.feature.canvas.VisionSimulation
 import com.materialkolor.builder.feature.picker.PickerTarget
+import com.materialkolor.builder.kit.control.ToastDuration
 
 /**
  * Everything the workspace can be asked to do.
@@ -124,9 +125,16 @@ internal sealed interface WorkspaceAction {
         val label: String,
     ) : WorkspaceAction
 
-    /** Show [message] in a toast. */
+    /**
+     * Show [message] in a toast for [duration]. A toast with an action names it [actionLabel] and
+     * runs [onAction] when it is pressed, and it needs both. Give it [ToastDuration.Long], the time
+     * the kit allows for an action such as Undo.
+     */
     data class ShowToast(
         val message: String,
+        val actionLabel: String? = null,
+        val duration: ToastDuration = ToastDuration.Short,
+        val onAction: (() -> Unit)? = null,
     ) : WorkspaceAction
 
     /** Draw the chrome light, dark or as the system does. It never touches the preview mode. */

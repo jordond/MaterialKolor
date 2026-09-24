@@ -68,21 +68,26 @@
     <string name="projects_conflict_load">Load latest</string>
     <string name="projects_conflict_keep">Keep mine</string>
 
+    <!-- The banner when a newer version of the builder saved data this one leaves alone until a reload. -->
+    <string name="projects_newer_data">A newer version of the builder saved some of your work here. Reload the page to pick it up.</string>
+
     <!-- Toasts when storage turns something down. -->
     <string name="projects_problem_open">That project couldn’t be opened</string>
     <string name="projects_problem_create">There’s no room to save another project</string>
+    <string name="projects_problem_duplicate">That project couldn’t be copied</string>
     <string name="projects_problem_rename">The new name couldn’t be saved</string>
     <string name="projects_problem_delete">That project couldn’t be deleted</string>
+    <string name="projects_problem_delete_newer">A newer version of the builder saved that project. Reload the page to delete it.</string>
     <string name="projects_problem_restore">That project couldn’t be brought back</string>
+    <string name="projects_problem_set_aside">Some saved work couldn’t be read, so it was set aside</string>
 
-    <!-- The banner over a theme opened from a link, until it is saved. -->
-    <string name="share_transient">This theme came from a link and isn’t saved yet</string>
+    <!-- The banner over a theme that isn't saved yet, one opened from a link or one storage turned down. -->
+    <string name="share_transient">This theme isn’t in your projects yet</string>
     <string name="share_transient_save">Save to my projects</string>
 
     <!-- The share dialog. -->
     <string name="share_title">Share this theme</string>
     <string name="share_body">Anyone with the link opens this theme as it is now.</string>
-    <string name="share_link_label">Share link</string>
     <string name="share_copy">Copy link</string>
     <string name="share_send">Share</string>
     <string name="share_copied">Link copied</string>

@@ -21,6 +21,7 @@ import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -56,11 +57,10 @@ internal fun ShareDialog(
     val scope = rememberCoroutineScope()
     var manual by remember(link, visible) { mutableStateOf(false) }
 
-    // The platform call is the first thing the launch suspends on, still inside the click.
     fun send(call: suspend (String) -> ShareOutcome) {
         val url = link ?: return
-        scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            when (val outcome = call(url)) {
+        scope.launchSend(url, call) { outcome ->
+            when (outcome) {
                 ShareOutcome.Copied, ShareOutcome.Shared -> onDone(outcome)
                 ShareOutcome.CopyFailed, ShareOutcome.ShareFailed -> manual = true
             }
@@ -102,5 +102,23 @@ internal fun ShareDialog(
         if (manual) {
             BuilderText(text = stringResource(Res.string.share_manual), emphasis = Emphasis.Danger)
         }
+    }
+}
+
+/**
+ * What Copy link and Share do when clicked. Hands [url] to [call], then hands [onOutcome] how it
+ * went.
+ *
+ * Browsers only copy and share inside the click, so the platform call inside [call] is the first
+ * suspension and it starts before this returns. Call it straight from `onClick`, with no hop through
+ * a model before it.
+ */
+internal fun CoroutineScope.launchSend(
+    url: String,
+    call: suspend (String) -> ShareOutcome,
+    onOutcome: (ShareOutcome) -> Unit,
+) {
+    launch(start = CoroutineStart.UNDISPATCHED) {
+        onOutcome(call(url))
     }
 }

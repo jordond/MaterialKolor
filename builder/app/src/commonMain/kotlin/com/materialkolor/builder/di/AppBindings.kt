@@ -8,9 +8,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlin.time.Clock
 
 /**
- * The app wide coroutine scope and the computation dispatcher.
+ * The app wide coroutine scope, the computation dispatcher and the clock.
  */
 @BindingContainer
 @ContributesTo(AppScope::class)
@@ -27,4 +28,11 @@ internal object AppBindings {
     @Provides
     @Computation
     fun provideComputationDispatcher(): CoroutineDispatcher = Dispatchers.Default
+
+    /**
+     * The time everything saved is stamped with and each project's age is told by, so one test clock
+     * holds all of them still.
+     */
+    @Provides
+    fun provideClock(): Clock = Clock.System
 }
