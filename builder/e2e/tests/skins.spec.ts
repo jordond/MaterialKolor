@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { openBuilder, pressBareCanvas, SETTLE_MS, wantHooks } from './builder';
 import {
   button,
+  focusCanvas,
   LAND_TIMEOUT_MS,
   onPage,
   openWorkspace,
@@ -67,8 +68,14 @@ test('3, 4 and 2 switch the library, and Apply takes the Expressive suggestion a
   await pressKeyUntil(page, '4', () => undoNames('Fluent'));
   // b-503a
   // The 2 opens the suggestion with the switch, and the suggestion is modal, so the mirror hides the
-  // top bar's Undo until it closes. The suggestion showing is what says the 2 landed.
-  await pressKeyUntil(page, '2', async () => (await suggestion.count()) > 0);
+  // top bar's Undo and the tab row the canvas is focused by until it closes. The suggestion showing
+  // is what says the 2 landed, and each try waits for it as long as a switch may take to land, so
+  // no try goes looking for the tab row once the suggestion is up.
+  for (let tries = 0; tries < 3 && (await suggestion.count()) === 0; tries += 1) {
+    await focusCanvas(page);
+    await page.keyboard.press('2');
+    await suggestion.first().waitFor({ state: 'attached', timeout: LAND_TIMEOUT_MS }).catch(() => undefined);
+  }
 
   await expect(suggestion).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
   await press(page, button(page, 'Apply'));
