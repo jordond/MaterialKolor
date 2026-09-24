@@ -20,6 +20,9 @@ import androidx.compose.ui.graphics.layer.drawLayer
  * only because of the change itself. When a reveal asks for the old frame, the next draw records it
  * and completes the capture. The reveal picks up from there at the start of the following frame, so
  * neither its state writes nor the change run inside this draw.
+ *
+ * While [SkinTransition.warmUp] runs, the host also composes its sample off screen and draws each
+ * step under the live frame, so the page looks the same throughout.
  */
 @Composable
 public fun SkinTransitionHost(
@@ -32,6 +35,7 @@ public fun SkinTransitionHost(
         propagateMinConstraints = true,
     ) {
         content()
+        WarmUpSlot(transition) // pf-3
     }
 }
 
@@ -49,8 +53,17 @@ private fun Modifier.skinReveal(transition: SkinTransition): Modifier =
                 return@onDrawWithContent
             }
 
-            drawContent()
             val progress = transition.progress.value
+            // pf-3
+            // A warm-up step waits for any reveal to end, so the old frame stays in the snapshot.
+            val warm = transition.warmPass
+            if (warm != null && progress >= 1f) {
+                drawWarmUp(transition, warm.step, circle)
+                warm.drawn.complete(Unit)
+                return@onDrawWithContent
+            }
+
+            drawContent()
             if (progress >= 1f) return@onDrawWithContent
 
             when (val style = transition.style) {
