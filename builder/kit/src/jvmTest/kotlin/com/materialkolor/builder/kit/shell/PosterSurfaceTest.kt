@@ -155,7 +155,9 @@ class PosterSurfaceTest {
                     val fluent = checkNotNull(colors)
                     fluent.darkMode shouldBe !poster.isLight
                     fluent.shades.base shouldBe poster.ramp.toFluentShades().base
-                    val ratio = fluent.text.text.primary.compositeOver(page).contrastRatio(page)
+                    val ratio = fluent.text.text.primary
+                        .compositeOver(page)
+                        .contrastRatio(page)
                     if (ratio < FluentTextFloor) misses += "${next.toHex()} ${"%.2f".format(ratio)}"
                 }
             }
