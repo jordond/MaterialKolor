@@ -109,14 +109,25 @@ public class SkinTransition internal constructor(
 
     private val switching = Mutex()
 
+    // b-503a
+
+    /** Counts reveals, so one whose animation has not started yet can tell a newer one took over. */
+    private var generation: Int = 0
+
     /**
      * Applies [change] behind a reveal in the given [style].
      *
      * The host records the old frame while it draws, and the change applies at the start of the
      * frame after that, never inside a draw pass. The change applies straight away with no capture
-     * when motion is frozen or the tab is hidden, and also when the host has not drawn and reached
-     * its next frame within 100 ms. A reveal that arrives while another is still running snaps that
-     * one to its end first. Under reduced motion either style becomes the short crossfade.
+     * when motion is frozen or the tab is hidden, and also when the host has not drawn within 100 ms
+     * or its next frame has not come within 100 ms of that draw. A reveal that arrives while another
+     * is still running snaps that one to its end first. Under reduced motion either style becomes the
+     * short crossfade.
+     *
+     * The old frame covers everything for one more frame after the change, while the new UI composes
+     * under it, and the animation starts on the frame after that. A skin switch can take the browser
+     * hundreds of milliseconds to compose, and an animation timed from that frame would be over by
+     * the time the next one drew.
      *
      * Returns once the reveal has finished or been cut short by the next one. Cancelling the caller
      * after the change has applied does not stop the reveal, since the animation belongs to the host.
@@ -134,6 +145,7 @@ public class SkinTransition internal constructor(
     ) {
         val animation = switching.withLock {
             progress.snapTo(1f)
+            val turn = ++generation // b-503a
             val environment = environment()
             if (environment.frozen || !environment.tabVisible) {
                 change()
@@ -162,7 +174,10 @@ public class SkinTransition internal constructor(
             }
             scope.launch(start = CoroutineStart.UNDISPATCHED) {
                 try {
-                    progress.animateTo(targetValue = 1f, animationSpec = spec)
+                    // b-503a
+                    // A newer reveal snaps this one to its end, which cancels nothing while it waits here.
+                    nextFrame()
+                    if (turn == generation) progress.animateTo(targetValue = 1f, animationSpec = spec)
                 } finally {
                     if (bitmap === image) bitmap = null
                 }
@@ -172,34 +187,40 @@ public class SkinTransition internal constructor(
     }
 
     /**
-     * Asks the host to record its next frame, then waits for the frame after it. False when that
-     * did not happen in time.
+     * Asks the host to record its next frame, then waits for the frame after it. False when the host
+     * did not draw within the timeout or the next frame did not come within it after that.
      *
      * The host completes the capture from inside its draw pass, and a dispatcher that resumes
      * inline would carry straight on from there. Waiting for the next frame on the host's clock is
      * the boundary. Everything after the capture, the state writes and the change included, runs
      * at the start of a frame and never inside a draw, whatever dispatcher the caller is on.
+     *
+     * A browser runs the timer and the frame on one thread, so a capture frame that takes longer than
+     * the timeout holds the timer back until it ends. Whether the host drew decides, not which of the
+     * two resumed first, and each wait gets a timeout of its own.
      */
     private suspend fun capture(): Boolean {
         val captured = CompletableDeferred<Unit>()
         pendingCapture = captured
-        return try {
-            finishesWithin(CaptureTimeout) {
-                captured.await()
-                nextFrame()
-            }
+        try {
+            finishesWithin(CaptureTimeout) { captured.await() }
+            if (!captured.isCompleted) return false
         } finally {
             pendingCapture = null
         }
+        var framed = false
+        finishesWithin(CaptureTimeout) { nextFrame { framed = true } }
+        return framed
     }
 
     /**
-     * Suspends until the next frame starts, on the clock the host animates with. The caller's own
-     * context only has to carry a clock when the transition's scope somehow lacks one.
+     * Suspends until the next frame starts, on the clock the host animates with, and runs [onFrame]
+     * in it. The caller's own context only has to carry a clock when the transition's scope somehow
+     * lacks one.
      */
-    private suspend fun nextFrame() {
+    private suspend fun nextFrame(onFrame: () -> Unit = {}) {
         val clock = scope.coroutineContext[MonotonicFrameClock]
-        if (clock != null) clock.withFrameNanos {} else withFrameNanos {}
+        if (clock != null) clock.withFrameNanos { onFrame() } else withFrameNanos { onFrame() }
     }
 }
 

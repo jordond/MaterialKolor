@@ -207,7 +207,9 @@ class SkinTransitionTest {
             pixels.nearOrigin() shouldNotBe Old
             pixels.nearOrigin() shouldNotBe New
 
-            mainClock.advanceTimeBy(120)
+            // b-503a
+            // The animation starts a frame after the change, once the new UI has composed under the old frame.
+            mainClock.advanceTimeBy(136)
             reveal.isCompleted shouldBe true
             hostPixels().farCorner() shouldBe New
         }
@@ -221,7 +223,7 @@ class SkinTransitionTest {
             mainClock.advanceTimeByFrame()
             harness.transition.style shouldBe RevealStyle.Crossfade
 
-            mainClock.advanceTimeBy(176)
+            mainClock.advanceTimeBy(192) // b-503a
             reveal.isCompleted shouldBe true
             hostPixels().farCorner() shouldBe New
         }
