@@ -236,7 +236,11 @@ internal fun libraryAndStyleCommands(
             shortcut = LIBRARY_KEYS[index],
             selected = choice == current,
         ) {
-            if (choice != current) dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin = null))
+            // b-503a
+            // From the switcher, as a press on it would (flow 5.3, MO-04).
+            if (choice != current) {
+                dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin = list.switcherOrigin()))
+            }
         }
     }
     val styleState = state.capabilities[Control.Style]

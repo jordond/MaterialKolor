@@ -92,6 +92,7 @@ internal fun TopBarContent(
         .testTag(LIBRARY_SWITCHER_TAG)
         .topBarFocus(focus, TopBarControl.Library)
         .switcherPulse(state, dispatcher) // b-314
+        .reportSwitcherOrigin(report) // b-503a
     val onSwitch = { choice: LibraryChoice, origin: Offset ->
         dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin))
     }

@@ -8,6 +8,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalUriHandler
 import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.domain.capability.ControlState
@@ -154,12 +155,15 @@ internal sealed interface ControlSite {
  *
  * @property[librarySegmented] Whether the top bar shows the libraries as a segmented row rather than
  * in its dropdown, the form the switcher measured last.
+ * @property[switcherOrigin] The middle of the library switcher in root coordinates, read when a
+ * library command runs so the new skin reveals from it, or null before the switcher has shown.
  */
 internal class CommandList(
     private val reasons: Map<Reason, String>,
     val windowClass: WindowClass,
     val librarySegmented: Boolean, // b-315d
     val overflowed: Set<TopBarControl> = emptySet(), // b-406
+    val switcherOrigin: () -> Offset? = { null }, // b-503a
 ) {
     private val commands = mutableListOf<Command>()
 
@@ -216,7 +220,10 @@ internal fun actionRegistry(
     val windowClass = LocalLayout.current.windowClass
     // b-315d
     val segmented = shortcuts.switcherForm.segmented ?: (windowClass == WindowClass.Expanded)
-    val list = CommandList(reasons, windowClass, segmented, shortcuts.switcherForm.overflowed) // b-406
+    // b-406, b-503a
+    val list = CommandList(reasons, windowClass, segmented, shortcuts.switcherForm.overflowed) {
+        shortcuts.switcherForm.origin
+    }
     val uriHandler = LocalUriHandler.current
     val saved = stringResource(Res.string.command_saved)
     val saveFailed = stringResource(Res.string.export_save_failed)

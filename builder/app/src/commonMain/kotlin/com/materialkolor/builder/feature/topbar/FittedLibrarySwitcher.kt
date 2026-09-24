@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.SubcomposeMeasureScope
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -53,7 +55,26 @@ internal class SwitcherFormState {
 
     /** The top bar buttons the bar has moved into its overflow menu, all three on a phone. */
     var overflowed: Set<TopBarControl> by mutableStateOf(emptySet())
+
+    // b-503a
+
+    /**
+     * The middle of the switcher where it was last placed, in root coordinates, or null before it has
+     * been. A library key reveals the new skin from here (flow 5.3). A plain field, since only a
+     * shortcut reads it and nothing draws from it.
+     */
+    var origin: Offset? = null
 }
+
+// b-503a
+
+/** Keeps [report]'s origin on the middle of the switcher this goes on. Nothing when [report] is null. */
+internal fun Modifier.reportSwitcherOrigin(report: SwitcherFormState?): Modifier =
+    if (report == null) {
+        this
+    } else {
+        onGloballyPositioned { coordinates -> report.origin = coordinates.boundsInRoot().center }
+    }
 
 /** Where the switcher reports its form, or null where nothing reads it. */
 internal val LocalSwitcherForm: ProvidableCompositionLocal<SwitcherFormState?> =
