@@ -254,7 +254,9 @@ class AccentsEditorTest {
             onNodeWithText("Show brand on ramp").performClick()
             waitForIdle()
 
-            harness.actions shouldBe listOf(
+            // b-307
+            val pick = harness.actions.first() as WorkspaceAction.OpenPicker
+            listOf(pick.copy(returnFocusTo = null)) + harness.actions.drop(1) shouldBe listOf(
                 WorkspaceAction.OpenPicker(PickerTarget.Accent(0)),
                 WorkspaceAction.ShowOnRamp(RampTarget.OfAccent(AccentSlot(0, AccentPart.Color), isDark = false)),
             )

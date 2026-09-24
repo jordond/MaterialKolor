@@ -37,7 +37,16 @@ internal class FakeEnvironment(
     /** Every pair of splash colors written, light then dark, oldest first. */
     val splashColors: MutableList<Pair<Argb, Argb>> = mutableListOf()
 
-    override suspend fun pickScreenColor(): Argb? = screenColor
+    // b-307
+
+    /** How many times the eye dropper was opened. */
+    var screenPicks: Int = 0
+        private set
+
+    override suspend fun pickScreenColor(): Argb? {
+        screenPicks++
+        return screenColor
+    }
 
     override fun hideSplash() {
         splashHidden = true

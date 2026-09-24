@@ -186,6 +186,58 @@ class HistoryTest {
         assertFalse(session.history.canUndo)
     }
 
+    // b-307
+    @Test
+    fun history_presetSeedPutBackAfterADrag_leavesNoEntry() {
+        val session = Session()
+        session.edit(DocumentChange.SetSeed(red, SeedSource.Preset(id = "plum")), at = 0)
+
+        session.edit(DocumentChange.SetSeed(blue, SeedSource.Picked), EditPhase.Dragging, at = 10_000)
+        session.edit(DocumentChange.SetSeed(red, SeedSource.Picked), EditPhase.Dragging, at = 10_016)
+        session.edit(DocumentChange.SetSeed(red, SeedSource.Preset(id = "plum")), EditPhase.Released, at = 10_032)
+
+        assertEquals(1, session.history.persisted().size)
+        assertEquals(ChangeLabel(ChangeKind.Preset, detail = "plum"), session.history.undoLabel)
+    }
+
+    @Test
+    fun history_releaseThatNeverMerges_closesTheDragItEnds() {
+        val session = Session()
+
+        session.edit(DocumentChange.SetSeed(blue, SeedSource.Picked), EditPhase.Dragging, at = 0)
+        session.edit(DocumentChange.SetSeed(red, SeedSource.Preset(id = "plum")), EditPhase.Released, at = 16)
+        session.edit(DocumentChange.SetSeed(blue, SeedSource.Picked), EditPhase.Dragging, at = 32)
+
+        assertEquals(2, session.history.persisted().size)
+    }
+
+    @Test
+    fun history_dragBackToTheStart_keepsWhatCanBeRedone() {
+        val session = Session()
+        session.edit(DocumentChange.SetAmoled(true), at = 0)
+        session.undo()
+
+        session.edit(contrast(30), EditPhase.Dragging, at = 10_000)
+        assertFalse(session.history.canRedo)
+        session.edit(contrast(0), EditPhase.Released, at = 10_016)
+
+        assertTrue(session.history.canRedo)
+        assertEquals(ChangeLabel(ChangeKind.Amoled), session.history.redoLabel)
+        assertFalse(session.history.canUndo)
+    }
+
+    @Test
+    fun history_dragThatLands_throwsAwayRedo() {
+        val session = Session()
+        session.edit(DocumentChange.SetAmoled(true), at = 0)
+        session.undo()
+
+        session.edit(contrast(30), EditPhase.Dragging, at = 10_000)
+        session.edit(contrast(40), EditPhase.Released, at = 10_016)
+
+        assertFalse(session.history.canRedo)
+    }
+
     @Test
     fun history_mergedEditsBackToTheStart_leaveNoEntry() {
         val session = Session()
