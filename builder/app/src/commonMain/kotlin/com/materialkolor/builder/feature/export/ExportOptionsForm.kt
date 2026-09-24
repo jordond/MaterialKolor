@@ -8,11 +8,13 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import com.materialkolor.builder.codegen.validate.ReservedNameClash
 import com.materialkolor.builder.codegen.validate.ReservedNames
 import com.materialkolor.builder.domain.capability.Capabilities
@@ -109,11 +111,15 @@ internal fun ExportOptionsForm(
     val spacing = LocalBuilderTokens.current.spacing
     val prefs = state.prefs
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-        PackageField(
-            packageName = prefs.packageName,
-            onChange = { name -> dispatcher.dispatch(ExportAction.SetPackageName(name)) },
-            onProblem = { problem -> drafts.packageName = problem },
-        )
+        // b-221f
+        // Each target keeps its own package, so a switch starts the field over on the new one's.
+        key(state.target) {
+            PackageField(
+                packageName = prefs.packageName,
+                onChange = { name -> dispatcher.dispatch(ExportAction.SetPackageName(name)) },
+                onProblem = { problem -> drafts.packageName = problem },
+            )
+        }
         ThemeNameField(state, workspace, onProblem = { problem -> drafts.themeName = problem })
         if (capabilities[Control.KmpOrAndroid].shown) {
             val names = mapOf(
@@ -220,14 +226,15 @@ private fun ThemeNameField(
  * per key.
  *
  * While drafts are going out the field keeps the text it started from as its committed value, so
- * the drafts coming back as [value] never move the cursor or undo a newer keystroke. Once Enter,
- * leaving the field or Esc settles on a text, the field follows [value] again as soon as [value]
- * has caught up with it.
+ * the drafts coming back as [value] never move the cursor or undo a newer keystroke. Enter settles
+ * it on the text typed. Only once the field is left on a valid draft does it follow [value] again,
+ * since an echo can come back late, after Esc or after typing back to the start, and a stale
+ * [value] that happens to match the field says nothing about the echoes still on their way.
  *
  * A problem only lasts as long as the draft behind it. A new [value] that arrives while nothing is
  * going out replaces the draft, and the field leaving composition takes its draft along, so both
- * clear it. Otherwise a collapsed Options or a target switch would hold the export back under a
- * notice the field no longer shows.
+ * clear it. Otherwise a collapsed Options would hold the export back under a notice the field no
+ * longer shows.
  */
 @Composable
 private fun LiveField(
@@ -239,8 +246,11 @@ private fun LiveField(
     errorOf: (ExportProblem) -> String,
     supportingText: String? = null,
 ) {
-    var startedFrom by remember { mutableStateOf<String?>(null) }
-    var settlingOn by remember { mutableStateOf<String?>(null) }
+    // b-221f
+    // The committed text the field keeps while its drafts are out, or null while it follows value.
+    var held by remember { mutableStateOf<String?>(null) }
+    var focused by remember { mutableStateOf(false) }
+    var draftInvalid by remember { mutableStateOf(false) }
     var lastValue by remember { mutableStateOf(value) }
     val currentOnProblem by rememberUpdatedState(onProblem)
     DisposableEffect(Unit) {
@@ -248,31 +258,27 @@ private fun LiveField(
     }
     SideEffect {
         // Nothing is going out, so this value is not a draft coming back and the field shows it now.
-        if (startedFrom == null && value != lastValue) onProblem(null)
+        if (held == null && value != lastValue) onProblem(null)
         lastValue = value
-        if (settlingOn != null && settlingOn == value) {
-            startedFrom = null
-            settlingOn = null
-        }
+        // Left on a valid draft, the field has sent everything it holds, so it follows value again.
+        if (held != null && !focused && !draftInvalid) held = null
     }
     BuilderTextField(
-        value = settlingOn ?: startedFrom ?: value,
+        value = held ?: value,
         // The drafts went out as they were typed, so a commit only has to settle on the last one.
         onCommit = { text ->
-            if (startedFrom == null) onChange(text) else settlingOn = text
+            if (held == null) onChange(text) else held = text
         },
         label = label,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().onFocusChanged { state -> focused = state.hasFocus },
         error = { draft -> problemOf(draft)?.let(errorOf) },
         supportingText = supportingText,
         onDraftChange = { draft ->
             val problem = problemOf(draft)
             onProblem(problem)
+            draftInvalid = problem != null
             if (problem == null) {
-                val start = startedFrom ?: value
-                startedFrom = start
-                // Esc, or typing back to the start, settles on it. Anything else keeps drafting.
-                settlingOn = draft.takeIf { draft == start }
+                held = held ?: value
                 onChange(draft)
             }
         },

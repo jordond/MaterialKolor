@@ -10,6 +10,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ColorNames
 import com.materialkolor.builder.domain.color.InvalidReason
@@ -76,6 +78,10 @@ internal fun SeedHero(
     val hct = remember(seed) { HctReadout.of(seed).rounded() }
     val hexLabel = stringResource(Res.string.poster_copied_hex)
     val kotlinLabel = stringResource(Res.string.poster_copied_kotlin)
+    // b-221f
+    // A refused copy opens the manual copy dialog, which hands focus back to the button pressed.
+    val copyHex = remember { FocusRequester() }
+    val copyKotlin = remember { FocusRequester() }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         InfoLabel(label = stringResource(Res.string.poster_seed), topic = InfoTopic.Seed)
         BuilderHexField(
@@ -111,14 +117,18 @@ internal fun SeedHero(
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
             BuilderButton(
-                onClick = { dispatcher.dispatch(WorkspaceAction.CopyText(seed.toHex(), hexLabel)) },
+                onClick = { dispatcher.dispatch(WorkspaceAction.CopyText(seed.toHex(), hexLabel, copyHex)) },
                 label = stringResource(Res.string.poster_copy_hex),
+                modifier = Modifier.focusRequester(copyHex), // b-221f
                 emphasis = Emphasis.Subtle,
                 icon = IconId.Copy,
             )
             BuilderButton(
-                onClick = { dispatcher.dispatch(WorkspaceAction.CopyText(kotlinLiteralOf(seed), kotlinLabel)) },
+                onClick = {
+                    dispatcher.dispatch(WorkspaceAction.CopyText(kotlinLiteralOf(seed), kotlinLabel, copyKotlin))
+                },
                 label = stringResource(Res.string.poster_copy_kotlin),
+                modifier = Modifier.focusRequester(copyKotlin), // b-221f
                 emphasis = Emphasis.Subtle,
                 icon = IconId.Copy,
             )

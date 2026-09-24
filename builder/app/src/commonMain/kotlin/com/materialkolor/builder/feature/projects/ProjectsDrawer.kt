@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.projects_empty
 import com.materialkolor.builder.generated.resources.projects_new
@@ -43,6 +44,7 @@ import org.jetbrains.compose.resources.stringResource
  * @param[onAction] Called with what the drawer asks for.
  * @param[onGetLink] Called when the storage banner asks for a share link.
  * @param[onDismissRequest] Called when the drawer asks to close.
+ * @param[returnFocusTo] The button that opened the drawer, which gets focus back once it closes.
  */
 @Composable
 internal fun ProjectsDrawer(
@@ -53,6 +55,7 @@ internal fun ProjectsDrawer(
     onGetLink: () -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
+    returnFocusTo: FocusRequester? = null, // b-221f
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     var renaming by remember { mutableStateOf<String?>(null) }
@@ -64,6 +67,7 @@ internal fun ProjectsDrawer(
         onDismissRequest = onDismissRequest,
         title = stringResource(Res.string.projects_title),
         modifier = modifier,
+        returnFocusTo = returnFocusTo, // b-221f
     ) {
         Column(
             modifier = Modifier.padding(horizontal = spacing.large).padding(bottom = spacing.medium),

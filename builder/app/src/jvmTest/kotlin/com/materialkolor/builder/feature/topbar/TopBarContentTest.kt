@@ -7,6 +7,7 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -30,6 +31,7 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.domain.persist.ProjectViewState
 import com.materialkolor.builder.engine.resolve.ThemeResolver
@@ -208,6 +210,35 @@ class TopBarContentTest {
 
             graph.session.document.value.library shouldBe Library.Fluent
             onNodeWithText("Export code").assertIsFocused()
+        }
+
+    // b-221f
+    @Test
+    fun appearanceRows_inTheMoreMenu_onlyTheChosenOneIsSelected() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            val document = ThemeDocument.Default
+            val state = workspaceState(document, HistoryState())
+                .copy(preferences = Preferences(appearance = Appearance.Dark))
+            setContent {
+                val dispatcher = rememberDispatcher<WorkspaceAction> {}
+                BuilderTheme(
+                    skin = skinOf(document),
+                    result = ThemeResolver().resolve(document),
+                    isDark = false,
+                    reducedMotion = true,
+                ) {
+                    ProvideBuilderLayout(modifier = Modifier.fillMaxSize()) {
+                        TopBarContent(state = state, dispatcher = dispatcher)
+                    }
+                }
+            }
+
+            onNodeWithContentDescription("More options").performClick()
+            waitForIdle()
+
+            onNodeWithText("Use the dark appearance").assertIsSelected()
+            onNodeWithText("Use the light appearance").assertIsNotSelected()
+            onNodeWithText("Use the system appearance").assertIsNotSelected()
         }
 
     /** The whole builder on fakes, booted, with its graph so a test can read the session. */
