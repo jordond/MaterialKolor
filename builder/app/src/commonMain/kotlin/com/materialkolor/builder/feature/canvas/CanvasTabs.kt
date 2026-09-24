@@ -58,6 +58,15 @@ internal const val DEVICE_SCREEN_TAG: String = "canvas-device-screen"
 internal val LocalCanvasProbe: ProvidableCompositionLocal<((tab: PreviewTab) -> Unit)?> =
     staticCompositionLocalOf { null }
 
+// pf-1
+
+/**
+ * Told the name of each swatch or ramp a data tab composes, each time it composes it, or null, which
+ * it always is outside tests. Tests provide it to prove an edit composes again only what it changed.
+ */
+internal val LocalTileProbe: ProvidableCompositionLocal<((name: String) -> Unit)?> =
+    staticCompositionLocalOf { null }
+
 /**
  * The light and dark panes of the canvas, drawn through the same vision filter.
  *

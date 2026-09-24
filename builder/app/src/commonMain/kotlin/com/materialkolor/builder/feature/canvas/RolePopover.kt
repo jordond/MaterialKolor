@@ -49,7 +49,7 @@ import org.jetbrains.compose.resources.stringResource
  * @property[pinned] Whether it is a role the document pins in this mode.
  */
 @Immutable
-internal class RoleSwatch(
+internal data class RoleSwatch(
     val name: String,
     val argb: Argb,
     val ink: Color,
@@ -80,6 +80,7 @@ internal fun RolePopover(
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
 ) {
+    LocalTileProbe.current?.invoke(swatch.name) // pf-1
     var open by remember { mutableStateOf(false) }
     val tile = remember { FocusRequester() } // b-308ba
     val copyHex = WorkspaceAction.CopyText(

@@ -1,5 +1,6 @@
 package com.materialkolor.builder.feature.poster
 
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
@@ -21,7 +22,9 @@ import com.materialkolor.builder.engine.resolve.SchemeInputs
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.dynamiccolor.DynamicScheme
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldBeTypeOf
@@ -31,6 +34,9 @@ import kotlin.test.Test
 private val Seed = Argb(0x6750A4)
 
 private const val TERTIARY_FIELD = "Tertiary seed, any format"
+
+/** How many frames the chip drag test moves the seed for. */
+private const val DRAG_FRAMES = 4 // pf-1
 
 @OptIn(ExperimentalTestApi::class)
 class StyleChipsTest {
@@ -55,6 +61,39 @@ class StyleChipsTest {
             harness.document = harness.document.copy(seed = Argb(0x1E88E5))
             waitForIdle()
             asked shouldHaveSize Style.entries.size * 2
+        }
+
+    // pf-1
+    @Test
+    fun chips_aSchemeChange_drawsOneChipAFrameAndAllOnceItSettles() =
+        runComposeUiTest {
+            val harness = PosterHarness(ThemeDocument(seed = Seed))
+            val asked = mutableListOf<SchemeInputs>()
+            showSection(harness) { context, dispatcher ->
+                StyleChips(
+                    context = context,
+                    dispatcher = dispatcher,
+                    lookup = { inputs, isDark -> harness.resolver.scheme(inputs, isDark).also { asked += inputs } },
+                    pause = { withFrameNanos {} },
+                )
+            }
+            waitForIdle()
+            asked shouldHaveSize Style.entries.size
+
+            // A drag lands a new seed every frame, and no frame draws more than one chip for it.
+            mainClock.autoAdvance = false
+            var last = Seed
+            repeat(DRAG_FRAMES) { step ->
+                last = Argb(0x1E88E5 + step)
+                harness.document = harness.document.copy(seed = last)
+                mainClock.advanceTimeByFrame()
+                asked.size shouldBeLessThanOrEqual Style.entries.size + step + 1
+            }
+
+            mainClock.autoAdvance = true
+            waitForIdle()
+            asked.filter { inputs -> inputs.seed == last }.map { inputs -> inputs.style } shouldContainExactlyInAnyOrder
+                Style.entries
         }
 
     @Test
