@@ -78,6 +78,8 @@ internal fun CanvasArea(
                 specs = specs,
                 appState = appState,
                 componentsState = componentsState,
+                // b-308
+                dispatcher = dispatcher,
                 deviceWidth = if (compact) DeviceWidth.Phone else state.view.deviceWidth,
             )
             // B-217b lays the inspect overlay here, over the active tab, while `state.inspect` is on.

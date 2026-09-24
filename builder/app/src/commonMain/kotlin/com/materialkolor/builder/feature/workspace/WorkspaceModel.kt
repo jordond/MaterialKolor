@@ -30,6 +30,7 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.shuffle.Shuffle
 import com.materialkolor.builder.engine.shuffle.ShuffleResult
 import com.materialkolor.builder.engine.shuffle.shuffleLocks
+import com.materialkolor.builder.feature.canvas.RampTarget
 import com.materialkolor.builder.feature.canvas.VisionSimulation
 import com.materialkolor.builder.feature.picker.PickerTarget
 import com.materialkolor.builder.feature.topbar.raisesExpressiveSuggestion
@@ -146,6 +147,7 @@ internal class WorkspaceModel(
 
     fun setPreviewTab(tab: PreviewTab) {
         updateView { view -> view.copy(tab = tab) }
+        updateState { state -> state.copy(rampTarget = null) } // b-308
     }
 
     /** Only the preview's mode moves. The chrome keeps its appearance (F-04). */
@@ -243,6 +245,14 @@ internal class WorkspaceModel(
     /** Put [text] on the clipboard. False when the platform would not take it. */
     suspend fun copyText(text: String): Boolean = clipboard.writeText(text).isSuccess
 
+    // b-308
+
+    /** Show the Palettes tab with the ramp of [target] picked out, until the next tab switch. */
+    fun showOnRamp(target: RampTarget) {
+        updateView { view -> view.copy(tab = PreviewTab.Palettes) }
+        updateState { state -> state.copy(rampTarget = target) }
+    }
+
     /** Read the session back into the state at once, so nothing waits on a collector. */
     private fun syncSession(expressiveSuggestion: Boolean) {
         val document = session.document.value
@@ -278,6 +288,8 @@ internal class WorkspaceModel(
      * @property[saveStatus] Whether the open project's latest changes are saved.
      * @property[expressiveSuggestion] Whether the top bar offers the Expressive style on the 2025
      * spec after a switch to Expressive (F-03).
+     * @property[rampTarget] What the Palettes tab picks out after Show on ramp, or null. A tab
+     * switch clears it and nothing saves it.
      */
     @Immutable
     data class State(
@@ -294,6 +306,7 @@ internal class WorkspaceModel(
         val projectName: String = "",
         val saveStatus: SaveStatus = SaveStatus.Idle,
         val expressiveSuggestion: Boolean = false,
+        val rampTarget: RampTarget? = null, // b-308
     ) {
         /** What [document] exports to. */
         val target: ExportTarget
