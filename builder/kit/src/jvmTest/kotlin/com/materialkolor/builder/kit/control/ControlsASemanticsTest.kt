@@ -274,6 +274,19 @@ class ControlsASemanticsTest {
             }
         }
 
+    // b-225
+    @Test
+    fun badge_blankLabel_drawsNothingInsteadOfFailing() =
+        runComposeUiTest {
+            eachActionSkin(
+                content = {
+                    BuilderBadge("", Modifier.testTag("blank"), status = BadgeStatus.Success, icon = IconId.Check)
+                },
+            ) {
+                onNodeWithTag("blank").assertDoesNotExist()
+            }
+        }
+
     @Test
     fun card_everySkin_pressableCardIsOneButtonAndPlainCardIsAGroup() =
         runComposeUiTest {
