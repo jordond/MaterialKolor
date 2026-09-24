@@ -1,7 +1,9 @@
 package com.materialkolor.builder.kit.skin.material
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,10 +18,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import com.materialkolor.builder.kit.control.progressLabel
 import com.materialkolor.builder.kit.control.rememberSweepPhase
 import com.materialkolor.builder.kit.control.sweepSpan
+import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.headless.ActionSweep
 
 /**
- * Material's linear bar. B-402 decides whether the expressive flavour gets the loading indicator.
+ * Material's linear bar, or in the expressive flavour Material's loading indicator
+ * ([ExpressiveProgress]).
  *
  * Material's own indeterminate bar runs a clock of its own, which ignores frozen motion, reduced
  * motion and a hidden tab (MO-10). So the indeterminate bar is Material's determinate one held at
@@ -35,6 +39,10 @@ internal fun MaterialProgress(
     val labelled = modifier
         .fillMaxWidth()
         .progressLabel(label, progress)
+    if (LocalSkin.current.expressive) {
+        ExpressiveProgress(labelled, progress)
+        return
+    }
     if (progress != null) {
         LinearProgressIndicator(progress = { progress }, modifier = labelled)
         return
@@ -48,6 +56,32 @@ internal fun MaterialProgress(
         color = color,
         strokeCap = cap,
         drawStopIndicator = { drawMaterialSweep(phase.value, color, cap) },
+    )
+}
+
+/**
+ * Material's expressive loading indicator, a shape that morphs as the work goes on, in the middle of
+ * the width the bar is given.
+ *
+ * Only the overload that takes its progress is called. The one without runs an endless clock of its
+ * own, which ignores frozen motion, reduced motion and a hidden tab like the linear bar's (MO-10).
+ * While nobody can tell how far along the work is, the shape follows the same sweep as the linear
+ * bar instead, from [rememberSweepPhase], and still reads as a bar with no amount.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun ExpressiveProgress(
+    labelled: Modifier,
+    progress: Float?,
+) {
+    if (progress != null) {
+        LoadingIndicator(progress = { progress }, modifier = labelled)
+        return
+    }
+    val phase = rememberSweepPhase(ActionSweep)
+    LoadingIndicator(
+        progress = { phase.value },
+        modifier = labelled.semantics { progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate },
     )
 }
 

@@ -7,6 +7,7 @@ import androidx.compose.ui.semantics.stateDescription
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.control.roleLessName
 import com.materialkolor.builder.kit.generated.resources.Res
+import com.materialkolor.builder.kit.generated.resources.role_progress_bar
 import com.materialkolor.builder.kit.generated.resources.role_slider
 import org.jetbrains.compose.resources.stringResource
 
@@ -32,6 +33,16 @@ public val sliderRoleWord: String
     get() = stringResource(Res.string.role_slider)
 
 /**
+ * The kit's word for a progress bar as it reads after a name, "progress bar", in the current locale.
+ * Read it in composition and hand it to [valueNodeName] for a node that shows how far along some
+ * work is, so it reads the way the kit's own progress bars do on the web, "Upload, progress bar,
+ * 40%".
+ */
+public val progressRoleWord: String
+    @Composable
+    get() = stringResource(Res.string.role_progress_bar)
+
+/**
  * Names a node that plays no role but holds a value, such as the handle between the two copies of
  * a split preview.
  *
@@ -45,7 +56,8 @@ public val sliderRoleWord: String
  * @param[name] What the node is, such as "Split".
  * @param[value] What it holds now, such as "50% Light".
  * @param[folds] [foldsValueIntoName], read in composition.
- * @param[roleWord] The word for what the node works as, such as [sliderRoleWord], read on the web
+ * @param[roleWord] The word for what the node works as, such as [sliderRoleWord] or
+ * [progressRoleWord], read on the web
  * between the name and the value. Left null, the node names no role.
  */
 public fun SemanticsPropertyReceiver.valueNodeName(

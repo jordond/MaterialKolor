@@ -40,7 +40,7 @@ private const val BubblePixelsNeeded = 50
 /** How far past its control a focus ring and the blend at its edge reach. */
 internal val RingReach: Dp = FocusRingOffset + FocusRingWidth + 1.dp
 
-/** How far over a ring [shouldShowABubbleAbove] looks for the bubble. */
+/** How far past a ring [shouldShowABubbleAbove] and [shouldShowABubbleBelow] look for the bubble. */
 private val BubbleReach: Dp = 48.dp
 
 /**
@@ -73,10 +73,13 @@ internal class PageOverlays {
  * anchor.
  *
  * @param[overlays] Given the host, so a test can tell a bubble opened.
+ * @param[bubbleBelow] Whether the room for a bubble goes under the content instead, with the content
+ * at the top of the host, so a tooltip finds no room above its anchor and opens below it.
  */
 @Composable
 internal fun InThePage(
     overlays: PageOverlays,
+    bubbleBelow: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(LocalOverlaysInTree provides true) {
@@ -86,7 +89,12 @@ internal fun InThePage(
             Box(
                 modifier = Modifier
                     .widthIn(min = PageWidth)
-                    .padding(start = RingRoom, top = BubbleRoom, end = RingRoom, bottom = RingRoom),
+                    .padding(
+                        start = RingRoom,
+                        top = if (bubbleBelow) RingRoom else BubbleRoom,
+                        end = RingRoom,
+                        bottom = if (bubbleBelow) BubbleRoom else RingRoom,
+                    ),
             ) { content() }
         }
     }
@@ -95,26 +103,22 @@ internal fun InThePage(
 /**
  * How much of the middle half of each side of [around] the ring covers at 3 to 1, the way the S5
  * probe measures it. A row of the left or the right side counts when a ring pixel lies on it within
- * that side's band, and a column of the top or the bottom side the same way. The bands are the ones
- * [shouldRingEverySide] looks in, so a side reads zero where the ring is cut or sits under something.
+ * that side's band, and a column of the top or the bottom side the same way. The bands are the
+ * [SideBands] [shouldRingEverySide] looks in, so a side reads zero where the ring is cut or sits
+ * under something.
  */
 internal fun RingCapture.sideCoverage(
     reach: Dp = 8.dp,
     around: Rect = focused,
 ): Map<String, Double> {
-    val box = around
-    val out = reach.value * density
-    val rows = pixelsWithin(box.top + box.height / 4, box.bottom - box.height / 4)
-    val columns = pixelsWithin(box.left + box.width / 4, box.right - box.width / 4)
-    val left = (box.left - out)..(box.left + box.width / 4)
-    val right = (box.right - box.width / 4)..(box.right + out)
-    val top = (box.top - out)..(box.top + box.height / 4)
-    val bottom = (box.bottom - box.height / 4)..(box.bottom + out)
+    val bands = sideBands(reach, around)
+    val rows = pixelsWithin(bands.middleY.start, bands.middleY.endInclusive)
+    val columns = pixelsWithin(bands.middleX.start, bands.middleX.endInclusive)
     return mapOf(
-        "top" to share(columns, pixels.filter { point -> point.y + 0.5f in top }.map { point -> point.x }),
-        "right" to share(rows, pixels.filter { point -> point.x + 0.5f in right }.map { point -> point.y }),
-        "bottom" to share(columns, pixels.filter { point -> point.y + 0.5f in bottom }.map { point -> point.x }),
-        "left" to share(rows, pixels.filter { point -> point.x + 0.5f in left }.map { point -> point.y }),
+        "top" to share(columns, pixels.filter { point -> point.y + 0.5f in bands.top }.map { point -> point.x }),
+        "right" to share(rows, pixels.filter { point -> point.x + 0.5f in bands.right }.map { point -> point.y }),
+        "bottom" to share(columns, pixels.filter { point -> point.y + 0.5f in bands.bottom }.map { point -> point.x }),
+        "left" to share(rows, pixels.filter { point -> point.x + 0.5f in bands.left }.map { point -> point.y }),
     )
 }
 
@@ -164,7 +168,21 @@ internal fun RingCapture.shouldRingAllTheWayRoundOutside(inner: Rect) {
 internal fun RingCapture.shouldShowABubbleAbove(overlays: PageOverlays) {
     withClue("overlays open in the page") { overlays.open shouldBeGreaterThanOrEqual 1 }
     val clear = focused.top - RingReach.value * density
-    val rows = pixelsWithin(clear - BubbleReach.value * density, clear)
+    shouldDrawABubbleOn(pixelsWithin(clear - BubbleReach.value * density, clear))
+}
+
+/**
+ * Checks that a bubble opened in the page and drew under the focused node, below its ring, the way a
+ * tooltip opens with no room above its anchor. Only the node's own columns are looked at.
+ */
+internal fun RingCapture.shouldShowABubbleBelow(overlays: PageOverlays) {
+    withClue("overlays open in the page") { overlays.open shouldBeGreaterThanOrEqual 1 }
+    val clear = focused.bottom + RingReach.value * density
+    shouldDrawABubbleOn(pixelsWithin(clear, clear + BubbleReach.value * density))
+}
+
+/** Checks that enough pixels changed on [rows], across the focused node's own columns, for a bubble. */
+private fun RingCapture.shouldDrawABubbleOn(rows: IntRange) {
     val columns = pixelsWithin(focused.left, focused.right)
     var drawn = 0
     for (y in rows.first.coerceAtLeast(0)..minOf(rows.last, after.height - 1)) {
@@ -177,7 +195,7 @@ internal fun RingCapture.shouldShowABubbleAbove(overlays: PageOverlays) {
             if (moved) drawn++
         }
     }
-    withClue("$drawn pixels drawn over the ring") { drawn shouldBeGreaterThanOrEqual BubblePixelsNeeded }
+    withClue("$drawn pixels drawn beside the ring") { drawn shouldBeGreaterThanOrEqual BubblePixelsNeeded }
 }
 
 /** The whole pixels whose centres lie between [from] and [to]. */

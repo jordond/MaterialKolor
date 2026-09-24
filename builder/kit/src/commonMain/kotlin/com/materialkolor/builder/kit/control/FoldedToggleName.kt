@@ -28,3 +28,26 @@ public fun Modifier.foldedToggleName(
     val spoken = stateName(name, ControlState.Checked(checked), enabled, role = FoldedRole.Checkbox)
     return semantics { contentDescription = spoken }
 }
+
+/**
+ * Names a switch an app draws for itself, such as a Material switch on a settings row, and carries
+ * its role and state onto the web the way the kit's own switches do.
+ *
+ * Put it on the node that takes the switch, after its `toggleable` with the switch role. Off the web
+ * [name] becomes the node's content description, and the toggleable reports the role and whether it
+ * is on. The web mirror drops that state and reads every clickable as a button (P3), so there the
+ * switch word and the state travel in the name instead, as in "Wi-Fi, switch, on" (D37).
+ *
+ * @param[name] What the switch turns on and off, read out as its name.
+ * @param[checked] Whether it is on.
+ * @param[enabled] Whether it takes input. On the web a disabled switch says so in its name.
+ */
+@Composable
+public fun Modifier.foldedSwitchName(
+    name: String,
+    checked: Boolean,
+    enabled: Boolean = true,
+): Modifier {
+    val spoken = stateName(name, ControlState.Switched(checked), enabled, role = FoldedRole.Switch)
+    return semantics { contentDescription = spoken }
+}
