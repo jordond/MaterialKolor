@@ -1,6 +1,7 @@
 package com.materialkolor.builder.feature.canvas
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,7 +9,11 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -17,6 +22,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.domain.color.Argb
@@ -37,6 +43,8 @@ import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.feature.workspace.capabilitiesOf
+import com.materialkolor.builder.kit.a11y.Announcer
+import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import dev.stateholder.dispatcher.Dispatcher
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
@@ -166,6 +174,67 @@ class PalettesTabTest {
             onNodeWithText("Brand container sits on this ramp").assertIsDisplayed()
         }
 
+    // b-308ba
+    @Test
+    fun highlight_anEditAfterIt_leavesTheScrollAlone() =
+        runDesktopComposeUiTest(width = TABS_PHONE, height = TABS_HEIGHT) {
+            val document = material.copy(accents = listOf(brand))
+            var result by mutableStateOf(resolvedFor(document))
+            val slot = AccentSlot(index = 0, part = AccentPart.Container)
+            val highlight = RampHighlight(RampTarget.OfAccent(slot, isDark = false), generation = 0)
+            setContent {
+                DataTabTheme(result) {
+                    PalettesTab(result, PreviewMode.Light, filter = null, highlight, 0, TabActions().dispatcher)
+                }
+            }
+            waitForIdle()
+            val label = onNodeWithText("Brand container sits on this ramp")
+            label.assertIsDisplayed()
+            onNodeWithText("Primary").performScrollTo()
+            waitForIdle()
+            label.assertIsNotDisplayed()
+
+            result = resolvedFor(document.copy(seed = Argb(0x00696B)))
+            waitForIdle()
+
+            onNodeWithText("Primary").assertIsDisplayed()
+            label.assertIsNotDisplayed()
+        }
+
+    @Test
+    fun highlight_accentPickedInDark_showsInLight() =
+        runDesktopComposeUiTest(width = TABS_WIDE, height = TABS_HEIGHT) {
+            val result = resolvedFor(material.copy(accents = listOf(brand)))
+            val slot = AccentSlot(index = 0, part = AccentPart.Color)
+            showPalettes(result, PreviewMode.Light, RampHighlight(RampTarget.OfAccent(slot, isDark = true), 0))
+
+            onNode(hasTestTag(PICKED_RAMP_TAG) and hasAnyDescendant(hasText("Brand"))).assertExists()
+        }
+
+    @Test
+    fun highlight_2021RampPickedInDark_showsInLight() =
+        runDesktopComposeUiTest(width = TABS_WIDE, height = TABS_HEIGHT) {
+            val result = resolvedFor(material.copy(spec = SpecVersion.Spec2021))
+            showPalettes(result, PreviewMode.Light, RampHighlight(RampTarget.OfRole(Role.Primary, isDark = true), 0))
+
+            onNodeWithText("primary sits on this ramp").assertExists()
+            onNode(hasTestTag(PICKED_RAMP_TAG) and hasAnyDescendant(hasText("Primary"))).assertExists()
+        }
+
+    @Test
+    fun highlight_2025RampThatDiffersPickedInDark_staysOutOfLight() =
+        runDesktopComposeUiTest(width = TABS_WIDE, height = TABS_HEIGHT) {
+            val result = resolvedFor(material.copy(spec = SpecVersion.Spec2025))
+            val palette = RampSet.Palettes.first { palette ->
+                result.ramps[palette, false].steps != result.ramps[palette, true].steps
+            }
+            val dark = result.ramps[palette, true]
+            val role = dark.markers.first().role
+            showPalettes(result, PreviewMode.Light, RampHighlight(RampTarget.OfRole(role, isDark = true), 0))
+
+            onNodeWithTag(PICKED_RAMP_TAG).assertDoesNotExist()
+        }
+
     @Test
     fun showOnRamp_fromTheRolesPopover_picksOutTheRampOnPalettes() =
         runDesktopComposeUiTest(width = TABS_WIDE, height = TABS_HEIGHT) {
@@ -195,7 +264,14 @@ class PalettesTabTest {
                     else -> state
                 }
             }
-            setContent { DataTabTheme(result) { CanvasArea(state, PaddingValues(), dispatcher) } }
+            val announced = mutableListOf<String>()
+            setContent {
+                DataTabTheme(result) {
+                    CompositionLocalProvider(LocalAnnouncer provides Announcer { message -> announced += message }) {
+                        CanvasArea(state, PaddingValues(), dispatcher)
+                    }
+                }
+            }
             waitForIdle()
 
             onNodeWithContentDescription(tileName(result, Role.Primary, isDark = false)).performClick()
@@ -206,6 +282,11 @@ class PalettesTabTest {
             state.view.tab shouldBe PreviewTab.Palettes
             onNodeWithText("primary sits on this ramp").assertIsDisplayed()
             onNode(hasTestTag(PICKED_RAMP_TAG) and hasAnyDescendant(hasText("Primary"))).assertExists()
+            // b-308ba
+            announced shouldBe listOf("primary sits on this ramp")
+            val first = result.ramps[KeyColor.Primary, false].steps.first()
+            val stop = "tone ${first.tone}, ${first.argb.toHex()}"
+            onNode(hasContentDescription(stop) and hasAnyAncestor(hasTestTag(PICKED_RAMP_TAG))).assertIsFocused()
         }
 
     private fun ComposeUiTest.showPalettes(

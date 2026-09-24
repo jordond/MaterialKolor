@@ -31,7 +31,7 @@
     <!-- The Contrast tab note when no visible pair fails. -->
     <string name="tabs_all_pass">Every pair passes AA at this contrast level</string>
     <!-- The Contrast tab note under a mode's heading when Failures only is on and nothing in that mode fails. -->
-    <string name="tabs_mode_no_failures">Nothing fails in this mode.</string>
+    <string name="tabs_mode_no_failures">Nothing fails in this mode</string>
     <!-- The Palettes tab heading over the ramps that are the same in both modes. -->
     <string name="tabs_same_in_both">Same in light and dark</string>
     <!-- The Palettes tab heading over the primary palette. -->

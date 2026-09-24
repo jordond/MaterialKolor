@@ -55,9 +55,8 @@ import kotlin.math.roundToInt
 
 /**
  * The Inspect card for [target]. It names the mode, then each color the element declared with its
- * hex and tone, then the ratio and badge of the first pair the audit rates, or of its first two
- * colors when the audit rates none. Pinned, it adds the
- * actions for the first color.
+ * hex and tone, then the ratio and badge of the first pair the audit rates, or of a role and the
+ * role drawn on it when the audit rates none. Pinned, it adds the actions for the first color.
  */
 @Composable
 internal fun InspectCard(
@@ -73,7 +72,7 @@ internal fun InspectCard(
     // b-308b
     val rated = remember(result, refs, isDark) {
         result.audit.firstRated(refs, isDark)
-            ?: result.rateFirstTwo(refs, isDark)
+            ?: result.rateOnPair(refs, isDark) // b-308ba
     }
     BuilderCard(modifier.testTag(INSPECT_CARD_TAG)) {
         BuilderText(
@@ -247,20 +246,39 @@ internal fun ContrastAudit.firstRated(
     return null
 }
 
-// b-308b
+// b-308ba
 
 /**
- * The second of [refs] as text over the first, rated in the mode [isDark] picks, or null when there
- * are fewer than two. It stands in when the audit rates none of the pairs, such as a role pair on the
- * Custom target, so the card still shows a ratio.
+ * The first two of [refs] where one role is drawn on the other, rated as text over it in the mode
+ * [isDark] picks, pairs taken in the order the colors were declared. It stands in when the audit rates
+ * none of the pairs, such as a role pair on the Custom target, so the card still shows a ratio. Any
+ * other two colors, such as a field's outline and its focused outline, get no rating, since a ratio
+ * between them would mean nothing.
  */
-internal fun ThemeResult.rateFirstTwo(
+internal fun ThemeResult.rateOnPair(
     refs: List<ColorRef>,
     isDark: Boolean,
 ): AuditRow? {
-    if (refs.size < 2) return null
-    return rate(ContrastPair(foreground = refs[1], background = refs[0], kind = PairKind.Text), isDark)
+    val roles = refs.filterIsInstance<ColorRef.OfRole>()
+    for (first in roles.indices) {
+        for (second in first + 1 until roles.size) {
+            val pair = onPairOf(roles[first], roles[second]) ?: continue
+            return rate(pair, isDark)
+        }
+    }
+    return null
 }
+
+/** [one] and [other] as text over its background when one role is drawn on the other, or null. */
+private fun onPairOf(
+    one: ColorRef.OfRole,
+    other: ColorRef.OfRole,
+): ContrastPair? =
+    when {
+        one.role.onPair == other.role -> ContrastPair(foreground = other, background = one, kind = PairKind.Text)
+        other.role.onPair == one.role -> ContrastPair(foreground = one, background = other, kind = PairKind.Text)
+        else -> null
+    }
 
 /** A ratio to one decimal, cut rather than rounded so a pair just under a line never reads as on it. */
 internal fun ratioText(ratio: Double): String {

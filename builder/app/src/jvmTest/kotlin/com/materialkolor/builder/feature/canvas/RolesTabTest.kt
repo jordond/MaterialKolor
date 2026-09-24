@@ -34,9 +34,12 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.color.HctReadout
 import com.materialkolor.builder.engine.resolve.ThemeResult
+import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.ktx.contrastRatio
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.comparables.shouldBeLessThan
+import io.kotest.matchers.doubles.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlin.math.roundToInt
@@ -123,22 +126,27 @@ class RolesTabTest {
                 .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription))
         }
 
+    // b-308ba
+    // Custom light, whose focus ring reads on the panel but not on the canvas.
     @Test
     fun columns_sitOnThePanelSurface() =
         runDesktopComposeUiTest(width = TABS_WIDE, height = TABS_HEIGHT) {
             val result = resolvedFor(material)
             var panel = Color.Unspecified
             var canvas = Color.Unspecified
+            var focus = Color.Unspecified
             setContent {
-                DataTabTheme(result) {
+                DataTabTheme(result, Skin(Library.Custom, expressive = false)) {
                     panel = LocalBuilderTokens.current.panel
                     canvas = LocalBuilderTokens.current.canvas
+                    focus = LocalBuilderTokens.current.focus
                     RolesTab(result, PreviewMode.Split, filter = null, dispatcher = TabActions().dispatcher)
                 }
             }
             waitForIdle()
 
             panel.toArgb() shouldNotBe canvas.toArgb()
+            focus.contrastRatio(panel) shouldBeGreaterThanOrEqual FOCUS_RING_RATIO
             val panels = onAllNodesWithTag(DATA_PANEL_TAG)
             panels.assertCountEquals(2)
             val frame = onRoot().captureToImage().toPixelMap()
@@ -207,6 +215,9 @@ class RolesTabTest {
 
 /** A row of a data panel inside its padding and above its content, where only the panel shows. */
 private const val PANEL_PROBE_Y = 8
+
+/** The least a focus ring may contrast with what it sits on, WCAG's bar for a graphic. */
+private const val FOCUS_RING_RATIO = 3.0
 
 /** What the swatch of [role] reads out as in the mode [isDark] picks. */
 internal fun tileName(

@@ -139,6 +139,6 @@ class ContrastTabTest {
 
     private companion object {
         const val ALL_PASS = "Every pair passes AA at this contrast level"
-        const val NONE_IN_MODE = "Nothing fails in this mode."
+        const val NONE_IN_MODE = "Nothing fails in this mode"
     }
 }

@@ -8,6 +8,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.builder.domain.capability.ControlState
 import com.materialkolor.builder.domain.color.Argb
@@ -63,7 +65,8 @@ internal class RoleSwatch(
  * The menu copies the hex or the Kotlin literal and shows the swatch on its ramp. A role also gets
  * Pin this role, pinning the role in the swatch's mode to the color it has now, or Unpin this role
  * when that mode is already pinned. It stays disabled while the target has no role pins, with the
- * reason under it.
+ * reason under it. A copy the browser refuses hands focus back to the tile once its manual copy
+ * dialog closes, since the menu is gone by then.
  *
  * @param[swatch] The swatch.
  * @param[pins] How the target treats role pins.
@@ -78,10 +81,16 @@ internal fun RolePopover(
     modifier: Modifier = Modifier,
 ) {
     var open by remember { mutableStateOf(false) }
-    val copyHex = WorkspaceAction.CopyText(swatch.argb.toHex(), stringResource(Res.string.tabs_copied_hex, swatch.name))
+    val tile = remember { FocusRequester() } // b-308ba
+    val copyHex = WorkspaceAction.CopyText(
+        text = swatch.argb.toHex(),
+        label = stringResource(Res.string.tabs_copied_hex, swatch.name),
+        returnFocusTo = tile, // b-308ba
+    )
     val copyKotlin = WorkspaceAction.CopyText(
-        kotlinLiteralOf(swatch.argb),
-        stringResource(Res.string.tabs_copied_kotlin, swatch.name),
+        text = kotlinLiteralOf(swatch.argb),
+        label = stringResource(Res.string.tabs_copied_kotlin, swatch.name),
+        returnFocusTo = tile, // b-308ba
     )
     val items = buildList {
         add(
@@ -116,7 +125,7 @@ internal fun RolePopover(
             contrast = swatch.contrast,
             onCopy = { dispatcher.dispatch(copyHex) },
             onClick = { open = true },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().focusRequester(tile), // b-308ba
             pinned = swatch.pinned,
         )
     }

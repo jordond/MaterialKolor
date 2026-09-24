@@ -12,15 +12,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.model.AccentPart
 import com.materialkolor.builder.domain.model.KeyColor
@@ -45,6 +46,7 @@ import com.materialkolor.builder.generated.resources.tabs_palette_secondary
 import com.materialkolor.builder.generated.resources.tabs_palette_tertiary
 import com.materialkolor.builder.generated.resources.tabs_ramp_shown
 import com.materialkolor.builder.generated.resources.tabs_same_in_both
+import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
@@ -52,13 +54,11 @@ import com.materialkolor.builder.kit.widget.RampMark
 import com.materialkolor.builder.kit.widget.RampStrip
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 
 /** Tags the ramp Show on ramp picked out, for tests to find it. */
 internal const val PICKED_RAMP_TAG: String = "picked-ramp"
-
-/** How thick the outline around the picked ramp is. */
-private val PickedOutlineWidth: Dp = 2.dp
 
 /**
  * The Palettes tab, the tonal palettes the roles of [result] are drawn from and one ramp per
@@ -72,7 +72,9 @@ private val PickedOutlineWidth: Dp = 2.dp
  *
  * The ramp [highlight] points at is scrolled into view and outlined with a label naming what sits
  * on it, as long as it was picked in the project [generation] counts. A target the theme no longer
- * has, such as an accent an undo took away, picks out nothing.
+ * has, such as an accent an undo took away, picks out nothing. Focus moves to the ramp's first stop
+ * and the label is read out, once for each highlight, so an edit after it leaves the scroll alone.
+ * A ramp that is the same in both modes is picked out whichever mode it was picked in.
  *
  * @param[result] The resolved theme the canvas shows.
  * @param[mode] Which modes to show, laid out like the Roles tab.
@@ -95,10 +97,19 @@ internal fun PalettesTab(
     val layout = remember(result, mode) { rampLayout(result, mode) }
     val target = highlight?.takeIf { shown -> shown.generation == generation }?.target
     val picked = remember(result, target) { target?.let { wanted -> result.pick(wanted) } }
+    // b-308ba
+    val requesters = remember { PickedRequesters() }
+    val announcer = LocalAnnouncer.current
+    LaunchedEffect(highlight) {
+        val name = picked?.name ?: return@LaunchedEffect
+        requesters.view.bringIntoView()
+        requesters.focus.requestFocus()
+        announcer.announce(getString(Res.string.tabs_ramp_shown, name))
+    }
     val shared: (@Composable ColumnScope.() -> Unit)? = if (layout.shared.isEmpty()) {
         null
     } else {
-        { SharedRamps(layout.shared, result, picked, dispatcher) }
+        { SharedRamps(layout.shared, result, picked, requesters, dispatcher) }
     }
     DataColumns(
         mode = mode,
@@ -108,8 +119,17 @@ internal fun PalettesTab(
         top = shared,
         columns = layout.light.isNotEmpty() || layout.dark.isNotEmpty(),
     ) { isDark ->
-        for (entry in layout.mode(isDark)) RampBlock(entry, result, picked, dispatcher)
+        for (entry in layout.mode(isDark)) RampBlock(entry, result, picked, requesters, dispatcher)
     }
+}
+
+// b-308ba
+
+/** How the tab reaches the picked ramp, to scroll it into view and to focus its first stop. */
+@Stable
+private class PickedRequesters {
+    val view: BringIntoViewRequester = BringIntoViewRequester()
+    val focus: FocusRequester = FocusRequester()
 }
 
 /** The ramps both modes share, on one panel under Same in light and dark. */
@@ -118,6 +138,7 @@ private fun SharedRamps(
     entries: List<RampEntry>,
     result: ThemeResult,
     picked: PickedRamp?,
+    requesters: PickedRequesters,
     dispatcher: Dispatcher<WorkspaceAction>,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.small)) {
@@ -126,7 +147,7 @@ private fun SharedRamps(
             modifier = Modifier.semantics { heading() },
             style = BuilderTextStyle.Title,
         )
-        DataPanel { for (entry in entries) RampBlock(entry, result, picked, dispatcher) }
+        DataPanel { for (entry in entries) RampBlock(entry, result, picked, requesters, dispatcher) }
     }
 }
 
@@ -199,15 +220,22 @@ private class RampLayout(
  * @property[source] The ramp it sits on.
  * @property[isDark] The mode it was picked in.
  * @property[name] What sits there, as the Roles tab names it.
+ * @property[bothModes] Whether the ramp is the same in light and dark, as an accent's always is and
+ * every ramp is under 2021.
  */
 @Immutable
 private class PickedRamp(
     val source: RampSource,
     val isDark: Boolean,
     val name: String,
+    val bothModes: Boolean, // b-308ba
 ) {
-    /** Whether [entry] is the ramp this picks out, a shared ramp standing for either mode. */
-    fun matches(entry: RampEntry): Boolean = entry.source == source && (entry.isDark ?: isDark) == isDark
+    /**
+     * Whether [entry] is the ramp this picks out. A shared ramp stands for either mode, and so does
+     * one that is the same in both, so it still shows in the mode it was not picked in.
+     */
+    fun matches(entry: RampEntry): Boolean =
+        entry.source == source && (bothModes || (entry.isDark ?: isDark) == isDark) // b-308ba
 }
 
 /** The ramps of [result] for [mode], shared ones pulled out in Split. */
@@ -280,11 +308,21 @@ private fun ThemeResult.pick(target: RampTarget): PickedRamp? =
                 ramp.markers.any { marker -> marker.role == target.role }
             }
             ramp?.let { found ->
-                PickedRamp(RampSource.OfPalette(found.palette), target.isDark, target.role.name.lowerFirst())
+                PickedRamp(
+                    source = RampSource.OfPalette(found.palette),
+                    isDark = target.isDark,
+                    name = target.role.name.lowerFirst(),
+                    bothModes = sameInBothModes(found.palette),
+                )
             }
         }
         is RampTarget.OfKeyColor -> {
-            PickedRamp(RampSource.OfPalette(target.palette), target.isDark, target.palette.swatchName)
+            PickedRamp(
+                source = RampSource.OfPalette(target.palette),
+                isDark = target.isDark,
+                name = target.palette.swatchName,
+                bothModes = sameInBothModes(target.palette),
+            )
         }
         is RampTarget.OfAccent -> {
             accents.families.getOrNull(target.slot.index)?.let {
@@ -292,27 +330,33 @@ private fun ThemeResult.pick(target: RampTarget): PickedRamp? =
                     source = RampSource.OfAccent(target.slot.index),
                     isDark = target.isDark,
                     name = ColorRef.OfAccent(target.slot).readoutName(document),
+                    bothModes = true,
                 )
             }
         }
     }
 
+// b-308ba
+
+/** Whether the ramp of [palette] has the same stops in light and dark, as every ramp has under 2021. */
+private fun ThemeResult.sameInBothModes(palette: KeyColor): Boolean =
+    ramps[palette, false].steps == ramps[palette, true].steps
+
 /**
  * One ramp under its name. The picked ramp wears an outline and a label saying what sits on it,
- * and scrolls itself into view.
+ * and takes [requesters], so the tab can scroll to it and focus its first stop.
  */
 @Composable
 private fun RampBlock(
     entry: RampEntry,
     result: ThemeResult,
     picked: PickedRamp?,
+    requesters: PickedRequesters,
     dispatcher: Dispatcher<WorkspaceAction>,
 ) {
     val tokens = LocalBuilderTokens.current
     val title = entry.title(result)
     val shown = picked?.takeIf { pick -> pick.matches(entry) }
-    val requester = remember { BringIntoViewRequester() }
-    if (shown != null) LaunchedEffect(shown) { requester.bringIntoView() }
     val labels = entry.steps.associate { step ->
         step.tone to stringResource(Res.string.tabs_copied_tone, title, step.tone)
     }
@@ -322,10 +366,10 @@ private fun RampBlock(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .bringIntoViewRequester(requester)
+            .then(if (shown != null) Modifier.bringIntoViewRequester(requesters.view) else Modifier) // b-308ba
             .then(if (shown != null) Modifier.testTag(PICKED_RAMP_TAG) else Modifier)
             .border(
-                width = PickedOutlineWidth,
+                width = tokens.highlightWidth, // b-308ba
                 color = if (shown != null) tokens.accent else Color.Transparent,
                 shape = RoundedCornerShape(tokens.radius.small),
             ).padding(tokens.spacing.small),
@@ -334,10 +378,12 @@ private fun RampBlock(
         BuilderText(title, Modifier.semantics { heading() }, style = BuilderTextStyle.SectionLabel)
         if (shown != null) BuilderText(stringResource(Res.string.tabs_ramp_shown, shown.name))
         val ramp = entry.ramp
+        // b-308ba
+        val strip = if (shown != null) Modifier.focusRequester(requesters.focus) else Modifier
         if (ramp != null) {
-            RampStrip(ramp, onCopyTone)
+            RampStrip(ramp, onCopyTone, strip)
         } else {
-            RampStrip(entry.steps, entry.marks.map { mark -> mark.inWords() }, entry.keyTone, onCopyTone)
+            RampStrip(entry.steps, entry.marks.map { mark -> mark.inWords() }, entry.keyTone, onCopyTone, strip)
         }
     }
 }
