@@ -39,5 +39,10 @@ gradlePlugin {
             id = "materialkolor.builder.compose"
             implementationClass = "com.materialkolor.convention.plugin.BuilderComposePlugin"
         }
+
+        register("materialKolorBuilderWeb") {
+            id = "materialkolor.builder.web"
+            implementationClass = "com.materialkolor.convention.plugin.BuilderWebPlugin"
+        }
     }
 }

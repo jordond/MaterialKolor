@@ -73,6 +73,10 @@ public fun BuilderTextField(
 /**
  * Draws [draft] in the surrounding skin. The large field is the poster's seed headline, which every
  * skin draws as headless text with its own underline.
+ *
+ * On the web the field node is named [label], with the disabled note while it is disabled (D37).
+ * Material's field is otherwise nameless there, since its editable text overwrites the label, and
+ * the page marks every field editable, disabled or not.
  */
 @Composable
 internal fun SkinField(
@@ -87,7 +91,7 @@ internal fun SkinField(
     modifier: Modifier,
     onEdit: () -> Unit = {},
 ) {
-    val field = modifier.fieldCommits(draft, onCommit, onRevert = onEdit)
+    val field = modifier.fieldCommits(draft, onCommit, onRevert = onEdit).foldState(label, null, enabled)
     val onValueChange = { next: TextFieldValue ->
         if (next.text != draft.text) onEdit()
         draft.value = next

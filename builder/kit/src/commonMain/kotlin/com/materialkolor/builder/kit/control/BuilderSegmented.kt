@@ -32,6 +32,10 @@ import com.materialkolor.builder.kit.skin.material.MaterialSegmented
  * move the choice. The chosen option carries a check as well as its fill, so the choice never rests
  * on colour alone.
  *
+ * Where every choice costs something, such as the library switcher's reskin and undo entry, turn
+ * [selectOnFocus] off. The arrow keys then only move the focus, and Enter or Space chooses the
+ * focused option.
+ *
  * @param[options] What there is to choose from, a handful at most so every label fits.
  * @param[selected] The current choice. One that is not among [options], say for a frame while the
  * options catch up, leaves nothing chosen.
@@ -40,6 +44,7 @@ import com.materialkolor.builder.kit.skin.material.MaterialSegmented
  * @param[modifier] Applied to the group.
  * @param[enabled] Whether the choice can change.
  * @param[optionIcon] A glyph for an option, or null for a label alone.
+ * @param[selectOnFocus] Whether the arrow keys choose as they move, or only move the focus.
  * @param[optionLabel] The label of an option.
  */
 @Composable
@@ -51,11 +56,22 @@ public fun <T> BuilderSegmented(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     optionIcon: (T) -> IconId? = { null },
+    selectOnFocus: Boolean = true,
     optionLabel: (T) -> String,
 ) {
     when (LocalSkin.current.library) {
         Library.Material3 -> {
-            MaterialSegmented(options, selected, onSelect, label, modifier, enabled, optionIcon, optionLabel)
+            MaterialSegmented(
+                options,
+                selected,
+                onSelect,
+                label,
+                modifier,
+                enabled,
+                optionIcon,
+                selectOnFocus,
+                optionLabel,
+            )
         }
         Library.Unstyled -> {
             HeadlessSegmented(
@@ -67,6 +83,7 @@ public fun <T> BuilderSegmented(
                 modifier,
                 enabled,
                 optionIcon,
+                selectOnFocus,
                 optionLabel,
             )
         }
@@ -80,6 +97,7 @@ public fun <T> BuilderSegmented(
                 modifier,
                 enabled,
                 optionIcon,
+                selectOnFocus,
                 optionLabel,
             )
         }
@@ -93,6 +111,7 @@ public fun <T> BuilderSegmented(
                 modifier,
                 enabled,
                 optionIcon,
+                selectOnFocus,
                 optionLabel,
             )
         }
@@ -110,6 +129,7 @@ internal fun <T> HeadlessSegmented(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     optionIcon: (T) -> IconId? = { null },
+    selectOnFocus: Boolean = true,
     optionLabel: (T) -> String,
 ) {
     val target = LocalLayout.current.primaryTouchTarget
@@ -124,12 +144,13 @@ internal fun <T> HeadlessSegmented(
             .actionSurface(style.colors, style.shape, style.borderWidth)
             .padding(style.inset),
         enabled = enabled,
+        selectOnFocus = selectOnFocus,
     ) { value, isSelected, interactionSource ->
         val colors = option.colors(isSelected)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .foldState(optionLabel(value), ControlState.Selected(isSelected), enabled)
+                .foldState(optionLabel(value), ControlState.Selected(isSelected), enabled, role = FoldedRole.Radio)
                 .controlTouchTarget(target)
                 .controlPress(interactionSource)
                 .controlRing(interactionSource, option.shape)

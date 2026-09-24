@@ -93,6 +93,15 @@ internal class OverlayStyle(
 /** How much of the canvas shows through the veil behind a modal overlay, on the skins that veil with it. */
 internal const val ScrimAlpha: Float = 0.6f
 
+/**
+ * How strongly Unstyled's ink veils a row under the pointer, in its menus and on any plain
+ * clickable through its indication.
+ */
+internal const val UnstyledHighlightAlpha: Float = 0.06f
+
+/** How strongly Unstyled's ink veils a selected row, and a plain clickable while it is pressed. */
+internal const val UnstyledSelectedAlpha: Float = 0.1f
+
 /** The width of a hairline border. */
 internal val Hairline: Dp = 1.dp
 
@@ -151,8 +160,8 @@ internal fun unstyledOverlayStyle(tokens: BuilderTokens): OverlayStyle {
         shadow = 0.dp,
         scrim = tokens.scrim,
         itemShape = RoundedCornerShape(tokens.radius.small),
-        highlight = tokens.textStrong.copy(alpha = 0.06f),
-        selected = tokens.textStrong.copy(alpha = 0.1f),
+        highlight = tokens.textStrong.copy(alpha = UnstyledHighlightAlpha),
+        selected = tokens.textStrong.copy(alpha = UnstyledSelectedAlpha),
         focus = tokens.focus,
         field = tokens.panel,
         fieldBorder = BorderStroke(Hairline, tokens.borderStrong),

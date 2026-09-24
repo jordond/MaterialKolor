@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +38,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.kit.a11y.Announcer
+import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.headless.OverlayTopSlot
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
@@ -122,6 +125,18 @@ public class BuilderToastHostState {
         shown.remove(toast)
     }
 
+    /** The id of the newest toast read out through an [Announcer], so no toast is read twice. */
+    private var announcedThrough = -1L
+
+    /** Reads out through [announcer] every toast on screen that has not been read yet. */
+    internal fun announceNew(announcer: Announcer) {
+        for (toast in shown.toList()) {
+            if (toast.id <= announcedThrough) continue
+            announcedThrough = toast.id
+            announcer.announce(toast.announcement)
+        }
+    }
+
     public companion object {
         /** The most toasts the host stacks at once. */
         public const val MaxToasts: Int = 3
@@ -136,13 +151,16 @@ public fun rememberBuilderToastHostState(): BuilderToastHostState = remember { B
  * Stacks the toasts of [state] at the bottom centre of the space it is given, newest at the bottom.
  *
  * The stack is one polite live region that is always there, even with no toast in it, so a screen
- * reader hears each toast arrive and reads it once it has finished what it was saying (AR-06). A
+ * reader hears each toast arrive and reads it once it has finished what it was saying (AR-06). On
+ * the web, where controls fold their state into their names (D37), that live region never reaches
+ * the page, so each toast is read out once through [LocalAnnouncer] instead, a modal open or not. A
  * toast goes by itself after its duration, and its action closes it. The countdown waits while the
  * pointer rests on a toast or focus is inside it, and picks up with the time it had left (WCAG
  * 2.2.1), so a keyboard user on Undo never loses the toast under them. Material3 draws each toast
  * as a `Snackbar`, the other skins as a headless toast. Where overlays render in the page (D40) the
  * stack is drawn in the overlay host's top slot over the space it is given, so a toast raised from
- * inside a dialog or a sheet shows over its veil rather than under it.
+ * inside a dialog or a sheet shows over its veil rather than under it, and its action joins the
+ * dialog's Tab cycle.
  *
  * @param[state] The toasts to show.
  * @param[modifier] Applied to the host, which fills the space it is given without taking any
@@ -155,12 +173,19 @@ public fun BuilderToastHost(
 ) {
     val tokens = LocalBuilderTokens.current
     val library = LocalSkin.current.library
+    val announces = LocalFoldsStateIntoName.current
+    if (announces) {
+        val announcer = LocalAnnouncer.current
+        LaunchedEffect(state, announcer) {
+            snapshotFlow { state.toasts.lastOrNull() }.collect { state.announceNew(announcer) }
+        }
+    }
     OverlayTopSlot(modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             Column(
                 modifier = Modifier
                     .widthIn(max = OverlayMetrics.toastMaxWidth)
-                    .semantics { liveRegion = LiveRegionMode.Polite }
+                    .then(if (announces) Modifier else Modifier.semantics { liveRegion = LiveRegionMode.Polite })
                     .padding(tokens.spacing.large),
                 verticalArrangement = Arrangement.spacedBy(tokens.spacing.small),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -273,6 +298,10 @@ private fun ToastAction(
         BuilderText(label, style = BuilderTextStyle.Label, color = style.toastContent)
     }
 }
+
+/** What an announcer reads out for a toast, its message and then its action. */
+private val BuilderToast.announcement: String
+    get() = listOfNotNull(message, actionLabel).joinToString(", ")
 
 /** How finely the countdown keeps the time a paused toast has left. */
 private const val ToastTickMillis = 100L

@@ -14,6 +14,19 @@
     <string name="state_collapsed">Collapsed</string>
     <string name="state_disabled">Disabled</string>
 
+    <!--
+        The role a control plays, read on the web after its name and before its state, "Include dark
+        scheme, checkbox, checked", while the page reads every clickable as a button. Written as they
+        read there, so their case is kept.
+    -->
+    <string name="role_checkbox">checkbox</string>
+    <string name="role_switch">switch</string>
+    <string name="role_radio">radio</string>
+    <string name="role_tab">tab</string>
+
+    <!-- What the code viewer's list of lines is called when read out. -->
+    <string name="code_view_name">Code</string>
+
     <!-- How far along a progress bar is, as a whole percentage. -->
     <string name="progress_percent">%1$d%</string>
 

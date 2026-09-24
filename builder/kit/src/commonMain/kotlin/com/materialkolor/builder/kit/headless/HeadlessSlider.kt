@@ -26,7 +26,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
@@ -34,6 +33,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import com.composeunstyled.UnstyledSlider
 import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
+import com.materialkolor.builder.kit.control.roleLessName
 import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.controlRing
@@ -180,7 +181,8 @@ internal fun Modifier.sliderKeys(
 
 /**
  * The slider's name, spoken value and set-progress action. On the web [name] carries the value and
- * the disabled state too, from [stateName], since the mirror drops both (AR-10, D37).
+ * the disabled state too, from [stateName], since the mirror drops both (AR-10, D37). The slider
+ * has no role there, so with [nameAsText] the name goes in as text (S5 answer 1).
  *
  * Set-progress replaces the one the slider underneath brings, since this modifier sits outside it
  * and the outer one wins. Like the keys it never snaps to a stop. It clamps the target into the
@@ -188,6 +190,7 @@ internal fun Modifier.sliderKeys(
  */
 internal fun Modifier.sliderSemantics(
     name: String,
+    nameAsText: Boolean,
     stateDescription: String,
     value: Float,
     rules: SliderRules,
@@ -196,7 +199,7 @@ internal fun Modifier.sliderSemantics(
     onValueChangeFinished: () -> Unit,
 ): Modifier =
     semantics {
-        contentDescription = name
+        roleLessName(name, nameAsText)
         this.stateDescription = stateDescription
         setProgress { target ->
             val next = target.coerceIn(rules.range.start, rules.range.endInclusive)
@@ -245,6 +248,7 @@ internal fun HeadlessSlider(
             .sliderKeys(value, rules, enabled, isRtl, press, onValueChange, onValueChangeFinished)
             .sliderSemantics(
                 name = stateName(label, ControlState.Value(stateDescription), enabled),
+                nameAsText = LocalFoldsStateIntoName.current,
                 stateDescription = stateDescription,
                 value = value,
                 rules = rules,

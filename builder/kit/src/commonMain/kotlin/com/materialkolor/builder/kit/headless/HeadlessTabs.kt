@@ -40,6 +40,7 @@ import com.composeunstyled.UnstyledTabGroup
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
@@ -128,7 +129,7 @@ internal fun <T> HeadlessTabs(
                                 .heightIn(min = target)
                                 .controlRing(interactions, style.tabShape, style.focus)
                                 .tabFill(isSelected, style)
-                                .foldState(label(tab), ControlState.Selected(isSelected)),
+                                .foldState(label(tab), ControlState.Selected(isSelected), role = FoldedRole.Tab),
                             interactionSource = interactions,
                             contentAlignment = Alignment.Center,
                         ) {

@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessMenu
+import com.materialkolor.builder.kit.headless.overlayLibrary
 import com.materialkolor.builder.kit.icon.IconId
-import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.unstyledOverlayStyle
@@ -20,6 +20,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * @property[icon] A glyph before the label, or null for none.
  * @property[emphasis] [Emphasis.Danger] marks a row that destroys something.
  * @property[enabled] False to show the row without letting anyone choose it.
+ * @property[selected] Whether the row is the current one of a set, such as the chosen appearance,
+ * or null for a plain command. A row that knows carries a check while it is the current one and
+ * reads out as selected or not.
  */
 public class BuilderMenuItem(
     public val label: String,
@@ -27,13 +30,15 @@ public class BuilderMenuItem(
     public val icon: IconId? = null,
     public val emphasis: Emphasis = Emphasis.Primary,
     public val enabled: Boolean = true,
+    public val selected: Boolean? = null,
 )
 
 /**
  * A list of commands that opens under [anchor].
  *
- * Esc and a click outside close it, focus starts on the first row, and each row reads as a button.
- * Material3 draws its own `DropdownMenu`, the other skins the headless dropdown.
+ * Esc and a click outside close it, focus starts on the first row, and each row reads as a button,
+ * or as an option that is selected or not when its item says so. Material3 draws its own
+ * `DropdownMenu`, the other skins the headless dropdown.
  *
  * @param[expanded] Whether the menu is open.
  * @param[onDismissRequest] Called when the menu asks to close, including after a row is chosen.
@@ -50,7 +55,8 @@ public fun BuilderMenu(
     anchor: @Composable () -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
-    when (LocalSkin.current.library) {
+    // b-221b
+    when (overlayLibrary()) {
         Library.Material3 -> MaterialMenu(expanded, onDismissRequest, items, modifier, anchor)
         Library.Unstyled -> HeadlessMenu(
             expanded,

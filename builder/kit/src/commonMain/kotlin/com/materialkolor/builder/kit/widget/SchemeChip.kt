@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderTooltip
 import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
@@ -73,7 +74,7 @@ public fun SchemeChip(
     val tokens = LocalBuilderTokens.current
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
-    val name = stateName(label, ControlState.Selected(selected))
+    val name = stateName(label, ControlState.Selected(selected), role = FoldedRole.Radio)
     val ringColor = if (selected) tokens.accent else Color.Transparent
     BuilderTooltip(text = label, modifier = modifier) {
         Box(

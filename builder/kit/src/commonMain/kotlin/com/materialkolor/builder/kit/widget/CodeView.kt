@@ -47,6 +47,8 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -58,7 +60,9 @@ import com.materialkolor.builder.codegen.dsl.Token
 import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.kit.control.BuilderIconButton
 import com.materialkolor.builder.kit.control.BuilderTooltip
+import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.generated.resources.Res
+import com.materialkolor.builder.kit.generated.resources.code_view_name
 import com.materialkolor.builder.kit.generated.resources.widget_copy
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.CodePalette
@@ -98,16 +102,22 @@ private sealed interface CodePart {
  * The copy button sits in the top corner. Selecting text takes a part of the file, the button takes
  * all of it, byte for byte.
  *
+ * On the web the list of lines goes by [label], since the page reads it as a list and a list with
+ * no name is announced as nothing but a list (S5 row 33).
+ *
  * @param[lines] The file as lines of tokens, as in `GeneratedFile.lines`.
  * @param[onCopy] Called when the copy button is pressed. The caller does the copying.
  * @param[modifier] Applied to the viewer.
+ * @param[label] What the code is, such as the file's name, read out as the name of its lines.
  */
 @Composable
 public fun CodeView(
     lines: List<List<Token>>,
     onCopy: () -> Unit,
     modifier: Modifier = Modifier,
+    label: String = stringResource(Res.string.code_view_name),
 ) {
+    val listName = if (LocalFoldsStateIntoName.current) Modifier.semantics { contentDescription = label } else Modifier
     val tokens = LocalBuilderTokens.current
     val style = LocalBuilderType.current.code
     val density = LocalDensity.current
@@ -165,7 +175,7 @@ public fun CodeView(
                     .horizontalScroll(sideways),
             ) {
                 LazyColumn(
-                    modifier = Modifier
+                    modifier = listName
                         .width(gutterWidth + tokens.spacing.medium + codeWidth + tokens.spacing.medium * 2)
                         .fillMaxHeight(),
                     state = listState,

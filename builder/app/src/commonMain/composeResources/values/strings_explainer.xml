@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The poster line when light primary is not the seed, by what moved most. -->
+    <string name="explainer_take_calmer">Primary is a calmer take on your seed.</string>
+    <string name="explainer_take_bolder">Primary is a bolder take on your seed.</string>
+    <string name="explainer_take_deeper">Primary is a deeper take on your seed.</string>
+    <string name="explainer_take_lighter">Primary is a lighter take on your seed.</string>
+    <string name="explainer_take_turned">Primary turns your seed to another hue.</string>
+    <!-- The link after the line that opens the explainer. -->
+    <string name="explainer_why">Why?</string>
+
+    <!-- The explainer's title. -->
+    <string name="explainer_title">Why primary differs from your seed</string>
+    <!-- The colors the explainer lists. -->
+    <string name="explainer_seed">Seed</string>
+    <string name="explainer_primary_light">primary, light</string>
+    <string name="explainer_primary_dark">primary, dark</string>
+    <string name="explainer_container_light">primaryContainer, light</string>
+    <!-- One listed color. The arguments are its hex, hue, chroma and tone. -->
+    <string name="explainer_hct">%1$s, hue %2$d, chroma %3$d, tone %4$d</string>
+
+    <!-- The sentences worked out from the scheme. A style's name comes first where there is one. -->
+    <string name="explainer_chroma_capped">%1$s caps primary chroma at %2$d. Your color has %3$d.</string>
+    <string name="explainer_chroma_lifted">%1$s asks primary for chroma %2$d. Your color has %3$d.</string>
+    <string name="explainer_chroma_kept">%1$s keeps the chroma of your color, %2$d.</string>
+    <string name="explainer_chroma_none">%1$s draws primary with no chroma, so it comes out gray. Your color has %2$d.</string>
+    <string name="explainer_chroma_gamut">At tone %1$d this hue holds chroma %2$d at most.</string>
+    <string name="explainer_hue_turned">%1$s turns the hue %2$d degrees, from %3$d to %4$d.</string>
+    <string name="explainer_tone_light">In light mode the %1$d spec puts primary at tone %2$d. Your color sits at tone %3$d.</string>
+    <string name="explainer_tone_dark">In dark mode the %1$d spec puts primary at tone %2$d. Your color sits at tone %3$d.</string>
+    <string name="explainer_keep_chroma_detail">Fidelity keeps chroma %1$d and puts primaryContainer at tone %2$d, next to your color at %3$d.</string>
+    <string name="explainer_override_detail">Primary keeps your hue and chroma and the %1$d spec sets its tone to %2$d. Your seed still drives the other palettes.</string>
+
+    <!-- The three ways out, each one undo step. -->
+    <string name="explainer_keep_chroma">Keep chroma</string>
+    <string name="explainer_use_override">Use as primary override</string>
+    <string name="explainer_match">Match exactly</string>
+    <!-- Whether Match exactly pins dark mode as well. -->
+    <string name="explainer_match_dark">Pin dark mode too</string>
+    <!-- The ratio Match exactly moves. The arguments are the ratio now and after. -->
+    <string name="explainer_match_ratio">primary on onPrimary goes from %1$s to %2$s to 1</string>
+    <!-- The badge when the matched pair misses AA. -->
+    <string name="explainer_match_badge">Below 4.5 to 1</string>
+    <string name="explainer_match_warning">Small text on primary will be hard to read.</string>
+    <!-- The pins Match exactly writes. The arguments are the primary and onPrimary hex. -->
+    <string name="explainer_match_pins_light">Pins primary %1$s and onPrimary %2$s in light mode</string>
+    <string name="explainer_match_pins_dark">Pins primary %1$s and onPrimary %2$s in dark mode</string>
+    <!-- Closes the explainer. -->
+    <string name="explainer_close">Close</string>
+</resources>

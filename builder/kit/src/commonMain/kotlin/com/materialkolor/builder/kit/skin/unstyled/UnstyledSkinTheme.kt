@@ -24,6 +24,8 @@ import com.materialkolor.builder.kit.skin.StatusColors
 import com.materialkolor.builder.kit.skin.builderCodePalette
 import com.materialkolor.builder.kit.skin.builderMotion
 import com.materialkolor.builder.kit.skin.headless.ScrimAlpha
+import com.materialkolor.builder.kit.skin.headless.UnstyledHighlightAlpha
+import com.materialkolor.builder.kit.skin.headless.UnstyledSelectedAlpha
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.token.brandFontFamily
@@ -148,13 +150,10 @@ private class UnstyledIndicationNode(
     override fun ContentDrawScope.draw() {
         drawContent()
         val alpha = when {
-            pressed -> UnstyledPressedAlpha
-            hovered -> UnstyledHoveredAlpha
+            pressed -> UnstyledSelectedAlpha
+            hovered -> UnstyledHighlightAlpha
             else -> return
         }
         drawRect(currentValueOf(LocalBuilderTokens).textStrong.copy(alpha = alpha))
     }
 }
-
-private const val UnstyledHoveredAlpha = 0.06f
-private const val UnstyledPressedAlpha = 0.1f

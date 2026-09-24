@@ -29,16 +29,12 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,28 +42,25 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
 import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.CardDisabledNote
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.ListRowContent
 import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.control.listRowInput
 import com.materialkolor.builder.kit.control.listRowState
-import com.materialkolor.builder.kit.headless.radioGroupOption
-import com.materialkolor.builder.kit.headless.rememberRadioGroupFocus
+import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.controlPress
@@ -131,7 +124,9 @@ internal fun MaterialButton(
     enabled: Boolean,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val decorated = modifier.materialFeedback(interactionSource, ButtonDefaults.shape)
+    val decorated = modifier
+        .foldState(label, null, enabled)
+        .materialFeedback(interactionSource, ButtonDefaults.shape)
     val content: @Composable RowScope.() -> Unit = { MaterialLabel(label, icon) }
     MaterialTarget {
         when (emphasis) {
@@ -172,8 +167,9 @@ internal fun MaterialIconButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val decorated = modifier.materialFeedback(interactionSource, IconButtonDefaults.standardShape)
+    val name = stateName(contentDescription, state = null, enabled = enabled)
     val content: @Composable () -> Unit = {
-        BuilderIcon(icon, contentDescription = contentDescription, tint = LocalContentColor.current)
+        BuilderIcon(icon, contentDescription = name, tint = LocalContentColor.current)
     }
     MaterialTarget {
         when (emphasis) {
@@ -228,70 +224,6 @@ internal fun MaterialToggleButton(
             interactionSource = interactionSource,
         ) {
             MaterialLabel(label, icon)
-        }
-    }
-}
-
-/**
- * Material's single choice segmented row, with the radio group's roving focus and arrow keys laid
- * over it, since Material's row moves neither. B-402 swaps in the expressive button group.
- */
-@Composable
-internal fun <T> MaterialSegmented(
-    options: List<T>,
-    selected: T,
-    onSelect: (T) -> Unit,
-    label: String,
-    modifier: Modifier,
-    enabled: Boolean,
-    optionIcon: (T) -> IconId?,
-    optionLabel: (T) -> String,
-) {
-    val selectedIndex = options.indexOf(selected)
-    val focus = rememberRadioGroupFocus(options.size, selectedIndex)
-    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-    MaterialTarget {
-        SingleChoiceSegmentedButtonRow(modifier.semantics { contentDescription = label }) {
-            options.forEachIndexed { index, value ->
-                key(index) {
-                    val interactionSource = remember { MutableInteractionSource() }
-                    val shape = SegmentedButtonDefaults.itemShape(index, options.size)
-                    val glyph = optionIcon(value)
-                    SegmentedButton(
-                        selected = index == selectedIndex,
-                        onClick = { onSelect(value) },
-                        shape = shape,
-                        modifier = Modifier
-                            .radioGroupOption(focus, index, selectedIndex, rtl) { target -> onSelect(options[target]) }
-                            .foldState(optionLabel(value), ControlState.Selected(index == selectedIndex), enabled)
-                            .materialFeedback(interactionSource, shape),
-                        enabled = enabled,
-                        interactionSource = interactionSource,
-                        icon = {
-                            SegmentedButtonDefaults.Icon(
-                                active = index == selectedIndex,
-                                activeContent = {
-                                    BuilderIcon(
-                                        IconId.Check,
-                                        contentDescription = null,
-                                        tint = LocalContentColor.current,
-                                    )
-                                },
-                                inactiveContent = glyph?.let { id ->
-                                    { BuilderIcon(id, contentDescription = null, tint = LocalContentColor.current) }
-                                },
-                            )
-                        },
-                    ) {
-                        BuilderText(
-                            optionLabel(value),
-                            style = BuilderTextStyle.Label,
-                            color = LocalContentColor.current,
-                            maxLines = 1,
-                        )
-                    }
-                }
-            }
         }
     }
 }
@@ -389,8 +321,10 @@ internal fun MaterialCard(
             .controlRing(interactionSource, CardDefaults.shape),
         enabled = enabled,
         interactionSource = interactionSource,
-        content = padded,
-    )
+    ) {
+        padded()
+        CardDisabledNote(enabled)
+    }
 }
 
 @Composable

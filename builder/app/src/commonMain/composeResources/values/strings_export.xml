@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The export sheet's title. -->
+    <string name="export_title">Export code</string>
+
+    <!-- The Dynamic or Frozen choice in the sheet's header. -->
+    <string name="export_mode">Mode</string>
+    <string name="export_mode_dynamic">Dynamic</string>
+    <string name="export_mode_frozen">Frozen hex</string>
+
+    <!-- The disclosure that holds the export options. The argument is the package name. -->
+    <string name="export_options">Options</string>
+    <string name="export_options_summary">Package %1$s</string>
+    <string name="export_package">Package name</string>
+    <string name="export_package_hint">Only kept in this browser, never in the share link</string>
+    <string name="export_package_invalid">Use lowercase words separated by dots, like com.example.theme</string>
+    <string name="export_theme_name">Theme name</string>
+    <string name="export_theme_name_invalid">Use a Kotlin name that is not a keyword, like AppTheme</string>
+    <string name="export_theme_name_taken">The export already uses this name, so pick another one</string>
+    <string name="export_project">Project</string>
+    <string name="export_project_multiplatform">Multiplatform</string>
+    <string name="export_project_android">Android only</string>
+    <string name="export_version_catalog">Use a version catalog</string>
+    <string name="export_animate">Animate color changes</string>
+    <string name="export_duration">Animation length</string>
+    <!-- One animation length in the list. The argument is a number of milliseconds. -->
+    <string name="export_duration_ms">%1$d ms</string>
+    <string name="export_variants">Contrast levels</string>
+    <string name="export_variants_standard">Standard only</string>
+    <string name="export_variants_all">All three</string>
+    <string name="export_dynamic_color">Use wallpaper colors on Android 12 and up</string>
+    <string name="export_dynamic_color_note">On those phones the wallpaper colors replace your scheme</string>
+
+    <!-- The warning when an Expressive theme has a style with no 2025 form. -->
+    <string name="export_expressive_2021">This style has no 2025 form, so the Expressive theme builds its colors with the 2021 spec. Tonal spot, Neutral, Vibrant and Expressive have one.</string>
+
+    <!-- Why nothing can be exported yet. -->
+    <string name="export_blocked_package">%1$s is not a package name Kotlin accepts. Use lowercase words separated by dots, like com.example.theme.</string>
+    <string name="export_blocked_theme_name">%1$s cannot be a theme name. Use a Kotlin name like AppTheme.</string>
+    <string name="export_blocked_extra_colors">Some extra colors have names the export cannot use, or there are too many of them. Rename or remove them first.</string>
+    <string name="export_blocked_taken">The export already uses the name %1$s. Pick another one.</string>
+
+    <!-- The buttons under the code. Copy turns into Copied for a moment after it worked. -->
+    <string name="export_copy_file">Copy file</string>
+    <string name="export_copy_all">Copy all</string>
+    <string name="export_copied">Copied</string>
+    <string name="export_download">Download zip</string>
+    <string name="export_share">Share files</string>
+    <string name="export_save_failed">Could not save the zip</string>
+    <string name="export_share_failed">Could not share the zip</string>
+
+    <!-- The dialog when the browser would not take a copy. -->
+    <string name="export_manual_title">Copy it yourself</string>
+    <string name="export_manual_hint">The browser did not let the builder use the clipboard. Select the text below and copy it from there.</string>
+    <string name="export_manual_done">Done</string>
+</resources>
