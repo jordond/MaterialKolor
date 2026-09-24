@@ -24,9 +24,6 @@ internal fun writeThemeColor(color: String): Unit =
     }""",
     )
 
-/** Whether the browser has the screen eyedropper, Chromium on desktop so far. */
-internal fun pageHasEyeDropper(): Boolean = js("typeof window.EyeDropper === 'function'")
-
 /**
  * Call [listener] when the page goes out of sight, hidden behind another tab, closed, or put in the
  * back and forward cache. Closing a tab usually fires both, so [listener] may run twice in a row.

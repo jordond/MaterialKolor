@@ -26,6 +26,11 @@ internal class FakeFileSaver(
 
     override suspend fun shareFiles(files: List<OutgoingFile>): Result<Unit> = attempt { shared += files }
 
+    // b-302a
+
+    /** Follows [canShareFiles], so a test that turns sharing on gets it for every batch. */
+    override fun canShare(files: List<OutgoingFile>): Boolean = canShareFiles
+
     private inline fun attempt(keep: () -> Unit): Result<Unit> {
         failure?.let { error -> return Result.failure(error) }
         keep()

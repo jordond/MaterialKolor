@@ -100,10 +100,16 @@ private object TestFileSaver : FileSaver {
     ): Result<Unit> = Result.success(Unit)
 
     override suspend fun shareFiles(files: List<OutgoingFile>): Result<Unit> = Result.success(Unit)
+
+    // b-302a
+    override fun canShare(files: List<OutgoingFile>): Boolean = false
 }
 
 private object TestImageInput : ImageInput {
     override val drops: Flow<ImageHandle> = emptyFlow()
+
+    // b-302a
+    override val dragging: StateFlow<Boolean> = MutableStateFlow(false)
 
     override suspend fun pick(): ImageHandle? = null
 

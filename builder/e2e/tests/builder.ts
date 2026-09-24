@@ -43,3 +43,20 @@ async function waitForHooks(page: Page): Promise<void> {
 export async function hook(page: Page, name: string, argument = ''): Promise<string> {
   return page.evaluate(([hookName, hookArgument]) => window.__mk![hookName](hookArgument), [name, argument]);
 }
+
+// b-302
+
+/** Open [path] and wait until the browser API hooks are up too. */
+export async function openWithBrowserApis(page: Page, path = '/'): Promise<void> {
+  await openBuilder(page, path);
+  await page.waitForFunction(() => typeof window.__mk?.gesture === 'function');
+}
+
+/**
+ * Run the browser API hook [action] inside a real click, the only place the browser lets a page copy,
+ * download, share, pick a file or open the eyedropper.
+ */
+export async function gesture(page: Page, action: string): Promise<void> {
+  await hook(page, 'gesture', action);
+  await page.click('#mk-e2e-gesture');
+}

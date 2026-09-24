@@ -128,6 +128,15 @@ enum class StoreError {
  * The system clipboard.
  */
 interface Clipboard {
+    // b-302a
+
+    /**
+     * Put [text] on the clipboard. A failure means it did not land.
+     *
+     * Browsers only allow this with user activation, so start it from the click with
+     * `scope.launch(start = CoroutineStart.UNDISPATCHED)` and make this call the first suspension,
+     * with no model hop, `withContext` or `yield` before it.
+     */
     suspend fun writeText(text: String): Result<Unit>
 }
 
@@ -148,17 +157,45 @@ class OutgoingFile(
  * Downloads and the share sheet.
  */
 interface FileSaver {
-    /** Save [bytes] as [name] through the platform's download or save dialog. */
+    // b-302a
+
+    /**
+     * Save [bytes] as [name] through the platform's download or save dialog.
+     *
+     * Safari only allows this with user activation. Build [bytes] before the click, then start this
+     * from the click with `scope.launch(start = CoroutineStart.UNDISPATCHED)` and make it the first
+     * suspension, with no model hop, `withContext` or `yield` before it.
+     */
     suspend fun save(
         name: String,
         bytes: ByteArray,
         mime: String,
     ): Result<Unit>
 
-    /** Whether [shareFiles] can hand files to the share sheet here. */
+    // b-302a
+
+    /** Whether the share sheet takes the kinds of file an export makes here, so Share is worth offering. */
     val canShareFiles: Boolean
 
-    /** Hand [files] to the share sheet. */
+    // b-302a
+
+    /**
+     * Whether the share sheet takes [files] here, answered without suspending.
+     *
+     * The click asks this first and then calls either [shareFiles] or [save]. It never falls back to
+     * [save] after a share fails, because by then the click is spent in Safari.
+     */
+    fun canShare(files: List<OutgoingFile>): Boolean
+
+    // b-302a
+
+    /**
+     * Hand [files] to the share sheet.
+     *
+     * Every browser needs user activation for this, so it starts the way [save] does, with the bytes
+     * built before the click and this call as the first suspension of an undispatched launch. A share
+     * sheet the user dismisses counts as success, with no toast and no fallback to [save].
+     */
     suspend fun shareFiles(files: List<OutgoingFile>): Result<Unit>
 }
 
@@ -177,26 +214,45 @@ interface ImageHandle {
  * @property[height] The height of [pixels], at most 128.
  * @property[pixels] ARGB pixels row by row, scaled so the longer side is at most 128 px.
  * @property[thumbnail] The image scaled so the longer side is at most 256 px, for showing back.
+ * @property[detail] The image scaled so the longer side is at most 1024 px, for the image eyedropper.
  */
 class DecodedImage(
     val width: Int,
     val height: Int,
     val pixels: IntArray,
     val thumbnail: ImageBitmap,
+    // b-302
+    val detail: ImageBitmap,
 )
 
 /**
  * Images coming in from a picker or a drop.
  */
 interface ImageInput {
-    /** Open the platform picker. Null when the user closes it without choosing. */
+    // b-302a
+
+    /**
+     * Open the platform picker. Null when the user closes it without choosing, or when there is no
+     * click to open it in.
+     *
+     * Browsers only open it with user activation, so start it from the click with
+     * `scope.launch(start = CoroutineStart.UNDISPATCHED)` and make this call the first suspension,
+     * with no model hop, `withContext` or `yield` before it.
+     */
     suspend fun pick(): ImageHandle?
 
-    /** Images dropped anywhere on the builder. */
+    // b-302a
+
+    /** Files dropped anywhere on the builder, images or not, so [decode] can turn down the rest. */
     val drops: Flow<ImageHandle>
 
-    /** Read [handle]. Null when it is not an image the platform can read. */
+    /** Read [handle]. Null when it is not an image the platform can read, or one too big to read safely. */
     suspend fun decode(handle: ImageHandle): DecodedImage?
+
+    // b-302a
+
+    /** Whether files are being dragged over the builder right now, for the drop overlay. */
+    val dragging: StateFlow<Boolean>
 }
 
 /**
@@ -208,7 +264,9 @@ sealed interface Paste {
         val text: String,
     ) : Paste
 
-    /** Pasted files, usually a screenshot. */
+    // b-302a
+
+    /** Pasted files, usually a screenshot. Files that are not images come too, for [ImageInput.decode] to turn down. */
     data class Files(
         val files: List<ImageHandle>,
     ) : Paste
@@ -237,7 +295,15 @@ interface Environment {
     /** Whether [pickScreenColor] can do anything here. */
     val eyeDropperAvailable: Boolean
 
-    /** Let the user pick a color off the screen. Null when they cancel. */
+    // b-302a
+
+    /**
+     * Let the user pick a color off the screen. Null when they cancel.
+     *
+     * Browsers only open the eyedropper with user activation, so start it from the click with
+     * `scope.launch(start = CoroutineStart.UNDISPATCHED)` and make this call the first suspension,
+     * with no model hop, `withContext` or `yield` before it.
+     */
     suspend fun pickScreenColor(): Argb?
 
     /** Remove the boot splash once the first frame is up. */
