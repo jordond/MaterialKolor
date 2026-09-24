@@ -149,18 +149,18 @@ internal fun rememberSkin(document: State<ThemeDocument>): State<Skin> =
  * draws the state the colors were resolved from. The kit keeps the content movable across a library
  * switch (D44), so the reveal that is playing, the toasts and every scroll position survive it (F-03).
  *
- * @param[probe] Drawn over the workspace with the state it was handed, for tests. Nothing by default.
  * @param[awaitIdle] Waits for an idle moment. With it the builder warms up for its first switch to
  * Fluent once the first frame is up. None by default, and no warm-up then.
+ * @param[probe] Drawn over the workspace with the state it was handed, for tests. Nothing by default.
  */
 @Composable
 internal fun BuilderRoot(
     graph: AppGraph,
     model: AppModel = metroViewModel(),
     workspaceModel: WorkspaceModel = metroViewModel(),
-    probe: @Composable (state: WorkspaceModel.State) -> Unit = {},
     // pf-3
     awaitIdle: (suspend () -> Unit)? = null,
+    probe: @Composable (state: WorkspaceModel.State) -> Unit = {},
 ) {
     val state by model.collectAsState()
     // b-221c
