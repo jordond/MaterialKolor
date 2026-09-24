@@ -24,6 +24,7 @@ import com.materialkolor.builder.feature.picker.PickerHost
 import com.materialkolor.builder.feature.poster.ExplainerHost
 import com.materialkolor.builder.feature.poster.PosterFocus
 import com.materialkolor.builder.feature.poster.PosterPanel
+import com.materialkolor.builder.feature.poster.shareReturn
 import com.materialkolor.builder.feature.projects.ProjectsHost
 import com.materialkolor.builder.feature.projects.ShareHost
 import com.materialkolor.builder.feature.topbar.TopBarContent
@@ -178,25 +179,32 @@ internal fun WorkspaceScreen(
         }
     }
 
+    // b-306c
+    // Held here, so the manual copy dialog asks nothing of a copy button that has left the screen.
+    val posterFocus = remember { PosterFocus() }
     WorkspaceScreen(
         state = state,
         posterColors = LocalThemeResult.current.poster,
         toasts = toasts,
         dispatcher = dispatcher,
         modifier = modifier,
+        posterFocus = posterFocus, // b-306c
     )
     // b-221c
     ManualCopyDialog(
         visible = manualCopyOpen,
         text = manualCopyText,
         onDismissRequest = { manualCopyOpen = false },
-        returnFocusTo = manualCopyFrom, // b-221f
+        returnFocusTo = posterFocus.returnFocusFor(manualCopyFrom), // b-306c
     )
 }
 
 /**
  * The workspace laid out by the shell, the poster, the top bar, the canvas with its dock, and the
  * panels and toasts over them.
+ *
+ * @param[posterFocus] The poster buttons that Projects, the explainer and the manual copy dialog
+ * hand focus back to once they close (AR-09).
  */
 @Composable
 internal fun WorkspaceScreen(
@@ -205,13 +213,11 @@ internal fun WorkspaceScreen(
     toasts: BuilderToastHostState,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    posterFocus: PosterFocus = remember { PosterFocus() }, // b-306c
 ) {
     // b-221c
     // Share and Export hand focus back to the buttons that opened them once they close (AR-09).
     val focus = rememberTopBarFocus()
-    // b-221f
-    // Projects and the explainer hand focus back to the poster buttons that opened them (AR-09).
-    val posterFocus = remember { PosterFocus() }
     WorkspaceShell(
         posterColors = posterColors,
         posterCollapsed = state.preferences.posterCollapsed,
@@ -228,7 +234,9 @@ internal fun WorkspaceScreen(
             ExportHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.Export)) // b-221c
             ProjectsHost(state, dispatcher, returnFocusTo = posterFocus.projects.returnFocusTo) // b-221f
             ExplainerHost(state, dispatcher, returnFocusTo = posterFocus.why.returnFocusTo) // b-221f
-            ShareHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.Share)) // b-221c
+            // b-306c
+            val shareReturn = posterFocus.shareReturn(state.panel, focus.requester(TopBarControl.Share))
+            ShareHost(state, dispatcher, returnFocusTo = shareReturn)
             CommandHost(state, dispatcher)
             PickerHost(state, dispatcher)
             ImageHost(state, dispatcher)

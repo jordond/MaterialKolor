@@ -12,11 +12,13 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalInputModeManager
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.capability.Control
+import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.CustomTone
 import com.materialkolor.builder.domain.model.SlotResolution
+import com.materialkolor.builder.engine.color.HctReadout
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.extras_tone_dark
@@ -134,7 +136,8 @@ private fun ToneSlider(
     val spacing = LocalBuilderTokens.current.spacing
     val drag = remember { PendingTone() }
     val stored = context.document.customTones[slot]
-    val tone = (if (isDark) stored?.dark else stored?.light) ?: slot.resolution.ownTone(isDark)
+    val color = context.result.customSlots[slot, isDark]
+    val tone = (if (isDark) stored?.dark else stored?.light) ?: slot.resolution.ownTone(isDark, color) // b-306c
     val name = ColorRef.OfSlot(slot).readoutName(context.document)
     val label = stringResource(if (isDark) Res.string.extras_tone_dark else Res.string.extras_tone_light, name)
     val value = if (isDark) Res.string.extras_tone_value_dark else Res.string.extras_tone_value_light
@@ -142,7 +145,7 @@ private fun ToneSlider(
         horizontalArrangement = Arrangement.spacedBy(spacing.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ColorSwatch(context.result.customSlots[slot, isDark])
+        ColorSwatch(color)
         BuilderSlider(
             value = tone.toFloat(),
             onValueChange = { moved ->
@@ -179,11 +182,19 @@ private fun CustomTone?.withTone(
         CustomTone(light = tone, dark = this?.dark)
     }
 
-/** The tone the slot's own resolution cuts it at in the mode [isDark] picks. A role has none. */
-private fun SlotResolution.ownTone(isDark: Boolean): Int =
+/**
+ * The tone a slot nobody moved sits at in the mode [isDark] picks. A ramp slot is cut at its
+ * resolution's tone. An on-color only reads against that tone, and a tone set on it moves the
+ * on-color itself (D22), so its own tone is measured off [color], the color the target resolved
+ * for it. A role has none.
+ */
+internal fun SlotResolution.ownTone(
+    isDark: Boolean,
+    color: Argb,
+): Int =
     when (this) {
         is SlotResolution.FromRamp -> if (isDark) dark else light
-        is SlotResolution.OnRamp -> if (isDark) dark else light
+        is SlotResolution.OnRamp -> HctReadout.of(color).tone.roundToInt() // b-306c
         is SlotResolution.FromRole -> error("A slot that follows a role has no tone of its own")
     }
 

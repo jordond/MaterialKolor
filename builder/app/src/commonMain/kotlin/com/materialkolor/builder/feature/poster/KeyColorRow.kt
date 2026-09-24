@@ -16,8 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.InputMode
-import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.platform.LocalInputModeManager
 import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.capability.ControlState
@@ -236,16 +234,6 @@ internal class KeyColorPicks {
 
     /** The Pick button of the row for [slot]. */
     operator fun get(slot: KeyColor): FocusRequester = requesters.getValue(slot)
-}
-
-/**
- * Moves the focus to [target] ahead of a button that is about to remove itself, while the keyboard
- * is in use, so the user carries on from somewhere close by. A button that goes while it holds the
- * focus clears it, so this has to run before the change that removes it. A pointer leaves the focus
- * alone.
- */
-internal fun InputModeManager.handFocusTo(target: FocusRequester) {
-    if (inputMode == InputMode.Keyboard) target.requestFocus()
 }
 
 /** What the row for [slot] is called. */

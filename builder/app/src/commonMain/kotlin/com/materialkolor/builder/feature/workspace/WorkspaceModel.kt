@@ -91,7 +91,10 @@ internal class WorkspaceModel(
         session.saveStatus.mergeState { state, status -> state.copy(saveStatus = status) }
         // b-221c
         // b-221f
+        // b-306c
         // Read with the document the session holds now, so a new number never lands beside the old document.
+        // That only holds while these collectors run after show() lets go of the thread, with the document
+        // already set. A session slice that publishes both from one StateFlow will make it hold everywhere.
         session.generation.mergeState { state, generation ->
             state.withDocument(session.document.value).copy(projectGeneration = generation)
         }
@@ -295,7 +298,9 @@ internal class WorkspaceModel(
      * @property[saveStatus] Whether the open project's latest changes are saved.
      * @property[projectGeneration] Counts the projects this tab has shown, one more each time another
      * opens. It changes in the same state as the document the new project brings, so anything that
-     * belongs to one project can tell a new project from an edit.
+     * belongs to one project can tell a new project from an edit. That pairing holds only while the
+     * collectors run after the session's `show()` lets go of the thread, until a session slice
+     * publishes both from one `StateFlow`.
      * @property[expressiveSuggestion] Whether the top bar offers the Expressive style on the 2025
      * spec after a switch to Expressive (F-03).
      * @property[rampHighlight] What the Palettes tab picks out after Show on ramp, with the project

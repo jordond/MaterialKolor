@@ -90,6 +90,7 @@ public fun PreviewPane(
     ) {
         PaneLocals(ink) {
             when (skin.library) {
+                // b-306
                 Library.Material3 -> MaterialPane(roles, skin.expressive, spec.result.document.motionScheme, content)
                 Library.Unstyled -> UnstyledPane(roles, spec.isDark, ink, content)
                 Library.Fluent -> content() // stub, the Fluent theme lands with B-405
@@ -191,7 +192,7 @@ private fun PaneLocals(
 private fun MaterialPane(
     roles: Map<Role, RoleEntry>,
     expressive: Boolean,
-    motion: MotionSchemeChoice,
+    motion: MotionSchemeChoice, // b-306
     content: @Composable () -> Unit,
 ) {
     val colorScheme = remember(roles) { roles.toColorScheme() }
