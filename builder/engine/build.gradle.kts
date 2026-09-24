@@ -1,3 +1,5 @@
+import com.materialkolor.convention.materialKolor
+
 plugins {
     id("materialkolor.builder.compose")
 }
@@ -6,8 +8,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":builder:domain"))
-            api(project(":material-kolor-core"))
-            implementation(project(":material-kolor-palette"))
+            api(materialKolor("core"))
+            implementation(materialKolor("palette"))
             implementation(libs.kotlinx.coroutines.core)
 
             // b-115
@@ -21,7 +23,7 @@ kotlin {
         // b-115
         // The role tables are checked against what the Material 3 module builds for the same scheme.
         jvmTest.dependencies {
-            implementation(project(":material-kolor-material3"))
+            implementation(materialKolor("material3"))
             implementation(libs.compose.material3)
         }
 
@@ -30,9 +32,9 @@ kotlin {
         // The expressive theme is composed to read its own defaults, hence the UI test runtime.
         // Unstyled and Fluent only reach compile time in their modules, so the tests add them.
         jvmTest.dependencies {
-            implementation(project(":material-kolor-unstyled"))
+            implementation(materialKolor("unstyled"))
             implementation(libs.composeUnstyled.theming)
-            implementation(project(":material-kolor-fluent"))
+            implementation(materialKolor("fluent"))
             implementation(libs.fluent)
             implementation(libs.compose.ui.test)
             implementation(project.extensions.getByType<org.jetbrains.compose.ComposeExtension>().dependencies.desktop.currentOs)

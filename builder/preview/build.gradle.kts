@@ -1,3 +1,4 @@
+import com.materialkolor.convention.materialKolor
 import org.jetbrains.compose.ComposeExtension
 import org.jetbrains.compose.resources.ResourcesExtension
 
@@ -15,8 +16,8 @@ kotlin {
         commonMain.dependencies {
             api(project(":builder:kit"))
 
-            implementation(project(":material-kolor-material3"))
-            implementation(project(":material-kolor-unstyled"))
+            implementation(materialKolor("material3"))
+            implementation(materialKolor("unstyled"))
 
             implementation(libs.compose.foundation)
             implementation(libs.compose.resources)
@@ -26,7 +27,7 @@ kotlin {
             implementation(libs.lucide)
 
             // b-405
-            implementation(project(":material-kolor-fluent"))
+            implementation(materialKolor("fluent"))
             implementation(libs.fluent)
         }
 

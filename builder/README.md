@@ -2,8 +2,7 @@
 
 The Compose Multiplatform app behind [materialkolor.com](https://materialkolor.com). Pick a seed color, tune the
 scheme, preview it in Material 3, Compose Unstyled or Compose Fluent, and export the code. It ships on the web as
-wasm, and the same app runs on the desktop for development. It always builds against the MaterialKolor modules in
-this repo.
+wasm, and the same app runs on the desktop for development.
 
 ## Modules
 
@@ -35,6 +34,15 @@ this repo.
 # Web, the optimized build on the webpack dev server
 ./gradlew :builder:web:wasmJsBrowserProductionRun
 ```
+
+## MaterialKolor source
+
+By default the builder depends on the MaterialKolor modules in this repo, so a library change shows up right away.
+Pass `-Pmaterialkolor.useLocal=false` to build against the published modules at `materialKolorExport` instead, the
+version every export pins. Production is always built that way, so the builder draws each theme with the same library
+the exported code compiles against.
+
+## Running the site
 
 To run the site the way it ships, assemble it and serve it through the Worker:
 
@@ -74,7 +82,9 @@ Everything deploys from the Builder workflow (`.github/workflows/builder.yml`) t
 - **Pull requests** from this repo upload a preview version of the staging Worker and comment its URL on the pull
   request. The comment updates on every push.
 - **Staging** at [staging.materialkolor.com](https://staging.materialkolor.com) deploys on every push to `next`.
-  It is built with `-Psite.env=staging`, so it is never indexed and its share links stay on staging.
+  It is built with `-Psite.env=staging`, so it is never indexed and its share links stay on staging. It uses the
+  MaterialKolor modules in this repo, as pull request previews do.
 - **Production** at [materialkolor.com](https://materialkolor.com) deploys from a `builder/<version>` tag. The tag
   must match `builder-version` in `gradle/libs.versions.toml`, and the MaterialKolor version the exports pin
-  (`materialKolorExport`) must already be on Maven Central.
+  (`materialKolorExport`) must already be on Maven Central. Everything on a tag, tests included, builds against
+  that published version.

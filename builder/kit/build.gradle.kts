@@ -1,3 +1,4 @@
+import com.materialkolor.convention.materialKolor
 import org.jetbrains.compose.ComposeExtension
 import org.jetbrains.compose.resources.ResourcesExtension
 
@@ -20,9 +21,9 @@ kotlin {
             // or reads a palette needs the type too.
             api(project(":builder:codegen"))
 
-            implementation(project(":material-kolor-material3"))
-            implementation(project(":material-kolor-unstyled"))
-            implementation(project(":material-kolor-fluent"))
+            implementation(materialKolor("material3"))
+            implementation(materialKolor("unstyled"))
+            implementation(materialKolor("fluent"))
 
             implementation(libs.compose.foundation)
             implementation(libs.compose.resources)
