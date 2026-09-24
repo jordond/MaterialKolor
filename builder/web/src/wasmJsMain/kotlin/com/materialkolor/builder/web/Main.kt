@@ -1,11 +1,16 @@
 package com.materialkolor.builder.web
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import com.materialkolor.builder.BuilderApp
+import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.web.interop.A11yLiveRegion
 import com.materialkolor.builder.web.interop.FocusRepair
 import com.materialkolor.builder.web.interop.MirrorRoot
+import com.materialkolor.builder.web.interop.browserIsAutomated
+import com.materialkolor.builder.web.interop.locationQuery
+import com.materialkolor.builder.web.interop.motionFrozen
 import kotlinx.browser.document
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.configureWebResources
@@ -16,7 +21,12 @@ fun main() {
     // Resources load from the site root, so a page opened on /t/<code> does not look for them under /t/.
     configureWebResources { resourcePathMapping { path -> "/$path" } }
 
-    ComposeViewport(VIEWPORT_ID) { BuilderApp(BrowserPlatform) }
+    // b-503a
+    // Read once at boot, before the router can rewrite the address, and never a setting.
+    val frozen = motionFrozen(locationQuery(), browserIsAutomated())
+    ComposeViewport(VIEWPORT_ID) {
+        CompositionLocalProvider(LocalMotionFrozen provides frozen) { BuilderApp(BrowserPlatform) }
+    }
 
     // b-220
     // The viewport element outlives `ComposeViewport` clearing its children, so both hooks can go
