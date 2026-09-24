@@ -9,10 +9,10 @@ import { openBuilder, reloadBuilder, wantHooks } from './builder';
 // Foundation shows the toolbar on touch input, not at a phone width, so the tests keep the desktop
 // viewport, where the seed field sits docked on the first screen, and only turn touch on.
 //
-// The mirror cannot find the row. A long press puts up foundation's selection handles, which are
-// popups, and a popup takes the mirror over for good (D40), leaving it three nodes deep. So the row
-// is found by its pixels, the part of the page that changed above or below the field, and each
-// button by the gaps between the labels.
+// The row is found by its pixels, the part of the page that changed above or below the field, and
+// each button by the gaps between the labels. That dates from when a long press put up foundation's
+// selection handles, popups that took the mirror over for good (D40), and it still works now that
+// the handles stay off on the web (D45).
 
 /** The digits the Paste test puts over the long pressed word, the hex's own digits. */
 const PASTED = '0B6E4F';
@@ -60,6 +60,146 @@ test('Copy from the toolbar puts the selection on the clipboard', async ({ page,
   expect(text).toContain(copied);
 });
 
+// b-228
+// Spike S13. A long press used to put up foundation's selection handles, popups that took the
+// mirror over for good (D40). With the handles kept out of a field on the web, the mirror keeps the
+// page through the long press and still hears the seed the Paste puts in.
+test('the mirror keeps the page through a long press and hears the paste after it', async ({ page, context }) => {
+  await openBuilder(page);
+  await page.evaluate((text) => navigator.clipboard.writeText(text), PASTED);
+  const cdp = await context.newCDPSession(page);
+  const field = await seedField(page);
+  const box = await boxOf(field);
+  const before = await settledMirror(page);
+
+  const row = await longPressForRow(page, cdp, box);
+  const during = await settledMirror(page);
+  console.log(`b-228 mirror nodes: before ${before}, after the long press ${during}`);
+  expect(during).toBeGreaterThan(before * 0.8);
+
+  await tap(cdp, row.button('Paste'));
+  await expect
+    .poll(async () => (await seedField(page)).textContent(), { timeout: 10_000 })
+    .toContain(PASTED);
+  console.log(`b-228 mirror nodes after the paste: ${await settledMirror(page)}`);
+});
+
+// b-228a
+// D45 reaches the text the builder shows for copying by hand too. A share link and a refused copy's
+// hex sit in read only fields, where a long press brings up Copy with no handles, and the export
+// code takes no selection from a finger at all. Each keeps the mirror through a long press.
+
+test('a long press on the share link keeps the mirror and shows Copy', async ({ page, context }) => {
+  await openBuilder(page);
+  const cdp = await context.newCDPSession(page);
+  await openBy(page, mirrorButton(page, 'Share'), mirrorButton(page, 'Copy link'));
+  const link = await copyField(page);
+  const before = await settledMirror(page);
+
+  const row = await longPressForRow(page, cdp, link, { readOnly: true });
+  expect(row.labels).toEqual(['Copy', 'Select all']);
+  const after = await settledMirror(page);
+  console.log(`b-228a mirror nodes in the share dialog: before ${before}, after the long press ${after}`);
+  expect(after).toBeGreaterThan(before * 0.8);
+});
+
+test('a long press on the text of a refused copy keeps the mirror and shows Copy', async ({ page, context }) => {
+  await context.addInitScript(() => {
+    const refuse = () => Promise.reject(new DOMException('Refused for the test', 'NotAllowedError'));
+    Object.defineProperty(Clipboard.prototype, 'writeText', { configurable: true, value: refuse });
+    Object.defineProperty(Clipboard.prototype, 'write', { configurable: true, value: refuse });
+  });
+  await openBuilder(page);
+  const cdp = await context.newCDPSession(page);
+  await openBy(page, mirrorButton(page, /^Copy hex/), mirrorButton(page, 'Done'));
+  const hex = await copyField(page);
+  const before = await settledMirror(page);
+
+  const at = { x: hex.x + 16, y: hex.y + hex.height / 2 };
+  const row = await longPressForRow(page, cdp, hex, { readOnly: true, at });
+  expect(row.labels).toEqual(['Copy', 'Select all']);
+  const after = await settledMirror(page);
+  console.log(`b-228a mirror nodes in the manual copy dialog: before ${before}, after the long press ${after}`);
+  expect(after).toBeGreaterThan(before * 0.8);
+});
+
+test('a long press on the export code keeps the mirror', async ({ page, context }) => {
+  await openBuilder(page);
+  const cdp = await context.newCDPSession(page);
+  const code = page.locator('#cmp_a11y_root').getByRole('list', { name: 'Color.kt' });
+  await openBy(page, mirrorButton(page, 'Export code'), code);
+  const box = await boxOf(code);
+  const before = await settledMirror(page);
+
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: box.x + 120, y: box.y + 44 }] });
+  await page.waitForTimeout(800);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  const after = await settledMirror(page);
+  console.log(`b-228a mirror nodes on the export sheet: before ${before}, after the long press ${after}`);
+  expect(after).toBeGreaterThan(before * 0.8);
+});
+
+/** The button named [name] in the mirror, the whole name when it is a string. */
+function mirrorButton(page: Page, name: string | RegExp): Locator {
+  return page.locator('#cmp_a11y_root').getByRole('button', { name, exact: true }).first();
+}
+
+/**
+ * Clicks [button] and waits for [opened] to show in the mirror, and clicks again if it does not,
+ * since a click that lands while the page is still settling can go unheard. It never clicks while
+ * a click may still be opening, since a second click would land on the scrim and close it.
+ */
+async function openBy(page: Page, button: Locator, opened: Locator): Promise<void> {
+  await expect(button).toBeAttached({ timeout: 30_000 });
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const box = await button.boundingBox();
+    if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    try {
+      await opened.first().waitFor({ state: 'attached', timeout: 8_000 });
+      return;
+    } catch {
+      // Not open yet, so the click went unheard.
+    }
+  }
+  throw new Error('The click never opened it');
+}
+
+/** The read only field of the open dialog, which holds the text to copy by hand. */
+async function copyField(page: Page): Promise<Box> {
+  const field = page.locator('#cmp_a11y_root').getByRole('textbox', { name: /^Text to copy/ });
+  await expect(field).toBeAttached({ timeout: 10_000 });
+  await expect.poll(async () => (await field.boundingBox())?.height ?? 0, { timeout: 10_000 }).toBeGreaterThan(0);
+  return boxOf(field);
+}
+
+/**
+ * The number of elements in the mirror once it has held still for a second, which is longer than
+ * the listener's longest wait before it syncs.
+ */
+async function settledMirror(page: Page): Promise<number> {
+  // The mirror sits in the viewport's shadow root, out of reach of a plain document query.
+  const count = () =>
+    page.evaluate(() => {
+      const roots: (Document | ShadowRoot)[] = [document];
+      for (let i = 0; i < roots.length; i++) {
+        const mirror = roots[i].querySelector('#cmp_a11y_root');
+        if (mirror) return mirror.querySelectorAll('*').length;
+        roots[i].querySelectorAll('*').forEach((element) => {
+          if (element.shadowRoot) roots.push(element.shadowRoot);
+        });
+      }
+      return -1;
+    });
+  let last = -1;
+  for (let round = 0; round < 20; round++) {
+    await page.waitForTimeout(1_000);
+    const now = await count();
+    if (now === last) return now;
+    last = now;
+  }
+  return last;
+}
+
 interface Box {
   x: number;
   y: number;
@@ -98,12 +238,18 @@ async function themeColor(page: Page): Promise<string> {
 }
 
 /**
- * Holds a finger on the middle of the field's hex for longer than a long press takes, then finds the
- * row that came up, in the pixels that changed outside the field.
+ * Holds a finger on the middle of the field's hex, or on [options.at], for longer than a long press
+ * takes, then finds the row that came up, in the pixels that changed outside the field. A read only
+ * field's row has no Cut or Paste.
  */
-async function longPressForRow(page: Page, cdp: CDPSession, field: Box): Promise<Row> {
+async function longPressForRow(
+  page: Page,
+  cdp: CDPSession,
+  field: Box,
+  options: { readOnly?: boolean; at?: Point } = {},
+): Promise<Row> {
   const before = await page.screenshot();
-  const point = { x: field.x + field.width / 2, y: field.y + field.height * 0.4 };
+  const point = options.at ?? { x: field.x + field.width / 2, y: field.y + field.height * 0.4 };
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
   await page.waitForTimeout(800);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
@@ -111,7 +257,7 @@ async function longPressForRow(page: Page, cdp: CDPSession, field: Box): Promise
   await expect
     .poll(
       async () => {
-        row = await findRow(page, before, field);
+        row = await findRow(page, before, field, options.readOnly ?? false);
         return row?.labels.length ?? 0;
       },
       { timeout: 10_000 },
@@ -133,7 +279,7 @@ async function tap(cdp: CDPSession, point: Point): Promise<void> {
  * its handles. The rows of pixels with a long run of change are the toolbar, and along its middle
  * each run of label pixels, split at a gap wider than a space, is one button.
  */
-async function findRow(page: Page, before: Buffer, field: Box): Promise<Row | null> {
+async function findRow(page: Page, before: Buffer, field: Box, readOnly: boolean): Promise<Row | null> {
   const after = await page.screenshot();
   const found = await page.evaluate(
     async ({ beforePng, afterPng, box }) => {
@@ -205,7 +351,7 @@ async function findRow(page: Page, before: Buffer, field: Box): Promise<Row | nu
   );
   if (!found || found.centers.length === 0) return null;
   const names: Record<number, string[]> = {
-    2: ['Paste', 'Select all'],
+    2: readOnly ? ['Copy', 'Select all'] : ['Paste', 'Select all'],
     3: ['Cut', 'Copy', 'Paste'],
     4: ['Cut', 'Copy', 'Paste', 'Select all'],
   };

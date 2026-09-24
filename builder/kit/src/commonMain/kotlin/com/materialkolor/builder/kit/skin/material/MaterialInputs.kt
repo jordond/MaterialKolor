@@ -4,20 +4,27 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -27,8 +34,10 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,10 +49,13 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.collapse
@@ -54,9 +66,11 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
@@ -66,6 +80,7 @@ import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.control.stateWords
 import com.materialkolor.builder.kit.headless.DisclosureChevron
+import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
 import com.materialkolor.builder.kit.headless.SliderKeyPress
 import com.materialkolor.builder.kit.headless.SliderRules
 import com.materialkolor.builder.kit.headless.disclosureEnter
@@ -74,6 +89,7 @@ import com.materialkolor.builder.kit.headless.disclosureName
 import com.materialkolor.builder.kit.headless.rovingTarget
 import com.materialkolor.builder.kit.headless.sliderKeys
 import com.materialkolor.builder.kit.headless.sliderSemantics
+import com.materialkolor.builder.kit.headless.withoutSelectionHandles
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.skin.headless.FieldStyle
@@ -222,7 +238,10 @@ internal fun MaterialSlider(
     )
 }
 
-/** The Material3 outlined text field over a builder field draft. */
+/**
+ * The Material3 outlined text field over a builder field draft. An error field always has its
+ * message here, which names the error on the field.
+ */
 @Composable
 internal fun MaterialField(
     value: TextFieldValue,
@@ -235,19 +254,95 @@ internal fun MaterialField(
     onDone: () -> Unit,
     modifier: Modifier,
 ) {
-    OutlinedTextField(
+    MaterialOutlinedField(
         value = value,
         onValueChange = onValueChange,
+        label = label,
         modifier = modifier.semantics { if (isError && message != null) error(message) },
         enabled = enabled,
         textStyle = textStyle,
-        label = { Text(label) },
-        supportingText = message?.let { text -> { Text(text) } },
+        supportingText = message,
         isError = isError,
         keyboardOptions = KeyboardOptions(autoCorrectEnabled = false, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { onDone() }),
-        singleLine = true,
     )
+}
+
+// b-228a
+
+/**
+ * Material3's single line outlined text field, put together from the parts `OutlinedTextField` is
+ * made of, the foundation field inside Material's outlined decoration box. It looks and reads the
+ * same as `OutlinedTextField` with the same arguments, but its inner text goes without the touch
+ * selection handles where overlays render in the page (D45), which `OutlinedTextField` gives no way
+ * to reach.
+ *
+ * `OutlinedTextField` also names an error field "Invalid input" when nothing else does. Every
+ * builder field in error carries its own message, so that part is left out.
+ */
+@Composable
+internal fun MaterialOutlinedField(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    label: String,
+    modifier: Modifier,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    textStyle: TextStyle = LocalTextStyle.current,
+    supportingText: String? = null,
+    isError: Boolean = false,
+    trailingIcon: (@Composable () -> Unit)? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+) {
+    val interactions = remember { MutableInteractionSource() }
+    val focused by interactions.collectIsFocusedAsState()
+    val colors = OutlinedTextFieldDefaults.colors()
+    val inTree = LocalOverlaysInTree.current
+    val textColor = textStyle.color.takeOrElse { colors.textColor(enabled, isError, focused) }
+    // The label sits across the outline, so the field gives it half its line above the box.
+    val labelLine = MaterialTheme.typography.bodySmall.lineHeight
+    val labelHalf = with(LocalDensity.current) { (if (labelLine.isSp) labelLine else 16.sp).toDp() / 2 }
+    CompositionLocalProvider(LocalTextSelectionColors provides colors.textSelectionColors) {
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = modifier
+                .semantics(mergeDescendants = true) {}
+                .padding(top = labelHalf)
+                .defaultMinSize(
+                    minWidth = OutlinedTextFieldDefaults.MinWidth,
+                    minHeight = OutlinedTextFieldDefaults.MinHeight,
+                ),
+            enabled = enabled,
+            readOnly = readOnly,
+            textStyle = textStyle.merge(TextStyle(color = textColor)),
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            singleLine = true,
+            interactionSource = interactions,
+            cursorBrush = SolidColor(colors.cursorColor(isError)),
+            decorationBox = { innerTextField ->
+                OutlinedTextFieldDefaults.DecorationBox(
+                    value = value.text,
+                    innerTextField = {
+                        Box(Modifier.withoutSelectionHandles(inTree), propagateMinConstraints = true) {
+                            innerTextField()
+                        }
+                    },
+                    enabled = enabled,
+                    singleLine = true,
+                    visualTransformation = VisualTransformation.None,
+                    interactionSource = interactions,
+                    isError = isError,
+                    label = { Text(label) },
+                    trailingIcon = trailingIcon,
+                    supportingText = supportingText?.let { text -> { Text(text) } },
+                    colors = colors,
+                )
+            },
+        )
+    }
 }
 
 /**

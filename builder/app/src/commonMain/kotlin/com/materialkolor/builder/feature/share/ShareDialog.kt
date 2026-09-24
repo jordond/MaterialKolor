@@ -1,6 +1,5 @@
 package com.materialkolor.builder.feature.share
 
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +21,7 @@ import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.widget.SelectableText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
@@ -99,9 +99,8 @@ internal fun ShareDialog(
             BuilderText(text = stringResource(Res.string.share_unavailable))
         } else {
             BuilderText(text = stringResource(Res.string.share_body))
-            SelectionContainer {
-                BuilderText(text = link, style = BuilderTextStyle.Code)
-            }
+            // b-228a
+            SelectableText(text = link, style = BuilderTextStyle.Code)
         }
         if (manual) {
             BuilderText(text = stringResource(Res.string.share_manual), emphasis = Emphasis.Danger)
