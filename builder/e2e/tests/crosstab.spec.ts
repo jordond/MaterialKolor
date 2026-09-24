@@ -1,15 +1,15 @@
 import { expect, test, type Page } from '@playwright/test';
 import { wantHooks } from './builder';
 import {
+  boxOf,
   button,
   LAND_TIMEOUT_MS,
   onPage,
   openWorkspace,
   press,
-  seedField,
+  scrollTo,
   seedText,
   storedProjects,
-  typeInto,
   typeSeed,
 } from '../fixtures/workspace';
 
@@ -39,22 +39,34 @@ test('an edit in one tab lands in the other as a step its Undo takes back', asyn
   await expect.poll(() => seedText(reader), { timeout: LAND_TIMEOUT_MS }).toBe(first);
 });
 
-test('an edit in one tab offers the other the latest while it edits too, and Load latest takes it', async ({
-  context,
-}) => {
+test('an edit in one tab offers the other the latest while it drags, and Load latest takes it', async ({ context }) => {
   const { writer, reader } = await twoTabs(context.newPage.bind(context));
-  // A field commits a color 400 ms after it reads as one, so both hold one digit short until the
-  // writer commits and the reader straight after, well inside the writer's autosave delay. The
-  // writer's save then reaches a tab that has just edited.
-  await typeInto(writer, seedField(writer), '#0B6E4');
-  await typeInto(reader, seedField(reader), '#8E24A');
-  await writer.keyboard.press('F');
-  await writer.keyboard.press('Enter');
-  await reader.keyboard.press('A');
-  await reader.keyboard.press('Enter');
+  // The reader holds the contrast slider and keeps it moving. Each step is an edit that saves
+  // nothing until it lets go, so the writer's save lands in a tab that edited in the last 2 s
+  // however busy the machine, and the writer never hears from the reader.
+  const slider = onPage(reader, /^Contrast level, slider/);
+  await scrollTo(reader, slider, onPage(reader, /^Seed and theme controls/));
+  const track = await boxOf(slider);
+  const middle = { x: track.x + track.width / 2, y: track.y + track.height / 2 };
+  await reader.mouse.move(middle.x, middle.y);
+  await reader.mouse.down();
+  let holding = true;
+  const moving = (async () => {
+    for (let step = 0; holding; step++) {
+      await reader.mouse.move(middle.x + (step % 2 === 0 ? 12 : -12), middle.y, { steps: 3 });
+      await reader.waitForTimeout(200);
+    }
+  })();
 
-  await expect(onPage(reader, CONFLICT)).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
-  expect(await seedText(reader)).toBe('#8E24AA');
+  try {
+    await typeSeed(writer, '#0B6E4F');
+    await expect(onPage(reader, CONFLICT)).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
+  } finally {
+    holding = false;
+    await moving;
+    await reader.mouse.up();
+  }
+  expect(await seedText(reader)).not.toBe('#0B6E4F');
   await expect(button(reader, 'Keep mine')).toHaveCount(1);
   await press(reader, button(reader, 'Load latest'));
   await expect.poll(() => seedText(reader), { timeout: LAND_TIMEOUT_MS }).toBe('#0B6E4F');

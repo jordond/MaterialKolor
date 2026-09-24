@@ -35,8 +35,9 @@ test.beforeEach(async ({ context }) => {
   await wantHooks(context);
 });
 
-test('Download zip holds every file the sheet shows, its Kotlin as the golden has it', async ({ page, browserName }) => {
-  test.fixme(browserName === 'webkit', 'Follow-up: Download zip raises no download event in WebKit within 60 s');
+test('Download zip holds every file the sheet shows, its Kotlin as the golden has it', async ({ page }) => {
+  // b-503b
+  // WebKit raises the download too. The zip starts inside the press, as Safari asks.
   await openSheet(page);
   const tabs = await fileTabs(page);
 
