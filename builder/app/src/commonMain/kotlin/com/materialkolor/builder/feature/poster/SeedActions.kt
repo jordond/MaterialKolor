@@ -39,12 +39,15 @@ import org.jetbrains.compose.resources.stringResource
  * undo entry behind a crossfade. With the seed and the style both locked there is nothing left to
  * draw, so Shuffle turns off and a line says why. The Space key beside it is a hint for a keyboard,
  * so a touch screen leaves it out.
+ *
+ * @param[shuffle] Whether Shuffle leads the row. The sheet's seed row already holds it.
  */
 @Composable
 internal fun SeedActions(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    shuffle: Boolean = true,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val preferences = context.preferences
@@ -54,19 +57,21 @@ internal fun SeedActions(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(spacing.small),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                BuilderButton(
-                    onClick = { dispatcher.dispatch(WorkspaceAction.Shuffle(origin = null)) },
-                    label = stringResource(Res.string.poster_shuffle),
-                    emphasis = Emphasis.Primary,
-                    icon = IconId.Shuffle,
-                    enabled = !nothingToShuffle,
-                )
-                if (!LocalLayout.current.coarsePointer) {
-                    BuilderBadge(label = stringResource(Res.string.poster_space), icon = IconId.Keyboard)
+            if (shuffle) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(spacing.small),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    BuilderButton(
+                        onClick = { dispatcher.dispatch(WorkspaceAction.Shuffle(origin = null)) },
+                        label = stringResource(Res.string.poster_shuffle),
+                        emphasis = Emphasis.Primary,
+                        icon = IconId.Shuffle,
+                        enabled = !nothingToShuffle,
+                    )
+                    if (!LocalLayout.current.coarsePointer) {
+                        BuilderBadge(label = stringResource(Res.string.poster_space), icon = IconId.Keyboard)
+                    }
                 }
             }
             BuilderButton(
@@ -97,6 +102,30 @@ internal fun SeedActions(
             BuilderText(text = stringResource(Res.string.poster_all_locked), emphasis = Emphasis.Secondary)
         }
     }
+}
+
+/**
+ * Shuffle as an icon, for the rail and the sheet's seed row. With nothing left to shuffle it turns
+ * off and its tooltip says why.
+ */
+@Composable
+internal fun ShuffleIconButton(
+    context: PosterContext,
+    dispatcher: Dispatcher<WorkspaceAction>,
+    modifier: Modifier = Modifier,
+    emphasis: Emphasis = Emphasis.Subtle,
+) {
+    val nothingToShuffle = context.preferences.shufflesNothing()
+    val name = stringResource(Res.string.poster_shuffle)
+    PosterIconButton(
+        icon = IconId.Shuffle,
+        description = name,
+        onClick = { dispatcher.dispatch(WorkspaceAction.Shuffle(origin = null)) },
+        modifier = modifier,
+        emphasis = emphasis,
+        enabled = !nothingToShuffle,
+        tooltip = if (nothingToShuffle) stringResource(Res.string.poster_all_locked) else name,
+    )
 }
 
 /** Whether these preferences hold [lock] on. */

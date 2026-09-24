@@ -14,13 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.poster_expand
 import com.materialkolor.builder.generated.resources.poster_projects
 import com.materialkolor.builder.generated.resources.poster_rail_seed
-import com.materialkolor.builder.generated.resources.poster_shuffle
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
@@ -44,12 +44,7 @@ internal fun PosterRail(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         SeedSwatch(description = stringResource(Res.string.poster_rail_seed, context.document.seed.toHex()))
-        PosterIconButton(
-            icon = IconId.Shuffle,
-            description = stringResource(Res.string.poster_shuffle),
-            onClick = { dispatcher.dispatch(WorkspaceAction.Shuffle(origin = null)) },
-            enabled = !context.preferences.shufflesNothing(),
-        )
+        ShuffleIconButton(context, dispatcher)
         PosterIconButton(
             icon = IconId.Folder,
             description = stringResource(Res.string.poster_projects),
@@ -63,20 +58,26 @@ internal fun PosterRail(
     }
 }
 
+/** The seed swatch's ring. It mirrors the kit's outline width until kit publishes a stroke token (B-221b). */
+private val SwatchRingWidth: Dp = 1.dp
+
 /**
- * The seed on the rail. The rail is already the seed, so the swatch is the page ringed in ink, as
- * big as the buttons under it.
+ * The seed on the rail and in the sheet's seed row. The poster is already the seed, so the swatch
+ * is the page ringed in ink, as big as the buttons beside it.
+ *
+ * @param[description] What it reads out, or null where the seed's hex already shows beside it.
+ * @param[modifier] Applied to the swatch.
  */
 @Composable
-private fun SeedSwatch(
-    description: String,
+internal fun SeedSwatch(
+    description: String?,
     modifier: Modifier = Modifier,
 ) {
     val tokens = LocalBuilderTokens.current
     Box(
         modifier = modifier
             .size(LocalLayout.current.primaryTouchTarget)
-            .border(Dp.Hairline, tokens.borderStrong, RoundedCornerShape(tokens.radius.small))
-            .semantics { contentDescription = description },
+            .border(SwatchRingWidth, tokens.borderStrong, RoundedCornerShape(tokens.radius.small))
+            .then(if (description == null) Modifier else Modifier.semantics { contentDescription = description }),
     )
 }

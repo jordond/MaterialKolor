@@ -4,6 +4,8 @@
     <string name="poster_wordmark">MaterialKolor</string>
     <!-- The Projects button, when the session has not named a project yet. -->
     <string name="poster_projects">Projects</string>
+    <!-- What the Projects button reads out once a project is open. The argument is the project's name. -->
+    <string name="poster_projects_named">Projects, %1$s</string>
     <!-- Beside the Projects button, while the latest changes are saved. -->
     <string name="poster_saved">Saved</string>
     <!-- Beside the Projects button, while a save is waiting or under way. -->

@@ -13,20 +13,30 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.LocalThemeResult
+import com.materialkolor.builder.core.platform.StoreError
 import com.materialkolor.builder.core.session.HistoryState
+import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.domain.color.Argb
+import com.materialkolor.builder.domain.color.ColorNames
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.Library
@@ -43,10 +53,12 @@ import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.feature.workspace.capabilitiesOf
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.shell.PosterSurface
+import com.materialkolor.builder.kit.shell.WorkspaceShell
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
 import dev.stateholder.dispatcher.rememberDispatcher
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -58,6 +70,16 @@ private val Seed = Argb(0x6750A4)
 /** A phone held upright, which gets the poster sheet. */
 private const val PHONE_WIDTH = 400
 private const val PHONE_HEIGHT = 800
+
+/** The phone the sheet peek is checked on, upright and on its side (D38). */
+private const val PEEK_PHONE_SHORT = 390
+private const val PEEK_PHONE_LONG = 844
+
+/** How much of the poster sheet shows at peek, upright and on its side, as the kit's shell sets it. */
+private val UprightPeek: Dp = 344.dp
+private val SidewaysPeek: Dp = 96.dp
+
+private const val ALL_LOCKED = "The seed and the style are both locked"
 
 @OptIn(ExperimentalTestApi::class)
 class PosterPanelTest {
@@ -158,6 +180,28 @@ class PosterPanelTest {
         }
 
     @Test
+    fun seedHero_documentSwappedWhileFocused_showsTheNewSeedAfterBlurWithoutEditing() =
+        runComposeUiTest {
+            var document by mutableStateOf(ThemeDocument(seed = Seed, seedSource = SeedSource.Typed))
+            showPoster(document = { document })
+
+            seedField().requestFocus()
+            mainClock.autoAdvance = false
+            seedField().performTextReplacement("#00ff00")
+            mainClock.advanceTimeByFrame()
+            // An undo, or a seed picked elsewhere, lands while the field still holds a draft.
+            document = document.copy(seed = Argb(0x1E88E5), seedSource = SeedSource.Picked)
+            mainClock.advanceTimeByFrame()
+            mainClock.advanceTimeBy(COMMIT_DELAY * 2)
+            mainClock.autoAdvance = true
+            runOnIdle { focus.clearFocus() }
+            waitForIdle()
+
+            actions.shouldBeEmpty()
+            fieldText() shouldBe "#1E88E5"
+        }
+
+    @Test
     fun seedHero_eachSource_showsWhereTheSeedCameFrom() =
         runComposeUiTest {
             var document by mutableStateOf(ThemeDocument(seed = Seed, seedSource = SeedSource.Typed))
@@ -248,6 +292,30 @@ class PosterPanelTest {
         }
 
     @Test
+    fun posterHeader_projects_readsAsProjectsAndTheName() =
+        runComposeUiTest {
+            showPoster(projectName = "Ocean")
+
+            onNodeWithContentDescription("Projects, Ocean").assertExists()
+        }
+
+    @Test
+    fun posterHeader_saveStatus_showsEachStatusAsABadge() =
+        runComposeUiTest {
+            var status: SaveStatus by mutableStateOf(SaveStatus.Pending)
+            showPoster(saveStatus = { status })
+            onNodeWithText("Saving", useUnmergedTree = true).assertExists()
+
+            status = SaveStatus.Failed(StoreError.QuotaExceeded)
+            waitForIdle()
+            onNodeWithText("Not saved", useUnmergedTree = true).assertExists()
+
+            status = SaveStatus.Idle
+            waitForIdle()
+            onNodeWithText("Saved", useUnmergedTree = true).assertExists()
+        }
+
+    @Test
     fun posterHeader_collapse_asksForTheRail() =
         runComposeUiTest {
             showPoster()
@@ -286,7 +354,39 @@ class PosterPanelTest {
         }
 
     @Test
-    fun infoButton_seed_opensItsExplanationAndDocsLink() =
+    fun posterRail_everythingLocked_shuffleIsOffAndItsTooltipSaysWhy() =
+        runComposeUiTest {
+            // The headless tooltip, which opens on hover alone.
+            val locked = Preferences(styleLock = true, seedLock = true)
+            showPoster(preferences = locked, rail = true, library = Library.Custom)
+
+            onNodeWithContentDescription("Shuffle").assertIsNotEnabled()
+            onNodeWithContentDescription("Shuffle").performMouseInput { enter(center) }
+            waitForIdle()
+
+            onNodeWithText(ALL_LOCKED, substring = true).assertExists()
+        }
+
+    @Test
+    fun posterSheet_uprightPhone_peekShowsTheSeedRowAndShuffle() =
+        runDesktopComposeUiTest(width = PEEK_PHONE_SHORT, height = PEEK_PHONE_LONG) {
+            showPoster(coarsePointer = true, shell = true)
+
+            assertPeekShows(UprightPeek)
+            assertInPeek(hasText("Pick"), UprightPeek)
+            assertInPeek(hasText("Image"), UprightPeek)
+        }
+
+    @Test
+    fun posterSheet_phoneOnItsSide_peekShowsTheSeedRowAndShuffle() =
+        runDesktopComposeUiTest(width = PEEK_PHONE_LONG, height = PEEK_PHONE_SHORT) {
+            showPoster(coarsePointer = true, shell = true)
+
+            assertPeekShows(SidewaysPeek)
+        }
+
+    @Test
+    fun infoButton_seed_opensItsExplanationWithoutADocsLink() =
         runComposeUiTest {
             showPoster()
             onNodeWithText("The one color every palette grows from", substring = true).assertDoesNotExist()
@@ -295,18 +395,23 @@ class PosterPanelTest {
             waitForIdle()
 
             onNodeWithText("The one color every palette grows from", substring = true).assertExists()
-            onNodeWithText("Read more in the docs").assertExists()
+            onNodeWithText("Read more in the docs").assertDoesNotExist()
         }
 
     /**
-     * The poster on its surface, the way the shell draws it. Edits land on the document straight
-     * away, as the workspace would, so a commit that matches the seed never shows up twice.
+     * The poster on its surface, the way the shell draws it, or inside the shell itself with
+     * [shell], so a phone gets the sheet at its peek. Edits land on the document straight away, as
+     * the workspace would, so a commit that matches the seed never shows up twice.
      */
     private fun ComposeUiTest.showPoster(
         document: () -> ThemeDocument? = { null },
         preferences: Preferences = Preferences(),
         projectName: String = "",
+        saveStatus: () -> SaveStatus = { SaveStatus.Idle },
         rail: Boolean = false,
+        library: Library = Library.Material3,
+        coarsePointer: Boolean = false,
+        shell: Boolean = false,
     ) {
         val resolver = ThemeResolver()
         setContent {
@@ -318,25 +423,58 @@ class PosterPanelTest {
                 if (action is WorkspaceAction.Edit) edited = action.change.apply(edited)
             }
             val result = remember(shown) { resolver.resolve(shown) }
+            val state = workspaceState(shown, preferences, projectName, saveStatus())
             BuilderTheme(
-                skin = Skin(library = Library.Material3, expressive = false),
+                skin = Skin(library = library, expressive = false),
                 result = result,
                 isDark = false,
                 reducedMotion = true,
             ) {
-                ProvideBuilderLayout(modifier = Modifier.fillMaxSize()) {
+                ProvideBuilderLayout(coarsePointer = coarsePointer, modifier = Modifier.fillMaxSize()) {
                     CompositionLocalProvider(LocalThemeResult provides result) {
-                        PosterSurface(result.poster) {
-                            PosterPanel(
-                                state = workspaceState(shown, preferences, projectName),
-                                rail = rail,
-                                dispatcher = dispatcher,
+                        if (shell) {
+                            WorkspaceShell(
+                                posterColors = result.poster,
+                                posterCollapsed = false,
+                                poster = { asRail -> PosterPanel(state, asRail, dispatcher) },
+                                topBar = {},
+                                canvas = {},
+                                dock = {},
                             )
+                        } else {
+                            PosterSurface(result.poster) {
+                                PosterPanel(state = state, rail = rail, dispatcher = dispatcher)
+                            }
                         }
                     }
                 }
             }
         }
+    }
+
+    /** The seed row, the seed's hex and name, and Shuffle all sit inside the sheet's [peek]. */
+    private fun ComposeUiTest.assertPeekShows(peek: Dp) {
+        assertInPeek(hasText(Seed.toHex()), peek)
+        assertInPeek(hasText(ColorNames.nameOf(Seed)), peek)
+        assertInPeek(hasContentDescription("Shuffle"), peek)
+    }
+
+    /**
+     * Some node [matcher] finds sits wholly inside the bottom [peek] of the window. The hero lower
+     * down the sheet repeats the hex and the name, so only one of them has to. Bounds in the root
+     * are clipped to what shows, so a node cut off by the window edge comes up shorter than it is.
+     */
+    private fun ComposeUiTest.assertInPeek(
+        matcher: SemanticsMatcher,
+        peek: Dp,
+    ) {
+        val bottom = onRoot().fetchSemanticsNode().boundsInRoot.bottom
+        val top = bottom - with(density) { peek.toPx() }
+        val inPeek = onAllNodes(matcher, useUnmergedTree = true).fetchSemanticsNodes().filter { node ->
+            val shown = node.boundsInRoot
+            shown.top >= top && shown.bottom <= bottom && shown.height >= node.size.height - 1f
+        }
+        inPeek.shouldNotBeEmpty()
     }
 
     private fun ComposeUiTest.seedField() = onNode(hasSetTextAction())
@@ -351,6 +489,7 @@ class PosterPanelTest {
         document: ThemeDocument,
         preferences: Preferences,
         projectName: String,
+        saveStatus: SaveStatus,
     ): WorkspaceModel.State =
         WorkspaceModel.State(
             document = document,
@@ -359,5 +498,6 @@ class PosterPanelTest {
             view = ProjectViewState(),
             preferences = preferences,
             projectName = projectName,
+            saveStatus = saveStatus,
         )
 }

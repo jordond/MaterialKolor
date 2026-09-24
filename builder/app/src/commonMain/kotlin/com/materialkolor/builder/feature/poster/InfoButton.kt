@@ -10,13 +10,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.glossary_accents
 import com.materialkolor.builder.generated.resources.glossary_accents_question
 import com.materialkolor.builder.generated.resources.glossary_contrast
 import com.materialkolor.builder.generated.resources.glossary_contrast_question
-import com.materialkolor.builder.generated.resources.glossary_docs
 import com.materialkolor.builder.generated.resources.glossary_key_colors
 import com.materialkolor.builder.generated.resources.glossary_key_colors_question
 import com.materialkolor.builder.generated.resources.glossary_pins
@@ -29,39 +27,29 @@ import com.materialkolor.builder.generated.resources.glossary_style
 import com.materialkolor.builder.generated.resources.glossary_style_question
 import com.materialkolor.builder.generated.resources.glossary_targets
 import com.materialkolor.builder.generated.resources.glossary_targets_question
-import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
-import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** Where the builder's docs live. Each topic has a page of its own under it. */
-private const val DOCS_BUILDER_URL = "https://docs.materialkolor.com/builder"
-
 /**
  * The poster sections an info button explains (F-36).
  *
- * @property[slug] The topic's page under the builder docs.
+ * The docs have no builder pages yet, so a topic carries no link. Once the help pages exist each
+ * one links under the top bar's `DOCS_URL`, the one docs address the app keeps.
  */
-internal enum class InfoTopic(
-    val slug: String,
-) {
-    Seed("seed"),
-    Style("style"),
-    Spec("spec"),
-    Contrast("contrast"),
-    KeyColors("key-colors"),
-    Pins("pins"),
-    Accents("accents"),
-    Targets("targets"),
+internal enum class InfoTopic {
+    Seed,
+    Style,
+    Spec,
+    Contrast,
+    KeyColors,
+    Pins,
+    Accents,
+    Targets,
     ;
-
-    /** The docs page that says more about this topic. */
-    val docsUrl: String
-        get() = "$DOCS_BUILDER_URL/$slug"
 
     /** What the info button asks, read out and shown as its tooltip. */
     val question: StringResource
@@ -92,8 +80,7 @@ internal enum class InfoTopic(
 
 /**
  * A poster section's small label with its info button, and the explanation under it while it is
- * open. The explanation sits in the column rather than a popup, so it scrolls with the poster and
- * its docs link is one more stop for Tab.
+ * open. The explanation sits in the column rather than a popup, so it scrolls with the poster.
  *
  * @param[label] The section's name, as in "Seed".
  * @param[topic] What the info button explains.
@@ -142,21 +129,11 @@ internal fun InfoButton(
     )
 }
 
-/** [topic]'s short explanation and a link to its docs page. */
+/** [topic]'s short explanation. */
 @Composable
 internal fun InfoNote(
     topic: InfoTopic,
     modifier: Modifier = Modifier,
 ) {
-    val uriHandler = LocalUriHandler.current
-    val spacing = LocalBuilderTokens.current.spacing
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
-        BuilderText(text = stringResource(topic.explanation))
-        BuilderButton(
-            onClick = { uriHandler.openUri(topic.docsUrl) },
-            label = stringResource(Res.string.glossary_docs),
-            emphasis = Emphasis.Subtle,
-            icon = IconId.ExternalLink,
-        )
-    }
+    BuilderText(text = stringResource(topic.explanation), modifier = modifier)
 }

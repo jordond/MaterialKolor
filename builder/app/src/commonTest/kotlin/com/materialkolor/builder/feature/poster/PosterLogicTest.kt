@@ -7,6 +7,7 @@ import com.materialkolor.builder.domain.color.InvalidReason
 import com.materialkolor.builder.domain.color.ParseNote
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.persist.Preferences
+import com.materialkolor.builder.engine.color.HctReadout
 import com.materialkolor.builder.feature.workspace.ShuffleLock
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.poster_save_failed
@@ -19,6 +20,8 @@ import com.materialkolor.builder.generated.resources.poster_source_picked
 import com.materialkolor.builder.generated.resources.poster_source_preset
 import com.materialkolor.builder.generated.resources.poster_source_shuffled
 import com.materialkolor.builder.generated.resources.poster_source_typed
+import com.materialkolor.builder.kit.control.BadgeStatus
+import com.materialkolor.builder.kit.icon.IconId
 import io.kotest.matchers.collections.shouldBeUnique
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -31,18 +34,18 @@ class PosterLogicTest {
     }
 
     @Test
-    fun hctReadout_valuesBetweenWholeNumbers_roundToTheNearest() {
-        HctReadout.of(hue = 281.4, chroma = 47.6, tone = 40.5) shouldBe HctReadout(281, 48, 41)
+    fun rounded_valuesBetweenWholeNumbers_roundToTheNearest() {
+        HctReadout(hue = 281.4, chroma = 47.6, tone = 40.5).rounded() shouldBe RoundedHct(281, 48, 41)
     }
 
     @Test
-    fun hctReadout_aHueJustUnderAFullTurn_readsZero() {
-        HctReadout.of(hue = 359.6, chroma = 10.0, tone = 50.0) shouldBe HctReadout(0, 10, 50)
+    fun rounded_aHueJustUnderAFullTurn_readsZero() {
+        HctReadout(hue = 359.6, chroma = 10.0, tone = 50.0).rounded() shouldBe RoundedHct(0, 10, 50)
     }
 
     @Test
-    fun hctReadout_white_readsToneOneHundred() {
-        HctReadout.of(Argb(0xFFFFFF)).tone shouldBe 100
+    fun rounded_white_readsToneOneHundred() {
+        HctReadout.of(Argb(0xFFFFFF)).rounded().tone shouldBe 100
     }
 
     @Test
@@ -107,19 +110,18 @@ class PosterLogicTest {
     }
 
     @Test
-    fun saveStatusLabel_eachStatus_saysWhetherTheProjectIsSaved() {
-        saveStatusLabel(SaveStatus.Idle) shouldBe Res.string.poster_saved
-        saveStatusLabel(SaveStatus.Pending) shouldBe Res.string.poster_saving
-        saveStatusLabel(SaveStatus.Failed(StoreError.QuotaExceeded)) shouldBe Res.string.poster_save_failed
+    fun saveBadgeOf_eachStatus_saysWhetherTheProjectIsSavedInWordsAndAGlyph() {
+        saveBadgeOf(SaveStatus.Idle) shouldBe SaveBadge(Res.string.poster_saved, BadgeStatus.Success, IconId.Check)
+        saveBadgeOf(SaveStatus.Pending) shouldBe SaveBadge(Res.string.poster_saving, BadgeStatus.Neutral, icon = null)
+        saveBadgeOf(SaveStatus.Failed(StoreError.QuotaExceeded)) shouldBe
+            SaveBadge(Res.string.poster_save_failed, BadgeStatus.Danger, IconId.Warning)
     }
 
     @Test
-    fun infoTopic_everyTopic_hasItsOwnDocsPageAndWords() {
+    fun infoTopic_everyTopic_hasItsOwnWords() {
         val topics = InfoTopic.entries
 
-        topics.map { topic -> topic.docsUrl }.shouldBeUnique()
         topics.map { topic -> topic.question }.shouldBeUnique()
         topics.map { topic -> topic.explanation }.shouldBeUnique()
-        topics.forEach { topic -> topic.docsUrl.startsWith("https://docs.materialkolor.com/") shouldBe true }
     }
 }

@@ -17,6 +17,7 @@ import com.materialkolor.builder.domain.color.ParseNote
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.SeedSource
+import com.materialkolor.builder.engine.color.HctReadout
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.poster_copied_hex
@@ -50,7 +51,6 @@ import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
-import com.materialkolor.hct.Hct
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -72,7 +72,7 @@ internal fun SeedHero(
     val seed = context.document.seed
     val spacing = LocalBuilderTokens.current.spacing
     val messages = rememberHexMessages()
-    val hct = remember(seed) { HctReadout.of(seed) }
+    val hct = remember(seed) { HctReadout.of(seed).rounded() }
     val hexLabel = stringResource(Res.string.poster_copied_hex)
     val kotlinLabel = stringResource(Res.string.poster_copied_kotlin)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
@@ -129,30 +129,24 @@ internal fun SeedHero(
 internal fun kotlinLiteralOf(argb: Argb): String = "Color(0xFF${argb.toHex().removePrefix("#")})"
 
 /**
- * A seed's hue, chroma and tone, each rounded for the readout. A hue that rounds up to a full turn
- * reads as 0.
+ * A seed's hue, chroma and tone as the readout shows them, each rounded to a whole number.
+ *
+ * @property[hue] The hue in whole degrees, 0 to 359.
+ * @property[chroma] The chroma, rounded.
+ * @property[tone] The tone, rounded.
  */
 @Immutable
-internal data class HctReadout(
+internal data class RoundedHct(
     val hue: Int,
     val chroma: Int,
     val tone: Int,
-) {
-    companion object {
-        fun of(argb: Argb): HctReadout {
-            val hct = Hct.fromInt(argb.value)
-            return of(hct.hue, hct.chroma, hct.tone)
-        }
+)
 
-        fun of(
-            hue: Double,
-            chroma: Double,
-            tone: Double,
-        ): HctReadout = HctReadout(hue.roundToInt() % FULL_TURN, chroma.roundToInt(), tone.roundToInt())
+/** This readout rounded for the screen. A hue that rounds up to a full turn reads as 0. */
+internal fun HctReadout.rounded(): RoundedHct =
+    RoundedHct(hue.roundToInt() % FULL_TURN, chroma.roundToInt(), tone.roundToInt())
 
-        private const val FULL_TURN = 360
-    }
-}
+private const val FULL_TURN = 360
 
 /**
  * The words for where a seed came from, one string and the argument it takes, if any.

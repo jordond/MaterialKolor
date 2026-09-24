@@ -19,7 +19,4 @@
     <string name="glossary_pins">A pin holds one role at a color of your own, whatever the seed does.</string>
     <string name="glossary_accents">Color families beyond primary, secondary and tertiary, each with its own tones and roles.</string>
     <string name="glossary_targets">What the export is written for. Some options only exist for some targets, so they show up when they apply.</string>
-
-    <!-- The link under each explanation. -->
-    <string name="glossary_docs">Read more in the docs</string>
 </resources>
