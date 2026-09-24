@@ -236,7 +236,8 @@ class SettingsAppTest {
                         onAllNodes(isFocused(), useUnmergedTree = true).fetchSemanticsNodes().single()
                     }
 
-                    stops.filter { node -> NavigationShield.matches(node) }.map { node -> "${node.config}" }.shouldBeEmpty()
+                    val shields = stops.filter { node -> NavigationShield.matches(node) }
+                    shields.map { node -> "${node.config}" }.shouldBeEmpty()
                     stops
                         .mapNotNull { node -> node.config.getOrNull(SemanticsProperties.ContentDescription) }
                         .flatten() shouldContainAll FluentPage.entries.map { page -> page.label }
