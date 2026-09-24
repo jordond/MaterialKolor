@@ -44,6 +44,9 @@ private const val DRAG_MOVES = 20
 
 // b-509b
 
+/** A Medium window whose top bar has moved History into More. */
+private const val TIGHT_WIDTH = 600
+
 /** The frames a jump across a library switch takes to land in every part of the page, with room to spare. */
 private const val SWITCH_FRAMES = 4
 
@@ -109,28 +112,14 @@ class TimelineTest {
     @Test
     fun timeline_popupJumpOntoFluent_staysOpenWithFocusOnTheCurrentStep() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            // The desktop's own overlays, so the list opens in a popup window over the page.
-            with(harness) { show() }
-            runOnUiThread { harness.workspace.edit(LibraryChoice.Fluent.change, EditPhase.Discrete) }
-            waitUntil { harness.workspace.state.value.document.library == Library.Fluent }
-            waitForIdle()
-            runOnUiThread { harness.workspace.undo() }
-            waitUntil { harness.workspace.state.value.document.library == Library.Material3 }
-            waitForIdle()
+            popupJumpOntoFluent(historyInBar = true)
+        }
 
-            keys { pressKey(Key.H) }
-            // The page's root and the list's own window.
-            onAllNodes(isRoot()).fetchSemanticsNodes().size shouldBe 2
-            focusedRow().assertIsSelected().assert(hasText("Start"))
-            // A popup window hears keys through its own root, so they go to the row holding focus.
-            focusedRow().performKeyInput { pressKey(Key.DirectionUp) }
-            waitForIdle()
-            focusedRow().assert(hasText("Library change to Fluent")).performKeyInput { pressKey(Key.Enter) }
-            waitUntil { harness.workspace.state.value.document.library == Library.Fluent }
-            waitForIdle()
-
-            harness.workspace.state.value.panel shouldBe Panel.History
-            focusedRow().assertIsSelected().assert(hasText("Library change to Fluent"))
+    // b-509b
+    @Test
+    fun timeline_popupFromMoreJumpOntoFluent_staysOpenWithFocusOnTheCurrentStep() =
+        runDesktopComposeUiTest(width = TIGHT_WIDTH, height = HEIGHT) {
+            popupJumpOntoFluent(historyInBar = false)
         }
 
     // b-509b
@@ -183,6 +172,38 @@ class TimelineTest {
     }
 
     // b-509b
+
+    /**
+     * Opens the list in a popup window, the desktop's own overlays, and jumps from Start onto a
+     * Fluent step, which moves the top bar into Fluent's while the window is up. The list hangs from
+     * the History button when [historyInBar] holds, and from More otherwise.
+     */
+    private fun ComposeUiTest.popupJumpOntoFluent(historyInBar: Boolean) {
+        with(harness) { show() }
+        onAllNodes(hasContentDescription("History") and hasClickAction() and InWorkspace)
+            .fetchSemanticsNodes()
+            .size shouldBe if (historyInBar) 1 else 0
+        runOnUiThread { harness.workspace.edit(LibraryChoice.Fluent.change, EditPhase.Discrete) }
+        waitUntil { harness.workspace.state.value.document.library == Library.Fluent }
+        waitForIdle()
+        runOnUiThread { harness.workspace.undo() }
+        waitUntil { harness.workspace.state.value.document.library == Library.Material3 }
+        waitForIdle()
+
+        keys { pressKey(Key.H) }
+        // The page's root and the list's own window.
+        onAllNodes(isRoot()).fetchSemanticsNodes().size shouldBe 2
+        focusedRow().assertIsSelected().assert(hasText("Start"))
+        // A popup window hears keys through its own root, so they go to the row holding focus.
+        focusedRow().performKeyInput { pressKey(Key.DirectionUp) }
+        waitForIdle()
+        focusedRow().assert(hasText("Library change to Fluent")).performKeyInput { pressKey(Key.Enter) }
+        waitUntil { harness.workspace.state.value.document.library == Library.Fluent }
+        waitForIdle()
+
+        harness.workspace.state.value.panel shouldBe Panel.History
+        focusedRow().assertIsSelected().assert(hasText("Library change to Fluent"))
+    }
 
     /**
      * Opens the list with H, jumps to the row on the other library, lets [frames] frames of the
