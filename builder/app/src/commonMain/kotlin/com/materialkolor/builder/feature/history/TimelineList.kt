@@ -72,7 +72,8 @@ import org.jetbrains.compose.resources.stringResource
  * The page never hears a key pressed in here, so the list takes Undo and Redo itself and moves
  * focus to the row the history lands on, and H closes it. A jump across a library switch moves the
  * workspace into the new skin and drops focus, and nothing on the page claims it while a panel is
- * open, so the list hands focus back to the current row when it held focus before the jump.
+ * open, so the list hands focus back to the current row, in the frame its rows move, when it held
+ * focus before the jump.
  *
  * Swatches read a light scheme from the resolver's scheme cache and never resolve a whole theme,
  * so the eight themes kept for undo stay put. Each paints a skeleton first, and a long history
@@ -291,9 +292,12 @@ private class ListFocus {
 
 /**
  * Puts focus on [currentRow] after Undo or Redo pressed in the list moved [cursor], and after a
- * library switch dropped it while the list held it. The switch lands with the skin, a frame or two
- * after the jump, so this keys on the skin's library and waits [SETTLE_FRAMES] for the rows to be
- * back in the new skin, the way the page's own holder waits.
+ * library switch dropped it while the list held it.
+ *
+ * The switch lands with the skin, a frame or two after the jump, and redraws every row in the new
+ * skin. The row that held focus goes with its old skin and leaves focus nowhere, where no key
+ * reaches the list, not even Esc. So focus goes back in the same composition that swaps the rows,
+ * before the frame ends, and a key pressed at any point of the switch still lands in the list.
  */
 @Composable
 private fun FocusFollowsTheHistory(
@@ -307,14 +311,13 @@ private fun FocusFollowsTheHistory(
         // A row this list does not show yet has no node to take focus, and that is fine.
         runCatching { currentRow.requestFocus() }
     }
+    // b-509b
     val library = LocalSkin.current.library
     val lastLibrary = remember { LibraryHolder(library) }
-    LaunchedEffect(library) {
-        if (lastLibrary.library == library) return@LaunchedEffect
+    SideEffect {
+        if (lastLibrary.library == library) return@SideEffect
         lastLibrary.library = library
-        if (!focus.heldAtLastAction) return@LaunchedEffect
-        repeat(SETTLE_FRAMES) { withFrameNanos { } }
-        if (!focus.inList) runCatching { currentRow.requestFocus() }
+        if (focus.heldAtLastAction && !focus.inList) runCatching { currentRow.requestFocus() }
     }
 }
 
@@ -348,6 +351,3 @@ private suspend fun awaitHoldStill() {
 
 /** How long a swatch's step holds still before the swatch reads it again, in frame time. */
 private const val HOLD_STILL_NANOS: Long = 150_000_000L
-
-/** The frames a skin switch takes to land before focus goes back, as the page's holder waits. */
-private const val SETTLE_FRAMES = 2

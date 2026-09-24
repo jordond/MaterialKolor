@@ -31,6 +31,7 @@ import com.materialkolor.builder.feature.command.InWorkspace
 import com.materialkolor.builder.feature.command.keys
 import com.materialkolor.builder.feature.topbar.LibraryChoice
 import com.materialkolor.builder.feature.workspace.Panel
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
@@ -40,6 +41,11 @@ private const val HEIGHT = 800
 
 /** How many times the drag under the open list moves the seed, one move every other frame. */
 private const val DRAG_MOVES = 20
+
+// b-509b
+
+/** The frames a jump across a library switch takes to land in every part of the page, with room to spare. */
+private const val SWITCH_FRAMES = 4
 
 // b-509
 
@@ -127,6 +133,22 @@ class TimelineTest {
             focusedRow().assertIsSelected().assert(hasText("Library change to Fluent"))
         }
 
+    // b-509b
+    @Test
+    fun timeline_escOnAnyFrameOfAJumpAcrossALibrarySwitch_closesTheList() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            runOnUiThread { harness.workspace.edit(LibraryChoice.Unstyled.change, EditPhase.Discrete) }
+            waitUntil { harness.workspace.state.value.document.library == Library.Unstyled }
+            waitForIdle()
+
+            // A busy page can take the key on any frame of the switch, so Esc goes in after each
+            // count of frames in turn, the list hopping between Start and the Unstyled step.
+            val lost = (0..SWITCH_FRAMES).filterNot { frames -> escClosesTheListAfterAJump(frames) }
+
+            lost.shouldBeEmpty()
+        }
+
     // b-509
     @Test
     fun timeline_dragRunningWhileOpen_readsTheNewestSwatchOnceItHoldsStill() =
@@ -158,6 +180,34 @@ class TimelineTest {
 
     private fun ComposeUiTest.boot() {
         with(harness) { show(inTree = true) }
+    }
+
+    // b-509b
+
+    /**
+     * Opens the list with H, jumps to the row on the other library, lets [frames] frames of the
+     * switch go by and presses Esc. Says whether that closed the list, and closes it when it did not,
+     * so the next round starts from a closed list.
+     */
+    private fun ComposeUiTest.escClosesTheListAfterAJump(frames: Int): Boolean {
+        val library = harness.workspace.state.value.document.library
+        keys { pressKey(Key.H) }
+        // The list opens on the row the theme is at, and Start sits under the Unstyled step.
+        keys { pressKey(if (library == Library.Unstyled) Key.DirectionDown else Key.DirectionUp) }
+        mainClock.autoAdvance = false
+        keys { pressKey(Key.Enter) }
+        repeat(frames) { mainClock.advanceTimeByFrame() }
+        keys { pressKey(Key.Escape) }
+        mainClock.autoAdvance = true
+        waitForIdle()
+
+        harness.workspace.state.value.document.library shouldNotBe library
+        val closed = harness.workspace.state.value.panel == null
+        if (!closed) {
+            runOnUiThread { harness.workspace.closePanel() }
+            waitForIdle()
+        }
+        return closed
     }
 
     /**
