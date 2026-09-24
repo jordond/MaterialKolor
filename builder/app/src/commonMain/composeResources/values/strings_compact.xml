@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The mark at the start of a phone's top bar, the wordmark cut down to fit beside the project name. -->
+    <string name="compact_mark">MK</string>
+    <!-- What the mark reads out as. -->
+    <string name="compact_mark_name">MaterialKolor</string>
+</resources>

@@ -13,6 +13,7 @@ import com.materialkolor.builder.feature.poster.shufflesNothing
 import com.materialkolor.builder.feature.poster.styleName
 import com.materialkolor.builder.feature.poster.styleTooltip
 import com.materialkolor.builder.feature.topbar.LibraryChoice
+import com.materialkolor.builder.feature.topbar.TopBarControl
 import com.materialkolor.builder.feature.topbar.redoText
 import com.materialkolor.builder.feature.topbar.undoText
 import com.materialkolor.builder.feature.workspace.Panel
@@ -76,7 +77,9 @@ internal fun generalCommands(
 ) {
     val more = stringResource(Res.string.topbar_more)
     val palette = stringResource(Res.string.topbar_commands)
-    val paletteSite = if (list.windowClass == WindowClass.Compact) {
+    // b-406
+    val inOverflow = list.windowClass == WindowClass.Compact || TopBarControl.Commands in list.overflowed
+    val paletteSite = if (inOverflow) {
         ControlSite.MenuItem(Region.TopBar, more, palette)
     } else {
         ControlSite.Direct(Region.TopBar, palette)
@@ -124,7 +127,7 @@ internal fun historyCommands(
         id = "undo",
         category = CommandCategory.History,
         label = undo,
-        site = topBarSite(list, undo),
+        site = topBarSite(list, undo, TopBarControl.Undo),
         shortcut = Shortcut.Undo,
         disabledBecause = nothingToUndo.takeUnless { state.history.canUndo },
     ) { dispatcher.dispatch(WorkspaceAction.Undo) }
@@ -132,19 +135,20 @@ internal fun historyCommands(
         id = "redo",
         category = CommandCategory.History,
         label = redo,
-        site = topBarSite(list, redo),
+        site = topBarSite(list, redo, TopBarControl.Redo),
         shortcut = Shortcut.Redo,
         disabledBecause = nothingToRedo.takeUnless { state.history.canRedo },
     ) { dispatcher.dispatch(WorkspaceAction.Redo) }
 }
 
-/** A top bar button that phones move into the overflow menu. */
+/** A top bar button that phones, and a Medium bar short of room, move into the overflow menu. */
 @Composable
 private fun topBarSite(
     list: CommandList,
     name: String,
+    control: TopBarControl, // b-406
 ): ControlSite =
-    if (list.windowClass == WindowClass.Compact) {
+    if (list.windowClass == WindowClass.Compact || control in list.overflowed) {
         ControlSite.MenuItem(Region.TopBar, stringResource(Res.string.topbar_more), name)
     } else {
         ControlSite.Direct(Region.TopBar, name)

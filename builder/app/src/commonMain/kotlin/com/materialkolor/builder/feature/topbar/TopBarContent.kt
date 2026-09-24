@@ -1,11 +1,15 @@
 package com.materialkolor.builder.feature.topbar
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.platform.testTag
@@ -51,8 +55,10 @@ import org.jetbrains.compose.resources.stringResource
  *
  * On a wide window it holds the switcher, the command palette, undo, redo, Share, Export code and
  * the overflow menu. The actions always get their full width, and the switcher takes what is left,
- * segmented where the window is wide and the row fits, a dropdown otherwise. Phones move the command
- * palette, undo and redo into the overflow.
+ * segmented where the window is wide and the row fits, a dropdown otherwise. A Medium window keeps
+ * the dropdown's name whole, moving the command palette, then redo, then undo into the overflow
+ * until it fits. Phones show the mark and the project's name with Share, Export and the overflow,
+ * which holds the command palette, undo and redo, and the libraries in a row of chips under the bar.
  *
  * A library switch goes through the reveal from the switcher as one undo entry. What has to outlive
  * a skin switch, the open menu and which control has focus, is held here, outside the skin's own
@@ -68,55 +74,28 @@ internal fun TopBarContent(
     focus: TopBarFocus = rememberTopBarFocus(),
 ) {
     var menuOpen by remember { mutableStateOf(false) }
-    val compact = LocalLayout.current.windowClass == WindowClass.Compact
-    val items = overflowItems(state, dispatcher, compact, LocalUriHandler.current)
-
-    TopBarRegion(modifier.testTag(TOP_BAR_TAG)) {
-        // b-231
-        // The actions take their full width first, since a row measures its weighted child last, and
-        // the switcher gets what is left, so More options is never squeezed.
-        FittedLibrarySwitcher(
-            selected = LibraryChoice.of(state.document),
-            modifier = Modifier.weight(1f),
-            switcherModifier = Modifier
-                .testTag(LIBRARY_SWITCHER_TAG)
-                .topBarFocus(focus, TopBarControl.Library)
-                .switcherPulse(state, dispatcher), // b-314
-            onSwitch = { choice, origin ->
-                dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin))
-            },
-            onRefit = { focus.restoreAfterRefit(TopBarControl.Library) },
-        )
-        if (!compact) {
-            TopBarIconButton(
-                control = TopBarControl.Commands,
-                focus = focus,
-                icon = IconId.Command,
-                description = stringResource(Res.string.topbar_commands),
-                // b-315
-                tooltip = stringResource(
-                    Res.string.topbar_commands_tooltip,
-                    Shortcut.Palette.text(LocalAppleKeys.current),
-                ),
-                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Palette)) },
-            )
-            TopBarIconButton(
-                control = TopBarControl.Undo,
-                focus = focus,
-                icon = IconId.Undo,
-                description = undoText(state.history, state.document),
-                enabled = state.history.canUndo,
-                onClick = { dispatcher.dispatch(WorkspaceAction.Undo) },
-            )
-            TopBarIconButton(
-                control = TopBarControl.Redo,
-                focus = focus,
-                icon = IconId.Redo,
-                description = redoText(state.history, state.document),
-                enabled = state.history.canRedo,
-                onClick = { dispatcher.dispatch(WorkspaceAction.Redo) },
-            )
-        }
+    val windowClass = LocalLayout.current.windowClass
+    // b-406
+    val fit = remember { MediumBarFit() }
+    val overflowed = when (windowClass) {
+        WindowClass.Compact -> MediumOverflowOrder.toSet()
+        WindowClass.Medium -> fit.overflowed
+        WindowClass.Expanded -> emptySet()
+    }
+    val report = LocalSwitcherForm.current
+    if (report != null) SideEffect { report.overflowed = overflowed }
+    // The switcher changes form with the window class, so focus it held follows it to the new one.
+    LaunchedEffect(windowClass) { focus.restoreAfterRefit(TopBarControl.Library) }
+    val items = overflowItems(state, dispatcher, overflowed, LocalUriHandler.current)
+    val selected = LibraryChoice.of(state.document)
+    val switcherModifier = Modifier
+        .testTag(LIBRARY_SWITCHER_TAG)
+        .topBarFocus(focus, TopBarControl.Library)
+        .switcherPulse(state, dispatcher) // b-314
+    val onSwitch = { choice: LibraryChoice, origin: Offset ->
+        dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin))
+    }
+    val actions: @Composable () -> Unit = {
         TopBarIconButton(
             control = TopBarControl.Share,
             focus = focus,
@@ -143,6 +122,72 @@ internal fun TopBarContent(
                 description = stringResource(Res.string.topbar_more),
                 onClick = { menuOpen = true },
             )
+        }
+    }
+
+    if (windowClass == WindowClass.Compact) {
+        // b-406
+        Column(modifier) {
+            CompactTopBar(state.projectName, Modifier.testTag(TOP_BAR_TAG)) { actions() }
+            LibraryChipRow(selected = selected, onSwitch = onSwitch, switcherModifier = switcherModifier)
+        }
+    } else {
+        TopBarRegion(modifier.testTag(TOP_BAR_TAG)) {
+            // b-231
+            // The actions take their full width first, since a row measures its weighted child last, and
+            // the switcher gets what is left, so More options is never squeezed.
+            if (windowClass == WindowClass.Medium) {
+                LibraryDropdown(
+                    selected = selected,
+                    onSwitch = onSwitch,
+                    fit = fit,
+                    modifier = Modifier.weight(1f),
+                    switcherModifier = switcherModifier,
+                )
+            } else {
+                FittedLibrarySwitcher(
+                    selected = selected,
+                    modifier = Modifier.weight(1f),
+                    switcherModifier = switcherModifier,
+                    onSwitch = onSwitch,
+                    onRefit = { focus.restoreAfterRefit(TopBarControl.Library) },
+                )
+            }
+            if (TopBarControl.Commands !in overflowed) {
+                TopBarIconButton(
+                    control = TopBarControl.Commands,
+                    focus = focus,
+                    icon = IconId.Command,
+                    description = stringResource(Res.string.topbar_commands),
+                    // b-315
+                    tooltip = stringResource(
+                        Res.string.topbar_commands_tooltip,
+                        Shortcut.Palette.text(LocalAppleKeys.current),
+                    ),
+                    onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Palette)) },
+                )
+            }
+            if (TopBarControl.Undo !in overflowed) {
+                TopBarIconButton(
+                    control = TopBarControl.Undo,
+                    focus = focus,
+                    icon = IconId.Undo,
+                    description = undoText(state.history, state.document),
+                    enabled = state.history.canUndo,
+                    onClick = { dispatcher.dispatch(WorkspaceAction.Undo) },
+                )
+            }
+            if (TopBarControl.Redo !in overflowed) {
+                TopBarIconButton(
+                    control = TopBarControl.Redo,
+                    focus = focus,
+                    icon = IconId.Redo,
+                    description = redoText(state.history, state.document),
+                    enabled = state.history.canRedo,
+                    onClick = { dispatcher.dispatch(WorkspaceAction.Redo) },
+                )
+            }
+            actions()
         }
     }
 
@@ -183,14 +228,14 @@ private fun TopBarIconButton(
 }
 
 /**
- * The overflow menu, the chrome's appearance, Help, the shortcuts, About and GitHub. On a phone the
- * command palette, undo and redo come first.
+ * The overflow menu, the chrome's appearance, Help, the shortcuts, About and GitHub. Whichever of
+ * the command palette, undo and redo the bar has moved in come first, all three on a phone.
  */
 @Composable
 private fun overflowItems(
     state: WorkspaceModel.State,
     dispatcher: Dispatcher<WorkspaceAction>,
-    compact: Boolean,
+    overflowed: Set<TopBarControl>, // b-406
     uriHandler: UriHandler,
 ): List<BuilderMenuItem> {
     val appearance = state.preferences.appearance
@@ -201,30 +246,38 @@ private fun overflowItems(
             selected = option == appearance,
         )
     }
-    val phoneItems = if (compact) {
-        listOf(
-            BuilderMenuItem(
-                label = stringResource(Res.string.topbar_commands),
-                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Palette)) },
-                icon = IconId.Command,
-            ),
-            BuilderMenuItem(
-                label = undoText(state.history, state.document),
-                onClick = { dispatcher.dispatch(WorkspaceAction.Undo) },
-                icon = IconId.Undo,
-                enabled = state.history.canUndo,
-            ),
-            BuilderMenuItem(
-                label = redoText(state.history, state.document),
-                onClick = { dispatcher.dispatch(WorkspaceAction.Redo) },
-                icon = IconId.Redo,
-                enabled = state.history.canRedo,
-            ),
-        )
-    } else {
-        emptyList()
+    val movedItems = buildList {
+        if (TopBarControl.Commands in overflowed) {
+            add(
+                BuilderMenuItem(
+                    label = stringResource(Res.string.topbar_commands),
+                    onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Palette)) },
+                    icon = IconId.Command,
+                ),
+            )
+        }
+        if (TopBarControl.Undo in overflowed) {
+            add(
+                BuilderMenuItem(
+                    label = undoText(state.history, state.document),
+                    onClick = { dispatcher.dispatch(WorkspaceAction.Undo) },
+                    icon = IconId.Undo,
+                    enabled = state.history.canUndo,
+                ),
+            )
+        }
+        if (TopBarControl.Redo in overflowed) {
+            add(
+                BuilderMenuItem(
+                    label = redoText(state.history, state.document),
+                    onClick = { dispatcher.dispatch(WorkspaceAction.Redo) },
+                    icon = IconId.Redo,
+                    enabled = state.history.canRedo,
+                ),
+            )
+        }
     }
-    return phoneItems +
+    return movedItems +
         appearanceItems +
         listOf(
             BuilderMenuItem(

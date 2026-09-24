@@ -41,6 +41,8 @@ import com.materialkolor.builder.generated.resources.command_previous_tab
 import com.materialkolor.builder.generated.resources.command_show_tab
 import com.materialkolor.builder.generated.resources.poster_collapse
 import com.materialkolor.builder.generated.resources.poster_expand
+import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.layout.PosterMode
 import com.materialkolor.builder.kit.layout.WindowClass
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
@@ -132,13 +134,18 @@ internal fun previewCommands(
         shortcut = Shortcut.Fullscreen,
         selected = state.fullscreen,
     ) { dispatcher.dispatch(WorkspaceAction.ToggleFullscreen) }
-    val collapsed = state.preferences.posterCollapsed
+    // b-406g
+    val mode = LocalLayout.current.posterMode
+    val collapsed = state.posterCollapsed(mode)
     val poster = stringResource(if (collapsed) Res.string.poster_expand else Res.string.poster_collapse)
+    // b-406
+    // The phone's sheet has no collapse button, so there only the keys and the palette ask for it.
+    val sheet = mode == PosterMode.Sheet
     list.add(
         id = "poster",
         category = CommandCategory.Preview,
         label = poster,
-        site = ControlSite.Direct(Region.Poster, poster),
+        site = if (sheet) null else ControlSite.Direct(Region.Poster, poster),
         shortcut = Shortcut.Poster,
     ) { dispatcher.dispatch(WorkspaceAction.SetPosterCollapsed(!collapsed)) }
 }

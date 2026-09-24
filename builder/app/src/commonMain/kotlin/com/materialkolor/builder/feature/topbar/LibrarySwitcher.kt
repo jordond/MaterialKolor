@@ -144,9 +144,9 @@ internal fun libraryName(choice: LibraryChoice): String =
 
 /**
  * Where the last press on the switcher landed. Plain fields, since only a pick reads them and
- * nothing draws from them.
+ * nothing draws from them. The phone's chip row keeps one too (b-406).
  */
-private class RevealOrigin {
+internal class RevealOrigin {
     var bounds: Rect = Rect.Zero
     var press: Offset? = null
 
@@ -159,7 +159,7 @@ private class RevealOrigin {
 }
 
 /** Keeps [origin] up to date. It watches presses on the way down and consumes none of them. */
-private fun Modifier.trackRevealOrigin(origin: RevealOrigin): Modifier =
+internal fun Modifier.trackRevealOrigin(origin: RevealOrigin): Modifier =
     onGloballyPositioned { coordinates -> origin.bounds = coordinates.boundsInRoot() }
         .pointerInput(origin) {
             awaitEachGesture {

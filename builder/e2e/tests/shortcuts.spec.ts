@@ -131,17 +131,35 @@ test('after a number key switches the library, Space and V work with no click', 
   await expect(visionRow).toHaveCount(0);
 
   await page.keyboard.press('3');
+  // b-406
   // The top bar's Undo names the switch once it has landed, and the page moves into the new skin then.
-  await expect(page.locator(A11Y).getByRole('button', { name: /^Undo library change/ })).toHaveCount(1, {
-    timeout: 10_000,
-  });
-  await page.waitForTimeout(SETTLE_MS);
+  // The keys reach the page again once the canvas holds focus with that label still in place.
+  await expect.poll(() => switchLanded(page), { timeout: 10_000 }).toBe(true);
   await page.keyboard.press('Space');
   await expect.poll(() => seedText(page), { timeout: 10_000 }).not.toBe(before);
   await page.keyboard.press('v');
 
   await expect(visionRow.first()).toBeAttached({ timeout: 10_000 });
 });
+
+/**
+ * Whether Undo names the library change and the canvas holds focus, and both still hold two frames
+ * later, so the new skin has settled around them.
+ */
+async function switchLanded(page: Page): Promise<boolean> {
+  const undo = page.locator(A11Y).getByRole('button', { name: /^Undo library change/ });
+  const holds = async () =>
+    (await undo.count()) === 1 &&
+    (await page.evaluate(() => {
+      const host = document.activeElement;
+      return (host?.shadowRoot?.activeElement ?? host)?.tagName;
+    })) === 'CANVAS';
+  if (!(await holds())) return false;
+  await page.evaluate(
+    () => new Promise((settled) => requestAnimationFrame(() => requestAnimationFrame(() => settled(null)))),
+  );
+  return holds();
+}
 
 /** The palette's search field, once it shows. */
 function searchField(page: Page): Locator {

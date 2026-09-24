@@ -124,15 +124,21 @@ internal fun CommandPalette(
     // command starts and finishes later, a download or the Saved toast.
     val scope = rememberCoroutineScope()
     val runner = remember(dispatcher) { PaletteRunner(dispatcher) }
-    val width = if (LocalLayout.current.windowClass == WindowClass.Expanded) ExpandedWidth else MediumWidth
     // The dialog keeps this much clear around its panel, so the panel itself comes out at the width.
     val margin = LocalBuilderTokens.current.spacing.large
+    // b-406
+    // The widths the kit's palette frame gives each window class, full width on a phone.
+    val sized = when (LocalLayout.current.windowClass) {
+        WindowClass.Compact -> modifier.fillMaxWidth()
+        WindowClass.Medium -> modifier.width(MediumWidth + margin * 2)
+        WindowClass.Expanded -> modifier.width(ExpandedWidth + margin * 2)
+    }
     val close = { dispatcher.dispatch(WorkspaceAction.ClosePanel) }
     BuilderDialog(
         visible = visible,
         onDismissRequest = close,
         title = stringResource(Res.string.palette_title),
-        modifier = modifier.width(width + margin * 2),
+        modifier = sized,
         returnFocusTo = returnFocusTo,
         actions = { BuilderButton(onClick = close, label = stringResource(Res.string.palette_close)) },
     ) {

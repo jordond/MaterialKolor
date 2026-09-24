@@ -35,6 +35,7 @@ import com.materialkolor.builder.feature.canvas.RampTarget
 import com.materialkolor.builder.feature.canvas.VisionSimulation
 import com.materialkolor.builder.feature.picker.PickerTarget
 import com.materialkolor.builder.feature.topbar.raisesExpressiveSuggestion
+import com.materialkolor.builder.kit.layout.PosterMode
 import dev.stateholder.extensions.viewmodel.StateViewModel
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -239,6 +240,23 @@ internal class WorkspaceModel(
         updatePreferences { prefs -> prefs.copy(posterCollapsed = collapsed) }
     }
 
+    // b-406g
+
+    /**
+     * Collapse or open the poster shown in [mode]. On the narrow Medium rail the poster opens over the
+     * canvas for this session only, and the stored choice stays with the docked poster.
+     */
+    fun setPosterCollapsed(
+        collapsed: Boolean,
+        mode: PosterMode,
+    ) {
+        if (mode == PosterMode.Rail72) {
+            updateState { state -> state.copy(posterOverCanvas = !collapsed) }
+        } else {
+            setPosterCollapsed(collapsed)
+        }
+    }
+
     fun setLock(
         lock: ShuffleLock,
         on: Boolean,
@@ -321,6 +339,8 @@ internal class WorkspaceModel(
      * a hint stays closed for the session when the preferences write fails.
      * @property[visionMenuOpen] Whether the dock's Vision menu is open, so V can open it too.
      * @property[grayscaleHeld] Whether B is held, which shows the canvas in grayscale over [vision].
+     * @property[posterOverCanvas] Whether the poster is open over the canvas from the narrow Medium
+     * rail. Every session starts with it shut and nothing saves it.
      */
     @Immutable
     data class State(
@@ -344,10 +364,21 @@ internal class WorkspaceModel(
         // b-315c
         val visionMenuOpen: Boolean = false,
         val grayscaleHeld: Boolean = false,
+        val posterOverCanvas: Boolean = false, // b-406g
     ) {
         /** What [document] exports to. */
         val target: ExportTarget
             get() = ExportTarget.of(document.library, document.expressive)
+
+        // b-406g
+
+        /**
+         * Whether the poster shows as the rail in [mode]. Below 840 dp at Medium it starts as the rail
+         * and opens over the canvas when asked (spec section 7), and a docked poster keeps the stored
+         * choice.
+         */
+        fun posterCollapsed(mode: PosterMode): Boolean =
+            if (mode == PosterMode.Rail72) !posterOverCanvas else preferences.posterCollapsed
 
         /** This state showing [document], its capabilities worked out in the same step. */
         fun withDocument(document: ThemeDocument): State =

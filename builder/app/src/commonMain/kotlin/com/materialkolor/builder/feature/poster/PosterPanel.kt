@@ -255,7 +255,7 @@ private fun PosterContent(
             verticalArrangement = Arrangement.spacedBy(spacing.extraLarge),
         ) {
             if (sheet) {
-                SheetSections(context, dispatcher, focus)
+                PosterSheet(context, dispatcher, focus) // b-406
             } else {
                 DockedSections(context, dispatcher, focus)
             }
@@ -280,29 +280,4 @@ private fun ColumnScope.DockedSections(
     ContrastSection(context, dispatcher)
     CoreColorsRow(context, dispatcher)
     SpecExtrasRow(context, dispatcher)
-}
-
-/**
- * The poster in the phone sheet, in the order its detents show it (D38). The peek leads with the
- * seed row and Shuffle, which is all a phone on its side sees, and upright it goes on to Pick,
- * Image, the style and the contrast. Half adds the explainer and the fine tune rows, and full ends
- * with the hero for editing the hex and the header.
- */
-@Composable
-private fun ColumnScope.SheetSections(
-    context: PosterContext,
-    dispatcher: Dispatcher<WorkspaceAction>,
-    focus: PosterFocus?,
-) {
-    SeedPeekRow(context, dispatcher)
-    SeedActions(context, dispatcher, shuffle = false)
-    FirstRunHint(context, dispatcher) // b-314
-    ImageCandidateRow(context, dispatcher) // b-311
-    StyleChipsSection(context, dispatcher)
-    ContrastSection(context, dispatcher)
-    PrimaryExplainerLine(context, dispatcher, why = focus?.why)
-    CoreColorsRow(context, dispatcher)
-    SpecExtrasRow(context, dispatcher)
-    SeedHero(context, dispatcher, focus = focus) // b-306c
-    PosterHeader(context, dispatcher, focus = focus)
 }

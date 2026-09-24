@@ -7,6 +7,7 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakeClipboard
 import com.materialkolor.builder.fakes.FakeRouter
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
+import com.materialkolor.builder.kit.layout.PosterMode
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,6 +53,36 @@ class PosterCollapseTest : SessionTestBase() {
             runCurrent()
 
             PreferencesRepository(stores, backgroundScope).current().posterCollapsed shouldBe false
+            harness.clearAndJoin()
+        }
+
+    // b-406g
+    @Test
+    fun setPosterCollapsed_onTheNarrowRail_opensForTheSessionAndStoresNothing() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val workspace = harness.own(
+                WorkspaceModel(session, preferences, FakeClipboard(), FakeRouter(), ThemeResolver()),
+            )
+            workspace.state.value.posterCollapsed(PosterMode.Rail72) shouldBe true
+            workspace.state.value.posterCollapsed(PosterMode.Docked320) shouldBe false
+
+            workspace.setPosterCollapsed(false, PosterMode.Rail72)
+            runCurrent()
+
+            workspace.state.value.posterCollapsed(PosterMode.Rail72) shouldBe false
+            PreferencesRepository(stores, backgroundScope).current().posterCollapsed shouldBe false
+
+            workspace.setPosterCollapsed(true, PosterMode.Docked320)
+            runCurrent()
+
+            workspace.state.value.posterCollapsed(PosterMode.Rail72) shouldBe false
+            PreferencesRepository(stores, backgroundScope).current().posterCollapsed shouldBe true
+            val next = harness.own(
+                WorkspaceModel(session, preferences, FakeClipboard(), FakeRouter(), ThemeResolver()),
+            )
+            next.state.value.posterCollapsed(PosterMode.Rail72) shouldBe true
             harness.clearAndJoin()
         }
 }

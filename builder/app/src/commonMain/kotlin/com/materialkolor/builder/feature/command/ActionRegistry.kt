@@ -20,6 +20,7 @@ import com.materialkolor.builder.feature.poster.reasonText
 import com.materialkolor.builder.feature.projects.ProjectsAction
 import com.materialkolor.builder.feature.projects.ProjectsModel
 import com.materialkolor.builder.feature.share.ShareController
+import com.materialkolor.builder.feature.topbar.TopBarControl
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
@@ -158,6 +159,7 @@ internal class CommandList(
     private val reasons: Map<Reason, String>,
     val windowClass: WindowClass,
     val librarySegmented: Boolean, // b-315d
+    val overflowed: Set<TopBarControl> = emptySet(), // b-406
 ) {
     private val commands = mutableListOf<Command>()
 
@@ -214,7 +216,7 @@ internal fun actionRegistry(
     val windowClass = LocalLayout.current.windowClass
     // b-315d
     val segmented = shortcuts.switcherForm.segmented ?: (windowClass == WindowClass.Expanded)
-    val list = CommandList(reasons, windowClass, segmented)
+    val list = CommandList(reasons, windowClass, segmented, shortcuts.switcherForm.overflowed) // b-406
     val uriHandler = LocalUriHandler.current
     val saved = stringResource(Res.string.command_saved)
     val saveFailed = stringResource(Res.string.export_save_failed)

@@ -48,6 +48,11 @@ internal val LocalSwitcherFitProbe: ProvidableCompositionLocal<(() -> Unit)?> =
 internal class SwitcherFormState {
     /** True for the segmented row, false for the dropdown, or null before the switcher has shown. */
     var segmented: Boolean? by mutableStateOf(null)
+
+    // b-406
+
+    /** The top bar buttons the bar has moved into its overflow menu, all three on a phone. */
+    var overflowed: Set<TopBarControl> by mutableStateOf(emptySet())
 }
 
 /** Where the switcher reports its form, or null where nothing reads it. */
