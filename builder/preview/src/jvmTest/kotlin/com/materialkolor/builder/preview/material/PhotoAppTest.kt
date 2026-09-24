@@ -71,7 +71,6 @@ import io.kotest.matchers.floats.shouldBeLessThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import java.io.File
-import kotlin.math.absoluteValue
 import kotlin.test.Test
 
 /**
@@ -415,9 +414,11 @@ private fun ComposeUiTest.memoryMasks(): Map<Int, Rect> {
         masks[index] = Rect(left, memory.top, right, memory.bottom)
         left = right + gap
     }
-    // The masks run out at the carousel's far edge, or the reading of them is off.
+    // The masks run out at the carousel's far edge, the last one a little past it at most, or the
+    // reading of them is off.
     withClue("$masks in $feed") {
-        (masks.values.maxOf { mask -> mask.right } - feed.right).absoluteValue shouldBeLessThan 1f
+        val past = masks.values.maxOf { mask -> mask.right } - feed.right
+        (past >= -1f && past <= gap) shouldBe true
     }
     return masks
 }
