@@ -54,9 +54,11 @@ on:
       - '.editorconfig'
       - '.github/workflows/builder.yml'
 
+# A new push to a pull request cancels its older run. A push to a branch waits its turn instead, so it
+# never cuts off a Staging deploy that is already running.
 concurrency:
   group: builder-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -384,7 +386,8 @@ jobs:
       && (github.ref == 'refs/heads/next' || github.ref == 'refs/heads/feat/builder-v2')
       && needs.cloudflare.outputs.ready == 'true'
     runs-on: ubuntu-latest
-    # One deploy at a time across both branches, and never cut off halfway.
+    # One deploy at a time across both branches. Pushes never cancel a run in progress (see the
+    # workflow's concurrency), so a deploy that has started always finishes.
     concurrency:
       group: builder-staging
       cancel-in-progress: false
