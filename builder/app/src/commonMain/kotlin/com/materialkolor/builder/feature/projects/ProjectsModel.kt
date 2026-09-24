@@ -149,9 +149,15 @@ internal class ProjectsModel(
                     updateState { state -> state.copy(lastDeletion = deletion.project) }
                     if (state.value.openId == id) moveOffDeleted(id)
                 }
-                Deletion.NotListed -> Unit
-                Deletion.NewerBuild -> report(ProjectsProblem.NotDeletedNewer)
-                is Deletion.Failed -> report(ProjectsProblem.NotDeleted)
+                Deletion.NotListed -> {
+                    Unit
+                }
+                Deletion.NewerBuild -> {
+                    report(ProjectsProblem.NotDeletedNewer)
+                }
+                is Deletion.Failed -> {
+                    report(ProjectsProblem.NotDeleted)
+                }
             }
         }
     }

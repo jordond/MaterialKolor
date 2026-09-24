@@ -46,7 +46,10 @@ class WorkspaceToastTest {
                 }
             }
             waitUntil { platform.environment.splashHidden }
-            waitUntil { projects.state.value.projects.isNotEmpty() }
+            waitUntil {
+                projects.state.value.projects
+                    .isNotEmpty()
+            }
             val deleted = projects.state.value.projects
                 .first()
             val message = "Deleted ${deleted.name}"
@@ -60,7 +63,10 @@ class WorkspaceToastTest {
             mainClock.autoAdvance = true
 
             onNodeWithText("Undo").performClick()
-            waitUntil { projects.state.value.projects.any { meta -> meta.id == deleted.id } }
+            waitUntil {
+                projects.state.value.projects
+                    .any { meta -> meta.id == deleted.id }
+            }
 
             onNodeWithText(message).assertDoesNotExist()
             projects.state.value.lastDeletion shouldBe null
