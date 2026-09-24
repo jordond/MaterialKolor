@@ -18,6 +18,10 @@ import com.materialkolor.builder.feature.canvas.CanvasArea
 import com.materialkolor.builder.feature.canvas.CanvasDock
 import com.materialkolor.builder.feature.canvas.FullscreenExit
 import com.materialkolor.builder.feature.command.CommandHost
+import com.materialkolor.builder.feature.command.ShortcutFocus
+import com.materialkolor.builder.feature.command.ShortcutScope
+import com.materialkolor.builder.feature.command.commandReturnFocus
+import com.materialkolor.builder.feature.command.rememberShortcuts
 import com.materialkolor.builder.feature.export.ExportHost
 import com.materialkolor.builder.feature.export.launchCopy
 import com.materialkolor.builder.feature.image.ImageHost
@@ -37,6 +41,8 @@ import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.workspace_copied
 import com.materialkolor.builder.kit.control.BuilderToastHostState
 import com.materialkolor.builder.kit.control.rememberBuilderToastHostState
+import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.shell.ToastRegion
 import com.materialkolor.builder.kit.shell.WorkspaceShell
 import com.materialkolor.builder.kit.transition.RevealStyle
@@ -75,6 +81,7 @@ internal fun WorkspaceScreen(
     var manualCopyOpen by remember { mutableStateOf(false) }
     var manualCopyFrom by remember { mutableStateOf<FocusRequester?>(null) } // b-221f
     var pickerFrom by remember { mutableStateOf<FocusRequester?>(null) } // b-307
+    val shortcutFocus = remember { ShortcutFocus() } // b-315
 
     // Plays the transition's reveal out of the origin, or a crossfade without one, around the change.
     fun reveal(
@@ -147,6 +154,7 @@ internal fun WorkspaceScreen(
                 model.setFineTuneRowOpen(action.row, action.open)
             }
             is WorkspaceAction.OpenPanel -> {
+                shortcutFocus.noteOpen(action.panel) // b-315
                 model.openPanel(action.panel)
             }
             WorkspaceAction.ClosePanel -> {
@@ -202,15 +210,21 @@ internal fun WorkspaceScreen(
     // b-306c
     // Held here, so the manual copy dialog asks nothing of a copy button that has left the screen.
     val posterFocus = remember { PosterFocus() }
-    WorkspaceScreen(
-        state = state,
-        posterColors = LocalThemeResult.current.poster,
-        toasts = toasts,
-        dispatcher = dispatcher,
-        modifier = modifier,
-        posterFocus = posterFocus, // b-306c
-        pickerFrom = pickerFrom, // b-307
-    )
+    // b-315
+    // The keyboard map lives on the page root, around the text fields it keeps out of the way of.
+    ShortcutScope(shortcutFocus) {
+        val shortcuts = rememberShortcuts(state, dispatcher, shortcutFocus)
+        WorkspaceScreen(
+            state = state,
+            posterColors = LocalThemeResult.current.poster,
+            toasts = toasts,
+            dispatcher = dispatcher,
+            modifier = modifier.then(shortcuts), // b-315
+            posterFocus = posterFocus, // b-306c
+            pickerFrom = pickerFrom, // b-307
+            shortcutFocus = shortcutFocus, // b-315
+        )
+    }
     // b-221c
     ManualCopyDialog(
         visible = manualCopyOpen,
@@ -227,6 +241,8 @@ internal fun WorkspaceScreen(
  * @param[posterFocus] The poster buttons that Projects, the explainer and the manual copy dialog
  * hand focus back to once they close (AR-09).
  * @param[pickerFrom] The Pick button that opened the picker last, which it hands focus back to.
+ * @param[shortcutFocus] The page's focus holder, which a panel a shortcut opened hands focus back
+ * to, or null where no shortcuts are wired.
  */
 @Composable
 internal fun WorkspaceScreen(
@@ -237,6 +253,7 @@ internal fun WorkspaceScreen(
     modifier: Modifier = Modifier,
     posterFocus: PosterFocus = remember { PosterFocus() }, // b-306c
     pickerFrom: FocusRequester? = null, // b-307
+    shortcutFocus: ShortcutFocus? = null, // b-315
 ) {
     // b-221c
     // Share and Export hand focus back to the buttons that opened them once they close (AR-09).
@@ -263,7 +280,13 @@ internal fun WorkspaceScreen(
             // b-306c
             val shareReturn = posterFocus.shareReturn(state.panel, focus.requester(TopBarControl.Share))
             ShareHost(state, dispatcher, returnFocusTo = shareReturn)
-            CommandHost(state, dispatcher)
+            // b-315
+            val compact = LocalLayout.current.windowClass == WindowClass.Compact
+            CommandHost(
+                state = state,
+                dispatcher = dispatcher,
+                returnFocusTo = { panel -> commandReturnFocus(panel, shortcutFocus, focus, compact) },
+            )
             PickerHost(state, dispatcher, returnFocusTo = pickerFrom) // b-307
             ImageHost(state, dispatcher)
             // b-314

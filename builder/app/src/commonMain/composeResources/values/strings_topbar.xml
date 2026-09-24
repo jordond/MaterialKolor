@@ -11,8 +11,8 @@
 
     <!-- The button that opens the command palette. -->
     <string name="topbar_commands">Command palette</string>
-    <!-- The tooltip over the command palette button, with its shortcut. -->
-    <string name="topbar_commands_tooltip">Command palette (Cmd+K)</string>
+    <!-- The tooltip over the command palette button, with its shortcut, "Cmd+K" or "Ctrl+K". -->
+    <string name="topbar_commands_tooltip">Command palette (%1$s)</string>
     <!-- The undo button once there is something to undo. The argument names the change, such as "style change to Vibrant". -->
     <string name="topbar_undo_change">Undo %1$s</string>
     <!-- The redo button once there is something to redo. The argument names the change. -->

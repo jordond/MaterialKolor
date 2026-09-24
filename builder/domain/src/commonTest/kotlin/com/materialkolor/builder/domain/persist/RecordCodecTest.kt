@@ -62,7 +62,8 @@ class RecordCodecTest {
     fun encode_defaultPreferences_writesEveryFieldOut() {
         val expected = """{"schema":0,"data":{"appearance":"System","motion":"System","hueLock":false,""" +
             """"styleLock":true,"seedLock":false,"dismissedHints":[],"firstExportDone":false,""" +
-            """"posterCollapsed":false,"lastProjectId":null,"persistRequested":false,"exportPrefs":{}}}"""
+            """"posterCollapsed":false,"lastProjectId":null,"persistRequested":false,"exportPrefs":{},""" +
+            """"singleKeyShortcuts":true}}""" // b-315
 
         assertEquals(expected, Preferences.Codec.encode(Preferences()))
     }

@@ -11,6 +11,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.feature.about.GITHUB_URL
+import com.materialkolor.builder.feature.command.LocalAppleKeys
+import com.materialkolor.builder.feature.command.Shortcut
 import com.materialkolor.builder.feature.poster.switcherPulse
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
@@ -83,7 +85,11 @@ internal fun TopBarContent(
                 focus = focus,
                 icon = IconId.Command,
                 description = stringResource(Res.string.topbar_commands),
-                tooltip = stringResource(Res.string.topbar_commands_tooltip),
+                // b-315
+                tooltip = stringResource(
+                    Res.string.topbar_commands_tooltip,
+                    Shortcut.Palette.text(LocalAppleKeys.current),
+                ),
                 onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Palette)) },
             )
             TopBarIconButton(

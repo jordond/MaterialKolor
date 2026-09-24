@@ -1,0 +1,340 @@
+package com.materialkolor.builder.feature.command
+
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusTarget
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.input.InputModeManager
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.InterceptPlatformTextInput
+import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.compose.ui.platform.PlatformTextInputInterceptor
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.materialkolor.builder.core.data.PreferencesRepository
+import com.materialkolor.builder.core.platform.Environment
+import com.materialkolor.builder.di.AppScope
+import com.materialkolor.builder.feature.workspace.Panel
+import com.materialkolor.builder.feature.workspace.WorkspaceAction
+import com.materialkolor.builder.feature.workspace.WorkspaceModel
+import dev.stateholder.dispatcher.Dispatcher
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
+import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+
+/**
+ * What the shortcuts keep outside the workspace's own model, whether they write Cmd or Ctrl and
+ * the single-key switch (WCAG 2.1.4), which lives in the browser's preferences as
+ * `singleKeyShortcuts`.
+ */
+@Inject
+@ContributesIntoMap(AppScope::class, binding<ViewModel>())
+@ViewModelKey
+internal class ShortcutsModel(
+    private val preferences: PreferencesRepository,
+    environment: Environment,
+) : ViewModel() {
+    /** Whether this runs on an Apple system, where the shortcuts take Cmd. */
+    val apple: Boolean = isApple(environment.browser)
+
+    /** Turn the single-key shortcuts on or off, in every tab of this browser. */
+    fun setSingleKeys(on: Boolean) {
+        viewModelScope.launch { preferences.update { prefs -> prefs.copy(singleKeyShortcuts = on) } }
+    }
+}
+
+/**
+ * The page's focus holder and what the shortcuts need to know about focus.
+ *
+ * The holder is the page root. It takes focus so keys reach the shortcuts when no control has it,
+ * after boot, when focus rests nowhere and on a press no control claims. It is never a Tab stop and
+ * draws no ring, since it can only take focus while it asks for it.
+ *
+ * Text fields below it are counted as their input sessions open and close, which also covers an
+ * input method composing, so single keys stay out of the way of typing.
+ */
+@Stable
+internal class ShortcutFocus {
+    /** The page root. */
+    val holder: FocusRequester = FocusRequester()
+
+    internal var armed by mutableStateOf(false)
+    internal var holderFocused: Boolean = false
+    internal var pageHasFocus by mutableStateOf(false)
+
+    /** How many text input sessions are open below the holder. */
+    internal var textSessions: Int = 0
+
+    /** How many text input sessions have opened below the holder so far. */
+    internal var sessionStarts: Int = 0
+
+    private var fromKeys = false
+
+    /** The panel a shortcut opened last, which hands focus back to the holder. */
+    var keyOpened: Panel? by mutableStateOf(null)
+        private set
+
+    /** Whether a text field below the holder is taking input. */
+    val typing: Boolean
+        get() = textSessions > 0
+
+    /** Give the holder focus. An overlay's focus trap turns it down, so an open overlay keeps focus. */
+    fun focusHolder() {
+        armed = true
+        holder.requestFocus()
+    }
+
+    /** Called with every panel that opens, so a panel a shortcut opened gives focus to the holder. */
+    fun noteOpen(panel: Panel) {
+        keyOpened = if (fromKeys) panel else null
+    }
+
+    /** Runs [block] as a shortcut, so a panel it opens counts as opened from the keyboard. */
+    fun runFromKeys(block: () -> Unit) {
+        fromKeys = true
+        try {
+            block()
+        } finally {
+            fromKeys = false
+        }
+    }
+
+    /** Where [panel] hands focus once it closes, the holder when a shortcut opened it, else [otherwise]. */
+    fun returnFocusFor(
+        panel: Panel,
+        otherwise: FocusRequester?,
+    ): FocusRequester? = if (keyOpened == panel) holder else otherwise
+}
+
+/**
+ * Tells the input modes the keyboard is in use, as Tab does, so a control that hands focus on after
+ * a shortcut does so the way it does for a Tab user (R-B-217d). Every shortcut calls it first.
+ */
+internal fun InputModeManager.useKeyboard() {
+    requestInputMode(InputMode.Keyboard)
+}
+
+/**
+ * Counts the text input sessions [content] opens for [focus], and says whether the shortcuts are
+ * written with Cmd, from [model].
+ */
+@Composable
+internal fun ShortcutScope(
+    focus: ShortcutFocus,
+    model: ShortcutsModel = metroViewModel(),
+    content: @Composable () -> Unit,
+) {
+    val interceptor = remember(focus) {
+        PlatformTextInputInterceptor { request, nextHandler ->
+            focus.textSessions++
+            focus.sessionStarts++
+            try {
+                nextHandler.startInputMethod(request)
+            } finally {
+                focus.textSessions--
+            }
+        }
+    }
+    InterceptPlatformTextInput(interceptor) {
+        CompositionLocalProvider(LocalAppleKeys provides model.apple, content = content)
+    }
+}
+
+/**
+ * The page root's modifier, the focus holder with the keyboard map (spec section 6) on it.
+ *
+ * Keys arrive as they bubble up from the focused control, so a control that takes a key, a button
+ * taking Space say, keeps it. Undo and Redo wait the same way, so a field keeps its own text undo.
+ * Only Cmd or Ctrl with K, S, O and \, which fire in fields, are taken on the way down. Single keys
+ * and Space never fire while a text field below takes input, and Cmd or Ctrl with V, C, X or A is
+ * always left alone. Esc leaves Inspect, or else moves focus out of a field to the holder, once
+ * overlays and Inspect have had their turn.
+ *
+ * A shortcut whose command cannot run toasts the reason once per press, all but Undo and Redo, which
+ * stay quiet with nothing to undo or redo as they do in any editor.
+ */
+@Composable
+internal fun rememberShortcuts(
+    state: WorkspaceModel.State,
+    dispatcher: Dispatcher<WorkspaceAction>,
+    focus: ShortcutFocus,
+    model: ShortcutsModel = metroViewModel(),
+): Modifier {
+    val commands = actionRegistry(state, dispatcher, shortcuts = model)
+    val latestCommands by rememberUpdatedState(commands)
+    val latestState by rememberUpdatedState(state)
+    val inputModes = LocalInputModeManager.current
+    val scope = rememberCoroutineScope()
+    ClaimFocusWhenNowhere(focus, state.panel)
+
+    // After a shortcut, focus that the shortcut left nowhere goes to the holder.
+    fun claimIfNowhere() {
+        scope.launch {
+            repeat(SETTLE_FRAMES) { withFrameNanos { } }
+            if (!focus.pageHasFocus && latestState.panel == null) focus.focusHolder()
+        }
+    }
+
+    fun escape(): Boolean {
+        inputModes.useKeyboard()
+        return when {
+            latestState.inspect -> {
+                dispatcher.dispatch(WorkspaceAction.SetInspect(false))
+                true
+            }
+            focus.typing -> {
+                focus.focusHolder()
+                true
+            }
+            else -> {
+                false
+            }
+        }
+    }
+
+    // The chords that fire in fields go first, since a field may map one of them to an edit of its
+    // own, as Ctrl+K deletes to the end of the line on macOS. The rest wait for the focused control.
+    fun onKey(
+        event: KeyEvent,
+        preview: Boolean,
+    ): Boolean {
+        if (event.type != KeyEventType.KeyDown) return false
+        if (event.key == Key.Escape && !event.anyModifier()) return !preview && escape()
+        val singleKeys = latestState.preferences.singleKeyShortcuts
+        val (shortcut, chord) = Shortcut.match(event, model.apple, singleKeys) ?: return false
+        if (preview != shortcut.firesInFields(chord)) return false
+        if (focus.typing && !shortcut.firesInFields(chord)) return false
+        val command = latestCommands.firstOrNull { command -> command.shortcut == shortcut } ?: return false
+        inputModes.useKeyboard()
+        when (val commandState = command.state) {
+            CommandState.Enabled -> {
+                focus.runFromKeys(command.run)
+                claimIfNowhere()
+            }
+            is CommandState.Disabled -> {
+                val reason = commandState.reason
+                if (shortcut !in QUIET_WHEN_DISABLED) dispatcher.dispatch(WorkspaceAction.ShowToast(reason))
+            }
+        }
+        return true
+    }
+
+    return remember(focus) {
+        Modifier
+            .onPreviewKeyEvent { event -> onKey(event, preview = true) }
+            .onKeyEvent { event -> onKey(event, preview = false) }
+            .pointerInput(focus) { claimUnclaimedPresses(focus, scope) { latestState.inspect } }
+            .onFocusChanged { focusState ->
+                focus.pageHasFocus = focusState.hasFocus
+                focus.holderFocused = focusState.isFocused
+                if (!focusState.isFocused) focus.armed = false
+            }.focusProperties { canFocus = focus.armed }
+            .focusRequester(focus.holder)
+            .focusTarget()
+    }
+}
+
+/**
+ * Hands focus to the holder after boot and after a panel closed, when nothing on the page has it by
+ * then. Two frames go by first, so a panel's own hand-off lands before this looks.
+ *
+ * Focus that leaves the page while no panel is open is left alone, since on the desktop a menu's
+ * popup takes it the same way, and a menu in the page's own overlay host keeps it by its trap.
+ */
+@Composable
+private fun ClaimFocusWhenNowhere(
+    focus: ShortcutFocus,
+    panel: Panel?,
+) {
+    val lastPanel = remember { mutableStateOf<Panel?>(null) }
+    LaunchedEffect(panel) {
+        val closed = lastPanel.value != null && panel == null
+        val booted = lastPanel.value == null && panel == null
+        lastPanel.value = panel
+        if (!closed && !booted) return@LaunchedEffect
+        repeat(SETTLE_FRAMES) { withFrameNanos { } }
+        if (!focus.pageHasFocus) focus.focusHolder()
+    }
+    LaunchedEffect(focus.armed) {
+        if (!focus.armed) return@LaunchedEffect
+        withFrameNanos { }
+        if (!focus.holderFocused) focus.armed = false
+    }
+}
+
+private const val SETTLE_FRAMES = 2
+
+/** The shortcuts that say nothing when their command cannot run, since an empty history is no news. */
+private val QUIET_WHEN_DISABLED = setOf(Shortcut.Undo, Shortcut.Redo)
+
+/**
+ * Gives the holder focus after a press that no control consumed, so a click on the bare canvas
+ * leaves a text field. A press that opened a text field keeps it, and so does one while [inspecting],
+ * since Inspect pins on a press.
+ *
+ * The field the press left closes its input session a few frames later, and on the desktop focus
+ * can go with it, so for a few frames more the holder takes focus back whenever the page lost it.
+ */
+private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.claimUnclaimedPresses(
+    focus: ShortcutFocus,
+    scope: CoroutineScope,
+    inspecting: () -> Boolean,
+) {
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
+        val sessionsBefore = focus.sessionStarts
+        var claimed = down.isConsumed
+        while (true) {
+            val event = awaitPointerEvent(PointerEventPass.Main)
+            if (event.changes.any { change -> change.isConsumed }) claimed = true
+            if (event.changes.none { change -> change.pressed }) break
+        }
+        if (claimed || inspecting()) return@awaitEachGesture
+        scope.launch {
+            repeat(SETTLE_FRAMES) { withFrameNanos { } }
+            if (focus.sessionStarts != sessionsBefore) return@launch
+            focus.focusHolder()
+            repeat(RECLAIM_FRAMES) {
+                withFrameNanos { }
+                if (focus.sessionStarts != sessionsBefore) return@launch
+                if (!focus.pageHasFocus) focus.focusHolder()
+            }
+        }
+    }
+}
+
+private const val RECLAIM_FRAMES = 8
+
+private fun KeyEvent.anyModifier(): Boolean = isCtrlPressed || isMetaPressed || isAltPressed || isShiftPressed
