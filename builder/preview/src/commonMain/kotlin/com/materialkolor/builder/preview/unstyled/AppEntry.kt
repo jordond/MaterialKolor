@@ -1,7 +1,5 @@
 package com.materialkolor.builder.preview.unstyled
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.domain.persist.DeviceWidth
@@ -10,6 +8,9 @@ import com.materialkolor.builder.preview.split.PaneSpec
 
 /**
  * The Unstyled sample app, the web dashboard with its token side panel.
+ *
+ * The app lays itself out for [deviceWidth] and fills whatever size it is given. Scaling the frame
+ * to fit the pane, down to 0.6, and scrolling past that belong to the canvas, not the app.
  *
  * @param[spec] The pane the app is drawn in.
  * @param[state] What the app remembers, shared by both copies.
@@ -23,5 +24,5 @@ internal fun UnstyledAppEntry(
     deviceWidth: DeviceWidth,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier.fillMaxSize()) // stub
+    DashboardApp(state, deviceWidth, modifier)
 }
