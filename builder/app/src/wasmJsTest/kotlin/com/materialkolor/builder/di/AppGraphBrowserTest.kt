@@ -163,4 +163,7 @@ private object TestEnvironment : Environment {
 
     // b-314
     override val browser: String = "TestBrowser/1.0"
+
+    // b-314b
+    override fun reload(path: String) = Unit
 }

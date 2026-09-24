@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.generated.resources.Res
+import com.materialkolor.builder.generated.resources.banners_close
+import com.materialkolor.builder.generated.resources.banners_reload
 import com.materialkolor.builder.generated.resources.projects_conflict
 import com.materialkolor.builder.generated.resources.projects_conflict_keep
 import com.materialkolor.builder.generated.resources.projects_conflict_load
@@ -18,6 +20,7 @@ import com.materialkolor.builder.generated.resources.projects_storage_unavailabl
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderCard
 import com.materialkolor.builder.kit.control.BuilderIcon
+import com.materialkolor.builder.kit.control.BuilderIconButton
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
@@ -53,16 +56,20 @@ internal fun ConflictBanner(
 /**
  * Nothing saved here outlives the session, private browsing for example, so the banner points to
  * the share link as the way to keep a theme.
+ *
+ * @param[onClose] Puts the banner away, or null where it stays, as it does in the drawer.
  */
 @Composable
 internal fun StorageUnavailableBanner(
     onGetLink: () -> Unit,
     modifier: Modifier = Modifier,
+    onClose: (() -> Unit)? = null, // b-314b
 ) {
     ProjectBanner(
         icon = IconId.Warning,
         message = stringResource(Res.string.projects_storage_unavailable),
         modifier = modifier,
+        onClose = onClose, // b-314b
     ) {
         BuilderButton(
             onClick = onGetLink,
@@ -74,26 +81,40 @@ internal fun StorageUnavailableBanner(
 
 /**
  * A newer version of the builder saved some of the data here, and this one leaves it alone until a
- * reload picks it up (D41). The platform has no way to reload from here, so the banner only says so.
+ * reload picks it up (D41). Reload loads the builder again at `/`.
  */
 @Composable
-internal fun NewerDataBanner(modifier: Modifier = Modifier) {
+internal fun NewerDataBanner(
+    onReload: () -> Unit, // b-314b
+    modifier: Modifier = Modifier,
+) {
     ProjectBanner(
         icon = IconId.Info,
         message = stringResource(Res.string.projects_newer_data),
         modifier = modifier,
-    )
+    ) {
+        // b-314b
+        BuilderButton(
+            onClick = onReload,
+            label = stringResource(Res.string.banners_reload),
+            emphasis = Emphasis.Primary,
+        )
+    }
 }
 
 /**
  * A card with an [icon] and a [message], and its [actions], when it has any, lined up at the end
  * below them.
+ *
+ * @param[onClose] Puts the banner away from a close button at the end of the message, or null for
+ * a banner without one.
  */
 @Composable
 internal fun ProjectBanner(
     icon: IconId,
     message: String,
     modifier: Modifier = Modifier,
+    onClose: (() -> Unit)? = null, // b-314b
     actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
@@ -105,6 +126,14 @@ internal fun ProjectBanner(
             ) {
                 BuilderIcon(icon, contentDescription = null)
                 BuilderText(text = message, modifier = Modifier.weight(1f))
+                // b-314b
+                if (onClose != null) {
+                    BuilderIconButton(
+                        onClick = onClose,
+                        icon = IconId.Close,
+                        contentDescription = stringResource(Res.string.banners_close),
+                    )
+                }
             }
             if (actions != null) {
                 Row(

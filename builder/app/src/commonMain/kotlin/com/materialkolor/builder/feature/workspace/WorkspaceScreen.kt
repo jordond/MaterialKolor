@@ -256,6 +256,7 @@ internal fun WorkspaceScreen(
         // b-217
         fullscreenExit = { FullscreenExit(dispatcher) },
         overlays = {
+            WorkspaceBanners(state, dispatcher) // b-314b
             ExportHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.Export)) // b-221c
             ProjectsHost(state, dispatcher, returnFocusTo = posterFocus.projects.returnFocusTo) // b-221f
             ExplainerHost(state, dispatcher, returnFocusTo = posterFocus.why.returnFocusTo) // b-221f

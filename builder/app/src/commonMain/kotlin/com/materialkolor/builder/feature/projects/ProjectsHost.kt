@@ -1,23 +1,18 @@
 package com.materialkolor.builder.feature.projects
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import com.materialkolor.builder.core.data.DeletedProject
-import com.materialkolor.builder.feature.share.SharedLinkBanner
+import com.materialkolor.builder.feature.workspace.BannerAction
+import com.materialkolor.builder.feature.workspace.BannerStack
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
+import com.materialkolor.builder.feature.workspace.WorkspaceBanner
+import com.materialkolor.builder.feature.workspace.WorkspaceBanners
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.projects_deleted
@@ -31,8 +26,6 @@ import com.materialkolor.builder.generated.resources.projects_problem_restore
 import com.materialkolor.builder.generated.resources.projects_problem_set_aside
 import com.materialkolor.builder.generated.resources.projects_undo
 import com.materialkolor.builder.kit.control.ToastDuration
-import com.materialkolor.builder.kit.layout.MediumBreakpoint
-import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import dev.stateholder.extensions.collectAsState
 import dev.zacsweers.metrox.viewmodel.metroViewModel
@@ -40,8 +33,8 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The projects drawer, open while `state.panel` is [Panel.Projects], and the banners about the open
- * project, which show whatever panel is open.
+ * The projects drawer, open while `state.panel` is [Panel.Projects]. The banners about the open
+ * project join the one stack [WorkspaceBanners] draws.
  *
  * Opening or starting a project closes the drawer. A delete raises an undo toast through
  * [dispatcher], up for the kit's [ToastDuration.Long] and paused while it is hovered or focused, and
@@ -73,9 +66,9 @@ internal fun ProjectsHost(
         },
         onGetLink = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Share)) },
         onDismissRequest = { dispatcher.dispatch(WorkspaceAction.ClosePanel) },
+        modifier = modifier, // b-314b
         returnFocusTo = returnFocusTo, // b-221f
     )
-    ProjectBanners(projects, model::handle, modifier)
     projects.lastDeletion?.let { deleted ->
         UndoToast(deleted, dispatcher) { undone -> model.handle(ProjectsAction.UndoDelete(undone)) }
     }
@@ -89,37 +82,39 @@ internal fun ProjectsHost(
     }
 }
 
+// b-314b
+
 /**
- * The banners that hang off the open project, below the top bar. A clash with another tab comes
- * first, then a theme that is not saved yet, then data a newer build saved. Without storage there is
- * nowhere to save the theme, so that banner stays away and the drawer says why.
+ * The banners [state] raises by itself, a clash with another tab, a theme that is not saved yet and
+ * data a newer build saved, in the same stack and order as [WorkspaceBanners]. The workspace draws
+ * the whole stack through that one, so these never show twice.
+ *
+ * @param[onReload] What the newer data banner's Reload does.
  */
 @Composable
 internal fun ProjectBanners(
     state: ProjectsModel.State,
     onAction: (ProjectsAction) -> Unit,
     modifier: Modifier = Modifier,
+    onReload: () -> Unit = {},
 ) {
-    val offerSave = state.transient && state.storageAvailable
-    if (!state.conflict && !offerSave && !state.newerData) return
-    val spacing = LocalBuilderTokens.current.spacing
-    Box(modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                // Two section gaps clear the top bar.
-                .padding(top = spacing.section + spacing.section, start = spacing.medium, end = spacing.medium)
-                .widthIn(max = MediumBreakpoint)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(spacing.small),
-        ) {
-            if (state.conflict) {
-                ConflictBanner(onResolve = { keepMine -> onAction(ProjectsAction.ResolveConflict(keepMine)) })
+    val banners = listOfNotNull(
+        WorkspaceBanner.Conflict.takeIf { state.conflict },
+        WorkspaceBanner.UnsavedTheme.takeIf { state.transient && state.storageAvailable },
+        WorkspaceBanner.NewerData.takeIf { state.newerData },
+    )
+    BannerStack(
+        banners = banners,
+        onAction = { action ->
+            when (action) {
+                is BannerAction.ResolveConflict -> onAction(ProjectsAction.ResolveConflict(action.keepMine))
+                BannerAction.SaveTheme -> onAction(ProjectsAction.SaveShared)
+                BannerAction.ReloadHome -> onReload()
+                else -> Unit
             }
-            if (offerSave) SharedLinkBanner(onSave = { onAction(ProjectsAction.SaveShared) })
-            if (state.newerData) NewerDataBanner()
-        }
-    }
+        },
+        modifier = modifier,
+    )
 }
 
 /**

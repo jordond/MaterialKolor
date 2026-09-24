@@ -88,7 +88,14 @@ internal class WebEnvironment : Environment {
 
     // b-314
     override val browser: String = userAgent()
+
+    // b-314b
+    override fun reload(path: String) = assignLocation(path)
 }
+
+// b-314b
+// Goes through history like a click on a link would, so back returns to the page it left.
+private fun assignLocation(path: String): Unit = js("window.location.assign(path)")
 
 private const val SPLASH_FADE_MILLIS = 200
 

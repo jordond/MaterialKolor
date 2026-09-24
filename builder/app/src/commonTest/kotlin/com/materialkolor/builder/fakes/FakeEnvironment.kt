@@ -92,6 +92,15 @@ internal class FakeEnvironment(
 
     // b-314
     override val browser: String = FAKE_BROWSER
+
+    // b-314b
+
+    /** Every path the page was asked to reload at, oldest first. */
+    val reloads: MutableList<String> = mutableListOf()
+
+    override fun reload(path: String) {
+        reloads += path
+    }
 }
 
 /** What every [FakeEnvironment] says it runs in. */

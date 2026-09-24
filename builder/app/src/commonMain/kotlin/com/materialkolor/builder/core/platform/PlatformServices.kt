@@ -399,6 +399,14 @@ interface Environment {
      * user agent, the desktop build the JVM and the operating system.
      */
     val browser: String
+
+    // b-314b
+
+    /**
+     * Load the page again at [path], so a newer build can read what this one cannot. The web goes
+     * there with `location.assign`. The desktop build has no page to load, so it does nothing.
+     */
+    fun reload(path: String)
 }
 
 // b-214

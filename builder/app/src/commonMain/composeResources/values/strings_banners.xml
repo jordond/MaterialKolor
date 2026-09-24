@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The banner when a share link could not be read and boot opened the last theme instead. -->
+    <string name="banners_invalid_link">That link didn’t work, so your last theme is open instead.</string>
+    <!-- The same banner when there was no saved theme, so boot opened the defaults. -->
+    <string name="banners_invalid_link_defaults">That link didn’t work, so you’re starting from the defaults.</string>
+    <!-- Starts a new project from the defaults, offered when boot opened a saved theme instead. -->
+    <string name="banners_start_from_defaults">Start from defaults</string>
+
+    <!-- The banner when the address has no page, so boot opened the builder at home. -->
+    <string name="banners_unknown_path">There’s no page at that address, so here’s the builder.</string>
+
+    <!-- The banner when a share link was made by a newer version of the builder. -->
+    <string name="banners_newer_version">Made with a newer version. Reload to update.</string>
+
+    <!-- Loads the page again, so a newer version of the builder can read what this one cannot. -->
+    <string name="banners_reload">Reload</string>
+    <!-- Puts a boot notice away. -->
+    <string name="banners_dismiss">Dismiss</string>
+
+    <!-- The banner when a save failed because storage stayed full after old history was cleared. -->
+    <string name="banners_storage_full">This browser’s storage is full, so your latest changes aren’t saved. Delete a project you don’t need, or get a link to keep this theme.</string>
+    <!-- Opens the projects drawer from the storage full banner. -->
+    <string name="banners_storage_full_projects">Projects</string>
+    <!-- Opens the share dialog from the storage full banner. -->
+    <string name="banners_get_link">Get a link</string>
+
+    <!-- The button that closes the banner saying this browser keeps nothing. -->
+    <string name="banners_close">Close</string>
+</resources>
