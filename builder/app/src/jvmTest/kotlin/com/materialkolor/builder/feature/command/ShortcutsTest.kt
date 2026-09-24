@@ -278,7 +278,8 @@ class ShortcutsTest {
             }
             waitForIdle()
             val hint = hasText("The seed and the style are both locked, so Shuffle has nothing to change")
-            // The poster says it under its buttons all along.
+            // The poster says it under its buttons all along, once it has caught up with the locks.
+            waitUntil { onAllNodes(hint, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
             val before = onAllNodes(hint, useUnmergedTree = true).fetchSemanticsNodes().size
             val seed = seed()
 
