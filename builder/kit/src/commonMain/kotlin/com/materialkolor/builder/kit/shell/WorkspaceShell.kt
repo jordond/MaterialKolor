@@ -13,13 +13,19 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
@@ -160,8 +166,10 @@ public fun WorkspaceShell(
  * only the dock floating over it.
  *
  * Nothing that takes focus stays in the Tab order wholly under the sheet (WCAG 2.4.11). At Half the
- * canvas leaves it, and the dock too where the sheet covers it, and at Full the top bar goes as
- * well. They come back as the sheet sinks to Peek.
+ * canvas leaves it, and the dock too where the sheet covers it as placed, and at Full the top bar
+ * goes as well. The top bar comes back as the sheet sinks to Half, and the canvas and a covered
+ * dock at Peek. A click or a focus request still reaches what shows of them. When the sheet rises
+ * over the region that holds focus, focus moves to the sheet's handle.
  */
 @Composable
 private fun SheetShell(
@@ -186,18 +194,32 @@ private fun SheetShell(
     // The frame stands a margin off the bottom edge in fullscreen, and on the edge otherwise.
     val toastBottom = clearance.calculateBottomPadding() + if (fullscreen) tokens.spacing.medium else 0.dp
     val sheetOver = { detent: BottomSheetDetent -> !fullscreen && sheetState.targetDetent >= detent }
-    // Half stops halfway up, or higher where the peek is taller than that.
-    val dockCoveredFrom = if (sheetClearance(layout, tokens) <= maxOf(layout.heightDp / 2, peek)) {
-        BottomSheetDetent.Half
-    } else {
-        BottomSheetDetent.Full
+    val cover = remember { SheetCover() }
+    // Asked as focus moves, so the dock as the skin draws it decides, not a nominal height.
+    val dockCoveredFrom = {
+        if (cover.dockUnder(sheetState, BottomSheetDetent.Half)) BottomSheetDetent.Half else BottomSheetDetent.Full
+    }
+    val handle = remember { FocusRequester() }
+    LaunchedEffect(sheetState, fullscreen) {
+        if (fullscreen) return@LaunchedEffect
+        var resting = sheetState.targetDetent
+        snapshotFlow { sheetState.targetDetent }.collect { target ->
+            // Moves inside a region never ask it, so focus already there would stay under the sheet.
+            if (target > resting && cover.focusUnder(target, dockCoveredFrom())) handle.requestFocus()
+            resting = target
+        }
     }
     ShellLayout(
         start = { 0.dp },
         toasts = ToastInsets(start = { 0.dp }, end = 0.dp, bottom = toastBottom),
         room = room,
         topBar = {
-            Box(Modifier.skipTabWhile { sheetOver(BottomSheetDetent.Full) }) {
+            Box(
+                Modifier.skipTabWhile(
+                    covered = { sheetOver(BottomSheetDetent.Full) },
+                    focused = { inside -> cover.topBarFocused = inside },
+                ),
+            ) {
                 if (fullscreenExit == null) topBar() else FullscreenExitStrip(fullscreenExit) // b-217
             }
         },
@@ -210,7 +232,12 @@ private fun SheetShell(
                         detentLabel = posterDetentNames(),
                         peekHeight = peek,
                         style = posterOverlayStyle(LocalBuilderTokens.current),
-                        modifier = Modifier.zIndex(1f).fillMaxSize(),
+                        // The handle is the sheet's first stop, so the requester lands there.
+                        modifier = Modifier
+                            .zIndex(1f)
+                            .fillMaxSize()
+                            .onPlaced { coordinates -> cover.sheetTop = coordinates.positionInRoot().y }
+                            .focusRequester(handle),
                     ) {
                         poster(false)
                     }
@@ -230,13 +257,26 @@ private fun SheetShell(
                 } else {
                     RoundedCornerShape(topStart = tokens.radius.large, topEnd = tokens.radius.large)
                 },
-                canvas = { Box(Modifier.skipTabWhile { sheetOver(BottomSheetDetent.Half) }) { canvas(clearance) } },
+                canvas = {
+                    Box(
+                        Modifier.skipTabWhile(
+                            covered = { sheetOver(BottomSheetDetent.Half) },
+                            focused = { inside -> cover.canvasFocused = inside },
+                        ),
+                    ) {
+                        canvas(clearance)
+                    }
+                },
             ) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = peek + tokens.spacing.large)
-                        .skipTabWhile { sheetOver(dockCoveredFrom) },
+                        .onPlaced { coordinates -> cover.dockTop = coordinates.positionInRoot().y }
+                        .skipTabWhile(
+                            covered = { sheetOver(dockCoveredFrom()) },
+                            focused = { inside -> cover.dockFocused = inside },
+                        ),
                 ) {
                     dock()
                 }

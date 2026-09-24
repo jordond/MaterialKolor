@@ -33,8 +33,8 @@ test('Tab twice from a gallery text field moves past it and does not bounce back
 test('one Tab leaves a gallery text field', async ({ page }) => {
   // Both browsers keep focus in the field for the first Tab and move on at the second, and WebKit also
   // puts the caret back at the start, so focus leaves and comes straight back there. The field and the
-  // page's focus repair are app and web code, outside this slice (B-217c).
-  test.fixme(true, 'The first Tab out of a canvas text field stays in it on Chromium and WebKit');
+  // page's focus repair are app and web code, which B-227 owns.
+  test.fixme(true, 'web focus repair (D40 F3), B-227');
   const start = await typeInFirstField(page);
 
   await press(page, 'Tab');

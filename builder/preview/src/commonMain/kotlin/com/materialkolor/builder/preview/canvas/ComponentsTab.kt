@@ -35,7 +35,7 @@ private val MinCardWidth = 280.dp
 /** What each gallery card tells [LocalCompositionProbe] as it composes, followed by its title. */
 internal const val GALLERY_CARD: String = "GalleryCard/"
 
-/** What a gallery grid tells [LocalCompositionProbe] each time it composes. */
+/** What a gallery grid tells [LocalCompositionProbe] each time the scope that calls its lazy column composes. */
 internal const val GALLERY_GRID: String = "GalleryGrid"
 
 /**
@@ -119,8 +119,11 @@ internal fun GalleryGrid(
         val byGroup = cards.groupBy { shown -> shown.group }
         GalleryGroup.entries.mapNotNull { group -> byGroup[group]?.let { members -> group to members } }
     }
-    LocalCompositionProbe.current?.invoke(GALLERY_GRID)
     val room = remember { GalleryRoom() }
+    // Fired right where the lazy column is called, so a scope around the call that recomposes as the
+    // width moves, such as a BoxWithConstraints, fires it every frame. The rows' builder would not
+    // show that, since it runs again only when the column count changes.
+    LocalCompositionProbe.current?.invoke(GALLERY_GRID)
     LazyColumn(
         state = listState,
         modifier = modifier.measureColumns(room, gap).fillMaxSize(),

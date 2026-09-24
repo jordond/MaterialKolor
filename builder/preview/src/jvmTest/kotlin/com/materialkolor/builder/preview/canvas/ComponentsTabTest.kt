@@ -127,8 +127,10 @@ class ComponentsTabTest {
             mainClock.autoAdvance = true
             waitForIdle()
 
-            // Before B-217c the grid sat in a BoxWithConstraints whose content composed 19 times over
-            // this sweep. The cards composed 12 times then as now, only those that change rows.
+            // Before B-217c the grid called its lazy column inside a BoxWithConstraints, and with the
+            // probe beside that call it fired 19 times over this sweep. A probe in the rows' builder
+            // fires once then as now, so it cannot tell the two apart. The cards composed 12 times
+            // then as now, only those that change rows.
             composed.count { where -> where == GALLERY_GRID } shouldBe 0
             composed.count { where -> where.startsWith(GALLERY_CARD) } shouldBeLessThanOrEqual GalleryStandIns.size
             val row = (5 until 8).map { index -> onNodeWithTag("Card $index").fetchSemanticsNode().boundsInRoot.top }
