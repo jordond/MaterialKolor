@@ -10,6 +10,18 @@ import { openBuilder, wantHooks } from './builder';
 /** The gallery's text fields. Their labels are their text in the mirror, so they have no `aria-label`. */
 const FIELDS = '#cmp_a11y_root [contenteditable]:not([aria-label])';
 
+// b-227
+// The Filled and Outlined cards each hold a "Destination" field and a disabled "Origin" one, in
+// that order in `FIELDS`. Both "Destination" fields show the gallery's one text.
+const FILLED = 0;
+const OUTLINED = 2;
+
+/**
+ * The text input Compose keeps in its shadow root while a text field has focus, laid over that field.
+ * It goes away when focus leaves every text field.
+ */
+const BACKING_FIELD = '.compose-backing-field';
+
 /** Long enough for a key to reach Compose and the focus move it makes to settle. */
 const SETTLE_MS = 300;
 
@@ -18,8 +30,9 @@ test.beforeEach(async ({ context }) => {
 });
 
 test('Tab twice from a gallery text field moves past it and does not bounce back', async ({ page }) => {
-  const start = await typeInFirstField(page);
+  const start = await typeInField(page, FILLED);
 
+  // The first Tab reaches the Outlined field and the second the Slider card.
   await press(page, 'Tab');
   await press(page, 'Tab');
   await typeSettled(page, 'zq');
@@ -31,25 +44,48 @@ test('Tab twice from a gallery text field moves past it and does not bounce back
 });
 
 test('one Tab leaves a gallery text field', async ({ page }) => {
-  // Both browsers keep focus in the field for the first Tab and move on at the second, and WebKit also
-  // puts the caret back at the start, so focus leaves and comes straight back there. The field and the
-  // page's focus repair are app and web code, which B-227 owns.
-  test.fixme(true, 'web focus repair (D40 F3), B-227');
-  const start = await typeInFirstField(page);
+  // The Outlined field has no twin after it, so one Tab goes on to the Slider card. Compose drops its
+  // backing input once no text field has focus, and a key typed then lands in neither field.
+  const start = await typeInField(page, OUTLINED);
 
   await press(page, 'Tab');
+  await expect(page.locator(BACKING_FIELD)).toHaveCount(0);
   await typeSettled(page, 'y');
 
   await expect(start).toHaveText('start');
+  await expect(page.locator(FIELDS).nth(FILLED)).toHaveText('start');
 });
 
-/** Opens the gallery, clicks into its first text field and types `start` there. */
-async function typeInFirstField(page: Page): Promise<Locator> {
+test('one Tab from the Filled field lands in the Outlined one', async ({ page }) => {
+  // This is what looked like the first Tab staying put (B-217c). Focus does move, but into the
+  // Outlined "Destination" field, which shows the same text. So a key typed next shows up in both,
+  // at the end in Chromium, which moves the caret there when the text is set, and at the start in
+  // WebKit, where a field that never had focus keeps its caret at 0.
+  await typeInField(page, FILLED);
+  const outlined = (await page.locator(FIELDS).nth(OUTLINED).boundingBox())!;
+
+  await press(page, 'Tab');
+
+  await expect
+    .poll(async () => {
+      const boxes = await page.locator(BACKING_FIELD).evaluateAll((fields) =>
+        fields.map((field) => {
+          const { x, y, width, height } = field.getBoundingClientRect();
+          return { x, y, width, height };
+        }),
+      );
+      return boxes.length === 1 && holdsCentreOf(outlined, boxes[0]);
+    })
+    .toBe(true);
+});
+
+/** Opens the gallery, clicks into its text field [nth] of `FIELDS` and types `start` there. */
+async function typeInField(page: Page, nth: number): Promise<Locator> {
   await openBuilder(page);
   await expect(page.locator('#cmp_a11y_root > *').first()).toBeAttached({ timeout: 30_000 });
   const tab = (await page.locator('#cmp_a11y_root [aria-label^="Components, tab"]').boundingBox())!;
   await page.mouse.click(tab.x + tab.width / 2, tab.y + tab.height / 2);
-  const start = page.locator(FIELDS).first();
+  const start = page.locator(FIELDS).nth(nth);
   // The Inputs cards sit 600 px down the gallery. A fixed scroll lands there however slowly the
   // mirror follows, where scrolling until the field shows could carry it past on a busy machine.
   await page.mouse.move(tab.x + tab.width / 2, tab.y + 240);
@@ -63,6 +99,16 @@ async function typeInFirstField(page: Page): Promise<Locator> {
   await typeSettled(page, 'start');
   await expect(start).toHaveText('start');
   return start;
+}
+
+/** Whether the centre of [inner] lies inside [outer]. */
+function holdsCentreOf(
+  outer: { x: number; y: number; width: number; height: number },
+  inner: { x: number; y: number; width: number; height: number },
+): boolean {
+  const x = inner.x + inner.width / 2;
+  const y = inner.y + inner.height / 2;
+  return x >= outer.x && x <= outer.x + outer.width && y >= outer.y && y <= outer.y + outer.height;
 }
 
 async function press(page: Page, key: string): Promise<void> {
