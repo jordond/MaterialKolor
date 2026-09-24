@@ -41,7 +41,11 @@ import com.materialkolor.builder.engine.resolve.RoleEntry
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.preview.split.LocalCompositionProbe
 import com.materialkolor.builder.preview.split.PaneSpec
+import com.materialkolor.fluent.toFluentColors
 import com.materialkolor.unstyled.MaterialKolorTokens
+import io.github.composefluent.ExperimentalFluentApi
+import io.github.composefluent.FluentThemeConfiguration
+import io.github.composefluent.component.ContentDialogHostState
 import androidx.compose.material3.LocalContentColor as MaterialContentColor
 import androidx.compose.material3.LocalTextStyle as MaterialTextStyle
 import com.composeunstyled.LocalContentColor as UnstyledContentColor
@@ -52,7 +56,8 @@ import com.composeunstyled.theme.ColorScheme as UnstyledColorScheme
  * One copy of the preview, dressed in a fresh theme of the library [LocalSkin] names.
  *
  * Every color comes from `spec.result`, the role tables for Material 3 and Unstyled so AMOLED and
- * the document's pins show, and the Custom slots for Custom. Nothing is generated here. Before the
+ * the document's pins show, the Custom slots for Custom and the primary ramp of the mode's scheme
+ * for Fluent. Nothing is generated here. Before the
  * library theme goes on, the pane sets content color, text style, selection colors and indication
  * for every library, so nothing the builder's own chrome provides reaches the preview, and whatever
  * the pane provides ends at its edge. Material's themes get the library's own typography and
@@ -93,7 +98,7 @@ public fun PreviewPane(
                 // b-306
                 Library.Material3 -> MaterialPane(roles, skin.expressive, spec.result.document.motionScheme, content)
                 Library.Unstyled -> UnstyledPane(roles, spec.isDark, ink, content)
-                Library.Fluent -> content() // stub, the Fluent theme lands with B-405
+                Library.Fluent -> FluentPane(spec, content)
                 Library.Custom -> CompositionLocalProvider(
                     LocalPreviewIdentity provides checkNotNull(identity),
                     content = content,
@@ -239,6 +244,32 @@ private fun UnstyledPane(
         }
     }
     theme(colorScheme = if (isDark) UnstyledColorScheme.Dark else UnstyledColorScheme.Light, content = content)
+}
+
+/**
+ * A Fluent theme whose accent is the pane's primary ramp, the way `toFluentColors` cuts it.
+ *
+ * Only the theme goes on, through `FluentThemeConfiguration`, the way the Fluent skin sets it for
+ * the chrome. `FluentTheme` would also put a dialog host and an acrylic backdrop round the screen
+ * and, on desktop, a text context menu that crashes on a right click in any field. Fluent takes
+ * nothing from the role table, so pins and AMOLED never reach this pane, which is what Fluent is.
+ */
+@OptIn(ExperimentalFluentApi::class)
+@Composable
+private fun FluentPane(
+    spec: PaneSpec,
+    content: @Composable () -> Unit,
+) {
+    val scheme = spec.result.scheme(spec.isDark)
+    val colors = remember(scheme) { scheme.toFluentColors() }
+    // The sample app never asks Fluent for a dialog, so this host stays empty.
+    val dialogs = remember { ContentDialogHostState() }
+    FluentThemeConfiguration(
+        colors = colors,
+        useAcrylicPopup = false,
+        contentDialogHostState = dialogs,
+        content = content,
+    )
 }
 
 /** Draw the pane through a layer whose paint carries [filter], or leave it be when there is none. */
