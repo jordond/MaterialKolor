@@ -328,6 +328,19 @@ public class ContrastAudit internal constructor(
     }
 }
 
+// b-308
+
+/**
+ * Rate [pair] in the mode [isDark] picks, the same way the audit rates its own pairs.
+ *
+ * It works for a pair the audit leaves out too, such as a role pair on the Custom target that no
+ * pin brought in, so a view that shows a ratio for any pair reads it from one place.
+ */
+public fun ThemeResult.rate(
+    pair: ContrastPair,
+    isDark: Boolean,
+): AuditRow = ContrastAudit.rate(this, pair, isDark)
+
 /** Fluent's default accent fill in light mode, the `dark1` shade, tone 40 of the primary ramp. */
 private const val FLUENT_FILL_LIGHT = 40
 

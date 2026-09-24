@@ -11,6 +11,7 @@ import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.MotionOverride
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
+import com.materialkolor.builder.feature.canvas.RampTarget
 import com.materialkolor.builder.feature.canvas.VisionSimulation
 import com.materialkolor.builder.feature.picker.PickerTarget
 import com.materialkolor.builder.kit.control.ToastDuration
@@ -159,6 +160,13 @@ internal sealed interface WorkspaceAction {
 
     /** Put the Expressive suggestion away. It changes nothing on its own. */
     data object DismissExpressiveSuggestion : WorkspaceAction
+
+    // b-308
+
+    /** Show the Palettes tab with the ramp [target] sits on picked out. */
+    data class ShowOnRamp(
+        val target: RampTarget,
+    ) : WorkspaceAction
 }
 
 /**
