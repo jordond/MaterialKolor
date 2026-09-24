@@ -42,8 +42,6 @@ include(
     ":material-kolor-fluent",
     ":material-color-utilities",
     ":mcu-upstream",
-    ":builder:shared",
-    ":builder:android",
 )
 
 include(
