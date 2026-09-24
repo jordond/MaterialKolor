@@ -1,7 +1,6 @@
 package com.materialkolor.builder.preview.split
 
 import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -10,7 +9,6 @@ import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.layout.LayoutInfo
-import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.DarkSpec
 import com.materialkolor.builder.preview.LightSpec
@@ -60,10 +58,8 @@ class SplitHandleReachTest {
 
     private fun ComposeUiTest.showHandle(layout: LayoutInfo) {
         setContent {
-            CompositionLocalProvider(LocalLayout provides layout) {
-                Chrome {
-                    SplitPreview(LightSpec, DarkSpec, SplitState(), Modifier.size(400.dp, 300.dp)) { }
-                }
+            Chrome(layout = layout) {
+                SplitPreview(LightSpec, DarkSpec, SplitState(), Modifier.size(400.dp, 300.dp)) { }
             }
         }
         waitForIdle()
