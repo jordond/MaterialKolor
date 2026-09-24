@@ -126,6 +126,8 @@ abstract class RewriteIndexHtml : DefaultTask() {
             .walkTopDown()
             .filter { file -> file.isFile && file.parentFile.name == "font" }
             .filter { file -> file.parentFile.parentFile.name.startsWith(BUILDER_RESOURCES) }
+            // Fluent's face loads on the first switch to Fluent, not for the first frame.
+            .filterNot { file -> file.name.startsWith(LAZY_FONT_PREFIX) }
             .map { file -> "/" + file.relativeTo(root).invariantSeparatorsPath }
             .sorted()
             .toList()
@@ -335,6 +337,9 @@ private const val DISTRIBUTION_TASK = "wasmJsBrowserDistribution"
 private const val ASSETS = "assets"
 private const val RESOURCES = "composeResources"
 private const val BUILDER_RESOURCES = "com.materialkolor."
+
+/** Fonts the app loads later, left out of the boot list. Selawik waits for the first switch to Fluent. */
+private const val LAZY_FONT_PREFIX = "Selawik"
 
 // b-501
 private const val BOOT_TAG = "<script src=\"/boot.js\"></script>"
