@@ -298,7 +298,9 @@ private class ChipShelf(
     private var draws = 0
 
     private val shown: Map<Style, MutableState<ChipColors>> =
-        Style.entries.associateWith { style -> mutableStateOf(draw(style, ChipKey.of(document, style, isDark), lookup)) }
+        Style.entries.associateWith { style ->
+            mutableStateOf(draw(style, ChipKey.of(document, style, isDark), lookup))
+        }
 
     /** The colours [style]'s chip shows now. */
     operator fun get(style: Style): ChipColors = shown.getValue(style).value
