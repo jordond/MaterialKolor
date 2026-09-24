@@ -16,5 +16,8 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
   }
   const site = await serveSite(root);
   process.env.MK_E2E_BASE_URL = site.url;
+  // b-213a
+  // The smoke lists the served files to hold the budget's first visit set against what boots.
+  process.env.MK_E2E_SITE_DIR = root;
   return site.close;
 }

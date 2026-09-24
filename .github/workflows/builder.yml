@@ -172,7 +172,9 @@ jobs:
 
   # Screenshot baselines come only from this job. Run it by hand with `record` to get them as an
   # artifact to commit. A module with no committed baselines yet is compared rather than verified,
-  # since verifying fails on a missing baseline.
+  # since verifying fails on a missing baseline. Once a module has one baseline it is verified, so
+  # a new screenshot test in it fails verify until someone dispatches `record` on that branch and
+  # commits the PNGs it uploads.
   screenshots:
     name: "Screenshots"
     runs-on: ubuntu-latest

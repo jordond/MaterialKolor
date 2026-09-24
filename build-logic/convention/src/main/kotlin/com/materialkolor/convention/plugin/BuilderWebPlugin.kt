@@ -4,10 +4,11 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Exec
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
@@ -15,9 +16,12 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.register
+import org.gradle.process.ExecOperations
 import java.io.File
+import javax.inject.Inject
 
 /**
  * Turns the production wasm distribution of `:builder:web` into the site the host serves.
@@ -31,13 +35,11 @@ import java.io.File
 class BuilderWebPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            val distribution = layout.buildDirectory.dir("dist/wasmJs/productionExecutable")
-
             val rewriteIndexHtml = tasks.register<RewriteIndexHtml>("rewriteIndexHtml") {
                 group = SITE_GROUP
                 description = "Points index.html at the hashed glue and lists the assets it boots with."
                 dependsOn(DISTRIBUTION_TASK)
-                this.distribution.set(distribution)
+                distribution.set(distributionDirectory())
                 index.set(layout.buildDirectory.file("site-parts/index.html"))
             }
 
@@ -52,22 +54,29 @@ class BuilderWebPlugin : Plugin<Project> {
                 group = SITE_GROUP
                 description = "Lays the production build out as the host serves it, in build/site."
                 dependsOn(DISTRIBUTION_TASK)
-                this.distribution.set(distribution)
+                distribution.set(distributionDirectory())
                 index.set(rewriteIndexHtml.flatMap { task -> task.index })
                 host.set(writeHeaders.flatMap { task -> task.outputDirectory })
                 site.set(layout.buildDirectory.dir("site"))
             }
 
-            tasks.register<Exec>("checkBudget") {
+            tasks.register<CheckBudget>("checkBudget") {
                 group = SITE_GROUP
                 description = "Fails when the brotli size of the site is over budget.json."
-                dependsOn(assembleSite)
-                workingDir = projectDir
-                val site = layout.buildDirectory.dir("site").get().asFile.path
-                commandLine("node", "scripts/check-budget.mjs", "--site", site)
+                site.set(assembleSite.flatMap { task -> task.site })
+                script.set(layout.projectDirectory.file("scripts/check-budget.mjs"))
+                budget.set(layout.projectDirectory.file("budget.json"))
+                baseline.set(layout.projectDirectory.file("budget-baseline.json"))
+                stamp.set(layout.buildDirectory.file("site-parts/budget-checked"))
             }
         }
     }
+
+    // The Kotlin plugin registers the distribution task once the build script declares the wasm
+    // target, which is after this plugin applies. Site tasks call this when they are configured,
+    // by which time the task is there, and read the directory from it so the path cannot drift.
+    private fun Project.distributionDirectory(): Provider<Directory> =
+        layout.dir(tasks.named(DISTRIBUTION_TASK, Sync::class.java).map(Sync::getDestinationDir))
 }
 
 /** Rewrites the distribution's `index.html` for the site layout. */
@@ -87,6 +96,7 @@ abstract class RewriteIndexHtml : DefaultTask() {
             ?: throw GradleException("Expected one builder.<hash>.js in $root, found ${names.filter(GLUE::matches)}")
         val wasm = names.filter { name -> HASHED.containsMatchIn(name) && name.endsWith(".wasm") }
         // The builder's own fonts only. Libraries ship fallback fonts the first frame never asks for.
+        // The initial fonts role in budget.json names the same files.
         val fonts = root
             .resolve(RESOURCES)
             .walkTopDown()
@@ -153,6 +163,51 @@ abstract class WriteHeaders : DefaultTask() {
             appendLine("/$RESOURCES/*")
             appendLine("  Cache-Control: public, max-age=86400, stale-while-revalidate=604800")
         }
+}
+
+/**
+ * Runs `check-budget.mjs` on the assembled site. The site, the script and both budget files are its
+ * inputs and a stamp its output, so it is up to date until one of them changes.
+ */
+abstract class CheckBudget : DefaultTask() {
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val site: DirectoryProperty
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val script: RegularFileProperty
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val budget: RegularFileProperty
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val baseline: RegularFileProperty
+
+    @get:OutputFile
+    abstract val stamp: RegularFileProperty
+
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    @TaskAction
+    fun check() {
+        execOperations.exec {
+            commandLine(
+                "node",
+                script.get().asFile.path,
+                "--site",
+                site.get().asFile.path,
+                "--budget",
+                budget.get().asFile.path,
+                "--baseline",
+                baseline.get().asFile.path,
+            )
+        }
+        stamp.get().asFile.writeText("Within budget.\n")
+    }
 }
 
 /** Copies the distribution into the site layout, hashed files under `/assets/`. */
