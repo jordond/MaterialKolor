@@ -56,7 +56,6 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.DropdownPositionProvider
 import com.materialkolor.builder.kit.headless.HeadlessDropdown
 import com.materialkolor.builder.kit.headless.LocalOverlayHost
-import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
 import com.materialkolor.builder.kit.headless.OverlayHostState
 import com.materialkolor.builder.kit.headless.OverlayKind
 import com.materialkolor.builder.kit.headless.TooltipPositionProvider
@@ -67,28 +66,9 @@ import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import kotlin.test.Test
-
-/** [ControlsHarness] with the overlays rendering in the page or in windows of their own. */
-@Composable
-internal fun HostOverlays(
-    skin: Skin,
-    inTree: Boolean,
-    content: @Composable () -> Unit,
-) {
-    CompositionLocalProvider(LocalOverlaysInTree provides inTree) { ControlsHarness(skin, content = content) }
-}
-
-/** Runs [block] for every skin, first with overlays in windows of their own and then in the page. */
-@OptIn(ExperimentalTestApi::class)
-internal fun hostEachWay(block: suspend ComposeUiTest.(skin: Skin, inTree: Boolean) -> Unit) {
-    for (inTree in listOf(false, true)) {
-        withClue(if (inTree) "in tree" else "in windows") { forEachSkin { _, skin -> block(skin, inTree) } }
-    }
-}
 
 private val MenuItems: List<BuilderMenuItem> = listOf(
     BuilderMenuItem("Duplicate", {}, IconId.Copy),

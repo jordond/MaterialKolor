@@ -55,7 +55,6 @@ import com.materialkolor.builder.codegen.generate
 import com.materialkolor.builder.domain.capability.forTarget
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.KeyColor
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.ExportMode
@@ -66,6 +65,7 @@ import com.materialkolor.builder.engine.export.ExportResolver
 import com.materialkolor.builder.engine.resolve.RampSet
 import com.materialkolor.builder.engine.resolve.RampStep
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.kit.control.ControlSkins
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
@@ -87,13 +87,7 @@ import kotlin.test.Test
 internal val WidgetDocument: ThemeDocument = ThemeDocument(seed = Argb(0x6750A4))
 
 /** Every skin the widgets are drawn in, named for the screenshots. */
-internal val WidgetSkins: List<Pair<String, Skin>> = listOf(
-    "material3" to Skin(Library.Material3, expressive = false),
-    "expressive" to Skin(Library.Material3, expressive = true),
-    "unstyled" to Skin(Library.Unstyled, expressive = false),
-    "custom" to Skin(Library.Custom, expressive = false),
-    "fluent" to Skin(Library.Fluent, expressive = false),
-)
+internal val WidgetSkins: List<Pair<String, Skin>> = ControlSkins
 
 /** Runs [block] once per skin in a fresh test, with the skin's name as the clue. */
 @OptIn(ExperimentalTestApi::class)

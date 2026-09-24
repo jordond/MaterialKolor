@@ -38,7 +38,9 @@ import com.materialkolor.palettes.TonalPalette
  * motion and its icons.
  *
  * [content] moves from one skin to the next rather than starting over, so everything it remembers,
- * an open dialog or menu included, and the overlay host it draws into survive a skin switch.
+ * an open dialog or menu included, and the overlay host it draws into survive a skin switch. Focus
+ * in the page does not. The move takes the focused node out and puts it back, so after a switch
+ * nothing in the page has focus until someone moves it again.
  *
  * @param[skin] The library and flavour to wear.
  * @param[result] The resolved document, read on the UI thread only like every result.

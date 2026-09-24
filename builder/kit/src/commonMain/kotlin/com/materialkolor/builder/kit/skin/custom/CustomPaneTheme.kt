@@ -21,6 +21,9 @@ private val PaneSkin = Skin(Library.Custom, expressive = false)
  * [slots] exactly as the document resolved them. Where overlays render in the page (D40) the pane
  * has an overlay host of its own, clipped to the pane, so its menus and dialogs stay inside the
  * pane's clip and filters, and a modal in the pane clears the pane rather than the whole builder.
+ * That host clips to [content], so [content] has to fill the pane. A popover in the pane only sees
+ * the pane too. A press outside the pane does not close it, and its Tab trap stops at the pane's
+ * edge, so Tab can leave it for the chrome around the pane.
  *
  * This is for preview panes and never for the chrome. The chrome takes its Custom skin from
  * `BuilderTheme`, whose slots leave pins and AMOLED out so the builder stays readable.

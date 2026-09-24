@@ -160,7 +160,7 @@ public fun rememberBuilderToastHostState(): BuilderToastHostState = remember { B
  * as a `Snackbar`, the other skins as a headless toast. Where overlays render in the page (D40) the
  * stack is drawn in the overlay host's top slot over the space it is given, so a toast raised from
  * inside a dialog or a sheet shows over its veil rather than under it, and its action joins the
- * dialog's Tab cycle.
+ * dialog's Tab cycle. When a toast goes with focus on its action, focus goes back into the dialog.
  *
  * @param[state] The toasts to show.
  * @param[modifier] Applied to the host, which fills the space it is given without taking any

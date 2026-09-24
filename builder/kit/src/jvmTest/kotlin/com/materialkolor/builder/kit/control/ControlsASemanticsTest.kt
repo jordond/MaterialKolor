@@ -40,7 +40,6 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.icon.IconId
@@ -55,13 +54,7 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 /** Every skin the action controls are checked in. */
-internal val ActionSkins: List<Skin> = listOf(
-    Skin(Library.Material3, expressive = false),
-    Skin(Library.Material3, expressive = true),
-    Skin(Library.Unstyled, expressive = false),
-    Skin(Library.Custom, expressive = false),
-    Skin(Library.Fluent, expressive = false),
-)
+internal val ActionSkins: List<Skin> = ControlSkins.map { (_, skin) -> skin }
 
 private val Desktop = LayoutInfo.of(widthDp = 1280.dp, heightDp = 800.dp)
 private val Phone = LayoutInfo.of(widthDp = 400.dp, heightDp = 800.dp)

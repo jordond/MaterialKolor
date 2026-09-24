@@ -33,12 +33,14 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.key.Key
@@ -145,8 +147,9 @@ private fun tonal(
 }
 
 /**
- * Material's `AlertDialog`. Its window keeps focus inside, focus starts on the first action, and Esc
- * closes it even where the platform does not turn Esc into back.
+ * Material's `AlertDialog`. Its window keeps focus inside, focus starts on the first action unless
+ * something inside has already taken it, a field that asks for it as it opens, and Esc closes it
+ * even where the platform does not turn Esc into back.
  *
  * `AlertDialog` always opens a window of its own, so where overlays render in the page (D40) it
  * gives way to [MaterialPageDialog].
@@ -169,6 +172,7 @@ internal fun MaterialDialog(
     ReturnFocusWhenGone(visible, returnFocusTo)
     if (!visible) return
     val firstAction = remember { FocusRequester() }
+    val focusInside = remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
@@ -180,6 +184,7 @@ internal fun MaterialDialog(
         },
         modifier = modifier
             .semantics { paneTitle = title }
+            .onFocusChanged { state -> focusInside.value = state.hasFocus }
             .onKeyEvent { event ->
                 val escape = event.type == KeyEventType.KeyDown && event.key == Key.Escape
                 if (escape) onDismissRequest()
@@ -189,7 +194,7 @@ internal fun MaterialDialog(
         text = { Column(content = content) },
         properties = DialogProperties(animateTransition = !LocalReducedMotion.current),
     )
-    LaunchedEffect(Unit) { firstAction.requestFocus() }
+    LaunchedEffect(Unit) { if (!focusInside.value) firstAction.requestFocus() }
 }
 
 /**

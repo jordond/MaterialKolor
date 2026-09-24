@@ -17,8 +17,10 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
@@ -26,6 +28,9 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.control.BuilderDialog
+import com.materialkolor.builder.kit.control.BuilderMenu
+import com.materialkolor.builder.kit.control.BuilderMenuItem
+import com.materialkolor.builder.kit.control.BuilderSelect
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTooltip
 import com.materialkolor.builder.kit.control.HostOverlays
@@ -102,4 +107,48 @@ class SkinSwitchStateTest {
             skin.library shouldBe Library.Custom
             onAllNodes(isPopup()).assertCountEquals(0)
         }
+
+    @Test
+    fun openMenuAndSelectAcrossASkinSwap_inWindows_closeWithTheSwap() =
+        runComposeUiTest {
+            var skin by mutableStateOf(Skin(Library.Material3, expressive = false))
+            var menu by mutableStateOf(false)
+            setContent {
+                HostOverlays(skin, inTree = false) {
+                    Column {
+                        BuilderMenu(menu, { menu = false }, SwapMenuItems) { BuilderText("Theme") }
+                        BuilderSelect(
+                            label = "Style",
+                            options = SwapStyles,
+                            selected = SwapStyles.first(),
+                            onSelect = {},
+                            modifier = Modifier.testTag("style"),
+                        )
+                    }
+                }
+            }
+            waitForIdle()
+            onNodeWithTag("style").performClick()
+            waitForIdle()
+            onAllNodes(isPopup()).assertCountEquals(1)
+            menu = true
+            waitForIdle()
+            onAllNodes(isPopup()).assertCountEquals(2)
+            for (library in listOf(Library.Custom, Library.Material3)) {
+                withClue(library.name) {
+                    skin = Skin(library, expressive = false)
+                    waitForIdle()
+                    menu shouldBe true
+                    onAllNodes(isPopup()).assertCountEquals(1)
+                    onAllNodes(hasText("Duplicate")).assertCountEquals(1)
+                }
+            }
+        }
 }
+
+private val SwapMenuItems: List<BuilderMenuItem> = listOf(
+    BuilderMenuItem("Duplicate", {}),
+    BuilderMenuItem("Delete", {}),
+)
+
+private val SwapStyles: List<String> = listOf("Tonal spot", "Vibrant")
