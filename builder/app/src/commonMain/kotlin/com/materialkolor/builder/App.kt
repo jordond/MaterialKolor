@@ -19,6 +19,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.PlatformServices
+import com.materialkolor.builder.core.platform.TimingMarks
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.capability.forTarget
 import com.materialkolor.builder.domain.color.Argb
@@ -26,6 +27,7 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.resolve.ThemeResult
+import com.materialkolor.builder.feature.image.ImageSeedModel
 import com.materialkolor.builder.feature.workspace.AppModel
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.feature.workspace.WorkspaceScreen
@@ -42,6 +44,9 @@ import dev.stateholder.extensions.collectAsState
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 
 /**
  * The builder, on whatever platform [platform] describes.
@@ -75,16 +80,25 @@ internal val LocalThemeResolver: ProvidableCompositionLocal<ThemeResolver?> = st
 /**
  * The one theme result per frame, derived from the collected [document] as its own target sees it
  * (D35). A setting the target turns off never reaches the chrome or the preview.
+ *
+ * @param[environment] Marks each resolve's start and end for the perf run. None by default.
  */
 @Composable
 internal fun rememberThemeResult(
     document: State<ThemeDocument>,
     resolver: ThemeResolver,
+    // b-504
+    environment: Environment? = null,
 ): State<ThemeResult> =
-    remember(document, resolver) {
+    remember(document, resolver, environment) {
         derivedStateOf {
             val stored = document.value
-            resolver.resolve(stored.forTarget(ExportTarget.of(stored.library, stored.expressive)))
+            // b-504
+            environment?.mark(TimingMarks.RESOLVE_START)
+            resolver
+                .resolve(stored.forTarget(ExportTarget.of(stored.library, stored.expressive)))
+                // b-504
+                .also { environment?.mark(TimingMarks.RESOLVE) }
         }
     }
 
@@ -117,17 +131,22 @@ internal fun BuilderRoot(
     // b-221c
     val workspace = workspaceModel.collectAsState()
     val document = remember(workspace) { derivedStateOf { workspace.value.document } }
-    val result by rememberThemeResult(document, graph.themeResolver)
-    val skin by rememberSkin(document)
+    // b-504
     val environment = graph.environment
+    val result by rememberThemeResult(document, graph.themeResolver, environment)
+    val skin by rememberSkin(document)
     val announcer = remember(environment) { Announcer { message -> environment.announce(message) } }
 
     LaunchedEffect(model) {
         model.boot()
         withFrameNanos {}
         environment.hideSplash()
+        // b-504
+        environment.mark(TimingMarks.FIRST_FRAME)
     }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { model.flush() }
+    // b-504
+    ImageMarkEffects(environment)
 
     CompositionLocalProvider(
         LocalThemeResult provides result,
@@ -157,4 +176,32 @@ internal fun BuilderRoot(
 private fun ThemeColorEffect(environment: Environment) {
     val surface = Argb(LocalBuilderTokens.current.panel.toArgb())
     LaunchedEffect(environment, surface) { environment.setThemeColor(surface) }
+}
+
+// b-504
+
+/**
+ * Leaves the perf run's two timing marks for each image the user brings in, when its thumbnail is in
+ * and when its candidates are. The image model is the one the workspace reads, since each owner keeps
+ * one of a kind.
+ */
+@Composable
+private fun ImageMarkEffects(
+    environment: Environment,
+    images: ImageSeedModel = metroViewModel(),
+) {
+    LaunchedEffect(environment, images) {
+        images.state
+            .map { state -> state.arriving?.thumbnail }
+            .distinctUntilChanged()
+            .filterNotNull()
+            .collect { environment.mark(TimingMarks.THUMBNAIL) }
+    }
+    LaunchedEffect(environment, images) {
+        images.state
+            .map { state -> state.newest }
+            .distinctUntilChanged()
+            .filterNotNull()
+            .collect { environment.mark(TimingMarks.EXTRACT) }
+    }
 }

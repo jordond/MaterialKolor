@@ -109,6 +109,15 @@ internal class FakeEnvironment(
 
     /** Whether a reload loads anything, true as on the web. */
     override var canReload: Boolean = true
+
+    // b-504
+
+    /** Every timing mark left, oldest first. */
+    val marks: MutableList<String> = mutableListOf()
+
+    override fun mark(name: String) {
+        marks += name
+    }
 }
 
 /** What every [FakeEnvironment] says it runs in. */

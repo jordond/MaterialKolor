@@ -412,6 +412,8 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Assemble the staging site
+        # b-504
+        env: { CF_WEB_ANALYTICS_TOKEN: "${{ vars.CF_WEB_ANALYTICS_TOKEN }}" }
         run: ./gradlew :builder:web:assembleSite -Psite.env=staging
 
       - name: setup-node

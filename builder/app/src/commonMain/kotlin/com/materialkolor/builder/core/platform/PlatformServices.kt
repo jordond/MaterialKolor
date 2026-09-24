@@ -425,6 +425,39 @@ interface Environment {
      */
     val siteOrigin: String
         get() = SITE_ORIGIN
+
+    // b-504
+
+    /**
+     * Leave the timing mark [name], one of [TimingMarks], for the perf run to read. The web calls
+     * `performance.mark`, and its first frame mark also loads the analytics beacon. Elsewhere it
+     * does nothing.
+     */
+    fun mark(name: String) = Unit
+}
+
+// b-504
+
+/**
+ * The names [Environment.mark] leaves, in the `mk:` namespace the rest of the page uses. The perf run
+ * in `builder/e2e/perf` times the budgets against them, and the web loads analytics after
+ * [FIRST_FRAME].
+ */
+object TimingMarks {
+    /** The first frame is up and the splash is on its way out. */
+    const val FIRST_FRAME: String = "mk:first-frame"
+
+    /** The root starts to resolve a theme result. */
+    const val RESOLVE_START: String = "mk:resolve-start"
+
+    /** The root has resolved a theme result, so the time since [RESOLVE_START] is what it took. */
+    const val RESOLVE: String = "mk:resolve"
+
+    /** An image the user brought in has its thumbnail. */
+    const val THUMBNAIL: String = "mk:thumbnail"
+
+    /** An image the user brought in has its seed candidates. */
+    const val EXTRACT: String = "mk:extract"
 }
 
 // b-501b
