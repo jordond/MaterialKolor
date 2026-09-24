@@ -46,7 +46,7 @@ internal fun PaletteSection(
             caption = "The seven shades Fluent themes from, generated from ${SampleCopy.label(seed)} " +
                 "${seed.color.toHex()} by rememberFluentColors.",
         ) {
-            ShadeRamp(shades = FluentTheme.colors.shades)
+            ShadeRamp(shades = FluentTheme.colors.shades, labelsFrom = SampleTheme.colors.accentTarget)
         }
 
         PaletteCard(
@@ -108,7 +108,6 @@ private fun TagRamps() {
                 ShadeRamp(
                     shades = SampleTheme.colors.shades(tag),
                     height = 24.dp,
-                    labeled = false,
                 )
             }
         }

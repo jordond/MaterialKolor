@@ -51,8 +51,6 @@ kotlin {
         }
 
         jvmTest.dependencies {
-            implementation(libs.compose.ui.test)
-            implementation(compose.desktop.currentOs)
             implementation(project(":samples:testing"))
         }
     }

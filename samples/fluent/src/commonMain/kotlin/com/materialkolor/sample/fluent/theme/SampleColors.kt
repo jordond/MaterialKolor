@@ -31,6 +31,7 @@ internal data class Tint(
  * @param[work] The ramp behind [TaskTag.Work].
  * @param[errand] The ramp behind [TaskTag.Errand].
  * @param[isDark] Whether the theme is dark, which decides which end of each ramp a tint uses.
+ * @property[accentTarget] The accent ramp a seed fade is heading to. Once the fade settles it matches [accent].
  */
 @Immutable
 internal class SampleColors(
@@ -38,6 +39,7 @@ internal class SampleColors(
     private val work: Shades,
     private val errand: Shades,
     private val isDark: Boolean,
+    val accentTarget: Shades,
 ) {
     /** A soft tint of the accent, for badges and the empty state. */
     val accentTint: Tint = accent.tint(isDark)
@@ -59,26 +61,22 @@ internal class SampleColors(
 }
 
 /**
- * Builds the tag ramps from the [accent] ramp Fluent is themed with.
+ * The ramp behind [tag], built from the [accent] ramp Fluent is themed with.
  */
-internal fun sampleColors(
+internal fun tagShades(
     accent: Shades,
-    isDark: Boolean,
-): SampleColors {
+    tag: TaskTag,
+): Shades {
     // Personal wears the accent itself. Work and Errand turn its hue a third and two thirds of the way round the
     // wheel at the same chroma, so the three stay apart for every seed and move with it. Both then go through
     // toFluentShades, the same adapter step that made the accent.
+    val turn = when (tag) {
+        TaskTag.Personal -> return accent
+        TaskTag.Work -> FULL_TURN / 3
+        TaskTag.Errand -> FULL_TURN * 2 / 3
+    }
     val hct = accent.base.toHct()
-
-    fun turned(degrees: Double): Shades =
-        TonalPalette.fromHueAndChroma((hct.hue + degrees) % FULL_TURN, hct.chroma).toFluentShades()
-
-    return SampleColors(
-        accent = accent,
-        work = turned(FULL_TURN / 3),
-        errand = turned(FULL_TURN * 2 / 3),
-        isDark = isDark,
-    )
+    return TonalPalette.fromHueAndChroma((hct.hue + turn) % FULL_TURN, hct.chroma).toFluentShades()
 }
 
 /**

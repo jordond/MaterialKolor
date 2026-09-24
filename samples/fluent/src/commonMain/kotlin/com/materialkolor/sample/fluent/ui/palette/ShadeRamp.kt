@@ -32,26 +32,31 @@ import io.github.composefluent.generateShades
  * @param[shades] The ramp to show.
  * @param[modifier] The modifier for the ramp.
  * @param[height] How tall the ramp is.
- * @param[labeled] Whether each shade shows its name and hex value.
+ * @param[labelsFrom] The ramp the label colors are worked out from, or null to leave the tiles bare. Pass the ramp a
+ *   fade is heading to rather than [shades] mid fade, so the contrast search runs once per seed and not every frame.
  */
 @Composable
 internal fun ShadeRamp(
     shades: Shades,
     modifier: Modifier = Modifier,
     height: Dp = 96.dp,
-    labeled: Boolean = true,
+    labelsFrom: Shades? = null,
 ) {
+    // Each slot keeps its tone from seed to seed, so a label picked for the target ramp reads on its tile all
+    // through a fade.
+    val onColors = remember(labelsFrom) { labelsFrom?.named()?.map { (_, color) -> color.readableOn() } }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
             .clip(FluentTheme.shapes.overlay),
     ) {
-        for ((name, color) in shades.named()) {
+        shades.named().forEachIndexed { index, (name, color) ->
             ShadeTile(
                 name = name,
                 color = color,
-                labeled = labeled,
+                onColor = onColors?.get(index),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight(),
@@ -99,16 +104,18 @@ private fun ComparisonRow(
         ShadeRamp(
             shades = shades,
             height = 32.dp,
-            labeled = false,
         )
     }
 }
 
+/**
+ * One shade, with its name and hex value in [onColor] when there is one.
+ */
 @Composable
 private fun ShadeTile(
     name: String,
     color: Color,
-    labeled: Boolean,
+    onColor: Color?,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -117,8 +124,7 @@ private fun ShadeTile(
             .padding(8.dp),
         contentAlignment = Alignment.BottomStart,
     ) {
-        if (labeled) {
-            val onColor = remember(color) { color.readableOn() }
+        if (onColor != null) {
             Column {
                 Text(
                     text = name,

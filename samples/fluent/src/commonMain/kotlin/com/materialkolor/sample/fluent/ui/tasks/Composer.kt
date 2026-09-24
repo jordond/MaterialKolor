@@ -59,8 +59,8 @@ internal fun Composer(
         if (canAdd) {
             onAdd(title)
             title = ""
-            focusRequester.requestFocus()
         }
+        focusRequester.requestFocus()
     }
 
     Row(
