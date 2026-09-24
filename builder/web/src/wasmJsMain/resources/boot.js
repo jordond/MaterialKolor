@@ -82,9 +82,11 @@
    * between them by the system's scheme, unless mk:splash says the app is always light or always
    * dark. The poster takes the seed of a theme link, else the seed mk:splash keeps, else stays
    * neutral. With no mk:splash at all the default document's colors stand in. An older mk:splash
-   * without a seed or an appearance still paints its chrome.
+   * without a seed or an appearance still paints its chrome. With ?motion=frozen the splash holds
+   * still, as it does under reduced motion.
    */
   function paintSplash() {
+    if (new URLSearchParams(location.search).get('motion') === 'frozen') root.classList.add('mk-motion-frozen');
     const stored = readSplash();
     const light = stored ? color(stored.light) : null;
     const dark = stored ? color(stored.dark) : null;
