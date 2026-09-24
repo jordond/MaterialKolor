@@ -11,6 +11,7 @@ import com.materialkolor.builder.engine.poster.PosterColors
 import com.materialkolor.builder.feature.about.AboutHost
 import com.materialkolor.builder.feature.canvas.CanvasArea
 import com.materialkolor.builder.feature.canvas.CanvasDock
+import com.materialkolor.builder.feature.canvas.FullscreenExit
 import com.materialkolor.builder.feature.command.CommandHost
 import com.materialkolor.builder.feature.export.ExportHost
 import com.materialkolor.builder.feature.image.ImageHost
@@ -181,6 +182,10 @@ internal fun WorkspaceScreen(
         canvas = { contentPadding -> CanvasArea(state, contentPadding, dispatcher) },
         dock = { CanvasDock(state, dispatcher) },
         modifier = modifier,
+        // b-217
+        fullscreen = state.fullscreen,
+        // b-217
+        fullscreenExit = { FullscreenExit(dispatcher) },
         overlays = {
             ExportHost(state, dispatcher)
             ProjectsHost(state, dispatcher)

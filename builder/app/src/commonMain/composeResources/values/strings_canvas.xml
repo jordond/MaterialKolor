@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The canvas tab showing the sample app. -->
+    <string name="canvas_tab_app">App</string>
+    <!-- The canvas tab showing the components gallery. -->
+    <string name="canvas_tab_components">Components</string>
+    <!-- The canvas tab listing every color role. -->
+    <string name="canvas_tab_roles">Roles</string>
+    <!-- The canvas tab showing the tonal palettes. -->
+    <string name="canvas_tab_palettes">Palettes</string>
+    <!-- The canvas tab scoring each role pair for contrast. -->
+    <string name="canvas_tab_contrast">Contrast</string>
+    <!-- What a screen reader calls the Light, Split and Dark switch in the dock. -->
+    <string name="canvas_mode_label">Preview mode</string>
+    <!-- The dock option that shows the light scheme alone, also the name of the light copy of a split. -->
+    <string name="canvas_mode_light">Light</string>
+    <!-- The dock option that shows light and dark with a handle between them. -->
+    <string name="canvas_mode_split">Split</string>
+    <!-- The dock option that shows the dark scheme alone, also the name of the dark copy of a split. -->
+    <string name="canvas_mode_dark">Dark</string>
+    <!-- The dock button that opens the device widths. %1$s is the width in use, such as Tablet. -->
+    <string name="canvas_device_button">Device width, %1$s</string>
+    <!-- The device width of a phone held upright. -->
+    <string name="canvas_device_phone">Phone</string>
+    <!-- The device width of a tablet. -->
+    <string name="canvas_device_tablet">Tablet</string>
+    <!-- The device width of a desktop window. -->
+    <string name="canvas_device_desktop">Desktop</string>
+    <!-- The dock toggle that turns the preview into an inspector. -->
+    <string name="canvas_inspect">Inspect</string>
+    <!-- The dock button that opens the color vision simulations. %1$s is the one in use, such as None. -->
+    <string name="canvas_vision_button">Color vision, %1$s</string>
+    <!-- The color vision option that simulates nothing. -->
+    <string name="canvas_vision_none">None</string>
+    <!-- The color vision option for missing long wavelength cones. -->
+    <string name="canvas_vision_protanopia">Protanopia</string>
+    <!-- The color vision option for missing medium wavelength cones. -->
+    <string name="canvas_vision_deuteranopia">Deuteranopia</string>
+    <!-- The color vision option for missing short wavelength cones. -->
+    <string name="canvas_vision_tritanopia">Tritanopia</string>
+    <!-- The color vision option that shows lightness only. -->
+    <string name="canvas_vision_achromatopsia">Achromatopsia</string>
+    <!-- The dock button that hides the poster and the top bar. -->
+    <string name="canvas_fullscreen">Fullscreen</string>
+    <!-- The floating pill that brings the poster and the top bar back. -->
+    <string name="canvas_fullscreen_exit">Exit fullscreen</string>
+</resources>

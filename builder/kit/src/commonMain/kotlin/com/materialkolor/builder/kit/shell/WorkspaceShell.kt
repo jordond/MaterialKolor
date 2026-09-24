@@ -125,6 +125,10 @@ internal fun sheetClearance(
  * @param[dock] The floating dock, usually a `DockRegion`.
  * @param[modifier] Applied to the whole shell.
  * @param[sheetState] Where the poster sheet rests on a phone.
+ * @param[fullscreen] Whether to hide the poster and the top bar and give the canvas the whole
+ * window. The dock stays and [fullscreenExit] floats at the canvas's top end. Every slot keeps its
+ * state across the switch.
+ * @param[fullscreenExit] The floating pill that leaves fullscreen, shown only while [fullscreen].
  * @param[overlays] Drawn over everything else, such as toasts, panels and the command palette.
  */
 @Composable
@@ -137,22 +141,31 @@ public fun WorkspaceShell(
     dock: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     sheetState: BottomSheetState = rememberBottomSheetState(),
+    // b-217
+    fullscreen: Boolean = false,
+    // b-217
+    fullscreenExit: @Composable () -> Unit = {},
     overlays: @Composable () -> Unit = {},
 ) {
     val mode = LocalLayout.current.posterMode
+    // b-217
+    val exit = if (fullscreen) fullscreenExit else null
     Box(modifier.fillMaxSize().background(LocalBuilderTokens.current.panel)) {
         when (mode) {
-            PosterMode.Sheet -> SheetShell(posterColors, sheetState, poster, topBar, canvas, dock)
+            PosterMode.Sheet -> SheetShell(posterColors, sheetState, poster, topBar, canvas, dock, exit)
             PosterMode.Rail72,
             PosterMode.Docked320,
             PosterMode.Docked400,
-            -> DockedShell(posterColors, mode, posterCollapsed, poster, topBar, canvas, dock)
+            -> DockedShell(posterColors, mode, posterCollapsed, poster, topBar, canvas, dock, exit)
         }
         overlays()
     }
 }
 
-/** The phone layout, the canvas under the top bar and the poster in a sheet over both. */
+/**
+ * The phone layout, the canvas under the top bar and the poster in a sheet over both. With a
+ * [fullscreenExit] the canvas takes the whole window and only the dock and the exit float over it.
+ */
 @Composable
 private fun SheetShell(
     posterColors: PosterColors,
@@ -161,25 +174,32 @@ private fun SheetShell(
     topBar: @Composable () -> Unit,
     canvas: @Composable (contentPadding: PaddingValues) -> Unit,
     dock: @Composable () -> Unit,
+    fullscreenExit: (@Composable () -> Unit)?,
 ) {
     val tokens = LocalBuilderTokens.current
     val layout = LocalLayout.current
-    val peek = posterPeekHeight(layout)
-    val clearance = PaddingValues(bottom = sheetClearance(layout, tokens))
+    // b-217
+    val fullscreen = fullscreenExit != null
+    val peek = if (fullscreen) 0.dp else posterPeekHeight(layout)
+    val clearance = PaddingValues(
+        bottom = if (fullscreen) tokens.spacing.large + ShellMetrics.dockHeight else sheetClearance(layout, tokens),
+    )
     ShellLayout(
         start = { 0.dp },
-        topBar = topBar,
+        topBar = { if (!fullscreen) topBar() },
         poster = {
-            PosterSurface(posterColors) {
-                HeadlessBottomSheet(
-                    state = sheetState,
-                    label = stringResource(Res.string.shell_poster_label),
-                    detentLabel = posterDetentNames(),
-                    peekHeight = peek,
-                    style = posterOverlayStyle(LocalBuilderTokens.current),
-                    modifier = Modifier.zIndex(1f).fillMaxSize(),
-                ) {
-                    poster(false)
+            if (!fullscreen) {
+                PosterSurface(posterColors) {
+                    HeadlessBottomSheet(
+                        state = sheetState,
+                        label = stringResource(Res.string.shell_poster_label),
+                        detentLabel = posterDetentNames(),
+                        peekHeight = peek,
+                        style = posterOverlayStyle(LocalBuilderTokens.current),
+                        modifier = Modifier.zIndex(1f).fillMaxSize(),
+                    ) {
+                        poster(false)
+                    }
                 }
             }
         },
@@ -188,11 +208,16 @@ private fun SheetShell(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = tokens.spacing.medium)
-                    .padding(top = tokens.spacing.extraSmall),
-                shape = RoundedCornerShape(topStart = tokens.radius.large, topEnd = tokens.radius.large),
+                    .padding(top = tokens.spacing.extraSmall, bottom = if (fullscreen) tokens.spacing.medium else 0.dp),
+                shape = if (fullscreen) {
+                    RoundedCornerShape(tokens.radius.large)
+                } else {
+                    RoundedCornerShape(topStart = tokens.radius.large, topEnd = tokens.radius.large)
+                },
                 canvas = { canvas(clearance) },
             ) {
                 Box(Modifier.align(Alignment.BottomCenter).padding(bottom = peek + tokens.spacing.large)) { dock() }
+                FullscreenExitSlot(fullscreenExit)
             }
         },
     )
@@ -201,7 +226,8 @@ private fun SheetShell(
 /**
  * Every wider layout. The poster stands on the start edge and the top bar and the canvas share the
  * rest. On the narrow Medium rail the canvas only makes room for the rail, so the opened poster
- * floats over the canvas instead of pushing it.
+ * floats over the canvas instead of pushing it. With a [fullscreenExit] the canvas takes the whole
+ * window inside the margin.
  */
 @Composable
 private fun DockedShell(
@@ -212,6 +238,7 @@ private fun DockedShell(
     topBar: @Composable () -> Unit,
     canvas: @Composable (contentPadding: PaddingValues) -> Unit,
     dock: @Composable () -> Unit,
+    fullscreenExit: (@Composable () -> Unit)?,
 ) {
     val tokens = LocalBuilderTokens.current
     val margin = tokens.spacing.medium
@@ -225,34 +252,51 @@ private fun DockedShell(
     )
     val posterWidth = { lerp(ShellMetrics.railWidth, openWidth, openness) }
     val roomWidth = if (floats) ({ ShellMetrics.railWidth }) else posterWidth
+    // b-217
+    val fullscreen = fullscreenExit != null
     ShellLayout(
-        start = { roomWidth() + margin * 2 },
-        topBar = topBar,
+        start = { if (fullscreen) 0.dp else roomWidth() + margin * 2 },
+        topBar = { if (!fullscreen) topBar() },
         poster = {
-            PosterSurface(posterColors) {
-                PosterPanel(
-                    modifier = Modifier
-                        .zIndex(1f)
-                        .padding(margin)
-                        .fillMaxHeight()
-                        .layoutWidth(posterWidth),
-                    floating = floats && open,
-                    contentWidth = if (open) openWidth else null,
-                ) {
-                    poster(!open)
+            if (!fullscreen) {
+                PosterSurface(posterColors) {
+                    PosterPanel(
+                        modifier = Modifier
+                            .zIndex(1f)
+                            .padding(margin)
+                            .fillMaxHeight()
+                            .layoutWidth(posterWidth),
+                        floating = floats && open,
+                        contentWidth = if (open) openWidth else null,
+                    ) {
+                        poster(!open)
+                    }
                 }
             }
         },
         canvas = {
             CanvasFrame(
-                modifier = Modifier.fillMaxSize().padding(end = margin, bottom = margin),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = if (fullscreen) margin else 0.dp, top = if (fullscreen) margin else 0.dp)
+                    .padding(end = margin, bottom = margin),
                 shape = RoundedCornerShape(tokens.radius.large),
                 canvas = { canvas(PaddingValues()) },
             ) {
                 Box(Modifier.align(Alignment.BottomCenter).padding(bottom = tokens.spacing.large)) { dock() }
+                FullscreenExitSlot(fullscreenExit)
             }
         },
     )
+}
+
+// b-217
+
+/** Floats [exit] at the top end of the canvas frame, or nothing outside fullscreen. */
+@Composable
+private fun BoxScope.FullscreenExitSlot(exit: (@Composable () -> Unit)?) {
+    if (exit == null) return
+    Box(Modifier.align(Alignment.TopEnd).padding(LocalBuilderTokens.current.spacing.large)) { exit() }
 }
 
 /**
