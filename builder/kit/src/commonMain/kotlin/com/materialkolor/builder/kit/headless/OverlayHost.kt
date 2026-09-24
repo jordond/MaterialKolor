@@ -7,13 +7,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.contextmenu.provider.LocalTextContextMenuDropdownProvider
 import androidx.compose.foundation.text.contextmenu.provider.LocalTextContextMenuToolbarProvider
-import androidx.compose.foundation.text.contextmenu.provider.TextContextMenuDataProvider
-import androidx.compose.foundation.text.contextmenu.provider.TextContextMenuProvider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalContext
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -24,23 +23,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerInputScope
-import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
-import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -48,14 +40,14 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalTextToolbar
-import androidx.compose.ui.platform.TextToolbar
-import androidx.compose.ui.platform.TextToolbarStatus
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.window.PopupPositionProvider
+import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.kit.skin.LocalSkin
 
 /**
  * Whether overlays draw inside the page rather than in a popup or dialog window of their own (D40).
@@ -87,7 +79,11 @@ internal enum class OverlayKind {
     /** A tooltip. It never takes focus and leaves what lies under it as it is. */
     Passive,
 
-    /** The toasts. They sit in the host's top slot over every other layer, and no modal hides them. */
+    /**
+     * The toasts. They sit in the host's top slot over every other layer, and no modal hides them.
+     * Tab reaches them from an open modal, so a toast's action joins its cycle, and only an open
+     * popover keeps Tab away from them.
+     */
     Top,
 }
 
@@ -171,6 +167,12 @@ internal class OverlayHostState {
     fun isUnderFocusTrap(index: Int): Boolean =
         layers.withIndex().any { (i, layer) -> i > index && layer.open && layer.kind != OverlayKind.Passive }
 
+    /**
+     * Whether an open popover keeps the keyboard away from the top slot. A modal does not, so Undo on
+     * a toast raised from a dialog stays one Tab away.
+     */
+    fun isTopUnderFocusTrap(): Boolean = layers.any { layer -> layer.open && layer.kind == OverlayKind.Popover }
+
     /** Whether focus rests in the page or in a layer, rather than nowhere after a layer left with it. */
     fun holdsFocus(): Boolean = pageHasFocus || layers.any { it.hasFocus } || top.any { it.hasFocus }
 
@@ -206,20 +208,46 @@ internal fun currentOverlayHost(): OverlayHostState? =
     if (LocalOverlaysInTree.current) LocalOverlayHost.current else null
 
 /**
+ * The library a control that may hold a popup or dialog window draws itself in.
+ *
+ * `BuilderTheme` carries its content across a skin switch, so a `BoxWithConstraints` in it composes
+ * its content again while it is being measured. A window closed there crashes the desktop scene,
+ * which is still laying the window out. So where overlays open windows the library
+ * follows the skin one composition late, and the old window closes in a composition of its own.
+ * In the page the library follows the skin at once.
+ */
+@Composable
+internal fun overlayLibrary(): Library {
+    val library = LocalSkin.current.library
+    if (LocalOverlaysInTree.current) return library
+    val settled = remember { mutableStateOf(library) }
+    SideEffect { settled.value = library }
+    return settled.value
+}
+
+/**
  * Hosts the overlays over [content] when they render in the page.
  *
  * It sits once at the root, inside `BuilderTheme`. A nested theme reuses the host it is already under,
  * and with the switch off the host steps aside and [content] is laid out as it would be without it.
  * While a modal is open the page and every layer under it leave the Tab order and the semantics
  * tree (AR-11), and they come back once it closes. A popover keeps Tab to itself the same way but
- * leaves the page readable. The toasts in the top slot stay readable under both.
+ * leaves the page readable. The toasts in the top slot stay readable under both, and Tab reaches
+ * them from a modal but not from a popover.
+ *
+ * A [nested] host is a pane's own. It never reuses the host above it, and it clips its overlays to
+ * the bounds of [content], the pane's, so they stay inside the pane's clip and filters, and a modal
+ * in it clears only the pane.
  *
  * Text fields get no context menu or selection toolbar here. Foundation draws both in a popup, and
  * the rows it offers are not public, so they cannot be drawn in the page instead.
  */
 @Composable
-internal fun OverlayHost(content: @Composable () -> Unit) {
-    if (!LocalOverlaysInTree.current || LocalOverlayHost.current != null) {
+internal fun OverlayHost(
+    nested: Boolean = false,
+    content: @Composable () -> Unit,
+) {
+    if (!LocalOverlaysInTree.current || (!nested && LocalOverlayHost.current != null)) {
         content()
         return
     }
@@ -232,6 +260,7 @@ internal fun OverlayHost(content: @Composable () -> Unit) {
     ) {
         Box(
             modifier = Modifier
+                .then(if (nested) Modifier.clipToBounds() else Modifier)
                 .onPlaced { coordinates -> host.coordinates = coordinates }
                 .pointerInput(Unit) { swallowSecondaryPresses() },
             propagateMinConstraints = true,
@@ -239,7 +268,7 @@ internal fun OverlayHost(content: @Composable () -> Unit) {
             Box(
                 modifier = Modifier
                     .onFocusChanged { state -> host.pageHasFocus = state.hasFocus }
-                    .trapFocus(host, OverlayHostState.Page)
+                    .trapFocus { host.isUnderFocusTrap(OverlayHostState.Page) }
                     .hideUnderModal(host, OverlayHostState.Page),
                 propagateMinConstraints = true,
             ) { content() }
@@ -322,33 +351,6 @@ internal fun OverlayTopSlot(
     OverlayPortal(host, layer, open = true, placement = placement, content = content)
 }
 
-/**
- * Where focus lands as an overlay opens, so it is always inside an open modal or popover.
- *
- * It goes to the first thing in the panel that takes it. When nothing does, a menu of disabled rows
- * or a dialog of text alone, the panel takes it itself, so Tab and Esc reach the overlay rather than
- * the page under it.
- */
-internal class OverlayFocus {
-    private val panel = FocusRequester()
-    private val inside = FocusRequester()
-    private var panelTakesFocus by mutableStateOf(false)
-
-    /** Goes on the panel, around what it holds. */
-    val modifier: Modifier = Modifier
-        .focusRequester(panel)
-        .focusProperties { canFocus = panelTakesFocus }
-        .focusTarget()
-        .focusRequester(inside)
-
-    /** Focuses [first], or else the first thing in the panel in reading order, or else the panel. */
-    fun enter(first: FocusRequester? = null) {
-        if (first?.requestFocus() == true || inside.requestFocus()) return
-        panelTakesFocus = true
-        panel.requestFocus()
-    }
-}
-
 @Composable
 private fun OverlayLayers(
     host: OverlayHostState,
@@ -356,11 +358,11 @@ private fun OverlayLayers(
 ) {
     host.layers.forEachIndexed { index, layer ->
         key(layer) {
-            OverlayLayerContent(layer, modifier.trapFocus(host, index).hideUnderModal(host, index))
+            OverlayLayerContent(layer, modifier.trapFocus { host.isUnderFocusTrap(index) }.hideUnderModal(host, index))
         }
     }
     for (layer in host.top) {
-        key(layer) { OverlayLayerContent(layer, modifier.trapFocus(host, OverlayHostState.Page)) }
+        key(layer) { OverlayLayerContent(layer, modifier.trapFocus { host.isTopUnderFocusTrap() }) }
     }
 }
 
@@ -399,11 +401,9 @@ private fun Modifier.dismissOnEscape(layer: OverlayLayer): Modifier =
         escape
     }
 
-/** Keeps focus out of the page or the layer at [index] while an open modal or popover covers it. */
-private fun Modifier.trapFocus(
-    host: OverlayHostState,
-    index: Int,
-): Modifier = focusProperties { onEnter = { if (host.isUnderFocusTrap(index)) cancelFocusChange() } }.focusGroup()
+/** Keeps focus out of the page, a layer or the top slot while [trapped] says an overlay over it holds it. */
+private fun Modifier.trapFocus(trapped: () -> Boolean): Modifier =
+    focusProperties { onEnter = { if (trapped()) cancelFocusChange() } }.focusGroup()
 
 /**
  * Hides the page or the layer at [index] from assistive technology while an open modal covers it.
@@ -413,41 +413,6 @@ private fun Modifier.hideUnderModal(
     host: OverlayHostState,
     index: Int,
 ): Modifier = then(if (host.isUnderModal(index)) Modifier.clearAndSetSemantics {} else Modifier)
-
-/**
- * Swallows a secondary press before a text field sees it, since foundation's text context menu is
- * a popup. Nothing else in the builder answers one.
- */
-private suspend fun PointerInputScope.swallowSecondaryPresses() {
-    awaitPointerEventScope {
-        while (true) {
-            val event = awaitPointerEvent(PointerEventPass.Initial)
-            if (event.buttons.isSecondaryPressed) {
-                event.changes.forEach { change -> if (change.changedToDownIgnoreConsumed()) change.consume() }
-            }
-        }
-    }
-}
-
-/** A text context menu that shows nothing, standing in for foundation's popup. */
-private object NoTextContextMenu : TextContextMenuProvider {
-    override suspend fun showTextContextMenu(dataProvider: TextContextMenuDataProvider) = Unit
-}
-
-/** A text selection toolbar that shows nothing, standing in for the web's popup. */
-private object NoTextToolbar : TextToolbar {
-    override val status: TextToolbarStatus = TextToolbarStatus.Hidden
-
-    override fun showMenu(
-        rect: Rect,
-        onCopyRequested: (() -> Unit)?,
-        onPasteRequested: (() -> Unit)?,
-        onCutRequested: (() -> Unit)?,
-        onSelectAllRequested: (() -> Unit)?,
-    ) = Unit
-
-    override fun hide() = Unit
-}
 
 /**
  * Lays [content] out where the placement puts it. A provider picks the spot from the anchor and

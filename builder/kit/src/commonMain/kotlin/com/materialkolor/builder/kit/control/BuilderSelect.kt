@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessSelect
-import com.materialkolor.builder.kit.skin.LocalSkin
+import com.materialkolor.builder.kit.headless.overlayLibrary
 import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.unstyledOverlayStyle
@@ -39,7 +39,8 @@ public fun <T> BuilderSelect(
 ) {
     require(selected in options) { "The selected option $selected is not one of the options" }
     val tokens = LocalBuilderTokens.current
-    when (LocalSkin.current.library) {
+    // b-221b
+    when (overlayLibrary()) {
         Library.Material3 -> MaterialSelect(label, options, selected, onSelect, optionLabel, enabled, modifier)
         Library.Unstyled -> HeadlessSelect(
             label,
