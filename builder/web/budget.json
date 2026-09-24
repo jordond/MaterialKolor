@@ -25,7 +25,8 @@
       "composeResources/com.materialkolor.**"
     ],
     "exclude": [
-      "composeResources/**/files/OFL-*.txt"
+      "composeResources/**/files/OFL-*.txt",
+      "composeResources/**/drawable/preset_*.webp"
     ],
     "maxBytes": 8000000
   },

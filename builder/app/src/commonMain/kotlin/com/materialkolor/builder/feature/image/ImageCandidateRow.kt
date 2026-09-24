@@ -53,6 +53,7 @@ import com.materialkolor.builder.kit.widget.SchemeChip
 import com.materialkolor.builder.kit.widget.SchemeChipFootprint
 import com.materialkolor.builder.kit.widget.SchemeChipSkeleton
 import dev.stateholder.dispatcher.Dispatcher
+import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -61,8 +62,9 @@ import org.jetbrains.compose.resources.stringResource
  * While an image is on its way the row shows its thumbnail, once it has one, beside skeleton chips,
  * whatever the seed came from. Once the seed comes from an image the row shows a chip for each
  * candidate, and a chip click swaps the seed for that candidate. The image itself only shows while
- * it is still in memory, so after a reload the row offers to add it again instead. Any other seed
- * leaves the row out.
+ * it is still in memory, so after a reload the row offers to add it again instead. A seed from a
+ * preset picture shows that picture and its chips the same way. Any other seed leaves the row out.
+ * The picture opens the image eyedropper.
  *
  * The skeleton takes the row's place, so when the focus was in the row as an image came in, the
  * skeleton takes it over. When the image lands the chips take it back, and when it never does the
@@ -80,9 +82,11 @@ internal fun ImageCandidateRow(
     // b-311a b-311c
     // Read in the frame the row changes over, before what it showed leaves and the focus goes with it.
     val focus = remember { RowFocus() }
+    val preset = Presets.imageOf(source) // b-311b
     val shows = when {
         arriving != null -> RowContent.Arriving
         source is SeedSource.Image -> RowContent.Candidates
+        preset != null -> RowContent.Preset // b-311b
         else -> RowContent.None
     }
     val refocus = remember(shows, arriving?.id) { focus.handOver() }
@@ -95,6 +99,10 @@ internal fun ImageCandidateRow(
         source is SeedSource.Image -> {
             val newest = seeds.newest?.takeIf { newest -> newest.source == source }
             CandidateRow(context, source, newest, dispatcher, rowModifier, refocus)
+        }
+        // b-311b
+        preset != null -> {
+            PresetRow(context, preset, dispatcher, rowModifier, refocus)
         }
     }
 }
@@ -159,40 +167,68 @@ private fun CandidateRow(
                 icon = IconId.Image,
             )
         } else {
-            Thumbnail(newest.thumbnail)
+            EyedropperThumbnail(newest.thumbnail, newest.detail, source, context.openPanel, dispatcher) // b-311b
         }
-        CandidateChips(context, source, dispatcher, Modifier.focusRequester(chips))
+        CandidateChips(context, source.candidates, source, dispatcher, Modifier.focusRequester(chips))
         if (newest?.mostlyGray == true) {
             BuilderText(text = stringResource(Res.string.image_mostly_gray), emphasis = Emphasis.Secondary)
         }
     }
 }
 
+// b-311b
+
+/**
+ * A preset picture's seed, the picture over its candidate chips. A chip keeps the preset as the seed
+ * source. With [refocus] the chips take the focus as they come in.
+ */
+@Composable
+private fun PresetRow(
+    context: PosterContext,
+    preset: Preset.Image,
+    dispatcher: Dispatcher<WorkspaceAction>,
+    modifier: Modifier,
+    refocus: Boolean,
+) {
+    val spacing = LocalBuilderTokens.current.spacing
+    val source = context.document.seedSource
+    val chips = remember { FocusRequester() }
+    if (refocus) LaunchedEffect(Unit) { chips.requestFocus() }
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+        // Only ever 256 px, so the eyedropper shows the same picture.
+        val picture = imageResource(preset.drawable)
+        EyedropperThumbnail(picture, picture, source, context.openPanel, dispatcher)
+        CandidateChips(context, preset.candidates, source, dispatcher, Modifier.focusRequester(chips))
+    }
+}
+
 /**
  * One chip per candidate, drawn the way a style chip is, from the scheme the candidate makes in the
- * document's style. The schemes resolve one per frame, so a new image never costs five in one.
+ * document's style. The schemes resolve one per frame, so a new image never costs five in one. A
+ * chip keeps [source] as the seed source.
  */
 @Composable
 private fun CandidateChips(
     context: PosterContext,
-    source: SeedSource.Image,
+    candidates: List<Argb>, // b-311b
+    source: SeedSource,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier,
 ) {
     val resolver = rememberThemeResolver()
     val isDark = context.visibleModes == PreviewMode.Dark
     val base = context.result.document
-    val inputs = remember(source.candidates, base) {
-        source.candidates.map { candidate -> SchemeInputs.from(base.copy(seed = candidate)) }
+    val inputs = remember(candidates, base) {
+        candidates.map { candidate -> SchemeInputs.from(base.copy(seed = candidate)) }
     }
-    val colors = rememberCandidateColors(source.candidates, inputs, isDark, resolver) // b-311c
+    val colors = rememberCandidateColors(candidates, inputs, isDark, resolver) // b-311c
     val selected = context.document.seed
     val choose = { candidate: Argb, origin: Rect? ->
         val change = DocumentChange.SetSeed(candidate, source)
         dispatcher.dispatch(WorkspaceAction.EditWithReveal(change, origin?.center))
     }
     BuilderChoiceGroup(
-        options = source.candidates,
+        options = candidates,
         selected = selected,
         // The keys only move the focus here, so a pick that ever comes this way has no chip to reveal from.
         onSelect = { candidate -> if (candidate != selected) choose(candidate, null) },
@@ -201,7 +237,7 @@ private fun CandidateChips(
         selectOnFocus = false,
     ) { candidate, isSelected, optionModifier ->
         val placeholder = LocalBuilderTokens.current.border
-        val chip = colors.getOrNull(source.candidates.indexOf(candidate))
+        val chip = colors.getOrNull(candidates.indexOf(candidate))
         val bounds = remember { ChipBounds() }
         val name = remember(candidate) { ColorNames.nameOf(candidate) }
         SchemeChip(
@@ -296,6 +332,7 @@ private class RowFocus {
 private enum class RowContent {
     Arriving,
     Candidates,
+    Preset, // b-311b
     None,
 }
 

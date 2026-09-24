@@ -10,13 +10,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import com.materialkolor.builder.domain.persist.Preferences
+import com.materialkolor.builder.feature.image.ImageMenuButton
 import com.materialkolor.builder.feature.picker.PickerTarget
 import com.materialkolor.builder.feature.picker.pickButtonFocus
 import com.materialkolor.builder.feature.workspace.ShuffleLock
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.poster_all_locked
-import com.materialkolor.builder.generated.resources.poster_image
 import com.materialkolor.builder.generated.resources.poster_lock_hue
 import com.materialkolor.builder.generated.resources.poster_lock_seed
 import com.materialkolor.builder.generated.resources.poster_lock_style
@@ -85,11 +85,7 @@ internal fun SeedActions(
                 modifier = pickButtonFocus(pick),
                 icon = IconId.Eyedropper,
             )
-            BuilderButton(
-                onClick = { dispatcher.dispatch(WorkspaceAction.OpenImagePicker) },
-                label = stringResource(Res.string.poster_image),
-                icon = IconId.Image,
-            )
+            ImageMenuButton(context, dispatcher) // b-311b
         }
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),

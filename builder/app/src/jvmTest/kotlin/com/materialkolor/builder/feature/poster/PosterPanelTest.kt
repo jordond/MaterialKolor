@@ -278,7 +278,10 @@ class PosterPanelTest {
             showPoster()
 
             onNodeWithText("Pick").performClick()
+            // b-311b
+            // Image opens a menu, and its Upload image row opens the image picker.
             onNodeWithText("Image").performClick()
+            onNodeWithText("Upload image").performClick()
             waitForIdle()
 
             // b-307
