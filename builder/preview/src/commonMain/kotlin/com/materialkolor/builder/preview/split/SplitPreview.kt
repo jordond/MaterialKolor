@@ -22,11 +22,12 @@ import com.materialkolor.builder.preview.canvas.PreviewPane
 /**
  * Two copies of one screen, the end copy wiped over the start copy up to a draggable handle.
  *
- * Only the end copy's layer reads [split], so dragging the handle moves a clip and a handle and
- * recomposes neither copy. Hit testing follows the clip, so each side takes pointer input where it
- * shows. The end copy is hidden from assistive tech and refuses focus that moves in from outside,
- * so a screen reader and the Tab key find one app, the start copy. Focus asked for from inside, as
- * when a pointer taps a text field there, still lands, so pointer users can use either side.
+ * Each copy draws in a layer of its own and only the end copy's layer reads [split], so dragging the
+ * handle moves a clip and a handle and neither recomposes nor redraws either copy. Hit testing
+ * follows the clip, so each side takes pointer input where it shows. The end copy is hidden from
+ * assistive tech and refuses focus that moves in from outside, so a screen reader and the Tab key
+ * find one app, the start copy. Focus asked for from inside, as when a pointer taps a text field
+ * there, still lands, so pointer users can use either side.
  *
  * @param[start] The copy drawn from the start edge, the one assistive tech reads.
  * @param[end] The copy past the handle.
@@ -53,7 +54,8 @@ public fun SplitPreview(
             .onSizeChanged { measured -> size.value = measured },
         propagateMinConstraints = true,
     ) {
-        PreviewPane(start) { screen(start) }
+        // Its own layer, so nothing the split itself redraws takes the start copy with it.
+        PreviewPane(start, Modifier.graphicsLayer()) { screen(start) }
         CompositionLocalProvider(LocalPaneSide provides PaneSide.End) {
             PreviewPane(
                 spec = end,

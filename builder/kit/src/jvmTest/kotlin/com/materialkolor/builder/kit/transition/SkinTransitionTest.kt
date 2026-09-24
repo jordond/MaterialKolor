@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -305,6 +307,44 @@ class SkinTransitionTest {
             mainClock.advanceTimeBy(100)
             harness.color shouldBe New
             harness.transition.snapshot.size shouldNotBe IntSize.Zero
+        }
+
+    // pf-3
+
+    @Test
+    fun warmUp_drawsTheSampleUnderTheLiveFrame_thenLetsItGo() =
+        runComposeUiTest {
+            val harness = showHost()
+            var sampleDraws = 0
+            var sampleComposed = false
+
+            val warm = runOnUiThread {
+                harness.scope.launch {
+                    harness.transition.warmUp(
+                        sample = {
+                            DisposableEffect(Unit) {
+                                sampleComposed = true
+                                onDispose { sampleComposed = false }
+                            }
+                            Box(Modifier.fillMaxSize().drawBehind { sampleDraws++ }.background(Newer))
+                        },
+                    )
+                }
+            }
+            mainClock.advanceTimeBy(0)
+            mainClock.advanceTimeByFrame()
+
+            sampleComposed shouldBe true
+            sampleDraws shouldNotBe 0
+            harness.transition.warmPass shouldNotBe null
+            val shown = hostPixels()
+            listOf(shown.nearOrigin(), shown.center(), shown.farCorner()) shouldBe listOf(Old, Old, Old)
+
+            repeat(12) { mainClock.advanceTimeByFrame() }
+            warm.isCompleted shouldBe true
+            sampleComposed shouldBe false
+            harness.transition.warmPass shouldBe null
+            hostPixels().center() shouldBe Old
         }
 }
 
