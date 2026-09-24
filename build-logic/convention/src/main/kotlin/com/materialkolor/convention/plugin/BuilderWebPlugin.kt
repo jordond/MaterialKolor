@@ -31,7 +31,8 @@ import javax.inject.Inject
  * `composeResources/` at the root. `checkBudget` holds the result against `budget.json`.
  *
  * `-Psite.env=staging` adds a noindex header and turns every crawler away in `robots.txt`, which
- * lets them all in on production.
+ * lets them all in on production. It also points the page's canonical link and link cards at the
+ * staging origin.
  */
 class BuilderWebPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -45,11 +46,14 @@ class BuilderWebPlugin : Plugin<Project> {
                 index.set(layout.buildDirectory.file("site-parts/index.html"))
             }
 
+            // b-505
+            val siteEnvironment = providers.gradleProperty("site.env").orElse("production")
+
             val writeHeaders = tasks.register<WriteHeaders>("writeHeaders") {
                 group = SITE_GROUP
                 // b-501b
                 description = "Writes the host's _headers and robots.txt files."
-                environment.set(providers.gradleProperty("site.env").orElse("production"))
+                environment.set(siteEnvironment)
                 outputDirectory.set(layout.buildDirectory.dir("site-parts/host"))
             }
 
@@ -60,6 +64,8 @@ class BuilderWebPlugin : Plugin<Project> {
                 distribution.set(distributionDirectory())
                 index.set(rewriteIndexHtml.flatMap { task -> task.index })
                 host.set(writeHeaders.flatMap { task -> task.outputDirectory })
+                // b-505
+                origin.set(siteEnvironment.map(::siteOrigin))
                 site.set(layout.buildDirectory.dir("site"))
             }
 
@@ -232,6 +238,12 @@ abstract class AssembleSite : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val host: DirectoryProperty
 
+    // b-505
+
+    /** Where the site is served, which the page's canonical link and link cards name. */
+    @get:Input
+    abstract val origin: Property<String>
+
     @get:OutputDirectory
     abstract val site: DirectoryProperty
 
@@ -251,10 +263,42 @@ abstract class AssembleSite : DefaultTask() {
             }
             file.copyTo(output.resolve(target))
         }
-        index.get().asFile.copyTo(output.resolve("index.html"))
+        // b-505
+        // Every page and card URL in the head of index.html starts with the production origin.
+        output.resolve("index.html").writeText(index.get().asFile.readText().replace(PRODUCTION_ORIGIN, origin.get()))
         host.get().asFile.listFiles().orEmpty().forEach { file -> file.copyTo(output.resolve(file.name)) }
+        if (origin.get() != PRODUCTION_ORIGIN) checkNoProductionOrigin(output)
+    }
+
+    // b-505
+    // A staging page that still names production would hand production its link previews and search
+    // results, so any host file that does fails the build rather than going out.
+    private fun checkNoProductionOrigin(output: File) {
+        val named = output
+            .listFiles()
+            .orEmpty()
+            .filter { file -> file.isFile && (file.extension in HOST_TEXT_EXTENSIONS || file.name == "_headers") }
+            .filter { file -> PRODUCTION_ORIGIN in file.readText() }
+            .map(File::getName)
+            .sorted()
+        if (named.isNotEmpty()) {
+            throw GradleException("$named still name $PRODUCTION_ORIGIN in a site for ${origin.get()}")
+        }
     }
 }
+
+// b-505
+/** Where a site built with `site.env` set to [environment] is served from. */
+private fun siteOrigin(environment: String): String =
+    when (environment) {
+        "production" -> PRODUCTION_ORIGIN
+        "staging" -> STAGING_ORIGIN
+        else -> throw GradleException("site.env is '$environment', expected production or staging")
+    }
+
+private const val PRODUCTION_ORIGIN = "https://materialkolor.com"
+private const val STAGING_ORIGIN = "https://staging.materialkolor.com"
+private val HOST_TEXT_EXTENSIONS = setOf("html", "js", "json", "webmanifest", "txt")
 
 private const val SITE_GROUP = "site"
 private const val DISTRIBUTION_TASK = "wasmJsBrowserDistribution"
