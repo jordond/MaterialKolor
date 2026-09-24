@@ -68,7 +68,8 @@ internal fun suggestsExpressiveStyle(document: ThemeDocument): Boolean =
     EffectiveSpec.of(style = document.style, requested = document.spec) != SpecVersion.Spec2025
 
 /**
- * The library switcher. A segmented row on wide windows and a dropdown on narrower ones.
+ * The library switcher. A segmented row when [segmented] holds, which by default it does on wide
+ * windows, and a dropdown otherwise.
  *
  * [onSwitch] gets the new choice and where the reveal should grow from, the press that picked it
  * or the middle of the switcher after a keyboard pick. Picking the current choice does nothing.
@@ -81,6 +82,7 @@ internal fun LibrarySwitcher(
     document: ThemeDocument,
     onSwitch: (choice: LibraryChoice, origin: Offset) -> Unit,
     modifier: Modifier = Modifier,
+    segmented: Boolean = LocalLayout.current.windowClass == WindowClass.Expanded, // b-231
 ) {
     val origin = remember { RevealOrigin() }
     val selected = LibraryChoice.of(document)
@@ -90,28 +92,25 @@ internal fun LibrarySwitcher(
         if (choice != selected) onSwitch(choice, origin.take())
     }
     val tracked = modifier.trackRevealOrigin(origin)
-    when (LocalLayout.current.windowClass) {
-        WindowClass.Expanded -> {
-            BuilderSegmented(
-                options = LibraryChoice.entries,
-                selected = selected,
-                onSelect = onSelect,
-                label = label,
-                modifier = tracked,
-                selectOnFocus = false, // b-221c
-                optionLabel = { choice -> names.getValue(choice) },
-            )
-        }
-        WindowClass.Medium, WindowClass.Compact -> {
-            BuilderSelect(
-                label = label,
-                options = LibraryChoice.entries,
-                selected = selected,
-                onSelect = onSelect,
-                modifier = tracked,
-                optionLabel = { choice -> names.getValue(choice) },
-            )
-        }
+    if (segmented) {
+        BuilderSegmented(
+            options = LibraryChoice.entries,
+            selected = selected,
+            onSelect = onSelect,
+            label = label,
+            modifier = tracked,
+            selectOnFocus = false, // b-221c
+            optionLabel = { choice -> names.getValue(choice) },
+        )
+    } else {
+        BuilderSelect(
+            label = label,
+            options = LibraryChoice.entries,
+            selected = selected,
+            onSelect = onSelect,
+            modifier = tracked,
+            optionLabel = { choice -> names.getValue(choice) },
+        )
     }
 }
 

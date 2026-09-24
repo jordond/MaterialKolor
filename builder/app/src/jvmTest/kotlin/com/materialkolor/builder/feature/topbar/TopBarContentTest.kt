@@ -53,8 +53,8 @@ private const val EXPRESSIVE_MESSAGE = "Expressive themes usually use the Expres
 private const val UNDO_EXPRESSIVE = "Undo library change to Expressive"
 private const val REDO_EXPRESSIVE = "Redo library change to Expressive"
 
-/** A desktop window wide enough for the segmented switcher. */
-private const val WIDTH = 1280
+/** A desktop window wide enough for the segmented switcher in every skin, beside the full actions. */
+private const val WIDTH = 1600 // b-231
 private const val HEIGHT = 800
 
 /**
