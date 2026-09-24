@@ -141,7 +141,14 @@ class SettingsAppTest {
     @Test
     fun accentControls_switchOnAndGroupHeader_resolveToARowOfTheAudit() =
         runComposeUiTest {
-            setContent { FluentHarness(FluentLightSpec, DemoAppState(), DeviceWidth.Desktop, Modifier.size(1280.dp, 800.dp)) }
+            setContent {
+                FluentHarness(
+                    FluentLightSpec,
+                    DemoAppState(),
+                    DeviceWidth.Desktop,
+                    Modifier.size(1280.dp, 800.dp),
+                )
+            }
 
             for (control in listOf(TransparencySwitch and isOn(), AccentGroupHeader)) {
                 val refs = onNode(control, useUnmergedTree = true).fetchSemanticsNode().config[PreviewRoles]
