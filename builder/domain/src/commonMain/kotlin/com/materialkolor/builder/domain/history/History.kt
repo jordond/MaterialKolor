@@ -68,7 +68,7 @@ public class History(
         phase: EditPhase,
         now: Long,
     ) {
-        if (canFold(change, phase, now) && !change.startsNewImage(before)) { // b-311a
+        if (canFold(change, phase, now, before)) { // b-311a
             fold(after, change, phase, now)
         } else {
             push(before, after, change, phase, now)
@@ -108,6 +108,7 @@ public class History(
         change: DocumentChange,
         phase: EditPhase,
         now: Long,
+        before: ThemeDocument, // b-311a
     ): Boolean {
         val previous = last ?: return false
         if (previous.coalesceKey != change.coalesceKey) return false
@@ -115,7 +116,7 @@ public class History(
         // A release closes its drag even when the change never merges, so a preset seed put back
         // after a drag leaves no second step.
         if (phase == EditPhase.Released && previous.phase == EditPhase.Dragging) return true
-        if (!change.merges || !previous.merges) return false
+        if (!change.merges || !previous.merges || change.startsNewImage(before)) return false // b-311a
         return when (phase) {
             EditPhase.Dragging -> {
                 previous.phase == EditPhase.Dragging
