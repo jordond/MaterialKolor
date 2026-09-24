@@ -60,3 +60,46 @@ export async function gesture(page: Page, action: string): Promise<void> {
   await hook(page, 'gesture', action);
   await page.click('#mk-e2e-gesture');
 }
+
+// b-315c
+
+/**
+ * Paste [text] and [files] on the page, into a text field, into a text field in a shadow root the
+ * way Compose keeps its inputs, or into a stand-in for Compose's hidden clip target. True when the
+ * page took it. The page needs `__makeFiles` and `__makeTransfer` hung on it first, as
+ * `installFileMakers` in `image-files.ts` does.
+ */
+export async function dispatchPaste(
+  page: Page,
+  {
+    text,
+    files = [],
+    into = 'page',
+  }: { text?: string; files?: string[]; into?: 'page' | 'field' | 'shadowField' | 'clipTarget' },
+): Promise<boolean> {
+  return page.evaluate(
+    async ({ text, names, into }) => {
+      let target: HTMLElement = document.body;
+      let added: HTMLElement | null = null;
+      if (into !== 'page') {
+        target = document.createElement('textarea');
+        if (into === 'field') {
+          added = target;
+        } else {
+          added = document.createElement('div');
+          added.attachShadow({ mode: 'open' }).appendChild(target);
+          if (into === 'clipTarget') target.setAttribute('aria-hidden', 'true');
+        }
+        document.body.appendChild(added);
+        target.focus();
+      }
+      const transfer = (window as any).__makeTransfer(await (window as any).__makeFiles(names), text);
+      const event = new Event('paste', { bubbles: true, cancelable: true, composed: true });
+      Object.defineProperty(event, 'clipboardData', { value: transfer });
+      target.dispatchEvent(event);
+      added?.remove();
+      return event.defaultPrevented;
+    },
+    { text, names: files, into },
+  );
+}

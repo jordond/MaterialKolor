@@ -28,6 +28,7 @@ import com.materialkolor.builder.generated.resources.command_key_esc
 import com.materialkolor.builder.generated.resources.command_key_escape
 import com.materialkolor.builder.generated.resources.command_key_export
 import com.materialkolor.builder.generated.resources.command_key_fullscreen
+import com.materialkolor.builder.generated.resources.command_key_grayscale
 import com.materialkolor.builder.generated.resources.command_key_hue_lock
 import com.materialkolor.builder.generated.resources.command_key_inspect
 import com.materialkolor.builder.generated.resources.command_key_library_1
@@ -47,6 +48,7 @@ import com.materialkolor.builder.generated.resources.command_key_save
 import com.materialkolor.builder.generated.resources.command_key_shuffle
 import com.materialkolor.builder.generated.resources.command_key_style_lock
 import com.materialkolor.builder.generated.resources.command_key_undo
+import com.materialkolor.builder.generated.resources.command_key_vision_menu
 import com.materialkolor.builder.generated.resources.command_screen_reader_note
 import com.materialkolor.builder.generated.resources.command_single_keys
 import com.materialkolor.builder.generated.resources.command_single_keys_note
@@ -194,4 +196,7 @@ internal fun shortcutLabel(shortcut: Shortcut): StringResource =
         Shortcut.DeviceWidth -> Res.string.command_key_device_width
         Shortcut.Fullscreen -> Res.string.command_key_fullscreen
         Shortcut.Poster -> Res.string.command_key_poster
+        // b-315c
+        Shortcut.VisionMenu -> Res.string.command_key_vision_menu
+        Shortcut.Grayscale -> Res.string.command_key_grayscale
     }

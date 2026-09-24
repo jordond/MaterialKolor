@@ -201,6 +201,18 @@ internal sealed interface WorkspaceAction {
         val toast: ShowToast,
         val onShown: (withdraw: () -> Unit) -> Unit,
     ) : WorkspaceAction
+
+    // b-315c
+
+    /** Open the dock's Vision menu or close it. Nothing saves it. */
+    data class SetVisionMenuOpen(
+        val open: Boolean,
+    ) : WorkspaceAction
+
+    /** Show the canvas in grayscale while B is held, or let go (F-25). Nothing saves it. */
+    data class HoldGrayscale(
+        val held: Boolean,
+    ) : WorkspaceAction
 }
 
 /**

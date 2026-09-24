@@ -18,6 +18,7 @@ import com.materialkolor.builder.feature.canvas.CanvasArea
 import com.materialkolor.builder.feature.canvas.CanvasDock
 import com.materialkolor.builder.feature.canvas.FullscreenExit
 import com.materialkolor.builder.feature.command.CommandHost
+import com.materialkolor.builder.feature.command.PasteHost
 import com.materialkolor.builder.feature.command.ShortcutFocus
 import com.materialkolor.builder.feature.command.ShortcutScope
 import com.materialkolor.builder.feature.command.commandReturnFocus
@@ -204,6 +205,13 @@ internal fun WorkspaceScreen(
                 val shown = toasts.show(toast.message, toast.actionLabel, toast.duration, toast.onAction)
                 action.onShown { toasts.dismiss(shown) }
             }
+            // b-315c
+            is WorkspaceAction.SetVisionMenuOpen -> {
+                model.setVisionMenuOpen(action.open)
+            }
+            is WorkspaceAction.HoldGrayscale -> {
+                model.holdGrayscale(action.held)
+            }
         }
     }
 
@@ -289,6 +297,7 @@ internal fun WorkspaceScreen(
             )
             PickerHost(state, dispatcher, returnFocusTo = pickerFrom) // b-307
             ImageHost(state, dispatcher)
+            PasteHost(state, dispatcher) // b-315c
             // b-314
             AboutHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.More))
             HelpHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.More))

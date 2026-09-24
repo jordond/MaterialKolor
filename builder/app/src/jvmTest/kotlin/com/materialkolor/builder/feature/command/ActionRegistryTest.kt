@@ -63,7 +63,9 @@ class ActionRegistryTest {
 
             val shortcuts = harness.commands.mapNotNull { command -> command.shortcut }
 
-            shortcuts.sorted() shouldBe Shortcut.entries.sorted()
+            // b-315c
+            // V and the held B work the dock straight from the keys.
+            shortcuts.sorted() shouldBe Shortcut.entries.filter { shortcut -> shortcut.inRegistry }.sorted()
             harness.commands
                 .map { command -> command.id }
                 .distinct()

@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { gesture, hook, openWithBrowserApis, wantHooks } from './builder';
+import { dispatchPaste, gesture, hook, openWithBrowserApis, wantHooks } from './builder';
 
 // The clipboard, downloads, the share sheet, images from the picker, drops and pastes, and the
 // eyedropper, driven through the shell's test hooks while the app is still a placeholder. Spike S7
@@ -498,44 +498,4 @@ async function readableSize(page: Page, name: string): Promise<string> {
     bitmap.close();
     return size;
   }, name);
-}
-
-/**
- * Paste [text] and [files] on the page, into a text field, into a text field in a shadow root the
- * way Compose keeps its inputs, or into a stand-in for Compose's hidden clip target. True when the
- * page took it.
- */
-async function dispatchPaste(
-  page: Page,
-  {
-    text,
-    files = [],
-    into = 'page',
-  }: { text?: string; files?: string[]; into?: 'page' | 'field' | 'shadowField' | 'clipTarget' },
-): Promise<boolean> {
-  return page.evaluate(
-    async ({ text, names, into }) => {
-      let target: HTMLElement = document.body;
-      let added: HTMLElement | null = null;
-      if (into !== 'page') {
-        target = document.createElement('textarea');
-        if (into === 'field') {
-          added = target;
-        } else {
-          added = document.createElement('div');
-          added.attachShadow({ mode: 'open' }).appendChild(target);
-          if (into === 'clipTarget') target.setAttribute('aria-hidden', 'true');
-        }
-        document.body.appendChild(added);
-        target.focus();
-      }
-      const transfer = (window as any).__makeTransfer(await (window as any).__makeFiles(names), text);
-      const event = new Event('paste', { bubbles: true, cancelable: true, composed: true });
-      Object.defineProperty(event, 'clipboardData', { value: transfer });
-      target.dispatchEvent(event);
-      added?.remove();
-      return event.defaultPrevented;
-    },
-    { text, names: files, into },
-  );
 }

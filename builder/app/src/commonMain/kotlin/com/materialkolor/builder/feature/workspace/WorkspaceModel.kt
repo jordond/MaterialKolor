@@ -191,6 +191,16 @@ internal class WorkspaceModel(
         updateState { state -> state.copy(inspect = on) }
     }
 
+    // b-315c
+
+    fun setVisionMenuOpen(open: Boolean) {
+        updateState { state -> state.copy(visionMenuOpen = open) }
+    }
+
+    fun holdGrayscale(held: Boolean) {
+        updateState { state -> state.copy(grayscaleHeld = held) }
+    }
+
     fun toggleFullscreen() {
         updateState { state -> state.copy(fullscreen = !state.fullscreen) }
     }
@@ -309,6 +319,8 @@ internal class WorkspaceModel(
      * it was picked in, or null. A tab switch clears it and nothing saves it.
      * @property[sessionDismissedHints] The hints closed in this tab, kept beside the stored ones so
      * a hint stays closed for the session when the preferences write fails.
+     * @property[visionMenuOpen] Whether the dock's Vision menu is open, so V can open it too.
+     * @property[grayscaleHeld] Whether B is held, which shows the canvas in grayscale over [vision].
      */
     @Immutable
     data class State(
@@ -329,6 +341,9 @@ internal class WorkspaceModel(
         val expressiveSuggestion: Boolean = false,
         val rampHighlight: RampHighlight? = null, // b-308
         val sessionDismissedHints: Set<String> = emptySet(), // b-314a
+        // b-315c
+        val visionMenuOpen: Boolean = false,
+        val grayscaleHeld: Boolean = false,
     ) {
         /** What [document] exports to. */
         val target: ExportTarget
