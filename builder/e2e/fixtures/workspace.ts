@@ -53,8 +53,18 @@ export async function boxOf(
   timeout = LAND_TIMEOUT_MS,
 ): Promise<{ x: number; y: number; width: number; height: number }> {
   const first = target.first();
-  await expect.poll(async () => (await first.boundingBox())?.height ?? 0, { timeout }).toBeGreaterThan(0);
-  return (await first.boundingBox())!;
+  let box: { x: number; y: number; width: number; height: number } | null = null;
+  await expect
+    .poll(
+      async () => {
+        box = await first.boundingBox();
+        return box?.height ?? 0;
+      },
+      { timeout },
+    )
+    .toBeGreaterThan(0);
+  // The box the poll saw, since a second read can miss it while the canvas lays out again.
+  return box!;
 }
 
 /** Clicks the middle of [target] where the canvas draws it. */
