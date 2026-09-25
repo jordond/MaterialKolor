@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -20,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -29,6 +32,8 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.IntOffset
@@ -50,16 +55,20 @@ import com.materialkolor.builder.kit.skin.headless.popoverEnter
 import com.materialkolor.builder.kit.skin.headless.popoverExit
 import com.materialkolor.builder.kit.skin.headless.rememberOverlayVisibility
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import kotlinx.coroutines.delay
 import kotlin.math.max
 
 /**
  * A short label over [content], shown while the pointer rests on it and while it has keyboard focus.
  *
- * Focus shows it as readily as hover, so nothing it says is only there for a mouse. Focus
- * a click left behind does not, the way the focus ring works. The pointer can move onto the
- * label without it going away (WCAG 1.4.13). Esc or a press on the anchor hides it until the pointer
- * and focus have both left, and it never takes focus itself. Drawn in the page, the label
- * stays out of the semantics tree, since [content] already carries the name.
+ * Keyboard focus shows it at once, so nothing it says is only there for a mouse. Focus a click
+ * left behind does not, the way the focus ring works. The pointer shows it after a short rest, and
+ * only once it has moved over the anchor, so anchors a scroll slides under a still pointer stay
+ * quiet. A scroll over the anchor or the label hides it until the pointer moves again. The pointer
+ * can move onto the label without it going away (WCAG 1.4.13). Esc or a press on the anchor hides
+ * it until the pointer and focus have both left, and it never takes focus itself. Drawn in the
+ * page, the label stays out of the semantics tree, since [content] already carries the name, and
+ * a wheel turned over it still scrolls the page under it.
  *
  * The label keeps clear of the anchor's focus ring, and far enough off it that its own shadow falls
  * short of the ring too, so a focused anchor rings whole under it.
@@ -78,18 +87,21 @@ internal fun HeadlessTooltip(
 ) {
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
+    val pointer = remember { TooltipPointer() }
     var focused by remember { mutableStateOf(false) }
     var hidden by remember { mutableStateOf(false) }
     val visibility = LocalFocusVisibility.current
     val focusShows by remember(visibility) { derivedStateOf { focused && visibility.isVisible } }
-    val wanted = hovered || focusShows
+    LaunchedEffect(hovered, pointer.armed) { pointer.follow(hovered) }
+    val wanted = pointer.shows || focusShows
     LaunchedEffect(wanted) { if (!wanted) hidden = false }
     val visible = wanted && !hidden
     Box(
         modifier = modifier
             .hoverable(interaction)
+            .onGloballyPositioned { layout -> pointer.placed(layout.positionInRoot()) }
             .onFocusChanged { state -> focused = state.hasFocus }
-            .pointerInput(Unit) { hideOnPress { hidden = true } }
+            .pointerInput(pointer) { watchAnchor(pointer) { hidden = true } }
             .onKeyEvent { event ->
                 val escape = visible && event.type == KeyEventType.KeyDown && event.key == Key.Escape
                 if (escape) hidden = true
@@ -97,17 +109,113 @@ internal fun HeadlessTooltip(
             },
     ) {
         content()
-        TooltipPopup(visible, text, style, interaction)
+        TooltipPopup(visible, text, style, interaction, pointer)
     }
 }
 
 /**
- * Calls [hide] as a pointer goes down anywhere on the anchor, before the anchor sees the press.
+ * What the pointer has done over a tooltip's anchor and label, beyond plain hover.
+ *
+ * Hover alone does not show the label. The pointer has to move over the anchor or the label
+ * first, and an anchor that content carried under a still pointer has not seen a move.
  */
-private suspend fun PointerInputScope.hideOnPress(hide: () -> Unit) {
+private class TooltipPointer {
+    /**
+     * True once the pointer has moved over the anchor or the label, until it scrolls there or leaves.
+     */
+    var armed: Boolean by mutableStateOf(false)
+        private set
+
+    /**
+     * Whether the pointer shows the label.
+     */
+    var shows: Boolean by mutableStateOf(false)
+        private set
+
+    /**
+     * Goes up each time a scroll takes the label away, so it leaves at once instead of fading out
+     * under the pointer.
+     */
+    var drops: Int by mutableIntStateOf(0)
+        private set
+
+    private var origin: Offset? = null
+    private var carried = false
+
+    /**
+     * Notes where the anchor sits. Once it has moved, the next pointer event over it came from the
+     * content moving rather than the pointer.
+     */
+    fun placed(position: Offset) {
+        val last = origin
+        if (last != null && last != position) carried = true
+        origin = position
+    }
+
+    fun moved() {
+        if (carried) carried = false else armed = true
+    }
+
+    fun left() {
+        armed = false
+    }
+
+    fun scrolled() {
+        armed = false
+        if (shows) {
+            shows = false
+            drops++
+        }
+    }
+
+    /**
+     * Shows the label once the pointer has rested on the anchor, and hides it a moment after the
+     * pointer leaves, which leaves time to cross onto the label.
+     */
+    suspend fun follow(hovered: Boolean) {
+        if (!hovered) {
+            delay(OverlayMetrics.tooltipGraceMillis)
+            shows = false
+        } else if (armed && !shows) {
+            delay(OverlayMetrics.tooltipDelayMillis)
+            shows = true
+        }
+    }
+}
+
+/**
+ * Follows the pointer over the anchor, before the anchor sees it. A press calls [hide].
+ */
+private suspend fun PointerInputScope.watchAnchor(
+    pointer: TooltipPointer,
+    hide: () -> Unit,
+) {
     awaitPointerEventScope {
         while (true) {
-            if (awaitPointerEvent(PointerEventPass.Initial).type == PointerEventType.Press) hide()
+            when (awaitPointerEvent(PointerEventPass.Initial).type) {
+                PointerEventType.Press -> hide()
+                PointerEventType.Scroll -> pointer.scrolled()
+                PointerEventType.Enter, PointerEventType.Move -> pointer.moved()
+                PointerEventType.Exit -> pointer.left()
+            }
+        }
+    }
+}
+
+/**
+ * Follows the pointer over the label. A press on the label stops there, so it lands on nothing
+ * under it, while a scroll goes on to the page.
+ */
+private suspend fun PointerInputScope.watchLabel(pointer: TooltipPointer) {
+    awaitPointerEventScope {
+        while (true) {
+            val event = awaitPointerEvent(PointerEventPass.Initial)
+            when (event.type) {
+                PointerEventType.Press -> event.changes.forEach { change -> change.consume() }
+                PointerEventType.Scroll -> pointer.scrolled()
+                PointerEventType.Enter, PointerEventType.Move -> pointer.moved()
+                PointerEventType.Exit -> pointer.left()
+            }
         }
     }
 }
@@ -118,9 +226,10 @@ private fun TooltipPopup(
     text: String,
     style: OverlayStyle,
     interaction: MutableInteractionSource,
+    pointer: TooltipPointer,
 ) {
     val anchor = if (LocalOverlaysInTree.current) rememberOverlayAnchor() else null
-    val state = rememberOverlayVisibility(visible)
+    val state = key(pointer.drops) { rememberOverlayVisibility(visible) }
     if (!state.isOverlayShown(visible)) return
     val host = inTreeOverlayHost()
     val tokens = LocalBuilderTokens.current
@@ -134,6 +243,7 @@ private fun TooltipPopup(
             Box(
                 modifier = Modifier
                     .hoverable(interaction)
+                    .pointerInput(pointer) { watchLabel(pointer) }
                     .then(quiet)
                     .padding(tokens.spacing.extraSmall)
                     .widthIn(max = OverlayMetrics.tooltipMaxWidth)

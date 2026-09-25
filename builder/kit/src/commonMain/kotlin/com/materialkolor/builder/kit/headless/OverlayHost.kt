@@ -471,6 +471,7 @@ private fun OverlayLayerContent(
                 layer.hasFocus = state.hasFocus
                 if (letGo && layer.kind == OverlayKind.Top) host.topLostFocus()
             }.then(modifier)
+            .then(if (layer.kind == OverlayKind.Passive) Modifier.shareThePointer() else Modifier)
             .overlayKeys { layer.keys }
             .then(if (dismiss != null) Modifier.dismissOnEscape(layer) else Modifier),
     ) {
