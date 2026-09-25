@@ -23,7 +23,7 @@ import org.jetbrains.compose.resources.stringResource
  * the bottom under a hairline. The header, the body and the footer keep the same room from the
  * panel's edges, and the inner corners take the skin's panel rounding. It keeps focus inside while it is open, closes on Esc and on
  * the veil, and hands focus back to [returnFocusTo] once it has gone. It slides in from the start
- * edge, or only fades under reduced motion. Material3 has no side sheet, so it wears Material's colours and shapes over the
+ * edge, or only fades under reduced motion. Material3 has no side sheet, so it uses Material's colours and shapes over the
  * headless drawer like every other skin.
  *
  * @param[visible] Whether the panel is open.

@@ -52,7 +52,7 @@ import io.github.composefluent.scheme.VisualStateScheme
  * focus from Tab, the arrow keys select the next or previous tab in reading order, wrapping at the
  * ends, and Home and End jump. The row scrolls sideways when the tabs do not fit, and its ends sit
  * inside the scroll with room for the focus ring's reach, so the first and last tab ring on every
- * side, as the others do (S5 row 9). The chosen tab wears Fluent's indicator, held still under
+ * side, as the others do (S5 row 9). The chosen tab shows Fluent's indicator, held still under
  * reduced motion.
  */
 @Composable

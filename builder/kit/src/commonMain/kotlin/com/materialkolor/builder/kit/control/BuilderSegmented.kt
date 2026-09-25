@@ -66,7 +66,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
  * @param[compact] Fit a row that fills a narrow width, such as the poster's contrast levels. The
  * options share the width evenly with little room round their labels, a label steps down in size
  * where it would not fit, and the chosen option shows no check. What marks it is the fill only it
- * wears, the skin's pill or Fluent's indicator, a shape the others lack rather than a colour.
+ * has, the skin's pill or Fluent's indicator, a shape the others lack rather than a colour.
  * Material's own segmented button keeps room for a check whether it shows one or not, so here
  * Material draws the row as a track with the chosen option filled.
  * @param[optionLabel] The label of an option.

@@ -203,7 +203,7 @@ internal fun <T> MaterialSegmented(
  * nothing turns that off, so the row takes only the group's connected shapes.
  *
  * Each option still reads as a radio button with the radio group's roving focus over it, where the
- * toggle button on its own would read as a checkbox. The chosen option wears the check as well as
+ * toggle button on its own would read as a checkbox. The chosen option has the check as well as
  * the fill and the rounder shape, so the choice never rests on colour alone. The row draws the
  * focused option's ring over every option ([RowRing]).
  */

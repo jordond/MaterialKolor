@@ -110,7 +110,7 @@ internal fun materialOverlayStyle(
         dialogShape = shapes.extraLarge,
         panelRadius = LocalBuilderTokens.current.radius.medium,
         // b-511
-        // Material's extra large corner, as its side sheet and its dialogs wear it.
+        // Material's extra large corner, as its side sheet and its dialogs use it.
         drawerRadius = LocalBuilderTokens.current.radius.large,
         divider = colors.outlineVariant,
         shadow = shadow,

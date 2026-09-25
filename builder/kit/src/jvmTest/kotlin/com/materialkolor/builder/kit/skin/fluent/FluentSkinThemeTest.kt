@@ -144,7 +144,7 @@ class FluentSkinThemeTest {
     ): FiniteAnimationSpec<Float> = tween(millis, easing = easing)
 
     @Test
-    fun tokens_bothModes_comeSolidOutOfTheFluentColoursTheThemeWears() =
+    fun tokens_bothModes_comeSolidOutOfTheFluentColoursTheThemeUses() =
         runComposeUiTest {
             val seen = mutableMapOf<Boolean, Pair<BuilderTokens, Color>>()
             setContent {

@@ -33,7 +33,7 @@ import com.materialkolor.material3.toColorScheme
  * is a fallback font fetched from the network.
  *
  * @param[scheme] The chrome scheme for the current mode.
- * @param[expressive] Whether to wear the expressive theme and motion.
+ * @param[expressive] Whether to use the expressive theme and motion.
  * @param[reducedMotion] Whether to provide the reduced motion set instead of the Material one.
  * @param[content] The builder.
  */

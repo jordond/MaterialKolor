@@ -70,7 +70,7 @@ private enum class GalleryDestination(
 /**
  * The Custom components gallery (F-21).
  *
- * Every card holds the builder's own kit controls under [CustomPaneTheme], so they wear the
+ * Every card holds the builder's own kit controls under [CustomPaneTheme], so they use the
  * pane's Custom slots and not the chrome's. Each control shows up enabled and disabled, apart from
  * the few the kit gives no disabled look. Nothing in the gallery opens a popup, a dialog or an
  * overlay, since on the web a window takes the accessibility mirror over for good (D40). Menus,

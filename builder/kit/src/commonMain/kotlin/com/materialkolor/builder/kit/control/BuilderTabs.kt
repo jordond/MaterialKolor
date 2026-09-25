@@ -27,7 +27,7 @@ import io.github.composefluent.FluentTheme
  */
 public enum class TabsVariant {
     /**
-     * The skin's own tab row, such as Material's underlined tabs. The export sheet's file tabs wear it.
+     * The skin's own tab row, such as Material's underlined tabs. The export sheet's file tabs use it.
      */
     Standard,
 

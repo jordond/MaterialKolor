@@ -13,7 +13,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
 // pf-3
 
 /**
- * The skin a Fluent warm-up wears.
+ * The skin a Fluent warm-up uses.
  */
 private val FluentWarmUpSkin = Skin(library = Library.Fluent, expressive = false)
 

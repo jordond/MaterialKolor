@@ -131,7 +131,7 @@ internal fun sheetClearance(
  * canvas and then the dock.
  *
  * The shell only places the slots. The skin owned regions, `TopBarRegion` and `DockRegion` among
- * them, are for the slots to wear.
+ * them, are for the slots to use.
  *
  * @param[posterColors] The poster's colours, from the resolved document.
  * @param[posterCollapsed] Whether the poster shows as the rail. It collapses the docked poster on

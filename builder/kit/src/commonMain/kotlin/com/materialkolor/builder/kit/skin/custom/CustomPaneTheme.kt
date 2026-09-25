@@ -10,7 +10,7 @@ import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.Skin
 
 /**
- * The skin a Custom pane wears, which has no Expressive flavour.
+ * The skin a Custom pane uses, which has no Expressive flavour.
  */
 private val PaneSkin = Skin(Library.Custom, expressive = false)
 
@@ -19,7 +19,7 @@ private val PaneSkin = Skin(Library.Custom, expressive = false)
  *
  * A preview pane sits inside the builder's chrome, and a kit control reads the skin, identity,
  * tokens and motion of the nearest theme above it. Without this that is the chrome, so a kit
- * control in a Custom pane would paint in the chrome's colours. Inside this the controls wear
+ * control in a Custom pane would paint in the chrome's colours. Inside this the controls use
  * [slots] exactly as the document resolved them. Where overlays render in the page (D40) the pane
  * has an overlay host of its own, clipped to the pane, so its menus and dialogs stay inside the
  * pane's clip and filters, and a modal in the pane clears the pane rather than the whole builder.

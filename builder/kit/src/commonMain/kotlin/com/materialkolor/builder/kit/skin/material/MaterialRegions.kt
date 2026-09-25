@@ -103,7 +103,7 @@ private fun Modifier.pullStart(pull: Dp): Modifier =
 
 /**
  * The preview window on the canvas, a Material surface rounded to the builder's large radius and
- * lifted on the shadow Material's overlays wear. It clips what it holds to its corners.
+ * lifted on the same shadow as Material's overlays. It clips what it holds to its corners.
  */
 @Composable
 internal fun MaterialWindowRegion(

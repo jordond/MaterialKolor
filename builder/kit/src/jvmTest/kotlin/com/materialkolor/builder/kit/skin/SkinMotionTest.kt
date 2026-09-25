@@ -15,7 +15,7 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 /**
- * Every skin the builder can wear, Material3 once per flavour.
+ * Every skin the builder can use, Material3 once per flavour.
  */
 private val Skins: List<Skin> =
     Library.entries.map { library -> Skin(library, expressive = false) } + Skin(Library.Material3, expressive = true)

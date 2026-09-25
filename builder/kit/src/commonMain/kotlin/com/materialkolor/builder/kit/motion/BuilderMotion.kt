@@ -137,7 +137,7 @@ public interface BuilderMotion {
 }
 
 /**
- * The tween set the Unstyled and Custom skins wear (MO-09).
+ * The tween set the Unstyled and Custom skins use (MO-09).
  *
  * Material3 builds its own from `MotionScheme` and Fluent from `FluentDuration`, both of them
  * reporting the same [durations] so the rest of the builder does not have to care.

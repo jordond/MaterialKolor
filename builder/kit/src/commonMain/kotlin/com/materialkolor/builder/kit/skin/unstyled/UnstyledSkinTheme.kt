@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
  * The theme is applied with the colour scheme [isDark] names rather than the system setting, so the
  * builder's own mode switch wins. Its colour transition stays at the default snap, the skin
  * transition already covers the change. The default text style keeps Unstyled's sizes and weights
- * but wears the brand face, since the default family on wasm is a fallback font fetched from the
+ * but uses the brand face, since the default family on wasm is a fallback font fetched from the
  * network.
  *
  * The theme also hands out the skin's own indication. Left unset, Compose Unstyled falls back to a
@@ -114,7 +114,7 @@ private fun unstyledTokens(status: StatusColors): BuilderTokens {
 }
 
 /**
- * The ground a plain clickable wears under Unstyled, the skin's ink faint on hover and a touch
+ * The ground a plain clickable gets under Unstyled, the skin's ink faint on hover and a touch
  * stronger while pressed, the same veils its menus put under a row.
  */
 internal data object UnstyledIndication : IndicationNodeFactory {

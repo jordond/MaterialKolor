@@ -26,7 +26,7 @@ internal fun paneSideAt(
 }
 
 /**
- * Whether a copy on [side] wears the dark scheme while the canvas shows [shown]. A split is light then dark.
+ * Whether a copy on [side] is in the dark scheme while the canvas shows [shown]. A split is light then dark.
  */
 internal fun isDark(
     side: PaneSide,

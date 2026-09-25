@@ -345,7 +345,7 @@ private fun ThemeResult.sameInBothModes(palette: KeyColor): Boolean =
 
 /**
  * One ramp under its [title] and its key color's tag, with the tags of what landed on it below. The
- * picked ramp wears an outline and a label saying what sits on it, and takes [requesters], so the
+ * picked ramp has an outline and a label saying what sits on it, and takes [requesters], so the
  * tab can scroll to it and focus its first stop.
  *
  * It takes nothing of the theme but its own ramp, so a change that leaves the ramp alone, such as

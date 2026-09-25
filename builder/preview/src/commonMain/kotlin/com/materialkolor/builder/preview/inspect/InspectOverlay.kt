@@ -100,7 +100,7 @@ public class InspectActions(
  * declared element shows its card too, read only, and [PinKey] pins it and moves focus to its first
  * enabled action. The element never hears that key, while Enter and Space still reach it. Esc drops
  * a pinned card first and leaves Inspect after. While this layout holds focus itself and the
- * keyboard is in use, the preview wears a focus ring.
+ * keyboard is in use, the preview shows a focus ring.
  *
  * The outline and card follow their element as the preview scrolls and go when it leaves. An element
  * scrolled out of sight inside the preview, such as off the side of a horizontal scroll, keeps its
@@ -109,7 +109,7 @@ public class InspectActions(
  * tree, never in a popup, and kept inside it.
  *
  * @param[on] Whether Inspect is on for what the canvas shows.
- * @param[result] The theme the preview wears, which the card reads colors and ratings from.
+ * @param[result] The theme the preview uses, which the card reads colors and ratings from.
  * @param[shown] What the canvas shows, both copies of a split or one copy alone.
  * @param[split] Where the handle sits while [shown] is Split. The content has to fill this layout,
  * so the copies line up with it.
@@ -169,7 +169,7 @@ public fun InspectOverlay(
  * there as they are drawn and placed, so they follow it while the preview scrolls.
  * @property[side] The copy of the split it sits in.
  * @property[roles] The colors it declared.
- * @property[isDark] Whether that copy wears the dark scheme.
+ * @property[isDark] Whether that copy is in the dark scheme.
  */
 @Immutable
 internal data class InspectTarget(

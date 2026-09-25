@@ -6,7 +6,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import com.materialkolor.builder.domain.model.Library
 
 /**
- * Which library the builder is wearing right now.
+ * Which library the builder uses right now.
  *
  * Expressive is a flag rather than a fifth library because it only swaps the Material3 theme and a
  * handful of components inside the Material3 skin. It changes nothing about the document.

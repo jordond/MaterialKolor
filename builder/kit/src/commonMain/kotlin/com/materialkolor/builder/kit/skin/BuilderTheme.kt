@@ -53,7 +53,7 @@ import com.materialkolor.palettes.TonalPalette
  *
  * It also tracks whether focus moves by keyboard, so a click leaves no focus ring behind (D58).
  *
- * @param[skin] The library and flavour to wear.
+ * @param[skin] The library and flavour to use.
  * @param[result] The resolved document, read on the UI thread only like every result.
  * @param[isDark] Which mode of the chrome to draw.
  * @param[reducedMotion] Swap every skin's motion for the reduced set (F-37).

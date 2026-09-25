@@ -14,7 +14,7 @@ import com.materialkolor.builder.engine.resolve.ThemeResult
  * builds a spec. A pane never resolves anything itself, it only reads [result].
  *
  * @property[result] The resolved theme for the target the preview shows.
- * @property[isDark] Which mode of [result] the pane wears.
+ * @property[isDark] Which mode of [result] the pane is drawn in.
  * @property[label] What the pane is called, read out by the split handle, such as "Light".
  * @property[filter] A color matrix the whole pane is drawn through, for vision simulation and the
  * held grayscale peek, or null to draw it as it is. A `ColorMatrix` wraps a mutable array and

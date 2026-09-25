@@ -52,7 +52,7 @@ class TabMovesFocusTest {
         }
 
     @Test
-    fun tab_inAMultiLineFieldWearingIt_movesOnWithoutTyping() =
+    fun tab_inAMultiLineFieldUsingIt_movesOnWithoutTyping() =
         runComposeUiTest {
             var text by mutableStateOf("")
             setContent {
@@ -70,7 +70,7 @@ class TabMovesFocusTest {
         }
 
     @Test
-    fun shiftTab_inAMultiLineFieldWearingIt_movesBackWithoutTyping() =
+    fun shiftTab_inAMultiLineFieldUsingIt_movesBackWithoutTyping() =
         runComposeUiTest {
             var text by mutableStateOf("")
             setContent {

@@ -182,7 +182,7 @@ internal class PageTextToolbar : TextToolbar {
 /**
  * Hands the page's text toolbar the locals it is called in.
  *
- * `BuilderTheme` calls it once inside the skin, so the row the root host draws wears the builder's
+ * `BuilderTheme` calls it once inside the skin, so the row the root host draws is in the builder's
  * own skin, and it does nothing where the toolbar in reach is not the page's.
  */
 @Composable

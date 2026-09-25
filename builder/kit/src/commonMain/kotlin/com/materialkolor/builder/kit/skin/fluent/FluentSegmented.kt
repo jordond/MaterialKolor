@@ -54,7 +54,7 @@ import io.github.composefluent.component.SegmentedItemPosition
  * The frame is drawn here in Fluent's colours rather than taken from Fluent's `SegmentedControl`,
  * which clips its buttons to its own outline and so would cut the focus ring off every side but the
  * inner ones. Each button takes its press on the node its modifier lands on, so the folded name, the
- * radio role and the test tag all sit on the node that is pressed. The chosen option wears Fluent's
+ * radio role and the test tag all sit on the node that is pressed. The chosen option shows Fluent's
  * indicator and a check, so the choice never rests on its fill alone. A compact row leaves the check
  * out, and the indicator marks the choice.
  */
