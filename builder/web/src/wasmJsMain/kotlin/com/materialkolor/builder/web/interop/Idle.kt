@@ -10,10 +10,14 @@ import kotlin.js.ExperimentalWasmJsInterop
 // The builder warms up for its first switch to Fluent in idle time after the first frame, a step at
 // a time, and waits here before each step so none lands on someone's input.
 
-/** How long a browser without `requestIdleCallback` waits instead, which is Safari's case. */
+/**
+ * How long a browser without `requestIdleCallback` waits instead, which is Safari's case.
+ */
 private const val FALLBACK_MILLIS = 200
 
-/** Suspends until the browser has an idle moment. */
+/**
+ * Suspends until the browser has an idle moment.
+ */
 internal suspend fun awaitIdle(): Unit =
     suspendCancellableCoroutine { continuation ->
         val handle = requestIdle(FALLBACK_MILLIS) { continuation.resume(Unit) }

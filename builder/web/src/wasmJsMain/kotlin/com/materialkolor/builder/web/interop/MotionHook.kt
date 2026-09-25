@@ -9,7 +9,9 @@ import kotlin.js.ExperimentalWasmJsInterop
 // (architecture 7, MO-10). It only holds when a test drives the browser, so a shared link that
 // carries it never freezes a person's own visit.
 
-/** Whether a test drives the browser, as `navigator.webdriver` says. */
+/**
+ * Whether a test drives the browser, as `navigator.webdriver` says.
+ */
 internal fun browserIsAutomated(): Boolean = js("navigator.webdriver === true")
 
 /**

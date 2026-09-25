@@ -33,10 +33,14 @@ import kotlin.js.ExperimentalWasmJsInterop
  * since the document still counts the field as focused then and it comes back with the window.
  */
 internal object FocusRepair {
-    /** The class CMP puts on its hidden text input. */
+    /**
+     * The class CMP puts on its hidden text input.
+     */
     const val BACKING_FIELD_CLASS = "compose-backing-field"
 
-    /** Watches [viewport] for its hidden text input going away and leaving focus with nobody. */
+    /**
+     * Watches [viewport] for its hidden text input going away and leaving focus with nobody.
+     */
     fun install(viewport: Element) {
         val removals = MutationObserver { records, _ -> onChildrenChanged(records) }
         viewport.addEventListener("focusin") { event -> watchContainer(event, removals) }
@@ -56,7 +60,9 @@ internal object FocusRepair {
         removals.observe(container, childChanges())
     }
 
-    /** The field is still in place here, so the canvas beside it is found now and focused later. */
+    /**
+     * The field is still in place here, so the canvas beside it is found now and focused later.
+     */
     private fun onFocusOut(event: Event) {
         if (event !is FocusEvent || event.relatedTarget != null) return
         val canvas = event.backingField()?.parentElement?.canvas() ?: return

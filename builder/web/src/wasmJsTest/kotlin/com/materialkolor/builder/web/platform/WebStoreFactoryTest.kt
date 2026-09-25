@@ -61,7 +61,9 @@ class WebStoreFactoryTest {
     }
 }
 
-/** Run [block] to its end. Every call into localStorage is synchronous, so the store never suspends. */
+/**
+ * Run [block] to its end. Every call into localStorage is synchronous, so the store never suspends.
+ */
 private fun <T> settled(block: suspend () -> T): T {
     var outcome: Result<T>? = null
     block.startCoroutine(Continuation(EmptyCoroutineContext) { result -> outcome = result })

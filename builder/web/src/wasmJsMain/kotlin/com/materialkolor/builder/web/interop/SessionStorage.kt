@@ -7,7 +7,9 @@ import kotlin.js.ExperimentalWasmJsInterop
 // sessionStorage lasts as long as the tab, through reloads. It only ever holds small hints, so a
 // blocked or full one is shrugged off and the hint is simply gone.
 
-/** The text under [key] for this tab, or null when there is none. */
+/**
+ * The text under [key] for this tab, or null when there is none.
+ */
 internal fun sessionStorageRead(key: String): String? =
     js(
         """{
@@ -15,7 +17,9 @@ internal fun sessionStorageRead(key: String): String? =
     }""",
     )
 
-/** Put [value] under [key] for this tab, or remove the key when [value] is null. */
+/**
+ * Put [value] under [key] for this tab, or remove the key when [value] is null.
+ */
 internal fun sessionStorageWrite(
     key: String,
     value: String?,

@@ -51,7 +51,9 @@ class MirrorRootTest {
         }
     }
 
-    /** The way CMP does it, a host arrives with the root already inside its open shadow root. */
+    /**
+     * The way CMP does it, a host arrives with the root already inside its open shadow root.
+     */
     @Test
     fun aRootInsideAHostThatArrivesLaterIsScrubbed(): Promise<JsAny?> {
         val viewport = attached()
@@ -83,7 +85,9 @@ class MirrorRootTest {
         }
     }
 
-    /** Appends a host to this element and fills its open shadow root with a mirror root, in one go. */
+    /**
+     * Appends a host to this element and fills its open shadow root with a mirror root, in one go.
+     */
     private fun HTMLElement.hostWithMirrorRoot(): HTMLElement {
         val shadow = child().attachShadow(ShadowRootInit(ShadowRootMode.OPEN))
         val root = (document.createElement("div") as HTMLElement).asMirrorRoot()

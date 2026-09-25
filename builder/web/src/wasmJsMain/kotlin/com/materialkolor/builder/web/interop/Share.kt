@@ -24,7 +24,9 @@ internal fun pageCanShareFiles(): Boolean =
  */
 internal fun pageCanShare(files: List<File>): Boolean = askCanShare(files.toJsArray())
 
-/** An empty file called [name] of type [mime]. `navigator.canShare` only looks at those two. */
+/**
+ * An empty file called [name] of type [mime]. `navigator.canShare` only looks at those two.
+ */
 internal fun shareProbe(
     name: String,
     mime: String,
@@ -42,7 +44,9 @@ private fun askCanShare(files: JsArray<File>): Boolean =
     }""",
     )
 
-/** A browser file called [name] of type [mime] holding [bytes]. */
+/**
+ * A browser file called [name] of type [mime] holding [bytes].
+ */
 internal fun browserFile(
     bytes: Int8Array,
     name: String,

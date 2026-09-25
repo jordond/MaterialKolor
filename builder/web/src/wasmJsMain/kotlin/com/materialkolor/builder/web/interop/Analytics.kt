@@ -21,7 +21,9 @@ import kotlin.js.ExperimentalWasmJsInterop
 internal object Analytics {
     private var loaded = false
 
-    /** Add the beacon to the page once, when the page has a token. Later calls do nothing. */
+    /**
+     * Add the beacon to the page once, when the page has a token. Later calls do nothing.
+     */
     fun load() {
         if (loaded) return
         loaded = true
@@ -30,7 +32,9 @@ internal object Analytics {
     }
 }
 
-/** The token in `#mk-config`, or null when the page has none, an empty one or unreadable JSON. */
+/**
+ * The token in `#mk-config`, or null when the page has none, an empty one or unreadable JSON.
+ */
 private fun readAnalyticsToken(): String? =
     js(
         """{
@@ -45,7 +49,9 @@ private fun readAnalyticsToken(): String? =
     }""",
     )
 
-/** Load the beacon at [url] with [token], deferred, the way Cloudflare's own snippet does. */
+/**
+ * Load the beacon at [url] with [token], deferred, the way Cloudflare's own snippet does.
+ */
 private fun addBeacon(
     url: String,
     token: String,
@@ -60,5 +66,7 @@ private fun addBeacon(
     }""",
     )
 
-/** The script the site's content security policy lets in, next to `cloudflareinsights.com` for its reports. */
+/**
+ * The script the site's content security policy lets in, next to `cloudflareinsights.com` for its reports.
+ */
 private const val BEACON_URL = "https://static.cloudflareinsights.com/beacon.min.js"

@@ -11,19 +11,27 @@ import kotlin.js.Promise
 // localStorage throws when the page may not use it, blocked cookies in Chromium for example, and
 // when it is full. Every call here catches, so the rest of the shell never sees a JS exception.
 
-/** The text under [key], or null when there is none or storage is blocked. */
+/**
+ * The text under [key], or null when there is none or storage is blocked.
+ */
 internal fun localStorageRead(key: String): String? = readItem(key)
 
-/** Put [value] under [key]. Returns why it did not land, or null when it did. */
+/**
+ * Put [value] under [key]. Returns why it did not land, or null when it did.
+ */
 internal fun localStorageWrite(
     key: String,
     value: String,
 ): StoreError? = writeOutcome(writeItem(key, value))
 
-/** Remove [key]. Returns why it could not be removed, or null when it was. */
+/**
+ * Remove [key]. Returns why it could not be removed, or null when it was.
+ */
 internal fun localStorageRemove(key: String): StoreError? = writeOutcome(removeItem(key))
 
-/** Whether this page may write to localStorage at all. A full storage still counts. */
+/**
+ * Whether this page may write to localStorage at all. A full storage still counts.
+ */
 internal fun localStorageWorks(): Boolean {
     val outcome = writeOutcome(writeItem(PROBE_KEY, "1"))
     removeItem(PROBE_KEY)
@@ -36,7 +44,9 @@ internal fun localStorageWorks(): Boolean {
  */
 internal fun onLocalStorageChange(listener: (String?) -> Unit): Unit = listenForStorage(listener)
 
-/** Ask the browser to keep this origin's storage through storage pressure. True when it agreed. */
+/**
+ * Ask the browser to keep this origin's storage through storage pressure. True when it agreed.
+ */
 internal suspend fun requestPersistentStorage(): Boolean = persist().await<JsBoolean>().toBoolean()
 
 private fun writeOutcome(code: Int): StoreError? =
