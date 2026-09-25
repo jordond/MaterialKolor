@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +18,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -49,6 +51,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
  * @param[enabled] Whether the button can be pressed.
  * @param[hint] A key that does the same, drawn as a keycap after the label, such as Space. It only
  * shows, so the button still reads out as [label].
+ * @param[trailingIcon] A glyph after the label, the size of [icon]. It only shows, so whatever it says
+ * belongs in the button's spoken name too. With one the label gives way first and ends in an
+ * ellipsis, so the glyph always keeps its room.
  */
 @Composable
 public fun BuilderButton(
@@ -59,9 +64,10 @@ public fun BuilderButton(
     icon: IconId? = null,
     enabled: Boolean = true,
     hint: String? = null,
+    trailingIcon: IconId? = null,
 ) {
     when (LocalSkin.current.library) {
-        Library.Material3 -> MaterialButton(onClick, label, modifier, emphasis, icon, enabled, hint)
+        Library.Material3 -> MaterialButton(onClick, label, modifier, emphasis, icon, enabled, hint, trailingIcon)
         Library.Unstyled -> HeadlessButton(
             onClick,
             label,
@@ -71,8 +77,9 @@ public fun BuilderButton(
             icon,
             enabled,
             hint,
+            trailingIcon,
         )
-        Library.Fluent -> FluentButton(onClick, label, modifier, emphasis, icon, enabled, hint)
+        Library.Fluent -> FluentButton(onClick, label, modifier, emphasis, icon, enabled, hint, trailingIcon)
         Library.Custom -> HeadlessButton(
             onClick,
             label,
@@ -82,6 +89,7 @@ public fun BuilderButton(
             icon,
             enabled,
             hint,
+            trailingIcon,
         )
     }
 }
@@ -99,6 +107,7 @@ internal fun HeadlessButton(
     icon: IconId? = null,
     enabled: Boolean = true,
     hint: String? = null,
+    trailingIcon: IconId? = null,
 ) {
     val colors = style.colors(emphasis)
     val interactionSource = remember { MutableInteractionSource() }
@@ -122,10 +131,25 @@ internal fun HeadlessButton(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) BuilderIcon(icon, contentDescription = null, tint = colors.content)
-        BuilderText(label, style = BuilderTextStyle.Label, color = colors.content, maxLines = 1)
+        BuilderText(
+            text = label,
+            modifier = trailingLabel(trailingIcon),
+            style = BuilderTextStyle.Label,
+            color = colors.content,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
         if (hint != null) ButtonKeycap(hint, colors.content)
+        if (trailingIcon != null) BuilderIcon(trailingIcon, contentDescription = null, tint = colors.content)
     }
 }
+
+/**
+ * How a button's label sits beside a [trailingIcon]. With one it gives way first, so the glyph keeps
+ * its room while the label ends in an ellipsis.
+ */
+internal fun RowScope.trailingLabel(trailingIcon: IconId?): Modifier =
+    if (trailingIcon == null) Modifier else Modifier.weight(1f, fill = false)
 
 /**
  * A key drawn as a keycap inside a button, in [ink] on a faint wash of it. It only shows, since the
