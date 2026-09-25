@@ -78,11 +78,6 @@
         white-space: nowrap;
       }
 
-      /*
-        The splash. boot.js sets --mk-light, --mk-dark and, when the seed is known, --mk-seed. It adds
-        mk-light or mk-dark to the page when the app's appearance is not the system's, and
-        mk-motion-frozen for ?motion=frozen.
-      */
       #splash {
         --mk-chrome: var(--mk-light, #fff8f6);
         --mk-ink: #201a18;
@@ -152,10 +147,6 @@
         content: var(--mk-hex, "");
       }
 
-      /*
-        The seed bloom, one seed becoming a palette. Tints of the seed, the seed and shades of it, or
-        neutral ones when no seed is known. Sized by the canvas so the row fits a 320 px phone.
-      */
       .mk-canvas {
         --mk-tone: var(--mk-seed, color-mix(in srgb, var(--mk-ink) 40%, var(--mk-chrome)));
         display: flex;
@@ -221,11 +212,6 @@
         }
       }
 
-      /*
-        Each swatch rises and scales in 90 ms after the one before, and the hex settles onto the poster
-        once. Only transform and opacity move, so the compositor runs it while the main thread
-        compiles the app. Reduced motion and ?motion=frozen hold it all still.
-      */
       @media (prefers-reduced-motion: no-preference) {
         html:not(.mk-motion-frozen) .mk-swatches span {
           animation: mk-bloom 1.6s cubic-bezier(0.4, 0, 0.2, 1) calc(var(--mk-step, 0) * 90ms) infinite both;
@@ -257,7 +243,6 @@
         }
       }
 
-      /* The unsupported page and the noscript note. Old browsers read this, so it stays plain. */
       #unsupported {
         display: none;
       }

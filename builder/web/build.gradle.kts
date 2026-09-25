@@ -23,8 +23,6 @@ kotlin {
         binaries.executable()
     }
 
-    // The fallback for browsers without WasmGC, same test runner as wasmJs. Its glue has a name of
-    // its own so the site can hold both engines side by side.
     js {
         browser {
             commonWebpackConfig {

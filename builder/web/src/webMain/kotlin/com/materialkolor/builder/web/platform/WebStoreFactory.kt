@@ -24,27 +24,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlin.time.Clock
 
-/**
- * Stores kept in localStorage, one key per record, as the text their codec writes.
- *
- * Nothing is cached, so every read sees what another tab wrote a moment ago. Another tab's write
- * arrives as one `storage` event, which lands on [externalChanges] and makes every [Store.data]
- * read its key again.
- *
- * This talks to localStorage itself rather than through kstore-storage. With its cache off, kstore
- * adds a lock this single thread does not need, lets a full storage escape as a bare JS exception,
- * and its update flow never hears about another tab's write.
- *
- * Text that no longer decodes is moved to its quarantine key and reported once, the same way the
- * in-memory stores do it. When there is no room to move it, it stays where it is and every update to
- * that key is turned down with the storage error, so a write never lands on top of it.
- *
- * A record a newer build wrote is never moved, since that build may still be open in another tab.
- * It reads as the default, every update to its key is turned down with [StoreError.Unavailable], and
- * it is reported once per key so the app can ask for a reload.
- *
- * @param[now] The time in milliseconds since the epoch, stamped on quarantine keys.
- */
 internal class WebStoreFactory(
     private val now: () -> Long = { Clock.System.now().toEpochMilliseconds() },
 ) : StoreFactory {
@@ -88,7 +67,6 @@ internal class WebStoreFactory(
 
         override suspend fun get(): T = settle().value
 
-        // Nothing suspends between the read and the write, so no other write from this tab lands in between.
         override suspend fun update(block: (T) -> T): StoreError? {
             val reading = settle()
             reading.blocked?.let { error -> return error }
@@ -133,7 +111,6 @@ internal class WebStoreFactory(
             return StoreError.Unavailable
         }
 
-        // Copy first and remove after, so the text is never in neither place.
         private fun setAside(
             text: String,
             reason: QuarantineReason,
@@ -153,10 +130,6 @@ internal class WebStoreFactory(
     }
 }
 
-/**
- * What a store holds, and the error that keeps it from being written when a newer build wrote it or
- * unreadable text could not be moved aside.
- */
 private class Reading<T>(
     val value: T,
     val blocked: StoreError?,

@@ -17,9 +17,6 @@ import com.materialkolor.builder.web.platform.WebRouter
 import com.materialkolor.builder.web.platform.WebStoreFactory
 import com.materialkolor.builder.web.platform.exposeBrowserApisToE2e
 
-/**
- * The browser's services, one file per service under `platform`.
- */
 internal object BrowserPlatform : PlatformServices {
     override val router: Router = WebRouter()
     override val stores: StoreFactory = WebStoreFactory()

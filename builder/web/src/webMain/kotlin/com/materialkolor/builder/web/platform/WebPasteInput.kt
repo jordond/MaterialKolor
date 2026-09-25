@@ -21,6 +21,7 @@ internal object WebPasteInput : PasteInput {
                 onText = { text -> trySend(Paste.Text(text)) },
                 onFiles = { files -> trySend(Paste.Files(files.map(::BrowserImage))) },
             )
+
             awaitClose(stop)
         }
 }

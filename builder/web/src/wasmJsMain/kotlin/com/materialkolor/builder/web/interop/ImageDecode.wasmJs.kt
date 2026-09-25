@@ -9,7 +9,6 @@ import kotlin.wasm.unsafe.WebAssembly
 import kotlin.wasm.unsafe.wasmMemory
 import kotlin.wasm.unsafe.withScopedMemoryAllocator
 
-// Through linear memory, since every element read across the boundary is a call on wasm.
 internal actual fun Int32Array.copyToIntArray(): IntArray {
     val size = length
     if (size == 0) return IntArray(0)
@@ -20,7 +19,6 @@ internal actual fun Int32Array.copyToIntArray(): IntArray {
     }
 }
 
-// The allocator hands out addresses that are multiples of 8, so the view lines up.
 private fun copyIntoMemory(
     source: Int32Array,
     memory: WebAssembly.Memory,

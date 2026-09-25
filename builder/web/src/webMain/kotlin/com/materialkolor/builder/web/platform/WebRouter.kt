@@ -47,14 +47,11 @@ internal class WebRouter(
     private val pops = MutableSharedFlow<Unit>(extraBufferCapacity = POP_BUFFER)
     private var depth = history.depth()
 
-    // Overlays this page load opened and has not closed yet, the entries from depth 1 up.
     private var opened = 0
     private var pendingBacks = 0
     private val waitingPushes = ArrayDeque<String>()
     private var homeWaiting = false
 
-    // Backs given up on whose move may still come, how many moves have come, so a wait that a move
-    // ended gives nothing up, and how many times backs were given up, so only the last one expires.
     private var lateBacks = 0
     private var moves = 0
     private var givenUp = 0
@@ -67,7 +64,6 @@ internal class WebRouter(
         exposeToE2e()
     }
 
-    // While a back is on its way the current entry is about to change, so home waits for it too.
     override fun replaceHome() {
         if (pendingBacks > 0) {
             homeWaiting = true
@@ -111,7 +107,6 @@ internal class WebRouter(
         if (pendingBacks == 0) catchUp()
     }
 
-    // A back the browser refused never reports a move, so it is not left counted as pending.
     private fun goBackQuietly(steps: Int) {
         if (steps <= 0) return
         pendingBacks += steps
@@ -126,14 +121,11 @@ internal class WebRouter(
         while (waitingPushes.isNotEmpty()) pushOverlay(waitingPushes.removeFirst())
     }
 
-    // Gives the backs on their way up once no move has come for a while, unless a move came since.
     private fun waitForMove() {
         val movesBefore = moves
         history.later(MOVE_WAIT_MS) { if (moves == movesBefore && pendingBacks > 0) giveUp() }
     }
 
-    // A move whose report never came still shows in the entry's depth. Otherwise the backs are
-    // late, or lost, and what waits for them lands now on top of the entries they were to pop.
     private fun giveUp() {
         val now = history.depth()
         if (now < depth) {
@@ -176,9 +168,6 @@ internal interface HistoryPort {
     )
 }
 
-/**
- * The browser's own history.
- */
 internal object BrowserHistory : HistoryPort {
     override fun path(): String = locationPath()
 
