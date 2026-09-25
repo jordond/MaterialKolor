@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.materialkolor.builder.kit.a11y.collectIsFocusVisibleAsState
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.token.BuilderTokens
@@ -286,7 +287,7 @@ internal fun MutableTransitionState<Boolean>.isOverlayShown(visible: Boolean): B
  * The feedback of a row or a small button inside an overlay.
  *
  * It shrinks by the skin's press scale, takes [highlight] while hovered or focused, and draws the
- * focus ring on keyboard focus. A disabled target only fades.
+ * focus ring on keyboard focus, not on focus a click left behind. A disabled target only fades.
  */
 @Composable
 internal fun Modifier.overlayFeedback(
@@ -300,6 +301,7 @@ internal fun Modifier.overlayFeedback(
 ): Modifier {
     val hovered by interactionSource.collectIsHoveredAsState()
     val focused by interactionSource.collectIsFocusedAsState()
+    val ringed by interactionSource.collectIsFocusVisibleAsState() // b-513
     val ground = when {
         !enabled -> Color.Transparent
         selected -> style.selected
@@ -309,6 +311,6 @@ internal fun Modifier.overlayFeedback(
     return this
         .controlPress(interactionSource, enabled)
         .background(ground, shape)
-        .then(if (focused) Modifier.border(FocusRingWidth, focus, shape) else Modifier)
+        .then(if (ringed) Modifier.border(FocusRingWidth, focus, shape) else Modifier)
         .then(if (enabled) Modifier else Modifier.alpha(DisabledAlpha))
 }

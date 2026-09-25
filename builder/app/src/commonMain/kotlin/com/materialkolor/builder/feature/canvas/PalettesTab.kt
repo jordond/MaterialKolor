@@ -13,7 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -36,8 +39,6 @@ import com.materialkolor.builder.feature.poster.readoutName
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.tabs_copied_tone
-import com.materialkolor.builder.generated.resources.tabs_mark_dark
-import com.materialkolor.builder.generated.resources.tabs_mark_light
 import com.materialkolor.builder.generated.resources.tabs_palette_error
 import com.materialkolor.builder.generated.resources.tabs_palette_neutral
 import com.materialkolor.builder.generated.resources.tabs_palette_neutral_variant
@@ -65,10 +66,11 @@ internal const val PICKED_RAMP_TAG: String = "picked-ramp"
  * accent (F-23).
  *
  * Each ramp's stops copy their hex when pressed, and its markers show the tones the roles or the
- * accent's four colors picked. In Split a ramp that is the same in light and dark, as every ramp is
- * under 2021 and an accent's always is, shows once under Same in light and dark with each marker
- * named by its mode. The rest show per mode in the light and dark columns. Light or Dark shows that
- * mode's ramps alone.
+ * accent's four colors picked. Under the ramp one tag per tone names what landed there, and the
+ * tag and its marker light up together under the pointer. In Split a ramp that is the same in light
+ * and dark, as every ramp is under 2021 and an accent's always is, shows once under Same in light
+ * and dark with a row of tags for each mode. The rest show per mode in the light and dark columns.
+ * Light or Dark shows that mode's ramps alone.
  *
  * The ramp [highlight] points at is scrolled into view and outlined with a label naming what sits
  * on it, as long as it was picked in the project [generation] counts. A target the theme no longer
@@ -164,20 +166,6 @@ private sealed interface RampSource {
 }
 
 /**
- * A marker before its name is put into words.
- *
- * @property[name] The role or accent color, in lower camel case.
- * @property[tone] The tone it picked.
- * @property[isDark] The mode it picked it in, or null on a ramp that shows one mode only.
- */
-@Immutable
-private data class ModeMark(
-    val name: String,
-    val tone: Double,
-    val isDark: Boolean?,
-)
-
-/**
  * One ramp as the tab shows it.
  *
  * @property[source] Which palette or accent it is.
@@ -185,8 +173,6 @@ private data class ModeMark(
  * @property[steps] Its stops, darkest first.
  * @property[keyTone] The tone of its key color.
  * @property[marks] What picked a tone from it.
- * @property[ramp] The engine's ramp when this is a scheme palette in one mode, drawn with its own
- * markers, or null.
  */
 @Immutable
 private data class RampEntry(
@@ -195,7 +181,6 @@ private data class RampEntry(
     val steps: List<RampStep>,
     val keyTone: Double,
     val marks: List<ModeMark>,
-    val ramp: Ramp? = null,
 )
 
 /**
@@ -282,10 +267,10 @@ private fun paletteEntry(
     source: RampSource,
     ramp: Ramp,
     isDark: Boolean,
-): RampEntry = RampEntry(source, isDark, ramp.steps, ramp.keyTone, marks = emptyList(), ramp = ramp)
+): RampEntry = RampEntry(source, isDark, ramp.steps, ramp.keyTone, marks = ramp.marks(isDark = null))
 
-/** The roles that picked from this ramp, named for the mode [isDark] picks. */
-private fun Ramp.marks(isDark: Boolean): List<ModeMark> =
+/** The roles that picked from this ramp, for the mode [isDark] picks, or for the one mode shown when null. */
+private fun Ramp.marks(isDark: Boolean?): List<ModeMark> =
     markers.map { marker -> ModeMark(marker.role.name.lowerFirst(), marker.tone, isDark) }
 
 /** The four colors of the family in the mode [isDark] picks, named for it when [named]. */
@@ -343,8 +328,9 @@ private fun ThemeResult.sameInBothModes(palette: KeyColor): Boolean =
     ramps[palette, false].steps == ramps[palette, true].steps
 
 /**
- * One ramp under its [title]. The picked ramp wears an outline and a label saying what sits on it,
- * and takes [requesters], so the tab can scroll to it and focus its first stop.
+ * One ramp under its [title] and its key color's tag, with the tags of what landed on it below. The
+ * picked ramp wears an outline and a label saying what sits on it, and takes [requesters], so the
+ * tab can scroll to it and focus its first stop.
  *
  * It takes nothing of the theme but its own ramp, so a change that leaves the ramp alone, such as
  * another accent or a custom tone, does not compose it again.
@@ -366,6 +352,10 @@ private fun RampBlock(
     val onCopyTone = { step: RampStep ->
         dispatcher.dispatch(WorkspaceAction.CopyText(step.argb.toHex(), labels.getValue(step.tone)))
     }
+    // b-513
+    val markers = remember(entry) { entry.marks.map { mark -> RampMark(mark.name, mark.tone) } }
+    var lit by remember { mutableStateOf<Int?>(null) }
+    val onLit = remember { { tone: Int? -> lit = tone } }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -378,28 +368,13 @@ private fun RampBlock(
             ).padding(tokens.spacing.small),
         verticalArrangement = Arrangement.spacedBy(tokens.spacing.small),
     ) {
-        BuilderText(title, Modifier.semantics { heading() }, style = BuilderTextStyle.SectionLabel)
+        RampTitle(title, entry.keyTone, lit, onLit) // b-513
         if (shown != null) BuilderText(stringResource(Res.string.tabs_ramp_shown, shown.name))
-        val ramp = entry.ramp
         // b-308ba
         val strip = if (shown != null) Modifier.focusRequester(requesters.focus) else Modifier
-        if (ramp != null) {
-            RampStrip(ramp, onCopyTone, strip)
-        } else {
-            RampStrip(entry.steps, entry.marks.map { mark -> mark.inWords() }, entry.keyTone, onCopyTone, strip)
-        }
+        RampStrip(entry.steps, markers, entry.keyTone, onCopyTone, strip, labels = false, lit = lit, onLit = onLit)
+        ModeTags(entry.marks, lit, onLit) // b-513
     }
-}
-
-/** The marker as the strip labels it, with its mode when it has one. */
-@Composable
-private fun ModeMark.inWords(): RampMark {
-    val label = when (isDark) {
-        null -> name
-        false -> stringResource(Res.string.tabs_mark_light, name)
-        true -> stringResource(Res.string.tabs_mark_dark, name)
-    }
-    return RampMark(label, tone)
 }
 
 /** What the ramp is called, the palette's name or the accent's own. */

@@ -46,10 +46,10 @@
     <string name="tabs_palette_neutral_variant">Neutral variant</string>
     <!-- The Palettes tab heading over the error palette. -->
     <string name="tabs_palette_error">Error</string>
-    <!-- A marker on a ramp shared by both modes, for the light scheme. %1$s is the role, such as primary. -->
-    <string name="tabs_mark_light">%1$s light</string>
-    <!-- A marker on a ramp shared by both modes, for the dark scheme. %1$s is the role, such as primary. -->
-    <string name="tabs_mark_dark">%1$s dark</string>
+    <!-- A tag under a ramp naming what landed on one tone. %1$d is the tone and %2$s the roles or accent colors there, such as primary, surfaceTint. -->
+    <string name="tabs_tone_tag">%1$d · %2$s</string>
+    <!-- What the Palettes tab calls the tone a palette is built around, named in the tag beside the ramp's title. -->
+    <string name="tabs_key_color">key color</string>
     <!-- Names what was copied in the copy toast. %1$s is the ramp, such as Primary, and %2$d the tone of the stop. -->
     <string name="tabs_copied_tone">%1$s tone %2$d</string>
     <!-- The label on the ramp Show on ramp picked out. %1$s is the role or accent color, such as primary. -->

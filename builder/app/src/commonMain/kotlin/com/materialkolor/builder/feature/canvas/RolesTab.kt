@@ -151,7 +151,8 @@ private fun swatchGroups(
 
 /**
  * A role, inked with its on-pair and rated against it. An on role is inked with the role it sits
- * on, and a role with neither is inked black or white by its tone.
+ * on and rated against it too, so both cards of a pair carry the same readout. A role with neither
+ * is inked black or white by its tone and has no ratio.
  */
 private fun roleSwatch(
     result: ThemeResult,
@@ -172,7 +173,11 @@ private fun roleSwatch(
         argb = entry.argb,
         ink = ink,
         tone = entry.tone,
-        contrast = onPair?.let { on -> result.ratio(ColorRef.OfRole(on), ColorRef.OfRole(role), isDark) },
+        contrast = when { // b-513
+            onPair != null -> result.ratio(ColorRef.OfRole(onPair), ColorRef.OfRole(role), isDark)
+            under != null -> result.ratio(ColorRef.OfRole(role), ColorRef.OfRole(under), isDark)
+            else -> null
+        },
         target = RampTarget.OfRole(role, isDark),
         pinned = (if (isDark) pin?.dark else pin?.light) != null,
     )
@@ -196,7 +201,7 @@ private fun keyColorSwatch(
     )
 }
 
-/** One color of an accent, inked with its partner and rated against it when it is a fill. */
+/** One color of an accent, inked with its partner and rated against it, the on color over the fill. */
 private fun accentSwatch(
     result: ThemeResult,
     slot: AccentSlot,
@@ -211,7 +216,11 @@ private fun accentSwatch(
         argb = argb,
         ink = family[partner.part, isDark].toColor(),
         tone = HctReadout.of(argb).tone,
-        contrast = if (onFill) result.ratio(ColorRef.OfAccent(partner), ColorRef.OfAccent(slot), isDark) else null,
+        contrast = if (onFill) { // b-513
+            result.ratio(ColorRef.OfAccent(partner), ColorRef.OfAccent(slot), isDark)
+        } else {
+            result.ratio(ColorRef.OfAccent(slot), ColorRef.OfAccent(partner), isDark)
+        },
         target = RampTarget.OfAccent(slot, isDark),
     )
 }

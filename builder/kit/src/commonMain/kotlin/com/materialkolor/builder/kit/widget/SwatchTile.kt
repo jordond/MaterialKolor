@@ -89,8 +89,8 @@ private const val AA_LARGE = 3.0
  * One role of a scheme, filled with its color and inked with its on-pair.
  *
  * It shows the role name, the hex, the tone the role resolved to and its contrast against [onColor]
- * as a ratio and a WCAG badge. A role with no on-pair, such as outline or an on role, has no ratio to
- * rate, so it passes a null [contrast] and the contrast line stays hidden. It reads out as a button
+ * as a ratio and a WCAG badge. A role with no pair, such as outline, has no ratio to rate, so it
+ * passes a null [contrast] and the contrast line stays hidden. It reads out as a button
  * named like "primary, #6750A4, tone 40". A [pinned] role wears a pin beside its name and reads out
  * pinned as its state. The web hears only the name, so there the ratio, the badge and the pinned
  * state travel in it, as in "primary, #6750A4, tone 40, 6.4:1, AA, pinned" (D37, F-22).
