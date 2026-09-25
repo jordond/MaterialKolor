@@ -1,7 +1,7 @@
 package com.materialkolor.convention
 
 import org.gradle.api.Project
-import org.gradle.api.tasks.testing.Test
+import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
@@ -11,12 +11,12 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import java.time.Duration
 
 /**
- * Which wasm runtime a builder module is compiled and tested against.
+ * Which runtime a builder module's web targets, wasmJs and js, are compiled and tested against.
  *
  * Only the site ships, so the modules that hold no UI run their tests on node, which is quicker to
  * start and needs no headless browser.
  */
-internal enum class BuilderWasmRuntime {
+internal enum class BuilderWebRuntime {
     NodeJs,
     Browser,
 }
@@ -27,7 +27,7 @@ internal enum class BuilderWasmRuntime {
  * The builder is not published, so this deliberately does not go through the library convention.
  */
 @OptIn(ExperimentalWasmDsl::class)
-internal fun Project.configureBuilderModule(runtime: BuilderWasmRuntime) {
+internal fun Project.configureBuilderModule(runtime: BuilderWebRuntime) {
     extensions.configure<KotlinMultiplatformExtension> {
         applyDefaultHierarchyTemplate()
 
@@ -41,8 +41,17 @@ internal fun Project.configureBuilderModule(runtime: BuilderWasmRuntime) {
 
         wasmJs {
             when (runtime) {
-                BuilderWasmRuntime.NodeJs -> nodejs()
-                BuilderWasmRuntime.Browser -> browser()
+                BuilderWebRuntime.NodeJs -> nodejs()
+                BuilderWebRuntime.Browser -> browser()
+            }
+        }
+
+        // The fallback for browsers without WasmGC. With both web targets declared, the default
+        // hierarchy template adds the shared webMain and webTest source sets.
+        js {
+            when (runtime) {
+                BuilderWebRuntime.NodeJs -> nodejs()
+                BuilderWebRuntime.Browser -> browser()
             }
         }
 
@@ -62,10 +71,12 @@ internal fun Project.configureBuilderModule(runtime: BuilderWasmRuntime) {
  *
  * The slowest suite, app's jvmTest, takes about 80 seconds, so five minutes means a test that
  * never goes idle, not a slow machine. Pass `-Pbuilder.testTimeoutMinutes=<n>` to change it.
+ * It targets every test task, so the node and Karma runs of the web targets are covered as well
+ * as jvmTest.
  */
 private fun Project.configureTestTimeout() {
     val minutes = providers.gradleProperty("builder.testTimeoutMinutes").map(String::toLong).orElse(5L)
-    tasks.withType<Test>().configureEach {
+    tasks.withType<AbstractTestTask>().configureEach {
         timeout.set(minutes.map(Duration::ofMinutes))
     }
 }

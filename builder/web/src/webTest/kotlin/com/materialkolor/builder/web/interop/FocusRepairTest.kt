@@ -173,11 +173,10 @@ class FocusRepairTest {
 /**
  * Counts the calls to [element]'s `focus`, whether or not the browser fires a focus event for them.
  */
-@JsFun(
-    "(element) => { element.focusCalls = 0; const focus = element.focus.bind(element); " +
-        "element.focus = (options) => { element.focusCalls += 1; focus(options); }; }",
-)
-private external fun countFocusCalls(element: HTMLElement)
+private fun countFocusCalls(element: HTMLElement): Unit =
+    js(
+        "(() => { element.focusCalls = 0; const focus = element.focus.bind(element); " +
+            "element.focus = (options) => { element.focusCalls += 1; focus(options); }; })()",
+    )
 
-@JsFun("(element) => element.focusCalls")
-private external fun focusCallsOf(element: HTMLElement): Int
+private fun focusCallsOf(element: HTMLElement): Int = js("element.focusCalls")

@@ -76,5 +76,4 @@ internal object MirrorRoot {
  * kotlinx-browser passes `null` for the options it leaves out, and Chrome rejects a null
  * `attributeFilter`.
  */
-@JsFun("() => ({ childList: true, subtree: true })")
-private external fun subtreeChanges(): MutationObserverInit
+private fun subtreeChanges(): MutationObserverInit = js("({ childList: true, subtree: true })")

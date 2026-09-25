@@ -102,15 +102,12 @@ internal object FocusRepair {
     private fun Element.canvas(): HTMLCanvasElement? = querySelector("canvas") as? HTMLCanvasElement
 }
 
-@JsFun("(element) => element.focus({ preventScroll: true })")
-private external fun focusWithoutScroll(element: HTMLElement)
+private fun focusWithoutScroll(element: HTMLElement): Unit = js("element.focus({ preventScroll: true })")
 
-@JsFun("(action) => queueMicrotask(action)")
-private external fun runAsMicrotask(action: () -> Unit)
+private fun runAsMicrotask(action: () -> Unit): Unit = js("queueMicrotask(action)")
 
 /**
  * Options for watching an element's own children. The kotlinx-browser factory passes `null` for
  * the options it leaves out, and Chrome rejects a null `attributeFilter`.
  */
-@JsFun("() => ({ childList: true })")
-private external fun childChanges(): MutationObserverInit
+private fun childChanges(): MutationObserverInit = js("({ childList: true })")
