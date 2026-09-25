@@ -55,6 +55,7 @@ import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.PanelEdge
 import com.materialkolor.builder.kit.skin.headless.panelEnter
 import com.materialkolor.builder.kit.skin.headless.popoverEnter
@@ -283,6 +284,7 @@ class ControlsCSemanticsTest {
             waitForIdle()
             onNodeWithText("Undo last edit").assertDoesNotExist()
             onNodeWithTag("anchor", useUnmergedTree = true).performMouseInput { moveTo(center) }
+            mainClock.advanceTimeBy(OverlayMetrics.tooltipDelayMillis * 2)
             waitForIdle()
             onNodeWithText("Undo last edit").assertExists()
         }
