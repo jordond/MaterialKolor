@@ -21,7 +21,6 @@ import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.ExportPrefs
 import com.materialkolor.builder.domain.persist.ExportTarget
-import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.MotionOverride
 import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.domain.persist.PreviewMode
@@ -82,7 +81,7 @@ internal class WorkspaceModel(
         // The session publishes the document and its project's number as one value, so no state here
         // ever pairs one project's document with another project's number, whatever order things run in.
         session.shown.mergeState { state, shown ->
-            state.withDocument(shown.document).copy(projectGeneration = shown.generation).withTimeline()
+            state.withDocument(shown.document).withGeneration(shown.generation).withTimeline()
         }
         session.history.mergeState { state, history -> state.copy(history = history).withTimeline() }
         session.viewState.mergeState { state, view -> state.copy(view = view) }
@@ -188,13 +187,15 @@ internal class WorkspaceModel(
         updateView { view -> view.copy(deviceWidth = width) }
     }
 
-    fun setFineTuneRowOpen(
-        row: FineTuneRow,
-        open: Boolean,
-    ) {
-        updateView { view ->
-            view.copy(openFineTuneRows = if (open) view.openFineTuneRows + row else view.openFineTuneRows - row)
-        }
+    /**
+     * Open the Fine-tune sheet at [section], or at its top, the locks, when [section] is null.
+     */
+    fun openFineTune(section: FineTuneSection? = null) {
+        updateState { state -> state.copy(fineTune = section ?: FineTuneSection.Locks) } // b-521
+    }
+
+    fun closeFineTune() { // b-521
+        updateState { state -> state.copy(fineTune = null) }
     }
 
     fun setVision(vision: VisionSimulation) {
@@ -231,6 +232,8 @@ internal class WorkspaceModel(
                     panel = panel,
                     pickerTarget = null,
                     fullscreen = state.fullscreen && panel != Panel.History,
+                    // b-521 The Projects drawer covers the poster, so the Fine-tune sheet shuts under it.
+                    fineTune = state.fineTune.takeIf { panel != Panel.Projects },
                 ).withTimeline()
         }
     }
@@ -264,6 +267,7 @@ internal class WorkspaceModel(
     }
 
     fun setPosterCollapsed(collapsed: Boolean) {
+        if (collapsed) closeFineTune() // b-521
         updatePreferences { prefs -> prefs.copy(posterCollapsed = collapsed) }
     }
 
@@ -276,6 +280,7 @@ internal class WorkspaceModel(
         mode: PosterMode,
     ) {
         if (mode == PosterMode.Rail72) {
+            if (collapsed) closeFineTune() // b-521
             updateState { state -> state.copy(posterOverCanvas = !collapsed) }
         } else {
             setPosterCollapsed(collapsed)
@@ -319,8 +324,8 @@ internal class WorkspaceModel(
         updateState { state ->
             state
                 .withDocument(shown.document)
+                .withGeneration(shown.generation)
                 .copy(
-                    projectGeneration = shown.generation,
                     history = history,
                     expressiveSuggestion = expressiveSuggestion,
                 ).withTimeline()
@@ -379,6 +384,9 @@ internal class WorkspaceModel(
      * @property[timeline] Every step of the history and where the document sits among them, while
      * [panel] is the History list, or null while it is not. It follows the history, the document and
      * the panel, and nothing builds it while the list is closed.
+     * @property[fineTune] The section the Fine-tune sheet is open at, or null while it is shut. It
+     * lives for this session only. Collapsing the poster, opening the Projects drawer or showing
+     * another project shuts it.
      */
     @Immutable
     data class State(
@@ -402,6 +410,7 @@ internal class WorkspaceModel(
         val grayscaleHeld: Boolean = false,
         val posterOverCanvas: Boolean = false,
         val timeline: Timeline? = null,
+        val fineTune: FineTuneSection? = null,
     ) {
         /**
          * What [document] exports to.
@@ -421,6 +430,14 @@ internal class WorkspaceModel(
          */
         fun withDocument(document: ThemeDocument): State =
             if (document == this.document) this else copy(document = document, capabilities = capabilitiesOf(document))
+
+        /**
+         * This state counting [generation] projects, with the Fine-tune sheet shut when that is
+         * another project than the one shown.
+         */
+        fun withGeneration(generation: Int): State =
+            // b-521
+            if (generation == projectGeneration) this else copy(projectGeneration = generation, fineTune = null)
     }
 
     /**

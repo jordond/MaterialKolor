@@ -47,12 +47,12 @@ import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.SeedSource
-import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.feature.canvas.RampTarget
 import com.materialkolor.builder.feature.poster.readoutName
 import com.materialkolor.builder.feature.poster.styleName
 import com.materialkolor.builder.feature.share.ShareController
 import com.materialkolor.builder.feature.share.sharedNoticeText
+import com.materialkolor.builder.feature.workspace.FineTuneSection
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.generated.resources.Res
@@ -554,7 +554,7 @@ private fun paletteEntries(
             onlyWhenAsked = true,
         ) {
             runner.dispatch(WorkspaceAction.SetPosterCollapsed(false))
-            if (section.inCoreColors) runner.dispatch(WorkspaceAction.SetFineTuneRowOpen(FineTuneRow.CoreColors, true))
+            section.fineTune?.let { fineTune -> runner.dispatch(WorkspaceAction.OpenFineTune(fineTune)) } // b-521
         }
     }
     return rows + sections + roles
@@ -596,21 +596,24 @@ private fun wordList(text: String): List<String> =
     text.split(',').map { word -> word.trim() }.filter { word -> word.isNotEmpty() }
 
 /**
- * The poster's sections a search can go to, by the names the poster shows. Key colors and pins
- * sit in the Core colors row, which opens with them.
+ * The poster's sections a search can go to, by the names the poster shows. Key colors, pins, extra
+ * colors and target options live in the Fine-tune sheet, which opens at them.
+ *
+ * @property[fineTune] The Fine-tune sheet's section this one lives in, or null when it sits on the
+ * poster itself.
  */
 private enum class PosterSection(
     val title: StringResource,
     val words: StringResource? = null,
-    val inCoreColors: Boolean = false,
+    val fineTune: FineTuneSection? = null, // b-521
 ) {
     Seed(Res.string.poster_seed),
     Style(Res.string.style_label),
     Contrast(Res.string.contrast_label),
-    KeyColors(Res.string.keycolors_label, inCoreColors = true),
-    Pins(Res.string.pins_label, Res.string.palette_words_pins, inCoreColors = true),
-    Accents(Res.string.accents_label, Res.string.palette_words_accents),
-    TargetOptions(Res.string.extras_targets_label),
+    KeyColors(Res.string.keycolors_label, fineTune = FineTuneSection.KeyColors),
+    Pins(Res.string.pins_label, Res.string.palette_words_pins, fineTune = FineTuneSection.Pins),
+    Accents(Res.string.accents_label, Res.string.palette_words_accents, fineTune = FineTuneSection.Accents),
+    TargetOptions(Res.string.extras_targets_label, fineTune = FineTuneSection.TargetOptions),
 }
 
 /**

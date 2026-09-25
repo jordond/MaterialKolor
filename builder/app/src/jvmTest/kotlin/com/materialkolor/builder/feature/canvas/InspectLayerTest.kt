@@ -34,10 +34,10 @@ import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.edit.PinMode
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Role
-import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.ProjectViewState
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.resolve.ThemeResult
+import com.materialkolor.builder.feature.workspace.FineTuneSection
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.capabilitiesOf
 import com.materialkolor.builder.preview.inspect.INSPECT_CARD_TAG
@@ -134,7 +134,7 @@ class InspectLayerTest {
             waitForIdle()
             host.actions.takeLast(2) shouldBe listOf(
                 WorkspaceAction.SetPosterCollapsed(collapsed = false),
-                WorkspaceAction.SetFineTuneRowOpen(FineTuneRow.CoreColors, open = true),
+                WorkspaceAction.OpenFineTune(FineTuneSection.KeyColors),
             )
 
             onNode(OnCard and hasText("Show on ramp")).performClick()

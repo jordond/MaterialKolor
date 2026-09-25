@@ -26,8 +26,8 @@ import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.feature.picker.PickerTarget
+import com.materialkolor.builder.feature.workspace.FineTuneSection
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -68,14 +68,14 @@ class CoreColorsRowTest {
             onNodeWithText("Core colors and pins").performClick()
             waitForIdle()
 
-            harness.actions shouldBe listOf(WorkspaceAction.SetFineTuneRowOpen(FineTuneRow.CoreColors, open = true))
+            harness.actions shouldBe listOf(WorkspaceAction.OpenFineTune(FineTuneSection.KeyColors))
             onNodeWithText("Key colors").assertExists()
             onNodeWithText("Pinned roles").assertExists()
 
             onNodeWithText("Core colors and pins").performClick()
             waitForIdle()
 
-            harness.actions.last() shouldBe WorkspaceAction.SetFineTuneRowOpen(FineTuneRow.CoreColors, open = false)
+            harness.actions.last() shouldBe WorkspaceAction.CloseFineTune
             harness.undoEntries() shouldBe 0
         }
 
@@ -240,7 +240,7 @@ class CoreColorsRowTest {
                 pins = TwoPins,
             )
             val harness = PosterHarness(document)
-            harness.openFineTuneRows = setOf(FineTuneRow.CoreColors)
+            harness.fineTune = FineTuneSection.KeyColors
             showSection(harness) { context, dispatcher -> CoreColorsRow(context, dispatcher) }
 
             onNodeWithText(ONE_RAMP, substring = true).assertExists()

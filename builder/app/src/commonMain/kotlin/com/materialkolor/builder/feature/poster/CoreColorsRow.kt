@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.domain.model.KeyColor
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.domain.persist.FineTuneRow
+import com.materialkolor.builder.feature.workspace.FineTuneSection
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.keycolors_summary_both
@@ -33,9 +33,12 @@ internal fun CoreColorsRow(
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     BuilderDisclosure(
-        expanded = FineTuneRow.CoreColors in context.openFineTuneRows,
+        // b-521 shim, B-524 replaces
+        expanded = context.fineTune in setOf(FineTuneSection.KeyColors, FineTuneSection.Pins),
         onExpandedChange = { open ->
-            dispatcher.dispatch(WorkspaceAction.SetFineTuneRowOpen(FineTuneRow.CoreColors, open))
+            dispatcher.dispatch(
+                if (open) WorkspaceAction.OpenFineTune(FineTuneSection.KeyColors) else WorkspaceAction.CloseFineTune,
+            )
         },
         title = stringResource(Res.string.keycolors_title),
         modifier = modifier,

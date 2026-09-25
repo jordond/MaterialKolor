@@ -162,8 +162,12 @@ internal fun WorkspaceScreen(
             is WorkspaceAction.SetPosterCollapsed -> {
                 model.setPosterCollapsed(action.collapsed, posterMode)
             }
-            is WorkspaceAction.SetFineTuneRowOpen -> {
-                model.setFineTuneRowOpen(action.row, action.open)
+            // b-521
+            is WorkspaceAction.OpenFineTune -> {
+                model.openFineTune(action.section)
+            }
+            WorkspaceAction.CloseFineTune -> {
+                model.closeFineTune()
             }
             is WorkspaceAction.OpenPanel -> {
                 shortcutFocus.noteOpen(action.panel)

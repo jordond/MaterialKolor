@@ -7,7 +7,6 @@ import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.ExportTarget
-import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.MotionOverride
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
@@ -146,12 +145,17 @@ internal sealed interface WorkspaceAction {
     ) : WorkspaceAction
 
     /**
-     * Open or close one of the fine tune rows.
+     * Open the Fine-tune sheet at [section], or at its top when [section] is null. It stays open for
+     * this session only and nothing saves it.
      */
-    data class SetFineTuneRowOpen(
-        val row: FineTuneRow,
-        val open: Boolean,
+    data class OpenFineTune(
+        val section: FineTuneSection? = null, // b-521
     ) : WorkspaceAction
+
+    /**
+     * Close the Fine-tune sheet.
+     */
+    data object CloseFineTune : WorkspaceAction // b-521
 
     /**
      * Open [panel] over the workspace.
@@ -299,4 +303,40 @@ internal enum class ShuffleLock {
      * Keep the seed.
      */
     Seed,
+}
+
+/**
+ * The sections of the Fine-tune sheet, which the command palette and the inspect overlay open it at.
+ * Locks sits at the sheet's top, so opening there is opening the sheet as it starts.
+ */
+internal enum class FineTuneSection {
+    /**
+     * What a shuffle keeps, the Hue and Seed locks.
+     */
+    Locks, // b-521
+
+    /**
+     * The key colors beside the seed.
+     */
+    KeyColors,
+
+    /**
+     * The roles pinned to a color of their own.
+     */
+    Pins,
+
+    /**
+     * The extra colors the theme carries.
+     */
+    Accents,
+
+    /**
+     * The spec and the platform the theme targets.
+     */
+    Spec,
+
+    /**
+     * The options of the export target, such as AMOLED and color animation.
+     */
+    TargetOptions,
 }

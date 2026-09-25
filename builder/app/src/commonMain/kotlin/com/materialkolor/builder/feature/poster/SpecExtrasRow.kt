@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.domain.capability.EffectiveSpec
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.domain.persist.FineTuneRow
+import com.materialkolor.builder.feature.workspace.FineTuneSection
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.extras_summary
@@ -35,9 +35,13 @@ internal fun SpecExtrasRow(
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     BuilderDisclosure(
-        expanded = FineTuneRow.SpecExtras in context.openFineTuneRows,
+        // b-521 shim, B-524 replaces
+        expanded =
+            context.fineTune in setOf(FineTuneSection.Spec, FineTuneSection.Accents, FineTuneSection.TargetOptions),
         onExpandedChange = { open ->
-            dispatcher.dispatch(WorkspaceAction.SetFineTuneRowOpen(FineTuneRow.SpecExtras, open))
+            dispatcher.dispatch(
+                if (open) WorkspaceAction.OpenFineTune(FineTuneSection.Spec) else WorkspaceAction.CloseFineTune,
+            )
         },
         title = stringResource(Res.string.extras_title),
         modifier = modifier,
