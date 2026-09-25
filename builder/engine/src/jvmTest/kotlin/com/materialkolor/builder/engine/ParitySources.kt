@@ -262,7 +262,7 @@ internal class ExportSource(
     /**
      * The color [value] names, a literal, a top-level color or a parameter. A parameter reads as
      * its default, or with none as what every call to its function passes, the way Custom's
-     * `rememberThemeColors(seedColor: Color, …)` takes its seed from `AppTheme`.
+     * `rememberThemeColors(seedColor: Color, ...)` takes its seed from `AppTheme`.
      */
     private fun colorOf(
         value: String,
@@ -372,7 +372,7 @@ private val NamedArgument = Regex("""^(\w+) = (.+)$""")
 private val Whitespace = Regex("""\s+""")
 
 /**
- * Every `Color(0x…)` literal in a set of generated files, by where it sits.
+ * Every `Color(0x...)` literal in a set of generated files, by where it sits.
  *
  * A literal's name is the property, argument or Unstyled token it is assigned to, behind the names
  * of the calls it is nested in, as in `lightThemeColors/brand/color` or `primaryLight`.

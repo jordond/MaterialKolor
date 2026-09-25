@@ -12,9 +12,9 @@ import com.materialkolor.ktx.toneColor
 import com.materialkolor.palettes.TonalPalette
 
 /**
- * What a dynamic export's colors come to, read out of its own code and nothing else: the arguments
- * of its scheme call, the pins it lays over the scheme, the Custom slots it cuts, the accent
- * families it builds and the Fluent shades it builds inline.
+ * What a dynamic export's colors come to, read out of its own code and nothing else. That means the
+ * arguments of its scheme call, the pins it lays over the scheme, the Custom slots it cuts, the
+ * accent families it builds and the Fluent shades it builds inline.
  *
  * Every color is worked out through the library call the export makes, on a scheme built with
  * the arguments it passes, so a swapped mode, a wrong tone or a wrong ramp shows up as a color.
@@ -28,9 +28,9 @@ internal class DynamicExport private constructor(
     private val document = arguments.document()
 
     /**
-     * Every color the export gives in the mode [isDark] picks, by the name it sits under: a role
-     * by its property, a Custom slot by its property, a Fluent shade by its name, an accent color as
-     * `brand/onColor`, or for Unstyled as `ThemeTokens.onBrand`.
+     * Every color the export gives in the mode [isDark] picks, keyed by the name it sits under. A role
+     * is keyed by its property, a Custom slot by its property, a Fluent shade by its name, an accent
+     * color as `brand/onColor`, or for Unstyled as `ThemeTokens.onBrand`.
      */
     fun colors(isDark: Boolean): Map<String, Argb> =
         when (target) {
@@ -252,7 +252,7 @@ internal class DynamicExport private constructor(
  * Works out what one expression an export writes comes to in the mode [isDark] picks, with [names]
  * in scope and, inside a `TonalPalette` helper, [receiver] as `this`.
  *
- * It knows what the exports write and nothing more: `if (isDark) a else b`, color, tone and
+ * It knows what the exports write and nothing more. That is `if (isDark) a else b`, color, tone and
  * threshold literals, a scheme's ramps, `toneColor`, `onTone`, a `MaterialKolors` role, and a call
  * to a `TonalPalette` helper the export declares itself, whose body it reads and runs.
  */

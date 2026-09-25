@@ -134,9 +134,9 @@ class ExportParityTest {
     }
 
     /**
-     * Every document's dynamic [target] export gives the preview's colors in both modes: every role
-     * with its pins, every Custom slot with its tones, every accent family and every Fluent shade,
-     * each worked out from what the export writes.
+     * Every document's dynamic [target] export gives the preview's colors in both modes. That covers
+     * every role with its pins, every Custom slot with its tones, every accent family and every
+     * Fluent shade, each worked out from what the export writes.
      */
     private fun assertGivesThePreviewColors(
         target: ExportTarget,
