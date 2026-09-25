@@ -14,7 +14,7 @@ code.
 | `:builder:kit`          | The design system: components, icons and the skins for each UI library.               |
 | `:builder:preview`      | The sample screens a theme is previewed on.                                           |
 | `:builder:app`          | Features, state and the platform interfaces, plus the desktop entry point.            |
-| `:builder:web`          | The wasm entry point, browser interop and the site assembly.                          |
+| `:builder:web`          | The wasm and JS entry point, browser interop and the site assembly.                   |
 | `builder/worker`        | The Cloudflare Worker that serves the site and draws link previews for `/t/` links.   |
 | `builder/e2e`           | Playwright tests and the perf run, against the assembled site.                        |
 | `builder/codegen-check` | A standalone Gradle build that compiles every exported golden.                        |
@@ -33,7 +33,23 @@ code.
 
 # Web, the optimized build on the webpack dev server
 ./gradlew :builder:web:wasmJsBrowserProductionRun
+
+# Web on the JS engine, then open the page with ?engine=js
+./gradlew :builder:web:jsBrowserDevelopmentRun
 ```
+
+## Web engines
+
+The site ships two builds of the same app and `boot.js` picks one per visit. Browsers with WasmGC
+run the Kotlin/Wasm build. Browsers with WebAssembly and WebGL 2 but no WasmGC run the Kotlin/JS
+build, which draws with the same skiko wasm. That covers Safari 15.2 to 18.1 and Chrome, Edge and
+Firefox from before WasmGC, back to Chrome 95 and Firefox 100. A browser without WebAssembly and
+its legacy exception handling, which skiko needs, or without WebGL 2, WebAssembly turned off
+included, gets the unsupported page. There is no notice on the JS engine, and the error details
+name the engine that ran.
+
+Add `?engine=js` to any address to run the JS build where wasm would run. It lasts for that visit
+only. The JS dev server serves only the JS glue, so the page it opens needs `?engine=js` to boot.
 
 ## MaterialKolor source
 

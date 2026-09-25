@@ -4,9 +4,9 @@
 //
 //   node scripts/check-budget.mjs [--site dir] [--budget file]
 //
-// Exits 1 when a file is over its role's limit, a role's files together are over its total, first
-// visit is over its total, an asset belongs to no role, or any site file is over the host's raw size
-// cap.
+// Exits 1 when a file is over its role's limit, a role's files together are over its total, an
+// engine's first visit is over its total, an asset belongs to no role, or any site file is over the
+// host's raw size cap.
 
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
@@ -26,8 +26,14 @@ const roles = budget.roles.map((role) => {
   return { ...role, pattern: globToRegExp(role.files) };
 });
 const skipped = budget.skip.map(globToRegExp);
-const firstVisit = budget.firstVisit.files.map(globToRegExp);
+const shared = budget.firstVisit.files.map(globToRegExp);
 const lazy = budget.firstVisit.exclude.map(globToRegExp);
+// boot.js loads one engine per visit, so each engine's first visit is the shared files plus its own.
+const engines = Object.entries(budget.firstVisit.engines).map(([name, engine]) => ({
+  name,
+  maxBytes: engine.maxBytes,
+  patterns: engine.files.map(globToRegExp),
+}));
 
 const site = listFiles(siteDir);
 
@@ -39,8 +45,9 @@ const files = site
     file,
     raw,
     role: roles.find((role) => role.pattern.test(file)),
-    firstVisit: firstVisit.some((pattern) => pattern.test(file)) && !lazy.some((pattern) => pattern.test(file)),
+    engines: firstVisitEngines(file),
   }))
+  .map((entry) => ({ ...entry, firstVisit: entry.engines.length > 0 }))
   .filter((entry) => entry.role || entry.firstVisit || entry.file.startsWith('assets/'))
   .map((entry) => {
     const measured = entry.role || entry.firstVisit;
@@ -72,11 +79,17 @@ for (const role of roles.filter((role) => role.totalBytes !== undefined)) {
   rows.push([`${role.name}, all files`, role.name, '', sum, role.totalBytes]);
 }
 
-const total = files.filter((entry) => entry.firstVisit).reduce((sum, entry) => sum + entry.brotli, 0);
-if (total > budget.firstVisit.maxBytes) {
-  failures.push(`first visit is ${total} bytes, over the limit of ${budget.firstVisit.maxBytes}`);
+for (const engine of engines) {
+  const visit = files.filter((entry) => entry.engines.includes(engine.name));
+  if (!visit.some((entry) => entry.file.startsWith('assets/'))) {
+    failures.push(`first visit on ${engine.name} names no file in assets/, check its files in budget.json`);
+  }
+  const total = visit.reduce((sum, entry) => sum + entry.brotli, 0);
+  if (total > engine.maxBytes) {
+    failures.push(`first visit on ${engine.name} is ${total} bytes, over the limit of ${engine.maxBytes}`);
+  }
+  rows.push([`first visit, ${engine.name}`, '', '', total, engine.maxBytes]);
 }
-rows.push(['first visit', '', '', total, budget.firstVisit.maxBytes]);
 
 // The host's cap is on raw bytes and holds every file it is given, measured or skipped here.
 const rawLimit = budget.rawFile.maxBytes;
@@ -93,6 +106,13 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log('\nWithin budget.');
+
+/** The engines whose first visit loads [file], every engine for a shared file, none for a lazy one. */
+function firstVisitEngines(file) {
+  if (lazy.some((pattern) => pattern.test(file))) return [];
+  if (shared.some((pattern) => pattern.test(file))) return engines.map((engine) => engine.name);
+  return engines.filter((engine) => engine.patterns.some((pattern) => pattern.test(file))).map((engine) => engine.name);
+}
 
 function compress(bytes) {
   const { quality, window } = budget.compression;

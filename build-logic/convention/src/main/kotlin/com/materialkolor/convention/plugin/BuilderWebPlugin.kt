@@ -24,11 +24,12 @@ import java.io.File
 import javax.inject.Inject
 
 /**
- * Turns the production wasm distribution of `:builder:web` into the site the host serves.
+ * Turns the production wasm and JS distributions of `:builder:web` into the site the host serves.
  *
  * Webpack already names the glue and wasm files by content. `assembleSite` moves them under
  * `/assets/`, where one `_headers` rule marks them immutable, and keeps `index.html`, `boot.js` and
- * `composeResources/` at the root. `checkBudget` holds the result against `budget.json`.
+ * `composeResources/` at the root. Both engines share that one site and `boot.js` picks the glue
+ * the browser can run. `checkBudget` holds the result against `budget.json`.
  *
  * `-Psite.env=staging` adds a noindex header and turns every crawler away in `robots.txt`, which
  * lets them all in on production. It also points the page's canonical link and link cards at the
@@ -40,8 +41,9 @@ class BuilderWebPlugin : Plugin<Project> {
             val rewriteIndexHtml = tasks.register<RewriteIndexHtml>("rewriteIndexHtml") {
                 group = SITE_GROUP
                 description = "Fills the asset list in index.html that boot.js boots from."
-                dependsOn(DISTRIBUTION_TASK)
-                distribution.set(distributionDirectory())
+                dependsOn(WASM_DISTRIBUTION_TASK, JS_DISTRIBUTION_TASK)
+                wasmDistribution.set(distributionDirectory(WASM_DISTRIBUTION_TASK))
+                jsDistribution.set(distributionDirectory(JS_DISTRIBUTION_TASK))
                 index.set(layout.buildDirectory.file("site-parts/index.html"))
             }
 
@@ -63,8 +65,9 @@ class BuilderWebPlugin : Plugin<Project> {
             val assembleSite = tasks.register<AssembleSite>("assembleSite") {
                 group = SITE_GROUP
                 description = "Lays the production build out as the host serves it, in build/site."
-                dependsOn(DISTRIBUTION_TASK)
-                distribution.set(distributionDirectory())
+                dependsOn(WASM_DISTRIBUTION_TASK, JS_DISTRIBUTION_TASK)
+                wasmDistribution.set(distributionDirectory(WASM_DISTRIBUTION_TASK))
+                jsDistribution.set(distributionDirectory(JS_DISTRIBUTION_TASK))
                 index.set(rewriteIndexHtml.flatMap { task -> task.index })
                 host.set(writeHeaders.flatMap { task -> task.outputDirectory })
                 origin.set(siteEnvironment.map(::siteOrigin))
@@ -83,35 +86,38 @@ class BuilderWebPlugin : Plugin<Project> {
         }
     }
 
-    // The Kotlin plugin registers the distribution task once the build script declares the wasm
-    // target, which is after this plugin applies. Site tasks call this when they are configured,
-    // by which time the task is there, and read the directory from it so the path cannot drift.
-    private fun Project.distributionDirectory(): Provider<Directory> =
-        layout.dir(tasks.named(DISTRIBUTION_TASK, Sync::class.java).map(Sync::getDestinationDir))
+    // The Kotlin plugin registers the distribution tasks once the build script declares the wasm
+    // and JS targets, which is after this plugin applies. Site tasks call this when they are
+    // configured, by which time the tasks are there, and read the directory from each so the path
+    // cannot drift.
+    private fun Project.distributionDirectory(task: String): Provider<Directory> =
+        layout.dir(tasks.named(task, Sync::class.java).map(Sync::getDestinationDir))
 }
 
 /**
- * Fills the `#mk-assets` placeholder in the distribution's `index.html` with the hashed glue and
- * wasm under `/assets/` and the fonts the first frame asks for.
+ * Fills the `#mk-assets` placeholder in the wasm distribution's `index.html` with each engine's
+ * hashed glue and wasm under `/assets/` and the fonts the first frame asks for.
  *
- * `boot.js` reads the list to load the glue, so the placeholder has to come before the tag that loads
- * `boot.js`. The dev page runs on the placeholder's own value.
+ * `boot.js` reads the list to load the glue of the engine it picks, so the placeholder has to come
+ * before the tag that loads `boot.js`. The dev page runs on the placeholder's own value.
  */
 abstract class RewriteIndexHtml : DefaultTask() {
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val distribution: DirectoryProperty
+    abstract val wasmDistribution: DirectoryProperty
+
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val jsDistribution: DirectoryProperty
 
     @get:OutputFile
     abstract val index: RegularFileProperty
 
     @TaskAction
     fun rewrite() {
-        val root = distribution.get().asFile
-        val names = root.list().orEmpty().sorted()
-        val glue = names.singleOrNull { name -> GLUE.matches(name) }
-            ?: throw GradleException("Expected one builder.<hash>.js in $root, found ${names.filter(GLUE::matches)}")
-        val wasm = names.filter { name -> HASHED.containsMatchIn(name) && name.endsWith(".wasm") }
+        val root = wasmDistribution.get().asFile
+        val wasm = engineAssets(root, WASM_GLUE)
+        val js = engineAssets(jsDistribution.get().asFile, JS_GLUE)
         // The builder's own fonts only. Libraries ship fallback fonts the first frame never asks for.
         // The initial fonts role in budget.json names the same files.
         val fonts = root
@@ -133,13 +139,35 @@ abstract class RewriteIndexHtml : DefaultTask() {
         if (placeholder.range.first > boot) throw GradleException("#mk-assets has to come before $BOOT_TAG")
 
         val assets = buildString {
-            append("{\"glue\":").append(jsonString("/$ASSETS/$glue"))
-            append(",\"wasm\":").append(wasm.joinToString(",", "[", "]") { name -> jsonString("/$ASSETS/$name") })
+            append("{\"wasm\":").append(wasm)
+            append(",\"js\":").append(js)
             append(",\"fonts\":").append(fonts.joinToString(",", "[", "]", transform = ::jsonString))
             append("}")
         }
         val filled = "<script type=\"application/json\" id=\"mk-assets\">$assets</script>"
         index.get().asFile.writeText(html.replaceRange(placeholder.range, filled))
+    }
+
+    /**
+     * One engine's glue and hashed wasm files at the root of its [distribution], as the JSON object
+     * `boot.js` reads, with paths under `/assets/`.
+     */
+    private fun engineAssets(
+        distribution: File,
+        glue: Regex,
+    ): String {
+        val names = distribution.list().orEmpty().sorted()
+        val glues = names.filter(glue::matches)
+        val script = glues.singleOrNull()
+            ?: throw GradleException("Expected one glue matching $glue in $distribution, found $glues")
+        val binaries = names.filter { name -> HASHED.containsMatchIn(name) && name.endsWith(".wasm") }
+        if (binaries.isEmpty()) throw GradleException("Expected hashed wasm files in $distribution, found none")
+        return buildString {
+            append("{\"glue\":").append(jsonString("/$ASSETS/$script"))
+            append(",\"binaries\":")
+            append(binaries.joinToString(",", "[", "]") { name -> jsonString("/$ASSETS/$name") })
+            append("}")
+        }
     }
 
     private fun jsonString(value: String): String = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
@@ -229,12 +257,17 @@ abstract class CheckBudget : DefaultTask() {
 }
 
 /**
- * Copies the distribution into the site layout, hashed files under `/assets/`.
+ * Copies the wasm distribution into the site layout, hashed files under `/assets/`, then adds the
+ * JS distribution's hashed files beside them. Everything unhashed comes from the wasm one.
  */
 abstract class AssembleSite : DefaultTask() {
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val distribution: DirectoryProperty
+    abstract val wasmDistribution: DirectoryProperty
+
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val jsDistribution: DirectoryProperty
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
@@ -261,7 +294,7 @@ abstract class AssembleSite : DefaultTask() {
 
     @TaskAction
     fun assemble() {
-        val root = distribution.get().asFile
+        val root = wasmDistribution.get().asFile
         val output = site.get().asFile
         output.deleteRecursively()
         output.mkdirs()
@@ -275,11 +308,29 @@ abstract class AssembleSite : DefaultTask() {
             }
             file.copyTo(output.resolve(target))
         }
+        addJsAssets(output.resolve(ASSETS))
         // Every page and card URL in the head of index.html starts with the production origin.
         output.resolve("index.html").writeText(index.get().asFile.readText().replace(PRODUCTION_ORIGIN, origin.get()))
         addConfig(output.resolve("index.html"))
         host.get().asFile.listFiles().orEmpty().forEach { file -> file.copyTo(output.resolve(file.name)) }
         if (origin.get() != PRODUCTION_ORIGIN) checkNoProductionOrigin(output)
+    }
+
+    // Only the JS glue and the files it loads, which webpack hashed. Its unhashed copies of skiko are
+    // never asked for. Both engines load the same skiko build, so a name already in /assets/ has the
+    // same bytes, and one that does not is a naming bug rather than something to overwrite.
+    private fun addJsAssets(assets: File) {
+        jsDistribution.get().asFile.listFiles().orEmpty()
+            .filter { file -> file.isFile && HASHED.containsMatchIn(file.name) }
+            .sortedBy(File::getName)
+            .forEach { file ->
+                val target = assets.resolve(file.name)
+                when {
+                    !target.exists() -> file.copyTo(target)
+                    !target.readBytes().contentEquals(file.readBytes()) ->
+                        throw GradleException("${file.name} is in both distributions with different bytes")
+                }
+            }
     }
 
     // The page's own settings go in ahead of boot.js, and only when there is one to give, so a site
@@ -325,7 +376,8 @@ private const val STAGING_ORIGIN = "https://staging.materialkolor.com"
 private val HOST_TEXT_EXTENSIONS = setOf("html", "js", "json", "webmanifest", "txt")
 
 private const val SITE_GROUP = "site"
-private const val DISTRIBUTION_TASK = "wasmJsBrowserDistribution"
+private const val WASM_DISTRIBUTION_TASK = "wasmJsBrowserDistribution"
+private const val JS_DISTRIBUTION_TASK = "jsBrowserDistribution"
 private const val ASSETS = "assets"
 private const val RESOURCES = "composeResources"
 private const val BUILDER_RESOURCES = "com.materialkolor."
@@ -343,7 +395,12 @@ private val ASSETS_ELEMENT = Regex("""<script type="application/json" id="mk-ass
  * A name webpack gave a content hash, matching `webpack.config.d/output.js`.
  */
 private val HASHED = Regex("""\.[0-9a-f]{16}\.""")
-private val GLUE = Regex("""builder\.[0-9a-f]{16}\.js""")
+
+/**
+ * Each engine's glue, named after `outputFileName` in the web build script.
+ */
+private val WASM_GLUE = Regex("""builder\.[0-9a-f]{16}\.js""")
+private val JS_GLUE = Regex("""builder-js\.[0-9a-f]{16}\.js""")
 
 private const val CONTENT_SECURITY_POLICY =
     "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; " +
