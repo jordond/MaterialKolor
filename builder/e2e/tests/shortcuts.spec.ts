@@ -115,10 +115,12 @@ test('inside the palette, Cmd or Ctrl with S and O never reach the browser, and 
   await page.keyboard.press(`${primary}+o`);
 
   await expect.poll(() => toast.count(), { timeout: 10_000 }).toBeGreaterThan(toastsBefore);
-  await expect(projects).toHaveAttribute('aria-label', /, saved$/, { timeout: 10_000 });
   expect(await openOverlay(page)).toBe('Palette');
   await expect(page.locator(A11Y).getByText(/^Projects, dialog/)).toHaveCount(0);
   expect(await seenKeys(page)).toEqual(['s true', 'o true']);
+  // The palette takes the poster out of the tree while it is open, so the button reads once it closes.
+  await page.keyboard.press('Escape');
+  await expect(projects).toHaveAttribute('aria-label', /, saved$/, { timeout: 10_000 });
 });
 
 test('after a number key switches the library, Space and V work with no click', async ({ page }) => {
@@ -192,22 +194,14 @@ async function seedText(page: Page): Promise<string> {
   return (await (await seedField(page)).textContent()) ?? '';
 }
 
-/** Every ARIA attribute of the poster's hue lock, which change when it is turned on. */
+/**
+ * Whether the hue lock is on, as the page stored it. The docked poster no longer shows the lock,
+ * which moved into Fine-tune, so the stored preferences say it instead.
+ */
 async function lockState(page: Page): Promise<string> {
-  const name = /^Lock hue/;
-  const scope = page.locator(A11Y);
-  const lock = scope
-    .getByRole('checkbox', { name })
-    .or(scope.getByRole('switch', { name }))
-    .or(scope.getByRole('button', { name }))
-    .first();
-  return lock.evaluate((element) =>
-    Array.from(element.attributes)
-      .filter((attribute) => attribute.name.startsWith('aria-'))
-      .map((attribute) => `${attribute.name}=${attribute.value}`)
-      .sort()
-      .join(' '),
-  );
+  const stored = await page.evaluate(() => localStorage.getItem('mk:prefs'));
+  const data = stored === null ? {} : (JSON.parse(stored).data ?? {});
+  return `hueLock=${data.hueLock === true}`;
 }
 
 /** `Meta` when the page's user agent names an Apple system, where it takes Cmd, else `Control`. */
