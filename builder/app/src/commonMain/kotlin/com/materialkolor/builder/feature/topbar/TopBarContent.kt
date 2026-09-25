@@ -4,7 +4,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -131,7 +130,7 @@ internal fun TopBarContent(
         .testTag(LIBRARY_SWITCHER_TAG)
         // b-512
         // A dropdown's floating label stays inside the bar.
-        .heightIn(max = TopBarControlMaxHeight)
+        .shrinkToHeight(TopBarControlMaxHeight)
         .topBarFocus(focus, TopBarControl.Library)
         .switcherPulse(state, dispatcher) // b-314
         .reportSwitcherOrigin(report) // b-503a

@@ -12,16 +12,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.SubcomposeMeasureScope
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.kit.headless.menusOpenAsWindows
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.BuilderType
 import com.materialkolor.builder.kit.token.LocalBuilderType
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 // b-406
 
@@ -176,6 +180,33 @@ private fun SubcomposeMeasureScope.naturalWidth(
     val room = Constraints(maxWidth = PROBE_MAX_WIDTH)
     return probe.maxOfOrNull { measurable -> measurable.measure(room).width } ?: 0
 }
+
+// b-512
+
+/**
+ * Draws what it holds scaled down from its top start corner, just enough to stand no taller than
+ * [max], and takes up only the scaled size. Something that fits already is left as it is. Presses
+ * and the menu anchored to it follow the scale.
+ *
+ * It keeps Material's outlined dropdown, whose label floats over its top edge, whole inside the top
+ * bar, where the field and its label together stand taller than the bar.
+ */
+internal fun Modifier.shrinkToHeight(max: Dp): Modifier =
+    layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints.copy(minHeight = 0, maxHeight = Constraints.Infinity))
+        val limit = max.roundToPx()
+        if (placeable.height <= limit) {
+            return@layout layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+        }
+        val scale = limit.toFloat() / placeable.height
+        layout((placeable.width * scale).roundToInt(), limit) {
+            placeable.placeRelativeWithLayer(0, 0) {
+                scaleX = scale
+                scaleY = scale
+                transformOrigin = TransformOrigin(0f, 0f)
+            }
+        }
+    }
 
 // b-406g
 
