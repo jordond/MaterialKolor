@@ -39,7 +39,7 @@ import com.composeunstyled.theme.ColorScheme as UnstyledColorScheme
 import io.github.composefluent.LocalContentColor as FluentContentColor
 
 /**
- * Dresses [content] in the active skin, re-coloured from [poster], so the controls on the poster
+ * Themes [content] with the active skin, re-coloured from [poster], so the controls on the poster
  * stand on the seed in the seed's own tones.
  *
  * The poster is content rather than chrome. It keeps its seed coloured look in every skin, and only

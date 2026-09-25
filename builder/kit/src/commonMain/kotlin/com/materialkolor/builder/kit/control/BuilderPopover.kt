@@ -32,7 +32,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * host, and anywhere else in a focusable popup.
  *
  * Material3 draws it in Material's container with its large corner and a menu's shadow, and the other
- * skins in their own popover dress. Each keeps 8 dp of room inside its edge.
+ * skins in their own popover style. Each keeps 8 dp of room inside its edge.
  *
  * @param[expanded] Whether the popover is open.
  * @param[onDismissRequest] Called when the popover asks to close. It must set [expanded] to false,

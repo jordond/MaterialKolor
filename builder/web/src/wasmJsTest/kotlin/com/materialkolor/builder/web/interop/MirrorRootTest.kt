@@ -96,7 +96,7 @@ class MirrorRootTest {
     }
 
     /**
-     * Dresses this element the way CMP 1.12.1 dresses `#cmp_a11y_root`, plus the two live region
+     * Sets up this element the way CMP 1.12.1 sets up `#cmp_a11y_root`, plus the two live region
      * attributes it leaves to their defaults.
      */
     private fun HTMLElement.asMirrorRoot(): HTMLElement {

@@ -122,7 +122,7 @@ internal fun MaterialWindowRegion(
 }
 
 /**
- * A Material surface in the side panel's dress, rounded on its inner edge like Material's side sheet.
+ * A Material surface in the side panel's style, rounded on its inner edge like Material's side sheet.
  */
 @Composable
 internal fun MaterialPanelRegion(

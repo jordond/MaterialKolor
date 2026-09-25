@@ -53,7 +53,7 @@ import com.composeunstyled.LocalTextStyle as UnstyledTextStyle
 import com.composeunstyled.theme.ColorScheme as UnstyledColorScheme
 
 /**
- * One copy of the preview, dressed in a fresh theme of the library [LocalSkin] names.
+ * One copy of the preview, drawn in a fresh theme of the library [LocalSkin] names.
  *
  * Every color comes from `spec.result`, the role tables for Material 3 and Unstyled so AMOLED and
  * the document's pins show, the Custom slots for Custom and the primary ramp of the mode's scheme

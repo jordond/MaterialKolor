@@ -80,11 +80,11 @@ import com.materialkolor.builder.kit.skin.headless.popoverExit
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
- * The Material3 dress for the headless overlays.
+ * The Material3 style for the headless overlays.
  *
- * It dresses the overlays Material has no component for, the side panel, the end sheet, the bottom
+ * It styles the overlays Material has no component for, the side panel, the end sheet, the bottom
  * sheet with three detents and the scroll area. Where overlays render in the page (D40) it also
- * dresses the headless tooltip that stands in for `PlainTooltip`, and through [materialMenuStyle]
+ * styles the headless tooltip that stands in for `PlainTooltip`, and through [materialMenuStyle]
  * the menu and the select's list that stand in for `DropdownMenu`. The dialog there draws Material's
  * own dialog container over the headless modal, whose veil reads `tokens.scrim` directly rather
  * than anything from here.
@@ -138,7 +138,7 @@ internal fun materialOverlayStyle(
 private const val MaterialHoverAlpha = 0.08f
 
 /**
- * The dress of Material's menu container, for the menu and the select's list drawn in the page.
+ * Material's menu container style, for the menu and the select's list drawn in the page.
  */
 @Composable
 internal fun materialMenuStyle(): OverlayStyle =
@@ -151,7 +151,7 @@ internal fun materialMenuStyle(): OverlayStyle =
 // b-511
 
 /**
- * The dress of a popover that holds more than a menu, Material's container with its large corner.
+ * The style of a popover that holds more than a menu, Material's container with its large corner.
  */
 @Composable
 internal fun materialPopoverStyle(): OverlayStyle =

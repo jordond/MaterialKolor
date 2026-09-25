@@ -50,7 +50,7 @@ internal fun HeadlessTopBarRegion(
 }
 
 /**
- * A toolbar row in the skin's popover dress, floating on its own shadow where the skin has one.
+ * A toolbar row in the skin's popover style, floating on its own shadow where the skin has one.
  */
 @Composable
 internal fun HeadlessDockRegion(
@@ -72,7 +72,7 @@ internal fun HeadlessDockRegion(
 // b-512
 
 /**
- * The preview window on the canvas in the skin's dialog dress, its corners, its shadow where the
+ * The preview window on the canvas in the skin's dialog style, its corners, its shadow where the
  * skin has one and its outline drawn over the edge of what it holds, which it clips to its corners.
  */
 @Composable
@@ -85,7 +85,7 @@ internal fun HeadlessWindowRegion(
 }
 
 /**
- * A full height panel in the skin's panel dress, rounded on its inner edge.
+ * A full height panel in the skin's panel style, rounded on its inner edge.
  */
 @Composable
 internal fun HeadlessPanelRegion(
@@ -103,7 +103,7 @@ internal fun HeadlessPanelRegion(
 }
 
 /**
- * The command palette in the skin's dialog dress.
+ * The command palette in the skin's dialog style.
  */
 @Composable
 internal fun HeadlessPaletteFrame(
@@ -135,7 +135,7 @@ internal fun innerEdgeShape(
     }
 
 /**
- * The overlay dress on a region, its shadow, its ground and its outline.
+ * Draws a region's shadow, ground and outline from the overlay style.
  */
 private fun Modifier.regionFrame(
     style: OverlayStyle,

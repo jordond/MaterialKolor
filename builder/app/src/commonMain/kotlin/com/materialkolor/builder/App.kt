@@ -142,7 +142,7 @@ internal fun rememberSkin(document: State<ThemeDocument>): State<Skin> =
     remember(document) { derivedStateOf { skinOf(document.value) } }
 
 /**
- * Dresses the workspace in the skin and colors of the open project.
+ * Themes the workspace with the skin and colors of the open project.
  *
  * The workspace state is collected once, here, and the theme result and the skin come from its own
  * document. So no frame pairs a new document with the old colors or the old skin, and the workspace
