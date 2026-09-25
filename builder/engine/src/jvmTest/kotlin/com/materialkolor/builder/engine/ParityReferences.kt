@@ -46,11 +46,15 @@ import com.materialkolor.unstyled.toThemeValues
  * exports write them, as a literal per mode.
  */
 
-/** The document's contrast as the double the library takes. */
+/**
+ * The document's contrast as the double the library takes.
+ */
 internal val ThemeDocument.contrastLevel: Double
     get() = contrast.hundredths / 100.0
 
-/** The pin this document holds for [role] in the mode [isDark] picks, if any. */
+/**
+ * The pin this document holds for [role] in the mode [isDark] picks, if any.
+ */
 internal fun ThemeDocument.pin(
     role: Role,
     isDark: Boolean,
@@ -73,7 +77,9 @@ internal fun referenceSpec(spec: SpecVersion): ColorSpec.SpecVersion =
 internal fun referencePlatform(platform: SchemePlatform): DynamicScheme.Platform =
     DynamicScheme.Platform.valueOf(platform.name.uppercase())
 
-/** The core scheme for [document], built by core's public factory with every key color. */
+/**
+ * The core scheme for [document], built by core's public factory with every key color.
+ */
 internal fun referenceScheme(
     document: ThemeDocument,
     isDark: Boolean,
@@ -94,13 +100,17 @@ internal fun referenceScheme(
         platform = referencePlatform(document.platform),
     )
 
-/** Every role as core's [MaterialKolors] reads it off [scheme], with no AMOLED and no pins. */
+/**
+ * Every role as core's [MaterialKolors] reads it off [scheme], with no AMOLED and no pins.
+ */
 internal fun coreRoles(scheme: DynamicScheme): Map<Role, Argb> {
     val kolors = MaterialKolors(scheme)
     return Role.entries.associateWith { role -> kolors.roleColor(role).asArgb() }
 }
 
-/** Every role the Material 3 module's `dynamicColorScheme` gives [document], pins on top. */
+/**
+ * Every role the Material 3 module's `dynamicColorScheme` gives [document], pins on top.
+ */
 internal fun material3Roles(
     document: ThemeDocument,
     isDark: Boolean,
@@ -139,7 +149,9 @@ internal fun unstyledRoles(
     }
 }
 
-/** Every role [scheme] holds as the expressive theme put it in `MaterialTheme`, pins on top. */
+/**
+ * Every role [scheme] holds as the expressive theme put it in `MaterialTheme`, pins on top.
+ */
 internal fun expressiveRoles(
     document: ThemeDocument,
     scheme: ColorScheme,
@@ -196,7 +208,9 @@ internal fun accentFamilies(document: ThemeDocument): List<AccentFamilyValues> =
         )
     }
 
-/** The ramp core's `rememberTonalPalette(seed, harmonizeWith)` remembers, built by the chain its body runs. */
+/**
+ * The ramp core's `rememberTonalPalette(seed, harmonizeWith)` remembers, built by the chain its body runs.
+ */
 internal fun tonalPalette(
     seed: Argb,
     harmonizeWith: Argb?,
@@ -205,7 +219,9 @@ internal fun tonalPalette(
     return TonalPalette.from(harmonizeWith?.let { themeSeed -> color.harmonize(themeSeed.asColor()) } ?: color)
 }
 
-/** Every shade by the name `Shades` gives it, as in `light2`. */
+/**
+ * Every shade by the name `Shades` gives it, as in `light2`.
+ */
 internal fun FluentShadeValues.byShade(): Map<String, Argb> =
     mapOf(
         "dark3" to dark3,
@@ -282,7 +298,9 @@ internal fun renderExpressive(
     }
 }
 
-/** A color scheme per mode. */
+/**
+ * A color scheme per mode.
+ */
 internal class ModeSchemes(
     val light: ColorScheme,
     val dark: ColorScheme,
@@ -342,7 +360,9 @@ private fun TonalPalette.accentColors(
         onContainer = onTone(tones.container, threshold).asArgb(),
     )
 
-/** The threshold the exported `ExtendedColors.kt` names for this document threshold. */
+/**
+ * The threshold the exported `ExtendedColors.kt` names for this document threshold.
+ */
 private fun OnColorThreshold.referenceThreshold(): ContrastThreshold =
     when (this) {
         OnColorThreshold.AaNormal -> ContrastThreshold.WCAG_AA_NORMAL_TEXT

@@ -72,21 +72,29 @@ public class RampSet internal constructor(
     public val light: ImmutableList<Ramp>,
     public val dark: ImmutableList<Ramp>,
 ) {
-    /** The ramps of the mode [isDark] picks. */
+    /**
+     * The ramps of the mode [isDark] picks.
+     */
     public fun mode(isDark: Boolean): ImmutableList<Ramp> = if (isDark) dark else light
 
-    /** The ramp for [palette] in the mode [isDark] picks. */
+    /**
+     * The ramp for [palette] in the mode [isDark] picks.
+     */
     public operator fun get(
         palette: KeyColor,
         isDark: Boolean,
     ): Ramp = mode(isDark).first { ramp -> ramp.palette == palette }
 
     public companion object {
-        /** The tones every ramp is laid out at, darkest first. */
+        /**
+         * The tones every ramp is laid out at, darkest first.
+         */
         public val Tones: ImmutableList<Int> =
             persistentListOf(0, 5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 95, 98, 99, 100)
 
-        /** The palettes a ramp set holds, in the order they are shown. */
+        /**
+         * The palettes a ramp set holds, in the order they are shown.
+         */
         public val Palettes: ImmutableList<KeyColor> =
             persistentListOf(
                 KeyColor.Primary,
@@ -97,7 +105,9 @@ public class RampSet internal constructor(
                 KeyColor.Error,
             )
 
-        /** Lay out the palettes of [light] and [dark] and mark the tones their roles picked. */
+        /**
+         * Lay out the palettes of [light] and [dark] and mark the tones their roles picked.
+         */
         internal fun from(
             light: DynamicScheme,
             dark: DynamicScheme,

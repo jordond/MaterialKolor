@@ -35,6 +35,8 @@ public sealed interface ShuffleResult {
         }
     }
 
-    /** The seed is locked and the style is locked too or has no other style to go to. */
+    /**
+     * The seed is locked and the style is locked too or has no other style to go to.
+     */
     public data object NothingToShuffle : ShuffleResult
 }

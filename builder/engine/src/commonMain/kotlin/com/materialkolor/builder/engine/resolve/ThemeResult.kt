@@ -35,18 +35,26 @@ public class ThemeResult internal constructor(
     public val effectiveSpec: SpecVersion
         get() = light.specVersion.toDomain()
 
-    /** Every role in both modes, with AMOLED and pins applied. */
+    /**
+     * Every role in both modes, with AMOLED and pins applied.
+     */
     public val roles: RoleTables by lazy { RoleTables.from(light, dark, document) }
 
-    /** The six tonal palettes in both modes, with the tones their roles picked. */
+    /**
+     * The six tonal palettes in both modes, with the tones their roles picked.
+     */
     public val ramps: RampSet by lazy { RampSet.from(light, dark) }
 
     // b-116
 
-    /** Every accent of the document as a family, in the document's order. */
+    /**
+     * Every accent of the document as a family, in the document's order.
+     */
     public val accents: AccentFamilies by lazy { AccentFamilies.from(document) }
 
-    /** Every slot of the Custom target in both modes, with the document's custom tones moved in. */
+    /**
+     * Every slot of the Custom target in both modes, with the document's custom tones moved in.
+     */
     public val customSlots: CustomSlotColors by lazy { CustomSlotColors.from(document, light, dark, roles) }
 
     // b-202
@@ -63,13 +71,19 @@ public class ThemeResult internal constructor(
         CustomSlotColors.from(plain, chromeLight, chromeDark, chromeRoles)
     }
 
-    /** The colors of the seed poster. */
+    /**
+     * The colors of the seed poster.
+     */
     public val poster: PosterColors by lazy { PosterColors.of(document.seed) }
 
-    /** Every contrast pair of the document's target, rated in both modes. */
+    /**
+     * Every contrast pair of the document's target, rated in both modes.
+     */
     public val audit: ContrastAudit by lazy { ContrastAudit.from(this) }
 
-    /** The document scheme for the mode [isDark] picks. */
+    /**
+     * The document scheme for the mode [isDark] picks.
+     */
     public fun scheme(isDark: Boolean): DynamicScheme = if (isDark) dark else light
 
     /**

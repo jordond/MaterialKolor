@@ -30,17 +30,23 @@ public class CustomSlotColors internal constructor(
     public val light: ImmutableMap<CustomSlot, Argb>,
     public val dark: ImmutableMap<CustomSlot, Argb>,
 ) {
-    /** Every slot in the mode [isDark] picks. */
+    /**
+     * Every slot in the mode [isDark] picks.
+     */
     public fun mode(isDark: Boolean): ImmutableMap<CustomSlot, Argb> = if (isDark) dark else light
 
-    /** What [slot] resolved to in the mode [isDark] picks. */
+    /**
+     * What [slot] resolved to in the mode [isDark] picks.
+     */
     public operator fun get(
         slot: CustomSlot,
         isDark: Boolean,
     ): Argb = mode(isDark).getValue(slot)
 
     internal companion object {
-        /** Resolve every slot of the Custom target for [document] out of its schemes and roles. */
+        /**
+         * Resolve every slot of the Custom target for [document] out of its schemes and roles.
+         */
         fun from(
             document: ThemeDocument,
             light: DynamicScheme,

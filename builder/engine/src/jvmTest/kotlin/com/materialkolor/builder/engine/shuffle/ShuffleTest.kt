@@ -202,22 +202,32 @@ class ShuffleTest {
         }
     }
 
-    /** Hands back the same draw every time, so every draw lands on the same seed. */
+    /**
+     * Hands back the same draw every time, so every draw lands on the same seed.
+     */
     private object ConstantRandom : Random() {
         override fun nextBits(bitCount: Int): Int = 0
     }
 
     private companion object {
-        /** How far rounding to ARGB can move a hue at the lowest chroma a shuffle draws. */
+        /**
+         * How far rounding to ARGB can move a hue at the lowest chroma a shuffle draws.
+         */
         const val HUE_TOLERANCE = 2.0
 
-        /** A hue inside the yellow green band [DislikeAnalyzer] dislikes at darker tones. */
+        /**
+         * A hue inside the yellow green band [DislikeAnalyzer] dislikes at darker tones.
+         */
         const val DISLIKED_HUE = 100.0
 
-        /** The tone [DislikeAnalyzer] lifts a disliked color to. */
+        /**
+         * The tone [DislikeAnalyzer] lifts a disliked color to.
+         */
         const val FIXED_TONE = 70.0
 
-        /** How far rounding to ARGB can move a tone. */
+        /**
+         * How far rounding to ARGB can move a tone.
+         */
         const val TONE_TOLERANCE = 1.0
     }
 }

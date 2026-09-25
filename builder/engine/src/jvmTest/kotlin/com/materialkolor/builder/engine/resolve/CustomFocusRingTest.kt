@@ -9,10 +9,14 @@ import com.materialkolor.ktx.contrastRatio
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-/** The least a focus ring stands from the ground it is drawn on (WCAG 2.2, 1.4.11). */
+/**
+ * The least a focus ring stands from the ground it is drawn on (WCAG 2.2, 1.4.11).
+ */
 private const val RingContrast = 3.0
 
-/** Seeds of every hue family and a grey, since the ring's tone and not its hue fixes the ratio. */
+/**
+ * Seeds of every hue family and a grey, since the ring's tone and not its hue fixes the ratio.
+ */
 private val Seeds: List<Argb> = listOf(
     Argb(0x6750A4),
     Argb(0x0000FF),

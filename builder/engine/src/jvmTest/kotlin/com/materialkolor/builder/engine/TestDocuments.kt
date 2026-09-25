@@ -23,10 +23,14 @@ class TestDocuments(
 ) {
     private val random = Random(seed)
 
-    /** [count] documents in a row. */
+    /**
+     * [count] documents in a row.
+     */
     fun documents(count: Int): List<ThemeDocument> = List(count) { next() }
 
-    /** One document with every engine input picked at random. */
+    /**
+     * One document with every engine input picked at random.
+     */
     fun next(): ThemeDocument =
         ThemeDocument(
             seed = nextArgb(),

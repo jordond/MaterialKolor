@@ -52,17 +52,23 @@ public class AccentFamily internal constructor(
     public val steps: ImmutableList<RampStep> =
         RampSet.Tones.map { tone -> RampStep(tone, Argb(palette.tone(tone))) }.toImmutableList()
 
-    /** The family in the mode [isDark] picks. */
+    /**
+     * The family in the mode [isDark] picks.
+     */
     public fun mode(isDark: Boolean): AccentColors = if (isDark) dark else light
 
-    /** The color [part] names in the mode [isDark] picks. */
+    /**
+     * The color [part] names in the mode [isDark] picks.
+     */
     public operator fun get(
         part: AccentPart,
         isDark: Boolean,
     ): Argb = mode(isDark).part(part)
 
     internal companion object {
-        /** Build the family for [accent] in a theme seeded with [themeSeed]. */
+        /**
+         * Build the family for [accent] in a theme seeded with [themeSeed].
+         */
         fun of(
             accent: Accent,
             themeSeed: Argb,
@@ -101,14 +107,18 @@ public class AccentFamily internal constructor(
 public class AccentFamilies internal constructor(
     public val families: ImmutableList<AccentFamily>,
 ) {
-    /** The color [slot] names in the mode [isDark] picks. */
+    /**
+     * The color [slot] names in the mode [isDark] picks.
+     */
     public operator fun get(
         slot: AccentSlot,
         isDark: Boolean,
     ): Argb = families[slot.index][slot.part, isDark]
 
     internal companion object {
-        /** Build a family for every accent of [document], harmonized with its seed where asked. */
+        /**
+         * Build a family for every accent of [document], harmonized with its seed where asked.
+         */
         fun from(document: ThemeDocument): AccentFamilies =
             AccentFamilies(
                 families = document.accents
@@ -118,7 +128,9 @@ public class AccentFamilies internal constructor(
     }
 }
 
-/** The color of these four that [part] names. */
+/**
+ * The color of these four that [part] names.
+ */
 internal fun AccentColors.part(part: AccentPart): Argb =
     when (part) {
         AccentPart.Color -> color
@@ -139,5 +151,7 @@ internal fun OnColorThreshold.toCore(): ContrastThreshold =
         OnColorThreshold.Aaa -> ContrastThreshold.WCAG_AAA_NORMAL_TEXT
     }
 
-/** The document color for a color the library handed back, which is always opaque here. */
+/**
+ * The document color for a color the library handed back, which is always opaque here.
+ */
 internal fun Color.toDomain(): Argb = Argb(toArgb())

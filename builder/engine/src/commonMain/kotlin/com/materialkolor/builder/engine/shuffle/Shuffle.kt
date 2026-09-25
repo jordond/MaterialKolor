@@ -155,7 +155,9 @@ public object Shuffle {
             !isDisliked(candidate) &&
             primaryReads(inputs.copy(seed = candidate), resolver)
 
-    /** The color as it will be stored is checked, since rounding to ARGB can nudge the hue. */
+    /**
+     * The color as it will be stored is checked, since rounding to ARGB can nudge the hue.
+     */
     private fun isDisliked(seed: Argb): Boolean = DislikeAnalyzer.isDisliked(Hct.fromInt(seed.value))
 
     /**
@@ -175,22 +177,34 @@ public object Shuffle {
         }
     }
 
-    /** How many random draws a shuffle makes before the fallback seeds take over. */
+    /**
+     * How many random draws a shuffle makes before the fallback seeds take over.
+     */
     public const val MAX_DRAWS: Int = 32
 
-    /** The lowest chroma a drawn seed asks for. */
+    /**
+     * The lowest chroma a drawn seed asks for.
+     */
     public const val MIN_CHROMA: Double = 36.0
 
-    /** The highest chroma a drawn seed asks for. Hues that cannot reach it get their most. */
+    /**
+     * The highest chroma a drawn seed asks for. Hues that cannot reach it get their most.
+     */
     public const val MAX_CHROMA: Double = 84.0
 
-    /** The darkest tone a drawn seed has. */
+    /**
+     * The darkest tone a drawn seed has.
+     */
     public const val MIN_TONE: Double = 40.0
 
-    /** The lightest tone a drawn seed has. */
+    /**
+     * The lightest tone a drawn seed has.
+     */
     public const val MAX_TONE: Double = 70.0
 
-    /** What primary on onPrimary has to reach at standard contrast. */
+    /**
+     * What primary on onPrimary has to reach at standard contrast.
+     */
     public const val MIN_PRIMARY_CONTRAST: Double = 4.5
 
     private const val FULL_TURN: Double = 360.0

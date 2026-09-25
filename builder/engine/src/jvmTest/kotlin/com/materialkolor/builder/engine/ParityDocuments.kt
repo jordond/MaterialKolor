@@ -27,7 +27,9 @@ class ParityDocuments(
     // Seeded apart from random, so the two streams never replay each other at shifted positions.
     private val base = TestDocuments(seed = Random(seed xor BASE_SALT).nextInt())
 
-    /** [count] documents in a row. */
+    /**
+     * [count] documents in a row.
+     */
     fun documents(count: Int): List<ThemeDocument> = List(count) { index -> next(index) }
 
     /**

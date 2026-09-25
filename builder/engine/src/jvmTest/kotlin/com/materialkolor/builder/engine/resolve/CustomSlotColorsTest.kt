@@ -120,7 +120,9 @@ class CustomSlotColorsTest {
         assertEquals(Argb(result.dark.secondaryPalette.tone(60)), dark)
     }
 
-    /** Every slot the way the custom theme sample's `AppColorsFactory` builds it. */
+    /**
+     * Every slot the way the custom theme sample's `AppColorsFactory` builds it.
+     */
     private fun sampleColors(scheme: DynamicScheme): Map<CustomSlot, Argb> {
         val kolors = MaterialKolors(scheme)
         val dark = scheme.isDark
