@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
@@ -58,8 +59,8 @@ internal fun MaterialTopBarRegion(
 }
 
 /**
- * Material's `HorizontalFloatingToolbar`, always expanded, in its vibrant colours, since its standard
- * container is the canvas's own colour and would vanish on it.
+ * Material's `HorizontalFloatingToolbar`, always expanded, in its standard colours on the lightest
+ * surface container, since its own container is the canvas's colour and would vanish on it.
  */
 @Composable
 internal fun MaterialDockRegion(
@@ -69,7 +70,10 @@ internal fun MaterialDockRegion(
     HorizontalFloatingToolbar(
         expanded = true,
         modifier = modifier,
-        colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(), // b-512
+        // b-512
+        colors = FloatingToolbarDefaults.standardFloatingToolbarColors(
+            toolbarContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        ),
         content = content,
     )
 }
