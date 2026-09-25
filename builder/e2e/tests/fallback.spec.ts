@@ -6,13 +6,13 @@ import { button, onPage, openWorkspace, press, pressKeyFor, seedText, shareVecto
 
 // The JS engine, the fallback for browsers without WasmGC (D61). ?engine=js boots it where wasm
 // would run, and the same share code exports the same code on both engines. The codegen's own
-// tests hold the text itself on each engine, this holds the two sites to each other.
+// tests check the exported text on each engine. This one checks the two engines agree.
 
 /** The Export sheet's title in the mirror, the dialog fold. */
 const EXPORT_DIALOG = /^Export code, dialog/;
 
 test('a share code boots on the JS engine with its seed and exports what wasm exports', async ({ browser, browserName }) => {
-  test.skip(browserName !== 'chromium', 'One browser is enough to hold the engines to each other');
+  test.skip(browserName !== 'chromium', 'One browser is enough to compare the engines');
   // Two boots and two exports, the JS one the slower.
   test.slow();
   const vector = shareVectors().find((candidate) => candidate.label === 'every section at once')!;

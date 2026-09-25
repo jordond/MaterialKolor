@@ -128,7 +128,7 @@ test.describe('splash', () => {
 
 // A browser without WasmGC runs the JS engine rather than getting the unsupported page (D61).
 test('a browser without WasmGC boots the JS glue and reaches the workspace', async ({ page }) => {
-  // Turns down a module whose first type is a struct, as boot.js's WasmGC gate declares, and hands
+  // Rejects a module whose first type is a struct, as boot.js's WasmGC gate declares, and passes
   // every other module, the exception handling gate included, to the real validate.
   await page.addInitScript(() => {
     const validate = WebAssembly.validate.bind(WebAssembly);

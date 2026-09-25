@@ -56,7 +56,7 @@
   paintSplash();
   window.addEventListener('keydown', keepBrowserShortcuts, true);
 
-  // One engine per visit. A glue that fails to load shows the overlay, it never falls back to the
+  // One engine per visit. A glue that fails to load shows the overlay and never falls back to the
   // other one.
   const glue = document.createElement('script');
   glue.src = assets.glue;

@@ -74,7 +74,7 @@ internal expect fun Int32Array.copyToIntArray(): IntArray
 // JPEG, GIF, WebP and BMP. Anything else, HEIC for one, has only the byte cap.
 //
 // Promise chains rather than async and await, and no destructuring, since the Kotlin/JS compiler
-// parses this and does not take them.
+// parses this and rejects both.
 private fun startScaling(
     blob: Blob,
     pixelEdge: Int,
