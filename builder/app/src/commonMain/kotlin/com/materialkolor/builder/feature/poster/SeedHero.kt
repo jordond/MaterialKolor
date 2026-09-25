@@ -5,11 +5,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ColorNames
 import com.materialkolor.builder.domain.color.InvalidReason
@@ -36,7 +42,10 @@ import com.materialkolor.builder.generated.resources.poster_note_alpha
 import com.materialkolor.builder.generated.resources.poster_note_both
 import com.materialkolor.builder.generated.resources.poster_note_clamped
 import com.materialkolor.builder.generated.resources.poster_seed
+import com.materialkolor.builder.generated.resources.poster_readout_image
+import com.materialkolor.builder.generated.resources.poster_readout_image_named
 import com.materialkolor.builder.generated.resources.poster_seed_field
+import com.materialkolor.builder.generated.resources.poster_seed_field_source
 import com.materialkolor.builder.generated.resources.poster_source_eyedropper
 import com.materialkolor.builder.generated.resources.poster_source_image
 import com.materialkolor.builder.generated.resources.poster_source_image_named
@@ -44,21 +53,25 @@ import com.materialkolor.builder.generated.resources.poster_source_picked
 import com.materialkolor.builder.generated.resources.poster_source_preset
 import com.materialkolor.builder.generated.resources.poster_source_shuffled
 import com.materialkolor.builder.generated.resources.poster_source_typed
-import com.materialkolor.builder.kit.control.BuilderBadge
 import com.materialkolor.builder.kit.control.BuilderHexField
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.BuilderTooltip
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.kit.token.LocalBuilderType
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 /**
- * The seed as the poster's headline. The hex is a real field that edits in place, and under it one
- * line holds the seed's name, its HCT readout, where it came from and whether the project is saved,
- * with the two copy buttons as icons at its end.
+ * The seed as the poster's headline. The hex is a real field that edits in place. Under it the
+ * seed's name sits large with the two copy buttons as icons at its end, and under that its hue,
+ * chroma and tone spelled out.
+ *
+ * Where the seed came from lives in the field's tooltip and what it reads out. Only a seed from an
+ * image says so on the readout line, by the file's name when it has one.
  *
  * The field shows the seed as stored, not as the target sees it. A commit lands as a typed seed,
  * one keystroke folding into the next in the history.
@@ -74,7 +87,9 @@ internal fun SeedHero(
     focus: PosterFocus? = null,
 ) {
     val seed = context.document.seed
-    val spacing = LocalBuilderTokens.current.spacing
+    val tokens = LocalBuilderTokens.current
+    val spacing = tokens.spacing
+    val type = LocalBuilderType.current
     val messages = rememberHexMessages()
     val hct = remember(seed) { HctReadout.of(seed).rounded() }
     val hexLabel = stringResource(Res.string.poster_copied_hex)
@@ -86,44 +101,43 @@ internal fun SeedHero(
     val triggers = focus ?: own
     val copyHex = triggers.copyHex
     val copyKotlin = triggers.copyKotlin
+    val source = sourceLabel(context.document.seedSource).text()
+    val fieldName = stringResource(
+        Res.string.poster_seed_field_source,
+        stringResource(Res.string.poster_seed_field),
+        source,
+    )
+    // b-522 The hex sets at 80 where it fits, and the field's own fit shrinks it where it does not.
+    val hero = remember(type) { type.copy(posterHero = type.posterHero.merge(HeroType)) }
     Column(modifier) {
         InfoLabel(label = stringResource(Res.string.poster_seed), topic = InfoTopic.Seed)
-        BuilderHexField(
-            value = seed,
-            onCommit = { argb, _ ->
-                val change = DocumentChange.SetSeed(argb, SeedSource.Typed)
-                dispatcher.dispatch(WorkspaceAction.Edit(change, EditPhase.Discrete))
-            },
-            label = stringResource(Res.string.poster_seed_field),
-            errorMessage = messages::errorOf,
-            noteMessage = messages::noteOf,
-            modifier = Modifier.fillMaxWidth(),
-            large = true,
-        )
+        BuilderTooltip(text = source, modifier = Modifier.fillMaxWidth()) {
+            CompositionLocalProvider(LocalBuilderType provides hero) {
+                BuilderHexField(
+                    value = seed,
+                    onCommit = { argb, _ ->
+                        val change = DocumentChange.SetSeed(argb, SeedSource.Typed)
+                        dispatcher.dispatch(WorkspaceAction.Edit(change, EditPhase.Discrete))
+                    },
+                    label = fieldName,
+                    errorMessage = messages::errorOf,
+                    noteMessage = messages::noteOf,
+                    modifier = Modifier.fillMaxWidth(),
+                    large = true,
+                )
+            }
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // The name, its readout and where it came from share a line while it has room.
-            FlowRow(
+            BasicText(
+                text = remember(seed) { ColorNames.nameOf(seed) },
                 modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(spacing.small),
-                itemVerticalAlignment = Alignment.CenterVertically,
-            ) {
-                BuilderText(
-                    text = remember(seed) { ColorNames.nameOf(seed) },
-                    style = BuilderTextStyle.Title,
-                    maxLines = 1,
-                )
-                BuilderText(
-                    text = stringResource(Res.string.poster_hct, hct.hue, hct.chroma, hct.tone),
-                    style = BuilderTextStyle.Value,
-                    maxLines = 1,
-                )
-                BuilderBadge(label = sourceLabel(context.document.seedSource).text())
-                SaveState(context.saveStatus)
-            }
+                style = type.title.merge(NameType).copy(color = tokens.textStrong),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
             PosterIconButton(
                 icon = IconId.Copy,
                 description = stringResource(Res.string.poster_copy_hex),
@@ -131,6 +145,7 @@ internal fun SeedHero(
                 buttonModifier = triggerFocus(copyHex),
             )
             PosterIconButton(
+                // b-522 Swap to IconId.Code once B-520 lands it.
                 icon = IconId.Export,
                 description = stringResource(Res.string.poster_copy_kotlin),
                 onClick = {
@@ -140,8 +155,34 @@ internal fun SeedHero(
                 buttonModifier = triggerFocus(copyKotlin),
             )
         }
+        val image = imageReadout(context.document.seedSource)
+        val readout = stringResource(Res.string.poster_hct, hct.hue, hct.chroma, hct.tone)
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+            itemVerticalAlignment = Alignment.CenterVertically,
+        ) {
+            BuilderText(text = readout, style = BuilderTextStyle.Value, maxLines = 1)
+            if (image != null) {
+                BuilderText(
+                    text = image.text(),
+                    style = BuilderTextStyle.Label,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
     }
 }
+
+/**
+ * How the hero sets the hex over the skin's poster type, 80 where it fits.
+ */
+private val HeroType = TextStyle(fontSize = 80.sp, lineHeight = 84.sp, letterSpacing = (-2).sp)
+
+/**
+ * How the hero sets the seed's name over the title type.
+ */
+private val NameType = TextStyle(fontSize = 26.sp, lineHeight = 32.sp, fontWeight = FontWeight.Medium)
 
 /**
  * [argb] as a Compose color literal, `Color(0xFF6750A4)`.
@@ -200,6 +241,17 @@ internal fun sourceLabel(source: SeedSource): SourceLabel =
         } else {
             SourceLabel(Res.string.poster_source_image_named, source.name)
         }
+    }
+
+/**
+ * What the readout line says about a seed from an image, by the file's name when it has one, or
+ * null for a seed from anywhere else.
+ */
+internal fun imageReadout(source: SeedSource): SourceLabel? =
+    when {
+        source !is SeedSource.Image -> null
+        source.name.isBlank() -> SourceLabel(Res.string.poster_readout_image)
+        else -> SourceLabel(Res.string.poster_readout_image_named, source.name)
     }
 
 /**

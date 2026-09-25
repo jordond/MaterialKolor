@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -18,14 +19,15 @@ import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.poster_collapse
 import com.materialkolor.builder.generated.resources.poster_projects
-import com.materialkolor.builder.generated.resources.poster_projects_named
+import com.materialkolor.builder.generated.resources.poster_projects_not_saved
+import com.materialkolor.builder.generated.resources.poster_projects_saved
+import com.materialkolor.builder.generated.resources.poster_projects_saving
 import com.materialkolor.builder.generated.resources.poster_save_failed
-import com.materialkolor.builder.generated.resources.poster_saved
-import com.materialkolor.builder.generated.resources.poster_saving
 import com.materialkolor.builder.generated.resources.poster_wordmark
 import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.control.BuilderBadge
 import com.materialkolor.builder.kit.control.BuilderButton
+import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderIconButton
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
@@ -44,7 +46,8 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The top of the poster, the mark and wordmark, the Projects button with the open project's name and the
  * collapse button on one row. The 320 dp poster has no room for all three, so there the Projects
- * button takes a row of its own. Whether the project is saved shows under the hex, see [SeedHero].
+ * button takes a row of its own. Whether the project is saved shows on the Projects button, a check
+ * once it is saved and a danger badge beside it when a save did not land.
  *
  * The phone sheet has no rail to collapse to, so it shows no collapse button.
  *
@@ -64,6 +67,7 @@ internal fun PosterHeader(
     val projects: @Composable (Modifier) -> Unit = { projectsModifier ->
         ProjectsButton(
             projectName = context.projectName,
+            saveStatus = context.saveStatus,
             dispatcher = dispatcher,
             modifier = projectsModifier.then(triggerFocus(focus?.projects)),
         )
@@ -108,63 +112,76 @@ internal fun PosterHeader(
 }
 
 /**
- * Whether the open project is saved, as small words. Saved and saving read in the muted ink, and a
- * failed save keeps its badge and warning glyph so it never rests on colour alone.
+ * The danger badge a failed save puts beside the Projects button, in words and a warning glyph so
+ * it never rests on colour alone. A saved or saving project shows nothing here.
  */
 @Composable
 internal fun SaveState(status: SaveStatus) {
-    val badge = saveBadgeOf(status)
-    val label = stringResource(badge.label)
-    if (badge.status == BadgeStatus.Danger) {
-        BuilderBadge(label = label, status = badge.status, icon = badge.icon)
-    } else {
-        BuilderText(text = label, style = BuilderTextStyle.Label, emphasis = Emphasis.Secondary, maxLines = 1)
-    }
-}
-
-/**
- * The Projects button. It shows the open project's name and reads out as Projects and the name, so
- * it never sounds like a title. Before the session has named a project it says Projects.
- */
-@Composable
-private fun ProjectsButton(
-    projectName: String,
-    dispatcher: Dispatcher<WorkspaceAction>,
-    modifier: Modifier = Modifier,
-) {
-    val named = projectName.isNotBlank()
-    val spoken = if (named) stringResource(Res.string.poster_projects_named, projectName) else null
-    BuilderButton(
-        onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Projects)) },
-        label = if (named) projectName else stringResource(Res.string.poster_projects),
-        modifier = if (spoken == null) modifier else modifier.semantics { contentDescription = spoken },
-        emphasis = Emphasis.Subtle,
-        icon = IconId.Folder,
+    if (status !is SaveStatus.Failed) return
+    BuilderBadge(
+        label = stringResource(Res.string.poster_save_failed),
+        status = BadgeStatus.Danger,
+        icon = IconId.Warning,
     )
 }
 
 /**
- * What the header's badge says about a save, in words and a glyph so it never rests on color alone.
+ * The Projects button. It shows the open project's name and reads out as Projects, the name and
+ * whether it is saved, so it never sounds like a title. A check after it says the project is saved.
+ * Before the session has named a project it says Projects and nothing more.
+ */
+@Composable
+private fun ProjectsButton(
+    projectName: String,
+    saveStatus: SaveStatus,
+    dispatcher: Dispatcher<WorkspaceAction>,
+    modifier: Modifier = Modifier,
+) {
+    val named = projectName.isNotBlank()
+    val mark = saveMarkOf(saveStatus)
+    val spoken = if (named) stringResource(mark.spoken, projectName) else null
+    // b-522 The kit button has no glyph after its label, so the check sits right beside it.
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.extraSmall),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        BuilderButton(
+            onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Projects)) },
+            label = if (named) projectName else stringResource(Res.string.poster_projects),
+            modifier = if (spoken == null) modifier else modifier.semantics { contentDescription = spoken },
+            emphasis = Emphasis.Subtle,
+            icon = IconId.Folder,
+        )
+        if (named) {
+            mark.glyph?.let { glyph ->
+                BuilderIcon(glyph, contentDescription = null, modifier = Modifier.clearAndSetSemantics {})
+            }
+            SaveState(saveStatus)
+        }
+    }
+}
+
+/**
+ * How the Projects button tells whether the open project is saved.
  *
- * @property[label] The status in words.
- * @property[status] What the badge reports, which picks its color.
- * @property[icon] The glyph before the words, none while a save is under way.
+ * @property[spoken] What the button reads out, Projects with the project's name and its save state.
+ * @property[glyph] The glyph beside the button, a check once saved. None while a save is under way,
+ * since the kit has no progress glyph, and none on a failed save, whose danger badge says it.
  */
 @Immutable
-internal data class SaveBadge(
-    val label: StringResource,
-    val status: BadgeStatus,
-    val icon: IconId?,
+internal data class SaveMark(
+    val spoken: StringResource,
+    val glyph: IconId?,
 )
 
 /**
- * The badge the header shows for [status].
+ * How the Projects button shows [status].
  */
-internal fun saveBadgeOf(status: SaveStatus): SaveBadge =
+internal fun saveMarkOf(status: SaveStatus): SaveMark =
     when (status) {
-        SaveStatus.Idle -> SaveBadge(Res.string.poster_saved, BadgeStatus.Success, IconId.Check)
-        SaveStatus.Pending -> SaveBadge(Res.string.poster_saving, BadgeStatus.Neutral, icon = null)
-        is SaveStatus.Failed -> SaveBadge(Res.string.poster_save_failed, BadgeStatus.Danger, IconId.Warning)
+        SaveStatus.Idle -> SaveMark(Res.string.poster_projects_saved, IconId.Check)
+        SaveStatus.Pending -> SaveMark(Res.string.poster_projects_saving, glyph = null)
+        is SaveStatus.Failed -> SaveMark(Res.string.poster_projects_not_saved, glyph = null)
     }
 
 /**

@@ -105,13 +105,17 @@ test('inside the palette, Cmd or Ctrl with S and O never reach the browser, and 
   await page.keyboard.press('ArrowDown');
   await page.waitForTimeout(SETTLE_MS);
   await listenForKeys(page);
-  const saved = page.locator(A11Y).getByText('Saved', { exact: true });
-  const savedBefore = await saved.count();
+  // The poster keeps the save state in the Projects button's name, so the word itself is only the
+  // toast that S raises.
+  const projects = page.locator(`${A11Y} [aria-label^="Projects, "]`).first();
+  const toast = page.locator(A11Y).getByText('Saved', { exact: true });
+  const toastsBefore = await toast.count();
 
   await page.keyboard.press(`${primary}+s`);
   await page.keyboard.press(`${primary}+o`);
 
-  await expect.poll(() => saved.count(), { timeout: 10_000 }).toBeGreaterThan(savedBefore);
+  await expect.poll(() => toast.count(), { timeout: 10_000 }).toBeGreaterThan(toastsBefore);
+  await expect(projects).toHaveAttribute('aria-label', /, saved$/, { timeout: 10_000 });
   expect(await openOverlay(page)).toBe('Palette');
   await expect(page.locator(A11Y).getByText(/^Projects, dialog/)).toHaveCount(0);
   expect(await seenKeys(page)).toEqual(['s true', 'o true']);

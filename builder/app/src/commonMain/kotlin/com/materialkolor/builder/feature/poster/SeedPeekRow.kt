@@ -82,7 +82,7 @@ internal fun SeedPeekRow(
 }
 
 /**
- * How big the peek sets the hex, half the docked hero's 72.
+ * How big the peek sets the hex, under half the docked hero's 80.
  */
 private val PeekHexSize: TextUnit = 36.sp
 

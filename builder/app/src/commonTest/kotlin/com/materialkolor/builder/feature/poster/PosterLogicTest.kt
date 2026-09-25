@@ -10,9 +10,9 @@ import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.engine.color.HctReadout
 import com.materialkolor.builder.feature.workspace.ShuffleLock
 import com.materialkolor.builder.generated.resources.Res
-import com.materialkolor.builder.generated.resources.poster_save_failed
-import com.materialkolor.builder.generated.resources.poster_saved
-import com.materialkolor.builder.generated.resources.poster_saving
+import com.materialkolor.builder.generated.resources.poster_projects_not_saved
+import com.materialkolor.builder.generated.resources.poster_projects_saved
+import com.materialkolor.builder.generated.resources.poster_projects_saving
 import com.materialkolor.builder.generated.resources.poster_source_eyedropper
 import com.materialkolor.builder.generated.resources.poster_source_image
 import com.materialkolor.builder.generated.resources.poster_source_image_named
@@ -20,7 +20,6 @@ import com.materialkolor.builder.generated.resources.poster_source_picked
 import com.materialkolor.builder.generated.resources.poster_source_preset
 import com.materialkolor.builder.generated.resources.poster_source_shuffled
 import com.materialkolor.builder.generated.resources.poster_source_typed
-import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.icon.IconId
 import io.kotest.matchers.collections.shouldBeUnique
 import io.kotest.matchers.shouldBe
@@ -110,11 +109,11 @@ class PosterLogicTest {
     }
 
     @Test
-    fun saveBadgeOf_eachStatus_saysWhetherTheProjectIsSavedInWordsAndAGlyph() {
-        saveBadgeOf(SaveStatus.Idle) shouldBe SaveBadge(Res.string.poster_saved, BadgeStatus.Success, IconId.Check)
-        saveBadgeOf(SaveStatus.Pending) shouldBe SaveBadge(Res.string.poster_saving, BadgeStatus.Neutral, icon = null)
-        saveBadgeOf(SaveStatus.Failed(StoreError.QuotaExceeded)) shouldBe
-            SaveBadge(Res.string.poster_save_failed, BadgeStatus.Danger, IconId.Warning)
+    fun saveMarkOf_eachStatus_saysWhetherTheProjectIsSavedInWordsAndAGlyph() {
+        saveMarkOf(SaveStatus.Idle) shouldBe SaveMark(Res.string.poster_projects_saved, IconId.Check)
+        saveMarkOf(SaveStatus.Pending) shouldBe SaveMark(Res.string.poster_projects_saving, glyph = null)
+        saveMarkOf(SaveStatus.Failed(StoreError.QuotaExceeded)) shouldBe
+            SaveMark(Res.string.poster_projects_not_saved, glyph = null)
     }
 
     @Test
