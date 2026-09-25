@@ -20,7 +20,9 @@ public data class HctReadout(
     public val tone: Double,
 ) {
     public companion object {
-        /** Measure [argb]. */
+        /**
+         * Measure [argb].
+         */
         public fun of(argb: Argb): HctReadout {
             val hct = Hct.fromInt(argb.value)
             return HctReadout(hue = hct.hue, chroma = hct.chroma, tone = hct.tone)

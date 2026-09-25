@@ -12,7 +12,9 @@ import com.materialkolor.unstyled.MaterialKolorTokens
  * own role mapping, so a role wired to the wrong color on either side fails the parity gate.
  */
 
-/** The Material 3 color scheme's color for [role]. */
+/**
+ * The Material 3 color scheme's color for [role].
+ */
 internal fun ColorScheme.roleColor(role: Role): Color =
     when (role) {
         Role.Primary -> primary
@@ -65,7 +67,9 @@ internal fun ColorScheme.roleColor(role: Role): Color =
         Role.OnTertiaryFixedVariant -> onTertiaryFixedVariant
     }
 
-/** What core's [MaterialKolors] hands back for [role], the call the Custom export writes. */
+/**
+ * What core's [MaterialKolors] hands back for [role], the call the Custom export writes.
+ */
 internal fun MaterialKolors.roleColor(role: Role): Color =
     when (role) {
         Role.Primary -> primary()
@@ -118,7 +122,9 @@ internal fun MaterialKolors.roleColor(role: Role): Color =
         Role.OnTertiaryFixedVariant -> onTertiaryFixedVariant()
     }
 
-/** The Unstyled token `toThemeValues` files [this] role under. */
+/**
+ * The Unstyled token `toThemeValues` files [this] role under.
+ */
 internal fun Role.unstyledToken(): ThemeToken<Color> =
     when (this) {
         Role.Primary -> MaterialKolorTokens.primary

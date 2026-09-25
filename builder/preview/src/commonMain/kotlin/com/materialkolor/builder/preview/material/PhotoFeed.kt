@@ -67,7 +67,9 @@ import com.materialkolor.builder.preview.canvas.choice
 import com.materialkolor.builder.preview.canvas.choose
 import androidx.compose.ui.semantics.Role as SemanticsRole
 
-/** The room under the feed the create button needs, so the last row can scroll clear of it. */
+/**
+ * The room under the feed the create button needs, so the last row can scroll clear of it.
+ */
 private val CreateClearance = 96.dp
 private val GridGap = 4.dp
 private val GridShape = RoundedCornerShape(12.dp)
@@ -75,7 +77,9 @@ private val BackupShape = RoundedCornerShape(24.dp)
 private val BackupBadgeSize = 48.dp
 private val ViewsMaxWidth = 480.dp
 
-/** How the feed fills a device, the grid's columns and the carousel's largest memory. */
+/**
+ * How the feed fills a device, the grid's columns and the carousel's largest memory.
+ */
 private class FeedMeasures(
     val columns: Int,
     val memoryWidth: Dp,
@@ -207,7 +211,9 @@ internal fun memoryTitleAlpha(
     return if (range > 0f) ((size - minSize) / range).coerceIn(0f, 1f) else 1f
 }
 
-/** A connected row of toggle buttons that picks the view, each turning round as it turns on. */
+/**
+ * A connected row of toggle buttons that picks the view, each turning round as it turns on.
+ */
 @Composable
 private fun PhotoViews(
     state: DemoAppState,
@@ -244,7 +250,9 @@ private fun PhotoViews(
     }
 }
 
-/** The backup under way on a low container, its wavy progress holding still, and the two photos that failed. */
+/**
+ * The backup under way on a low container, its wavy progress holding still, and the two photos that failed.
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun BackupCard(modifier: Modifier = Modifier) {
@@ -309,7 +317,9 @@ private fun BackupCard(modifier: Modifier = Modifier) {
     }
 }
 
-/** The photos [view] shows, [columns] to a row. */
+/**
+ * The photos [view] shows, [columns] to a row.
+ */
 private fun LazyListScope.photoGrid(
     view: PhotoView,
     columns: Int,
@@ -362,7 +372,9 @@ private fun PhotoArt(
     }
 }
 
-/** The colors of a [PhotoTint] in one scheme. */
+/**
+ * The colors of a [PhotoTint] in one scheme.
+ */
 @Immutable
 private class TileColors(
     val light: Color,

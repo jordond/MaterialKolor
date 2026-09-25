@@ -16,11 +16,15 @@ internal class LruCache<K : Any, V : Any>(
 
     private val entries = LinkedHashMap<K, V>()
 
-    /** How many entries the cache holds right now. */
+    /**
+     * How many entries the cache holds right now.
+     */
     val size: Int
         get() = entries.size
 
-    /** Whether [key] is cached, without counting as a use. */
+    /**
+     * Whether [key] is cached, without counting as a use.
+     */
     operator fun contains(key: K): Boolean = key in entries
 
     /**

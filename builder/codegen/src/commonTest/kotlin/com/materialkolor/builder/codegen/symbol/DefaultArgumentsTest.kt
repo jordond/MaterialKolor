@@ -57,7 +57,9 @@ class DefaultArgumentsTest {
         assertTrue(DefaultArguments.all.values.all { it.isNotEmpty() })
     }
 
-    /** The call a target would write for [document], with each value spelled as its enum name. */
+    /**
+     * The call a target would write for [document], with each value spelled as its enum name.
+     */
     private fun themeCall(
         defaults: SchemeDefaults,
         document: ThemeDocument,

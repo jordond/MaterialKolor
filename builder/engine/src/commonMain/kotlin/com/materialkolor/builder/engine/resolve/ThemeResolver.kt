@@ -76,17 +76,23 @@ public class ThemeResolver {
             platform = inputs.platform.toCore(),
         )
 
-    /** What the scheme cache is keyed by, the inputs and the mode. */
+    /**
+     * What the scheme cache is keyed by, the inputs and the mode.
+     */
     private data class SchemeKey(
         val inputs: SchemeInputs,
         val isDark: Boolean,
     )
 
     private companion object {
-        /** How many resolved documents are kept. */
+        /**
+         * How many resolved documents are kept.
+         */
         const val RESULT_CACHE_SIZE = 8
 
-        /** How many generated schemes are kept, across both modes. */
+        /**
+         * How many generated schemes are kept, across both modes.
+         */
         const val SCHEME_CACHE_SIZE = 64
     }
 }

@@ -66,7 +66,9 @@ class FluentRegionsTest {
             (onNodeWithText("Share").getBoundsInRoot().left - bar.left) shouldBeLessThanOrEqualTo 24.dp
         }
 
-    /** A dock too wide for its window squeezes its tools and never hands them to an overflow. */
+    /**
+     * A dock too wide for its window squeezes its tools and never hands them to an overflow.
+     */
     @Test
     fun dock_widerThanItsWindow_keepsEveryToolInTheBar() =
         runSkikoComposeUiTest(size = Size(390f, 200f)) {
@@ -84,7 +86,9 @@ class FluentRegionsTest {
             onNodeWithTag(DockTag).getBoundsInRoot().right shouldBeLessThanOrEqualTo 390.dp
         }
 
-    /** The toast is Fluent's `InfoBar`, its message in Selawik, and its action still closes it. */
+    /**
+     * The toast is Fluent's `InfoBar`, its message in Selawik, and its action still closes it.
+     */
     @Test
     fun toast_setsItsMessageInSelawikAndItsActionClosesIt() =
         runComposeUiTest {
@@ -115,7 +119,9 @@ private fun DockTool(index: Int) {
     BuilderButton(onClick = {}, label = "Tool $index", modifier = Modifier.width(64.dp))
 }
 
-/** The text layout of this node, which has to hold a single piece of text. */
+/**
+ * The text layout of this node, which has to hold a single piece of text.
+ */
 private fun SemanticsNodeInteraction.fetchTextLayout(): TextLayoutResult {
     val results = mutableListOf<TextLayoutResult>()
     fetchSemanticsNode().config[SemanticsActions.GetTextLayoutResult].action?.invoke(results)

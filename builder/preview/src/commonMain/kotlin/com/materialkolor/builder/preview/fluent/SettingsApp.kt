@@ -61,7 +61,9 @@ import io.github.composefluent.icons.Icons
 import io.github.composefluent.icons.regular.ChevronDown
 import io.github.composefluent.icons.regular.Navigation
 
-/** How wide the shade legend is beside the page. */
+/**
+ * How wide the shade legend is beside the page.
+ */
 private val LegendWidth = 300.dp
 
 /**
@@ -333,7 +335,9 @@ private fun SettingsGroup(
     }
 }
 
-/** A group's icon on the accent fill, the way Windows marks a page's own settings. */
+/**
+ * A group's icon on the accent fill, the way Windows marks a page's own settings.
+ */
 @Composable
 private fun AccentTile(icon: ImageVector) {
     Box(

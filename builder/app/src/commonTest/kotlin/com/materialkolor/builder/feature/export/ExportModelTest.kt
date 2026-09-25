@@ -312,7 +312,9 @@ class ExportModelTest : SessionTestBase() {
         )
 }
 
-/** The share code every link back in [text] carries, which has to be one and the same. */
+/**
+ * The share code every link back in [text] carries, which has to be one and the same.
+ */
 private fun linkCodeIn(text: String): String {
     val link = Regex(Regex.escape(SHARE_URL_PREFIX) + "([A-Za-z0-9_-]+)")
     val codes = link.findAll(text).map { match -> match.groupValues[1] }.toSet()

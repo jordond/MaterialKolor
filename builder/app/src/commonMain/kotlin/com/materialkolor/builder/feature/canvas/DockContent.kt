@@ -164,7 +164,9 @@ internal fun FullscreenExit(
     )
 }
 
-/** The device width button and its menu of Phone, Tablet and Desktop (F-46). */
+/**
+ * The device width button and its menu of Phone, Tablet and Desktop (F-46).
+ */
 @Composable
 private fun DeviceWidthMenu(
     width: DeviceWidth,

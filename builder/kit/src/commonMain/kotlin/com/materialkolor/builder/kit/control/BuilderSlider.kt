@@ -99,5 +99,7 @@ public fun BuilderSlider(
     }
 }
 
-/** A hundred arrow presses cross the range unless the caller picks its own step. */
+/**
+ * A hundred arrow presses cross the range unless the caller picks its own step.
+ */
 private const val DefaultStepsPerRange: Float = 100f

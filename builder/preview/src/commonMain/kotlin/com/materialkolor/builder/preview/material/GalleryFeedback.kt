@@ -29,10 +29,14 @@ import com.materialkolor.builder.preview.canvas.DemoAppState
 
 // The samples of the Feedback cards of MaterialCards in GalleryEntry.kt.
 
-/** How far along both progress indicators are. */
+/**
+ * How far along both progress indicators are.
+ */
 private const val DemoProgress = 0.6f
 
-/** Badges on icon buttons, cleared and brought back by a click on either enabled button. */
+/**
+ * Badges on icon buttons, cleared and brought back by a click on either enabled button.
+ */
 @Composable
 internal fun Badges(state: DemoAppState) {
     val read = state.isOn(ReadKey)
@@ -58,7 +62,9 @@ internal fun Badges(state: DemoAppState) {
     }
 }
 
-/** Determinate indicators only, since an endless one would never let the preview settle. */
+/**
+ * Determinate indicators only, since an endless one would never let the preview settle.
+ */
 @Composable
 internal fun ProgressIndicators() {
     Row(horizontalArrangement = Arrangement.spacedBy(SectionGap), verticalAlignment = Alignment.CenterVertically) {
@@ -73,7 +79,9 @@ internal fun ProgressIndicators() {
     }
 }
 
-/** A snackbar shown in place, its action flipping the message. Snackbar actions have no disabled look. */
+/**
+ * A snackbar shown in place, its action flipping the message. Snackbar actions have no disabled look.
+ */
 @Composable
 internal fun Snackbars(state: DemoAppState) {
     val restored = state.isOn(RestoredKey)

@@ -22,7 +22,9 @@ internal enum class GalleryComponent(
     FilledIconButton(Role.Primary, Role.OnPrimary),
     TonalIconButton(Role.SecondaryContainer, Role.OnSecondaryContainer),
 
-    /** Outline and icon both take the local content color, which the card's surface sets to OnSurface. */
+    /**
+     * Outline and icon both take the local content color, which the card's surface sets to OnSurface.
+     */
     OutlinedIconButton(Role.OnSurface),
     SegmentedButton(Role.SecondaryContainer, Role.OnSecondaryContainer, Role.Outline, Role.OnSurface),
     TextField(Role.SurfaceContainerHighest, Role.OnSurface, Role.OnSurfaceVariant, Role.Primary),
@@ -35,13 +37,17 @@ internal enum class GalleryComponent(
     Dialog(Role.SurfaceContainerHigh, Role.OnSurface, Role.OnSurfaceVariant, Role.Secondary),
     TopAppBar(Role.Surface, Role.OnSurface),
 
-    /** An icon button among a top app bar's actions, which the bar tints OnSurfaceVariant. */
+    /**
+     * An icon button among a top app bar's actions, which the bar tints OnSurfaceVariant.
+     */
     AppBarAction(Role.OnSurfaceVariant),
     NavigationBar(Role.SurfaceContainer, Role.OnSurfaceVariant),
     NavigationBarItem(Role.SecondaryContainer, Role.OnSecondaryContainer, Role.Secondary, Role.OnSurfaceVariant),
     TabRow(Role.Surface, Role.Primary, Role.OutlineVariant),
 
-    /** A tab of a primary tab row, which the gallery gives OnSurfaceVariant while unselected. */
+    /**
+     * A tab of a primary tab row, which the gallery gives OnSurfaceVariant while unselected.
+     */
     Tab(Role.Primary, Role.OnSurfaceVariant),
     CircularProgressIndicator(Role.Primary, Role.SecondaryContainer),
     Snackbar(Role.InverseSurface, Role.InverseOnSurface),
@@ -49,43 +55,61 @@ internal enum class GalleryComponent(
     PlainTooltip(Role.InverseSurface, Role.InverseOnSurface),
     RichTooltip(Role.SurfaceContainer, Role.OnSurfaceVariant, Role.Primary),
 
-    /** Most disabled components, faded OnSurface on a faded OnSurface container if they have one. */
+    /**
+     * Most disabled components, faded OnSurface on a faded OnSurface container if they have one.
+     */
     Disabled(Role.OnSurface),
 
-    /** A disabled filled or elevated button, a faded OnSurface container under a faded OnSurfaceVariant label. */
+    /**
+     * A disabled filled or elevated button, a faded OnSurface container under a faded OnSurfaceVariant label.
+     */
     DisabledButton(Role.OnSurface, Role.OnSurfaceVariant),
     DisabledOutlinedButton(Role.OutlineVariant, Role.OnSurfaceVariant),
     DisabledSwitch(Role.SurfaceContainerHighest, Role.OnSurface),
 
-    /** A disabled filled card, SurfaceVariant blended over SurfaceContainerHighest. */
+    /**
+     * A disabled filled card, SurfaceVariant blended over SurfaceContainerHighest.
+     */
     DisabledFilledCard(Role.SurfaceVariant, Role.SurfaceContainerHighest, Role.OnSurface),
     DisabledElevatedCard(Role.Surface, Role.OnSurface),
     DisabledOutlinedCard(Role.Surface, Role.OnSurface, Role.Outline),
 
-    /** A disabled list item, which keeps its Surface container and fades only its content. */
+    /**
+     * A disabled list item, which keeps its Surface container and fades only its content.
+     */
     DisabledListItem(Role.Surface, Role.OnSurface),
 
-    /** A disabled segmented button, faded OnSurface inside a faded Outline border. */
+    /**
+     * A disabled segmented button, faded OnSurface inside a faded Outline border.
+     */
     DisabledSegmentedButton(Role.Outline, Role.OnSurface),
 
-    /** A disabled text button or navigation item, faded OnSurfaceVariant with no container. */
+    /**
+     * A disabled text button or navigation item, faded OnSurfaceVariant with no container.
+     */
     DisabledVariant(Role.OnSurfaceVariant),
     ;
 
     val refs: List<ColorRef> = roles.map { role -> ColorRef.OfRole(role) }
 }
 
-/** Declare the roles [component] reads on its default colors, for the role usage check and Inspect. */
+/**
+ * Declare the roles [component] reads on its default colors, for the role usage check and Inspect.
+ */
 internal fun Modifier.previewRoles(component: GalleryComponent): Modifier = previewRoles(*component.refs.toTypedArray())
 
-/** Declare the roles of [component] while [enabled], and of its [disabled] look otherwise. */
+/**
+ * Declare the roles of [component] while [enabled], and of its [disabled] look otherwise.
+ */
 internal fun Modifier.previewRoles(
     enabled: Boolean,
     component: MaterialComponent,
     disabled: GalleryComponent = GalleryComponent.Disabled,
 ): Modifier = previewRoles(*(if (enabled) component.refs else disabled.refs).toTypedArray())
 
-/** Declare the roles of [component] while [enabled], and of its [disabled] look otherwise. */
+/**
+ * Declare the roles of [component] while [enabled], and of its [disabled] look otherwise.
+ */
 internal fun Modifier.previewRoles(
     enabled: Boolean,
     component: GalleryComponent,

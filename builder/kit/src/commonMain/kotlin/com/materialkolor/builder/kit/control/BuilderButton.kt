@@ -86,7 +86,9 @@ public fun BuilderButton(
     }
 }
 
-/** A button drawn from [style] over plain foundation, for the skins without a button of their own. */
+/**
+ * A button drawn from [style] over plain foundation, for the skins without a button of their own.
+ */
 @Composable
 internal fun HeadlessButton(
     onClick: () -> Unit,
@@ -150,14 +152,22 @@ internal fun ButtonKeycap(
     )
 }
 
-/** How strongly a keycap's wash takes its ink. */
+/**
+ * How strongly a keycap's wash takes its ink.
+ */
 private const val KeycapWash: Float = 0.16f
 
-/** The room round a keycap's key, past the small spacing at its sides. */
+/**
+ * The room round a keycap's key, past the small spacing at its sides.
+ */
 private val KeycapInset: Dp = 2.dp
 
-/** How big a keycap sets its key, smaller than the label beside it as the design has it. */
+/**
+ * How big a keycap sets its key, smaller than the label beside it as the design has it.
+ */
 private val KeycapSize: TextUnit = 11.sp
 
-/** The line a keycap's key takes. */
+/**
+ * The line a keycap's key takes.
+ */
 private val KeycapLine: TextUnit = 14.sp

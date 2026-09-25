@@ -58,7 +58,9 @@ internal class PasteRouter(
 ) : ViewModel() {
     private val routed = Channel<PastedText>(Channel.UNLIMITED)
 
-    /** What each pasted color, link or code came to, for the workspace to act on once. */
+    /**
+     * What each pasted color, link or code came to, for the workspace to act on once.
+     */
     val pasted: Flow<PastedText> = routed.receiveAsFlow()
 
     private var panelOpen = false
@@ -71,7 +73,9 @@ internal class PasteRouter(
         }
     }
 
-    /** Keep up with the workspace, where an open panel or Vision menu leaves every paste alone. */
+    /**
+     * Keep up with the workspace, where an open panel or Vision menu leaves every paste alone.
+     */
     fun follow(panelOpen: Boolean) {
         this.panelOpen = panelOpen
     }
@@ -148,7 +152,9 @@ internal fun PasteHostContent(
     }
 }
 
-/** Sets the seed to [argb] and puts up its toast, with an Undo that [undo] keeps. */
+/**
+ * Sets the seed to [argb] and puts up its toast, with an Undo that [undo] keeps.
+ */
 private suspend fun pasteSeed(
     argb: Argb,
     undo: PasteUndo,
@@ -182,7 +188,9 @@ private suspend fun pasteSeed(
     before.dispatcher.dispatch(WorkspaceAction.ShowWithdrawableToast(toast, onShown = seedUndo::shown))
 }
 
-/** Asks whether to open the theme [code] carries, and opens it in [scope] on Open. */
+/**
+ * Asks whether to open the theme [code] carries, and opens it in [scope] on Open.
+ */
 private suspend fun offerShared(
     code: String,
     scope: CoroutineScope,
@@ -202,7 +210,9 @@ private suspend fun offerShared(
     workspace().dispatcher.dispatch(toast)
 }
 
-/** What the host reads of the workspace, kept current for the collector and the toasts' actions. */
+/**
+ * What the host reads of the workspace, kept current for the collector and the toasts' actions.
+ */
 private class PasteWorkspace(
     val dispatcher: Dispatcher<WorkspaceAction>,
     val document: ThemeDocument,
@@ -210,7 +220,9 @@ private class PasteWorkspace(
     val openShared: suspend (code: String) -> BootNotice?,
 )
 
-/** The Undo of the newest pasted color's toast, or null once there is none. */
+/**
+ * The Undo of the newest pasted color's toast, or null once there is none.
+ */
 private class PasteUndo {
     var current: SeedUndo? = null
 }

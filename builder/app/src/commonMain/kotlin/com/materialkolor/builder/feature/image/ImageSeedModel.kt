@@ -56,7 +56,9 @@ internal class ImageSeedModel(
 ) : StateViewModel<ImageSeedModel.State>(State()) {
     private val emitted = Channel<ImageSeedResult>(Channel.UNLIMITED)
 
-    /** What each image came to, for the workspace to act on once. */
+    /**
+     * What each image came to, for the workspace to act on once.
+     */
     val results: Flow<ImageSeedResult> = emitted.receiveAsFlow()
 
     private var job: Job? = null
@@ -75,7 +77,9 @@ internal class ImageSeedModel(
         }
     }
 
-    /** Pull colors from [handle], cancelling whatever image came before it. */
+    /**
+     * Pull colors from [handle], cancelling whatever image came before it.
+     */
     fun take(handle: ImageHandle) {
         take(listOf(handle))
     }
@@ -114,7 +118,9 @@ internal class ImageSeedModel(
         }
     }
 
-    /** The document now shows [arriving]'s seed, so its skeleton can go. */
+    /**
+     * The document now shows [arriving]'s seed, so its skeleton can go.
+     */
     fun landed(arriving: ArrivingImage) {
         updateState { state -> if (state.arriving == arriving) state.copy(arriving = null) else state }
     }
@@ -150,7 +156,9 @@ internal class ImageSeedModel(
         landed(landing)
     }
 
-    /** The last of [handles] that decodes, with its image, or null when none of them does. */
+    /**
+     * The last of [handles] that decodes, with its image, or null when none of them does.
+     */
     private suspend fun decodeLast(handles: List<ImageHandle>): Pair<ImageHandle, DecodedImage>? {
         for (handle in handles.asReversed()) {
             val decoded = images.decode(handle) ?: continue
@@ -168,13 +176,17 @@ internal class ImageSeedModel(
         val arriving: ArrivingImage? = null,
         val newest: NewestImage? = null,
     ) {
-        /** This state as the open project sees it, with an image from another project left out. */
+        /**
+         * This state as the open project sees it, with an image from another project left out.
+         */
         fun forProject(project: Int): State =
             if (newest == null || newest.project == project) this else copy(newest = null)
     }
 
     private companion object {
-        /** Longer than any reveal waits before its change lands. */
+        /**
+         * Longer than any reveal waits before its change lands.
+         */
         const val LANDING_TIMEOUT_MILLIS = 1_000L
     }
 }
@@ -227,11 +239,15 @@ internal sealed interface ImageSeedResult {
         val top: Argb,
         val source: SeedSource.Image,
     ) : ImageSeedResult {
-        /** The edit that makes [top] the seed. */
+        /**
+         * The edit that makes [top] the seed.
+         */
         val change: DocumentChange.SetSeed
             get() = DocumentChange.SetSeed(top, source)
     }
 
-    /** The file is not an image the platform can read, or too big to read safely. */
+    /**
+     * The file is not an image the platform can read, or too big to read safely.
+     */
     data object Unsupported : ImageSeedResult
 }

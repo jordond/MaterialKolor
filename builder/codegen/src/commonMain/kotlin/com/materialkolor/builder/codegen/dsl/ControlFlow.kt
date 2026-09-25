@@ -61,13 +61,17 @@ public fun whenExpression(
     )
 }
 
-/** The branches of one [whenExpression]. */
+/**
+ * The branches of one [whenExpression].
+ */
 @CodegenDsl
 public class WhenScope internal constructor() {
     internal val branches: MutableList<WhenBranch> = mutableListOf()
     internal var otherwise: Expression? = null
 
-    /** `condition -> value`. */
+    /**
+     * `condition -> value`.
+     */
     public fun branch(
         condition: Expression,
         value: Expression,
@@ -76,20 +80,26 @@ public class WhenScope internal constructor() {
         branches += WhenBranch(condition, value)
     }
 
-    /** The `else ->` branch, which is written last wherever it was added. */
+    /**
+     * The `else ->` branch, which is written last wherever it was added.
+     */
     public fun otherwise(value: Expression) {
         require(otherwise == null) { "A when has one else branch" }
         otherwise = value
     }
 
-    /** A call used as a branch value, offered here for the same reason [ArgumentsScope.call] is. */
+    /**
+     * A call used as a branch value, offered here for the same reason [ArgumentsScope.call] is.
+     */
     public fun call(
         symbol: Symbol,
         multiline: Boolean = false,
         build: ArgumentsScope.() -> Unit = {},
     ): Expression = buildCall(listOf(functionToken(symbol.simpleName)), listOf(symbol), multiline, build)
 
-    /** The same, for a function that is already in scope. */
+    /**
+     * The same, for a function that is already in scope.
+     */
     public fun call(
         name: String,
         multiline: Boolean = false,
@@ -109,7 +119,9 @@ public fun lambda(
     build: BodyScope.() -> Unit,
 ): Expression = LambdaShape(parameter, BodyScope().apply(build)).expression()
 
-/** `left name right`, for infix calls such as `LocalExtendedColors provides colors`. */
+/**
+ * `left name right`, for infix calls such as `LocalExtendedColors provides colors`.
+ */
 public fun infix(
     left: Expression,
     name: String,
@@ -126,22 +138,30 @@ public fun infix(
     )
 }
 
-/** `Foo::class`, which imports `Foo`. */
+/**
+ * `Foo::class`, which imports `Foo`.
+ */
 public fun classLiteral(symbol: Symbol): Expression =
     Expression(
         tokens = listOf(typeToken(symbol.simpleName), punctuationToken("::"), keywordToken("class")),
         symbols = listOf(symbol),
     )
 
-/** A member of this value, as in `MaterialTheme.colorScheme` or `LocalExtendedColors.current`. */
+/**
+ * A member of this value, as in `MaterialTheme.colorScheme` or `LocalExtendedColors.current`.
+ */
 public fun Expression.member(name: String): Expression = access(this, plainToken(name), emptyList())
 
-/** An imported extension property read off this value, which imports it. */
+/**
+ * An imported extension property read off this value, which imports it.
+ */
 public fun Expression.member(symbol: Symbol): Expression = access(this, plainToken(symbol.simpleName), listOf(symbol))
 
 // b-111b
 
-/** `receiver[key]`, as in `properties[ThemeTokens.colors]`, written on one line. */
+/**
+ * `receiver[key]`, as in `properties[ThemeTokens.colors]`, written on one line.
+ */
 public fun Expression.index(key: Expression): Expression {
     require(!breaksOnItsOwn) { "The receiver of an index has to fit on one line" }
     require(!key.breaksOnItsOwn) { "The key of an index has to fit on one line" }
@@ -163,7 +183,9 @@ public fun Expression.call(
     build: ArgumentsScope.() -> Unit = {},
 ): Expression = memberCall(this, functionToken(name), emptyList(), multiline, build)
 
-/** An imported extension function called on this value, as in `palette.onTone(40)`, which imports it. */
+/**
+ * An imported extension function called on this value, as in `palette.onTone(40)`, which imports it.
+ */
 public fun Expression.call(
     symbol: Symbol,
     multiline: Boolean = false,
@@ -202,13 +224,17 @@ internal class IfElseShape(
     val whenTrue: Expression,
     val whenFalse: Expression,
 ) : Shape {
-    /** `if (condition) `, which starts the one line form. */
+    /**
+     * `if (condition) `, which starts the one line form.
+     */
     val keyword: List<Token> =
         listOf(keywordToken("if"), spaceToken, punctuationToken("(")) +
             condition.tokens +
             listOf(punctuationToken(")"), spaceToken)
 
-    /** `if (condition) {`, which opens the broken form. */
+    /**
+     * `if (condition) {`, which opens the broken form.
+     */
     val open: List<Token> = keyword + punctuationToken("{")
 }
 
@@ -222,7 +248,9 @@ internal class WhenShape(
     val branches: List<WhenBranch>,
     val otherwise: Expression?,
 ) : Shape {
-    /** `when (subject) {` or `when {`. */
+    /**
+     * `when (subject) {` or `when {`.
+     */
     val open: List<Token> = buildList {
         add(keywordToken("when"))
         add(spaceToken)
@@ -240,7 +268,9 @@ internal class LambdaShape(
     val parameter: String?,
     val body: BodyScope,
 ) : Shape {
-    /** `{` with the parameter and arrow after it, which is how the lambda opens when it breaks. */
+    /**
+     * `{` with the parameter and arrow after it, which is how the lambda opens when it breaks.
+     */
     val open: List<Token> = buildList {
         add(punctuationToken("{"))
         if (parameter != null) {
@@ -253,7 +283,9 @@ internal class LambdaShape(
 
     val isEmpty: Boolean = body.statements.isEmpty()
 
-    /** The value of a body that is nothing but one expression, the only kind that fits on one line. */
+    /**
+     * The value of a body that is nothing but one expression, the only kind that fits on one line.
+     */
     private val single: Expression? = body.statements
         .singleOrNull()
         ?.takeIf { it.prefix.isEmpty() }

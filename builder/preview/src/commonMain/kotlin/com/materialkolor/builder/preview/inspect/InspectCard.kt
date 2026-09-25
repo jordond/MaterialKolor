@@ -112,7 +112,9 @@ internal class InspectColor(
     val tone: Int?,
 )
 
-/** A swatch of the color, then its name, hex and tone, read out as one. */
+/**
+ * A swatch of the color, then its name, hex and tone, read out as one.
+ */
 @Composable
 private fun ColorLine(color: InspectColor) {
     val tokens = LocalBuilderTokens.current
@@ -138,7 +140,9 @@ private fun ColorLine(color: InspectColor) {
     }
 }
 
-/** The pair's ratio and the badge it earns, in icon and words. */
+/**
+ * The pair's ratio and the badge it earns, in icon and words.
+ */
 @Composable
 private fun RatingLine(row: AuditRow) {
     Row(
@@ -288,7 +292,9 @@ internal fun ThemeResult.rateOnPair(
     return null
 }
 
-/** [one] and [other] as text over its background when one role is drawn on the other, or null. */
+/**
+ * [one] and [other] as text over its background when one role is drawn on the other, or null.
+ */
 private fun onPairOf(
     one: ColorRef.OfRole,
     other: ColorRef.OfRole,
@@ -299,7 +305,9 @@ private fun onPairOf(
         else -> null
     }
 
-/** A ratio to one decimal, cut rather than rounded so a pair just under a line never reads as on it. */
+/**
+ * A ratio to one decimal, cut rather than rounded so a pair just under a line never reads as on it.
+ */
 internal fun ratioText(ratio: Double): String {
     val tenths = floor(ratio * TENTHS).toInt()
     return "${tenths / TENTHS}.${tenths % TENTHS}"
@@ -307,7 +315,9 @@ internal fun ratioText(ratio: Double): String {
 
 private const val TENTHS = 10
 
-/** The primary palette tone Fluent cuts each shade at, the same cut its export and the audit take. */
+/**
+ * The primary palette tone Fluent cuts each shade at, the same cut its export and the audit take.
+ */
 private val FluentShade.tone: Int
     get() = when (this) {
         FluentShade.Dark3 -> 15

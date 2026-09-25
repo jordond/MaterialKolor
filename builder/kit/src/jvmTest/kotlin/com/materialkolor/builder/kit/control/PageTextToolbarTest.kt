@@ -299,20 +299,28 @@ class PageTextToolbarTest {
         }
 }
 
-/** Where a press lands on the field's text, past the start padding of every skin. */
+/**
+ * Where a press lands on the field's text, past the start padding of every skin.
+ */
 private val TextStart = 24.dp
 
-/** How far the pane test moves the root host from the root's origin. */
+/**
+ * How far the pane test moves the root host from the root's origin.
+ */
 private val HostOffset = 160.dp
 
-/** How long after a press on the field lets go a second press still counts as a double click. */
+/**
+ * How long after a press on the field lets go a second press still counts as a double click.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.doubleTapTimeout(): Long =
     onNode(hasSetTextAction())
         .fetchSemanticsNode()
         .layoutInfo.viewConfiguration.doubleTapTimeoutMillis
 
-/** A text field whose selection is a caret. */
+/**
+ * A text field whose selection is a caret.
+ */
 private fun hasCollapsedSelection(): SemanticsMatcher =
     SemanticsMatcher("has a collapsed selection") { node ->
         node.config.getOrNull(SemanticsProperties.TextSelectionRange)?.collapsed == true
@@ -324,13 +332,17 @@ private fun ComposeUiTest.longPressField() {
     waitForIdle()
 }
 
-/** Taps a button of the row with a finger, the only way the row is ever pressed. */
+/**
+ * Taps a button of the row with a finger, the only way the row is ever pressed.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.tap(label: String) {
     onNodeWithText(label).performTouchInput { click() }
 }
 
-/** [HostOverlays] with a clipboard holding [Pasted], so no test reads the machine's own. */
+/**
+ * [HostOverlays] with a clipboard holding [Pasted], so no test reads the machine's own.
+ */
 @Composable
 private fun ToolbarHost(
     skin: Skin,

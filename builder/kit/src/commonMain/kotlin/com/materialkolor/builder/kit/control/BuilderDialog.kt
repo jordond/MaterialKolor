@@ -114,7 +114,9 @@ public fun BuilderDialog(
     }
 }
 
-/** The headless dialog in [style]. */
+/**
+ * The headless dialog in [style].
+ */
 @Composable
 private fun HeadlessDialog(
     visible: Boolean,

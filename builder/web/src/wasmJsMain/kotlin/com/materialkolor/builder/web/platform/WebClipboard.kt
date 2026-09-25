@@ -15,11 +15,15 @@ internal object WebClipboard : Clipboard {
     override suspend fun writeText(text: String): Result<Unit> = outcome(writeClipboardText(text))
 }
 
-/** Success when the browser gave no [refusal], else a failure that carries it. */
+/**
+ * Success when the browser gave no [refusal], else a failure that carries it.
+ */
 internal fun outcome(refusal: String?): Result<Unit> =
     if (refusal == null) Result.success(Unit) else Result.failure(BrowserRefusal(refusal))
 
-/** The browser said no, with the name of the DOM error when it gave one, `NotAllowedError` say. */
+/**
+ * The browser said no, with the name of the DOM error when it gave one, `NotAllowedError` say.
+ */
 internal class BrowserRefusal(
     reason: String,
 ) : Exception(reason)

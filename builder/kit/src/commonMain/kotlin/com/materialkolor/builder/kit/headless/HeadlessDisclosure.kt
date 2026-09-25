@@ -84,21 +84,29 @@ internal class DisclosureStyle(
     val summary: BuilderTextStyle = BuilderTextStyle.Body,
 )
 
-/** What a disclosure row says, its title and then its summary, the name the web folds its state into. */
+/**
+ * What a disclosure row says, its title and then its summary, the name the web folds its state into.
+ */
 internal fun disclosureName(
     title: String,
     summary: String?,
 ): String = listOfNotNull(title, summary).joinToString(", ")
 
-/** Content opening under a disclosure, which under reduced motion only fades. */
+/**
+ * Content opening under a disclosure, which under reduced motion only fades.
+ */
 internal fun disclosureEnter(motion: BuilderMotion): EnterTransition =
     expandVertically(motion.spatial()) + fadeIn(motion.effects())
 
-/** Content closing under a disclosure. */
+/**
+ * Content closing under a disclosure.
+ */
 internal fun disclosureExit(motion: BuilderMotion): ExitTransition =
     shrinkVertically(motion.spatial()) + fadeOut(motion.effects())
 
-/** The chevron at the end of a disclosure row, turned up while it is open. */
+/**
+ * The chevron at the end of a disclosure row, turned up while it is open.
+ */
 @Composable
 internal fun DisclosureChevron(expanded: Boolean) {
     val motion = LocalBuilderMotion.current
@@ -168,7 +176,9 @@ internal fun HeadlessDisclosure(
     }
 }
 
-/** The spoken state, and the expand or collapse action while the row is enabled. */
+/**
+ * The spoken state, and the expand or collapse action while the row is enabled.
+ */
 private fun Modifier.disclosureSemantics(
     spoken: String,
     expanded: Boolean,
@@ -214,7 +224,9 @@ private fun DisclosureHeading(
 
 // b-510
 
-/** A hairline of [color] across the top edge, or nothing while [width] is zero. */
+/**
+ * A hairline of [color] across the top edge, or nothing while [width] is zero.
+ */
 private fun Modifier.topRule(
     color: Color,
     width: Dp,

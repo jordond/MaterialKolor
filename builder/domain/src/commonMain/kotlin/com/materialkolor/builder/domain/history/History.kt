@@ -42,19 +42,27 @@ public class History(
     // Undo, redo and a jump clear it only as a guard. They clear last too, so the next record pushes and sets it anew.
     private var trimmed: HistoryEntry? = null
 
-    /** Whether there is a step to undo. */
+    /**
+     * Whether there is a step to undo.
+     */
     public val canUndo: Boolean
         get() = done.isNotEmpty()
 
-    /** Whether there is a step to redo. */
+    /**
+     * Whether there is a step to redo.
+     */
     public val canRedo: Boolean
         get() = undone.isNotEmpty()
 
-    /** What the undo button says, or null when there is nothing to undo. */
+    /**
+     * What the undo button says, or null when there is nothing to undo.
+     */
     public val undoLabel: ChangeLabel?
         get() = done.lastOrNull()?.label
 
-    /** What the redo button says, or null when there is nothing to redo. */
+    /**
+     * What the redo button says, or null when there is nothing to redo.
+     */
     public val redoLabel: ChangeLabel?
         get() = undone.lastOrNull()?.label
 
@@ -67,11 +75,15 @@ public class History(
     public val entries: List<HistoryEntry>
         get() = done + undone.asReversed()
 
-    /** How many of [entries] are applied. Zero is the document before the oldest step. */
+    /**
+     * How many of [entries] are applied. Zero is the document before the oldest step.
+     */
     public val cursor: Int
         get() = done.size
 
-    /** How many steps there are, applied and undone together. It never passes [CAPACITY]. */
+    /**
+     * How many steps there are, applied and undone together. It never passes [CAPACITY].
+     */
     public val size: Int
         get() = done.size + undone.size
 
@@ -241,10 +253,14 @@ public class History(
          */
         public const val CAPACITY: Int = 100
 
-        /** How many of the newest steps [persisted] hands out. */
+        /**
+         * How many of the newest steps [persisted] hands out.
+         */
         public const val PERSISTED: Int = 50
 
-        /** How close together two discrete edits have to land to fold into one step. */
+        /**
+         * How close together two discrete edits have to land to fold into one step.
+         */
         public const val MERGE_WINDOW_MILLIS: Long = 600
     }
 }

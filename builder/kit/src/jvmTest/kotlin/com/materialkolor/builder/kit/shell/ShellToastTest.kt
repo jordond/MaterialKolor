@@ -34,7 +34,9 @@ import kotlin.test.Test
 private const val ToastHeight = 900
 private val ToastMargin = 12.dp
 
-/** A window, how the poster shows in it, and whether the shell is in fullscreen. */
+/**
+ * A window, how the poster shows in it, and whether the shell is in fullscreen.
+ */
 private class ToastWindow(
     val width: Int,
     val mode: PosterMode,
@@ -126,16 +128,22 @@ private fun toastTest(
     }
 }
 
-/** The toast stack, the one polite live region the host keeps. */
+/**
+ * The toast stack, the one polite live region the host keeps.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.toastStack(): DpRect =
     onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.LiveRegion), useUnmergedTree = true).getBoundsInRoot()
 
-/** The poster's pane, docked, as the rail, opened over the canvas or as the sheet. */
+/**
+ * The poster's pane, docked, as the rail, opened over the canvas or as the sheet.
+ */
 private fun toastPane(): SemanticsMatcher =
     SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, ShellPosterLabel)
 
-/** Clear of [poster] by the margin on its inner side, whichever way the page reads. */
+/**
+ * Clear of [poster] by the margin on its inner side, whichever way the page reads.
+ */
 private fun DpRect.pastPoster(
     poster: DpRect,
     direction: LayoutDirection,

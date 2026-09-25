@@ -69,7 +69,9 @@ class WidgetRingEdgesTest {
         }
     }
 
-    /** The chip is small and round, so it is drawn at two pixels per dp like its other ring test. */
+    /**
+     * The chip is small and round, so it is drawn at two pixels per dp like its other ring test.
+     */
     @Test
     fun schemeChip_chosenOrNot_underItsTooltip_everySkin_ringsAllTheWayRound() {
         for (selected in listOf(false, true)) {

@@ -13,10 +13,14 @@ import com.materialkolor.builder.kit.generated.resources.Res
 public enum class ShippedFont(
     internal val licenseFile: String,
 ) {
-    /** The brand face the chrome and the poster are set in. */
+    /**
+     * The brand face the chrome and the poster are set in.
+     */
     BricolageGrotesque("files/OFL-BricolageGrotesque.txt"),
 
-    /** The monospace face the code and the hex values are set in. */
+    /**
+     * The monospace face the code and the hex values are set in.
+     */
     JetBrainsMono("files/OFL-JetBrainsMono.txt"),
 
     /**
@@ -26,5 +30,7 @@ public enum class ShippedFont(
     Selawik("files/OFL-Selawik.txt"), // b-404a
 }
 
-/** The full license [font] ships under, its copyright line first. */
+/**
+ * The full license [font] ships under, its copyright line first.
+ */
 public suspend fun readFontLicense(font: ShippedFont): String = Res.readBytes(font.licenseFile).decodeToString()

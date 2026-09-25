@@ -167,7 +167,9 @@ class HistoryJumpTest {
     private fun tone(light: Int): DocumentChange =
         DocumentChange.SetCustomTone(CustomSlot.Primary, if (light == 0) null else CustomTone(light = light))
 
-    /** A document being edited, the way the builder drives the history, jumps included. */
+    /**
+     * A document being edited, the way the builder drives the history, jumps included.
+     */
     private class Session {
         val history = History()
         var document: ThemeDocument = ThemeDocument.Default
@@ -190,7 +192,9 @@ class HistoryJumpTest {
         fun jumpTo(cursor: Int): ThemeDocument? = history.jumpTo(cursor)?.also { shown -> document = shown }
 
         companion object {
-            /** A history of [steps] renames, from the defaults to "Theme1" and on, far enough apart to never fold. */
+            /**
+             * A history of [steps] renames, from the defaults to "Theme1" and on, far enough apart to never fold.
+             */
             fun named(steps: Int): Session =
                 Session().apply {
                     (1..steps).forEach { step ->

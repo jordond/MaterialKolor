@@ -7,7 +7,9 @@ import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsString
 import kotlin.js.Promise
 
-/** Whether the browser has the screen eyedropper, Chromium on desktop so far. */
+/**
+ * Whether the browser has the screen eyedropper, Chromium on desktop so far.
+ */
 internal fun pageHasEyeDropper(): Boolean = js("typeof window.EyeDropper === 'function'")
 
 /**

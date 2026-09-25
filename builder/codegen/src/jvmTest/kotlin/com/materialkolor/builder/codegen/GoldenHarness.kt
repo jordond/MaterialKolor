@@ -22,7 +22,9 @@ internal class GoldenHarness(
     private val hashesFile: File,
     private val update: Boolean,
 ) {
-    /** Compares [files] with the golden [case], or rewrites that case in update mode. */
+    /**
+     * Compares [files] with the golden [case], or rewrites that case in update mode.
+     */
     fun verify(
         case: String,
         files: List<GeneratedFile>,
@@ -62,7 +64,9 @@ internal class GoldenHarness(
         }
     }
 
-    /** Checks `GoldenHashes.kt` agrees with the golden tree, or rewrites it in update mode. */
+    /**
+     * Checks `GoldenHashes.kt` agrees with the golden tree, or rewrites it in update mode.
+     */
     fun verifyHashes() {
         if (update) {
             writeHashes()
@@ -73,7 +77,9 @@ internal class GoldenHarness(
         assertEquals(renderHashes(), committed, "GoldenHashes.kt is out of date. $UPDATE_HINT")
     }
 
-    /** The CRC-32 of every case in the golden tree, by case name. */
+    /**
+     * The CRC-32 of every case in the golden tree, by case name.
+     */
     fun hashes(): Map<String, Long> =
         goldenRoot
             .listFiles { file -> file.isDirectory }
@@ -81,7 +87,9 @@ internal class GoldenHarness(
             .sortedBy { it.name }
             .associate { caseDir -> caseDir.name to GoldenDigest.of(readCase(caseDir)) }
 
-    /** The source of `GoldenHashes.kt` for the golden tree as it stands. */
+    /**
+     * The source of `GoldenHashes.kt` for the golden tree as it stands.
+     */
     fun renderHashes(): String {
         val entries = hashes()
         val value = if (entries.isEmpty()) {
@@ -100,7 +108,9 @@ internal class GoldenHarness(
         hashesFile.writeText(renderHashes())
     }
 
-    /** Every file of one case, by its path relative to the case with forward slashes. */
+    /**
+     * Every file of one case, by its path relative to the case with forward slashes.
+     */
     private fun readCase(caseDir: File): Map<String, String> {
         if (!caseDir.isDirectory) return emptyMap()
 
@@ -132,7 +142,9 @@ internal class GoldenHarness(
             |
             """.trimMargin()
 
-        /** The harness for this module's own goldens, in update mode when Gradle was asked for it. */
+        /**
+         * The harness for this module's own goldens, in update mode when Gradle was asked for it.
+         */
         val Default: GoldenHarness by lazy {
             val module = File(repoRoot(), "builder/codegen")
 
@@ -143,7 +155,9 @@ internal class GoldenHarness(
             )
         }
 
-        /** The repository root, found by walking up from wherever Gradle ran the tests. */
+        /**
+         * The repository root, found by walking up from wherever Gradle ran the tests.
+         */
         fun repoRoot(): File =
             generateSequence(File(System.getProperty("user.dir")).absoluteFile) { it.parentFile }
                 .firstOrNull { dir -> File(dir, "settings.gradle.kts").isFile && File(dir, "builder").isDirectory }

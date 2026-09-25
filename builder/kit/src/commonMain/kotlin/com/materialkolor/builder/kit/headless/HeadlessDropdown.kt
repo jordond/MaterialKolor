@@ -286,7 +286,9 @@ internal fun HeadlessDropdownItem(
     }
 }
 
-/** A menu of commands under [anchor], closing itself once a row is chosen. */
+/**
+ * A menu of commands under [anchor], closing itself once a row is chosen.
+ */
 @Composable
 internal fun HeadlessMenu(
     expanded: Boolean,
@@ -305,7 +307,9 @@ internal fun HeadlessMenu(
     }
 }
 
-/** A menu drawn open where it stands, the rows of [HeadlessMenu] in its list with nothing floating. */
+/**
+ * A menu drawn open where it stands, the rows of [HeadlessMenu] in its list with nothing floating.
+ */
 @Composable
 internal fun HeadlessMenuPanel(
     items: List<BuilderMenuItem>,
@@ -315,7 +319,9 @@ internal fun HeadlessMenuPanel(
     DropdownList(style, modifier = modifier) { HeadlessMenuRows(items, style, close = {}) }
 }
 
-/** One row per item, each calling [close] before it runs its item. */
+/**
+ * One row per item, each calling [close] before it runs its item.
+ */
 @Composable
 private fun HeadlessMenuRows(
     items: List<BuilderMenuItem>,
@@ -470,7 +476,9 @@ private fun SelectField(
     }
 }
 
-/** One option row per option, the chosen one checked and, given [selectedRow], focused by it. */
+/**
+ * One option row per option, the chosen one checked and, given [selectedRow], focused by it.
+ */
 @Composable
 private fun <T> HeadlessSelectRows(
     options: List<T>,

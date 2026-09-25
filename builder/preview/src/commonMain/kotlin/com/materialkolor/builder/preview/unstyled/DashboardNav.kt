@@ -42,7 +42,9 @@ private val NavItemHeight = 40.dp
 private val RailItemWidth = 48.dp
 private val BrandSize = 32.dp
 
-/** The destination the sidebar has picked. */
+/**
+ * The destination the sidebar has picked.
+ */
 internal fun DemoAppState.destination(): DashboardDestination =
     DashboardDestination.entries[choice(DashboardNavChoice, DashboardDestination.entries.size)]
 
@@ -50,7 +52,9 @@ private fun DemoAppState.go(destination: DashboardDestination) {
     choose(DashboardNavChoice, DashboardDestination.entries.size, destination.ordinal)
 }
 
-/** The desktop's sidebar, the brand over every destination with its name. */
+/**
+ * The desktop's sidebar, the brand over every destination with its name.
+ */
 @Composable
 internal fun DashboardSidebar(state: DemoAppState) {
     val current = state.destination()
@@ -80,7 +84,9 @@ internal fun DashboardSidebar(state: DemoAppState) {
     }
 }
 
-/** The tablet's rail, the sidebar folded down to its icons. */
+/**
+ * The tablet's rail, the sidebar folded down to its icons.
+ */
 @Composable
 internal fun DashboardRail(
     state: DemoAppState,

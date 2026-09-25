@@ -23,12 +23,16 @@ internal class SeedUndo(
     private var over = false
     private var withdraw: (() -> Unit)? = null
 
-    /** The toast is up, and [withdraw] takes it back. One that comes up after the end goes at once. */
+    /**
+     * The toast is up, and [withdraw] takes it back. One that comes up after the end goes at once.
+     */
     fun shown(withdraw: () -> Unit) {
         if (over) withdraw() else this.withdraw = withdraw
     }
 
-    /** Whether an Undo on [document] in [project] would still undo this seed and nothing else. */
+    /**
+     * Whether an Undo on [document] in [project] would still undo this seed and nothing else.
+     */
     fun holds(
         document: ThemeDocument,
         project: Int,
@@ -50,7 +54,9 @@ internal class SeedUndo(
         }
     }
 
-    /** Takes the toast back and lets the Undo go, for good. */
+    /**
+     * Takes the toast back and lets the Undo go, for good.
+     */
     fun end() {
         over = true
         withdraw?.invoke()

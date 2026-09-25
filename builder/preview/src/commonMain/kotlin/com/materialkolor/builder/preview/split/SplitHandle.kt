@@ -133,7 +133,9 @@ internal fun SplitHandle(
     }
 }
 
-/** Move, send to an edge or reset the split for one key press, and say whether the key was used. */
+/**
+ * Move, send to an edge or reset the split for one key press, and say whether the key was used.
+ */
 private fun SplitState.onKey(
     event: KeyEvent,
     horizontal: Boolean,
@@ -170,7 +172,9 @@ private fun String.fillIn(
     label: String,
 ): String = replace("%1\$d", percent.toString()).replace("%2\$s", label)
 
-/** The handle's line across the preview, the grip on it, and the focus ring round the grip. */
+/**
+ * The handle's line across the preview, the grip on it, and the focus ring round the grip.
+ */
 private fun DrawScope.drawHandle(
     tokens: BuilderTokens,
     along: Float,
@@ -193,7 +197,9 @@ private fun DrawScope.drawHandle(
     if (focused) drawCircle(tokens.focus, radius + line * 2, grip, style = Stroke(line))
 }
 
-/** The handle's distance from the start edge, centred on the split and kept inside the preview. */
+/**
+ * The handle's distance from the start edge, centred on the split and kept inside the preview.
+ */
 private fun handleStart(
     extent: Int,
     fraction: Float,

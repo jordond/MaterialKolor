@@ -33,13 +33,19 @@ public class InspectRegistry {
      */
     private val live = mutableStateOf(entries, neverEqualPolicy())
 
-    /** The elements that hold focus or contain what does, whether or not they are recorded yet. */
+    /**
+     * The elements that hold focus or contain what does, whether or not they are recorded yet.
+     */
     private val focusedOwners = HashSet<Any>()
 
-    /** The recorded elements among [focusedOwners], kept in snapshot state so a reader sees focus move. */
+    /**
+     * The recorded elements among [focusedOwners], kept in snapshot state so a reader sees focus move.
+     */
     private val focusedEntries = mutableStateMapOf<Any, InspectEntry>()
 
-    /** How many elements are recorded right now, across every pane. */
+    /**
+     * How many elements are recorded right now, across every pane.
+     */
     public val size: Int
         get() = entries.size
 
@@ -52,7 +58,9 @@ public class InspectRegistry {
     public val focused: InspectEntry?
         get() = focusedOwner()?.let { owner -> focusedEntries[owner] }
 
-    /** The element behind [focused], so a reader can tell focus moving from the same element moving. */
+    /**
+     * The element behind [focused], so a reader can tell focus moving from the same element moving.
+     */
     internal fun focusedOwner(): Any? = focusedEntries.entries.minByOrNull { (_, entry) -> entry.bounds.area }?.key
 
     /**
@@ -66,7 +74,9 @@ public class InspectRegistry {
         point: Offset,
     ): InspectEntry? = ownerAt(side, point)?.let { owner -> entries[owner] }
 
-    /** The element [hit] finds, as its key in the registry. */
+    /**
+     * The element [hit] finds, as its key in the registry.
+     */
     internal fun ownerAt(
         side: PaneSide,
         point: Offset,
@@ -89,7 +99,9 @@ public class InspectRegistry {
      */
     internal fun entryOf(owner: Any): InspectEntry? = live.value[owner]
 
-    /** Record or move the element [owner], which makes it the one recorded last. */
+    /**
+     * Record or move the element [owner], which makes it the one recorded last.
+     */
     internal fun record(
         owner: Any,
         entry: InspectEntry,
@@ -101,7 +113,9 @@ public class InspectRegistry {
         if (owner in focusedOwners && focusedEntries[owner] != entry) focusedEntries[owner] = entry
     }
 
-    /** Note whether the element [owner] holds focus or contains what does. */
+    /**
+     * Note whether the element [owner] holds focus or contains what does.
+     */
     internal fun focus(
         owner: Any,
         focused: Boolean,
@@ -116,7 +130,9 @@ public class InspectRegistry {
         }
     }
 
-    /** Forget the element [owner], which has left the screen. */
+    /**
+     * Forget the element [owner], which has left the screen.
+     */
     internal fun remove(owner: Any) {
         if (entries.remove(owner) != null) live.value = entries
         focus(owner, focused = false)

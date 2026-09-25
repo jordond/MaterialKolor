@@ -45,19 +45,29 @@ public value class ContrastLevel(
     override fun toString(): String = "ContrastLevel($hundredths)"
 
     public companion object {
-        /** Less contrast than the spec default, for people who find the default harsh. */
+        /**
+         * Less contrast than the spec default, for people who find the default harsh.
+         */
         public val Reduced: ContrastLevel = ContrastLevel(-100)
 
-        /** The level every scheme uses until someone asks for another. */
+        /**
+         * The level every scheme uses until someone asks for another.
+         */
         public val Standard: ContrastLevel = ContrastLevel(0)
 
-        /** Halfway to [High]. */
+        /**
+         * Halfway to [High].
+         */
         public val Medium: ContrastLevel = ContrastLevel(50)
 
-        /** The most contrast the engine offers. */
+        /**
+         * The most contrast the engine offers.
+         */
         public val High: ContrastLevel = ContrastLevel(100)
 
-        /** The four levels the contrast control offers, from least to most. */
+        /**
+         * The four levels the contrast control offers, from least to most.
+         */
         public val Stops: List<ContrastLevel> = listOf(Reduced, Standard, Medium, High)
 
         /**

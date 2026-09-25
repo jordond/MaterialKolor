@@ -125,7 +125,9 @@ class SeedExtractorTest {
         return PixelSample(pixels, width = SIDE, height = SIDE)
     }
 
-    /** kmpalette quantizes to five bits a channel, so a swatch sits a few steps off the color it came from. */
+    /**
+     * kmpalette quantizes to five bits a channel, so a swatch sits a few steps off the color it came from.
+     */
     private fun assertNear(
         expected: Int,
         actual: Argb,
@@ -139,7 +141,9 @@ class SeedExtractorTest {
         assertTrue(off <= QUANTIZE_STEP, "expected about $wanted, got $actual")
     }
 
-    /** Brown by HCT, a warm hue with real chroma. */
+    /**
+     * Brown by HCT, a warm hue with real chroma.
+     */
     private fun assertBrown(candidate: Argb) {
         val hct = Hct.fromInt(candidate.value)
         assertTrue(hct.hue in 30.0..90.0 && hct.chroma >= 10.0, "$candidate is not brown")
@@ -152,7 +156,9 @@ class SeedExtractorTest {
         const val BLUE = 0x1E5BD8
         const val GREEN = 0x2E9E4A
 
-        /** Two browns kmpalette's default filter drops, being on the red I line. */
+        /**
+         * Two browns kmpalette's default filter drops, being on the red I line.
+         */
         const val BROWN = 0x8B5A2B
         const val DARK_BROWN = 0x5C3A1E
         val FALLBACK = Argb(0x6750A4)

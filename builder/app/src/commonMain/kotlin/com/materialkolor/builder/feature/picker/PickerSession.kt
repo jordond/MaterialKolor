@@ -19,7 +19,7 @@ import com.materialkolor.builder.feature.workspace.WorkspaceAction
  * the last color once more as a release, which closes that step. Cancel sends back the value the
  * target stored when the session opened, "no override" and the seed's source included, and the
  * step it closes ends where it began, so nothing is left behind. Back, another panel and a swap to
- * another target put the value back the same way, while a switch to another project just drops the
+ * another target put the value back the same way, while a switch to another project drops the
  * session, since that document is gone.
  *
  * It only works out what to send. The caller dispatches the actions it hands back, in order.
@@ -27,7 +27,9 @@ import com.materialkolor.builder.feature.workspace.WorkspaceAction
 internal class PickerSession {
     private var open: Open? = null
 
-    /** What the open session edits, or null when none is open. */
+    /**
+     * What the open session edits, or null when none is open.
+     */
     val target: PickerTarget?
         get() = open?.target
 
@@ -78,7 +80,9 @@ internal class PickerSession {
         return WorkspaceAction.Edit(session.changeTo(argb, fromScreen), EditPhase.Dragging)
     }
 
-    /** Ends the session on the color it shows, as one undo entry, and closes the picker. */
+    /**
+     * Ends the session on the color it shows, as one undo entry, and closes the picker.
+     */
     fun done(): List<WorkspaceAction> {
         val session = open
         open = null
@@ -87,7 +91,9 @@ internal class PickerSession {
         return listOf(release, WorkspaceAction.ClosePanel)
     }
 
-    /** Puts back the value the target had when the session opened and closes the picker. */
+    /**
+     * Puts back the value the target had when the session opened and closes the picker.
+     */
     fun cancel(): List<WorkspaceAction> {
         val restore = open?.restore()
         open = null
@@ -105,10 +111,14 @@ internal class PickerSession {
         val initial: DocumentChange,
         val accent: Accent?,
     ) {
-        /** The last color sent, or null while the session has sent nothing. */
+        /**
+         * The last color sent, or null while the session has sent nothing.
+         */
         var last: Argb? = null
 
-        /** Whether [last] came off the screen. */
+        /**
+         * Whether [last] came off the screen.
+         */
         var fromScreen: Boolean = false
 
         fun changeTo(
@@ -133,7 +143,9 @@ internal class PickerSession {
                 }
             }
 
-        /** The release that puts the stored value back, or null when nothing moved it. */
+        /**
+         * The release that puts the stored value back, or null when nothing moved it.
+         */
         fun restore(): WorkspaceAction.Edit? = last?.let { WorkspaceAction.Edit(initial, EditPhase.Released) }
 
         companion object {
@@ -159,11 +171,15 @@ internal class PickerSession {
     }
 }
 
-/** The accent an accent session holds, which it only opens on once the document has it. */
+/**
+ * The accent an accent session holds, which it only opens on once the document has it.
+ */
 private fun accentOf(accent: Accent?): Accent =
     requireNotNull(accent) { "An accent session opens only on an accent the document has" }
 
-/** Whether [document] has a place for [this] and [capabilities] let it take input. */
+/**
+ * Whether [document] has a place for [this] and [capabilities] let it take input.
+ */
 private fun PickerTarget.takes(
     document: ThemeDocument,
     capabilities: Capabilities,

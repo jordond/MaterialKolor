@@ -30,7 +30,9 @@ import kotlin.test.Test
 
 // b-404a
 
-/** How long the checks give a reveal, well inside the 300 ms it waits on a font at most. */
+/**
+ * How long the checks give a reveal, well inside the 300 ms it waits on a font at most.
+ */
 private const val SHORT_WAIT_MS = 100L
 
 /**
@@ -110,7 +112,9 @@ class WorkspaceRevealTest {
         }
 }
 
-/** A transition over a small host, and a scope to launch its reveals in. */
+/**
+ * A transition over a small host, and a scope to launch its reveals in.
+ */
 private class RevealHost(
     val transition: SkinTransition,
     val scope: CoroutineScope,
@@ -136,7 +140,9 @@ private fun ComposeUiTest.showHost(): RevealHost {
     return checkNotNull(host)
 }
 
-/** Launches the reveal the workspace plays round [change], with [fluentFace] standing in for Selawik. */
+/**
+ * Launches the reveal the workspace plays round [change], with [fluentFace] standing in for Selawik.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.revealOn(
     host: RevealHost,

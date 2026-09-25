@@ -19,13 +19,17 @@ import org.khronos.webgl.toInt8Array
  * starts before its function first suspends, so start them undispatched from the click handler.
  */
 internal object WebFileSaver : FileSaver {
-    /** Whether the share sheet takes a zip and a Kotlin file, the kinds an export makes. */
+    /**
+     * Whether the share sheet takes a zip and a Kotlin file, the kinds an export makes.
+     */
     override val canShareFiles: Boolean = pageCanShareFiles()
 
     override fun canShare(files: List<OutgoingFile>): Boolean =
         pageCanShare(files.map { file -> shareProbe(file.name, file.mime) })
 
-    /** Start a download. Success means the browser took it, since a page never learns where it went. */
+    /**
+     * Start a download. Success means the browser took it, since a page never learns where it went.
+     */
     override suspend fun save(
         name: String,
         bytes: ByteArray,
@@ -44,13 +48,17 @@ internal object WebFileSaver : FileSaver {
 
     // b-310
 
-    /** Asked each time, since a convertible can swap its finger for a mouse while the page is open. */
+    /**
+     * Asked each time, since a convertible can swap its finger for a mouse while the page is open.
+     */
     override val canShareLink: Boolean
         get() = pageCanShareLink()
 
     // b-310
 
-    /** Open the share sheet with the link, or fail when the page has none. A dismissed sheet is success. */
+    /**
+     * Open the share sheet with the link, or fail when the page has none. A dismissed sheet is success.
+     */
     override suspend fun shareLink(
         url: String,
         title: String,

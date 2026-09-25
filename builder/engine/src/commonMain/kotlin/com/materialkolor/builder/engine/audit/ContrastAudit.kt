@@ -44,13 +44,19 @@ public enum class ContrastBadge {
 public enum class AuditReason(
     public val key: String,
 ) {
-    /** Text between 3 and 4.5 to 1, readable only when it is set large. */
+    /**
+     * Text between 3 and 4.5 to 1, readable only when it is set large.
+     */
     TextOnlyLarge(key = "audit_reason_text_only_large"),
 
-    /** Text under 3 to 1, hard to read at any size. */
+    /**
+     * Text under 3 to 1, hard to read at any size.
+     */
     TextUnreadable(key = "audit_reason_text_unreadable"),
 
-    /** A border or other shape under 3 to 1, hard to see against what it sits on. */
+    /**
+     * A border or other shape under 3 to 1, hard to see against what it sits on.
+     */
     ShapeFaint(key = "audit_reason_shape_faint"),
 }
 
@@ -64,19 +70,29 @@ public enum class AuditReason(
 public enum class AuditSuggestion(
     public val key: String,
 ) {
-    /** One of the colors is pinned, so move the pin or clear it. */
+    /**
+     * One of the colors is pinned, so move the pin or clear it.
+     */
     ChangePin(key = "audit_suggest_change_pin"),
 
-    /** An accent's tones sit too close, so pull them apart or raise its threshold. */
+    /**
+     * An accent's tones sit too close, so pull them apart or raise its threshold.
+     */
     MoveAccentTones(key = "audit_suggest_move_accent_tones"),
 
-    /** A Custom slot is cut at a fixed tone, so move that tone. */
+    /**
+     * A Custom slot is cut at a fixed tone, so move that tone.
+     */
     MoveSlotTone(key = "audit_suggest_move_slot_tone"),
 
-    /** Fluent's text colors are fixed, so only a lighter or darker seed moves the fill under them. */
+    /**
+     * Fluent's text colors are fixed, so only a lighter or darker seed moves the fill under them.
+     */
     ChangeSeed(key = "audit_suggest_change_seed"),
 
-    /** The colors come from the scheme, so a higher contrast level pulls them apart. */
+    /**
+     * The colors come from the scheme, so a higher contrast level pulls them apart.
+     */
     RaiseContrast(key = "audit_suggest_raise_contrast"),
 }
 
@@ -103,7 +119,9 @@ public data class AuditRow(
     public val reason: AuditReason?,
     public val suggestion: AuditSuggestion?,
 ) {
-    /** Whether the pair clears 4.5 to 1 as text or 3 to 1 as a shape. */
+    /**
+     * Whether the pair clears 4.5 to 1 as text or 3 to 1 as a shape.
+     */
     public val passes: Boolean
         get() = reason == null
 }
@@ -122,7 +140,9 @@ public data class AuditRow(
 public class ContrastAudit internal constructor(
     public val rows: ImmutableList<AuditRow>,
 ) {
-    /** The rows of the modes [visibleModes] shows. */
+    /**
+     * The rows of the modes [visibleModes] shows.
+     */
     public fun rows(visibleModes: PreviewMode): List<AuditRow> = rows.filter { row -> visibleModes.shows(row.isDark) }
 
     /**
@@ -138,7 +158,9 @@ public class ContrastAudit internal constructor(
             .minBy { row -> row.ratio }
 
     internal companion object {
-        /** Rate every pair of [result]'s target in both modes. */
+        /**
+         * Rate every pair of [result]'s target in both modes.
+         */
         fun from(result: ThemeResult): ContrastAudit {
             val document = result.document
             val pairs = ContrastPairs.forTarget(
@@ -153,7 +175,9 @@ public class ContrastAudit internal constructor(
             )
         }
 
-        /** Rate [pair] in the mode [isDark] picks, the one place a pair's colors are looked up. */
+        /**
+         * Rate [pair] in the mode [isDark] picks, the one place a pair's colors are looked up.
+         */
         internal fun rate(
             result: ThemeResult,
             pair: ContrastPair,
@@ -218,7 +242,9 @@ public class ContrastAudit internal constructor(
         private val ColorRef.isFluent: Boolean
             get() = this is ColorRef.OfFluentText || this is ColorRef.OfFluentShade
 
-        /** The roles the document pins in the mode [isDark] picks. */
+        /**
+         * The roles the document pins in the mode [isDark] picks.
+         */
         private fun ThemeResult.pinnedIn(isDark: Boolean): Set<Role> =
             document.pins.filterValues { pin -> (if (isDark) pin.dark else pin.light) != null }.keys
 
@@ -341,10 +367,14 @@ public fun ThemeResult.rate(
     isDark: Boolean,
 ): AuditRow = ContrastAudit.rate(this, pair, isDark)
 
-/** Fluent's default accent fill in light mode, the `dark1` shade, tone 40 of the primary ramp. */
+/**
+ * Fluent's default accent fill in light mode, the `dark1` shade, tone 40 of the primary ramp.
+ */
 private const val FLUENT_FILL_LIGHT = 40
 
-/** Fluent's default accent fill in dark mode, the `light2` shade, tone 80 of the primary ramp. */
+/**
+ * Fluent's default accent fill in dark mode, the `light2` shade, tone 80 of the primary ramp.
+ */
 private const val FLUENT_FILL_DARK = 80
 
 private const val AAA_TEXT = 7.0

@@ -11,18 +11,28 @@ import androidx.compose.ui.focus.onFocusChanged
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-/** A part of the dashboard that can hold focus while it shows. */
+/**
+ * A part of the dashboard that can hold focus while it shows.
+ */
 internal enum class DashboardArea {
-    /** The order status menu. */
+    /**
+     * The order status menu.
+     */
     StatusMenu,
 
-    /** The navigation under a phone's top bar. */
+    /**
+     * The navigation under a phone's top bar.
+     */
     PhoneNav,
 
-    /** The token side panel, docked or laid over a phone. */
+    /**
+     * The token side panel, docked or laid over a phone.
+     */
     TokenPanel,
 
-    /** The top bar and the page, which the token panel covers on a phone. */
+    /**
+     * The top bar and the page, which the token panel covers on a phone.
+     */
     Main,
 }
 
@@ -37,28 +47,44 @@ internal enum class DashboardArea {
 internal class DashboardFocus(
     private val scope: CoroutineScope,
 ) {
-    /** The order status button. */
+    /**
+     * The order status button.
+     */
     val statusButton: FocusRequester = FocusRequester()
 
-    /** The first pick of the status menu. */
+    /**
+     * The first pick of the status menu.
+     */
     val firstStatus: FocusRequester = FocusRequester()
 
-    /** The Navigation button of a phone's top bar. */
+    /**
+     * The Navigation button of a phone's top bar.
+     */
     val navToggle: FocusRequester = FocusRequester()
 
-    /** The first destination of a phone's navigation. */
+    /**
+     * The first destination of a phone's navigation.
+     */
     val firstDestination: FocusRequester = FocusRequester()
 
-    /** The top bar's button that shows and hides the token panel. */
+    /**
+     * The top bar's button that shows and hides the token panel.
+     */
     val drawerToggle: FocusRequester = FocusRequester()
 
-    /** The token panel's close button. */
+    /**
+     * The token panel's close button.
+     */
     val drawerClose: FocusRequester = FocusRequester()
 
-    /** The open status menu, which the page scrolls to show whole. */
+    /**
+     * The open status menu, which the page scrolls to show whole.
+     */
     val statusMenu: BringIntoViewRequester = BringIntoViewRequester()
 
-    /** The areas of this copy that hold focus. Plain, since nothing draws from it. */
+    /**
+     * The areas of this copy that hold focus. Plain, since nothing draws from it.
+     */
     private val holding = mutableSetOf<DashboardArea>()
 
     fun onFocusChanged(
@@ -68,10 +94,14 @@ internal class DashboardFocus(
         if (hasFocus) holding += area else holding -= area
     }
 
-    /** Whether [area] holds focus. */
+    /**
+     * Whether [area] holds focus.
+     */
     fun holds(area: DashboardArea): Boolean = area in holding
 
-    /** Moves focus to [target] once the next frame has put it in place. */
+    /**
+     * Moves focus to [target] once the next frame has put it in place.
+     */
     fun moveTo(target: FocusRequester) {
         scope.launch {
             withFrameNanos { }
@@ -80,7 +110,9 @@ internal class DashboardFocus(
         }
     }
 
-    /** Hands focus to [toggle] when [area] holds it, before [area] goes and takes it along. */
+    /**
+     * Hands focus to [toggle] when [area] holds it, before [area] goes and takes it along.
+     */
     fun handBack(
         area: DashboardArea,
         toggle: FocusRequester,
@@ -89,7 +121,9 @@ internal class DashboardFocus(
         runCatching { toggle.requestFocus() }
     }
 
-    /** Scrolls the page once the open status menu is laid out, so all of it shows. */
+    /**
+     * Scrolls the page once the open status menu is laid out, so all of it shows.
+     */
     fun revealStatusMenu() {
         scope.launch {
             // The menu composes in the next frame but has no place in the page's list until the one after.
@@ -100,14 +134,18 @@ internal class DashboardFocus(
     }
 }
 
-/** A [DashboardFocus] for this copy of the dashboard. */
+/**
+ * A [DashboardFocus] for this copy of the dashboard.
+ */
 @Composable
 internal fun rememberDashboardFocus(): DashboardFocus {
     val scope = rememberCoroutineScope()
     return remember(scope) { DashboardFocus(scope) }
 }
 
-/** Lets [focus] know whether [area] holds focus. */
+/**
+ * Lets [focus] know whether [area] holds focus.
+ */
 internal fun Modifier.tracksFocus(
     focus: DashboardFocus,
     area: DashboardArea,

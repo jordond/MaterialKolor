@@ -12,12 +12,16 @@ import org.w3c.dom.HTMLElement
  * accessibility tree.
  */
 internal object A11yLiveRegion {
-    /** The id of the region element, so a second install finds the first one. */
+    /**
+     * The id of the region element, so a second install finds the first one.
+     */
     const val ELEMENT_ID = "builder_live_region"
 
     private var pendingFrame: Int? = null
 
-    /** Adds the region to the page if it is not there yet, and returns it. */
+    /**
+     * Adds the region to the page if it is not there yet, and returns it.
+     */
     fun install(): HTMLElement {
         val existing = document.getElementById(ELEMENT_ID) as? HTMLElement
         if (existing != null) return existing
@@ -48,7 +52,9 @@ internal object A11yLiveRegion {
     }
 }
 
-/** Keeps the region out of sight and out of layout without hiding it from assistive tech. */
+/**
+ * Keeps the region out of sight and out of layout without hiding it from assistive tech.
+ */
 private const val VISUALLY_HIDDEN =
     "position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; " +
         "overflow: hidden; clip-path: inset(50%); white-space: nowrap;"

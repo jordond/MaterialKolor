@@ -51,12 +51,16 @@ public class PosterColors private constructor(
     public val sunken: Argb,
     public val outline: Argb,
 ) {
-    /** The page the poster is painted on, the exact seed. */
+    /**
+     * The page the poster is painted on, the exact seed.
+     */
     public val background: Argb
         get() = seed
 
     public companion object {
-        /** Work out the poster for [seed]. */
+        /**
+         * Work out the poster for [seed].
+         */
         public fun of(seed: Argb): PosterColors {
             val ramp = TonalPalette.from(seed.value)
             val page = seed.toColor()
@@ -86,19 +90,25 @@ public class PosterColors private constructor(
             )
         }
 
-        /** [candidate] when it reaches [ratio] on this page, or black or white, whichever reads better. */
+        /**
+         * [candidate] when it reaches [ratio] on this page, or black or white, whichever reads better.
+         */
         private fun Color.readable(
             candidate: Color,
             ratio: Double,
         ): Color = if (candidate.contrastRatio(this) >= ratio) candidate else better(Color.Black, Color.White)
 
-        /** Whichever of [dark] and [light] reads better on this page, [dark] on a tie. */
+        /**
+         * Whichever of [dark] and [light] reads better on this page, [dark] on a tie.
+         */
         private fun Color.better(
             dark: Color,
             light: Color,
         ): Color = if (dark.contrastRatio(this) >= light.contrastRatio(this)) dark else light
 
-        /** [candidate] when [ink] still reads on it, or this page. */
+        /**
+         * [candidate] when [ink] still reads on it, or this page.
+         */
         private fun Color.surface(
             candidate: Color,
             ink: Color,

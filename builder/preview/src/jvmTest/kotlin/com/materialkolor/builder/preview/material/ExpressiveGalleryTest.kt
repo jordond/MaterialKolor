@@ -61,19 +61,27 @@ import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.test.Test
 
-/** Where a recording job would write the screenshots. Nothing is written unless capture is on. */
+/**
+ * Where a recording job would write the screenshots. Nothing is written unless capture is on.
+ */
 private const val ExpressiveScreenshotDir = "src/jvmTest/screenshots/gallery"
 
 private const val ExpressiveSourceDir = "src/commonMain/kotlin/com/materialkolor/builder/preview/material"
 
-/** The sources the Expressive cards are drawn from. */
+/**
+ * The sources the Expressive cards are drawn from.
+ */
 private val ExpressiveSources: List<String> = listOf("ExpressiveGallery.kt", "ExpressiveFeedback.kt")
 
-/** The Expressive cards whose components Material gives no disabled look, or that hold nothing to press. */
+/**
+ * The Expressive cards whose components Material gives no disabled look, or that hold nothing to press.
+ */
 private val ExpressiveNoDisabled: Set<String> =
     setOf("FAB menu", "Material shapes", "Loading indicators", "Wavy progress indicators")
 
-/** Wide enough for four columns and tall enough that every card composes. */
+/**
+ * Wide enough for four columns and tall enough that every card composes.
+ */
 private val ExpressiveWhole: Modifier = Modifier
     .wrapContentSize(Alignment.TopStart, unbounded = true)
     .requiredSize(1280.dp, 9000.dp)
@@ -92,7 +100,9 @@ private val ExpressiveBannedWords: List<String> = listOf(
     "infiniteRepeat",
 )
 
-/** What the Expressive sources may take from the kit, its motion, the folds and the value node names. */
+/**
+ * What the Expressive sources may take from the kit, its motion, the folds and the value node names.
+ */
 private val ExpressiveKitImports: List<String> = listOf(
     "com.materialkolor.builder.kit.motion.",
     "com.materialkolor.builder.kit.control.folded",
@@ -101,7 +111,9 @@ private val ExpressiveKitImports: List<String> = listOf(
     "com.materialkolor.builder.kit.a11y.valueNodeName",
 )
 
-/** What the web mirror hears from each Expressive control as the gallery first shows. */
+/**
+ * What the web mirror hears from each Expressive control as the gallery first shows.
+ */
 private val ExpressiveWebNames: List<String> = listOf(
     "Wi-Fi, checkbox, not checked",
     "Pets, checkbox, not checked, disabled",
@@ -115,7 +127,9 @@ private val ExpressiveWebNames: List<String> = listOf(
     "Gem, radio, not selected",
 )
 
-/** What the web mirror hears from the progress samples, which read their name as text. */
+/**
+ * What the web mirror hears from the progress samples, which read their name as text.
+ */
 private val ExpressiveWebValues: List<String> = listOf(
     "Loading trips, progress bar",
     "Saving, progress bar, 60%",
@@ -359,18 +373,24 @@ class ExpressiveGalleryTest {
     }
 }
 
-/** Presses the node the web mirror hears as [name], and lets the gallery settle. */
+/**
+ * Presses the node the web mirror hears as [name], and lets the gallery settle.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.pressNamed(name: String) {
     onNode(hasContentDescription(name), useUnmergedTree = true).performSemanticsAction(SemanticsActions.OnClick)
     waitForIdle()
 }
 
-/** Every node under this one in the unmerged tree. */
+/**
+ * Every node under this one in the unmerged tree.
+ */
 private fun SemanticsNode.expressiveDescendants(): List<SemanticsNode> =
     children.flatMap { child -> listOf(child) + child.expressiveDescendants() }
 
-/** The frame of the card called [title], the node its title text sits in. */
+/**
+ * The frame of the card called [title], the node its title text sits in.
+ */
 private fun SemanticsNodeInteractionsProvider.expressiveFrame(title: String): SemanticsNode =
     onAllNodes(hasText(title), useUnmergedTree = true)
         .fetchSemanticsNodes()

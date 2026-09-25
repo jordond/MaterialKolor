@@ -95,7 +95,9 @@ class HistoryCapacityTest {
         assertEquals("Theme1", shown.themeName)
     }
 
-    /** A document being edited, the way the builder drives the history. */
+    /**
+     * A document being edited, the way the builder drives the history.
+     */
     private class Session {
         val history = History()
         var document: ThemeDocument = ThemeDocument.Default
@@ -111,7 +113,9 @@ class HistoryCapacityTest {
             document = after
         }
 
-        /** Undo until nothing is left, and say how many steps that took and what showed last. */
+        /**
+         * Undo until nothing is left, and say how many steps that took and what showed last.
+         */
         fun undoAll(): Pair<Int, ThemeDocument> {
             var undone = 0
             while (history.canUndo) {
@@ -122,7 +126,9 @@ class HistoryCapacityTest {
         }
 
         companion object {
-            /** A history holding exactly [History.CAPACITY] steps, from the defaults to "Theme100". */
+            /**
+             * A history holding exactly [History.CAPACITY] steps, from the defaults to "Theme100".
+             */
             fun full(): Session =
                 Session().apply {
                     (1..History.CAPACITY).forEach { step ->
@@ -133,10 +139,14 @@ class HistoryCapacityTest {
     }
 
     private companion object {
-        /** Far enough apart that no two steps fold. */
+        /**
+         * Far enough apart that no two steps fold.
+         */
         const val STEP_MILLIS = 10_000L
 
-        /** Well after the last step [Session.full] records. */
+        /**
+         * Well after the last step [Session.full] records.
+         */
         const val END = (History.CAPACITY + 1) * STEP_MILLIS
     }
 }

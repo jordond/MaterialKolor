@@ -109,7 +109,9 @@ internal fun ContrastDetails(
     }
 }
 
-/** The Contrast label with its info button, and the lowest ratio on the right in line with it. */
+/**
+ * The Contrast label with its info button, and the lowest ratio on the right in line with it.
+ */
 @Composable
 private fun ContrastHeader(context: PosterContext) {
     val spacing = LocalBuilderTokens.current.spacing
@@ -124,14 +126,18 @@ private fun ContrastHeader(context: PosterContext) {
     }
 }
 
-/** The pair behind the lowest ratio, and why the target ignores contrast if it does. */
+/**
+ * The pair behind the lowest ratio, and why the target ignores contrast if it does.
+ */
 @Composable
 private fun ContrastNotes(context: PosterContext) {
     LowestPair(rememberLowestPair(context), context.result.document)
     context.capabilities[Control.Contrast].explanation?.let { reason -> ReasonLine(reason) }
 }
 
-/** The text pair with the lowest ratio in the modes the preview shows. */
+/**
+ * The text pair with the lowest ratio in the modes the preview shows.
+ */
 @Composable
 private fun rememberLowestPair(context: PosterContext): AuditRow =
     remember(context.result, context.visibleModes) { context.result.audit.lowestPair(context.visibleModes) }
@@ -172,7 +178,9 @@ private fun LowestRatio(
     }
 }
 
-/** The pair behind the lowest ratio and the mode it is lowest in, one small line. */
+/**
+ * The pair behind the lowest ratio and the mode it is lowest in, one small line.
+ */
 @Composable
 private fun LowestPair(
     row: AuditRow,
@@ -206,7 +214,9 @@ internal enum class ContrastStop(
     ;
 
     companion object {
-        /** The named level nearest [level], which is [level] itself in any document (D53). */
+        /**
+         * The named level nearest [level], which is [level] itself in any document (D53).
+         */
         fun of(level: ContrastLevel): ContrastStop {
             val nearest = level.snapped()
             return entries.first { stop -> stop.level == nearest }
@@ -214,13 +224,17 @@ internal enum class ContrastStop(
     }
 }
 
-/** A ratio to one decimal, cut rather than rounded so a pair just under a line never reads as on it. */
+/**
+ * A ratio to one decimal, cut rather than rounded so a pair just under a line never reads as on it.
+ */
 internal fun ratioText(ratio: Double): String {
     val tenths = floor(ratio * TENTHS).toInt()
     return "${tenths / TENTHS}.${tenths % TENTHS}"
 }
 
-/** What the readout calls the color [this] names, the way the roles are named in code. */
+/**
+ * What the readout calls the color [this] names, the way the roles are named in code.
+ */
 internal fun ColorRef.readoutName(document: ThemeDocument): String =
     when (this) {
         is ColorRef.OfRole -> {

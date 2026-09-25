@@ -41,7 +41,9 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** The skin's own icons, noting every glyph something draws, once for each time it is drawn. */
+/**
+ * The skin's own icons, noting every glyph something draws, once for each time it is drawn.
+ */
 private class NotedIcons(
     private val icons: BuilderIcons,
     val drawn: MutableList<IconId>,
@@ -77,14 +79,18 @@ private fun ComposeUiTest.showPanel(
     waitForIdle()
 }
 
-/** The row labelled [label] that plays [role]. */
+/**
+ * The row labelled [label] that plays [role].
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.row(
     label: String,
     role: Role,
 ): SemanticsNodeInteraction = onNode(hasText(label) and hasRole(role))
 
-/** Tabs from Before through [rows] one at a time and on to After. */
+/**
+ * Tabs from Before through [rows] one at a time and on to After.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.tabThrough(rows: List<Pair<String, Role>>) {
     onNodeWithTag("before").requestFocus()
@@ -210,5 +216,7 @@ class OpenPanelsTest {
         }
 }
 
-/** The open list, the one node in a select's panel that scrolls down. */
+/**
+ * The open list, the one node in a select's panel that scrolls down.
+ */
 private val OpenList: SemanticsMatcher = SemanticsMatcher.keyIsDefined(SemanticsProperties.VerticalScrollAxisRange)

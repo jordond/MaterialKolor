@@ -35,7 +35,9 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * The 15 `MaterialKolorTokens` with no [Role] behind them have no resolved value and are left out.
  */
 public object UnstyledFrozen {
-    /** Every file the export of [input] writes, in the order a reader would open them. */
+    /**
+     * Every file the export of [input] writes, in the order a reader would open them.
+     */
     public fun files(input: ExportInput): List<GeneratedFile> {
         require(input.target == ExportTarget.Unstyled) {
             "The Unstyled frozen export cannot write a ${input.target} theme"
@@ -45,13 +47,19 @@ public object UnstyledFrozen {
     }
 }
 
-/** The object `Tokens.kt` declares. */
+/**
+ * The object `Tokens.kt` declares.
+ */
 internal const val THEME_TOKENS: String = "ThemeTokens"
 
-/** The property on [THEME_TOKENS] every map is written into. */
+/**
+ * The property on [THEME_TOKENS] every map is written into.
+ */
 internal const val COLORS_PROPERTY: String = "colors"
 
-/** `lightColors` and `darkColors` at the standard contrast, `mediumContrastLightColors` and the like otherwise. */
+/**
+ * `lightColors` and `darkColors` at the standard contrast, `mediumContrastLightColors` and the like otherwise.
+ */
 internal fun colorsName(
     variant: ContrastVariant,
     mode: FrozenMode,
@@ -138,12 +146,16 @@ private fun themeFile(input: ExportInput): GeneratedFile {
     }
 }
 
-/** Every token `ThemeTokens` declares after `colors`, the roles in the domain's order and then the accents. */
+/**
+ * Every token `ThemeTokens` declares after `colors`, the roles in the domain's order and then the accents.
+ */
 private fun tokenNames(input: ExportInput): List<String> =
     Role.entries.map { role -> role.tokenName } +
         input.resolved.accents.flatMap { accent -> accentTokenNames(accent.propertyName) }
 
-/** `ThemeToken<Color>("primary")`, or the same for the property. */
+/**
+ * `ThemeToken<Color>("primary")`, or the same for the property.
+ */
 private fun tokenCall(
     symbol: Symbol,
     name: String,
@@ -153,11 +165,15 @@ private fun tokenCall(
         argument(Literals.string(name))
     }
 
-/** `ThemeTokens.primary`. */
+/**
+ * `ThemeTokens.primary`.
+ */
 private fun token(name: String): Expression = ref(THEME_TOKENS).member(name)
 
 private fun AccentColors.asList(): List<Argb> = listOf(color, onColor, container, onContainer)
 
-/** The token for this role, named as `MaterialKolorTokens` names it, as in `surfaceContainerHigh`. */
+/**
+ * The token for this role, named as `MaterialKolorTokens` names it, as in `surfaceContainerHigh`.
+ */
 internal val Role.tokenName: String
     get() = name.replaceFirstChar { char -> char.lowercaseChar() }

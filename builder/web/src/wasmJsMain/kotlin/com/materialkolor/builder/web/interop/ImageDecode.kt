@@ -64,7 +64,9 @@ internal suspend fun scaleImage(
     maxPixels: Int,
 ): ScaledImage? = startScaling(blob, pixelEdge, thumbnailEdge, detailEdge, maxBytes, maxPixels).await<ScaledImage?>()
 
-/** Copy these ints into Kotlin in one go, through linear memory rather than one call per element. */
+/**
+ * Copy these ints into Kotlin in one go, through linear memory rather than one call per element.
+ */
 internal fun Int32Array.copyToIntArray(): IntArray {
     val size = length
     if (size == 0) return IntArray(0)

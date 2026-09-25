@@ -242,7 +242,9 @@ class ShareCodecCorruptionTest {
         }
     }
 
-    /** [code] with its contrast byte moved onto the nearest named level, or [code] itself when it sits on one. */
+    /**
+     * [code] with its contrast byte moved onto the nearest named level, or [code] itself when it sits on one.
+     */
     private fun snapped(code: String): String {
         val bytes = bytesOf(code)
         val level = ContrastLevel(bytes[CONTRAST_BYTE].toInt()).snapped()
@@ -293,7 +295,9 @@ class ShareCodecCorruptionTest {
     private fun ByteArray.unsignedValues(): IntArray = IntArray(size) { index -> unsigned(index) }
 
     private companion object {
-        /** Where the header keeps the contrast, as a signed byte of hundredths. */
+        /**
+         * Where the header keeps the contrast, as a signed byte of hundredths.
+         */
         const val CONTRAST_BYTE = 6
 
         val RETIRED_SLOT_CODES: List<Int> = (18..29) + (41..45)

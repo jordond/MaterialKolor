@@ -27,7 +27,9 @@ class ShareVectorsTest {
         assertTrue(vectors.any { vector -> vector.code.length == 12 })
     }
 
-    /** A vector with a contrast between the named levels, such as -37, opens at the nearest one (D53). */
+    /**
+     * A vector with a contrast between the named levels, such as -37, opens at the nearest one (D53).
+     */
     @Test
     fun shareVectors_everyCode_decodesToItsDocument() {
         vectors.forEach { vector ->

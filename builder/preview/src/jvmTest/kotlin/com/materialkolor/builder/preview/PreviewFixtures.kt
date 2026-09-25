@@ -14,21 +14,29 @@ import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.preview.split.PaneSpec
 
-/** Every library a pane can wear, Material 3 once per flavour. */
+/**
+ * Every library a pane can wear, Material 3 once per flavour.
+ */
 internal val PaneSkins: List<Skin> =
     Library.entries.map { library -> Skin(library, expressive = false) } + Skin(Library.Material3, expressive = true)
 
-/** A blue document for the preview, far from the chrome's red. */
+/**
+ * A blue document for the preview, far from the chrome's red.
+ */
 internal val PreviewResult: ThemeResult = ThemeResolver().resolve(ThemeDocument(seed = Argb(0x1E88E5)))
 
-/** A red document for the builder's own chrome. */
+/**
+ * A red document for the builder's own chrome.
+ */
 internal val ChromeResult: ThemeResult = ThemeResolver().resolve(ThemeDocument(seed = Argb(0xFF0000)))
 
 internal val LightSpec: PaneSpec = PaneSpec(PreviewResult, isDark = false, label = "Light")
 
 internal val DarkSpec: PaneSpec = PaneSpec(PreviewResult, isDark = true, label = "Dark")
 
-/** A desktop window with a mouse, the space the chrome sits in unless a test picks another. */
+/**
+ * A desktop window with a mouse, the space the chrome sits in unless a test picks another.
+ */
 internal val DesktopLayout: LayoutInfo = LayoutInfo(1280.dp, 800.dp)
 
 /**

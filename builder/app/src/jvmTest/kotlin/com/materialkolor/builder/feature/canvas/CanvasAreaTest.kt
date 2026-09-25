@@ -23,7 +23,9 @@ import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** A Medium window, where a Desktop screen shrinks past 0.6 and a Tablet one does not. */
+/**
+ * A Medium window, where a Desktop screen shrinks past 0.6 and a Tablet one does not.
+ */
 private const val MEDIUM = 700
 
 @OptIn(ExperimentalTestApi::class)
@@ -178,5 +180,7 @@ class CanvasAreaTest {
         }
 }
 
-/** What the Trips app says once the Past filter is on, there being no past trips. */
+/**
+ * What the Trips app says once the Past filter is on, there being no past trips.
+ */
 private const val NO_PAST_TRIPS = "No past trips yet"

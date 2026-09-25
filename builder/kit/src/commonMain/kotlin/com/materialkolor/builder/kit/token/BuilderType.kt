@@ -60,7 +60,9 @@ public fun brandFontFamily(): FontFamily =
         Font(Res.font.BricolageGrotesque_Variable, FontWeight.ExtraBold),
     )
 
-/** The mono face, a Latin subset of JetBrains Mono with its weight axis live. */
+/**
+ * The mono face, a Latin subset of JetBrains Mono with its weight axis live.
+ */
 @Composable
 public fun monoFontFamily(): FontFamily =
     FontFamily(
@@ -144,7 +146,9 @@ internal fun builderType(
         ),
     )
 
-/** The builder's type for the surrounding tree. Every skin provides the same value. */
+/**
+ * The builder's type for the surrounding tree. Every skin provides the same value.
+ */
 public val LocalBuilderType: ProvidableCompositionLocal<BuilderType> = staticCompositionLocalOf {
     error("No BuilderType provided")
 }

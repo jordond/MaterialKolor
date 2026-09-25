@@ -61,7 +61,9 @@ internal fun percentEncode(text: String): String =
         }
     }
 
-/** Whether the byte [this] stands for itself in a URL, RFC 3986's unreserved set. */
+/**
+ * Whether the byte [this] stands for itself in a URL, RFC 3986's unreserved set.
+ */
 private fun Int.isUnreserved(): Boolean =
     this in 'A'.code..'Z'.code ||
         this in 'a'.code..'z'.code ||

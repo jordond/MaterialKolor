@@ -25,7 +25,9 @@ public class Symbol(
         require(simpleName.isNotBlank()) { "A symbol needs a simple name" }
     }
 
-    /** The full name, which is also the import path when this symbol is worth importing. */
+    /**
+     * The full name, which is also the import path when this symbol is worth importing.
+     */
     public val qualifiedName: String
         get() = if (packageName.isEmpty()) simpleName else "$packageName.$simpleName"
 
@@ -71,7 +73,9 @@ public class Symbol(
             "kotlin.text",
         )
 
-        /** A symbol read off a fully qualified name, which keeps call sites short. */
+        /**
+         * A symbol read off a fully qualified name, which keeps call sites short.
+         */
         public fun of(
             qualifiedName: String,
             kind: SymbolKind,
@@ -85,7 +89,9 @@ public class Symbol(
             )
         }
 
-        /** A name that is declared in the file being generated, so it never imports. */
+        /**
+         * A name that is declared in the file being generated, so it never imports.
+         */
         public fun local(
             simpleName: String,
             kind: SymbolKind,

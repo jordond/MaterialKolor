@@ -44,12 +44,16 @@ import kotlin.test.assertNotNull
 
 private const val SheetTag = "controls-a"
 
-/** Where the recording job writes the baselines. Nothing is written unless a Roborazzi task turns capture on. */
+/**
+ * Where the recording job writes the baselines. Nothing is written unless a Roborazzi task turns capture on.
+ */
 private const val ScreenshotDir = "src/jvmTest/screenshots/controls-a"
 
 private val SheetLayout = LayoutInfo.of(widthDp = 1280.dp, heightDp = 800.dp)
 
-/** A phone, where every pressable control grows to a 48 dp footprint. */
+/**
+ * A phone, where every pressable control grows to a 48 dp footprint.
+ */
 private val CompactLayout = LayoutInfo.of(widthDp = 400.dp, heightDp = 800.dp)
 
 @OptIn(ExperimentalTestApi::class)
@@ -131,7 +135,9 @@ private fun ComposeUiTest.checkSheets(
     unreadable.shouldBeEmpty()
 }
 
-/** Every control of the batch, enabled first and then the same controls disabled below them. */
+/**
+ * Every control of the batch, enabled first and then the same controls disabled below them.
+ */
 @Composable
 private fun ControlSheet() {
     val tokens = LocalBuilderTokens.current
@@ -219,7 +225,9 @@ private fun ControlSheet() {
     }
 }
 
-/** The pressable controls on a phone, the Share button focused so the sheet shows where the ring sits. */
+/**
+ * The pressable controls on a phone, the Share button focused so the sheet shows where the ring sits.
+ */
 @Composable
 private fun CompactSheet() {
     val tokens = LocalBuilderTokens.current

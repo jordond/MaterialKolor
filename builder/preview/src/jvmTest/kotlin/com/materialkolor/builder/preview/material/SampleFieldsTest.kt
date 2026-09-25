@@ -30,7 +30,9 @@ private const val SampleTag = "sample"
 
 // b-228c
 
-/** Past the focus animations of the label and the indicator, and inside the caret's first blink. */
+/**
+ * Past the focus animations of the label and the indicator, and inside the caret's first blink.
+ */
 private const val FocusSettleMillis = 300L
 
 /**
@@ -118,7 +120,9 @@ class SampleFieldsTest {
         actual.buffer.contentEquals(expected.buffer) shouldBe true
     }
 
-    /** The pixels of the field tagged [tag], focused first when [focused]. */
+    /**
+     * The pixels of the field tagged [tag], focused first when [focused].
+     */
     private fun ComposeUiTest.pixelsOf(
         tag: String,
         focused: Boolean,
@@ -131,5 +135,7 @@ class SampleFieldsTest {
     }
 }
 
-/** Enabled and unfocused, enabled and focused, and disabled, as pairs of enabled and focused. */
+/**
+ * Enabled and unfocused, enabled and focused, and disabled, as pairs of enabled and focused.
+ */
 private val FieldStates: List<Pair<Boolean, Boolean>> = listOf(true to false, true to true, false to false)

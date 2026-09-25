@@ -35,7 +35,9 @@ private const val EYEDROPPER = "Pick a color from the image"
 
 @OptIn(ExperimentalTestApi::class)
 class PresetPickerTest {
-    /** A theme with something in every part a preset or a starter must leave alone. */
+    /**
+     * A theme with something in every part a preset or a starter must leave alone.
+     */
     private val busy = ThemeDocument(
         seed = Argb(0xFF00897B.toInt()),
         keyColors = KeyColors().with(KeyColor.Tertiary, Argb(0xFFFFB300.toInt())),
@@ -192,7 +194,9 @@ class PresetPickerTest {
         showSection(harness) { context, dispatcher -> ImageMenuButton(context, dispatcher) }
     }
 
-    /** Opens the picker from the Image menu and chooses the card named [name]. */
+    /**
+     * Opens the picker from the Image menu and chooses the card named [name].
+     */
     private fun ComposeUiTest.choose(name: String) {
         openPresets()
         onNodeWithText(name).performScrollTo().performClick()

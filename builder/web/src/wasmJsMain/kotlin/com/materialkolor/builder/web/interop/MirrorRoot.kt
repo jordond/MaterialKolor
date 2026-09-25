@@ -21,7 +21,9 @@ import kotlin.js.ExperimentalWasmJsInterop
  * and nothing watches the attribute afterwards.
  */
 internal object MirrorRoot {
-    /** The id CMP gives the mirror's root element. */
+    /**
+     * The id CMP gives the mirror's root element.
+     */
     const val ELEMENT_ID = "cmp_a11y_root"
 
     private val liveAttributes = listOf("aria-live", "aria-relevant", "aria-atomic")
@@ -42,7 +44,9 @@ internal object MirrorRoot {
         }.observe(viewport, subtreeChanges())
     }
 
-    /** Removes the live region attributes from the mirror root under [viewport], if it exists yet. */
+    /**
+     * Removes the live region attributes from the mirror root under [viewport], if it exists yet.
+     */
     private fun scrub(viewport: Element): Boolean {
         val root = viewport.findMirrorRoot() ?: return false
         liveAttributes.forEach { name -> root.removeAttribute(name) }
@@ -58,7 +62,9 @@ internal object MirrorRoot {
                 .asList()
                 .firstNotNullOfOrNull { node -> (node as? Element)?.shadowRoot?.getElementById(ELEMENT_ID) }
 
-    /** Whether any of these records put an element straight under [parent]. */
+    /**
+     * Whether any of these records put an element straight under [parent].
+     */
     private fun JsArray<MutationRecord>.addsChildTo(parent: Node): Boolean =
         (0 until length)
             .mapNotNull { index -> get(index) }

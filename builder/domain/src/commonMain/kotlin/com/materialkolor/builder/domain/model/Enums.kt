@@ -12,15 +12,21 @@ import kotlinx.serialization.Serializable
 public enum class SpecVersion(
     override val code: Int,
 ) : CodedEnum {
-    /** The original Material 3 spec. */
+    /**
+     * The original Material 3 spec.
+     */
     @SerialName("Spec2021")
     Spec2021(code = 0),
 
-    /** The 2025 expressive revision. */
+    /**
+     * The 2025 expressive revision.
+     */
     @SerialName("Spec2025")
     Spec2025(code = 1),
 
-    /** The 2026 revision, the one the color, material and finish style belongs to. */
+    /**
+     * The 2026 revision, the one the color, material and finish style belongs to.
+     */
     @SerialName("Spec2026")
     Spec2026(code = 2),
 }
@@ -34,11 +40,15 @@ public enum class SpecVersion(
 public enum class SchemePlatform(
     override val code: Int,
 ) : CodedEnum {
-    /** The everyday platform, what every scheme uses until someone asks otherwise. */
+    /**
+     * The everyday platform, what every scheme uses until someone asks otherwise.
+     */
     @SerialName("Phone")
     Phone(code = 0),
 
-    /** Higher contrast throughout, for a small always on display. */
+    /**
+     * Higher contrast throughout, for a small always on display.
+     */
     @SerialName("Watch")
     Watch(code = 1),
 }
@@ -52,19 +62,27 @@ public enum class SchemePlatform(
 public enum class Library(
     override val code: Int,
 ) : CodedEnum {
-    /** A Compose Material 3 `ColorScheme`. */
+    /**
+     * A Compose Material 3 `ColorScheme`.
+     */
     @SerialName("Material3")
     Material3(code = 0),
 
-    /** The plain color holder, for apps that bring their own design system. */
+    /**
+     * The plain color holder, for apps that bring their own design system.
+     */
     @SerialName("Unstyled")
     Unstyled(code = 1),
 
-    /** A Fluent color set. */
+    /**
+     * A Fluent color set.
+     */
     @SerialName("Fluent")
     Fluent(code = 2),
 
-    /** A hand shaped set of slots, the target with the most room in it. */
+    /**
+     * A hand shaped set of slots, the target with the most room in it.
+     */
     @SerialName("Custom")
     Custom(code = 3),
 }
@@ -78,11 +96,15 @@ public enum class Library(
 public enum class MotionSchemeChoice(
     override val code: Int,
 ) : CodedEnum {
-    /** Restrained springs, the calmer of the two. */
+    /**
+     * Restrained springs, the calmer of the two.
+     */
     @SerialName("Standard")
     Standard(code = 0),
 
-    /** Livelier springs, the default the expressive spec asks for. */
+    /**
+     * Livelier springs, the default the expressive spec asks for.
+     */
     @SerialName("Expressive")
     Expressive(code = 1),
 }

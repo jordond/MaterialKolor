@@ -78,19 +78,25 @@ private fun ComposeUiTest.showFocusOnlyGroups(
     waitForIdle()
 }
 
-/** The option labelled [label], by its radio role so the group's own text never matches. */
+/**
+ * The option labelled [label], by its radio role so the group's own text never matches.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.option(label: String): SemanticsNodeInteraction =
     onNode(hasText(label) and hasRole(Role.RadioButton))
 
-/** Presses [key] on whatever has focus and lets the focus land. */
+/**
+ * Presses [key] on whatever has focus and lets the focus land.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.pressOnFocused(key: Key) {
     onNode(isFocused()).performKeyInput { pressKey(key) }
     waitForIdle()
 }
 
-/** Presses Shift+Tab on whatever has focus and lets the focus land. */
+/**
+ * Presses Shift+Tab on whatever has focus and lets the focus land.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.shiftTabOnFocused() {
     onNode(isFocused()).performKeyInput { withKeyDown(Key.ShiftLeft) { pressKey(Key.Tab) } }

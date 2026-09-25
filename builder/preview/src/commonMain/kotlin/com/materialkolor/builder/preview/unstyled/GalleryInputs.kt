@@ -199,7 +199,9 @@ internal fun Checkboxes(state: DemoAppState) {
     }
 }
 
-/** A box that is ticked or not, with its label beside it, a toggle whose name carries its state onto the web. */
+/**
+ * A box that is ticked or not, with its label beside it, a toggle whose name carries its state onto the web.
+ */
 @Composable
 private fun GalleryCheckbox(
     label: String,

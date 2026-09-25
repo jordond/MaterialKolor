@@ -66,11 +66,15 @@ import kotlin.math.roundToInt
 // Selection ones with GallerySelection.kt and the rest with GalleryPanels.kt. Everything a sample
 // remembers lives in DemoAppState under a "gallery.fluent." key, so both copies of a split agree.
 
-/** The stops on the slider, 0 to 10. */
+/**
+ * The stops on the slider, 0 to 10.
+ */
 private const val SliderStops = 11
 private const val SliderTop = SliderStops - 1
 
-/** The slider's thumb, its ring included, and the dot inside it at rest, under a pointer and pressed. */
+/**
+ * The slider's thumb, its ring included, and the dot inside it at rest, under a pointer and pressed.
+ */
 private val ThumbSize = 22.dp
 private val ThumbDot = 12.dp
 private val ThumbDotHovered = 14.dp
@@ -109,7 +113,9 @@ internal fun SubtleButtons() {
     }
 }
 
-/** A standard icon button and two subtle ones, a row of them enabled and a row disabled. */
+/**
+ * A standard icon button and two subtle ones, a row of them enabled and a row disabled.
+ */
 @Composable
 internal fun IconButtons() {
     GalleryColumn {
@@ -303,7 +309,9 @@ private fun GallerySlider(
     }
 }
 
-/** Fluent's thumb, a ring round an accent dot that grows under a pointer, with no value tip. */
+/**
+ * Fluent's thumb, a ring round an accent dot that grows under a pointer, with no value tip.
+ */
 @Composable
 private fun SliderThumb(
     slider: SliderState,

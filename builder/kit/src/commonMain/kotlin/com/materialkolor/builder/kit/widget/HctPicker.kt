@@ -63,7 +63,9 @@ public fun HctPicker(
     HctPicker(value, onChange, modifier, onBodyComposed = null)
 }
 
-/** [HctPicker], with [onBodyComposed] called each time the picker's body composes. */
+/**
+ * [HctPicker], with [onBodyComposed] called each time the picker's body composes.
+ */
 @Composable
 internal fun HctPicker(
     value: Argb,
@@ -97,13 +99,17 @@ internal class PickerState(
     var tone: Double by mutableDoubleStateOf(0.0)
         private set
 
-    /** The color the three channels make. */
+    /**
+     * The color the three channels make.
+     */
     var color: Argb by mutableStateOf(initial)
         private set
 
     private var reachedChroma: Double by mutableDoubleStateOf(0.0)
 
-    /** The last value the caller handed in. */
+    /**
+     * The last value the caller handed in.
+     */
     private var seen: Argb = initial
 
     private var dragging: Boolean = false
@@ -114,7 +120,9 @@ internal class PickerState(
         adopt(initial)
     }
 
-    /** Where [channel] stands, with chroma as the color has it rather than as it was asked for. */
+    /**
+     * Where [channel] stands, with chroma as the color has it rather than as it was asked for.
+     */
     fun valueOf(channel: HctChannel): Double =
         when (channel) {
             HctChannel.Hue -> hue
@@ -128,7 +136,9 @@ internal class PickerState(
      */
     fun shownOf(channel: HctChannel): Int = shown[channel.ordinal].value
 
-    /** Starts over from a new [value] from outside, unless it is the color the picker already made. */
+    /**
+     * Starts over from a new [value] from outside, unless it is the color the picker already made.
+     */
     fun follow(value: Argb) {
         if (value == seen) return
         seen = value
@@ -158,7 +168,9 @@ internal class PickerState(
         return emit(Argb(made.toInt()), phase)
     }
 
-    /** Takes a typed [argb] and reports it as [EditPhase.Discrete] when it changes the color. */
+    /**
+     * Takes a typed [argb] and reports it as [EditPhase.Discrete] when it changes the color.
+     */
     fun type(argb: Argb) {
         if (argb == color) return
         adopt(argb)
@@ -169,7 +181,9 @@ internal class PickerState(
         dragging = true
     }
 
-    /** Ends a drag, reporting [EditPhase.Released] with the color it ended on when [released]. */
+    /**
+     * Ends a drag, reporting [EditPhase.Released] with the color it ended on when [released].
+     */
     fun endDrag(released: Boolean) {
         dragging = false
         if (released) report.value(color, EditPhase.Released)
@@ -213,7 +227,9 @@ private fun PickerBody(
     }
 }
 
-/** A track with its value beside it as a field, so the value can be typed as well as dragged. */
+/**
+ * A track with its value beside it as a field, so the value can be typed as well as dragged.
+ */
 @Composable
 private fun TrackRow(
     picker: PickerState,
@@ -253,5 +269,7 @@ private fun HctChannel.nameResource(): StringResource =
         HctChannel.Tone -> Res.string.picker_tone
     }
 
-/** A track's value field is three section gaps wide, room for "360" and the field's padding. */
+/**
+ * A track's value field is three section gaps wide, room for "360" and the field's padding.
+ */
 private const val TrackFieldWidthInSections: Int = 3

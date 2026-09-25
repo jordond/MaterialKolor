@@ -74,7 +74,9 @@ private const val SeedHex = "#6750A4"
  */
 private const val ScreenshotDir = "src/jvmTest/screenshots/skin-themes"
 
-/** A reduced contrast document with a pinned primary, the worst case for the chrome floor. */
+/**
+ * A reduced contrast document with a pinned primary, the worst case for the chrome floor.
+ */
 private val Document = ThemeDocument(
     seed = Argb(0x6750A4),
     contrast = ContrastLevel.Reduced,
@@ -156,7 +158,9 @@ class SkinThemesScreenshotTest {
         }
 }
 
-/** What one sheet saw of its skin. */
+/**
+ * What one sheet saw of its skin.
+ */
 private class Seen(
     val skin: Skin,
     val tokens: BuilderTokens,
@@ -230,7 +234,9 @@ private fun ComposeUiTest.checkSheets(
     unreadable.shouldBeEmpty()
 }
 
-/** Every token, every text style and every icon of the surrounding skin on one panel. */
+/**
+ * Every token, every text style and every icon of the surrounding skin on one panel.
+ */
 @Composable
 private fun TokenSheet() {
     val tokens = LocalBuilderTokens.current

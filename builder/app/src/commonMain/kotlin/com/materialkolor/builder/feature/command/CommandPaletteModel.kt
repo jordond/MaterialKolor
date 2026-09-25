@@ -33,22 +33,30 @@ internal class CommandPaletteModel : StateViewModel<CommandPaletteModel.State>(S
         val recents: List<String> = emptyList(),
     )
 
-    /** The field's draft changed to [text]. */
+    /**
+     * The field's draft changed to [text].
+     */
     fun type(text: String) {
         updateState { state -> state.copy(query = text) }
     }
 
-    /** The field committed [text]. */
+    /**
+     * The field committed [text].
+     */
     fun commit(text: String) {
         updateState { state -> state.copy(query = text, committed = text) }
     }
 
-    /** Empty the search, for Esc and for the next time the palette opens. */
+    /**
+     * Empty the search, for Esc and for the next time the palette opens.
+     */
     fun clear() {
         updateState { state -> state.copy(query = "", committed = "") }
     }
 
-    /** The command [id] ran, so it leads the next empty search. */
+    /**
+     * The command [id] ran, so it leads the next empty search.
+     */
     fun ran(id: String) {
         updateState { state -> state.copy(recents = (listOf(id) + (state.recents - id)).take(MAX_RECENTS)) }
     }
@@ -143,7 +151,9 @@ internal fun paletteGroups(
     return lead + rest.groupBy { entry -> entry.category }.map { (title, entries) -> PaletteGroup(title, entries) }
 }
 
-/** How well [query] matches [entry], the label counting most, or null when it does not. */
+/**
+ * How well [query] matches [entry], the label counting most, or null when it does not.
+ */
 private fun matchScore(
     query: String,
     entry: PaletteEntry,
@@ -189,7 +199,9 @@ internal fun fuzzyScore(
     return best.max().takeIf { score -> score != NONE }
 }
 
-/** What a letter matched at [index] of [text] scores, more at the start of a word. */
+/**
+ * What a letter matched at [index] of [text] scores, more at the start of a word.
+ */
 private fun letterScore(
     text: String,
     index: Int,

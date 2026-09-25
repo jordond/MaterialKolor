@@ -99,7 +99,9 @@ class GamutTrackTest {
     }
 }
 
-/** The most chroma any ask from zero to the ceiling comes back with, in half unit steps. */
+/**
+ * The most chroma any ask from zero to the ceiling comes back with, in half unit steps.
+ */
 private fun pickerBruteMaxChroma(
     hue: Double,
     tone: Double,

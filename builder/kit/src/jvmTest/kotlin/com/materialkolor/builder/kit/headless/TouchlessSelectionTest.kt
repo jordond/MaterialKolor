@@ -45,7 +45,9 @@ import kotlin.test.Test
 
 // b-228aa
 
-/** The key held with A and C, Command on a Mac and Control everywhere else, as the desktop reads it. */
+/**
+ * The key held with A and C, Command on a Mac and Control everywhere else, as the desktop reads it.
+ */
 private val ShortcutKey: Key =
     if (System.getProperty("os.name").orEmpty().startsWith("Mac")) Key.MetaLeft else Key.CtrlLeft
 
@@ -131,7 +133,9 @@ class TouchlessSelectionTest {
         }
 }
 
-/** A code view in [skin] with overlays in the page, copying to [clipboard]. */
+/**
+ * A code view in [skin] with overlays in the page, copying to [clipboard].
+ */
 @Composable
 private fun Host(
     skin: Skin,
@@ -146,7 +150,9 @@ private fun Host(
     }
 }
 
-/** Two lines of selectable text in [skin] on a touch screen, with overlays in the page. */
+/**
+ * Two lines of selectable text in [skin] on a touch screen, with overlays in the page.
+ */
 @Composable
 private fun LinesHost(skin: Skin) {
     CompositionLocalProvider(LocalOverlaysInTree provides true) {
@@ -160,7 +166,9 @@ private const val LinesTag = "lines"
 
 private const val Lines = "val primary = Color(0xFF6750A4)\nval onPrimary = Color(0xFFFFFFFF)"
 
-/** A clipboard that keeps the last text written to it. */
+/**
+ * A clipboard that keeps the last text written to it.
+ */
 private class CopiedText : Clipboard {
     var text: String? = null
 

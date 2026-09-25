@@ -143,18 +143,26 @@ internal fun rememberPosterContext(state: WorkspaceModel.State): PosterContext {
  */
 @Stable
 internal class PosterFocus {
-    /** The Projects button, in the header or on the rail, whichever the poster shows. */
+    /**
+     * The Projects button, in the header or on the rail, whichever the poster shows.
+     */
     val projects: PanelTrigger = PanelTrigger()
 
-    /** The explainer line's Why button. */
+    /**
+     * The explainer line's Why button.
+     */
     val why: PanelTrigger = PanelTrigger()
 
     // b-306c
 
-    /** The hero's Copy hex button, which a refused copy's manual copy dialog hands focus back to. */
+    /**
+     * The hero's Copy hex button, which a refused copy's manual copy dialog hands focus back to.
+     */
     val copyHex: PanelTrigger = PanelTrigger()
 
-    /** The hero's Copy Kotlin button, which a refused copy's manual copy dialog hands focus back to. */
+    /**
+     * The hero's Copy Kotlin button, which a refused copy's manual copy dialog hands focus back to.
+     */
     val copyKotlin: PanelTrigger = PanelTrigger()
 
     /**
@@ -189,7 +197,9 @@ internal fun PosterFocus.shareReturn(
     return if (opener.fromProjects) projects.returnFocusTo else shareButton
 }
 
-/** Whether the share dialog replaced the projects drawer, worked out from the panels seen in turn. */
+/**
+ * Whether the share dialog replaced the projects drawer, worked out from the panels seen in turn.
+ */
 @Stable
 private class ShareOpener {
     var fromProjects by mutableStateOf(false)
@@ -197,7 +207,9 @@ private class ShareOpener {
 
     private var last: Panel? = null
 
-    /** Takes in the panel a frame showed. Only the move onto Share changes the answer. */
+    /**
+     * Takes in the panel a frame showed. Only the move onto Share changes the answer.
+     */
     fun saw(panel: Panel?) {
         if (panel == Panel.Share && last != Panel.Share) fromProjects = last == Panel.Projects
         last = panel
@@ -212,15 +224,21 @@ private class ShareOpener {
 internal class PanelTrigger {
     internal val requester = FocusRequester()
 
-    /** How many buttons stand for this trigger, more than one while the rail and the poster swap. */
+    /**
+     * How many buttons stand for this trigger, more than one while the rail and the poster swap.
+     */
     internal var buttons by mutableIntStateOf(0)
 
-    /** Where the panel hands focus back, or null while no button stands for it. */
+    /**
+     * Where the panel hands focus back, or null while no button stands for it.
+     */
     val returnFocusTo: FocusRequester?
         get() = requester.takeIf { buttons > 0 }
 }
 
-/** The modifier for [trigger]'s button, which counts it as on screen while it is composed. */
+/**
+ * The modifier for [trigger]'s button, which counts it as on screen while it is composed.
+ */
 @Composable
 internal fun triggerFocus(trigger: PanelTrigger?): Modifier {
     if (trigger == null) return Modifier

@@ -97,19 +97,25 @@ internal class AppModel(
 
     // b-314b
 
-    /** Put the boot notice away for the rest of the session. */
+    /**
+     * Put the boot notice away for the rest of the session.
+     */
     fun dismissBootNotice() {
         updateState { state -> state.copy(bootNotice = null) }
     }
 
-    /** Close the banner about a browser that keeps nothing, for the rest of the session. */
+    /**
+     * Close the banner about a browser that keeps nothing, for the rest of the session.
+     */
     fun dismissStorageUnavailable() {
         updateState { state -> state.copy(storageUnavailableDismissed = true) }
     }
 
     // b-314ba
 
-    /** Put the banner about a newer build's data away for the rest of the session. */
+    /**
+     * Put the banner about a newer build's data away for the rest of the session.
+     */
     fun dismissNewerData() {
         updateState { state -> state.copy(newerDataDismissed = true) }
     }
@@ -123,12 +129,16 @@ internal class AppModel(
         environment.reload(pathOf(router.initial))
     }
 
-    /** Load the builder again at `/`, so a newer build picks up the data it saved here (D41). */
+    /**
+     * Load the builder again at `/`, so a newer build picks up the data it saved here (D41).
+     */
     fun reloadHome() {
         environment.reload(HOME_PATH)
     }
 
-    /** Write whatever is waiting to be saved, when the app goes to the background or the page hides. */
+    /**
+     * Write whatever is waiting to be saved, when the app goes to the background or the page hides.
+     */
     fun flush() {
         session.flush()
     }
@@ -166,7 +176,9 @@ internal class AppModel(
         val canReload: Boolean = false,
         val newerDataDismissed: Boolean = false,
     ) {
-        /** Whether the chrome is dark, following the system live when [appearance] says so. */
+        /**
+         * Whether the chrome is dark, following the system live when [appearance] says so.
+         */
         val isDark: Boolean
             get() = when (appearance) {
                 Appearance.System -> systemDark
@@ -174,7 +186,9 @@ internal class AppModel(
                 Appearance.Dark -> true
             }
 
-        /** Whether the chrome keeps motion to a minimum, the system's wish unless [motion] overrides it. */
+        /**
+         * Whether the chrome keeps motion to a minimum, the system's wish unless [motion] overrides it.
+         */
         val reducedMotion: Boolean
             get() = when (motion) {
                 MotionOverride.System -> systemReducedMotion
@@ -200,7 +214,9 @@ private fun storageFullAfter(
         is SaveStatus.Failed -> status.error == StoreError.QuotaExceeded
     }
 
-/** The path [route] was read from, a link's own `/t/` path or `/` for anything else. */
+/**
+ * The path [route] was read from, a link's own `/t/` path or `/` for anything else.
+ */
 private fun pathOf(route: Route): String =
     when (route) {
         is Route.Theme -> THEME_PATH_PREFIX + route.code
@@ -210,5 +226,7 @@ private fun pathOf(route: Route): String =
 private const val HOME_PATH = "/"
 private const val THEME_PATH_PREFIX = "/t/"
 
-/** The skin [document] is edited in, its own library and flavor. */
+/**
+ * The skin [document] is edited in, its own library and flavor.
+ */
 internal fun skinOf(document: ThemeDocument): Skin = Skin(library = document.library, expressive = document.expressive)

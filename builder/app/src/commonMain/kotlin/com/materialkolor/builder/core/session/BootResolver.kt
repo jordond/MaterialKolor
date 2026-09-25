@@ -127,7 +127,9 @@ internal object BootResolver {
         return if (local != null) BootStart.Reopen(local.id) else BootStart.Shared(code, document, projectName)
     }
 
-    /** The share code of [document] without a project name, or null when it has too much to share. */
+    /**
+     * The share code of [document] without a project name, or null when it has too much to share.
+     */
     private fun codeOf(document: ThemeDocument): String? =
         try {
             ShareCodec.encode(document)
@@ -140,10 +142,14 @@ internal object BootResolver {
  * What boot read about the saved projects before it resolved the address.
  */
 internal sealed interface SavedProjects {
-    /** Every project the drawer lists, in drawer order. */
+    /**
+     * Every project the drawer lists, in drawer order.
+     */
     val ids: List<String>
 
-    /** Only the drawer's index, for an address that cannot match a saved project by its theme. */
+    /**
+     * Only the drawer's index, for an address that cannot match a saved project by its theme.
+     */
     data class Listed(
         override val ids: List<String>,
     ) : SavedProjects
@@ -161,13 +167,17 @@ internal sealed interface SavedProjects {
     }
 }
 
-/** What boot needs about the saved projects for [route], the index alone unless it is a link. */
+/**
+ * What boot needs about the saved projects for [route], the index alone unless it is a link.
+ */
 internal suspend fun ProjectRepository.savedProjects(route: Route): SavedProjects {
     if (!BootResolver.readsRecords(route)) return SavedProjects.Listed(listedIds())
     return SavedProjects.Read(listedRecords())
 }
 
-/** Every listed project that could be read, in drawer order, for matching a link. */
+/**
+ * Every listed project that could be read, in drawer order, for matching a link.
+ */
 internal suspend fun ProjectRepository.listedRecords(): List<ProjectRecord> = listedIds().mapNotNull { id -> load(id) }
 
 private suspend fun ProjectRepository.listedIds(): List<String> =
@@ -195,7 +205,9 @@ internal data class BootPlan(
  * The project boot opens.
  */
 internal sealed interface BootStart {
-    /** The saved project [id]. */
+    /**
+     * The saved project [id].
+     */
     data class Reopen(
         val id: String,
     ) : BootStart
@@ -213,7 +225,9 @@ internal sealed interface BootStart {
         val projectName: String?,
     ) : BootStart
 
-    /** A new project from the defaults, named after the default seed. */
+    /**
+     * A new project from the defaults, named after the default seed.
+     */
     data object New : BootStart
 }
 
@@ -221,12 +235,18 @@ internal sealed interface BootStart {
  * Why the builder opened something other than what the address asked for.
  */
 internal enum class BootNotice {
-    /** The link could not be read. The UI offers "Open my last theme" and "Start from defaults". */
+    /**
+     * The link could not be read. The UI offers "Open my last theme" and "Start from defaults".
+     */
     InvalidLink,
 
-    /** The link was written by a newer builder. */
+    /**
+     * The link was written by a newer builder.
+     */
     NewerVersion,
 
-    /** The builder has no page at that path. */
+    /**
+     * The builder has no page at that path.
+     */
     UnknownPath,
 }

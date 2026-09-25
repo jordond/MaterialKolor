@@ -159,7 +159,9 @@ class ControlStateNameTest {
             onNode(isSelectableGroup() and hasTextExactly("Layout")).assert(hasNoContentDescription())
         }
 
-    /** One of every stateful control, each in a state worth reading. */
+    /**
+     * One of every stateful control, each in a state worth reading.
+     */
     @Composable
     private fun StatefulControls() {
         Box(Modifier.fillMaxSize()) {

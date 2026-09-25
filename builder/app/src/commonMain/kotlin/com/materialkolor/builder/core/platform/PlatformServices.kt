@@ -37,19 +37,29 @@ interface PlatformServices {
  * Panels open as history entries on the same URL, so back closes the top one instead of leaving.
  */
 interface Router {
-    /** Where the builder was opened, read before the first composition. */
+    /**
+     * Where the builder was opened, read before the first composition.
+     */
     val initial: Route
 
-    /** Put `/` back in the address bar once a link has been read, without adding an entry. */
+    /**
+     * Put `/` back in the address bar once a link has been read, without adding an entry.
+     */
     fun replaceHome()
 
-    /** Add a history entry for the overlay [id], so back closes it. */
+    /**
+     * Add a history entry for the overlay [id], so back closes it.
+     */
     fun pushOverlay(id: String)
 
-    /** Drop the entry the top overlay added, when it closes some other way than back. */
+    /**
+     * Drop the entry the top overlay added, when it closes some other way than back.
+     */
     fun popOverlay()
 
-    /** Emits each time back pops an overlay entry. */
+    /**
+     * Emits each time back pops an overlay entry.
+     */
     val overlayPops: Flow<Unit>
 }
 
@@ -65,10 +75,14 @@ interface Router {
  * its own banner) while clipboard and file failures are opaque platform errors.
  */
 interface Store<T> {
-    /** The record now and after every change, including changes from another tab. */
+    /**
+     * The record now and after every change, including changes from another tab.
+     */
     val data: Flow<T>
 
-    /** The record as it is stored right now. */
+    /**
+     * The record as it is stored right now.
+     */
     suspend fun get(): T
 
     /**
@@ -106,14 +120,18 @@ interface Store<T> {
  * Opens [Store]s by key.
  */
 interface StoreFactory {
-    /** The store for [key], written and read through [codec], holding [default] until it is first written. */
+    /**
+     * The store for [key], written and read through [codec], holding [default] until it is first written.
+     */
     fun <T> create(
         key: String,
         codec: RecordCodec<T>,
         default: T,
     ): Store<T>
 
-    /** Keys another tab wrote. Keys the builder does not know are left out. */
+    /**
+     * Keys another tab wrote. Keys the builder does not know are left out.
+     */
     val externalChanges: Flow<StorageKey>
 
     // b-214
@@ -133,10 +151,14 @@ interface StoreFactory {
  * Why a write to a [Store] did not land.
  */
 enum class StoreError {
-    /** The storage is full. The repository prunes old histories and tries again. */
+    /**
+     * The storage is full. The repository prunes old histories and tries again.
+     */
     QuotaExceeded,
 
-    /** There is no storage at all, private browsing for example. */
+    /**
+     * There is no storage at all, private browsing for example.
+     */
     Unavailable,
 }
 
@@ -190,7 +212,9 @@ interface FileSaver {
 
     // b-302a
 
-    /** Whether the share sheet takes the kinds of file an export makes here, so Share is worth offering. */
+    /**
+     * Whether the share sheet takes the kinds of file an export makes here, so Share is worth offering.
+     */
     val canShareFiles: Boolean
 
     // b-302a
@@ -241,7 +265,9 @@ interface FileSaver {
  * An image the user picked, dropped or pasted, not read yet.
  */
 interface ImageHandle {
-    /** The file name, when the platform knows it. */
+    /**
+     * The file name, when the platform knows it.
+     */
     val name: String?
 }
 
@@ -281,15 +307,21 @@ interface ImageInput {
 
     // b-302a
 
-    /** Files dropped anywhere on the builder, images or not, so [decode] can turn down the rest. */
+    /**
+     * Files dropped anywhere on the builder, images or not, so [decode] can turn down the rest.
+     */
     val drops: Flow<ImageHandle>
 
-    /** Read [handle]. Null when it is not an image the platform can read, or one too big to read safely. */
+    /**
+     * Read [handle]. Null when it is not an image the platform can read, or one too big to read safely.
+     */
     suspend fun decode(handle: ImageHandle): DecodedImage?
 
     // b-302a
 
-    /** Whether files are being dragged over the builder right now, for the drop overlay. */
+    /**
+     * Whether files are being dragged over the builder right now, for the drop overlay.
+     */
     val dragging: StateFlow<Boolean>
 }
 
@@ -297,14 +329,18 @@ interface ImageInput {
  * Something the user pasted while nothing editable had focus.
  */
 sealed interface Paste {
-    /** Pasted text, a color or a share link perhaps. */
+    /**
+     * Pasted text, a color or a share link perhaps.
+     */
     data class Text(
         val text: String,
     ) : Paste
 
     // b-302a
 
-    /** Pasted files, usually a screenshot. Files that are not images come too, for [ImageInput.decode] to turn down. */
+    /**
+     * Pasted files, usually a screenshot. Files that are not images come too, for [ImageInput.decode] to turn down.
+     */
     data class Files(
         val files: List<ImageHandle>,
     ) : Paste
@@ -321,16 +357,24 @@ interface PasteInput {
  * What the builder can learn about, and ask of, the page or window around it.
  */
 interface Environment {
-    /** Whether the system is in dark mode. */
+    /**
+     * Whether the system is in dark mode.
+     */
     val prefersDark: StateFlow<Boolean>
 
-    /** Whether the user asked the system for less motion. */
+    /**
+     * Whether the user asked the system for less motion.
+     */
     val reducedMotion: StateFlow<Boolean>
 
-    /** Whether the main pointer is a finger rather than a mouse. */
+    /**
+     * Whether the main pointer is a finger rather than a mouse.
+     */
     val coarsePointer: StateFlow<Boolean>
 
-    /** Whether [pickScreenColor] can do anything here. */
+    /**
+     * Whether [pickScreenColor] can do anything here.
+     */
     val eyeDropperAvailable: Boolean
 
     // b-302a
@@ -344,32 +388,48 @@ interface Environment {
      */
     suspend fun pickScreenColor(): Argb?
 
-    /** Remove the boot splash once the first frame is up. */
+    /**
+     * Remove the boot splash once the first frame is up.
+     */
     fun hideSplash()
 
-    /** Tint the browser chrome, the `theme-color` meta tag on the web. */
+    /**
+     * Tint the browser chrome, the `theme-color` meta tag on the web.
+     */
     fun setThemeColor(argb: Argb)
 
     // b-501b
 
-    /** Remember [splash] so the next boot paints it before any code loads. */
+    /**
+     * Remember [splash] so the next boot paints it before any code loads.
+     */
     fun writeSplash(splash: BootSplash)
 
-    /** An id for this tab, fresh on every load, so autosave can tell its own writes apart. */
+    /**
+     * An id for this tab, fresh on every load, so autosave can tell its own writes apart.
+     */
     val tabId: String
 
-    /** Ask the platform to keep stored data through storage pressure. True when it agreed. */
+    /**
+     * Ask the platform to keep stored data through storage pressure. True when it agreed.
+     */
     suspend fun requestPersist(): Boolean
 
-    /** Whether writes to [StoreFactory] stores outlive this session. */
+    /**
+     * Whether writes to [StoreFactory] stores outlive this session.
+     */
     val storageAvailable: Boolean
 
     // b-215a
 
-    /** The project this tab had open, kept through a reload and gone with the tab. Null when there is none. */
+    /**
+     * The project this tab had open, kept through a reload and gone with the tab. Null when there is none.
+     */
     fun readTabProject(): String?
 
-    /** Remember [id] as the project this tab has open, or forget it with null. */
+    /**
+     * Remember [id] as the project this tab has open, or forget it with null.
+     */
     fun writeTabProject(id: String?)
 
     // b-301
@@ -444,19 +504,29 @@ interface Environment {
  * [FIRST_FRAME].
  */
 object TimingMarks {
-    /** The first frame is up and the splash is on its way out. */
+    /**
+     * The first frame is up and the splash is on its way out.
+     */
     const val FIRST_FRAME: String = "mk:first-frame"
 
-    /** The root starts to resolve a theme result. */
+    /**
+     * The root starts to resolve a theme result.
+     */
     const val RESOLVE_START: String = "mk:resolve-start"
 
-    /** The root has resolved a theme result, so the time since [RESOLVE_START] is what it took. */
+    /**
+     * The root has resolved a theme result, so the time since [RESOLVE_START] is what it took.
+     */
     const val RESOLVE: String = "mk:resolve"
 
-    /** An image the user brought in has its thumbnail. */
+    /**
+     * An image the user brought in has its thumbnail.
+     */
     const val THUMBNAIL: String = "mk:thumbnail"
 
-    /** An image the user brought in has its seed candidates. */
+    /**
+     * An image the user brought in has its seed candidates.
+     */
     const val EXTRACT: String = "mk:extract"
 }
 

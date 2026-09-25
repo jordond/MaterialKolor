@@ -422,7 +422,9 @@ private const val START = 1_700_000_000_000
 
 private const val MINUTE = 60_000L
 
-/** A project record from a build whose schema this one does not know yet. */
+/**
+ * A project record from a build whose schema this one does not know yet.
+ */
 private const val NEWER_RECORD = """{"schema":999,"data":{"id":"p1"}}"""
 
 private const val NEWER_HISTORY = """{"schema":999,"data":{"entries":[]}}"""

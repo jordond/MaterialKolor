@@ -45,7 +45,9 @@ private const val ScreenshotDir = "src/jvmTest/screenshots/controls-c"
 private const val SceneTag = "overlay-scene"
 private const val TooltipAnchorTag = "tooltip-anchor"
 
-/** Which overlay the scene has open on top of the page. */
+/**
+ * Which overlay the scene has open on top of the page.
+ */
 private enum class Overlay {
     Menu,
     Dialog,
@@ -97,7 +99,9 @@ private fun ComposeUiTest.captureOverlays(
     unreadable.shouldBeEmpty()
 }
 
-/** Every control of the batch, with [overlay] open over the page. */
+/**
+ * Every control of the batch, with [overlay] open over the page.
+ */
 @Composable
 private fun OverlayScene(
     overlay: Overlay,

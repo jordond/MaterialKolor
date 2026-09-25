@@ -28,7 +28,9 @@ private const val CONTEXT = "context"
 internal val ExportInput.writesAndroidDynamicColor: Boolean
     get() = !prefs.multiplatform && prefs.androidDynamicColor
 
-/** `val context = LocalContext.current`, which the wallpaper schemes are read from. */
+/**
+ * `val context = LocalContext.current`, which the wallpaper schemes are read from.
+ */
 internal fun BodyScope.assignContext() {
     assign(CONTEXT, ref(Symbols.LocalContext).member("current"))
 }
@@ -84,7 +86,9 @@ internal fun materialThemeCall(
     }
 }
 
-/** `MotionScheme.standard()` or `MotionScheme.expressive()`. */
+/**
+ * `MotionScheme.standard()` or `MotionScheme.expressive()`.
+ */
 internal fun motionSchemeExpression(choice: MotionSchemeChoice): Expression {
     val motionScheme = ref(Symbols.MotionScheme)
 

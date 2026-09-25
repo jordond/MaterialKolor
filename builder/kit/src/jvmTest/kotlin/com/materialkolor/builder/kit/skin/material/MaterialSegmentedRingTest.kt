@@ -29,15 +29,21 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** A row of five, so the middle option has a neighbour on each side that is not an end. */
+/**
+ * A row of five, so the middle option has a neighbour on each side that is not an end.
+ */
 private val Libraries: List<String> = listOf("Material 3", "Expressive", "Unstyled", "Fluent", "Custom")
 
-/** The first, a middle and the last option, the three places a ring meets its neighbours differently. */
+/**
+ * The first, a middle and the last option, the three places a ring meets its neighbours differently.
+ */
 private val Chosen: List<String> = listOf(Libraries.first(), Libraries[2], Libraries.last())
 
 private const val RowTag = "row"
 
-/** An option of the segmented row tagged [RowTag]. */
+/**
+ * An option of the segmented row tagged [RowTag].
+ */
 private val RowOption: SemanticsMatcher = hasRole(Role.RadioButton) and hasAnyAncestor(hasTestTag(RowTag))
 
 /**
@@ -83,7 +89,9 @@ class MaterialSegmentedRingTest {
     }
 }
 
-/** The library switcher's row with [chosen] picked, tagged [RowTag]. */
+/**
+ * The library switcher's row with [chosen] picked, tagged [RowTag].
+ */
 @Composable
 private fun LibraryRow(chosen: String) {
     BuilderSegmented(
@@ -95,7 +103,9 @@ private fun LibraryRow(chosen: String) {
     ) { option -> option }
 }
 
-/** Turns the web's keyboard habits on around [content] when [on] is set. */
+/**
+ * Turns the web's keyboard habits on around [content] when [on] is set.
+ */
 @OptIn(KitTestApi::class)
 @Composable
 private fun WebKeyboard(
@@ -105,6 +115,8 @@ private fun WebKeyboard(
     if (on) ProvideWebKeyboardForTest(content) else content()
 }
 
-/** The label an option shows, as its merged text reads. */
+/**
+ * The label an option shows, as its merged text reads.
+ */
 private fun SemanticsNode.optionText(): String? =
     config.getOrNull(SemanticsProperties.Text)?.joinToString { text -> text.text }

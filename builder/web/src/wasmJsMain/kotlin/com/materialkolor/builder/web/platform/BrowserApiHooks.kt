@@ -28,7 +28,9 @@ import kotlin.math.roundToInt
 
 private val hookScope = CoroutineScope(Dispatchers.Unconfined)
 
-/** Hang the browser API hooks on the page when a spec opened it. */
+/**
+ * Hang the browser API hooks on the page when a spec opened it.
+ */
 internal fun PlatformServices.exposeBrowserApisToE2e() {
     if (!e2eHooksWanted()) return
     val outcomes = mutableMapOf<String, String>()
@@ -176,7 +178,9 @@ private fun Int.toHexArgb(): String =
 
 private fun Double.tenths(): Double = (this * 10).roundToInt() / 10.0
 
-/** A hook that does something and has nothing to say back. */
+/**
+ * A hook that does something and has nothing to say back.
+ */
 private fun exposeE2eAction(
     name: String,
     action: (String) -> Unit,

@@ -87,12 +87,16 @@ private fun ComposeUiTest.showSchemeGroup(
     return { chosen }
 }
 
-/** The scheme chip named [name], by its radio role so the tooltip's text never matches. */
+/**
+ * The scheme chip named [name], by its radio role so the tooltip's text never matches.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.chip(name: String): SemanticsNodeInteraction =
     onNode(hasContentDescription(name, substring = true) and hasRole(Role.RadioButton))
 
-/** Presses [key] on whatever has focus and lets the focus land. */
+/**
+ * Presses [key] on whatever has focus and lets the focus land.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.pressOnChosen(key: Key) {
     onNode(isFocused()).performKeyInput { pressKey(key) }

@@ -35,10 +35,14 @@ import kotlin.test.Test
 
 // b-315b
 
-/** A declared element near the start of a row wider than the preview. */
+/**
+ * A declared element near the start of a row wider than the preview.
+ */
 private const val ELEMENT = "element"
 
-/** The first action of a pinned card, so its presence means a card is pinned. */
+/**
+ * The first action of a pinned card, so its presence means a card is pinned.
+ */
 private const val PIN_ROLE = "Pin this role"
 
 @OptIn(ExperimentalTestApi::class)

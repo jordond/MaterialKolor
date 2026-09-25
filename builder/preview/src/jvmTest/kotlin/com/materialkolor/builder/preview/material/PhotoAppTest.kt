@@ -81,7 +81,9 @@ private const val PhotoScreenshotDir = "src/jvmTest/screenshots/photos"
 
 private const val PhotoSourceDir = "src/commonMain/kotlin/com/materialkolor/builder/preview/material"
 
-/** What the photo app's sources never name, anything that opens outside the layout, a field or an endless clock. */
+/**
+ * What the photo app's sources never name, anything that opens outside the layout, a field or an endless clock.
+ */
 private val PhotoBannedWords: List<String> = listOf(
     "androidx.compose.ui.window",
     "Popup",
@@ -95,11 +97,15 @@ private val PhotoBannedWords: List<String> = listOf(
     "infiniteRepeat",
 )
 
-/** The feed, the one list of the app that scrolls down. */
+/**
+ * The feed, the one list of the app that scrolls down.
+ */
 private val PhotoFeedNode: SemanticsMatcher =
     hasScrollToIndexAction() and SemanticsMatcher.keyIsDefined(SemanticsProperties.VerticalScrollAxisRange)
 
-/** The button that opens the create menu, as the tree shows it off the web. */
+/**
+ * The button that opens the create menu, as the tree shows it off the web.
+ */
 private val CreateButton: SemanticsMatcher = isToggleable() and hasContentDescription(PhotoCopy.Create)
 
 @OptIn(ExperimentalTestApi::class)
@@ -424,13 +430,17 @@ private fun ComposeUiTest.memoryMasks(): Map<Int, Rect> {
     return masks
 }
 
-/** Where the node's layout sits in the root, moved by every layer above it but clipped by none. */
+/**
+ * Where the node's layout sits in the root, moved by every layer above it but clipped by none.
+ */
 private fun SemanticsNode.unclippedBoundsInRoot(): Rect {
     val coordinates = layoutInfo.coordinates
     return Rect(coordinates.localToRoot(Offset.Zero), coordinates.size.toSize())
 }
 
-/** The bounds of the node [matcher] finds in each copy of a split, which have to be the same. */
+/**
+ * The bounds of the node [matcher] finds in each copy of a split, which have to be the same.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.boundsInBoth(matcher: SemanticsMatcher): Rect {
     val bounds = onAllNodes(matcher, useUnmergedTree = true)
@@ -441,7 +451,9 @@ private fun ComposeUiTest.boundsInBoth(matcher: SemanticsMatcher): Rect {
     return bounds[0]
 }
 
-/** What is passed to every call of a function whose name matches [name], each up to its closing parenthesis. */
+/**
+ * What is passed to every call of a function whose name matches [name], each up to its closing parenthesis.
+ */
 private fun String.callArguments(name: String): List<String> =
     Regex("""\b$name\(""")
         .findAll(this)

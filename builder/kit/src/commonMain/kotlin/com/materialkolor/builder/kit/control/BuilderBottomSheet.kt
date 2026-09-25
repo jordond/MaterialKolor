@@ -24,15 +24,23 @@ import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import org.jetbrains.compose.resources.stringResource
 
-/** The heights a bottom sheet rests at, smallest first. */
+/**
+ * The heights a bottom sheet rests at, smallest first.
+ */
 public enum class BottomSheetDetent {
-    /** Only the top of the sheet shows, enough to see what it holds. */
+    /**
+     * Only the top of the sheet shows, enough to see what it holds.
+     */
     Peek,
 
-    /** The sheet covers half of its host. */
+    /**
+     * The sheet covers half of its host.
+     */
     Half,
 
-    /** The sheet covers all of its host. */
+    /**
+     * The sheet covers all of its host.
+     */
     Full,
 }
 
@@ -48,26 +56,38 @@ public class BottomSheetState internal constructor(
 ) {
     internal val draggable: AnchoredDraggableState<BottomSheetDetent> = AnchoredDraggableState(initialDetent)
 
-    /** How the sheet rises to a higher detent, handed in by the motion set it is drawn in. */
+    /**
+     * How the sheet rises to a higher detent, handed in by the motion set it is drawn in.
+     */
     internal var raiseSpec: AnimationSpec<Float> = snap()
 
-    /** How the sheet sinks to a lower detent. */
+    /**
+     * How the sheet sinks to a lower detent.
+     */
     internal var lowerSpec: AnimationSpec<Float> = snap()
 
-    /** The detent the sheet last came to rest at. */
+    /**
+     * The detent the sheet last came to rest at.
+     */
     public val detent: BottomSheetDetent
         get() = draggable.settledValue
 
-    /** The detent the sheet is on its way to, which is [detent] while it rests. */
+    /**
+     * The detent the sheet is on its way to, which is [detent] while it rests.
+     */
     public val targetDetent: BottomSheetDetent
         get() = draggable.targetValue
 
-    /** Moves the sheet to [detent] with the skin's motion. */
+    /**
+     * Moves the sheet to [detent] with the skin's motion.
+     */
     public suspend fun animateTo(detent: BottomSheetDetent) {
         draggable.animateTo(detent, if (detent > targetDetent) raiseSpec else lowerSpec)
     }
 
-    /** Lets the sheet coast on [velocity] to the detent the fling carries it to. */
+    /**
+     * Lets the sheet coast on [velocity] to the detent the fling carries it to.
+     */
     internal suspend fun fling(
         velocity: Float,
         behavior: FlingBehavior,
@@ -84,7 +104,9 @@ public class BottomSheetState internal constructor(
         }
     }
 
-    /** Moves the sheet to [detent] at once. */
+    /**
+     * Moves the sheet to [detent] at once.
+     */
     public suspend fun snapTo(detent: BottomSheetDetent) {
         draggable.snapTo(detent)
     }
@@ -97,7 +119,9 @@ public class BottomSheetState internal constructor(
     }
 }
 
-/** A bottom sheet state that starts at [initialDetent] and survives recreation. */
+/**
+ * A bottom sheet state that starts at [initialDetent] and survives recreation.
+ */
 @Composable
 public fun rememberBottomSheetState(initialDetent: BottomSheetDetent = BottomSheetDetent.Peek): BottomSheetState =
     rememberSaveable(saver = BottomSheetState.Saver) { BottomSheetState(initialDetent) }

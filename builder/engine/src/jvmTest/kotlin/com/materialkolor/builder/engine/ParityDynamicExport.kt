@@ -12,9 +12,9 @@ import com.materialkolor.ktx.toneColor
 import com.materialkolor.palettes.TonalPalette
 
 /**
- * What a dynamic export's colors come to, read out of its own code and nothing else: the arguments
- * of its scheme call, the pins it lays over the scheme, the Custom slots it cuts, the accent
- * families it builds and the Fluent shades it builds inline.
+ * What a dynamic export's colors come to, read out of its own code and nothing else. That means the
+ * arguments of its scheme call, the pins it lays over the scheme, the Custom slots it cuts, the
+ * accent families it builds and the Fluent shades it builds inline.
  *
  * Every color is worked out through the library call the export makes, on a scheme built with
  * the arguments it passes, so a swapped mode, a wrong tone or a wrong ramp shows up as a color.
@@ -28,9 +28,9 @@ internal class DynamicExport private constructor(
     private val document = arguments.document()
 
     /**
-     * Every color the export gives in the mode [isDark] picks, by the name it sits under: a role
-     * by its property, a Custom slot by its property, a Fluent shade by its name, an accent color as
-     * `brand/onColor`, or for Unstyled as `ThemeTokens.onBrand`.
+     * Every color the export gives in the mode [isDark] picks, keyed by the name it sits under. A role
+     * is keyed by its property, a Custom slot by its property, a Fluent shade by its name, an accent
+     * color as `brand/onColor`, or for Unstyled as `ThemeTokens.onBrand`.
      */
     fun colors(isDark: Boolean): Map<String, Argb> =
         when (target) {
@@ -138,7 +138,9 @@ internal class DynamicExport private constructor(
         return values(source.callsOf("ThemeColors"), "ThemeColors", Evaluation(source, isDark, names))
     }
 
-    /** Every accent color `ExtendedColors(...)` gets in the mode [isDark] picks, none without accents. */
+    /**
+     * Every accent color `ExtendedColors(...)` gets in the mode [isDark] picks, none without accents.
+     */
     private fun families(
         type: String,
         isDark: Boolean,
@@ -149,7 +151,9 @@ internal class DynamicExport private constructor(
         return values(calls, type, Evaluation(source, isDark, palettes()))
     }
 
-    /** The colors of the one call in [calls], each named argument flattened to `name` or `name/part`. */
+    /**
+     * The colors of the one call in [calls], each named argument flattened to `name` or `name/part`.
+     */
     private fun values(
         calls: List<List<String>>,
         type: String,
@@ -177,7 +181,9 @@ internal class DynamicExport private constructor(
         }
     }
 
-    /** The shades an inline Fluent export's own `toShades()` cuts in the mode [isDark] picks. */
+    /**
+     * The shades an inline Fluent export's own `toShades()` cuts in the mode [isDark] picks.
+     */
     private fun inlineShades(isDark: Boolean): Map<String, Argb> {
         val colors = source.callsOf("Colors").singleOrNull()?.named()
             ?: source.fail("The export builds no single Colors(...)")
@@ -191,7 +197,9 @@ internal class DynamicExport private constructor(
         return evaluation.shades(shades)
     }
 
-    /** Every accent ramp the export remembers, by the `val` that holds it. */
+    /**
+     * Every accent ramp the export remembers, by the `val` that holds it.
+     */
     private fun palettes(): Map<String, TonalPalette> =
         source.assigned("rememberTonalPalette").mapValues { (name, arguments) ->
             val named = arguments.named()
@@ -207,7 +215,9 @@ internal class DynamicExport private constructor(
             )
         }
 
-    /** Every call to [function] passes the theme's own `isDark`, so its `if (isDark)` picks the theme's mode. */
+    /**
+     * Every call to [function] passes the theme's own `isDark`, so its `if (isDark)` picks the theme's mode.
+     */
     private fun requireThemeMode(function: String) {
         source.callsOf(function).forEach { arguments ->
             val mode = arguments.named()[IS_DARK]
@@ -216,7 +226,9 @@ internal class DynamicExport private constructor(
     }
 
     companion object {
-        /** The dynamic export [files] of [target] as its own code reads. A failure starts with [context]. */
+        /**
+         * The dynamic export [files] of [target] as its own code reads. A failure starts with [context].
+         */
         fun read(
             target: ExportTarget,
             files: List<GeneratedFile>,
@@ -240,7 +252,7 @@ internal class DynamicExport private constructor(
  * Works out what one expression an export writes comes to in the mode [isDark] picks, with [names]
  * in scope and, inside a `TonalPalette` helper, [receiver] as `this`.
  *
- * It knows what the exports write and nothing more: `if (isDark) a else b`, color, tone and
+ * It knows what the exports write and nothing more. That is `if (isDark) a else b`, color, tone and
  * threshold literals, a scheme's ramps, `toneColor`, `onTone`, a `MaterialKolors` role, and a call
  * to a `TonalPalette` helper the export declares itself, whose body it reads and runs.
  */
@@ -266,7 +278,9 @@ private class Evaluation(
     fun color(expression: String): Argb =
         value(expression) as? Argb ?: source.fail("$expression ${modeOf(isDark)} is no color")
 
-    /** The shades `palette.toShades()` in [expression] gives, by shade name. */
+    /**
+     * The shades `palette.toShades()` in [expression] gives, by shade name.
+     */
     fun shades(expression: String): Map<String, Argb> {
         val palette = value(expression.substringBeforeLast('.')) as? TonalPalette
             ?: source.fail("$expression is not called on a palette")
@@ -365,7 +379,9 @@ private class Evaluation(
         return properties.zip(values).associate { (property, value) -> property to evaluation.value(value) }
     }
 
-    /** The properties the export's own `data class [type]` declares, in order. */
+    /**
+     * The properties the export's own `data class [type]` declares, in order.
+     */
     private fun declaredProperties(type: String): List<String> {
         val declaration = Regex("""\bclass $type\(""").find(source.text)
             ?: source.fail("The export returns $type positionally but does not declare it")
@@ -390,7 +406,9 @@ private class Evaluation(
     }
 }
 
-/** Where the `(` that the closing `)` of [expression] pairs with sits. */
+/**
+ * Where the `(` that the closing `)` of [expression] pairs with sits.
+ */
 private fun openingOf(expression: String): Int {
     var depth = 0
     for (index in expression.indices.reversed()) {
@@ -402,14 +420,18 @@ private fun openingOf(expression: String): Int {
     error("Nothing opens the call in $expression")
 }
 
-/** The branch of `if (isDark) a else b` the mode [isDark] picks, or [value] itself when it has none. */
+/**
+ * The branch of `if (isDark) a else b` the mode [isDark] picks, or [value] itself when it has none.
+ */
 private fun branchOf(
     value: String,
     isDark: Boolean,
 ): String =
     Regex("""^if \(isDark\) (.+?) else (.+)$""").matchEntire(value)?.groupValues?.get(if (isDark) 1 else 2) ?: value
 
-/** The role whose property is [name], as in `surfaceContainerHigh`. */
+/**
+ * The role whose property is [name], as in `surfaceContainerHigh`.
+ */
 private fun roleNamed(name: String): Role? = Role.entries.firstOrNull { role -> role.name.lowerFirst() == name }
 
 private fun modeOf(isDark: Boolean): String = if (isDark) "in dark mode" else "in light mode"

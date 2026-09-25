@@ -25,7 +25,9 @@ internal fun paneSideAt(
     return if (end) PaneSide.End else PaneSide.Start
 }
 
-/** Whether a copy on [side] wears the dark scheme while the canvas shows [shown]. A split is light then dark. */
+/**
+ * Whether a copy on [side] wears the dark scheme while the canvas shows [shown]. A split is light then dark.
+ */
 internal fun isDark(
     side: PaneSide,
     shown: PreviewMode,

@@ -23,5 +23,7 @@ internal fun addE2eGestureButton(onClick: () -> Unit): Unit =
     }""",
     )
 
-/** Milliseconds since the page loaded, for timing a decode. */
+/**
+ * Milliseconds since the page loaded, for timing a decode.
+ */
 internal fun pageMillis(): Double = js("performance.now()")

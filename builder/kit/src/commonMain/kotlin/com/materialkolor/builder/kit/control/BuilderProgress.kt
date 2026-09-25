@@ -78,7 +78,9 @@ internal fun Modifier.progressLabel(
     }
 }
 
-/** Where the sweep rests whenever it may not move, across the middle of the track. */
+/**
+ * Where the sweep rests whenever it may not move, across the middle of the track.
+ */
 private const val StillPhase = 0.5f
 
 /**
@@ -108,7 +110,9 @@ internal fun sweepSpan(
     return start..(start + fraction)
 }
 
-/** A progress bar drawn from [style] over Compose Unstyled's progress. */
+/**
+ * A progress bar drawn from [style] over Compose Unstyled's progress.
+ */
 @Composable
 internal fun HeadlessProgress(
     label: String,

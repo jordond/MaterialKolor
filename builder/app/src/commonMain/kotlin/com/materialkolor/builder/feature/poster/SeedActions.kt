@@ -143,7 +143,9 @@ internal fun ShuffleIconButton(
     )
 }
 
-/** Whether these preferences hold [lock] on. */
+/**
+ * Whether these preferences hold [lock] on.
+ */
 internal fun Preferences.isLocked(lock: ShuffleLock): Boolean =
     when (lock) {
         ShuffleLock.Hue -> hueLock

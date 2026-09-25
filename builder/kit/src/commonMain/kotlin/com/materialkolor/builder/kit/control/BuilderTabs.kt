@@ -22,9 +22,13 @@ import io.github.composefluent.FluentTheme
 
 // b-512
 
-/** How a row of [BuilderTabs] looks. */
+/**
+ * How a row of [BuilderTabs] looks.
+ */
 public enum class TabsVariant {
-    /** The skin's own tab row, such as Material's underlined tabs. The export sheet's file tabs wear it. */
+    /**
+     * The skin's own tab row, such as Material's underlined tabs. The export sheet's file tabs wear it.
+     */
     Standard,
 
     /**
@@ -82,7 +86,9 @@ public fun <T> BuilderTabs(
 
 // b-512
 
-/** Material's canvas tabs, a tonal pill holding the tabs with the chosen one lifted to the lightest surface. */
+/**
+ * Material's canvas tabs, a tonal pill holding the tabs with the chosen one lifted to the lightest surface.
+ */
 @Composable
 @ReadOnlyComposable
 private fun materialCanvasTabs(): TabsStyle {
@@ -131,7 +137,9 @@ private fun expressiveCanvasTabs(): TabsStyle {
     )
 }
 
-/** Unstyled's canvas tabs, its plain underline, the first label close to the row's start edge. */
+/**
+ * Unstyled's canvas tabs, its plain underline, the first label close to the row's start edge.
+ */
 @Composable
 @ReadOnlyComposable
 private fun unstyledCanvasTabs(): TabsStyle {
@@ -153,7 +161,9 @@ private fun unstyledCanvasTabs(): TabsStyle {
     )
 }
 
-/** Fluent's canvas tabs, a subtle well holding the tabs with the chosen one on the layer fill, in Fluent's control corners. */
+/**
+ * Fluent's canvas tabs, a subtle well holding the tabs with the chosen one on the layer fill, in Fluent's control corners.
+ */
 @Composable
 private fun fluentCanvasTabs(): TabsStyle {
     val tokens = LocalBuilderTokens.current
@@ -175,7 +185,9 @@ private fun fluentCanvasTabs(): TabsStyle {
     )
 }
 
-/** Custom's canvas tabs, bare labels with the chosen one in a pill of the strongest ink. */
+/**
+ * Custom's canvas tabs, bare labels with the chosen one in a pill of the strongest ink.
+ */
 @Composable
 @ReadOnlyComposable
 private fun customCanvasTabs(): TabsStyle {

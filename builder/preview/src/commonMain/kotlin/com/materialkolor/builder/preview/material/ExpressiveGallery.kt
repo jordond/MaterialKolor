@@ -107,7 +107,9 @@ private enum class CreateAction(
     Place("Save a place", Lucide.MapPin),
 }
 
-/** A Material shape with a name to read out and an icon to hold. */
+/**
+ * A Material shape with a name to read out and an icon to hold.
+ */
 private enum class ShapeSample(
     val label: String,
     val icon: ImageVector,
@@ -120,7 +122,9 @@ private enum class ShapeSample(
     Pill("Pill", Lucide.Sailboat),
 }
 
-/** Every Expressive card, each shown in its group after the Material 3 cards. */
+/**
+ * Every Expressive card, each shown in its group after the Material 3 cards.
+ */
 internal val ExpressiveCards: List<GalleryCard> = listOf(
     GalleryCard("Button group", GalleryGroup.Actions) { state -> ButtonGroups(state) },
     GalleryCard("Split button", GalleryGroup.Actions) { state -> SplitButtons(state) },
@@ -133,7 +137,9 @@ internal val ExpressiveCards: List<GalleryCard> = listOf(
     GalleryCard("Wavy progress indicators", GalleryGroup.Feedback) { WavyProgressIndicators() },
 )
 
-/** The gallery of the Expressive flavour, the Material 3 cards and then the Expressive ones. */
+/**
+ * The gallery of the Expressive flavour, the Material 3 cards and then the Expressive ones.
+ */
 internal val ExpressiveGalleryCards: List<GalleryCard> = MaterialCards + ExpressiveCards
 
 /**
@@ -222,7 +228,9 @@ internal fun SplitButtons(state: DemoAppState) {
     }
 }
 
-/** The split button's options as they look open, drawn in place like the gallery's menu. */
+/**
+ * The split button's options as they look open, drawn in place like the gallery's menu.
+ */
 @Composable
 private fun BookingMenu(onPick: () -> Unit) {
     Surface(
@@ -279,7 +287,9 @@ internal fun FabMenu(state: DemoAppState) {
     }
 }
 
-/** A connected row of toggle buttons that picks one way to travel, the picked one turning round. */
+/**
+ * A connected row of toggle buttons that picks one way to travel, the picked one turning round.
+ */
 @Composable
 internal fun ConnectedButtons(state: DemoAppState) {
     val count = Transports.size
@@ -306,7 +316,9 @@ internal fun ConnectedButtons(state: DemoAppState) {
     }
 }
 
-/** The shapes of a connected button, rounder at the outer end of the first and the last. */
+/**
+ * The shapes of a connected button, rounder at the outer end of the first and the last.
+ */
 @Composable
 private fun connectedShapes(
     index: Int,
@@ -370,7 +382,9 @@ private fun ShapeSample.shape(): Shape =
         ShapeSample.Pill -> MaterialShapes.Pill
     }.toShape()
 
-/** A medium flexible top app bar at its full height, its title over a subtitle. */
+/**
+ * A medium flexible top app bar at its full height, its title over a subtitle.
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun FlexibleTopAppBars() {
@@ -395,7 +409,9 @@ internal fun FlexibleTopAppBars() {
     )
 }
 
-/** A standard floating toolbar at rest in the card, its last action disabled. */
+/**
+ * A standard floating toolbar at rest in the card, its last action disabled.
+ */
 @Composable
 internal fun FloatingToolbars() {
     HorizontalFloatingToolbar(

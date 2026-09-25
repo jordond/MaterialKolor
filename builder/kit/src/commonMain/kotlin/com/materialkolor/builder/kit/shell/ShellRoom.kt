@@ -34,7 +34,9 @@ internal class ShellRoom {
     var toasts: IntRect by mutableStateOf(IntRect.Zero)
 }
 
-/** The room of the shell its overlays are drawn over, null outside a `WorkspaceShell`. */
+/**
+ * The room of the shell its overlays are drawn over, null outside a `WorkspaceShell`.
+ */
 internal val LocalShellRoom: ProvidableCompositionLocal<ShellRoom?> =
     staticCompositionLocalOf { null }
 
@@ -89,22 +91,34 @@ internal fun Modifier.skipTabWhile(
  * plain, since only focus and the sheet's detent read them, so nothing recomposes as they change.
  */
 internal class SheetCover {
-    /** Whether focus is in the top bar. */
+    /**
+     * Whether focus is in the top bar.
+     */
     var topBarFocused: Boolean = false
 
-    /** Whether focus is in the canvas. */
+    /**
+     * Whether focus is in the canvas.
+     */
     var canvasFocused: Boolean = false
 
-    /** Whether focus is in the dock. */
+    /**
+     * Whether focus is in the dock.
+     */
     var dockFocused: Boolean = false
 
-    /** The dock's top edge in root pixels as last placed, NaN before that. */
+    /**
+     * The dock's top edge in root pixels as last placed, NaN before that.
+     */
     var dockTop: Float = Float.NaN
 
-    /** The top edge of the frame the sheet slides in, in root pixels as last placed, NaN before that. */
+    /**
+     * The top edge of the frame the sheet slides in, in root pixels as last placed, NaN before that.
+     */
     var sheetTop: Float = Float.NaN
 
-    /** Whether [sheet] resting at [detent] lies over the whole dock, as the two were last placed. */
+    /**
+     * Whether [sheet] resting at [detent] lies over the whole dock, as the two were last placed.
+     */
     fun dockUnder(
         sheet: BottomSheetState,
         detent: BottomSheetDetent,
@@ -113,7 +127,9 @@ internal class SheetCover {
         return !top.isNaN() && !dockTop.isNaN() && dockTop >= top
     }
 
-    /** Whether focus is in a region the sheet lies over at [detent], the dock from [dockFrom] up. */
+    /**
+     * Whether focus is in a region the sheet lies over at [detent], the dock from [dockFrom] up.
+     */
     fun focusUnder(
         detent: BottomSheetDetent,
         dockFrom: BottomSheetDetent,

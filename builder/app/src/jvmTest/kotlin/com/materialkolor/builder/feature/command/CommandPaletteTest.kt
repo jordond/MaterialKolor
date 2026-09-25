@@ -441,7 +441,9 @@ class CommandPaletteTest {
         waitForIdle()
     }
 
-    /** The palette's rows, top first, by their labels. */
+    /**
+     * The palette's rows, top first, by their labels.
+     */
     private fun ComposeUiTest.rowLabels(): List<String> =
         onAllNodes(PaletteRow)
             .fetchSemanticsNodes()
@@ -468,6 +470,8 @@ private val InPalette: SemanticsMatcher = hasAnyAncestor(
 private val PaletteRow: SemanticsMatcher =
     hasClickAction() and InPalette and !hasSetTextAction() and !hasText("Close") and !hasContentDescription("Close")
 
-/** The top bar's Commands button, which only the page's own window holds. */
+/**
+ * The top bar's Commands button, which only the page's own window holds.
+ */
 private val CommandsButton: SemanticsMatcher =
     hasClickAction() and hasContentDescription("Command palette") and !InPalette // b-315d

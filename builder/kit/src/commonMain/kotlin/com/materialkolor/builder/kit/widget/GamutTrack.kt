@@ -71,11 +71,15 @@ internal enum class HctChannel(
     Tone(0.0..ToneCeiling),
     ;
 
-    /** Where [value] sits along the track, from 0 to 1. */
+    /**
+     * Where [value] sits along the track, from 0 to 1.
+     */
     fun fractionOf(value: Double): Float =
         ((value - range.start) / (range.endInclusive - range.start)).toFloat().coerceIn(0f, 1f)
 
-    /** The value [fraction] of the way along the track. */
+    /**
+     * The value [fraction] of the way along the track.
+     */
     fun valueAt(fraction: Float): Double = range.start + fraction.coerceIn(0f, 1f) * (range.endInclusive - range.start)
 }
 
@@ -112,7 +116,9 @@ internal object GamutLimit {
         return min(reached, Hct.from(hue, reached, tone).chroma)
     }
 
-    /** The most chroma at [hue] and [tone], both rounded to whole numbers first. Only for shading. */
+    /**
+     * The most chroma at [hue] and [tone], both rounded to whole numbers first. Only for shading.
+     */
     fun maxChroma(
         hue: Double,
         tone: Double,
@@ -182,7 +188,9 @@ internal fun GamutTrack(
     )
 }
 
-/** Where a key moves [value] on [channel], or null for a key the track leaves alone. */
+/**
+ * Where a key moves [value] on [channel], or null for a key the track leaves alone.
+ */
 private fun keyTarget(
     key: Key,
     shift: Boolean,
@@ -286,7 +294,9 @@ private fun trackPaint(
     return TrackPaint(colors, outsideRuns(reached))
 }
 
-/** The runs of samples that were not [reached], each widened by half a sample to either side. */
+/**
+ * The runs of samples that were not [reached], each widened by half a sample to either side.
+ */
 private fun outsideRuns(reached: BooleanArray): List<ClosedFloatingPointRange<Float>> {
     val half = 0.5f / (SampleCount - 1)
     val runs = mutableListOf<ClosedFloatingPointRange<Float>>()
@@ -326,11 +336,15 @@ private class TrackDrawing(
     val rim: Stroke,
     val innerRim: Stroke,
 ) {
-    /** How far from the left [fraction] of the way along the travel sits, in pixels. */
+    /**
+     * How far from the left [fraction] of the way along the travel sits, in pixels.
+     */
     fun xOf(fraction: Float): Float = thumbRadius + travel * (if (isRtl) 1f - fraction else fraction)
 }
 
-/** Lays out the track for the current size and builds everything a frame reuses. */
+/**
+ * Lays out the track for the current size and builds everything a frame reuses.
+ */
 private fun CacheDrawScope.trackDrawing(
     paint: TrackPaint,
     tokens: BuilderTokens,
@@ -404,7 +418,9 @@ private fun DrawScope.drawTrack(
     drawCircle(tokens.panel, radius = radius - stroke * 1.5f, center = center, style = drawing.innerRim)
 }
 
-/** Veils a stretch of the track and hatches it, so it reads as out of reach without relying on color. */
+/**
+ * Veils a stretch of the track and hatches it, so it reads as out of reach without relying on color.
+ */
 private fun DrawScope.shade(
     drawing: TrackDrawing,
     left: Float,
@@ -429,7 +445,9 @@ private fun DrawScope.shade(
 
 private const val FullTurn: Double = 360.0
 
-/** Past the most chroma sRGB reaches at any hue and tone, which is a little over 113 for red. */
+/**
+ * Past the most chroma sRGB reaches at any hue and tone, which is a little over 113 for red.
+ */
 internal const val ChromaCeiling: Double = 120.0
 
 private const val ToneCeiling: Double = 100.0
@@ -438,19 +456,29 @@ private const val HueSlots: Int = 360
 
 private const val ToneSlots: Int = 101
 
-/** Halvings of [ChromaCeiling], enough to land within a few hundredths. */
+/**
+ * Halvings of [ChromaCeiling], enough to land within a few hundredths.
+ */
 private const val SearchSteps: Int = 12
 
-/** How far below the ask [Hct.from] may land and still count as reaching it. */
+/**
+ * How far below the ask [Hct.from] may land and still count as reaching it.
+ */
 private const val SearchSlack: Double = 2.0
 
-/** How far short of the asked chroma a sample may fall before its stretch is shaded. */
+/**
+ * How far short of the asked chroma a sample may fall before its stretch is shaded.
+ */
 private const val ShadeSlack: Double = 1.0
 
-/** How many samples a track's gradient is drawn from. */
+/**
+ * How many samples a track's gradient is drawn from.
+ */
 private const val SampleCount: Int = 48
 
-/** How far Shift and the page keys move. */
+/**
+ * How far Shift and the page keys move.
+ */
 private const val BigStep: Double = 10.0
 
 /**

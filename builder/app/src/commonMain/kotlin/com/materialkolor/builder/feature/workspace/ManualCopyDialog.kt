@@ -20,7 +20,9 @@ import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.widget.SelectableText
 import org.jetbrains.compose.resources.stringResource
 
-/** How much of the window the manual copy dialog's text may take before it scrolls. */
+/**
+ * How much of the window the manual copy dialog's text may take before it scrolls.
+ */
 private const val MANUAL_COPY_HEIGHT_FRACTION = 0.5f
 
 /**

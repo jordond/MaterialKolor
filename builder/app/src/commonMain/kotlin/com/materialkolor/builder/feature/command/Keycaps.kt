@@ -48,7 +48,9 @@ internal fun Keycaps(
     }
 }
 
-/** One keycap, a small outlined key holding [content], a key's name or its glyph. */
+/**
+ * One keycap, a small outlined key holding [content], a key's name or its glyph.
+ */
 @Composable
 internal fun Keycap(content: @Composable () -> Unit) {
     val tokens = LocalBuilderTokens.current
@@ -73,8 +75,12 @@ internal fun keycapChords(keys: String): List<List<String>> =
 private const val CHORD_SEPARATOR = ", "
 private const val KEY_SEPARATOR = '+'
 
-/** The narrowest and the shortest a keycap gets, so a one letter key is square. */
+/**
+ * The narrowest and the shortest a keycap gets, so a one letter key is square.
+ */
 private val KeycapSize: Dp = 24.dp
 
-/** How big a glyph on a keycap is, such as an arrow. */
+/**
+ * How big a glyph on a keycap is, such as an arrow.
+ */
 internal val KeycapGlyphSize: Dp = 14.dp

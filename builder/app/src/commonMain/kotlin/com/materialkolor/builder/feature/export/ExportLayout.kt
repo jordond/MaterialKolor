@@ -27,7 +27,9 @@ import org.jetbrains.compose.resources.stringResource
 
 // b-511
 
-/** The theme's name, the project it belongs to and its seed, "AppTheme from Burnt Ember #D9653B". */
+/**
+ * The theme's name, the project it belongs to and its seed, "AppTheme from Burnt Ember #D9653B".
+ */
 @Composable
 internal fun exportSubtitle(state: ExportModel.State): String {
     val themeName = state.document.themeName
@@ -89,7 +91,9 @@ internal fun ExportFooter(
     }
 }
 
-/** The narrowest the footer gets while its note and its buttons still share a row. */
+/**
+ * The narrowest the footer gets while its note and its buttons still share a row.
+ */
 private val FOOTER_ROW_MIN_WIDTH = 600.dp
 
 /**
@@ -132,5 +136,7 @@ internal fun FillLastColumn(
     }
 }
 
-/** The shortest the code gets before the body scrolls instead of squeezing it further. */
+/**
+ * The shortest the code gets before the body scrolls instead of squeezing it further.
+ */
 private val CodeMinHeight: Dp = 240.dp

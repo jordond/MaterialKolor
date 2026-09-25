@@ -54,19 +54,27 @@ import org.jetbrains.compose.resources.stringResource
 internal val LocalFoldsStateIntoName: ProvidableCompositionLocal<Boolean> =
     staticCompositionLocalOf { onWebMirror }
 
-/** The state a control reports. */
+/**
+ * The state a control reports.
+ */
 internal sealed interface ControlState {
-    /** A chip, a segment, a tab or a row that is or is not the current one. */
+    /**
+     * A chip, a segment, a tab or a row that is or is not the current one.
+     */
     data class Selected(
         val selected: Boolean,
     ) : ControlState
 
-    /** A checkbox or a toggle button. */
+    /**
+     * A checkbox or a toggle button.
+     */
     data class Checked(
         val checked: Boolean,
     ) : ControlState
 
-    /** A switch. */
+    /**
+     * A switch.
+     */
     data class Switched(
         val on: Boolean,
     ) : ControlState
@@ -79,7 +87,9 @@ internal sealed interface ControlState {
         val expanded: Boolean,
     ) : ControlState
 
-    /** A slider's value, a progress bar's percentage or a select's choice, already in words. */
+    /**
+     * A slider's value, a progress bar's percentage or a select's choice, already in words.
+     */
     data class Value(
         val text: String,
     ) : ControlState
@@ -91,34 +101,54 @@ internal sealed interface ControlState {
  * While that stands the role's word travels in the name (D40).
  */
 internal enum class FoldedRole {
-    /** A box that is ticked or not. */
+    /**
+     * A box that is ticked or not.
+     */
     Checkbox,
 
-    /** A switch that is on or off. */
+    /**
+     * A switch that is on or off.
+     */
     Switch,
 
-    /** One option of a single choice, a choice chip, a segment or a scheme chip. */
+    /**
+     * One option of a single choice, a choice chip, a segment or a scheme chip.
+     */
     Radio,
 
-    /** One tab of a tab row. */
+    /**
+     * One tab of a tab row.
+     */
     Tab,
 
-    /** A value set along a track, a slider or a channel of the color picker. */
+    /**
+     * A value set along a track, a slider or a channel of the color picker.
+     */
     Slider,
 
-    /** A bar that shows how far along some work is. */
+    /**
+     * A bar that shows how far along some work is.
+     */
     ProgressBar,
 
-    /** A select's field, which opens the list of its options. */
+    /**
+     * A select's field, which opens the list of its options.
+     */
     PopUpButton,
 
-    /** One row of a menu. */
+    /**
+     * One row of a menu.
+     */
     MenuItem,
 
-    /** One row of a select's list. */
+    /**
+     * One row of a select's list.
+     */
     Option,
 
-    /** A modal pane, a dialog, a sheet or a side panel. */
+    /**
+     * A modal pane, a dialog, a sheet or a side panel.
+     */
     Dialog,
 }
 
@@ -150,7 +180,9 @@ internal class StateWords(
     val option: String,
     val dialog: String,
 ) {
-    /** How [state] reads on its own, as a state description. */
+    /**
+     * How [state] reads on its own, as a state description.
+     */
     fun of(state: ControlState): String =
         when (state) {
             is ControlState.Selected -> if (state.selected) selected else notSelected
@@ -160,7 +192,9 @@ internal class StateWords(
             is ControlState.Value -> state.text
         }
 
-    /** How [state] reads after a name. A word drops its capital there, a value keeps its own. */
+    /**
+     * How [state] reads after a name. A word drops its capital there, a value keeps its own.
+     */
     fun afterName(state: ControlState): String =
         when (state) {
             is ControlState.Selected,
@@ -171,10 +205,14 @@ internal class StateWords(
             is ControlState.Value -> state.text
         }
 
-    /** The disabled word as it reads after a name. */
+    /**
+     * The disabled word as it reads after a name.
+     */
     val disabledAfterName: String get() = disabled.lowerFirst()
 
-    /** How [role] reads after a name. Role words are written that way already, so they keep their case. */
+    /**
+     * How [role] reads after a name. Role words are written that way already, so they keep their case.
+     */
     fun roleWord(role: FoldedRole): String =
         when (role) {
             FoldedRole.Checkbox -> checkbox
@@ -192,7 +230,9 @@ internal class StateWords(
 
 private fun String.lowerFirst(): String = replaceFirstChar { char -> char.lowercaseChar() }
 
-/** The kit's state words in the current locale. */
+/**
+ * The kit's state words in the current locale.
+ */
 @Composable
 internal fun stateWords(): StateWords =
     StateWords(

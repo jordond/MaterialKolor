@@ -38,16 +38,24 @@ import org.jetbrains.compose.resources.StringResource
  */
 @Immutable
 internal sealed interface Preset {
-    /** What the document keeps of it. */
+    /**
+     * What the document keeps of it.
+     */
     val id: String
 
-    /** What the picker calls it. */
+    /**
+     * What the picker calls it.
+     */
     val name: StringResource
 
-    /** The seed choosing it sets. */
+    /**
+     * The seed choosing it sets.
+     */
     val seed: Argb
 
-    /** The edit choosing it makes to [document], one undo entry that never folds into another. */
+    /**
+     * The edit choosing it makes to [document], one undo entry that never folds into another.
+     */
     fun change(document: ThemeDocument): DocumentChange
 
     /**
@@ -145,10 +153,14 @@ internal object Presets {
         starter("starter-mono", Res.string.image_starter_mono, 0xFF5F6368, Style.Monochrome),
     )
 
-    /** The pictures, in the order the picker shows them. */
+    /**
+     * The pictures, in the order the picker shows them.
+     */
     val images: List<Preset.Image> = all.filterIsInstance<Preset.Image>()
 
-    /** The starters, in the order the picker shows them. */
+    /**
+     * The starters, in the order the picker shows them.
+     */
     val starters: List<Preset.Starter> = all.filterIsInstance<Preset.Starter>()
 
     init {
@@ -159,10 +171,14 @@ internal object Presets {
         }
     }
 
-    /** The preset [id] names, or null for one this build does not know. */
+    /**
+     * The preset [id] names, or null for one this build does not know.
+     */
     fun of(id: String): Preset? = all.firstOrNull { preset -> preset.id == id }
 
-    /** The picture [source] came from, or null when it came from anything else. */
+    /**
+     * The picture [source] came from, or null when it came from anything else.
+     */
     fun imageOf(source: SeedSource): Preset.Image? =
         (source as? SeedSource.Preset)?.let { preset -> of(preset.id) as? Preset.Image }
 

@@ -10,10 +10,14 @@ import kotlin.js.ExperimentalWasmJsInterop
 // Safari throws a SecurityError when a page calls the history API too often in a short time, so
 // every call here catches and reports whether it went through.
 
-/** The path of the address the page is on, `/t/abc` for example. */
+/**
+ * The path of the address the page is on, `/t/abc` for example.
+ */
 internal fun locationPath(): String = js("window.location.pathname")
 
-/** The query of the address the page is on, with its leading `?`, or empty. */
+/**
+ * The query of the address the page is on, with its leading `?`, or empty.
+ */
 internal fun locationQuery(): String = js("window.location.search")
 
 // b-505
@@ -24,7 +28,9 @@ internal fun locationQuery(): String = js("window.location.search")
  */
 internal fun locationOrigin(): String? = js("/^https?:/.test(window.location.origin) ? window.location.origin : null")
 
-/** Swap the address for [url] without adding an entry. False when the browser refused. */
+/**
+ * Swap the address for [url] without adding an entry. False when the browser refused.
+ */
 internal fun historyReplaceUrl(url: String): Boolean =
     js(
         """{
@@ -37,7 +43,9 @@ internal fun historyReplaceUrl(url: String): Boolean =
     }""",
     )
 
-/** Add an entry on the same address for the overlay [id], [depth] deep. False when the browser refused. */
+/**
+ * Add an entry on the same address for the overlay [id], [depth] deep. False when the browser refused.
+ */
 internal fun historyPushOverlay(
     id: String,
     depth: Int,
@@ -69,7 +77,9 @@ internal fun historyBack(steps: Int): Boolean =
     }""",
     )
 
-/** How many overlay entries deep the current entry is. */
+/**
+ * How many overlay entries deep the current entry is.
+ */
 internal fun historyOverlayDepth(): Int =
     js(
         """{
@@ -78,7 +88,9 @@ internal fun historyOverlayDepth(): Int =
     }""",
     )
 
-/** Call [listener] with the overlay depth of the entry the browser moved to, back or forward. */
+/**
+ * Call [listener] with the overlay depth of the entry the browser moved to, back or forward.
+ */
 internal fun onHistoryPop(listener: (Int) -> Unit): Unit =
     js(
         """{

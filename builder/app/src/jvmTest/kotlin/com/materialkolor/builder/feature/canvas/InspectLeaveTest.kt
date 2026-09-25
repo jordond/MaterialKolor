@@ -20,7 +20,9 @@ import com.materialkolor.builder.preview.inspect.INSPECT_CARD_TAG
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** The Inspect card's first action, so its presence means a card is pinned. */
+/**
+ * The Inspect card's first action, so its presence means a card is pinned.
+ */
 private const val PIN_ROLE = "Pin this role"
 
 @OptIn(ExperimentalTestApi::class)
@@ -44,7 +46,9 @@ class InspectLeaveTest {
             onNodeWithText("Inspect").assertIsFocused().assertIsOff()
         }
 
-    /** A canvas host at the default view with Inspect on. */
+    /**
+     * A canvas host at the default view with Inspect on.
+     */
     private fun inspecting(): CanvasHost =
         CanvasHost(view = ProjectViewState()).also { host -> host.state = host.state.copy(inspect = true) }
 }

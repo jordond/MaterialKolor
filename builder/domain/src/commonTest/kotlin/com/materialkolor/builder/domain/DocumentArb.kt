@@ -60,10 +60,14 @@ class DocumentArb(
             customTones = nextCustomTones(),
         )
 
-    /** An opaque color. */
+    /**
+     * An opaque color.
+     */
     fun nextArgb(): Argb = Argb(random.nextInt())
 
-    /** One of the four contrast levels a document holds (D53). */
+    /**
+     * One of the four contrast levels a document holds (D53).
+     */
     fun nextContrast(): ContrastLevel = ContrastLevel.Stops.random(random)
 
     private fun nextArgbOrNull(): Argb? = if (random.nextBoolean()) nextArgb() else null

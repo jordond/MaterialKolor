@@ -150,7 +150,9 @@ internal fun previewCommands(
     ) { dispatcher.dispatch(WorkspaceAction.SetPosterCollapsed(!collapsed)) }
 }
 
-/** The device widths, which phones never get, since their preview is always a phone (F-46). */
+/**
+ * The device widths, which phones never get, since their preview is always a phone (F-46).
+ */
 @Composable
 @NonRestartableComposable
 private fun deviceWidthCommands(

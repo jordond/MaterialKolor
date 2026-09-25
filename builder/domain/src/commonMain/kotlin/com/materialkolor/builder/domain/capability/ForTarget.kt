@@ -47,7 +47,9 @@ public fun ThemeDocument.forTarget(target: ExportTarget): ThemeDocument {
         .fold(this) { document, control -> document.without(control) }
 }
 
-/** The library whose column of the table [ExportTarget.of] maps onto this target. */
+/**
+ * The library whose column of the table [ExportTarget.of] maps onto this target.
+ */
 private val ExportTarget.library: Library
     get() = when (this) {
         ExportTarget.Material3,
@@ -58,7 +60,9 @@ private val ExportTarget.library: Library
         ExportTarget.Custom -> Library.Custom
     }
 
-/** This document with the field [control] sets put back to its default, or as it is when there is none. */
+/**
+ * This document with the field [control] sets put back to its default, or as it is when there is none.
+ */
 private fun ThemeDocument.without(control: Control): ThemeDocument =
     when (control) {
         Control.PrimaryOverride -> copy(keyColors = keyColors.copy(primary = null))

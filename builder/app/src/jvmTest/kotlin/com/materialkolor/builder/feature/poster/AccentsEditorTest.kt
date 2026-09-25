@@ -313,7 +313,9 @@ class AccentsEditorTest {
         }
 }
 
-/** The line over one mode's four colors of the only extra color of [document], as the editor words it. */
+/**
+ * The line over one mode's four colors of the only extra color of [document], as the editor words it.
+ */
 private fun ratios(
     document: ThemeDocument,
     isDark: Boolean,
@@ -338,7 +340,9 @@ private fun ratios(
     return "$mode, on color $onColor to 1, on container $onContainer to 1"
 }
 
-/** Focuses [node] and presses Enter on it, the way a keyboard user does. */
+/**
+ * Focuses [node] and presses Enter on it, the way a keyboard user does.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.pressByKeyboard(node: SemanticsNodeInteraction) {
     node.requestFocus()

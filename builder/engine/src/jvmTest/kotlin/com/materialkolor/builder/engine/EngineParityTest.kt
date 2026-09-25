@@ -111,7 +111,9 @@ class EngineParityTest {
         }
     }
 
-    /** Unstyled has no AMOLED switch and its export never turns it on, so these run with it off. */
+    /**
+     * Unstyled has no AMOLED switch and its export never turns it on, so these run with it off.
+     */
     @Test
     fun resolve_randomDocuments_rolesMatchUnstyledThemeValues() {
         for (document in documents.map { document -> document.copy(amoled = false) }) {
@@ -147,7 +149,9 @@ class EngineParityTest {
         }
     }
 
-    /** `toFluentColors` reads each mode's own primary palette, and 2025 TonalSpot softens the dark one. */
+    /**
+     * `toFluentColors` reads each mode's own primary palette, and 2025 TonalSpot softens the dark one.
+     */
     @Test
     fun resolve_tonalSpot2025_fluentShadesDifferBetweenModes() {
         val document = ThemeDocument(
@@ -189,7 +193,9 @@ class EngineParityTest {
         }
     }
 
-    /** Every contrast is a frozen option, so a dynamic export that still carries it gets standard alone. */
+    /**
+     * Every contrast is a frozen option, so a dynamic export that still carries it gets standard alone.
+     */
     @Test
     fun resolve_dynamicWithAllContrastsLeftOver_resolvesStandardOnly() {
         val leftover = ExportPrefs(mode = ExportMode.Dynamic, frozenVariants = FrozenVariants.AllContrasts)
@@ -209,7 +215,9 @@ class EngineParityTest {
         assertTrue(resolved.fluentShades != null, "Fluent shades are filled for every target")
     }
 
-    /** The chrome schemes floor contrast for the builder's own UI, and that must never reach an export. */
+    /**
+     * The chrome schemes floor contrast for the builder's own UI, and that must never reach an export.
+     */
     @Test
     fun resolve_reducedContrast_readsTheDocumentSchemesNotTheChrome() {
         val document = ThemeDocument(seed = Argb(0x6750A4), contrast = ContrastLevel.Reduced)
@@ -315,7 +323,9 @@ class EngineParityTest {
     private fun fluentShadesOf(document: ThemeDocument): FluentShades =
         FluentShades(light = fluentShades(document, isDark = false), dark = fluentShades(document, isDark = true))
 
-    /** Whether harmonizing this accent with the theme seed moves its color, alpha aside. */
+    /**
+     * Whether harmonizing this accent with the theme seed moves its color, alpha aside.
+     */
     private fun Accent.harmonizeMoves(document: ThemeDocument): Boolean {
         val harmonized = seed.asColor().harmonize(document.seed.asColor()).asArgb()
         return harmonize && (harmonized.value and RGB_MASK) != (seed.value and RGB_MASK)
@@ -328,7 +338,9 @@ class EngineParityTest {
         block(true)
     }
 
-    /** Fail with every key whose color differs, rather than two whole maps to compare by eye. */
+    /**
+     * Fail with every key whose color differs, rather than two whole maps to compare by eye.
+     */
     private fun <K> assertSameColors(
         expected: Map<K, Argb>,
         actual: Map<K, Argb>,

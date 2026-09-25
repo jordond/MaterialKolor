@@ -65,7 +65,9 @@ import io.github.composefluent.surface.Card
 
 // The samples of the Containment, Navigation and Feedback cards of FluentCards in GalleryEntry.kt.
 
-/** How far along the progress bar and ring are. */
+/**
+ * How far along the progress bar and ring are.
+ */
 private const val DemoProgress = 0.6f
 
 private val Folders = listOf("Recent", "Shared", "Favorites")
@@ -76,7 +78,9 @@ private val Mailboxes = listOf(
     "Archive" to Icons.Regular.Folder,
 )
 
-/** A clickable Fluent card and its disabled copy, sharing the row. */
+/**
+ * A clickable Fluent card and its disabled copy, sharing the row.
+ */
 @Composable
 internal fun SampleCards() {
     Row(horizontalArrangement = Arrangement.spacedBy(Gap)) {
@@ -311,7 +315,9 @@ internal fun NavigationList(state: DemoAppState) {
     }
 }
 
-/** An info bar of each severity. None has an action, so there is nothing to disable. */
+/**
+ * An info bar of each severity. None has an action, so there is nothing to disable.
+ */
 @Composable
 internal fun InfoBars() {
     GalleryColumn {
@@ -326,7 +332,9 @@ internal fun InfoBars() {
     }
 }
 
-/** The determinate bar, since the endless one would loop past frozen motion and a hidden tab. */
+/**
+ * The determinate bar, since the endless one would loop past frozen motion and a hidden tab.
+ */
 @Composable
 internal fun ProgressBars() {
     ProgressBar(
@@ -338,7 +346,9 @@ internal fun ProgressBars() {
     )
 }
 
-/** The determinate ring, for the same reason as the bar. */
+/**
+ * The determinate ring, for the same reason as the bar.
+ */
 @Composable
 internal fun ProgressRings() {
     ProgressRing(
@@ -347,7 +357,9 @@ internal fun ProgressRings() {
     )
 }
 
-/** Status badges in Fluent's fixed system colors, then counts on a system color and on the accent. */
+/**
+ * Status badges in Fluent's fixed system colors, then counts on a system color and on the accent.
+ */
 @Composable
 internal fun Badges() {
     Wrapping {
@@ -366,7 +378,9 @@ internal fun Badges() {
     }
 }
 
-/** What an info bar of this severity says. */
+/**
+ * What an info bar of this severity says.
+ */
 private fun InfoBarSeverity.message(): String =
     when (this) {
         InfoBarSeverity.Informational -> "A new version is ready to install."
@@ -375,7 +389,9 @@ private fun InfoBarSeverity.message(): String =
         InfoBarSeverity.Critical -> "Sign-in failed. Check your password."
     }
 
-/** Names a progress indicator and says how far along it is, which Fluent's own leave out. */
+/**
+ * Names a progress indicator and says how far along it is, which Fluent's own leave out.
+ */
 private fun Modifier.progressSemantics(label: String): Modifier =
     semantics {
         contentDescription = label

@@ -31,7 +31,9 @@ import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** The two specs a style with a 2025 form offers, in the order the choice shows them. */
+/**
+ * The two specs a style with a 2025 form offers, in the order the choice shows them.
+ */
 private val RevisedSpecs = listOf(SpecVersion.Spec2021, SpecVersion.Spec2025)
 
 /**
@@ -64,7 +66,9 @@ internal fun SpecPlatformControl(
     }
 }
 
-/** The spec choice for the document's style, or the badge for a style with only one spec. */
+/**
+ * The spec choice for the document's style, or the badge for a style with only one spec.
+ */
 @Composable
 private fun SpecChoice(
     context: PosterContext,
@@ -112,7 +116,9 @@ private fun ClassicOnlyLines(asked2025: Boolean) {
     }
 }
 
-/** Phone or Watch, the device the scheme is tuned for. */
+/**
+ * Phone or Watch, the device the scheme is tuned for.
+ */
 @Composable
 private fun PlatformChoice(
     context: PosterContext,
@@ -140,7 +146,9 @@ private fun PlatformChoice(
     }
 }
 
-/** What [spec] is called, the year it came out. */
+/**
+ * What [spec] is called, the year it came out.
+ */
 internal fun specName(spec: SpecVersion): StringResource =
     when (spec) {
         SpecVersion.Spec2021 -> Res.string.extras_spec_2021
@@ -148,7 +156,9 @@ internal fun specName(spec: SpecVersion): StringResource =
         SpecVersion.Spec2026 -> Res.string.extras_spec_2026
     }
 
-/** What [platform] is called. */
+/**
+ * What [platform] is called.
+ */
 private fun platformName(platform: SchemePlatform): StringResource =
     when (platform) {
         SchemePlatform.Phone -> Res.string.extras_platform_phone

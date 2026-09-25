@@ -34,7 +34,9 @@ public fun BuilderDivider(
     }
 }
 
-/** A divider drawn from [style] with Compose Unstyled's separators. */
+/**
+ * A divider drawn from [style] with Compose Unstyled's separators.
+ */
 @Composable
 internal fun HeadlessDivider(
     style: DividerStyle,

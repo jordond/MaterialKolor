@@ -21,7 +21,9 @@ import com.materialkolor.builder.preview.inspect.InspectActions
 import com.materialkolor.builder.preview.inspect.InspectOverlay
 import dev.stateholder.dispatcher.Dispatcher
 
-/** The tabs Inspect works on, the two that show the sample screens in light and dark. */
+/**
+ * The tabs Inspect works on, the two that show the sample screens in light and dark.
+ */
 private val InspectTabs: Set<PreviewTab> = setOf(PreviewTab.App, PreviewTab.Components)
 
 /**
@@ -82,7 +84,9 @@ internal fun InspectLayer(
 
 // b-308b
 
-/** Where Show on ramp takes this color in the mode [isDark] picks, or null for a color on no ramp of the tab. */
+/**
+ * Where Show on ramp takes this color in the mode [isDark] picks, or null for a color on no ramp of the tab.
+ */
 internal fun ColorRef.rampTarget(isDark: Boolean): RampTarget? =
     when (this) {
         is ColorRef.OfRole -> RampTarget.OfRole(role, isDark)
@@ -90,7 +94,9 @@ internal fun ColorRef.rampTarget(isDark: Boolean): RampTarget? =
         is ColorRef.OfSlot, is ColorRef.OfFluentText, is ColorRef.OfFluentShade -> null
     }
 
-/** Tell [preview] each time a pointer lets go over the canvas, before anything under it sees the release. */
+/**
+ * Tell [preview] each time a pointer lets go over the canvas, before anything under it sees the release.
+ */
 private fun Modifier.saveOnRelease(preview: PreviewSplit): Modifier =
     pointerInput(preview) {
         awaitPointerEventScope {

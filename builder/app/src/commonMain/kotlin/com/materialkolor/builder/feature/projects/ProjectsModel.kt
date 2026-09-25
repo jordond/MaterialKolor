@@ -76,7 +76,9 @@ internal class ProjectsModel(
         }
     }
 
-    /** The time now in milliseconds since the epoch, for each project's age. */
+    /**
+     * The time now in milliseconds since the epoch, for each project's age.
+     */
     fun nowMillis(): Long = clock.now().toEpochMilliseconds()
 
     fun handle(action: ProjectsAction) {
@@ -163,14 +165,18 @@ internal class ProjectsModel(
         }
     }
 
-    /** Open the newest project other than [id], or a fresh one when [id] was the only one. */
+    /**
+     * Open the newest project other than [id], or a fresh one when [id] was the only one.
+     */
     private suspend fun moveOffDeleted(id: String) {
         val next = state.value.projects.firstOrNull { meta -> meta.id != id }
         if (next != null && session.open(next.id)) return
         session.newProject(copyCurrent = false)
     }
 
-    /** Put [deleted] back where it was listed, whether or not it is still the last deletion. */
+    /**
+     * Put [deleted] back where it was listed, whether or not it is still the last deletion.
+     */
     private fun undoDelete(deleted: DeletedProject) {
         updateState { state -> if (state.lastDeletion == deleted) state.copy(lastDeletion = null) else state }
         viewModelScope.launch {
@@ -242,19 +248,27 @@ internal class ProjectsModel(
         val newerData: Boolean = false,
         val problem: ProjectsProblem? = null,
     ) {
-        /** The open project's id, or null when it is not saved. */
+        /**
+         * The open project's id, or null when it is not saved.
+         */
         val openId: String?
             get() = (open as? ProjectRef.Persisted)?.id
 
-        /** Whether the open theme is not saved yet, one from a link or one storage turned down. */
+        /**
+         * Whether the open theme is not saved yet, one from a link or one storage turned down.
+         */
         val transient: Boolean
             get() = open is ProjectRef.Transient
 
-        /** Whether there are enough projects for the search field to show. */
+        /**
+         * Whether there are enough projects for the search field to show.
+         */
         val searchable: Boolean
             get() = projects.size > SEARCH_THRESHOLD
 
-        /** The projects the list shows, narrowed by [query] while the search field shows. */
+        /**
+         * The projects the list shows, narrowed by [query] while the search field shows.
+         */
         val shown: List<ProjectMeta>
             get() {
                 val needle = query.trim()
@@ -274,16 +288,24 @@ internal enum class ProjectsProblem {
     NotRenamed,
     NotDeleted,
 
-    /** A newer build saved the project, so only a reload can delete it (D41). */
+    /**
+     * A newer build saved the project, so only a reload can delete it (D41).
+     */
     NotDeletedNewer,
     NotRestored,
 
-    /** Saved data could not be read, so it was moved aside rather than lost. */
+    /**
+     * Saved data could not be read, so it was moved aside rather than lost.
+     */
     SetAside,
 }
 
-/** How many projects the drawer lists before it offers a search. */
+/**
+ * How many projects the drawer lists before it offers a search.
+ */
 internal const val SEARCH_THRESHOLD: Int = 8
 
-/** The number of saved projects at which persistent storage is asked for. */
+/**
+ * The number of saved projects at which persistent storage is asked for.
+ */
 private const val PERSIST_AT: Int = 2

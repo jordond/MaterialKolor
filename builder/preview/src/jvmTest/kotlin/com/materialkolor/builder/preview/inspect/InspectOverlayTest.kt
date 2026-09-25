@@ -28,16 +28,24 @@ import com.materialkolor.builder.preview.split.SplitState
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** A declared element for the card to pin to. */
+/**
+ * A declared element for the card to pin to.
+ */
 private const val ELEMENT = "element"
 
-/** A clickable element beside it, where the card lands. */
+/**
+ * A clickable element beside it, where the card lands.
+ */
 private const val UNDER = "under"
 
-/** How far into the card's top start corner the click lands, clear of its actions. */
+/**
+ * How far into the card's top start corner the click lands, clear of its actions.
+ */
 private const val INSET = 4f
 
-/** Actions that do nothing, for tests that only look at the card. */
+/**
+ * Actions that do nothing, for tests that only look at the card.
+ */
 private val NoActions: InspectActions =
     InspectActions(
         pinEnabled = true,

@@ -67,7 +67,9 @@ public data class Preferences(
     ): Preferences = copy(exportPrefs = exportPrefs + (target to prefs))
 
     public companion object {
-        /** Reads and writes [Preferences]. */
+        /**
+         * Reads and writes [Preferences].
+         */
         public val Codec: RecordCodec<Preferences> = RecordCodec(serializer(), Migrations.None)
     }
 }
@@ -77,15 +79,21 @@ public data class Preferences(
  */
 @Serializable
 public enum class Appearance {
-    /** Follow the system. */
+    /**
+     * Follow the system.
+     */
     @SerialName("System")
     System,
 
-    /** Always light. */
+    /**
+     * Always light.
+     */
     @SerialName("Light")
     Light,
 
-    /** Always dark. */
+    /**
+     * Always dark.
+     */
     @SerialName("Dark")
     Dark,
 }
@@ -95,15 +103,21 @@ public enum class Appearance {
  */
 @Serializable
 public enum class MotionOverride {
-    /** Follow the system's reduced motion setting. */
+    /**
+     * Follow the system's reduced motion setting.
+     */
     @SerialName("System")
     System,
 
-    /** Keep motion to a minimum. */
+    /**
+     * Keep motion to a minimum.
+     */
     @SerialName("Reduce")
     Reduce,
 
-    /** Animate fully. */
+    /**
+     * Animate fully.
+     */
     @SerialName("Full")
     Full,
 }
@@ -116,23 +130,33 @@ public enum class MotionOverride {
  */
 @Serializable
 public enum class ExportTarget {
-    /** A Compose Material 3 theme. */
+    /**
+     * A Compose Material 3 theme.
+     */
     @SerialName("Material3")
     Material3,
 
-    /** A Compose Material 3 theme with the expressive shapes, type and motion. */
+    /**
+     * A Compose Material 3 theme with the expressive shapes, type and motion.
+     */
     @SerialName("Material3Expressive")
     Material3Expressive,
 
-    /** The plain color holder. */
+    /**
+     * The plain color holder.
+     */
     @SerialName("Unstyled")
     Unstyled,
 
-    /** A Fluent color set. */
+    /**
+     * A Fluent color set.
+     */
     @SerialName("Fluent")
     Fluent,
 
-    /** A hand shaped set of slots. */
+    /**
+     * A hand shaped set of slots.
+     */
     @SerialName("Custom")
     Custom,
     ;
@@ -189,10 +213,14 @@ public data class ExportPrefs(
     public val androidDynamicColor: Boolean = false,
 ) {
     public companion object {
-        /** The package an export uses until someone types their own. */
+        /**
+         * The package an export uses until someone types their own.
+         */
         public const val DEFAULT_PACKAGE_NAME: String = "com.example.theme"
 
-        /** How long color changes animate for until someone picks another duration. */
+        /**
+         * How long color changes animate for until someone picks another duration.
+         */
         public const val DEFAULT_ANIMATION_DURATION_MS: Int = 300
     }
 }
@@ -202,11 +230,15 @@ public data class ExportPrefs(
  */
 @Serializable
 public enum class ExportMode {
-    /** MaterialKolor generates the scheme from the seed at runtime. */
+    /**
+     * MaterialKolor generates the scheme from the seed at runtime.
+     */
     @SerialName("Dynamic")
     Dynamic,
 
-    /** Every color is written out as hex, with no MaterialKolor dependency. */
+    /**
+     * Every color is written out as hex, with no MaterialKolor dependency.
+     */
     @SerialName("Frozen")
     Frozen,
 }
@@ -216,11 +248,15 @@ public enum class ExportMode {
  */
 @Serializable
 public enum class FrozenVariants {
-    /** Standard contrast only. */
+    /**
+     * Standard contrast only.
+     */
     @SerialName("StandardOnly")
     StandardOnly,
 
-    /** Standard, medium and high contrast. */
+    /**
+     * Standard, medium and high contrast.
+     */
     @SerialName("AllContrasts")
     AllContrasts,
 }

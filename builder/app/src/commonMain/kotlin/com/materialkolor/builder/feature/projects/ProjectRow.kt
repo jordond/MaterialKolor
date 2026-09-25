@@ -177,7 +177,9 @@ private fun RenameField(
     LaunchedEffect(focus) { focus.requestFocus() }
 }
 
-/** The keys that close the rename field. */
+/**
+ * The keys that close the rename field.
+ */
 private val CLOSE_KEYS: Set<Key> = setOf(Key.Enter, Key.NumPadEnter, Key.Escape)
 
 @Composable

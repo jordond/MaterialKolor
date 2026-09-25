@@ -70,7 +70,9 @@ public fun BuilderFilterChip(
     }
 }
 
-/** A filter chip drawn from [style]. */
+/**
+ * A filter chip drawn from [style].
+ */
 @Composable
 internal fun HeadlessFilterChip(
     selected: Boolean,

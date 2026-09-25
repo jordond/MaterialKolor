@@ -18,32 +18,50 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
  * The type is the same in every skin, so a style names a role in the builder rather than a size.
  */
 public enum class BuilderTextStyle {
-    /** The seed hex on the poster. */
+    /**
+     * The seed hex on the poster.
+     */
     PosterHero,
 
-    /** The MaterialKolor wordmark. */
+    /**
+     * The MaterialKolor wordmark.
+     */
     Wordmark,
 
-    /** A panel or dialog title. */
+    /**
+     * A panel or dialog title.
+     */
     Title,
 
-    /** The small label above a group of controls. */
+    /**
+     * The small label above a group of controls.
+     */
     SectionLabel,
 
-    /** Explainers and descriptions. */
+    /**
+     * Explainers and descriptions.
+     */
     Body,
 
-    /** A control label or a button. */
+    /**
+     * A control label or a button.
+     */
     Label,
 
-    /** A hex, a tone or a ratio shown beside a control. */
+    /**
+     * A hex, a tone or a ratio shown beside a control.
+     */
     Value,
 
-    /** Generated code. */
+    /**
+     * Generated code.
+     */
     Code,
 }
 
-/** The text style [style] names in this type. */
+/**
+ * The text style [style] names in this type.
+ */
 internal operator fun BuilderType.get(style: BuilderTextStyle): TextStyle =
     when (style) {
         BuilderTextStyle.PosterHero -> posterHero

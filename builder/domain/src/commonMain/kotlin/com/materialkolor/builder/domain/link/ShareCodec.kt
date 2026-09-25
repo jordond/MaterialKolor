@@ -40,10 +40,14 @@ public sealed interface DecodeResult {
         public val projectName: String?,
     ) : DecodeResult
 
-    /** The code was written by a newer builder, in a format this one cannot read yet. */
+    /**
+     * The code was written by a newer builder, in a format this one cannot read yet.
+     */
     public data object UnknownVersion : DecodeResult
 
-    /** The code is damaged, cut short, or was never a share code. */
+    /**
+     * The code is damaged, cut short, or was never a share code.
+     */
     public data object Corrupt : DecodeResult
 }
 
@@ -74,7 +78,9 @@ public sealed interface DecodeResult {
  * Accents travel as their seed, name, harmonize choice, tones and threshold, and nothing else.
  */
 public object ShareCodec {
-    /** The format version this codec writes, and the only one it reads. */
+    /**
+     * The format version this codec writes, and the only one it reads.
+     */
     public const val VERSION: Int = 1
 
     /**

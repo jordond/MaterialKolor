@@ -20,7 +20,9 @@ public class RecordCodec<T> internal constructor(
     private val migrations: Migrations,
     private val settle: (T) -> T = { value -> value },
 ) {
-    /** The schema this builder writes the record in. */
+    /**
+     * The schema this builder writes the record in.
+     */
     public val schema: Int
         get() = migrations.current
 

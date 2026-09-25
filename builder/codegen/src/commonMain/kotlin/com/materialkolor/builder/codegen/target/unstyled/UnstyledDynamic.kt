@@ -44,7 +44,9 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * one `dynamicColorSchemes` sets. Unstyled has no AMOLED switch yet, so AMOLED is never written.
  */
 public object UnstyledDynamic {
-    /** Every file the export of [input] writes, in the order a reader would open them. */
+    /**
+     * Every file the export of [input] writes, in the order a reader would open them.
+     */
     public fun files(input: ExportInput): List<GeneratedFile> {
         require(input.target == ExportTarget.Unstyled) {
             "The Unstyled dynamic export cannot write a ${input.target} theme"
@@ -134,7 +136,9 @@ private fun rememberedValues(
         trailingLambda { statement(schemeValues(document, isDark)) }
     }
 
-/** Whether a scheme call for this document has anything to say beyond its seed. */
+/**
+ * Whether a scheme call for this document has anything to say beyond its seed.
+ */
 private fun ThemeDocument.overridesScheme(defaults: SchemeDefaults): Boolean =
     KeyColorOrder.any { keyColor -> keyColors[keyColor] != null } ||
         !defaults.style.isDefault(style) ||
@@ -142,7 +146,9 @@ private fun ThemeDocument.overridesScheme(defaults: SchemeDefaults): Boolean =
         !defaults.specVersion.isDefault(spec) ||
         !defaults.platform.isDefault(platform)
 
-/** `rememberTonalPalette(seed = BrandSeed, harmonizeWith = SeedColor)`, the same ramp the Material 3 export builds. */
+/**
+ * `rememberTonalPalette(seed = BrandSeed, harmonizeWith = SeedColor)`, the same ramp the Material 3 export builds.
+ */
 private fun paletteCall(accent: Accent): Expression =
     call(Symbols.RememberTonalPalette, multiline = accent.harmonizes) {
         argument("seed", ref(accent.seedName))
@@ -193,7 +199,9 @@ private fun accentEntries(
     }
 }
 
-/** `brandPalette.onTone(40)`, with the threshold when the accent asks for another one. */
+/**
+ * `brandPalette.onTone(40)`, with the threshold when the accent asks for another one.
+ */
 private fun onToneCall(
     accent: Accent,
     tone: Int,
@@ -205,7 +213,9 @@ private fun onToneCall(
         }
     }
 
-/** `Tokens.kt`, the four tokens of every accent, or nothing when the theme has none. */
+/**
+ * `Tokens.kt`, the four tokens of every accent, or nothing when the theme has none.
+ */
 private fun tokensFile(input: ExportInput): GeneratedFile? {
     val accents = input.document.accents
     if (accents.isEmpty()) return null

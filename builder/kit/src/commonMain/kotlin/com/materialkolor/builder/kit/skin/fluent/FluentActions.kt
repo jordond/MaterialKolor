@@ -83,7 +83,9 @@ private fun Modifier.fluentFeedback(interactionSource: MutableInteractionSource)
         .controlPress(interactionSource)
         .controlRing(interactionSource, FluentTheme.shapes.control)
 
-/** A glyph and a label in whatever ink the surrounding Fluent layer provides. */
+/**
+ * A glyph and a label in whatever ink the surrounding Fluent layer provides.
+ */
 @Composable
 private fun FluentLabel(
     label: String,
@@ -134,16 +136,24 @@ private fun fluentOwnButtonColors(emphasis: Emphasis): VisualStateScheme<ButtonC
         }
     }
 
-/** How much of its fill Fluent keeps on an accent button under the pointer. */
+/**
+ * How much of its fill Fluent keeps on an accent button under the pointer.
+ */
 private const val HoveredFillAlpha = 0.9f
 
-/** How much of its fill Fluent keeps on an accent button while it is pressed. */
+/**
+ * How much of its fill Fluent keeps on an accent button while it is pressed.
+ */
 private const val PressedFillAlpha = 0.8f
 
-/** Fluent's control height. */
+/**
+ * Fluent's control height.
+ */
 private val FluentControlHeight = 32.dp
 
-/** The room Fluent's button keeps either side of its label. */
+/**
+ * The room Fluent's button keeps either side of its label.
+ */
 private val FluentButtonPadding = 12.dp
 
 /**
@@ -217,7 +227,9 @@ private fun fluentActionStyles(
     )
 }
 
-/** How round Fluent draws a card, its overlay corner. */
+/**
+ * How round Fluent draws a card, its overlay corner.
+ */
 private val FluentCardRadius = 8.dp
 
 /**

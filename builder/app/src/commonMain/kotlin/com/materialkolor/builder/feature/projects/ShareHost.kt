@@ -63,7 +63,9 @@ private class ShownLink(
     private var document: ThemeDocument? = null
     private var projectName: String? = null
 
-    /** The last link worked out, or null when there is none yet or the theme would not fit. */
+    /**
+     * The last link worked out, or null when there is none yet or the theme would not fit.
+     */
     var link: String? = null
         private set
 

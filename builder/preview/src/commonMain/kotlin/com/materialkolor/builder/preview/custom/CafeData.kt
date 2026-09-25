@@ -12,7 +12,9 @@ import com.composables.icons.lucide.Sprout
 
 // The cafe's words and its menu. All of it is placeholder copy until the owner signs it off.
 
-/** Every line of copy the cafe shows that is not part of the menu. */
+/**
+ * Every line of copy the cafe shows that is not part of the menu.
+ */
 internal object CafeCopy {
     const val StoreName = "Corner Cup"
     const val OpenUntil = "Open until 6 pm"
@@ -32,29 +34,43 @@ internal object CafeCopy {
     const val ViewOrder = "View order"
     const val BackToMenu = "Menu"
 
-    /** How the stamp card reads with [collected] of [needed] stamps. */
+    /**
+     * How the stamp card reads with [collected] of [needed] stamps.
+     */
     fun stampsLeft(
         collected: Int,
         needed: Int,
     ): String = "$collected of $needed, ${needed - collected} more for a free drink"
 
-    /** A count of drinks, one drink or several. */
+    /**
+     * A count of drinks, one drink or several.
+     */
     fun drinks(count: Int): String = if (count == 1) "1 drink" else "$count drinks"
 
-    /** A count of items in the order, one item or several. */
+    /**
+     * A count of items in the order, one item or several.
+     */
     fun items(count: Int): String = if (count == 1) "1 item" else "$count items"
 
-    /** What the heart of the drink [name] reads out. */
+    /**
+     * What the heart of the drink [name] reads out.
+     */
     fun favourite(name: String): String = "Favourite $name"
 
-    /** What the remove button of an order line reads out. */
+    /**
+     * What the remove button of an order line reads out.
+     */
     fun removeOne(name: String): String = "Remove one $name"
 
-    /** A price in cents as dollars and cents. */
+    /**
+     * A price in cents as dollars and cents.
+     */
     fun price(cents: Int): String = "$" + "${cents / 100}." + "${cents % 100}".padStart(2, '0')
 }
 
-/** How to have an order. */
+/**
+ * How to have an order.
+ */
 internal enum class OrderType(
     val label: String,
 ) {
@@ -62,7 +78,9 @@ internal enum class OrderType(
     DineIn("Dine in"),
 }
 
-/** How a drink is served, which says which accent tags it. */
+/**
+ * How a drink is served, which says which accent tags it.
+ */
 internal enum class Served(
     val label: String,
     val icon: ImageVector,
@@ -112,7 +130,9 @@ internal class CafeItem(
     val startQuantity: Int = 0,
 )
 
-/** The whole menu, in the order each category lists it. */
+/**
+ * The whole menu, in the order each category lists it.
+ */
 internal val CafeMenu: List<CafeItem> = listOf(
     CafeItem(
         id = "flatWhite",
@@ -165,13 +185,19 @@ internal val CafeMenu: List<CafeItem> = listOf(
     CafeItem("frozenCocoa", "Frozen cocoa", "Blended with ice and cream", 560, CafeCategory.Chocolate, Served.Cold),
 )
 
-/** The drinks of this category, in menu order. */
+/**
+ * The drinks of this category, in menu order.
+ */
 internal val CafeCategory.items: List<CafeItem>
     get() = CafeMenu.filter { item -> item.category == this }
 
-/** The most of one drink an order holds. */
+/**
+ * The most of one drink an order holds.
+ */
 internal const val MaxQuantity = 9
 
-/** How many stamps the stamp card holds, and how many are on it already. */
+/**
+ * How many stamps the stamp card holds, and how many are on it already.
+ */
 internal const val StampsNeeded = 10
 internal const val StampsCollected = 7

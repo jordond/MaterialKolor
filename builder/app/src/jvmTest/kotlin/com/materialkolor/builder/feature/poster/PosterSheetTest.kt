@@ -33,7 +33,9 @@ import kotlin.test.Test
 
 // b-406
 
-/** A phone, upright or on its side (D38). */
+/**
+ * A phone, upright or on its side (D38).
+ */
 private const val PHONE_SHORT = 390
 private const val PHONE_LONG = 844
 
@@ -119,7 +121,9 @@ class PosterSheetTest {
         waitForIdle()
     }
 
-    /** Where the first node [matcher] finds starts down the sheet, unclipped. */
+    /**
+     * Where the first node [matcher] finds starts down the sheet, unclipped.
+     */
     private fun ComposeUiTest.top(matcher: SemanticsMatcher): Float =
         onAllNodes(matcher, useUnmergedTree = true).fetchSemanticsNodes().minOf { node -> node.positionInRoot.y }
 

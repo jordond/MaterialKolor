@@ -13,7 +13,9 @@ private val Seed = Argb(0x6750A4)
 
 private val Plain = ThemeDocument(seed = Seed)
 
-/** An Unstyled theme with an extra color for each of [names], in order. */
+/**
+ * An Unstyled theme with an extra color for each of [names], in order.
+ */
 private fun unstyled(vararg names: String): ThemeDocument =
     Plain.copy(library = Library.Unstyled, accents = names.map { name -> accent(name) })
 

@@ -68,7 +68,9 @@ class HeadlessDropdownKeysTest {
 private fun ComposeUiTest.option(label: String): SemanticsNodeInteraction =
     onNode(hasText(label) and hasRole(Role.RadioButton))
 
-/** Presses [key] on the focused option and checks focus moved to the option named [lands]. */
+/**
+ * Presses [key] on the focused option and checks focus moved to the option named [lands].
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.press(
     key: Key,

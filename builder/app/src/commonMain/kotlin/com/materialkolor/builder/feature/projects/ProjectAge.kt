@@ -4,7 +4,9 @@ package com.materialkolor.builder.feature.projects
  * How long ago a project was saved, in the one unit the drawer shows.
  */
 internal sealed interface ProjectAge {
-    /** Less than a minute ago, or a clock that reads earlier than the save. */
+    /**
+     * Less than a minute ago, or a clock that reads earlier than the save.
+     */
     data object JustNow : ProjectAge
 
     data class Minutes(
@@ -32,7 +34,9 @@ internal sealed interface ProjectAge {
     ) : ProjectAge
 
     companion object {
-        /** The age of a save made at [savedAt] when it is [now], both in milliseconds since the epoch. */
+        /**
+         * The age of a save made at [savedAt] when it is [now], both in milliseconds since the epoch.
+         */
         fun of(
             savedAt: Long,
             now: Long,

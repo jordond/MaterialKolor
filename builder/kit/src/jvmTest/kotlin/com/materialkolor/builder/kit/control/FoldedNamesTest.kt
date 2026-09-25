@@ -22,7 +22,9 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.skin.Skin
 import kotlin.test.Test
 
-/** Shows one of every control an app draws for itself and names through the kit, with the fold as [folds]. */
+/**
+ * Shows one of every control an app draws for itself and names through the kit, with the fold as [folds].
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.showAppDrawn(
     skin: Skin,

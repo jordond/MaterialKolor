@@ -104,7 +104,9 @@ internal fun HeadlessTooltip(
 
 // b-513
 
-/** Calls [hide] as a pointer goes down anywhere on the anchor, before the anchor sees the press. */
+/**
+ * Calls [hide] as a pointer goes down anywhere on the anchor, before the anchor sees the press.
+ */
 private suspend fun PointerInputScope.hideOnPress(hide: () -> Unit) {
     awaitPointerEventScope {
         while (true) {
@@ -162,7 +164,9 @@ private fun TooltipPopup(
     }
 }
 
-/** Centred above the anchor, or below it when the window runs out above. */
+/**
+ * Centred above the anchor, or below it when the window runs out above.
+ */
 internal class TooltipPositionProvider(
     private val gap: Int,
 ) : PopupPositionProvider {

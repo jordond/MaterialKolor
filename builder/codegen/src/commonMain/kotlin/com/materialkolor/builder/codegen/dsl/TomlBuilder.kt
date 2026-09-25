@@ -15,22 +15,30 @@ public fun tomlFile(
     return GeneratedFile(path = path, language = Language.Toml, lines = scope.result())
 }
 
-/** The top level of a generated TOML file. */
+/**
+ * The top level of a generated TOML file.
+ */
 @CodegenDsl
 public class TomlScope internal constructor() {
     private val lines = mutableListOf<List<Token>>()
 
-    /** A comment line. */
+    /**
+     * A comment line.
+     */
     public fun comment(text: String) {
         lines += listOf(commentToken("# $text"))
     }
 
-    /** A blank line. */
+    /**
+     * Adds an empty line to the file.
+     */
     public fun blankLine() {
         lines.add(emptyList())
     }
 
-    /** A `[name]` table header followed by whatever the block adds. */
+    /**
+     * A `[name]` table header followed by whatever the block adds.
+     */
     public fun table(
         name: String,
         build: TomlTableScope.() -> Unit,
@@ -47,17 +55,23 @@ public class TomlScope internal constructor() {
     internal fun result(): List<List<Token>> = lines.toList()
 }
 
-/** The entries under one TOML table. */
+/**
+ * The entries under one TOML table.
+ */
 @CodegenDsl
 public class TomlTableScope internal constructor() {
     private val lines = mutableListOf<List<Token>>()
 
-    /** A comment line. */
+    /**
+     * A comment line.
+     */
     public fun comment(text: String) {
         lines += listOf(commentToken("# $text"))
     }
 
-    /** A plain `key = "value"` entry. */
+    /**
+     * A plain `key = "value"` entry.
+     */
     public fun key(
         name: String,
         value: String,
@@ -65,7 +79,9 @@ public class TomlTableScope internal constructor() {
         lines += keyTokens(name) + stringToken(value)
     }
 
-    /** An entry whose value is an inline table, as most catalog libraries are. */
+    /**
+     * An entry whose value is an inline table, as most catalog libraries are.
+     */
     public fun inlineTable(
         name: String,
         build: TomlInlineScope.() -> Unit,
@@ -95,12 +111,16 @@ public class TomlTableScope internal constructor() {
     internal fun result(): List<List<Token>> = lines.toList()
 }
 
-/** The entries inside one inline table. */
+/**
+ * The entries inside one inline table.
+ */
 @CodegenDsl
 public class TomlInlineScope internal constructor() {
     private val entries = mutableListOf<TomlEntry>()
 
-    /** One `key = "value"` pair. The key may be dotted, as in `version.ref`. */
+    /**
+     * One `key = "value"` pair. The key may be dotted, as in `version.ref`.
+     */
     public fun entry(
         key: String,
         value: String,

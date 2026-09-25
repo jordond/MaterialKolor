@@ -10,7 +10,9 @@ import androidx.compose.runtime.staticCompositionLocalOf
  * say to the app's own live region through this instead. A toast is the kit's one caller.
  */
 public fun interface Announcer {
-    /** Reads [message] out once, after whatever is being read now. */
+    /**
+     * Reads [message] out once, after whatever is being read now.
+     */
     public fun announce(message: String)
 }
 
@@ -21,5 +23,7 @@ public fun interface Announcer {
  */
 public val LocalAnnouncer: ProvidableCompositionLocal<Announcer> = staticCompositionLocalOf { SilentAnnouncer }
 
-/** An announcer that says nothing, for where the Compose semantics already reach assistive technology. */
+/**
+ * An announcer that says nothing, for where the Compose semantics already reach assistive technology.
+ */
 private val SilentAnnouncer: Announcer = Announcer { }

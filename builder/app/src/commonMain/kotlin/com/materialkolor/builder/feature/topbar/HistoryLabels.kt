@@ -99,15 +99,23 @@ private fun changeText(
     return if (detail == null) text else stringResource(Res.string.topbar_change_to, text, detail)
 }
 
-/** How a change's detail shows after its name. */
+/**
+ * How a change's detail shows after its name.
+ */
 private enum class Detail {
-    /** Left out. */
+    /**
+     * Left out.
+     */
     Hidden,
 
-    /** Shown as it is, a hex or a name someone typed. */
+    /**
+     * Shown as it is, a hex or a name someone typed.
+     */
     AsIs,
 
-    /** Shown as the library switcher names it. */
+    /**
+     * Shown as the library switcher names it.
+     */
     LibraryName,
 }
 
@@ -141,7 +149,9 @@ private fun redoneChoice(
         Library.Custom -> LibraryChoice.Custom
     }
 
-/** The string for [kind], and how its detail shows. */
+/**
+ * The string for [kind], and how its detail shows.
+ */
 private fun kindText(kind: ChangeKind): Pair<StringResource, Detail> =
     when (kind) {
         ChangeKind.Seed -> Res.string.topbar_change_seed to Detail.AsIs

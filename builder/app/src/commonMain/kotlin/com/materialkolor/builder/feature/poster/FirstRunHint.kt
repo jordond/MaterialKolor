@@ -47,10 +47,14 @@ import org.jetbrains.compose.resources.stringResource
 
 // b-314
 
-/** The first visit hint, by the id its dismissal is kept under (F-35). */
+/**
+ * The first visit hint, by the id its dismissal is kept under (F-35).
+ */
 internal const val FIRST_RUN_HINT = "first-run"
 
-/** The library switcher's one pulse beside the hint, kept apart so it plays once per browser. */
+/**
+ * The library switcher's one pulse beside the hint, kept apart so it plays once per browser.
+ */
 internal const val SWITCHER_PULSE_HINT = "switcher-pulse"
 
 /**

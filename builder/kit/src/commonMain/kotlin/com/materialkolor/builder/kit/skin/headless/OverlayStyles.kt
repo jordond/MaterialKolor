@@ -98,7 +98,9 @@ internal class OverlayStyle(
     val panelTitle: TextStyle? = null, // b-511
 )
 
-/** How much of the canvas shows through the veil behind a modal overlay, on the skins that veil with it. */
+/**
+ * How much of the canvas shows through the veil behind a modal overlay, on the skins that veil with it.
+ */
 internal const val ScrimAlpha: Float = 0.6f
 
 /**
@@ -107,7 +109,9 @@ internal const val ScrimAlpha: Float = 0.6f
  */
 internal const val UnstyledHighlightAlpha: Float = 0.06f
 
-/** How strongly Unstyled's ink veils a selected row, and a plain clickable while it is pressed. */
+/**
+ * How strongly Unstyled's ink veils a selected row, and a plain clickable while it is pressed.
+ */
 internal const val UnstyledSelectedAlpha: Float = 0.1f
 
 /**
@@ -117,52 +121,78 @@ internal const val UnstyledSelectedAlpha: Float = 0.1f
  * became a builder token. A size that starts to differ by skin moves to the tokens then.
  */
 internal object OverlayMetrics {
-    /** The narrowest and the widest a dialog panel gets. */
+    /**
+     * The narrowest and the widest a dialog panel gets.
+     */
     val dialogMinWidth: Dp = 280.dp
     val dialogMaxWidth: Dp = 560.dp
 
-    /** The widest the toast stack gets. */
+    /**
+     * The widest the toast stack gets.
+     */
     val toastMaxWidth: Dp = 560.dp
 
-    /** How strongly a toast's action takes the toast's own ink while hovered or focused. */
+    /**
+     * How strongly a toast's action takes the toast's own ink while hovered or focused.
+     */
     val toastActionHighlightAlpha: Float = 0.12f
 
-    /** How much of a bottom sheet shows at peek. */
+    /**
+     * How much of a bottom sheet shows at peek.
+     */
     val sheetPeekHeight: Dp = 96.dp
 
-    /** The widest a side panel gets, and how much of a narrower screen it takes. */
+    /**
+     * The widest a side panel gets, and how much of a narrower screen it takes.
+     */
     val sidePanelWidth: Dp = 380.dp // b-511
     val sidePanelNarrowFraction: Float = 0.85f
 
-    /** The narrowest, the widest and the tallest a dropdown list gets. */
+    /**
+     * The narrowest, the widest and the tallest a dropdown list gets.
+     */
     val menuMinWidth: Dp = 160.dp
     val menuMaxWidth: Dp = 360.dp
     val menuMaxHeight: Dp = 400.dp
 
     // b-511
 
-    /** How far a modal side panel or end sheet keeps its header, body and footer from its edges. */
+    /**
+     * How far a modal side panel or end sheet keeps its header, body and footer from its edges.
+     */
     val panelPadding: Dp = 24.dp
 
-    /** How far a popover hangs under its anchor, from the anchor to the popover's own edge. */
+    /**
+     * How far a popover hangs under its anchor, from the anchor to the popover's own edge.
+     */
     val popoverGap: Dp = 8.dp
 
-    /** How tall a row stands in a long list inside an overlay, such as the command palette's. */
+    /**
+     * How tall a row stands in a long list inside an overlay, such as the command palette's.
+     */
     val denseRowHeight: Dp = 44.dp
 
-    /** The widest a tooltip gets before its label wraps. */
+    /**
+     * The widest a tooltip gets before its label wraps.
+     */
     val tooltipMaxWidth: Dp = 280.dp
 
-    /** The grab handle drawn on top of a bottom sheet. */
+    /**
+     * The grab handle drawn on top of a bottom sheet.
+     */
     val sheetHandleWidth: Dp = 32.dp
     val sheetHandleHeight: Dp = 4.dp
 
-    /** How thick a scrollbar thumb is, and how far it keeps from the edge. */
+    /**
+     * How thick a scrollbar thumb is, and how far it keeps from the edge.
+     */
     val thumbThickness: Dp = 6.dp
     val thumbInset: Dp = 2.dp
 }
 
-/** Unstyled keeps to hairlines and small corners, and floats nothing. */
+/**
+ * Unstyled keeps to hairlines and small corners, and floats nothing.
+ */
 internal fun unstyledOverlayStyle(tokens: BuilderTokens): OverlayStyle {
     val hairline = BorderStroke(tokens.outlineWidth, tokens.border)
     return OverlayStyle(
@@ -193,7 +223,9 @@ internal fun unstyledOverlayStyle(tokens: BuilderTokens): OverlayStyle {
     )
 }
 
-/** Custom floats its overlays on soft shadows and rounds them the way the identity does. */
+/**
+ * Custom floats its overlays on soft shadows and rounds them the way the identity does.
+ */
 internal fun customOverlayStyle(tokens: BuilderTokens): OverlayStyle =
     OverlayStyle(
         surface = tokens.panelRaised,
@@ -222,14 +254,18 @@ internal fun customOverlayStyle(tokens: BuilderTokens): OverlayStyle =
         thumb = tokens.textMuted,
     )
 
-/** Which edge a panel is pinned to, and so where it slides from. */
+/**
+ * Which edge a panel is pinned to, and so where it slides from.
+ */
 internal enum class PanelEdge {
     Start,
     End,
     Bottom,
 }
 
-/** A menu or a tooltip scaling up from 0.96 with a fade, or only the fade under reduced motion (MO-05). */
+/**
+ * A menu or a tooltip scaling up from 0.96 with a fade, or only the fade under reduced motion (MO-05).
+ */
 @Composable
 internal fun popoverEnter(): EnterTransition {
     val motion = LocalBuilderMotion.current
@@ -237,7 +273,9 @@ internal fun popoverEnter(): EnterTransition {
     return if (LocalReducedMotion.current) fade else fade + scaleIn(motion.popover(), PopoverInitialScale)
 }
 
-/** The same popover leaving. */
+/**
+ * The same popover leaving.
+ */
 @Composable
 internal fun popoverExit(): ExitTransition {
     val motion = LocalBuilderMotion.current
@@ -245,7 +283,9 @@ internal fun popoverExit(): ExitTransition {
     return if (LocalReducedMotion.current) fade else fade + scaleOut(motion.panelExit(), PopoverInitialScale)
 }
 
-/** A panel sliding in from [edge], or only fading under reduced motion (MO-05). */
+/**
+ * A panel sliding in from [edge], or only fading under reduced motion (MO-05).
+ */
 @Composable
 internal fun panelEnter(edge: PanelEdge): EnterTransition {
     val motion = LocalBuilderMotion.current
@@ -257,7 +297,9 @@ internal fun panelEnter(edge: PanelEdge): EnterTransition {
     }
 }
 
-/** The same panel leaving, quicker than it arrived. */
+/**
+ * The same panel leaving, quicker than it arrived.
+ */
 @Composable
 internal fun panelExit(edge: PanelEdge): ExitTransition {
     val motion = LocalBuilderMotion.current
@@ -269,7 +311,9 @@ internal fun panelExit(edge: PanelEdge): ExitTransition {
     }
 }
 
-/** The scrim fading in step with its panel. */
+/**
+ * The scrim fading in step with its panel.
+ */
 @Composable
 internal fun scrimEnter(): EnterTransition = fadeIn(LocalBuilderMotion.current.panelEnter())
 
@@ -301,7 +345,9 @@ internal fun rememberOverlayVisibility(visible: Boolean): MutableTransitionState
     return state
 }
 
-/** True while the overlay is on screen or still on its way in or out. */
+/**
+ * True while the overlay is on screen or still on its way in or out.
+ */
 internal fun MutableTransitionState<Boolean>.isOverlayShown(visible: Boolean): Boolean =
     visible || currentState || targetState || !isIdle
 

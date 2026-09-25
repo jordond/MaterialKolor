@@ -23,15 +23,21 @@ import kotlin.jvm.JvmInline
 public value class Argb private constructor(
     public val value: Int,
 ) {
-    /** The red channel, 0 to 255. */
+    /**
+     * The red channel, 0 to 255.
+     */
     public val red: Int
         get() = (value shr 16) and CHANNEL_MASK
 
-    /** The green channel, 0 to 255. */
+    /**
+     * The green channel, 0 to 255.
+     */
     public val green: Int
         get() = (value shr 8) and CHANNEL_MASK
 
-    /** The blue channel, 0 to 255. */
+    /**
+     * The blue channel, 0 to 255.
+     */
     public val blue: Int
         get() = value and CHANNEL_MASK
 

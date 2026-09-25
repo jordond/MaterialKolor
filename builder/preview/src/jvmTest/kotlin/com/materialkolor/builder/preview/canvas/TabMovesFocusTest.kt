@@ -118,7 +118,9 @@ class TabMovesFocusTest {
 private const val Before = "Before"
 private const val After = "After"
 
-/** A button, then [field], then another button. */
+/**
+ * A button, then [field], then another button.
+ */
 @Composable
 private fun Between(field: @Composable () -> Unit) {
     MaterialTheme {
@@ -145,7 +147,9 @@ private fun MultiLineField(
     )
 }
 
-/** Focuses the one text field in the content, the way a click would. */
+/**
+ * Focuses the one text field in the content, the way a click would.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.focusField() {
     onNode(hasSetTextAction()).performSemanticsAction(SemanticsActions.RequestFocus)

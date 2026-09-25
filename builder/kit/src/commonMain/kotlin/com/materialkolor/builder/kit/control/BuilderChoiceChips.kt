@@ -119,7 +119,9 @@ public fun <T> BuilderChoiceChips(
     }
 }
 
-/** Choice chips drawn from the chip [style] over [HeadlessRadioFlow]. */
+/**
+ * Choice chips drawn from the chip [style] over [HeadlessRadioFlow].
+ */
 @Composable
 internal fun <T> HeadlessChoiceChips(
     options: List<T>,

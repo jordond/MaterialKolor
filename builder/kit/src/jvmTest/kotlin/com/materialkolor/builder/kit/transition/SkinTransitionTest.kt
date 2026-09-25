@@ -354,10 +354,14 @@ private class Harness {
     var color: Color by mutableStateOf(Old)
     var compositions: Int = 0
 
-    /** True only while the host is drawing. A plain field so setting it from draw writes no state. */
+    /**
+     * True only while the host is drawing. A plain field so setting it from draw writes no state.
+     */
     var drawing: Boolean = false
 
-    /** Set by every change to whether a draw was in progress when it ran. */
+    /**
+     * Set by every change to whether a draw was in progress when it ran.
+     */
     var changedWhileDrawing: Boolean? = null
 }
 
@@ -396,7 +400,9 @@ private fun ComposeUiTest.showHost(
     return harness
 }
 
-/** Raises [Harness.drawing] around the host's whole draw pass, the capture included. */
+/**
+ * Raises [Harness.drawing] around the host's whole draw pass, the capture included.
+ */
 private fun Modifier.markDrawing(harness: Harness): Modifier =
     drawWithContent {
         harness.drawing = true

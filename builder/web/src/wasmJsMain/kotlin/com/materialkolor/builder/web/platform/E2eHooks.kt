@@ -23,7 +23,9 @@ import kotlinx.coroutines.launch
 
 private val hookScope = CoroutineScope(Dispatchers.Unconfined)
 
-/** Hang the router's hooks on the page when a spec opened it. */
+/**
+ * Hang the router's hooks on the page when a spec opened it.
+ */
 internal fun Router.exposeToE2e() {
     if (!e2eHooksWanted()) return
     var pops = 0
@@ -87,7 +89,9 @@ internal fun StoreFactory.exposeToE2e() {
     exposeE2eHook("externalChanges") { external.joinToString(",") }
 }
 
-/** Hang the environment's hooks on the page when a spec opened it. */
+/**
+ * Hang the environment's hooks on the page when a spec opened it.
+ */
 internal fun Environment.exposeToE2e() {
     if (!e2eHooksWanted()) return
     var hides = 0
@@ -118,7 +122,9 @@ internal fun Environment.exposeToE2e() {
     exposeE2eHook("persisted") { persisted }
 }
 
-/** A hook that does something and has nothing to say back. */
+/**
+ * A hook that does something and has nothing to say back.
+ */
 private fun exposeE2eAction(
     name: String,
     action: (String) -> Unit,

@@ -31,13 +31,19 @@ import io.github.composefluent.component.Text
 // the Actions and Inputs samples, GallerySelection.kt the Selection ones, and GalleryPanels.kt the
 // Containment, Navigation and Feedback ones.
 
-/** The space around the grid and between its cards. */
+/**
+ * The space around the grid and between its cards.
+ */
 internal val GalleryGap = 16.dp
 
-/** The space between the controls inside a card. */
+/**
+ * The space between the controls inside a card.
+ */
 internal val Gap = 8.dp
 
-/** Keys of what the gallery's controls remember in [DemoAppState]. */
+/**
+ * Keys of what the gallery's controls remember in [DemoAppState].
+ */
 internal object FluentGalleryKeys {
     const val List: String = "gallery.fluent"
     const val Bold: String = "gallery.fluent.bold"
@@ -96,7 +102,9 @@ internal fun FluentGalleryEntry(
     }
 }
 
-/** Every card of the Fluent gallery, in the order they show within each group. */
+/**
+ * Every card of the Fluent gallery, in the order they show within each group.
+ */
 internal val FluentCards: List<GalleryCard> = listOf(
     GalleryCard("Button", GalleryGroup.Actions) { StandardButtons() },
     GalleryCard("Accent button", GalleryGroup.Actions) { AccentButtons() },
@@ -130,7 +138,9 @@ private fun FluentGroupHeader(group: GalleryGroup) {
     )
 }
 
-/** The Fluent card a gallery card's controls sit in, titled with the card's name. */
+/**
+ * The Fluent card a gallery card's controls sit in, titled with the card's name.
+ */
 @Composable
 private fun FluentCardFrame(
     card: GalleryCard,
@@ -149,10 +159,14 @@ private fun FluentCardFrame(
     }
 }
 
-/** Enabled first, then disabled, the order every card shows its controls in. */
+/**
+ * Enabled first, then disabled, the order every card shows its controls in.
+ */
 internal val EnabledThenDisabled: List<Boolean> = listOf(true, false)
 
-/** A control enabled and the same control disabled, in a row that wraps when the card is narrow. */
+/**
+ * A control enabled and the same control disabled, in a row that wraps when the card is narrow.
+ */
 @Composable
 internal fun EnabledAndDisabled(content: @Composable (enabled: Boolean) -> Unit) {
     Wrapping {
@@ -160,7 +174,9 @@ internal fun EnabledAndDisabled(content: @Composable (enabled: Boolean) -> Unit)
     }
 }
 
-/** Lays its content out in a row that wraps when the card is narrow. */
+/**
+ * Lays its content out in a row that wraps when the card is narrow.
+ */
 @Composable
 internal fun Wrapping(content: @Composable FlowRowScope.() -> Unit) {
     FlowRow(
@@ -171,7 +187,9 @@ internal fun Wrapping(content: @Composable FlowRowScope.() -> Unit) {
     )
 }
 
-/** A card's controls stacked, a little apart. */
+/**
+ * A card's controls stacked, a little apart.
+ */
 @Composable
 internal fun GalleryColumn(content: @Composable ColumnScope.() -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(Gap), content = content)

@@ -93,7 +93,9 @@ class FocusRepairTest {
         return afterRepair { assertFalse(shadow.focused == canvas) }
     }
 
-    /** WebKit and Gecko drop focus to `<body>` without a `focusout` when the focused field goes. */
+    /**
+     * WebKit and Gecko drop focus to `<body>` without a `focusout` when the focused field goes.
+     */
     @Test
     fun aRemovalWithoutFocusOutRefocusesTheCanvas(): Promise<JsAny?> {
         field.dispatchFocusIn()
@@ -107,7 +109,9 @@ class FocusRepairTest {
         }
     }
 
-    /** A Tab from one text field to the next, the way CMP does it within one task. */
+    /**
+     * A Tab from one text field to the next, the way CMP does it within one task.
+     */
     @Test
     fun aMoveToAnotherBackingFieldDoesNotPassThroughTheCanvas(): Promise<JsAny?> {
         field.dispatchFocusIn()
@@ -136,7 +140,9 @@ class FocusRepairTest {
         }
     }
 
-    /** Runs [check] once the repair has had its turn, then takes the viewport down either way. */
+    /**
+     * Runs [check] once the repair has had its turn, then takes the viewport down either way.
+     */
     private fun afterRepair(check: () -> Unit): Promise<JsAny?> =
         nextFrame().then { _ ->
             try {
@@ -164,7 +170,9 @@ class FocusRepairTest {
     }
 }
 
-/** Counts the calls to [element]'s `focus`, whether or not the browser fires a focus event for them. */
+/**
+ * Counts the calls to [element]'s `focus`, whether or not the browser fires a focus event for them.
+ */
 @JsFun(
     "(element) => { element.focusCalls = 0; const focus = element.focus.bind(element); " +
         "element.focus = (options) => { element.focusCalls += 1; focus(options); }; }",

@@ -17,7 +17,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** Roving focus in the two single choice groups, the segmented control and the choice chips. */
+/**
+ * Roving focus in the two single choice groups, the segmented control and the choice chips.
+ */
 @OptIn(ExperimentalTestApi::class)
 class ControlsAKeyboardTest {
     @Test
@@ -159,7 +161,9 @@ class ControlsAKeyboardTest {
         }
 }
 
-/** Presses [key] on the option labelled [option] and lets the choice land. */
+/**
+ * Presses [key] on the option labelled [option] and lets the choice land.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.press(
     option: String,
@@ -169,7 +173,9 @@ private fun ComposeUiTest.press(
     waitForIdle()
 }
 
-/** Focuses the Before button and tabs once, which has to land on the chosen option [landsOn]. */
+/**
+ * Focuses the Before button and tabs once, which has to land on the chosen option [landsOn].
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.tabIntoGroup(landsOn: String) {
     waitForIdle()

@@ -31,10 +31,14 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
 
-/** A declared element for the card to pin to. */
+/**
+ * A declared element for the card to pin to.
+ */
 private const val ELEMENT = "element"
 
-/** The first action of a pinned card, so its presence means a card is pinned. */
+/**
+ * The first action of a pinned card, so its presence means a card is pinned.
+ */
 private const val PIN_ROLE = "Pin this role"
 
 @OptIn(ExperimentalTestApi::class)
@@ -84,14 +88,18 @@ class InspectFocusTest {
             previewEdge() shouldBe focus.toArgb()
         }
 
-    /** The color at the middle of the preview's start edge, where a focus ring would be drawn. */
+    /**
+     * The color at the middle of the preview's start edge, where a focus ring would be drawn.
+     */
     private fun ComposeUiTest.previewEdge(): Int {
         val image = onNodeWithTag(PREVIEW_TAG).captureToImage().toPixelMap()
         return image[0, image.height / 2].toArgb()
     }
 }
 
-/** A small element declaring a role pair, at the preview's top start corner. */
+/**
+ * A small element declaring a role pair, at the preview's top start corner.
+ */
 @Composable
 private fun Element() {
     Box(Modifier.size(40.dp).testTag(ELEMENT).previewRoles(*PrimaryPair))

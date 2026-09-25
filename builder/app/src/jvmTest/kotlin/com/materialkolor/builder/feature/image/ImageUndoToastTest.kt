@@ -132,7 +132,9 @@ class ImageUndoToastTest {
         }
     }
 
-    /** Drops [handle] and waits for the toast its seed puts up. */
+    /**
+     * Drops [handle] and waits for the toast its seed puts up.
+     */
     private fun ComposeUiTest.seed(handle: FakeImageHandle): ShownToast {
         val before = workspace.withdrawable.size
         images.drop(handle)
@@ -178,13 +180,17 @@ private class ToastWorkspace(
     }
 }
 
-/** A toast as the workspace put it up. */
+/**
+ * A toast as the workspace put it up.
+ */
 private class ShownToast(
     private val toast: WorkspaceAction.ShowToast,
 ) {
     var withdrawn = false
 
-    /** Presses its action, as the toast host does. */
+    /**
+     * Presses its action, as the toast host does.
+     */
     fun press() {
         toast.onAction?.invoke()
     }

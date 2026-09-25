@@ -26,7 +26,9 @@ import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.test.Test
 
-/** The sources every Fluent gallery card is drawn from. */
+/**
+ * The sources every Fluent gallery card is drawn from.
+ */
 private val GallerySources: List<String> = listOf(
     "src/commonMain/kotlin/com/materialkolor/builder/preview/fluent/GalleryEntry.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/preview/fluent/FluentGallery.kt",
@@ -67,7 +69,9 @@ private val GalleryBannedFluent: Set<String> = setOf(
     "io.github.composefluent.component.Expander",
 )
 
-/** What the gallery may take from the kit, its motion, the fold modifiers and the text lever of D45. */
+/**
+ * What the gallery may take from the kit, its motion, the fold modifiers and the text lever of D45.
+ */
 private val GalleryKitImports: List<String> = listOf(
     "com.materialkolor.builder.kit.motion.",
     "com.materialkolor.builder.kit.control.folded",
@@ -80,7 +84,9 @@ private val GalleryKitImports: List<String> = listOf(
  */
 private val GalleryEndlessMotion: List<String> = listOf("rememberInfinite", "infiniteRepeat")
 
-/** A progress bar or ring called without a value, the endless kind. */
+/**
+ * A progress bar or ring called without a value, the endless kind.
+ */
 private val EndlessProgress = Regex("""\bProgress(Bar|Ring)\((?!\s*progress\b)""")
 
 /**

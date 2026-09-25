@@ -47,7 +47,9 @@ internal enum class VisionSimulation {
 
 // b-315c
 
-/** What the canvas shows for this simulation, grayscale while B is [held] (F-25). */
+/**
+ * What the canvas shows for this simulation, grayscale while B is [held] (F-25).
+ */
 internal fun VisionSimulation.whileHeld(held: Boolean): VisionSimulation =
     if (held) VisionSimulation.Achromatopsia else this
 
@@ -113,10 +115,14 @@ internal fun CanvasDock(
     DockContent(state, dispatcher, modifier)
 }
 
-/** How many unconfirmed saves of the handle to keep before the oldest is dropped. */
+/**
+ * How many unconfirmed saves of the handle to keep before the oldest is dropped.
+ */
 private const val MAX_UNCONFIRMED = 32
 
-/** How long the handle has to rest before where it rests is saved, so a drag saves once (F-19). */
+/**
+ * How long the handle has to rest before where it rests is saved, so a drag saves once (F-19).
+ */
 internal const val HANDLE_SETTLE_MILLIS = 250L
 
 /**
@@ -136,25 +142,37 @@ internal class PreviewSplit(
     mode: PreviewMode,
     saved: Float,
 ) {
-    /** The handle both copies of a split read. */
+    /**
+     * The handle both copies of a split read.
+     */
     val split: SplitState = SplitState(handleFor(mode, saved))
 
-    /** What the canvas composes, Split for as long as the handle slides. */
+    /**
+     * What the canvas composes, Split for as long as the handle slides.
+     */
     var shown: PreviewMode by mutableStateOf(mode)
         private set
 
     private var sliding by mutableStateOf(false)
 
-    /** Where Split puts the handle, the last fraction saved or sent to be saved. */
+    /**
+     * Where Split puts the handle, the last fraction saved or sent to be saved.
+     */
     private var handle = saved
 
-    /** Fractions sent to be saved that have not come back as saved yet, oldest first. */
+    /**
+     * Fractions sent to be saved that have not come back as saved yet, oldest first.
+     */
     private val unconfirmed = ArrayDeque<Float>()
 
-    /** Counts the saved fractions that did not start here. A save waiting on an older count is stale. */
+    /**
+     * Counts the saved fractions that did not start here. A save waiting on an older count is stale.
+     */
     private var foreignSaves: Int = 0
 
-    /** Counts the pointer releases over the canvas, each a cue to save a moved handle at once. */
+    /**
+     * Counts the pointer releases over the canvas, each a cue to save a moved handle at once.
+     */
     private var releases by mutableIntStateOf(0)
 
     /**
@@ -186,10 +204,14 @@ internal class PreviewSplit(
         sliding = false
     }
 
-    /** Where the handle rests in Split, or null while it slides or one copy shows. */
+    /**
+     * Where the handle rests in Split, or null while it slides or one copy shows.
+     */
     fun restingHandle(): Float? = if (sliding || shown != PreviewMode.Split) null else split.fraction
 
-    /** True when [fraction] is news to be saved, which it then counts as sent. */
+    /**
+     * True when [fraction] is news to be saved, which it then counts as sent.
+     */
     fun send(fraction: Float): Boolean {
         if (fraction == handle) return false
         handle = fraction
@@ -198,21 +220,31 @@ internal class PreviewSplit(
         return true
     }
 
-    /** A mark to hold a waiting save against, which [savedElsewhereSince] checks when the wait is over. */
+    /**
+     * A mark to hold a waiting save against, which [savedElsewhereSince] checks when the wait is over.
+     */
     fun mark(): Int = foreignSaves
 
-    /** True when a fraction saved elsewhere came in after [mark] was taken, which makes a save waiting on it stale. */
+    /**
+     * True when a fraction saved elsewhere came in after [mark] was taken, which makes a save waiting on it stale.
+     */
     fun savedElsewhereSince(mark: Int): Boolean = foreignSaves != mark
 
-    /** A pointer let go over the canvas. The handle, if it rests somewhere new, is saved a frame later. */
+    /**
+     * A pointer let go over the canvas. The handle, if it rests somewhere new, is saved a frame later.
+     */
     fun release() {
         releases++
     }
 
-    /** The release count, read in a snapshot flow so each release is heard once the frame is applied. */
+    /**
+     * The release count, read in a snapshot flow so each release is heard once the frame is applied.
+     */
     fun releaseCount(): Int = releases
 
-    /** The saved fraction is now [saved]. Unless it is one sent from here, the handle goes there. */
+    /**
+     * The saved fraction is now [saved]. Unless it is one sent from here, the handle goes there.
+     */
     fun onSaved(saved: Float) {
         val sent = unconfirmed.indexOf(saved)
         if (sent >= 0) {
@@ -227,7 +259,9 @@ internal class PreviewSplit(
     }
 }
 
-/** Where [mode] keeps the handle, [split] for Split. */
+/**
+ * Where [mode] keeps the handle, [split] for Split.
+ */
 private fun handleFor(
     mode: PreviewMode,
     split: Float,

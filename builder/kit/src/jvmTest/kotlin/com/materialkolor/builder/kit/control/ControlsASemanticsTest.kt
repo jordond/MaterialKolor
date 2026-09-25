@@ -53,7 +53,9 @@ import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** Every skin the action controls are checked in. */
+/**
+ * Every skin the action controls are checked in.
+ */
 internal val ActionSkins: List<Skin> = ControlSkins.map { (_, skin) -> skin }
 
 private val Desktop = LayoutInfo.of(widthDp = 1280.dp, heightDp = 800.dp)

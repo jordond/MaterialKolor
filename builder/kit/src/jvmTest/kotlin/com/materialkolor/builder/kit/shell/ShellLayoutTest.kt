@@ -55,7 +55,9 @@ private val ShellDockLift = 16.dp
 private val ShellTopBar = 64.dp
 private val ShellSkin = Skin(Library.Material3, expressive = false)
 
-/** One window from the spec's table and the poster treatment it calls for. */
+/**
+ * One window from the spec's table and the poster treatment it calls for.
+ */
 private class ShellWindow(
     val width: Int,
     val mode: PosterMode,
@@ -324,7 +326,9 @@ class ShellLayoutTest {
     }
 }
 
-/** Far enough into the 200 ms panel exit to catch the rail moving. */
+/**
+ * Far enough into the 200 ms panel exit to catch the rail moving.
+ */
 private const val ShellMidwayMillis = 120L
 
 @OptIn(ExperimentalTestApi::class)
@@ -334,7 +338,9 @@ private fun shellTest(
     block: suspend ComposeUiTest.() -> Unit,
 ) = runSkikoComposeUiTest(size = Size(width.toFloat(), height.toFloat())) { block() }
 
-/** The shell with every slot tagged, the top bar the skin's own and the dock a fixed size like a real one. */
+/**
+ * The shell with every slot tagged, the top bar the skin's own and the dock a fixed size like a real one.
+ */
 @Composable
 private fun ShellUnderTest(
     collapsed: Boolean,
@@ -377,7 +383,9 @@ private fun shellDocked(
     canvas.left shouldBe frameStart + (frameWidth - contentWidth) / 2
 }
 
-/** The dock centred on the canvas frame, standing just off its bottom edge. */
+/**
+ * The dock centred on the canvas frame, standing just off its bottom edge.
+ */
 private fun shellDockOnTheFrame(
     dock: DpRect,
     width: Dp,

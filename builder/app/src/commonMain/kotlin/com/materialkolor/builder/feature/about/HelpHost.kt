@@ -29,7 +29,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.stringResource
 
-/** How much of the window a dialog under About may take before its body scrolls. */
+/**
+ * How much of the window a dialog under About may take before its body scrolls.
+ */
 internal const val ABOUT_HEIGHT_FRACTION = 0.6f
 
 /**

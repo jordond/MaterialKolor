@@ -39,24 +39,34 @@ internal class SessionWrites(
 ) {
     private val _status = MutableStateFlow<SaveStatus>(SaveStatus.Idle)
 
-    /** The number of the newest save handed to autosave. Only the UI thread reads or writes it. */
+    /**
+     * The number of the newest save handed to autosave. Only the UI thread reads or writes it.
+     */
     private var newestSave = 0L
 
-    /** Whether the open project is saved. A failure comes after the repository pruned and tried again. */
+    /**
+     * Whether the open project is saved. A failure comes after the repository pruned and tried again.
+     */
     val status: StateFlow<SaveStatus> = _status.asStateFlow()
 
-    /** Mark a new save as waiting and hand back its number. Call it on the UI thread. */
+    /**
+     * Mark a new save as waiting and hand back its number. Call it on the UI thread.
+     */
     fun nextSave(): Long {
         _status.value = SaveStatus.Pending
         return ++newestSave
     }
 
-    /** Show [status] straight away, when another project shows or a new one could not be saved. */
+    /**
+     * Show [status] straight away, when another project shows or a new one could not be saved.
+     */
     fun resetStatus(status: SaveStatus) {
         _status.value = status
     }
 
-    /** Write [save], or hold it back while a conflict is up for its project. */
+    /**
+     * Write [save], or hold it back while a conflict is up for its project.
+     */
     suspend fun write(save: PendingSave): Boolean {
         if (conflicted() && showing() === save.project) return false
         val error = lock.withLock { persist(save) }
@@ -88,7 +98,9 @@ internal class SessionWrites(
         return saveHistory(id, save)
     }
 
-    /** Save a transient project for the first time, under the name it was opened with. */
+    /**
+     * Save a transient project for the first time, under the name it was opened with.
+     */
     private suspend fun materialize(save: PendingSave): StoreError? {
         val open = save.project
         val creation = projects.create(open.name.value, save.document, save.colors.previewColors)

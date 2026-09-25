@@ -66,8 +66,12 @@ class PastedTextTest {
     }
 }
 
-/** A real code of twelve characters. */
+/**
+ * A real code of twelve characters.
+ */
 private const val SHORT_CODE = "AdllOwAAAAAT"
 
-/** Starts with a version byte past the one this builder writes. */
+/**
+ * Starts with a version byte past the one this builder writes.
+ */
 private const val NEWER_CODE = "_wAAAAAAAAAAAAAAAAAA"

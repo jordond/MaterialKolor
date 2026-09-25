@@ -66,10 +66,14 @@ import kotlin.test.Test
  */
 private const val DashboardScreenshotDir = "src/jvmTest/screenshots/dashboard"
 
-/** Where the dashboard's sources live, from the module the tests run in. */
+/**
+ * Where the dashboard's sources live, from the module the tests run in.
+ */
 private const val DashboardSourceDir = "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled"
 
-/** The four families F-20 wants on every screen. */
+/**
+ * The four families F-20 wants on every screen.
+ */
 private val DashboardFamilies: Map<String, Set<Role>> = mapOf(
     "primary" to setOf(Role.Primary, Role.OnPrimary, Role.PrimaryContainer, Role.OnPrimaryContainer),
     "secondary" to setOf(Role.Secondary, Role.OnSecondary, Role.SecondaryContainer, Role.OnSecondaryContainer),
@@ -85,14 +89,20 @@ private val DashboardContainerLevels: Set<Role> = setOf(
     Role.SurfaceContainerHighest,
 )
 
-/** The dashboard's sources whose names do not start with Dashboard. */
+/**
+ * The dashboard's sources whose names do not start with Dashboard.
+ */
 private val DashboardSideSources: Set<String> = setOf("AppEntry.kt", "UnstyledRoles.kt")
 
-/** What the dashboard takes from the kit, its motion and the fold modifiers that carry state onto the web. */
+/**
+ * What the dashboard takes from the kit, its motion and the fold modifiers that carry state onto the web.
+ */
 private val DashboardKitImports: List<String> =
     listOf("com.materialkolor.builder.kit.motion.", "com.materialkolor.builder.kit.control.folded")
 
-/** Compose Unstyled parts that open a window, a portal or a text field, by a word in their name. */
+/**
+ * Compose Unstyled parts that open a window, a portal or a text field, by a word in their name.
+ */
 private val DashboardBannedUnstyled: List<String> =
     listOf("Dialog", "Modal", "BottomSheet", "DropdownMenu", "Tooltip", "Portal", "TextField")
 
@@ -356,7 +366,9 @@ class DashboardAppTest {
     }
 }
 
-/** Everything the dashboard keeps in [DemoAppState], to tell whether anything changed. */
+/**
+ * Everything the dashboard keeps in [DemoAppState], to tell whether anything changed.
+ */
 private fun DemoAppState.dashboardSnapshot(): List<Any> {
     val picks = listOf(
         DashboardNavChoice to DashboardDestination.entries.size,

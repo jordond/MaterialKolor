@@ -18,21 +18,33 @@ import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.headless.actionSurface
 import com.materialkolor.builder.kit.skin.material.MaterialBadge
 
-/** What a badge reports, which picks its colour in every skin. */
+/**
+ * What a badge reports, which picks its colour in every skin.
+ */
 public enum class BadgeStatus {
-    /** A plain fact, such as a count or a library name. */
+    /**
+     * A plain fact, such as a count or a library name.
+     */
     Neutral,
 
-    /** Something worth a glance, such as a new export target. */
+    /**
+     * Something worth a glance, such as a new export target.
+     */
     Info,
 
-    /** Something that passed, such as a contrast pair above its target. */
+    /**
+     * Something that passed, such as a contrast pair above its target.
+     */
     Success,
 
-    /** Something that only just passed or was downgraded. */
+    /**
+     * Something that only just passed or was downgraded.
+     */
     Warning,
 
-    /** Something that failed. */
+    /**
+     * Something that failed.
+     */
     Danger,
 }
 
@@ -66,7 +78,9 @@ public fun BuilderBadge(
     }
 }
 
-/** A badge drawn from [style]. */
+/**
+ * A badge drawn from [style].
+ */
 @Composable
 internal fun HeadlessBadge(
     label: String,

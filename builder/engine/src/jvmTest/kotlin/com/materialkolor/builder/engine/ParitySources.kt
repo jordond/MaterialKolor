@@ -49,7 +49,9 @@ internal data class SchemeArguments(
         )
 
     companion object {
-        /** The arguments the engine resolved [preview] with, for the document as [target] sees it. */
+        /**
+         * The arguments the engine resolved [preview] with, for the document as [target] sees it.
+         */
         fun of(
             target: ExportTarget,
             document: ThemeDocument,
@@ -66,7 +68,9 @@ internal data class SchemeArguments(
                 amoled = document.amoled.takeIf { target.hasAmoled },
             )
 
-        /** The arguments [call] passes in [source], the way the call itself reads them. */
+        /**
+         * The arguments [call] passes in [source], the way the call itself reads them.
+         */
         fun read(
             target: ExportTarget,
             source: ExportSource,
@@ -137,7 +141,9 @@ internal data class SchemeArguments(
             }
         }
 
-        /** The AMOLED switch of the call, or for Custom, which applies it through `MaterialKolors`, of the file. */
+        /**
+         * The AMOLED switch of the call, or for Custom, which applies it through `MaterialKolors`, of the file.
+         */
         private fun amoledOf(
             source: ExportSource,
             arguments: Map<String, String>,
@@ -237,13 +243,17 @@ internal class ExportSource(
             .map { match -> argumentsAt(text, match.range.last) }
             .toList()
 
-    /** The arguments of every call to [function] a `val` holds, by the name of that `val`. */
+    /**
+     * The arguments of every call to [function] a `val` holds, by the name of that `val`.
+     */
     fun assigned(function: String): Map<String, List<String>> =
         Regex("""\bval (\w+) = $function\(""")
             .findAll(text)
             .associate { match -> match.groupValues[1] to argumentsAt(text, match.range.last) }
 
-    /** The color [value] names, failing with [what] when it names none. */
+    /**
+     * The color [value] names, failing with [what] when it names none.
+     */
     fun color(
         value: String,
         what: String,
@@ -252,7 +262,7 @@ internal class ExportSource(
     /**
      * The color [value] names, a literal, a top-level color or a parameter. A parameter reads as
      * its default, or with none as what every call to its function passes, the way Custom's
-     * `rememberThemeColors(seedColor: Color, …)` takes its seed from `AppTheme`.
+     * `rememberThemeColors(seedColor: Color, ...)` takes its seed from `AppTheme`.
      */
     private fun colorOf(
         value: String,
@@ -266,7 +276,9 @@ internal class ExportSource(
         return colorOf(passed, followed + value)
     }
 
-    /** What every call to the function declaring the parameter [name] passes for it, if they agree. */
+    /**
+     * What every call to the function declaring the parameter [name] passes for it, if they agree.
+     */
     private fun passedFor(name: String): String? {
         val parameter = Regex("""(?<!val )\b$name: Color\b""").find(text) ?: return null
         val function = Declaration
@@ -280,7 +292,9 @@ internal class ExportSource(
             .singleOrNull()
     }
 
-    /** Whether the name at [index] is being declared, after `fun`, `fun Receiver.` or `class`. */
+    /**
+     * Whether the name at [index] is being declared, after `fun`, `fun Receiver.` or `class`.
+     */
     private fun declares(index: Int): Boolean =
         Declaring.containsMatchIn(text.substring(text.lastIndexOf('\n', index) + 1, index))
 
@@ -291,7 +305,9 @@ internal class ExportSource(
     }
 }
 
-/** The parameter every mode-aware call in an export takes the mode through. */
+/**
+ * The parameter every mode-aware call in an export takes the mode through.
+ */
 internal const val IS_DARK = "isDark"
 
 /**
@@ -318,7 +334,9 @@ internal fun argumentsAt(
     return arguments.map { argument -> argument.toString().oneLine() }.filter(String::isNotEmpty)
 }
 
-/** Where the bracket that closes the one at [open] in [text] sits. */
+/**
+ * Where the bracket that closes the one at [open] in [text] sits.
+ */
 internal fun closingOf(
     text: String,
     open: Int,
@@ -337,20 +355,24 @@ internal fun closingOf(
     error("Nothing closes the bracket at $open in\n$text")
 }
 
-/** The named ones of these arguments, by name. */
+/**
+ * The named ones of these arguments, by name.
+ */
 internal fun List<String>.named(): Map<String, String> =
     mapNotNull { argument -> NamedArgument.matchEntire(argument) }.associate { match ->
         match.groupValues[1] to match.groupValues[2]
     }
 
-/** [this] source text on one line, every run of whitespace a single space. */
+/**
+ * [this] source text on one line, every run of whitespace a single space.
+ */
 internal fun String.oneLine(): String = replace(Whitespace, " ").trim()
 
 private val NamedArgument = Regex("""^(\w+) = (.+)$""")
 private val Whitespace = Regex("""\s+""")
 
 /**
- * Every `Color(0x…)` literal in a set of generated files, by where it sits.
+ * Every `Color(0x...)` literal in a set of generated files, by where it sits.
  *
  * A literal's name is the property, argument or Unstyled token it is assigned to, behind the names
  * of the calls it is nested in, as in `lightThemeColors/brand/color` or `primaryLight`.

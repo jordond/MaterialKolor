@@ -49,10 +49,14 @@ internal object Material3FrozenCases {
 
     // b-112c
 
-    /** Accents with the wallpaper colors, which no golden covers. */
+    /**
+     * Accents with the wallpaper colors, which no golden covers.
+     */
     val AccentsAndroidDynamicColor: ExportInput = AccentsPinsAmoled.with(prefs = AndroidDynamicColor).input
 
-    /** The same, expressive. */
+    /**
+     * The same, expressive.
+     */
     val ExpressiveAccentsAndroidDynamicColor: ExportInput = AccentsPinsAmoled
         .with(
             document = AccentsPinsAmoled.input.document.copy(

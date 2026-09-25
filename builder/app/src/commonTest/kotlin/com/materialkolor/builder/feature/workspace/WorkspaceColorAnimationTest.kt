@@ -21,7 +21,9 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-/** The poster's color animation option writes the export options of one target and nothing else. */
+/**
+ * The poster's color animation option writes the export options of one target and nothing else.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class WorkspaceColorAnimationTest : SessionTestBase() {
     private val harness = ViewModelHarness()

@@ -41,10 +41,14 @@ public class RoleTables internal constructor(
     public val light: ImmutableMap<Role, RoleEntry>,
     public val dark: ImmutableMap<Role, RoleEntry>,
 ) {
-    /** Every role in the mode [isDark] picks. */
+    /**
+     * Every role in the mode [isDark] picks.
+     */
     public fun mode(isDark: Boolean): ImmutableMap<Role, RoleEntry> = if (isDark) dark else light
 
-    /** What [role] resolved to in the mode [isDark] picks. */
+    /**
+     * What [role] resolved to in the mode [isDark] picks.
+     */
     public operator fun get(
         role: Role,
         isDark: Boolean,

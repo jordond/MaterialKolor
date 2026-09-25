@@ -79,18 +79,26 @@ internal class Command(
     val run: () -> Unit,
 )
 
-/** Whether a [Command] runs now. */
+/**
+ * Whether a [Command] runs now.
+ */
 internal sealed interface CommandState {
-    /** It runs. */
+    /**
+     * It runs.
+     */
     data object Enabled : CommandState
 
-    /** It does not, for [reason], which the palette shows in its place. */
+    /**
+     * It does not, for [reason], which the palette shows in its place.
+     */
     data class Disabled(
         val reason: String,
     ) : CommandState
 }
 
-/** The palette's groups, in the order it lists them. */
+/**
+ * The palette's groups, in the order it lists them.
+ */
 internal enum class CommandCategory(
     val title: StringResource,
 ) {
@@ -109,7 +117,9 @@ internal enum class CommandCategory(
     Motion(Res.string.command_category_motion),
 }
 
-/** The part of the workspace a control sits in. */
+/**
+ * The part of the workspace a control sits in.
+ */
 internal enum class Region {
     TopBar,
     Poster,
@@ -124,21 +134,27 @@ internal enum class Region {
 internal sealed interface ControlSite {
     val region: Region
 
-    /** A control named [name] in [region], inside the disclosure titled [opener] when there is one. */
+    /**
+     * A control named [name] in [region], inside the disclosure titled [opener] when there is one.
+     */
     data class Direct(
         override val region: Region,
         val name: String,
         val opener: String? = null,
     ) : ControlSite
 
-    /** The row [item] of the menu the button named [menu] opens. */
+    /**
+     * The row [item] of the menu the button named [menu] opens.
+     */
     data class MenuItem(
         override val region: Region,
         val menu: String,
         val item: String,
     ) : ControlSite
 
-    /** A control named [name] in [panel], inside the disclosure titled [opener] when there is one. */
+    /**
+     * A control named [name] in [panel], inside the disclosure titled [opener] when there is one.
+     */
     data class InPanel(
         val panel: Panel,
         val name: String,
@@ -167,11 +183,15 @@ internal class CommandList(
 ) {
     private val commands = mutableListOf<Command>()
 
-    /** Everything added so far, in order. */
+    /**
+     * Everything added so far, in order.
+     */
     val all: List<Command>
         get() = commands
 
-    /** Add a command whose control state [control] decides. A hidden control adds nothing (P6). */
+    /**
+     * Add a command whose control state [control] decides. A hidden control adds nothing (P6).
+     */
     fun add(
         id: String,
         category: CommandCategory,
@@ -293,7 +313,9 @@ internal fun actionRegistry(
  */
 internal val LocalRegistryBuilds: ProvidableCompositionLocal<(() -> Unit)?> = staticCompositionLocalOf { null }
 
-/** Toasts [saved] once the save [status] reports has landed, and nothing when it failed. */
+/**
+ * Toasts [saved] once the save [status] reports has landed, and nothing when it failed.
+ */
 private fun CoroutineScope.announceSaved(
     saved: String,
     dispatcher: Dispatcher<WorkspaceAction>,

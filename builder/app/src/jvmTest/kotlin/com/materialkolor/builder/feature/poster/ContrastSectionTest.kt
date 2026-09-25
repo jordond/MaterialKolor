@@ -12,7 +12,9 @@ import kotlin.test.Test
 
 private val Plain = ThemeDocument(seed = Argb(0x6750A4))
 
-/** The four levels as the choice names them. */
+/**
+ * The four levels as the choice names them.
+ */
 private val Levels = listOf("Reduced", "Standard", "Medium", "High")
 
 private const val FLUENT_FIXED = "Fluent’s text colors are fixed and its ramps ignore contrast."

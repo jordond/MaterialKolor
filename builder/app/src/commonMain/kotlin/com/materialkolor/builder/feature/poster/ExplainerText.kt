@@ -43,7 +43,9 @@ internal data class PrimaryFacts(
     val primary: HctReadout,
 ) {
     companion object {
-        /** What [scheme] made of [seed] with [style]. */
+        /**
+         * What [scheme] made of [seed] with [style].
+         */
         fun of(
             seed: Argb,
             style: Style,
@@ -59,7 +61,9 @@ internal data class PrimaryFacts(
                 primary = HctReadout.of(Argb(scheme.primary)),
             )
 
-        /** What [result] made of its seed in the mode [isDark] picks. */
+        /**
+         * What [result] made of its seed in the mode [isDark] picks.
+         */
         fun of(
             result: ThemeResult,
             isDark: Boolean,
@@ -67,21 +71,33 @@ internal data class PrimaryFacts(
     }
 }
 
-/** How primary reads next to the seed, the word the poster's line leads with. */
+/**
+ * How primary reads next to the seed, the word the poster's line leads with.
+ */
 internal enum class PrimaryTake {
-    /** Less chroma than the seed. */
+    /**
+     * Less chroma than the seed.
+     */
     Calmer,
 
-    /** More chroma than the seed. */
+    /**
+     * More chroma than the seed.
+     */
     Bolder,
 
-    /** A lower tone than the seed. */
+    /**
+     * A lower tone than the seed.
+     */
     Deeper,
 
-    /** A higher tone than the seed. */
+    /**
+     * A higher tone than the seed.
+     */
     Lighter,
 
-    /** Another hue than the seed. */
+    /**
+     * Another hue than the seed.
+     */
     Turned,
 }
 
@@ -92,34 +108,54 @@ internal enum class PrimaryTake {
 internal enum class ExplainerKey(
     val namesStyle: Boolean,
 ) {
-    /** The style holds primary to less chroma than the seed has. */
+    /**
+     * The style holds primary to less chroma than the seed has.
+     */
     ChromaCapped(namesStyle = true),
 
-    /** The style asks primary for more chroma than the seed has. */
+    /**
+     * The style asks primary for more chroma than the seed has.
+     */
     ChromaLifted(namesStyle = true),
 
-    /** The style keeps the seed's chroma. */
+    /**
+     * The style keeps the seed's chroma.
+     */
     ChromaKept(namesStyle = true),
 
-    /** The style draws primary without chroma. */
+    /**
+     * The style draws primary without chroma.
+     */
     ChromaNone(namesStyle = true),
 
-    /** Primary's hue and tone cannot hold all the chroma the style asked for. */
+    /**
+     * Primary's hue and tone cannot hold all the chroma the style asked for.
+     */
     ChromaGamut(namesStyle = false),
 
-    /** The style moves primary to another hue. */
+    /**
+     * The style moves primary to another hue.
+     */
     HueTurned(namesStyle = true),
 
-    /** Where the spec puts primary in light mode. */
+    /**
+     * Where the spec puts primary in light mode.
+     */
     ToneLight(namesStyle = false),
 
-    /** Where the spec puts primary in dark mode. */
+    /**
+     * Where the spec puts primary in dark mode.
+     */
     ToneDark(namesStyle = false),
 
-    /** What Keep chroma gives, read from the Fidelity scheme. */
+    /**
+     * What Keep chroma gives, read from the Fidelity scheme.
+     */
     KeepChroma(namesStyle = false),
 
-    /** What Use as primary override gives, read from the scheme with the override. */
+    /**
+     * What Use as primary override gives, read from the scheme with the override.
+     */
     PrimaryOverride(namesStyle = false),
 }
 
@@ -152,11 +188,15 @@ internal data class MatchExactly(
     val onPrimaryLight: Argb,
     val onPrimaryDark: Argb?,
 ) {
-    /** Whether small text on the matched primary misses 4.5 to 1. */
+    /**
+     * Whether small text on the matched primary misses 4.5 to 1.
+     */
     val warns: Boolean
         get() = after < MATCH_TEXT_RATIO
 
-    /** The pins it writes, light first. */
+    /**
+     * The pins it writes, light first.
+     */
     val pins: List<DocumentChange.SetPin>
         get() = buildList {
             add(DocumentChange.SetPin(Role.Primary, PinMode.Light, seed))
@@ -250,7 +290,9 @@ internal object ExplainerText {
             add(tone(facts))
         }
 
-    /** What Keep chroma would give, from the [fidelity] scheme built from the same seed. */
+    /**
+     * What Keep chroma would give, from the [fidelity] scheme built from the same seed.
+     */
     fun keepChroma(
         seed: Argb,
         fidelity: DynamicScheme,
@@ -266,7 +308,9 @@ internal object ExplainerText {
         )
     }
 
-    /** What Use as primary override would give, from the [overridden] scheme. */
+    /**
+     * What Use as primary override would give, from the [overridden] scheme.
+     */
     fun primaryOverride(overridden: DynamicScheme): ExplainerSentence =
         ExplainerSentence(
             ExplainerKey.PrimaryOverride,
@@ -295,7 +339,9 @@ internal object ExplainerText {
         }
     }
 
-    /** The chroma primary really got when its hue and tone hold less than the style asked for. */
+    /**
+     * The chroma primary really got when its hue and tone hold less than the style asked for.
+     */
     private fun gamut(facts: PrimaryFacts): ExplainerSentence? {
         if (facts.paletteChroma - facts.primary.chroma <= NOTICEABLE) return null
         return ExplainerSentence(
@@ -320,7 +366,9 @@ internal object ExplainerText {
             listOf(facts.spec.year, facts.primary.tone.roundToInt(), facts.seed.tone.roundToInt()),
         )
 
-    /** How far [to] sits from [from] around the hue circle, signed, within half a turn. */
+    /**
+     * How far [to] sits from [from] around the hue circle, signed, within half a turn.
+     */
     private fun hueDistance(
         from: Double,
         to: Double,
@@ -329,7 +377,9 @@ internal object ExplainerText {
     private fun wholeHue(hue: Double): Int = hue.roundToInt() % FULL_TURN.toInt()
 }
 
-/** The year a spec is named after, as the explainer says it. */
+/**
+ * The year a spec is named after, as the explainer says it.
+ */
 internal val SpecVersion.year: Int
     get() = when (this) {
         SpecVersion.Spec2021 -> 2021
@@ -337,13 +387,19 @@ internal val SpecVersion.year: Int
         SpecVersion.Spec2026 -> 2026
     }
 
-/** How far apart in hue, chroma or tone two colors sit before the poster calls them different. */
+/**
+ * How far apart in hue, chroma or tone two colors sit before the poster calls them different.
+ */
 private const val NOTICEABLE = 2.0
 
-/** Below this chroma a hue barely shows, so a change of hue says nothing. */
+/**
+ * Below this chroma a hue barely shows, so a change of hue says nothing.
+ */
 private const val HUE_CHROMA_FLOOR = 5.0
 
-/** The ratio small text needs for AA, below which Match exactly warns. */
+/**
+ * The ratio small text needs for AA, below which Match exactly warns.
+ */
 private const val MATCH_TEXT_RATIO = 4.5
 
 private const val FULL_TURN = 360.0

@@ -8,10 +8,14 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
-/** The tallest a row of dialog buttons stands, the touch target a phone asks of a primary action. */
+/**
+ * The tallest a row of dialog buttons stands, the touch target a phone asks of a primary action.
+ */
 private val TallestButtonRow: Dp = LayoutInfo(widthDp = 0.dp, heightDp = 0.dp, coarsePointer = true).primaryTouchTarget
 
-/** The room a kit dialog needs under its body, the gap over its buttons and the buttons themselves. */
+/**
+ * The room a kit dialog needs under its body, the gap over its buttons and the buttons themselves.
+ */
 @Composable
 internal fun dialogButtonRoom(): Dp = LocalBuilderTokens.current.spacing.large + TallestButtonRow
 

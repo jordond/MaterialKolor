@@ -64,7 +64,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.stringResource
 
-/** The animation lengths offered, in milliseconds. A length stored from elsewhere joins them. */
+/**
+ * The animation lengths offered, in milliseconds. A length stored from elsewhere joins them.
+ */
 private val DURATIONS_MS = listOf(150, 300, 500, 1000)
 
 /**
@@ -73,18 +75,26 @@ private val DURATIONS_MS = listOf(150, 300, 500, 1000)
  */
 @Stable
 internal class DraftProblems {
-    /** What is wrong with the package draft, or null when nothing is. */
+    /**
+     * What is wrong with the package draft, or null when nothing is.
+     */
     var packageName: ExportProblem? by mutableStateOf(null)
 
-    /** What is wrong with the theme name draft, or null when nothing is. */
+    /**
+     * What is wrong with the theme name draft, or null when nothing is.
+     */
     var themeName: ExportProblem? by mutableStateOf(null)
 
-    /** Every problem a draft has, the package first. */
+    /**
+     * Every problem a draft has, the package first.
+     */
     val all: List<ExportProblem>
         get() = listOfNotNull(packageName, themeName)
 }
 
-/** Whether an export writes a multiplatform project or an Android one. */
+/**
+ * Whether an export writes a multiplatform project or an Android one.
+ */
 private enum class ProjectKind {
     Multiplatform,
     AndroidOnly,
@@ -237,7 +247,9 @@ private fun NamePair(
     }
 }
 
-/** The narrowest the form gets while the package and the theme name still share a row. */
+/**
+ * The narrowest the form gets while the package and the theme name still share a row.
+ */
 private val NAME_PAIR_MIN_WIDTH = 480.dp
 
 @Composable
@@ -260,7 +272,9 @@ private fun PackageField(
     )
 }
 
-/** The theme name, checked against Kotlin and against the names the target's export already uses. */
+/**
+ * The theme name, checked against Kotlin and against the names the target's export already uses.
+ */
 @Composable
 private fun ThemeNameField(
     state: ExportModel.State,
@@ -357,11 +371,15 @@ private fun LiveField(
     )
 }
 
-/** Whether the export of this document would clash with a name it already uses, were the theme called [name]. */
+/**
+ * Whether the export of this document would clash with a name it already uses, were the theme called [name].
+ */
 private fun ThemeDocument.takesReservedName(name: String): Boolean =
     ReservedNames.clashes(copy(themeName = name)).any { clash -> clash is ReservedNameClash.ThemeName }
 
-/** Color animation, and how long it runs once it is on. */
+/**
+ * Color animation, and how long it runs once it is on.
+ */
 @Composable
 private fun AnimationOptions(
     state: ExportModel.State,
@@ -389,13 +407,19 @@ private fun AnimationOptions(
     )
 }
 
-/** The targets a Material 3 theme is written for, the only ones with the wallpaper colors branch. */
+/**
+ * The targets a Material 3 theme is written for, the only ones with the wallpaper colors branch.
+ */
 private val MATERIAL3_TARGETS = setOf(ExportTarget.Material3, ExportTarget.Material3Expressive)
 
-/** Whether the control shows at all. */
+/**
+ * Whether the control shows at all.
+ */
 private val ControlState.shown: Boolean
     get() = this !is ControlState.Hidden
 
-/** Whether the control takes input. */
+/**
+ * Whether the control takes input.
+ */
 private val ControlState.usable: Boolean
     get() = this is ControlState.Enabled

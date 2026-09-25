@@ -100,7 +100,9 @@ class OverlayAnchorTest {
         }
 }
 
-/** Counts the writes to [anchor]'s bounds while [block] runs. */
+/**
+ * Counts the writes to [anchor]'s bounds while [block] runs.
+ */
 @OptIn(ExperimentalTestApi::class)
 private suspend fun ComposeUiTest.hostCountBoundsWrites(
     anchor: OverlayAnchor,

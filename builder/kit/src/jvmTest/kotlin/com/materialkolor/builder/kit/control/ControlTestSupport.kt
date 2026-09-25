@@ -6,7 +6,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 
-/** Matches a node that plays [role]. */
+/**
+ * Matches a node that plays [role].
+ */
 internal fun hasRole(role: Role): SemanticsMatcher = SemanticsMatcher.expectValue(SemanticsProperties.Role, role)
 
 internal fun hasOverlayPaneTitle(title: String): SemanticsMatcher =
@@ -15,15 +17,21 @@ internal fun hasOverlayPaneTitle(title: String): SemanticsMatcher =
 internal fun hasStateDescription(state: String): SemanticsMatcher =
     SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, state)
 
-/** Matches a node with no content description at all. */
+/**
+ * Matches a node with no content description at all.
+ */
 internal fun hasNoContentDescription(): SemanticsMatcher =
     SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription)
 
-/** Matches a node whose content descriptions are exactly [names]. */
+/**
+ * Matches a node whose content descriptions are exactly [names].
+ */
 internal fun hasContentDescriptionExactly(vararg names: String): SemanticsMatcher =
     SemanticsMatcher.expectValue(SemanticsProperties.ContentDescription, names.toList())
 
-/** A kit's worth of state words in English, for the plain functions. */
+/**
+ * A kit's worth of state words in English, for the plain functions.
+ */
 internal val TestStateWords: StateWords = StateWords(
     selected = "Selected",
     notSelected = "Not selected",
@@ -46,7 +54,9 @@ internal val TestStateWords: StateWords = StateWords(
     dialog = "dialog",
 )
 
-/** One ink on one ground a control draws, and the least contrast the pair may have. */
+/**
+ * One ink on one ground a control draws, and the least contrast the pair may have.
+ */
 internal class InkPair(
     val name: String,
     val ink: Color,
@@ -54,7 +64,9 @@ internal class InkPair(
     val minimum: Double,
 )
 
-/** The WCAG contrast ratio of two opaque colours. */
+/**
+ * The WCAG contrast ratio of two opaque colours.
+ */
 internal fun contrast(
     a: Color,
     b: Color,
@@ -64,7 +76,9 @@ internal fun contrast(
     return (lighter + 0.05) / (darker + 0.05)
 }
 
-/** Every pair that falls short of its minimum, one line each, headed by the [mode] it was seen in. */
+/**
+ * Every pair that falls short of its minimum, one line each, headed by the [mode] it was seen in.
+ */
 internal fun Iterable<InkPair>.shortfalls(mode: String): List<String> =
     mapNotNull { pair ->
         val ratio = contrast(pair.ink, pair.ground)

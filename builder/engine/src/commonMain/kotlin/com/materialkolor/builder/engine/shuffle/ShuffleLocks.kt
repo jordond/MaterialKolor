@@ -17,7 +17,9 @@ public data class ShuffleLocks(
     public val seed: Boolean = false,
 )
 
-/** The shuffle locks these preferences hold. */
+/**
+ * The shuffle locks these preferences hold.
+ */
 public fun Preferences.shuffleLocks(): ShuffleLocks =
     ShuffleLocks(
         hue = hueLock,

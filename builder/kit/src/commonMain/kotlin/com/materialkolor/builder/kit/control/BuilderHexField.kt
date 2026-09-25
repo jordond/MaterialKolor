@@ -143,14 +143,22 @@ private fun rememberFittedHero(
     }
 }
 
-/** This size times [scale], or unspecified as it was. */
+/**
+ * This size times [scale], or unspecified as it was.
+ */
 private fun TextUnit.scaled(scale: Float): TextUnit = if (isSpecified) this * scale else this
 
-/** Room kept past the hex for the caret, so the last digit never sits under it. */
+/**
+ * Room kept past the hex for the caret, so the last digit never sits under it.
+ */
 private val HeroCaretRoom: Dp = 4.dp
 
-/** The least the headline is scaled to fit. Text longer than that scrolls in the field. */
+/**
+ * The least the headline is scaled to fit. Text longer than that scrolls in the field.
+ */
 private const val HeroMinScale: Float = 0.4f
 
-/** How long the field waits after the last valid keystroke before it commits (F-05). */
+/**
+ * How long the field waits after the last valid keystroke before it commits (F-05).
+ */
 internal const val CommitDelayMillis: Long = 400L

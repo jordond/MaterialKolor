@@ -50,7 +50,9 @@ internal fun TargetOptions(
     }
 }
 
-/** The switch that drops dark mode's surfaces to pure black. */
+/**
+ * The switch that drops dark mode's surfaces to pure black.
+ */
 @Composable
 private fun AmoledOption(
     context: PosterContext,
@@ -68,7 +70,9 @@ private fun AmoledOption(
     state.explanation?.let { reason -> ReasonLine(reason) }
 }
 
-/** Standard or Expressive, the motion scheme the export carries and the preview moves with. */
+/**
+ * Standard or Expressive, the motion scheme the export carries and the preview moves with.
+ */
 @Composable
 private fun MotionOption(
     context: PosterContext,
@@ -98,7 +102,9 @@ private fun MotionOption(
     }
 }
 
-/** What [choice] is called. */
+/**
+ * What [choice] is called.
+ */
 private fun motionName(choice: MotionSchemeChoice): StringResource =
     when (choice) {
         MotionSchemeChoice.Standard -> Res.string.extras_motion_standard

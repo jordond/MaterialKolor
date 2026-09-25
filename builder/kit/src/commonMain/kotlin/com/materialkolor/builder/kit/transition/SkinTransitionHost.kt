@@ -81,7 +81,9 @@ private fun Modifier.skinReveal(transition: SkinTransition): Modifier =
         }
     }
 
-/** Draws the captured frame, from the bitmap when there is one and the recorded layer otherwise. */
+/**
+ * Draws the captured frame, from the bitmap when there is one and the recorded layer otherwise.
+ */
 private fun DrawScope.drawSnapshot(
     transition: SkinTransition,
     alpha: Float,

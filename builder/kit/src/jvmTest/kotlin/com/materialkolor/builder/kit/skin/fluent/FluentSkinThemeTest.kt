@@ -36,7 +36,9 @@ private val Result = ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4)
 
 private val FluentSkin = Skin(Library.Fluent, expressive = false)
 
-/** The ids `fluent-icons-core` has no glyph for, which borrow Lucide's. */
+/**
+ * The ids `fluent-icons-core` has no glyph for, which borrow Lucide's.
+ */
 private val LucideFallbacks: Set<IconId> = setOf(
     IconId.Undo,
     IconId.Redo,
@@ -61,7 +63,9 @@ private val LucideFallbacks: Set<IconId> = setOf(
     IconId.History, // b-508
 )
 
-/** Every kit file B-403 and B-403b own, the ones a Fluent swap can reach. */
+/**
+ * Every kit file B-403 and B-403b own, the ones a Fluent swap can reach.
+ */
 private val FluentOwned: List<String> = listOf(
     "skin/fluent/FluentSkinTheme.kt",
     "skin/fluent/FluentActions.kt",
@@ -100,7 +104,9 @@ private val WindowsAndLoops: List<Regex> = listOf(
     Regex("""\bProgressRing\("""),
 )
 
-/** Where the kit's common sources sit, from the module directory Gradle runs the tests in. */
+/**
+ * Where the kit's common sources sit, from the module directory Gradle runs the tests in.
+ */
 private val KitSources = File("src/commonMain/kotlin/com/materialkolor/builder/kit")
 
 @OptIn(ExperimentalTestApi::class)

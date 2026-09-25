@@ -119,7 +119,9 @@ private fun Modifier.scrollAreaKeys(
         }.focusable(enabled = overflows, interactionSource = interactions)
 }
 
-/** A vertical scrollbar for [state], drawn as a rounded thumb in the skin's thumb ink. */
+/**
+ * A vertical scrollbar for [state], drawn as a rounded thumb in the skin's thumb ink.
+ */
 @Composable
 internal fun HeadlessVerticalScrollbar(
     state: ScrollState,

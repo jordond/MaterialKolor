@@ -81,7 +81,9 @@ public fun SplitPreview(
     }
 }
 
-/** What [SplitPreview] tells [LocalCompositionProbe] each time it composes. */
+/**
+ * What [SplitPreview] tells [LocalCompositionProbe] each time it composes.
+ */
 internal const val SPLIT_PREVIEW: String = "SplitPreview"
 
 /**

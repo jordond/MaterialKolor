@@ -62,10 +62,14 @@ public sealed interface ColorRef {
  * A text color Fluent ships as a constant rather than taking from the accent ramp.
  */
 public enum class FluentText {
-    /** Text and glyphs on an accent fill, white in light mode and black in dark mode. */
+    /**
+     * Text and glyphs on an accent fill, white in light mode and black in dark mode.
+     */
     OnAccentPrimary,
 
-    /** Quieter text on an accent fill, the same color with some of the fill showing through. */
+    /**
+     * Quieter text on an accent fill, the same color with some of the fill showing through.
+     */
     OnAccentSecondary,
 }
 
@@ -73,25 +77,39 @@ public enum class FluentText {
  * The accent shades a Fluent theme is built from, named the way Fluent's `Shades` names them.
  */
 public enum class FluentShade {
-    /** The darkest shade. */
+    /**
+     * The darkest shade.
+     */
     Dark3,
 
-    /** The second darkest shade. */
+    /**
+     * The second darkest shade.
+     */
     Dark2,
 
-    /** The shade just darker than the accent. */
+    /**
+     * The shade just darker than the accent.
+     */
     Dark1,
 
-    /** The accent itself. */
+    /**
+     * The accent itself.
+     */
     Base,
 
-    /** The shade just lighter than the accent. */
+    /**
+     * The shade just lighter than the accent.
+     */
     Light1,
 
-    /** The second lightest shade. */
+    /**
+     * The second lightest shade.
+     */
     Light2,
 
-    /** The lightest shade. */
+    /**
+     * The lightest shade.
+     */
     Light3,
 }
 
@@ -99,10 +117,14 @@ public enum class FluentShade {
  * Whether a pair is read as text or as a shape, which sets the ratio it has to clear.
  */
 public enum class PairKind {
-    /** Words, held to 4.5 to 1 for AA. */
+    /**
+     * Words, held to 4.5 to 1 for AA.
+     */
     Text,
 
-    /** Borders, focus rings and other shapes someone has to see, held to 3 to 1. */
+    /**
+     * Borders, focus rings and other shapes someone has to see, held to 3 to 1.
+     */
     NonText,
 }
 
@@ -163,7 +185,9 @@ public object ContrastPairs {
         return pairs.distinct()
     }
 
-    /** Every surface level, the roles onSurface is drawn on. */
+    /**
+     * Every surface level, the roles onSurface is drawn on.
+     */
     private val surfaceLevels: List<Role> = Role.entries.filter { role -> role.onPair == Role.OnSurface }
 
     private val fixedVariants: Map<Role, Role> = mapOf(
@@ -194,7 +218,9 @@ public object ContrastPairs {
     private fun ContrastPair.roles(): List<Role> =
         listOf(foreground, background).mapNotNull { ref -> (ref as? ColorRef.OfRole)?.role }
 
-    /** The role a slot takes, or null for a slot cut off a ramp. */
+    /**
+     * The role a slot takes, or null for a slot cut off a ramp.
+     */
     private val CustomSlot.role: Role?
         get() = (resolution as? SlotResolution.FromRole)?.role
 
@@ -203,7 +229,9 @@ public object ContrastPairs {
 
     private val rolesTakenBySlots: Set<Role> = slotByRole.keys
 
-    /** The three surface steps a Custom theme lays content on. */
+    /**
+     * The three surface steps a Custom theme lays content on.
+     */
     private val customSurfaces: List<CustomSlot> =
         listOf(CustomSlot.Surface, CustomSlot.SurfaceRaised, CustomSlot.SurfaceSunken)
 

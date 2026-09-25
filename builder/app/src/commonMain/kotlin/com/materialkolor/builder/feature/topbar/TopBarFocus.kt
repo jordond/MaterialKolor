@@ -13,7 +13,9 @@ import com.materialkolor.builder.kit.skin.LocalSkin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-/** The top bar controls that can hold keyboard focus. */
+/**
+ * The top bar controls that can hold keyboard focus.
+ */
 internal enum class TopBarControl {
     Library,
     Commands,
@@ -38,14 +40,20 @@ internal class TopBarFocus(
 ) {
     private val requesters = mutableMapOf<TopBarControl, FocusRequester>()
 
-    /** Counts focus changes, so a late forget can tell whether anything happened since. */
+    /**
+     * Counts focus changes, so a late forget can tell whether anything happened since.
+     */
     private var changes = 0
 
-    /** The control holding focus, or the one that just lost it. Plain, since nothing draws from it. */
+    /**
+     * The control holding focus, or the one that just lost it. Plain, since nothing draws from it.
+     */
     var focused: TopBarControl? = null
         private set
 
-    /** The control holding focus right now, or null. */
+    /**
+     * The control holding focus right now, or null.
+     */
     var holding: TopBarControl? = null
         private set
 
@@ -102,7 +110,9 @@ internal fun rememberTopBarFocus(): TopBarFocus {
     return focus
 }
 
-/** Lets [focus] track this control as [control] and bring focus back to it. */
+/**
+ * Lets [focus] track this control as [control] and bring focus back to it.
+ */
 internal fun Modifier.topBarFocus(
     focus: TopBarFocus,
     control: TopBarControl,

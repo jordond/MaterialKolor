@@ -179,7 +179,9 @@ internal interface HistoryPort {
     )
 }
 
-/** The browser's own history. */
+/**
+ * The browser's own history.
+ */
 internal object BrowserHistory : HistoryPort {
     override fun path(): String = locationPath()
 
@@ -214,8 +216,12 @@ internal object BrowserHistory : HistoryPort {
 private const val HOME = "/"
 private const val POP_BUFFER = 16
 
-/** How long a push or home waits for a back's move before it gives the back up. */
+/**
+ * How long a push or home waits for a back's move before it gives the back up.
+ */
 private const val MOVE_WAIT_MS = 250
 
-/** How long a back given up on may still land and close nothing. */
+/**
+ * How long a back given up on may still land and close nothing.
+ */
 private const val LATE_MOVE_MS = 1_000

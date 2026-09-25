@@ -22,11 +22,13 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.test.Test
 
-/** The long edge the extractor reads an image at, as the browser scales it. */
+/**
+ * The long edge the extractor reads an image at, as the browser scales it.
+ */
 private const val PIXEL_EDGE = 128
 
 /**
- * Keeps the preset candidates in `Presets.kt` honest. Each picture is decoded with Skia, scaled to
+ * Checks the preset candidates in `Presets.kt` against the extractor. Each picture is decoded with Skia, scaled to
  * 128 px the way an image the user brings is, and handed to the extractor again.
  */
 @OptIn(ExperimentalResourceApi::class)
@@ -57,7 +59,9 @@ class PresetCandidatesTest {
         Presets.starters.size shouldBe 8
     }
 
-    /** The picture in [bytes] at 128 px on its long edge, as ARGB pixels. */
+    /**
+     * The picture in [bytes] at 128 px on its long edge, as ARGB pixels.
+     */
     private fun sampleOf(bytes: ByteArray): PixelSample {
         val image = Image.makeFromEncoded(bytes)
         val scale = PIXEL_EDGE.toFloat() / max(image.width, image.height)

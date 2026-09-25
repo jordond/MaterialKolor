@@ -26,7 +26,9 @@ import io.kotest.matchers.shouldNotBe
 import kotlin.math.roundToInt
 import kotlin.test.Test
 
-/** A red loud enough that TonalSpot has to calm it. */
+/**
+ * A red loud enough that TonalSpot has to calm it.
+ */
 private val Seed = Argb(0xE53935)
 
 @OptIn(ExperimentalTestApi::class)
@@ -164,7 +166,9 @@ class ContrastExplainerTest {
 
 // b-221f
 
-/** The explainer line with the explainer the workspace hosts over it, as the two sit on screen. */
+/**
+ * The explainer line with the explainer the workspace hosts over it, as the two sit on screen.
+ */
 @Composable
 private fun LineAndExplainer(
     context: PosterContext,

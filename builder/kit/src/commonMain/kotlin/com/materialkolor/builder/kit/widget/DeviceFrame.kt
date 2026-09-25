@@ -71,7 +71,9 @@ public fun DeviceFrame(
     }
 }
 
-/** How thick the bezel is around the screen. */
+/**
+ * How thick the bezel is around the screen.
+ */
 private fun DeviceWidth.bezel(tokens: BuilderTokens): Dp =
     when (this) {
         DeviceWidth.Phone -> tokens.spacing.medium
@@ -79,7 +81,9 @@ private fun DeviceWidth.bezel(tokens: BuilderTokens): Dp =
         DeviceWidth.Desktop -> tokens.spacing.small
     }
 
-/** The corner radius of the screen inside the bezel. */
+/**
+ * The corner radius of the screen inside the bezel.
+ */
 private fun DeviceWidth.screenRadius(tokens: BuilderTokens): Dp =
     when (this) {
         DeviceWidth.Phone -> tokens.radius.large

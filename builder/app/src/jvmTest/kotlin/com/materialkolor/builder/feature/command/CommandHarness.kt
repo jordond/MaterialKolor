@@ -30,7 +30,9 @@ import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
-/** The whole builder on fakes, booted, with the command registry of every composition in [commands]. */
+/**
+ * The whole builder on fakes, booted, with the command registry of every composition in [commands].
+ */
 @OptIn(ExperimentalTestApi::class, KitTestApi::class)
 internal class CommandHarness(
     val platform: FakePlatform = FakePlatform(),
@@ -39,7 +41,9 @@ internal class CommandHarness(
     lateinit var graph: AppGraph
     var commands: List<Command> = emptyList()
 
-    /** The command [id], as the registry has it now. */
+    /**
+     * The command [id], as the registry has it now.
+     */
     fun command(id: String): Command = commands.first { command -> command.id == id }
 
     /**
@@ -89,7 +93,9 @@ internal class CommandHarness(
     }
 }
 
-/** Presses keys on whatever holds focus, the way a keyboard does. */
+/**
+ * Presses keys on whatever holds focus, the way a keyboard does.
+ */
 @OptIn(ExperimentalTestApi::class)
 internal fun ComposeUiTest.keys(block: androidx.compose.ui.test.KeyInjectionScope.() -> Unit) {
     onAllNodes(isRoot()).onFirst().performKeyInput(block)

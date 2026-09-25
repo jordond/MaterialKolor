@@ -34,10 +34,14 @@ internal object WebImageInput : ImageInput {
     private val dropped = MutableSharedFlow<ImageHandle>(extraBufferCapacity = DROP_BUFFER)
     private val dragOver = MutableStateFlow(false)
 
-    /** Each file dropped while something collects, image or not. A drop with nobody listening does nothing. */
+    /**
+     * Each file dropped while something collects, image or not. A drop with nobody listening does nothing.
+     */
     override val drops: Flow<ImageHandle> = dropped.asSharedFlow()
 
-    /** Whether files are being dragged over the page, for the drop overlay. */
+    /**
+     * Whether files are being dragged over the page, for the drop overlay.
+     */
     override val dragging: StateFlow<Boolean> = dragOver.asStateFlow()
 
     init {
@@ -47,7 +51,9 @@ internal object WebImageInput : ImageInput {
         )
     }
 
-    /** Open the file picker. It opens before this first suspends, so start it undispatched from a click. */
+    /**
+     * Open the file picker. It opens before this first suspends, so start it undispatched from a click.
+     */
     override suspend fun pick(): ImageHandle? = pickImageFile()?.let(::BrowserImage)
 
     override suspend fun decode(handle: ImageHandle): DecodedImage? {

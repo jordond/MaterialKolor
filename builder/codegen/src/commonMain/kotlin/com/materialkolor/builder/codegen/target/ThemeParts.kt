@@ -36,34 +36,50 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 // Fluent dynamic one, the modes serve every frozen export, and the accent family serves the frozen
 // exports and the Material 3 dynamic one.
 
-/** The two modes a frozen export writes each set of colors in, light first. */
+/**
+ * The two modes a frozen export writes each set of colors in, light first.
+ */
 internal enum class FrozenMode {
     Light,
     Dark,
 }
 
-/** The theme function's first parameter, which every frozen theme picks its colors by. */
+/**
+ * The theme function's first parameter, which every frozen theme picks its colors by.
+ */
 internal const val IS_DARK_PARAMETER: String = "isDark"
 
-/** The theme function's content parameter. */
+/**
+ * The theme function's content parameter.
+ */
 internal const val CONTENT_PARAMETER: String = "content"
 
 // b-111c
 
-/** The theme function's switch for the wallpaper colors, which only an Android export that asks for them has. */
+/**
+ * The theme function's switch for the wallpaper colors, which only an Android export that asks for them has.
+ */
 internal const val DYNAMIC_COLOR_PARAMETER: String = "dynamicColor"
 
-/** The data class an export declares for the four colors of one accent. */
+/**
+ * The data class an export declares for the four colors of one accent.
+ */
 internal const val COLOR_FAMILY: String = "ColorFamily"
 
-/** The four colors of a family, in the order `ColorFamily` declares them. */
+/**
+ * The four colors of a family, in the order `ColorFamily` declares them.
+ */
 internal val FamilyParts: List<String> = listOf("color", "onColor", "colorContainer", "onColorContainer")
 
-/** The contrast variants the export writes, standard first and then medium and high. */
+/**
+ * The contrast variants the export writes, standard first and then medium and high.
+ */
 internal val ResolvedExport.contrastVariants: List<ContrastVariant>
     get() = ContrastVariant.entries.filter { variant -> variant in roles }
 
-/** What a value at this contrast is prefixed with, as in `mediumContrast`, and nothing at the standard one. */
+/**
+ * What a value at this contrast is prefixed with, as in `mediumContrast`, and nothing at the standard one.
+ */
 internal val ContrastVariant.namePrefix: String
     get() = when (this) {
         ContrastVariant.Standard -> ""
@@ -71,15 +87,21 @@ internal val ContrastVariant.namePrefix: String
         ContrastVariant.High -> "highContrast"
     }
 
-/** The property an accent's family is read from, as in `brand`. */
+/**
+ * The property an accent's family is read from, as in `brand`.
+ */
 internal val Accent.propertyName: String
     get() = accentPropertyName(name)
 
-/** The property a resolved accent's family is read from, the same name its [Accent] gets. */
+/**
+ * The property a resolved accent's family is read from, the same name its [Accent] gets.
+ */
 internal val AccentFamilyValues.propertyName: String
     get() = accentPropertyName(name)
 
-/** The accent's four colors in [mode]. */
+/**
+ * The accent's four colors in [mode].
+ */
 internal fun AccentFamilyValues.colorsIn(mode: FrozenMode): AccentColors =
     when (mode) {
         FrozenMode.Light -> light
@@ -88,14 +110,18 @@ internal fun AccentFamilyValues.colorsIn(mode: FrozenMode): AccentColors =
 
 // b-111c
 
-/** Every role's color in [mode], at the contrast variant this table was resolved at. */
+/**
+ * Every role's color in [mode], at the contrast variant this table was resolved at.
+ */
 internal fun RoleTable.colorsIn(mode: FrozenMode): Map<Role, Argb> =
     when (mode) {
         FrozenMode.Light -> light
         FrozenMode.Dark -> dark
     }
 
-/** `if (isDark) dark else light`, which is how a frozen theme picks between its two standard values. */
+/**
+ * `if (isDark) dark else light`, which is how a frozen theme picks between its two standard values.
+ */
 internal fun byMode(
     light: String,
     dark: String,
@@ -119,7 +145,9 @@ internal fun KotlinFileScope.themeFunction(
     }
 }
 
-/** The `ColorFamily` data class, the one every export with accents declares. */
+/**
+ * The `ColorFamily` data class, the one every export with accents declares.
+ */
 internal fun KotlinFileScope.colorFamilyClass() {
     classDeclaration(
         name = COLOR_FAMILY,
@@ -147,7 +175,9 @@ private fun accentPropertyName(name: String): String = name.replaceFirstChar { c
 
 // b-111c
 
-/** `dynamicColor: Boolean = true`, which goes right after `isDark`. */
+/**
+ * `dynamicColor: Boolean = true`, which goes right after `isDark`.
+ */
 internal fun FunctionScope.dynamicColorParameter() {
     parameter(DYNAMIC_COLOR_PARAMETER, Symbols.Boolean, default = Literals.boolean(true))
 }

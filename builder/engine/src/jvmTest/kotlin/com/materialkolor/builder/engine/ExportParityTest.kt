@@ -117,7 +117,9 @@ class ExportParityTest {
         assertGivesThePreviewColors(ExportTarget.Custom)
     }
 
-    /** Every document's dynamic [target] export passes the arguments the engine resolves its preview with. */
+    /**
+     * Every document's dynamic [target] export passes the arguments the engine resolves its preview with.
+     */
     private fun assertPassesTheEngineArguments(
         target: ExportTarget,
         versions: ExportVersions = Versions,
@@ -132,9 +134,9 @@ class ExportParityTest {
     }
 
     /**
-     * Every document's dynamic [target] export gives the preview's colors in both modes: every role
-     * with its pins, every Custom slot with its tones, every accent family and every Fluent shade,
-     * each worked out from what the export writes.
+     * Every document's dynamic [target] export gives the preview's colors in both modes. That covers
+     * every role with its pins, every Custom slot with its tones, every accent family and every
+     * Fluent shade, each worked out from what the export writes.
      */
     private fun assertGivesThePreviewColors(
         target: ExportTarget,
@@ -173,7 +175,9 @@ class ExportParityTest {
             ),
         )
 
-    /** Every color a frozen export of [document] for [target] should write, by the name it sits under. */
+    /**
+     * Every color a frozen export of [document] for [target] should write, by the name it sits under.
+     */
     private fun frozenColors(
         target: ExportTarget,
         document: ThemeDocument,
@@ -249,7 +253,9 @@ class ExportParityTest {
         }
     }
 
-    /** Every accent color [target] writes in the mode [isDark] picks, by the name it sits under. */
+    /**
+     * Every accent color [target] writes in the mode [isDark] picks, by the name it sits under.
+     */
     private fun accentColors(
         target: ExportTarget,
         preview: ThemeResult,
@@ -295,12 +301,16 @@ class ExportParityTest {
             composeUnstyled = "2.10.0",
         )
 
-        /** A release that does not publish `material-kolor-fluent`, so a Fluent export builds its shades inline. */
+        /**
+         * A release that does not publish `material-kolor-fluent`, so a Fluent export builds its shades inline.
+         */
         val InlineFluentVersions = Versions.copy(fluentModuleAvailable = false)
     }
 }
 
-/** [this] document as an export for [target] sees it. */
+/**
+ * [this] document as an export for [target] sees it.
+ */
 private fun ThemeDocument.on(target: ExportTarget): ThemeDocument {
     val library = when (target) {
         ExportTarget.Material3, ExportTarget.Material3Expressive -> Library.Material3
@@ -311,11 +321,15 @@ private fun ThemeDocument.on(target: ExportTarget): ThemeDocument {
     return copy(library = library, expressive = target == ExportTarget.Material3Expressive).forTarget(target)
 }
 
-/** How a failure names the dynamic export of [this] target, the inline Fluent binding apart. */
+/**
+ * How a failure names the dynamic export of [this] target, the inline Fluent binding apart.
+ */
 private fun ExportTarget.dynamicName(versions: ExportVersions): String =
     if (this == ExportTarget.Fluent && !versions.fluentModuleAvailable) "$this dynamic inline" else "$this dynamic"
 
-/** [this] document at the contrast [variant] stands for, the way `ExportResolver` resolves it. */
+/**
+ * [this] document at the contrast [variant] stands for, the way `ExportResolver` resolves it.
+ */
 private fun ThemeDocument.atContrast(variant: ContrastVariant): ThemeDocument =
     when (variant) {
         ContrastVariant.Standard -> this
@@ -323,7 +337,9 @@ private fun ThemeDocument.atContrast(variant: ContrastVariant): ThemeDocument =
         ContrastVariant.High -> copy(contrast = ContrastLevel.High)
     }
 
-/** How the names of [this] variant's colors start, empty for standard. */
+/**
+ * How the names of [this] variant's colors start, empty for standard.
+ */
 private val ContrastVariant.prefix: String
     get() = when (this) {
         ContrastVariant.Standard -> ""
@@ -334,7 +350,9 @@ private val ContrastVariant.prefix: String
 private fun ThemeResult.roleColors(isDark: Boolean) =
     (if (isDark) roles.dark else roles.light).mapValues { (_, entry) -> entry.argb }
 
-/** The Fluent shades the preview's own primary palette gives in the mode [isDark] picks. */
+/**
+ * The Fluent shades the preview's own primary palette gives in the mode [isDark] picks.
+ */
 private fun ThemeResult.fluentShades(isDark: Boolean): FluentShadeValues {
     val shades = scheme(isDark).primaryPalette.toFluentShades()
     return FluentShadeValues(
@@ -348,7 +366,9 @@ private fun ThemeResult.fluentShades(isDark: Boolean): FluentShadeValues {
     )
 }
 
-/** The Unstyled token an accent part is written under, as in `onBrandContainer`. */
+/**
+ * The Unstyled token an accent part is written under, as in `onBrandContainer`.
+ */
 private fun AccentPart.unstyledToken(accent: String): String =
     when (this) {
         AccentPart.Color -> accent
@@ -357,7 +377,9 @@ private fun AccentPart.unstyledToken(accent: String): String =
         AccentPart.OnContainer -> "on${accent.upperFirst()}Container"
     }
 
-/** The `ColorFamily` property an accent part is written under. */
+/**
+ * The `ColorFamily` property an accent part is written under.
+ */
 private val AccentPart.property: String
     get() = when (this) {
         AccentPart.Color -> "color"

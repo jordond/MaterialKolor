@@ -8,7 +8,9 @@ import kotlin.test.assertEquals
 
 // b-315d
 
-/** The router against a history whose moves the test lands, holds back or drops. */
+/**
+ * The router against a history whose moves the test lands, holds back or drops.
+ */
 class WebRouterTest {
     @Test
     fun aPushWhileABackIsOnItsWay_landsOnceTheBackDoes() {
@@ -102,7 +104,9 @@ private class FakeHistory : HistoryPort {
     private val timers = mutableListOf<() -> Unit>()
     private var listener: (Int) -> Unit = {}
 
-    /** The ids from the first entry to the current one. */
+    /**
+     * The ids from the first entry to the current one.
+     */
     val ids: List<String>
         get() = entries.take(index + 1).map { (id, _) -> id }
 
@@ -143,19 +147,25 @@ private class FakeHistory : HistoryPort {
         timers += block
     }
 
-    /** Moves the oldest back from wherever the history is now, and reports it unless not [report]. */
+    /**
+     * Moves the oldest back from wherever the history is now, and reports it unless not [report].
+     */
     fun land(report: Boolean = true) {
         val steps = backs.removeFirst()
         index = (index - steps).coerceAtLeast(0)
         if (report) listener(depth())
     }
 
-    /** Loses the oldest back, the way a browser may. */
+    /**
+     * Loses the oldest back, the way a browser may.
+     */
     fun drop() {
         backs.removeFirst()
     }
 
-    /** The back button, which moves at once. */
+    /**
+     * The back button, which moves at once.
+     */
     fun userBack() {
         index--
         listener(depth())

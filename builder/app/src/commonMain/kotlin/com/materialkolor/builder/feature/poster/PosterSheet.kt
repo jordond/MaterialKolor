@@ -58,7 +58,9 @@ internal fun sheetSectionsInView(
         SheetSection.entries.filter { section -> section.detent <= detent }
     }
 
-/** The sheet the poster rests in on a phone, or null where the poster is not in one. */
+/**
+ * The sheet the poster rests in on a phone, or null where the poster is not in one.
+ */
 internal val LocalPosterSheetState: ProvidableCompositionLocal<BottomSheetState?> =
     staticCompositionLocalOf { null }
 
@@ -78,15 +80,21 @@ internal class PosterSheetView(
     private val sheet: BottomSheetState?,
     private val layout: LayoutInfo,
 ) {
-    /** The detent the sheet rests at, or is on its way to. */
+    /**
+     * The detent the sheet rests at, or is on its way to.
+     */
     val detent: BottomSheetDetent
         get() = sheet?.targetDetent ?: BottomSheetDetent.Peek
 
-    /** Whether this is a phone on its side, where the peek only has room for the seed row (D38). */
+    /**
+     * Whether this is a phone on its side, where the peek only has room for the seed row (D38).
+     */
     val short: Boolean
         get() = layout.heightDp < ShortHeightBreakpoint && layout.coarsePointer
 
-    /** The sections in view at [detent], in the order the sheet shows them. */
+    /**
+     * The sections in view at [detent], in the order the sheet shows them.
+     */
     val inView: List<SheetSection>
         get() = sheetSectionsInView(detent, short)
 }

@@ -7,22 +7,34 @@ package com.materialkolor.builder.domain.persist
  * can list projects from the index alone and a heavy history is only read for the open project.
  */
 public object StorageKeys {
-    /** The [ProjectIndex], every project the drawer lists. */
+    /**
+     * The [ProjectIndex], every project the drawer lists.
+     */
     public const val INDEX: String = "mk:index"
 
-    /** The browser's [Preferences]. */
+    /**
+     * The browser's [Preferences].
+     */
     public const val PREFS: String = "mk:prefs"
 
-    /** The light and dark splash colors of the open theme, plain JSON that `boot.js` reads before the app loads. */
+    /**
+     * The light and dark splash colors of the open theme, plain JSON that `boot.js` reads before the app loads.
+     */
     public const val SPLASH: String = "mk:splash"
 
-    /** Where the [ProjectRecord] of project [id] lives. */
+    /**
+     * Where the [ProjectRecord] of project [id] lives.
+     */
     public fun project(id: String): String = "$PROJECT_PREFIX${checkedId(id)}"
 
-    /** Where the [HistoryRecord] of project [id] lives. */
+    /**
+     * Where the [HistoryRecord] of project [id] lives.
+     */
     public fun history(id: String): String = "$HISTORY_PREFIX${checkedId(id)}"
 
-    /** Where the [ProjectViewState] of project [id] lives. */
+    /**
+     * Where the [ProjectViewState] of project [id] lives.
+     */
     public fun view(id: String): String = "$VIEW_PREFIX${checkedId(id)}"
 
     /**
@@ -80,13 +92,19 @@ public object StorageKeys {
  * One of the builder's own records, as [StorageKeys.parse] reads it back off its key.
  */
 public sealed interface StorageKey {
-    /** The [ProjectIndex] under [StorageKeys.INDEX]. */
+    /**
+     * The [ProjectIndex] under [StorageKeys.INDEX].
+     */
     public data object Index : StorageKey
 
-    /** The [Preferences] under [StorageKeys.PREFS]. */
+    /**
+     * The [Preferences] under [StorageKeys.PREFS].
+     */
     public data object Prefs : StorageKey
 
-    /** The splash colors under [StorageKeys.SPLASH]. */
+    /**
+     * The splash colors under [StorageKeys.SPLASH].
+     */
     public data object Splash : StorageKey
 
     /**

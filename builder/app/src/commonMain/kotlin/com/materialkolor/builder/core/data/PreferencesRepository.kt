@@ -26,7 +26,9 @@ internal class PreferencesRepository(
 ) {
     private val store = stores.create(StorageKeys.PREFS, Preferences.Codec, Preferences())
 
-    /** The preferences now and after every change, including one made in another tab. */
+    /**
+     * The preferences now and after every change, including one made in another tab.
+     */
     val preferences: StateFlow<Preferences> = store.data.stateIn(scope, SharingStarted.Eagerly, Preferences())
 
     /**
@@ -38,7 +40,9 @@ internal class PreferencesRepository(
      */
     suspend fun update(block: (Preferences) -> Preferences): StoreError? = store.update(block)
 
-    /** The options [target] was last exported with, or the defaults when it never was. */
+    /**
+     * The options [target] was last exported with, or the defaults when it never was.
+     */
     suspend fun exportPrefs(target: ExportTarget): ExportPrefs = store.get().exportPrefsFor(target)
 
     /**
@@ -54,6 +58,8 @@ internal class PreferencesRepository(
 
     // b-215
 
-    /** The preferences as they are stored right now, for boot, before [preferences] has caught up. */
+    /**
+     * The preferences as they are stored right now, for boot, before [preferences] has caught up.
+     */
     suspend fun current(): Preferences = store.get()
 }

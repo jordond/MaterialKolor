@@ -12,22 +12,34 @@ import com.materialkolor.builder.domain.model.Role
 
 // The photo app's sample content. All of it is provisional copy for the owner to replace.
 
-/** The memory the carousel features, a choice in the demo state both copies scroll to. */
+/**
+ * The memory the carousel features, a choice in the demo state both copies scroll to.
+ */
 internal const val PhotoMemoryChoice = "photo.memory"
 
-/** Which photos the button group shows, a choice in the demo state. */
+/**
+ * Which photos the button group shows, a choice in the demo state.
+ */
 internal const val PhotoViewChoice = "photo.view"
 
-/** Whether the create menu is open, a switch in the demo state. */
+/**
+ * Whether the create menu is open, a switch in the demo state.
+ */
 internal const val PhotoCreateSwitch = "photo.create"
 
-/** The photo feed, a list both copies keep at the same place. */
+/**
+ * The photo feed, a list both copies keep at the same place.
+ */
 internal const val PhotoFeedList = "photo.feed"
 
-/** How far the backup has got, 214 of 356. */
+/**
+ * How far the backup has got, 214 of 356.
+ */
 internal const val BackupProgress = 214f / 356f
 
-/** The words the photo app shows outside its lists. */
+/**
+ * The words the photo app shows outside its lists.
+ */
 internal object PhotoCopy {
     const val Title = "Photos"
     const val Subtitle = "1,248 photos, 36 albums"
@@ -56,7 +68,9 @@ internal enum class PhotoTint(
     Neutral(Role.SurfaceContainerHigh, Role.Outline, Role.OnSurface),
 }
 
-/** The Material shape a generated picture shows in its middle, standing in for what was photographed. */
+/**
+ * The Material shape a generated picture shows in its middle, standing in for what was photographed.
+ */
 internal enum class PhotoMotif {
     Sun,
     Snowflake,
@@ -69,7 +83,9 @@ internal enum class PhotoMotif {
     Burst,
 }
 
-/** A memory the carousel can feature. */
+/**
+ * A memory the carousel can feature.
+ */
 internal class PhotoMemory(
     val title: String,
     val tint: PhotoTint,
@@ -85,7 +101,9 @@ internal val PhotoMemories: List<PhotoMemory> = listOf(
     PhotoMemory("Old town", PhotoTint.Tertiary, PhotoMotif.Arch),
 )
 
-/** One photo of the library grid. */
+/**
+ * One photo of the library grid.
+ */
 internal class Photo(
     val tint: PhotoTint,
     val motif: PhotoMotif,
@@ -108,7 +126,9 @@ private val PhotoLibrary: List<Photo> = listOf(
     Photo(PhotoTint.Primary, PhotoMotif.Moon, favourite = true),
 )
 
-/** The views the button group picks between, each a slice of the library. */
+/**
+ * The views the button group picks between, each a slice of the library.
+ */
 internal enum class PhotoView(
     val label: String,
 ) {
@@ -117,7 +137,9 @@ internal enum class PhotoView(
     Shared("Shared"),
     ;
 
-    /** The photos this view shows, newest first. */
+    /**
+     * The photos this view shows, newest first.
+     */
     fun photos(): List<Photo> =
         when (this) {
             Recent -> PhotoLibrary
@@ -126,7 +148,9 @@ internal enum class PhotoView(
         }
 }
 
-/** Where the bottom bar or the rail can go. The library is the one the app has open. */
+/**
+ * Where the bottom bar or the rail can go. The library is the one the app has open.
+ */
 internal enum class PhotoDestination(
     val label: String,
     val icon: ImageVector,
@@ -136,7 +160,9 @@ internal enum class PhotoDestination(
     Sharing("Sharing", Lucide.Users),
 }
 
-/** What the create menu offers. */
+/**
+ * What the create menu offers.
+ */
 internal enum class PhotoCreate(
     val label: String,
     val icon: ImageVector,

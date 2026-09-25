@@ -31,7 +31,9 @@ internal data class ActionColors(
     val border: Color,
 )
 
-/** How a button and an icon button look, one set of colours per [Emphasis]. */
+/**
+ * How a button and an icon button look, one set of colours per [Emphasis].
+ */
 @Immutable
 internal data class ButtonStyle(
     val shape: Shape,
@@ -54,7 +56,9 @@ internal data class ButtonStyle(
         }
 }
 
-/** Anything with an on and an off look, a toggle button, a chip or one option of a segmented control. */
+/**
+ * Anything with an on and an off look, a toggle button, a chip or one option of a segmented control.
+ */
 @Immutable
 internal data class SelectableStyle(
     val shape: Shape,
@@ -87,7 +91,9 @@ internal data class SegmentedStyle(
     val endRingOffset: Dp = FocusRingOffset,
 )
 
-/** A badge, one set of colours per [BadgeStatus]. */
+/**
+ * A badge, one set of colours per [BadgeStatus].
+ */
 @Immutable
 internal data class BadgeStyle(
     val shape: Shape,
@@ -141,7 +147,9 @@ internal data class ProgressSweep(
     val fraction: Float,
 )
 
-/** The sweep every skin runs, Material3 included, so a skin switch keeps the pace. */
+/**
+ * The sweep every skin runs, Material3 included, so a skin switch keeps the pace.
+ */
 internal val ActionSweep: ProgressSweep = ProgressSweep(periodMillis = 1400, fraction = 0.4f)
 
 @Immutable
@@ -166,7 +174,9 @@ internal data class ListRowStyle(
     val supporting: Color,
 )
 
-/** Everything the actions and display controls read from a skin that has no components of its own. */
+/**
+ * Everything the actions and display controls read from a skin that has no components of its own.
+ */
 @Immutable
 internal data class ActionStyles(
     val button: ButtonStyle,
@@ -206,15 +216,21 @@ internal data class ActionMetrics(
     val borderedSecondary: Boolean,
 )
 
-/** The Unstyled skin's actions, flat with small corners, with an outline wherever there is no fill. */
+/**
+ * The Unstyled skin's actions, flat with small corners, with an outline wherever there is no fill.
+ */
 internal val UnstyledActionStyles: ActionStyles
     @Composable get() = rememberActionStyles(::unstyledActionStyles)
 
-/** The Custom skin's actions, pill shaped and a little roomier, with raised fills instead of outlines. */
+/**
+ * The Custom skin's actions, pill shaped and a little roomier, with raised fills instead of outlines.
+ */
 internal val CustomActionStyles: ActionStyles
     @Composable get() = rememberActionStyles(::customActionStyles)
 
-/** The styles [build] cuts from the surrounding skin's tokens, rebuilt only when the tokens change. */
+/**
+ * The styles [build] cuts from the surrounding skin's tokens, rebuilt only when the tokens change.
+ */
 @Composable
 internal fun rememberActionStyles(build: (BuilderTokens) -> ActionStyles): ActionStyles {
     val tokens = LocalBuilderTokens.current
@@ -371,7 +387,9 @@ internal fun actionStyles(
     )
 }
 
-/** Fills and outlines the control in [colors]. A transparent fill or outline draws nothing. */
+/**
+ * Fills and outlines the control in [colors]. A transparent fill or outline draws nothing.
+ */
 internal fun Modifier.actionSurface(
     colors: ActionColors,
     shape: Shape,

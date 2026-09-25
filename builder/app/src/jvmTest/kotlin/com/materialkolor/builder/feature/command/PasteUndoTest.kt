@@ -22,7 +22,9 @@ private const val WAIT_MILLIS = 5_000L
 
 // b-315c
 
-/** The Undo on a pasted color's toast only ever undoes that color (F-05). */
+/**
+ * The Undo on a pasted color's toast only ever undoes that color (F-05).
+ */
 @OptIn(ExperimentalTestApi::class)
 class PasteUndoTest {
     private val pastes = FakePasteInput()
@@ -72,7 +74,9 @@ class PasteUndoTest {
         }
     }
 
-    /** Pastes [text] and waits for the toast its seed puts up. */
+    /**
+     * Pastes [text] and waits for the toast its seed puts up.
+     */
     private fun ComposeUiTest.paste(text: String): WorkspaceAction.ShowToast {
         pastes.paste(Paste.Text(text))
         waitUntil(timeoutMillis = WAIT_MILLIS) { workspace.toasts.isNotEmpty() }
@@ -81,7 +85,9 @@ class PasteUndoTest {
     }
 }
 
-/** Stands in for the workspace. Edits land at once, an Undo is only counted, and toasts are kept. */
+/**
+ * Stands in for the workspace. Edits land at once, an Undo is only counted, and toasts are kept.
+ */
 private class PasteWorkspaceFake(
     document: ThemeDocument,
 ) {

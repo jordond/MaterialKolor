@@ -28,13 +28,19 @@ internal const val ShellTopBarTag = "shell-top-bar"
 internal const val ShellDockTag = "shell-dock"
 internal const val ShellRootTag = "shell-root"
 
-/** The poster's name, as `strings_shell.xml` has it. */
+/**
+ * The poster's name, as `strings_shell.xml` has it.
+ */
 internal const val ShellPosterLabel = "Seed and theme controls"
 
-/** The design reference's seed, a mid tone orange that sits close to the ink floor. */
+/**
+ * The design reference's seed, a mid tone orange that sits close to the ink floor.
+ */
 internal val ShellPosterColors: PosterColors = PosterColors.of(Argb(0xD9653B))
 
-/** Every skin the shell is drawn in, named for the screenshot files. */
+/**
+ * Every skin the shell is drawn in, named for the screenshot files.
+ */
 internal val ShellSkins: List<Pair<String, Skin>> = listOf(
     "material3" to Skin(Library.Material3, expressive = false),
     "expressive" to Skin(Library.Material3, expressive = true),
@@ -43,7 +49,9 @@ internal val ShellSkins: List<Pair<String, Skin>> = listOf(
     "fluent" to Skin(Library.Fluent, expressive = false),
 )
 
-/** A skin over a resolved document, a measured layout for a mouse or a finger, and frozen motion. */
+/**
+ * A skin over a resolved document, a measured layout for a mouse or a finger, and frozen motion.
+ */
 @Composable
 internal fun ShellHarness(
     skin: Skin,
@@ -60,13 +68,17 @@ internal fun ShellHarness(
     }
 }
 
-/** A slot filled edge to edge by a tagged box, so its bounds are the space the shell gave it. */
+/**
+ * A slot filled edge to edge by a tagged box, so its bounds are the space the shell gave it.
+ */
 @Composable
 internal fun ShellSlot(tag: String) {
     Box(Modifier.fillMaxSize().testTag(tag))
 }
 
-/** Where the node tagged [tag] sits, in dp from the top start of the window. */
+/**
+ * Where the node tagged [tag] sits, in dp from the top start of the window.
+ */
 @OptIn(ExperimentalTestApi::class)
 internal fun ComposeUiTest.shellBounds(tag: String): DpRect =
     onNodeWithTag(tag, useUnmergedTree = true).getBoundsInRoot()

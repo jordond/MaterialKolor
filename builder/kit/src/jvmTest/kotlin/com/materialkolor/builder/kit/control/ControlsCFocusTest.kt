@@ -170,7 +170,9 @@ class ControlsCFocusTest {
         }
 }
 
-/** A focusable page above a toast host, with the clock handed to the test. */
+/**
+ * A focusable page above a toast host, with the clock handed to the test.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.showHostOverPage(skin: Skin): BuilderToastHostState {
     val toasts = BuilderToastHostState()

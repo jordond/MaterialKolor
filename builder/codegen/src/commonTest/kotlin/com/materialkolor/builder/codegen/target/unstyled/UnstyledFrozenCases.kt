@@ -180,7 +180,9 @@ class UnstyledFrozenTest {
 
     private fun List<GeneratedFile>.text(fileName: String): String = single { it.path.endsWith("/$fileName") }.text
 
-    /** The lines of one map in `Color.kt`, from its declaration to its closing parenthesis. */
+    /**
+     * The lines of one map in `Color.kt`, from its declaration to its closing parenthesis.
+     */
     private fun String.mapBlock(name: String): String =
         substringAfter("val $name: Map<ThemeToken<Color>, Color> = mapOf(\n", missingDelimiterValue = "")
             .substringBefore("\n)")

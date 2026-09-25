@@ -63,7 +63,9 @@ private val GalleryIconButtonSize = 40.dp
 private val GalleryFocusRingWidth = 2.dp
 private val GalleryTooltipGap = 6.dp
 
-/** Keys of what the gallery's controls remember in [DemoAppState]. */
+/**
+ * Keys of what the gallery's controls remember in [DemoAppState].
+ */
 internal object GalleryKeys {
     const val List: String = "gallery.unstyled"
     const val Favourite: String = "gallery.unstyled.favourite"
@@ -122,7 +124,9 @@ internal fun UnstyledGalleryEntry(
     }
 }
 
-/** Every card of the Unstyled gallery, in the order they show within each group. */
+/**
+ * Every card of the Unstyled gallery, in the order they show within each group.
+ */
 internal val UnstyledCards: List<GalleryCard> = listOf(
     GalleryCard("Filled button", GalleryGroup.Actions) { ActionButtons(GalleryButtonStyle.Filled) },
     GalleryCard("Tonal button", GalleryGroup.Actions) { ActionButtons(GalleryButtonStyle.Tonal) },
@@ -180,25 +184,35 @@ private fun UnstyledCardFrame(
     }
 }
 
-/** Enabled first, then disabled, the order every card shows its controls in. */
+/**
+ * Enabled first, then disabled, the order every card shows its controls in.
+ */
 internal val EnabledThenDisabled: List<Boolean> = listOf(true, false)
 
-/** What a disabled part draws its content in, faded OnSurface. */
+/**
+ * What a disabled part draws its content in, faded OnSurface.
+ */
 internal val disabledContent: Color
     @Composable get() = DashboardToken.OnSurface.color.copy(alpha = DisabledContentAlpha)
 
-/** What a disabled part fills or outlines its container with, a fainter OnSurface. */
+/**
+ * What a disabled part fills or outlines its container with, a fainter OnSurface.
+ */
 internal val disabledContainer: Color
     @Composable get() = DashboardToken.OnSurface.color.copy(alpha = DisabledContainerAlpha)
 
-/** The color of [token] while [enabled], and the disabled content color otherwise. */
+/**
+ * The color of [token] while [enabled], and the disabled content color otherwise.
+ */
 @Composable
 internal fun tint(
     token: DashboardToken,
     enabled: Boolean,
 ): Color = if (enabled) token.color else disabledContent
 
-/** The focus ring every gallery control shows while the keyboard has it. */
+/**
+ * The focus ring every gallery control shows while the keyboard has it.
+ */
 @Composable
 internal fun Modifier.galleryFocusRing(
     interactions: MutableInteractionSource,
@@ -212,7 +226,9 @@ internal fun Modifier.galleryFocusRing(
         offset = if (offset) 2.dp else 0.dp,
     )
 
-/** A control enabled and the same control disabled, side by side. */
+/**
+ * A control enabled and the same control disabled, side by side.
+ */
 @Composable
 internal fun EnabledPair(content: @Composable RowScope.(enabled: Boolean) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(Gap), verticalAlignment = Alignment.CenterVertically) {
@@ -220,23 +236,33 @@ internal fun EnabledPair(content: @Composable RowScope.(enabled: Boolean) -> Uni
     }
 }
 
-/** A card's controls stacked, a little apart. */
+/**
+ * A card's controls stacked, a little apart.
+ */
 @Composable
 internal fun GalleryColumn(content: @Composable ColumnScope.() -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(Gap), content = content)
 }
 
-/** How a labelled button is painted. */
+/**
+ * How a labelled button is painted.
+ */
 internal enum class GalleryButtonStyle(
     val component: UnstyledGalleryComponent,
 ) {
-    /** The main action, on primary. */
+    /**
+     * The main action, on primary.
+     */
     Filled(UnstyledGalleryComponent.FilledButton),
 
-    /** A quieter action, on the secondary container. */
+    /**
+     * A quieter action, on the secondary container.
+     */
     Tonal(UnstyledGalleryComponent.TonalButton),
 
-    /** A quieter action still, outlined. */
+    /**
+     * A quieter action still, outlined.
+     */
     Outlined(UnstyledGalleryComponent.OutlinedButton),
 }
 

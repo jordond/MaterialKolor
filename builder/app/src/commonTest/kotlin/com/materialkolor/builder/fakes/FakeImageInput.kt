@@ -15,21 +15,29 @@ import kotlinx.coroutines.flow.receiveAsFlow
 internal class FakeImageInput : ImageInput {
     private val dropped = Channel<ImageHandle>(Channel.UNLIMITED)
 
-    /** What the next [pick] returns, null for a closed picker. */
+    /**
+     * What the next [pick] returns, null for a closed picker.
+     */
     var picked: ImageHandle? = null
 
-    /** How many times the picker was opened. */
+    /**
+     * How many times the picker was opened.
+     */
     var picks: Int = 0
         private set
 
-    /** What each handle decodes to. A handle missing here is not an image. */
+    /**
+     * What each handle decodes to. A handle missing here is not an image.
+     */
     val decoded: MutableMap<ImageHandle, DecodedImage> = mutableMapOf()
 
     override val drops: Flow<ImageHandle> = dropped.receiveAsFlow()
 
     // b-302a
 
-    /** Whether files are over the builder. A test sets it to show or hide the drop overlay. */
+    /**
+     * Whether files are over the builder. A test sets it to show or hide the drop overlay.
+     */
     override val dragging: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     override suspend fun pick(): ImageHandle? {
@@ -39,7 +47,9 @@ internal class FakeImageInput : ImageInput {
 
     // b-311
 
-    /** Holds every decode until it completes, when a test sets it. Null lets decodes through at once. */
+    /**
+     * Holds every decode until it completes, when a test sets it. Null lets decodes through at once.
+     */
     var decodeGate: CompletableDeferred<Unit>? = null
 
     override suspend fun decode(handle: ImageHandle): DecodedImage? {
@@ -47,7 +57,9 @@ internal class FakeImageInput : ImageInput {
         return decoded[handle]
     }
 
-    /** Drop [handle] on the builder. It waits for a collector if there is none yet. */
+    /**
+     * Drop [handle] on the builder. It waits for a collector if there is none yet.
+     */
     fun drop(handle: ImageHandle) {
         dropped.trySend(handle)
     }

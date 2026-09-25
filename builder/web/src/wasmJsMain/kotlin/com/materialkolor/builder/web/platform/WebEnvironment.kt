@@ -73,7 +73,7 @@ internal class WebEnvironment : Environment {
 
     /**
      * Keep [splash] under `mk:splash` as [BootSplash.toJson] for `boot.js`, which paints it before
-     * any code loads. A full or blocked storage just means the next boot shows the default splash.
+     * any code loads. A full or blocked storage means the next boot shows the default splash.
      */
     override fun writeSplash(splash: BootSplash) {
         localStorageWrite(StorageKeys.SPLASH, splash.toJson())

@@ -119,12 +119,16 @@ internal fun <T> FluentTabs(
     }
 }
 
-/** Fluent's selector bar item colours, in the poster's ink on the poster. */
+/**
+ * Fluent's selector bar item colours, in the poster's ink on the poster.
+ */
 @Composable
 internal fun fluentTabColors(selected: Boolean): VisualStateScheme<SelectorBarItemColor> {
     val fluent = if (selected) SelectorBarDefaults.selectedItemColors() else SelectorBarDefaults.defaultItemColors()
     return LocalFluentPosterInk.current?.tabs(fluent) ?: fluent
 }
 
-/** How far a tab's focus ring reaches past the tab, which the ends of the row keep free. */
+/**
+ * How far a tab's focus ring reaches past the tab, which the ends of the row keep free.
+ */
 private val TabRingReach: Dp = FocusRingOffset + FocusRingWidth

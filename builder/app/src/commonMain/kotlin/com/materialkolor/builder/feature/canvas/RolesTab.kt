@@ -64,7 +64,9 @@ import org.jetbrains.compose.resources.stringResource
  */
 private val SwatchMinWidth: Dp = 152.dp
 
-/** The tone at and above which a swatch with no on-pair is inked black rather than white. */
+/**
+ * The tone at and above which a swatch with no on-pair is inked black rather than white.
+ */
 private const val BLACK_INK_TONE = 50.0
 
 /**
@@ -122,7 +124,9 @@ private class SwatchGroup(
     val swatches: List<RoleSwatch>,
 )
 
-/** The groups one mode of [result] lists, the accents only when the document has any. */
+/**
+ * The groups one mode of [result] lists, the accents only when the document has any.
+ */
 private fun swatchGroups(
     result: ThemeResult,
     isDark: Boolean,
@@ -183,7 +187,9 @@ private fun roleSwatch(
     )
 }
 
-/** The key color [palette] is built around. It has no on-pair, so it is inked by its tone. */
+/**
+ * The key color [palette] is built around. It has no on-pair, so it is inked by its tone.
+ */
 private fun keyColorSwatch(
     result: ThemeResult,
     palette: KeyColor,
@@ -201,7 +207,9 @@ private fun keyColorSwatch(
     )
 }
 
-/** One color of an accent, inked with its partner and rated against it, the on color over the fill. */
+/**
+ * One color of an accent, inked with its partner and rated against it, the on color over the fill.
+ */
 private fun accentSwatch(
     result: ThemeResult,
     slot: AccentSlot,
@@ -225,21 +233,29 @@ private fun accentSwatch(
     )
 }
 
-/** The ratio of [foreground] as text over [background], rated the way the audit rates it. */
+/**
+ * The ratio of [foreground] as text over [background], rated the way the audit rates it.
+ */
 private fun ThemeResult.ratio(
     foreground: ColorRef,
     background: ColorRef,
     isDark: Boolean,
 ): Double = rate(ContrastPair(foreground, background, PairKind.Text), isDark).ratio
 
-/** What the key color of this palette is called in code, as in primaryPaletteKeyColor. */
+/**
+ * What the key color of this palette is called in code, as in primaryPaletteKeyColor.
+ */
 internal val KeyColor.swatchName: String
     get() = name.replaceFirstChar { char -> char.lowercaseChar() } + "PaletteKeyColor"
 
-/** Black on a light color, white on a dark one. */
+/**
+ * Black on a light color, white on a dark one.
+ */
 private fun inkFor(tone: Double): Color = if (tone >= BLACK_INK_TONE) Color.Black else Color.White
 
-/** The part an accent part is paired with, the fill for an on color and the on color for a fill. */
+/**
+ * The part an accent part is paired with, the fill for an on color and the on color for a fill.
+ */
 private val AccentPart.partner: AccentPart
     get() = when (this) {
         AccentPart.Color -> AccentPart.OnColor
@@ -248,7 +264,9 @@ private val AccentPart.partner: AccentPart
         AccentPart.OnContainer -> AccentPart.Container
     }
 
-/** What the Roles tab calls a role group. */
+/**
+ * What the Roles tab calls a role group.
+ */
 private val RoleGroup.title: StringResource
     get() = when (this) {
         RoleGroup.Accent -> Res.string.tabs_group_accent
@@ -298,7 +316,9 @@ private fun SwatchGrid(content: @Composable () -> Unit) {
     }
 }
 
-/** The focus direction an arrow key asks for, or null for any other key. */
+/**
+ * The focus direction an arrow key asks for, or null for any other key.
+ */
 private fun KeyEvent.arrowDirection(): FocusDirection? =
     when (key) {
         Key.DirectionLeft -> FocusDirection.Left

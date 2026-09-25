@@ -20,6 +20,8 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 public val LocalOverlayKeys: ProvidableCompositionLocal<((KeyEvent) -> Boolean)?> =
     staticCompositionLocalOf { null }
 
-/** Hands each key to [keys] first, read as the key arrives, so it always reaches the latest one. */
+/**
+ * Hands each key to [keys] first, read as the key arrives, so it always reaches the latest one.
+ */
 internal fun Modifier.overlayKeys(keys: () -> ((KeyEvent) -> Boolean)?): Modifier =
     onPreviewKeyEvent { event -> keys()?.invoke(event) ?: false }

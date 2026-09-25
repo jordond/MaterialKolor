@@ -146,7 +146,9 @@ internal fun SeedHero(
     }
 }
 
-/** [argb] as a Compose color literal, `Color(0xFF6750A4)`. */
+/**
+ * [argb] as a Compose color literal, `Color(0xFF6750A4)`.
+ */
 internal fun kotlinLiteralOf(argb: Argb): String = "Color(0xFF${argb.toHex().removePrefix("#")})"
 
 /**
@@ -163,7 +165,9 @@ internal data class RoundedHct(
     val tone: Int,
 )
 
-/** This readout rounded for the screen. A hue that rounds up to a full turn reads as 0. */
+/**
+ * This readout rounded for the screen. A hue that rounds up to a full turn reads as 0.
+ */
 internal fun HctReadout.rounded(): RoundedHct =
     RoundedHct(hue.roundToInt() % FULL_TURN, chroma.roundToInt(), tone.roundToInt())
 
@@ -184,7 +188,9 @@ internal data class SourceLabel(
     fun text(): String = if (argument == null) stringResource(resource) else stringResource(resource, argument)
 }
 
-/** Where [source] says the seed came from. An image names its file when it has one. */
+/**
+ * Where [source] says the seed came from. An image names its file when it has one.
+ */
 internal fun sourceLabel(source: SeedSource): SourceLabel =
     when (source) {
         SeedSource.Typed -> SourceLabel(Res.string.poster_source_typed)
@@ -220,16 +226,24 @@ internal class HexMessages(
         }
 }
 
-/** What a color field is for, which the note about a dropped alpha names. */
+/**
+ * What a color field is for, which the note about a dropped alpha names.
+ */
 internal enum class HexSubject {
-    /** The seed, or the second seed Cmf takes. */
+    /**
+     * The seed, or the second seed Cmf takes.
+     */
     Seed,
 
-    /** A key color set by hand. */
+    /**
+     * A key color set by hand.
+     */
     KeyColor,
 }
 
-/** What a color field for [subject] says about text it cannot read and colors it had to change. */
+/**
+ * What a color field for [subject] says about text it cannot read and colors it had to change.
+ */
 @Composable
 internal fun rememberHexMessages(subject: HexSubject = HexSubject.Seed): HexMessages {
     val errors = InvalidReason.entries.associateWith { reason -> stringResource(errorResource(reason)) }

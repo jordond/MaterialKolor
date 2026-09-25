@@ -33,10 +33,14 @@ import io.kotest.matchers.floats.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** How many frames a stepped drag of the handle takes. */
+/**
+ * How many frames a stepped drag of the handle takes.
+ */
 private const val DRAG_STEPS = 6
 
-/** How far either side of the settle time the keyboard save is checked, a few frames. */
+/**
+ * How far either side of the settle time the keyboard save is checked, a few frames.
+ */
 private const val SETTLE_MARGIN_MILLIS = 50L
 
 @OptIn(ExperimentalTestApi::class)
@@ -266,7 +270,9 @@ class CanvasModeTest {
             waitForIdle()
         }
 
-    /** Lets any slide finish and the handle rest long enough to be saved. */
+    /**
+     * Lets any slide finish and the handle rest long enough to be saved.
+     */
     private fun ComposeUiTest.settle() {
         waitForIdle()
         mainClock.advanceTimeBy(HANDLE_SETTLE_MILLIS * 4)

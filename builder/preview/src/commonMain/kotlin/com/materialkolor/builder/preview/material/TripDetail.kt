@@ -51,10 +51,14 @@ import androidx.compose.ui.semantics.Role as SemanticsRole
 private val SceneHeight = 184.dp
 private val StopSize = 36.dp
 
-/** How far the trip's text sits in from the scene and the buttons. */
+/**
+ * How far the trip's text sits in from the scene and the buttons.
+ */
 private val TextInset = 4.dp
 
-/** The open trip, scene first and the notes last. */
+/**
+ * The open trip, scene first and the notes last.
+ */
 @Composable
 internal fun TripDetail(
     trip: Trip,
@@ -77,7 +81,9 @@ internal fun TripDetail(
     }
 }
 
-/** A sky, a sun and three ridges in the scheme's colors, where a photo would go. */
+/**
+ * A sky, a sun and three ridges in the scheme's colors, where a photo would go.
+ */
 @Composable
 private fun TripScene(modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
@@ -108,7 +114,9 @@ private fun TripScene(modifier: Modifier = Modifier) {
     }
 }
 
-/** The ridge [points] scaled to the canvas, closed along its [bottom] edge. */
+/**
+ * The ridge [points] scaled to the canvas, closed along its [bottom] edge.
+ */
 private fun ridgePath(
     points: FloatArray,
     scaleX: Float,
@@ -190,7 +198,9 @@ private fun DayPlan(trip: Trip) {
     }
 }
 
-/** A snackbar in the error container, offering to turn offline maps on. */
+/**
+ * A snackbar in the error container, offering to turn offline maps on.
+ */
 @Composable
 private fun MapsNeedSignal(state: DemoAppState) {
     val colors = MaterialTheme.colorScheme

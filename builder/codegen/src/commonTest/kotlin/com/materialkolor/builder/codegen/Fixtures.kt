@@ -37,7 +37,9 @@ internal class Fixture(
     val name: String,
     val input: ExportInput,
 ) {
-    /** This fixture with its document or prefs changed, and its colors and link redone to match. */
+    /**
+     * This fixture with its document or prefs changed, and its colors and link redone to match.
+     */
     fun with(
         document: ThemeDocument = input.document,
         prefs: ExportPrefs = input.prefs,
@@ -191,7 +193,9 @@ internal object Fixtures {
         ExpressiveOnTonalSpot2021,
     )
 
-    /** An export input for [document], with made up colors that follow from it and its real link. */
+    /**
+     * An export input for [document], with made up colors that follow from it and its real link.
+     */
     fun input(
         document: ThemeDocument,
         prefs: ExportPrefs = ExportPrefs(),
@@ -329,7 +333,9 @@ internal object Fixtures {
             dark = fluentShadeValues(seed, from = DARK_SHADES_SALT),
         )
 
-    /** The seven shades of one mode, nudged on from the salt [from]. Dark starts further along, so the sets differ. */
+    /**
+     * The seven shades of one mode, nudged on from the salt [from]. Dark starts further along, so the sets differ.
+     */
     private fun fluentShadeValues(
         seed: Argb,
         from: Int,
@@ -344,7 +350,9 @@ internal object Fixtures {
             light3 = nudge(seed, salt = from + 3, dark = false),
         )
 
-    /** [source] moved by [salt] steps, and lifted for dark mode. Plain Int math, so every platform agrees. */
+    /**
+     * [source] moved by [salt] steps, and lifted for dark mode. Plain Int math, so every platform agrees.
+     */
     private fun nudge(
         source: Argb,
         salt: Int,

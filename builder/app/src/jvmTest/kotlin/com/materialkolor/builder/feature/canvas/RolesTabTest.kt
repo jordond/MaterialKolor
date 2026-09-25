@@ -213,13 +213,19 @@ class RolesTabTest {
     }
 }
 
-/** A row of a data panel inside its padding and above its content, where only the panel shows. */
+/**
+ * A row of a data panel inside its padding and above its content, where only the panel shows.
+ */
 private const val PANEL_PROBE_Y = 8
 
-/** The least a focus ring may contrast with what it sits on, WCAG's bar for a graphic. */
+/**
+ * The least a focus ring may contrast with what it sits on, WCAG's bar for a graphic.
+ */
 private const val FOCUS_RING_RATIO = 3.0
 
-/** What the swatch of [role] reads out as in the mode [isDark] picks. */
+/**
+ * What the swatch of [role] reads out as in the mode [isDark] picks.
+ */
 internal fun tileName(
     result: ThemeResult,
     role: Role,

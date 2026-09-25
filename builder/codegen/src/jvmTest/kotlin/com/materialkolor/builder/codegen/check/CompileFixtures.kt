@@ -38,17 +38,23 @@ fun main(args: Array<String>) {
     File(root, "libs.versions.toml").writeText(catalog.render())
 }
 
-/** One golden case as the compile check sees it, generated into a package of its own. */
+/**
+ * One golden case as the compile check sees it, generated into a package of its own.
+ */
 private class FixtureCase(
     val name: String,
     val input: ExportInput,
     val files: List<GeneratedFile>,
 ) {
-    /** The project this case compiles in, as in `material3-dynamic` or `fluent-dynamic-inline`. */
+    /**
+     * The project this case compiles in, as in `material3-dynamic` or `fluent-dynamic-inline`.
+     */
     val fixture: String
         get() = listOfNotNull(targetAndMode, fluentBinding).joinToString("-")
 
-    /** The name of the plainest case of this case's project, the one its wasm compile covers. */
+    /**
+     * The name of the plainest case of this case's project, the one its wasm compile covers.
+     */
     val plainCase: String
         get() = if (fluentBinding == INLINE) fixture else "$targetAndMode-default"
 
@@ -63,7 +69,9 @@ private class FixtureCase(
             return "$target-${input.prefs.mode.name.lowercase()}"
         }
 
-    /** How a dynamic Fluent case gets its shades, `module` or `inline`, which splits its project in two. */
+    /**
+     * How a dynamic Fluent case gets its shades, `module` or `inline`, which splits its project in two.
+     */
     private val fluentBinding: String?
         get() = input.versions.fluentBinding.name
             .lowercase()
@@ -94,7 +102,9 @@ private class FixtureCase(
     }
 }
 
-/** The version catalog every fixture shares, merged from the catalogs the cases generate. */
+/**
+ * The version catalog every fixture shares, merged from the catalogs the cases generate.
+ */
 private class Catalog {
     private val sections = sortedMapOf<String, MutableMap<String, String>>()
 
@@ -154,7 +164,9 @@ private class Catalog {
     }
 }
 
-/** One fixture project, the cases of one target and mode. */
+/**
+ * One fixture project, the cases of one target and mode.
+ */
 private class FixtureProject(
     private val name: String,
     private val cases: List<FixtureCase>,

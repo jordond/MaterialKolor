@@ -32,10 +32,14 @@ import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** Pane widths and how many columns of cards each fits. */
+/**
+ * Pane widths and how many columns of cards each fits.
+ */
 private val GalleryColumns: Map<Int, Int> = mapOf(412 to 1, 840 to 2, 1280 to 4)
 
-/** Twenty stand-in cards over two groups. */
+/**
+ * Twenty stand-in cards over two groups.
+ */
 private val GalleryStandIns: List<GalleryCard> = List(20) { index ->
     GalleryCard("Card $index", if (index < 5) GalleryGroup.Actions else GalleryGroup.Feedback) {}
 }
@@ -138,13 +142,19 @@ class ComponentsTabTest {
         }
 }
 
-/** Where the swept grid starts, two columns of cards. */
+/**
+ * Where the swept grid starts, two columns of cards.
+ */
 private val GallerySweepStart = 800.dp
 
-/** How long the sweep takes, about the rail's panel motion. */
+/**
+ * How long the sweep takes, about the rail's panel motion.
+ */
 private const val GallerySweepMillis = 300
 
-/** Sizes to [width] at layout time, so the width moving recomposes nothing here. */
+/**
+ * Sizes to [width] at layout time, so the width moving recomposes nothing here.
+ */
 private fun Modifier.layoutWidth(width: () -> Dp): Modifier =
     layout { measurable, constraints ->
         val px = width().roundToPx()
@@ -152,7 +162,9 @@ private fun Modifier.layoutWidth(width: () -> Dp): Modifier =
         layout(placeable.width, placeable.height) { placeable.place(0, 0) }
     }
 
-/** The stand-in cards, each [cardHeight] tall and tagged with its title. */
+/**
+ * The stand-in cards, each [cardHeight] tall and tagged with its title.
+ */
 @Composable
 private fun GalleryStandInGrid(cardHeight: Dp) {
     GalleryGrid(

@@ -63,7 +63,9 @@ import com.materialkolor.builder.preview.split.PaneSide
 import com.materialkolor.builder.preview.split.SplitState
 import kotlinx.coroutines.flow.drop
 
-/** Tags the Inspect card, for tests to find what it shows. */
+/**
+ * Tags the Inspect card, for tests to find what it shows.
+ */
 public const val INSPECT_CARD_TAG: String = "inspect-card"
 
 /**
@@ -177,35 +179,53 @@ internal data class InspectTarget(
     val isDark: Boolean,
 )
 
-/** What one stretch of Inspect over one view of the canvas has found. */
+/**
+ * What one stretch of Inspect over one view of the canvas has found.
+ */
 @Stable
 internal class InspectOverlayState {
     val registry: InspectRegistry = InspectRegistry()
 
-    /** The element under a hovering pointer. */
+    /**
+     * The element under a hovering pointer.
+     */
     var hovered: InspectTarget? by mutableStateOf(null)
 
-    /** The element a press pinned the card to. */
+    /**
+     * The element a press pinned the card to.
+     */
     var pinned: InspectTarget? by mutableStateOf(null)
 
-    /** Where this layout's top start corner sits in the window, the space the registry keeps. */
+    /**
+     * Where this layout's top start corner sits in the window, the space the registry keeps.
+     */
     var origin: Offset by mutableStateOf(Offset.Zero)
 
-    /** How wide this layout is, for finding the copy a point falls in away from the pointer. */
+    /**
+     * How wide this layout is, for finding the copy a point falls in away from the pointer.
+     */
     var width: Int = 0
 
-    /** Where the card sits in this layout, or null while none shows. Only the pointer reads it. */
+    /**
+     * Where the card sits in this layout, or null while none shows. Only the pointer reads it.
+     */
     var card: Rect? = null
 
     // b-315b
 
-    /** Whether focus is on the card or inside it, so dropping the pin hands focus to the layout first. */
+    /**
+     * Whether focus is on the card or inside it, so dropping the pin hands focus to the layout first.
+     */
     var cardHasFocus: Boolean = false
 
-    /** Whether the card's first enabled action takes focus once it shows, as it does after [PinKey]. */
+    /**
+     * Whether the card's first enabled action takes focus once it shows, as it does after [PinKey].
+     */
     var focusActions: Boolean by mutableStateOf(false)
 
-    /** Whether the [PinKey] press that pinned the card is still down, so its repeats and release go too. */
+    /**
+     * Whether the [PinKey] press that pinned the card is still down, so its repeats and release go too.
+     */
     private var pinKeyDown = false
 
     /**
@@ -261,7 +281,9 @@ internal class InspectOverlayState {
         return true
     }
 
-    /** The element at [position] in this layout and the mode of the copy it sits in, or null for none. */
+    /**
+     * The element at [position] in this layout and the mode of the copy it sits in, or null for none.
+     */
     fun targetAt(
         position: Offset,
         shown: PreviewMode,
@@ -274,14 +296,18 @@ internal class InspectOverlayState {
         return InspectTarget(owner, side, entry.roles, isDark(side, shown))
     }
 
-    /** The element keyboard focus is on, for the card it shows, or null when focus is on none. */
+    /**
+     * The element keyboard focus is on, for the card it shows, or null when focus is on none.
+     */
     fun focusedTarget(shown: PreviewMode): InspectTarget? {
         val owner = registry.focusedOwner() ?: return null
         val entry = registry.entryOf(owner) ?: return null
         return InspectTarget(owner, entry.side, entry.roles, isDark(entry.side, shown))
     }
 
-    /** Whether the pinned or the hovered element has left the screen. */
+    /**
+     * Whether the pinned or the hovered element has left the screen.
+     */
     fun hasLeft(): Boolean = pinned.hasLeft() || hovered.hasLeft()
 
     /**
@@ -384,12 +410,18 @@ private fun Modifier.focusRing(
         }
     }
 
-/** What a press over the overlay turned out to be, until every pointer is up again. */
+/**
+ * What a press over the overlay turned out to be, until every pointer is up again.
+ */
 private enum class Press {
-    /** A press over a copy of the preview, kept from the content and pinning the card when it ends. */
+    /**
+     * A press over a copy of the preview, kept from the content and pinning the card when it ends.
+     */
     Inspect,
 
-    /** A press on the split handle or the card, left alone. */
+    /**
+     * A press on the split handle or the card, left alone.
+     */
     PassThrough,
 }
 

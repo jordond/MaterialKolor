@@ -135,7 +135,9 @@ class ProjectSessionConflictTest : SessionTestBase() {
                 .document.style shouldBe Style.Vibrant
         }
 
-    /** Boot, edit, and have another tab save [FOREST] straight after, so a conflict is up. */
+    /**
+     * Boot, edit, and have another tab save [FOREST] straight after, so a conflict is up.
+     */
     private suspend fun TestScope.conflicted(session: ProjectSession): String {
         val id = booted(session)
         session.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)

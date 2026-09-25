@@ -11,7 +11,9 @@ internal object CssColors {
      */
     fun find(name: String): Argb? = byName[name]?.let { Argb(it) }
 
-    /** Each name with its color as `0xRRGGBB`. */
+    /**
+     * Each name with its color as `0xRRGGBB`.
+     */
     val byName: Map<String, Int> =
         mapOf(
             "aliceblue" to 0xF0F8FF,

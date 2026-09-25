@@ -51,7 +51,9 @@ internal fun CoreColorsRow(
     }
 }
 
-/** How many key colors are set by hand and how many roles are pinned, or that the seed has it all. */
+/**
+ * How many key colors are set by hand and how many roles are pinned, or that the seed has it all.
+ */
 @Composable
 private fun coreColorsSummary(document: ThemeDocument): String {
     val set = KeyColor.entries.count { slot -> document.keyColors[slot] != null }

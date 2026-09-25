@@ -41,13 +41,19 @@ import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderType
 
-/** The diameter of the colored circle, design D. */
+/**
+ * The diameter of the colored circle, design D.
+ */
 internal val SchemeChipDiameter: Dp = 46.dp // b-311a
 
-/** The width of the ring around a chosen chip. */
+/**
+ * The width of the ring around a chosen chip.
+ */
 internal val SchemeChipRingWidth: Dp = 2.dp // b-311a
 
-/** The gap between the circle and its ring. */
+/**
+ * The gap between the circle and its ring.
+ */
 internal val SchemeChipRingGap: Dp = 2.dp // b-311a
 
 /**
@@ -213,14 +219,22 @@ public fun SchemeChipName(
     )
 }
 
-/** How big a chip's name is set, design D. */
+/**
+ * How big a chip's name is set, design D.
+ */
 internal val SchemeChipNameSize: TextUnit = 11.sp
 
-/** The line a chip's name takes. */
+/**
+ * The line a chip's name takes.
+ */
 internal val SchemeChipNameLine: TextUnit = 14.sp
 
-/** The smallest a chip's name steps down to in a narrow cell. */
+/**
+ * The smallest a chip's name steps down to in a narrow cell.
+ */
 internal val SchemeChipNameMinSize: TextUnit = 9.sp
 
-/** How far each step down takes a chip's name. */
+/**
+ * How far each step down takes a chip's name.
+ */
 internal val SchemeChipNameStep: TextUnit = 0.5.sp

@@ -27,7 +27,9 @@ internal class FakePasteInput : PasteInput {
             awaitClose { collectors.update { all -> all - channel } }
         }
 
-    /** Paste [paste] with nothing editable focused. It waits for a collector if there is none yet. */
+    /**
+     * Paste [paste] with nothing editable focused. It waits for a collector if there is none yet.
+     */
     fun paste(paste: Paste) {
         val all = collectors.value
         if (all.isEmpty()) {

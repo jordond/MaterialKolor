@@ -78,10 +78,14 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 
-/** How long Copy shows as Copied after it worked (F-26). */
+/**
+ * How long Copy shows as Copied after it worked (F-26).
+ */
 internal const val COPIED_MILLIS = 1_200L
 
-/** What a copy button copies. */
+/**
+ * What a copy button copies.
+ */
 private enum class CopyKind {
     File,
     All,
@@ -275,7 +279,9 @@ private fun sheetExport(
     return SheetExport(ready, problems, ready?.fileAt(state.selectedPath))
 }
 
-/** What the copies did while the sheet is open, and what the option fields say is wrong. */
+/**
+ * What the copies did while the sheet is open, and what the option fields say is wrong.
+ */
 @Stable
 private class SheetCopies {
     val drafts = DraftProblems()
@@ -285,7 +291,9 @@ private class SheetCopies {
     var manualOpen: Boolean by mutableStateOf(false)
 }
 
-/** The target, the mode, the Expressive warning and the options. */
+/**
+ * The target, the mode, the Expressive warning and the options.
+ */
 @Composable
 private fun ExportHeader(
     state: ExportModel.State,
@@ -334,7 +342,9 @@ private fun ExportHeader(
     }
 }
 
-/** The file tabs and the code of the file picked, the code last so it can take the height left. */
+/**
+ * The file tabs and the code of the file picked, the code last so it can take the height left.
+ */
 @Composable
 private fun ExportFiles(
     export: ExportOutcome.Ready,
@@ -358,7 +368,9 @@ private fun ExportFiles(
     )
 }
 
-/** A copy button that shows Copied, with a check, while [copied]. */
+/**
+ * A copy button that shows Copied, with a check, while [copied].
+ */
 @Composable
 private fun CopyButton(
     copied: Boolean,
@@ -422,7 +434,9 @@ private fun zipShares(
     return coarse && shareable
 }
 
-/** One line that needs attention, with its icon. */
+/**
+ * One line that needs attention, with its icon.
+ */
 @Composable
 private fun Notice(
     text: String,
@@ -447,9 +461,13 @@ private fun problemText(problem: ExportProblem): String =
         is ExportProblem.NameTaken -> stringResource(Res.string.export_blocked_taken, problem.name)
     }
 
-/** The file at [path], or the first one when [path] is null or the export no longer has it. */
+/**
+ * The file at [path], or the first one when [path] is null or the export no longer has it.
+ */
 private fun ExportOutcome.Ready.fileAt(path: String?): GeneratedFile? =
     files.firstOrNull { file -> file.path == path } ?: files.firstOrNull()
 
-/** The last part of a path, the name a tab shows. */
+/**
+ * The last part of a path, the name a tab shows.
+ */
 private fun String.fileName(): String = substringAfterLast('/')

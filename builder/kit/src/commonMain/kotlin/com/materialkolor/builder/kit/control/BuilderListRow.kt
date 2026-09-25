@@ -91,7 +91,9 @@ public fun BuilderListRow(
     }
 }
 
-/** What a list row shows and does, handed whole to each skin. */
+/**
+ * What a list row shows and does, handed whole to each skin.
+ */
 internal class ListRowContent(
     val headline: String,
     val supporting: String?,
@@ -151,7 +153,9 @@ internal fun Modifier.listRowState(row: ListRowContent): Modifier {
     return foldState(name, row.selected?.let { current -> ControlState.Selected(current) }, row.enabled)
 }
 
-/** A list row drawn from [style]. */
+/**
+ * A list row drawn from [style].
+ */
 @Composable
 internal fun HeadlessListRow(
     row: ListRowContent,
@@ -193,7 +197,9 @@ internal fun HeadlessListRow(
 
 // b-511
 
-/** A row's main line, larger and firmer than the line under it, in every skin. */
+/**
+ * A row's main line, larger and firmer than the line under it, in every skin.
+ */
 @Composable
 internal fun ListRowHeadline(
     text: String,
@@ -202,7 +208,9 @@ internal fun ListRowHeadline(
     BasicText(text, style = LocalBuilderType.current.body.merge(color = color, fontWeight = FontWeight.Medium))
 }
 
-/** A row's quieter second line, under its [ListRowHeadline]. */
+/**
+ * A row's quieter second line, under its [ListRowHeadline].
+ */
 @Composable
 internal fun ListRowSupporting(
     text: String,

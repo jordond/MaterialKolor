@@ -14,7 +14,9 @@ internal class FakeRouter(
 ) : Router {
     private val pops = Channel<Unit>(Channel.UNLIMITED)
 
-    /** Every call made so far, oldest first. */
+    /**
+     * Every call made so far, oldest first.
+     */
     val calls: MutableList<RouterCall> = mutableListOf()
 
     override val overlayPops: Flow<Unit> = pops.receiveAsFlow()
@@ -31,7 +33,9 @@ internal class FakeRouter(
         calls += RouterCall.PopOverlay
     }
 
-    /** Press back with an overlay open. It waits for a collector if there is none yet. */
+    /**
+     * Press back with an overlay open. It waits for a collector if there is none yet.
+     */
     fun back() {
         pops.trySend(Unit)
     }

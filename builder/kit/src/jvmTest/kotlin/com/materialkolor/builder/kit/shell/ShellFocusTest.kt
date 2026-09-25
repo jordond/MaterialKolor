@@ -40,10 +40,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.test.Test
 
-/** The regions in the order AR-01 wants Tab to reach them. */
+/**
+ * The regions in the order AR-01 wants Tab to reach them.
+ */
 private val ShellReadingOrder = listOf(ShellTopBarTag, ShellPosterTag, ShellCanvasTag, ShellDockTag)
 
-/** Enough presses to pass every stop the skins' own regions add, such as the sheet's handle. */
+/**
+ * Enough presses to pass every stop the skins' own regions add, such as the sheet's handle.
+ */
 private const val ShellTabPresses = 12
 
 @OptIn(ExperimentalTestApi::class)
@@ -229,7 +233,9 @@ class ShellFocusTest {
     }
 }
 
-/** The shell with a stop in every slot but those given, its sheet resting where [sheet] says. */
+/**
+ * The shell with a stop in every slot but those given, its sheet resting where [sheet] says.
+ */
 @Composable
 private fun ShellUnderSheet(
     sheet: BottomSheetState,
@@ -247,13 +253,17 @@ private fun ShellUnderSheet(
     )
 }
 
-/** A text field filling a slot's top start corner. */
+/**
+ * A text field filling a slot's top start corner.
+ */
 @Composable
 private fun ShellField(tag: String) {
     BasicTextField(rememberTextFieldState(), Modifier.width(200.dp).testTag(tag))
 }
 
-/** Focuses [start] and presses Tab, and gives the stops in the order it first reached each. */
+/**
+ * Focuses [start] and presses Tab, and gives the stops in the order it first reached each.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.shellTabFrom(start: String): List<String> {
     onNodeWithTag(start, useUnmergedTree = true).requestFocus()
@@ -269,7 +279,9 @@ private fun ComposeUiTest.shellTabFrom(start: String): List<String> {
     return reached
 }
 
-/** A focus stop [size] square filling a slot's corner. */
+/**
+ * A focus stop [size] square filling a slot's corner.
+ */
 @Composable
 private fun ShellStop(
     tag: String,
@@ -278,7 +290,9 @@ private fun ShellStop(
     Box(Modifier.size(size).testTag(tag).focusable())
 }
 
-/** Which of the four stops holds focus, if any. */
+/**
+ * Which of the four stops holds focus, if any.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.shellFocusedStop(): String? =
     ShellReadingOrder.firstOrNull { tag ->

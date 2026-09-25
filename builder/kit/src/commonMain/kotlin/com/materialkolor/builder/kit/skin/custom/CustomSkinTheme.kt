@@ -31,7 +31,9 @@ public class BuilderIdentity internal constructor(
 ) {
     private val colors: Map<CustomSlot, Color> = colors.toMap()
 
-    /** The colour [slot] resolved to. */
+    /**
+     * The colour [slot] resolved to.
+     */
     public operator fun get(slot: CustomSlot): Color = colors.getValue(slot)
 
     override fun equals(other: Any?): Boolean = this === other || (other is BuilderIdentity && colors == other.colors)

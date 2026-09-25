@@ -41,7 +41,9 @@ import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.launch
 
-/** The media type of the downloaded zip. */
+/**
+ * The media type of the downloaded zip.
+ */
 internal const val ZIP_MIME = "application/zip"
 
 /**
@@ -85,7 +87,9 @@ internal class ExportModel(
     ) {
     private val exports = ExportResolver(themes = resolver)
 
-    /** The MaterialKolor version every export is built and checked against. */
+    /**
+     * The MaterialKolor version every export is built and checked against.
+     */
     val materialKolorVersion: String
         get() = versions.materialKolor // b-511
     private var memo: Memo? = null
@@ -185,7 +189,9 @@ internal class ExportModel(
         viewModelScope.launch { preferences.update { prefs -> prefs.copy(firstExportDone = true) } }
     }
 
-    /** The last export worked out, and what it was worked out from. */
+    /**
+     * The last export worked out, and what it was worked out from.
+     */
     private class Memo(
         val key: Key,
         val outcome: ExportOutcome,
@@ -212,11 +218,15 @@ internal class ExportModel(
         val projectName: String = "",
         val selectedPath: String? = null,
     ) {
-        /** What [document] exports to. */
+        /**
+         * What [document] exports to.
+         */
         val target: ExportTarget
             get() = ExportTarget.of(document.library, document.expressive)
 
-        /** The options [target] was last exported with. */
+        /**
+         * The options [target] was last exported with.
+         */
         val prefs: ExportPrefs
             get() = preferences.exportPrefsFor(target)
 
@@ -238,7 +248,9 @@ internal fun interface ExportGenerator {
     fun files(input: ExportInput): List<GeneratedFile>
 }
 
-/** Puts codegen's [generate] into the graph. */
+/**
+ * Puts codegen's [generate] into the graph.
+ */
 @BindingContainer
 @ContributesTo(AppScope::class)
 internal object ExportBindings {
@@ -275,26 +287,36 @@ internal sealed interface ExportOutcome {
  * Something that stops an export, each named once however many fields it covers.
  */
 internal sealed interface ExportProblem {
-    /** [packageName] is not a package Kotlin accepts. */
+    /**
+     * [packageName] is not a package Kotlin accepts.
+     */
     data class PackageName(
         val packageName: String,
     ) : ExportProblem
 
-    /** [themeName] is not a name Kotlin accepts. */
+    /**
+     * [themeName] is not a name Kotlin accepts.
+     */
     data class ThemeName(
         val themeName: String,
     ) : ExportProblem
 
-    /** One or more extra colors have a name the export cannot use, or there are too many of them. */
+    /**
+     * One or more extra colors have a name the export cannot use, or there are too many of them.
+     */
     data object ExtraColors : ExportProblem
 
-    /** The export already uses [name] for something else. */
+    /**
+     * The export already uses [name] for something else.
+     */
     data class NameTaken(
         val name: String,
     ) : ExportProblem
 }
 
-/** What stops [targeted], the document as its target sees it, from being exported with [prefs]. */
+/**
+ * What stops [targeted], the document as its target sees it, from being exported with [prefs].
+ */
 internal fun problemsOf(
     targeted: ThemeDocument,
     prefs: ExportPrefs,

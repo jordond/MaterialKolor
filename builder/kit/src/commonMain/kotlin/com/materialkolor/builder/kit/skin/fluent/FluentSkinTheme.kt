@@ -124,7 +124,9 @@ internal fun fluentTokens(
     )
 }
 
-/** The tones the code viewer draws the secondary and tertiary ramps at, where Fluent puts its accent. */
+/**
+ * The tones the code viewer draws the secondary and tertiary ramps at, where Fluent puts its accent.
+ */
 private const val LightCodeTone = 40
 private const val DarkCodeTone = 80
 

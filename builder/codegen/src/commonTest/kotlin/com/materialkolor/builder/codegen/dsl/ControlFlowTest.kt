@@ -6,7 +6,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-/** Writes [value] after `val x = ` as a top level property would, without the file around it. */
+/**
+ * Writes [value] after `val x = ` as a top level property would, without the file around it.
+ */
 private fun written(value: Expression): String {
     val writer = CodeWriter()
     writer.expression(value, listOf(plainToken("val x = ")))

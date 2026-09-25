@@ -25,7 +25,9 @@ internal suspend fun PointerInputScope.swallowSecondaryPresses() {
     }
 }
 
-/** A text context menu that shows nothing, standing in for foundation's popup. */
+/**
+ * A text context menu that shows nothing, standing in for foundation's popup.
+ */
 internal object NoTextContextMenu : TextContextMenuProvider {
     override suspend fun showTextContextMenu(dataProvider: TextContextMenuDataProvider) = Unit
 }

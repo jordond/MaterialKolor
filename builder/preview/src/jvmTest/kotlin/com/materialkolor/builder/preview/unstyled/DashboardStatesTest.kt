@@ -31,15 +31,21 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 import androidx.compose.ui.semantics.Role as SemanticsRole
 
-/** The tab of the range picker called [range]. */
+/**
+ * The tab of the range picker called [range].
+ */
 private fun tab(range: DashboardRange): SemanticsMatcher =
     SemanticsMatcher.expectValue(SemanticsProperties.Role, SemanticsRole.Tab) and hasText(range.label)
 
-/** The kit's state words for a panel that is shut and one that is open, as a state description. */
+/**
+ * The kit's state words for a panel that is shut and one that is open, as a state description.
+ */
 private const val COLLAPSED = "Collapsed"
 private const val EXPANDED = "Expanded"
 
-/** A clickable whose name starts with [name], with or without a state folded in after it. */
+/**
+ * A clickable whose name starts with [name], with or without a state folded in after it.
+ */
 private fun named(name: String): SemanticsMatcher = hasClickAction() and hasContentDescription(name, substring = true)
 
 @OptIn(ExperimentalTestApi::class)
@@ -135,11 +141,15 @@ class DashboardStatesTest {
         }
 }
 
-/** Asserts the node goes by [name] alone. */
+/**
+ * Asserts the node goes by [name] alone.
+ */
 private fun SemanticsNodeInteraction.assertName(name: String): SemanticsNodeInteraction =
     assert(hasContentDescriptionExactly(name))
 
-/** The dashboard for [width] with every panel shut, in a frame tall enough that every lazy item composes. */
+/**
+ * The dashboard for [width] with every panel shut, in a frame tall enough that every lazy item composes.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.shutDashboard(
     width: DeviceWidth,

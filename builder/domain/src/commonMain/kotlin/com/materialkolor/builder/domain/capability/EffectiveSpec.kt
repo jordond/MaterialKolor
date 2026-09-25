@@ -69,15 +69,23 @@ public object EffectiveSpec {
             Style.Cmf -> Availability.CmfOnly
         }
 
-    /** Which specs a style has a form in. */
+    /**
+     * Which specs a style has a form in.
+     */
     private enum class Availability {
-        /** Only the 2021 spec. */
+        /**
+         * Only the 2021 spec.
+         */
         Classic,
 
-        /** The 2021 spec and its 2025 revision. */
+        /**
+         * The 2021 spec and its 2025 revision.
+         */
         Revised,
 
-        /** Only the 2026 spec. */
+        /**
+         * Only the 2026 spec.
+         */
         CmfOnly,
     }
 }

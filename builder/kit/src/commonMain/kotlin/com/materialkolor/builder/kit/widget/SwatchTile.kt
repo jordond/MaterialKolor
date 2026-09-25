@@ -66,19 +66,29 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
-/** How tall the colored part of a swatch is. */
+/**
+ * How tall the colored part of a swatch is.
+ */
 private val SwatchColorHeight: Dp = 72.dp
 
-/** The outline of a widget with keyboard focus, thick enough to read on any fill. */
+/**
+ * The outline of a widget with keyboard focus, thick enough to read on any fill.
+ */
 internal val WidgetFocusWidth: Dp = 2.dp
 
-/** Tags the pin badge on a pinned swatch, so a test can find it. */
+/**
+ * Tags the pin badge on a pinned swatch, so a test can find it.
+ */
 internal const val SwatchPinTag: String = "swatch-pin"
 
-/** Tags the room a swatch keeps for its tone and contrast lines, so a test can find it. */
+/**
+ * Tags the room a swatch keeps for its tone and contrast lines, so a test can find it.
+ */
 internal const val SwatchReadoutTag: String = "swatch-readout"
 
-/** Tags the panel band behind a copy button, so a test can find it. */
+/**
+ * Tags the panel band behind a copy button, so a test can find it.
+ */
 internal const val CopyBandTag: String = "copy-band"
 
 private const val AAA_TEXT = 7.0
@@ -95,7 +105,7 @@ private const val AA_LARGE = 3.0
  * pinned as its state. The web hears only the name, so there the ratio, the badge and the pinned
  * state travel in it, as in "primary, #6750A4, tone 40, 6.4:1, AA, pinned" (D37, F-22).
  *
- * The copy button is a visible button, not a hover trick. It shows on a touch screen, while the
+ * The copy button does not depend on hover alone. It shows on a touch screen, while the
  * swatch or the button has keyboard focus, and while a mouse is over the swatch. Keyboard focus rings
  * the swatch on the panel around it, where the focus color holds 3 to 1.
  *
@@ -231,7 +241,9 @@ public fun SwatchTile(
  */
 private val CopyBandWidth: Dp = FocusRingOffset + FocusRingWidth * 2
 
-/** The largest icon button a skin draws, Material's and Custom's. The copy band is cut to hold it. */
+/**
+ * The largest icon button a skin draws, Material's and Custom's. The copy band is cut to hold it.
+ */
 private val LargestIconButton: Dp = 40.dp
 
 /**
@@ -273,7 +285,9 @@ internal fun CopyButton(
     }
 }
 
-/** The ratio against the on-pair and the badge it earns, with an icon so the badge never rests on color. */
+/**
+ * The ratio against the on-pair and the badge it earns, with an icon so the badge never rests on color.
+ */
 @Composable
 private fun ContrastLine(
     ratioText: String,
@@ -296,7 +310,9 @@ private fun ContrastLine(
     }
 }
 
-/** The badge a text pair at [ratio] earns under WCAG 2.2. */
+/**
+ * The badge a text pair at [ratio] earns under WCAG 2.2.
+ */
 internal fun textBadge(ratio: Double): ContrastBadge =
     when {
         ratio >= AAA_TEXT -> ContrastBadge.Aaa
@@ -337,7 +353,9 @@ internal fun oneDecimal(value: Double): String {
     return "${tenths / 10}.${tenths % 10}"
 }
 
-/** The color as `#RRGGBB`, the way the rest of the builder writes it. */
+/**
+ * The color as `#RRGGBB`, the way the rest of the builder writes it.
+ */
 internal fun Color.hex(): String = Argb(toArgb()).toHex()
 
 /**

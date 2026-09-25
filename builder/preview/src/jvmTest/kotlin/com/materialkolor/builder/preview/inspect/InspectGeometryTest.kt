@@ -10,12 +10,16 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** A layout a thousand pixels wide, its handle at three tenths from the start edge. */
+/**
+ * A layout a thousand pixels wide, its handle at three tenths from the start edge.
+ */
 private const val WIDTH = 1000
 
 private const val FRACTION = 0.3f
 
-/** Where the handle sits in right to left, counted from the left edge. */
+/**
+ * Where the handle sits in right to left, counted from the left edge.
+ */
 private const val RTL_HANDLE = 700f
 
 private val Room = IntSize(1000, 800)

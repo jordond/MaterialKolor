@@ -35,7 +35,9 @@ private val Seed = Argb(0x6750A4)
 
 private const val TERTIARY_FIELD = "Tertiary seed, any format"
 
-/** How many frames the chip drag test moves the seed for. */
+/**
+ * How many frames the chip drag test moves the seed for.
+ */
 private const val DRAG_FRAMES = 4 // pf-1
 
 @OptIn(ExperimentalTestApi::class)

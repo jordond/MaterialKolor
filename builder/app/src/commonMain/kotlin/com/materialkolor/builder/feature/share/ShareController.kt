@@ -41,17 +41,23 @@ internal class ShareController(
     // b-505
     private val environment: Environment,
 ) : ViewModel() {
-    /** Whether a share goes to the share sheet here rather than the clipboard. */
+    /**
+     * Whether a share goes to the share sheet here rather than the clipboard.
+     */
     val sharesToSheet: Boolean
         get() = files.canShareLink
 
-    /** The link to [document] called [projectName], or null when the document cannot be put in one. */
+    /**
+     * The link to [document] called [projectName], or null when the document cannot be put in one.
+     */
     fun link(
         document: ThemeDocument,
         projectName: String,
     ): String? = shareLink(document, projectName, environment.siteOrigin)
 
-    /** Put [url] on the clipboard. Copied only when the clipboard really took it. */
+    /**
+     * Put [url] on the clipboard. Copied only when the clipboard really took it.
+     */
     suspend fun copy(url: String): ShareOutcome =
         if (clipboard.writeText(url).isSuccess) ShareOutcome.Copied else ShareOutcome.CopyFailed
 
@@ -82,16 +88,24 @@ internal class ShareController(
  * How a copy or a share went.
  */
 internal enum class ShareOutcome {
-    /** The link is on the clipboard. */
+    /**
+     * The link is on the clipboard.
+     */
     Copied,
 
-    /** The clipboard would not take the link, so it has to be copied by hand. */
+    /**
+     * The clipboard would not take the link, so it has to be copied by hand.
+     */
     CopyFailed,
 
-    /** The share sheet took the link, or the user closed it. */
+    /**
+     * The share sheet took the link, or the user closed it.
+     */
     Shared,
 
-    /** The share sheet would not open, so the link has to be copied by hand. */
+    /**
+     * The share sheet would not open, so the link has to be copied by hand.
+     */
     ShareFailed,
 }
 

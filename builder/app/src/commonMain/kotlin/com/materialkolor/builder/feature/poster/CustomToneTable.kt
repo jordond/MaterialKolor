@@ -38,14 +38,20 @@ import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
-/** The Custom slots cut from a palette by tone, the only ones the table moves (D27). */
+/**
+ * The Custom slots cut from a palette by tone, the only ones the table moves (D27).
+ */
 internal val ToneSlots: List<CustomSlot> =
     CustomSlot.entries.filter { slot -> slot.resolution !is SlotResolution.FromRole }
 
-/** The tones a slider covers. */
+/**
+ * The tones a slider covers.
+ */
 private val ToneRange: ClosedFloatingPointRange<Float> = 0f..100f
 
-/** One arrow press moves one tone. */
+/**
+ * One arrow press moves one tone.
+ */
 private const val TONE_STEP = 1f
 
 /**
@@ -75,7 +81,9 @@ internal fun CustomToneTable(
     }
 }
 
-/** One slot, its name and Reset over a light and a dark slider. */
+/**
+ * One slot, its name and Reset over a light and a dark slider.
+ */
 @Composable
 private fun CustomToneRow(
     context: PosterContext,
@@ -171,7 +179,9 @@ private fun ToneSlider(
     }
 }
 
-/** [this] with the tone of the mode [isDark] picks moved to [tone], and the other mode kept as it is. */
+/**
+ * [this] with the tone of the mode [isDark] picks moved to [tone], and the other mode kept as it is.
+ */
 private fun CustomTone?.withTone(
     isDark: Boolean,
     tone: Int,
@@ -198,7 +208,9 @@ internal fun SlotResolution.ownTone(
         is SlotResolution.FromRole -> error("A slot that follows a role has no tone of its own")
     }
 
-/** The last tones a drag reported, which its release lands on. Only the release reads it. */
+/**
+ * The last tones a drag reported, which its release lands on. Only the release reads it.
+ */
 private class PendingTone {
     var tone: CustomTone? = null
 }

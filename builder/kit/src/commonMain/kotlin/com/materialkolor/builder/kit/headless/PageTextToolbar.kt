@@ -60,7 +60,9 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-/** A button the page's text toolbar can show, in the order the row lays them out. */
+/**
+ * A button the page's text toolbar can show, in the order the row lays them out.
+ */
 internal enum class TextToolbarAction {
     Cut,
     Copy,
@@ -94,11 +96,15 @@ internal class TextToolbarMenu(
  * dropped. Once the scroll settles, or the next press lands, the next menu shows again.
  */
 internal class PageTextToolbar : TextToolbar {
-    /** The menu on show, or null while the toolbar is hidden. */
+    /**
+     * The menu on show, or null while the toolbar is hidden.
+     */
     var menu: TextToolbarMenu? by mutableStateOf(null)
         private set
 
-    /** Whether a scroll in the host is moving the page under the row right now. */
+    /**
+     * Whether a scroll in the host is moving the page under the row right now.
+     */
     private var scrolling = false
 
     /**
@@ -137,7 +143,7 @@ internal class PageTextToolbar : TextToolbar {
 
     /**
      * The locals of the skin the builder is drawn in, which the host above the skin cannot see.
-     * The row wears that skin's menu dress, and until they arrive nothing is drawn.
+     * The row takes that skin's menu styling, and until they arrive nothing is drawn.
      */
     var locals: CompositionLocalContext? by mutableStateOf(null)
 
@@ -305,7 +311,9 @@ private fun label(action: TextToolbarAction): String =
         TextToolbarAction.SelectAll -> stringResource(Res.string.text_toolbar_select_all)
     }
 
-/** [rect] taken from the root's coordinates into the host's, or null while none of it lies inside the host. */
+/**
+ * [rect] taken from the root's coordinates into the host's, or null while none of it lies inside the host.
+ */
 private fun OverlayHostState.visibleFromRoot(rect: Rect): Rect? {
     val layout = coordinates?.takeIf { it.isAttached } ?: return null
     val root = layout.findRootCoordinates()

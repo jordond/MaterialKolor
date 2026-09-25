@@ -64,10 +64,14 @@ private const val HEIGHT = 800
 
 // b-314a
 
-/** The first line of both OFL texts, under the copyright lines. */
+/**
+ * The first line of both OFL texts, under the copyright lines.
+ */
 private const val OFL_HEADING = "SIL OPEN FONT LICENSE Version 1.1"
 
-/** The line About opens with. */
+/**
+ * The line About opens with.
+ */
 private val BUILDER_VERSION_LINE = "Builder ${BuildKonfig.BUILDER_VERSION}"
 
 // b-314
@@ -248,7 +252,9 @@ class AboutHostTest {
         waitForIdle()
     }
 
-    /** Choose [label] in About's motion row, and wait until the chrome draws [reduced] motion. */
+    /**
+     * Choose [label] in About's motion row, and wait until the chrome draws [reduced] motion.
+     */
     private fun ComposeUiTest.chooseMotion(
         label: String,
         motion: MotionOverride,

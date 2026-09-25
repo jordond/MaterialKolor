@@ -271,7 +271,9 @@ class PickerSessionTest : SessionTestBase() {
         return harness.own(WorkspaceModel(session, preferences, FakeClipboard(), router, ThemeResolver()))
     }
 
-    /** Starts on [document] with one step to undo and one to redo. */
+    /**
+     * Starts on [document] with one step to undo and one to redo.
+     */
     private fun WorkspaceModel.startFrom(document: ThemeDocument) {
         edit(DocumentChange.Replace(document), EditPhase.Discrete)
         edit(DocumentChange.SetThemeName("Undone"), EditPhase.Discrete)
@@ -309,7 +311,9 @@ class PickerSessionTest : SessionTestBase() {
         val Blue = Argb(0xFF1976D2.toInt())
         val Green = Argb(0xFF388E3C.toInt())
 
-        /** Every target stores something other than what the tests pick, or nothing at all. */
+        /**
+         * Every target stores something other than what the tests pick, or nothing at all.
+         */
         val Stored = ThemeDocument(
             seed = Argb(0xFF6750A4.toInt()),
             seedSource = SeedSource.Image(name = "photo.jpg"),

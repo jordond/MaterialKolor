@@ -79,7 +79,9 @@ class RampSetTest {
         assertEquals(true, Role.Scrim in neutral)
     }
 
-    /** Every style at 2021 and 2025, and Cmf at the 2026 spec it belongs to. */
+    /**
+     * Every style at 2021 and 2025, and Cmf at the 2026 spec it belongs to.
+     */
     private fun styleSpecs(): List<Pair<Style, SpecVersion>> =
         Style.entries.flatMap { style ->
             when (style) {

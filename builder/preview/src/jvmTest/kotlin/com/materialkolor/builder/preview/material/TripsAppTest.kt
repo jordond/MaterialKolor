@@ -61,14 +61,18 @@ import kotlin.test.Test
  */
 private const val TripsScreenshotDir = "src/jvmTest/screenshots/trips"
 
-/** The frame the dock shows each device in, the kit's screen widths at the height of a first screen. */
+/**
+ * The frame the dock shows each device in, the kit's screen widths at the height of a first screen.
+ */
 private val TripsFrames: Map<DeviceWidth, IntSize> = mapOf(
     DeviceWidth.Phone to IntSize(412, 900),
     DeviceWidth.Tablet to IntSize(840, 900),
     DeviceWidth.Desktop to IntSize(1280, 800),
 )
 
-/** The four families F-20 wants on every screen. */
+/**
+ * The four families F-20 wants on every screen.
+ */
 private val TripsFamilies: Map<String, Set<Role>> = mapOf(
     "primary" to setOf(Role.Primary, Role.OnPrimary, Role.PrimaryContainer, Role.OnPrimaryContainer),
     "secondary" to setOf(Role.Secondary, Role.OnSecondary, Role.SecondaryContainer, Role.OnSecondaryContainer),
@@ -84,7 +88,9 @@ private val TripsContainerLevels: Set<Role> = setOf(
     Role.SurfaceContainerHighest,
 )
 
-/** The offline maps row as the merged tree shows it. */
+/**
+ * The offline maps row as the merged tree shows it.
+ */
 private val TripsOfflineRow: SemanticsMatcher = isToggleable() and hasText("Offline maps")
 
 @OptIn(ExperimentalTestApi::class)
@@ -237,7 +243,9 @@ class TripsAppTest {
         }
 }
 
-/** The Trips app in a Material 3 pane of [spec], under the chrome, with motion frozen. */
+/**
+ * The Trips app in a Material 3 pane of [spec], under the chrome, with motion frozen.
+ */
 @Composable
 private fun TripsHarness(
     spec: PaneSpec,

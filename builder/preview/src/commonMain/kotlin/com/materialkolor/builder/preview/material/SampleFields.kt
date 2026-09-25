@@ -139,7 +139,9 @@ private fun SampleField(
     }
 }
 
-/** Half the line of the small label that sits across an outlined field's outline. */
+/**
+ * Half the line of the small label that sits across an outlined field's outline.
+ */
 @Composable
 private fun labelHalfHeight(): Dp {
     val line = MaterialTheme.typography.bodySmall.lineHeight

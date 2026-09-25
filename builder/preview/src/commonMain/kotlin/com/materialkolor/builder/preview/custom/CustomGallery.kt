@@ -62,10 +62,14 @@ internal enum class CustomComponent(
     SecondaryAction(CustomSlot.SurfaceRaised, CustomSlot.TextStrong),
     SubtleAction(CustomSlot.TextMuted),
 
-    /** A danger action, outlined and labelled in the error ink with no fill. */
+    /**
+     * A danger action, outlined and labelled in the error ink with no fill.
+     */
     DangerAction(CustomSlot.Error),
 
-    /** A toggle button, raised and outlined while off and filled with the accent while on. */
+    /**
+     * A toggle button, raised and outlined while off and filled with the accent while on.
+     */
     Selectable(
         CustomSlot.SurfaceRaised,
         CustomSlot.TextStrong,
@@ -74,7 +78,9 @@ internal enum class CustomComponent(
         CustomSlot.OnPrimary,
     ),
 
-    /** A choice or filter chip, outlined with no fill while off and filled with the accent while on. */
+    /**
+     * A choice or filter chip, outlined with no fill while off and filled with the accent while on.
+     */
     Chip(CustomSlot.TextStrong, CustomSlot.BorderStrong, CustomSlot.Primary, CustomSlot.OnPrimary),
     TextField(
         CustomSlot.SurfaceRaised,
@@ -96,11 +102,15 @@ internal enum class CustomComponent(
     Segmented(CustomSlot.BorderStrong, CustomSlot.TextStrong, CustomSlot.Primary, CustomSlot.OnPrimary),
     SelectField(CustomSlot.SurfaceRaised, CustomSlot.BorderSoft, CustomSlot.TextMuted, CustomSlot.TextStrong),
 
-    /** The raised panel a menu, a select's list, a dialog or a sheet opens on. */
+    /**
+     * The raised panel a menu, a select's list, a dialog or a sheet opens on.
+     */
     Overlay(CustomSlot.SurfaceRaised, CustomSlot.TextStrong, CustomSlot.TextMuted),
     Card(CustomSlot.Surface, CustomSlot.TextStrong, CustomSlot.BorderSoft),
 
-    /** A sample card, its secondary line in the muted text colour. */
+    /**
+     * A sample card, its secondary line in the muted text colour.
+     */
     SampleCard(CustomSlot.Surface, CustomSlot.TextStrong, CustomSlot.BorderSoft, CustomSlot.TextMuted),
     ListRow(CustomSlot.TextStrong, CustomSlot.TextMuted, CustomSlot.SurfaceRaised, CustomSlot.BorderStrong),
     Divider(CustomSlot.BorderSoft),
@@ -108,25 +118,35 @@ internal enum class CustomComponent(
     Tabs(CustomSlot.SurfaceRaised, CustomSlot.TextStrong, CustomSlot.Primary, CustomSlot.OnPrimary),
     NeutralBadge(CustomSlot.SurfaceRaised, CustomSlot.TextStrong, CustomSlot.BorderSoft),
 
-    /** A success or warning badge, a status ink no slot moves under text in the Surface slot. */
+    /**
+     * A success or warning badge, a status ink no slot moves under text in the Surface slot.
+     */
     StatusBadge(CustomSlot.Surface),
     DangerBadge(CustomSlot.Error, CustomSlot.Surface),
     Progress(CustomSlot.BorderSoft, CustomSlot.Primary),
 
-    /** A tooltip or a toast, the Surface slot on the strong text colour. */
+    /**
+     * A tooltip or a toast, the Surface slot on the strong text colour.
+     */
     Inverse(CustomSlot.TextStrong, CustomSlot.Surface),
 
-    /** The sunken canvas the cards sit on. */
+    /**
+     * The sunken canvas the cards sit on.
+     */
     Canvas(CustomSlot.SurfaceSunken, CustomSlot.TextStrong),
     ;
 
     val refs: List<ColorRef> = slots.map { slot -> ColorRef.OfSlot(slot) }
 }
 
-/** Declare the slots [component] paints, for the role usage check and Inspect. */
+/**
+ * Declare the slots [component] paints, for the role usage check and Inspect.
+ */
 internal fun Modifier.previewRoles(component: CustomComponent): Modifier = previewRoles(*component.refs.toTypedArray())
 
-/** The component a kit action of this emphasis is drawn as. */
+/**
+ * The component a kit action of this emphasis is drawn as.
+ */
 internal val Emphasis.component: CustomComponent
     get() = when (this) {
         Emphasis.Primary -> CustomComponent.PrimaryAction
@@ -135,7 +155,9 @@ internal val Emphasis.component: CustomComponent
         Emphasis.Danger -> CustomComponent.DangerAction
     }
 
-/** The action an icon button of this emphasis stands for, and its icon. */
+/**
+ * The action an icon button of this emphasis stands for, and its icon.
+ */
 private val Emphasis.iconAction: Pair<String, IconId>
     get() = when (this) {
         Emphasis.Primary -> "Add" to IconId.Plus
@@ -144,7 +166,9 @@ private val Emphasis.iconAction: Pair<String, IconId>
         Emphasis.Danger -> "Delete" to IconId.Trash
     }
 
-/** Enabled first, then disabled, the order every card shows its copies in. */
+/**
+ * Enabled first, then disabled, the order every card shows its copies in.
+ */
 internal val EnabledThenDisabled: List<Boolean> = listOf(true, false)
 
 private const val SliderStops = 11
@@ -157,7 +181,9 @@ private val SortOrders = listOf(
     "By hue" to IconId.Eyedropper,
 )
 
-/** A button of [emphasis], enabled and disabled. */
+/**
+ * A button of [emphasis], enabled and disabled.
+ */
 @Composable
 internal fun ActionButtons(
     emphasis: Emphasis,
@@ -176,7 +202,9 @@ internal fun ActionButtons(
     }
 }
 
-/** An icon button of every emphasis, enabled on the first row and disabled on the second. */
+/**
+ * An icon button of every emphasis, enabled on the first row and disabled on the second.
+ */
 @Composable
 internal fun IconButtons() {
     GalleryColumn {
@@ -376,7 +404,9 @@ internal fun InlineSelect(state: DemoAppState) {
     }
 }
 
-/** A menu as it looks open, drawn in place rather than in a popup (D40). */
+/**
+ * A menu as it looks open, drawn in place rather than in a popup (D40).
+ */
 @Composable
 internal fun InlineMenu(state: DemoAppState) {
     val tokens = LocalBuilderTokens.current
@@ -416,13 +446,17 @@ internal fun GalleryOverlayPanel(
     )
 }
 
-/** A card's controls stacked with the kit's small gap. */
+/**
+ * A card's controls stacked with the kit's small gap.
+ */
 @Composable
 internal fun GalleryColumn(content: @Composable ColumnScope.() -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.small), content = content)
 }
 
-/** A control's enabled copy and its disabled one, side by side. */
+/**
+ * A control's enabled copy and its disabled one, side by side.
+ */
 @Composable
 internal fun EnabledPair(content: @Composable RowScope.(enabled: Boolean) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.small)) {

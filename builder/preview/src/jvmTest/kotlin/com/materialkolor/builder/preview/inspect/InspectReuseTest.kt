@@ -22,10 +22,14 @@ import kotlin.test.Test
 
 // b-315b
 
-/** How many rows the scrolling list has, far more than fit. */
+/**
+ * How many rows the scrolling list has, far more than fit.
+ */
 private const val ROWS = 200
 
-/** How tall each row is, and how far each step scrolls. */
+/**
+ * How tall each row is, and how far each step scrolls.
+ */
 private val RowHeight = 40.dp
 
 /**
@@ -70,7 +74,9 @@ class InspectReuseTest {
             registry.size shouldBe shown.size
         }
 
-    /** Where each row [list] shows sits in the window. */
+    /**
+     * Where each row [list] shows sits in the window.
+     */
     private fun ComposeUiTest.shownRows(list: LazyListState): List<Rect> {
         val rows = runOnIdle { list.layoutInfo.visibleItemsInfo.map { item -> item.index } }
         return rows.map { row -> onNodeWithTag(rowTag(row)).fetchSemanticsNode().boundsInWindow }

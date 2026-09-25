@@ -105,13 +105,17 @@ internal class SliderRules(
         require(stops.all { stop -> stop in range }) { "Every stop has to sit inside $range, got $stops" }
     }
 
-    /** Pulls [value] onto the nearest stop when it is within [snapDistance] of it. */
+    /**
+     * Pulls [value] onto the nearest stop when it is within [snapDistance] of it.
+     */
     fun snap(value: Float): Float {
         val nearest = stops.minByOrNull { stop -> abs(stop - value) } ?: return value
         return if (abs(nearest - value) <= snapDistance) nearest else value
     }
 
-    /** Moves [value] by [steps] steps, landing on the step grid that starts at the range's start. */
+    /**
+     * Moves [value] by [steps] steps, landing on the step grid that starts at the range's start.
+     */
     fun move(
         value: Float,
         steps: Int,
@@ -120,11 +124,15 @@ internal class SliderRules(
         return (range.start + index * step).coerceIn(range.start, range.endInclusive)
     }
 
-    /** Where [value] sits along the range, from 0 to 1. */
+    /**
+     * Where [value] sits along the range, from 0 to 1.
+     */
     fun fractionOf(value: Float): Float = ((value - range.start) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
 }
 
-/** How many steps Shift and the page keys move at once. */
+/**
+ * How many steps Shift and the page keys move at once.
+ */
 internal const val SliderBigStep: Int = 10
 
 /**
@@ -217,7 +225,9 @@ internal fun Modifier.sliderSemantics(
         }
     }
 
-/** The value as a slider reads it out when the caller has nothing better, to two decimals. */
+/**
+ * The value as a slider reads it out when the caller has nothing better, to two decimals.
+ */
 internal fun sliderValueDescription(value: Float): String {
     val hundredths = (value * 100).roundToInt()
     val sign = if (hundredths < 0) "-" else ""
@@ -291,7 +301,9 @@ internal fun HeadlessSlider(
     )
 }
 
-/** Fills [shape] grown by [width] on every side in [color], behind whatever the thumb draws. */
+/**
+ * Fills [shape] grown by [width] on every side in [color], behind whatever the thumb draws.
+ */
 private fun Modifier.thumbHalo(
     width: Dp,
     color: Color,

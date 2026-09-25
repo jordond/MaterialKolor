@@ -29,25 +29,39 @@ import io.kotest.matchers.floats.shouldBeLessThan
 import io.kotest.matchers.floats.shouldBeLessThanOrEqual
 import kotlin.test.Test
 
-/** The narrowest a swatch gets in the app, the Roles tab's least column width. */
+/**
+ * The narrowest a swatch gets in the app, the Roles tab's least column width.
+ */
 private val NarrowestSwatch: Dp = 152.dp
 
-/** A phone in the hand, where the copy button always shows at the 48 dp target. */
+/**
+ * A phone in the hand, where the copy button always shows at the 48 dp target.
+ */
 private val Phone: LayoutInfo = LayoutInfo.of(360.dp, 800.dp, coarsePointer = true)
 
-/** A desktop under a mouse, where a skin's own icon button outgrows the 24 dp target. */
+/**
+ * A desktop under a mouse, where a skin's own icon button outgrows the 24 dp target.
+ */
 private val Desktop: LayoutInfo = LayoutInfo.of(1280.dp, 800.dp)
 
-/** The swatch's name, which a test focuses it by. */
+/**
+ * The swatch's name, which a test focuses it by.
+ */
 private const val NarrowSwatchName = "primary, #6750A4, tone 40"
 
-/** A line long enough to scroll sideways in [CodeViewSize]. */
+/**
+ * A line long enough to scroll sideways in [CodeViewSize].
+ */
 private const val LongLine = "val primaryContainer = Color(0xFFEADDFF) // the first line runs past the corner"
 
-/** A code view narrower than [LongLine]. */
+/**
+ * A code view narrower than [LongLine].
+ */
 private val CodeViewSize: Dp = 320.dp
 
-/** Enough presses of the right arrow to scroll [LongLine] to its end. */
+/**
+ * Enough presses of the right arrow to scroll [LongLine] to its end.
+ */
 private const val SidewaysPresses = 80
 
 /**

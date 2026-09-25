@@ -24,7 +24,9 @@ internal object EngineBindings {
     @SingleIn(AppScope::class)
     fun provideThemeResolver(): ThemeResolver = ThemeResolver()
 
-    /** The versions an export names, from the build config. */
+    /**
+     * The versions an export names, from the build config.
+     */
     @Provides
     fun provideExportVersions(): ExportVersions =
         ExportVersions(

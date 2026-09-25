@@ -14,31 +14,49 @@ import com.composables.icons.lucide.Users
 // Every word the dashboard shows lives in this file. The copy is a first draft for the owner to
 // review, which is why none of it goes through string resources yet.
 
-/** The switch that shows the token side panel, shared by both copies of a split. */
+/**
+ * The switch that shows the token side panel, shared by both copies of a split.
+ */
 internal const val DashboardDrawerSwitch: String = "dashboard.drawerOpen"
 
-/** The switch that shows the order status menu. */
+/**
+ * The switch that shows the order status menu.
+ */
 internal const val DashboardMenuSwitch: String = "dashboard.menuOpen"
 
-/** The switch that shows the navigation under the top bar of a phone. */
+/**
+ * The switch that shows the navigation under the top bar of a phone.
+ */
 internal const val DashboardNavSwitch: String = "dashboard.navOpen"
 
-/** The sidebar pick, one option per [DashboardDestination]. */
+/**
+ * The sidebar pick, one option per [DashboardDestination].
+ */
 internal const val DashboardNavChoice: String = "dashboard.nav"
 
-/** The tab pick, one option per [DashboardRange]. */
+/**
+ * The tab pick, one option per [DashboardRange].
+ */
 internal const val DashboardRangeChoice: String = "dashboard.range"
 
-/** The menu pick, one option per [OrderFilter]. */
+/**
+ * The menu pick, one option per [OrderFilter].
+ */
 internal const val DashboardFilterChoice: String = "dashboard.filter"
 
-/** The scrolling page, the table of orders included. */
+/**
+ * The scrolling page, the table of orders included.
+ */
 internal const val DashboardPageList: String = "dashboard.page"
 
-/** The list of tokens in the side panel. */
+/**
+ * The list of tokens in the side panel.
+ */
 internal const val DashboardTokenList: String = "dashboard.tokens"
 
-/** The words on the dashboard that belong to no list of data. */
+/**
+ * The words on the dashboard that belong to no list of data.
+ */
 internal object DashboardCopy {
     const val Brand: String = "Pulse"
     const val Navigation: String = "Navigation"
@@ -146,7 +164,9 @@ internal class Metric(
     val rising: Boolean,
     val goal: Float? = null,
 ) {
-    /** Whether the move is good news. */
+    /**
+     * Whether the move is good news.
+     */
     val good: Boolean get() = rising == kind.risingIsGood
 }
 
@@ -216,7 +236,9 @@ private val Reports: Map<DashboardRange, RangeReport> = mapOf(
     ),
 )
 
-/** What the page shows for this range. */
+/**
+ * What the page shows for this range.
+ */
 internal val DashboardRange.report: RangeReport get() = Reports.getValue(this)
 
 private fun points(
@@ -263,7 +285,9 @@ internal enum class OrderFilter(
     Refunded("Refunded", OrderStatus.Refunded),
     ;
 
-    /** Whether the table shows [order] under this pick. */
+    /**
+     * Whether the table shows [order] under this pick.
+     */
     fun keeps(order: Order): Boolean = status == null || order.status == status
 }
 
@@ -282,7 +306,9 @@ internal class Order(
     val status: OrderStatus,
 )
 
-/** The orders table, newest first. */
+/**
+ * The orders table, newest first.
+ */
 internal val DashboardOrders: List<Order> = listOf(
     Order("#3210", "Amara Okafor", "$1,999.00", OrderStatus.Paid),
     Order("#3209", "Jonas Berg", "$39.00", OrderStatus.Pending),

@@ -122,7 +122,9 @@ class FluentFrozenTest {
             "dark3" to shades.dark3,
         )
 
-    /** The files without their header, which carries the link and so differs between cases. */
+    /**
+     * The files without their header, which carries the link and so differs between cases.
+     */
     private fun codeOf(files: List<GeneratedFile>): List<String> =
         files.map { file ->
             file.text

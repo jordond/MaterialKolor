@@ -113,7 +113,7 @@ internal fun SaveState(status: SaveStatus) {
 
 /**
  * The Projects button. It shows the open project's name and reads out as Projects and the name, so
- * it never sounds like a title. Before the session has named a project it just says Projects.
+ * it never sounds like a title. Before the session has named a project it says Projects.
  */
 @Composable
 private fun ProjectsButton(
@@ -147,7 +147,9 @@ internal data class SaveBadge(
     val icon: IconId?,
 )
 
-/** The badge the header shows for [status]. */
+/**
+ * The badge the header shows for [status].
+ */
 internal fun saveBadgeOf(status: SaveStatus): SaveBadge =
     when (status) {
         SaveStatus.Idle -> SaveBadge(Res.string.poster_saved, BadgeStatus.Success, IconId.Check)

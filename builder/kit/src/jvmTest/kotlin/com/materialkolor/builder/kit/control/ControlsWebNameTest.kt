@@ -69,7 +69,9 @@ private fun ComposeUiTest.showFolded(
     }
 }
 
-/** Matches a node whose last text is [last]. */
+/**
+ * Matches a node whose last text is [last].
+ */
 private fun hasLastText(last: String): SemanticsMatcher =
     SemanticsMatcher("last text is $last") { node ->
         node.config.getOrNull(SemanticsProperties.Text)?.lastOrNull() == AnnotatedString(last)

@@ -100,7 +100,9 @@ internal fun TokenPanel(
     }
 }
 
-/** Puts the token panel away, and hands focus back to the top bar's toggle if the panel held it. */
+/**
+ * Puts the token panel away, and hands focus back to the top bar's toggle if the panel held it.
+ */
 internal fun DashboardFocus.closeTokenPanel(state: DemoAppState) {
     state.setOn(DashboardDrawerSwitch, false)
     handBack(DashboardArea.TokenPanel, drawerToggle)

@@ -18,7 +18,9 @@ import kotlinx.coroutines.flow.map
  * The open project.
  */
 internal sealed interface ProjectRef {
-    /** A saved project. */
+    /**
+     * A saved project.
+     */
     data class Persisted(
         val id: String,
     ) : ProjectRef
@@ -98,13 +100,19 @@ internal data class Conflict(
  * Whether the open project's latest changes are saved.
  */
 internal sealed interface SaveStatus {
-    /** Everything is saved. */
+    /**
+     * Everything is saved.
+     */
     data object Idle : SaveStatus
 
-    /** A save is waiting or under way. */
+    /**
+     * A save is waiting or under way.
+     */
     data object Pending : SaveStatus
 
-    /** The last save did not land, even after the repository made room and tried again. */
+    /**
+     * The last save did not land, even after the repository made room and tried again.
+     */
     data class Failed(
         val error: StoreError,
     ) : SaveStatus
@@ -132,7 +140,9 @@ internal data class SessionColors(
     }
 }
 
-/** How recent an edit in this tab has to be for another tab's save to raise a [Conflict]. */
+/**
+ * How recent an edit in this tab has to be for another tab's save to raise a [Conflict].
+ */
 internal const val CONFLICT_WINDOW_MILLIS: Long = 2_000
 
 /**

@@ -50,7 +50,9 @@ class SkinSwitchTextFieldTest {
         }
 }
 
-/** A different ink per library, so every switch re-styles the field. */
+/**
+ * A different ink per library, so every switch re-styles the field.
+ */
 private val InkOf: Map<Library, Color> = mapOf(
     Library.Material3 to Color.Red,
     Library.Fluent to Color.Blue,

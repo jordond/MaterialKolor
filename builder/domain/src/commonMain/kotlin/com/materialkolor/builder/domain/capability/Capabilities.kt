@@ -9,67 +9,109 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * A control whose state depends on the export target, one row of the per-target control matrix.
  */
 public enum class Control {
-    /** Every way to set the seed, typing, the picker, the eyedropper, an image and shuffle. */
+    /**
+     * Every way to set the seed, typing, the picker, the eyedropper, an image and shuffle.
+     */
     SeedEntryPoints,
 
-    /** The primary key color override. */
+    /**
+     * The primary key color override.
+     */
     PrimaryOverride,
 
-    /** The secondary, tertiary, error, neutral and neutral variant key color overrides. */
+    /**
+     * The secondary, tertiary, error, neutral and neutral variant key color overrides.
+     */
     OtherOverrides,
 
-    /** The palette style picker. */
+    /**
+     * The palette style picker.
+     */
     Style,
 
-    /** The second seed the Cmf style takes for its tertiary. Only shown while the style is Cmf. */
+    /**
+     * The second seed the Cmf style takes for its tertiary. Only shown while the style is Cmf.
+     */
     CmfSecondSeed,
 
-    /** The contrast slider. */
+    /**
+     * The contrast slider.
+     */
     Contrast,
 
-    /** The spec version picker, whose options come from [EffectiveSpec.offered]. */
+    /**
+     * The spec version picker, whose options come from [EffectiveSpec.offered].
+     */
     SpecVersion,
 
-    /** The Phone or Watch platform picker. */
+    /**
+     * The Phone or Watch platform picker.
+     */
     Platform,
 
-    /** Pinning a role to a color of your own. */
+    /**
+     * Pinning a role to a color of your own.
+     */
     RolePins,
 
-    /** The pure black dark mode switch. */
+    /**
+     * The pure black dark mode switch.
+     */
     AmoledDark,
 
-    /** The motion scheme picker. */
+    /**
+     * The motion scheme picker.
+     */
     MotionScheme,
 
-    /** Whether the exported theme animates between color changes. */
+    /**
+     * Whether the exported theme animates between color changes.
+     */
     ColorAnimation,
 
-    /** Extra color families on top of the scheme, the document's accents. */
+    /**
+     * Extra color families on top of the scheme, the document's accents.
+     */
     ExtendedColors,
 
-    /** The table of tones for the Custom target's slots. */
+    /**
+     * The table of tones for the Custom target's slots.
+     */
     CustomToneTable,
 
-    /** The Light, Split and Dark preview modes. */
+    /**
+     * The Light, Split and Dark preview modes.
+     */
     PreviewModes,
 
-    /** The device width the preview is laid out at. */
+    /**
+     * The device width the preview is laid out at.
+     */
     DeviceWidth,
 
-    /** Inspecting which role or slot a preview element is painted with. */
+    /**
+     * Inspecting which role or slot a preview element is painted with.
+     */
     Inspect,
 
-    /** Exporting every color as a literal hex value. */
+    /**
+     * Exporting every color as a literal hex value.
+     */
     FrozenExport,
 
-    /** Choosing between a multiplatform and an Android only project. */
+    /**
+     * Choosing between a multiplatform and an Android only project.
+     */
     KmpOrAndroid,
 
-    /** Whether the dependency snippet goes through a version catalog. */
+    /**
+     * Whether the dependency snippet goes through a version catalog.
+     */
     VersionCatalog,
 
-    /** The 2025 Dim roles. */
+    /**
+     * The 2025 Dim roles.
+     */
     DimRoles,
 }
 
@@ -90,7 +132,7 @@ public sealed interface ControlState {
      * The control is not shown at all.
      *
      * @property[reason] Why it is left out, for the places that explain an absence, or null when
-     * the control simply has no meaning here.
+     * the control has no meaning here.
      */
     public data class Hidden(
         public val reason: Reason? = null,
@@ -116,7 +158,9 @@ public sealed interface ControlState {
 public class Capabilities private constructor(
     private val states: Map<Control, ControlState>,
 ) {
-    /** How [control] shows up. */
+    /**
+     * How [control] shows up.
+     */
     public operator fun get(control: Control): ControlState = states.getValue(control)
 
     override fun equals(other: Any?): Boolean = other is Capabilities && other.states == states
@@ -182,7 +226,9 @@ private fun stateOf(
         Control.DimRoles -> ControlState.Hidden(Reason.DimRolesUnexposed)
     }
 
-/** A row where Fluent is the only target that differs and every other target is plainly enabled. */
+/**
+ * A row where Fluent is the only target that differs and every other target is plainly enabled.
+ */
 private fun fluentApart(
     target: ExportTarget,
     fluent: ControlState,

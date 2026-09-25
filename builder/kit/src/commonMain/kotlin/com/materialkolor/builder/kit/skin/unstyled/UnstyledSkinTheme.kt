@@ -73,7 +73,9 @@ internal fun UnstyledSkinTheme(
     }
 }
 
-/** The builder tokens, read back out of the Unstyled theme so its components and ours agree. */
+/**
+ * The builder tokens, read back out of the Unstyled theme so its components and ours agree.
+ */
 @Composable
 private fun unstyledTokens(status: StatusColors): BuilderTokens {
     val colors = Theme[MaterialKolorTokens.colors]

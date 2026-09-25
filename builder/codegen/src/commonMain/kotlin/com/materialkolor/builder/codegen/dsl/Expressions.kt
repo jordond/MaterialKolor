@@ -15,7 +15,9 @@ public class TypeRef internal constructor(
     internal val symbols: List<Symbol>,
 )
 
-/** A type written as a symbol, optionally with type arguments, as in `List<Color>`. */
+/**
+ * A type written as a symbol, optionally with type arguments, as in `List<Color>`.
+ */
 public fun type(
     symbol: Symbol,
     vararg arguments: TypeRef,
@@ -38,20 +40,28 @@ public fun type(
     return TypeRef(tokens, listOf(symbol) + arguments.flatMap { it.symbols })
 }
 
-/** A type declared by the file being generated, so it carries no import. */
+/**
+ * A type declared by the file being generated, so it carries no import.
+ */
 public fun type(simpleName: String): TypeRef = TypeRef(listOf(typeToken(simpleName)), emptyList())
 
-/** The same type with a question mark on it. */
+/**
+ * The same type with a question mark on it.
+ */
 public fun TypeRef.orNull(): TypeRef = TypeRef(tokens + punctuationToken("?"), symbols)
 
-/** A function type such as `@Composable () -> Unit`. */
+/**
+ * A function type such as `@Composable () -> Unit`.
+ */
 public fun lambdaType(
     parameters: List<TypeRef> = emptyList(),
     returns: TypeRef = type(Symbols.Unit),
     annotations: List<Symbol> = emptyList(),
 ): TypeRef = lambdaType(parameters, returns, annotations.map { AnnotationSpec(it) })
 
-/** The same, for annotations that take arguments. */
+/**
+ * The same, for annotations that take arguments.
+ */
 @JvmName("lambdaTypeWithAnnotations")
 public fun lambdaType(
     parameters: List<TypeRef> = emptyList(),
@@ -97,7 +107,9 @@ public class Expression internal constructor(
     internal val breaksOnItsOwn: Boolean = false,
 )
 
-/** The ways an expression can break over several lines, one per form the DSL offers. */
+/**
+ * The ways an expression can break over several lines, one per form the DSL offers.
+ */
 internal sealed interface Shape
 
 internal class CallShape(
@@ -106,7 +118,9 @@ internal class CallShape(
     val argumentsBreak: Boolean,
     val trailing: LambdaShape?,
 ) : Shape {
-    /** The arguments in their parentheses on one line, or nothing when a trailing lambda is all there is. */
+    /**
+     * The arguments in their parentheses on one line, or nothing when a trailing lambda is all there is.
+     */
     val flatArguments: List<Token> =
         if (arguments.isEmpty() && trailing != null) {
             emptyList()
@@ -131,13 +145,19 @@ internal class RenderedArgument(
     val value: Expression,
 )
 
-/** A name that is already in scope, such as a parameter or a value declared in the same file. */
+/**
+ * A name that is already in scope, such as a parameter or a value declared in the same file.
+ */
 public fun ref(name: String): Expression = Expression(listOf(plainToken(name)), emptyList())
 
-/** A reference to a symbol, which imports it. */
+/**
+ * A reference to a symbol, which imports it.
+ */
 public fun ref(symbol: Symbol): Expression = Expression(listOf(symbolToken(symbol)), listOf(symbol))
 
-/** An expression assembled from tokens directly, for the cases the DSL has no shape for. */
+/**
+ * An expression assembled from tokens directly, for the cases the DSL has no shape for.
+ */
 public fun raw(
     tokens: List<Token>,
     symbols: List<Symbol> = emptyList(),
@@ -155,7 +175,9 @@ public fun call(
     build: ArgumentsScope.() -> Unit = {},
 ): Expression = buildCall(listOf(functionToken(symbol.simpleName)), listOf(symbol), multiline, build)
 
-/** A call of a function that is already in scope. */
+/**
+ * A call of a function that is already in scope.
+ */
 public fun call(
     name: String,
     multiline: Boolean = false,
@@ -212,14 +234,18 @@ private fun typeArgumentTokens(arguments: List<TypeRef>): List<Token> =
         }
     }
 
-/** Collects the arguments of one call. */
+/**
+ * Collects the arguments of one call.
+ */
 @CodegenDsl
 public class ArgumentsScope internal constructor() {
     internal val arguments: MutableList<RenderedArgument> = mutableListOf()
     internal val typeArguments: MutableList<TypeRef> = mutableListOf()
     internal var trailing: LambdaShape? = null
 
-    /** A named argument, which is how generated code always writes them. */
+    /**
+     * A named argument, which is how generated code always writes them.
+     */
     public fun argument(
         name: String,
         value: Expression,
@@ -228,12 +254,16 @@ public class ArgumentsScope internal constructor() {
         arguments += RenderedArgument(prefix, value)
     }
 
-    /** A positional argument, for calls where a name would only add noise. */
+    /**
+     * A positional argument, for calls where a name would only add noise.
+     */
     public fun argument(value: Expression) {
         arguments += RenderedArgument(emptyList(), value)
     }
 
-    /** A named argument that disappears when there is nothing to say. */
+    /**
+     * A named argument that disappears when there is nothing to say.
+     */
     public fun optionalArgument(
         name: String,
         value: Expression?,
@@ -278,7 +308,9 @@ public class ArgumentsScope internal constructor() {
         build: ArgumentsScope.() -> Unit = {},
     ): Expression = buildCall(listOf(functionToken(symbol.simpleName)), listOf(symbol), multiline, build)
 
-    /** A nested call of a function that is already in scope, used as an argument value. */
+    /**
+     * A nested call of a function that is already in scope, used as an argument value.
+     */
     public fun call(
         name: String,
         multiline: Boolean = false,

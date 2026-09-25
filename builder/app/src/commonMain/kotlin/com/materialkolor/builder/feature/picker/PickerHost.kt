@@ -71,12 +71,16 @@ internal fun PickerHost(
     )
 }
 
-/** The target the picker showed last, held past its close. */
+/**
+ * The target the picker showed last, held past its close.
+ */
 private class KeptTarget {
     var target: PickerTarget? = null
 }
 
-/** What the picker on [target] is called, the role as the readout names it or the accent by name. */
+/**
+ * What the picker on [target] is called, the role as the readout names it or the accent by name.
+ */
 @Composable
 private fun titleOf(
     target: PickerTarget,

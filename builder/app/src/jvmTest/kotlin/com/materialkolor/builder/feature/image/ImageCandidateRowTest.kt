@@ -63,7 +63,9 @@ class ImageCandidateRowTest {
     private val store = ViewModelStore().apply { put("images", model) }
     private val photo = FakeImageHandle("photo.png")
 
-    /** The tone a chip shows until its colors resolve, read from the skin the row is drawn in. */
+    /**
+     * The tone a chip shows until its colors resolve, read from the skin the row is drawn in.
+     */
     private var placeholder = Color.Unspecified
 
     @Test
@@ -333,7 +335,9 @@ class ImageCandidateRowTest {
             store.clear()
         }
 
-    /** Drops [photo], waits for its seed and puts the focus on the chosen chip. Returns its source. */
+    /**
+     * Drops [photo], waits for its seed and puts the focus on the chosen chip. Returns its source.
+     */
     private fun ComposeUiTest.seedAndFocusAChip(harness: PosterHarness): SeedSource {
         images.drop(photo)
         waitUntil(timeoutMillis = WAIT_MILLIS) { harness.document.seedSource is SeedSource.Image }
@@ -343,19 +347,25 @@ class ImageCandidateRowTest {
         return harness.document.seedSource
     }
 
-    /** An image seed from [name] with [candidates], as a reload leaves it. */
+    /**
+     * An image seed from [name] with [candidates], as a reload leaves it.
+     */
     private fun imageOf(
         name: String,
         vararg candidates: Long,
     ): SeedSource.Image = SeedSource.Image(name, candidates.map { argb -> Argb(argb.toInt()) })
 
-    /** The color across the top half of [candidate]'s chip, its primary once resolved. */
+    /**
+     * The color across the top half of [candidate]'s chip, its primary once resolved.
+     */
     private fun ComposeUiTest.chipTop(candidate: Argb): Color {
         val pixels = onNodeWithContentDescription(chipLabel(candidate), substring = true).captureToImage().toPixelMap()
         return pixels[pixels.width / 2, pixels.height * 3 / 10]
     }
 
-    /** The candidate row on the poster, fed by the model, with the host that sends its results. */
+    /**
+     * The candidate row on the poster, fed by the model, with the host that sends its results.
+     */
     private fun ComposeUiTest.showRow(
         harness: PosterHarness,
         picking: Boolean = false,
@@ -382,5 +392,7 @@ class ImageCandidateRowTest {
     }
 }
 
-/** How a chip's name starts, its hex and the comma before its color name. */
+/**
+ * How a chip's name starts, its hex and the comma before its color name.
+ */
 internal fun chipLabel(candidate: Argb): String = "${candidate.toHex()}, "

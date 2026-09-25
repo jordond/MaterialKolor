@@ -49,7 +49,9 @@ import kotlin.test.Test
 import androidx.compose.material3.LocalContentColor as MaterialContentColor
 import com.composeunstyled.LocalContentColor as UnstyledContentColor
 
-/** What a pane and the chrome around it said their primary and content colors were. */
+/**
+ * What a pane and the chrome around it said their primary and content colors were.
+ */
 private class Seen(
     var chromePrimary: Color? = null,
     var panePrimary: Color? = null,
@@ -238,7 +240,9 @@ class PreviewPaneTest {
         }
 }
 
-/** The primary color the surrounding theme of [library] hands out, the pane's or the chrome's. */
+/**
+ * The primary color the surrounding theme of [library] hands out, the pane's or the chrome's.
+ */
 @Composable
 private fun primaryOf(
     library: Library,

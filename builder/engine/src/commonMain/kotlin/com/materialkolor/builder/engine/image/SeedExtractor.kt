@@ -38,7 +38,9 @@ public data class ImageSeeds(
  * or skin still offers its own colors.
  */
 public object SeedExtractor {
-    /** The most candidates one picture offers, which is what the seed panel has room for. */
+    /**
+     * The most candidates one picture offers, which is what the seed panel has room for.
+     */
     public const val MAX_CANDIDATES: Int = 5
 
     /**
@@ -92,23 +94,35 @@ public object SeedExtractor {
         return gray >= read * MOSTLY_GRAY_SHARE
     }
 
-    /** kmpalette's default filter without the red I line, which drops only near black and near white. */
+    /**
+     * kmpalette's default filter without the red I line, which drops only near black and near white.
+     */
     private val NOT_BLACK_OR_WHITE = Palette.Filter { _, hsl ->
         hsl[LIGHTNESS] > NEAR_BLACK_LIGHTNESS && hsl[LIGHTNESS] < NEAR_WHITE_LIGHTNESS
     }
 
-    /** Where lightness sits in the HSL array kmpalette hands a filter. */
+    /**
+     * Where lightness sits in the HSL array kmpalette hands a filter.
+     */
     private const val LIGHTNESS: Int = 2
 
-    /** At or under this HSL lightness kmpalette's default filter drops a color as near black. */
+    /**
+     * At or under this HSL lightness kmpalette's default filter drops a color as near black.
+     */
     private const val NEAR_BLACK_LIGHTNESS: Float = 0.05f
 
-    /** At or over this HSL lightness kmpalette's default filter drops a color as near white. */
+    /**
+     * At or over this HSL lightness kmpalette's default filter drops a color as near white.
+     */
     private const val NEAR_WHITE_LIGHTNESS: Float = 0.95f
 
-    /** Below this chroma a pixel reads as gray. */
+    /**
+     * Below this chroma a pixel reads as gray.
+     */
     private const val GRAY_CHROMA: Double = 10.0
 
-    /** The share of pixels that has to be gray for the picture to count as mostly gray. */
+    /**
+     * The share of pixels that has to be gray for the picture to count as mostly gray.
+     */
     private const val MOSTLY_GRAY_SHARE: Double = 0.8
 }

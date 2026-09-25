@@ -29,7 +29,9 @@ import io.kotest.matchers.floats.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** The clickable destination called [destination], in the sidebar or a phone's navigation. */
+/**
+ * The clickable destination called [destination], in the sidebar or a phone's navigation.
+ */
 private fun navItem(destination: DashboardDestination): SemanticsMatcher =
     hasClickAction() and hasText(destination.label)
 
@@ -184,7 +186,9 @@ class DashboardFocusTest {
         }
 }
 
-/** The dashboard for [width] filling the window, with its state to look into. */
+/**
+ * The dashboard for [width] filling the window, with its state to look into.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.dashboard(width: DeviceWidth): DemoAppState {
     val state = DemoAppState()

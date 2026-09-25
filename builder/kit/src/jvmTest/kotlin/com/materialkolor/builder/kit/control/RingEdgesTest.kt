@@ -27,7 +27,9 @@ import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** A light seed and a dark one, so the hero's ring is held to 3 to 1 on both kinds of poster. */
+/**
+ * A light seed and a dark one, so the hero's ring is held to 3 to 1 on both kinds of poster.
+ */
 private val PosterSeeds: List<Argb> = listOf(Argb(0xF2E6A0), Argb(0x1B2A4A))
 
 /**
@@ -71,7 +73,9 @@ class RingEdgesTest {
         }
     }
 
-    /** The row clips where it scrolls, and its ends keep room for the end tabs' rings (gap B). */
+    /**
+     * The row clips where it scrolls, and its ends keep room for the end tabs' rings (gap B).
+     */
     @Test
     fun tabs_firstAndLastTab_everySkin_ringOnEverySide() {
         val tabs = listOf("Light", "Dark", "Contrast")
@@ -131,7 +135,9 @@ class RingEdgesTest {
             capture.shouldCoverEverySide()
         }
 
-    /** The sheet clips to its rounded top, and the handle's ring stands in from its sides (gap E). */
+    /**
+     * The sheet clips to its rounded top, and the handle's ring stands in from its sides (gap E).
+     */
     @Test
     fun bottomSheet_handle_everySkin_ringsOnEverySideInsideTheSheet() =
         forEachSkin { _, skin ->
@@ -232,7 +238,9 @@ private fun segmentRing(
     return checkNotNull(capture)
 }
 
-/** How far the ring reaches past each side of the focused node, in pixels, at one pixel per dp. */
+/**
+ * How far the ring reaches past each side of the focused node, in pixels, at one pixel per dp.
+ */
 private fun RingCapture.reach(): Rect =
     Rect(
         left = focused.left - ringBounds.left,

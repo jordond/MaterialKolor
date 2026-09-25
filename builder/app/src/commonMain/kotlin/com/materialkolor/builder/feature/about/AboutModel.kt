@@ -21,11 +21,15 @@ import dev.zacsweers.metrox.viewmodel.ViewModelKey
 internal class AboutModel(
     environment: Environment,
 ) : ViewModel() {
-    /** The browser and the system it runs on. */
+    /**
+     * The browser and the system it runs on.
+     */
     val browser: String = environment.browser
 
     // b-505
 
-    /** Where the theme link in a report opens. */
+    /**
+     * Where the theme link in a report opens.
+     */
     val siteOrigin: String = environment.siteOrigin
 }

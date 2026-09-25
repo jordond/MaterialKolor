@@ -26,10 +26,14 @@ internal enum class FluentGalleryComponent(
     ToggleButton(accentFill = false),
     CheckedToggleButton(accentFill = true),
 
-    /** The field, its text and its header. The line under a focused field takes the accent. */
+    /**
+     * The field, its text and its header. The line under a focused field takes the accent.
+     */
     TextBox(accentFill = false),
 
-    /** The filled part of the rail and the thumb's dot. */
+    /**
+     * The filled part of the rail and the thumb's dot.
+     */
     Slider(accentFill = true),
     CheckBox(accentFill = false),
     CheckedCheckBox(accentFill = true),
@@ -40,44 +44,62 @@ internal enum class FluentGalleryComponent(
     SegmentedControl(accentFill = false),
     Segment(accentFill = false),
 
-    /** The chosen segment, whose line under the label takes the accent. */
+    /**
+     * The chosen segment, whose line under the label takes the accent.
+     */
     SelectedSegment(accentFill = true),
     SampleCard(accentFill = false),
     Expander(accentFill = false),
     Dialog(accentFill = false),
     SelectorItem(accentFill = false),
 
-    /** The current item of a selector bar, whose line under the label takes the accent. */
+    /**
+     * The current item of a selector bar, whose line under the label takes the accent.
+     */
     SelectedSelectorItem(accentFill = true),
     TabRow(accentFill = false),
     Tab(accentFill = false),
     NavigationItem(accentFill = false),
 
-    /** The current item of a navigation list, whose pill beside the label takes the accent. */
+    /**
+     * The current item of a navigation list, whose pill beside the label takes the accent.
+     */
     SelectedNavigationItem(accentFill = true),
 
-    /** Every severity paints a fixed system color. */
+    /**
+     * Every severity paints a fixed system color.
+     */
     InfoBar(accentFill = false),
     Progress(accentFill = true),
 
-    /** A status badge, painted with a fixed system color. */
+    /**
+     * A status badge, painted with a fixed system color.
+     */
     Badge(accentFill = false),
 
-    /** A count on the accent fill. */
+    /**
+     * A count on the accent fill.
+     */
     AccentBadge(accentFill = true),
 
-    /** Any disabled part, in Fluent's fixed disabled greys. */
+    /**
+     * Any disabled part, in Fluent's fixed disabled greys.
+     */
     Disabled(accentFill = false),
     ;
 
     val refs: List<ColorRef> get() = if (accentFill) FluentAccentRefs else emptyList()
 }
 
-/** Declare the colors [component] paints, for Inspect. */
+/**
+ * Declare the colors [component] paints, for Inspect.
+ */
 internal fun Modifier.previewRoles(component: FluentGalleryComponent): Modifier =
     if (component.accentFill) fluentAccentRoles() else fluentNeutralRoles()
 
-/** Declare the colors of [component] while [enabled], and of the disabled look otherwise. */
+/**
+ * Declare the colors of [component] while [enabled], and of the disabled look otherwise.
+ */
 internal fun Modifier.previewRoles(
     enabled: Boolean,
     component: FluentGalleryComponent,

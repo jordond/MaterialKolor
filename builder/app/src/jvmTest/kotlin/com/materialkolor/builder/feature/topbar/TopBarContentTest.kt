@@ -53,7 +53,9 @@ private const val EXPRESSIVE_MESSAGE = "Expressive themes usually use the Expres
 private const val UNDO_EXPRESSIVE = "Undo library change to Expressive"
 private const val REDO_EXPRESSIVE = "Redo library change to Expressive"
 
-/** A desktop window wide enough for the segmented switcher in every skin, beside the full actions. */
+/**
+ * A desktop window wide enough for the segmented switcher in every skin, beside the full actions.
+ */
 private const val WIDTH = 1600 // b-231
 private const val HEIGHT = 800
 
@@ -241,7 +243,9 @@ class TopBarContentTest {
             onNodeWithText("Use the system appearance").assertIsNotSelected()
         }
 
-    /** The whole builder on fakes, booted, with its graph so a test can read the session. */
+    /**
+     * The whole builder on fakes, booted, with its graph so a test can read the session.
+     */
     private fun ComposeUiTest.showRoot(): AppGraph {
         val platform = FakePlatform()
         val graph = createGraphFactory<AppGraph.Factory>().create(platform)

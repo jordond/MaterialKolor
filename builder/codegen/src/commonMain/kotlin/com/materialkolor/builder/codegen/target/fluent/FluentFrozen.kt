@@ -27,7 +27,9 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * document or the export options say about those.
  */
 public object FluentFrozen {
-    /** Every file the export of [input] writes. */
+    /**
+     * Every file the export of [input] writes.
+     */
     public fun files(input: ExportInput): List<GeneratedFile> {
         require(input.target == ExportTarget.Fluent) { "The Fluent frozen export cannot write a ${input.target} theme" }
 
@@ -35,10 +37,14 @@ public object FluentFrozen {
     }
 }
 
-/** The light shades `Theme.kt` declares. */
+/**
+ * The light shades `Theme.kt` declares.
+ */
 internal const val LIGHT_THEME_SHADES: String = "LightThemeShades"
 
-/** The dark shades `Theme.kt` declares. */
+/**
+ * The dark shades `Theme.kt` declares.
+ */
 internal const val DARK_THEME_SHADES: String = "DarkThemeShades"
 
 private const val COLORS = "colors"
@@ -80,7 +86,9 @@ private fun themeFile(input: ExportInput): GeneratedFile {
     }
 }
 
-/** `val LightThemeShades = Shades(...)`, the seven shades of one mode in the order `Shades` declares them. */
+/**
+ * `val LightThemeShades = Shades(...)`, the seven shades of one mode in the order `Shades` declares them.
+ */
 private fun KotlinFileScope.shadesProperty(
     name: String,
     shades: FluentShadeValues,

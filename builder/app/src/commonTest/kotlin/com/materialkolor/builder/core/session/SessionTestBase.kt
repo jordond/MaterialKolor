@@ -40,7 +40,9 @@ abstract class SessionTestBase {
         return session to preferences
     }
 
-    /** Boot on a first visit and let the session start watching other tabs. */
+    /**
+     * Boot on a first visit and let the session start watching other tabs.
+     */
     internal suspend fun TestScope.booted(session: ProjectSession): String {
         session.boot(Route.Home)
         runCurrent()
@@ -54,7 +56,9 @@ abstract class SessionTestBase {
         runCurrent()
     }
 
-    /** Save [document] to the project [id] the way another tab would, as its [revision]th save. */
+    /**
+     * Save [document] to the project [id] the way another tab would, as its [revision]th save.
+     */
     internal suspend fun TestScope.saveFromAnotherTab(
         id: String,
         document: ThemeDocument,

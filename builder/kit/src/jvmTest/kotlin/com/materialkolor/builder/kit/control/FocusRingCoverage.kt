@@ -25,22 +25,34 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
-/** The least share of each side's middle a ring has to cover, the bar the S5 probe holds it to. */
+/**
+ * The least share of each side's middle a ring has to cover, the bar the S5 probe holds it to.
+ */
 internal const val SideCoverageNeeded: Double = 0.5
 
-/** The least contrast a ring pixel needs against what it covers (WCAG 2.4.13). */
+/**
+ * The least contrast a ring pixel needs against what it covers (WCAG 2.4.13).
+ */
 private const val RingContrastNeeded = 3.0
 
-/** How far a channel has to move for a pixel to count as drawn when something opens. */
+/**
+ * How far a channel has to move for a pixel to count as drawn when something opens.
+ */
 private const val DrawnBy = 24f / 255f
 
-/** How many pixels a tooltip bubble changes over its anchor at the least, at one pixel per dp. */
+/**
+ * How many pixels a tooltip bubble changes over its anchor at the least, at one pixel per dp.
+ */
 private const val BubblePixelsNeeded = 50
 
-/** How far past its control a focus ring and the blend at its edge reach. */
+/**
+ * How far past its control a focus ring and the blend at its edge reach.
+ */
 internal val RingReach: Dp = FocusRingOffset + FocusRingWidth + 1.dp
 
-/** How far past a ring [shouldShowABubbleAbove] and [shouldShowABubbleBelow] look for the bubble. */
+/**
+ * How far past a ring [shouldShowABubbleAbove] and [shouldShowABubbleBelow] look for the bubble.
+ */
 private val BubbleReach: Dp = 48.dp
 
 /**
@@ -51,17 +63,25 @@ private val BubbleReach: Dp = 48.dp
  */
 private val BubbleRoom: Dp = 200.dp
 
-/** How wide [InThePage] is at the least, so a bubble fits over a small anchor. */
+/**
+ * How wide [InThePage] is at the least, so a bubble fits over a small anchor.
+ */
 private val PageWidth: Dp = 240.dp
 
-/** The room [InThePage] keeps round the other sides of its content, for the ring. */
+/**
+ * The room [InThePage] keeps round the other sides of its content, for the ring.
+ */
 private val RingRoom: Dp = 8.dp
 
-/** The overlays [InThePage] draws in the page, read once the frame is captured. */
+/**
+ * The overlays [InThePage] draws in the page, read once the frame is captured.
+ */
 internal class PageOverlays {
     var host: OverlayHostState? = null
 
-    /** How many overlays are open in the page, such as a tooltip bubble. */
+    /**
+     * How many overlays are open in the page, such as a tooltip bubble.
+     */
     val open: Int
         get() = host?.layers?.count { layer -> layer.open } ?: 0
 }
@@ -122,7 +142,9 @@ internal fun RingCapture.sideCoverage(
     )
 }
 
-/** The side coverage in the probe's order, top, right, bottom and left, with the lowest ratio drawn. */
+/**
+ * The side coverage in the probe's order, top, right, bottom and left, with the lowest ratio drawn.
+ */
 internal fun RingCapture.coverageLine(
     reach: Dp = 8.dp,
     around: Rect = focused,
@@ -181,7 +203,9 @@ internal fun RingCapture.shouldShowABubbleBelow(overlays: PageOverlays) {
     shouldDrawABubbleOn(pixelsWithin(clear, clear + BubbleReach.value * density))
 }
 
-/** Checks that enough pixels changed on [rows], across the focused node's own columns, for a bubble. */
+/**
+ * Checks that enough pixels changed on [rows], across the focused node's own columns, for a bubble.
+ */
 private fun RingCapture.shouldDrawABubbleOn(rows: IntRange) {
     val columns = pixelsWithin(focused.left, focused.right)
     var drawn = 0
@@ -198,13 +222,17 @@ private fun RingCapture.shouldDrawABubbleOn(rows: IntRange) {
     withClue("$drawn pixels drawn beside the ring") { drawn shouldBeGreaterThanOrEqual BubblePixelsNeeded }
 }
 
-/** The whole pixels whose centres lie between [from] and [to]. */
+/**
+ * The whole pixels whose centres lie between [from] and [to].
+ */
 private fun pixelsWithin(
     from: Float,
     to: Float,
 ): IntRange = ceil(from - 0.5f).toInt()..floor(to - 0.5f).toInt()
 
-/** The share of [line] that [hits] lands on. */
+/**
+ * The share of [line] that [hits] lands on.
+ */
 private fun share(
     line: IntRange,
     hits: List<Int>,
