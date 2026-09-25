@@ -140,15 +140,17 @@ private fun ProjectsButton(
     val named = projectName.isNotBlank()
     val mark = saveMarkOf(saveStatus)
     val spoken = if (named) stringResource(mark.spoken, projectName) else null
-    // b-522 The kit button has no glyph after its label, so the check sits right beside it.
+    // b-522 The kit button has no glyph after its label, so the check sits right beside it. The button
+    // gives way first, so a long name never pushes the check or the badge out of the row.
     Row(
         horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.extraSmall),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val button = Modifier.weight(1f, fill = false).then(modifier)
         BuilderButton(
             onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Projects)) },
             label = if (named) projectName else stringResource(Res.string.poster_projects),
-            modifier = if (spoken == null) modifier else modifier.semantics { contentDescription = spoken },
+            modifier = if (spoken == null) button else button.semantics { contentDescription = spoken },
             emphasis = Emphasis.Subtle,
             icon = IconId.Folder,
         )
