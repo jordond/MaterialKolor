@@ -30,6 +30,7 @@ import com.materialkolor.builder.kit.control.BuilderIconButton
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.BuilderTooltip
+import com.materialkolor.builder.kit.control.ButtonSize
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -74,7 +75,8 @@ internal fun PosterHeader(
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+            // b-522 A tight gap, so a name of about a dozen letters shows whole in the compact pill.
+            horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // The mark sits close to the wordmark, so the project's name keeps the room it had.
@@ -152,6 +154,7 @@ private fun ProjectsButton(
             emphasis = Emphasis.Subtle,
             icon = IconId.Folder,
             trailingIcon = mark.glyph.takeIf { named },
+            size = ButtonSize.Compact,
         )
         if (named) SaveState(saveStatus)
     }

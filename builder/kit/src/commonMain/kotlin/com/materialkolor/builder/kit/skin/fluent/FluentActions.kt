@@ -26,12 +26,17 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ButtonKeycap
+import com.materialkolor.builder.kit.control.ButtonSize
+import com.materialkolor.builder.kit.control.CompactButtonGap
+import com.materialkolor.builder.kit.control.CompactButtonIcon
+import com.materialkolor.builder.kit.control.CompactButtonPadding
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.HeadlessBadge
@@ -93,9 +98,10 @@ private fun FluentLabel(
     label: String,
     icon: IconId?,
     textModifier: Modifier = Modifier,
+    iconSize: Dp = LocalBuilderTokens.current.iconSize,
 ) {
     val ink = LocalContentColor.current
-    if (icon != null) BuilderIcon(icon, contentDescription = null, tint = ink)
+    if (icon != null) BuilderIcon(icon, contentDescription = null, tint = ink, size = iconSize)
     BuilderText(
         text = label,
         modifier = textModifier,
@@ -259,9 +265,12 @@ internal fun FluentButton(
     enabled: Boolean,
     hint: String? = null,
     trailingIcon: IconId? = null,
+    size: ButtonSize = ButtonSize.Regular,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val colors = fluentButtonColors(emphasis).schemeFor(interactionSource.collectVisualState(disabled = !enabled))
+    val compact = size == ButtonSize.Compact
+    val iconSize = if (compact) CompactButtonIcon else LocalBuilderTokens.current.iconSize
     FluentButtonLayer(
         colors = colors,
         emphasis = emphasis,
@@ -277,14 +286,17 @@ internal fun FluentButton(
             .defaultMinSize(minHeight = FluentControlHeight),
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = FluentButtonPadding),
-            horizontalArrangement = Arrangement.spacedBy(ButtonDefaults.iconSpacing, Alignment.CenterHorizontally),
+            modifier = Modifier.padding(horizontal = if (compact) CompactButtonPadding else FluentButtonPadding),
+            horizontalArrangement = Arrangement.spacedBy(
+                if (compact) CompactButtonGap else ButtonDefaults.iconSpacing,
+                Alignment.CenterHorizontally,
+            ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            FluentLabel(label, icon, trailingLabel(trailingIcon))
+            FluentLabel(label, icon, trailingLabel(trailingIcon), iconSize)
             if (hint != null) ButtonKeycap(hint, LocalContentColor.current)
             if (trailingIcon != null) {
-                BuilderIcon(trailingIcon, contentDescription = null, tint = LocalContentColor.current)
+                BuilderIcon(trailingIcon, contentDescription = null, tint = LocalContentColor.current, size = iconSize)
             }
         }
     }
