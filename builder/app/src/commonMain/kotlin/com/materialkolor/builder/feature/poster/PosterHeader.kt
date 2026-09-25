@@ -1,6 +1,8 @@
 package com.materialkolor.builder.feature.poster
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -37,8 +39,9 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The top of the poster on one row, the wordmark, the Projects button with the open project's name,
- * whether it is saved, and the collapse button.
+ * The top of the poster, the wordmark, the Projects button with the open project's name and the
+ * collapse button on one row. The 320 dp poster has no room for all three, so there the Projects
+ * button takes a row of its own. Whether the project is saved shows under the hex, see [SeedHero].
  *
  * The phone sheet has no rail to collapse to, so it shows no collapse button (D38).
  *
@@ -52,50 +55,53 @@ internal fun PosterHeader(
     focus: PosterFocus? = null, // b-221f
 ) {
     val spacing = LocalBuilderTokens.current.spacing
-    val collapsible = LocalLayout.current.posterMode != PosterMode.Sheet
+    val mode = LocalLayout.current.posterMode
+    val collapsible = mode != PosterMode.Sheet
     // b-510
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(spacing.small),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        BuilderText(
-            text = stringResource(Res.string.poster_wordmark),
-            style = BuilderTextStyle.Wordmark,
-            maxLines = 1,
+    val projects: @Composable (Modifier) -> Unit = { projectsModifier ->
+        ProjectsButton(
+            projectName = context.projectName,
+            dispatcher = dispatcher,
+            modifier = projectsModifier.then(triggerFocus(focus?.projects)), // b-221f
         )
-        // The project's name takes what the row has left, so a long one gives way before the rest.
+    }
+    val narrow = mode == PosterMode.Docked320
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
         Row(
-            modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall, Alignment.End),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ProjectsButton(
-                projectName = context.projectName,
-                dispatcher = dispatcher,
-                modifier = Modifier.weight(1f, fill = false).then(triggerFocus(focus?.projects)), // b-221f
+            BuilderText(
+                text = stringResource(Res.string.poster_wordmark),
+                modifier = if (narrow) Modifier.weight(1f) else Modifier,
+                style = BuilderTextStyle.Wordmark,
+                maxLines = 1,
             )
-            SaveState(context.saveStatus)
+            if (!narrow) {
+                // The project's name takes what the row has left, so a long one gives way first.
+                Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) { projects(Modifier) }
+            }
+            if (collapsible) {
+                PosterIconButton(
+                    icon = IconId.Collapse,
+                    description = stringResource(Res.string.poster_collapse),
+                    onClick = { dispatcher.dispatch(WorkspaceAction.SetPosterCollapsed(collapsed = true)) },
+                )
+            }
         }
-        if (collapsible) {
-            PosterIconButton(
-                icon = IconId.Collapse,
-                description = stringResource(Res.string.poster_collapse),
-                onClick = { dispatcher.dispatch(WorkspaceAction.SetPosterCollapsed(collapsed = true)) },
-            )
-        }
+        if (narrow) projects(Modifier)
     }
 }
 
 // b-510
 
 /**
- * Whether the open project is saved, as small words beside the Projects button. Saved and saving
- * read in the muted ink, and a failed save keeps its warning glyph so it never rests on the words'
- * colour alone (AR-03).
+ * Whether the open project is saved, as small words. Saved and saving read in the muted ink, and a
+ * failed save keeps its badge and warning glyph so it never rests on colour alone (AR-03).
  */
 @Composable
-private fun SaveState(status: SaveStatus) {
+internal fun SaveState(status: SaveStatus) {
     val badge = saveBadgeOf(status)
     val label = stringResource(badge.label)
     if (badge.status == BadgeStatus.Danger) {

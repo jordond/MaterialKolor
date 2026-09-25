@@ -55,8 +55,10 @@ internal fun SeedActions(
     val preferences = context.preferences
     val nothingToShuffle = preferences.shufflesNothing()
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+        // b-510
+        // The three share one row at 400 dp in every skin, with a tight gap Material's roomy buttons need.
         FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+            horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall),
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
             if (shuffle) {

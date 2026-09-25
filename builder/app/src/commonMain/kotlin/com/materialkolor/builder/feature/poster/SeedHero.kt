@@ -57,8 +57,8 @@ import kotlin.math.roundToInt
 
 /**
  * The seed as the poster's headline (F-05). The hex is a real field that edits in place, and under
- * it one line holds the seed's name, its HCT readout and where it came from, with the two copy
- * buttons as icons at its end.
+ * it one line holds the seed's name, its HCT readout, where it came from and whether the project is
+ * saved, with the two copy buttons as icons at its end.
  *
  * The field shows the seed as stored, not as the target sees it. A commit lands as a typed seed,
  * one keystroke folding into the next in the history.
@@ -125,6 +125,7 @@ internal fun SeedHero(
                     maxLines = 1,
                 )
                 BuilderBadge(label = sourceLabel(context.document.seedSource).text())
+                SaveState(context.saveStatus) // b-510
             }
             PosterIconButton(
                 icon = IconId.Copy,

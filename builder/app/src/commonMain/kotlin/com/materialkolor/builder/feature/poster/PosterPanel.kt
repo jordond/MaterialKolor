@@ -258,8 +258,9 @@ private fun PosterContent(
                 .fillMaxWidth()
                 .padding(start = side, top = top, end = side, bottom = spacing.extraLarge),
             // b-510
-            // A gap inside a group. Each group adds its own room on top, see PosterGroupGap.
-            verticalArrangement = Arrangement.spacedBy(spacing.medium),
+            // A gap inside a group. Each group adds its own room on top, see PosterGroupGap. The
+            // sheet packs its peek tighter, so the contrast levels still show at rest.
+            verticalArrangement = Arrangement.spacedBy(if (sheet) spacing.small else spacing.medium),
         ) {
             if (sheet) {
                 PosterSheet(context, dispatcher, focus) // b-406

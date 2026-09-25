@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -17,7 +18,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -33,6 +36,7 @@ import com.materialkolor.builder.kit.skin.headless.controlTouchTarget
 import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 import com.materialkolor.builder.kit.skin.material.MaterialButton
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.kit.token.LocalBuilderType
 
 /**
  * A labelled action in the surrounding skin.
@@ -134,14 +138,14 @@ internal fun ButtonKeycap(
 ) {
     val tokens = LocalBuilderTokens.current
     val shape = RoundedCornerShape(percent = 50)
-    BuilderText(
+    val style = LocalBuilderType.current.value.merge(color = ink, fontSize = KeycapSize, lineHeight = KeycapLine)
+    BasicText(
         text = key,
         modifier = Modifier
             .clearAndSetSemantics {}
             .background(ink.copy(alpha = KeycapWash), shape)
-            .padding(horizontal = tokens.spacing.small, vertical = KeycapInset),
-        style = BuilderTextStyle.Value,
-        color = ink,
+            .padding(horizontal = tokens.spacing.extraSmall + KeycapInset, vertical = KeycapInset),
+        style = style,
         maxLines = 1,
     )
 }
@@ -149,5 +153,11 @@ internal fun ButtonKeycap(
 /** How strongly a keycap's wash takes its ink. */
 private const val KeycapWash: Float = 0.16f
 
-/** The room above and below a keycap's key. */
+/** The room round a keycap's key, past the small spacing at its sides. */
 private val KeycapInset: Dp = 2.dp
+
+/** How big a keycap sets its key, smaller than the label beside it as the design has it. */
+private val KeycapSize: TextUnit = 11.sp
+
+/** The line a keycap's key takes. */
+private val KeycapLine: TextUnit = 14.sp

@@ -3,12 +3,12 @@ package com.materialkolor.builder.feature.poster
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.color.ContrastLevel
@@ -40,7 +40,6 @@ import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
-import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
@@ -62,22 +61,15 @@ internal fun ContrastSection(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    details: Boolean = true, // b-510
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val selected = ContrastStop.of(context.document.contrast)
     val state = context.capabilities[Control.Contrast]
     val labels = ContrastStop.entries.associateWith { stop -> stringResource(stop.label) }
-    val row = remember(context.result, context.visibleModes) { context.result.audit.lowestPair(context.visibleModes) }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         // b-510
-        Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
-            InfoLabel(
-                label = stringResource(Res.string.contrast_label),
-                topic = InfoTopic.Contrast,
-                modifier = Modifier.weight(1f),
-            )
-            LowestRatio(row)
-        }
+        if (details) ContrastHeader(context)
         BuilderSegmented(
             options = ContrastStop.entries,
             selected = selected,
@@ -94,29 +86,78 @@ internal fun ContrastSection(
             selectOnFocus = false,
             compact = true,
         ) { stop -> labels.getValue(stop) }
-        LowestPair(row, context.result.document)
-        state.explanation?.let { reason -> ReasonLine(reason) }
+        if (details) ContrastNotes(context)
     }
 }
 
 // b-510
 
 /**
- * The lowest ratio any text pair has in the modes the preview shows, with the badge it earns, as
- * one line beside the Contrast label.
+ * What the contrast levels leave, for the phone sheet, which shows the levels alone at its peek and
+ * this under them once it is dragged up. The label with its info button and the lowest ratio, the
+ * pair behind it, and why a target ignores contrast if it does.
  */
 @Composable
-private fun LowestRatio(row: AuditRow) {
+internal fun ContrastDetails(
+    context: PosterContext,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = LocalBuilderTokens.current.spacing
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+        ContrastHeader(context)
+        ContrastNotes(context)
+    }
+}
+
+/** The Contrast label with its info button, and the lowest ratio on the right in line with it. */
+@Composable
+private fun ContrastHeader(context: PosterContext) {
+    val spacing = LocalBuilderTokens.current.spacing
+    val row = rememberLowestPair(context)
+    Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
+        InfoLabel(
+            label = stringResource(Res.string.contrast_label),
+            topic = InfoTopic.Contrast,
+            modifier = Modifier.alignByBaseline(),
+        )
+        LowestRatio(row, Modifier.weight(1f).alignByBaseline())
+    }
+}
+
+/** The pair behind the lowest ratio, and why the target ignores contrast if it does. */
+@Composable
+private fun ContrastNotes(context: PosterContext) {
+    LowestPair(rememberLowestPair(context), context.result.document)
+    context.capabilities[Control.Contrast].explanation?.let { reason -> ReasonLine(reason) }
+}
+
+/** The text pair with the lowest ratio in the modes the preview shows. */
+@Composable
+private fun rememberLowestPair(context: PosterContext): AuditRow =
+    remember(context.result, context.visibleModes) { context.result.audit.lowestPair(context.visibleModes) }
+
+/**
+ * The lowest ratio any text pair has in the modes the preview shows, with the badge it earns, as
+ * one line on the right of the Contrast label. Where the line runs short its words give way first,
+ * and the ratio and the badge always show.
+ */
+@Composable
+private fun LowestRatio(
+    row: AuditRow,
+    modifier: Modifier = Modifier,
+) {
     val spacing = LocalBuilderTokens.current.spacing
     Row(
-        modifier = Modifier.heightIn(min = LocalLayout.current.minTouchTarget),
-        horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall),
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall, Alignment.End),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BuilderText(
             text = stringResource(Res.string.contrast_lowest),
+            modifier = Modifier.weight(1f, fill = false),
             style = BuilderTextStyle.Label,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
         BuilderText(
             text = stringResource(Res.string.contrast_ratio, ratioText(row.ratio)),

@@ -125,8 +125,8 @@ private fun RowScope.MaterialLabel(
 
 // b-510
 
-/** Room round a button with a keycap, Material's own start and a tight end the keycap fills. */
-private val HintPadding: PaddingValues = PaddingValues(start = 20.dp, end = 8.dp)
+/** Room round a button with a keycap, Material's small button start and a tight end the keycap fills. */
+private val HintPadding: PaddingValues = PaddingValues(start = 16.dp, end = 6.dp)
 
 @Composable
 internal fun MaterialButton(

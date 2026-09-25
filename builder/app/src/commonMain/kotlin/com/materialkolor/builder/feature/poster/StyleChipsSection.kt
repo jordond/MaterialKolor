@@ -8,12 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import com.materialkolor.builder.generated.resources.style_chip_tooltip
 import com.materialkolor.builder.generated.resources.style_spec_forced
-import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.widget.SchemeChipFootprint
 import com.materialkolor.builder.kit.widget.SchemeChipName
 import androidx.compose.runtime.Composable
@@ -23,6 +21,8 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -64,6 +64,7 @@ import com.materialkolor.builder.kit.control.BuilderChoiceGroup
 import com.materialkolor.builder.kit.control.BuilderHexField
 import com.materialkolor.builder.kit.control.BuilderIconButton
 import com.materialkolor.builder.kit.control.BuilderText
+import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
@@ -139,7 +140,7 @@ internal fun StyleChips(
     val isDark = context.visibleModes == PreviewMode.Dark
     val shelf = rememberChipShelf(context.result.document, isDark, lookup, pause)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-        StyleHeader(selected) // b-510
+        StyleHeader(selected, plain = scrolling) // b-510
         StyleChipRow(selected, context.document, shelf, scrolling) { style, origin ->
             dispatcher.dispatch(WorkspaceAction.EditWithReveal(DocumentChange.SetStyle(style), origin))
         }
@@ -152,23 +153,33 @@ internal fun StyleChips(
 /**
  * What the chosen style does with the seed, why the target treats it differently if it does, and
  * the second seed while the style is Cmf.
+ *
+ * @param[info] Whether the line carries the Style info button, for the phone sheet, whose peek
+ * labels the chips without one to leave room for the contrast levels.
  */
 @Composable
 internal fun StyleDetails(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    info: Boolean = false,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val selected = context.document.style
+    var open by rememberSaveable { mutableStateOf(false) }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-        BuilderText(
-            text = stringResource(
-                Res.string.style_line,
-                stringResource(styleName(selected)),
-                stringResource(styleDescription(selected)),
-            ),
-        )
+        Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
+            BuilderText(
+                text = stringResource(
+                    Res.string.style_line,
+                    stringResource(styleName(selected)),
+                    stringResource(styleDescription(selected)),
+                ),
+                modifier = Modifier.weight(1f),
+            )
+            if (info) InfoButton(topic = InfoTopic.Style, expanded = open, onClick = { open = !open })
+        }
+        if (info && open) InfoNote(InfoTopic.Style)
         context.capabilities[Control.Style].explanation?.let { reason -> ReasonLine(reason) }
         if (selected == Style.Cmf) {
             CmfSeedField(context, dispatcher)
@@ -183,22 +194,25 @@ internal fun StyleDetails(
  * theme asks for, a note on the right naming that spec.
  */
 @Composable
-private fun StyleHeader(selected: Style) {
+private fun StyleHeader(
+    selected: Style,
+    plain: Boolean,
+) {
     val spacing = LocalBuilderTokens.current.spacing
+    val label = stringResource(Res.string.style_label)
     Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
-        InfoLabel(
-            label = stringResource(Res.string.style_label),
-            topic = InfoTopic.Style,
-            modifier = Modifier.weight(1f),
-        )
+        if (plain) {
+            BuilderText(label, Modifier.alignByBaseline(), style = BuilderTextStyle.SectionLabel, maxLines = 1)
+        } else {
+            InfoLabel(label = label, topic = InfoTopic.Style, modifier = Modifier.alignByBaseline())
+        }
         forcedSpec(selected)?.let { spec ->
             val note = stringResource(
                 Res.string.style_spec_forced,
                 stringResource(specName(spec)),
                 stringResource(styleDisplayName(selected)),
             )
-            // The label row is as tall as its info button, so the note sits level with the label.
-            Box(Modifier.heightIn(min = LocalLayout.current.minTouchTarget), contentAlignment = Alignment.Center) {
+            Box(Modifier.weight(1f).alignByBaseline(), contentAlignment = Alignment.CenterEnd) {
                 BuilderBadge(label = note, icon = IconId.Lock)
             }
         }
