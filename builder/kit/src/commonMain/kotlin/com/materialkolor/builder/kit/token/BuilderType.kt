@@ -115,10 +115,10 @@ internal fun builderType(
         ),
         sectionLabel = TextStyle(
             fontFamily = brand,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Bold,
             fontSize = 12.sp,
             lineHeight = 16.sp,
-            letterSpacing = 0.8.sp,
+            letterSpacing = 1.4.sp,
         ),
         body = TextStyle(
             fontFamily = brand,
