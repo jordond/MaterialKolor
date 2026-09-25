@@ -94,6 +94,8 @@ internal val LocalSwitcherForm: ProvidableCompositionLocal<SwitcherFormState?> =
  * @param[switcherModifier] Applied to the switcher itself, in whichever form it shows.
  * @param[onRefit] Called once the switcher has changed form, after the old form has gone, so focus
  *   it held can move to the new one.
+ * @param[onFit] Told, each time the switcher measures in a wide window, how wide the segmented row
+ *   is and how much room it got, both in pixels, so the bar can make more room for it.
  */
 @Composable
 internal fun FittedLibrarySwitcher(
@@ -102,6 +104,7 @@ internal fun FittedLibrarySwitcher(
     modifier: Modifier = Modifier,
     switcherModifier: Modifier = Modifier,
     onRefit: () -> Unit = {},
+    onFit: (needed: Int, room: Int) -> Unit = { _, _ -> }, // b-512
 ) {
     val wide = LocalLayout.current.windowClass == WindowClass.Expanded
     val skin = LocalSkin.current
@@ -113,11 +116,17 @@ internal fun FittedLibrarySwitcher(
     SubcomposeLayout(modifier) { constraints ->
         val loose = constraints.copy(minWidth = 0, minHeight = 0)
         val key = FitKey(loose, selected, skin, type, labels, density, fontScale)
-        val segmented = wide &&
-            fit.fits(key) {
+        // b-512
+        val needed = if (wide) {
+            fit.width(key) {
                 probe?.invoke()
-                fitsSegmented(selected, loose)
+                segmentedWidth(selected, loose)
             }
+        } else {
+            null
+        }
+        if (needed != null && loose.hasBoundedWidth) onFit(needed, loose.maxWidth)
+        val segmented = needed != null && (!loose.hasBoundedWidth || needed <= loose.maxWidth)
         val form = if (segmented) SwitcherForm.Segmented else SwitcherForm.Dropdown
         val refit = fit.shown != null && fit.shown != form
         fit.shown = form
@@ -143,13 +152,14 @@ internal fun FittedLibrarySwitcher(
 }
 
 /**
- * Whether the segmented row fits in [constraints] at its own width. The row measured here is never
- * placed and says nothing to assistive technology, so only the one that shows can be reached.
+ * How wide the segmented row is at its own width, measured for the height [constraints] allow. The
+ * row measured here is never placed and says nothing to assistive technology, so only the one that
+ * shows can be reached.
  */
-private fun SubcomposeMeasureScope.fitsSegmented(
+private fun SubcomposeMeasureScope.segmentedWidth(
     selected: LibraryChoice,
     constraints: Constraints,
-): Boolean {
+): Int {
     val probe = subcompose(SwitcherForm.Probe) {
         LibrarySwitcher(
             selected = selected,
@@ -165,7 +175,7 @@ private fun SubcomposeMeasureScope.fitsSegmented(
         val shared = measurable.maxIntrinsicWidth(constraints.maxHeight)
         maxOf(shared, measurable.measure(constraints.copy(maxWidth = Constraints.Infinity)).width)
     } ?: 0
-    return !constraints.hasBoundedWidth || natural <= constraints.maxWidth
+    return natural
 }
 
 /**
@@ -188,21 +198,68 @@ private data class FitKey(
  */
 private class SwitcherFit {
     private var key: FitKey? = null
-    private var fits: Boolean = false
+    private var width: Int = 0
 
     /** The form that showed last, or null before the first measure. */
     var shown: SwitcherForm? = null
 
-    /** Whether the row fits for [key], from [measure] when anything in [key] changed since. */
-    fun fits(
+    /** How wide the row is for [key], from [measure] when anything in [key] changed since. */
+    fun width(
         key: FitKey,
-        measure: () -> Boolean,
-    ): Boolean {
+        measure: () -> Int,
+    ): Int {
         if (key != this.key) {
-            fits = measure()
+            width = measure()
             this.key = key
         }
-        return fits
+        return width
+    }
+}
+
+// b-512
+
+/**
+ * Whether a wide top bar shows Share and the command palette in their compact forms, a glyph each,
+ * to make room for the segmented library switcher.
+ *
+ * The switcher tells it what the row needs and what room it got each time it measures. Short of
+ * room, the two buttons go compact, and the room that frees is remembered, so they only open out
+ * again once the row would still fit beside them. That keeps a bar at the edge from swapping forms
+ * on every frame.
+ */
+@Stable
+internal class WideBarFit {
+    /** True while Share and the command palette show as glyphs alone. */
+    var compact: Boolean by mutableStateOf(false)
+        private set
+
+    /** The room going compact freed, measured once the bar had caught up with it. Plain, nothing draws from it. */
+    private var freed: Int = 0
+
+    /** The room the row had just before the bar went compact, until the next measure prices the move. */
+    private var roomBeforeCompact: Int? = null
+
+    /**
+     * Goes compact or opens out for a row that needs [needed] and got [room], both in pixels, measured
+     * in a bar composed [shownCompact] or not. A measure from a bar that has not caught up yet changes
+     * nothing.
+     */
+    fun refit(
+        needed: Int,
+        room: Int,
+        shownCompact: Boolean,
+    ) {
+        if (shownCompact != compact) return
+        roomBeforeCompact?.let { before ->
+            freed = (room - before).coerceAtLeast(1)
+            roomBeforeCompact = null
+        }
+        if (!compact && needed > room) {
+            roomBeforeCompact = room
+            compact = true
+        } else if (compact && room - needed >= freed) {
+            compact = false
+        }
     }
 }
 

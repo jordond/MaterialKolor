@@ -173,7 +173,9 @@ class TopBarFitTest {
     fun switcher_unfocusedAcrossTheFitBoundary_takesNoFocus() =
         runDesktopComposeUiTest(width = ROOMY_WIDTH, height = HEIGHT) {
             val barWidth = showBar(barWidth = ROW_ROOM)
-            val share = hasContentDescription("Share") and hasClickAction() and InBar
+            // b-512
+            // Share shows its label while the row fits and a glyph once it does not, and focus follows it.
+            val share = (hasContentDescription("Share") or hasText("Share")) and hasClickAction() and InBar
             onNode(share).requestFocus()
             waitForIdle()
 
@@ -253,11 +255,13 @@ class TopBarFitTest {
     /** The switcher and each end-edge action that shows, by name, with their bounds. */
     private fun ComposeUiTest.controls(): List<Pair<String, Rect>> {
         val switcher = onAllNodes(hasTestTag(LIBRARY_SWITCHER_TAG)).fetchSemanticsNodes()
+        // b-512
+        // Share and Export code show as labels or as glyphs, so either name counts.
         val actions = listOf("Command palette", "Undo", "Redo", "Share", "More options").flatMap { name ->
-            val matcher = hasContentDescription(name, substring = true) and hasClickAction() and InBar
-            onAllNodes(matcher).fetchSemanticsNodes().map { node -> name to node.boundsInRoot }
+            val named = hasContentDescription(name, substring = true) or hasText(name)
+            onAllNodes(named and hasClickAction() and InBar).fetchSemanticsNodes().map { node -> name to node.boundsInRoot }
         }
-        val export = onAllNodes(hasText("Export code") and hasClickAction() and InBar)
+        val export = onAllNodes((hasText("Export code") or hasContentDescription("Export code")) and hasClickAction() and InBar)
             .fetchSemanticsNodes()
             .map { node -> "Export code" to node.boundsInRoot }
         return switcher.map { node -> "Library" to node.boundsInRoot } + actions + export

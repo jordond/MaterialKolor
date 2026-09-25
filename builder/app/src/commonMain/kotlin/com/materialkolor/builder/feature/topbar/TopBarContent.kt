@@ -1,6 +1,12 @@
 package com.materialkolor.builder.feature.topbar
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -10,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
@@ -44,17 +51,23 @@ import com.materialkolor.builder.generated.resources.topbar_more
 import com.materialkolor.builder.generated.resources.topbar_share
 import com.materialkolor.builder.generated.resources.topbar_shortcuts
 import com.materialkolor.builder.kit.control.BuilderButton
+import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderIconButton
 import com.materialkolor.builder.kit.control.BuilderMenu
 import com.materialkolor.builder.kit.control.BuilderMenuItem
 import com.materialkolor.builder.kit.control.BuilderPopover
+import com.materialkolor.builder.kit.control.BuilderPressable
+import com.materialkolor.builder.kit.control.BuilderText
+import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.BuilderTooltip
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.WindowClass
+import com.materialkolor.builder.kit.shell.TopBarControlMaxHeight
 import com.materialkolor.builder.kit.shell.TopBarRegion
 import com.materialkolor.builder.kit.skin.LocalSkin
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -64,11 +77,13 @@ import org.jetbrains.compose.resources.stringResource
  *
  * On a wide window it holds the switcher, the command palette, undo, redo, History, Share, Export
  * code and the overflow menu. The actions always get their full width, and the switcher takes what
- * is left, segmented where the window is wide and the row fits, a dropdown otherwise. A Medium
- * window keeps the dropdown's name whole, moving History, then the command palette, then redo, then
- * undo into the overflow until it fits. Phones show the mark and the project's name with Share,
- * Export and the overflow, which holds History, the command palette, undo and redo, and the
- * libraries in a row of chips under the bar.
+ * is left, segmented where the window is wide and the row fits, a dropdown otherwise. A wide window
+ * shows Share with its label and the command palette with its key in a keycap, and turns both into
+ * glyphs when that makes the room the segmented row needs. A Medium window keeps the dropdown's name
+ * whole, moving History, then the command palette, then redo, then undo into the overflow until it
+ * fits. Phones show the project's swatch and name with Share, Export as a glyph and the overflow,
+ * which holds History, the command palette, undo and redo, and the libraries in a row of chips under
+ * the bar.
  *
  * The History list opens in a popover under the History button, or under the overflow button once
  * History has moved there (D57). It stays open while someone jumps between steps and hands focus
@@ -102,10 +117,21 @@ internal fun TopBarContent(
     if (report != null) SideEffect { report.overflowed = overflowed }
     // The switcher changes form with the window class, so focus it held follows it to the new one.
     LaunchedEffect(windowClass) { focus.restoreAfterRefit(TopBarControl.Library) }
+    // b-512
+    // A wide bar shows Share's label and the palette's keycap while the segmented switcher still fits.
+    val wideFit = remember { WideBarFit() }
+    val wideForms = windowClass == WindowClass.Expanded && !wideFit.compact
+    LaunchedEffect(wideForms) {
+        focus.restoreAfterRefit(TopBarControl.Share)
+        focus.restoreAfterRefit(TopBarControl.Commands)
+    }
     val items = overflowItems(state, dispatcher, overflowed, LocalUriHandler.current)
     val selected = LibraryChoice.of(state.document)
     val switcherModifier = Modifier
         .testTag(LIBRARY_SWITCHER_TAG)
+        // b-512
+        // A dropdown's floating label stays inside the bar.
+        .heightIn(max = TopBarControlMaxHeight)
         .topBarFocus(focus, TopBarControl.Library)
         .switcherPulse(state, dispatcher) // b-314
         .reportSwitcherOrigin(report) // b-503a
@@ -158,27 +184,52 @@ internal fun TopBarContent(
         }
     }
     val actions: @Composable () -> Unit = {
-        TopBarIconButton(
-            control = TopBarControl.Share,
-            focus = focus,
-            icon = IconId.Share,
-            description = stringResource(Res.string.topbar_share),
-            onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Share)) },
-        )
-        BuilderButton(
-            onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Export)) },
-            label = stringResource(Res.string.topbar_export),
-            modifier = Modifier.topBarFocus(focus, TopBarControl.Export),
-            emphasis = Emphasis.Primary,
-            icon = IconId.Export,
-        )
+        val share = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Share)) }
+        // b-512
+        if (wideForms) {
+            BuilderButton(
+                onClick = share,
+                label = stringResource(Res.string.topbar_share),
+                modifier = Modifier.topBarFocus(focus, TopBarControl.Share),
+                emphasis = Emphasis.Secondary,
+            )
+        } else {
+            TopBarIconButton(
+                control = TopBarControl.Share,
+                focus = focus,
+                icon = IconId.Share,
+                description = stringResource(Res.string.topbar_share),
+                onClick = share,
+            )
+        }
+        val export = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Export)) }
+        // b-512
+        // A phone's bar has room for the glyph alone, still named Export code.
+        if (windowClass == WindowClass.Compact) {
+            BuilderIconButton(
+                onClick = export,
+                icon = IconId.Export,
+                contentDescription = stringResource(Res.string.topbar_export),
+                modifier = Modifier.topBarFocus(focus, TopBarControl.Export),
+                emphasis = Emphasis.Primary,
+            )
+        } else {
+            BuilderButton(
+                onClick = export,
+                label = stringResource(Res.string.topbar_export),
+                modifier = Modifier.topBarFocus(focus, TopBarControl.Export),
+                emphasis = Emphasis.Primary,
+                icon = IconId.Export,
+            )
+        }
         moreButton() // b-509
     }
 
     if (windowClass == WindowClass.Compact) {
         // b-406
         Column(modifier) {
-            CompactTopBar(state.projectName, Modifier.testTag(TOP_BAR_TAG)) { actions() }
+            // b-512
+            CompactTopBar(state.projectName, state.document.seed, Modifier.testTag(TOP_BAR_TAG)) { actions() }
             LibraryChipRow(selected = selected, onSwitch = onSwitch, switcherModifier = switcherModifier)
         }
     } else {
@@ -195,25 +246,21 @@ internal fun TopBarContent(
                     switcherModifier = switcherModifier,
                 )
             } else {
+                // b-512
+                val shownCompact = wideFit.compact
                 FittedLibrarySwitcher(
                     selected = selected,
                     modifier = Modifier.weight(1f),
                     switcherModifier = switcherModifier,
                     onSwitch = onSwitch,
                     onRefit = { focus.restoreAfterRefit(TopBarControl.Library) },
+                    onFit = { needed, room -> wideFit.refit(needed, room, shownCompact) },
                 )
             }
             if (TopBarControl.Commands !in overflowed) {
-                TopBarIconButton(
-                    control = TopBarControl.Commands,
+                CommandsButton(
                     focus = focus,
-                    icon = IconId.Command,
-                    description = stringResource(Res.string.topbar_commands),
-                    // b-315
-                    tooltip = stringResource(
-                        Res.string.topbar_commands_tooltip,
-                        Shortcut.Palette.text(LocalAppleKeys.current),
-                    ),
+                    keycap = wideForms, // b-512
                     onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Palette)) },
                 )
             }
@@ -278,6 +325,61 @@ private fun TopBarIconButton(
     }
 }
 
+// b-512
+
+/**
+ * The command palette's button, a search glyph, and with [keycap] the palette's key beside it in a
+ * keycap. It reads as Command palette either way, with the key in its tooltip.
+ */
+@Composable
+private fun CommandsButton(
+    focus: TopBarFocus,
+    keycap: Boolean,
+    onClick: () -> Unit,
+) {
+    val description = stringResource(Res.string.topbar_commands)
+    val keys = Shortcut.Palette.text(LocalAppleKeys.current)
+    // b-315
+    val tooltip = stringResource(Res.string.topbar_commands_tooltip, keys)
+    if (!keycap) {
+        TopBarIconButton(
+            control = TopBarControl.Commands,
+            focus = focus,
+            icon = IconId.Search,
+            description = description,
+            tooltip = tooltip,
+            onClick = onClick,
+        )
+        return
+    }
+    val tokens = LocalBuilderTokens.current
+    val ink = tokens.textMuted
+    BuilderTooltip(text = tooltip) {
+        BuilderPressable(
+            onClick = onClick,
+            label = description,
+            modifier = Modifier.topBarFocus(focus, TopBarControl.Commands),
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = tokens.spacing.small),
+                horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                BuilderIcon(IconId.Search, contentDescription = null, tint = ink)
+                BuilderText(
+                    text = keys,
+                    modifier = Modifier
+                        .border(tokens.outlineWidth, tokens.border, RoundedCornerShape(tokens.radius.small))
+                        .padding(horizontal = tokens.spacing.extraSmall + tokens.spacing.extraSmall / 2),
+                    style = BuilderTextStyle.Value,
+                    color = ink,
+                    maxLines = 1,
+                )
+            }
+        }
+    }
+}
+
 // b-509
 
 /**
@@ -334,6 +436,7 @@ private fun overflowItems(
         BuilderMenuItem(
             label = stringResource(appearanceLabel(option)),
             onClick = { dispatcher.dispatch(WorkspaceAction.SetAppearance(option)) },
+            icon = option.icon, // b-512
             selected = option == appearance,
         )
     }
@@ -409,4 +512,14 @@ private fun appearanceLabel(appearance: Appearance): StringResource =
         Appearance.System -> Res.string.topbar_appearance_system
         Appearance.Light -> Res.string.topbar_appearance_light
         Appearance.Dark -> Res.string.topbar_appearance_dark
+    }
+
+// b-512
+
+/** The glyph an appearance row wears, so its text starts where the other rows' text does. */
+private val Appearance.icon: IconId
+    get() = when (this) {
+        Appearance.System -> IconId.Desktop
+        Appearance.Light -> IconId.Sun
+        Appearance.Dark -> IconId.Moon
     }

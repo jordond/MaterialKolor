@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -68,6 +69,11 @@ internal object ShellMetrics {
     /** The top bar, in every window class. */
     val topBarHeight: Dp = 64.dp
 
+    // b-512
+
+    /** The tallest a control in the top bar stands, clear of the bar's edges by 4 dp each. */
+    val topBarControlHeight: Dp = 56.dp
+
     /** How much of the poster sheet shows at peek on a phone held upright. */
     val posterPeekHeight: Dp = 344.dp
 
@@ -99,8 +105,9 @@ internal fun sheetClearance(
  * Below 840 dp it is the rail, which opens over the canvas. On a phone, upright or on its side, it
  * lives in a bottom sheet with the dock floating above its peek. The poster keeps its seed coloured
  * look in every skin, since the shell draws it inside [PosterSurface]. The canvas is a rounded frame
- * whose content stops growing at the content cap on very wide screens, with the dock floating at its
- * bottom.
+ * whose content stops growing at the content cap on very wide screens, with the dock centred under
+ * the content, so the dock covers none of it. Only on a phone does the dock float, over the canvas
+ * above the poster's peek.
  *
  * Tab walks the regions in reading order in every layout (AR-01), the top bar, the poster, the
  * canvas and then the dock.
@@ -118,7 +125,7 @@ internal fun sheetClearance(
  * @param[topBar] The top bar, usually a `TopBarRegion`.
  * @param[canvas] The preview and its tabs, given the padding its content scrolls out from under.
  * On a phone that clears the poster peek and the dock, and everywhere else it is zero.
- * @param[dock] The floating dock, usually a `DockRegion`.
+ * @param[dock] The dock, usually a `DockRegion`.
  * @param[modifier] Applied to the whole shell.
  * @param[sheetState] Where the poster sheet rests on a phone.
  * @param[fullscreen] Whether to hide the poster and the top bar and give the canvas the window. The
@@ -354,9 +361,11 @@ private fun DockedShell(
                     .padding(end = margin, bottom = margin),
                 shape = RoundedCornerShape(tokens.radius.large),
                 canvas = { canvas(PaddingValues()) },
-            ) {
-                Box(Modifier.align(Alignment.BottomCenter).padding(bottom = tokens.spacing.large)) { dock() }
-            }
+                // b-512
+                dockBelow = {
+                    Box(Modifier.padding(top = tokens.spacing.small, bottom = tokens.spacing.large)) { dock() }
+                },
+            )
         },
     )
 }
@@ -423,19 +432,28 @@ private fun ShellLayout(
     }
 }
 
-/** The canvas frame, with its content capped on very wide screens and centred in what is left. */
+/**
+ * The canvas frame, with its content capped on very wide screens and centred in what is left. A
+ * [dockBelow] sits centred under the content, which takes the height it leaves, and [floating]
+ * floats over both.
+ */
 @Composable
 private fun CanvasFrame(
     modifier: Modifier,
     shape: Shape,
     canvas: @Composable () -> Unit,
+    dockBelow: (@Composable () -> Unit)? = null, // b-512
     floating: @Composable BoxScope.() -> Unit = {},
 ) {
     Box(
         modifier = modifier.clip(shape).background(LocalBuilderTokens.current.canvas),
         contentAlignment = Alignment.TopCenter,
     ) {
-        Box(Modifier.widthIn(max = LocalLayout.current.canvasMaxWidth).fillMaxSize()) { canvas() }
+        // b-512
+        Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(Modifier.weight(1f).widthIn(max = LocalLayout.current.canvasMaxWidth).fillMaxWidth()) { canvas() }
+            dockBelow?.invoke()
+        }
         floating()
     }
 }

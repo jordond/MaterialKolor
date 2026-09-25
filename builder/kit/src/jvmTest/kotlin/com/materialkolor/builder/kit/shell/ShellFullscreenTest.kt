@@ -20,6 +20,7 @@ import com.materialkolor.builder.kit.layout.PosterMode
 import com.materialkolor.builder.kit.skin.Skin
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.comparables.shouldBeLessThan
 import io.kotest.matchers.comparables.shouldBeLessThanOrEqualTo
 import io.kotest.matchers.shouldBe
@@ -58,7 +59,15 @@ class ShellFullscreenTest {
                     canvas.left shouldBeLessThan 16.dp
                     canvas.right shouldBe width.dp - 12.dp
                     exit.right shouldBe canvas.right
-                    dock.bottom shouldBeLessThan canvas.bottom
+                    if (expected == PosterMode.Sheet) {
+                        // A phone floats the dock over the canvas.
+                        dock.bottom shouldBeLessThan canvas.bottom
+                    } else {
+                        // b-512
+                        // Everywhere else it sits under the canvas and covers none of it.
+                        dock.top shouldBeGreaterThanOrEqualTo canvas.bottom
+                        dock.bottom shouldBeLessThan FullscreenHeight.dp
+                    }
                 }
             }
         }

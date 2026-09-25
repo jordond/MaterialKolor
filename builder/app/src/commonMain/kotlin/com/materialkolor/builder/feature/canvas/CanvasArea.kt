@@ -72,10 +72,14 @@ internal fun CanvasArea(
     }
     val specs = rememberPaneSpecs(state.vision.whileHeld(state.grayscaleHeld)) // b-315c
     val compact = LocalLayout.current.windowClass == WindowClass.Compact
+    // b-512
+    // The tabs start at the canvas's own inset, as the preview window below them does.
+    val inset = canvasInset(compact)
     Column(modifier.fillMaxSize()) {
         CanvasTabs(
             selected = state.view.tab,
             onSelect = { tab -> dispatcher.dispatch(WorkspaceAction.SetPreviewTab(tab)) },
+            modifier = Modifier.padding(start = inset, end = inset, top = inset),
         )
         InspectLayer(state, preview, dispatcher, Modifier.weight(1f).fillMaxWidth().padding(contentPadding)) {
             CanvasTabBody(
@@ -97,8 +101,8 @@ internal fun CanvasArea(
 }
 
 /**
- * The floating dock over the canvas with preview mode, device width, inspect and vision, worn in
- * a `DockRegion` (F-19).
+ * The dock under the preview with preview mode, device width, inspect and vision, worn in a
+ * `DockRegion` (F-19).
  */
 @Composable
 internal fun CanvasDock(

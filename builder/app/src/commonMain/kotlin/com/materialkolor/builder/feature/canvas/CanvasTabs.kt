@@ -1,22 +1,29 @@
 package com.materialkolor.builder.feature.canvas
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.LocalThemeResult
@@ -33,6 +40,13 @@ import com.materialkolor.builder.generated.resources.canvas_tab_contrast
 import com.materialkolor.builder.generated.resources.canvas_tab_palettes
 import com.materialkolor.builder.generated.resources.canvas_tab_roles
 import com.materialkolor.builder.kit.control.BuilderTabs
+import com.materialkolor.builder.kit.control.BuilderText
+import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.TabsVariant
+import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.layout.WindowClass
+import com.materialkolor.builder.kit.shell.PreviewWindowRegion
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.widget.screenWidth
 import com.materialkolor.builder.preview.canvas.AppTab
 import com.materialkolor.builder.preview.canvas.ComponentsTab
@@ -40,6 +54,7 @@ import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.split.SplitPreview
+import com.materialkolor.builder.preview.split.SplitState
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -97,7 +112,8 @@ internal fun rememberPaneSpecs(vision: VisionSimulation): PaneSpecs {
 }
 
 /**
- * The canvas tabs App, Components, Roles, Palettes and Contrast. A click or the arrow keys pick one.
+ * The canvas tabs App, Components, Roles, Palettes and Contrast, in the canvas's pill form. A click
+ * or the arrow keys pick one.
  */
 @Composable
 internal fun CanvasTabs(
@@ -112,7 +128,18 @@ internal fun CanvasTabs(
         onSelect = onSelect,
         label = { tab -> names.getValue(tab) },
         modifier = modifier,
+        variant = TabsVariant.Canvas, // b-512
     )
+}
+
+// b-512
+
+/** How far the tabs and the preview window stand in from the canvas's edges. */
+@Composable
+@ReadOnlyComposable
+internal fun canvasInset(compact: Boolean): Dp {
+    val spacing = LocalBuilderTokens.current.spacing
+    return if (compact) spacing.small else spacing.large
 }
 
 /**
@@ -144,13 +171,19 @@ internal fun CanvasTabBody(
             probe?.invoke(PreviewTab.App)
             // One scroll for both copies, so a screen wider than the canvas scrolls as one.
             val scroll = rememberScrollState()
-            PreviewCopies(preview, specs, modifier) { spec ->
-                DeviceScreen(deviceWidth, scroll) { AppTab(spec, appState, deviceWidth) }
+            // b-512
+            PreviewWindow(deviceWidth, preview, specs, modifier) {
+                PreviewCopies(preview, specs, Modifier) { spec ->
+                    DeviceScreen(deviceWidth, scroll) { AppTab(spec, appState, deviceWidth) }
+                }
             }
         }
         PreviewTab.Components -> {
             probe?.invoke(PreviewTab.Components)
-            PreviewCopies(preview, specs, modifier) { spec -> ComponentsTab(spec, componentsState) }
+            // b-512
+            PreviewWindow(width = null, preview, specs, modifier) {
+                PreviewCopies(preview, specs, Modifier) { spec -> ComponentsTab(spec, componentsState) }
+            }
         }
         PreviewTab.Roles -> {
             probe?.invoke(PreviewTab.Roles)
@@ -165,6 +198,109 @@ internal fun CanvasTabBody(
             ContrastTab(result, mode, specs.filter, modifier)
         }
     }
+}
+
+// b-512
+
+/**
+ * The preview window, standing the canvas's inset in from every edge of [modifier]'s room and as
+ * tall as that room. It is as wide as [width]'s screen scaled to fit, down to 0.6, or the whole room
+ * when the screen is wider than that or [width] is null. It is centred, and the canvas shows round
+ * it. While Split shows, the window names each half at its top, beside the handle.
+ */
+@Composable
+private fun PreviewWindow(
+    width: DeviceWidth?,
+    preview: PreviewSplit,
+    specs: PaneSpecs,
+    modifier: Modifier,
+    content: @Composable () -> Unit,
+) {
+    val inset = canvasInset(LocalLayout.current.windowClass == WindowClass.Compact)
+    Box(modifier.fillMaxSize().padding(inset)) {
+        PreviewWindowRegion(Modifier.windowWidth(width)) {
+            content()
+            if (preview.shown == PreviewMode.Split) SplitTags(preview.split, specs.light.label, specs.dark.label)
+        }
+    }
+}
+
+/**
+ * Sizes the window [width]'s screen wide at the scale that fits the room, down to 0.6, and no wider
+ * than the room, or the whole room for a null [width], as tall as the room and centred in it.
+ */
+private fun Modifier.windowWidth(width: DeviceWidth?): Modifier =
+    layout { measurable, constraints ->
+        val room = constraints.maxWidth
+        val wide = if (width == null || !constraints.hasBoundedWidth) {
+            room
+        } else {
+            val screen = width.screenWidth.roundToPx()
+            val scale = (room.toFloat() / screen).coerceIn(MIN_SCREEN_SCALE, 1f)
+            minOf(room, (screen * scale).roundToInt())
+        }
+        val child = if (constraints.hasBoundedHeight) {
+            Constraints.fixed(wide, constraints.maxHeight)
+        } else {
+            Constraints.fixedWidth(wide)
+        }
+        val placeable = measurable.measure(child)
+        layout(room, placeable.height) { placeable.placeRelative((room - wide) / 2, 0) }
+    }
+
+/**
+ * The Light and Dark tags at the top of the window, each on its own side of the handle at [split],
+ * which they follow as it moves without composing again. A tag with no room on its side stays out
+ * of sight. Assistive tech skips them, since the handle already names both sides.
+ */
+@Composable
+private fun SplitTags(
+    split: SplitState,
+    start: String,
+    end: String,
+) {
+    val tokens = LocalBuilderTokens.current
+    val gap = tokens.spacing.medium
+    Layout(
+        content = {
+            WindowTag(start, container = tokens.textStrong, ink = tokens.panel)
+            WindowTag(end, container = tokens.panel, ink = tokens.textStrong)
+        },
+        modifier = Modifier.fillMaxSize().clearAndSetSemantics {},
+    ) { measurables, constraints ->
+        val loose = constraints.copy(minWidth = 0, minHeight = 0)
+        val tags = measurables.map { measurable -> measurable.measure(loose) }
+        val space = gap.roundToPx()
+        layout(constraints.maxWidth, constraints.maxHeight) {
+            // Read while placing, so a drag of the handle only places the tags again.
+            val edge = (split.fraction * constraints.maxWidth).roundToInt()
+            val startTag = tags[0]
+            val endTag = tags[1]
+            val startX = edge - space - startTag.width
+            if (startX >= space) startTag.placeRelative(startX, space)
+            val endX = edge + space
+            if (endX + endTag.width <= constraints.maxWidth - space) endTag.placeRelative(endX, space)
+        }
+    }
+}
+
+/** One of the window's small Light and Dark tags. */
+@Composable
+private fun WindowTag(
+    text: String,
+    container: Color,
+    ink: Color,
+) {
+    val tokens = LocalBuilderTokens.current
+    BuilderText(
+        text = text,
+        modifier = Modifier
+            .background(container, RoundedCornerShape(tokens.radius.small))
+            .padding(horizontal = tokens.spacing.small, vertical = tokens.spacing.extraSmall / 2),
+        style = BuilderTextStyle.Label,
+        color = ink,
+        maxLines = 1,
+    )
 }
 
 /** Both copies of [screen] with the handle between them, or the one copy [preview] shows. */
