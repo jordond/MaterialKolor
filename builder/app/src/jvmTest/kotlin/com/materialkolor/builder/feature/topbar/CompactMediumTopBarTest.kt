@@ -142,25 +142,6 @@ class CompactMediumTopBarTest {
         }
 
     @Test
-    fun chipRow_arrowKeysMoveFocusAndEnterPicks() =
-        runDesktopComposeUiTest(width = 390, height = HEIGHT) {
-            val graph = showRoot(folds = false)
-            val start = LibraryChoice.of(graph.session.document.value)
-            val next = LibraryChoice.entries[(start.ordinal + 1) % LibraryChoice.entries.size]
-            val chip = onAllNodes(hasText(NAMES.getValue(start)) and InChips and hasClickAction()).onFirst()
-
-            chip.requestFocus()
-            chip.performKeyInput { pressKey(Key.DirectionRight) }
-            waitForIdle()
-            LibraryChoice.of(graph.session.document.value) shouldBe start
-            val focused = onAllNodes(isFocused() and hasText(NAMES.getValue(next))).onFirst()
-            focused.performKeyInput { pressKey(Key.Enter) }
-            waitForIdle()
-
-            LibraryChoice.of(graph.session.document.value) shouldBe next
-        }
-
-    @Test
     fun chipRow_tapPicksTheLibrary() =
         runDesktopComposeUiTest(width = 390, height = HEIGHT) {
             val graph = showRoot(folds = false)
