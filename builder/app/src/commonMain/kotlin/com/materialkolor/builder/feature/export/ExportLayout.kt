@@ -134,4 +134,3 @@ internal fun FillLastColumn(
 
 /** The shortest the code gets before the body scrolls instead of squeezing it further. */
 private val CodeMinHeight: Dp = 240.dp
-

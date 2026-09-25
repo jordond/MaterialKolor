@@ -229,7 +229,9 @@ internal fun ExportSheet(
                         Notice(text = problemText(problem), icon = IconId.Error, emphasis = Emphasis.Danger)
                     }
                     if (ready != null) {
-                        ExportFiles(ready, state.selectedPath, dispatcher, onCopy = { text -> copy(CopyKind.File, text) })
+                        ExportFiles(ready, state.selectedPath, dispatcher, onCopy = { text ->
+                            copy(CopyKind.File, text)
+                        })
                     }
                 }
             }
