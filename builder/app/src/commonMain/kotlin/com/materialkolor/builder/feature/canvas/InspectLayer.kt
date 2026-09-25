@@ -13,8 +13,8 @@ import com.materialkolor.builder.domain.capability.ControlState
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.edit.PinMode
-import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.PreviewTab
+import com.materialkolor.builder.feature.workspace.FineTuneSection
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.preview.inspect.InspectActions
@@ -64,7 +64,7 @@ internal fun InspectLayer(
             },
             onJumpToKeyColor = { _ ->
                 dispatcher.dispatch(WorkspaceAction.SetPosterCollapsed(collapsed = false))
-                dispatcher.dispatch(WorkspaceAction.SetFineTuneRowOpen(FineTuneRow.CoreColors, open = true))
+                dispatcher.dispatch(WorkspaceAction.OpenFineTune(FineTuneSection.KeyColors)) // b-521
             },
             onLeave = { dispatcher.dispatch(WorkspaceAction.SetInspect(on = false)) },
         )

@@ -24,11 +24,11 @@ import com.materialkolor.builder.LocalThemeResult
 import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.domain.capability.Capabilities
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.feature.image.ImageCandidateRow
+import com.materialkolor.builder.feature.workspace.FineTuneSection
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
@@ -52,7 +52,7 @@ import dev.stateholder.dispatcher.Dispatcher
  * it shows.
  * @property[visibleModes] The modes the preview shows, which the contrast readout and the style
  * chips follow.
- * @property[openFineTuneRows] The fine tune rows open in this project.
+ * @property[fineTune] The section the Fine-tune sheet is open at, or null while it is shut.
  * @property[sessionDismissedHints] The hints closed in this tab, whether or not storage kept that.
  */
 @Immutable
@@ -65,7 +65,7 @@ internal data class PosterContext(
     val saveStatus: SaveStatus,
     val openPanel: Panel? = null,
     val visibleModes: PreviewMode = PreviewMode.Split,
-    val openFineTuneRows: Set<FineTuneRow> = emptySet(),
+    val fineTune: FineTuneSection? = null, // b-521
     val sessionDismissedHints: Set<String> = emptySet(),
 )
 
@@ -111,7 +111,7 @@ internal fun rememberPosterContext(state: WorkspaceModel.State): PosterContext {
         state.saveStatus,
         state.panel,
         state.view.mode,
-        state.view.openFineTuneRows,
+        state.fineTune, // b-521
         state.sessionDismissedHints,
     ) {
         PosterContext(
@@ -123,7 +123,7 @@ internal fun rememberPosterContext(state: WorkspaceModel.State): PosterContext {
             saveStatus = state.saveStatus,
             openPanel = state.panel,
             visibleModes = state.view.mode,
-            openFineTuneRows = state.view.openFineTuneRows,
+            fineTune = state.fineTune, // b-521
             sessionDismissedHints = state.sessionDismissedHints,
         )
     }

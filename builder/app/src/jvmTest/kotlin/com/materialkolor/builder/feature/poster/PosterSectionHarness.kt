@@ -21,10 +21,10 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportPrefs
 import com.materialkolor.builder.domain.persist.ExportTarget
-import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.feature.workspace.FineTuneSection
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.capabilitiesOf
@@ -48,7 +48,7 @@ internal class PosterHarness(
     val resolver = ThemeResolver()
     var document by mutableStateOf(document)
     var openPanel by mutableStateOf(openPanel)
-    var openFineTuneRows by mutableStateOf(emptySet<FineTuneRow>())
+    var fineTune by mutableStateOf<FineTuneSection?>(null) // b-521
 
     var preferences by mutableStateOf(Preferences())
 
@@ -63,22 +63,13 @@ internal class PosterHarness(
             is WorkspaceAction.EditWithReveal -> edit(action.change, EditPhase.Discrete)
             is WorkspaceAction.OpenPanel -> openPanel = action.panel
             WorkspaceAction.ClosePanel -> openPanel = null
-            is WorkspaceAction.SetFineTuneRowOpen -> setRowOpen(action.row, action.open)
+            is WorkspaceAction.OpenFineTune -> fineTune = action.section ?: FineTuneSection.Locks // b-521
+            WorkspaceAction.CloseFineTune -> fineTune = null
             is WorkspaceAction.SetColorAnimation -> setColorAnimation(action.target, action.on)
             is WorkspaceAction.SetColorAnimationDuration -> setColorAnimationDuration(action.target, action.durationMs)
             is WorkspaceAction.DismissHint -> dismissHint(action.id)
             else -> Unit
         }
-    }
-
-    /**
-     * Opens or closes [row], the way the workspace keeps it per project.
-     */
-    private fun setRowOpen(
-        row: FineTuneRow,
-        open: Boolean,
-    ) {
-        openFineTuneRows = if (open) openFineTuneRows + row else openFineTuneRows - row
     }
 
     /**
@@ -163,7 +154,7 @@ internal fun ComposeUiTest.showSection(
             saveStatus = SaveStatus.Idle,
             openPanel = harness.openPanel,
             visibleModes = PreviewMode.Split,
-            openFineTuneRows = harness.openFineTuneRows,
+            fineTune = harness.fineTune,
         )
         BuilderTheme(
             skin = Skin(library = Library.Material3, expressive = false),

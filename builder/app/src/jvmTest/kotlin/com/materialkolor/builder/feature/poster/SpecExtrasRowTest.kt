@@ -27,7 +27,7 @@ import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.model.TonalRamp
-import com.materialkolor.builder.domain.persist.FineTuneRow
+import com.materialkolor.builder.feature.workspace.FineTuneSection
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -61,14 +61,14 @@ class SpecExtrasRowTest {
             onNodeWithText(TITLE).performClick()
             waitForIdle()
 
-            harness.actions shouldBe listOf(WorkspaceAction.SetFineTuneRowOpen(FineTuneRow.SpecExtras, open = true))
+            harness.actions shouldBe listOf(WorkspaceAction.OpenFineTune(FineTuneSection.Spec))
             onNodeWithText("Spec").assertExists()
             onNodeWithText(AMOLED).assertExists()
 
             onNodeWithText(TITLE).performClick()
             waitForIdle()
 
-            harness.actions.last() shouldBe WorkspaceAction.SetFineTuneRowOpen(FineTuneRow.SpecExtras, open = false)
+            harness.actions.last() shouldBe WorkspaceAction.CloseFineTune
             harness.undoEntries() shouldBe 0
         }
 
@@ -196,7 +196,7 @@ class SpecExtrasRowTest {
     fun targetOptions_fluent_leavesAmoledMotionAndTonesOut() =
         runComposeUiTest {
             val harness = PosterHarness(Plain.copy(library = Library.Fluent))
-            harness.openFineTuneRows = setOf(FineTuneRow.SpecExtras)
+            harness.fineTune = FineTuneSection.Spec
             showSection(harness) { context, dispatcher -> SpecExtrasRow(context, dispatcher) }
 
             onNodeWithText(AMOLED).assertDoesNotExist()
@@ -228,7 +228,7 @@ class SpecExtrasRowTest {
     fun toneTable_custom_listsOnlyTheSlotsCutByTone() =
         runComposeUiTest {
             val harness = PosterHarness(Plain.copy(library = Library.Custom))
-            harness.openFineTuneRows = setOf(FineTuneRow.SpecExtras)
+            harness.fineTune = FineTuneSection.Spec
             showSection(harness) { context, dispatcher -> SpecExtrasRow(context, dispatcher) }
 
             ToneSlots.size shouldBe 11

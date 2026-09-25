@@ -39,12 +39,11 @@ import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.domain.persist.FineTuneRow
 import com.materialkolor.builder.domain.persist.MotionOverride
 import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.feature.canvas.RampTarget
+import com.materialkolor.builder.feature.workspace.FineTuneSection
 import com.materialkolor.builder.feature.workspace.Panel
-import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
@@ -198,7 +197,27 @@ class CommandPaletteTest {
             enter()
 
             waitUntil { !harness.workspace.state.value.preferences.posterCollapsed }
-            harness.workspace.state.value.view.openFineTuneRows shouldContain FineTuneRow.CoreColors
+            harness.workspace.state.value.fineTune shouldBe FineTuneSection.KeyColors
+        }
+
+    @Test
+    fun goTo_opensTheFineTuneSheetAtASectionItHolds_andSeedOnlyOpensThePoster() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            runOnUiThread { harness.workspace.setPosterCollapsed(true) }
+            waitUntil { harness.workspace.state.value.preferences.posterCollapsed }
+
+            openPalette()
+            search("seed")
+            onNode(rowMatcher("Go to Seed")).performScrollTo().performClick()
+            waitUntil { !harness.workspace.state.value.preferences.posterCollapsed }
+            harness.workspace.state.value.fineTune shouldBe null
+
+            openPalette()
+            search("target options")
+            onNode(rowMatcher("Go to Target options")).performScrollTo().performClick()
+            waitForIdle()
+            harness.workspace.state.value.fineTune shouldBe FineTuneSection.TargetOptions
         }
 
     @Test
