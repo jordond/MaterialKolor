@@ -30,7 +30,7 @@ public class TomlScope internal constructor() {
     }
 
     /**
-     * A blank line.
+     * Adds an empty line to the file.
      */
     public fun blankLine() {
         lines.add(emptyList())

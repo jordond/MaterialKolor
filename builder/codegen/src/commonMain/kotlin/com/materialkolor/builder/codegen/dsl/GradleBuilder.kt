@@ -101,7 +101,7 @@ public class GradleScope internal constructor() {
     }
 
     /**
-     * A blank line.
+     * Adds an empty line to the script.
      */
     public fun blankLine() {
         entries += GradleEntry.Line(emptyList(), null)
