@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Badge
@@ -54,6 +55,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.control.BuilderIcon
+import com.materialkolor.builder.kit.control.CompactButtonPadding
+import com.materialkolor.builder.kit.control.CompactButtonGap
+import com.materialkolor.builder.kit.control.CompactButtonIcon
+import com.materialkolor.builder.kit.control.CompactButtonHeight
+import com.materialkolor.builder.kit.control.ButtonSize
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ButtonKeycap
@@ -116,11 +122,15 @@ private fun RowScope.MaterialLabel(
     icon: IconId?,
     hint: String? = null,
     trailingIcon: IconId? = null,
+    size: ButtonSize = ButtonSize.Regular,
 ) {
     val ink = LocalContentColor.current
+    val compact = size == ButtonSize.Compact
+    val iconSize = if (compact) CompactButtonIcon else LocalBuilderTokens.current.iconSize
+    val spacing = if (compact) CompactButtonGap else ButtonDefaults.IconSpacing
     if (icon != null) {
-        BuilderIcon(icon, contentDescription = null, tint = ink)
-        Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+        BuilderIcon(icon, contentDescription = null, tint = ink, size = iconSize)
+        Spacer(Modifier.width(spacing))
     }
     BuilderText(
         text = label,
@@ -135,8 +145,8 @@ private fun RowScope.MaterialLabel(
         ButtonKeycap(hint, ink)
     }
     if (trailingIcon != null) {
-        Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-        BuilderIcon(trailingIcon, contentDescription = null, tint = ink)
+        Spacer(Modifier.width(spacing))
+        BuilderIcon(trailingIcon, contentDescription = null, tint = ink, size = iconSize)
     }
 }
 
@@ -144,6 +154,11 @@ private fun RowScope.MaterialLabel(
  * Room round a button with a keycap, Material's small button start and a tight end the keycap fills.
  */
 private val HintPadding: PaddingValues = PaddingValues(start = 16.dp, end = 4.dp)
+
+/**
+ * Room round a compact button's content.
+ */
+private val CompactPadding: PaddingValues = PaddingValues(horizontal = CompactButtonPadding)
 
 /**
  * Room between a button's label and its keycap.
@@ -160,16 +175,24 @@ internal fun MaterialButton(
     enabled: Boolean,
     hint: String? = null,
     trailingIcon: IconId? = null,
+    size: ButtonSize = ButtonSize.Regular,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val compact = size == ButtonSize.Compact
+    // The drawn pill shrinks inside the footprint materialFeedback grows, so the touch target stays.
     val decorated = modifier
         .foldState(label, null, enabled)
         .materialFeedback(interactionSource, ButtonDefaults.shape)
-    val content: @Composable RowScope.() -> Unit = { MaterialLabel(label, icon, hint, trailingIcon) }
+        .then(if (compact) Modifier.height(CompactButtonHeight) else Modifier)
+    val content: @Composable RowScope.() -> Unit = { MaterialLabel(label, icon, hint, trailingIcon, size) }
     MaterialTarget {
         when (emphasis) {
             Emphasis.Primary -> {
-                val padding = if (hint == null) ButtonDefaults.ContentPadding else HintPadding
+                val padding = when {
+                    hint != null -> HintPadding
+                    compact -> CompactPadding
+                    else -> ButtonDefaults.ContentPadding
+                }
                 Button(
                     onClick,
                     decorated,
@@ -180,10 +203,24 @@ internal fun MaterialButton(
                 )
             }
             Emphasis.Secondary -> {
-                OutlinedButton(onClick, decorated, enabled, interactionSource = interactionSource, content = content)
+                OutlinedButton(
+                    onClick,
+                    decorated,
+                    enabled,
+                    contentPadding = if (compact) CompactPadding else ButtonDefaults.ContentPadding,
+                    interactionSource = interactionSource,
+                    content = content,
+                )
             }
             Emphasis.Subtle -> {
-                TextButton(onClick, decorated, enabled, interactionSource = interactionSource, content = content)
+                TextButton(
+                    onClick,
+                    decorated,
+                    enabled,
+                    contentPadding = if (compact) CompactPadding else ButtonDefaults.TextButtonContentPadding,
+                    interactionSource = interactionSource,
+                    content = content,
+                )
             }
             Emphasis.Danger -> {
                 Button(
@@ -194,6 +231,7 @@ internal fun MaterialButton(
                         containerColor = MaterialTheme.colorScheme.error,
                         contentColor = MaterialTheme.colorScheme.onError,
                     ),
+                    contentPadding = if (compact) CompactPadding else ButtonDefaults.ContentPadding,
                     interactionSource = interactionSource,
                     content = content,
                 )

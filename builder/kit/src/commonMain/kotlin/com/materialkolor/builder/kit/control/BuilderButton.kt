@@ -54,6 +54,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
  * @param[trailingIcon] A glyph after the label, the size of [icon]. It only shows, so whatever it says
  * belongs in the button's spoken name too. With one the label gives way first and ends in an
  * ellipsis, so the glyph always keeps its room.
+ * @param[size] How much room the drawn button takes. The touch target stays the layout's in either
+ * size, reaching past a compact button's edges.
  */
 @Composable
 public fun BuilderButton(
@@ -65,9 +67,20 @@ public fun BuilderButton(
     enabled: Boolean = true,
     hint: String? = null,
     trailingIcon: IconId? = null,
+    size: ButtonSize = ButtonSize.Regular,
 ) {
     when (LocalSkin.current.library) {
-        Library.Material3 -> MaterialButton(onClick, label, modifier, emphasis, icon, enabled, hint, trailingIcon)
+        Library.Material3 -> MaterialButton(
+            onClick,
+            label,
+            modifier,
+            emphasis,
+            icon,
+            enabled,
+            hint,
+            trailingIcon,
+            size,
+        )
         Library.Unstyled -> HeadlessButton(
             onClick,
             label,
@@ -78,8 +91,9 @@ public fun BuilderButton(
             enabled,
             hint,
             trailingIcon,
+            size,
         )
-        Library.Fluent -> FluentButton(onClick, label, modifier, emphasis, icon, enabled, hint, trailingIcon)
+        Library.Fluent -> FluentButton(onClick, label, modifier, emphasis, icon, enabled, hint, trailingIcon, size)
         Library.Custom -> HeadlessButton(
             onClick,
             label,
@@ -90,9 +104,46 @@ public fun BuilderButton(
             enabled,
             hint,
             trailingIcon,
+            size,
         )
     }
 }
+
+/**
+ * How much room a [BuilderButton] draws itself in.
+ */
+public enum class ButtonSize {
+    /**
+     * The skin's own button.
+     */
+    Regular,
+
+    /**
+     * A small pill for a tight row, such as the poster's header, with smaller glyphs and less room
+     * round the label.
+     */
+    Compact,
+}
+
+/**
+ * How tall a compact button draws, in every skin.
+ */
+internal val CompactButtonHeight: Dp = 34.dp
+
+/**
+ * The room at a compact button's sides.
+ */
+internal val CompactButtonPadding: Dp = 10.dp
+
+/**
+ * The room between a compact button's glyphs and its label.
+ */
+internal val CompactButtonGap: Dp = 4.dp
+
+/**
+ * How big a compact button draws its glyphs.
+ */
+internal val CompactButtonIcon: Dp = 16.dp
 
 /**
  * A button drawn from [style] over plain foundation, for the skins without a button of their own.
@@ -108,7 +159,10 @@ internal fun HeadlessButton(
     enabled: Boolean = true,
     hint: String? = null,
     trailingIcon: IconId? = null,
+    size: ButtonSize = ButtonSize.Regular,
 ) {
+    val compact = size == ButtonSize.Compact
+    val iconSize = if (compact) CompactButtonIcon else LocalBuilderTokens.current.iconSize
     val colors = style.colors(emphasis)
     val interactionSource = remember { MutableInteractionSource() }
     Row(
@@ -125,12 +179,15 @@ internal fun HeadlessButton(
             .alpha(enabledAlpha(enabled))
             .controlRing(interactionSource, style.shape)
             .actionSurface(colors, style.shape, style.borderWidth)
-            .heightIn(min = style.height)
-            .padding(horizontal = style.horizontalPadding),
-        horizontalArrangement = Arrangement.spacedBy(style.gap, Alignment.CenterHorizontally),
+            .heightIn(min = if (compact) CompactButtonHeight else style.height)
+            .padding(horizontal = if (compact) CompactButtonPadding else style.horizontalPadding),
+        horizontalArrangement = Arrangement.spacedBy(
+            if (compact) CompactButtonGap else style.gap,
+            Alignment.CenterHorizontally,
+        ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (icon != null) BuilderIcon(icon, contentDescription = null, tint = colors.content)
+        if (icon != null) BuilderIcon(icon, contentDescription = null, tint = colors.content, size = iconSize)
         BuilderText(
             text = label,
             modifier = trailingLabel(trailingIcon),
@@ -140,7 +197,9 @@ internal fun HeadlessButton(
             overflow = TextOverflow.Ellipsis,
         )
         if (hint != null) ButtonKeycap(hint, colors.content)
-        if (trailingIcon != null) BuilderIcon(trailingIcon, contentDescription = null, tint = colors.content)
+        if (trailingIcon != null) {
+            BuilderIcon(trailingIcon, contentDescription = null, tint = colors.content, size = iconSize)
+        }
     }
 }
 
