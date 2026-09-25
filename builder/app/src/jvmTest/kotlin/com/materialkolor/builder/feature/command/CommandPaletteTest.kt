@@ -79,10 +79,10 @@ class CommandPaletteTest {
                 val category = categories.getValue(command.category)
                 val keys = command.shortcut?.text(apple)
                 val shows = when (val state = command.state) {
-                    is CommandState.Disabled -> hasText(state.reason)
-                    CommandState.Enabled -> if (keys == null) !hasText(category) else hasContentDescription(keys)
+                    is CommandState.Disabled -> rowMatcher(command.label, state.reason)
+                    CommandState.Enabled -> rowMatcher(command.label) and (keys?.let(::hasContentDescription) ?: PaletteRow)
                 }
-                onAllNodes(rowMatcher(command.label) and shows).fetchSemanticsNodes().none { node ->
+                onAllNodes(shows).fetchSemanticsNodes().none { node ->
                     val header = headers.filter { each -> each.positionInRoot.y < node.positionInRoot.y }
                         .maxByOrNull { each -> each.positionInRoot.y }
                     header?.config?.get(SemanticsProperties.Text)?.first()?.text == category

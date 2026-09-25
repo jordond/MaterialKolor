@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
@@ -299,6 +300,9 @@ private fun ColumnScope.PaletteBody(
         }
     }
     PaletteFooter()
+    // b-511
+    // The search field leads, so it takes focus as the palette opens.
+    LaunchedEffect(field) { field.requestFocus() }
 }
 
 // b-511
