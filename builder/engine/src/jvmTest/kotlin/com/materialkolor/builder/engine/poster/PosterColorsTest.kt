@@ -10,6 +10,7 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class PosterColorsTest {
@@ -25,6 +26,25 @@ class PosterColorsTest {
             assertAtLeast(3.0, poster.outline, seed, "outline on $seed")
             assertAtLeast(4.5, poster.ink, poster.raised, "ink on raised for $seed")
             assertAtLeast(4.5, poster.ink, poster.sunken, "ink on sunken for $seed")
+        }
+    }
+
+    @Test
+    fun inverse_thousandRandomSeeds_standsOnThePostersInkAndReads() {
+        val random = Random(116)
+        repeat(1_000) {
+            val seed = Argb(random.nextInt())
+            val poster = PosterColors.of(seed)
+            val inverse = poster.inverse()
+
+            assertEquals(poster.ink, inverse.background, "inverse page on $seed")
+            assertEquals(!poster.isLight, inverse.isLight, "inverse lightness on $seed")
+            assertAtLeast(4.5, inverse.ink, inverse.background, "inverse ink on $seed")
+            assertAtLeast(3.0, inverse.inkMuted, inverse.background, "inverse muted ink on $seed")
+            assertAtLeast(3.0, inverse.outline, inverse.background, "inverse outline on $seed")
+            assertAtLeast(4.5, inverse.ink, inverse.raised, "inverse ink on raised for $seed")
+            assertAtLeast(4.5, inverse.ink, inverse.sunken, "inverse ink on sunken for $seed")
+            assertSame(poster, inverse.inverse(), "inverse of the inverse on $seed")
         }
     }
 
