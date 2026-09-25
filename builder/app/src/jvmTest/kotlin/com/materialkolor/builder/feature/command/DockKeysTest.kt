@@ -58,7 +58,7 @@ class DockKeysTest {
     fun aNumberKey_thenSpaceAndV_workWithNoClick() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             with(harness) { show() }
-            keys { pressKey(Key.Three) }
+            keys { pressKey(Key.Two) }
             waitUntil { harness.workspace.state.value.document.library == Library.Unstyled }
             waitForIdle()
             val seed = harness.graph.session.document.value.seed

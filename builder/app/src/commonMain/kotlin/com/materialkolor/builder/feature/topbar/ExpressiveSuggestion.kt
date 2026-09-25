@@ -19,8 +19,8 @@ import com.materialkolor.builder.kit.control.Emphasis
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Offers the Expressive style on the 2025 spec after a switch to Expressive left the document on
- * something else.
+ * Offers the Expressive style on the 2025 spec after the Expressive switch went on and left the
+ * document on something else.
  *
  * Nothing changes until someone presses Apply. Keep mine, Esc and a click on the veil all leave
  * the document as it is.
@@ -28,7 +28,7 @@ import org.jetbrains.compose.resources.stringResource
  * @param[visible] Whether the suggestion is up.
  * @param[onApply] Called for Apply. The caller makes [expressiveStyleChange] and closes it.
  * @param[onKeepMine] Called for Keep mine and for any other way of closing it.
- * @param[returnFocusTo] The switcher, where focus goes once it closes.
+ * @param[returnFocusTo] The Expressive switch, where focus goes once it closes.
  */
 @Composable
 internal fun ExpressiveSuggestion(
@@ -62,9 +62,8 @@ internal fun ExpressiveSuggestion(
 }
 
 /**
- * Whether [change], taking the document from [before] to [after], is a switch onto Expressive that
- * should offer the Expressive style. Only a library switch raises it, never an undo, an
- * import or a shuffle.
+ * Whether [change], taking the document from [before] to [after], turns Expressive on and should
+ * offer the Expressive style. Only a library edit raises it, never an undo, an import or a shuffle.
  */
 internal fun raisesExpressiveSuggestion(
     change: DocumentChange,
@@ -72,8 +71,8 @@ internal fun raisesExpressiveSuggestion(
     after: ThemeDocument,
 ): Boolean =
     change is DocumentChange.SetLibrary &&
-        LibraryChoice.of(before) != LibraryChoice.Expressive &&
-        LibraryChoice.of(after) == LibraryChoice.Expressive &&
+        !before.onExpressive &&
+        after.onExpressive &&
         suggestsExpressiveStyle(after)
 
 /**

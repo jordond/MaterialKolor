@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
  */
 internal enum class TopBarControl {
     Library,
+    Expressive,
     Commands,
     Undo,
     Redo,

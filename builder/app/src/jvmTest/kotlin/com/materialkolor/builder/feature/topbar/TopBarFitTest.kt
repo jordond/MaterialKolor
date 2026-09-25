@@ -74,7 +74,7 @@ private val DROPDOWN_ROOM: Dp = 720.dp
 /**
  * The names the segmented switcher shows, one per library.
  */
-private val LIBRARY_NAMES = listOf("M3", "Expressive", "Unstyled", "Fluent", "Custom")
+private val LIBRARY_NAMES = listOf("M3", "Unstyled", "Fluent", "Custom")
 
 private val InBar: SemanticsMatcher = hasAnyAncestor(hasTestTag(TOP_BAR_TAG)) and InWorkspace
 private val InSwitcher: SemanticsMatcher = hasAnyAncestor(hasTestTag(LIBRARY_SWITCHER_TAG))

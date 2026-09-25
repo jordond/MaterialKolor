@@ -9,6 +9,9 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onLast
@@ -29,6 +32,7 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.canvas.TestOwner
 import com.materialkolor.builder.feature.poster.kotlinLiteralOf
+import com.materialkolor.builder.feature.topbar.TOP_BAR_TAG
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import dev.zacsweers.metro.createGraphFactory
@@ -107,11 +111,33 @@ class BuilderRootTest {
             onNode(isFocused()).performKeyInput { pressKey(Key.DirectionRight) }
             waitForIdle()
             graph.session.document.value shouldBe start
-            onNodeWithText("Expressive").assertIsFocused()
+            onNodeWithText("Unstyled").assertIsFocused()
 
             onNode(isFocused()).performKeyInput { pressKey(Key.Enter) }
             waitForIdle()
+            graph.session.document.value.library shouldBe Library.Unstyled
+
+            runOnUiThread { workspace.undo() }
+            waitForIdle()
+            graph.session.document.value shouldBe start
+            graph.session.history.value.canUndo shouldBe false
+        }
+
+    @Test
+    fun expressiveSwitch_enterFlipsItAsOneUndoEntryAndGetsFocusBackFromTheSuggestion() =
+        runDesktopComposeUiTest(width = 1600, height = HEIGHT) {
+            val graph = showRoot()
+            val start = graph.session.document.value
+            val expressive = hasText("Expressive") and hasAnyAncestor(hasTestTag(TOP_BAR_TAG))
+
+            onNode(expressive).requestFocus()
+            onNode(isFocused()).performKeyInput { pressKey(Key.Enter) }
+            waitForIdle()
             graph.session.document.value.expressive shouldBe true
+            // The default theme is on the 2021 spec, so the suggestion comes up and hands focus back.
+            onNodeWithText("Keep mine").performClick()
+            waitForIdle()
+            onNode(expressive).assertIsFocused()
 
             runOnUiThread { workspace.undo() }
             waitForIdle()
