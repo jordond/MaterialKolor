@@ -20,7 +20,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.stringResource
 
-/** The animation lengths the export sheet offers, in milliseconds. A length stored from elsewhere joins them. */
+/**
+ * The animation lengths the export sheet offers, in milliseconds. A length stored from elsewhere joins them.
+ */
 private val AnimationDurationsMs: List<Int> = listOf(150, 300, 500, 1000)
 
 /**
@@ -33,7 +35,9 @@ internal fun PosterContext.showsColorAnimation(): Boolean =
     capabilities[Control.ColorAnimation].shown &&
         preferences.exportPrefsFor(exportTarget()).mode == ExportMode.Dynamic
 
-/** The target the document exports to, whose export options this browser remembers. */
+/**
+ * The target the document exports to, whose export options this browser remembers.
+ */
 private fun PosterContext.exportTarget(): ExportTarget = ExportTarget.of(document.library, document.expressive)
 
 /**
@@ -72,7 +76,9 @@ internal fun ColorAnimationOption(
     }
 }
 
-/** How long the animation runs, the lengths on offer with [current] among them. */
+/**
+ * How long the animation runs, the lengths on offer with [current] among them.
+ */
 @Composable
 private fun DurationChoice(
     current: Int,

@@ -152,7 +152,9 @@ internal fun historyCommands(
     ) { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.History)) }
 }
 
-/** A top bar button that phones, and a Medium bar short of room, move into the overflow menu. */
+/**
+ * A top bar button that phones, and a Medium bar short of room, move into the overflow menu.
+ */
 @Composable
 private fun topBarSite(
     list: CommandList,

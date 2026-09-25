@@ -151,7 +151,9 @@ internal fun CheatSheet(
     }
 }
 
-/** One shortcut, what it does and its keys, read out together. */
+/**
+ * One shortcut, what it does and its keys, read out together.
+ */
 @Composable
 private fun ShortcutRow(
     label: String,
@@ -175,7 +177,9 @@ private fun groupTitle(group: ShortcutGroup): StringResource =
         ShortcutGroup.Project -> Res.string.command_group_project
     }
 
-/** What [shortcut] does, as the cheat sheet says it. */
+/**
+ * What [shortcut] does, as the cheat sheet says it.
+ */
 internal fun shortcutLabel(shortcut: Shortcut): StringResource =
     when (shortcut) {
         Shortcut.Palette -> Res.string.command_key_palette

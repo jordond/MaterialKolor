@@ -230,16 +230,22 @@ internal fun ColorSwatch(
     )
 }
 
-/** The Pick button of each key color row, where the focus goes when a button beside it goes away. */
+/**
+ * The Pick button of each key color row, where the focus goes when a button beside it goes away.
+ */
 @Stable
 internal class KeyColorPicks {
     private val requesters = KeyColor.entries.associateWith { FocusRequester() }
 
-    /** The Pick button of the row for [slot]. */
+    /**
+     * The Pick button of the row for [slot].
+     */
     operator fun get(slot: KeyColor): FocusRequester = requesters.getValue(slot)
 }
 
-/** What the row for [slot] is called. */
+/**
+ * What the row for [slot] is called.
+ */
 internal fun keyColorName(slot: KeyColor): StringResource =
     when (slot) {
         KeyColor.Primary -> Res.string.keycolors_name_primary

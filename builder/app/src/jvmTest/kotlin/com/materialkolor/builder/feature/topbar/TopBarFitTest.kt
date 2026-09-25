@@ -62,16 +62,24 @@ import kotlin.test.Test
 
 private const val HEIGHT = 800
 
-/** Wide enough for the segmented switcher in every skin. */
+/**
+ * Wide enough for the segmented switcher in every skin.
+ */
 private const val ROOMY_WIDTH = 1600
 
-/** Room for the segmented switcher in every skin. */
+/**
+ * Room for the segmented switcher in every skin.
+ */
 private val ROW_ROOM: Dp = 1400.dp
 
-/** Room for the dropdown only. */
+/**
+ * Room for the dropdown only.
+ */
 private val DROPDOWN_ROOM: Dp = 720.dp
 
-/** The names the segmented switcher shows, one per library. */
+/**
+ * The names the segmented switcher shows, one per library.
+ */
 private val LIBRARY_NAMES = listOf("M3", "Expressive", "Unstyled", "Fluent", "Custom")
 
 private val InBar: SemanticsMatcher = hasAnyAncestor(hasTestTag(TOP_BAR_TAG)) and InWorkspace
@@ -209,7 +217,9 @@ class TopBarFitTest {
             checks shouldBeGreaterThan booted
         }
 
-    /** Boots the builder [width] wide and checks the top bar in each library's skin. */
+    /**
+     * Boots the builder [width] wide and checks the top bar in each library's skin.
+     */
     private fun checkEverySkin(width: Int) =
         runDesktopComposeUiTest(width = width, height = HEIGHT) {
             val graph = showRoot()
@@ -223,7 +233,9 @@ class TopBarFitTest {
             misfits.joinToString("\n") shouldBe ""
         }
 
-    /** Everything wrong with how the top bar sits in a window [width] wide, or nothing. */
+    /**
+     * Everything wrong with how the top bar sits in a window [width] wide, or nothing.
+     */
     private fun ComposeUiTest.misfits(
         width: Int,
         target: Dp,
@@ -252,7 +264,9 @@ class TopBarFitTest {
         return found
     }
 
-    /** The switcher and each end-edge action that shows, by name, with their bounds. */
+    /**
+     * The switcher and each end-edge action that shows, by name, with their bounds.
+     */
     private fun ComposeUiTest.controls(): List<Pair<String, Rect>> {
         val switcher = onAllNodes(hasTestTag(LIBRARY_SWITCHER_TAG)).fetchSemanticsNodes()
         // b-512
@@ -269,19 +283,25 @@ class TopBarFitTest {
         return switcher.map { node -> "Library" to node.boundsInRoot } + actions + export
     }
 
-    /** Whether the switcher, in either form, holds keyboard focus. */
+    /**
+     * Whether the switcher, in either form, holds keyboard focus.
+     */
     private fun ComposeUiTest.switcherFocused(): Boolean =
         onAllNodes(isFocused() and (InSwitcher or hasTestTag(LIBRARY_SWITCHER_TAG))).fetchSemanticsNodes().size == 1
 
     private fun seedChange(rgb: Int): DocumentChange = DocumentChange.SetSeed(Argb(rgb), SeedSource.Typed)
 
-    /** Whether the switcher shows as the segmented row, which names every library at once. */
+    /**
+     * Whether the switcher shows as the segmented row, which names every library at once.
+     */
     private fun ComposeUiTest.segmentedShown(): Boolean =
         LIBRARY_NAMES.all { name ->
             onAllNodes(hasText(name) and InSwitcher, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
         }
 
-    /** The segmented options whose label is narrower than its own line, which a row that fits never has. */
+    /**
+     * The segmented options whose label is narrower than its own line, which a row that fits never has.
+     */
     private fun ComposeUiTest.clippedOptions(): List<String> =
         LIBRARY_NAMES
             .filter { name ->
@@ -297,7 +317,9 @@ class TopBarFitTest {
         return if (action(layouts)) layouts.firstOrNull() else null
     }
 
-    /** Where a press still lands on this control, its bounds or its larger touch area. */
+    /**
+     * Where a press still lands on this control, its bounds or its larger touch area.
+     */
     private fun SemanticsNode.reach(): Rect {
         val touch = touchBoundsInRoot
         return if (touch.width * touch.height > boundsInRoot.width * boundsInRoot.height) touch else boundsInRoot

@@ -138,14 +138,18 @@ private suspend fun dispatchResult(
     }
 }
 
-/** What the host reads of the workspace, kept current for the collector and the toast's Undo. */
+/**
+ * What the host reads of the workspace, kept current for the collector and the toast's Undo.
+ */
 private class Workspace(
     val dispatcher: Dispatcher<WorkspaceAction>,
     val document: ThemeDocument,
     val project: Int,
 )
 
-/** The Undo of the newest seed's toast, or null once there is none. */
+/**
+ * The Undo of the newest seed's toast, or null once there is none.
+ */
 private class UndoSlot {
     var current: SeedUndo? = null
 }

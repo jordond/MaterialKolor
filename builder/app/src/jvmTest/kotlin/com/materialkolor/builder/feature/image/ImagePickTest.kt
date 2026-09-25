@@ -84,7 +84,9 @@ class ImagePickTest {
             graph.session.document.value shouldBe before
         }
 
-    /** The whole builder on fakes, booted. */
+    /**
+     * The whole builder on fakes, booted.
+     */
     private fun ComposeUiTest.showRoot(): AppGraph {
         val graph = createGraphFactory<AppGraph.Factory>().create(platform)
         val owner = TestOwner()

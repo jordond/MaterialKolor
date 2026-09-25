@@ -21,9 +21,13 @@ internal fun isApple(browser: String): Boolean = APPLE_MARKERS.any { marker -> m
 
 private val APPLE_MARKERS = listOf("Macintosh", "Mac OS", "iPhone", "iPad", "iPod", "Darwin")
 
-/** The key a [Chord] is pressed with. */
+/**
+ * The key a [Chord] is pressed with.
+ */
 internal sealed interface ChordKey {
-    /** A key found by where it sits, the way US keyboards print [name] on it. */
+    /**
+     * A key found by where it sits, the way US keyboards print [name] on it.
+     */
     data class Physical(
         val key: Key,
         val name: String,
@@ -50,11 +54,15 @@ internal data class Chord(
     val primary: Boolean = false,
     val shift: Boolean = false,
 ) {
-    /** Whether the chord is a key on its own or with Shift, which WCAG 2.1.4 lets someone turn off. */
+    /**
+     * Whether the chord is a key on its own or with Shift, which WCAG 2.1.4 lets someone turn off.
+     */
     val singleKey: Boolean
         get() = !primary
 
-    /** The chord as the cheat sheet and the tooltips write it, "Cmd+K" or "Ctrl+K". */
+    /**
+     * The chord as the cheat sheet and the tooltips write it, "Cmd+K" or "Ctrl+K".
+     */
     fun text(apple: Boolean): String {
         val name = when (key) {
             is ChordKey.Physical -> key.name
@@ -68,7 +76,9 @@ internal data class Chord(
         return parts.joinToString("+")
     }
 
-    /** Whether [event] presses this chord, with Cmd as the primary key when [apple]. */
+    /**
+     * Whether [event] presses this chord, with Cmd as the primary key when [apple].
+     */
     fun matches(
         event: KeyEvent,
         apple: Boolean,
@@ -97,7 +107,9 @@ internal data class Chord(
     }
 }
 
-/** How the cheat sheet groups the shortcuts, in the order of the spec's keyboard map. */
+/**
+ * How the cheat sheet groups the shortcuts, in the order of the spec's keyboard map.
+ */
 internal enum class ShortcutGroup {
     General,
     Theme,
@@ -169,10 +181,14 @@ internal enum class Shortcut(
     Grayscale(ShortcutGroup.Preview, listOf(Chord(physical(Key.B, "B"))), inRegistry = false),
     ;
 
-    /** The chords written out for this platform, "P, Ctrl+O" say. */
+    /**
+     * The chords written out for this platform, "P, Ctrl+O" say.
+     */
     fun text(apple: Boolean): String = chords.joinToString(", ") { chord -> chord.text(apple) }
 
-    /** Whether [chord] of this shortcut fires while a text field has focus. */
+    /**
+     * Whether [chord] of this shortcut fires while a text field has focus.
+     */
     fun firesInFields(chord: Chord): Boolean = inFields && !chord.singleKey
 
     companion object {
@@ -196,7 +212,9 @@ internal enum class Shortcut(
     }
 }
 
-/** Cmd or Ctrl with V, C, X or A, which always stay the browser's and the field's own. */
+/**
+ * Cmd or Ctrl with V, C, X or A, which always stay the browser's and the field's own.
+ */
 internal fun clipboardChord(
     event: KeyEvent,
     apple: Boolean,

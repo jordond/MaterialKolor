@@ -107,7 +107,9 @@ internal fun ExplainerDialog(
     }
 }
 
-/** The colors, the reasons and the three ways out. */
+/**
+ * The colors, the reasons and the three ways out.
+ */
 @Composable
 private fun ExplainerBody(
     context: PosterContext,
@@ -142,7 +144,9 @@ private fun ExplainerBody(
     }
 }
 
-/** One listed color, a swatch with its hex and HCT values. */
+/**
+ * One listed color, a swatch with its hex and HCT values.
+ */
 @Composable
 private fun HctLine(
     label: String,
@@ -260,7 +264,9 @@ private fun ExplainerActions(
     }
 }
 
-/** One way out, what it would do and the button that does it. */
+/**
+ * One way out, what it would do and the button that does it.
+ */
 @Composable
 private fun ActionBlock(
     detail: String,
@@ -275,7 +281,9 @@ private fun ActionBlock(
     }
 }
 
-/** The sentence in words, with [styleName] first where the sentence names the style. */
+/**
+ * The sentence in words, with [styleName] first where the sentence names the style.
+ */
 @Composable
 private fun ExplainerSentence.text(styleName: String = ""): String {
     val arguments: List<Any> = if (key.namesStyle) listOf(styleName) + values else values

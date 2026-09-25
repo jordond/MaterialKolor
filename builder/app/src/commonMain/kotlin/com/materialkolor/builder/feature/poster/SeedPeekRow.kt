@@ -84,8 +84,12 @@ internal fun SeedPeekRow(
 
 // b-510
 
-/** How big the peek sets the hex, the phone design's size, under the docked hero's 72. */
+/**
+ * How big the peek sets the hex, the phone design's size, under the docked hero's 72.
+ */
 private val PeekHexSize: TextUnit = 36.sp
 
-/** The line the peek's hex takes. */
+/**
+ * The line the peek's hex takes.
+ */
 private val PeekHexLine: TextUnit = 40.sp

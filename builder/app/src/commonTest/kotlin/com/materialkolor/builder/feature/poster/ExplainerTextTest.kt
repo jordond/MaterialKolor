@@ -22,7 +22,9 @@ import kotlin.test.Test
 class ExplainerTextTest {
     private val resolver = ThemeResolver()
 
-    /** A red loud enough that every style has to cap or move it. */
+    /**
+     * A red loud enough that every style has to cap or move it.
+     */
     private val seed = Argb(0xE53935)
 
     @Test

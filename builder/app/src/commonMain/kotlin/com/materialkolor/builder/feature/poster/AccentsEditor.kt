@@ -74,14 +74,20 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
-/** The contrast rules an on color can be held to, loosest first. */
+/**
+ * The contrast rules an on color can be held to, loosest first.
+ */
 private val Thresholds: List<OnColorThreshold> =
     listOf(OnColorThreshold.AaLarge, OnColorThreshold.AaNormal, OnColorThreshold.Aaa)
 
-/** The tones an extra color's slider covers. */
+/**
+ * The tones an extra color's slider covers.
+ */
 private val AccentToneRange: ClosedFloatingPointRange<Float> = 0f..100f
 
-/** One arrow press moves one tone. */
+/**
+ * One arrow press moves one tone.
+ */
 private const val ACCENT_TONE_STEP = 1f
 
 private const val MAX_ACCENT_TONE = 100
@@ -299,7 +305,9 @@ private fun FamilyColors(
     }
 }
 
-/** The modes this preview mode shows, as whether each is dark, light first. */
+/**
+ * The modes this preview mode shows, as whether each is dark, light first.
+ */
 private val PreviewMode.shown: List<Boolean>
     get() = when (this) {
         PreviewMode.Light -> listOf(false)
@@ -307,7 +315,9 @@ private val PreviewMode.shown: List<Boolean>
         PreviewMode.Dark -> listOf(true)
     }
 
-/** The contrast of [foreground] as text over [background] in the extra color at [index], as the audit rates it. */
+/**
+ * The contrast of [foreground] as text over [background] in the extra color at [index], as the audit rates it.
+ */
 private fun ThemeResult.ratio(
     index: Int,
     foreground: AccentPart,
@@ -322,7 +332,9 @@ private fun ThemeResult.ratio(
     return rate(pair, isDark).ratio
 }
 
-/** One of an extra color's four tones, the mode it is for and the slot it cuts. */
+/**
+ * One of an extra color's four tones, the mode it is for and the slot it cuts.
+ */
 private enum class AccentTone(
     val isDark: Boolean,
     val container: Boolean,
@@ -334,13 +346,17 @@ private enum class AccentTone(
     DarkContainer(isDark = true, container = true, label = Res.string.accents_tone_dark_container),
 }
 
-/** The tone [which] names on this extra color. */
+/**
+ * The tone [which] names on this extra color.
+ */
 private fun Accent.tone(which: AccentTone): Int {
     val tones = if (which.isDark) dark else light
     return if (which.container) tones.container else tones.color
 }
 
-/** This extra color with the tone [which] names moved to [tone] and the other three kept. */
+/**
+ * This extra color with the tone [which] names moved to [tone] and the other three kept.
+ */
 private fun Accent.withTone(
     which: AccentTone,
     tone: Int,
@@ -350,7 +366,9 @@ private fun Accent.withTone(
     return if (which.isDark) copy(dark = moved) else copy(light = moved)
 }
 
-/** One tone of the extra color at [index], with the tone it holds beside it. */
+/**
+ * One tone of the extra color at [index], with the tone it holds beside it.
+ */
 @Composable
 private fun AccentToneSlider(
     dispatcher: Dispatcher<WorkspaceAction>,
@@ -391,7 +409,9 @@ private fun AccentToneSlider(
     }
 }
 
-/** The last extra color a drag reported, which its release lands on. Only the release reads it. */
+/**
+ * The last extra color a drag reported, which its release lands on. Only the release reads it.
+ */
 private class PendingAccent {
     var accent: Accent? = null
 }
@@ -423,7 +443,9 @@ private fun ThresholdChoice(
     }
 }
 
-/** What [threshold] is called. */
+/**
+ * What [threshold] is called.
+ */
 private fun thresholdName(threshold: OnColorThreshold): StringResource =
     when (threshold) {
         OnColorThreshold.AaLarge -> Res.string.accents_threshold_aa_large
@@ -431,22 +453,32 @@ private fun thresholdName(threshold: OnColorThreshold): StringResource =
         OnColorThreshold.Aaa -> Res.string.accents_threshold_aaa
     }
 
-/** Where the focus goes when Add brings in a row or a Remove button takes its row with it. */
+/**
+ * Where the focus goes when Add brings in a row or a Remove button takes its row with it.
+ */
 @Stable
 private class AccentFocus {
     private val names = mutableMapOf<Int, FocusRequester>()
 
-    /** The Add button. */
+    /**
+     * The Add button.
+     */
     val add = FocusRequester()
 
-    /** The place of the color Add has just asked for, until the list grows and its name takes the focus. */
+    /**
+     * The place of the color Add has just asked for, until the list grows and its name takes the focus.
+     */
     var added: Int? = null
 
-    /** The name field of the row at [index]. */
+    /**
+     * The name field of the row at [index].
+     */
     fun name(index: Int): FocusRequester = names.getOrPut(index) { FocusRequester() }
 }
 
-/** What a row's name and seed fields say, resolved once for the whole list. */
+/**
+ * What a row's name and seed fields say, resolved once for the whole list.
+ */
 @Immutable
 private class AccentRowMessages(
     val names: AccentNameMessages,

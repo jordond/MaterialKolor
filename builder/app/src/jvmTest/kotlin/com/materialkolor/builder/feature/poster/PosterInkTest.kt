@@ -21,7 +21,9 @@ import io.kotest.matchers.shouldBe
 import kotlin.random.Random
 import kotlin.test.Test
 
-/** What poster text has to reach on the seed, WCAG AA for body text. */
+/**
+ * What poster text has to reach on the seed, WCAG AA for body text.
+ */
 private const val TEXT_RATIO = 4.5
 
 @OptIn(ExperimentalTestApi::class)

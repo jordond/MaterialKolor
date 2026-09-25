@@ -138,11 +138,15 @@ class RolePopoverTest {
         return actions
     }
 
-    /** The action as the test compares it, a copy without the tile it hands focus back to. */
+    /**
+     * The action as the test compares it, a copy without the tile it hands focus back to.
+     */
     private fun WorkspaceAction.withoutFocus(): WorkspaceAction =
         (this as? WorkspaceAction.CopyText)?.copy(returnFocusTo = null) ?: this
 
-    /** Open the light primary swatch's menu and choose [item]. */
+    /**
+     * Open the light primary swatch's menu and choose [item].
+     */
     private fun ComposeUiTest.choose(
         result: ThemeResult,
         item: String,

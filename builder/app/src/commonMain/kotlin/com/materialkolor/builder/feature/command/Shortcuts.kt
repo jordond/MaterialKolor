@@ -77,18 +77,26 @@ internal class ShortcutsModel(
     private val preferences: PreferencesRepository,
     environment: Environment,
 ) : ViewModel() {
-    /** Whether this runs on an Apple system, where the shortcuts take Cmd. */
+    /**
+     * Whether this runs on an Apple system, where the shortcuts take Cmd.
+     */
     val apple: Boolean = isApple(environment.browser)
 
     // b-315c
 
-    /** Emits when the page goes out of sight, which lets go of a held B whose release never comes. */
+    /**
+     * Emits when the page goes out of sight, which lets go of a held B whose release never comes.
+     */
     val pageHides: Flow<Unit> = environment.pageHides
 
-    /** The form the top bar's library switcher shows, which the registry reads. */
+    /**
+     * The form the top bar's library switcher shows, which the registry reads.
+     */
     val switcherForm: SwitcherFormState = SwitcherFormState() // b-315d
 
-    /** Turn the single-key shortcuts on or off, in every tab of this browser. */
+    /**
+     * Turn the single-key shortcuts on or off, in every tab of this browser.
+     */
     fun setSingleKeys(on: Boolean) {
         viewModelScope.launch { preferences.update { prefs -> prefs.copy(singleKeyShortcuts = on) } }
     }
@@ -106,47 +114,67 @@ internal class ShortcutsModel(
  */
 @Stable
 internal class ShortcutFocus {
-    /** The page root. */
+    /**
+     * The page root.
+     */
     val holder: FocusRequester = FocusRequester()
 
     internal var armed by mutableStateOf(false)
     internal var holderFocused: Boolean = false
     internal var pageHasFocus by mutableStateOf(false)
 
-    /** How many text input sessions are open below the holder. */
+    /**
+     * How many text input sessions are open below the holder.
+     */
     internal var textSessions: Int = 0
 
-    /** How many text input sessions have opened below the holder so far. */
+    /**
+     * How many text input sessions have opened below the holder so far.
+     */
     internal var sessionStarts: Int = 0
 
-    /** Whether single keys are on, kept here for the keys a panel takes itself. */
+    /**
+     * Whether single keys are on, kept here for the keys a panel takes itself.
+     */
     internal var singleKeys: Boolean = true // b-315c
 
-    /** The page's handling of a key pressed inside an overlay, which the page root never hears. */
+    /**
+     * The page's handling of a key pressed inside an overlay, which the page root never hears.
+     */
     internal var overlayKey: (KeyEvent) -> Boolean = { false } // b-315d
 
     private var fromKeys = false
 
-    /** The panel a shortcut opened last, which hands focus back to the holder. */
+    /**
+     * The panel a shortcut opened last, which hands focus back to the holder.
+     */
     var keyOpened: Panel? by mutableStateOf(null)
         private set
 
-    /** Whether a text field below the holder is taking input. */
+    /**
+     * Whether a text field below the holder is taking input.
+     */
     val typing: Boolean
         get() = textSessions > 0
 
-    /** Give the holder focus. An overlay's focus trap turns it down, so an open overlay keeps focus. */
+    /**
+     * Give the holder focus. An overlay's focus trap turns it down, so an open overlay keeps focus.
+     */
     fun focusHolder() {
         armed = true
         holder.requestFocus()
     }
 
-    /** Called with every panel that opens, so a panel a shortcut opened gives focus to the holder. */
+    /**
+     * Called with every panel that opens, so a panel a shortcut opened gives focus to the holder.
+     */
     fun noteOpen(panel: Panel) {
         keyOpened = if (fromKeys) panel else null
     }
 
-    /** Runs [block] as a shortcut, so a panel it opens counts as opened from the keyboard. */
+    /**
+     * Runs [block] as a shortcut, so a panel it opens counts as opened from the keyboard.
+     */
     fun runFromKeys(block: () -> Unit) {
         fromKeys = true
         try {
@@ -156,7 +184,9 @@ internal class ShortcutFocus {
         }
     }
 
-    /** Where [panel] hands focus once it closes, the holder when a shortcut opened it, else [otherwise]. */
+    /**
+     * Where [panel] hands focus once it closes, the holder when a shortcut opened it, else [otherwise].
+     */
     fun returnFocusFor(
         panel: Panel,
         otherwise: FocusRequester?,
@@ -207,7 +237,9 @@ internal fun ShortcutScope(
 
 // b-315c
 
-/** The page's [ShortcutFocus], for the panels that take keys of their own, or null outside the page. */
+/**
+ * The page's [ShortcutFocus], for the panels that take keys of their own, or null outside the page.
+ */
 internal val LocalShortcutFocus: ProvidableCompositionLocal<ShortcutFocus?> = staticCompositionLocalOf { null }
 
 /**
@@ -226,17 +258,23 @@ internal fun rememberPanelShortcuts(): PanelShortcuts {
     return remember(focus, apple, inputModes) { PanelShortcuts(focus, apple, inputModes) }
 }
 
-/** What [rememberPanelShortcuts] gives a panel. */
+/**
+ * What [rememberPanelShortcuts] gives a panel.
+ */
 @Stable
 internal class PanelShortcuts(
     private val focus: ShortcutFocus?,
     private val apple: Boolean,
     private val inputModes: InputModeManager,
 ) {
-    /** Runs the shortcut pressed and says whether it did anything. Set it as the panel composes. */
+    /**
+     * Runs the shortcut pressed and says whether it did anything. Set it as the panel composes.
+     */
     var onShortcut: (Shortcut) -> Boolean = { false }
 
-    /** Goes on the panel, around everything that takes focus in it. */
+    /**
+     * Goes on the panel, around everything that takes focus in it.
+     */
     val modifier: Modifier = if (focus == null) Modifier else Modifier.onKeyEvent(::onKey)
 
     private fun onKey(event: KeyEvent): Boolean {
@@ -409,7 +447,9 @@ internal fun rememberShortcuts(
     }
 }
 
-/** The page's shortcuts that an overlay hands on, since each would otherwise reach the browser. */
+/**
+ * The page's shortcuts that an overlay hands on, since each would otherwise reach the browser.
+ */
 private val OVERLAY_SHORTCUTS = setOf(Shortcut.Save, Shortcut.Projects) // b-315d
 
 /**
@@ -460,12 +500,16 @@ private fun ClaimFocusWhenNowhere(
 
 private const val SETTLE_FRAMES = 2
 
-/** Whether a held key is down, known at once rather than a recomposition later. */
+/**
+ * Whether a held key is down, known at once rather than a recomposition later.
+ */
 private class HeldKey {
     var down: Boolean = false
 }
 
-/** The shortcuts that say nothing when their command cannot run, since an empty history is no news. */
+/**
+ * The shortcuts that say nothing when their command cannot run, since an empty history is no news.
+ */
 private val QUIET_WHEN_DISABLED = setOf(Shortcut.Undo, Shortcut.Redo)
 
 /**

@@ -80,7 +80,9 @@ class ReportLinkTest {
         themeLink: String? = "https://materialkolor.com/t/abc",
     ): ReportDetails = ReportDetails("2.0.0", "6.0.0", browser, themeLink)
 
-    /** Undoes [percentEncode], to check nothing was lost on the way. */
+    /**
+     * Undoes [percentEncode], to check nothing was lost on the way.
+     */
     private fun percentDecode(text: String): String {
         val bytes = mutableListOf<Byte>()
         var index = 0

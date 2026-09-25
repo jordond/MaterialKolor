@@ -37,11 +37,15 @@ import kotlin.test.Test
 
 private const val LINK = "https://materialkolor.com/t/AQAAAAAAAAA"
 
-/** A share link as long as a theme with a few custom colors makes it. */
+/**
+ * A share link as long as a theme with a few custom colors makes it.
+ */
 private const val LONG_LINK =
     "https://materialkolor.com/t/AdllOwAAABALQnVybnQgT3JhbmdlIHdpdGggYSBsb25nIG5hbWUgdGhhdCBnb2VzIG9uIHBhc3QgdGhlIGVkZ2U"
 
-/** A phone held upright. */
+/**
+ * A phone held upright.
+ */
 private const val PHONE_WIDTH = 360
 
 private const val PHONE_HEIGHT = 780

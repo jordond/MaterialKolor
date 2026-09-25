@@ -14,17 +14,23 @@ import com.materialkolor.builder.domain.model.Style as PaletteStyle
  * outside any text field (F-05, F-32, F-33).
  */
 internal sealed interface PastedText {
-    /** A color, to set the seed to. */
+    /**
+     * A color, to set the seed to.
+     */
     data class Color(
         val argb: Argb,
     ) : PastedText
 
-    /** A share link or a bare share code, to open. */
+    /**
+     * A share link or a bare share code, to open.
+     */
     data class Share(
         val code: String,
     ) : PastedText
 
-    /** The name of a palette style, to switch to. */
+    /**
+     * The name of a palette style, to switch to.
+     */
     data class Style(
         val style: PaletteStyle,
     ) : PastedText
@@ -62,7 +68,9 @@ private fun linkCodeOf(text: String): String? {
     return (route as? Route.Theme)?.code
 }
 
-/** [text] read as a bare share code, or null when it cannot be one, having a slash or a space. */
+/**
+ * [text] read as a bare share code, or null when it cannot be one, having a slash or a space.
+ */
 private fun bareDecode(text: String): DecodeResult? {
     if ('/' in text || text.any { char -> char.isWhitespace() }) return null
     return ShareCodec.decode(text)
@@ -78,7 +86,9 @@ private fun looksLikeACode(text: String): Boolean =
 
 private const val MIN_NEWER_CODE_LENGTH = 16
 
-/** The path of [text] when it is a URL or starts with one, or null for a bare word. */
+/**
+ * The path of [text] when it is a URL or starts with one, or null for a bare word.
+ */
 private fun pathOf(text: String): String? {
     val scheme = text.indexOf("://")
     return when {

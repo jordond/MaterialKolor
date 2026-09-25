@@ -66,18 +66,26 @@ import kotlin.test.Test
 private const val WIDTH = 1280
 private const val HEIGHT = 800
 
-/** The F-35 hint, word for word. */
+/**
+ * The F-35 hint, word for word.
+ */
 private const val HINT = "Paste a color, drop an image, or press Space to shuffle. Press ? for shortcuts."
 
-/** Well past the longest reveal a skin plays. */
+/**
+ * Well past the longest reveal a skin plays.
+ */
 private const val PULSE_DONE_MS = 1_000L
 
-/** Part way into the pulse, while the ring still shows. */
+/**
+ * Part way into the pulse, while the ring still shows.
+ */
 private const val PULSE_MIDWAY_MS = 150L
 
 // b-314a
 
-/** Preferences a newer build wrote, which every write from this build is turned down over. */
+/**
+ * Preferences a newer build wrote, which every write from this build is turned down over.
+ */
 private const val NEWER_PREFS = """{"schema":999,"data":{}}"""
 
 // b-314
@@ -277,7 +285,9 @@ class FirstRunHintTest {
             done shouldBe 1
         }
 
-    /** The whole builder on fakes, booted, with [probe] drawn over the workspace every frame. */
+    /**
+     * The whole builder on fakes, booted, with [probe] drawn over the workspace every frame.
+     */
     private fun ComposeUiTest.showRoot(probe: @Composable (state: WorkspaceModel.State) -> Unit = {}): AppGraph {
         val graph = createGraphFactory<AppGraph.Factory>().create(platform)
         val owner = TestOwner()
@@ -348,7 +358,9 @@ class FirstRunHintTest {
         )
     }
 
-    /** The top bar's state, which keeps the hints it is asked to dismiss the way the workspace does. */
+    /**
+     * The top bar's state, which keeps the hints it is asked to dismiss the way the workspace does.
+     */
     private class TopBarHolder(
         initial: WorkspaceModel.State,
     ) {

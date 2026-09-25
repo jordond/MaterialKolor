@@ -51,7 +51,9 @@ internal enum class InfoTopic {
     Targets,
     ;
 
-    /** What the info button asks, read out and shown as its tooltip. */
+    /**
+     * What the info button asks, read out and shown as its tooltip.
+     */
     val question: StringResource
         get() = when (this) {
             Seed -> Res.string.glossary_seed_question
@@ -64,7 +66,9 @@ internal enum class InfoTopic {
             Targets -> Res.string.glossary_targets_question
         }
 
-    /** The short answer the info button opens. */
+    /**
+     * The short answer the info button opens.
+     */
     val explanation: StringResource
         get() = when (this) {
             Seed -> Res.string.glossary_seed
@@ -133,7 +137,9 @@ internal fun InfoButton(
     )
 }
 
-/** [topic]'s short explanation. */
+/**
+ * [topic]'s short explanation.
+ */
 @Composable
 internal fun InfoNote(
     topic: InfoTopic,

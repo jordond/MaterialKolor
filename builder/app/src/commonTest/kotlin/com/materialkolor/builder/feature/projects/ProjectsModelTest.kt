@@ -393,8 +393,12 @@ class ProjectsModelTest : SessionTestBase() {
     }
 }
 
-/** Far longer than the kit keeps an undo toast up. */
+/**
+ * Far longer than the kit keeps an undo toast up.
+ */
 private const val UNDO_LONG_AFTER_MILLIS: Long = 60_000
 
-/** Text a newer build saved, which this one leaves where it is. */
+/**
+ * Text a newer build saved, which this one leaves where it is.
+ */
 private const val NEWER_TEXT = """{"schema":999,"data":{}}"""

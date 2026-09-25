@@ -33,14 +33,18 @@ import kotlin.test.Test
 private const val WIDTH = 1280
 private const val HEIGHT = 800
 
-/** A seed whose primary comes out calmer, so the poster shows the explainer line and its Why. */
+/**
+ * A seed whose primary comes out calmer, so the poster shows the explainer line and its Why.
+ */
 private val CalmerSeed = Argb(0xE53935)
 
 private const val EXPLAINER_TITLE = "Why primary differs from your seed"
 
 private const val SHARE_TITLE = "Share this theme" // b-306c
 
-/** The panels the poster opens hand focus back to the button that opened them (AR-09). */
+/**
+ * The panels the poster opens hand focus back to the button that opened them (AR-09).
+ */
 @OptIn(ExperimentalTestApi::class)
 class PosterFocusTest {
     private val platform = FakePlatform()
@@ -194,7 +198,9 @@ class PosterFocusTest {
         waitForIdle()
     }
 
-    /** The whole builder on fakes, booted. */
+    /**
+     * The whole builder on fakes, booted.
+     */
     private fun ComposeUiTest.showRoot(): AppGraph {
         val graph = createGraphFactory<AppGraph.Factory>().create(platform)
         val owner = TestOwner()

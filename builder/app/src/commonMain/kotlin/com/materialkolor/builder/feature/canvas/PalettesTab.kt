@@ -58,7 +58,9 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 
-/** Tags the ramp Show on ramp picked out, for tests to find it. */
+/**
+ * Tags the ramp Show on ramp picked out, for tests to find it.
+ */
 internal const val PICKED_RAMP_TAG: String = "picked-ramp"
 
 /**
@@ -127,14 +129,18 @@ internal fun PalettesTab(
 
 // b-308ba
 
-/** How the tab reaches the picked ramp, to scroll it into view and to focus its first stop. */
+/**
+ * How the tab reaches the picked ramp, to scroll it into view and to focus its first stop.
+ */
 @Stable
 private class PickedRequesters {
     val view: BringIntoViewRequester = BringIntoViewRequester()
     val focus: FocusRequester = FocusRequester()
 }
 
-/** The ramps both modes share, on one panel under Same in light and dark. */
+/**
+ * The ramps both modes share, on one panel under Same in light and dark.
+ */
 @Composable
 private fun SharedRamps(
     entries: List<RampEntry>,
@@ -153,7 +159,9 @@ private fun SharedRamps(
     }
 }
 
-/** Where a ramp comes from, one of the scheme's six palettes or an accent. */
+/**
+ * Where a ramp comes from, one of the scheme's six palettes or an accent.
+ */
 @Immutable
 private sealed interface RampSource {
     data class OfPalette(
@@ -223,7 +231,9 @@ private data class PickedRamp(
         entry.source == source && (bothModes || (entry.isDark ?: isDark) == isDark) // b-308ba
 }
 
-/** The ramps of [result] for [mode], shared ones pulled out in Split. */
+/**
+ * The ramps of [result] for [mode], shared ones pulled out in Split.
+ */
 private fun rampLayout(
     result: ThemeResult,
     mode: PreviewMode,
@@ -269,11 +279,15 @@ private fun paletteEntry(
     isDark: Boolean,
 ): RampEntry = RampEntry(source, isDark, ramp.steps, ramp.keyTone, marks = ramp.marks(isDark = null))
 
-/** The roles that picked from this ramp, for the mode [isDark] picks, or for the one mode shown when null. */
+/**
+ * The roles that picked from this ramp, for the mode [isDark] picks, or for the one mode shown when null.
+ */
 private fun Ramp.marks(isDark: Boolean?): List<ModeMark> =
     markers.map { marker -> ModeMark(marker.role.name.lowerFirst(), marker.tone, isDark) }
 
-/** The four colors of the family in the mode [isDark] picks, named for it when [named]. */
+/**
+ * The four colors of the family in the mode [isDark] picks, named for it when [named].
+ */
 private fun AccentFamily.marks(
     isDark: Boolean,
     named: Boolean,
@@ -323,7 +337,9 @@ private fun ThemeResult.pick(target: RampTarget): PickedRamp? =
 
 // b-308ba
 
-/** Whether the ramp of [palette] has the same stops in light and dark, as every ramp has under 2021. */
+/**
+ * Whether the ramp of [palette] has the same stops in light and dark, as every ramp has under 2021.
+ */
 private fun ThemeResult.sameInBothModes(palette: KeyColor): Boolean =
     ramps[palette, false].steps == ramps[palette, true].steps
 
@@ -377,7 +393,9 @@ private fun RampBlock(
     }
 }
 
-/** What the ramp is called, the palette's name or the accent's own. */
+/**
+ * What the ramp is called, the palette's name or the accent's own.
+ */
 @Composable
 private fun RampEntry.title(result: ThemeResult): String =
     when (source) {
@@ -390,7 +408,9 @@ private fun RampEntry.title(result: ThemeResult): String =
         }
     }
 
-/** What the Palettes tab calls a palette. */
+/**
+ * What the Palettes tab calls a palette.
+ */
 private val KeyColor.title: StringResource
     get() = when (this) {
         KeyColor.Primary -> Res.string.tabs_palette_primary

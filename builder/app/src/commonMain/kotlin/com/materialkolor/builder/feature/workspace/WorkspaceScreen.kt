@@ -335,7 +335,9 @@ internal fun WorkspaceScreen(
     )
 }
 
-/** A circle out of [origin], or a crossfade in place when there is none. */
+/**
+ * A circle out of [origin], or a crossfade in place when there is none.
+ */
 private fun revealFrom(origin: Offset?): RevealStyle =
     if (origin == null) {
         RevealStyle.Crossfade
@@ -345,7 +347,9 @@ private fun revealFrom(origin: Offset?): RevealStyle =
 
 // b-404a
 
-/** What a reveal waits on when the change brings in no face the page has not fetched. */
+/**
+ * What a reveal waits on when the change brings in no face the page has not fetched.
+ */
 private val NoFontWait: suspend () -> Unit = {}
 
 /**
@@ -361,7 +365,9 @@ internal fun fontWaitFor(
     fluentFace: suspend () -> Unit = ::preloadFluentFace,
 ): suspend () -> Unit = if (change.landsOnFluent()) fluentFace else NoFontWait
 
-/** Whether [this] leaves the document in Fluent, a switch to it or a whole document that uses it. */
+/**
+ * Whether [this] leaves the document in Fluent, a switch to it or a whole document that uses it.
+ */
 private fun DocumentChange.landsOnFluent(): Boolean =
     when (this) {
         is DocumentChange.SetLibrary -> library == Library.Fluent

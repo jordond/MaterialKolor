@@ -17,7 +17,9 @@ import androidx.compose.ui.focus.focusRequester
 internal object PickButtons {
     private val onScreen = mutableStateMapOf<FocusRequester, Int>()
 
-    /** [opener] while its button is on screen, otherwise null. */
+    /**
+     * [opener] while its button is on screen, otherwise null.
+     */
     fun returnFocusFor(opener: FocusRequester?): FocusRequester? =
         opener?.takeIf { requester -> (onScreen[requester] ?: 0) > 0 }
 

@@ -64,10 +64,14 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
-/** The smallest an app screen shrinks to fit the canvas before the canvas scrolls it instead. */
+/**
+ * The smallest an app screen shrinks to fit the canvas before the canvas scrolls it instead.
+ */
 internal const val MIN_SCREEN_SCALE = 0.6f
 
-/** Tags the scrolling frame each app screen sits in, for tests to read its scroll range. */
+/**
+ * Tags the scrolling frame each app screen sits in, for tests to read its scroll range.
+ */
 internal const val DEVICE_SCREEN_TAG: String = "canvas-device-screen"
 
 /**
@@ -100,7 +104,9 @@ internal class PaneSpecs(
     val filter: ColorMatrix?,
 )
 
-/** The panes for the frame's theme result seen through [vision]. Each gets a fresh matrix. */
+/**
+ * The panes for the frame's theme result seen through [vision]. Each gets a fresh matrix.
+ */
 @Composable
 internal fun rememberPaneSpecs(vision: VisionSimulation): PaneSpecs {
     val result = LocalThemeResult.current
@@ -138,7 +144,9 @@ internal fun CanvasTabs(
 
 // b-512
 
-/** How far the tabs and the preview window stand in from the canvas's edges. */
+/**
+ * How far the tabs and the preview window stand in from the canvas's edges.
+ */
 @Composable
 @ReadOnlyComposable
 internal fun canvasInset(compact: Boolean): Dp {
@@ -302,7 +310,9 @@ private fun SplitTags(
     }
 }
 
-/** One of the small Light and Dark tags over the window. */
+/**
+ * One of the small Light and Dark tags over the window.
+ */
 @Composable
 private fun WindowTag(
     text: String,
@@ -324,7 +334,9 @@ private fun WindowTag(
     )
 }
 
-/** Both copies of [screen] with the handle between them, or the one copy [preview] shows. */
+/**
+ * Both copies of [screen] with the handle between them, or the one copy [preview] shows.
+ */
 @Composable
 private fun PreviewCopies(
     preview: PreviewSplit,
@@ -378,7 +390,9 @@ private class ScreenRoom {
     var width: Int = 0
 }
 
-/** Notes the widest the content may be in [room], and otherwise measures as it would. */
+/**
+ * Notes the widest the content may be in [room], and otherwise measures as it would.
+ */
 private fun Modifier.measureRoom(room: ScreenRoom): Modifier =
     layout { measurable, constraints ->
         room.width = constraints.maxWidth
@@ -413,7 +427,9 @@ private fun Modifier.scaledScreen(
         }
     }
 
-/** What the tab is called on its tab. */
+/**
+ * What the tab is called on its tab.
+ */
 private val PreviewTab.title: StringResource
     get() = when (this) {
         PreviewTab.App -> Res.string.canvas_tab_app

@@ -167,7 +167,9 @@ internal fun TimelineList(
     }
 }
 
-/** One step, or Start, as a row that jumps there. */
+/**
+ * One step, or Start, as a row that jumps there.
+ */
 @Composable
 private fun TimelineRow(
     headline: String,
@@ -251,7 +253,9 @@ private fun StepSwatch(
     }
 }
 
-/** The light scheme of [document] for its own target, from the resolver's scheme cache alone. */
+/**
+ * The light scheme of [document] for its own target, from the resolver's scheme cache alone.
+ */
 private fun lightScheme(
     resolver: ThemeResolver,
     document: ThemeDocument,
@@ -260,7 +264,9 @@ private fun lightScheme(
     return resolver.scheme(SchemeInputs.from(document.forTarget(target)), isDark = false)
 }
 
-/** The three colors a swatch draws, read from its scheme once. */
+/**
+ * The three colors a swatch draws, read from its scheme once.
+ */
 private class SwatchColors(
     val primary: Color,
     val secondaryContainer: Color,
@@ -277,14 +283,20 @@ private class SwatchColors(
  * switch needs after it has dropped focus. Plain fields, since nothing draws from them.
  */
 private class ListFocus {
-    /** Whether focus is in the list right now. */
+    /**
+     * Whether focus is in the list right now.
+     */
     var inList: Boolean = false
 
-    /** Whether focus was in the list when the last jump or key ran. */
+    /**
+     * Whether focus was in the list when the last jump or key ran.
+     */
     var heldAtLastAction: Boolean = false
         private set
 
-    /** Whether the row the history lands on next takes focus, after Undo or Redo pressed here. */
+    /**
+     * Whether the row the history lands on next takes focus, after Undo or Redo pressed here.
+     */
     var followCursor: Boolean = false
 
     fun noteJump() {
@@ -329,18 +341,26 @@ private fun FocusFollowsTheHistory(
     }
 }
 
-/** The library the list last drew in. Plain, since only the effect above reads it. */
+/**
+ * The library the list last drew in. Plain, since only the effect above reads it.
+ */
 private class LibraryHolder(
     var library: Library,
 )
 
-/** The narrowest the list gets, so a short history does not squeeze its rows. */
+/**
+ * The narrowest the list gets, so a short history does not squeeze its rows.
+ */
 private val TimelineMinWidth: Dp = 280.dp
 
-/** How faded an undone step's swatch is, the kit's own disabled alpha. */
+/**
+ * How faded an undone step's swatch is, the kit's own disabled alpha.
+ */
 private const val UNDONE_SWATCH_ALPHA = 0.38f
 
-/** How many swatches read their scheme in one frame. */
+/**
+ * How many swatches read their scheme in one frame.
+ */
 private const val SWATCHES_PER_FRAME = 8
 
 /**
@@ -350,12 +370,16 @@ private const val SWATCHES_PER_FRAME = 8
 internal val LocalSwatchReadProbe: ProvidableCompositionLocal<(() -> Unit)?> =
     staticCompositionLocalOf { null }
 
-/** Waits out [HOLD_STILL_NANOS] of frames, the time a step holds still before its swatch reads it again. */
+/**
+ * Waits out [HOLD_STILL_NANOS] of frames, the time a step holds still before its swatch reads it again.
+ */
 private suspend fun awaitHoldStill() {
     val start = withFrameNanos { frame -> frame }
     var now = start
     while (now - start < HOLD_STILL_NANOS) now = withFrameNanos { frame -> frame }
 }
 
-/** How long a swatch's step holds still before the swatch reads it again, in frame time. */
+/**
+ * How long a swatch's step holds still before the swatch reads it again, in frame time.
+ */
 private const val HOLD_STILL_NANOS: Long = 150_000_000L

@@ -41,18 +41,26 @@ import kotlin.test.Test
 private const val WIDTH = 1280
 private const val HEIGHT = 800
 
-/** How many times the drag under the open list moves the seed, one move every other frame. */
+/**
+ * How many times the drag under the open list moves the seed, one move every other frame.
+ */
 private const val DRAG_MOVES = 20
 
 // b-509b
 
-/** A Medium window whose top bar has moved History into More. */
+/**
+ * A Medium window whose top bar has moved History into More.
+ */
 private const val TIGHT_WIDTH = 600
 
-/** The frames a jump across a library switch takes to land in every part of the page, with room to spare. */
+/**
+ * The frames a jump across a library switch takes to land in every part of the page, with room to spare.
+ */
 private const val SWITCH_FRAMES = 4
 
-/** Frames enough for a row's swatch to read its new step, and well short of a swatch's hold-still wait. */
+/**
+ * Frames enough for a row's swatch to read its new step, and well short of a swatch's hold-still wait.
+ */
 private const val SHIFT_FRAMES = 6
 
 // b-509
@@ -278,6 +286,8 @@ class TimelineTest {
     private fun seedChange(notch: Int): DocumentChange.SetSeed =
         DocumentChange.SetSeed(Argb(0x3366CC + notch * 0x010101), SeedSource.Picked)
 
-    /** Whatever holds focus, a row of the list while it is open. */
+    /**
+     * Whatever holds focus, a row of the list while it is open.
+     */
     private fun ComposeUiTest.focusedRow(): SemanticsNodeInteraction = onNode(isFocused() and InWorkspace)
 }

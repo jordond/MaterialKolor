@@ -23,19 +23,29 @@ internal class OpenProject(
     val context: CoroutineContext,
     parent: Job?,
 ) {
-    /** The project's id, null until a transient project is first saved. */
+    /**
+     * The project's id, null until a transient project is first saved.
+     */
     val id = MutableStateFlow(id)
 
-    /** The name the next save writes. */
+    /**
+     * The name the next save writes.
+     */
     val name = MutableStateFlow(name)
 
-    /** The record as this tab last saved or read it, null before the first save. */
+    /**
+     * The record as this tab last saved or read it, null before the first save.
+     */
     val held = MutableStateFlow(held)
 
-    /** The history as it was last saved, so one that did not change is not written again. */
+    /**
+     * The history as it was last saved, so one that did not change is not written again.
+     */
     val savedHistory = MutableStateFlow<HistoryRecord?>(null)
 
-    /** Watches other tabs while the project is showing. */
+    /**
+     * Watches other tabs while the project is showing.
+     */
     val job = SupervisorJob(parent)
 }
 
@@ -52,7 +62,9 @@ internal class PendingSave(
     val colors: SessionColors,
 )
 
-/** A view state of [project] waiting for autosave. */
+/**
+ * A view state of [project] waiting for autosave.
+ */
 internal class PendingView(
     val project: OpenProject,
     val state: ProjectViewState,

@@ -170,7 +170,9 @@ class FocusHandOffTest {
         }
 }
 
-/** Focuses [node] and presses Enter on it, the way a keyboard user does. */
+/**
+ * Focuses [node] and presses Enter on it, the way a keyboard user does.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.pressWithKeyboard(node: SemanticsNodeInteraction) {
     node.requestFocus()

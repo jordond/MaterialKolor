@@ -366,7 +366,9 @@ class ImageSeedModelTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
-    /** A model on the fakes, with every result it sends collected as it comes. */
+    /**
+     * A model on the fakes, with every result it sends collected as it comes.
+     */
     private fun TestScope.model(): Pair<ImageSeedModel, List<ImageSeedResult>> {
         val model = harness.own(ImageSeedModel(images, pastes))
         val results = mutableListOf<ImageSeedResult>()
@@ -376,14 +378,18 @@ class ImageSeedModelTest : SessionTestBase() {
         return model to results
     }
 
-    /** A workspace on a booted session, which edits on the test's clock. */
+    /**
+     * A workspace on a booted session, which edits on the test's clock.
+     */
     private suspend fun TestScope.workspace(): WorkspaceModel {
         val (session, preferences) = session()
         booted(session)
         return harness.own(WorkspaceModel(session, preferences, FakeClipboard(), FakeRouter(), ThemeResolver()))
     }
 
-    /** Lands [seeded] the way the host's reveal does once its crossfade is under way. */
+    /**
+     * Lands [seeded] the way the host's reveal does once its crossfade is under way.
+     */
     private fun WorkspaceModel.land(seeded: ImageSeedResult.Seeded) {
         edit(seeded.change, EditPhase.Discrete)
     }
@@ -392,7 +398,9 @@ class ImageSeedModelTest : SessionTestBase() {
         val TYPED = Argb(0xFF6750A4.toInt())
         const val MERGE_WINDOW_MILLIS = History.MERGE_WINDOW_MILLIS
 
-        /** How long the model waits for the workspace to say the seed landed. */
+        /**
+         * How long the model waits for the workspace to say the seed landed.
+         */
         const val LANDING_TIMEOUT_MILLIS = 1_000L
     }
 }

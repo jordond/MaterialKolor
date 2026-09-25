@@ -138,7 +138,9 @@ class BootResolverTest {
         plan shouldBe BootPlan(BootStart.Shared(code, ocean.document, projectName = "ocean"))
     }
 
-    /** Resolve the way boot does, with records for a link and the index alone otherwise. */
+    /**
+     * Resolve the way boot does, with records for a link and the index alone otherwise.
+     */
     private fun resolve(
         route: Route,
         tab: String? = null,

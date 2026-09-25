@@ -16,15 +16,21 @@ import dev.zacsweers.metrox.viewmodel.ViewModelGraph
  */
 @DependencyGraph(AppScope::class)
 internal interface AppGraph : ViewModelGraph {
-    /** The resolver the root theme reads on the UI thread. */
+    /**
+     * The resolver the root theme reads on the UI thread.
+     */
     val themeResolver: ThemeResolver
 
-    /** Dark mode and reduced motion for the root, straight from the platform. */
+    /**
+     * Dark mode and reduced motion for the root, straight from the platform.
+     */
     val environment: Environment
 
     // b-216
 
-    /** The open project, for the root's theme result. */
+    /**
+     * The open project, for the root's theme result.
+     */
     val session: ProjectSession
 
     @DependencyGraph.Factory

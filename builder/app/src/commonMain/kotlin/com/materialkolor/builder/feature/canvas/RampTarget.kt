@@ -12,7 +12,9 @@ import com.materialkolor.builder.domain.model.Role
  */
 @Immutable
 internal sealed interface RampTarget {
-    /** Whether the color was picked from the dark column. */
+    /**
+     * Whether the color was picked from the dark column.
+     */
     val isDark: Boolean
 
     /**

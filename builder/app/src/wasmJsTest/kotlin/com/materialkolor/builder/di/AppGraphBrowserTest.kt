@@ -65,7 +65,9 @@ class AppGraphBrowserTest {
         }
 }
 
-/** Services that do nothing, apart from stores held in memory. */
+/**
+ * Services that do nothing, apart from stores held in memory.
+ */
 private object TestPlatform : PlatformServices {
     override val router: Router = TestRouter
     override val stores: StoreFactory = InMemoryStoreFactory()

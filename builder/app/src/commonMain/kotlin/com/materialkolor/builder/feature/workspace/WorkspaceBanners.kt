@@ -140,31 +140,49 @@ internal fun WorkspaceBanners(
  * One banner in the stack, in the order they stack.
  */
 internal enum class WorkspaceBanner {
-    /** Another tab saved the open project while this one was editing it. */
+    /**
+     * Another tab saved the open project while this one was editing it.
+     */
     Conflict,
 
-    /** A link could not be read, so boot opened the last theme instead. */
+    /**
+     * A link could not be read, so boot opened the last theme instead.
+     */
     InvalidLink,
 
-    /** A link could not be read, so boot opened the defaults instead. */
+    /**
+     * A link could not be read, so boot opened the defaults instead.
+     */
     InvalidLinkDefaults,
 
-    /** The address had no page, so boot opened the builder at home. */
+    /**
+     * The address had no page, so boot opened the builder at home.
+     */
     UnknownPath,
 
-    /** A link was written by a newer builder. */
+    /**
+     * A link was written by a newer builder.
+     */
     NewerVersion,
 
-    /** Storage stayed full after the repository made room, so the last save did not land. */
+    /**
+     * Storage stayed full after the repository made room, so the last save did not land.
+     */
     StorageFull,
 
-    /** Nothing saved here outlives the session. */
+    /**
+     * Nothing saved here outlives the session.
+     */
     StorageUnavailable,
 
-    /** The open theme is not saved to the drawer yet. */
+    /**
+     * The open theme is not saved to the drawer yet.
+     */
     UnsavedTheme,
 
-    /** A newer build saved data this one leaves alone until a reload. */
+    /**
+     * A newer build saved data this one leaves alone until a reload.
+     */
     NewerData,
 }
 
@@ -172,38 +190,58 @@ internal enum class WorkspaceBanner {
  * What a banner in the stack can ask for.
  */
 internal sealed interface BannerAction {
-    /** Settle a clash with another tab, keeping this tab's document or taking the other's. */
+    /**
+     * Settle a clash with another tab, keeping this tab's document or taking the other's.
+     */
     data class ResolveConflict(
         val keepMine: Boolean,
     ) : BannerAction
 
-    /** Start a project from the defaults in place of the theme boot opened. */
+    /**
+     * Start a project from the defaults in place of the theme boot opened.
+     */
     data object StartFromDefaults : BannerAction
 
-    /** Put the boot notice away. */
+    /**
+     * Put the boot notice away.
+     */
     data object DismissBootNotice : BannerAction
 
-    /** Load the link the page opened on again, for a newer build to read. */
+    /**
+     * Load the link the page opened on again, for a newer build to read.
+     */
     data object ReloadLink : BannerAction
 
-    /** Open the projects drawer. */
+    /**
+     * Open the projects drawer.
+     */
     data object OpenProjects : BannerAction
 
-    /** Open the share dialog for a link to the theme. */
+    /**
+     * Open the share dialog for a link to the theme.
+     */
     data object GetLink : BannerAction
 
-    /** Close the banner about a browser that keeps nothing. */
+    /**
+     * Close the banner about a browser that keeps nothing.
+     */
     data object CloseStorageUnavailable : BannerAction
 
-    /** Save the theme that is not saved yet to the drawer. */
+    /**
+     * Save the theme that is not saved yet to the drawer.
+     */
     data object SaveTheme : BannerAction
 
-    /** Load the builder again at `/`, for a newer build to pick up its data. */
+    /**
+     * Load the builder again at `/`, for a newer build to pick up its data.
+     */
     data object ReloadHome : BannerAction
 
     // b-314ba
 
-    /** Put the banner about a newer build's data away, where a reload does nothing. */
+    /**
+     * Put the banner about a newer build's data away, where a reload does nothing.
+     */
     data object DismissNewerData : BannerAction
 }
 
@@ -297,7 +335,9 @@ private fun AnnounceOnce(message: String) {
     }
 }
 
-/** What [banner] says, the text it is read out with. */
+/**
+ * What [banner] says, the text it is read out with.
+ */
 private fun messageOf(banner: WorkspaceBanner): StringResource =
     when (banner) {
         WorkspaceBanner.Conflict -> Res.string.projects_conflict

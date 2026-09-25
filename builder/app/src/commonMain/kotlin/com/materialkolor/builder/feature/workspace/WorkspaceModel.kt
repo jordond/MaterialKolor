@@ -119,13 +119,17 @@ internal class WorkspaceModel(
         syncSession(suggesting)
     }
 
-    /** Step back once. */
+    /**
+     * Step back once.
+     */
     fun undo() {
         session.undo()
         syncSession(expressiveSuggestion = false)
     }
 
-    /** Step forward once. */
+    /**
+     * Step forward once.
+     */
     fun redo() {
         session.redo()
         syncSession(expressiveSuggestion = false)
@@ -133,13 +137,17 @@ internal class WorkspaceModel(
 
     // b-508
 
-    /** Move straight to the step [cursor] of the history, and put the Expressive suggestion away as Undo does. */
+    /**
+     * Move straight to the step [cursor] of the history, and put the Expressive suggestion away as Undo does.
+     */
     fun jumpTo(cursor: Int) {
         session.jumpTo(cursor)
         syncSession(expressiveSuggestion = false)
     }
 
-    /** Put the Expressive suggestion away, after Apply or Keep mine. */
+    /**
+     * Put the Expressive suggestion away, after Apply or Keep mine.
+     */
     fun dismissExpressiveSuggestion() {
         updateState { state -> state.copy(expressiveSuggestion = false) }
     }
@@ -171,7 +179,9 @@ internal class WorkspaceModel(
         updateState { state -> state.copy(rampHighlight = null) } // b-308
     }
 
-    /** Only the preview's mode moves. The chrome keeps its appearance (F-04). */
+    /**
+     * Only the preview's mode moves. The chrome keeps its appearance (F-04).
+     */
     fun setPreviewMode(mode: PreviewMode) {
         updateView { view -> view.copy(mode = mode) }
     }
@@ -233,20 +243,26 @@ internal class WorkspaceModel(
         }
     }
 
-    /** Open the picker on [target]. */
+    /**
+     * Open the picker on [target].
+     */
     fun openPicker(target: PickerTarget) {
         openPanel(Panel.Picker)
         updateState { state -> state.copy(pickerTarget = target) }
     }
 
-    /** Close the open panel and drop the history entry it added. */
+    /**
+     * Close the open panel and drop the history entry it added.
+     */
     fun closePanel() {
         if (state.value.panel == null) return
         updateState { state -> state.copy(panel = null, pickerTarget = null, timeline = null) }
         router.popOverlay()
     }
 
-    /** Only the chrome's appearance moves. The preview keeps its mode (F-04). */
+    /**
+     * Only the chrome's appearance moves. The preview keeps its mode (F-04).
+     */
     fun setAppearance(appearance: Appearance) {
         updatePreferences { prefs -> prefs.copy(appearance = appearance) }
     }
@@ -307,7 +323,9 @@ internal class WorkspaceModel(
         updateState { state -> state.copy(rampHighlight = RampHighlight(target, state.projectGeneration)) }
     }
 
-    /** Read the session back into the state at once, so nothing waits on a collector. */
+    /**
+     * Read the session back into the state at once, so nothing waits on a collector.
+     */
     private fun syncSession(expressiveSuggestion: Boolean) {
         val shown = session.shown.value // b-229
         val history = session.history.value
@@ -402,7 +420,9 @@ internal class WorkspaceModel(
         val posterOverCanvas: Boolean = false, // b-406g
         val timeline: Timeline? = null, // b-508
     ) {
-        /** What [document] exports to. */
+        /**
+         * What [document] exports to.
+         */
         val target: ExportTarget
             get() = ExportTarget.of(document.library, document.expressive)
 
@@ -416,7 +436,9 @@ internal class WorkspaceModel(
         fun posterCollapsed(mode: PosterMode): Boolean =
             if (mode == PosterMode.Rail72) !posterOverCanvas else preferences.posterCollapsed
 
-        /** This state showing [document], its capabilities worked out in the same step. */
+        /**
+         * This state showing [document], its capabilities worked out in the same step.
+         */
         fun withDocument(document: ThemeDocument): State =
             if (document == this.document) this else copy(document = document, capabilities = capabilitiesOf(document))
     }
@@ -434,7 +456,9 @@ internal class WorkspaceModel(
         updateExportPrefs(target) { prefs -> prefs.copy(animate = on) }
     }
 
-    /** Set how long the color animation of [target] runs, in milliseconds, leaving every other target alone. */
+    /**
+     * Set how long the color animation of [target] runs, in milliseconds, leaving every other target alone.
+     */
     fun setColorAnimationDuration(
         target: ExportTarget,
         durationMs: Int,
@@ -451,7 +475,9 @@ internal class WorkspaceModel(
     }
 }
 
-/** The capabilities of [document]'s target, read with the spec its style really runs. */
+/**
+ * The capabilities of [document]'s target, read with the spec its style really runs.
+ */
 internal fun capabilitiesOf(document: ThemeDocument): Capabilities =
     Capabilities.of(
         library = document.library,

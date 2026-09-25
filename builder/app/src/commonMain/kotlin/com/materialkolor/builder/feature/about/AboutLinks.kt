@@ -10,8 +10,12 @@ package com.materialkolor.builder.feature.about
  */
 internal val HELP_PAGES_URL: String? = null
 
-/** The project on GitHub, which the top bar's overflow and About link to. */
+/**
+ * The project on GitHub, which the top bar's overflow and About link to.
+ */
 internal const val GITHUB_URL = "https://github.com/jordond/materialkolor"
 
-/** The project's issue tracker, where Report a problem opens a new issue. */
+/**
+ * The project's issue tracker, where Report a problem opens a new issue.
+ */
 internal const val ISSUES_URL = "$GITHUB_URL/issues"

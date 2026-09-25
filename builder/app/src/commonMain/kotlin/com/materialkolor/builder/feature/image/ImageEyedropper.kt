@@ -64,16 +64,24 @@ import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.floor
 
-/** Tags the picture in the eyedropper, for tests to click a spot on it. */
+/**
+ * Tags the picture in the eyedropper, for tests to click a spot on it.
+ */
 internal const val EYEDROPPER_PICTURE_TAG: String = "image-eyedropper-picture"
 
-/** How wide the loupe is, before it rounds down to whole cells. */
+/**
+ * How wide the loupe is, before it rounds down to whole cells.
+ */
 private val LoupeDiameter = 112.dp
 
-/** How many of the picture's pixels the loupe spans across, an odd count so one sits in the middle. */
+/**
+ * How many of the picture's pixels the loupe spans across, an odd count so one sits in the middle.
+ */
 private const val LOUPE_PIXELS = 11
 
-/** The opaque alpha byte, which a picked seed always carries. */
+/**
+ * The opaque alpha byte, which a picked seed always carries.
+ */
 private const val OPAQUE: Int = 0xFF shl 24
 
 /**
@@ -219,7 +227,9 @@ private fun PixelPicker(
     )
 }
 
-/** The pixel of [picture] under [offset], in a box of [size] that shows all of it. */
+/**
+ * The pixel of [picture] under [offset], in a box of [size] that shows all of it.
+ */
 internal fun pixelUnder(
     offset: Offset,
     size: Size,
@@ -230,7 +240,9 @@ internal fun pixelUnder(
     return IntOffset(x, y)
 }
 
-/** The exact color of the pixel at [at], made opaque. */
+/**
+ * The exact color of the pixel at [at], made opaque.
+ */
 private fun ImageBitmap.pixelAt(at: IntOffset): Argb {
     val color = toPixelMap(startX = at.x, startY = at.y, width = 1, height = 1)[0, 0]
     return Argb(color.toArgb() or OPAQUE)

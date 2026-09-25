@@ -30,16 +30,24 @@ import kotlin.test.Test
 
 // b-315b
 
-/** What the Trips app's floating action button reads as. */
+/**
+ * What the Trips app's floating action button reads as.
+ */
 private const val NEW_TRIP = "New trip"
 
-/** The first action of a pinned card, so its presence means a card is pinned. */
+/**
+ * The first action of a pinned card, so its presence means a card is pinned.
+ */
 private const val PIN_ROLE = "Pin this role"
 
-/** How many Tab presses it may take to reach the Trips app from the canvas tabs. */
+/**
+ * How many Tab presses it may take to reach the Trips app from the canvas tabs.
+ */
 private const val MAX_TABS = 12
 
-/** Anything drawn on the Inspect card. */
+/**
+ * Anything drawn on the Inspect card.
+ */
 private val OnCard: SemanticsMatcher = hasAnyAncestor(hasTestTag(INSPECT_CARD_TAG))
 
 @OptIn(ExperimentalTestApi::class)

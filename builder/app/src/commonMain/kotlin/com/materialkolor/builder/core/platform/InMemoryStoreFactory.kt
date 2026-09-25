@@ -59,7 +59,9 @@ class InMemoryStoreFactory(
         default: T,
     ): Store<T> = InMemoryStore(key, codec, default)
 
-    /** Put [text] under [key] as it is, the way an older or broken build might have left it. */
+    /**
+     * Put [text] under [key] as it is, the way an older or broken build might have left it.
+     */
     internal fun seed(
         key: String,
         text: String,
@@ -67,14 +69,20 @@ class InMemoryStoreFactory(
         texts.update { stored -> stored + (key to text) }
     }
 
-    /** The text under [key], or null when there is none. */
+    /**
+     * The text under [key], or null when there is none.
+     */
     internal fun textAt(key: String): String? = texts.value[key]
 
-    /** Every key that holds something. */
+    /**
+     * Every key that holds something.
+     */
     internal val keys: Set<String>
         get() = texts.value.keys
 
-    /** Turn down the next [count] updates with [error], whichever stores they go to. */
+    /**
+     * Turn down the next [count] updates with [error], whichever stores they go to.
+     */
     internal fun failNextUpdates(
         count: Int,
         error: StoreError,
@@ -82,7 +90,9 @@ class InMemoryStoreFactory(
         failures.update { queued -> queued + List(count) { error } }
     }
 
-    /** Turn down the next [count] deletes with [error], whichever stores they go to. */
+    /**
+     * Turn down the next [count] deletes with [error], whichever stores they go to.
+     */
     internal fun failNextDeletes(
         count: Int,
         error: StoreError,
@@ -101,7 +111,9 @@ class InMemoryStoreFactory(
         beforeUpdates.update { pending -> pending + (key to action) }
     }
 
-    /** Put [text] under [key] the way another tab would, and report the key on [externalChanges]. */
+    /**
+     * Put [text] under [key] the way another tab would, and report the key on [externalChanges].
+     */
     internal fun writeFromAnotherTab(
         key: String,
         text: String,
@@ -213,7 +225,9 @@ class InMemoryStoreFactory(
     }
 }
 
-/** Take the first queued error off, or null when none is queued. */
+/**
+ * Take the first queued error off, or null when none is queued.
+ */
 private fun MutableStateFlow<List<StoreError>>.takeFirst(): StoreError? {
     var taken: StoreError? = null
     update { queued ->

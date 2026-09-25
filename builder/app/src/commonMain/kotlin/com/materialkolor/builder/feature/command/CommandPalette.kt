@@ -314,7 +314,9 @@ private fun ColumnScope.PaletteBody(
 
 // b-511
 
-/** A group's header over its rows, read as a heading. */
+/**
+ * A group's header over its rows, read as a heading.
+ */
 @Composable
 private fun GroupHeader(title: String) {
     val spacing = LocalBuilderTokens.current.spacing
@@ -408,10 +410,14 @@ private fun PaletteFooter() {
     }
 }
 
-/** The narrowest the footer gets while its hints and the paste note still share a line. */
+/**
+ * The narrowest the footer gets while its hints and the paste note still share a line.
+ */
 private val FooterRowMinWidth: Dp = 560.dp
 
-/** One key hint in the footer, its keycaps then what they do, read as [keys] and then [hint]. */
+/**
+ * One key hint in the footer, its keycaps then what they do, read as [keys] and then [hint].
+ */
 @Composable
 private fun FooterHint(
     hint: String,
@@ -428,22 +434,30 @@ private fun FooterHint(
     }
 }
 
-/** The arrow on a Down keycap, or on an Up one turned by [modifier]. */
+/**
+ * The arrow on a Down keycap, or on an Up one turned by [modifier].
+ */
 @Composable
 private fun KeyGlyph(modifier: Modifier = Modifier) {
     BuilderIcon(IconId.ChevronDown, null, modifier, emphasis = Emphasis.Secondary, size = KeycapGlyphSize)
 }
 
-/** How far the Down arrow turns to point up. */
+/**
+ * How far the Down arrow turns to point up.
+ */
 private const val UP_TURN_DEGREES = 180f
 
-/** A keycap holding a key's name. */
+/**
+ * A keycap holding a key's name.
+ */
 @Composable
 private fun KeyName(name: String) {
     Keycap { BuilderText(name, style = BuilderTextStyle.Value, emphasis = Emphasis.Secondary) }
 }
 
-/** What the palette understood [query] to be, first, then the rows the search finds in [entries]. */
+/**
+ * What the palette understood [query] to be, first, then the rows the search finds in [entries].
+ */
 private fun paletteRows(
     query: String,
     recents: List<String>,
@@ -495,7 +509,9 @@ private fun understoodEntries(
     }
 }
 
-/** Every one of [commands] as a row, then the poster's sections and the roles (AR-10). */
+/**
+ * Every one of [commands] as a row, then the poster's sections and the roles (AR-10).
+ */
 @Composable
 private fun paletteEntries(
     state: WorkspaceModel.State,
@@ -551,14 +567,18 @@ private fun paletteEntries(
     return rows + sections + roles
 }
 
-/** The other words each command is found by, looked up by its id. */
+/**
+ * The other words each command is found by, looked up by its id.
+ */
 @Composable
 private fun paletteWords(): (id: String) -> List<String> {
     val resolved = WORDS.values.distinct().associateWith { resource -> wordList(stringResource(resource)) }
     return { id -> WORDS[id.substringBefore('.')]?.let(resolved::getValue).orEmpty() }
 }
 
-/** The words of each command, by its id or the part of its id before the first dot. */
+/**
+ * The words of each command, by its id or the part of its id before the first dot.
+ */
 private val WORDS: Map<String, StringResource> = mapOf(
     "shuffle" to Res.string.palette_words_shuffle,
     "undo" to Res.string.palette_words_undo,
@@ -620,7 +640,9 @@ private class PaletteRunner(
         workspace.dispatch(action)
     }
 
-    /** Runs [command] from inside the press, the palette still open as it starts. */
+    /**
+     * Runs [command] from inside the press, the palette still open as it starts.
+     */
     fun run(command: () -> Unit) {
         open = true
         try {
@@ -634,7 +656,9 @@ private class PaletteRunner(
     }
 }
 
-/** Opens the theme [code] carries, and toasts why when it cannot. */
+/**
+ * Opens the theme [code] carries, and toasts why when it cannot.
+ */
 private fun CoroutineScope.openShared(
     share: ShareController,
     code: String,
@@ -646,7 +670,9 @@ private fun CoroutineScope.openShared(
     }
 }
 
-/** Whether this presses [key] on its own, with no modifier held. */
+/**
+ * Whether this presses [key] on its own, with no modifier held.
+ */
 private fun KeyEvent.pressed(key: Key): Boolean {
     val modified = isShiftPressed || isCtrlPressed || isMetaPressed || isAltPressed
     return type == KeyEventType.KeyDown && this.key == key && !modified
@@ -655,9 +681,13 @@ private fun KeyEvent.pressed(key: Key): Boolean {
 private const val SET_SEED_ID = "palette.setSeed"
 private const val OPEN_SHARED_ID = "palette.openShared"
 
-/** The panel's width on a wide window and on a medium one. */
+/**
+ * The panel's width on a wide window and on a medium one.
+ */
 private val ExpandedWidth: Dp = 640.dp
 private val MediumWidth: Dp = 560.dp
 
-/** How tall the rows stand, so the palette keeps its size as a search narrows them. */
+/**
+ * How tall the rows stand, so the palette keeps its size as a search narrows them.
+ */
 private val ListHeight: Dp = 400.dp

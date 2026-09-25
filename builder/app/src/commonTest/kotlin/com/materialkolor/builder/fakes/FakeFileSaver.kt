@@ -11,13 +11,19 @@ internal class FakeFileSaver(
     // b-310
     override var canShareLink: Boolean = false,
 ) : FileSaver {
-    /** Every file saved, oldest first. */
+    /**
+     * Every file saved, oldest first.
+     */
     val saved: MutableList<OutgoingFile> = mutableListOf()
 
-    /** Every batch handed to the share sheet, oldest first. */
+    /**
+     * Every batch handed to the share sheet, oldest first.
+     */
     val shared: MutableList<List<OutgoingFile>> = mutableListOf()
 
-    /** When set, every save and share fails with it and nothing is kept. */
+    /**
+     * When set, every save and share fails with it and nothing is kept.
+     */
     var failure: Throwable? = null
 
     override suspend fun save(
@@ -30,7 +36,9 @@ internal class FakeFileSaver(
 
     // b-310
 
-    /** Every link handed to the share sheet, with its title, oldest first. */
+    /**
+     * Every link handed to the share sheet, with its title, oldest first.
+     */
     val sharedLinks: MutableList<Pair<String, String>> = mutableListOf()
 
     // b-310
@@ -41,7 +49,9 @@ internal class FakeFileSaver(
 
     // b-302a
 
-    /** Follows [canShareFiles], so a test that turns sharing on gets it for every batch. */
+    /**
+     * Follows [canShareFiles], so a test that turns sharing on gets it for every batch.
+     */
     override fun canShare(files: List<OutgoingFile>): Boolean = canShareFiles
 
     private inline fun attempt(keep: () -> Unit): Result<Unit> {

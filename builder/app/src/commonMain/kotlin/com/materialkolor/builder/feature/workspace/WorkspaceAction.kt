@@ -24,22 +24,30 @@ import com.materialkolor.builder.kit.control.ToastDuration
  * from, in window coordinates, or null to crossfade in place instead.
  */
 internal sealed interface WorkspaceAction {
-    /** Make [change] to the document straight away, the path every drag and keystroke takes. */
+    /**
+     * Make [change] to the document straight away, the path every drag and keystroke takes.
+     */
     data class Edit(
         val change: DocumentChange,
         val phase: EditPhase,
     ) : WorkspaceAction
 
-    /** Make [change] as one discrete edit behind a reveal, a library switch or a style chip. */
+    /**
+     * Make [change] as one discrete edit behind a reveal, a library switch or a style chip.
+     */
     data class EditWithReveal(
         val change: DocumentChange,
         val origin: Offset?,
     ) : WorkspaceAction
 
-    /** Step back once. */
+    /**
+     * Step back once.
+     */
     data object Undo : WorkspaceAction
 
-    /** Step forward once. */
+    /**
+     * Step forward once.
+     */
     data object Redo : WorkspaceAction
 
     // b-508
@@ -52,12 +60,16 @@ internal sealed interface WorkspaceAction {
         val cursor: Int,
     ) : WorkspaceAction
 
-    /** Draw a new seed, and a new style when the style is not locked. */
+    /**
+     * Draw a new seed, and a new style when the style is not locked.
+     */
     data class Shuffle(
         val origin: Offset?,
     ) : WorkspaceAction
 
-    /** Turn one of the shuffle locks on or off. */
+    /**
+     * Turn one of the shuffle locks on or off.
+     */
     data class SetLock(
         val lock: ShuffleLock,
         val on: Boolean,
@@ -74,10 +86,14 @@ internal sealed interface WorkspaceAction {
         val returnFocusTo: FocusRequester? = null, // b-307
     ) : WorkspaceAction
 
-    /** Ask for an image to take a seed from. */
+    /**
+     * Ask for an image to take a seed from.
+     */
     data object OpenImagePicker : WorkspaceAction
 
-    /** Show another tab of the preview. */
+    /**
+     * Show another tab of the preview.
+     */
     data class SetPreviewTab(
         val tab: PreviewTab,
     ) : WorkspaceAction
@@ -93,46 +109,64 @@ internal sealed interface WorkspaceAction {
         val origin: Offset?,
     ) : WorkspaceAction
 
-    /** Move the divider of the split preview, from 0 at the start edge to 1 at the end. */
+    /**
+     * Move the divider of the split preview, from 0 at the start edge to 1 at the end.
+     */
     data class SetSplitFraction(
         val fraction: Float,
     ) : WorkspaceAction
 
-    /** Frame the preview at another device width. */
+    /**
+     * Frame the preview at another device width.
+     */
     data class SetDeviceWidth(
         val width: DeviceWidth,
     ) : WorkspaceAction
 
-    /** Simulate a color vision deficiency over the canvas, or stop. */
+    /**
+     * Simulate a color vision deficiency over the canvas, or stop.
+     */
     data class SetVision(
         val vision: VisionSimulation,
     ) : WorkspaceAction
 
-    /** Turn the inspect overlay on or off. */
+    /**
+     * Turn the inspect overlay on or off.
+     */
     data class SetInspect(
         val on: Boolean,
     ) : WorkspaceAction
 
-    /** Hide the poster and the top bar, or bring them back. */
+    /**
+     * Hide the poster and the top bar, or bring them back.
+     */
     data object ToggleFullscreen : WorkspaceAction
 
-    /** Collapse the poster to its rail, or open it again. */
+    /**
+     * Collapse the poster to its rail, or open it again.
+     */
     data class SetPosterCollapsed(
         val collapsed: Boolean,
     ) : WorkspaceAction
 
-    /** Open or close one of the fine tune rows. */
+    /**
+     * Open or close one of the fine tune rows.
+     */
     data class SetFineTuneRowOpen(
         val row: FineTuneRow,
         val open: Boolean,
     ) : WorkspaceAction
 
-    /** Open [panel] over the workspace. */
+    /**
+     * Open [panel] over the workspace.
+     */
     data class OpenPanel(
         val panel: Panel,
     ) : WorkspaceAction
 
-    /** Close whichever panel is open. */
+    /**
+     * Close whichever panel is open.
+     */
     data object ClosePanel : WorkspaceAction
 
     /**
@@ -159,27 +193,37 @@ internal sealed interface WorkspaceAction {
         val onAction: (() -> Unit)? = null,
     ) : WorkspaceAction
 
-    /** Draw the chrome light, dark or as the system does. It never touches the preview mode. */
+    /**
+     * Draw the chrome light, dark or as the system does. It never touches the preview mode.
+     */
     data class SetAppearance(
         val appearance: Appearance,
     ) : WorkspaceAction
 
-    /** Let the chrome's motion follow the system, or force it one way. */
+    /**
+     * Let the chrome's motion follow the system, or force it one way.
+     */
     data class SetMotionOverride(
         val motion: MotionOverride,
     ) : WorkspaceAction
 
-    /** Close the hint [id] for good. */
+    /**
+     * Close the hint [id] for good.
+     */
     data class DismissHint(
         val id: String,
     ) : WorkspaceAction
 
-    /** Put the Expressive suggestion away. It changes nothing on its own. */
+    /**
+     * Put the Expressive suggestion away. It changes nothing on its own.
+     */
     data object DismissExpressiveSuggestion : WorkspaceAction
 
     // b-308
 
-    /** Show the Palettes tab with the ramp [target] sits on picked out. */
+    /**
+     * Show the Palettes tab with the ramp [target] sits on picked out.
+     */
     data class ShowOnRamp(
         val target: RampTarget,
     ) : WorkspaceAction
@@ -195,7 +239,9 @@ internal sealed interface WorkspaceAction {
         val on: Boolean,
     ) : WorkspaceAction
 
-    /** Set how long [target]'s exported color animation runs, in milliseconds. It is no undo entry either. */
+    /**
+     * Set how long [target]'s exported color animation runs, in milliseconds. It is no undo entry either.
+     */
     data class SetColorAnimationDuration(
         val target: ExportTarget,
         val durationMs: Int,
@@ -214,12 +260,16 @@ internal sealed interface WorkspaceAction {
 
     // b-315c
 
-    /** Open the dock's Vision menu or close it. Nothing saves it. */
+    /**
+     * Open the dock's Vision menu or close it. Nothing saves it.
+     */
     data class SetVisionMenuOpen(
         val open: Boolean,
     ) : WorkspaceAction
 
-    /** Show the canvas in grayscale while B is held, or let go (F-25). Nothing saves it. */
+    /**
+     * Show the canvas in grayscale while B is held, or let go (F-25). Nothing saves it.
+     */
     data class HoldGrayscale(
         val held: Boolean,
     ) : WorkspaceAction
@@ -247,12 +297,18 @@ internal enum class Panel {
  * What a shuffle can be told to leave alone.
  */
 internal enum class ShuffleLock {
-    /** Keep the seed's hue and vary only its chroma and tone. */
+    /**
+     * Keep the seed's hue and vary only its chroma and tone.
+     */
     Hue,
 
-    /** Keep the palette style. */
+    /**
+     * Keep the palette style.
+     */
     Style,
 
-    /** Keep the seed. */
+    /**
+     * Keep the seed.
+     */
     Seed,
 }

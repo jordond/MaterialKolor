@@ -119,7 +119,9 @@ private fun TakeSwatch(
     )
 }
 
-/** The poster line for this take. */
+/**
+ * The poster line for this take.
+ */
 internal val PrimaryTake.line: StringResource
     get() = when (this) {
         PrimaryTake.Calmer -> Res.string.explainer_take_calmer
@@ -129,7 +131,9 @@ internal val PrimaryTake.line: StringResource
         PrimaryTake.Turned -> Res.string.explainer_take_turned
     }
 
-/** The words of this sentence. */
+/**
+ * The words of this sentence.
+ */
 internal val ExplainerKey.resource: StringResource
     get() = when (this) {
         ExplainerKey.ChromaCapped -> Res.string.explainer_chroma_capped

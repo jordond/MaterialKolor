@@ -272,7 +272,9 @@ class AppModelTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
-    /** What the stack shows for [app] beside a projects model with nothing to say by default. */
+    /**
+     * What the stack shows for [app] beside a projects model with nothing to say by default.
+     */
     private fun bannersOf(
         app: AppModel,
         projects: ProjectsModel.State = ProjectsModel.State(open = ProjectRef.Persisted("p1")),
@@ -285,10 +287,14 @@ class AppModelTest : SessionTestBase() {
     ): AppModel = harness.own(AppModel(session, router, preferences, environment))
 
     private companion object {
-        /** No build wrote this, so the code reads as corrupt. */
+        /**
+         * No build wrote this, so the code reads as corrupt.
+         */
         const val CORRUPT_LINK = "/t/abc123"
 
-        /** One byte, a version past this build's, so the code reads as a newer build's. */
+        /**
+         * One byte, a version past this build's, so the code reads as a newer build's.
+         */
         const val NEWER_LINK = "/t/Ag"
     }
 }

@@ -118,7 +118,9 @@ class WorkspaceShuffleTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
-    /** A booted workspace whose shuffle locks are exactly [locks]. */
+    /**
+     * A booted workspace whose shuffle locks are exactly [locks].
+     */
     private suspend fun TestScope.workspace(vararg locks: ShuffleLock): WorkspaceModel {
         val (session, preferences) = session()
         booted(session)
@@ -137,7 +139,9 @@ class WorkspaceShuffleTest : SessionTestBase() {
     }
 
     private companion object {
-        /** How far a round trip through sRGB can move a hue, in degrees. */
+        /**
+         * How far a round trip through sRGB can move a hue, in degrees.
+         */
         const val HUE_TOLERANCE = 3.0
     }
 }

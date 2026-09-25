@@ -19,7 +19,9 @@ import org.jetbrains.compose.resources.stringResource
 
 // b-406
 
-/** The phone's library chip row under the top bar, for tests that check where it sits. */
+/**
+ * The phone's library chip row under the top bar, for tests that check where it sits.
+ */
 internal const val LIBRARY_CHIP_ROW_TAG: String = "top-bar-library-chips"
 
 /**

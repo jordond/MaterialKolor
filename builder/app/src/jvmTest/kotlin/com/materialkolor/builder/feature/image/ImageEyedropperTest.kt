@@ -30,7 +30,9 @@ import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** Four pixels, none of them a candidate, so only an exact read lands on one. */
+/**
+ * Four pixels, none of them a candidate, so only an exact read lands on one.
+ */
 private val Pixels = listOf(0xFF123456, 0xFF654321, 0xFF0A0B0C, 0xFFFEDCBA).map { argb -> Argb(argb.toInt()) }
 
 private val Candidates = listOf(0xFFD32F2F, 0xFF388E3C).map { argb -> Argb(argb.toInt()) }
@@ -118,7 +120,9 @@ class ImageEyedropperTest {
         waitForIdle()
     }
 
-    /** A two by two picture of [pixels], row by row from the top left. */
+    /**
+     * A two by two picture of [pixels], row by row from the top left.
+     */
     private fun pictureOf(pixels: List<Argb>): ImageBitmap {
         val picture = ImageBitmap(2, 2)
         val canvas = Canvas(picture)

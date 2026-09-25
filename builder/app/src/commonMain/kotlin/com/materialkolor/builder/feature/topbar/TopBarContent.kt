@@ -425,7 +425,9 @@ private fun appearanceLabel(appearance: Appearance): StringResource =
 
 // b-512
 
-/** The glyph an appearance row wears, so its text starts where the other rows' text does. */
+/**
+ * The glyph an appearance row wears, so its text starts where the other rows' text does.
+ */
 private val Appearance.icon: IconId
     get() = when (this) {
         Appearance.System -> IconId.Desktop

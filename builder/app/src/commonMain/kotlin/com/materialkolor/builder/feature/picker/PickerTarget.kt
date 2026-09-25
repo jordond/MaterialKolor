@@ -12,32 +12,44 @@ import com.materialkolor.builder.engine.resolve.ThemeResult
  * What the color picker is editing.
  */
 internal sealed interface PickerTarget {
-    /** The seed. */
+    /**
+     * The seed.
+     */
     data object Seed : PickerTarget
 
-    /** One palette's key color override. */
+    /**
+     * One palette's key color override.
+     */
     data class KeyColorOverride(
         val slot: KeyColor,
     ) : PickerTarget
 
-    /** A role pinned to a color of its own, in the modes [mode] covers. */
+    /**
+     * A role pinned to a color of its own, in the modes [mode] covers.
+     */
     data class Pin(
         val role: Role,
         val mode: PinMode,
     ) : PickerTarget
 
-    /** The seed of the extra color family at [index]. */
+    /**
+     * The seed of the extra color family at [index].
+     */
     data class Accent(
         val index: Int,
     ) : PickerTarget
 
-    /** The second seed the Cmf style takes for its tertiary. */
+    /**
+     * The second seed the Cmf style takes for its tertiary.
+     */
     data object CmfSeed : PickerTarget
 }
 
 // b-307
 
-/** The control that says whether [this] takes input on the document's target. */
+/**
+ * The control that says whether [this] takes input on the document's target.
+ */
 internal val PickerTarget.control: Control
     get() = when (this) {
         PickerTarget.Seed -> {

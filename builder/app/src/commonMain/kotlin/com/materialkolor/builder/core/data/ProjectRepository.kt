@@ -43,10 +43,14 @@ internal class ProjectRepository(
 ) {
     private val indexStore = stores.create(StorageKeys.INDEX, ProjectIndex.Codec, ProjectIndex())
 
-    /** Every saved project, as the drawer lists them. */
+    /**
+     * Every saved project, as the drawer lists them.
+     */
     val index: Flow<ProjectIndex> = indexStore.data
 
-    /** The project [id], or null when there is none or it could no longer be read. */
+    /**
+     * The project [id], or null when there is none or it could no longer be read.
+     */
     suspend fun load(id: String): ProjectRecord? = projectStore(id).get().takeIf { record -> record.revision > UNSAVED }
 
     /**
@@ -175,7 +179,9 @@ internal class ProjectRepository(
         return Deletion.Deleted(deleted, cleanupError)
     }
 
-    /** Put a project [delete] removed back, where the drawer listed it. */
+    /**
+     * Put a project [delete] removed back, where the drawer listed it.
+     */
     suspend fun restore(deleted: DeletedProject): StoreError? {
         val id = deleted.meta.id
         val record = deleted.record
@@ -189,7 +195,9 @@ internal class ProjectRepository(
         return write(id) { indexStore.update { index -> index.withRestored(deleted) } }
     }
 
-    /** The undo history of project [id], empty when it has none. */
+    /**
+     * The undo history of project [id], empty when it has none.
+     */
     suspend fun loadHistory(id: String): HistoryRecord = historyStore(id).get()
 
     /**
@@ -208,7 +216,9 @@ internal class ProjectRepository(
         return error
     }
 
-    /** How the preview of project [id] was left, or the defaults when it never was. */
+    /**
+     * How the preview of project [id] was left, or the defaults when it never was.
+     */
     suspend fun viewState(id: String): ProjectViewState = viewStore(id).get()
 
     /**
@@ -271,7 +281,9 @@ internal class ProjectRepository(
     suspend fun fromNewerBuild(id: String): Boolean =
         projectStore(id).fromNewerBuild() || historyStore(id).fromNewerBuild() || viewStore(id).fromNewerBuild()
 
-    /** Run [attempt], and when storage is full drop the old histories and run it once more. */
+    /**
+     * Run [attempt], and when storage is full drop the old histories and run it once more.
+     */
     private suspend fun write(
         id: String,
         attempt: suspend () -> StoreError?,
@@ -327,12 +339,16 @@ internal class ProjectRepository(
  * What [ProjectRepository.create] and [ProjectRepository.duplicate] came to.
  */
 internal sealed interface Creation {
-    /** The project was saved and listed. */
+    /**
+     * The project was saved and listed.
+     */
     data class Created(
         val record: ProjectRecord,
     ) : Creation
 
-    /** Storage would not take the project. */
+    /**
+     * Storage would not take the project.
+     */
     data class Failed(
         val error: StoreError,
     ) : Creation
@@ -354,13 +370,19 @@ internal sealed interface Deletion {
         val cleanupError: StoreError?,
     ) : Deletion
 
-    /** The drawer does not list the project, so nothing was removed. */
+    /**
+     * The drawer does not list the project, so nothing was removed.
+     */
     data object NotListed : Deletion
 
-    /** A newer build saved the project, so this one leaves it where it is (D41). */
+    /**
+     * A newer build saved the project, so this one leaves it where it is (D41).
+     */
     data object NewerBuild : Deletion
 
-    /** Storage would not take the change to the index, so nothing was removed. */
+    /**
+     * Storage would not take the change to the index, so nothing was removed.
+     */
     data class Failed(
         val error: StoreError,
     ) : Deletion
@@ -384,19 +406,25 @@ internal data class DeletedProject(
     val viewState: ProjectViewState,
 )
 
-/** How many projects keep their undo history. */
+/**
+ * How many projects keep their undo history.
+ */
 internal const val HISTORIES_KEPT: Int = 10
 
 private fun ProjectIndex.lists(id: String): Boolean = projects.any { meta -> meta.id == id }
 
-/** The index with [record] listed at the end, created and updated at [time]. */
+/**
+ * The index with [record] listed at the end, created and updated at [time].
+ */
 private fun ProjectIndex.withAdded(
     record: ProjectRecord,
     previewColors: List<Argb>,
     time: Long,
 ): ProjectIndex = copy(projects = projects + record.toMeta(previewColors, createdAt = time, updatedAt = time))
 
-/** The index with the entry of [record] brought up to date at [time]. It never lists a project it did not. */
+/**
+ * The index with the entry of [record] brought up to date at [time]. It never lists a project it did not.
+ */
 private fun ProjectIndex.withSaved(
     record: ProjectRecord,
     previewColors: List<Argb>,
@@ -444,7 +472,9 @@ private fun requirePreviewColors(previewColors: List<Argb>) {
     }
 }
 
-/** What a project reads as before it is first saved, told apart by its revision. */
+/**
+ * What a project reads as before it is first saved, told apart by its revision.
+ */
 private fun unsaved(id: String): ProjectRecord =
     ProjectRecord(id, name = "", document = ThemeDocument(seed = DEFAULT_SEED), revision = UNSAVED, writerTab = "")
 

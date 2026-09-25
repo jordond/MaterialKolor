@@ -27,10 +27,14 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
 
 // b-231
 
-/** The top bar as a whole, for tests that check how its controls sit. */
+/**
+ * The top bar as a whole, for tests that check how its controls sit.
+ */
 internal const val TOP_BAR_TAG: String = "top-bar"
 
-/** The library switcher in the top bar, in either form. */
+/**
+ * The library switcher in the top bar, in either form.
+ */
 internal const val LIBRARY_SWITCHER_TAG: String = "top-bar-library-switcher"
 
 /**
@@ -48,12 +52,16 @@ internal val LocalSwitcherFitProbe: ProvidableCompositionLocal<(() -> Unit)?> =
  */
 @Stable
 internal class SwitcherFormState {
-    /** True for the segmented row, false for the dropdown, or null before the switcher has shown. */
+    /**
+     * True for the segmented row, false for the dropdown, or null before the switcher has shown.
+     */
     var segmented: Boolean? by mutableStateOf(null)
 
     // b-406
 
-    /** The top bar buttons the bar has moved into its overflow menu, all three on a phone. */
+    /**
+     * The top bar buttons the bar has moved into its overflow menu, all three on a phone.
+     */
     var overflowed: Set<TopBarControl> by mutableStateOf(emptySet())
 
     // b-503a
@@ -68,7 +76,9 @@ internal class SwitcherFormState {
 
 // b-503a
 
-/** Keeps [report]'s origin on the middle of the switcher this goes on. Nothing when [report] is null. */
+/**
+ * Keeps [report]'s origin on the middle of the switcher this goes on. Nothing when [report] is null.
+ */
 internal fun Modifier.reportSwitcherOrigin(report: SwitcherFormState?): Modifier =
     if (report == null) {
         this
@@ -76,7 +86,9 @@ internal fun Modifier.reportSwitcherOrigin(report: SwitcherFormState?): Modifier
         onGloballyPositioned { coordinates -> report.origin = coordinates.boundsInRoot().center }
     }
 
-/** Where the switcher reports its form, or null where nothing reads it. */
+/**
+ * Where the switcher reports its form, or null where nothing reads it.
+ */
 internal val LocalSwitcherForm: ProvidableCompositionLocal<SwitcherFormState?> =
     staticCompositionLocalOf { null }
 
@@ -200,10 +212,14 @@ private class SwitcherFit {
     private var key: FitKey? = null
     private var width: Int = 0
 
-    /** The form that showed last, or null before the first measure. */
+    /**
+     * The form that showed last, or null before the first measure.
+     */
     var shown: SwitcherForm? = null
 
-    /** How wide the row is for [key], from [measure] when anything in [key] changed since. */
+    /**
+     * How wide the row is for [key], from [measure] when anything in [key] changed since.
+     */
     fun width(
         key: FitKey,
         measure: () -> Int,
@@ -229,14 +245,20 @@ private class SwitcherFit {
  */
 @Stable
 internal class WideBarFit {
-    /** True while Share and the command palette show as glyphs alone. */
+    /**
+     * True while Share and the command palette show as glyphs alone.
+     */
     var compact: Boolean by mutableStateOf(false)
         private set
 
-    /** The room going compact freed, measured once the bar had caught up with it. Plain, nothing draws from it. */
+    /**
+     * The room going compact freed, measured once the bar had caught up with it. Plain, nothing draws from it.
+     */
     private var freed: Int = 0
 
-    /** The room the row had just before the bar went compact, until the next measure prices the move. */
+    /**
+     * The room the row had just before the bar went compact, until the next measure prices the move.
+     */
     private var roomBeforeCompact: Int? = null
 
     /**
@@ -263,7 +285,9 @@ internal class WideBarFit {
     }
 }
 
-/** The switcher's slots, the form that shows and the segmented row measured to see if it fits. */
+/**
+ * The switcher's slots, the form that shows and the segmented row measured to see if it fits.
+ */
 private enum class SwitcherForm {
     Segmented,
     Dropdown,

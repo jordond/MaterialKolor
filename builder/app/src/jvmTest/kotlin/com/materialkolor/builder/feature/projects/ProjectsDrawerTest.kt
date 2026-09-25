@@ -252,7 +252,9 @@ class ProjectsDrawerTest {
         onNode(hasSetTextAction() and hasText(name)).assertExists()
     }
 
-    /** The search is the only text field until a rename opens one. */
+    /**
+     * The search is the only text field until a rename opens one.
+     */
     private fun ComposeUiTest.onAllSearchFields() = onAllNodes(hasSetTextAction())
 
     private fun ComposeUiTest.showDrawer(

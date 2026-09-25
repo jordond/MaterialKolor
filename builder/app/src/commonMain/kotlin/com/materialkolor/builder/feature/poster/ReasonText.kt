@@ -19,7 +19,9 @@ import com.materialkolor.builder.kit.control.Emphasis
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** The words for [reason], the string named by its key. */
+/**
+ * The words for [reason], the string named by its key.
+ */
 internal fun reasonText(reason: Reason): StringResource =
     when (reason) {
         Reason.FluentOneRamp -> Res.string.reason_fluent_one_ramp
@@ -33,11 +35,15 @@ internal fun reasonText(reason: Reason): StringResource =
         Reason.DimRolesUnexposed -> Res.string.reason_dim_roles_unexposed
     }
 
-/** Whether the control takes input. */
+/**
+ * Whether the control takes input.
+ */
 internal val ControlState.usable: Boolean
     get() = this is ControlState.Enabled
 
-/** Whether the control has a place on the poster at all. A hidden one composes nothing. */
+/**
+ * Whether the control has a place on the poster at all. A hidden one composes nothing.
+ */
 internal val ControlState.shown: Boolean
     get() = this !is ControlState.Hidden
 
@@ -52,7 +58,9 @@ internal val ControlState.explanation: Reason?
         is ControlState.Disabled -> reason
     }
 
-/** [reason] in words, in the place of the control it explains. */
+/**
+ * [reason] in words, in the place of the control it explains.
+ */
 @Composable
 internal fun ReasonLine(
     reason: Reason,

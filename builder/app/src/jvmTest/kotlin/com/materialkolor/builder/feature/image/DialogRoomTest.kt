@@ -32,11 +32,15 @@ import io.kotest.matchers.comparables.shouldBeLessThanOrEqualTo
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** A phone on its side. */
+/**
+ * A phone on its side.
+ */
 private const val PHONE_WIDTH = 740
 private const val PHONE_HEIGHT = 360
 
-/** A window tall enough that nothing in either dialog has to give way. */
+/**
+ * A window tall enough that nothing in either dialog has to give way.
+ */
 private const val ROOMY_HEIGHT = 1200
 
 /**
@@ -101,7 +105,9 @@ class DialogRoomTest {
         }
     }
 
-    /** Where the button named [label] sits in [dialog], in a window [height] tall. */
+    /**
+     * Where the button named [label] sits in [dialog], in a window [height] tall.
+     */
     private fun buttonBounds(
         library: Library,
         height: Int,
@@ -116,7 +122,9 @@ class DialogRoomTest {
         return bounds
     }
 
-    /** Shows [dialog] in [library]'s skin on a touch screen that fills the window. */
+    /**
+     * Shows [dialog] in [library]'s skin on a touch screen that fills the window.
+     */
     private fun ComposeUiTest.showDialog(
         library: Library,
         dialog: @Composable () -> Unit,

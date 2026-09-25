@@ -132,7 +132,9 @@ private val CASES = listOf(
 
 // b-314ba
 
-/** The banners that ask for a reload, where a reload does nothing. */
+/**
+ * The banners that ask for a reload, where a reload does nothing.
+ */
 private val NO_RELOAD_CASES = listOf(
     BannerCase(
         WorkspaceBanner.NewerVersion,
@@ -358,7 +360,9 @@ class WorkspaceBannersTest {
 
     // b-314ba
 
-    /** Shows each of [cases] alone and checks what it says, what it leaves out and what its buttons ask for. */
+    /**
+     * Shows each of [cases] alone and checks what it says, what it leaves out and what its buttons ask for.
+     */
     private fun ComposeUiTest.assertCases(
         cases: List<BannerCase>,
         canReload: Boolean,
@@ -386,7 +390,9 @@ class WorkspaceBannersTest {
         }
     }
 
-    /** Shows the stack [projects] raises beside an app with nothing to say, through [WorkspaceBanners]. */
+    /**
+     * Shows the stack [projects] raises beside an app with nothing to say, through [WorkspaceBanners].
+     */
     private fun ComposeUiTest.showBanners(
         projects: ProjectsModel.State,
         actions: MutableList<BannerAction> = mutableListOf(),
@@ -420,7 +426,9 @@ class WorkspaceBannersTest {
 
 // b-314ba
 
-/** An app state with nothing to say, on a platform where a reload works. */
+/**
+ * An app state with nothing to say, on a platform where a reload works.
+ */
 private fun appState(): AppModel.State =
     AppModel.State(
         appearance = Appearance.System,

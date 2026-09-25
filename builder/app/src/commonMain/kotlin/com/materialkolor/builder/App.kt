@@ -210,7 +210,9 @@ internal fun BuilderRoot(
     }
 }
 
-/** Tints the browser's own chrome with the surface the shell stands on (F-04). */
+/**
+ * Tints the browser's own chrome with the surface the shell stands on (F-04).
+ */
 @Composable
 private fun ThemeColorEffect(environment: Environment) {
     val surface = Argb(LocalBuilderTokens.current.panel.toArgb())
@@ -247,7 +249,9 @@ private fun ImageMarkEffects(
 
 // pf-3
 
-/** An announcer that says nothing, so a warm-up never reads out what the page already did. */
+/**
+ * An announcer that says nothing, so a warm-up never reads out what the page already did.
+ */
 private val SilentAnnouncer = Announcer { }
 
 /**

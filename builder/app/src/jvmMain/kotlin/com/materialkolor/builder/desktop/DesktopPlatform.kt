@@ -38,7 +38,9 @@ internal object DesktopPlatform : PlatformServices {
     override val environment: Environment = DesktopEnvironment
 }
 
-/** A window has no address bar, so the builder always opens at home and overlays keep no history. */
+/**
+ * A window has no address bar, so the builder always opens at home and overlays keep no history.
+ */
 private object DesktopRouter : Router {
     override val initial: Route = Route.Home
     override val overlayPops: Flow<Unit> = emptyFlow()

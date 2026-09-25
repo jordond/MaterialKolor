@@ -123,7 +123,9 @@ internal fun AboutHost(
     }
 }
 
-/** The report details for [document] in [browser], its link on [origin] worked out once per document. */
+/**
+ * The report details for [document] in [browser], its link on [origin] worked out once per document.
+ */
 @Composable
 private fun rememberReportDetails(
     document: ThemeDocument,
@@ -139,7 +141,9 @@ private fun rememberReportDetails(
         )
     }
 
-/** Both versions and a line on what the builder does. */
+/**
+ * Both versions and a line on what the builder does.
+ */
 @Composable
 private fun AboutIntro() {
     val spacing = LocalBuilderTokens.current.spacing
@@ -158,7 +162,9 @@ private fun AboutIntro() {
     }
 }
 
-/** A heading and what it heads. */
+/**
+ * A heading and what it heads.
+ */
 @Composable
 private fun AboutSection(
     title: String,
@@ -201,7 +207,9 @@ private fun motionLabel(motion: MotionOverride): StringResource =
         MotionOverride.Full -> Res.string.about_motion_full
     }
 
-/** Who made the builder, the fonts with their full licenses, and the libraries and icons it ships. */
+/**
+ * Who made the builder, the fonts with their full licenses, and the libraries and icons it ships.
+ */
 @Composable
 private fun Credits() {
     val spacing = LocalBuilderTokens.current.spacing

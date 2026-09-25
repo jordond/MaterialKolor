@@ -26,10 +26,14 @@ import kotlin.test.Test
 
 private const val HEIGHT = 800
 
-/** The rail's button, which opens the poster. */
+/**
+ * The rail's button, which opens the poster.
+ */
 private const val OPEN = "Open the poster"
 
-/** The open poster's button, which folds it back to the rail. */
+/**
+ * The open poster's button, which folds it back to the rail.
+ */
 private const val COLLAPSE = "Collapse the poster"
 
 /**
@@ -94,7 +98,9 @@ class PosterRailSessionTest {
 
     private fun ComposeUiTest.shows(name: String): Boolean = onAllNodes(button(name)).fetchSemanticsNodes().isNotEmpty()
 
-    /** The whole builder on fakes kept in [stores], booted, one session of it. */
+    /**
+     * The whole builder on fakes kept in [stores], booted, one session of it.
+     */
     private fun ComposeUiTest.showRoot(stores: InMemoryStoreFactory): AppGraph {
         val platform = FakePlatform(stores = stores)
         val graph = createGraphFactory<AppGraph.Factory>().create(platform)

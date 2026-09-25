@@ -34,7 +34,9 @@ import com.materialkolor.builder.preview.canvas.VisionMatrices
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** Tags the name of the active simulation beside the button, which assistive tech skips. */
+/**
+ * Tags the name of the active simulation beside the button, which assistive tech skips.
+ */
 internal const val VISION_LABEL_TAG: String = "canvas-vision-label"
 
 /**
@@ -109,7 +111,9 @@ internal fun VisionMenu(
     }
 }
 
-/** The color matrix the canvas is drawn through for this simulation, a fresh one each call. */
+/**
+ * The color matrix the canvas is drawn through for this simulation, a fresh one each call.
+ */
 internal fun VisionSimulation.matrix(): ColorMatrix? =
     when (this) {
         VisionSimulation.None -> null
@@ -119,7 +123,9 @@ internal fun VisionSimulation.matrix(): ColorMatrix? =
         VisionSimulation.Achromatopsia -> VisionMatrices.colorMatrix(VisionMatrices.Achromatopsia)
     }
 
-/** What the simulation is called in the menu and on the dock. */
+/**
+ * What the simulation is called in the menu and on the dock.
+ */
 private val VisionSimulation.title: StringResource
     get() = when (this) {
         VisionSimulation.None -> Res.string.canvas_vision_none

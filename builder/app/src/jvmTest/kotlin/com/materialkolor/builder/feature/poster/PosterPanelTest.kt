@@ -64,20 +64,28 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
 
-/** The seed field's pause before it commits (F-05). */
+/**
+ * The seed field's pause before it commits (F-05).
+ */
 private const val COMMIT_DELAY = 400L
 
 private val Seed = Argb(0x6750A4)
 
-/** A phone held upright, which gets the poster sheet. */
+/**
+ * A phone held upright, which gets the poster sheet.
+ */
 private const val PHONE_WIDTH = 400
 private const val PHONE_HEIGHT = 800
 
-/** The phone the sheet peek is checked on, upright and on its side (D38). */
+/**
+ * The phone the sheet peek is checked on, upright and on its side (D38).
+ */
 private const val PEEK_PHONE_SHORT = 390
 private const val PEEK_PHONE_LONG = 844
 
-/** How much of the poster sheet shows at peek, upright and on its side, as the kit's shell sets it. */
+/**
+ * How much of the poster sheet shows at peek, upright and on its side, as the kit's shell sets it.
+ */
 private val UprightPeek: Dp = 344.dp
 private val SidewaysPeek: Dp = 96.dp
 
@@ -479,7 +487,9 @@ class PosterPanelTest {
         }
     }
 
-    /** The seed row, the seed's hex and name, and Shuffle all sit inside the sheet's [peek]. */
+    /**
+     * The seed row, the seed's hex and name, and Shuffle all sit inside the sheet's [peek].
+     */
     private fun ComposeUiTest.assertPeekShows(peek: Dp) {
         assertInPeek(hasText(Seed.toHex()), peek)
         assertInPeek(hasText(ColorNames.nameOf(Seed)), peek)

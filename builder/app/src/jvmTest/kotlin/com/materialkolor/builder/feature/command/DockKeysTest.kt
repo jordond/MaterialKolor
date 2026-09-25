@@ -23,7 +23,9 @@ private const val HEIGHT = 800
 
 // b-315c
 
-/** V opens the dock's Vision menu, and a held B shows the canvas in grayscale (F-25, section 6). */
+/**
+ * V opens the dock's Vision menu, and a held B shows the canvas in grayscale (F-25, section 6).
+ */
 @OptIn(ExperimentalTestApi::class)
 class DockKeysTest {
     private val harness = CommandHarness()

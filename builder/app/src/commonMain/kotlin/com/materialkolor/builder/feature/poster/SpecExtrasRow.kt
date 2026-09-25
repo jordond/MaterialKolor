@@ -53,7 +53,9 @@ internal fun SpecExtrasRow(
     }
 }
 
-/** The spec the scheme is really built with, and how many extra colors the theme has. */
+/**
+ * The spec the scheme is really built with, and how many extra colors the theme has.
+ */
 @Composable
 private fun specExtrasSummary(document: ThemeDocument): String {
     val spec = stringResource(specName(EffectiveSpec.of(document.style, document.spec)))

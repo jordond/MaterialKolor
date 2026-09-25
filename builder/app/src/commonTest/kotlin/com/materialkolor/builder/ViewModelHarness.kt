@@ -20,14 +20,18 @@ internal class ViewModelHarness {
     private val store = ViewModelStore()
     private val owned = mutableListOf<ViewModel>()
 
-    /** Hand [model] to the harness so it is cleared with the rest. */
+    /**
+     * Hand [model] to the harness so it is cleared with the rest.
+     */
     fun <T : ViewModel> own(model: T): T {
         store.put("model-${owned.size}", model)
         owned += model
         return model
     }
 
-    /** Clear every model and wait for their scopes, from inside a `runTest` body. */
+    /**
+     * Clear every model and wait for their scopes, from inside a `runTest` body.
+     */
     suspend fun clearAndJoin() {
         val scopes = owned.map { model -> model.viewModelScope.coroutineContext.job }
         store.clear()

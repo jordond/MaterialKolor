@@ -41,7 +41,9 @@ internal class Autosave<T : Any>(
     private val writing = Mutex()
     private var timer: Job? = null
 
-    /** Whether a value is waiting to be written. */
+    /**
+     * Whether a value is waiting to be written.
+     */
     val hasPending: Boolean
         get() = pending.value.isNotEmpty()
 
@@ -58,13 +60,17 @@ internal class Autosave<T : Any>(
         }
     }
 
-    /** Stop the timer, so what is waiting stays until the next [schedule] or [flush]. */
+    /**
+     * Stop the timer, so what is waiting stays until the next [schedule] or [flush].
+     */
     fun cancelTimer() {
         timer?.cancel()
         timer = null
     }
 
-    /** Write whatever is waiting now, and wait for a write already under way to finish first. */
+    /**
+     * Write whatever is waiting now, and wait for a write already under way to finish first.
+     */
     suspend fun flush() {
         writePending()
     }
@@ -80,5 +86,7 @@ internal class Autosave<T : Any>(
     }
 }
 
-/** How long after the last committed change autosave writes, in milliseconds. */
+/**
+ * How long after the last committed change autosave writes, in milliseconds.
+ */
 internal const val AUTOSAVE_DELAY_MILLIS: Long = 500

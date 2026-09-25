@@ -28,7 +28,9 @@ import kotlin.test.Test
 class ContrastTabTest {
     private val material = ThemeDocument.Default.copy(library = Library.Material3, expressive = false)
 
-    /** Primary and onPrimary pinned a shade apart in light mode, a pair that fails outright. */
+    /**
+     * Primary and onPrimary pinned a shade apart in light mode, a pair that fails outright.
+     */
     private val failing = material.copy(
         pins = mapOf(
             Role.Primary to RolePin(light = Argb(0x777777)),

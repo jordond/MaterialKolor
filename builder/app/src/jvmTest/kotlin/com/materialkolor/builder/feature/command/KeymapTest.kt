@@ -95,7 +95,9 @@ class KeymapTest {
     private val events = mutableListOf<KeyEvent>()
     private var shown = false
 
-    /** The key downs [press] sends to a focused box, as the page would see them. */
+    /**
+     * The key downs [press] sends to a focused box, as the page would see them.
+     */
     private fun ComposeUiTest.captured(press: KeyInjectionScope.() -> Unit): List<KeyEvent> {
         events.clear()
         if (!shown) showBox()

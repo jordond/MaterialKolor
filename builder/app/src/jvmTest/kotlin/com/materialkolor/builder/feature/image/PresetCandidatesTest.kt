@@ -22,7 +22,9 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.test.Test
 
-/** The long edge the extractor reads an image at, as the browser scales it. */
+/**
+ * The long edge the extractor reads an image at, as the browser scales it.
+ */
 private const val PIXEL_EDGE = 128
 
 /**
@@ -57,7 +59,9 @@ class PresetCandidatesTest {
         Presets.starters.size shouldBe 8
     }
 
-    /** The picture in [bytes] at 128 px on its long edge, as ARGB pixels. */
+    /**
+     * The picture in [bytes] at 128 px on its long edge, as ARGB pixels.
+     */
     private fun sampleOf(bytes: ByteArray): PixelSample {
         val image = Image.makeFromEncoded(bytes)
         val scale = PIXEL_EDGE.toFloat() / max(image.width, image.height)

@@ -160,7 +160,9 @@ internal data class PinnedMode(
     val argb: Argb,
 ) {
     companion object {
-        /** Every pinned mode in [pins], in role order and light before dark. */
+        /**
+         * Every pinned mode in [pins], in role order and light before dark.
+         */
         fun of(pins: Map<Role, RolePin>): List<PinnedMode> =
             Role.entries.flatMap { role ->
                 val pin = pins[role]
@@ -172,15 +174,21 @@ internal data class PinnedMode(
     }
 }
 
-/** The clear button of each pinned mode, kept for as long as the list is on screen. */
+/**
+ * The clear button of each pinned mode, kept for as long as the list is on screen.
+ */
 private class PinClears {
     private val requesters = mutableMapOf<Pair<Role, PinMode>, FocusRequester>()
 
-    /** The clear button of [pin]. */
+    /**
+     * The clear button of [pin].
+     */
     operator fun get(pin: PinnedMode): FocusRequester = requesters.getOrPut(pin.role to pin.mode) { FocusRequester() }
 }
 
-/** What the list calls this mode. */
+/**
+ * What the list calls this mode.
+ */
 private val PinMode.label: StringResource
     get() = when (this) {
         PinMode.Light -> Res.string.pins_mode_light

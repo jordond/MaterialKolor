@@ -133,7 +133,9 @@ class ActionRegistryTest {
         return missing
     }
 
-    /** Whether [command]'s control is on screen, opening its menu, panel or disclosure first. */
+    /**
+     * Whether [command]'s control is on screen, opening its menu, panel or disclosure first.
+     */
     private fun ComposeUiTest.found(
         harness: CommandHarness,
         command: Command,
@@ -165,7 +167,9 @@ class ActionRegistryTest {
             }
         }
 
-    /** Opens the disclosure titled [opener] when there is one and [name] is not drawn yet. */
+    /**
+     * Opens the disclosure titled [opener] when there is one and [name] is not drawn yet.
+     */
     private fun ComposeUiTest.openIfClosed(
         opener: String?,
         name: String,
@@ -196,7 +200,9 @@ class ActionRegistryTest {
         if (count(site.item) > closed) clickNamed(site.menu)
     }
 
-    /** How many workspace nodes, in any window, read [name] as their text or content description. */
+    /**
+     * How many workspace nodes, in any window, read [name] as their text or content description.
+     */
     private fun ComposeUiTest.count(name: String): Int =
         onAllNodes((hasText(name) or hasContentDescription(name)) and InWorkspace, useUnmergedTree = true)
             .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -221,13 +227,19 @@ class ActionRegistryTest {
 
 private const val HEIGHT = 800
 
-/** The top bar's overflow button, which opens most of the menu sites. */
+/**
+ * The top bar's overflow button, which opens most of the menu sites.
+ */
 private const val MORE_OPTIONS = "More options" // b-231
 
-/** The commands whose buttons sit in the top bar or its overflow, depending on the room (b-406). */
+/**
+ * The commands whose buttons sit in the top bar or its overflow, depending on the room (b-406).
+ */
 private val TOP_BAR_IDS = setOf("palette", "undo", "redo", "history", "share", "export") // b-509
 
-/** Every command id the registry has at Expanded on the default theme. */
+/**
+ * Every command id the registry has at Expanded on the default theme.
+ */
 private val EXPECTED_IDS = listOf(
     "palette",
     "cheatSheet",

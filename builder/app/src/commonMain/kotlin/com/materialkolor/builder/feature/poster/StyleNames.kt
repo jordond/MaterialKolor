@@ -52,7 +52,9 @@ import org.jetbrains.compose.resources.StringResource
 
 // b-510
 
-/** What [style] is called under its chip, in words with spaces, as in "Tonal Spot". */
+/**
+ * What [style] is called under its chip, in words with spaces, as in "Tonal Spot".
+ */
 internal fun styleDisplayName(style: Style): StringResource =
     when (style) {
         Style.TonalSpot -> Res.string.style_display_tonal_spot
@@ -86,7 +88,9 @@ internal fun specTag(
  */
 internal fun forcedSpec(style: Style): SpecVersion? = EffectiveSpec.offered(style).singleOrNull()
 
-/** What [style] is called, the way the library spells it. */
+/**
+ * What [style] is called, the way the library spells it.
+ */
 internal fun styleName(style: Style): StringResource =
     when (style) {
         Style.TonalSpot -> Res.string.style_name_tonal_spot
@@ -101,7 +105,9 @@ internal fun styleName(style: Style): StringResource =
         Style.Cmf -> Res.string.style_name_cmf
     }
 
-/** The short hint [style]'s chip shows on hover and focus. */
+/**
+ * The short hint [style]'s chip shows on hover and focus.
+ */
 internal fun styleTooltip(style: Style): StringResource =
     when (style) {
         Style.TonalSpot -> Res.string.style_tooltip_tonal_spot
@@ -116,7 +122,9 @@ internal fun styleTooltip(style: Style): StringResource =
         Style.Cmf -> Res.string.style_tooltip_cmf
     }
 
-/** The one line on what [style] does with the seed. */
+/**
+ * The one line on what [style] does with the seed.
+ */
 internal fun styleDescription(style: Style): StringResource =
     when (style) {
         Style.TonalSpot -> Res.string.style_description_tonal_spot
@@ -131,7 +139,9 @@ internal fun styleDescription(style: Style): StringResource =
         Style.Cmf -> Res.string.style_description_cmf
     }
 
-/** The specs [style] runs in, as its chip's tooltip says them. */
+/**
+ * The specs [style] runs in, as its chip's tooltip says them.
+ */
 internal fun specSupport(style: Style): StringResource {
     val offered = EffectiveSpec.offered(style)
     return when {

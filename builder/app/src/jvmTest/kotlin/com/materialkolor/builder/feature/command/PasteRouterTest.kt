@@ -23,7 +23,9 @@ private val Blue = Argb(0xFF1A73E8.toInt())
 
 // b-315c
 
-/** Text pasted with nothing editable focused, on the whole builder (F-05, F-32). */
+/**
+ * Text pasted with nothing editable focused, on the whole builder (F-05, F-32).
+ */
 @OptIn(ExperimentalTestApi::class)
 class PasteRouterTest {
     private val harness = CommandHarness()
@@ -110,7 +112,9 @@ class PasteRouterTest {
 
     private fun document() = harness.graph.session.document.value
 
-    /** The toast's action [label], which no other workspace control shows as text. */
+    /**
+     * The toast's action [label], which no other workspace control shows as text.
+     */
     private fun ComposeUiTest.workspaceButton(label: String) =
         onNode(hasText(label) and hasClickAction() and InWorkspace)
 }

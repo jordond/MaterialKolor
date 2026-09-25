@@ -110,7 +110,9 @@ class SessionWritesTest : SessionTestBase() {
             stores.textAt(StorageKeys.view(id)) shouldBe null
         }
 
-    /** Drag the seed around in the picker and cancel, which puts [from]'s seed back as a release. */
+    /**
+     * Drag the seed around in the picker and cancel, which puts [from]'s seed back as a release.
+     */
     private fun ProjectSession.cancelPicker(from: ThemeDocument) {
         edit(DocumentChange.SetSeed(FOREST.seed, SeedSource.Picked), EditPhase.Dragging)
         edit(DocumentChange.SetSeed(MEADOW.seed, SeedSource.Picked), EditPhase.Dragging)

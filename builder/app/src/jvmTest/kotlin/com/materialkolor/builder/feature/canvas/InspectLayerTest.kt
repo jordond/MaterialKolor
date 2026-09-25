@@ -48,16 +48,24 @@ import kotlin.math.floor
 import kotlin.math.roundToInt
 import kotlin.test.Test
 
-/** What the Trips app says once the Past filter is on, there being no past trips. */
+/**
+ * What the Trips app says once the Past filter is on, there being no past trips.
+ */
 private const val NO_PAST_TRIPS = "No past trips yet"
 
-/** What the Trips app's floating action button reads as. */
+/**
+ * What the Trips app's floating action button reads as.
+ */
 private const val NEW_TRIP = "New trip"
 
-/** The first action of a pinned card, so its presence means a card is pinned. */
+/**
+ * The first action of a pinned card, so its presence means a card is pinned.
+ */
 private const val PIN_ROLE = "Pin this role"
 
-/** Anything drawn on the Inspect card. */
+/**
+ * Anything drawn on the Inspect card.
+ */
 private val OnCard: SemanticsMatcher = hasAnyAncestor(hasTestTag(INSPECT_CARD_TAG))
 
 @OptIn(ExperimentalTestApi::class)
@@ -233,11 +241,15 @@ class InspectLayerTest {
             host.state.inspect shouldBe false
         }
 
-    /** A canvas host at the default view with Inspect on. */
+    /**
+     * A canvas host at the default view with Inspect on.
+     */
     private fun inspecting(): CanvasHost =
         CanvasHost(view = ProjectViewState()).also { host -> host.state = host.state.copy(inspect = true) }
 
-    /** The card shows the Fab's two roles in the given mode, their contrast and the mode's name. */
+    /**
+     * The card shows the Fab's two roles in the given mode, their contrast and the mode's name.
+     */
     private fun ComposeUiTest.assertFabCard(
         result: ThemeResult,
         isDark: Boolean,
@@ -262,8 +274,12 @@ class InspectLayerTest {
     }
 }
 
-/** How many frames a stepped drag of the handle takes. */
+/**
+ * How many frames a stepped drag of the handle takes.
+ */
 private const val DRAG_STEPS = 6
 
-/** How many Tab presses it may take to reach the Trips app from the canvas tabs. */
+/**
+ * How many Tab presses it may take to reach the Trips app from the canvas tabs.
+ */
 private const val MAX_TABS = 12

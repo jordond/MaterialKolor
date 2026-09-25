@@ -294,7 +294,9 @@ internal fun rememberCandidateColors(
     return colors
 }
 
-/** The image as it came in, in the room a chip takes. */
+/**
+ * The image as it came in, in the room a chip takes.
+ */
 @Composable
 private fun Thumbnail(bitmap: ImageBitmap) {
     val radius = LocalBuilderTokens.current.radius
@@ -309,19 +311,25 @@ private fun Thumbnail(bitmap: ImageBitmap) {
 
 // b-311d
 
-/** The three colors a candidate chip is drawn in. */
+/**
+ * The three colors a candidate chip is drawn in.
+ */
 internal class CandidateColors(
     val primary: Color,
     val secondaryContainer: Color,
     val tertiaryContainer: Color,
 )
 
-/** Which chip resolves its colors next, kept across new inputs so no chip waits for long. */
+/**
+ * Which chip resolves its colors next, kept across new inputs so no chip waits for long.
+ */
 private class NextChip {
     var index: Int = 0
 }
 
-/** Whether the focus is in the row, in whatever it shows right now. */
+/**
+ * Whether the focus is in the row, in whatever it shows right now.
+ */
 private class RowFocus {
     var inRow: Boolean = false
 
@@ -334,7 +342,9 @@ private class RowFocus {
 
 // b-311c
 
-/** What the row shows, whose change hands the focus over. */
+/**
+ * What the row shows, whose change hands the focus over.
+ */
 private enum class RowContent {
     Arriving,
     Candidates,
@@ -342,7 +352,9 @@ private enum class RowContent {
     None,
 }
 
-/** Where a chip sits in the root, which a pick reveals from. Only a pick reads it. */
+/**
+ * Where a chip sits in the root, which a pick reveals from. Only a pick reads it.
+ */
 private class ChipBounds {
     var rect: Rect = Rect.Zero
 }

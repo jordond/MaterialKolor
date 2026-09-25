@@ -104,7 +104,9 @@ class CanvasFullscreenTest {
         }
 }
 
-/** The canvas tab named for [tab]. */
+/**
+ * The canvas tab named for [tab].
+ */
 private fun canvasTab(tab: PreviewTab): SemanticsMatcher =
     hasText(tab.name) and SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab)
 

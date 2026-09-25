@@ -24,7 +24,9 @@ import kotlin.test.Test
 class DataTabTilesTest {
     private val material = ThemeDocument.Default.copy(library = Library.Material3, expressive = false)
 
-    /** One resolver for both results, so the chrome stays on the same schemes as the app's does. */
+    /**
+     * One resolver for both results, so the chrome stays on the same schemes as the app's does.
+     */
     private val resolver = ThemeResolver()
 
     @Test

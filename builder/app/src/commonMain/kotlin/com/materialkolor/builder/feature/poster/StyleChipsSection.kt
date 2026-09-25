@@ -82,7 +82,9 @@ internal typealias StyleSchemeLookup = (inputs: SchemeInputs, isDark: Boolean) -
 
 // pf-1
 
-/** What the chips wait on before each chip as they catch up, the next frame in the app. */
+/**
+ * What the chips wait on before each chip as they catch up, the next frame in the app.
+ */
 internal typealias ChipPause = suspend () -> Unit
 
 /**
@@ -110,7 +112,9 @@ internal fun StyleChipsSection(
     StyleChips(context, dispatcher, lookup, modifier, scrolling = scrolling, details = details)
 }
 
-/** The resolver the app root provides, or one of the poster's own where there is none. */
+/**
+ * The resolver the app root provides, or one of the poster's own where there is none.
+ */
 @Composable
 internal fun rememberThemeResolver(): ThemeResolver = LocalThemeResolver.current ?: remember { ThemeResolver() }
 
@@ -262,7 +266,9 @@ private fun StyleChipRow(
     }
 }
 
-/** How many chips each row of the grid holds, two rows for the ten styles as the design has it. */
+/**
+ * How many chips each row of the grid holds, two rows for the ten styles as the design has it.
+ */
 private const val ChipColumns = 5
 
 /**
@@ -312,7 +318,9 @@ private fun StyleChip(
     }
 }
 
-/** The three colors a chip is drawn in, read from its scheme once. */
+/**
+ * The three colors a chip is drawn in, read from its scheme once.
+ */
 private class ChipColors(
     val primary: Color,
     val secondaryContainer: Color,
@@ -324,7 +332,9 @@ private class ChipColors(
     }
 }
 
-/** Where a chip sits in the root, which a pick reveals from. Only a pick reads it. */
+/**
+ * Where a chip sits in the root, which a pick reveals from. Only a pick reads it.
+ */
 private class ChipBounds {
     var rect: Rect = Rect.Zero
 }
@@ -367,10 +377,14 @@ private class ChipShelf(
     isDark: Boolean,
     lookup: StyleSchemeLookup,
 ) {
-    /** What each chip was last drawn from. Only the catch up reads it. */
+    /**
+     * What each chip was last drawn from. Only the catch up reads it.
+     */
     private val drawnFrom = mutableMapOf<Style, ChipKey>()
 
-    /** When each chip was last drawn, counted in draws, so the longest waiting goes first. */
+    /**
+     * When each chip was last drawn, counted in draws, so the longest waiting goes first.
+     */
     private val drawnAt = mutableMapOf<Style, Int>()
     private var draws = 0
 
@@ -379,10 +393,14 @@ private class ChipShelf(
             mutableStateOf(draw(style, ChipKey.of(document, style, isDark), lookup))
         }
 
-    /** The colours [style]'s chip shows now. */
+    /**
+     * The colours [style]'s chip shows now.
+     */
     operator fun get(style: Style): ChipColors = shown.getValue(style).value
 
-    /** Draws again every chip [document] in the mode [isDark] picks has moved on from, pausing before each. */
+    /**
+     * Draws again every chip [document] in the mode [isDark] picks has moved on from, pausing before each.
+     */
     suspend fun catchUp(
         document: ThemeDocument,
         isDark: Boolean,
@@ -410,7 +428,9 @@ private class ChipShelf(
     }
 }
 
-/** Waits for the next frame, so a catch up draws one chip a frame. */
+/**
+ * Waits for the next frame, so a catch up draws one chip a frame.
+ */
 private val NextFrame: ChipPause = { withFrameNanos {} }
 
 /**

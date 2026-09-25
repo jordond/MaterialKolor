@@ -87,7 +87,9 @@ class TimingMarksTest {
 
     private fun resolves(): Int = platform.environment.marks.count { mark -> mark == TimingMarks.RESOLVE }
 
-    /** The whole builder on fakes, booted. */
+    /**
+     * The whole builder on fakes, booted.
+     */
     private fun ComposeUiTest.showRoot(): AppGraph {
         val graph = createGraphFactory<AppGraph.Factory>().create(platform)
         val owner = TestOwner()

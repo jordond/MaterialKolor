@@ -46,11 +46,15 @@ internal const val WIDE = 1280
 internal const val PHONE = 390
 internal const val HEIGHT = 800
 
-/** The split handle, a slider named Split. The Trips app has a progress bar of its own. */
+/**
+ * The split handle, a slider named Split. The Trips app has a progress bar of its own.
+ */
 internal val SplitHandle: SemanticsMatcher =
     SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo) and hasContentDescription("Split")
 
-/** Where the split handle sits, from its slider semantics. */
+/**
+ * Where the split handle sits, from its slider semantics.
+ */
 @OptIn(ExperimentalTestApi::class)
 internal fun ComposeUiTest.handleFraction(): Float =
     onNode(SplitHandle).fetchSemanticsNode().config[SemanticsProperties.ProgressBarRangeInfo].current
@@ -69,7 +73,9 @@ internal class CanvasHost(
         state = reduce(state, action)
     }
 
-    /** The fractions the canvas sent to be saved, oldest first. */
+    /**
+     * The fractions the canvas sent to be saved, oldest first.
+     */
     val savedFractions: List<Float>
         get() = actions.filterIsInstance<WorkspaceAction.SetSplitFraction>().map { action -> action.fraction }
 
@@ -101,7 +107,9 @@ private fun workspaceState(view: ProjectViewState): WorkspaceModel.State {
     )
 }
 
-/** The canvas and its dock over the host's state, the way the shell lays them out. */
+/**
+ * The canvas and its dock over the host's state, the way the shell lays them out.
+ */
 @Composable
 internal fun Canvas(
     host: CanvasHost,
@@ -145,7 +153,9 @@ internal class TestOwner : ViewModelStoreOwner {
     override val viewModelStore: ViewModelStore = ViewModelStore()
 }
 
-/** The Material skin and the resolved document, laid out for the window. */
+/**
+ * The Material skin and the resolved document, laid out for the window.
+ */
 @Composable
 private fun Themed(
     host: CanvasHost,

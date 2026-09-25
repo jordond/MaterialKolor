@@ -20,7 +20,9 @@ private const val WIDTH = 1280
 private const val HEIGHT = 800
 private const val WAIT_MILLIS = 10_000L
 
-/** One pause before the sample composes, one before its steps and one before the live frame's. */
+/**
+ * One pause before the sample composes, one before its steps and one before the live frame's.
+ */
 private const val PAUSES = 3
 
 // pf-3
@@ -58,7 +60,9 @@ class FluentWarmUpTest {
             onAllNodes(hasClickAction()).fetchSemanticsNodes().size shouldBe clickable
         }
 
-    /** The whole builder on fakes, booted, warming up through [awaitIdle]. */
+    /**
+     * The whole builder on fakes, booted, warming up through [awaitIdle].
+     */
     private fun ComposeUiTest.showRoot(awaitIdle: suspend () -> Unit): AppGraph {
         val graph = createGraphFactory<AppGraph.Factory>().create(platform)
         val owner = TestOwner()

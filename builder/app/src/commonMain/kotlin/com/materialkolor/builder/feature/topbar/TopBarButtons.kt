@@ -23,7 +23,9 @@ import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import org.jetbrains.compose.resources.stringResource
 
-/** An icon button under a tooltip that says what it does, the description unless [tooltip] says more. */
+/**
+ * An icon button under a tooltip that says what it does, the description unless [tooltip] says more.
+ */
 @Composable
 internal fun TopBarIconButton(
     control: TopBarControl,

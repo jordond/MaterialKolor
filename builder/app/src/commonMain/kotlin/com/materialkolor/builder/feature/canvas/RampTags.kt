@@ -58,14 +58,18 @@ private data class ToneTag(
     val names: List<String>,
 )
 
-/** These marks gathered by rounded tone, from the darkest up, as the ramp runs. */
+/**
+ * These marks gathered by rounded tone, from the darkest up, as the ramp runs.
+ */
 private fun List<ModeMark>.toneTags(): List<ToneTag> =
     groupBy { mark -> mark.tone.roundToInt() }
         .entries
         .sortedBy { (tone, _) -> tone }
         .map { (tone, marks) -> ToneTag(tone, marks.map { mark -> mark.name }) }
 
-/** The ramp's heading with the tag of its key color beside it. */
+/**
+ * The ramp's heading with the tag of its key color beside it.
+ */
 @Composable
 internal fun RampTitle(
     title: String,
@@ -127,7 +131,9 @@ internal fun ModeTags(
     }
 }
 
-/** [tags] in a row that wraps onto as many lines as the card needs. */
+/**
+ * [tags] in a row that wraps onto as many lines as the card needs.
+ */
 @Composable
 private fun TagRow(
     tags: List<ToneTag>,

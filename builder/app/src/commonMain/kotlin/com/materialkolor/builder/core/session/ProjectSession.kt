@@ -136,30 +136,46 @@ internal class ProjectSession(
         }
     }
 
-    /** The theme being edited, with the number of the project it belongs to. */
+    /**
+     * The theme being edited, with the number of the project it belongs to.
+     */
     val shown: StateFlow<ShownDocument> = _shown.asStateFlow()
 
-    /** The theme being edited. It is [shown] without the number. */
+    /**
+     * The theme being edited. It is [shown] without the number.
+     */
     val document: StateFlow<ThemeDocument> = _shown.derived { shown -> shown.document }
 
-    /** What undo and redo can do right now. */
+    /**
+     * What undo and redo can do right now.
+     */
     val history: StateFlow<HistoryState> = _history.asStateFlow()
 
-    /** Which project is open. */
+    /**
+     * Which project is open.
+     */
     val project: StateFlow<ProjectRef> = _project.asStateFlow()
 
-    /** How the preview of the open project is set up. */
+    /**
+     * How the preview of the open project is set up.
+     */
     val viewState: StateFlow<ProjectViewState> = _viewState.asStateFlow()
 
-    /** Another tab's save that clashes with an edit made here, or null. */
+    /**
+     * Another tab's save that clashes with an edit made here, or null.
+     */
     val conflict: StateFlow<Conflict?> = _conflict.asStateFlow()
 
-    /** Whether the open project is saved. A failure comes after the repository pruned and tried again. */
+    /**
+     * Whether the open project is saved. A failure comes after the repository pruned and tried again.
+     */
     val saveStatus: StateFlow<SaveStatus> = writes.status
 
     // b-216b
 
-    /** The open project's name, the one its next save writes. It follows renames and other tabs. */
+    /**
+     * The open project's name, the one its next save writes. It follows renames and other tabs.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     val projectName: Flow<String> = current.flatMapLatest { open -> open.name }
 
@@ -221,12 +237,16 @@ internal class ProjectSession(
         commit(after)
     }
 
-    /** Step back once. Nothing happens when there is nothing to undo. */
+    /**
+     * Step back once. Nothing happens when there is nothing to undo.
+     */
     fun undo() {
         moveTo(steps.undo() ?: return)
     }
 
-    /** Step forward once. Nothing happens when there is nothing to redo. */
+    /**
+     * Step forward once. Nothing happens when there is nothing to redo.
+     */
     fun redo() {
         moveTo(steps.redo() ?: return)
     }
@@ -243,7 +263,9 @@ internal class ProjectSession(
         moveTo(steps.jumpTo(cursor) ?: return)
     }
 
-    /** The steps as they stand now, built when asked and never published on each frame of a drag. */
+    /**
+     * The steps as they stand now, built when asked and never published on each frame of a drag.
+     */
     fun timeline(): Timeline {
         val entries = steps.entries
         return Timeline(
@@ -339,7 +361,9 @@ internal class ProjectSession(
         return flush()
     }
 
-    /** Change how the preview is set up, saved once the changes stop. */
+    /**
+     * Change how the preview is set up, saved once the changes stop.
+     */
     fun updateView(block: (ProjectViewState) -> ProjectViewState) {
         val state = _viewState.updateAndGet(block)
         viewAutosave.schedule(PendingView(current.value, state))
@@ -386,7 +410,9 @@ internal class ProjectSession(
         commit(document)
     }
 
-    /** Write the splash colors of [document] and schedule its save. */
+    /**
+     * Write the splash colors of [document] and schedule its save.
+     */
     private fun commit(document: ThemeDocument) {
         committed = document
         committedEditAt = lastEditAt
@@ -398,7 +424,9 @@ internal class ProjectSession(
 
     // b-501b
 
-    /** Keep [colors] for the next boot's splash, with the seed and the chrome's appearance. */
+    /**
+     * Keep [colors] for the next boot's splash, with the seed and the chrome's appearance.
+     */
     private fun writeSplash(colors: SessionColors) {
         val appearance = preferences.preferences.value.appearance
         writeSplash(BootSplash(colors.splashLight, colors.splashDark, colors.splashSeed, appearance))
@@ -409,7 +437,9 @@ internal class ProjectSession(
         environment.writeSplash(next)
     }
 
-    /** Show [document] in place of the one showing, in the same project. */
+    /**
+     * Show [document] in place of the one showing, in the same project.
+     */
     private fun showDocument(document: ThemeDocument) {
         _shown.update { shown -> shown.copy(document = document) }
     }
@@ -450,7 +480,9 @@ internal class ProjectSession(
         show(open, ProjectRef.Transient(shared.code), shared.document, History(), ProjectViewState())
     }
 
-    /** Create a project from [document], or show it unsaved when storage will not take it. */
+    /**
+     * Create a project from [document], or show it unsaved when storage will not take it.
+     */
     private suspend fun startNew(
         document: ThemeDocument,
         view: ProjectViewState,
@@ -503,7 +535,9 @@ internal class ProjectSession(
         if (conflicted || editedLately) _conflict.value = Conflict(incoming) else adopt(open, incoming)
     }
 
-    /** Take the other tab's [theirs] as an undo step, so Undo brings this tab's document back. */
+    /**
+     * Take the other tab's [theirs] as an undo step, so Undo brings this tab's document back.
+     */
     private fun adopt(
         open: OpenProject,
         theirs: ProjectRecord,
@@ -537,7 +571,9 @@ internal class ProjectSession(
         preferences.update { prefs -> prefs.copy(lastProjectId = id) }
     }
 
-    /** A project whose changes from other tabs come back to the caller's dispatcher, the UI thread. */
+    /**
+     * A project whose changes from other tabs come back to the caller's dispatcher, the UI thread.
+     */
     private suspend fun openHere(
         id: String?,
         name: String,

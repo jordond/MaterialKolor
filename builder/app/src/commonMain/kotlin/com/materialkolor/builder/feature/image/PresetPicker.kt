@@ -59,10 +59,14 @@ import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-/** Tags a starter's scheme chip once it has resolved, for tests to count them. */
+/**
+ * Tags a starter's scheme chip once it has resolved, for tests to count them.
+ */
 internal const val STARTER_CHIP_TAG: String = "image-starter-chip"
 
-/** Tags a starter's skeleton while its scheme resolves. */
+/**
+ * Tags a starter's skeleton while its scheme resolves.
+ */
 internal const val STARTER_SKELETON_TAG: String = "image-starter-skeleton"
 
 /**
@@ -184,7 +188,9 @@ internal fun PresetPicker(
     }
 }
 
-/** A heading, a line on what choosing from it does, and the cards. */
+/**
+ * A heading, a line on what choosing from it does, and the cards.
+ */
 @Composable
 private fun PresetGroup(
     title: String,
@@ -204,7 +210,9 @@ private fun PresetGroup(
     }
 }
 
-/** One preset as a card, its picture over its [name]. The card reads as a button named by what it says. */
+/**
+ * One preset as a card, its picture over its [name]. The card reads as a button named by what it says.
+ */
 @Composable
 private fun PresetCard(
     name: String,
@@ -223,7 +231,9 @@ private fun PresetCard(
     }
 }
 
-/** The preset's picture in the room a chip takes. */
+/**
+ * The preset's picture in the room a chip takes.
+ */
 @Composable
 private fun PresetPicture(preset: Preset.Image) {
     val radius = LocalBuilderTokens.current.radius

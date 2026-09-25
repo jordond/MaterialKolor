@@ -179,7 +179,9 @@ class BuilderRootTest {
         waitForIdle()
     }
 
-    /** The whole builder on fakes, booted, with [probe] drawn over the workspace. */
+    /**
+     * The whole builder on fakes, booted, with [probe] drawn over the workspace.
+     */
     private fun ComposeUiTest.showRoot(probe: @Composable (state: WorkspaceModel.State) -> Unit = {}): AppGraph {
         val graph = createGraphFactory<AppGraph.Factory>().create(platform)
         val owner = TestOwner()

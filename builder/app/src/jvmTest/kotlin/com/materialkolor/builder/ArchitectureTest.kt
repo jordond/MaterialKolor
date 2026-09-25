@@ -301,19 +301,25 @@ internal enum class ArchitectureRule(
         appliesTo = { file -> file.module !in UI_LIBRARY_EXEMPT_MODULES && file.sourceSet.endsWith("Main") },
     ),
 
-    /** Only the web shell talks to the browser. */
+    /**
+     * Only the web shell talks to the browser.
+     */
     BrowserInterop(
         pattern = Regex("""(?<![\w.])js\(|@JsFun\b|\bkotlinx\.browser\b"""),
         appliesTo = { file -> file.module != "web" },
     ),
 
-    /** Nothing blocks a thread, wasm has only the one. */
+    /**
+     * Nothing blocks a thread, wasm has only the one.
+     */
     DispatchersIo(
         pattern = Regex("""\bDispatchers\.IO\b"""),
         appliesTo = { true },
     ),
 
-    /** Endless animation goes through `rememberLoopPhase`, which stops while the tab is hidden. */
+    /**
+     * Endless animation goes through `rememberLoopPhase`, which stops while the tab is hidden.
+     */
     InfiniteAnimation(
         pattern = Regex("""\b(rememberInfiniteTransition|infiniteRepeatable)\b"""),
         appliesTo = { file -> file.path != LOOP_PHASE_PATH },
@@ -346,10 +352,14 @@ internal data class SourceFile(
     val path: String,
     val text: String,
 ) {
-    /** The builder module the file belongs to, `kit` for example. */
+    /**
+     * The builder module the file belongs to, `kit` for example.
+     */
     val module: String = path.removePrefix("builder/").substringBefore('/')
 
-    /** The source set the file belongs to, `commonMain` for example. */
+    /**
+     * The source set the file belongs to, `commonMain` for example.
+     */
     val sourceSet: String = path.substringAfter("/src/").substringBefore('/')
 }
 

@@ -48,17 +48,25 @@ internal val MediumOverflowOrder: List<TopBarControl> =
  */
 @Stable
 internal class MediumBarFit {
-    /** How many buttons sit in the overflow, from the start of [MediumOverflowOrder]. */
+    /**
+     * How many buttons sit in the overflow, from the start of [MediumOverflowOrder].
+     */
     var moved: Int by mutableIntStateOf(0)
         private set
 
-    /** The room each move freed, measured once the bar had caught up with it. Plain, nothing draws from it. */
+    /**
+     * The room each move freed, measured once the bar had caught up with it. Plain, nothing draws from it.
+     */
     private val freed = IntArray(MediumOverflowOrder.size)
 
-    /** The room the dropdown had just before the last move, until the next measure prices the move. */
+    /**
+     * The room the dropdown had just before the last move, until the next measure prices the move.
+     */
     private var roomBeforeMove: Int? = null
 
-    /** The buttons in the overflow right now. */
+    /**
+     * The buttons in the overflow right now.
+     */
     val overflowed: Set<TopBarControl>
         get() = MediumOverflowOrder.take(moved).toSet()
 
@@ -210,20 +218,28 @@ internal fun Modifier.shrinkToHeight(max: Dp): Modifier =
 
 // b-406g
 
-/** How long a menu window takes to leave, in frame time, with room to spare for Material's springs. */
+/**
+ * How long a menu window takes to leave, in frame time, with room to spare for Material's springs.
+ */
 private const val MENU_EXIT_NANOS: Long = 250_000_000L
 
-/** Waits out [MENU_EXIT_NANOS] of frames, so the menu a pick came from is gone. */
+/**
+ * Waits out [MENU_EXIT_NANOS] of frames, so the menu a pick came from is gone.
+ */
 private suspend fun awaitMenuExit() {
     val start = withFrameNanos { frame -> frame }
     var now = start
     while (now - start < MENU_EXIT_NANOS) now = withFrameNanos { frame -> frame }
 }
 
-/** The room a trigger is measured in to find its own width, far more than any window gives it. */
+/**
+ * The room a trigger is measured in to find its own width, far more than any window gives it.
+ */
 private const val PROBE_MAX_WIDTH: Int = 32_767
 
-/** Everything the widest trigger hangs on, the skin and type it draws in and the names it shows. */
+/**
+ * Everything the widest trigger hangs on, the skin and type it draws in and the names it shows.
+ */
 private data class TriggerKey(
     val skin: Skin,
     val type: BuilderType,
@@ -232,7 +248,9 @@ private data class TriggerKey(
     val fontScale: Float,
 )
 
-/** Which library's trigger came out widest last. Plain fields, since only the dropdown's measure reads them. */
+/**
+ * Which library's trigger came out widest last. Plain fields, since only the dropdown's measure reads them.
+ */
 private class WidestTrigger {
     private var key: TriggerKey? = null
     private var widest: LibraryChoice = LibraryChoice.M3

@@ -17,7 +17,9 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
 internal val LocalImageSeeds: ProvidableCompositionLocal<ImageSeedModel.State> =
     compositionLocalOf { ImageSeedModel.State() }
 
-/** Hands [content] what [model] holds for the project [state] shows, through [LocalImageSeeds]. */
+/**
+ * Hands [content] what [model] holds for the project [state] shows, through [LocalImageSeeds].
+ */
 @Composable
 internal fun ProvideImageSeeds(
     state: WorkspaceModel.State,

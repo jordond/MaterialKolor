@@ -64,7 +64,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** Tags each pair row of the Contrast tab, for tests to count them. */
+/**
+ * Tags each pair row of the Contrast tab, for tests to count them.
+ */
 internal const val CONTRAST_ROW_TAG: String = "contrast-row"
 
 /**
@@ -166,7 +168,9 @@ private fun PairRow(
     }
 }
 
-/** A small square of [argb], only there to be seen. */
+/**
+ * A small square of [argb], only there to be seen.
+ */
 @Composable
 private fun PairSwatch(argb: Argb) {
     val tokens = LocalBuilderTokens.current
@@ -180,7 +184,9 @@ private fun PairSwatch(argb: Argb) {
     )
 }
 
-/** What the Contrast tab says for a reason, the string named by its key. */
+/**
+ * What the Contrast tab says for a reason, the string named by its key.
+ */
 internal val AuditReason.text: StringResource
     get() = when (this) {
         AuditReason.TextOnlyLarge -> Res.string.audit_reason_text_only_large
@@ -188,7 +194,9 @@ internal val AuditReason.text: StringResource
         AuditReason.ShapeFaint -> Res.string.audit_reason_shape_faint
     }
 
-/** What the Contrast tab says for a suggestion, the string named by its key. */
+/**
+ * What the Contrast tab says for a suggestion, the string named by its key.
+ */
 internal val AuditSuggestion.text: StringResource
     get() = when (this) {
         AuditSuggestion.ChangePin -> Res.string.audit_suggest_change_pin

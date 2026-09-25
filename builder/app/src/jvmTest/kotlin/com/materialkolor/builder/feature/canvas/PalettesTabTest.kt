@@ -314,7 +314,9 @@ class PalettesTabTest {
 
 // b-513
 
-/** A tag under a ramp, as in "40 · primary, surfaceTint", that names [name] among what landed on its tone. */
+/**
+ * A tag under a ramp, as in "40 · primary, surfaceTint", that names [name] among what landed on its tone.
+ */
 private fun hasMark(name: String): SemanticsMatcher =
     SemanticsMatcher("a tone tag naming $name") { node ->
         node.config.getOrNull(SemanticsProperties.Text).orEmpty().any { text ->
@@ -322,7 +324,9 @@ private fun hasMark(name: String): SemanticsMatcher =
         }
     }
 
-/** The heading over each palette's ramp. */
+/**
+ * The heading over each palette's ramp.
+ */
 internal val PaletteTitles: Map<KeyColor, String> = mapOf(
     KeyColor.Primary to "Primary",
     KeyColor.Secondary to "Secondary",

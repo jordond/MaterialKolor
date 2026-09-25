@@ -147,7 +147,9 @@ internal data class SaveBadge(
     val icon: IconId?,
 )
 
-/** The badge the header shows for [status]. */
+/**
+ * The badge the header shows for [status].
+ */
 internal fun saveBadgeOf(status: SaveStatus): SaveBadge =
     when (status) {
         SaveStatus.Idle -> SaveBadge(Res.string.poster_saved, BadgeStatus.Success, IconId.Check)

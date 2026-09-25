@@ -23,7 +23,9 @@ private const val HEIGHT = 800
 
 // b-315c
 
-/** C and Shift+C inside the export sheet copy its files, from inside the key press (R-B-302). */
+/**
+ * C and Shift+C inside the export sheet copy its files, from inside the key press (R-B-302).
+ */
 @OptIn(ExperimentalTestApi::class)
 class ExportSheetKeysTest {
     private val harness = CommandHarness()
@@ -49,7 +51,9 @@ class ExportSheetKeysTest {
             harness.platform.clipboard.texts shouldBe listOf(ready.allText)
         }
 
-    /** Boots the builder, opens the export sheet and says what it exports. */
+    /**
+     * Boots the builder, opens the export sheet and says what it exports.
+     */
     private fun ComposeUiTest.openSheet(): ExportOutcome.Ready {
         with(harness) { show(probe = { export = metroViewModel() }) }
         runOnUiThread { harness.workspace.openPanel(Panel.Export) }
@@ -58,7 +62,9 @@ class ExportSheetKeysTest {
         return export.outcome().shouldBeInstanceOf<ExportOutcome.Ready>()
     }
 
-    /** Presses keys on what has focus in the sheet, with no frame or task run after them. */
+    /**
+     * Presses keys on what has focus in the sheet, with no frame or task run after them.
+     */
     private fun ComposeUiTest.pressInSheet(block: KeyInjectionScope.() -> Unit) {
         mainClock.autoAdvance = false
         onAllNodes(isFocused()).onLast().performKeyInput(block)

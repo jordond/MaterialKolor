@@ -75,7 +75,9 @@ internal class PosterHarness(
         }
     }
 
-    /** Opens or closes [row], the way the workspace keeps it per project. */
+    /**
+     * Opens or closes [row], the way the workspace keeps it per project.
+     */
     private fun setRowOpen(
         row: FineTuneRow,
         open: Boolean,
@@ -85,7 +87,9 @@ internal class PosterHarness(
 
     // b-306b
 
-    /** Turns color animation on or off in the export options of [target] alone, as the workspace does. */
+    /**
+     * Turns color animation on or off in the export options of [target] alone, as the workspace does.
+     */
     private fun setColorAnimation(
         target: ExportTarget,
         on: Boolean,
@@ -93,7 +97,9 @@ internal class PosterHarness(
         updateExportPrefs(target) { prefs -> prefs.copy(animate = on) }
     }
 
-    /** Sets how long the color animation of [target] runs, as the workspace does. */
+    /**
+     * Sets how long the color animation of [target] runs, as the workspace does.
+     */
     private fun setColorAnimationDuration(
         target: ExportTarget,
         durationMs: Int,
@@ -101,7 +107,9 @@ internal class PosterHarness(
         updateExportPrefs(target) { prefs -> prefs.copy(animationDurationMs = durationMs) }
     }
 
-    /** Keeps what [block] makes of the export options of [target], the way the preferences repository does. */
+    /**
+     * Keeps what [block] makes of the export options of [target], the way the preferences repository does.
+     */
     private fun updateExportPrefs(
         target: ExportTarget,
         block: (ExportPrefs) -> ExportPrefs,
@@ -111,12 +119,16 @@ internal class PosterHarness(
 
     // b-314
 
-    /** Keeps [id] closed, the way the preferences repository does. */
+    /**
+     * Keeps [id] closed, the way the preferences repository does.
+     */
     private fun dismissHint(id: String) {
         preferences = preferences.copy(dismissedHints = preferences.dismissedHints + id)
     }
 
-    /** How many steps undo walks back before the history runs out. */
+    /**
+     * How many steps undo walks back before the history runs out.
+     */
     fun undoEntries(): Int = generateSequence { history.undo() }.count()
 
     private fun edit(
@@ -131,12 +143,16 @@ internal class PosterHarness(
     }
 
     private companion object {
-        /** Longer than any merge window, so only the phase decides what folds. */
+        /**
+         * Longer than any merge window, so only the phase decides what folds.
+         */
         const val MERGE_GAP = 60_000L
     }
 }
 
-/** Shows [section] on the poster surface, the way the poster panel stands it, fed by [harness]. */
+/**
+ * Shows [section] on the poster surface, the way the poster panel stands it, fed by [harness].
+ */
 @OptIn(ExperimentalTestApi::class)
 internal fun ComposeUiTest.showSection(
     harness: PosterHarness,

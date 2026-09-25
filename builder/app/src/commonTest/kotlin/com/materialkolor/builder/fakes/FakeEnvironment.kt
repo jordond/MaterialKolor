@@ -21,31 +21,45 @@ internal class FakeEnvironment(
     override val reducedMotion: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val coarsePointer: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
-    /** What the eye dropper picks next, null for a cancel. */
+    /**
+     * What the eye dropper picks next, null for a cancel.
+     */
     var screenColor: Argb? = null
 
-    /** Whether the platform agrees to keep stored data. */
+    /**
+     * Whether the platform agrees to keep stored data.
+     */
     var persistGranted: Boolean = true
 
-    /** How many times persistent storage was asked for. */
+    /**
+     * How many times persistent storage was asked for.
+     */
     var persistRequests: Int = 0
         private set
 
-    /** Whether the boot splash was removed. */
+    /**
+     * Whether the boot splash was removed.
+     */
     var splashHidden: Boolean = false
         private set
 
-    /** Every browser chrome tint, oldest first. */
+    /**
+     * Every browser chrome tint, oldest first.
+     */
     val themeColors: MutableList<Argb> = mutableListOf()
 
     // b-501b
 
-    /** Every splash written, oldest first. */
+    /**
+     * Every splash written, oldest first.
+     */
     val splashes: MutableList<BootSplash> = mutableListOf()
 
     // b-307
 
-    /** How many times the eye dropper was opened. */
+    /**
+     * How many times the eye dropper was opened.
+     */
     var screenPicks: Int = 0
         private set
 
@@ -71,7 +85,9 @@ internal class FakeEnvironment(
         return persistGranted
     }
 
-    /** The project this tab has open, as a reload would find it. */
+    /**
+     * The project this tab has open, as a reload would find it.
+     */
     var tabProject: String? = null
 
     override fun readTabProject(): String? = tabProject
@@ -83,10 +99,14 @@ internal class FakeEnvironment(
     // b-301
     // b-221c
 
-    /** Emit on this to hide the page, as closing the tab would. */
+    /**
+     * Emit on this to hide the page, as closing the tab would.
+     */
     override val pageHides: MutableSharedFlow<Unit> = MutableSharedFlow(extraBufferCapacity = 1)
 
-    /** Everything read out to a screen reader, oldest first. */
+    /**
+     * Everything read out to a screen reader, oldest first.
+     */
     val announcements: MutableList<String> = mutableListOf()
 
     override fun announce(message: String) {
@@ -98,7 +118,9 @@ internal class FakeEnvironment(
 
     // b-314b
 
-    /** Every path the page was asked to reload at, oldest first. */
+    /**
+     * Every path the page was asked to reload at, oldest first.
+     */
     val reloads: MutableList<String> = mutableListOf()
 
     override fun reload(path: String) {
@@ -107,12 +129,16 @@ internal class FakeEnvironment(
 
     // b-314ba
 
-    /** Whether a reload loads anything, true as on the web. */
+    /**
+     * Whether a reload loads anything, true as on the web.
+     */
     override var canReload: Boolean = true
 
     // b-504
 
-    /** Every timing mark left, oldest first. */
+    /**
+     * Every timing mark left, oldest first.
+     */
     val marks: MutableList<String> = mutableListOf()
 
     override fun mark(name: String) {
@@ -120,5 +146,7 @@ internal class FakeEnvironment(
     }
 }
 
-/** What every [FakeEnvironment] says it runs in. */
+/**
+ * What every [FakeEnvironment] says it runs in.
+ */
 internal const val FAKE_BROWSER: String = "FakeBrowser/1.0 (Test OS)"

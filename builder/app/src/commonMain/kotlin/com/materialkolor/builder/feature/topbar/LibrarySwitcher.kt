@@ -44,12 +44,16 @@ internal enum class LibraryChoice(
     Custom(Library.Custom, expressive = false),
     ;
 
-    /** The one edit that moves a document to this choice, library and flag together. */
+    /**
+     * The one edit that moves a document to this choice, library and flag together.
+     */
     val change: DocumentChange
         get() = DocumentChange.SetLibrary(library, expressive)
 
     companion object {
-        /** The choice [document] is on. */
+        /**
+         * The choice [document] is on.
+         */
         fun of(document: ThemeDocument): LibraryChoice =
             when (document.library) {
                 Library.Material3 -> if (document.expressive) Expressive else M3
@@ -92,7 +96,9 @@ internal fun LibrarySwitcher(
     )
 }
 
-/** The library switcher on [selected], for callers that hold the choice rather than the document. */
+/**
+ * The library switcher on [selected], for callers that hold the choice rather than the document.
+ */
 @Composable
 internal fun LibrarySwitcher(
     selected: LibraryChoice,
@@ -129,7 +135,9 @@ internal fun LibrarySwitcher(
     }
 }
 
-/** What the switcher calls [choice]. The undo and redo buttons name a library switch the same way. */
+/**
+ * What the switcher calls [choice]. The undo and redo buttons name a library switch the same way.
+ */
 @Composable
 internal fun libraryName(choice: LibraryChoice): String =
     stringResource(
@@ -150,7 +158,9 @@ internal class RevealOrigin {
     var bounds: Rect = Rect.Zero
     var press: Offset? = null
 
-    /** The press in root coordinates, or the switcher's middle when a key made the pick. */
+    /**
+     * The press in root coordinates, or the switcher's middle when a key made the pick.
+     */
     fun take(): Offset {
         val local = press
         press = null
@@ -158,7 +168,9 @@ internal class RevealOrigin {
     }
 }
 
-/** Keeps [origin] up to date. It watches presses on the way down and consumes none of them. */
+/**
+ * Keeps [origin] up to date. It watches presses on the way down and consumes none of them.
+ */
 internal fun Modifier.trackRevealOrigin(origin: RevealOrigin): Modifier =
     onGloballyPositioned { coordinates -> origin.bounds = coordinates.boundsInRoot() }
         .pointerInput(origin) {

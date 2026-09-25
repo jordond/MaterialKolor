@@ -23,7 +23,9 @@ import com.materialkolor.hct.Hct
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** How far round the hue circle from the seed each place down the list starts a new extra color, in degrees. */
+/**
+ * How far round the hue circle from the seed each place down the list starts a new extra color, in degrees.
+ */
 private const val HUE_TURN = 40.0
 
 private const val FULL_TURN = 360.0
@@ -43,27 +45,43 @@ internal fun newAccent(document: ThemeDocument): Accent {
     return Accent(name = name, seed = Argb(Hct.from(hue, seed.chroma, seed.tone).toInt()))
 }
 
-/** Something that stops a name from naming an extra color. */
+/**
+ * Something that stops a name from naming an extra color.
+ */
 internal enum class AccentNameProblem {
-    /** It is not a Kotlin name. */
+    /**
+     * It is not a Kotlin name.
+     */
     Invalid,
 
-    /** Kotlin keeps it for itself. */
+    /**
+     * Kotlin keeps it for itself.
+     */
     Keyword,
 
-    /** It is longer than an export takes. */
+    /**
+     * It is longer than an export takes.
+     */
     TooLong,
 
-    /** Another extra color has it. */
+    /**
+     * Another extra color has it.
+     */
     Duplicate,
 
-    /** Another extra color has it with other capitals, which the export would write the same. */
+    /**
+     * Another extra color has it with other capitals, which the export would write the same.
+     */
     CaseClash,
 
-    /** A role of the scheme has it. */
+    /**
+     * A role of the scheme has it.
+     */
     Role,
 
-    /** The export's own files use it for something else. */
+    /**
+     * The export's own files use it for something else.
+     */
     Taken,
 }
 
@@ -90,7 +108,9 @@ internal fun accentNameProblems(
     return (if (taken) invalid + AccentNameProblem.Taken else invalid).distinct()
 }
 
-/** The problem this error is for the extra color at [index], or null when it is about something else. */
+/**
+ * The problem this error is for the extra color at [index], or null when it is about something else.
+ */
 private fun ValidationError.problemAt(index: Int): AccentNameProblem? =
     when (this) {
         is ValidationError.AccentNameInvalid -> AccentNameProblem.Invalid.takeIf { this.index == index }
@@ -117,14 +137,18 @@ private fun ValidationError.problemAt(index: Int): AccentNameProblem? =
 internal class AccentNameMessages(
     private val messages: Map<AccentNameProblem, String>,
 ) {
-    /** One message for each of [problems], in their order, or null when there are none. */
+    /**
+     * One message for each of [problems], in their order, or null when there are none.
+     */
     fun messageFor(problems: List<AccentNameProblem>): String? =
         problems.takeIf { found -> found.isNotEmpty() }?.joinToString(separator = " ") { problem ->
             messages.getValue(problem)
         }
 }
 
-/** What a name field says about each problem a name can have. */
+/**
+ * What a name field says about each problem a name can have.
+ */
 @Composable
 internal fun rememberAccentNameMessages(): AccentNameMessages {
     val messages = AccentNameProblem.entries.associateWith { problem ->
@@ -137,7 +161,9 @@ internal fun rememberAccentNameMessages(): AccentNameMessages {
     return remember(messages) { AccentNameMessages(messages) }
 }
 
-/** The words for [problem]. Only [AccentNameProblem.TooLong] has an argument, the most bytes a name takes. */
+/**
+ * The words for [problem]. Only [AccentNameProblem.TooLong] has an argument, the most bytes a name takes.
+ */
 private fun problemText(problem: AccentNameProblem): StringResource =
     when (problem) {
         AccentNameProblem.Invalid -> Res.string.accents_name_invalid
