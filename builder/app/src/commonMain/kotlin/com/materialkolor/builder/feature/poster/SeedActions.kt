@@ -3,10 +3,13 @@ package com.materialkolor.builder.feature.poster
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.feature.image.ImageMenuButton
 import com.materialkolor.builder.feature.picker.PickerTarget
@@ -20,10 +23,12 @@ import com.materialkolor.builder.generated.resources.poster_lock_seed
 import com.materialkolor.builder.generated.resources.poster_lock_style
 import com.materialkolor.builder.generated.resources.poster_pick
 import com.materialkolor.builder.generated.resources.poster_shuffle
+import com.materialkolor.builder.generated.resources.poster_shuffle_off
 import com.materialkolor.builder.generated.resources.poster_space
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderToggleButton
+import com.materialkolor.builder.kit.control.BuilderTooltip
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -33,15 +38,17 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Shuffle, Pick and Image, with the shuffle locks under them.
+ * Shuffle, Pick and Image on one row, Shuffle taking what the other two leave.
  *
  * Shuffle only asks. The workspace draws the next seed with the locks applied and lands it as one
  * undo entry behind a crossfade. With the seed and the style both locked there is nothing left to
- * draw, so Shuffle turns off and a line says why. The Space keycap inside it is a hint for a
- * keyboard, so a touch screen leaves it out. The three actions share one row and the locks another.
+ * draw, so Shuffle turns off and its tooltip and what it reads out say why. The Space keycap inside
+ * it is a hint for a keyboard, so a touch screen leaves it out.
+ *
+ * The docked poster keeps its locks elsewhere, the style's by the style and the rest in Fine-tune.
  *
  * @param[shuffle] Whether Shuffle leads the row. The sheet's seed row already holds it.
- * @param[locks] Whether the locks follow the actions. The sheet shows them further down.
+ * @param[locks] Whether [ShuffleLocks] follow the actions.
  */
 @Composable
 internal fun SeedActions(
@@ -49,27 +56,19 @@ internal fun SeedActions(
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
     shuffle: Boolean = true,
-    locks: Boolean = true,
+    // b-522 The docked poster no longer shows the locks here.
+    locks: Boolean = false,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
-    val preferences = context.preferences
-    val nothingToShuffle = preferences.shufflesNothing()
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-        // The three share one row at 400 dp in every skin, with a tight gap Material's roomy buttons need.
+        // A tight gap, so Material's roomy buttons share one row at 400 dp. A row too narrow for all
+        // three wraps, and Shuffle then fills a row of its own.
         FlowRow(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall),
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
-            if (shuffle) {
-                val space = stringResource(Res.string.poster_space)
-                BuilderButton(
-                    onClick = { dispatcher.dispatch(WorkspaceAction.Shuffle(origin = null)) },
-                    label = stringResource(Res.string.poster_shuffle),
-                    emphasis = Emphasis.Primary,
-                    enabled = !nothingToShuffle,
-                    hint = if (LocalLayout.current.coarsePointer) null else space,
-                )
-            }
+            if (shuffle) ShuffleButton(context, dispatcher, Modifier.weight(1f))
             val pick = remember { FocusRequester() }
             BuilderButton(
                 onClick = { dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.Seed, returnFocusTo = pick)) },
@@ -84,8 +83,42 @@ internal fun SeedActions(
 }
 
 /**
+ * Shuffle as the row's lead button, with the Space keycap for a keyboard. With nothing left to
+ * shuffle it turns off, its tooltip says why and it reads out as Shuffle and the reason.
+ */
+@Composable
+private fun ShuffleButton(
+    context: PosterContext,
+    dispatcher: Dispatcher<WorkspaceAction>,
+    modifier: Modifier = Modifier,
+) {
+    val nothingToShuffle = context.preferences.shufflesNothing()
+    val space = stringResource(Res.string.poster_space)
+    val button: @Composable (Modifier) -> Unit = { buttonModifier ->
+        BuilderButton(
+            onClick = { dispatcher.dispatch(WorkspaceAction.Shuffle(origin = null)) },
+            label = stringResource(Res.string.poster_shuffle),
+            modifier = buttonModifier,
+            emphasis = Emphasis.Primary,
+            enabled = !nothingToShuffle,
+            hint = if (LocalLayout.current.coarsePointer) null else space,
+        )
+    }
+    if (!nothingToShuffle) {
+        button(modifier)
+        return
+    }
+    val reason = stringResource(Res.string.poster_all_locked)
+    val spoken = stringResource(Res.string.poster_shuffle_off, reason)
+    BuilderTooltip(text = reason, modifier = modifier) {
+        button(Modifier.fillMaxWidth().semantics { contentDescription = spoken })
+    }
+}
+
+/**
  * The three shuffle locks on one row, and why Shuffle is off once the seed and the style are both
- * locked. The label says lock, so the locks leave their glyph out and fit the row.
+ * locked. The label says lock, so the locks leave their glyph out and fit the row. The phone sheet
+ * still shows it, and the docked poster no longer does.
  */
 @Composable
 internal fun ShuffleLocks(

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The one hint on a first visit. The tests check it word for word. -->
-    <string name="about_first_run_hint">Paste a color, drop an image, or press Space to shuffle. Press ? for shortcuts.</string>
     <!-- The button that closes the first visit hint for good. -->
     <string name="about_first_run_hint_close">Close the hint</string>
 

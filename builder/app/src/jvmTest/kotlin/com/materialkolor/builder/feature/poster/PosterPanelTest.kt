@@ -212,19 +212,22 @@ class PosterPanelTest {
         }
 
     @Test
-    fun seedHero_eachSource_showsWhereTheSeedCameFrom() =
+    fun seedHero_eachSource_readsWhereTheSeedCameFrom() =
         runComposeUiTest {
             var document by mutableStateOf(ThemeDocument(seed = Seed, seedSource = SeedSource.Typed))
             showPoster(document = { document })
-            onNodeWithText("Typed", useUnmergedTree = true).assertExists()
+            // b-522 The source moved into the field's name, and only an image shows as text.
+            seedField().assert(hasContentDescription("Seed color, any format. Typed in"))
 
             document = document.copy(seedSource = SeedSource.Image("sunset.png"))
             waitForIdle()
-            onNodeWithText("From sunset.png", useUnmergedTree = true).assertExists()
+            seedField().assert(hasContentDescription("Seed color, any format. From sunset.png"))
+            onNodeWithText("from sunset.png", useUnmergedTree = true).assertExists()
 
             document = document.copy(seedSource = SeedSource.Shuffled)
             waitForIdle()
-            onNodeWithText("Shuffled", useUnmergedTree = true).assertExists()
+            seedField().assert(hasContentDescription("Seed color, any format. Shuffled"))
+            onNodeWithText("from sunset.png", useUnmergedTree = true).assertDoesNotExist()
         }
 
     @Test
@@ -256,24 +259,29 @@ class PosterPanelTest {
         }
 
     @Test
-    fun seedActions_seedAndStyleLocked_showsTheHintAndTurnsShuffleOff() =
+    fun seedActions_seedAndStyleLocked_turnsShuffleOffAndItSaysWhy() =
         runComposeUiTest {
             showPoster(preferences = Preferences(styleLock = true, seedLock = true))
 
-            onNodeWithText("The seed and the style are both locked", substring = true).assertExists()
+            // b-522 The reason moved from a line under the buttons into Shuffle's tooltip and name.
+            onNodeWithContentDescription("The seed and the style are both locked", substring = true)
+                .assertIsNotEnabled()
             onNodeWithText("Shuffle").assertIsNotEnabled()
         }
 
     @Test
-    fun seedActions_lockToggle_setsThatLock() =
+    fun shuffleLocks_lockToggle_setsThatLock() =
         runComposeUiTest {
-            showPoster(preferences = Preferences(hueLock = false, styleLock = true))
+            // b-522 The docked poster no longer shows the locks, so they stand on their own here.
+            val harness = PosterHarness(ThemeDocument(seed = Seed))
+            harness.preferences = Preferences(hueLock = false, styleLock = true)
+            showSection(harness) { context, dispatcher -> ShuffleLocks(context, dispatcher) }
 
             onNodeWithText("Lock hue").performClick()
             onNodeWithText("Lock style").performClick()
             waitForIdle()
 
-            actions shouldBe listOf(
+            harness.actions shouldBe listOf(
                 WorkspaceAction.SetLock(ShuffleLock.Hue, on = true),
                 WorkspaceAction.SetLock(ShuffleLock.Style, on = false),
             )
@@ -302,7 +310,7 @@ class PosterPanelTest {
         runComposeUiTest {
             showPoster(projectName = "Ocean")
 
-            onNodeWithText("Saved", useUnmergedTree = true).assertExists()
+            onNodeWithContentDescription("Projects, Ocean, saved").assertExists()
             onNodeWithText("Ocean").performClick()
             waitForIdle()
 
@@ -310,27 +318,30 @@ class PosterPanelTest {
         }
 
     @Test
-    fun posterHeader_projects_readsAsProjectsAndTheName() =
+    fun posterHeader_projects_readsAsProjectsTheNameAndTheSaveState() =
         runComposeUiTest {
             showPoster(projectName = "Ocean")
 
-            onNodeWithContentDescription("Projects, Ocean").assertExists()
+            onNodeWithContentDescription("Projects, Ocean, saved").assertExists()
         }
 
     @Test
-    fun posterHeader_saveStatus_showsEachStatusAsABadge() =
+    fun posterHeader_saveStatus_readsOnTheProjectsButtonWithABadgeOnlyWhenItFailed() =
         runComposeUiTest {
             var status: SaveStatus by mutableStateOf(SaveStatus.Pending)
-            showPoster(saveStatus = { status })
-            onNodeWithText("Saving", useUnmergedTree = true).assertExists()
+            showPoster(projectName = "Ocean", saveStatus = { status })
+            // b-522 The save state moved from words under the hex into the Projects button.
+            onNodeWithContentDescription("Projects, Ocean, saving").assertExists()
 
             status = SaveStatus.Failed(StoreError.QuotaExceeded)
             waitForIdle()
+            onNodeWithContentDescription("Projects, Ocean, not saved").assertExists()
             onNodeWithText("Not saved", useUnmergedTree = true).assertExists()
 
             status = SaveStatus.Idle
             waitForIdle()
-            onNodeWithText("Saved", useUnmergedTree = true).assertExists()
+            onNodeWithContentDescription("Projects, Ocean, saved").assertExists()
+            onNodeWithText("Not saved", useUnmergedTree = true).assertDoesNotExist()
         }
 
     @Test
@@ -511,7 +522,7 @@ class PosterPanelTest {
     }
 
     private fun ComposeUiTest.seedField() =
-        onNode(hasSetTextAction() and hasContentDescription("Seed color, any format"))
+        onNode(hasSetTextAction() and hasContentDescription("Seed color, any format", substring = true))
 
     private fun ComposeUiTest.fieldText(): String =
         seedField().fetchSemanticsNode().config[SemanticsProperties.EditableText].text

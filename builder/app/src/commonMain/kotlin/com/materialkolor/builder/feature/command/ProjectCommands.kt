@@ -3,6 +3,7 @@ package com.materialkolor.builder.feature.command
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
+import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.ExportMode
@@ -11,6 +12,7 @@ import com.materialkolor.builder.domain.persist.FrozenVariants
 import com.materialkolor.builder.domain.persist.MotionOverride
 import com.materialkolor.builder.feature.export.ExportAction
 import com.materialkolor.builder.feature.export.ExportModel
+import com.materialkolor.builder.feature.poster.saveMarkOf
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
@@ -41,7 +43,6 @@ import com.materialkolor.builder.generated.resources.export_variants_all
 import com.materialkolor.builder.generated.resources.export_variants_standard
 import com.materialkolor.builder.generated.resources.export_version_catalog
 import com.materialkolor.builder.generated.resources.poster_projects
-import com.materialkolor.builder.generated.resources.poster_projects_named
 import com.materialkolor.builder.generated.resources.projects_new
 import com.materialkolor.builder.generated.resources.share_copy
 import com.materialkolor.builder.generated.resources.topbar_appearance_dark
@@ -63,17 +64,19 @@ import org.jetbrains.compose.resources.stringResource
 internal fun projectCommands(
     list: CommandList,
     projectName: String,
+    // b-522 The Projects button reads its save state after the name.
+    saveStatus: SaveStatus,
     dispatcher: Dispatcher<WorkspaceAction>,
     onSave: () -> Unit,
     onNew: () -> Unit,
     onCopyLink: () -> Unit,
 ) {
     val projects = stringResource(Res.string.poster_projects)
-    // The poster's button reads the project's name once it has one.
+    // The poster's button reads the project's name and its save state once it has a name.
     val projectsName = if (projectName.isBlank()) {
         projects
     } else {
-        stringResource(Res.string.poster_projects_named, projectName)
+        stringResource(saveMarkOf(saveStatus).spoken, projectName)
     }
     val projectsSite = ControlSite.Direct(Region.Poster, projectsName)
     list.add("projects", CommandCategory.Project, projects, projectsSite, shortcut = Shortcut.Projects) {

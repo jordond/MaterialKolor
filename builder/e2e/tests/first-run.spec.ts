@@ -21,8 +21,8 @@ import {
 // The one hint a first visit gets, read from the page's accessibility tree. A dismissal kept
 // in storage has to hold through a reload.
 
-/** The hint, word for word, `about_first_run_hint`. */
-const HINT = 'Paste a color, drop an image, or press Space to shuffle. Press ? for shortcuts.';
+/** The hint, word for word, `poster_first_run_hint`. */
+const HINT = 'Paste a color or drop an image anywhere.';
 
 /**
  * The poster's Projects button once boot has opened a project. It reads "Projects" and the project's

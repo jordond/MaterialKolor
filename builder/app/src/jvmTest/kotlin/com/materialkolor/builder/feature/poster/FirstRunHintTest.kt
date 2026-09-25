@@ -69,7 +69,7 @@ private const val HEIGHT = 800
 /**
  * The first run hint, word for word.
  */
-private const val HINT = "Paste a color, drop an image, or press Space to shuffle. Press ? for shortcuts."
+private const val HINT = "Paste a color or drop an image anywhere."
 
 /**
  * Well past the longest reveal a skin plays.
