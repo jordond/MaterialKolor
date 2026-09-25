@@ -115,15 +115,10 @@ internal fun ContrastDetails(
  */
 @Composable
 private fun ContrastHeader(context: PosterContext) {
-    val spacing = LocalBuilderTokens.current.spacing
+    // b-523
     val row = rememberLowestPair(context)
-    Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
-        InfoLabel(
-            label = stringResource(Res.string.contrast_label),
-            topic = InfoTopic.Contrast,
-            modifier = Modifier.alignByBaseline(),
-        )
-        LowestRatio(row, context.result.document, Modifier.weight(1f).alignByBaseline()) // b-523
+    InfoLabel(label = stringResource(Res.string.contrast_label), topic = InfoTopic.Contrast) {
+        LowestRatio(row, context.result.document, Modifier.weight(1f))
     }
 }
 

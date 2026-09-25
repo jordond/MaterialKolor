@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -99,12 +100,15 @@ internal enum class InfoTopic {
  * @param[label] The section's name, as in "Seed".
  * @param[topic] What the info button explains.
  * @param[modifier] Applied to the column.
+ * @param[end] What sits at the far end of the label's line, such as a readout. The explanation
+ * opens under the whole line, so it never squeezes what sits here.
  */
 @Composable
 internal fun InfoLabel(
     label: String,
     topic: InfoTopic,
     modifier: Modifier = Modifier,
+    end: @Composable RowScope.() -> Unit = {},
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     var open by rememberSaveable(topic) { mutableStateOf(false) }
@@ -115,6 +119,7 @@ internal fun InfoLabel(
         ) {
             BuilderText(text = label, style = BuilderTextStyle.SectionLabel, maxLines = 1)
             InfoButton(topic = topic, expanded = open, onClick = { open = !open })
+            end() // b-523
         }
         if (open) {
             InfoNote(topic)
