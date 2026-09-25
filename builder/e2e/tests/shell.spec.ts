@@ -218,7 +218,7 @@ test.describe('error overlay', () => {
 
     const dialog = page.getByRole('alertdialog', { name: 'Something went wrong' });
     await expect(dialog).toBeVisible();
-    await expect(dialog).toContainText('Your work is saved. Reload.');
+    await expect(dialog).toContainText('Check the console for logs, or try reloading.');
     await expect(page.locator('#error-reload')).toBeFocused();
     expect(await page.evaluate(() => document.getElementById('app')?.inert)).toBe(true);
 
@@ -369,19 +369,25 @@ test.describe('head', () => {
     expect(await response.text()).toBe('User-agent: *\nAllow: /\n');
   });
 
-  test('the page boots with no content security policy violation', async ({ page }) => {
-    await page.addInitScript(() => {
-      const violations: string[] = [];
-      (window as unknown as { mkViolations: string[] }).mkViolations = violations;
-      document.addEventListener('securitypolicyviolation', (event) => {
-        violations.push(`${event.violatedDirective} ${event.blockedURI}`);
+  // One policy for both engines. Skiko is wasm on the JS engine too, so it needs 'wasm-unsafe-eval' as well.
+  for (const [engine, route] of [
+    ['wasm', '/'],
+    ['js', '/?engine=js'],
+  ] as const) {
+    test(`the page boots on ${engine} with no content security policy violation`, async ({ page }) => {
+      await page.addInitScript(() => {
+        const violations: string[] = [];
+        (window as unknown as { mkViolations: string[] }).mkViolations = violations;
+        document.addEventListener('securitypolicyviolation', (event) => {
+          violations.push(`${event.violatedDirective} ${event.blockedURI}`);
+        });
       });
+      const response = await page.goto(site(route));
+      expect(response?.headers()['content-security-policy']).toContain("script-src 'self'");
+      await expect(page.locator('#splash')).toHaveCount(0, { timeout: BOOT_TIMEOUT_MS });
+      expect(await page.evaluate(() => (window as unknown as { mkViolations: string[] }).mkViolations)).toEqual([]);
     });
-    const response = await page.goto(site('/'));
-    expect(response?.headers()['content-security-policy']).toContain("script-src 'self'");
-    await expect(page.locator('#splash')).toHaveCount(0, { timeout: 30_000 });
-    expect(await page.evaluate(() => (window as unknown as { mkViolations: string[] }).mkViolations)).toEqual([]);
-  });
+  }
 });
 
 /** The width and height a PNG's header gives. */

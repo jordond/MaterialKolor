@@ -71,8 +71,8 @@ jobs:
         id: tests
         run: >-
           ./gradlew
-          :builder:domain:jvmTest :builder:domain:wasmJsNodeTest
-          :builder:codegen:jvmTest :builder:codegen:wasmJsNodeTest
+          :builder:domain:jvmTest :builder:domain:wasmJsNodeTest :builder:domain:jsNodeTest
+          :builder:codegen:jvmTest :builder:codegen:wasmJsNodeTest :builder:codegen:jsNodeTest
           :builder:engine:jvmTest
 
       - name: Lint
