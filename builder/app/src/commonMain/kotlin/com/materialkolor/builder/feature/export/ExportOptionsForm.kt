@@ -1,7 +1,10 @@
 package com.materialkolor.builder.feature.export
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -13,8 +16,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.codegen.validate.ReservedNameClash
 import com.materialkolor.builder.codegen.validate.ReservedNames
 import com.materialkolor.builder.domain.capability.Capabilities
@@ -110,74 +115,137 @@ internal fun ExportOptionsForm(
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val prefs = state.prefs
+    // b-511
+    // Laid out like the design, the two names side by side and the switches sharing rows, so the
+    // options fit a 900 dp sheet with the code under them.
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-        // b-221f
-        // Each target keeps its own package, so a switch starts the field over on the new one's.
-        key(state.target) {
-            PackageField(
-                packageName = prefs.packageName,
-                onChange = { name -> dispatcher.dispatch(ExportAction.SetPackageName(name)) },
-                onProblem = { problem -> drafts.packageName = problem },
-            )
+        NamePair(
+            first = { fieldModifier ->
+                // b-221f
+                // Each target keeps its own package, so a switch starts the field over on the new one's.
+                key(state.target) {
+                    PackageField(
+                        packageName = prefs.packageName,
+                        onChange = { name -> dispatcher.dispatch(ExportAction.SetPackageName(name)) },
+                        onProblem = { problem -> drafts.packageName = problem },
+                        modifier = fieldModifier,
+                    )
+                }
+            },
+            second = { fieldModifier ->
+                ThemeNameField(
+                    state = state,
+                    workspace = workspace,
+                    onProblem = { problem -> drafts.themeName = problem },
+                    modifier = fieldModifier,
+                )
+            },
+        )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(spacing.extraLarge),
+            verticalArrangement = Arrangement.spacedBy(spacing.small),
+            itemVerticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (capabilities[Control.KmpOrAndroid].shown) {
+                val names = mapOf(
+                    ProjectKind.Multiplatform to stringResource(Res.string.export_project_multiplatform),
+                    ProjectKind.AndroidOnly to stringResource(Res.string.export_project_android),
+                )
+                BuilderSegmented(
+                    options = ProjectKind.entries,
+                    selected = if (prefs.multiplatform) ProjectKind.Multiplatform else ProjectKind.AndroidOnly,
+                    onSelect = { kind ->
+                        dispatcher.dispatch(ExportAction.SetMultiplatform(kind == ProjectKind.Multiplatform))
+                    },
+                    label = stringResource(Res.string.export_project),
+                    enabled = capabilities[Control.KmpOrAndroid].usable,
+                    optionLabel = { kind -> names.getValue(kind) },
+                )
+            }
+            if (capabilities[Control.VersionCatalog].shown) {
+                BuilderSwitch(
+                    checked = prefs.versionCatalog,
+                    onCheckedChange = { on -> dispatcher.dispatch(ExportAction.SetVersionCatalog(on)) },
+                    label = stringResource(Res.string.export_version_catalog),
+                    enabled = capabilities[Control.VersionCatalog].usable,
+                )
+            }
         }
-        ThemeNameField(state, workspace, onProblem = { problem -> drafts.themeName = problem })
-        if (capabilities[Control.KmpOrAndroid].shown) {
-            val names = mapOf(
-                ProjectKind.Multiplatform to stringResource(Res.string.export_project_multiplatform),
-                ProjectKind.AndroidOnly to stringResource(Res.string.export_project_android),
-            )
-            BuilderSegmented(
-                options = ProjectKind.entries,
-                selected = if (prefs.multiplatform) ProjectKind.Multiplatform else ProjectKind.AndroidOnly,
-                onSelect = { kind ->
-                    dispatcher.dispatch(ExportAction.SetMultiplatform(kind == ProjectKind.Multiplatform))
-                },
-                label = stringResource(Res.string.export_project),
-                enabled = capabilities[Control.KmpOrAndroid].usable,
-                optionLabel = { kind -> names.getValue(kind) },
-            )
+        val animation = prefs.mode == ExportMode.Dynamic && capabilities[Control.ColorAnimation].shown
+        val variants = prefs.mode == ExportMode.Frozen && capabilities[Control.FrozenExport].shown
+        val wallpaper = state.target in MATERIAL3_TARGETS && !prefs.multiplatform
+        if (animation || variants || wallpaper) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(spacing.extraLarge),
+                verticalArrangement = Arrangement.spacedBy(spacing.small),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (animation) AnimationOptions(state, capabilities[Control.ColorAnimation].usable, dispatcher)
+                if (variants) {
+                    val names = mapOf(
+                        FrozenVariants.StandardOnly to stringResource(Res.string.export_variants_standard),
+                        FrozenVariants.AllContrasts to stringResource(Res.string.export_variants_all),
+                    )
+                    BuilderSegmented(
+                        options = FrozenVariants.entries,
+                        selected = prefs.frozenVariants,
+                        onSelect = { chosen -> dispatcher.dispatch(ExportAction.SetFrozenVariants(chosen)) },
+                        label = stringResource(Res.string.export_variants),
+                        enabled = capabilities[Control.FrozenExport].usable,
+                        optionLabel = { chosen -> names.getValue(chosen) },
+                    )
+                }
+                if (wallpaper) {
+                    BuilderSwitch(
+                        checked = prefs.androidDynamicColor,
+                        onCheckedChange = { on -> dispatcher.dispatch(ExportAction.SetAndroidDynamicColor(on)) },
+                        label = stringResource(Res.string.export_dynamic_color),
+                    )
+                }
+            }
         }
-        if (capabilities[Control.VersionCatalog].shown) {
-            BuilderSwitch(
-                checked = prefs.versionCatalog,
-                onCheckedChange = { on -> dispatcher.dispatch(ExportAction.SetVersionCatalog(on)) },
-                label = stringResource(Res.string.export_version_catalog),
-                enabled = capabilities[Control.VersionCatalog].usable,
-            )
-        }
-        if (prefs.mode == ExportMode.Dynamic && capabilities[Control.ColorAnimation].shown) {
-            AnimationOptions(state, capabilities[Control.ColorAnimation].usable, dispatcher)
-        }
-        if (prefs.mode == ExportMode.Frozen && capabilities[Control.FrozenExport].shown) {
-            val names = mapOf(
-                FrozenVariants.StandardOnly to stringResource(Res.string.export_variants_standard),
-                FrozenVariants.AllContrasts to stringResource(Res.string.export_variants_all),
-            )
-            BuilderSegmented(
-                options = FrozenVariants.entries,
-                selected = prefs.frozenVariants,
-                onSelect = { variants -> dispatcher.dispatch(ExportAction.SetFrozenVariants(variants)) },
-                label = stringResource(Res.string.export_variants),
-                enabled = capabilities[Control.FrozenExport].usable,
-                optionLabel = { variants -> names.getValue(variants) },
-            )
-        }
-        if (state.target in MATERIAL3_TARGETS && !prefs.multiplatform) {
-            BuilderSwitch(
-                checked = prefs.androidDynamicColor,
-                onCheckedChange = { on -> dispatcher.dispatch(ExportAction.SetAndroidDynamicColor(on)) },
-                label = stringResource(Res.string.export_dynamic_color),
-            )
+        if (wallpaper) {
             BuilderText(text = stringResource(Res.string.export_dynamic_color_note), emphasis = Emphasis.Secondary)
         }
     }
 }
+
+// b-511
+
+/**
+ * Two fields side by side, each half the width, or one over the other where the form is narrower
+ * than [NAME_PAIR_MIN_WIDTH]. Each slot is handed the modifier that sizes it.
+ */
+@Composable
+private fun NamePair(
+    first: @Composable (Modifier) -> Unit,
+    second: @Composable (Modifier) -> Unit,
+) {
+    val spacing = LocalBuilderTokens.current.spacing
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        if (maxWidth >= NAME_PAIR_MIN_WIDTH) {
+            Row(horizontalArrangement = Arrangement.spacedBy(spacing.medium)) {
+                first(Modifier.weight(1f))
+                second(Modifier.weight(1f))
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+                first(Modifier.fillMaxWidth())
+                second(Modifier.fillMaxWidth())
+            }
+        }
+    }
+}
+
+/** The narrowest the form gets while the package and the theme name still share a row. */
+private val NAME_PAIR_MIN_WIDTH = 480.dp
 
 @Composable
 private fun PackageField(
     packageName: String,
     onChange: (String) -> Unit,
     onProblem: (ExportProblem?) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val invalid = stringResource(Res.string.export_package_invalid)
     LiveField(
@@ -188,6 +256,7 @@ private fun PackageField(
         problemOf = { draft -> if (validatePackageName(draft).isEmpty()) null else ExportProblem.PackageName(draft) },
         errorOf = { invalid },
         supportingText = stringResource(Res.string.export_package_hint),
+        modifier = modifier,
     )
 }
 
@@ -197,6 +266,7 @@ private fun ThemeNameField(
     state: ExportModel.State,
     workspace: Dispatcher<WorkspaceAction>,
     onProblem: (ExportProblem?) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val invalid = stringResource(Res.string.export_theme_name_invalid)
     val taken = stringResource(Res.string.export_theme_name_taken)
@@ -216,6 +286,7 @@ private fun ThemeNameField(
             }
         },
         errorOf = { problem -> if (problem is ExportProblem.NameTaken) taken else invalid },
+        modifier = modifier,
     )
 }
 
@@ -245,6 +316,7 @@ private fun LiveField(
     problemOf: (String) -> ExportProblem?,
     errorOf: (ExportProblem) -> String,
     supportingText: String? = null,
+    modifier: Modifier = Modifier,
 ) {
     // b-221f
     // The committed text the field keeps while its drafts are out, or null while it follows value.
@@ -270,7 +342,7 @@ private fun LiveField(
             if (held == null) onChange(text) else held = text
         },
         label = label,
-        modifier = Modifier.fillMaxWidth().onFocusChanged { state -> focused = state.hasFocus },
+        modifier = modifier.fillMaxWidth().onFocusChanged { state -> focused = state.hasFocus },
         error = { draft -> problemOf(draft)?.let(errorOf) },
         supportingText = supportingText,
         onDraftChange = { draft ->
