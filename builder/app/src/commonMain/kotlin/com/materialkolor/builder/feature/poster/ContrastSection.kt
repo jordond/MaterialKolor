@@ -1,6 +1,7 @@
 package com.materialkolor.builder.feature.poster
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,7 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.color.ContrastLevel
@@ -26,19 +29,19 @@ import com.materialkolor.builder.generated.resources.contrast_badge_fail
 import com.materialkolor.builder.generated.resources.contrast_high
 import com.materialkolor.builder.generated.resources.contrast_label
 import com.materialkolor.builder.generated.resources.contrast_level
-import com.materialkolor.builder.generated.resources.contrast_lowest
 import com.materialkolor.builder.generated.resources.contrast_medium
 import com.materialkolor.builder.generated.resources.contrast_pair_dark
 import com.materialkolor.builder.generated.resources.contrast_pair_light
-import com.materialkolor.builder.generated.resources.contrast_ratio
+import com.materialkolor.builder.generated.resources.contrast_readout
+import com.materialkolor.builder.generated.resources.contrast_readout_spoken
+import com.materialkolor.builder.generated.resources.contrast_readout_tooltip
 import com.materialkolor.builder.generated.resources.contrast_reduced
 import com.materialkolor.builder.generated.resources.contrast_standard
-import com.materialkolor.builder.kit.control.BadgeStatus
-import com.materialkolor.builder.kit.control.BuilderBadge
+import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderSegmented
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
-import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.BuilderTooltip
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
@@ -51,10 +54,10 @@ import kotlin.math.floor
  *
  * Contrast is one of the four levels the library names, offered as one choice on a single row that
  * fills the poster's width. A pick is one discrete edit. The arrow keys only move the focus, and
- * Enter or Space picks, since each pick is a new scheme. The lowest ratio and its badge sit on the
- * right of the label, and the pair it belongs to on a line under the levels. The readout rates the
- * target's own pairs in the modes the preview shows, and its badge carries an icon as well as its
- * words. A target that ignores contrast says why and takes no pick.
+ * Enter or Space picks, since each pick is a new scheme. The lowest ratio and its grade sit on the
+ * right of the label, and the pair they belong to is in the readout's tooltip and spoken name. The
+ * readout rates the target's own pairs in the modes the preview shows, and a grade short of AA
+ * carries a glyph as well as its words. A target that ignores contrast says why and takes no pick.
  */
 @Composable
 internal fun ContrastSection(
@@ -91,8 +94,8 @@ internal fun ContrastSection(
 
 /**
  * What the contrast levels leave, for the phone sheet, which shows the levels alone at its peek and
- * this under them once it is dragged up. The label with its info button and the lowest ratio, the
- * pair behind it, and why a target ignores contrast if it does.
+ * this under them once it is dragged up. The label with its info button and the lowest ratio, and
+ * why a target ignores contrast if it does.
  */
 @Composable
 internal fun ContrastDetails(
@@ -107,7 +110,8 @@ internal fun ContrastDetails(
 }
 
 /**
- * The Contrast label with its info button, and the lowest ratio on the right in line with it.
+ * The Contrast label with its info button, and the lowest ratio with its grade on the right in line
+ * with it.
  */
 @Composable
 private fun ContrastHeader(context: PosterContext) {
@@ -119,16 +123,15 @@ private fun ContrastHeader(context: PosterContext) {
             topic = InfoTopic.Contrast,
             modifier = Modifier.alignByBaseline(),
         )
-        LowestRatio(row, Modifier.weight(1f).alignByBaseline())
+        LowestRatio(row, context.result.document, Modifier.weight(1f).alignByBaseline()) // b-523
     }
 }
 
 /**
- * The pair behind the lowest ratio, and why the target ignores contrast if it does.
+ * Why the target ignores contrast if it does.
  */
 @Composable
 private fun ContrastNotes(context: PosterContext) {
-    LowestPair(rememberLowestPair(context), context.result.document)
     context.capabilities[Control.Contrast].explanation?.let { reason -> ReasonLine(reason) }
 }
 
@@ -140,59 +143,52 @@ private fun rememberLowestPair(context: PosterContext): AuditRow =
     remember(context.result, context.visibleModes) { context.result.audit.lowestPair(context.visibleModes) }
 
 /**
- * The lowest ratio any text pair has in the modes the preview shows, with the badge it earns, as
- * one line on the right of the Contrast label. Where the line runs short its words give way first,
- * and the ratio and the badge always show.
+ * The lowest ratio any text pair has in the modes the preview shows, with the grade it earns, as
+ * one plain line on the right of the Contrast label, "5.0:1 AA". A grade short of AA leads with a
+ * warning glyph, so it never rests on its words alone. The pair behind the ratio shows in the
+ * tooltip and is read out with it, as in "Lowest text pair 5.0:1, AA, inversePrimary on
+ * inverseSurface, in dark".
  */
 @Composable
 private fun LowestRatio(
     row: AuditRow,
+    document: ThemeDocument,
     modifier: Modifier = Modifier,
 ) {
+    // b-523
     val spacing = LocalBuilderTokens.current.spacing
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall, Alignment.End),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        BuilderText(
-            text = stringResource(Res.string.contrast_lowest),
-            modifier = Modifier.weight(1f, fill = false),
-            style = BuilderTextStyle.Label,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        BuilderText(
-            text = stringResource(Res.string.contrast_ratio, ratioText(row.ratio)),
-            style = BuilderTextStyle.Value,
-            maxLines = 1,
-        )
-        BuilderBadge(
-            label = stringResource(row.badge.label),
-            status = row.badge.status,
-            icon = row.badge.icon,
-        )
+    val ratio = ratioText(row.ratio)
+    val grade = stringResource(row.badge.label)
+    val pair = stringResource(
+        if (row.isDark) Res.string.contrast_pair_dark else Res.string.contrast_pair_light,
+        row.pair.foreground.readoutName(document),
+        row.pair.background.readoutName(document),
+    )
+    val spoken = stringResource(Res.string.contrast_readout_spoken, ratio, grade, pair)
+    Box(modifier, contentAlignment = Alignment.CenterEnd) {
+        BuilderTooltip(text = stringResource(Res.string.contrast_readout_tooltip, pair)) {
+            Row(
+                modifier = Modifier.clearAndSetSemantics { contentDescription = spoken },
+                horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                row.badge.warning?.let { glyph ->
+                    BuilderIcon(glyph, contentDescription = null, size = ReadoutGlyphSize)
+                }
+                BuilderText(
+                    text = stringResource(Res.string.contrast_readout, ratio, grade),
+                    style = BuilderTextStyle.Value,
+                    maxLines = 1,
+                )
+            }
+        }
     }
 }
 
 /**
- * The pair behind the lowest ratio and the mode it is lowest in, one small line.
+ * The size of the glyph before a grade short of AA, the height of the readout's text.
  */
-@Composable
-private fun LowestPair(
-    row: AuditRow,
-    document: ThemeDocument,
-) {
-    BuilderText(
-        text = stringResource(
-            if (row.isDark) Res.string.contrast_pair_dark else Res.string.contrast_pair_light,
-            row.pair.foreground.readoutName(document),
-            row.pair.background.readoutName(document),
-        ),
-        style = BuilderTextStyle.Label,
-        emphasis = Emphasis.Secondary,
-    )
-}
+private val ReadoutGlyphSize = 14.dp
 
 /**
  * The four named contrast levels, in the order the choice offers them.
@@ -265,16 +261,12 @@ private val ContrastBadge.label: StringResource
         ContrastBadge.Fail -> Res.string.contrast_badge_fail
     }
 
-private val ContrastBadge.status: BadgeStatus
+/**
+ * The glyph a grade short of AA leads with, or null for a grade that passes.
+ */
+private val ContrastBadge.warning: IconId?
     get() = when (this) {
-        ContrastBadge.Aaa, ContrastBadge.Aa -> BadgeStatus.Success
-        ContrastBadge.AaLarge -> BadgeStatus.Warning
-        ContrastBadge.Fail -> BadgeStatus.Danger
-    }
-
-private val ContrastBadge.icon: IconId
-    get() = when (this) {
-        ContrastBadge.Aaa, ContrastBadge.Aa -> IconId.Check
+        ContrastBadge.Aaa, ContrastBadge.Aa -> null
         ContrastBadge.AaLarge -> IconId.Warning
         ContrastBadge.Fail -> IconId.Error
     }
