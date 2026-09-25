@@ -43,7 +43,8 @@ code.
 The site ships two builds of the same app and `boot.js` picks one per visit. Browsers with WasmGC
 run the Kotlin/Wasm build. Browsers with WebAssembly and WebGL 2 but no WasmGC run the Kotlin/JS
 build, which draws with the same skiko wasm. That covers Safari 15.2 to 18.1 and Chrome, Edge and
-Firefox from before WasmGC. A browser without WebAssembly or WebGL 2, WebAssembly turned off
+Firefox from before WasmGC, back to Chrome 95 and Firefox 100. A browser without WebAssembly and
+its legacy exception handling, which skiko needs, or without WebGL 2, WebAssembly turned off
 included, gets the unsupported page. There is no notice on the JS engine, and the error details
 name the engine that ran.
 

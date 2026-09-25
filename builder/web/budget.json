@@ -1,5 +1,5 @@
 {
-  "$comment": "Sizes are brotli bytes, 1 MB = 1000000 bytes. A role's maxBytes holds each file it names, its totalBytes all of them together. BUDGET.md says what is measured and how. The limits are loose backstops against accidents, not targets.",
+  "$comment": "Sizes are brotli bytes, 1 MB = 1000000 bytes. A role's maxBytes holds each file it names, its totalBytes all of them together. The limits are loose backstops against accidents, not targets.",
   "compression": {
     "algorithm": "brotli",
     "quality": 11,

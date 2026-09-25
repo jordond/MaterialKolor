@@ -28,6 +28,15 @@
     0x0a, 0x08, 0x01, 0x06, 0x00, 0x06, 0x40, 0x19, 0x0b, 0x0b, // its body, try catch_all end
   ]);
 
+  // The same function with no GC types, what the JS engine needs. Skiko's wasm uses the legacy
+  // exception handling on both engines.
+  const JS_GATE_MODULE = new Uint8Array([
+    0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, // magic and version 1
+    0x01, 0x04, 0x01, 0x60, 0x00, 0x00, // types, a func with no params
+    0x03, 0x02, 0x01, 0x00, // one function of that type
+    0x0a, 0x08, 0x01, 0x06, 0x00, 0x06, 0x40, 0x19, 0x0b, 0x0b, // its body, try catch_all end
+  ]);
+
   const root = document.documentElement;
   const linkSeed = readLinkSeed();
   const chosen = engine();
@@ -57,22 +66,22 @@
 
   /**
    * The engine this browser runs, 'wasm' or 'js', or null for none. Wasm needs WasmGC, legacy
-   * exception handling and WebGL 2. JS needs WebAssembly, for skiko, and WebGL 2. ?engine=js picks
-   * JS where it runs, and nothing keeps that choice past the visit.
+   * exception handling and WebGL 2. JS needs WebAssembly with legacy exception handling, for skiko,
+   * and WebGL 2. ?engine=js picks JS where it runs, and nothing keeps that choice past the visit.
    */
   function engine() {
     try {
-      if (typeof WebAssembly !== 'object' || !hasWebGl2()) return null;
+      if (typeof WebAssembly !== 'object' || !validates(JS_GATE_MODULE) || !hasWebGl2()) return null;
       if (new URLSearchParams(location.search).get('engine') === 'js') return 'js';
-      return hasWasmGc() ? 'wasm' : 'js';
+      return validates(GATE_MODULE) ? 'wasm' : 'js';
     } catch (error) {
       return null;
     }
   }
 
-  function hasWasmGc() {
+  function validates(module) {
     try {
-      return WebAssembly.validate(GATE_MODULE);
+      return WebAssembly.validate(module);
     } catch (error) {
       return false;
     }
