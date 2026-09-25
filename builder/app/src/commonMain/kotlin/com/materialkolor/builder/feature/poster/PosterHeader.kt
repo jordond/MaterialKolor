@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -127,8 +128,9 @@ internal fun SaveState(status: SaveStatus) {
 
 /**
  * The Projects button. It shows the open project's name and reads out as Projects, the name and
- * whether it is saved, so it never sounds like a title. A check after it says the project is saved.
- * Before the session has named a project it says Projects and nothing more.
+ * whether it is saved, so it never sounds like a title. A check after it says the project is saved
+ * while the row has room for it beside the whole name, and the name wins when it does not. Before
+ * the session has named a project it says Projects and nothing more.
  */
 @Composable
 private fun ProjectsButton(
@@ -140,25 +142,61 @@ private fun ProjectsButton(
     val named = projectName.isNotBlank()
     val mark = saveMarkOf(saveStatus)
     val spoken = if (named) stringResource(mark.spoken, projectName) else null
-    // b-522 The kit button has no glyph after its label, so the check sits right beside it. The button
-    // gives way first, so a long name never pushes the check or the badge out of the row.
+    val glyph = mark.glyph.takeIf { named }
+    // b-522 The kit button has no glyph after its label, so the check sits right beside it.
     Row(
         horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.extraSmall),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val button = Modifier.weight(1f, fill = false).then(modifier)
-        BuilderButton(
-            onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Projects)) },
-            label = if (named) projectName else stringResource(Res.string.poster_projects),
-            modifier = if (spoken == null) button else button.semantics { contentDescription = spoken },
-            emphasis = Emphasis.Subtle,
-            icon = IconId.Folder,
+        GlyphWhenItFits(
+            button = {
+                BuilderButton(
+                    onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Projects)) },
+                    label = if (named) projectName else stringResource(Res.string.poster_projects),
+                    modifier = if (spoken == null) modifier else modifier.semantics { contentDescription = spoken },
+                    emphasis = Emphasis.Subtle,
+                    icon = IconId.Folder,
+                )
+            },
+            glyph = glyph?.let { id ->
+                { BuilderIcon(id, contentDescription = null, modifier = Modifier.clearAndSetSemantics {}) }
+            },
+            modifier = Modifier.weight(1f, fill = false),
         )
-        if (named) {
-            mark.glyph?.let { glyph ->
-                BuilderIcon(glyph, contentDescription = null, modifier = Modifier.clearAndSetSemantics {})
-            }
-            SaveState(saveStatus)
+        if (named) SaveState(saveStatus)
+    }
+}
+
+/**
+ * [button] with [glyph] after it, or [button] alone with all the room when the two do not fit side
+ * by side at the button's full width. The glyph only repeats what the button reads out.
+ */
+@Composable
+private fun GlyphWhenItFits(
+    button: @Composable () -> Unit,
+    glyph: (@Composable () -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
+    val gap = LocalBuilderTokens.current.spacing.extraSmall
+    Layout(
+        content = {
+            button()
+            glyph?.invoke()
+        },
+        modifier = modifier,
+    ) { measurables, constraints ->
+        val loose = constraints.copy(minWidth = 0)
+        val mark = measurables.getOrNull(1)?.measure(loose)
+        val room = mark?.let { placed -> placed.width + gap.roundToPx() } ?: 0
+        val whole = measurables[0].maxIntrinsicWidth(constraints.maxHeight)
+        val fits = mark != null && whole + room <= constraints.maxWidth
+        val shown = if (fits) mark else null
+        val used = if (fits) room else 0
+        val body = measurables[0].measure(loose.copy(maxWidth = (constraints.maxWidth - used).coerceAtLeast(0)))
+        val height = maxOf(body.height, shown?.height ?: 0)
+        layout(body.width + used, height) {
+            body.placeRelative(0, (height - body.height) / 2)
+            shown?.placeRelative(body.width + gap.roundToPx(), (height - shown.height) / 2)
         }
     }
 }
