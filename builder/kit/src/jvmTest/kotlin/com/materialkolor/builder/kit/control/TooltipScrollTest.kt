@@ -123,7 +123,11 @@ class TooltipScrollTest {
     }
 }
 
-private fun OverlayHostState.labelShown(): Boolean = layers.any { layer -> layer.kind == OverlayKind.Passive && layer.open }
+private fun OverlayHostState.labelShown(): Boolean =
+    layers.any { layer ->
+        layer.kind == OverlayKind.Passive &&
+            layer.open
+    }
 
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.labelShown(host: OverlayHostState?): Boolean =
