@@ -23,11 +23,13 @@ import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.canvas.TestOwner
+import com.materialkolor.builder.feature.workspace.FineTuneSection
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 private const val WIDTH = 1280
@@ -94,6 +96,21 @@ class PosterFocusTest {
             escapeFromTheOverlay()
 
             projects.assertIsFocused()
+        }
+
+    @Test
+    fun fineTune_openedFromItsButton_escClosesItAndHandsFocusBack() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            showRoot()
+            val button = onNodeWithText("Fine-tune")
+
+            button.performSemanticsAction(SemanticsActions.OnClick)
+            waitForIdle()
+            workspace.state.value.fineTune shouldBe FineTuneSection.Locks
+            escapeFromTheOverlay()
+
+            workspace.state.value.fineTune shouldBe null
+            button.assertIsFocused()
         }
 
     @Test

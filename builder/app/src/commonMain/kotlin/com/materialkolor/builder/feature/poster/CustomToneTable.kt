@@ -73,7 +73,7 @@ internal fun CustomToneTable(
     if (!state.shown) return
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.large)) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
-            BuilderText(text = stringResource(Res.string.extras_tones_label), style = BuilderTextStyle.SectionLabel)
+            Eyebrow(stringResource(Res.string.extras_tones_label))
             BuilderText(text = stringResource(Res.string.extras_tones_note), emphasis = Emphasis.Secondary)
         }
         ToneSlots.forEach { slot -> CustomToneRow(context, dispatcher, slot, enabled = state.usable) }

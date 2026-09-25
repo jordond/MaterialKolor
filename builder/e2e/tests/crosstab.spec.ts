@@ -22,8 +22,8 @@ import {
 /** `projects_conflict`, word for word. */
 const CONFLICT = 'This project changed in another tab';
 
-/** The fine tune row that holds the extra colors, collapsed until it is pressed. */
-const TARGET_ROW = /^Spec, platform, extra colors and target options, .+, collapsed$/;
+/** The Fine-tune button at the poster's foot, which opens the sheet that holds the extra colors. */
+const FINE_TUNE = /^Fine-tune, /;
 
 /** The first extra color's light tone slider, which the mirror writes as text. */
 const TONE_SLIDER = /light color tone, slider/;
@@ -52,11 +52,14 @@ test('an edit in one tab offers the other the latest while it drags, and Load la
   // Contrast is four choices now. The seed picker's drag stops once the other tab takes the
   // keys, its save then comes in as an undo step, so the writer adds the extra color and the reader
   // takes it in before it holds the slider.
-  await openTargetRow(writer);
+  // The Fine-tune sheet takes the poster under it out of the tree, so the writer closes it again
+  // before it types the seed.
+  await openFineTune(writer);
   await scrollTo(writer, button(writer, 'Add extra color'), poster(writer));
   await press(writer, button(writer, 'Add extra color'));
+  await writer.keyboard.press('Escape');
   await scrollBackUp(writer);
-  await openTargetRow(reader);
+  await openFineTune(reader);
   const slider = onPage(reader, TONE_SLIDER);
   await expect(slider.first()).toBeAttached({ timeout: LAND_TIMEOUT_MS });
   await scrollTo(reader, slider, poster(reader));
@@ -80,6 +83,7 @@ test('an edit in one tab offers the other the latest while it drags, and Load la
     await moving;
     await reader.mouse.up();
   }
+  await reader.keyboard.press('Escape');
   expect(await seedText(reader)).not.toBe('#0B6E4F');
   await expect(button(reader, 'Keep mine')).toHaveCount(1);
   await press(reader, button(reader, 'Load latest'));
@@ -92,10 +96,10 @@ function poster(page: Page): Locator {
   return onPage(page, /^Seed and theme controls/);
 }
 
-/** Scrolls the poster to the row that holds the extra colors and opens it. */
-async function openTargetRow(page: Page): Promise<void> {
-  await scrollTo(page, button(page, TARGET_ROW), poster(page));
-  await press(page, button(page, TARGET_ROW));
+/** Scrolls the poster down to the Fine-tune button and opens the sheet. The sheet then scrolls under the same wheel. */
+async function openFineTune(page: Page): Promise<void> {
+  await scrollTo(page, button(page, FINE_TUNE), poster(page));
+  await press(page, button(page, FINE_TUNE));
 }
 
 /** Scrolls the poster back up until the seed field is on screen, for [typeSeed]. */

@@ -18,6 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.glossary_accents
@@ -117,7 +120,7 @@ internal fun InfoLabel(
             horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            BuilderText(text = label, style = BuilderTextStyle.SectionLabel, maxLines = 1)
+            Eyebrow(label) // b-524
             InfoButton(topic = topic, expanded = open, onClick = { open = !open })
             end() // b-523
         }
@@ -125,6 +128,24 @@ internal fun InfoLabel(
             InfoNote(topic)
         }
     }
+}
+
+/**
+ * A section's eyebrow, its name set in capitals the way the poster draws them. It reads out as
+ * [label] in its own case, so a screen reader says the word rather than spelling it.
+ */
+@Composable
+internal fun Eyebrow(
+    label: String,
+    modifier: Modifier = Modifier,
+) {
+    // b-524
+    BuilderText(
+        text = label.uppercase(),
+        modifier = modifier.clearAndSetSemantics { text = AnnotatedString(label) },
+        style = BuilderTextStyle.SectionLabel,
+        maxLines = 1,
+    )
 }
 
 /**

@@ -16,7 +16,6 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
-import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.CustomTone
 import com.materialkolor.builder.domain.model.Library
@@ -27,14 +26,11 @@ import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.model.TonalRamp
-import com.materialkolor.builder.feature.workspace.FineTuneSection
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 private val Plain = ThemeDocument(seed = Argb(0x6750A4))
-
-private const val TITLE = "Spec, platform, extra colors and target options"
 
 private const val CLASSIC_ONLY = "This style only exists in the 2021 spec."
 
@@ -47,40 +43,7 @@ private const val NO_AMOLED = "The Unstyled adapter has no AMOLED switch yet."
 private const val LIGHT_TONE = "primaryPressed light tone"
 
 @OptIn(ExperimentalTestApi::class)
-class SpecExtrasRowTest {
-    @Test
-    fun row_title_opensAndClosesThroughTheWorkspaceAndSummarizes() =
-        runComposeUiTest {
-            val accent = Accent(name = "brand", seed = Argb(0x00897B))
-            val harness = PosterHarness(Plain.copy(spec = SpecVersion.Spec2025, accents = listOf(accent)))
-            showSection(harness) { context, dispatcher -> SpecExtrasRow(context, dispatcher) }
-
-            onNodeWithText("2025 spec, 1 extra color").assertExists()
-            onNodeWithText("Spec").assertDoesNotExist()
-
-            onNodeWithText(TITLE).performClick()
-            waitForIdle()
-
-            harness.actions shouldBe listOf(WorkspaceAction.OpenFineTune(FineTuneSection.Spec))
-            onNodeWithText("Spec").assertExists()
-            onNodeWithText(AMOLED).assertExists()
-
-            onNodeWithText(TITLE).performClick()
-            waitForIdle()
-
-            harness.actions.last() shouldBe WorkspaceAction.CloseFineTune
-            harness.undoEntries() shouldBe 0
-        }
-
-    @Test
-    fun row_summary_namesTheSpecTheStyleReallyRuns() =
-        runComposeUiTest {
-            val harness = PosterHarness(Plain.copy(style = Style.Rainbow, spec = SpecVersion.Spec2025))
-            showSection(harness) { context, dispatcher -> SpecExtrasRow(context, dispatcher) }
-
-            onNodeWithText("2021 spec, no extra colors").assertExists()
-        }
-
+class OutputOptionsTest {
     @Test
     fun spec_revisedStyle_offersBothAndSetsTheSpecAsOneEntry() =
         runComposeUiTest {
@@ -196,8 +159,7 @@ class SpecExtrasRowTest {
     fun targetOptions_fluent_leavesAmoledMotionAndTonesOut() =
         runComposeUiTest {
             val harness = PosterHarness(Plain.copy(library = Library.Fluent))
-            harness.fineTune = FineTuneSection.Spec
-            showSection(harness) { context, dispatcher -> SpecExtrasRow(context, dispatcher) }
+            showSection(harness) { context, dispatcher -> FineTuneContent(context, dispatcher) }
 
             onNodeWithText(AMOLED).assertDoesNotExist()
             onNodeWithText("Motion").assertDoesNotExist()
@@ -228,8 +190,7 @@ class SpecExtrasRowTest {
     fun toneTable_custom_listsOnlyTheSlotsCutByTone() =
         runComposeUiTest {
             val harness = PosterHarness(Plain.copy(library = Library.Custom))
-            harness.fineTune = FineTuneSection.Spec
-            showSection(harness) { context, dispatcher -> SpecExtrasRow(context, dispatcher) }
+            showSection(harness) { context, dispatcher -> FineTuneContent(context, dispatcher) }
 
             ToneSlots.size shouldBe 11
             onNodeWithText("Custom tones").assertExists()

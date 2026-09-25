@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The fine tune row with the spec, the platform, the extra colors and the target options. -->
-    <string name="extras_title">Spec, platform, extra colors and target options</string>
-    <!-- Under the row's title. The arguments are the spec the scheme is built with and the extra color count below. -->
-    <string name="extras_summary">%1$s spec, %2$s</string>
-    <!-- Under the row's title, how many extra colors the theme has. -->
+    <!-- In the Fine-tune button's summary, how many extra colors the theme has. -->
     <plurals name="extras_summary_colors">
         <item quantity="one">%1$d extra color</item>
         <item quantity="other">%1$d extra colors</item>
     </plurals>
-    <!-- Under the row's title while the theme has no extra colors. -->
-    <string name="extras_summary_no_colors">no extra colors</string>
 
     <!-- The label over the spec choice, also read out for it. -->
     <string name="extras_spec_label">Spec</string>
