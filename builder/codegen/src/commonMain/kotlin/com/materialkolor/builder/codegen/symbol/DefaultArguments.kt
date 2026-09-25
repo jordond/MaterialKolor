@@ -23,7 +23,9 @@ public class DefaultArgument<T>(
     public val value: T,
     public val source: String,
 ) {
-    /** Whether passing [candidate] would only repeat what the function does anyway. */
+    /**
+     * Whether passing [candidate] would only repeat what the function does anyway.
+     */
     public fun isDefault(candidate: T): Boolean = candidate == value
 
     override fun toString(): String = "$parameter = $source"
@@ -70,7 +72,9 @@ public class SchemeDefaults(
     public val animate: DefaultArgument<Boolean>? = null,
     public val motionScheme: DefaultArgument<MotionSchemeChoice?>? = null,
 ) {
-    /** Every default above that the function has. */
+    /**
+     * Every default above that the function has.
+     */
     public val arguments: List<DefaultArgument<*>>
         get() = listOfNotNull(style, contrastLevel, specVersion, platform, isAmoled, animate, motionScheme)
 }
@@ -145,7 +149,9 @@ public object DefaultArguments {
         platform = defaultPlatform(),
     )
 
-    /** The contrast `TonalPalette.onTone` aims for when an accent does not say. */
+    /**
+     * The contrast `TonalPalette.onTone` aims for when an accent does not say.
+     */
     public val OnToneThreshold: DefaultArgument<OnColorThreshold> =
         DefaultArgument("threshold", OnColorThreshold.AaNormal, "ContrastThreshold.WCAG_AA_NORMAL_TEXT")
 
@@ -156,16 +162,22 @@ public object DefaultArguments {
     public val RememberTonalPaletteHarmonizeWith: DefaultArgument<Boolean> =
         DefaultArgument("harmonizeWith", false, "null")
 
-    /** Whether `Color.harmonize` also matches saturation. */
+    /**
+     * Whether `Color.harmonize` also matches saturation.
+     */
     public val HarmonizeMatchSaturation: DefaultArgument<Boolean> =
         DefaultArgument("matchSaturation", false, "false")
 
     // b-112b
 
-    /** Whether the `MaterialKolors` constructor drops dark surfaces to black. */
+    /**
+     * Whether the `MaterialKolors` constructor drops dark surfaces to black.
+     */
     public val MaterialKolorsIsAmoled: DefaultArgument<Boolean> = notAmoled()
 
-    /** Every default in this table, by the function it belongs to. */
+    /**
+     * Every default in this table, by the function it belongs to.
+     */
     public val all: Map<Symbol, List<DefaultArgument<*>>>
         get() = listOf(
             DynamicMaterialTheme,

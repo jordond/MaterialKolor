@@ -61,7 +61,9 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * Keep the two in step or the export stops matching the preview, which B-117's parity gate checks.
  */
 public object CustomDynamic {
-    /** Every file the export of [input] writes, in the order a reader would open them. */
+    /**
+     * Every file the export of [input] writes, in the order a reader would open them.
+     */
     public fun files(input: ExportInput): List<GeneratedFile> {
         require(input.target == ExportTarget.Custom) {
             "The Custom dynamic export cannot write a ${input.target} theme"
@@ -71,7 +73,9 @@ public object CustomDynamic {
     }
 }
 
-/** The composable in `ThemeColors.kt` that works out every slot, which `Theme.kt` calls. */
+/**
+ * The composable in `ThemeColors.kt` that works out every slot, which `Theme.kt` calls.
+ */
 internal const val REMEMBER_THEME_COLORS: String = "rememberThemeColors"
 
 private const val SEED_COLOR_PARAMETER = "seedColor"
@@ -84,23 +88,31 @@ private const val COLORS = "colors"
  * with the same source are written once, without an `if`.
  */
 private sealed interface SlotSource {
-    /** A pinned role, written as the pin's color. */
+    /**
+     * A pinned role, written as the pin's color.
+     */
     data class Pinned(
         val color: Argb,
     ) : SlotSource
 
-    /** A role the scheme works out, read off `MaterialKolors` so AMOLED reaches it. */
+    /**
+     * A role the scheme works out, read off `MaterialKolors` so AMOLED reaches it.
+     */
     data class SchemeRole(
         val role: Role,
     ) : SlotSource
 
-    /** A tone cut off one of the scheme's ramps. */
+    /**
+     * A tone cut off one of the scheme's ramps.
+     */
     data class RampTone(
         val ramp: TonalRamp,
         val tone: Int,
     ) : SlotSource
 
-    /** The color `onTone` finds on a ramp for a background tone, at the default threshold. */
+    /**
+     * The color `onTone` finds on a ramp for a background tone, at the default threshold.
+     */
     data class RampOnTone(
         val ramp: TonalRamp,
         val background: Int,
@@ -191,7 +203,9 @@ private fun KotlinFileScope.rememberThemeColors(document: ThemeDocument) {
     }
 }
 
-/** `rememberTonalPalette(seed = BrandSeed, harmonizeWith = seedColor)`, the ramp the Material 3 export builds. */
+/**
+ * `rememberTonalPalette(seed = BrandSeed, harmonizeWith = seedColor)`, the ramp the Material 3 export builds.
+ */
 private fun paletteCall(accent: Accent): Expression =
     call(Symbols.RememberTonalPalette, multiline = accent.harmonizes) {
         argument("seed", ref(accent.seedName))
@@ -200,7 +214,9 @@ private fun paletteCall(accent: Accent): Expression =
         }
     }
 
-/** `MaterialKolors(scheme)`, with `isAmoled = true` when the document asks for AMOLED. */
+/**
+ * `MaterialKolors(scheme)`, with `isAmoled = true` when the document asks for AMOLED.
+ */
 private fun kolorsCall(document: ThemeDocument): Expression =
     call(Symbols.MaterialKolors) {
         argument(ref(SCHEME))
@@ -282,7 +298,9 @@ private fun SlotSource.expression(): Expression =
         is SlotSource.RampOnTone -> palette(ramp).call(Symbols.OnTone) { argument(Literals.int(background)) }
     }
 
-/** `scheme.primaryPalette` and the like. */
+/**
+ * `scheme.primaryPalette` and the like.
+ */
 private fun palette(ramp: TonalRamp): Expression {
     val name = when (ramp) {
         TonalRamp.Primary -> "primaryPalette"

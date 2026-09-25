@@ -7,7 +7,9 @@ import com.materialkolor.builder.codegen.dsl.plainToken
 import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportTarget
 
-/** Where the readme sits in the export. */
+/**
+ * Where the readme sits in the export.
+ */
 internal const val README_PATH: String = "README.md"
 
 /**
@@ -17,7 +19,9 @@ internal const val README_PATH: String = "README.md"
  * The dependency lines are copied out of the build file snippet itself, so the two never disagree.
  */
 internal object Readme {
-    /** The readme for [input], given every other file the export writes. */
+    /**
+     * The readme for [input], given every other file the export writes.
+     */
     fun file(
         input: ExportInput,
         files: List<GeneratedFile>,

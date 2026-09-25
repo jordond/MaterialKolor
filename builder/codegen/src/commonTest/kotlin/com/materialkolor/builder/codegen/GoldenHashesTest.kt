@@ -20,7 +20,9 @@ import kotlin.test.assertEquals
  * holds the list to `GoldenHashes`.
  */
 internal object GoldenCases {
-    /** The cases objects, each by the name the test failures use. */
+    /**
+     * The cases objects, each by the name the test failures use.
+     */
     private val sources: Map<String, Map<String, ExportInput>> = mapOf(
         "Material3DynamicCases" to Material3DynamicCases.all,
         "Material3FrozenCases" to Material3FrozenCases.all,
@@ -33,7 +35,9 @@ internal object GoldenCases {
         "SnippetsCases" to SnippetsCases.all,
     )
 
-    /** Every export case, by case name. */
+    /**
+     * Every export case, by case name.
+     */
     val exports: Map<String, ExportInput> = buildMap {
         sources.forEach { (source, cases) ->
             cases.forEach { (case, input) ->
@@ -42,7 +46,9 @@ internal object GoldenCases {
         }
     }
 
-    /** The cases that are not a whole export, each hashed by the test that owns it. */
+    /**
+     * The cases that are not a whole export, each hashed by the test that owns it.
+     */
     val parts: Set<String> = setOf(
         // HeaderTest
         "header-default",

@@ -42,7 +42,9 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * can also ask for the wallpaper colors, which then win over the seed from Android 12 on.
  */
 public object Material3Dynamic {
-    /** Every file the export of [input] writes, in the order a reader would open them. */
+    /**
+     * Every file the export of [input] writes, in the order a reader would open them.
+     */
     public fun files(input: ExportInput): List<GeneratedFile> {
         val target = input.target
         require(target == ExportTarget.Material3 || target == ExportTarget.Material3Expressive) {
@@ -53,10 +55,14 @@ public object Material3Dynamic {
     }
 }
 
-/** The name of the seed color in `Color.kt`, which every other file reads. */
+/**
+ * The name of the seed color in `Color.kt`, which every other file reads.
+ */
 internal const val SEED_COLOR: String = "SeedColor"
 
-/** The second seed a CMF theme gives its tertiary palette. */
+/**
+ * The second seed a CMF theme gives its tertiary palette.
+ */
 private const val TERTIARY_SEED_COLOR = "TertiarySeedColor"
 
 private const val IS_DARK = "isDark"
@@ -67,7 +73,9 @@ private const val EXTENDED_COLORS = "extendedColors"
 
 // b-112
 
-/** The key colors in the order the theme functions take them, which is also the order `Color.kt` lists them. */
+/**
+ * The key colors in the order the theme functions take them, which is also the order `Color.kt` lists them.
+ */
 internal val KeyColorOrder: List<KeyColor> =
     listOf(
         KeyColor.Primary,
@@ -238,7 +246,9 @@ private fun pinExpression(
     )
 }
 
-/** `PaletteStyle.TonalSpot` and the like. A CMF style carries its tertiary seed when it has one. */
+/**
+ * `PaletteStyle.TonalSpot` and the like. A CMF style carries its tertiary seed when it has one.
+ */
 internal fun styleExpression(
     style: Style,
     document: ThemeDocument,
@@ -261,7 +271,9 @@ internal fun styleExpression(
     }
 }
 
-/** `ColorSpec.SpecVersion.SPEC_2025` and the like. */
+/**
+ * `ColorSpec.SpecVersion.SPEC_2025` and the like.
+ */
 internal fun specExpression(spec: SpecVersion): Expression {
     val specVersion = ref(Symbols.ColorSpec).member("SpecVersion")
 
@@ -272,7 +284,9 @@ internal fun specExpression(spec: SpecVersion): Expression {
     }
 }
 
-/** `DynamicScheme.Platform.PHONE` or `WATCH`. */
+/**
+ * `DynamicScheme.Platform.PHONE` or `WATCH`.
+ */
 internal fun platformExpression(platform: SchemePlatform): Expression {
     val schemePlatform = ref(Symbols.DynamicScheme).member("Platform")
 
@@ -282,17 +296,23 @@ internal fun platformExpression(platform: SchemePlatform): Expression {
     }
 }
 
-/** The tertiary seed a CMF theme is built with, and nothing for any other style. */
+/**
+ * The tertiary seed a CMF theme is built with, and nothing for any other style.
+ */
 private fun ThemeDocument.tertiarySeedForCmf(): Argb? = cmfTertiarySeed.takeIf { style == Style.Cmf }
 
 // b-112
 
-/** The theme function's parameter for this key color, as in `neutralVariant`. */
+/**
+ * The theme function's parameter for this key color, as in `neutralVariant`.
+ */
 internal val KeyColor.parameterName: String
     get() = name.replaceFirstChar { char -> char.lowercaseChar() }
 
 // b-112b
 
-/** The `ColorScheme` property for this role, as in `surfaceContainerHigh`. */
+/**
+ * The `ColorScheme` property for this role, as in `surfaceContainerHigh`.
+ */
 internal val Role.propertyName: String
     get() = name.replaceFirstChar { char -> char.lowercaseChar() }

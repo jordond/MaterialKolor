@@ -51,7 +51,9 @@ internal object UnstyledDynamicCases {
     fun files(case: String): List<GeneratedFile> = UnstyledDynamic.files(all.getValue(case))
 }
 
-/** This fixture exported for Unstyled. */
+/**
+ * This fixture exported for Unstyled.
+ */
 internal fun Fixture.unstyled(): Fixture = with(document = input.document.copy(library = Library.Unstyled))
 
 class UnstyledDynamicTest {

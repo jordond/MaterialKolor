@@ -29,13 +29,17 @@ private fun annotationExpression(
     }
 }
 
-/** The visibility a declaration can ask for. Leaving it out gives Kotlin's default, public. */
+/**
+ * The visibility a declaration can ask for. Leaving it out gives Kotlin's default, public.
+ */
 public enum class Visibility {
     Internal,
     Private,
 }
 
-/** Which kind of class [KotlinFileScope.classDeclaration] writes. */
+/**
+ * Which kind of class [KotlinFileScope.classDeclaration] writes.
+ */
 public enum class ClassKind {
     Class,
     DataClass,
@@ -54,13 +58,17 @@ private fun ClassKind.keywordTokens(): List<Token> =
         ClassKind.DataClass -> listOf(keywordToken("data"), spaceToken, keywordToken("class"))
     }
 
-/** The constructor properties of a class, and optionally its body. */
+/**
+ * The constructor properties of a class, and optionally its body.
+ */
 @CodegenDsl
 public class ClassScope internal constructor() {
     internal val properties: MutableList<ParameterSpec> = mutableListOf()
     internal val members: MutableList<Declaration> = mutableListOf()
 
-    /** A `val` in the primary constructor, with an optional default. */
+    /**
+     * A `val` in the primary constructor, with an optional default.
+     */
     public fun property(
         name: String,
         type: TypeRef,
@@ -69,7 +77,9 @@ public class ClassScope internal constructor() {
         properties += ParameterSpec(name, type, default, isProperty = true)
     }
 
-    /** The same, for the common case where the type is just a symbol. */
+    /**
+     * The same, for the common case where the type is just a symbol.
+     */
     public fun property(
         name: String,
         symbol: Symbol,
@@ -78,18 +88,24 @@ public class ClassScope internal constructor() {
         property(name, type(symbol), default)
     }
 
-    /** The properties and functions between the braces. */
+    /**
+     * The properties and functions between the braces.
+     */
     public fun body(build: MembersScope.() -> Unit) {
         members += MembersScope().apply(build).declarations
     }
 }
 
-/** The properties and functions in the body of a class or an object. */
+/**
+ * The properties and functions in the body of a class or an object.
+ */
 @CodegenDsl
 public class MembersScope internal constructor() {
     internal val declarations: MutableList<Declaration> = mutableListOf()
 
-    /** A `val` in the body, as in `val all = listOf(brand)`. */
+    /**
+     * A `val` in the body, as in `val all = listOf(brand)`.
+     */
     public fun property(
         name: String,
         value: Expression,
@@ -99,7 +115,9 @@ public class MembersScope internal constructor() {
         declarations += PropertyDeclaration(name, value, type, const = false, visibility, receiver = null)
     }
 
-    /** A member function. */
+    /**
+     * A member function.
+     */
     public fun function(
         name: String,
         annotations: List<Symbol> = emptyList(),
@@ -111,7 +129,9 @@ public class MembersScope internal constructor() {
         function(name, annotations.map { AnnotationSpec(it) }, returns, visibility, receiver, build)
     }
 
-    /** The same, for annotations that take arguments. */
+    /**
+     * The same, for annotations that take arguments.
+     */
     @JvmName("functionWithAnnotations")
     public fun function(
         name: String,
@@ -126,9 +146,13 @@ public class MembersScope internal constructor() {
     }
 }
 
-/** Something a file or a class body declares, which knows its own names, imports and layout. */
+/**
+ * Something a file or a class body declares, which knows its own names, imports and layout.
+ */
 internal sealed interface Declaration {
-    /** Every name this declares, its members included, for the import clash guard. */
+    /**
+     * Every name this declares, its members included, for the import clash guard.
+     */
     val names: List<String>
 
     val symbols: List<Symbol>

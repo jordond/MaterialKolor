@@ -68,7 +68,9 @@ public fun zipArchive(
     )
 }
 
-/** The theme files of [input], from the one export that writes its target in its mode. */
+/**
+ * The theme files of [input], from the one export that writes its target in its mode.
+ */
 private fun themeFiles(input: ExportInput): List<GeneratedFile> =
     when (input.target) {
         ExportTarget.Material3, ExportTarget.Material3Expressive -> {

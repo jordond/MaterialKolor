@@ -56,7 +56,9 @@ public class GeneratedFile(
     public val language: Language,
     public val lines: List<List<Token>>,
 ) {
-    /** The whole file, ending on the newline every text file is supposed to end on. */
+    /**
+     * The whole file, ending on the newline every text file is supposed to end on.
+     */
     public val text: String = renderText(lines)
 
     override fun toString(): String = "GeneratedFile(path=$path, language=$language)"

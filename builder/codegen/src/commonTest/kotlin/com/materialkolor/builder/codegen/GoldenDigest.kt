@@ -9,7 +9,9 @@ import com.materialkolor.builder.codegen.dsl.GeneratedFile
  * cases can compare against them without reading a single file from disk.
  */
 internal object GoldenDigest {
-    /** The CRC-32 of [files], see the other overload. */
+    /**
+     * The CRC-32 of [files], see the other overload.
+     */
     fun of(files: List<GeneratedFile>): Long {
         require(files.map { it.path }.distinct().size == files.size) { "A golden case has one file per path" }
 
@@ -31,7 +33,9 @@ internal object GoldenDigest {
         return crc32(bytes)
     }
 
-    /** The standard CRC-32, the one zip and `java.util.zip.CRC32` use. */
+    /**
+     * The standard CRC-32, the one zip and `java.util.zip.CRC32` use.
+     */
     fun crc32(bytes: ByteArray): Long {
         var crc = -1
         bytes.forEach { byte ->

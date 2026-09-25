@@ -40,13 +40,19 @@ internal object FluentDynamicCases {
     fun files(case: String): List<GeneratedFile> = FluentDynamic.files(all.getValue(case))
 }
 
-/** This fixture exported for Fluent. */
+/**
+ * This fixture exported for Fluent.
+ */
 internal fun Fixture.fluent(): Fixture = with(document = input.document.copy(library = Library.Fluent))
 
-/** The same export when `material-kolor-fluent` is not published, so the shades are mapped inline. */
+/**
+ * The same export when `material-kolor-fluent` is not published, so the shades are mapped inline.
+ */
 internal fun ExportInput.inline(): ExportInput = copy(versions = versions.copy(fluentModuleAvailable = false))
 
-/** This fixture exported for Fluent without the module. */
+/**
+ * This fixture exported for Fluent without the module.
+ */
 internal fun Fixture.fluentInline(): ExportInput = fluent().input.inline()
 
 class FluentDynamicTest {

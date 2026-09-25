@@ -30,7 +30,9 @@ internal object ZipWriter {
         }
     }
 
-    /** The archive holding [entries] in the order given. */
+    /**
+     * The archive holding [entries] in the order given.
+     */
     fun write(entries: List<Entry>): ByteArray {
         require(entries.size < ZIP64_ENTRY_COUNT) {
             "A zip without the 64 bit extension holds fewer than $ZIP64_ENTRY_COUNT entries"
@@ -133,26 +135,38 @@ internal object ZipWriter {
     private const val CENTRAL_HEADER_SIZE = 46
     private const val END_RECORD_SIZE = 22
 
-    /** Version 2.0, the first that knows folders, which is all a stored archive needs. */
+    /**
+     * Version 2.0, the first that knows folders, which is all a stored archive needs.
+     */
     private const val VERSION_NEEDED = 20
 
-    /** General purpose bit 11, the names are UTF-8. */
+    /**
+     * General purpose bit 11, the names are UTF-8.
+     */
     private const val UTF8_NAMES_FLAG = 0x0800
     private const val METHOD_STORED = 0
 
-    /** Midnight, the earliest time a zip can hold. */
+    /**
+     * Midnight, the earliest time a zip can hold.
+     */
     private const val DOS_TIME = 0
 
-    /** The 1st of January 1980, the earliest date a zip can hold. */
+    /**
+     * The 1st of January 1980, the earliest date a zip can hold.
+     */
     private const val DOS_DATE = (1 shl 5) or 1
 
     private const val MAX_SHORT = 0xFFFF
 
-    /** The entry count that tells a reader the real count sits in the 64 bit extension. */
+    /**
+     * The entry count that tells a reader the real count sits in the 64 bit extension.
+     */
     private const val ZIP64_ENTRY_COUNT = 0xFFFF
 }
 
-/** Little endian writes into a buffer sized up front. */
+/**
+ * Little endian writes into a buffer sized up front.
+ */
 private class ByteWriter(
     private val buffer: ByteArray,
 ) {

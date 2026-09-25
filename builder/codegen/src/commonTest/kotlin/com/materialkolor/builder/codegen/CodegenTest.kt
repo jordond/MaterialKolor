@@ -218,7 +218,9 @@ class CodegenTest {
         return ThemeDocument.Default.copy(library = library, expressive = target == ExportTarget.Material3Expressive)
     }
 
-    /** The MaterialKolor module a dynamic export of [target] builds on. */
+    /**
+     * The MaterialKolor module a dynamic export of [target] builds on.
+     */
     private fun materialKolorModule(
         target: ExportTarget,
         versions: ExportVersions,
@@ -268,7 +270,9 @@ class CodegenTest {
             .toSet()
     }
 
-    /** The Kotlin files each export writes for a default theme, which has no accents. */
+    /**
+     * The Kotlin files each export writes for a default theme, which has no accents.
+     */
     private fun themeFileNames(
         target: ExportTarget,
         mode: ExportMode,

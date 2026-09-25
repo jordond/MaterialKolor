@@ -6,7 +6,9 @@ package com.materialkolor.builder.codegen.zip
  * It is plain Int math over a lookup table, so the JVM and wasm work it out the same way.
  */
 internal object Crc32 {
-    /** The checksum of [bytes], held unsigned in the 32 bits of an Int. */
+    /**
+     * The checksum of [bytes], held unsigned in the 32 bits of an Int.
+     */
     fun of(bytes: ByteArray): Int {
         var crc = -1
         bytes.forEach { byte ->

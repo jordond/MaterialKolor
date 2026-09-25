@@ -67,7 +67,9 @@ internal object CustomDynamicCases {
     fun files(case: String): List<GeneratedFile> = CustomDynamic.files(all.getValue(case))
 }
 
-/** This fixture exported for Custom. */
+/**
+ * This fixture exported for Custom.
+ */
 internal fun Fixture.custom(): Fixture = with(document = input.document.copy(library = Library.Custom))
 
 class CustomDynamicTest {
@@ -264,7 +266,9 @@ class CustomDynamicTest {
         name: String,
     ): String = CustomDynamic.files(input).single { it.path.endsWith("/$name") }.text
 
-    /** The declaration that opens with [start], up to its closing parenthesis. */
+    /**
+     * The declaration that opens with [start], up to its closing parenthesis.
+     */
     private fun String.declaration(start: String): String = substring(indexOf(start)).substringBefore("\n)\n")
 
     private fun render(value: Expression): String =

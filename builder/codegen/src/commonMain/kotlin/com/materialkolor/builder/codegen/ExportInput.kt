@@ -32,11 +32,15 @@ public data class ExportInput(
         require(shareUrl.isNotBlank()) { "An export needs the link back to its theme" }
     }
 
-    /** What the export is written for, the library together with whether it is expressive. */
+    /**
+     * What the export is written for, the library together with whether it is expressive.
+     */
     public val target: ExportTarget
         get() = ExportTarget.of(document.library, document.expressive)
 
-    /** The package as a directory path, as in `com/example/theme`. */
+    /**
+     * The package as a directory path, as in `com/example/theme`.
+     */
     public val packagePath: String
         get() = prefs.packageName.replace('.', '/')
 
@@ -72,7 +76,9 @@ public data class ExportVersions(
     public val composeUnstyled: String,
     public val fluentModuleAvailable: Boolean = true,
 ) {
-    /** How a Fluent export gets its colors, which follows from whether the module is published. */
+    /**
+     * How a Fluent export gets its colors, which follows from whether the module is published.
+     */
     public val fluentBinding: FluentBinding
         get() = if (fluentModuleAvailable) FluentBinding.Module else FluentBinding.Inline
 }
@@ -81,9 +87,13 @@ public data class ExportVersions(
  * How a Fluent export turns a seed into Fluent colors.
  */
 public enum class FluentBinding {
-    /** Through `material-kolor-fluent`, which ships with MaterialKolor 6.0. */
+    /**
+     * Through `material-kolor-fluent`, which ships with MaterialKolor 6.0.
+     */
     Module,
 
-    /** Through a small shade mapping written into the export itself, on top of core. */
+    /**
+     * Through a small shade mapping written into the export itself, on top of core.
+     */
     Inline,
 }

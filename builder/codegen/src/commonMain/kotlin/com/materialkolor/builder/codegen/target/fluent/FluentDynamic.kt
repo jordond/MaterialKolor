@@ -41,7 +41,9 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * either.
  */
 public object FluentDynamic {
-    /** Every file the export of [input] writes, in the order a reader would open them. */
+    /**
+     * Every file the export of [input] writes, in the order a reader would open them.
+     */
     public fun files(input: ExportInput): List<GeneratedFile> {
         require(input.target == ExportTarget.Fluent) {
             "The Fluent dynamic export cannot write a ${input.target} theme"
@@ -52,10 +54,14 @@ public object FluentDynamic {
     }
 }
 
-/** The line the inline form adds to its header. */
+/**
+ * The line the inline form adds to its header.
+ */
 internal const val SWAP_TO_MODULE_NOTE: String = "Swap to material-kolor-fluent when it is available."
 
-/** The same line when the theme animates, which only the module can do. */
+/**
+ * The same line when the theme animates, which only the module can do.
+ */
 internal const val SWAP_TO_MODULE_ANIMATED_NOTE: String =
     "Swap to material-kolor-fluent when it is available, and the colors animate once it is."
 
@@ -64,7 +70,9 @@ private const val TARGET_COLORS = "targetColors"
 private const val SCHEME = "scheme"
 private const val TO_SHADES = "toShades"
 
-/** The seven shades in the order `Shades` declares them, each with the tone the module reads it from. */
+/**
+ * The seven shades in the order `Shades` declares them, each with the tone the module reads it from.
+ */
 private val ShadeTones: List<Pair<String, Int>> =
     listOf(
         "base" to 50,
@@ -100,10 +108,14 @@ private fun themeFile(input: ExportInput): GeneratedFile {
     }
 }
 
-/** The inline form's header note, which says the colors animate once the module is in when they would. */
+/**
+ * The inline form's header note, which says the colors animate once the module is in when they would.
+ */
 private fun swapNote(animate: Boolean): String = if (animate) SWAP_TO_MODULE_ANIMATED_NOTE else SWAP_TO_MODULE_NOTE
 
-/** `rememberFluentColors(...)`, passed through `animateFluentColors` when the theme animates. */
+/**
+ * `rememberFluentColors(...)`, passed through `animateFluentColors` when the theme animates.
+ */
 private fun BodyScope.moduleColors(input: ExportInput) {
     val colors = callOf(Symbols.RememberFluentColors, multiline = true) {
         schemeArguments(
@@ -131,7 +143,9 @@ private fun BodyScope.moduleColors(input: ExportInput) {
     )
 }
 
-/** The scheme from core and `Colors` built from its primary palette, remembered as the module does. */
+/**
+ * The scheme from core and `Colors` built from its primary palette, remembered as the module does.
+ */
 private fun BodyScope.inlineColors(document: ThemeDocument) {
     assign(
         name = SCHEME,
@@ -159,7 +173,9 @@ private fun BodyScope.inlineColors(document: ThemeDocument) {
     )
 }
 
-/** The private `TonalPalette.toShades()` of the inline form, the module's `toFluentShades` written out. */
+/**
+ * The private `TonalPalette.toShades()` of the inline form, the module's `toFluentShades` written out.
+ */
 private fun KotlinFileScope.toShades() {
     function(
         name = TO_SHADES,

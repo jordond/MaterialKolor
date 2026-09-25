@@ -35,7 +35,9 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * wallpaper colors, which then win over the standard pair from Android 12 on.
  */
 public object Material3Frozen {
-    /** Every file the export of [input] writes, in the order a reader would open them. */
+    /**
+     * Every file the export of [input] writes, in the order a reader would open them.
+     */
     public fun files(input: ExportInput): List<GeneratedFile> {
         val target = input.target
         require(target == ExportTarget.Material3 || target == ExportTarget.Material3Expressive) {
@@ -50,7 +52,9 @@ private const val EXTENDED_COLORS = "extendedColors"
 private const val EXTENDED_LIGHT = "extendedLight"
 private const val EXTENDED_DARK = "extendedDark"
 
-/** Every role in the order `lightColorScheme` and `darkColorScheme` take them, which `Color.kt` follows too. */
+/**
+ * Every role in the order `lightColorScheme` and `darkColorScheme` take them, which `Color.kt` follows too.
+ */
 private val SchemeOrder: List<Role> =
     listOf(
         Role.Primary,
@@ -153,7 +157,9 @@ private fun BodyScope.themeBody(input: ExportInput) {
     }
 }
 
-/** The theme call on the standard pair. */
+/**
+ * The theme call on the standard pair.
+ */
 private fun themeCall(input: ExportInput): Expression =
     materialThemeCall(
         input = input,
@@ -163,7 +169,9 @@ private fun themeCall(input: ExportInput): Expression =
         ),
     )
 
-/** `lightColorScheme(primary = primaryLight, ...)` with every role, in the order the function takes them. */
+/**
+ * `lightColorScheme(primary = primaryLight, ...)` with every role, in the order the function takes them.
+ */
 private fun schemeCall(
     variant: ContrastVariant,
     mode: FrozenMode,
@@ -178,7 +186,9 @@ private fun schemeCall(
     }
 }
 
-/** `ExtendedColors.kt` with a literal family per accent in each mode, or nothing when the theme has none. */
+/**
+ * `ExtendedColors.kt` with a literal family per accent in each mode, or nothing when the theme has none.
+ */
 private fun extendedColorsFile(input: ExportInput): GeneratedFile? {
     val accents = input.resolved.accents
     if (accents.isEmpty()) return null
@@ -201,14 +211,18 @@ private fun extendedColorsFile(input: ExportInput): GeneratedFile? {
     }
 }
 
-/** `primaryLight`, or `primaryDarkHighContrast` for a role at another contrast. */
+/**
+ * `primaryLight`, or `primaryDarkHighContrast` for a role at another contrast.
+ */
 private fun roleValueName(
     role: Role,
     mode: FrozenMode,
     variant: ContrastVariant,
 ): String = role.schemeParameter + mode.name + variant.namePrefix.replaceFirstChar { char -> char.uppercaseChar() }
 
-/** `lightScheme` and `darkScheme` at the standard contrast, `mediumContrastLightColorScheme` and the like otherwise. */
+/**
+ * `lightScheme` and `darkScheme` at the standard contrast, `mediumContrastLightColorScheme` and the like otherwise.
+ */
 private fun schemeName(
     variant: ContrastVariant,
     mode: FrozenMode,
@@ -218,6 +232,8 @@ private fun schemeName(
         ContrastVariant.Medium, ContrastVariant.High -> "${variant.namePrefix}${mode.name}ColorScheme"
     }
 
-/** The scheme parameter for this role, as in `surfaceContainerHigh`. */
+/**
+ * The scheme parameter for this role, as in `surfaceContainerHigh`.
+ */
 private val Role.schemeParameter: String
     get() = name.replaceFirstChar { char -> char.lowercaseChar() }

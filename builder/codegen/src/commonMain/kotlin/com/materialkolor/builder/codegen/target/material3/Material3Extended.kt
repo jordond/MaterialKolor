@@ -26,13 +26,19 @@ import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.OnColorThreshold
 import com.materialkolor.builder.domain.persist.ExportMode
 
-/** The composable in `ExtendedColors.kt` that builds every accent family, which `Theme.kt` calls. */
+/**
+ * The composable in `ExtendedColors.kt` that builds every accent family, which `Theme.kt` calls.
+ */
 internal const val REMEMBER_EXTENDED_COLORS: String = "rememberExtendedColors"
 
-/** The composition local `Theme.kt` provides the accent families through. */
+/**
+ * The composition local `Theme.kt` provides the accent families through.
+ */
 internal const val LOCAL_EXTENDED_COLORS: String = "LocalExtendedColors"
 
-/** The data class `ExtendedColors.kt` declares to hold every accent family. */
+/**
+ * The data class `ExtendedColors.kt` declares to hold every accent family.
+ */
 internal const val EXTENDED_COLORS_TYPE: String = "ExtendedColors"
 
 private const val TO_COLOR_FAMILY = "colorFamily"
@@ -55,7 +61,9 @@ private const val THRESHOLD = "threshold"
  * The families snap from light to dark rather than animating, even when the theme animates.
  */
 internal object Material3Extended {
-    /** The file for the accents of [input], or nothing when the theme has none. */
+    /**
+     * The file for the accents of [input], or nothing when the theme has none.
+     */
     fun file(input: ExportInput): GeneratedFile? {
         val accents = input.document.accents
         if (accents.isEmpty()) return null
@@ -97,7 +105,9 @@ internal fun KotlinFileScope.extendedColorsDeclarations(
     )
 }
 
-/** The value in `Color.kt` that holds an accent's seed, as in `BrandSeed`. */
+/**
+ * The value in `Color.kt` that holds an accent's seed, as in `BrandSeed`.
+ */
 internal val Accent.seedName: String
     get() = name.replaceFirstChar { char -> char.uppercaseChar() } + "Seed"
 
@@ -110,7 +120,9 @@ internal val Accent.seedName: String
 internal val Accent.paletteName: String
     get() = "${propertyName}Palette"
 
-/** Whether the ramp call of the accent passes `harmonizeWith`, which gives it a second argument. */
+/**
+ * Whether the ramp call of the accent passes `harmonizeWith`, which gives it a second argument.
+ */
 internal val Accent.harmonizes: Boolean
     get() = !DefaultArguments.RememberTonalPaletteHarmonizeWith.isDefault(harmonize)
 
@@ -152,7 +164,9 @@ private fun KotlinFileScope.rememberExtendedColors(accents: List<Accent>) {
 
 // b-112b
 
-/** `brandPalette.colorFamily(tone = ..., containerTone = ...)`, at the accent's tones for each mode. */
+/**
+ * `brandPalette.colorFamily(tone = ..., containerTone = ...)`, at the accent's tones for each mode.
+ */
 internal fun familyOf(accent: Accent): Expression =
     ref(accent.paletteName).call(TO_COLOR_FAMILY, multiline = true) {
         argument(TONE, toneExpression(light = accent.light.color, dark = accent.dark.color))
@@ -165,7 +179,9 @@ internal fun familyOf(accent: Accent): Expression =
 
 // b-112b
 
-/** `if (isDark) 80 else 40`, or just the tone when both modes use the same one. */
+/**
+ * `if (isDark) 80 else 40`, or just the tone when both modes use the same one.
+ */
 internal fun toneExpression(
     light: Int,
     dark: Int,

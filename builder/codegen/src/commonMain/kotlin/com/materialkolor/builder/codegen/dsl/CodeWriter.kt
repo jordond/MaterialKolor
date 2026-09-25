@@ -3,7 +3,9 @@ package com.materialkolor.builder.codegen.dsl
 internal const val MAX_LINE_LENGTH = 120
 internal const val INDENT = "    "
 
-/** Lays tokens out into lines, breaking whatever runs past the column limit. */
+/**
+ * Lays tokens out into lines, breaking whatever runs past the column limit.
+ */
 internal class CodeWriter {
     private val lines = mutableListOf<List<Token>>()
     private var depth = 0
@@ -98,7 +100,9 @@ internal class CodeWriter {
         }
     }
 
-    /** A lambda with its statements below the opening brace, or `{}` when there are none. */
+    /**
+     * A lambda with its statements below the opening brace, or `{}` when there are none.
+     */
     private fun lambda(
         shape: LambdaShape,
         prefix: List<Token>,
@@ -124,7 +128,9 @@ internal class CodeWriter {
         elseBranch(shape.whenFalse, suffix)
     }
 
-    /** The `else` side of a broken if, following an `else if` chain down to its last branch. */
+    /**
+     * The `else` side of a broken if, following an `else if` chain down to its last branch.
+     */
     private fun elseBranch(
         value: Expression,
         suffix: List<Token>,

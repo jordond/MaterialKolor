@@ -20,12 +20,16 @@ public fun gradleFile(
     return GeneratedFile(path = path, language = Language.Kotlin, lines = writer.result)
 }
 
-/** One level of a Gradle Kotlin DSL snippet. */
+/**
+ * One level of a Gradle Kotlin DSL snippet.
+ */
 @CodegenDsl
 public class GradleScope internal constructor() {
     private val entries = mutableListOf<GradleEntry>()
 
-    /** A nested block, as in `dependencies { }` or `commonMain.dependencies { }`. */
+    /**
+     * A nested block, as in `dependencies { }` or `commonMain.dependencies { }`.
+     */
     public fun block(
         name: String,
         build: GradleScope.() -> Unit,
@@ -33,7 +37,9 @@ public class GradleScope internal constructor() {
         entries += GradleEntry.Block(name, GradleScope().apply(build))
     }
 
-    /** A call written on its own line. */
+    /**
+     * A call written on its own line.
+     */
     public fun call(
         name: String,
         multiline: Boolean = false,
@@ -54,7 +60,9 @@ public class GradleScope internal constructor() {
         build: ArgumentsScope.() -> Unit = {},
     ): Expression = buildCall(listOf(functionToken(name)), emptyList(), multiline, build)
 
-    /** A dependency on a literal coordinate, as in `implementation("group:name:version")`. */
+    /**
+     * A dependency on a literal coordinate, as in `implementation("group:name:version")`.
+     */
     public fun dependency(
         configuration: String,
         coordinate: String,
@@ -62,7 +70,9 @@ public class GradleScope internal constructor() {
         dependency(configuration, Literals.string(coordinate))
     }
 
-    /** A dependency on anything else, such as a version catalog accessor. */
+    /**
+     * A dependency on anything else, such as a version catalog accessor.
+     */
     public fun dependency(
         configuration: String,
         notation: Expression,
@@ -76,17 +86,23 @@ public class GradleScope internal constructor() {
         statement(configured)
     }
 
-    /** Any expression on its own line. */
+    /**
+     * Any expression on its own line.
+     */
     public fun statement(value: Expression) {
         entries += GradleEntry.Line(emptyList(), value)
     }
 
-    /** A comment line. */
+    /**
+     * A comment line.
+     */
     public fun comment(text: String) {
         entries += GradleEntry.Line(listOf(lineCommentToken(text)), null)
     }
 
-    /** A blank line. */
+    /**
+     * A blank line.
+     */
     public fun blankLine() {
         entries += GradleEntry.Line(emptyList(), null)
     }

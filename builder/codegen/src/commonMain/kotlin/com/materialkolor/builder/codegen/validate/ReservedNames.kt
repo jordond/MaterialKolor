@@ -30,7 +30,9 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * else by that name.
  */
 public sealed interface ReservedNameClash {
-    /** The name as it was typed. */
+    /**
+     * The name as it was typed.
+     */
     public val name: String
 
     /**
@@ -75,7 +77,9 @@ public object ReservedNames {
      */
     public fun of(target: ExportTarget): Set<String> = topLevel(target) + members(target)
 
-    /** The theme and accent names of [document] that its export target cannot use, theme name first. */
+    /**
+     * The theme and accent names of [document] that its export target cannot use, theme name first.
+     */
     public fun clashes(document: ThemeDocument): List<ReservedNameClash> {
         val target = ExportTarget.of(document.library, document.expressive)
         val forTheme = topLevel(target).mapTo(mutableSetOf()) { it.folded() }
@@ -91,7 +95,9 @@ public object ReservedNames {
         }
     }
 
-    /** What [target] imports or declares at the top of a file, which the theme function sits beside too. */
+    /**
+     * What [target] imports or declares at the top of a file, which the theme function sits beside too.
+     */
     private fun topLevel(target: ExportTarget): Set<String> =
         when (target) {
             ExportTarget.Material3, ExportTarget.Material3Expressive -> Material3Symbols.names() + Material3Declared
@@ -140,7 +146,9 @@ public object ReservedNames {
     private fun List<Symbol>.names(): Set<String> = mapTo(mutableSetOf()) { symbol -> symbol.simpleName }
 }
 
-/** What every export can name, the Kotlin types, the Compose runtime and graphics, and core. */
+/**
+ * What every export can name, the Kotlin types, the Compose runtime and graphics, and core.
+ */
 private val CommonSymbols: List<Symbol> =
     listOf(
         Symbols.Boolean,
@@ -190,7 +198,9 @@ private val Material3Symbols: List<Symbol> =
             Symbols.DynamicLightColorScheme,
         )
 
-/** What the Material 3 export declares in `ExtendedColors.kt`, kept apart since none of it is imported. */
+/**
+ * What the Material 3 export declares in `ExtendedColors.kt`, kept apart since none of it is imported.
+ */
 private val Material3Declared: Set<String> =
     setOf(COLOR_FAMILY, EXTENDED_COLORS_TYPE, LOCAL_EXTENDED_COLORS, REMEMBER_EXTENDED_COLORS)
 
@@ -222,18 +232,26 @@ private val FluentSymbols: List<Symbol> =
 
 // b-111
 
-/** What the Custom export declares. */
+/**
+ * What the Custom export declares.
+ */
 private val CustomDeclared: Set<String> = setOf(THEME_COLORS, LOCAL_THEME_COLORS, COLOR_FAMILY)
 
-/** The slots of `ThemeColors`, which an accent becomes a property beside and so cannot share a name with. */
+/**
+ * The slots of `ThemeColors`, which an accent becomes a property beside and so cannot share a name with.
+ */
 private val CustomMembers: Set<String> = CustomSlot.entries.mapTo(mutableSetOf()) { slot -> slot.propertyName }
 
-/** What the Fluent export declares. */
+/**
+ * What the Fluent export declares.
+ */
 private val FluentDeclared: Set<String> = setOf(LIGHT_THEME_SHADES, DARK_THEME_SHADES)
 
 // b-111b
 
-/** What the Unstyled frozen export declares, the tokens object and a light and dark map per contrast. */
+/**
+ * What the Unstyled frozen export declares, the tokens object and a light and dark map per contrast.
+ */
 private val UnstyledDeclared: Set<String> =
     ContrastVariant.entries.flatMapTo(mutableSetOf(THEME_TOKENS)) { variant ->
         FrozenMode.entries.map { mode -> colorsName(variant, mode) }
@@ -270,5 +288,7 @@ internal val UnstyledTokens: Set<String> =
 
 // b-112b
 
-/** The Custom dynamic export's names beyond the frozen set that can clash. */
+/**
+ * The Custom dynamic export's names beyond the frozen set that can clash.
+ */
 private val CustomDynamicNames: Set<String> = setOf(Symbols.MaterialKolors.simpleName, REMEMBER_THEME_COLORS)

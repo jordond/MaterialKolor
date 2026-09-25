@@ -41,7 +41,9 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * and `AppTheme`, without anything from MaterialKolor.
  */
 public object CustomFrozen {
-    /** Every file the export of [input] writes, in the order a reader would open them. */
+    /**
+     * Every file the export of [input] writes, in the order a reader would open them.
+     */
     public fun files(input: ExportInput): List<GeneratedFile> {
         require(input.target == ExportTarget.Custom) { "The Custom frozen export cannot write a ${input.target} theme" }
         require(input.resolved.customSlots.keys == input.resolved.roles.keys) {
@@ -52,15 +54,21 @@ public object CustomFrozen {
     }
 }
 
-/** The data class `ThemeColors.kt` declares for every slot and accent. */
+/**
+ * The data class `ThemeColors.kt` declares for every slot and accent.
+ */
 internal const val THEME_COLORS: String = "ThemeColors"
 
-/** The composition local `Theme.kt` provides the colors through. */
+/**
+ * The composition local `Theme.kt` provides the colors through.
+ */
 internal const val LOCAL_THEME_COLORS: String = "LocalThemeColors"
 
 private const val COLORS = "colors"
 
-/** The property a slot is written as, as in `textStrong`, the same name the slot serializes under. */
+/**
+ * The property a slot is written as, as in `textStrong`, the same name the slot serializes under.
+ */
 internal val CustomSlot.propertyName: String
     get() = name.replaceFirstChar { char -> char.lowercaseChar() }
 
@@ -97,7 +105,9 @@ private fun themeColorsFile(input: ExportInput): GeneratedFile {
     }
 }
 
-/** `ThemeColors(primary = ..., ...)` with every slot and then every accent's family, all literal. */
+/**
+ * `ThemeColors(primary = ..., ...)` with every slot and then every accent's family, all literal.
+ */
 private fun themeColorsValue(
     slots: Map<CustomSlot, Argb>,
     accents: List<AccentFamilyValues>,
@@ -143,7 +153,9 @@ private fun CustomSlotValues.colorsIn(mode: FrozenMode): Map<CustomSlot, Argb> =
         FrozenMode.Dark -> dark
     }
 
-/** `lightThemeColors`, or `highContrastDarkThemeColors` at another contrast. */
+/**
+ * `lightThemeColors`, or `highContrastDarkThemeColors` at another contrast.
+ */
 private fun themeColorsName(
     variant: ContrastVariant,
     mode: FrozenMode,

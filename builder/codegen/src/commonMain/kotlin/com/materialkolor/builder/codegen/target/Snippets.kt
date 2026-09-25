@@ -10,10 +10,14 @@ import com.materialkolor.builder.codegen.dsl.tomlFile
 import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportTarget
 
-/** Where the version catalog snippet sits in the export. */
+/**
+ * Where the version catalog snippet sits in the export.
+ */
 internal const val CATALOG_PATH: String = "gradle/libs.versions.toml"
 
-/** Where the build file snippet sits in the export. */
+/**
+ * Where the build file snippet sits in the export.
+ */
 internal const val BUILD_SNIPPET_PATH: String = "snippets/build.gradle.kts"
 
 /**
@@ -30,11 +34,15 @@ internal class Dependency(
     val versionKey: String,
     val version: String,
 ) {
-    /** The accessor a build file reads the catalog entry by, as in `libs.materialKolor.core`. */
+    /**
+     * The accessor a build file reads the catalog entry by, as in `libs.materialKolor.core`.
+     */
     val accessor: String
         get() = "libs." + alias.replace('-', '.')
 
-    /** The coordinate a build file names without a catalog. */
+    /**
+     * The coordinate a build file names without a catalog.
+     */
     val coordinate: String
         get() = "$module:$version"
 }
@@ -49,7 +57,9 @@ internal class Dependency(
  * is named at the one pinned version (D9).
  */
 internal object Snippets {
-    /** The catalog snippet when [ExportInput.prefs] asks for one, then the build file snippet, or nothing. */
+    /**
+     * The catalog snippet when [ExportInput.prefs] asks for one, then the build file snippet, or nothing.
+     */
     fun files(input: ExportInput): List<GeneratedFile> {
         val dependencies = dependencies(input)
         if (dependencies.isEmpty()) return emptyList()
@@ -60,7 +70,9 @@ internal object Snippets {
         )
     }
 
-    /** What [input] depends on, MaterialKolor first. Empty when it needs nothing beyond Compose. */
+    /**
+     * What [input] depends on, MaterialKolor first. Empty when it needs nothing beyond Compose.
+     */
     fun dependencies(input: ExportInput): List<Dependency> =
         when (input.prefs.mode) {
             ExportMode.Dynamic -> {
@@ -91,7 +103,9 @@ internal object Snippets {
             }
         }
 
-    /** The R9 note for [target], or null when the target runs everywhere Compose does. */
+    /**
+     * The R9 note for [target], or null when the target runs everywhere Compose does.
+     */
     fun platformNote(target: ExportTarget): String? =
         when (target) {
             ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Custom -> {
@@ -105,7 +119,9 @@ internal object Snippets {
             }
         }
 
-    /** The MaterialKolor [module], at the one pinned version. */
+    /**
+     * The MaterialKolor [module], at the one pinned version.
+     */
     private fun materialKolor(
         module: String,
         input: ExportInput,

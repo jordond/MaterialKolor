@@ -31,7 +31,9 @@ public object Literals {
             symbols = listOf(Symbols.Color),
         )
 
-    /** An ARGB colour as the bare `0xFF6750A4` text, in upper case and always eight digits. */
+    /**
+     * An ARGB colour as the bare `0xFF6750A4` text, in upper case and always eight digits.
+     */
     public fun hexText(argb: Int): String =
         buildString {
             append("0x")
@@ -40,7 +42,9 @@ public object Literals {
             }
         }
 
-    /** A number held in hundredths, written as the `Double` literal it stands for. */
+    /**
+     * A number held in hundredths, written as the `Double` literal it stands for.
+     */
     public fun decimal(hundredths: Int): Expression =
         raw(listOf(Token(TokenKind.NumberLiteral, decimalText(hundredths))))
 
@@ -65,13 +69,19 @@ public object Literals {
         }
     }
 
-    /** A whole number. */
+    /**
+     * A whole number.
+     */
     public fun int(value: Int): Expression = raw(listOf(Token(TokenKind.NumberLiteral, value.toString())))
 
-    /** `true` or `false`. */
+    /**
+     * `true` or `false`.
+     */
     public fun boolean(value: Boolean): Expression = raw(listOf(Token(TokenKind.Keyword, value.toString())))
 
-    /** A quoted string, escaped so it survives a Kotlin parser. */
+    /**
+     * A quoted string, escaped so it survives a Kotlin parser.
+     */
     public fun string(value: String): Expression = raw(listOf(Token(TokenKind.StringLiteral, "\"${escape(value)}\"")))
 
     /**

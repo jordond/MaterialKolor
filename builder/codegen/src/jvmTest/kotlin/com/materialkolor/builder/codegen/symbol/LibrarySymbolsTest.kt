@@ -122,7 +122,9 @@ class LibrarySymbolsTest {
             }
     }
 
-    /** Every name imported by the library, its samples, the builder and the README. */
+    /**
+     * Every name imported by the library, its samples, the builder and the README.
+     */
     private fun importedNames(): Set<String> {
         val roots = listOf("material-kolor-core", "material-kolor-material3", "material-kolor-unstyled")
             .plus(listOf("material-kolor-fluent", "material-kolor-palette", "samples"))

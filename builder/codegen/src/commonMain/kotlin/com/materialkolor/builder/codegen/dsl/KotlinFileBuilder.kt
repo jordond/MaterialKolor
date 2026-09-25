@@ -3,7 +3,9 @@ package com.materialkolor.builder.codegen.dsl
 import com.materialkolor.builder.codegen.symbol.Symbol
 import kotlin.jvm.JvmName
 
-/** Keeps the nested builder scopes from reaching into each other by accident. */
+/**
+ * Keeps the nested builder scopes from reaching into each other by accident.
+ */
 @DslMarker
 public annotation class CodegenDsl
 
@@ -37,7 +39,9 @@ public fun kotlinFile(
     return GeneratedFile(path = path, language = Language.Kotlin, lines = scope.render())
 }
 
-/** The top level of a generated Kotlin file. */
+/**
+ * The top level of a generated Kotlin file.
+ */
 @CodegenDsl
 public class KotlinFileScope internal constructor(
     private val packageName: String,
@@ -50,12 +54,16 @@ public class KotlinFileScope internal constructor(
     // What this file declares, class members included, so an import that would shadow one of them fails.
     private val declaredNames = mutableSetOf<String>()
 
-    /** The comment lines that sit above the package declaration. */
+    /**
+     * The comment lines that sit above the package declaration.
+     */
     public fun header(lines: List<String>) {
         headerLines += lines
     }
 
-    /** A standalone comment, which stays glued to whatever is declared after it. */
+    /**
+     * A standalone comment, which stays glued to whatever is declared after it.
+     */
     public fun comment(vararg lines: String) {
         blocks += Block(lines.map { listOf(lineCommentToken(it)) }, isComment = true)
     }
@@ -76,7 +84,9 @@ public class KotlinFileScope internal constructor(
         declare(PropertyDeclaration(name, value, type, const, visibility, receiver))
     }
 
-    /** A top level function, which is an extension function when it has a [receiver]. */
+    /**
+     * A top level function, which is an extension function when it has a [receiver].
+     */
     public fun function(
         name: String,
         annotations: List<Symbol> = emptyList(),
@@ -88,7 +98,9 @@ public class KotlinFileScope internal constructor(
         function(name, annotations.map { AnnotationSpec(it) }, returns, visibility, receiver, build)
     }
 
-    /** The same, for annotations that take arguments. */
+    /**
+     * The same, for annotations that take arguments.
+     */
     @JvmName("functionWithAnnotations")
     public fun function(
         name: String,
@@ -117,7 +129,9 @@ public class KotlinFileScope internal constructor(
         declare(ClassDeclaration.ofClass(name, kind, annotations, visibility, scope))
     }
 
-    /** An `object` with the given members. */
+    /**
+     * An `object` with the given members.
+     */
     public fun objectDeclaration(
         name: String,
         annotations: List<AnnotationSpec> = emptyList(),
@@ -192,13 +206,17 @@ public class KotlinFileScope internal constructor(
     }
 }
 
-/** The parameters and body of one generated function. */
+/**
+ * The parameters and body of one generated function.
+ */
 @CodegenDsl
 public class FunctionScope internal constructor() {
     private val parameters = mutableListOf<ParameterSpec>()
     private var body: BodyScope? = null
 
-    /** A parameter with an explicit type and an optional default. */
+    /**
+     * A parameter with an explicit type and an optional default.
+     */
     public fun parameter(
         name: String,
         type: TypeRef,
@@ -207,7 +225,9 @@ public class FunctionScope internal constructor() {
         parameters += ParameterSpec(name, type, default)
     }
 
-    /** The same, for the common case where the type is just a symbol. */
+    /**
+     * The same, for the common case where the type is just a symbol.
+     */
     public fun parameter(
         name: String,
         symbol: Symbol,
@@ -216,7 +236,9 @@ public class FunctionScope internal constructor() {
         parameter(name, type(symbol), default)
     }
 
-    /** The statements between the braces. */
+    /**
+     * The statements between the braces.
+     */
     public fun body(build: BodyScope.() -> Unit) {
         body = BodyScope().apply(build)
     }
@@ -230,7 +252,9 @@ public class FunctionScope internal constructor() {
             body?.let { addAll(it.collectSymbols()) }
         }
 
-    /** Writes the signature after [head], which is everything up to and including the name. */
+    /**
+     * Writes the signature after [head], which is everything up to and including the name.
+     */
     internal fun render(
         writer: CodeWriter,
         head: List<Token>,
@@ -278,7 +302,9 @@ public class FunctionScope internal constructor() {
     }
 }
 
-/** A function parameter, or with [isProperty] a `val` in a primary constructor. */
+/**
+ * A function parameter, or with [isProperty] a `val` in a primary constructor.
+ */
 internal class ParameterSpec(
     val name: String,
     val type: TypeRef,
@@ -312,12 +338,16 @@ internal class ParameterSpec(
     }
 }
 
-/** The statements inside a generated function. */
+/**
+ * The statements inside a generated function.
+ */
 @CodegenDsl
 public class BodyScope internal constructor() {
     internal val statements: MutableList<Statement> = mutableListOf()
 
-    /** A call written as a statement of its own. */
+    /**
+     * A call written as a statement of its own.
+     */
     public fun call(
         symbol: Symbol,
         multiline: Boolean = false,
@@ -326,7 +356,9 @@ public class BodyScope internal constructor() {
         statement(buildCall(listOf(functionToken(symbol.simpleName)), listOf(symbol), multiline, build))
     }
 
-    /** A call of a function that is already in scope, written as a statement. */
+    /**
+     * A call of a function that is already in scope, written as a statement.
+     */
     public fun call(
         name: String,
         multiline: Boolean = false,
@@ -347,19 +379,25 @@ public class BodyScope internal constructor() {
         build: ArgumentsScope.() -> Unit = {},
     ): Expression = buildCall(listOf(functionToken(symbol.simpleName)), listOf(symbol), multiline, build)
 
-    /** The same, for a call of a function that is already in scope. */
+    /**
+     * The same, for a call of a function that is already in scope.
+     */
     public fun callOf(
         name: String,
         multiline: Boolean = false,
         build: ArgumentsScope.() -> Unit = {},
     ): Expression = buildCall(listOf(functionToken(name)), emptyList(), multiline, build)
 
-    /** Any expression, written as a statement. */
+    /**
+     * Any expression, written as a statement.
+     */
     public fun statement(value: Expression) {
         statements += Statement(emptyList(), value)
     }
 
-    /** A local `val`. */
+    /**
+     * A local `val`.
+     */
     public fun assign(
         name: String,
         value: Expression,
@@ -390,17 +428,23 @@ public class BodyScope internal constructor() {
         statements += Statement(prefix, value, target.symbols)
     }
 
-    /** An explicit `return`. */
+    /**
+     * An explicit `return`.
+     */
     public fun returns(value: Expression) {
         statements += Statement(listOf(keywordToken("return"), spaceToken), value)
     }
 
-    /** A comment line. */
+    /**
+     * A comment line.
+     */
     public fun comment(text: String) {
         statements += Statement(listOf(lineCommentToken(text)), null)
     }
 
-    /** A blank line between statements. */
+    /**
+     * A blank line between statements.
+     */
     public fun blankLine() {
         statements += Statement(emptyList(), null)
     }
