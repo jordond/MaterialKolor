@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.LocalThemeResult
 import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.domain.capability.Capabilities
@@ -242,17 +243,23 @@ private fun PosterContent(
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
-    val sheet = LocalLayout.current.posterMode == PosterMode.Sheet
+    val mode = LocalLayout.current.posterMode
+    val sheet = mode == PosterMode.Sheet
     // The sheet's handle already stands above its content, so the sheet starts close under it.
     val top = if (sheet) spacing.extraSmall else spacing.extraLarge
+    // b-510
+    // The design's 28 at 400 wide. The narrower poster and the sheet keep 20, so five chips a row fit.
+    val side = if (mode == PosterMode.Docked400) spacing.extraLarge + spacing.extraSmall else spacing.large + spacing.extraSmall
     // b-305
     // The poster always holds controls, so the scroll area needs no tab stop of its own.
     BuilderScrollArea(modifier.fillMaxSize(), tabStop = false) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = spacing.extraLarge, top = top, end = spacing.extraLarge, bottom = spacing.extraLarge),
-            verticalArrangement = Arrangement.spacedBy(spacing.extraLarge),
+                .padding(start = side, top = top, end = side, bottom = spacing.extraLarge),
+            // b-510
+            // A gap inside a group. Each group adds its own room on top, see PosterGroupGap.
+            verticalArrangement = Arrangement.spacedBy(spacing.medium),
         ) {
             if (sheet) {
                 PosterSheet(context, dispatcher, focus) // b-406
@@ -263,21 +270,34 @@ private fun PosterContent(
     }
 }
 
-/** The docked poster, the header and the hero on top as F-66 lists it. */
+/**
+ * The docked poster, the header and the hero on top as F-66 lists it, grouped the way the design
+ * spaces it. The seed, the style, the contrast and the fine tune rows each start a group.
+ */
 @Composable
 private fun ColumnScope.DockedSections(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     focus: PosterFocus?,
 ) {
+    val group = Modifier.padding(top = PosterGroupGap) // b-510
     PosterHeader(context, dispatcher, focus = focus)
-    SeedHero(context, dispatcher, focus = focus) // b-306c
-    SeedActions(context, dispatcher)
+    SeedHero(context, dispatcher, modifier = group, focus = focus) // b-306c
+    SeedActions(context, dispatcher, modifier = Modifier.padding(top = LocalBuilderTokens.current.spacing.extraSmall))
     FirstRunHint(context, dispatcher) // b-314
     ImageCandidateRow(context, dispatcher) // b-311
     PrimaryExplainerLine(context, dispatcher, why = focus?.why)
-    StyleChipsSection(context, dispatcher)
-    ContrastSection(context, dispatcher)
-    CoreColorsRow(context, dispatcher)
+    StyleChipsSection(context, dispatcher, modifier = group)
+    ContrastSection(context, dispatcher, modifier = group)
+    CoreColorsRow(context, dispatcher, modifier = group)
     SpecExtrasRow(context, dispatcher)
 }
+
+// b-510
+
+/**
+ * The room a group adds over the gap inside one, so groups stand about 24 dp apart and the parts of
+ * one about 12, as the design spaces the poster.
+ */
+internal val PosterGroupGap: Dp
+    @Composable get() = LocalBuilderTokens.current.spacing.medium

@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,10 +23,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderTooltip
 import com.materialkolor.builder.kit.control.ControlState
@@ -33,6 +39,7 @@ import com.materialkolor.builder.kit.control.stateName
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.kit.token.LocalBuilderType
 
 /** The diameter of the colored circle, design D. */
 internal val SchemeChipDiameter: Dp = 46.dp // b-311a
@@ -50,8 +57,8 @@ internal val SchemeChipRingGap: Dp = 2.dp // b-311a
  * left and [tertiaryContainer] in the bottom right. The colors are passed in, so the chip never
  * resolves a scheme itself.
  *
- * It reads out as a radio button named [label] with its selected state, and shows [label] as a
- * tooltip on hover and focus. The chosen chip carries a ring and a check, so the choice never rests
+ * It reads out as a radio button named [label] with its selected state, and shows [tooltip] on
+ * hover and focus, [label] unless it says more. The chosen chip carries a ring and a check, so the choice never rests
  * on color alone. Keyboard focus rings it outside its hairline, on whatever it sits on, so the ring
  * never lies on the chip's own edge (S5 rerun). Place it inside a selectable group so assistive
  * technology hears the set. Inside
@@ -64,6 +71,7 @@ internal val SchemeChipRingGap: Dp = 2.dp // b-311a
  * @param[onClick] Called when the chip is chosen.
  * @param[label] What the chip stands for, such as a style name.
  * @param[modifier] Applied to the chip.
+ * @param[tooltip] What the chip shows on hover and focus.
  */
 @Composable
 public fun SchemeChip(
@@ -74,11 +82,12 @@ public fun SchemeChip(
     onClick: () -> Unit,
     label: String,
     modifier: Modifier = Modifier,
+    tooltip: String = label, // b-510
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     val name = stateName(label, ControlState.Selected(selected), role = FoldedRole.Radio)
-    BuilderTooltip(text = label, modifier = modifier) {
+    BuilderTooltip(text = tooltip, modifier = modifier) {
         SchemeChipFace(
             primary = primary,
             secondaryContainer = secondaryContainer,
@@ -165,3 +174,53 @@ private fun SchemeChipFace(
         }
     }
 }
+
+// b-510
+
+/**
+ * A chip's name, set under it on one line in the builder's label type at [SchemeChipNameSize]. A
+ * name too long for the width it is given steps down in size until it fits, so a row of equal cells
+ * never wraps or cuts one.
+ *
+ * The chip already names what it stands for, so the name only shows and adds nothing to what
+ * assistive tech reads.
+ *
+ * @param[name] What to show.
+ * @param[modifier] Applied to the text, whose width the name fits.
+ */
+@Composable
+public fun SchemeChipName(
+    name: String,
+    modifier: Modifier = Modifier,
+) {
+    val tokens = LocalBuilderTokens.current
+    val style = LocalBuilderType.current.label.merge(
+        color = tokens.textStrong,
+        fontSize = SchemeChipNameSize,
+        lineHeight = SchemeChipNameLine,
+        textAlign = TextAlign.Center,
+    )
+    BasicText(
+        text = name,
+        modifier = modifier.clearAndSetSemantics {},
+        style = style,
+        maxLines = 1,
+        autoSize = TextAutoSize.StepBased(
+            minFontSize = SchemeChipNameMinSize,
+            maxFontSize = SchemeChipNameSize,
+            stepSize = SchemeChipNameStep,
+        ),
+    )
+}
+
+/** How big a chip's name is set, design D. */
+internal val SchemeChipNameSize: TextUnit = 11.sp
+
+/** The line a chip's name takes. */
+internal val SchemeChipNameLine: TextUnit = 14.sp
+
+/** The smallest a chip's name steps down to in a narrow cell. */
+internal val SchemeChipNameMinSize: TextUnit = 9.sp
+
+/** How far each step down takes a chip's name. */
+internal val SchemeChipNameStep: TextUnit = 0.5.sp

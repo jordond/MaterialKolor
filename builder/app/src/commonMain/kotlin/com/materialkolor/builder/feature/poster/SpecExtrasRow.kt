@@ -41,6 +41,7 @@ internal fun SpecExtrasRow(
         },
         title = stringResource(Res.string.extras_title),
         modifier = modifier,
+        flush = true, // b-510
         summary = specExtrasSummary(context.document),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {

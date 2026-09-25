@@ -3,6 +3,15 @@ package com.materialkolor.builder.feature.poster
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
+import com.materialkolor.builder.generated.resources.style_chip_tooltip
+import com.materialkolor.builder.generated.resources.style_spec_forced
+import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.widget.SchemeChipName
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -24,7 +33,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalInputModeManager
 import com.materialkolor.builder.LocalThemeResolver
 import com.materialkolor.builder.domain.capability.Control
-import com.materialkolor.builder.domain.capability.EffectiveSpec
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.KeyColor
@@ -44,41 +52,8 @@ import com.materialkolor.builder.generated.resources.style_chips
 import com.materialkolor.builder.generated.resources.style_cmf_derive
 import com.materialkolor.builder.generated.resources.style_cmf_derived
 import com.materialkolor.builder.generated.resources.style_cmf_field
-import com.materialkolor.builder.generated.resources.style_description_cmf
-import com.materialkolor.builder.generated.resources.style_description_content
-import com.materialkolor.builder.generated.resources.style_description_expressive
-import com.materialkolor.builder.generated.resources.style_description_fidelity
-import com.materialkolor.builder.generated.resources.style_description_fruit_salad
-import com.materialkolor.builder.generated.resources.style_description_monochrome
-import com.materialkolor.builder.generated.resources.style_description_neutral
-import com.materialkolor.builder.generated.resources.style_description_rainbow
-import com.materialkolor.builder.generated.resources.style_description_tonal_spot
-import com.materialkolor.builder.generated.resources.style_description_vibrant
 import com.materialkolor.builder.generated.resources.style_label
 import com.materialkolor.builder.generated.resources.style_line
-import com.materialkolor.builder.generated.resources.style_name_cmf
-import com.materialkolor.builder.generated.resources.style_name_content
-import com.materialkolor.builder.generated.resources.style_name_expressive
-import com.materialkolor.builder.generated.resources.style_name_fidelity
-import com.materialkolor.builder.generated.resources.style_name_fruit_salad
-import com.materialkolor.builder.generated.resources.style_name_monochrome
-import com.materialkolor.builder.generated.resources.style_name_neutral
-import com.materialkolor.builder.generated.resources.style_name_rainbow
-import com.materialkolor.builder.generated.resources.style_name_tonal_spot
-import com.materialkolor.builder.generated.resources.style_name_vibrant
-import com.materialkolor.builder.generated.resources.style_spec_classic
-import com.materialkolor.builder.generated.resources.style_spec_cmf
-import com.materialkolor.builder.generated.resources.style_spec_revised
-import com.materialkolor.builder.generated.resources.style_tooltip_cmf
-import com.materialkolor.builder.generated.resources.style_tooltip_content
-import com.materialkolor.builder.generated.resources.style_tooltip_expressive
-import com.materialkolor.builder.generated.resources.style_tooltip_fidelity
-import com.materialkolor.builder.generated.resources.style_tooltip_fruit_salad
-import com.materialkolor.builder.generated.resources.style_tooltip_monochrome
-import com.materialkolor.builder.generated.resources.style_tooltip_neutral
-import com.materialkolor.builder.generated.resources.style_tooltip_rainbow
-import com.materialkolor.builder.generated.resources.style_tooltip_tonal_spot
-import com.materialkolor.builder.generated.resources.style_tooltip_vibrant
 import com.materialkolor.builder.kit.control.BuilderBadge
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderChoiceGroup
@@ -150,8 +125,8 @@ internal fun StyleChips(
     val isDark = context.visibleModes == PreviewMode.Dark
     val shelf = rememberChipShelf(context.result.document, isDark, lookup, pause)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-        InfoLabel(label = stringResource(Res.string.style_label), topic = InfoTopic.Style)
-        StyleChipRow(selected, shelf) { style, origin ->
+        StyleHeader(selected) // b-510
+        StyleChipRow(selected, context.document, shelf) { style, origin ->
             dispatcher.dispatch(WorkspaceAction.EditWithReveal(DocumentChange.SetStyle(style), origin))
         }
         BuilderText(
@@ -168,19 +143,53 @@ internal fun StyleChips(
     }
 }
 
+// b-510
+
 /**
- * The ten chips as one radio group with a single tab stop. Tab lands on the chosen chip, and the
- * arrows, Home and End move the focus around the group without picking, wrapping at the ends.
+ * The Style label with its info button and, while the chosen style runs in one spec whatever the
+ * theme asks for, a note on the right naming that spec.
+ */
+@Composable
+private fun StyleHeader(selected: Style) {
+    val spacing = LocalBuilderTokens.current.spacing
+    Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
+        InfoLabel(
+            label = stringResource(Res.string.style_label),
+            topic = InfoTopic.Style,
+            modifier = Modifier.weight(1f),
+        )
+        forcedSpec(selected)?.let { spec ->
+            val note = stringResource(
+                Res.string.style_spec_forced,
+                stringResource(specName(spec)),
+                stringResource(styleDisplayName(selected)),
+            )
+            // The label row is as tall as its info button, so the note sits level with the label.
+            Box(Modifier.heightIn(min = LocalLayout.current.minTouchTarget), contentAlignment = Alignment.Center) {
+                BuilderBadge(label = note, icon = IconId.Lock)
+            }
+        }
+    }
+}
+
+/**
+ * The ten chips as one radio group with a single tab stop, five equal cells a row. Tab lands on the
+ * chosen chip, and the arrows, Home and End move the focus around the group without picking,
+ * wrapping at the ends.
  *
- * It reads nothing of the document but the style, so a drag leaves it alone and only a chip whose
- * colours [shelf] brought up to date draws again.
+ * It reads nothing of the document but the style and the spec, so a drag leaves it alone and only
+ * a chip whose colours [shelf] brought up to date draws again.
  */
 @Composable
 private fun StyleChipRow(
     selected: Style,
+    document: ThemeDocument,
     shelf: ChipShelf,
     onChoose: (style: Style, origin: Offset?) -> Unit,
 ) {
+    val tags = remember(document.style, document.spec) {
+        Style.entries.associateWith { style -> specTag(style, document) }
+    }
     BuilderChoiceGroup(
         options = Style.entries,
         selected = selected,
@@ -188,50 +197,65 @@ private fun StyleChipRow(
         onSelect = { style -> if (style != selected) onChoose(style, null) },
         label = stringResource(Res.string.style_chips),
         selectOnFocus = false,
+        columns = ChipColumns, // b-510
     ) { style, isSelected, optionModifier ->
         StyleChip(
             style = style,
             shelf = shelf,
             selected = isSelected,
+            tag = tags[style],
             onChoose = { origin -> if (style != selected) onChoose(style, origin) },
             modifier = optionModifier,
         )
     }
 }
 
+/** How many chips each row of the grid holds, two rows for the ten styles as the design has it. */
+private const val ChipColumns = 5
+
 /**
  * One chip, drawn from the scheme [style] makes of the document's seed in the mode the preview
- * shows, as [shelf] has it now, with the specs the style runs in under it.
+ * shows, as [shelf] has it now, with the style's name under it. A chip that would move the theme to
+ * another spec names that spec, [tag], under its name, and its tooltip lists every spec it runs in.
  */
 @Composable
 private fun StyleChip(
     style: Style,
     shelf: ChipShelf,
     selected: Boolean,
+    tag: SpecVersion?,
     onChoose: (origin: Offset) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val spacing = LocalBuilderTokens.current.spacing
     val colors = shelf[style] // pf-1
     val bounds = remember { ChipBounds() }
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(spacing.extraSmall),
-    ) {
+    val name = stringResource(styleName(style))
+    val shown = stringResource(styleDisplayName(style))
+    val hint = stringResource(styleTooltip(style))
+    // b-510
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         SchemeChip(
             primary = colors.primary,
             secondaryContainer = colors.secondaryContainer,
             tertiaryContainer = colors.tertiaryContainer,
             selected = selected,
             onClick = { onChoose(bounds.rect.center) },
-            label = stringResource(
-                Res.string.style_chip,
-                stringResource(styleName(style)),
-                stringResource(styleTooltip(style)),
-            ),
-            modifier = modifier.onGloballyPositioned { coordinates -> bounds.rect = coordinates.boundsInRoot() },
+            label = stringResource(Res.string.style_chip, name, hint),
+            // A cell narrower than the chip's ring room lets the ring reach past it, and the circle
+            // keeps its size.
+            modifier = Modifier
+                .wrapContentWidth(unbounded = true)
+                .then(modifier)
+                .onGloballyPositioned { coordinates -> bounds.rect = coordinates.boundsInRoot() },
+            tooltip = stringResource(Res.string.style_chip_tooltip, shown, hint, stringResource(specSupport(style))),
         )
-        BuilderBadge(label = stringResource(specSupport(style)))
+        SchemeChipName(name = shown, modifier = Modifier.fillMaxWidth())
+        if (tag != null) {
+            BuilderBadge(
+                label = stringResource(specName(tag)),
+                modifier = Modifier.padding(top = LocalBuilderTokens.current.spacing.extraSmall),
+            )
+        }
     }
 }
 
@@ -412,60 +436,5 @@ private fun CmfSeedField(
             )
         }
         state.explanation?.let { reason -> ReasonLine(reason) }
-    }
-}
-
-/** What [style] is called, the way the library spells it. */
-internal fun styleName(style: Style): StringResource =
-    when (style) {
-        Style.TonalSpot -> Res.string.style_name_tonal_spot
-        Style.Neutral -> Res.string.style_name_neutral
-        Style.Vibrant -> Res.string.style_name_vibrant
-        Style.Expressive -> Res.string.style_name_expressive
-        Style.Rainbow -> Res.string.style_name_rainbow
-        Style.FruitSalad -> Res.string.style_name_fruit_salad
-        Style.Monochrome -> Res.string.style_name_monochrome
-        Style.Fidelity -> Res.string.style_name_fidelity
-        Style.Content -> Res.string.style_name_content
-        Style.Cmf -> Res.string.style_name_cmf
-    }
-
-/** The short hint [style]'s chip shows on hover and focus. */
-internal fun styleTooltip(style: Style): StringResource =
-    when (style) {
-        Style.TonalSpot -> Res.string.style_tooltip_tonal_spot
-        Style.Neutral -> Res.string.style_tooltip_neutral
-        Style.Vibrant -> Res.string.style_tooltip_vibrant
-        Style.Expressive -> Res.string.style_tooltip_expressive
-        Style.Rainbow -> Res.string.style_tooltip_rainbow
-        Style.FruitSalad -> Res.string.style_tooltip_fruit_salad
-        Style.Monochrome -> Res.string.style_tooltip_monochrome
-        Style.Fidelity -> Res.string.style_tooltip_fidelity
-        Style.Content -> Res.string.style_tooltip_content
-        Style.Cmf -> Res.string.style_tooltip_cmf
-    }
-
-/** The one line on what [style] does with the seed. */
-internal fun styleDescription(style: Style): StringResource =
-    when (style) {
-        Style.TonalSpot -> Res.string.style_description_tonal_spot
-        Style.Neutral -> Res.string.style_description_neutral
-        Style.Vibrant -> Res.string.style_description_vibrant
-        Style.Expressive -> Res.string.style_description_expressive
-        Style.Rainbow -> Res.string.style_description_rainbow
-        Style.FruitSalad -> Res.string.style_description_fruit_salad
-        Style.Monochrome -> Res.string.style_description_monochrome
-        Style.Fidelity -> Res.string.style_description_fidelity
-        Style.Content -> Res.string.style_description_content
-        Style.Cmf -> Res.string.style_description_cmf
-    }
-
-/** The specs [style] runs in, as its chip's badge says them. */
-internal fun specSupport(style: Style): StringResource {
-    val offered = EffectiveSpec.offered(style)
-    return when {
-        SpecVersion.Spec2026 in offered -> Res.string.style_spec_cmf
-        SpecVersion.Spec2025 in offered -> Res.string.style_spec_revised
-        else -> Res.string.style_spec_classic
     }
 }

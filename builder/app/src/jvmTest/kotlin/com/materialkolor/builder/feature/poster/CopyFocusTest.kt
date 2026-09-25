@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import com.materialkolor.builder.domain.color.Argb
@@ -36,7 +36,7 @@ class CopyFocusTest {
                 if (heroShown) SeedHero(context, dispatcher, focus = focus)
             }
 
-            onNodeWithText("Copy Kotlin").performClick()
+            onNodeWithContentDescription("Copy Kotlin").performClick()
             waitForIdle()
             val opener = (harness.actions.last() as WorkspaceAction.CopyText).returnFocusTo
             focus.returnFocusFor(opener) shouldBeSameInstanceAs focus.copyKotlin.requester
@@ -54,7 +54,7 @@ class CopyFocusTest {
             val focus = PosterFocus()
             showSection(harness) { context, dispatcher -> SeedHero(context, dispatcher, focus = focus) }
 
-            onNodeWithText("Copy hex").performClick()
+            onNodeWithContentDescription("Copy hex").performClick()
             waitForIdle()
 
             val opener = (harness.actions.last() as WorkspaceAction.CopyText).returnFocusTo

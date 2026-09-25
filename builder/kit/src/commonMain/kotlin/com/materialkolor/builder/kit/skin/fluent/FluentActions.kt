@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
+import com.materialkolor.builder.kit.control.ButtonKeycap
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
@@ -234,6 +235,7 @@ internal fun FluentButton(
     emphasis: Emphasis,
     icon: IconId?,
     enabled: Boolean,
+    hint: String? = null, // b-510
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val colors = fluentButtonColors(emphasis).schemeFor(interactionSource.collectVisualState(disabled = !enabled))
@@ -257,6 +259,7 @@ internal fun FluentButton(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             FluentLabel(label, icon)
+            if (hint != null) ButtonKeycap(hint, LocalContentColor.current) // b-510
         }
     }
 }

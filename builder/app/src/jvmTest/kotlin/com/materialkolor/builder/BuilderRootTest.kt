@@ -153,7 +153,7 @@ class BuilderRootTest {
             // No frame and no task runs after the click, so only a write started inside it lands.
             mainClock.autoAdvance = false
 
-            onNodeWithText("Copy Kotlin").performClick()
+            onNodeWithContentDescription("Copy Kotlin").performClick()
 
             platform.clipboard.texts shouldBe listOf(kotlinLiteralOf(graph.session.document.value.seed))
         }
@@ -164,7 +164,7 @@ class BuilderRootTest {
             platform.clipboard.failure = IllegalStateException("No user activation")
             val graph = showRoot()
 
-            onNodeWithText("Copy Kotlin").performClick()
+            onNodeWithContentDescription("Copy Kotlin").performClick()
             waitForIdle()
 
             onNodeWithText("Copy it yourself").assertExists()

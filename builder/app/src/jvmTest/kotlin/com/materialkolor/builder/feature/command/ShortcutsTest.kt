@@ -20,7 +20,6 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performScrollToNode
@@ -195,7 +194,7 @@ class ShortcutsTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             boot()
             val seed = seed()
-            onNodeWithText("Copy hex").requestFocus()
+            onNodeWithContentDescription("Copy hex").requestFocus()
             waitForIdle()
 
             keys { pressKey(Key.Spacebar) }

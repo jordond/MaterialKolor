@@ -28,6 +28,7 @@ import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.FittedLabel
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
@@ -54,7 +55,8 @@ import io.github.composefluent.component.SegmentedItemPosition
  * which clips its buttons to its own outline and so would cut the focus ring off every side but the
  * inner ones. Each button takes its press on the node its modifier lands on, so the folded name, the
  * radio role and the test tag all sit on the node that is pressed. The chosen option wears Fluent's
- * indicator and a check, so the choice never rests on its fill alone.
+ * indicator and a check, so the choice never rests on its fill alone. A compact row leaves the check
+ * out, and the indicator marks the choice.
  */
 @Composable
 internal fun <T> FluentSegmented(
@@ -67,6 +69,7 @@ internal fun <T> FluentSegmented(
     optionIcon: (T) -> IconId?,
     selectOnFocus: Boolean,
     optionLabel: (T) -> String,
+    compact: Boolean = false, // b-510
 ) {
     val selectedIndex = options.indexOf(selected)
     val focus = rememberRadioGroupFocus(options.size, selectedIndex)
@@ -109,16 +112,21 @@ internal fun <T> FluentSegmented(
                     enabled = enabled,
                     position = segmentPosition(index, options.size),
                     interactionSource = interactionSource,
-                    icon = (if (isSelected) IconId.Check else optionIcon(value))?.let { glyph ->
+                    // b-510
+                    icon = (if (compact) null else if (isSelected) IconId.Check else optionIcon(value))?.let { glyph ->
                         { BuilderIcon(glyph, contentDescription = null, tint = LocalContentColor.current) }
                     },
                     text = {
-                        BuilderText(
-                            name,
-                            style = BuilderTextStyle.Label,
-                            color = LocalContentColor.current,
-                            maxLines = 1,
-                        )
+                        if (compact) {
+                            FittedLabel(name, LocalContentColor.current) // b-510
+                        } else {
+                            BuilderText(
+                                name,
+                                style = BuilderTextStyle.Label,
+                                color = LocalContentColor.current,
+                                maxLines = 1,
+                            )
+                        }
                     },
                 )
             }

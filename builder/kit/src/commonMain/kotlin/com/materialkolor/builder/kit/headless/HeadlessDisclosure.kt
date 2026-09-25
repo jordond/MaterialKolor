@@ -25,7 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.collapse
@@ -33,6 +35,7 @@ import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.composeunstyled.DisclosedContent
 import com.composeunstyled.UnstyledButton
 import com.composeunstyled.UnstyledDisclosure
@@ -60,6 +63,10 @@ import com.materialkolor.builder.kit.skin.headless.enabledAlpha
  * @property[headerPadding] Between the edge and the title row.
  * @property[contentPadding] Around the content once it is open.
  * @property[focus] The keyboard focus ring around the title row.
+ * @property[rule] The hairline drawn across the top, where a row sits in a column rather than a box.
+ * @property[ruleWidth] How thick that hairline is, zero for none.
+ * @property[title] The type the title is set in.
+ * @property[summary] The type the summary under it is set in.
  */
 @Immutable
 internal class DisclosureStyle(
@@ -70,6 +77,11 @@ internal class DisclosureStyle(
     val headerPadding: PaddingValues,
     val contentPadding: PaddingValues,
     val focus: Color,
+    // b-510
+    val rule: Color = Color.Transparent,
+    val ruleWidth: Dp = 0.dp,
+    val title: BuilderTextStyle = BuilderTextStyle.Label,
+    val summary: BuilderTextStyle = BuilderTextStyle.Body,
 )
 
 /** What a disclosure row says, its title and then its summary, the name the web folds its state into. */
@@ -126,6 +138,7 @@ internal fun HeadlessDisclosure(
         expanded = expanded,
         onExpandedChange = onExpandedChange,
         modifier = modifier
+            .topRule(style.rule, style.ruleWidth) // b-510
             .background(style.container, style.shape)
             .border(style.outlineWidth, style.outline, style.shape),
     ) {
@@ -144,7 +157,7 @@ internal fun HeadlessDisclosure(
                 interactionSource = interactions,
                 contentAlignment = Alignment.CenterStart,
             ) {
-                DisclosureHeading(title, summary, expanded)
+                DisclosureHeading(title, summary, expanded, style)
             }
             DisclosedContent(enter = disclosureEnter(motion), exit = disclosureExit(motion)) {
                 Box(Modifier.padding(style.contentPadding)) {
@@ -183,17 +196,34 @@ private fun DisclosureHeading(
     title: String,
     summary: String?,
     expanded: Boolean,
+    style: DisclosureStyle,
 ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center,
         ) {
-            BuilderText(title, style = BuilderTextStyle.Label)
+            BuilderText(title, style = style.title)
             if (summary != null) {
-                BuilderText(summary, style = BuilderTextStyle.Body, emphasis = Emphasis.Secondary)
+                BuilderText(summary, style = style.summary, emphasis = Emphasis.Secondary)
             }
         }
         DisclosureChevron(expanded)
     }
 }
+
+// b-510
+
+/** A hairline of [color] across the top edge, or nothing while [width] is zero. */
+private fun Modifier.topRule(
+    color: Color,
+    width: Dp,
+): Modifier =
+    if (width <= 0.dp) {
+        this
+    } else {
+        drawBehind {
+            val stroke = width.toPx()
+            drawRect(color, size = Size(size.width, stroke))
+        }
+    }

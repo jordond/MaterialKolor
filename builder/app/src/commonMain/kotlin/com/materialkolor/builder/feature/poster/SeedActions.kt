@@ -3,10 +3,8 @@ package com.materialkolor.builder.feature.poster
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import com.materialkolor.builder.domain.persist.Preferences
@@ -23,7 +21,6 @@ import com.materialkolor.builder.generated.resources.poster_lock_style
 import com.materialkolor.builder.generated.resources.poster_pick
 import com.materialkolor.builder.generated.resources.poster_shuffle
 import com.materialkolor.builder.generated.resources.poster_space
-import com.materialkolor.builder.kit.control.BuilderBadge
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderToggleButton
@@ -40,8 +37,8 @@ import org.jetbrains.compose.resources.stringResource
  *
  * Shuffle only asks. The workspace draws the next seed with the locks applied and lands it as one
  * undo entry behind a crossfade. With the seed and the style both locked there is nothing left to
- * draw, so Shuffle turns off and a line says why. The Space key beside it is a hint for a keyboard,
- * so a touch screen leaves it out.
+ * draw, so Shuffle turns off and a line says why. The Space keycap inside it is a hint for a
+ * keyboard, so a touch screen leaves it out. The three actions share one row and the locks another.
  *
  * @param[shuffle] Whether Shuffle leads the row. The sheet's seed row already holds it.
  */
@@ -55,27 +52,21 @@ internal fun SeedActions(
     val spacing = LocalBuilderTokens.current.spacing
     val preferences = context.preferences
     val nothingToShuffle = preferences.shufflesNothing()
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
             if (shuffle) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(spacing.small),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    BuilderButton(
-                        onClick = { dispatcher.dispatch(WorkspaceAction.Shuffle(origin = null)) },
-                        label = stringResource(Res.string.poster_shuffle),
-                        emphasis = Emphasis.Primary,
-                        icon = IconId.Shuffle,
-                        enabled = !nothingToShuffle,
-                    )
-                    if (!LocalLayout.current.coarsePointer) {
-                        BuilderBadge(label = stringResource(Res.string.poster_space), icon = IconId.Keyboard)
-                    }
-                }
+                // b-510
+                val space = stringResource(Res.string.poster_space)
+                BuilderButton(
+                    onClick = { dispatcher.dispatch(WorkspaceAction.Shuffle(origin = null)) },
+                    label = stringResource(Res.string.poster_shuffle),
+                    emphasis = Emphasis.Primary,
+                    enabled = !nothingToShuffle,
+                    hint = if (LocalLayout.current.coarsePointer) null else space,
+                )
             }
             // b-307
             val pick = remember { FocusRequester() }
@@ -91,12 +82,13 @@ internal fun SeedActions(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
+            // b-510
+            // The label says lock, so the locks leave their glyph out and fit one row.
             ShuffleLock.entries.forEach { lock ->
                 BuilderToggleButton(
                     checked = preferences.isLocked(lock),
                     onCheckedChange = { on -> dispatcher.dispatch(WorkspaceAction.SetLock(lock, on)) },
                     label = stringResource(lockLabel(lock)),
-                    icon = IconId.Lock,
                 )
             }
         }

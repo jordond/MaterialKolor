@@ -3,12 +3,14 @@ package com.materialkolor.builder.kit.skin.material
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.LocalContentColor
@@ -51,13 +53,16 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import com.composeunstyled.collectIsFocusVisibleAsState
 import com.materialkolor.builder.kit.a11y.LocalWebKeyboard
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
+import com.materialkolor.builder.kit.control.FittedLabel
 import com.materialkolor.builder.kit.control.FoldedRole
+import com.materialkolor.builder.kit.control.HeadlessSegmented
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.control.roleLessName
@@ -69,6 +74,9 @@ import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.headless.FocusRingOffset
 import com.materialkolor.builder.kit.skin.headless.FocusRingWidth
+import com.materialkolor.builder.kit.skin.headless.ActionColors
+import com.materialkolor.builder.kit.skin.headless.SegmentedStyle
+import com.materialkolor.builder.kit.skin.headless.SelectableStyle
 import com.materialkolor.builder.kit.skin.headless.controlPress
 import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.skin.headless.controlTouchTarget
@@ -94,6 +102,7 @@ internal fun <T> MaterialSegmented(
     optionIcon: (T) -> IconId?,
     selectOnFocus: Boolean,
     optionLabel: (T) -> String,
+    compact: Boolean = false, // b-510
 ) {
     val selectedIndex = options.indexOf(selected)
     val focus = rememberRadioGroupFocus(options.size, selectedIndex)
@@ -109,6 +118,24 @@ internal fun <T> MaterialSegmented(
             selectOnFocus = selectOnFocus,
             optionLabel = optionLabel,
             focus = focus,
+            compact = compact,
+        )
+        return
+    }
+    // b-510
+    if (compact) {
+        HeadlessSegmented(
+            options = options,
+            selected = selected,
+            onSelect = onSelect,
+            label = label,
+            style = materialTrackStyle(),
+            modifier = modifier,
+            enabled = enabled,
+            optionIcon = optionIcon,
+            selectOnFocus = selectOnFocus,
+            optionLabel = optionLabel,
+            compact = true,
         )
         return
     }
@@ -191,6 +218,7 @@ private fun <T> ExpressiveSegmented(
     selectOnFocus: Boolean,
     optionLabel: (T) -> String,
     focus: RadioGroupFocus,
+    compact: Boolean = false, // b-510
 ) {
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val folds = LocalFoldsStateIntoName.current
@@ -244,27 +272,73 @@ private fun <T> ExpressiveSegmented(
                                 .controlPress(interactionSource),
                             enabled = enabled,
                             shapes = shapes,
+                            // b-510
+                            contentPadding = if (compact) CompactPadding else ButtonDefaults.contentPaddingFor(ButtonDefaults.MinHeight),
                             interactionSource = interactionSource,
                         ) {
-                            val glyph = if (isSelected) IconId.Check else optionIcon(value)
-                            if (glyph != null) {
-                                BuilderIcon(glyph, contentDescription = null, tint = LocalContentColor.current)
-                                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                            if (compact) {
+                                FittedLabel(name, LocalContentColor.current) // b-510
+                            } else {
+                                ExpressiveLabel(name, if (isSelected) IconId.Check else optionIcon(value))
                             }
-                            // A label is as wide as its whole line even where the row asks for its least.
-                            BuilderText(
-                                name,
-                                modifier = Modifier.width(IntrinsicSize.Max),
-                                style = BuilderTextStyle.Label,
-                                color = LocalContentColor.current,
-                                maxLines = 1,
-                            )
                         }
                     }
                 }
             }
         }
     }
+}
+
+// b-510
+
+/** An expressive option's glyph, if any, and its label. */
+@Composable
+private fun ExpressiveLabel(
+    name: String,
+    glyph: IconId?,
+) {
+    if (glyph != null) {
+        BuilderIcon(glyph, contentDescription = null, tint = LocalContentColor.current)
+        Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+    }
+    // A label is as wide as its whole line even where the row asks for its least.
+    BuilderText(
+        name,
+        modifier = Modifier.width(IntrinsicSize.Max),
+        style = BuilderTextStyle.Label,
+        color = LocalContentColor.current,
+        maxLines = 1,
+    )
+}
+
+/** The little room round a compact row's label. */
+private val CompactPadding: PaddingValues = PaddingValues(horizontal = 4.dp)
+
+/**
+ * Material's compact row as a track, the design's look for the poster's contrast levels. The track
+ * takes the raised fill and the chosen option the accent pill, with nothing round the others.
+ */
+@Composable
+private fun materialTrackStyle(): SegmentedStyle {
+    val tokens = LocalBuilderTokens.current
+    val pill = RoundedCornerShape(percent = 50)
+    val none = Color.Transparent
+    return SegmentedStyle(
+        shape = pill,
+        inset = tokens.spacing.extraSmall,
+        borderWidth = 0.dp,
+        colors = ActionColors(tokens.panelRaised, tokens.textStrong, none),
+        option = SelectableStyle(
+            shape = pill,
+            height = ButtonDefaults.MinHeight - tokens.spacing.extraSmall * 2,
+            horizontalPadding = tokens.spacing.extraSmall,
+            gap = tokens.spacing.small,
+            borderWidth = 0.dp,
+            off = ActionColors(none, tokens.textStrong, none),
+            on = ActionColors(tokens.accent, tokens.onAccent, none),
+        ),
+        endRingOffset = tokens.spacing.extraSmall,
+    )
 }
 
 /** The connected shapes for the option at [index] of [count], by where it sits in the row. */

@@ -112,14 +112,14 @@ class PosterFocusTest {
             platform.clipboard.failure = IllegalStateException("No user activation")
             showRoot()
 
-            onNodeWithText("Copy Kotlin").performSemanticsAction(SemanticsActions.OnClick)
+            onNodeWithContentDescription("Copy Kotlin").performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
             onNodeWithText("Copy it yourself").assertExists()
             onNodeWithText("Done").performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
 
             onNodeWithText("Copy it yourself").assertDoesNotExist()
-            onNodeWithText("Copy Kotlin").assertIsFocused()
+            onNodeWithContentDescription("Copy Kotlin").assertIsFocused()
         }
 
     // b-306c
@@ -129,10 +129,10 @@ class PosterFocusTest {
             platform.clipboard.failure = IllegalStateException("No user activation")
             showRoot()
 
-            onNodeWithText("Copy Kotlin").performSemanticsAction(SemanticsActions.OnClick)
+            onNodeWithContentDescription("Copy Kotlin").performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
             collapsePoster()
-            onNodeWithText("Copy Kotlin").assertDoesNotExist()
+            onNodeWithContentDescription("Copy Kotlin").assertDoesNotExist()
             onNodeWithText("Done").performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
 
