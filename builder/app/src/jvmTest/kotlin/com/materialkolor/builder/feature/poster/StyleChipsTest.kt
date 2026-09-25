@@ -2,10 +2,15 @@ package com.materialkolor.builder.feature.poster
 
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
@@ -18,7 +23,9 @@ import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.engine.resolve.SchemeInputs
+import com.materialkolor.builder.feature.workspace.ShuffleLock
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.dynamiccolor.DynamicScheme
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -34,6 +41,8 @@ import kotlin.test.Test
 private val Seed = Argb(0x6750A4)
 
 private const val TERTIARY_FIELD = "Tertiary seed, any format"
+
+private const val KEEP_STYLE = "Keep the style when shuffling"
 
 /**
  * How many frames the chip drag test moves the seed for.
@@ -210,6 +219,21 @@ class StyleChipsTest {
             harness.actions shouldBe listOf(
                 WorkspaceAction.Edit(DocumentChange.SetCmfSeed(null), EditPhase.Discrete),
             )
+        }
+
+    @Test
+    fun keepOnShuffle_readsTheStyleLockAndFlipsIt() =
+        runComposeUiTest {
+            val harness = PosterHarness(ThemeDocument(seed = Seed))
+            harness.preferences = Preferences(styleLock = true)
+            showSection(harness) { context, dispatcher -> StyleChipsSection(context, dispatcher) }
+
+            val keep = onNodeWithContentDescription(KEEP_STYLE)
+            keep.assert(SemanticsMatcher.expectValue(SemanticsProperties.ToggleableState, ToggleableState.On))
+            keep.performClick()
+            waitForIdle()
+
+            harness.actions shouldBe listOf(WorkspaceAction.SetLock(ShuffleLock.Style, on = false))
         }
 
     @Test

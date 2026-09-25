@@ -148,8 +148,8 @@ internal fun StyleChips(
 }
 
 /**
- * What the chosen style does with the seed, why the target treats it differently if it does, and
- * the second seed while the style is Cmf.
+ * What the chosen style does with the seed with the Keep on shuffle toggle at the end of that line,
+ * why the target treats it differently if it does, and the second seed while the style is Cmf.
  *
  * @param[info] Whether the line carries the Style info button, for the phone sheet, whose peek
  * labels the chips without one to leave room for the contrast levels.
@@ -165,7 +165,10 @@ internal fun StyleDetails(
     val selected = context.document.style
     var open by rememberSaveable { mutableStateOf(false) }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+            verticalAlignment = Alignment.CenterVertically, // b-523
+        ) {
             BuilderText(
                 text = stringResource(
                     Res.string.style_line,
@@ -175,6 +178,7 @@ internal fun StyleDetails(
                 modifier = Modifier.weight(1f),
             )
             if (info) InfoButton(topic = InfoTopic.Style, expanded = open, onClick = { open = !open })
+            KeepStyleToggle(context, dispatcher) // b-523
         }
         if (info && open) InfoNote(InfoTopic.Style)
         context.capabilities[Control.Style].explanation?.let { reason -> ReasonLine(reason) }
@@ -195,22 +199,39 @@ private fun StyleHeader(
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val label = stringResource(Res.string.style_label)
-    Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
-        if (plain) {
-            BuilderText(label, Modifier.alignByBaseline(), style = BuilderTextStyle.SectionLabel, maxLines = 1)
-        } else {
-            InfoLabel(label = label, topic = InfoTopic.Style, modifier = Modifier.alignByBaseline())
+    // b-523 The spec note sits at the end of the label's line, and an open explanation goes under both.
+    val note = forcedSpec(selected)?.let { spec ->
+        stringResource(
+            Res.string.style_spec_forced,
+            stringResource(specName(spec)),
+            stringResource(styleDisplayName(selected)),
+        )
+    }
+    if (plain) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            BuilderText(label, style = BuilderTextStyle.SectionLabel, maxLines = 1)
+            if (note != null) SpecNote(note, Modifier.weight(1f))
         }
-        forcedSpec(selected)?.let { spec ->
-            val note = stringResource(
-                Res.string.style_spec_forced,
-                stringResource(specName(spec)),
-                stringResource(styleDisplayName(selected)),
-            )
-            Box(Modifier.weight(1f).alignByBaseline(), contentAlignment = Alignment.CenterEnd) {
-                BuilderBadge(label = note, icon = IconId.Lock)
-            }
+    } else {
+        InfoLabel(label = label, topic = InfoTopic.Style) {
+            if (note != null) SpecNote(note, Modifier.weight(1f))
         }
+    }
+}
+
+/**
+ * The note on the right of the Style label naming the one spec the chosen style runs in.
+ */
+@Composable
+private fun SpecNote(
+    note: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier, contentAlignment = Alignment.CenterEnd) {
+        BuilderBadge(label = note, icon = IconId.Lock)
     }
 }
 

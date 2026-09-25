@@ -68,6 +68,11 @@
     <!-- Beside the Style label while the chosen style only runs in one spec. The first argument is the spec's year, the second the style's name under its chip. -->
     <string name="style_spec_forced">Spec %1$s, set by %2$s</string>
 
+    <!-- A toggle at the end of the style's line that keeps the style when Shuffle draws a new seed. Keep it short, it shares the line. -->
+    <string name="style_keep">Keep on shuffle</string>
+    <!-- The same toggle read out by assistive tech, which hears it without the line before it. -->
+    <string name="style_keep_spoken">Keep the style when shuffling</string>
+
     <!-- The second seed Cmf reads for its tertiary palette. -->
     <string name="style_cmf_field">Tertiary seed, any format</string>
     <!-- Under the tertiary seed field while Cmf derives the seed itself. -->
@@ -84,14 +89,16 @@
     <string name="contrast_standard">Standard</string>
     <string name="contrast_medium">Medium</string>
     <string name="contrast_high">High</string>
-    <!-- Beside the Contrast label, before the lowest ratio any text pair has in the modes the preview shows. -->
-    <string name="contrast_lowest">Lowest text pair</string>
-    <!-- The lowest ratio beside the words above. The argument is the ratio to one decimal, as in 6.5:1. -->
-    <string name="contrast_ratio">%1$s:1</string>
-    <!-- Under the contrast levels, the pair with that ratio. The arguments are the text role and the role it sits on, the way they are named in code. -->
+    <!-- On the right of the Contrast label, the lowest ratio any text pair has in the modes the preview shows and the grade it earns. The first argument is the ratio to one decimal, the second the grade below, as in 6.5:1 AA. -->
+    <string name="contrast_readout">%1$s:1 %2$s</string>
+    <!-- The readout's tooltip on hover. The argument is the pair below. -->
+    <string name="contrast_readout_tooltip">Lowest text pair: %1$s</string>
+    <!-- The readout read out by assistive tech. The first argument is the ratio to one decimal, the second the grade below, the third the pair below. -->
+    <string name="contrast_readout_spoken">Lowest text pair %1$s:1, %2$s, %3$s</string>
+    <!-- The pair with the lowest ratio. The arguments are the text role and the role it sits on, the way they are named in code. -->
     <string name="contrast_pair_light">%1$s on %2$s, in light</string>
     <string name="contrast_pair_dark">%1$s on %2$s, in dark</string>
-    <!-- The badge beside the readout. -->
+    <!-- The grade a ratio earns, beside the readout here and on the Contrast tab. -->
     <string name="contrast_badge_aaa">AAA</string>
     <string name="contrast_badge_aa">AA</string>
     <string name="contrast_badge_aa_large">AA large</string>
