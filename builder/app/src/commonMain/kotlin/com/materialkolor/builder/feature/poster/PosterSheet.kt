@@ -30,7 +30,9 @@ internal enum class SheetSection(
     ImageCandidates(BottomSheetDetent.Peek),
     StyleChips(BottomSheetDetent.Peek),
     Contrast(BottomSheetDetent.Peek),
+    StyleDetails(BottomSheetDetent.Half), // b-510
     Explainer(BottomSheetDetent.Half),
+    Locks(BottomSheetDetent.Half), // b-510
     CoreColors(BottomSheetDetent.Half),
     SpecExtras(BottomSheetDetent.Half),
     Hero(BottomSheetDetent.Full),
@@ -38,9 +40,10 @@ internal enum class SheetSection(
 }
 
 /**
- * The sections a sheet resting at [detent] has in view. The peek holds the seed row, the actions,
- * the style and the contrast, half adds the explainer and the fine tune rows, and full the hero and
- * the header. A phone on its side, [short], peeks at the seed row and Shuffle alone.
+ * The sections a sheet resting at [detent] has in view. The peek holds the seed row, Pick and Image,
+ * one scrolling row of style chips and the contrast, half adds what the chosen style does, the
+ * explainer, the locks and the fine tune rows, and full the hero and the header. A phone on its
+ * side, [short], peeks at the seed row and Shuffle alone.
  */
 internal fun sheetSectionsInView(
     detent: BottomSheetDetent,
@@ -102,12 +105,15 @@ internal fun ColumnScope.PosterSheet(
     SheetSection.entries.forEach { section ->
         when (section) {
             SheetSection.SeedPeek -> SeedPeekRow(context, dispatcher)
-            SheetSection.SeedActions -> SeedActions(context, dispatcher, shuffle = false)
+            SheetSection.SeedActions -> SeedActions(context, dispatcher, shuffle = false, locks = false) // b-510
             SheetSection.FirstRunHint -> FirstRunHint(context, dispatcher) // b-314
             SheetSection.ImageCandidates -> ImageCandidateRow(context, dispatcher) // b-311
-            SheetSection.StyleChips -> StyleChipsSection(context, dispatcher)
+            // b-510
+            SheetSection.StyleChips -> StyleChipsSection(context, dispatcher, scrolling = true, details = false)
             SheetSection.Contrast -> ContrastSection(context, dispatcher)
+            SheetSection.StyleDetails -> StyleDetails(context, dispatcher) // b-510
             SheetSection.Explainer -> PrimaryExplainerLine(context, dispatcher, why = focus?.why)
+            SheetSection.Locks -> ShuffleLocks(context, dispatcher) // b-510
             SheetSection.CoreColors -> CoreColorsRow(context, dispatcher)
             SheetSection.SpecExtras -> SpecExtrasRow(context, dispatcher)
             SheetSection.Hero -> SeedHero(context, dispatcher, focus = focus) // b-306c

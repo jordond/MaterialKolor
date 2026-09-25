@@ -13,6 +13,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -206,6 +207,7 @@ internal fun <T> MaterialSegmented(
  * the fill and the rounder shape, so the choice never rests on colour alone. The row draws the
  * focused option's ring over every option ([RowRing]).
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class) // b-510
 @Composable
 private fun <T> ExpressiveSegmented(
     options: List<T>,

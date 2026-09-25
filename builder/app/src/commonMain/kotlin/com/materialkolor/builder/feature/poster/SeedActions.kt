@@ -41,6 +41,7 @@ import org.jetbrains.compose.resources.stringResource
  * keyboard, so a touch screen leaves it out. The three actions share one row and the locks another.
  *
  * @param[shuffle] Whether Shuffle leads the row. The sheet's seed row already holds it.
+ * @param[locks] Whether the locks follow the actions. The sheet shows them further down.
  */
 @Composable
 internal fun SeedActions(
@@ -48,6 +49,7 @@ internal fun SeedActions(
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
     shuffle: Boolean = true,
+    locks: Boolean = true, // b-510
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val preferences = context.preferences
@@ -78,12 +80,29 @@ internal fun SeedActions(
             )
             ImageMenuButton(context, dispatcher) // b-311b
         }
+        if (locks) ShuffleLocks(context, dispatcher) // b-510
+    }
+}
+
+// b-510
+
+/**
+ * The three shuffle locks on one row, and why Shuffle is off once the seed and the style are both
+ * locked. The label says lock, so the locks leave their glyph out and fit the row.
+ */
+@Composable
+internal fun ShuffleLocks(
+    context: PosterContext,
+    dispatcher: Dispatcher<WorkspaceAction>,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = LocalBuilderTokens.current.spacing
+    val preferences = context.preferences
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
-            // b-510
-            // The label says lock, so the locks leave their glyph out and fit one row.
             ShuffleLock.entries.forEach { lock ->
                 BuilderToggleButton(
                     checked = preferences.isLocked(lock),
@@ -92,7 +111,7 @@ internal fun SeedActions(
                 )
             }
         }
-        if (nothingToShuffle) {
+        if (preferences.shufflesNothing()) {
             BuilderText(text = stringResource(Res.string.poster_all_locked), emphasis = Emphasis.Secondary)
         }
     }

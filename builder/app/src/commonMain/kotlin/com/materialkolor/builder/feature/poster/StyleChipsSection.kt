@@ -1,6 +1,9 @@
 package com.materialkolor.builder.feature.poster
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Box
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import com.materialkolor.builder.generated.resources.style_chip_tooltip
 import com.materialkolor.builder.generated.resources.style_spec_forced
 import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.widget.SchemeChipFootprint
 import com.materialkolor.builder.kit.widget.SchemeChipName
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -96,10 +100,13 @@ internal fun StyleChipsSection(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    // b-510
+    scrolling: Boolean = false,
+    details: Boolean = true,
 ) {
     val resolver = rememberThemeResolver()
     val lookup: StyleSchemeLookup = remember(resolver) { { inputs, isDark -> resolver.scheme(inputs, isDark) } }
-    StyleChips(context, dispatcher, lookup, modifier)
+    StyleChips(context, dispatcher, lookup, modifier, scrolling = scrolling, details = details)
 }
 
 /** The resolver the app root provides, or one of the poster's own where there is none. */
@@ -110,6 +117,10 @@ internal fun rememberThemeResolver(): ThemeResolver = LocalThemeResolver.current
  * [StyleChipsSection] with the scheme lookup passed in.
  *
  * @param[pause] What the chips wait on before each chip as they catch up.
+ * @param[scrolling] Lay the chips out as one row that scrolls sideways, as the phone sheet's peek
+ * shows them, rather than a grid of five a row.
+ * @param[details] Whether what the chosen style does follows the chips. The sheet shows it further
+ * down, see [StyleDetails].
  */
 @Composable
 internal fun StyleChips(
@@ -118,6 +129,9 @@ internal fun StyleChips(
     lookup: StyleSchemeLookup,
     modifier: Modifier = Modifier,
     pause: ChipPause = NextFrame, // pf-1
+    // b-510
+    scrolling: Boolean = false,
+    details: Boolean = true,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val selected = context.document.style
@@ -126,9 +140,28 @@ internal fun StyleChips(
     val shelf = rememberChipShelf(context.result.document, isDark, lookup, pause)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
         StyleHeader(selected) // b-510
-        StyleChipRow(selected, context.document, shelf) { style, origin ->
+        StyleChipRow(selected, context.document, shelf, scrolling) { style, origin ->
             dispatcher.dispatch(WorkspaceAction.EditWithReveal(DocumentChange.SetStyle(style), origin))
         }
+        if (details) StyleDetails(context, dispatcher) // b-510
+    }
+}
+
+// b-510
+
+/**
+ * What the chosen style does with the seed, why the target treats it differently if it does, and
+ * the second seed while the style is Cmf.
+ */
+@Composable
+internal fun StyleDetails(
+    context: PosterContext,
+    dispatcher: Dispatcher<WorkspaceAction>,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = LocalBuilderTokens.current.spacing
+    val selected = context.document.style
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
         BuilderText(
             text = stringResource(
                 Res.string.style_line,
@@ -185,19 +218,23 @@ private fun StyleChipRow(
     selected: Style,
     document: ThemeDocument,
     shelf: ChipShelf,
+    scrolling: Boolean,
     onChoose: (style: Style, origin: Offset?) -> Unit,
 ) {
     val tags = remember(document.style, document.spec) {
         Style.entries.associateWith { style -> specTag(style, document) }
     }
+    // A row that scrolls gives each chip a cell of its own width, since it has no width to share.
+    val cell = if (scrolling) Modifier.width(SchemeChipFootprint + LocalBuilderTokens.current.spacing.small) else null
     BuilderChoiceGroup(
         options = Style.entries,
         selected = selected,
         // The keys only move the focus here, so a pick that ever comes this way has no chip to reveal from.
         onSelect = { style -> if (style != selected) onChoose(style, null) },
         label = stringResource(Res.string.style_chips),
+        modifier = if (scrolling) Modifier.horizontalScroll(rememberScrollState()) else Modifier,
         selectOnFocus = false,
-        columns = ChipColumns, // b-510
+        columns = if (scrolling) 0 else ChipColumns, // b-510
     ) { style, isSelected, optionModifier ->
         StyleChip(
             style = style,
@@ -206,6 +243,7 @@ private fun StyleChipRow(
             tag = tags[style],
             onChoose = { origin -> if (style != selected) onChoose(style, origin) },
             modifier = optionModifier,
+            cell = cell ?: Modifier,
         )
     }
 }
@@ -226,6 +264,7 @@ private fun StyleChip(
     tag: SpecVersion?,
     onChoose: (origin: Offset) -> Unit,
     modifier: Modifier = Modifier,
+    cell: Modifier = Modifier,
 ) {
     val colors = shelf[style] // pf-1
     val bounds = remember { ChipBounds() }
@@ -233,7 +272,7 @@ private fun StyleChip(
     val shown = stringResource(styleDisplayName(style))
     val hint = stringResource(styleTooltip(style))
     // b-510
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(cell, horizontalAlignment = Alignment.CenterHorizontally) {
         SchemeChip(
             primary = colors.primary,
             secondaryContainer = colors.secondaryContainer,
