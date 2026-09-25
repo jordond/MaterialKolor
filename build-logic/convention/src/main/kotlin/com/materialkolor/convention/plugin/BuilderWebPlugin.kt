@@ -157,13 +157,15 @@ abstract class RewriteIndexHtml : DefaultTask() {
         glue: Regex,
     ): String {
         val names = distribution.list().orEmpty().sorted()
-        val script = names.singleOrNull { name -> glue.matches(name) }
-            ?: throw GradleException("Expected one glue matching $glue in $distribution, found ${names.filter(glue::matches)}")
+        val glues = names.filter(glue::matches)
+        val script = glues.singleOrNull()
+            ?: throw GradleException("Expected one glue matching $glue in $distribution, found $glues")
         val binaries = names.filter { name -> HASHED.containsMatchIn(name) && name.endsWith(".wasm") }
         if (binaries.isEmpty()) throw GradleException("Expected hashed wasm files in $distribution, found none")
         return buildString {
             append("{\"glue\":").append(jsonString("/$ASSETS/$script"))
-            append(",\"binaries\":").append(binaries.joinToString(",", "[", "]") { name -> jsonString("/$ASSETS/$name") })
+            append(",\"binaries\":")
+            append(binaries.joinToString(",", "[", "]") { name -> jsonString("/$ASSETS/$name") })
             append("}")
         }
     }
