@@ -224,8 +224,8 @@ class PosterPanelTest {
         runComposeUiTest {
             showPoster()
 
-            onNodeWithText("Copy hex").performClick()
-            onNodeWithText("Copy Kotlin").performClick()
+            onNodeWithContentDescription("Copy hex").performClick()
+            onNodeWithContentDescription("Copy Kotlin").performClick()
             waitForIdle()
 
             // b-221f

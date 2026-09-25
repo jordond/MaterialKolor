@@ -45,11 +45,9 @@ import com.materialkolor.builder.generated.resources.poster_source_preset
 import com.materialkolor.builder.generated.resources.poster_source_shuffled
 import com.materialkolor.builder.generated.resources.poster_source_typed
 import com.materialkolor.builder.kit.control.BuilderBadge
-import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderHexField
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
-import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
@@ -59,7 +57,8 @@ import kotlin.math.roundToInt
 
 /**
  * The seed as the poster's headline (F-05). The hex is a real field that edits in place, and under
- * it sit the seed's name, where it came from, its HCT readout and the two copy buttons.
+ * it one line holds the seed's name, its HCT readout, where it came from and whether the project is
+ * saved, with the two copy buttons as icons at its end.
  *
  * The field shows the seed as stored, not as the target sees it. A commit lands as a typed seed,
  * one keystroke folding into the next in the history.
@@ -89,7 +88,8 @@ internal fun SeedHero(
     val triggers = focus ?: own
     val copyHex = triggers.copyHex
     val copyKotlin = triggers.copyKotlin
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+    // b-510
+    Column(modifier) {
         InfoLabel(label = stringResource(Res.string.poster_seed), topic = InfoTopic.Seed)
         BuilderHexField(
             value = seed,
@@ -104,41 +104,43 @@ internal fun SeedHero(
             large = true,
         )
         Row(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            BuilderText(
-                text = remember(seed) { ColorNames.nameOf(seed) },
-                modifier = Modifier.weight(1f, fill = false),
-                style = BuilderTextStyle.Title,
-                maxLines = 1,
-            )
-            BuilderBadge(label = sourceLabel(context.document.seedSource).text())
-        }
-        BuilderText(
-            text = stringResource(Res.string.poster_hct, hct.hue, hct.chroma, hct.tone),
-            style = BuilderTextStyle.Value,
-        )
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(spacing.small),
-            verticalArrangement = Arrangement.spacedBy(spacing.small),
-        ) {
-            BuilderButton(
-                onClick = { dispatcher.dispatch(WorkspaceAction.CopyText(seed.toHex(), hexLabel, copyHex.requester)) },
-                label = stringResource(Res.string.poster_copy_hex),
-                modifier = triggerFocus(copyHex), // b-306c
-                emphasis = Emphasis.Subtle,
+            // The name, its readout and where it came from share a line while it has room.
+            FlowRow(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(spacing.small),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
+                BuilderText(
+                    text = remember(seed) { ColorNames.nameOf(seed) },
+                    style = BuilderTextStyle.Title,
+                    maxLines = 1,
+                )
+                BuilderText(
+                    text = stringResource(Res.string.poster_hct, hct.hue, hct.chroma, hct.tone),
+                    style = BuilderTextStyle.Value,
+                    maxLines = 1,
+                )
+                BuilderBadge(label = sourceLabel(context.document.seedSource).text())
+                SaveState(context.saveStatus) // b-510
+            }
+            PosterIconButton(
                 icon = IconId.Copy,
+                description = stringResource(Res.string.poster_copy_hex),
+                onClick = { dispatcher.dispatch(WorkspaceAction.CopyText(seed.toHex(), hexLabel, copyHex.requester)) },
+                buttonModifier = triggerFocus(copyHex), // b-306c
             )
-            BuilderButton(
+            PosterIconButton(
+                icon = IconId.Export,
+                description = stringResource(Res.string.poster_copy_kotlin),
                 onClick = {
                     val copy = WorkspaceAction.CopyText(kotlinLiteralOf(seed), kotlinLabel, copyKotlin.requester)
                     dispatcher.dispatch(copy)
                 },
-                label = stringResource(Res.string.poster_copy_kotlin),
-                modifier = triggerFocus(copyKotlin), // b-306c
-                emphasis = Emphasis.Subtle,
-                icon = IconId.Copy,
+                buttonModifier = triggerFocus(copyKotlin), // b-306c
             )
         }
     }

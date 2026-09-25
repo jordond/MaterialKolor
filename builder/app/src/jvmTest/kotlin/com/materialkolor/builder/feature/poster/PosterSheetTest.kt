@@ -45,7 +45,17 @@ private val Peek = listOf(
     SheetSection.StyleChips,
     SheetSection.Contrast,
 )
-private val Half = Peek + listOf(SheetSection.Explainer, SheetSection.CoreColors, SheetSection.SpecExtras)
+
+// b-510
+private val Half = Peek +
+    listOf(
+        SheetSection.ContrastDetails,
+        SheetSection.StyleDetails,
+        SheetSection.Explainer,
+        SheetSection.Locks,
+        SheetSection.CoreColors,
+        SheetSection.SpecExtras,
+    )
 private val Full = Half + listOf(SheetSection.Hero, SheetSection.Header)
 
 @OptIn(ExperimentalTestApi::class)

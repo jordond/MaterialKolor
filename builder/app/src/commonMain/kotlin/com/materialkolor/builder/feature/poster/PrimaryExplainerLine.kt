@@ -1,12 +1,22 @@
 package com.materialkolor.builder.feature.poster
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.engine.color.HctReadout
+import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
@@ -27,16 +37,19 @@ import com.materialkolor.builder.generated.resources.explainer_tone_dark
 import com.materialkolor.builder.generated.resources.explainer_tone_light
 import com.materialkolor.builder.generated.resources.explainer_why
 import com.materialkolor.builder.kit.control.BuilderButton
+import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
+import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The line under the seed actions that says how light primary reads next to the seed, with a Why
- * link to the explainer (F-16). It stays away while primary sits within 2 of the seed in hue,
+ * The card under the seed actions that says how primary reads next to the seed, the seed and primary
+ * side by side, the line and a Why link to the explainer on one row (F-16). It stays away while primary sits within 2 of the seed in hue,
  * chroma and tone, pins included.
  *
  * Why opens the explainer, which [ExplainerHost] shows over the workspace so it opens over the rail
@@ -51,18 +64,31 @@ internal fun PrimaryExplainerLine(
     modifier: Modifier = Modifier,
     why: PanelTrigger? = null, // b-221f
 ) {
-    val spacing = LocalBuilderTokens.current.spacing
+    val tokens = LocalBuilderTokens.current
+    val spacing = tokens.spacing
     val result = context.result
-    val take = remember(result) {
-        ExplainerText.take(HctReadout.of(result.document.seed), HctReadout.of(result.roles[Role.Primary, false].argb))
-    }
+    val seed = result.document.seed
+    val primary = result.roles[Role.Primary, false].argb
+    val take = remember(result) { ExplainerText.take(HctReadout.of(seed), HctReadout.of(primary)) }
     if (take == null) return
-    FlowRow(
-        modifier = modifier,
+    // b-510
+    val card = RoundedCornerShape(tokens.radius.medium)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(tokens.panelRaised, card)
+            .padding(start = spacing.medium, end = spacing.small),
         horizontalArrangement = Arrangement.spacedBy(spacing.small),
-        verticalArrangement = Arrangement.spacedBy(spacing.extraSmall),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        BuilderText(text = stringResource(take.line))
+        TakeSwatch(seed.toColor(), ringed = true)
+        BuilderIcon(IconId.ChevronRight, contentDescription = null, emphasis = Emphasis.Secondary)
+        TakeSwatch(primary.toColor(), ringed = false)
+        BuilderText(
+            text = stringResource(take.line),
+            modifier = Modifier.weight(1f).padding(vertical = spacing.small),
+            style = BuilderTextStyle.Label,
+        )
         BuilderButton(
             onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Explainer)) },
             label = stringResource(Res.string.explainer_why),
@@ -70,6 +96,27 @@ internal fun PrimaryExplainerLine(
             emphasis = Emphasis.Subtle,
         )
     }
+}
+
+// b-510
+
+/**
+ * One of the card's two swatches, the seed and then primary. The seed sits on its own colour, so
+ * it wears a ring in the poster's ink to show at all.
+ */
+@Composable
+private fun TakeSwatch(
+    color: Color,
+    ringed: Boolean,
+) {
+    val tokens = LocalBuilderTokens.current
+    val shape = RoundedCornerShape(tokens.radius.small)
+    Box(
+        Modifier
+            .size(tokens.iconSize)
+            .background(color, shape)
+            .then(if (ringed) Modifier.border(tokens.outlineWidth, tokens.borderStrong, shape) else Modifier),
+    )
 }
 
 /** The poster line for this take. */

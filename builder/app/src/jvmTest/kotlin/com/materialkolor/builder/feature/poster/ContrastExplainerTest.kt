@@ -45,7 +45,9 @@ class ContrastExplainerTest {
             val fg = row.pair.foreground.readoutName(document)
             val bg = row.pair.background.readoutName(document)
 
-            onNodeWithText("Lowest in $mode, $fg on $bg at ${ratioText(row.ratio)} to 1").assertExists()
+            // b-510
+            onNodeWithText("${ratioText(row.ratio)}:1").assertExists()
+            onNodeWithText("$fg on $bg, in $mode").assertExists()
         }
 
     @Test

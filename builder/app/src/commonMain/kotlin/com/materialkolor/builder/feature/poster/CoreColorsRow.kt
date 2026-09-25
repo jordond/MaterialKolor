@@ -39,6 +39,7 @@ internal fun CoreColorsRow(
         },
         title = stringResource(Res.string.keycolors_title),
         modifier = modifier,
+        flush = true, // b-510
         summary = coreColorsSummary(context.document),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {

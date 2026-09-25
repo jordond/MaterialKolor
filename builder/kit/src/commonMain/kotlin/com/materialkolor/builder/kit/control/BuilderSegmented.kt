@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
@@ -13,12 +15,15 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessRadioGroup
 import com.materialkolor.builder.kit.icon.IconId
@@ -35,6 +40,8 @@ import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.skin.headless.controlTouchTarget
 import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 import com.materialkolor.builder.kit.skin.material.MaterialSegmented
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.kit.token.LocalBuilderType
 
 /**
  * A short row of mutually exclusive options, such as Light, Split and Dark.
@@ -56,6 +63,12 @@ import com.materialkolor.builder.kit.skin.material.MaterialSegmented
  * @param[enabled] Whether the choice can change.
  * @param[optionIcon] A glyph for an option, or null for a label alone.
  * @param[selectOnFocus] Whether the arrow keys choose as they move, or only move the focus.
+ * @param[compact] Fit a row that fills a narrow width, such as the poster's contrast levels. The
+ * options share the width evenly with little room round their labels, a label steps down in size
+ * where it would not fit, and the chosen option shows no check. What marks it is the fill only it
+ * wears, the skin's pill or Fluent's indicator, a shape the others lack rather than a colour.
+ * Material's own segmented button keeps room for a check whether it shows one or not, so here
+ * Material draws the row as a track with the chosen option filled.
  * @param[optionLabel] The label of an option.
  */
 @Composable
@@ -68,6 +81,7 @@ public fun <T> BuilderSegmented(
     enabled: Boolean = true,
     optionIcon: (T) -> IconId? = { null },
     selectOnFocus: Boolean = true,
+    compact: Boolean = false, // b-510
     optionLabel: (T) -> String,
 ) {
     when (LocalSkin.current.library) {
@@ -82,6 +96,7 @@ public fun <T> BuilderSegmented(
                 optionIcon,
                 selectOnFocus,
                 optionLabel,
+                compact,
             )
         }
         Library.Unstyled -> {
@@ -96,6 +111,7 @@ public fun <T> BuilderSegmented(
                 optionIcon,
                 selectOnFocus,
                 optionLabel,
+                compact,
             )
         }
         Library.Fluent -> {
@@ -109,6 +125,7 @@ public fun <T> BuilderSegmented(
                 optionIcon,
                 selectOnFocus,
                 optionLabel,
+                compact,
             )
         }
         Library.Custom -> {
@@ -123,6 +140,7 @@ public fun <T> BuilderSegmented(
                 optionIcon,
                 selectOnFocus,
                 optionLabel,
+                compact,
             )
         }
     }
@@ -141,9 +159,11 @@ internal fun <T> HeadlessSegmented(
     optionIcon: (T) -> IconId? = { null },
     selectOnFocus: Boolean = true,
     optionLabel: (T) -> String,
+    compact: Boolean = false, // b-510
 ) {
     val target = LocalLayout.current.primaryTouchTarget
-    val option = style.option
+    val spacing = LocalBuilderTokens.current.spacing
+    val option = if (compact) style.option.copy(horizontalPadding = spacing.extraSmall) else style.option
     HeadlessRadioGroup(
         options = options,
         selected = selected,
@@ -170,12 +190,49 @@ internal fun <T> HeadlessSegmented(
             horizontalArrangement = Arrangement.spacedBy(option.gap, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val icon = if (isSelected) IconId.Check else optionIcon(value)
-            if (icon != null) BuilderIcon(icon, contentDescription = null, tint = colors.content)
-            BuilderText(optionLabel(value), style = BuilderTextStyle.Label, color = colors.content, maxLines = 1)
+            // b-510
+            if (compact) {
+                FittedLabel(optionLabel(value), colors.content)
+            } else {
+                val icon = if (isSelected) IconId.Check else optionIcon(value)
+                if (icon != null) BuilderIcon(icon, contentDescription = null, tint = colors.content)
+                BuilderText(optionLabel(value), style = BuilderTextStyle.Label, color = colors.content, maxLines = 1)
+            }
         }
     }
 }
+
+// b-510
+
+/**
+ * An option's label on one line in the builder's label type, stepping down in size until it fits
+ * the width it is given, for a compact row.
+ */
+@Composable
+internal fun FittedLabel(
+    text: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    val style = LocalBuilderType.current.label
+    BasicText(
+        text = text,
+        modifier = modifier,
+        style = style.merge(color = color),
+        maxLines = 1,
+        autoSize = TextAutoSize.StepBased(
+            minFontSize = FittedLabelMinSize,
+            maxFontSize = style.fontSize,
+            stepSize = FittedLabelStep,
+        ),
+    )
+}
+
+/** The smallest a compact row's label steps down to. */
+private val FittedLabelMinSize: TextUnit = 10.sp
+
+/** How far each step down takes a compact row's label. */
+private val FittedLabelStep: TextUnit = 0.5.sp
 
 // b-230d
 

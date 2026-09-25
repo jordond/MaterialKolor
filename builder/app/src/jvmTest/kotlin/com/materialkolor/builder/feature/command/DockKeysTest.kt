@@ -6,7 +6,7 @@ import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isFocused
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
@@ -94,7 +94,7 @@ class DockKeysTest {
             keys { keyDown(Key.B) }
             harness.workspace.state.value.grayscaleHeld shouldBe true
 
-            onNodeWithText("Copy hex").requestFocus()
+            onNodeWithContentDescription("Copy hex").requestFocus()
             waitForIdle()
 
             harness.workspace.state.value.grayscaleHeld shouldBe false

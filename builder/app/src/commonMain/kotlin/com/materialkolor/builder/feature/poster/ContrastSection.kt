@@ -2,17 +2,20 @@ package com.materialkolor.builder.feature.poster
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.engine.audit.AuditRow
 import com.materialkolor.builder.engine.audit.ContrastBadge
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
@@ -23,16 +26,19 @@ import com.materialkolor.builder.generated.resources.contrast_badge_fail
 import com.materialkolor.builder.generated.resources.contrast_high
 import com.materialkolor.builder.generated.resources.contrast_label
 import com.materialkolor.builder.generated.resources.contrast_level
-import com.materialkolor.builder.generated.resources.contrast_lowest_dark
-import com.materialkolor.builder.generated.resources.contrast_lowest_light
+import com.materialkolor.builder.generated.resources.contrast_lowest
 import com.materialkolor.builder.generated.resources.contrast_medium
+import com.materialkolor.builder.generated.resources.contrast_pair_dark
+import com.materialkolor.builder.generated.resources.contrast_pair_light
+import com.materialkolor.builder.generated.resources.contrast_ratio
 import com.materialkolor.builder.generated.resources.contrast_reduced
 import com.materialkolor.builder.generated.resources.contrast_standard
 import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.control.BuilderBadge
-import com.materialkolor.builder.kit.control.BuilderChoiceChips
+import com.materialkolor.builder.kit.control.BuilderSegmented
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
@@ -43,25 +49,28 @@ import kotlin.math.floor
 /**
  * The contrast level with the lowest text pair it leaves (F-12).
  *
- * Contrast is one of the four levels the library names, offered as one choice (D53). A pick is one
- * discrete edit. The arrow keys only move the focus, and Enter or Space picks, since each pick is a
- * new scheme. The choices wrap onto another line where the poster is narrow. The
- * readout rates the target's own pairs in the modes the preview shows, and its badge carries an
- * icon as well as its words. A target that ignores contrast says why and takes no pick.
+ * Contrast is one of the four levels the library names, offered as one choice (D53) on a single
+ * row that fills the poster's width. A pick is one discrete edit. The arrow keys only move the
+ * focus, and Enter or Space picks, since each pick is a new scheme. The lowest ratio and its badge
+ * sit on the right of the label, and the pair it belongs to on a line under the levels. The readout
+ * rates the target's own pairs in the modes the preview shows, and its badge carries an icon as
+ * well as its words. A target that ignores contrast says why and takes no pick.
  */
 @Composable
 internal fun ContrastSection(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    details: Boolean = true, // b-510
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val selected = ContrastStop.of(context.document.contrast)
     val state = context.capabilities[Control.Contrast]
     val labels = ContrastStop.entries.associateWith { stop -> stringResource(stop.label) }
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-        InfoLabel(label = stringResource(Res.string.contrast_label), topic = InfoTopic.Contrast)
-        BuilderChoiceChips(
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+        // b-510
+        if (details) ContrastHeader(context)
+        BuilderSegmented(
             options = ContrastStop.entries,
             selected = selected,
             onSelect = { stop ->
@@ -75,32 +84,85 @@ internal fun ContrastSection(
             modifier = Modifier.fillMaxWidth(),
             enabled = state.usable,
             selectOnFocus = false,
+            compact = true,
         ) { stop -> labels.getValue(stop) }
-        state.explanation?.let { reason -> ReasonLine(reason) }
-        LowestPairReadout(context)
+        if (details) ContrastNotes(context)
     }
 }
 
+// b-510
+
 /**
- * The text pair with the lowest ratio in the modes the preview shows, with the badge it earns.
+ * What the contrast levels leave, for the phone sheet, which shows the levels alone at its peek and
+ * this under them once it is dragged up. The label with its info button and the lowest ratio, the
+ * pair behind it, and why a target ignores contrast if it does.
  */
 @Composable
-private fun LowestPairReadout(context: PosterContext) {
+internal fun ContrastDetails(
+    context: PosterContext,
+    modifier: Modifier = Modifier,
+) {
     val spacing = LocalBuilderTokens.current.spacing
-    val row = remember(context.result, context.visibleModes) { context.result.audit.lowestPair(context.visibleModes) }
-    val document = context.result.document
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(spacing.small),
-        verticalArrangement = Arrangement.spacedBy(spacing.extraSmall),
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+        ContrastHeader(context)
+        ContrastNotes(context)
+    }
+}
+
+/** The Contrast label with its info button, and the lowest ratio on the right in line with it. */
+@Composable
+private fun ContrastHeader(context: PosterContext) {
+    val spacing = LocalBuilderTokens.current.spacing
+    val row = rememberLowestPair(context)
+    Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
+        InfoLabel(
+            label = stringResource(Res.string.contrast_label),
+            topic = InfoTopic.Contrast,
+            modifier = Modifier.alignByBaseline(),
+        )
+        LowestRatio(row, Modifier.weight(1f).alignByBaseline())
+    }
+}
+
+/** The pair behind the lowest ratio, and why the target ignores contrast if it does. */
+@Composable
+private fun ContrastNotes(context: PosterContext) {
+    LowestPair(rememberLowestPair(context), context.result.document)
+    context.capabilities[Control.Contrast].explanation?.let { reason -> ReasonLine(reason) }
+}
+
+/** The text pair with the lowest ratio in the modes the preview shows. */
+@Composable
+private fun rememberLowestPair(context: PosterContext): AuditRow =
+    remember(context.result, context.visibleModes) { context.result.audit.lowestPair(context.visibleModes) }
+
+/**
+ * The lowest ratio any text pair has in the modes the preview shows, with the badge it earns, as
+ * one line on the right of the Contrast label. Where the line runs short its words give way first,
+ * and the ratio and the badge always show.
+ */
+@Composable
+private fun LowestRatio(
+    row: AuditRow,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = LocalBuilderTokens.current.spacing
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall, Alignment.End),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         BuilderText(
-            text = stringResource(
-                if (row.isDark) Res.string.contrast_lowest_dark else Res.string.contrast_lowest_light,
-                row.pair.foreground.readoutName(document),
-                row.pair.background.readoutName(document),
-                ratioText(row.ratio),
-            ),
+            text = stringResource(Res.string.contrast_lowest),
+            modifier = Modifier.weight(1f, fill = false),
+            style = BuilderTextStyle.Label,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        BuilderText(
+            text = stringResource(Res.string.contrast_ratio, ratioText(row.ratio)),
             style = BuilderTextStyle.Value,
+            maxLines = 1,
         )
         BuilderBadge(
             label = stringResource(row.badge.label),
@@ -108,6 +170,23 @@ private fun LowestPairReadout(context: PosterContext) {
             icon = row.badge.icon,
         )
     }
+}
+
+/** The pair behind the lowest ratio and the mode it is lowest in, one small line. */
+@Composable
+private fun LowestPair(
+    row: AuditRow,
+    document: ThemeDocument,
+) {
+    BuilderText(
+        text = stringResource(
+            if (row.isDark) Res.string.contrast_pair_dark else Res.string.contrast_pair_light,
+            row.pair.foreground.readoutName(document),
+            row.pair.background.readoutName(document),
+        ),
+        style = BuilderTextStyle.Label,
+        emphasis = Emphasis.Secondary,
+    )
 }
 
 /**

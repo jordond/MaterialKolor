@@ -5,6 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -49,10 +50,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.ButtonKeycap
 import com.materialkolor.builder.kit.control.CardDisabledNote
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
@@ -107,6 +110,7 @@ internal fun Modifier.materialFeedback(
 private fun RowScope.MaterialLabel(
     label: String,
     icon: IconId?,
+    hint: String? = null, // b-510
 ) {
     val ink = LocalContentColor.current
     if (icon != null) {
@@ -114,7 +118,20 @@ private fun RowScope.MaterialLabel(
         Spacer(Modifier.width(ButtonDefaults.IconSpacing))
     }
     BuilderText(label, style = BuilderTextStyle.Label, color = ink, maxLines = 1)
+    // b-510
+    if (hint != null) {
+        Spacer(Modifier.width(HintSpacing))
+        ButtonKeycap(hint, ink)
+    }
 }
+
+// b-510
+
+/** Room round a button with a keycap, Material's small button start and a tight end the keycap fills. */
+private val HintPadding: PaddingValues = PaddingValues(start = 16.dp, end = 4.dp)
+
+/** Room between a button's label and its keycap. */
+private val HintSpacing: Dp = 6.dp
 
 @Composable
 internal fun MaterialButton(
@@ -124,16 +141,26 @@ internal fun MaterialButton(
     emphasis: Emphasis,
     icon: IconId?,
     enabled: Boolean,
+    hint: String? = null, // b-510
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val decorated = modifier
         .foldState(label, null, enabled)
         .materialFeedback(interactionSource, ButtonDefaults.shape)
-    val content: @Composable RowScope.() -> Unit = { MaterialLabel(label, icon) }
+    val content: @Composable RowScope.() -> Unit = { MaterialLabel(label, icon, hint) }
     MaterialTarget {
         when (emphasis) {
             Emphasis.Primary -> {
-                Button(onClick, decorated, enabled, interactionSource = interactionSource, content = content)
+                // b-510
+                val padding = if (hint == null) ButtonDefaults.ContentPadding else HintPadding
+                Button(
+                    onClick,
+                    decorated,
+                    enabled,
+                    contentPadding = padding,
+                    interactionSource = interactionSource,
+                    content = content,
+                )
             }
             Emphasis.Secondary -> {
                 OutlinedButton(onClick, decorated, enabled, interactionSource = interactionSource, content = content)

@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,7 +20,6 @@ import com.materialkolor.builder.generated.resources.poster_expand
 import com.materialkolor.builder.generated.resources.poster_projects
 import com.materialkolor.builder.generated.resources.poster_rail_seed
 import com.materialkolor.builder.kit.icon.IconId
-import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.stringResource
@@ -61,8 +60,9 @@ internal fun PosterRail(
 }
 
 /**
- * The seed on the rail and in the sheet's seed row. The poster is already the seed, so the swatch
- * is the page ringed in ink, as big as the buttons beside it.
+ * The seed on the rail. The poster is already the seed, so the swatch is the page as a round dot,
+ * ringed in the poster's ink at the width a highlight takes so it reads as a swatch and not an empty
+ * box.
  *
  * @param[description] What it reads out, or null where the seed's hex already shows beside it.
  * @param[modifier] Applied to the swatch.
@@ -73,10 +73,11 @@ internal fun SeedSwatch(
     modifier: Modifier = Modifier,
 ) {
     val tokens = LocalBuilderTokens.current
+    // b-510
     Box(
         modifier = modifier
-            .size(LocalLayout.current.primaryTouchTarget)
-            .border(tokens.outlineWidth, tokens.borderStrong, RoundedCornerShape(tokens.radius.small))
+            .size(tokens.iconSize + tokens.spacing.medium)
+            .border(tokens.highlightWidth, tokens.borderStrong, CircleShape)
             .then(if (description == null) Modifier else Modifier.semantics { contentDescription = description }),
     )
 }
