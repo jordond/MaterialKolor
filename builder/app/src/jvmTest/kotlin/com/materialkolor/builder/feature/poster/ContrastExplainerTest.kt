@@ -48,7 +48,10 @@ class ContrastExplainerTest {
             val fg = row.pair.foreground.readoutName(document)
             val bg = row.pair.background.readoutName(document)
 
-            onNodeWithContentDescription("Lowest text pair ${ratioText(row.ratio)}:1, ", substring = true).assertExists()
+            onNodeWithContentDescription(
+                "Lowest text pair ${ratioText(row.ratio)}:1, ",
+                substring = true,
+            ).assertExists()
             onNodeWithContentDescription("$fg on $bg, in $mode", substring = true).assertExists()
             // The pair moved into the readout's name, so the line under the levels is gone.
             onNodeWithText("$fg on $bg, in $mode").assertDoesNotExist()
