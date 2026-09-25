@@ -132,7 +132,7 @@ public sealed interface ControlState {
      * The control is not shown at all.
      *
      * @property[reason] Why it is left out, for the places that explain an absence, or null when
-     * the control simply has no meaning here.
+     * the control has no meaning here.
      */
     public data class Hidden(
         public val reason: Reason? = null,
