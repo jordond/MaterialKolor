@@ -84,7 +84,9 @@ public fun BuilderIconButton(
     }
 }
 
-/** A square button holding one glyph, drawn from [style]. */
+/**
+ * A square button holding one glyph, drawn from [style].
+ */
 @Composable
 internal fun HeadlessIconButton(
     onClick: () -> Unit,

@@ -43,7 +43,9 @@ private const val Slider = "slider"
 private const val LeftToRight = "slider-ltr"
 private const val RightToLeft = "slider-rtl"
 
-/** The contrast control's stops and snap distance (F-12). */
+/**
+ * The contrast control's stops and snap distance (F-12).
+ */
 private val ContrastStops = listOf(-1f, 0f, 0.5f, 1f)
 private const val ContrastSnap = 0.04f
 private const val Tolerance = 1e-4f

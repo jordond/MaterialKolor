@@ -121,7 +121,9 @@ internal fun HeadlessDrawer(
     }
 }
 
-/** Stops a tap on a panel from falling through to the veil under it and closing the panel. */
+/**
+ * Stops a tap on a panel from falling through to the veil under it and closing the panel.
+ */
 internal fun Modifier.keepTaps(): Modifier = pointerInput(Unit) { detectTapGestures { } }
 
 private fun drawerShape(
@@ -175,7 +177,9 @@ internal fun HeadlessPanelHeader(
     }
 }
 
-/** A panel's footer, under a hairline and in from the edges as far as the header. */
+/**
+ * A panel's footer, under a hairline and in from the edges as far as the header.
+ */
 @Composable
 private fun PanelFooter(
     style: OverlayStyle,
@@ -191,7 +195,9 @@ private fun PanelFooter(
     }
 }
 
-/** A square close button as big as the touch target the layout asks for (AR-04). */
+/**
+ * A square close button as big as the touch target the layout asks for (AR-04).
+ */
 @Composable
 internal fun HeadlessCloseButton(
     label: String,

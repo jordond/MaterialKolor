@@ -148,7 +148,9 @@ internal fun FluentPanelRegion(
     }
 }
 
-/** The command palette on a `Layer` in the flyout's dress, raised to a dialog's shadow. */
+/**
+ * The command palette on a `Layer` in the flyout's dress, raised to a dialog's shadow.
+ */
 @Composable
 internal fun FluentPaletteFrame(
     modifier: Modifier,
@@ -227,5 +229,7 @@ private fun FluentCommands(
     )
 }
 
-/** How far a `CommandBar` insets its commands from its ends. */
+/**
+ * How far a `CommandBar` insets its commands from its ends.
+ */
 private val CommandBarPadding = 8.dp

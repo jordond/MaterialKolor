@@ -28,13 +28,19 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** The four libraries in the order the cycle wears them, Fluent between the others. */
+/**
+ * The four libraries in the order the cycle wears them, Fluent between the others.
+ */
 private val Cycle: List<Library> = listOf(Library.Material3, Library.Unstyled, Library.Fluent, Library.Custom)
 
-/** How many times the cycle runs through all four. */
+/**
+ * How many times the cycle runs through all four.
+ */
 private const val Rounds = 20
 
-/** Counts how many of the builders it hands out are remembered and not yet forgotten. */
+/**
+ * Counts how many of the builders it hands out are remembered and not yet forgotten.
+ */
 private class LiveBuilders {
     var count: Int = 0
         private set

@@ -128,21 +128,33 @@ internal fun FluentDisclosure(
     }
 }
 
-/** This shape with its bottom corners squared, for a header with content open under it. */
+/**
+ * This shape with its bottom corners squared, for a header with content open under it.
+ */
 private fun Shape.topOnly(): Shape =
     if (this is CornerBasedShape) copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)) else this
 
-/** Fluent's room before an expander's heading. */
+/**
+ * Fluent's room before an expander's heading.
+ */
 private val HeaderStart = 16.dp
 
-/** Fluent's room after an expander's chevron. */
+/**
+ * Fluent's room after an expander's chevron.
+ */
 private val HeaderEnd = 8.dp
 
-/** Fluent's room above and below an expander's heading. */
+/**
+ * Fluent's room above and below an expander's heading.
+ */
 private val HeaderVertical = 13.dp
 
-/** The square Fluent keeps for an expander's chevron. */
+/**
+ * The square Fluent keeps for an expander's chevron.
+ */
 private val ChevronBox = 32.dp
 
-/** Round what an expander opens. */
+/**
+ * Round what an expander opens.
+ */
 private val ContentPadding = 16.dp

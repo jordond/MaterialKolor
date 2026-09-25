@@ -132,10 +132,14 @@ internal fun materialOverlayStyle(
     )
 }
 
-/** Material's own hover state layer. */
+/**
+ * Material's own hover state layer.
+ */
 private const val MaterialHoverAlpha = 0.08f
 
-/** The dress of Material's menu container, for the menu and the select's list drawn in the page. */
+/**
+ * The dress of Material's menu container, for the menu and the select's list drawn in the page.
+ */
 @Composable
 internal fun materialMenuStyle(): OverlayStyle =
     materialOverlayStyle(
@@ -146,7 +150,9 @@ internal fun materialMenuStyle(): OverlayStyle =
 
 // b-511
 
-/** The dress of a popover that holds more than a menu, Material's container with its large corner. */
+/**
+ * The dress of a popover that holds more than a menu, Material's container with its large corner.
+ */
 @Composable
 internal fun materialPopoverStyle(): OverlayStyle =
     materialOverlayStyle(
@@ -177,7 +183,9 @@ internal fun materialDenseRowStyle(): ListRowStyle {
     )
 }
 
-/** [color] lifted by [elevation] the way a Material `Surface` tints the plain surface colour. */
+/**
+ * [color] lifted by [elevation] the way a Material `Surface` tints the plain surface colour.
+ */
 @Composable
 private fun tonal(
     color: Color,

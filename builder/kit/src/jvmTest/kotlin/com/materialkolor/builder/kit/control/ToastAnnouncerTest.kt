@@ -49,7 +49,9 @@ class ToastAnnouncerTest {
         }
 }
 
-/** A toast host and an open dialog over it, with [folds] as the D37 flag and [announcer] to hear the toasts. */
+/**
+ * A toast host and an open dialog over it, with [folds] as the D37 flag and [announcer] to hear the toasts.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.hostToastsUnderADialog(
     skin: Skin,

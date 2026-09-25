@@ -27,10 +27,14 @@ import kotlin.math.floor
 // works. The first switch to Fluent met about forty at once. The host draws the same mixes here a
 // step at a time, under a cover of the live frame, in idle time before anyone switches.
 
-/** How far out the warm-up cuts its circles, as shares of the distance to the farthest corner. */
+/**
+ * How far out the warm-up cuts its circles, as shares of the distance to the farthest corner.
+ */
 private val WarmRadii = floatArrayOf(0.3f, 0.6f, 0.9f)
 
-/** How opaque the warm-up draws a crossfade's old frame. Any share short of one takes the same path. */
+/**
+ * How opaque the warm-up draws a crossfade's old frame. Any share short of one takes the same path.
+ */
 private const val WarmFade = 0.5f
 
 /**
@@ -40,23 +44,35 @@ private const val WarmFade = 0.5f
 internal enum class WarmStep(
     val drawsSample: Boolean,
 ) {
-    /** The sample as it is, the frame a switch lands on. */
+    /**
+     * The sample as it is, the frame a switch lands on.
+     */
     Sample(drawsSample = true),
 
-    /** The sample behind the reveal's circle, the old frame of the first switch back. */
+    /**
+     * The sample behind the reveal's circle, the old frame of the first switch back.
+     */
     SampleCircle(drawsSample = true),
 
-    /** The sample faded, the old frame of a crossfade out of it. */
+    /**
+     * The sample faded, the old frame of a crossfade out of it.
+     */
     SampleFade(drawsSample = true),
 
-    /** The live frame behind the circle, the old frame of the first switch. */
+    /**
+     * The live frame behind the circle, the old frame of the first switch.
+     */
     LiveCircle(drawsSample = false),
 
-    /** The live frame faded, the old frame of the first crossfade. */
+    /**
+     * The live frame faded, the old frame of the first crossfade.
+     */
     LiveFade(drawsSample = false),
 }
 
-/** A step the host has yet to draw, and what it completes once it has. */
+/**
+ * A step the host has yet to draw, and what it completes once it has.
+ */
 internal class WarmPass(
     val step: WarmStep,
     val drawn: CompletableDeferred<Unit>,
@@ -129,7 +145,9 @@ internal fun ContentDrawScope.drawWarmUp(
     clipRect(left = half) { drawLayer(live) }
 }
 
-/** Runs [draw] behind a circle out of the middle at each of [WarmRadii], as a reveal clips it. */
+/**
+ * Runs [draw] behind a circle out of the middle at each of [WarmRadii], as a reveal clips it.
+ */
 private inline fun DrawScope.behindCircles(
     circle: Path,
     draw: DrawScope.() -> Unit,
@@ -141,10 +159,14 @@ private inline fun DrawScope.behindCircles(
     }
 }
 
-/** The density the warm layer is emptied with. An empty recording draws nothing, so any will do. */
+/**
+ * The density the warm layer is emptied with. An empty recording draws nothing, so any will do.
+ */
 internal val EmptyDensity: Density = Density(1f)
 
-/** Draws [layer] the way a crossfade draws the old frame, then leaves it opaque again. */
+/**
+ * Draws [layer] the way a crossfade draws the old frame, then leaves it opaque again.
+ */
 private fun DrawScope.drawFaded(layer: GraphicsLayer) {
     layer.alpha = WarmFade
     drawLayer(layer)

@@ -121,7 +121,9 @@ public fun Modifier.foldedSelectedName(
     enabled: Boolean = true,
 ): Modifier = foldedName(name, role = null, ControlState.Selected(selected), enabled)
 
-/** [name] as the content description, with [role] and [state] folded in on the web. */
+/**
+ * [name] as the content description, with [role] and [state] folded in on the web.
+ */
 @Composable
 private fun Modifier.foldedName(
     name: String,

@@ -27,13 +27,17 @@ internal class OverlayAnchor {
     private var layout: LayoutCoordinates? = null
     private var host: OverlayHostState? = null
 
-    /** Keeps [layout], and moves [bounds] with it while an overlay follows the anchor. */
+    /**
+     * Keeps [layout], and moves [bounds] with it while an overlay follows the anchor.
+     */
     fun moved(layout: LayoutCoordinates) {
         this.layout = layout
         host?.let { measure(it) }
     }
 
-    /** Starts following the anchor in [host] as an overlay opens on it, and stops with null. */
+    /**
+     * Starts following the anchor in [host] as an overlay opens on it, and stops with null.
+     */
     fun follow(host: OverlayHostState?) {
         this.host = host
         host?.let { measure(it) }

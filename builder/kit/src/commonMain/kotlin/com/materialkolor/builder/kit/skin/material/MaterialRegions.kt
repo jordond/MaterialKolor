@@ -80,10 +80,14 @@ internal fun MaterialDockRegion(
 
 // b-512
 
-/** How far in from its start edge a `TopAppBar` with no navigation icon starts its title. */
+/**
+ * How far in from its start edge a `TopAppBar` with no navigation icon starts its title.
+ */
 private val TitleInset: Dp = 16.dp
 
-/** Lays the content out [pull] wider than it is given and places it [pull] toward the start. */
+/**
+ * Lays the content out [pull] wider than it is given and places it [pull] toward the start.
+ */
 private fun Modifier.pullStart(pull: Dp): Modifier =
     layout { measurable, constraints ->
         val extra = pull.roundToPx().coerceAtLeast(0)
@@ -117,7 +121,9 @@ internal fun MaterialWindowRegion(
     }
 }
 
-/** A Material surface in the side panel's dress, rounded on its inner edge like Material's side sheet. */
+/**
+ * A Material surface in the side panel's dress, rounded on its inner edge like Material's side sheet.
+ */
 @Composable
 internal fun MaterialPanelRegion(
     side: PanelSide,
@@ -135,7 +141,9 @@ internal fun MaterialPanelRegion(
     }
 }
 
-/** Material's dialog container, its shape, colour and tonal elevation. */
+/**
+ * Material's dialog container, its shape, colour and tonal elevation.
+ */
 @Composable
 internal fun MaterialPaletteFrame(
     modifier: Modifier,

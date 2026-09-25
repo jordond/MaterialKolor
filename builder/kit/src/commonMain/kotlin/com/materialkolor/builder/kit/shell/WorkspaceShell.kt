@@ -57,30 +57,46 @@ import org.jetbrains.compose.resources.stringResource
  * margins and the corner radii come from the tokens.
  */
 internal object ShellMetrics {
-    /** The poster docked at Expanded. */
+    /**
+     * The poster docked at Expanded.
+     */
     val posterWideWidth: Dp = 400.dp
 
-    /** The poster docked at Medium from 840 dp, and opened over the canvas below that. */
+    /**
+     * The poster docked at Medium from 840 dp, and opened over the canvas below that.
+     */
     val posterNarrowWidth: Dp = 320.dp
 
-    /** The seed strip the poster collapses to. */
+    /**
+     * The seed strip the poster collapses to.
+     */
     val railWidth: Dp = 72.dp
 
-    /** The top bar, in every window class. */
+    /**
+     * The top bar, in every window class.
+     */
     val topBarHeight: Dp = 64.dp
 
     // b-512
 
-    /** The tallest a control in the top bar stands, clear of the bar's edges by 4 dp each. */
+    /**
+     * The tallest a control in the top bar stands, clear of the bar's edges by 4 dp each.
+     */
     val topBarControlHeight: Dp = 56.dp
 
-    /** How much of the poster sheet shows at peek on a phone held upright. */
+    /**
+     * How much of the poster sheet shows at peek on a phone held upright.
+     */
     val posterPeekHeight: Dp = 344.dp
 
-    /** The room a floating dock takes, Material's floating toolbar height. */
+    /**
+     * The room a floating dock takes, Material's floating toolbar height.
+     */
     val dockHeight: Dp = 64.dp
 
-    /** The command palette's widest on Expanded, where the other dialogs stop at 560 dp. */
+    /**
+     * The command palette's widest on Expanded, where the other dialogs stop at 560 dp.
+     */
     val paletteWideWidth: Dp = 640.dp
 }
 
@@ -91,7 +107,9 @@ internal object ShellMetrics {
 internal fun posterPeekHeight(layout: LayoutInfo): Dp =
     if (layout.heightDp < ShortHeightBreakpoint) OverlayMetrics.sheetPeekHeight else ShellMetrics.posterPeekHeight
 
-/** How far above the bottom edge the poster peek and the floating dock reach in the sheet layout. */
+/**
+ * How far above the bottom edge the poster peek and the floating dock reach in the sheet layout.
+ */
 internal fun sheetClearance(
     layout: LayoutInfo,
     tokens: BuilderTokens,

@@ -45,10 +45,14 @@ import kotlin.test.Test
  */
 private const val ScreenshotDir = "src/jvmTest/screenshots/widgets"
 
-/** Each widget of the scene, tagged so it is captured on its own. */
+/**
+ * Each widget of the scene, tagged so it is captured on its own.
+ */
 private val WidgetTags: List<String> = listOf("swatches", "chips", "ramp", "code", "frame")
 
-/** The roles the scene shows as swatches. */
+/**
+ * The roles the scene shows as swatches.
+ */
 private val WidgetRoles: List<Role> = listOf(Role.Primary, Role.SecondaryContainer, Role.Error)
 
 @OptIn(ExperimentalTestApi::class)
@@ -82,7 +86,9 @@ private fun ComposeUiTest.captureWidgets(
     }
 }
 
-/** Every widget on the canvas of the surrounding skin, drawn from [result] in the mode [isDark] picks. */
+/**
+ * Every widget on the canvas of the surrounding skin, drawn from [result] in the mode [isDark] picks.
+ */
 @Composable
 private fun WidgetScene(
     result: ThemeResult,
@@ -138,7 +144,9 @@ private fun WidgetScene(
     }
 }
 
-/** The WCAG contrast ratio of two opaque colours. */
+/**
+ * The WCAG contrast ratio of two opaque colours.
+ */
 private fun widgetContrast(
     a: Color,
     b: Color,

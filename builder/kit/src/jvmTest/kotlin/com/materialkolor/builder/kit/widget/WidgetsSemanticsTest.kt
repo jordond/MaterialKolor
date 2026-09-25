@@ -85,13 +85,19 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.test.Test
 
-/** The seed every widget test resolves. */
+/**
+ * The seed every widget test resolves.
+ */
 internal val WidgetDocument: ThemeDocument = ThemeDocument(seed = Argb(0x6750A4))
 
-/** Every skin the widgets are drawn in, named for the screenshots. */
+/**
+ * Every skin the widgets are drawn in, named for the screenshots.
+ */
 internal val WidgetSkins: List<Pair<String, Skin>> = ControlSkins
 
-/** Runs [block] once per skin in a fresh test, with the skin's name as the clue. */
+/**
+ * Runs [block] once per skin in a fresh test, with the skin's name as the clue.
+ */
 @OptIn(ExperimentalTestApi::class)
 internal fun forEachWidgetSkin(block: suspend ComposeUiTest.(name: String, skin: Skin) -> Unit) {
     for ((name, skin) in WidgetSkins) {
@@ -99,7 +105,9 @@ internal fun forEachWidgetSkin(block: suspend ComposeUiTest.(name: String, skin:
     }
 }
 
-/** A skin over [WidgetDocument], a measured layout and frozen motion. */
+/**
+ * A skin over [WidgetDocument], a measured layout and frozen motion.
+ */
 @Composable
 internal fun WidgetHarness(
     skin: Skin,
@@ -115,7 +123,9 @@ internal fun WidgetHarness(
     }
 }
 
-/** The frozen Material3 `Color.kt` codegen writes for [WidgetDocument], a real generated file. */
+/**
+ * The frozen Material3 `Color.kt` codegen writes for [WidgetDocument], a real generated file.
+ */
 internal fun widgetGoldenColorFile(): GeneratedFile {
     val target = ExportTarget.Material3
     val prefs = ExportPrefs(mode = ExportMode.Frozen)
@@ -409,7 +419,9 @@ class WidgetsSemanticsTest {
         }
 }
 
-/** Whether [actual] is [expected] to within rounding. */
+/**
+ * Whether [actual] is [expected] to within rounding.
+ */
 internal fun widgetMatches(
     actual: Color,
     expected: Color,
@@ -420,7 +432,9 @@ internal fun widgetMatches(
         actual.blue to expected.blue,
     ).all { (a, b) -> abs(a - b) <= WidgetColorTolerance }
 
-/** Fails unless [actual] is [expected] to within rounding. */
+/**
+ * Fails unless [actual] is [expected] to within rounding.
+ */
 internal fun widgetShouldMatch(
     actual: Color,
     expected: Color,

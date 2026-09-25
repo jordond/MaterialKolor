@@ -12,7 +12,9 @@ class PopoverPlacementTest {
     private val window = IntSize(400, 600)
     private val popover = IntSize(160, 200)
 
-    /** 8 px under the anchor, measured from the edge it draws, which sits 8 px inside its bounds. */
+    /**
+     * 8 px under the anchor, measured from the edge it draws, which sits 8 px inside its bounds.
+     */
     private val provider = DropdownPositionProvider(gap = 8, alignEnd = true, inset = 8)
 
     @Test

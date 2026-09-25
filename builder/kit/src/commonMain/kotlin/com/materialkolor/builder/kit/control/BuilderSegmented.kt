@@ -146,7 +146,9 @@ public fun <T> BuilderSegmented(
     }
 }
 
-/** A segmented control drawn from [style] over [HeadlessRadioGroup]. */
+/**
+ * A segmented control drawn from [style] over [HeadlessRadioGroup].
+ */
 @Composable
 internal fun <T> HeadlessSegmented(
     options: List<T>,
@@ -228,10 +230,14 @@ internal fun FittedLabel(
     )
 }
 
-/** The smallest a compact row's label steps down to. */
+/**
+ * The smallest a compact row's label steps down to.
+ */
 private val FittedLabelMinSize: TextUnit = 10.sp
 
-/** How far each step down takes a compact row's label. */
+/**
+ * How far each step down takes a compact row's label.
+ */
 private val FittedLabelStep: TextUnit = 0.5.sp
 
 // b-230d

@@ -20,7 +20,9 @@ import org.jetbrains.compose.resources.FontResource
 import org.jetbrains.compose.resources.getFontResourceBytes
 import org.jetbrains.compose.resources.getSystemResourceEnvironment
 
-/** The two Selawik weights Fluent's type scale sets, Regular and SemiBold. */
+/**
+ * The two Selawik weights Fluent's type scale sets, Regular and SemiBold.
+ */
 private val SelawikFaces: List<FontResource> = listOf(Res.font.Selawik_Regular, Res.font.Selawik_Semibold)
 
 /**
@@ -47,7 +49,9 @@ internal fun fluentFontFamily(): FontFamily =
  */
 internal val LocalFluentStandInFace: ProvidableCompositionLocal<FontFamily?> = staticCompositionLocalOf { null }
 
-/** Fluent's own type scale set in Selawik, or in [LocalFluentStandInFace] when a warm-up sets one. */
+/**
+ * Fluent's own type scale set in Selawik, or in [LocalFluentStandInFace] when a warm-up sets one.
+ */
 @Composable
 internal fun rememberFluentTypography(): Typography {
     val scale = FluentTheme.typography
@@ -57,7 +61,9 @@ internal fun rememberFluentTypography(): Typography {
     return remember(face, scale) { scale.inFace(face) }
 }
 
-/** This scale with every style set in [face], sizes, weights and line heights kept. */
+/**
+ * This scale with every style set in [face], sizes, weights and line heights kept.
+ */
 internal fun Typography.inFace(face: FontFamily): Typography {
     fun TextStyle.inFace(): TextStyle = copy(fontFamily = face)
     return Typography(

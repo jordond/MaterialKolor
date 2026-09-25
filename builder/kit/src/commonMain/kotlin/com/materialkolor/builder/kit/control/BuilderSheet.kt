@@ -14,18 +14,26 @@ import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.headless.PanelEdge
 import org.jetbrains.compose.resources.stringResource
 
-/** How a [BuilderSheet] takes the screen. */
+/**
+ * How a [BuilderSheet] takes the screen.
+ */
 public enum class SheetPresentation {
-    /** A panel along the end edge, 60% of the width, with the page still showing beside it. */
+    /**
+     * A panel along the end edge, 60% of the width, with the page still showing beside it.
+     */
     EndPanel,
 
-    /** The whole screen. */
+    /**
+     * The whole screen.
+     */
     FullScreen,
 
     ;
 
     public companion object {
-        /** An end panel from 840 dp up, where 60% still leaves room for a form, and the full screen below. */
+        /**
+         * An end panel from 840 dp up, where 60% still leaves room for a form, and the full screen below.
+         */
         public fun of(layout: LayoutInfo): SheetPresentation =
             if (layout.widthDp >= DockedPosterBreakpoint) EndPanel else FullScreen
     }

@@ -135,7 +135,9 @@ internal fun <T> FluentSegmented(
 
 // b-510
 
-/** The glyph an option shows, a check while chosen, none at all in a compact row. */
+/**
+ * The glyph an option shows, a check while chosen, none at all in a compact row.
+ */
 private fun optionGlyph(
     selected: Boolean,
     compact: Boolean,
@@ -147,10 +149,14 @@ private fun optionGlyph(
         else -> own()
     }
 
-/** Fluent's outline round its segmented control. */
+/**
+ * Fluent's outline round its segmented control.
+ */
 private val SegmentedFrameWidth = 1.dp
 
-/** Where the option at [index] of [count] sits, which sets how Fluent insets an unchosen one. */
+/**
+ * Where the option at [index] of [count] sits, which sets how Fluent insets an unchosen one.
+ */
 private fun segmentPosition(
     index: Int,
     count: Int,
@@ -191,8 +197,12 @@ internal fun FluentIndicator(
     )
 }
 
-/** How wide Fluent's indicator is under a chosen item. */
+/**
+ * How wide Fluent's indicator is under a chosen item.
+ */
 private val IndicatorWidth = 16.dp
 
-/** How tall Fluent's indicator is. */
+/**
+ * How tall Fluent's indicator is.
+ */
 private val IndicatorHeight = 3.dp

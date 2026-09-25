@@ -48,28 +48,44 @@ import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-/** The frame [tabOntoRing] captures, the control on the panel with room for an outset ring. */
+/**
+ * The frame [tabOntoRing] captures, the control on the panel with room for an outset ring.
+ */
 private const val RingFrameTag = "ring-frame"
 
-/** The button [tabOntoRing] presses Tab from. */
+/**
+ * The button [tabOntoRing] presses Tab from.
+ */
 private const val RingStartTag = "ring-start"
 
-/** How far a channel has to move for S5 to count the pixel as changed. */
+/**
+ * How far a channel has to move for S5 to count the pixel as changed.
+ */
 private const val MovedBy = 24f / 255f
 
-/** How close to the ring colour a pixel has to sit, on every channel, to count as ring. */
+/**
+ * How close to the ring colour a pixel has to sit, on every channel, to count as ring.
+ */
 private const val NearRing = 0.02f
 
-/** The least contrast a ring pixel needs against what was there before (WCAG 2.4.13). */
+/**
+ * The least contrast a ring pixel needs against what was there before (WCAG 2.4.13).
+ */
 private const val RingContrast = 3.0
 
-/** How many ring pixels a control needs before it counts as ringed. */
+/**
+ * How many ring pixels a control needs before it counts as ringed.
+ */
 internal const val RingPixelsNeeded: Int = 100
 
-/** How strong Material3's focus state layer is over the content colour. */
+/**
+ * How strong Material3's focus state layer is over the content colour.
+ */
 private const val MaterialFocusLayer = 0.1f
 
-/** The document [tabOntoRing] resolves unless a test asks for another. */
+/**
+ * The document [tabOntoRing] resolves unless a test asks for another.
+ */
 internal val RingDocument: ThemeDocument = ThemeDocument(seed = Argb(0x6750A4))
 
 /**
@@ -89,7 +105,9 @@ internal class RingCapture(
     val density: Float,
     val region: Rect? = null,
 ) {
-    /** Every pixel that moved and now sits on a ring colour, whatever its contrast. */
+    /**
+     * Every pixel that moved and now sits on a ring colour, whatever its contrast.
+     */
     val candidates: List<IntOffset> = buildList {
         for (y in 0 until minOf(before.height, after.height)) {
             for (x in 0 until minOf(before.width, after.width)) {
@@ -107,13 +125,19 @@ internal class RingCapture(
     fun nearFocused(reach: Dp): RingCapture =
         RingCapture(rings, before, after, focused, density, focused.inflate(reach.value * density))
 
-    /** The ring colour the pixel at [point] shows, or null when it shows none. */
+    /**
+     * The ring colour the pixel at [point] shows, or null when it shows none.
+     */
     fun ringAt(point: IntOffset): Color? = rings.firstOrNull { ring -> near(after[point.x, point.y], ring) }
 
-    /** The candidates at 3 to 1 or better against their unfocused colour, which is the ring. */
+    /**
+     * The candidates at 3 to 1 or better against their unfocused colour, which is the ring.
+     */
     val pixels: List<IntOffset> = candidates.filter { point -> ratioAt(point) >= RingContrast }
 
-    /** The contrast of the pixel at [point] against its unfocused colour. */
+    /**
+     * The contrast of the pixel at [point] against its unfocused colour.
+     */
     fun ratioAt(point: IntOffset): Double = contrast(after[point.x, point.y], before[point.x, point.y])
 
     /**
@@ -127,7 +151,9 @@ internal class RingCapture(
             return maxOf(abs(layered.red - ring.red), abs(layered.green - ring.green), abs(layered.blue - ring.blue))
         }
 
-    /** The box around every ring coloured pixel, where the ring was drawn whatever its contrast. */
+    /**
+     * The box around every ring coloured pixel, where the ring was drawn whatever its contrast.
+     */
     val ringBounds: Rect
         get() {
             if (candidates.isEmpty()) return Rect.Zero
@@ -139,7 +165,9 @@ internal class RingCapture(
             )
         }
 
-    /** How many pixels the ring drew and how many of them stand out, for a failure message. */
+    /**
+     * How many pixels the ring drew and how many of them stand out, for a failure message.
+     */
     val summary: String
         get() {
             val lowest = candidates.minOfOrNull(::ratioAt) ?: 0.0
@@ -210,7 +238,9 @@ internal fun ComposeUiTest.tabOntoRing(
     return RingCapture(rings, before, after, focused, density)
 }
 
-/** Checks that the ring drew at least [least] pixels at 3 to 1 or better. */
+/**
+ * Checks that the ring drew at least [least] pixels at 3 to 1 or better.
+ */
 internal fun RingCapture.shouldShowRing(least: Int = RingPixelsNeeded) {
     withClue(summary) { pixels.size shouldBeGreaterThanOrEqual least }
 }
@@ -248,26 +278,40 @@ internal class SideBands(
     box: Rect,
     out: Float,
 ) {
-    /** The middle half of the top and the bottom, from left to right. */
+    /**
+     * The middle half of the top and the bottom, from left to right.
+     */
     val middleX: ClosedFloatingPointRange<Float> = (box.left + box.width / 4)..(box.right - box.width / 4)
 
-    /** The middle half of the left and the right side, from top to bottom. */
+    /**
+     * The middle half of the left and the right side, from top to bottom.
+     */
     val middleY: ClosedFloatingPointRange<Float> = (box.top + box.height / 4)..(box.bottom - box.height / 4)
 
-    /** How far across the left side reaches. */
+    /**
+     * How far across the left side reaches.
+     */
     val left: ClosedFloatingPointRange<Float> = (box.left - out)..(box.left + box.width / 4)
 
-    /** How far across the right side reaches. */
+    /**
+     * How far across the right side reaches.
+     */
     val right: ClosedFloatingPointRange<Float> = (box.right - box.width / 4)..(box.right + out)
 
-    /** How far down the top reaches. */
+    /**
+     * How far down the top reaches.
+     */
     val top: ClosedFloatingPointRange<Float> = (box.top - out)..(box.top + box.height / 4)
 
-    /** How far down the bottom reaches. */
+    /**
+     * How far down the bottom reaches.
+     */
     val bottom: ClosedFloatingPointRange<Float> = (box.bottom - box.height / 4)..(box.bottom + out)
 }
 
-/** The bands each side of [around] is looked for in, reaching [reach] outside it. */
+/**
+ * The bands each side of [around] is looked for in, reaching [reach] outside it.
+ */
 internal fun RingCapture.sideBands(
     reach: Dp,
     around: Rect,

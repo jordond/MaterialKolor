@@ -13,7 +13,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
  */
 @Immutable
 public interface BuilderIcons {
-    /** The glyph for [id]. The same id always gives back the same vector. */
+    /**
+     * The glyph for [id]. The same id always gives back the same vector.
+     */
     public operator fun get(id: IconId): ImageVector
 }
 

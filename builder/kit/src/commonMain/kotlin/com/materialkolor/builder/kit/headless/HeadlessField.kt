@@ -65,25 +65,35 @@ internal class FieldDraft(
 ) {
     var value: TextFieldValue by mutableStateOf(TextFieldValue(committed, TextRange(committed.length)))
 
-    /** Whether the field has focus, which the commit on leaving needs to know. */
+    /**
+     * Whether the field has focus, which the commit on leaving needs to know.
+     */
     var focused: Boolean by mutableStateOf(false)
 
-    /** The committed value as its owner writes it. */
+    /**
+     * The committed value as its owner writes it.
+     */
     var committed: String by mutableStateOf(committed)
         private set
 
-    /** The text that stands for [committed], which is [committed] itself unless the field sent it. */
+    /**
+     * The text that stands for [committed], which is [committed] itself unless the field sent it.
+     */
     var committedText: String by mutableStateOf(committed)
         private set
 
     val text: String
         get() = value.text
 
-    /** True when the draft differs from the text that stands for the committed value. */
+    /**
+     * True when the draft differs from the text that stands for the committed value.
+     */
     val dirty: Boolean
         get() = value.text != committedText
 
-    /** True while an input method is still composing, when Enter and Esc belong to it. */
+    /**
+     * True while an input method is still composing, when Enter and Esc belong to it.
+     */
     val composing: Boolean
         get() = value.composition != null
 
@@ -110,14 +120,18 @@ internal class FieldDraft(
         committedText = text
     }
 
-    /** Shows [text] and treats it as committed. */
+    /**
+     * Shows [text] and treats it as committed.
+     */
     fun settle(text: String) {
         committed = text
         committedText = text
         if (value.text != text) show(text)
     }
 
-    /** Throws the draft away for the committed value. False when there was nothing to throw away. */
+    /**
+     * Throws the draft away for the committed value. False when there was nothing to throw away.
+     */
     fun revert(): Boolean {
         if (!dirty) return false
         committedText = committed
@@ -130,7 +144,9 @@ internal class FieldDraft(
     }
 }
 
-/** A draft that follows [committed] whenever it changes from outside. */
+/**
+ * A draft that follows [committed] whenever it changes from outside.
+ */
 @Composable
 internal fun rememberFieldDraft(committed: String): FieldDraft {
     val draft = remember { FieldDraft(committed) }

@@ -39,13 +39,19 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-/** How long a reveal waits for the host to draw the old frame before it gives up on the capture. */
+/**
+ * How long a reveal waits for the host to draw the old frame before it gives up on the capture.
+ */
 private val CaptureTimeout = 100.milliseconds
 
-/** The longest a reveal holds the old frame while the app waits on a skin font (architecture 6.11). */
+/**
+ * The longest a reveal holds the old frame while the app waits on a skin font (architecture 6.11).
+ */
 private val FontWaitTimeout = 300.milliseconds
 
-/** How long a warm-up step waits for the host to draw it before the warm-up gives up. */
+/**
+ * How long a warm-up step waits for the host to draw it before the warm-up gives up.
+ */
 private val WarmUpTimeout = 2000.milliseconds // pf-3
 
 // b-503a
@@ -65,10 +71,14 @@ private val MaxFrameStep = 50.milliseconds
  * capture once per switch and draws that instead.
  */
 public enum class SnapshotMode {
-    /** Draw the recorded layer as it is. */
+    /**
+     * Draw the recorded layer as it is.
+     */
     Layer,
 
-    /** Rasterize the recorded layer once, then draw the bitmap. */
+    /**
+     * Rasterize the recorded layer once, then draw the bitmap.
+     */
     Bitmap,
 }
 
@@ -92,7 +102,9 @@ public sealed interface RevealStyle {
         public val origin: Offset,
     ) : RevealStyle
 
-    /** The old frame fades out in place, on the skin's crossfade spec. */
+    /**
+     * The old frame fades out in place, on the skin's crossfade spec.
+     */
     public data object Crossfade : RevealStyle
 }
 
@@ -117,30 +129,46 @@ public class SkinTransition internal constructor(
 ) {
     // pf-3
 
-    /** What the host composes off screen while a warm-up runs, null otherwise. */
+    /**
+     * What the host composes off screen while a warm-up runs, null otherwise.
+     */
     internal var warmSample: (@Composable () -> Unit)? by mutableStateOf(null)
 
-    /** The warm-up step the host draws next, while a warm-up waits for it. */
+    /**
+     * The warm-up step the host draws next, while a warm-up waits for it.
+     */
     internal var warmPass: WarmPass? by mutableStateOf(null)
 
-    /** Whether [warmLayer] holds the sample. Its node sets it from draw, so it is a plain field. */
+    /**
+     * Whether [warmLayer] holds the sample. Its node sets it from draw, so it is a plain field.
+     */
     internal var warmRecorded: Boolean = false
 
-    /** Set while a reveal waits for the host to record the old frame. The host completes it from draw. */
+    /**
+     * Set while a reveal waits for the host to record the old frame. The host completes it from draw.
+     */
     internal var pendingCapture: CompletableDeferred<Unit>? by mutableStateOf(null)
 
-    /** How the running reveal draws, already turned into a crossfade under reduced motion. */
+    /**
+     * How the running reveal draws, already turned into a crossfade under reduced motion.
+     */
     internal var style: RevealStyle by mutableStateOf(RevealStyle.Crossfade)
 
-    /** The rasterized old frame under [SnapshotMode.Bitmap], null otherwise. */
+    /**
+     * The rasterized old frame under [SnapshotMode.Bitmap], null otherwise.
+     */
     internal var bitmap: ImageBitmap? by mutableStateOf(null)
 
-    /** Zero while the old frame covers everything, one once it is gone. Only draw reads it. */
+    /**
+     * Zero while the old frame covers everything, one once it is gone. Only draw reads it.
+     */
     internal val progress: MutableFloatState = mutableFloatStateOf(1f) // b-503a
 
     private val switching = Mutex()
 
-    /** The reveal's animation while it plays, which the next reveal cuts short. */
+    /**
+     * The reveal's animation while it plays, which the next reveal cuts short.
+     */
     private var playing: Job? = null // b-503a
 
     /**
@@ -260,7 +288,9 @@ public class SkinTransition internal constructor(
         }
     }
 
-    /** Takes the sample out of composition, so the host stops drawing it. */
+    /**
+     * Takes the sample out of composition, so the host stops drawing it.
+     */
     private fun letSampleGo() {
         warmSample = null
         warmRecorded = false
@@ -365,7 +395,9 @@ private suspend fun finishesWithin(
         !work.isCancelled
     }
 
-/** The locals a reveal reads at the moment it starts. */
+/**
+ * The locals a reveal reads at the moment it starts.
+ */
 internal data class RevealEnvironment(
     val motion: BuilderMotion,
     val mode: SnapshotMode,

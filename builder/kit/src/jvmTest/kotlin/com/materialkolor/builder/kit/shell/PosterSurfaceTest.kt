@@ -49,11 +49,15 @@ import io.github.composefluent.LocalContentColor as FluentContentColor
 
 private const val ShellTextRatio = 4.5
 
-/** What a glyph or a stroke that is not text has to reach on its ground, WCAG's non-text contrast. */
+/**
+ * What a glyph or a stroke that is not text has to reach on its ground, WCAG's non-text contrast.
+ */
 private const val ShellGlyphRatio = 3.0
 private const val ShellClickTag = "shell-click"
 
-/** Ten hues at five tones, mid tones included, where ink sits closest to the floor. */
+/**
+ * Ten hues at five tones, mid tones included, where ink sits closest to the floor.
+ */
 private val ShellSeeds: List<Argb> = buildList {
     for (hue in 0 until 360 step 36) {
         for (tone in listOf(20.0, 35.0, 50.0, 62.0, 80.0)) {
@@ -62,7 +66,9 @@ private val ShellSeeds: List<Argb> = buildList {
     }
 }
 
-/** One ink a skin draws on the poster, the ground it stands on and the ratio it has to reach there. */
+/**
+ * One ink a skin draws on the poster, the ground it stands on and the ratio it has to reach there.
+ */
 private class ShellInk(
     val name: String,
     val ink: Color,
@@ -239,18 +245,24 @@ class PosterSurfaceTest {
 
 // pf-1
 
-/** How many times [Counted] ran. */
+/**
+ * How many times [Counted] ran.
+ */
 private class CompositionCount {
     var value: Int = 0
 }
 
-/** Counts its own runs. Its one argument never changes, so it only runs again when a theme above it forces it. */
+/**
+ * Counts its own runs. Its one argument never changes, so it only runs again when a theme above it forces it.
+ */
 @Composable
 private fun Counted(count: CompositionCount) {
     count.value++
 }
 
-/** Every ink on ground pair [skin] draws on the poster, from its own theme as well as the builder tokens. */
+/**
+ * Every ink on ground pair [skin] draws on the poster, from its own theme as well as the builder tokens.
+ */
 @Composable
 private fun shellInks(
     skin: Skin,

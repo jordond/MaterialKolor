@@ -45,7 +45,9 @@ public fun BuilderScrollArea(
 
 // b-511
 
-/** How much room the scrollbar keeps at the end of the area, its thumb and the gap on either side. */
+/**
+ * How much room the scrollbar keeps at the end of the area, its thumb and the gap on either side.
+ */
 private val ScrollbarRoom: Dp = OverlayMetrics.thumbThickness + OverlayMetrics.thumbInset * 2
 
 /**

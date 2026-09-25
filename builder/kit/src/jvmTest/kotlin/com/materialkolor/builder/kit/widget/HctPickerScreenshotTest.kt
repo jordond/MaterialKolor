@@ -20,10 +20,14 @@ import kotlin.test.Test
 
 private const val PickerSheetTag = "hct-picker"
 
-/** Where the recording job writes the baselines. Nothing is written unless a Roborazzi task turns capture on. */
+/**
+ * Where the recording job writes the baselines. Nothing is written unless a Roborazzi task turns capture on.
+ */
 private const val PickerScreenshotDir = "src/jvmTest/screenshots/hct-picker"
 
-/** A saturated green, so the hue and tone tracks both show stretches sRGB cannot reach. */
+/**
+ * A saturated green, so the hue and tone tracks both show stretches sRGB cannot reach.
+ */
 private val PickerVividSeed: Argb = Argb(0x00C853)
 
 @OptIn(ExperimentalTestApi::class)
@@ -43,7 +47,9 @@ class HctPickerScreenshotTest {
         }
 }
 
-/** The picker on a panel, the way the side panel hosts it. */
+/**
+ * The picker on a panel, the way the side panel hosts it.
+ */
 @Composable
 private fun PickerSheet() {
     val tokens = LocalBuilderTokens.current

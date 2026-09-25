@@ -106,7 +106,9 @@ private fun ColorScheme.builderTokens(status: StatusColors): BuilderTokens =
         iconSize = 20.dp,
     )
 
-/** Material's own scrim opacity. */
+/**
+ * Material's own scrim opacity.
+ */
 private const val MaterialScrimAlpha = 0.32f
 
 /**

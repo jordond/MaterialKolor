@@ -99,7 +99,9 @@ private fun ExpressiveProgress(
     )
 }
 
-/** How Material's expressive bar draws, its line and its track and the gap between them. */
+/**
+ * How Material's expressive bar draws, its line and its track and the gap between them.
+ */
 private class ExpressiveSweep(
     val color: Color,
     val trackColor: Color,
@@ -155,7 +157,9 @@ private fun DrawScope.drawStretch(
     )
 }
 
-/** Draws the sweep at [phase] the way Material draws its own bar, a line as thick as the track. */
+/**
+ * Draws the sweep at [phase] the way Material draws its own bar, a line as thick as the track.
+ */
 private fun DrawScope.drawMaterialSweep(
     phase: Float,
     color: Color,

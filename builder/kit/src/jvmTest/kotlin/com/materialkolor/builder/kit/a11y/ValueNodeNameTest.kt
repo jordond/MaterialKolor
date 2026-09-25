@@ -88,7 +88,9 @@ class ValueNodeNameTest {
     }
 }
 
-/** What a value node says, its text, its content description and its state description. */
+/**
+ * What a value node says, its text, its content description and its state description.
+ */
 private data class ValueNode(
     val text: String?,
     val description: String?,

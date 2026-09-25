@@ -56,7 +56,9 @@ private fun InMode(
     }
 }
 
-/** The ring colour of the dark Fluent skin, or null to leave the light one to [tabOntoRing]. */
+/**
+ * The ring colour of the dark Fluent skin, or null to leave the light one to [tabOntoRing].
+ */
 private fun ringsFor(dark: Boolean): (@Composable () -> List<Color>)? {
     if (!dark) return null
     return {
@@ -67,7 +69,9 @@ private fun ringsFor(dark: Boolean): (@Composable () -> List<Color>)? {
     }
 }
 
-/** Tabs onto [content] in the Fluent skin, light and dark, and checks the ring every way the S5 probe does. */
+/**
+ * Tabs onto [content] in the Fluent skin, light and dark, and checks the ring every way the S5 probe does.
+ */
 @OptIn(ExperimentalTestApi::class)
 internal fun ringsInBothModes(
     clue: String,

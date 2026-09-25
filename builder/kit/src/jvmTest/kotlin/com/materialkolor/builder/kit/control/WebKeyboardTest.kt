@@ -32,7 +32,9 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactly
 import kotlin.test.Test
 
-/** Shows [content] in [skin] with the state fold as [folds] and the web's keyboard as [keyboard]. */
+/**
+ * Shows [content] in [skin] with the state fold as [folds] and the web's keyboard as [keyboard].
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.showOnWeb(
     skin: Skin,
@@ -51,7 +53,9 @@ private fun ComposeUiTest.showOnWeb(
     }
 }
 
-/** A scroll area with more lines than fit, tagged [tag], holding [inside] above the lines. */
+/**
+ * A scroll area with more lines than fit, tagged [tag], holding [inside] above the lines.
+ */
 @Composable
 private fun OverflowingArea(
     tag: String,
@@ -64,7 +68,9 @@ private fun OverflowingArea(
     }
 }
 
-/** Tabs once from the node tagged [from] and lets the focus land. */
+/**
+ * Tabs once from the node tagged [from] and lets the focus land.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.tabFrom(from: String) {
     onNodeWithTag(from).requestFocus()

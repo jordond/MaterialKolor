@@ -41,7 +41,9 @@ internal object MaterialIcons : BuilderIcons {
         vectors[id.ordinal] ?: glyph(id).toVector(id).also { vector -> vectors[id.ordinal] = vector }
 }
 
-/** A glyph on the 24 by 24 Material grid, one or more filled paths in SVG path syntax. */
+/**
+ * A glyph on the 24 by 24 Material grid, one or more filled paths in SVG path syntax.
+ */
 private class MaterialGlyph(
     vararg val paths: String,
     val autoMirror: Boolean = false,
@@ -67,7 +69,9 @@ private fun MaterialGlyph.toVector(id: IconId): ImageVector {
     return builder.build()
 }
 
-/** Joins the pieces of one path, split only so each line stays readable. */
+/**
+ * Joins the pieces of one path, split only so each line stays readable.
+ */
 private fun path(vararg parts: String): String = parts.joinToString(separator = "")
 
 private fun glyph(id: IconId): MaterialGlyph =

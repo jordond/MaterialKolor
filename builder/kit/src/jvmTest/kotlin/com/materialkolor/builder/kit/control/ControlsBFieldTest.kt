@@ -50,7 +50,9 @@ private fun ComposeUiTest.handInFromOutside(write: () -> Unit) {
     mainClock.advanceTimeByFrame()
 }
 
-/** The key that holds undo on this machine, Cmd on a Mac and Ctrl elsewhere. */
+/**
+ * The key that holds undo on this machine, Cmd on a Mac and Ctrl elsewhere.
+ */
 private val UndoModifier: Key =
     if (System.getProperty("os.name").orEmpty().startsWith("Mac")) Key.MetaLeft else Key.CtrlLeft
 

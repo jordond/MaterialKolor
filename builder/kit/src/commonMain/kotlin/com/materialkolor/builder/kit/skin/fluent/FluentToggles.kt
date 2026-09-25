@@ -99,14 +99,18 @@ internal fun FluentSwitch(
     }
 }
 
-/** Fluent's switch styles, in the poster's ink on the poster. */
+/**
+ * Fluent's switch styles, in the poster's ink on the poster.
+ */
 @Composable
 internal fun fluentSwitchStyles(checked: Boolean): VisualStateScheme<SwitcherStyle> {
     val fluent = if (checked) SwitcherDefaults.selectedSwitcherStyle() else SwitcherDefaults.defaultSwitcherStyle()
     return LocalFluentPosterInk.current?.switches(fluent, checked) ?: fluent
 }
 
-/** Fluent's switch track and thumb, the thumb sliding to the end while on and swelling under the pointer. */
+/**
+ * Fluent's switch track and thumb, the thumb sliding to the end while on and swelling under the pointer.
+ */
 @Composable
 private fun SwitchTrack(
     checked: Boolean,
@@ -141,17 +145,25 @@ private fun SwitchTrack(
     }
 }
 
-/** Fluent's switch track. */
+/**
+ * Fluent's switch track.
+ */
 private val SwitchTrackWidth = 40.dp
 private val SwitchTrackHeight = 20.dp
 
-/** How far in from either end of the track the thumb travels. */
+/**
+ * How far in from either end of the track the thumb travels.
+ */
 private val SwitchTrackInset = 4.dp
 
-/** Where the thumb's centre comes to rest while on, measured from the inset start. */
+/**
+ * Where the thumb's centre comes to rest while on, measured from the inset start.
+ */
 private val SwitchThumbEnd = 26.dp
 
-/** Between the label and the track. */
+/**
+ * Between the label and the track.
+ */
 private val SwitchLabelGap = 12.dp
 
 /**
@@ -218,11 +230,17 @@ internal fun fluentCheckboxColors(checked: Boolean): VisualStateScheme<CheckBoxC
     return LocalFluentPosterInk.current?.checkboxes(fluent, checked) ?: fluent
 }
 
-/** Fluent's checkbox. */
+/**
+ * Fluent's checkbox.
+ */
 private val CheckboxSize = 20.dp
 
-/** Fluent's check inside a ticked box. */
+/**
+ * Fluent's check inside a ticked box.
+ */
 private val CheckSize = 12.dp
 
-/** Between the box and its label. */
+/**
+ * Between the box and its label.
+ */
 private val CheckboxLabelGap = 8.dp

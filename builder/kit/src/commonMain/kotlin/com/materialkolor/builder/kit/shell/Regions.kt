@@ -38,12 +38,18 @@ import com.materialkolor.builder.kit.skin.material.MaterialTopBarRegion
 import com.materialkolor.builder.kit.skin.material.MaterialWindowRegion
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
-/** Which edge of the workspace a panel stands on. Its other edge, the one facing the canvas, is its inner edge. */
+/**
+ * Which edge of the workspace a panel stands on. Its other edge, the one facing the canvas, is its inner edge.
+ */
 public enum class PanelSide {
-    /** The poster's edge, where the projects drawer opens. */
+    /**
+     * The poster's edge, where the projects drawer opens.
+     */
     Start,
 
-    /** The far edge, where the export panel opens. */
+    /**
+     * The far edge, where the export panel opens.
+     */
     End,
 }
 

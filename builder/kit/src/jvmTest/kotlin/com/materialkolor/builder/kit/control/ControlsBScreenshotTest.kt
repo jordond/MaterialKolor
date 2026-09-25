@@ -235,7 +235,9 @@ private fun SeenStyles.inkPairs(): List<InkPair> {
     }
 }
 
-/** Every input of this batch in its states, on one panel. */
+/**
+ * Every input of this batch in its states, on one panel.
+ */
 @Composable
 private fun ControlsSheet() {
     val tokens = LocalBuilderTokens.current

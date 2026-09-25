@@ -32,7 +32,9 @@ import kotlin.test.Test
  */
 private val FarApartDocument: ThemeDocument = ThemeDocument(seed = Argb(0x0000FF), style = Style.Vibrant)
 
-/** How far the focus layer has to pull the ring for [FarApartDocument] to test anything. */
+/**
+ * How far the focus layer has to pull the ring for [FarApartDocument] to test anything.
+ */
 private const val RingTolerance = 0.02f
 
 /**
@@ -225,10 +227,14 @@ class FocusRingTest {
     }
 }
 
-/** The libraries whose fields draw a focus outline all the way round. */
+/**
+ * The libraries whose fields draw a focus outline all the way round.
+ */
 private val OutlinedFieldLibraries: Set<Library> = setOf(Library.Material3, Library.Custom)
 
-/** The color a field in [skin] draws its focus outline in. */
+/**
+ * The color a field in [skin] draws its focus outline in.
+ */
 @Composable
 private fun fieldFocusColor(skin: Skin): Color =
     if (skin.library == Library.Material3) MaterialTheme.colorScheme.primary else LocalBuilderTokens.current.accent

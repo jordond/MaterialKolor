@@ -54,7 +54,9 @@ public fun BuilderCard(
     }
 }
 
-/** A card drawn from [style]. */
+/**
+ * A card drawn from [style].
+ */
 @Composable
 internal fun HeadlessCard(
     style: CardStyle,

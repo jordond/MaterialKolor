@@ -19,7 +19,9 @@ import kotlin.test.Test
 
 private const val InfoTag = "info"
 
-/** Shows the seed info button in [skin], with the fold as [folds] and the panel as [expanded]. */
+/**
+ * Shows the seed info button in [skin], with the fold as [folds] and the panel as [expanded].
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.showInfoButton(
     skin: Skin,
@@ -41,7 +43,9 @@ private fun ComposeUiTest.showInfoButton(
     }
 }
 
-/** Matches a node with no state description at all. */
+/**
+ * Matches a node with no state description at all.
+ */
 private fun hasNoStateDescription(): SemanticsMatcher =
     SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription)
 

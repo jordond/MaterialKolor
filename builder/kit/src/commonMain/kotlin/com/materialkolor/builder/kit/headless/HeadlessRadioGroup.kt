@@ -199,7 +199,9 @@ internal class RadioGroupFocus internal constructor(
     internal var focusedIndex: Int by mutableIntStateOf(NoRequest)
 
     internal companion object {
-        /** No key has asked for an option since the choice last changed. */
+        /**
+         * No key has asked for an option since the choice last changed.
+         */
         internal const val NoRequest: Int = -1
     }
 }

@@ -46,19 +46,29 @@ public data class BuilderDurations(
     }
 }
 
-/** The curves the builder draws its own motion on. Skins with their own curves ignore these. */
+/**
+ * The curves the builder draws its own motion on. Skins with their own curves ignore these.
+ */
 public object BuilderEasing {
-    /** Quick out, settles gently. The default for anything that moves a short distance. */
+    /**
+     * Quick out, settles gently. The default for anything that moves a short distance.
+     */
     public val Standard: Easing = CubicBezierEasing(0.2f, 0f, 0f, 1f)
 
-    /** Leaves fast and lands soft. The reveal and every panel arrival use this. */
+    /**
+     * Leaves fast and lands soft. The reveal and every panel arrival use this.
+     */
     public val EmphasizedDecelerate: Easing = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1f)
 
-    /** Builds speed on the way out. Panels and sheets leave on this. */
+    /**
+     * Builds speed on the way out. Panels and sheets leave on this.
+     */
     public val EmphasizedAccelerate: Easing = CubicBezierEasing(0.3f, 0f, 0.8f, 0.15f)
 }
 
-/** How far a press shrinks whatever was pressed (MO-06). */
+/**
+ * How far a press shrinks whatever was pressed (MO-06).
+ */
 public const val PressScale: Float = 0.97f
 
 /**
@@ -70,37 +80,59 @@ public const val PressScale: Float = 0.97f
  */
 @Immutable
 public interface BuilderMotion {
-    /** The timings behind the specs, for tests, screenshots and the reduced motion fallback. */
+    /**
+     * The timings behind the specs, for tests, screenshots and the reduced motion fallback.
+     */
     public val durations: BuilderDurations
 
-    /** How far a press shrinks its target. One under reduced motion, where nothing moves. */
+    /**
+     * How far a press shrinks its target. One under reduced motion, where nothing moves.
+     */
     public val pressScale: Float
 
-    /** Something moving a short distance. */
+    /**
+     * Something moving a short distance.
+     */
     public fun <T> spatial(): FiniteAnimationSpec<T>
 
-    /** Something only changing colour or opacity. */
+    /**
+     * Something only changing colour or opacity.
+     */
     public fun <T> effects(): FiniteAnimationSpec<T>
 
-    /** Something crossing the canvas, such as the split wipe handle. */
+    /**
+     * Something crossing the canvas, such as the split wipe handle.
+     */
     public fun <T> slide(): FiniteAnimationSpec<T>
 
-    /** The circle growing out of the library switcher. */
+    /**
+     * The circle growing out of the library switcher.
+     */
     public fun <T> reveal(): FiniteAnimationSpec<T>
 
-    /** A panel, a sheet or the poster arriving. */
+    /**
+     * A panel, a sheet or the poster arriving.
+     */
     public fun <T> panelEnter(): FiniteAnimationSpec<T>
 
-    /** The same, leaving. */
+    /**
+     * The same, leaving.
+     */
     public fun <T> panelExit(): FiniteAnimationSpec<T>
 
-    /** A menu or a tooltip. */
+    /**
+     * A menu or a tooltip.
+     */
     public fun <T> popover(): FiniteAnimationSpec<T>
 
-    /** The press scale. */
+    /**
+     * The press scale.
+     */
     public fun <T> press(): FiniteAnimationSpec<T>
 
-    /** The snapshot crossfade behind a discrete change. */
+    /**
+     * The snapshot crossfade behind a discrete change.
+     */
     public fun <T> crossfade(): FiniteAnimationSpec<T>
 }
 

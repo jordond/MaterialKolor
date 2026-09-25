@@ -19,16 +19,24 @@ import com.materialkolor.builder.kit.a11y.collectIsFocusVisibleAsState
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
-/** How faint a disabled control draws, container and ink together. */
+/**
+ * How faint a disabled control draws, container and ink together.
+ */
 internal const val DisabledAlpha: Float = 0.38f
 
-/** Full opacity, or [DisabledAlpha] when the control is disabled. */
+/**
+ * Full opacity, or [DisabledAlpha] when the control is disabled.
+ */
 internal fun enabledAlpha(enabled: Boolean): Float = if (enabled) 1f else DisabledAlpha
 
-/** How thick the keyboard focus ring is in every skin. */
+/**
+ * How thick the keyboard focus ring is in every skin.
+ */
 internal val FocusRingWidth: Dp = 2.dp
 
-/** How far the focus ring stands off the control, so it never sits on the control's own outline. */
+/**
+ * How far the focus ring stands off the control, so it never sits on the control's own outline.
+ */
 internal val FocusRingOffset: Dp = 2.dp
 
 /**

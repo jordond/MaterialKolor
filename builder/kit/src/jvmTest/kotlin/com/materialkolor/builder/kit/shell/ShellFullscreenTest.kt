@@ -100,7 +100,9 @@ class ShellFullscreenTest {
         }
 }
 
-/** The shell with tagged slots, telling [onCanvas] what its canvas remembered each time it composes. */
+/**
+ * The shell with tagged slots, telling [onCanvas] what its canvas remembered each time it composes.
+ */
 @Composable
 private fun FullscreenShell(
     fullscreen: Boolean,

@@ -23,7 +23,9 @@ import com.materialkolor.builder.kit.control.BottomSheetState
 internal class SheetMoveReport(
     private val sheet: BottomSheetState,
 ) : NestedScrollConnection {
-    /** Where the sheet stood as the step in flight began, NaN between steps. */
+    /**
+     * Where the sheet stood as the step in flight began, NaN between steps.
+     */
     private var before = Float.NaN
 
     override fun onPreScroll(

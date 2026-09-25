@@ -299,7 +299,9 @@ private fun <T> ExpressiveSegmented(
 
 // b-510
 
-/** An expressive option's glyph, if any, and its label. */
+/**
+ * An expressive option's glyph, if any, and its label.
+ */
 @Composable
 private fun ExpressiveLabel(
     name: String,
@@ -319,7 +321,9 @@ private fun ExpressiveLabel(
     )
 }
 
-/** The little room round a compact row's label. */
+/**
+ * The little room round a compact row's label.
+ */
 private val CompactPadding: PaddingValues = PaddingValues(horizontal = 4.dp)
 
 /**
@@ -349,7 +353,9 @@ private fun materialTrackStyle(): SegmentedStyle {
     )
 }
 
-/** The connected shapes for the option at [index] of [count], by where it sits in the row. */
+/**
+ * The connected shapes for the option at [index] of [count], by where it sits in the row.
+ */
 @Composable
 private fun connectedShapes(
     index: Int,
@@ -374,12 +380,16 @@ private fun connectedShapes(
  */
 @Stable
 private class RowRing {
-    /** Where the row sits, which each option's ring is measured from. */
+    /**
+     * Where the row sits, which each option's ring is measured from.
+     */
     var row: LayoutCoordinates? = null
 
     private val options: SnapshotStateMap<Int, RingedOption> = mutableStateMapOf()
 
-    /** Keeps the option at [index] on the row's list while it is shown. */
+    /**
+     * Keeps the option at [index] on the row's list while it is shown.
+     */
     @Composable
     fun rememberOption(
         index: Int,
@@ -394,7 +404,9 @@ private class RowRing {
         return option
     }
 
-    /** Draws the ring round whichever option shows one, the way [controlRing] draws it on its own. */
+    /**
+     * Draws the ring round whichever option shows one, the way [controlRing] draws it on its own.
+     */
     fun DrawScope.drawRing(color: Color) {
         val option = options.values.firstOrNull { option -> option.shows.value } ?: return
         val bounds = option.bounds ?: return
@@ -420,16 +432,22 @@ private class RowRing {
     }
 }
 
-/** One option of a [RowRing], whether its ring [shows] and the [shape] it goes round. */
+/**
+ * One option of a [RowRing], whether its ring [shows] and the [shape] it goes round.
+ */
 private class RingedOption(
     val shows: State<Boolean>,
     val shape: State<Shape>,
 ) {
-    /** Where the option sits in the row, or null before it is placed. */
+    /**
+     * Where the option sits in the row, or null before it is placed.
+     */
     var bounds: Rect? by mutableStateOf(null)
         private set
 
-    /** Measures the option at [coordinates] from the [row] it sits in. */
+    /**
+     * Measures the option at [coordinates] from the [row] it sits in.
+     */
     fun place(
         row: LayoutCoordinates?,
         coordinates: LayoutCoordinates,
@@ -439,7 +457,9 @@ private class RingedOption(
     }
 }
 
-/** This round rectangle grown by [amount] on every side, each corner as much rounder. */
+/**
+ * This round rectangle grown by [amount] on every side, each corner as much rounder.
+ */
 private fun RoundRect.grow(amount: Float): RoundRect =
     RoundRect(
         left = left - amount,

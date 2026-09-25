@@ -74,7 +74,9 @@ internal fun PosterPanel(
 internal fun posterOverlayStyle(tokens: BuilderTokens): OverlayStyle =
     customOverlayStyle(tokens.copy(panelRaised = tokens.panel))
 
-/** The rail opens with the panel arrival motion and closes with the exit, and snaps under reduced motion (MO-05). */
+/**
+ * The rail opens with the panel arrival motion and closes with the exit, and snaps under reduced motion (MO-05).
+ */
 @Composable
 internal fun posterSpec(opening: Boolean): AnimationSpec<Float> {
     val motion = LocalBuilderMotion.current
@@ -108,7 +110,9 @@ private fun Modifier.revealWidth(width: Dp): Modifier =
         layout(shown, placeable.height) { placeable.placeRelative(0, 0) }
     }
 
-/** The kit's names for the detents, remembered on the three names like the public sheet's. */
+/**
+ * The kit's names for the detents, remembered on the three names like the public sheet's.
+ */
 @Composable
 internal fun posterDetentNames(): (BottomSheetDetent) -> String {
     val peek = stringResource(Res.string.sheet_detent_peek)

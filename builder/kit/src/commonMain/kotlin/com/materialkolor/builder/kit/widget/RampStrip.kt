@@ -53,25 +53,39 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-/** How tall the continuous strip is. */
+/**
+ * How tall the continuous strip is.
+ */
 private val StripHeight: Dp = 16.dp
 
-/** The stroke width of a marker tick and of the ring at the key tone. */
+/**
+ * The stroke width of a marker tick and of the ring at the key tone.
+ */
 private val TickWidth: Dp = 2.dp
 
-/** The narrowest a stop can be and still carry its tone as a label. */
+/**
+ * The narrowest a stop can be and still carry its tone as a label.
+ */
 private val LabeledStopWidth: Dp = 32.dp
 
-/** How far off a marker the pointer can rest on the strip and still light it. */
+/**
+ * How far off a marker the pointer can rest on the strip and still light it.
+ */
 private val MarkerReach: Dp = 6.dp
 
-/** The tone at and above which a stop is light enough to take the darkest stop as ink. */
+/**
+ * The tone at and above which a stop is light enough to take the darkest stop as ink.
+ */
 private const val LIGHT_TONE = 50
 
-/** The whole tonal range, 0 to 100. */
+/**
+ * The whole tonal range, 0 to 100.
+ */
 private const val TONE_RANGE = 100f
 
-/** The least contrast a stop's focus line needs against the stop and against its halo (WCAG 2.4.13). */
+/**
+ * The least contrast a stop's focus line needs against the stop and against its halo (WCAG 2.4.13).
+ */
 private const val FOCUS_CONTRAST = 3.0
 
 /**
@@ -162,7 +176,9 @@ public fun RampStrip(
     }
 }
 
-/** [RampStrip] for one of the engine's ramps, marked with the roles that picked from it. */
+/**
+ * [RampStrip] for one of the engine's ramps, marked with the roles that picked from it.
+ */
 @Composable
 public fun RampStrip(
     ramp: Ramp,
@@ -263,7 +279,9 @@ private fun Modifier.stopFocusRing(ring: StopRing): Modifier {
         .border(haloWidth * 2 + WidgetFocusWidth, ring.halo)
 }
 
-/** [count] split into groups of at most [size], rounded up. */
+/**
+ * [count] split into groups of at most [size], rounded up.
+ */
 private fun ceilDiv(
     count: Int,
     size: Int,

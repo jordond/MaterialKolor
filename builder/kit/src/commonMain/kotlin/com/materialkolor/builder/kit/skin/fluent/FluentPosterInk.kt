@@ -36,32 +36,46 @@ internal class FluentPosterInk(
     val page: Color,
     val outline: Color,
 ) {
-    /** A label, a glyph or a stroke. */
+    /**
+     * A label, a glyph or a stroke.
+     */
     fun line(enabled: Boolean): Color = if (enabled) ink else ink.copy(alpha = DisabledAlpha)
 
-    /** An accent fill, the ink as strong as Fluent draws [fluent] in this state. */
+    /**
+     * An accent fill, the ink as strong as Fluent draws [fluent] in this state.
+     */
     fun accent(fluent: Color): Color = ink.copy(alpha = fluent.alpha)
 
-    /** What stands on an accent fill. */
+    /**
+     * What stands on an accent fill.
+     */
     fun onAccent(enabled: Boolean): Color = if (enabled) page else line(enabled = false)
 
-    /** A stroke in the ink wherever Fluent draws [fluent] at all. */
+    /**
+     * A stroke in the ink wherever Fluent draws [fluent] at all.
+     */
     fun stroke(
         fluent: Color,
         enabled: Boolean,
     ): Color = if (fluent.alpha == 0f) fluent else line(enabled)
 
-    /** A stroke in the ink wherever Fluent draws [fluent] at all. */
+    /**
+     * A stroke in the ink wherever Fluent draws [fluent] at all.
+     */
     fun stroke(
         fluent: Brush,
         enabled: Boolean,
     ): Brush = if (fluent is SolidColor && fluent.value.alpha == 0f) fluent else SolidColor(line(enabled))
 }
 
-/** The poster's colours inside `PosterSurface` in Fluent, and null everywhere else. */
+/**
+ * The poster's colours inside `PosterSurface` in Fluent, and null everywhere else.
+ */
 internal val LocalFluentPosterInk: ProvidableCompositionLocal<FluentPosterInk?> = staticCompositionLocalOf { null }
 
-/** Fluent's button colours on the poster, an ink fill under the seed where [accent] is set. */
+/**
+ * Fluent's button colours on the poster, an ink fill under the seed where [accent] is set.
+ */
 internal fun FluentPosterInk.buttons(
     fluent: VisualStateScheme<ButtonColor>,
     accent: Boolean,
@@ -74,7 +88,9 @@ internal fun FluentPosterInk.buttons(
         )
     }
 
-/** Fluent's switch on the poster, its track an ink fill while [checked]. */
+/**
+ * Fluent's switch on the poster, its track an ink fill while [checked].
+ */
 internal fun FluentPosterInk.switches(
     fluent: VisualStateScheme<SwitcherStyle>,
     checked: Boolean,
@@ -88,7 +104,9 @@ internal fun FluentPosterInk.switches(
         )
     }
 
-/** Fluent's checkbox on the poster, its box an ink fill while [checked]. */
+/**
+ * Fluent's checkbox on the poster, its box an ink fill while [checked].
+ */
 internal fun FluentPosterInk.checkboxes(
     fluent: VisualStateScheme<CheckBoxColor>,
     checked: Boolean,
@@ -102,7 +120,9 @@ internal fun FluentPosterInk.checkboxes(
         )
     }
 
-/** Fluent's selector bar item on the poster. */
+/**
+ * Fluent's selector bar item on the poster.
+ */
 internal fun FluentPosterInk.tabs(
     fluent: VisualStateScheme<SelectorBarItemColor>,
 ): VisualStateScheme<SelectorBarItemColor> =
@@ -110,7 +130,9 @@ internal fun FluentPosterInk.tabs(
         look.copy(contentColor = line(enabled), indicatorColor = accent(look.indicatorColor))
     }
 
-/** This scheme with [each] applied to the look of every state, told whether that state is enabled. */
+/**
+ * This scheme with [each] applied to the look of every state, told whether that state is enabled.
+ */
 private inline fun <T> VisualStateScheme<T>.eachState(each: (look: T, enabled: Boolean) -> T): VisualStateScheme<T> =
     PentaVisualScheme(
         default = each(schemeFor(VisualState.Default), true),

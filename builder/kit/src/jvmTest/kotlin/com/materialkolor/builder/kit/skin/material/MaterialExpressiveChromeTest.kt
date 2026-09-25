@@ -70,22 +70,32 @@ import io.kotest.matchers.shouldNotBe
 import java.io.File
 import kotlin.test.Test
 
-/** The Material3 skin in both of its flavours, the flat one first. */
+/**
+ * The Material3 skin in both of its flavours, the flat one first.
+ */
 private val Flavours: List<Skin> = listOf(
     Skin(Library.Material3, expressive = false),
     Skin(Library.Material3, expressive = true),
 )
 
-/** The library switcher's own options, the longest row of the segmented control's real callers. */
+/**
+ * The library switcher's own options, the longest row of the segmented control's real callers.
+ */
 private val Libraries: List<String> = listOf("Material 3", "Expressive", "Unstyled", "Fluent", "Custom")
 
-/** The preview modes, a row of three like most of the segmented control's callers. */
+/**
+ * The preview modes, a row of three like most of the segmented control's callers.
+ */
 private val Modes: List<String> = listOf("Light", "Split", "Dark")
 
-/** Widths the segmented control's callers give it, from a narrow panel to an unbounded top bar. */
+/**
+ * Widths the segmented control's callers give it, from a narrow panel to an unbounded top bar.
+ */
 private val CallerWidths: List<Dp?> = listOf(160.dp, 240.dp, 360.dp, 480.dp, 720.dp, null)
 
-/** The files this slice draws the expressive chrome in, which may never start an endless clock. */
+/**
+ * The files this slice draws the expressive chrome in, which may never start an endless clock.
+ */
 private val ChromeSources: List<String> = listOf(
     "src/commonMain/kotlin/com/materialkolor/builder/kit/skin/material/MaterialSegmented.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/kit/skin/material/MaterialProgress.kt",
@@ -94,7 +104,9 @@ private val ChromeSources: List<String> = listOf(
     "src/commonMain/kotlin/com/materialkolor/builder/kit/a11y/ValueNodeName.kt",
 )
 
-/** Stems, so the architecture scan does not read this list as an endless animation. */
+/**
+ * Stems, so the architecture scan does not read this list as an endless animation.
+ */
 private val EndlessClockWords: List<String> = listOf("rememberInfinite", "infiniteRepeat")
 
 private const val RowTag = "row"
@@ -105,10 +117,14 @@ private const val SwitchTag = "switch"
 
 private const val ChromeTag = "chrome"
 
-/** An option of the segmented row tagged [RowTag]. */
+/**
+ * An option of the segmented row tagged [RowTag].
+ */
 private val RowOption: SemanticsMatcher = hasRole(Role.RadioButton) and hasAnyAncestor(hasTestTag(RowTag))
 
-/** Whether a node reports a toggle state, which only the expressive toggle buttons do. */
+/**
+ * Whether a node reports a toggle state, which only the expressive toggle buttons do.
+ */
 private val HasToggleState: SemanticsMatcher = SemanticsMatcher.keyIsDefined(SemanticsProperties.ToggleableState)
 
 /**
@@ -381,7 +397,9 @@ class MaterialExpressiveChromeTest {
     }
 }
 
-/** Whether a test turns the web's folds on around what it shows. */
+/**
+ * Whether a test turns the web's folds on around what it shows.
+ */
 private enum class FoldScope {
     On,
     Off,
@@ -394,7 +412,9 @@ private enum class FoldScope {
     }
 }
 
-/** Runs [block] in a fresh test for each flavour of the Material3 skin, naming it on failure. */
+/**
+ * Runs [block] in a fresh test for each flavour of the Material3 skin, naming it on failure.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun forEachFlavour(block: suspend ComposeUiTest.(skin: Skin) -> Unit) {
     for (skin in Flavours) {
@@ -402,7 +422,9 @@ private fun forEachFlavour(block: suspend ComposeUiTest.(skin: Skin) -> Unit) {
     }
 }
 
-/** The preview modes with Split chosen, tagged [RowTag]. */
+/**
+ * The preview modes with Split chosen, tagged [RowTag].
+ */
 @Composable
 private fun ModeRow() {
     var mode by remember { mutableStateOf("Split") }
@@ -415,7 +437,9 @@ private fun ModeRow() {
     ) { option -> option }
 }
 
-/** A Material switch an app lays out for itself, the row taking the switch and naming it. */
+/**
+ * A Material switch an app lays out for itself, the row taking the switch and naming it.
+ */
 @Composable
 private fun WifiSwitch() {
     var on by remember { mutableStateOf(false) }
@@ -429,14 +453,18 @@ private fun WifiSwitch() {
     }
 }
 
-/** The text of the bar tagged [BarTag], as the web reads it. */
+/**
+ * The text of the bar tagged [BarTag], as the web reads it.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.barText(): String? =
     onNodeWithTag(BarTag).fetchSemanticsNode().config.getOrNull(SemanticsProperties.Text)?.joinToString { text ->
         text.text
     }
 
-/** What each call of [name] passes, the text between its parentheses. */
+/**
+ * What each call of [name] passes, the text between its parentheses.
+ */
 private fun String.callArguments(name: String): List<String> =
     Regex("""\b$name\(""")
         .findAll(this)

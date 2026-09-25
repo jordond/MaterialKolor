@@ -67,23 +67,35 @@ import kotlinx.coroutines.flow.drop
  */
 internal expect val overlaysInTree: Boolean
 
-/** [overlaysInTree] as a local, so a test can run every overlay both ways on the JVM. */
+/**
+ * [overlaysInTree] as a local, so a test can run every overlay both ways on the JVM.
+ */
 internal val LocalOverlaysInTree: ProvidableCompositionLocal<Boolean> =
     staticCompositionLocalOf { overlaysInTree }
 
-/** The host the overlays under it render into, null where overlays open windows of their own. */
+/**
+ * The host the overlays under it render into, null where overlays open windows of their own.
+ */
 internal val LocalOverlayHost: ProvidableCompositionLocal<OverlayHostState?> =
     staticCompositionLocalOf { null }
 
-/** How an overlay treats what lies under it. */
+/**
+ * How an overlay treats what lies under it.
+ */
 internal enum class OverlayKind {
-    /** A dialog, sheet or side panel. What lies under it leaves the Tab order and the semantics tree. */
+    /**
+     * A dialog, sheet or side panel. What lies under it leaves the Tab order and the semantics tree.
+     */
     Modal,
 
-    /** A menu or the list of a select. Tab stays inside it, and what lies under it can still be read. */
+    /**
+     * A menu or the list of a select. Tab stays inside it, and what lies under it can still be read.
+     */
     Popover,
 
-    /** A tooltip. It never takes focus and leaves what lies under it as it is. */
+    /**
+     * A tooltip. It never takes focus and leaves what lies under it as it is.
+     */
     Passive,
 
     /**
@@ -103,7 +115,9 @@ internal class OverlayPlacement(
     val provider: PopupPositionProvider?,
 )
 
-/** One overlay in the host, drawn with the locals of the place it was opened from. */
+/**
+ * One overlay in the host, drawn with the locals of the place it was opened from.
+ */
 internal class OverlayLayer(
     val kind: OverlayKind,
 ) {
@@ -118,31 +132,47 @@ internal class OverlayLayer(
      */
     var open: Boolean by mutableStateOf(true)
 
-    /** Whether focus is inside the layer. */
+    /**
+     * Whether focus is inside the layer.
+     */
     var hasFocus: Boolean = false
 
-    /** The panel drawn in the layer that takes focus as it opens, which the host can lead focus back into. */
+    /**
+     * The panel drawn in the layer that takes focus as it opens, which the host can lead focus back into.
+     */
     var focus: OverlayFocus? = null
 
-    /** The keys the place it was opened from hears first, from [LocalOverlayKeys]. */
+    /**
+     * The keys the place it was opened from hears first, from [LocalOverlayKeys].
+     */
     var keys: ((KeyEvent) -> Boolean)? = null // b-315d
 }
 
-/** The layer the overlay drawn here sits in, so its [OverlayFocus] can offer itself to the host. */
+/**
+ * The layer the overlay drawn here sits in, so its [OverlayFocus] can offer itself to the host.
+ */
 internal val LocalOverlayLayer: ProvidableCompositionLocal<OverlayLayer?> =
     staticCompositionLocalOf { null }
 
-/** The overlays open over the page, in the order they opened, the last one on top. */
+/**
+ * The overlays open over the page, in the order they opened, the last one on top.
+ */
 internal class OverlayHostState {
     val layers: SnapshotStateList<OverlayLayer> = mutableStateListOf()
 
-    /** The top slot over every layer, where the toasts go. */
+    /**
+     * The top slot over every layer, where the toasts go.
+     */
     val top: SnapshotStateList<OverlayLayer> = mutableStateListOf()
 
-    /** The host's own layout, which anchored overlays measure their anchors against. */
+    /**
+     * The host's own layout, which anchored overlays measure their anchors against.
+     */
     var coordinates: LayoutCoordinates? = null
 
-    /** The page's focus group, which notes the child that held focus each time focus leaves the page. */
+    /**
+     * The page's focus group, which notes the child that held focus each time focus leaves the page.
+     */
     val page: FocusRequester = FocusRequester()
 
     /**
@@ -151,14 +181,20 @@ internal class OverlayHostState {
      */
     val pageChildren: FocusRequester = FocusRequester()
 
-    /** Whether focus is in the page. */
+    /**
+     * Whether focus is in the page.
+     */
     var pageHasFocus: Boolean = false
 
-    /** Whether an open modal sits over the layer at [index], or over the page for [Page]. */
+    /**
+     * Whether an open modal sits over the layer at [index], or over the page for [Page].
+     */
     fun isUnderModal(index: Int): Boolean =
         layers.withIndex().any { (i, layer) -> i > index && layer.open && layer.kind == OverlayKind.Modal }
 
-    /** Whether an open modal or popover above the layer at [index] keeps the keyboard to itself. */
+    /**
+     * Whether an open modal or popover above the layer at [index] keeps the keyboard to itself.
+     */
     fun isUnderFocusTrap(index: Int): Boolean =
         layers.withIndex().any { (i, layer) -> i > index && layer.open && layer.kind != OverlayKind.Passive }
 
@@ -168,19 +204,27 @@ internal class OverlayHostState {
      */
     fun isTopUnderFocusTrap(): Boolean = layers.any { layer -> layer.open && layer.kind == OverlayKind.Popover }
 
-    /** Whether focus rests in the page or in a layer, rather than nowhere after a layer left with it. */
+    /**
+     * Whether focus rests in the page or in a layer, rather than nowhere after a layer left with it.
+     */
     fun holdsFocus(): Boolean = pageHasFocus || layers.any { it.hasFocus } || top.any { it.hasFocus }
 
-    /** Goes up each time focus leaves the top slot, so the host can look where it went once it settles. */
+    /**
+     * Goes up each time focus leaves the top slot, so the host can look where it went once it settles.
+     */
     var topFocusLosses: Int by mutableIntStateOf(0)
         private set
 
-    /** Notes that focus left the top slot, a toast's Undo that closed the toast under it included. */
+    /**
+     * Notes that focus left the top slot, a toast's Undo that closed the toast under it included.
+     */
     fun topLostFocus() {
         topFocusLosses++
     }
 
-    /** Notes the control in the page that holds focus, two focus groups deep, as focus leaves the page. */
+    /**
+     * Notes the control in the page that holds focus, two focus groups deep, as focus leaves the page.
+     */
     fun savePageFocus() {
         page.saveFocusedChild()
         pageChildren.saveFocusedChild()
@@ -203,7 +247,9 @@ internal class OverlayHostState {
         if (modal != null) modal.focus?.enter() else page.restoreFocusedChild()
     }
 
-    /** [layout]'s bounds in the host, or in the root before the host has been placed. */
+    /**
+     * [layout]'s bounds in the host, or in the root before the host has been placed.
+     */
     fun boundsOf(layout: LayoutCoordinates): IntRect {
         val host = coordinates?.takeIf { it.isAttached }
         val topLeft = host?.localPositionOf(layout, Offset.Zero) ?: layout.positionInRoot()
@@ -211,7 +257,9 @@ internal class OverlayHostState {
     }
 
     companion object {
-        /** The index [isUnderModal] and [isUnderFocusTrap] take for the page itself. */
+        /**
+         * The index [isUnderModal] and [isUnderFocusTrap] take for the page itself.
+         */
         const val Page: Int = -1
     }
 }
@@ -229,7 +277,9 @@ internal fun inTreeOverlayHost(): OverlayHostState? {
     return LocalOverlayHost.current ?: error("No OverlayHost provided, open overlays inside BuilderTheme")
 }
 
-/** The host overlays render into here, or null, without failing when there is none. */
+/**
+ * The host overlays render into here, or null, without failing when there is none.
+ */
 @Composable
 internal fun currentOverlayHost(): OverlayHostState? =
     if (LocalOverlaysInTree.current) LocalOverlayHost.current else null
@@ -475,7 +525,9 @@ private fun Modifier.dismissOnEscape(layer: OverlayLayer): Modifier =
         escape
     }
 
-/** Keeps focus out of the page, a layer or the top slot while [trapped] says an overlay over it holds it. */
+/**
+ * Keeps focus out of the page, a layer or the top slot while [trapped] says an overlay over it holds it.
+ */
 private fun Modifier.trapFocus(trapped: () -> Boolean): Modifier =
     focusProperties { onEnter = { if (trapped()) cancelFocusChange() } }.focusGroup()
 

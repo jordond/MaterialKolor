@@ -47,7 +47,9 @@ import kotlin.test.Test
 
 // b-228a
 
-/** Tags the field under the long press. */
+/**
+ * Tags the field under the long press.
+ */
 private const val FieldTag = "field"
 
 /**
@@ -220,7 +222,9 @@ private fun Code() {
     CodeView(file.lines, onCopy = {}, Tagged.size(480.dp, 200.dp))
 }
 
-/** A single line field the kit does not draw, built from its parts the way a preview sample field is. */
+/**
+ * A single line field the kit does not draw, built from its parts the way a preview sample field is.
+ */
 @Composable
 private fun FieldFromParts() {
     var value by remember { mutableStateOf(TextFieldValue("Deep ocean")) }
@@ -260,7 +264,9 @@ private fun isSelectionHandle(): SemanticsMatcher =
         node.config.any { (key, _) -> key.name == "SelectionHandleInfo" }
     }
 
-/** Holds a finger on the field's text, [start] in from its start edge, for a long press. */
+/**
+ * Holds a finger on the field's text, [start] in from its start edge, for a long press.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.longPressField(start: Dp = 24.dp) {
     onNodeWithTag(FieldTag).performTouchInput { longClick(Offset(start.toPx(), centerY)) }
@@ -283,10 +289,14 @@ private fun ComposeUiTest.longPressAndSlideOff(start: Dp = 24.dp) {
     waitForIdle()
 }
 
-/** How far in from the code view's start edge a press lands on code, past the line numbers. */
+/**
+ * How far in from the code view's start edge a press lands on code, past the line numbers.
+ */
 private val CodeStart = 160.dp
 
-/** [HostOverlays] with an empty clipboard, so no test reads the machine's own. */
+/**
+ * [HostOverlays] with an empty clipboard, so no test reads the machine's own.
+ */
 @Composable
 private fun Host(
     skin: Skin,

@@ -15,10 +15,14 @@ import com.materialkolor.builder.kit.motion.rememberLoopPhase
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import kotlin.math.abs
 
-/** How long a skeleton chip takes to pulse out to the strong border tone and back. */
+/**
+ * How long a skeleton chip takes to pulse out to the strong border tone and back.
+ */
 private const val SkeletonPulseMillis = 1_200
 
-/** Where the pulse rests whenever it may not move, halfway between its two tones. */
+/**
+ * Where the pulse rests whenever it may not move, halfway between its two tones.
+ */
 private const val SkeletonStillPhase = 0.25f
 
 /**
@@ -57,7 +61,9 @@ public fun SchemeChipSkeleton(modifier: Modifier = Modifier) {
     )
 }
 
-/** The phase of the skeleton's pulse, still under reduced motion. */
+/**
+ * The phase of the skeleton's pulse, still under reduced motion.
+ */
 @Composable
 private fun rememberSkeletonPhase(): State<Float> =
     if (LocalReducedMotion.current) {

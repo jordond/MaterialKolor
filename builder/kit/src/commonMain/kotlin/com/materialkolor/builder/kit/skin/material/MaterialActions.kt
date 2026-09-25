@@ -105,7 +105,9 @@ internal fun Modifier.materialFeedback(
         .controlPress(interactionSource)
         .controlRing(interactionSource, shape)
 
-/** A glyph and a label in whatever ink the surrounding Material component provides. */
+/**
+ * A glyph and a label in whatever ink the surrounding Material component provides.
+ */
 @Composable
 private fun RowScope.MaterialLabel(
     label: String,
@@ -127,10 +129,14 @@ private fun RowScope.MaterialLabel(
 
 // b-510
 
-/** Room round a button with a keycap, Material's small button start and a tight end the keycap fills. */
+/**
+ * Room round a button with a keycap, Material's small button start and a tight end the keycap fills.
+ */
 private val HintPadding: PaddingValues = PaddingValues(start = 16.dp, end = 4.dp)
 
-/** Room between a button's label and its keycap. */
+/**
+ * Room between a button's label and its keycap.
+ */
 private val HintSpacing: Dp = 6.dp
 
 @Composable

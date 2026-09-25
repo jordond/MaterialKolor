@@ -150,7 +150,9 @@ internal fun <T> HeadlessTabs(
     }
 }
 
-/** How far a tab's focus ring reaches past the tab, which the ends of the row keep free. */
+/**
+ * How far a tab's focus ring reaches past the tab, which the ends of the row keep free.
+ */
 private val TabRingReach: Dp = FocusRingOffset + FocusRingWidth
 
 /**

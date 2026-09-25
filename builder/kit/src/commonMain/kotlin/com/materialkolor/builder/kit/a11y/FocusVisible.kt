@@ -40,24 +40,32 @@ import androidx.compose.ui.input.pointer.pointerInput
  */
 @Stable
 internal class FocusVisibility {
-    /** Whether a focused control draws its ring now. */
+    /**
+     * Whether a focused control draws its ring now.
+     */
     var isVisible: Boolean by mutableStateOf(true)
         private set
 
-    /** Notes a key going down, which turns the rings on unless it is a modifier or part of a shortcut. */
+    /**
+     * Notes a key going down, which turns the rings on unless it is a modifier or part of a shortcut.
+     */
     fun onKey(event: KeyEvent) {
         if (event.type != KeyEventType.KeyDown || event.key in ModifierKeys) return
         if (event.isMetaPressed || event.isCtrlPressed || event.isAltPressed) return
         isVisible = true
     }
 
-    /** Notes a pointer going down anywhere, which turns the rings off. */
+    /**
+     * Notes a pointer going down anywhere, which turns the rings off.
+     */
     fun onPointerPress() {
         isVisible = false
     }
 }
 
-/** The keys that only change what another key does. */
+/**
+ * The keys that only change what another key does.
+ */
 private val ModifierKeys: Set<Key> = setOf(
     Key.ShiftLeft,
     Key.ShiftRight,

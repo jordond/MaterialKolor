@@ -36,7 +36,9 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** What the seed field says under itself in these tests, standing in for the app's own copy. */
+/**
+ * What the seed field says under itself in these tests, standing in for the app's own copy.
+ */
 internal fun inputErrorMessage(reason: InvalidReason): String =
     when (reason) {
         InvalidReason.Empty -> "Type a color"
@@ -55,7 +57,9 @@ internal fun inputNoteMessage(notes: Set<ParseNote>): String =
         }
     }
 
-/** The hex field with the test copy for its messages. */
+/**
+ * The hex field with the test copy for its messages.
+ */
 @Composable
 internal fun InputHexField(
     value: Argb,

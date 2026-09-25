@@ -141,7 +141,9 @@ private fun ProvidePosterTokens(
     CompositionLocalProvider(LocalBuilderTokens provides tokens, content = content)
 }
 
-/** A `MaterialTheme` over the poster's scheme, keeping the skin's shapes, type and motion. */
+/**
+ * A `MaterialTheme` over the poster's scheme, keeping the skin's shapes, type and motion.
+ */
 @Composable
 private fun MaterialPoster(
     paint: PosterPaint,
@@ -315,7 +317,9 @@ private fun ColorScheme.unstyledValues(paint: PosterPaint): Map<ThemeToken<Color
         MaterialKolorTokens.textHintInverse to inverseOnSurface,
     )
 
-/** The Custom skin with an identity cut from the poster, so Custom widgets reach for seed tones. */
+/**
+ * The Custom skin with an identity cut from the poster, so Custom widgets reach for seed tones.
+ */
 @Composable
 private fun CustomPoster(
     paint: PosterPaint,
@@ -330,7 +334,9 @@ private fun CustomPoster(
     }
 }
 
-/** Which poster colour each Custom slot takes, on the same lines as the Material roles. */
+/**
+ * Which poster colour each Custom slot takes, on the same lines as the Material roles.
+ */
 private fun PosterPaint.slot(slot: CustomSlot): Color =
     when (slot) {
         CustomSlot.Primary,

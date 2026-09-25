@@ -137,7 +137,9 @@ internal fun rememberChromeSlots(result: ThemeResult): CustomSlotColors {
 private val textFieldMinSizeOptimizationOff: Unit =
     run { ComposeFoundationFlags.isBasicTextFieldMinSizeOptimizationEnabled = false }
 
-/** Hands a skin's tokens, motion and icons to [content]. */
+/**
+ * Hands a skin's tokens, motion and icons to [content].
+ */
 @Composable
 internal fun ProvideSkinLocals(
     tokens: BuilderTokens,
@@ -153,7 +155,9 @@ internal fun ProvideSkinLocals(
     )
 }
 
-/** The builder's own tweens, or the reduced set when the user asked for less motion. */
+/**
+ * The builder's own tweens, or the reduced set when the user asked for less motion.
+ */
 internal fun builderMotion(reducedMotion: Boolean): BuilderMotion =
     if (reducedMotion) reducedBuilderMotion() else tweenBuilderMotion()
 

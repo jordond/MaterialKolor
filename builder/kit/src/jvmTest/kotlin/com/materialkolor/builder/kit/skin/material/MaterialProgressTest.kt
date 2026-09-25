@@ -40,7 +40,9 @@ private const val BarTag = "bar"
 
 private const val FrameTag = "frame"
 
-/** How wide the bars are laid out, wider than any shape Material would pin a bar to. */
+/**
+ * How wide the bars are laid out, wider than any shape Material would pin a bar to.
+ */
 private val BarWidth = 320.dp
 
 /**
@@ -130,12 +132,16 @@ class MaterialProgressTest {
         }
 }
 
-/** The range the bar tagged [BarTag] reports. */
+/**
+ * The range the bar tagged [BarTag] reports.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.rangeInfo(): ProgressBarRangeInfo =
     onNodeWithTag(BarTag).fetchSemanticsNode().config[SemanticsProperties.ProgressBarRangeInfo]
 
-/** Whether any pixel of this frame differs from the same pixel of [other]. */
+/**
+ * Whether any pixel of this frame differs from the same pixel of [other].
+ */
 private fun PixelMap.differsFrom(other: PixelMap): Boolean =
     (0 until minOf(height, other.height)).any { y ->
         (0 until minOf(width, other.width)).any { x -> this[x, y] != other[x, y] }

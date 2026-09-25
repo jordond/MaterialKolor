@@ -9,7 +9,9 @@ import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.Skin
 
-/** The skin a Custom pane wears, which has no Expressive flavour. */
+/**
+ * The skin a Custom pane wears, which has no Expressive flavour.
+ */
 private val PaneSkin = Skin(Library.Custom, expressive = false)
 
 /**

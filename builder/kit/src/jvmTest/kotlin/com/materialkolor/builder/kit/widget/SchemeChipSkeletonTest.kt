@@ -80,7 +80,9 @@ class SchemeChipSkeletonTest {
         }
 }
 
-/** The skeleton's center color on a running clock, first and a quarter pulse later. */
+/**
+ * The skeleton's center color on a running clock, first and a quarter pulse later.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.centerAcrossAQuarterPulse(
     skin: Skin,
@@ -100,7 +102,9 @@ private fun ComposeUiTest.skeletonCenter(): Color {
     return pixels[pixels.width / 2, pixels.height / 2]
 }
 
-/** A skin over [WidgetDocument] with motion left running, unlike [WidgetHarness]. */
+/**
+ * A skin over [WidgetDocument] with motion left running, unlike [WidgetHarness].
+ */
 @Composable
 private fun RunningHarness(
     skin: Skin,

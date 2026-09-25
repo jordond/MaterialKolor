@@ -54,17 +54,25 @@ import com.materialkolor.builder.kit.skin.material.MaterialToast
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import kotlinx.coroutines.delay
 
-/** How long a toast stays before it goes by itself. */
+/**
+ * How long a toast stays before it goes by itself.
+ */
 public enum class ToastDuration(
     internal val millis: Long?,
 ) {
-    /** Four seconds, for a plain confirmation. */
+    /**
+     * Four seconds, for a plain confirmation.
+     */
     Short(4_000),
 
-    /** Ten seconds, for a toast with an action such as Undo. */
+    /**
+     * Ten seconds, for a toast with an action such as Undo.
+     */
     Long(10_000),
 
-    /** Until someone acts on it or it is pushed out by newer toasts. */
+    /**
+     * Until someone acts on it or it is pushed out by newer toasts.
+     */
     Indefinite(null),
 }
 
@@ -95,7 +103,9 @@ public class BuilderToastHostState {
     private val shown = mutableStateListOf<BuilderToast>()
     private var nextId = 0L
 
-    /** The toasts on screen, oldest first. */
+    /**
+     * The toasts on screen, oldest first.
+     */
     public val toasts: List<BuilderToast>
         get() = shown
 
@@ -120,15 +130,21 @@ public class BuilderToastHostState {
         return toast
     }
 
-    /** Takes [toast] off the screen, if it is still there. */
+    /**
+     * Takes [toast] off the screen, if it is still there.
+     */
     public fun dismiss(toast: BuilderToast) {
         shown.remove(toast)
     }
 
-    /** The id of the newest toast read out through an [Announcer], so no toast is read twice. */
+    /**
+     * The id of the newest toast read out through an [Announcer], so no toast is read twice.
+     */
     private var announcedThrough = -1L
 
-    /** Reads out through [announcer] every toast on screen that has not been read yet. */
+    /**
+     * Reads out through [announcer] every toast on screen that has not been read yet.
+     */
     internal fun announceNew(announcer: Announcer) {
         for (toast in shown.toList()) {
             if (toast.id <= announcedThrough) continue
@@ -138,12 +154,16 @@ public class BuilderToastHostState {
     }
 
     public companion object {
-        /** The most toasts the host stacks at once. */
+        /**
+         * The most toasts the host stacks at once.
+         */
         public const val MaxToasts: Int = 3
     }
 }
 
-/** A toast host state that lives as long as the composition that remembers it. */
+/**
+ * A toast host state that lives as long as the composition that remembers it.
+ */
 @Composable
 public fun rememberBuilderToastHostState(): BuilderToastHostState = remember { BuilderToastHostState() }
 
@@ -275,7 +295,9 @@ private fun HeadlessToast(
     }
 }
 
-/** The one action of a toast, a text button in the toast's own ink. */
+/**
+ * The one action of a toast, a text button in the toast's own ink.
+ */
 @Composable
 private fun ToastAction(
     label: String,
@@ -300,9 +322,13 @@ private fun ToastAction(
     }
 }
 
-/** What an announcer reads out for a toast, its message and then its action. */
+/**
+ * What an announcer reads out for a toast, its message and then its action.
+ */
 private val BuilderToast.announcement: String
     get() = listOfNotNull(message, actionLabel).joinToString(", ")
 
-/** How finely the countdown keeps the time a paused toast has left. */
+/**
+ * How finely the countdown keeps the time a paused toast has left.
+ */
 private const val ToastTickMillis = 100L

@@ -94,7 +94,9 @@ public fun BuilderDisclosure(
 
 // b-510
 
-/** A disclosure with no box of its own, a hairline over it and its title at the column's edge. */
+/**
+ * A disclosure with no box of its own, a hairline over it and its title at the column's edge.
+ */
 @Composable
 private fun flushDisclosureStyle(): DisclosureStyle {
     val tokens = LocalBuilderTokens.current

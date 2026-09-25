@@ -59,10 +59,14 @@ import io.kotest.matchers.string.shouldNotBeBlank
 import java.awt.datatransfer.DataFlavor
 import kotlin.test.Test
 
-/** The least contrast a focus line needs against what it sits on and against its halo. */
+/**
+ * The least contrast a focus line needs against what it sits on and against its halo.
+ */
 private const val LineContrast = 3.0
 
-/** The key held with C to copy, Command on a Mac and Control everywhere else, as the desktop reads it. */
+/**
+ * The key held with C to copy, Command on a Mac and Control everywhere else, as the desktop reads it.
+ */
 private val CopyModifierKey: Key =
     if (System.getProperty("os.name").orEmpty().startsWith("Mac")) Key.MetaLeft else Key.CtrlLeft
 
@@ -130,7 +134,9 @@ class WidgetFocusRingTest {
         }
     }
 
-    /** The ring stands outside the chip's hairline rather than on it, chosen or not. */
+    /**
+     * The ring stands outside the chip's hairline rather than on it, chosen or not.
+     */
     @Test
     fun schemeChip_chosenOrNot_ringsOutsideItsEdgeAllTheWayRound() {
         for (selected in listOf(false, true)) {
@@ -223,10 +229,14 @@ class WidgetFocusRingTest {
 
 private const val RingSwatchName = "primary, #6750A4, tone 40"
 
-/** How far past a copy button its ring and the blend at its edge reach. */
+/**
+ * How far past a copy button its ring and the blend at its edge reach.
+ */
 private val CopyRingReach: Dp = FocusRingOffset + FocusRingWidth + 1.dp
 
-/** How long a run of code has to be for the drag test to select a good part of it. */
+/**
+ * How long a run of code has to be for the drag test to select a good part of it.
+ */
 private const val RunLength = 12
 
 @Composable
@@ -243,7 +253,9 @@ private fun RingSwatch() {
     )
 }
 
-/** A picker track for [channel] at the ring document's seed. */
+/**
+ * A picker track for [channel] at the ring document's seed.
+ */
 @Composable
 private fun RingTrack(channel: HctChannel) {
     val report = rememberUpdatedState<(Argb, EditPhase) -> Unit> { _, _ -> }
@@ -263,14 +275,18 @@ private fun RingChip(selected: Boolean) {
     )
 }
 
-/** Matches a text node with at least [length] characters. */
+/**
+ * Matches a text node with at least [length] characters.
+ */
 private fun hasTextOfAtLeast(length: Int): SemanticsMatcher =
     SemanticsMatcher("text of at least $length characters") { node ->
         val text = node.config.getOrNull(SemanticsProperties.Text).orEmpty()
         text.sumOf { part -> part.length } >= length
     }
 
-/** A clipboard that keeps the last text written to it. */
+/**
+ * A clipboard that keeps the last text written to it.
+ */
 private class CopiedText : Clipboard {
     var text: String? = null
 

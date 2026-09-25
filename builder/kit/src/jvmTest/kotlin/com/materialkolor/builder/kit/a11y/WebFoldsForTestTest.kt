@@ -79,7 +79,9 @@ class WebFoldsForTestTest {
         }
 }
 
-/** A scroll area tagged [tag] with more lines than fit, which the web's keyboard makes a Tab stop. */
+/**
+ * A scroll area tagged [tag] with more lines than fit, which the web's keyboard makes a Tab stop.
+ */
 @Composable
 private fun OverflowingArea(tag: String) {
     BuilderScrollArea(Modifier.testTag(tag).height(96.dp).width(240.dp)) {

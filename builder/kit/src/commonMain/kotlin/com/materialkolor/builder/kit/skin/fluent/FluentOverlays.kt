@@ -44,5 +44,7 @@ internal fun fluentOverlayStyle(tokens: BuilderTokens): OverlayStyle {
     )
 }
 
-/** Windows rounds list items and buttons tighter than its flyouts. */
+/**
+ * Windows rounds list items and buttons tighter than its flyouts.
+ */
 private val FluentItemRadius = 4.dp

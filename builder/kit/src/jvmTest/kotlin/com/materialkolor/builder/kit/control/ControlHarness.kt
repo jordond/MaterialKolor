@@ -29,7 +29,9 @@ import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
 
-/** Every skin the controls dispatch to, named for the screenshots. */
+/**
+ * Every skin the controls dispatch to, named for the screenshots.
+ */
 internal val ControlSkins: List<Pair<String, Skin>> = listOf(
     "material3" to Skin(Library.Material3, expressive = false),
     "expressive" to Skin(Library.Material3, expressive = true),
@@ -38,7 +40,9 @@ internal val ControlSkins: List<Pair<String, Skin>> = listOf(
     "fluent" to Skin(Library.Fluent, expressive = false),
 )
 
-/** Runs [block] once per skin in a fresh test, with the skin's name as the clue. */
+/**
+ * Runs [block] once per skin in a fresh test, with the skin's name as the clue.
+ */
 @OptIn(ExperimentalTestApi::class)
 internal fun forEachSkin(block: suspend ComposeUiTest.(name: String, skin: Skin) -> Unit) {
     for ((name, skin) in ControlSkins) {
@@ -46,7 +50,9 @@ internal fun forEachSkin(block: suspend ComposeUiTest.(name: String, skin: Skin)
     }
 }
 
-/** A skin over a resolved document, a measured layout and frozen motion. */
+/**
+ * A skin over a resolved document, a measured layout and frozen motion.
+ */
 @Composable
 internal fun ControlsHarness(
     skin: Skin,
@@ -66,7 +72,9 @@ internal fun OverlayTestButton(tag: String) {
     Box(Modifier.testTag(tag).size(40.dp).clickable(interactionSource = null, indication = null) {})
 }
 
-/** [ControlsHarness] with the overlays rendering in the page or in windows of their own. */
+/**
+ * [ControlsHarness] with the overlays rendering in the page or in windows of their own.
+ */
 @Composable
 internal fun HostOverlays(
     skin: Skin,
@@ -76,7 +84,9 @@ internal fun HostOverlays(
     CompositionLocalProvider(LocalOverlaysInTree provides inTree) { ControlsHarness(skin, content = content) }
 }
 
-/** Runs [block] for every skin, first with overlays in windows of their own and then in the page. */
+/**
+ * Runs [block] for every skin, first with overlays in windows of their own and then in the page.
+ */
 @OptIn(ExperimentalTestApi::class)
 internal fun hostEachWay(block: suspend ComposeUiTest.(skin: Skin, inTree: Boolean) -> Unit) {
     for (inTree in listOf(false, true)) {
@@ -84,7 +94,9 @@ internal fun hostEachWay(block: suspend ComposeUiTest.(skin: Skin, inTree: Boole
     }
 }
 
-/** The five skin variants every input is checked in. */
+/**
+ * The five skin variants every input is checked in.
+ */
 internal enum class SkinVariant(
     val skin: Skin,
 ) {
@@ -97,10 +109,14 @@ internal enum class SkinVariant(
 
 private val Document = ThemeDocument(seed = Argb(0x6750A4))
 
-/** A desktop window with a mouse, where the touch target is at its smallest. */
+/**
+ * A desktop window with a mouse, where the touch target is at its smallest.
+ */
 private val Desktop = LayoutInfo.of(1280.dp, 800.dp)
 
-/** Draws [content] on a panel of [variant], with motion frozen and a desktop layout. */
+/**
+ * Draws [content] on a panel of [variant], with motion frozen and a desktop layout.
+ */
 @OptIn(ExperimentalTestApi::class)
 internal fun ComposeUiTest.setSkinnedContent(
     variant: SkinVariant,
@@ -112,7 +128,9 @@ internal fun ComposeUiTest.setSkinnedContent(
     }
 }
 
-/** A panel of [variant] with motion frozen and a desktop layout. */
+/**
+ * A panel of [variant] with motion frozen and a desktop layout.
+ */
 @Composable
 internal fun SkinnedPanel(
     variant: SkinVariant,
@@ -129,7 +147,9 @@ internal fun SkinnedPanel(
     }
 }
 
-/** Runs [block] in a fresh composition for each skin variant, naming the variant on failure. */
+/**
+ * Runs [block] in a fresh composition for each skin variant, naming the variant on failure.
+ */
 @OptIn(ExperimentalTestApi::class)
 internal fun forEverySkin(block: ComposeUiTest.(SkinVariant) -> Unit) {
     for (variant in SkinVariant.entries) {

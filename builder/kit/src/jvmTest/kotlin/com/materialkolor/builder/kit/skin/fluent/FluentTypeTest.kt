@@ -41,7 +41,9 @@ class FluentTypeTest {
             set.styles().map { style -> style.copy(fontFamily = null) } shouldBe base.styles()
         }
 
-    /** The chrome and the poster both hand Fluent's components Selawik, the same face in each. */
+    /**
+     * The chrome and the poster both hand Fluent's components Selawik, the same face in each.
+     */
     @Test
     fun fluentSkin_setsFluentsOwnTextInSelawik_onTheChromeAndThePoster() =
         runComposeUiTest {

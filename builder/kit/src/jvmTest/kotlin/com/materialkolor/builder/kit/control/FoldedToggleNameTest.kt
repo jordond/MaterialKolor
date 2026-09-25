@@ -26,7 +26,9 @@ private const val HeartTag = "heart"
 
 private const val HeartName = "Favourite Flat white"
 
-/** Shows an app drawn heart in [skin] that starts off, with the fold as [folds]. */
+/**
+ * Shows an app drawn heart in [skin] that starts off, with the fold as [folds].
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.showHeart(
     skin: Skin,

@@ -10,22 +10,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/** Where Medium starts. */
+/**
+ * Where Medium starts.
+ */
 public val MediumBreakpoint: Dp = 600.dp
 
-/** Where the poster earns a docked panel instead of a rail. */
+/**
+ * Where the poster earns a docked panel instead of a rail.
+ */
 public val DockedPosterBreakpoint: Dp = 840.dp
 
-/** Where Expanded starts. */
+/**
+ * Where Expanded starts.
+ */
 public val ExpandedBreakpoint: Dp = 1200.dp
 
-/** Where the canvas stops growing with the window. */
+/**
+ * Where the canvas stops growing with the window.
+ */
 public val WideBreakpoint: Dp = 1600.dp
 
-/** How wide the canvas content is allowed to get past [WideBreakpoint]. */
+/**
+ * How wide the canvas content is allowed to get past [WideBreakpoint].
+ */
 public val CanvasContentCap: Dp = 1400.dp
 
-/** Below this height a window held with a coarse pointer is a phone on its side, and gets the sheet. */
+/**
+ * Below this height a window held with a coarse pointer is a phone on its side, and gets the sheet.
+ */
 public val ShortHeightBreakpoint: Dp = 480.dp // b-209a
 
 /**
@@ -36,19 +48,27 @@ public val ShortHeightBreakpoint: Dp = 480.dp // b-209a
  * zoom changes the class the way it should.
  */
 public enum class WindowClass {
-    /** Phones. The poster lives in a bottom sheet. */
+    /**
+     * Phones. The poster lives in a bottom sheet.
+     */
     Compact,
 
-    /** Tablets and small windows. The poster is a rail or a narrow docked panel. */
+    /**
+     * Tablets and small windows. The poster is a rail or a narrow docked panel.
+     */
     Medium,
 
-    /** Desktop. The poster is a full docked panel. */
+    /**
+     * Desktop. The poster is a full docked panel.
+     */
     Expanded,
 
     ;
 
     public companion object {
-        /** The class a container of [widthDp] belongs to. */
+        /**
+         * The class a container of [widthDp] belongs to.
+         */
         public fun of(widthDp: Dp): WindowClass =
             when {
                 widthDp < MediumBreakpoint -> Compact
@@ -63,16 +83,24 @@ public enum class WindowClass {
  * rather than three. A phone on its side is Medium by width but still gets the sheet (D38).
  */
 public enum class PosterMode {
-    /** Inside the bottom sheet, with detents. */
+    /**
+     * Inside the bottom sheet, with detents.
+     */
     Sheet,
 
-    /** A 72 dp seed strip that opens over the canvas. */
+    /**
+     * A 72 dp seed strip that opens over the canvas.
+     */
     Rail72,
 
-    /** Docked at 320 dp, collapsible to the rail. */
+    /**
+     * Docked at 320 dp, collapsible to the rail.
+     */
     Docked320,
 
-    /** Docked at 400 dp, collapsible to the rail. */
+    /**
+     * Docked at 400 dp, collapsible to the rail.
+     */
     Docked400,
 
     ;
@@ -119,11 +147,15 @@ public data class LayoutInfo(
     public val heightDp: Dp,
     public val coarsePointer: Boolean = false,
 ) {
-    /** Which of the three layouts applies. */
+    /**
+     * Which of the three layouts applies.
+     */
     public val windowClass: WindowClass
         get() = WindowClass.of(widthDp)
 
-    /** How the poster panel is shown. */
+    /**
+     * How the poster panel is shown.
+     */
     public val posterMode: PosterMode
         get() = PosterMode.of(windowClass, widthDp, heightDp, coarsePointer) // b-209a
 
@@ -140,7 +172,9 @@ public data class LayoutInfo(
             WindowClass.Expanded -> if (coarsePointer) 44.dp else 24.dp
         }
 
-    /** The smallest a primary action is allowed to be. Only Compact asks for more than the rest. */
+    /**
+     * The smallest a primary action is allowed to be. Only Compact asks for more than the rest.
+     */
     public val primaryTouchTarget: Dp
         get() = if (windowClass == WindowClass.Compact) 48.dp else minTouchTarget
 
@@ -154,7 +188,9 @@ public data class LayoutInfo(
         get() = if (widthDp >= WideBreakpoint) CanvasContentCap else Dp.Infinity
 
     public companion object {
-        /** The layout for a container of [widthDp] by [heightDp]. */
+        /**
+         * The layout for a container of [widthDp] by [heightDp].
+         */
         public fun of(
             widthDp: Dp,
             heightDp: Dp,

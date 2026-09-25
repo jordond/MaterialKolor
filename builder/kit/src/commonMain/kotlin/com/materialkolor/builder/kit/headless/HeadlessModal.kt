@@ -99,7 +99,9 @@ internal fun HeadlessModal(
     }
 }
 
-/** The veil and the panel over it, the same in a dialog window and in the overlay host. */
+/**
+ * The veil and the panel over it, the same in a dialog window and in the overlay host.
+ */
 @Composable
 private fun ModalLayer(
     state: MutableTransitionState<Boolean>,

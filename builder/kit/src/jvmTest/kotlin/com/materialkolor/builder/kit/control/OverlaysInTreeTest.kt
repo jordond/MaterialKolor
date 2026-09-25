@@ -656,7 +656,9 @@ private fun ComposeUiTest.hostCheckHeldFocus(
     triggerFocused shouldBe true
 }
 
-/** The locals an overlay has to carry from where it opened. */
+/**
+ * The locals an overlay has to carry from where it opened.
+ */
 private data class HostLocals(
     val tokens: BuilderTokens,
     val direction: LayoutDirection,

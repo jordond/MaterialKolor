@@ -81,13 +81,19 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
-/** Tags the swatch before a color literal, so a test can count them. */
+/**
+ * Tags the swatch before a color literal, so a test can count them.
+ */
 internal const val CodeSwatchTag: String = "code-swatch"
 
-/** Tags the code area, the one focus stop of the lines, so a test can focus it and press keys. */
+/**
+ * Tags the code area, the one focus stop of the lines, so a test can focus it and press keys.
+ */
 internal const val CodeScrollTag: String = "code-scroll"
 
-/** One run of a line, either text or the swatch of the color literal that follows. */
+/**
+ * One run of a line, either text or the swatch of the color literal that follows.
+ */
 @Immutable
 private sealed interface CodePart {
     data class Text(
@@ -336,7 +342,9 @@ private fun CoroutineScope.scrollOnKey(
     return true
 }
 
-/** Whether [this] gets a swatch before it. */
+/**
+ * Whether [this] gets a swatch before it.
+ */
 private val Token.isSwatched: Boolean
     get() = kind == TokenKind.ColorLiteral && color != null
 

@@ -29,10 +29,14 @@ internal class OverlayFocus {
     private val inside = FocusRequester()
     private var panelTakesFocus by mutableStateOf(false)
 
-    /** Whether focus rests on the panel or on anything inside it. */
+    /**
+     * Whether focus rests on the panel or on anything inside it.
+     */
     private var hasFocus = false
 
-    /** Goes on the panel, around what it holds. */
+    /**
+     * Goes on the panel, around what it holds.
+     */
     val modifier: Modifier = Modifier
         .then(OfferToLayerElement(this))
         .focusRequester(panel)
@@ -53,7 +57,9 @@ internal class OverlayFocus {
     }
 }
 
-/** Offers [focus] to the host layer the panel is drawn in, for as long as the panel is there. */
+/**
+ * Offers [focus] to the host layer the panel is drawn in, for as long as the panel is there.
+ */
 private class OfferToLayerElement(
     private val focus: OverlayFocus,
 ) : ModifierNodeElement<OfferToLayerNode>() {

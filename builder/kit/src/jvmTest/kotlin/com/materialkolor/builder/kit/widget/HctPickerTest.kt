@@ -56,16 +56,24 @@ import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** The color every picker test starts from. */
+/**
+ * The color every picker test starts from.
+ */
 internal val PickerSeed: Argb = Argb(0x6750A4)
 
-/** Wide enough for the tracks and their value fields side by side. */
+/**
+ * Wide enough for the tracks and their value fields side by side.
+ */
 internal val PickerWidth: Dp = 440.dp
 
-/** Every skin the picker is drawn in, named for the screenshots. */
+/**
+ * Every skin the picker is drawn in, named for the screenshots.
+ */
 internal val PickerSkins: List<Pair<String, Skin>> = ControlSkins
 
-/** Runs [block] once per skin in a fresh test, with the skin's name as the clue. */
+/**
+ * Runs [block] once per skin in a fresh test, with the skin's name as the clue.
+ */
 @OptIn(ExperimentalTestApi::class)
 internal fun pickerForEachSkin(block: suspend ComposeUiTest.(name: String, skin: Skin) -> Unit) {
     for ((name, skin) in PickerSkins) {
@@ -73,7 +81,9 @@ internal fun pickerForEachSkin(block: suspend ComposeUiTest.(name: String, skin:
     }
 }
 
-/** A skin over a resolved document, a measured layout and frozen motion. */
+/**
+ * A skin over a resolved document, a measured layout and frozen motion.
+ */
 @Composable
 internal fun PickerHarness(
     skin: Skin,
@@ -88,11 +98,15 @@ internal fun PickerHarness(
     }
 }
 
-/** The track named [name], told apart from its value field by the range it reports. */
+/**
+ * The track named [name], told apart from its value field by the range it reports.
+ */
 internal fun pickerTrack(name: String): SemanticsMatcher =
     hasContentDescription(name) and SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)
 
-/** Counts how often the picker's body composes. */
+/**
+ * Counts how often the picker's body composes.
+ */
 private class PickerCompositions {
     var count: Int = 0
 }
@@ -103,7 +117,9 @@ private fun ComposeUiTest.pickerTrackValue(name: String): Float =
 
 private val PickerUnstyled: Skin = Skin(Library.Unstyled, expressive = false)
 
-/** The value a picker under test was handed last, and every phase it reported. */
+/**
+ * The value a picker under test was handed last, and every phase it reported.
+ */
 private class PickerReports(
     start: Argb,
 ) {
@@ -111,11 +127,15 @@ private class PickerReports(
     val phases: MutableList<EditPhase> = mutableListOf()
 }
 
-/** A track as the web reads it, named by its text since it has no role there. */
+/**
+ * A track as the web reads it, named by its text since it has no role there.
+ */
 private fun pickerTrackText(name: String): SemanticsMatcher =
     hasText(name) and SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)
 
-/** Shows a picker at [start], unstyled unless [skin] says otherwise, that is handed back every color it reports. */
+/**
+ * Shows a picker at [start], unstyled unless [skin] says otherwise, that is handed back every color it reports.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.pickerShow(
     start: Argb = PickerSeed,

@@ -112,7 +112,9 @@ private fun FormatField(
     }
 }
 
-/** What the color field says about text it cannot read and about what it had to change. */
+/**
+ * What the color field says about text it cannot read and about what it had to change.
+ */
 @Immutable
 private class ParseMessages(
     private val errors: Map<InvalidReason, String>,
@@ -120,7 +122,9 @@ private class ParseMessages(
 ) {
     fun errorOf(reason: InvalidReason): String = errors.getValue(reason)
 
-    /** Every note in [set], one sentence each, in a steady order. */
+    /**
+     * Every note in [set], one sentence each, in a steady order.
+     */
     fun notesOf(set: Set<ParseNote>): String =
         ParseNote.entries.filter { note -> note in set }.joinToString(" ") { note -> notes.getValue(note) }
 }
