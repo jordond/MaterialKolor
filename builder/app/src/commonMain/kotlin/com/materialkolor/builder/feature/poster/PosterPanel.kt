@@ -269,7 +269,8 @@ private fun PosterContent(
     val mode = LocalLayout.current.posterMode
     val sheet = mode == PosterMode.Sheet
     // The sheet's handle already stands above its content, so the sheet starts close under it.
-    val top = if (sheet) spacing.extraSmall else spacing.extraLarge
+    // b-524 The docked poster starts 16 in, which leaves Fine-tune in view at 900 tall.
+    val top = if (sheet) spacing.extraSmall else spacing.large
     // 24 at 400 wide, a little under 28 so Shuffle, Pick and Image share a row with
     // Material's roomy buttons. The narrower poster and the sheet keep 20, so five chips a row fit.
     val side = if (mode == PosterMode.Docked400) spacing.extraLarge else spacing.large + spacing.extraSmall
@@ -301,8 +302,10 @@ private fun PosterContent(
                         .heightIn(min = viewport)
                         .padding(start = side, top = top, end = side, bottom = spacing.extraLarge),
                     // A gap inside a group. Each group adds its own room on top, see PosterGroupGap.
-                    // The sheet packs its peek tighter, so the contrast levels still show at rest.
-                    verticalArrangement = Arrangement.spacedBy(if (sheet) spacing.small else spacing.medium),
+                    // b-524 The gap is tight, so the docked poster reaches down to Fine-tune at 900
+                    // tall with the first run hint showing, and the sheet's peek still shows the
+                    // contrast levels at rest.
+                    verticalArrangement = Arrangement.spacedBy(spacing.small),
                 ) {
                     if (sheet) {
                         PosterSheet(context, dispatcher, focus)
@@ -337,13 +340,16 @@ private fun ColumnScope.DockedSections(
     StyleChipsSection(context, dispatcher, modifier = group)
     ContrastSection(context, dispatcher, modifier = group)
     Spacer(Modifier.weight(1f))
-    FirstRunHint(context, dispatcher)
-    FineTuneButton(context, dispatcher, trigger = focus?.fineTune)
+    // The hint sits right over the button, its close button's touch target is room enough.
+    Column {
+        FirstRunHint(context, dispatcher)
+        FineTuneButton(context, dispatcher, trigger = focus?.fineTune)
+    }
 }
 
 /**
- * The room a group adds over the gap inside one, so groups stand about 24 dp apart and the parts of
- * one about 12.
+ * The room a group adds over the gap inside one, so groups stand about 20 dp apart and the parts of
+ * one about 8.
  */
 internal val PosterGroupGap: Dp
     @Composable get() = LocalBuilderTokens.current.spacing.medium
