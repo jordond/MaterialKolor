@@ -248,8 +248,9 @@ private fun PosterContent(
     // The sheet's handle already stands above its content, so the sheet starts close under it.
     val top = if (sheet) spacing.extraSmall else spacing.extraLarge
     // b-510
-    // The design's 28 at 400 wide. The narrower poster and the sheet keep 20, so five chips a row fit.
-    val side = if (mode == PosterMode.Docked400) spacing.extraLarge + spacing.extraSmall else spacing.large + spacing.extraSmall
+    // 24 at 400 wide, a little under the design's 28 so Shuffle, Pick and Image share a row with
+    // Material's roomy buttons. The narrower poster and the sheet keep 20, so five chips a row fit.
+    val side = if (mode == PosterMode.Docked400) spacing.extraLarge else spacing.large + spacing.extraSmall
     // b-305
     // The poster always holds controls, so the scroll area needs no tab stop of its own.
     BuilderScrollArea(modifier.fillMaxSize(), tabStop = false) {

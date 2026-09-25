@@ -45,6 +45,7 @@ private val Peek = listOf(
     SheetSection.StyleChips,
     SheetSection.Contrast,
 )
+
 // b-510
 private val Half = Peek +
     listOf(

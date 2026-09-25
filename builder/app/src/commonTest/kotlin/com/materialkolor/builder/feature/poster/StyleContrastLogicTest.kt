@@ -55,7 +55,8 @@ class StyleContrastLogicTest {
         tags(on2025) shouldBe classic.associateWith { SpecVersion.Spec2021 } + (Style.Cmf to SpecVersion.Spec2026)
 
         val onCmf = on2021.copy(style = Style.Cmf, spec = SpecVersion.Spec2025)
-        tags(onCmf) shouldBe classic.associateWith { SpecVersion.Spec2021 } + revised.associateWith { SpecVersion.Spec2025 }
+        tags(onCmf) shouldBe
+            classic.associateWith { SpecVersion.Spec2021 } + revised.associateWith { SpecVersion.Spec2025 }
     }
 
     @Test

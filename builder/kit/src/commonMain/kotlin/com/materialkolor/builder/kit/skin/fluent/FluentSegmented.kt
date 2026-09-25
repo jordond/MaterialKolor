@@ -28,8 +28,8 @@ import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
-import com.materialkolor.builder.kit.control.FittedLabel
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.FittedLabel
 import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.control.foldState
@@ -112,8 +112,7 @@ internal fun <T> FluentSegmented(
                     enabled = enabled,
                     position = segmentPosition(index, options.size),
                     interactionSource = interactionSource,
-                    // b-510
-                    icon = (if (compact) null else if (isSelected) IconId.Check else optionIcon(value))?.let { glyph ->
+                    icon = optionGlyph(isSelected, compact) { optionIcon(value) }?.let { glyph ->
                         { BuilderIcon(glyph, contentDescription = null, tint = LocalContentColor.current) }
                     },
                     text = {
@@ -133,6 +132,20 @@ internal fun <T> FluentSegmented(
         }
     }
 }
+
+// b-510
+
+/** The glyph an option shows, a check while chosen, none at all in a compact row. */
+private fun optionGlyph(
+    selected: Boolean,
+    compact: Boolean,
+    own: () -> IconId?,
+): IconId? =
+    when {
+        compact -> null
+        selected -> IconId.Check
+        else -> own()
+    }
 
 /** Fluent's outline round its segmented control. */
 private val SegmentedFrameWidth = 1.dp

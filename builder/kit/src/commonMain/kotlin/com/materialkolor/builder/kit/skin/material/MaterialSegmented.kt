@@ -3,8 +3,8 @@ package com.materialkolor.builder.kit.skin.material
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -73,9 +73,9 @@ import com.materialkolor.builder.kit.headless.rememberRadioGroupFocus
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
+import com.materialkolor.builder.kit.skin.headless.ActionColors
 import com.materialkolor.builder.kit.skin.headless.FocusRingOffset
 import com.materialkolor.builder.kit.skin.headless.FocusRingWidth
-import com.materialkolor.builder.kit.skin.headless.ActionColors
 import com.materialkolor.builder.kit.skin.headless.SegmentedStyle
 import com.materialkolor.builder.kit.skin.headless.SelectableStyle
 import com.materialkolor.builder.kit.skin.headless.controlPress
@@ -275,7 +275,13 @@ private fun <T> ExpressiveSegmented(
                             enabled = enabled,
                             shapes = shapes,
                             // b-510
-                            contentPadding = if (compact) CompactPadding else ButtonDefaults.contentPaddingFor(ButtonDefaults.MinHeight),
+                            contentPadding = if (compact) {
+                                CompactPadding
+                            } else {
+                                ButtonDefaults.contentPaddingFor(
+                                    ButtonDefaults.MinHeight,
+                                )
+                            },
                             interactionSource = interactionSource,
                         ) {
                             if (compact) {

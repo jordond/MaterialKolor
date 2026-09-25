@@ -3,9 +3,9 @@ package com.materialkolor.builder.kit.skin.material
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -53,9 +53,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.control.BuilderIcon
-import com.materialkolor.builder.kit.control.ButtonKeycap
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
+import com.materialkolor.builder.kit.control.ButtonKeycap
 import com.materialkolor.builder.kit.control.CardDisabledNote
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
@@ -118,7 +118,7 @@ private fun RowScope.MaterialLabel(
     BuilderText(label, style = BuilderTextStyle.Label, color = ink, maxLines = 1)
     // b-510
     if (hint != null) {
-        Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+        Spacer(Modifier.width(HintSpacing))
         ButtonKeycap(hint, ink)
     }
 }
@@ -126,7 +126,10 @@ private fun RowScope.MaterialLabel(
 // b-510
 
 /** Room round a button with a keycap, Material's small button start and a tight end the keycap fills. */
-private val HintPadding: PaddingValues = PaddingValues(start = 16.dp, end = 6.dp)
+private val HintPadding: PaddingValues = PaddingValues(start = 16.dp, end = 4.dp)
+
+/** Room between a button's label and its keycap. */
+private val HintSpacing: Dp = 6.dp
 
 @Composable
 internal fun MaterialButton(

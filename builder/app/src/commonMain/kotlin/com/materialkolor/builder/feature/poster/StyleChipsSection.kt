@@ -2,18 +2,14 @@ package com.materialkolor.builder.feature.poster
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import com.materialkolor.builder.generated.resources.style_chip_tooltip
-import com.materialkolor.builder.generated.resources.style_spec_forced
-import com.materialkolor.builder.kit.widget.SchemeChipFootprint
-import com.materialkolor.builder.kit.widget.SchemeChipName
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -21,9 +17,9 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,12 +48,14 @@ import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.picker_pick_cmf
 import com.materialkolor.builder.generated.resources.style_chip
+import com.materialkolor.builder.generated.resources.style_chip_tooltip
 import com.materialkolor.builder.generated.resources.style_chips
 import com.materialkolor.builder.generated.resources.style_cmf_derive
 import com.materialkolor.builder.generated.resources.style_cmf_derived
 import com.materialkolor.builder.generated.resources.style_cmf_field
 import com.materialkolor.builder.generated.resources.style_label
 import com.materialkolor.builder.generated.resources.style_line
+import com.materialkolor.builder.generated.resources.style_spec_forced
 import com.materialkolor.builder.kit.control.BuilderBadge
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderChoiceGroup
@@ -69,6 +67,8 @@ import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.widget.SchemeChip
+import com.materialkolor.builder.kit.widget.SchemeChipFootprint
+import com.materialkolor.builder.kit.widget.SchemeChipName
 import com.materialkolor.dynamiccolor.DynamicScheme
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource

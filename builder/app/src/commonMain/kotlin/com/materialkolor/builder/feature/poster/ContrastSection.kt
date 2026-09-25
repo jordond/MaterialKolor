@@ -27,10 +27,10 @@ import com.materialkolor.builder.generated.resources.contrast_high
 import com.materialkolor.builder.generated.resources.contrast_label
 import com.materialkolor.builder.generated.resources.contrast_level
 import com.materialkolor.builder.generated.resources.contrast_lowest
+import com.materialkolor.builder.generated.resources.contrast_medium
 import com.materialkolor.builder.generated.resources.contrast_pair_dark
 import com.materialkolor.builder.generated.resources.contrast_pair_light
 import com.materialkolor.builder.generated.resources.contrast_ratio
-import com.materialkolor.builder.generated.resources.contrast_medium
 import com.materialkolor.builder.generated.resources.contrast_reduced
 import com.materialkolor.builder.generated.resources.contrast_standard
 import com.materialkolor.builder.kit.control.BadgeStatus

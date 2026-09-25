@@ -30,6 +30,7 @@ internal enum class SheetSection(
     ImageCandidates(BottomSheetDetent.Peek),
     StyleChips(BottomSheetDetent.Peek),
     Contrast(BottomSheetDetent.Peek),
+
     // b-510
     ContrastDetails(BottomSheetDetent.Half),
     StyleDetails(BottomSheetDetent.Half),
