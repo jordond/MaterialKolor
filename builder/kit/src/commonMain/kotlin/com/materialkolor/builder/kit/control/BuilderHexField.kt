@@ -1,7 +1,6 @@
 package com.materialkolor.builder.kit.control
 
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,8 +46,8 @@ import kotlinx.coroutines.delay
  * @param[noteMessage] What to say under the field about what had to change to read the color. Only
  * asked about a set with at least one note in it, and the words depend on what the color is for.
  * @param[modifier] Applied to the field.
- * @param[large] Draw it as the poster's 72 sp seed headline (F-66), which shows no label. It fills
- * the width it is given, and a color that would not fit at 72 sp is set smaller until it does.
+ * @param[large] Draw it as the poster's 72 sp seed headline (F-66), which shows no label. A color
+ * that would not fit the width the field is offered at 72 sp is set smaller until it does.
  * @param[enabled] Whether the field takes input.
  */
 @Composable
@@ -107,9 +106,10 @@ public fun BuilderHexField(
         return
     }
     // b-510
-    BoxWithConstraints(modifier) {
+    // The caller's modifier stays on the field, which fills the width the box is offered.
+    BoxWithConstraints {
         val fitted = rememberFittedHero(draft.text, type.posterHero, maxWidth)
-        field(fitted, Modifier.fillMaxWidth())
+        field(fitted, modifier)
     }
 }
 
