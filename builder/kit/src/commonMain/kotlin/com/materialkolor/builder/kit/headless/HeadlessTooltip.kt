@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -55,7 +56,6 @@ import com.materialkolor.builder.kit.skin.headless.popoverEnter
 import com.materialkolor.builder.kit.skin.headless.popoverExit
 import com.materialkolor.builder.kit.skin.headless.rememberOverlayVisibility
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
-import kotlinx.coroutines.delay
 import kotlin.math.max
 
 /**
@@ -174,13 +174,24 @@ private class TooltipPointer {
      */
     suspend fun follow(hovered: Boolean) {
         if (!hovered) {
-            delay(OverlayMetrics.tooltipGraceMillis)
+            awaitFrameTime(OverlayMetrics.tooltipGraceMillis)
             shows = false
         } else if (armed && !shows) {
-            delay(OverlayMetrics.tooltipDelayMillis)
+            awaitFrameTime(OverlayMetrics.tooltipDelayMillis)
             shows = true
         }
     }
+}
+
+/**
+ * Waits [millis] on the frame clock, the one the page's animations run on, so a test's clock
+ * drives the wait the way it drives them.
+ */
+private suspend fun awaitFrameTime(millis: Long) {
+    val start = withFrameMillis { time -> time }
+    do {
+        val now = withFrameMillis { time -> time }
+    } while (now - start < millis)
 }
 
 /**
