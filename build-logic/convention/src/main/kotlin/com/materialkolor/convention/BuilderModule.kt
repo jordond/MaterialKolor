@@ -1,11 +1,14 @@
 package com.materialkolor.convention
 
 import org.gradle.api.Project
+import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import java.time.Duration
 
 /**
  * Which wasm runtime a builder module is compiled and tested against.
@@ -49,6 +52,21 @@ internal fun Project.configureBuilderModule(runtime: BuilderWasmRuntime) {
         }
 
         jvmToolchain(intVersion("jvmTarget"))
+    }
+
+    configureTestTimeout()
+}
+
+/**
+ * Fails a builder test task that runs far past its normal time instead of letting it hang.
+ *
+ * The slowest suite, app's jvmTest, takes about 80 seconds, so five minutes means a test that
+ * never goes idle, not a slow machine. Pass `-Pbuilder.testTimeoutMinutes=<n>` to change it.
+ */
+private fun Project.configureTestTimeout() {
+    val minutes = providers.gradleProperty("builder.testTimeoutMinutes").map(String::toLong).orElse(5L)
+    tasks.withType<Test>().configureEach {
+        timeout.set(minutes.map(Duration::ofMinutes))
     }
 }
 
