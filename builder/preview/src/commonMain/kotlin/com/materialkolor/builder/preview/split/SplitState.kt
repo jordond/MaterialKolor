@@ -61,7 +61,7 @@ public class SplitState(
 /**
  * The part of the end copy past the handle.
  *
- * A new shape per fraction keeps the layer's outline cache honest. Side by side, the start copy
+ * A new shape per fraction keeps the layer's outline cache from going stale. Side by side, the start copy
  * holds the start edge, so the kept rectangle mirrors in right to left. Stacked, the start copy is
  * on top whatever the direction.
  *
