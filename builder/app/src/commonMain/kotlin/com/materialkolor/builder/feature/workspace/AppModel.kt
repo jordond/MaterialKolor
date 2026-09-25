@@ -26,7 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * What the root needs to dress the builder, the chrome's appearance and its motion, and the boot
+ * What the root needs to theme the builder, the chrome's appearance and its motion, and the boot
  * that opens the first project.
  *
  * The chrome's appearance comes from the preferences and the system, never from the preview mode,

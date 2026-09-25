@@ -39,7 +39,7 @@ import com.materialkolor.builder.kit.token.rememberBuilderType
 import com.materialkolor.palettes.TonalPalette
 
 /**
- * Dresses [content] in [skin], coloured from [result].
+ * Themes [content] with [skin], coloured from [result].
  *
  * Every skin draws from the chrome schemes of [result], which floor contrast at the standard level
  * and leave pins and AMOLED out, so the builder stays readable whatever the document does (P7). No

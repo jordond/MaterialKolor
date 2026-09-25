@@ -67,8 +67,8 @@ internal fun PosterPanel(
 }
 
 /**
- * The poster's overlay dress, the same in every skin since the poster is content. It is the Custom
- * dress with its soft shadow and large corners, standing on the page rather than a raised surface.
+ * The poster's overlay style, the same in every skin since the poster is content. It is the Custom
+ * style with its soft shadow and large corners, standing on the page rather than a raised surface.
  * Read it inside [PosterSurface], so its colours are the poster's.
  */
 internal fun posterOverlayStyle(tokens: BuilderTokens): OverlayStyle =

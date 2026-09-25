@@ -155,7 +155,7 @@ private fun detentNames(): (BottomSheetDetent) -> String {
  * Page Down, Home and End move it too. Tab onto a row below the fold raises the sheet until the
  * row shows, and a scrolling body hands a drag back to the sheet once it reaches its top. Read or
  * drive the detent through [state]. Material3's own bottom sheet only has two states, so every skin
- * draws the headless sheet in its own dress.
+ * draws the headless sheet in its own style.
  *
  * @param[state] The sheet's detent, from `rememberBottomSheetState`.
  * @param[label] The sheet's name, read on the handle.

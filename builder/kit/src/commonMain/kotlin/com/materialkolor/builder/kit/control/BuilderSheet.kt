@@ -47,7 +47,7 @@ public enum class SheetPresentation {
  * [footer] along the bottom under a hairline, all three the same room in from the sheet's edges. It
  * keeps focus inside while it is open, closes on Esc and on the veil, and hands focus back to
  * [returnFocusTo] once it has gone. It slides in from the end edge, or only fades under reduced
- * motion. Material3 has no side sheet, so every skin draws the headless drawer in its own dress.
+ * motion. Material3 has no side sheet, so every skin draws the headless drawer in its own style.
  *
  * @param[visible] Whether the sheet is open.
  * @param[onDismissRequest] Called when the sheet asks to close.

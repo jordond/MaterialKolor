@@ -18,7 +18,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
 private val FluentWarmUpSkin = Skin(library = Library.Fluent, expressive = false)
 
 /**
- * Dresses [content] in the Fluent skin for a warm-up that never shows.
+ * Themes [content] with the Fluent skin for a warm-up that never shows.
  *
  * The first switch to Fluent draws shadows, clips and shapes the page has not drawn before, and the
  * browser compiles a GPU program for each of them inside that one frame. The app composes its Fluent

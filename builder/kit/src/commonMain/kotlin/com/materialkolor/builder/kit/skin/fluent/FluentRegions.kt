@@ -74,7 +74,7 @@ internal fun FluentTopBarRegion(
 // b-512
 
 /**
- * The preview window on the canvas, a `Layer` in the card's dress with Fluent's overlay corners,
+ * The preview window on the canvas, a `Layer` in the card's style with Fluent's overlay corners,
  * clipping what it holds to them.
  */
 @Composable
@@ -97,7 +97,7 @@ internal fun FluentWindowRegion(
 }
 
 /**
- * Fluent's dock, a command bar on a `Layer` in the flyout's dress, floating on the flyout's
+ * Fluent's dock, a command bar on a `Layer` in the flyout's style, floating on the flyout's
  * shadow. It is as tall as Fluent's standard bar, or taller where the touch targets need it.
  */
 @Composable
@@ -124,7 +124,7 @@ internal fun FluentDockRegion(
 }
 
 /**
- * A full height panel on a `Layer` in the flyout's dress, rounded on its inner edge by Fluent's
+ * A full height panel on a `Layer` in the flyout's style, rounded on its inner edge by Fluent's
  * overlay radius and clipped to it.
  */
 @Composable
@@ -149,7 +149,7 @@ internal fun FluentPanelRegion(
 }
 
 /**
- * The command palette on a `Layer` in the flyout's dress, raised to a dialog's shadow.
+ * The command palette on a `Layer` in the flyout's style, raised to a dialog's shadow.
  */
 @Composable
 internal fun FluentPaletteFrame(

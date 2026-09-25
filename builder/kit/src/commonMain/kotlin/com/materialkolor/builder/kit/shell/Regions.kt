@@ -83,7 +83,7 @@ public val TopBarControlMaxHeight: Dp
 
 /**
  * The dock, a compact toolbar centred under the preview. Material3 uses its
- * `HorizontalFloatingToolbar`, the other skins a toolbar row in their own overlay dress.
+ * `HorizontalFloatingToolbar`, the other skins a toolbar row in their own overlay style.
  *
  * @param[modifier] Applied to the dock.
  * @param[content] The dock's tools, laid in a row.
@@ -154,7 +154,7 @@ public fun PanelRegion(
  * sheet they rise above its peek and the dock. The shell hands the region its room as it lays out,
  * so the toasts follow the rail as it moves. Outside a shell they stack at the bottom start, or
  * above the peek and the dock where the poster would be a sheet. Every skin shares one host, which
- * already draws each toast in the skin's own dress, a `Snackbar` under Material3. Where overlays
+ * already draws each toast in the skin's own look, a `Snackbar` under Material3. Where overlays
  * render in the page the toasts keep these spots but draw over every open dialog, sheet and menu.
  *
  * @param[state] The toasts to show.
@@ -186,7 +186,7 @@ public fun ToastRegion(
 /**
  * The command palette's frame. A centred dialog on Medium and Expanded, up to 560 dp wide on
  * Medium and 640 dp on Expanded, and a full width one on a phone. Material3 uses its dialog
- * container, the other skins their dialog dress. The modal plumbing around it, the scrim and the
+ * container, the other skins their dialog style. The modal plumbing around it, the scrim and the
  * focus trap, is the caller's.
  *
  * @param[modifier] Applied to the frame.
