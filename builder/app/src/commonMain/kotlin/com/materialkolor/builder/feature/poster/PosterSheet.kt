@@ -24,11 +24,12 @@ internal enum class SheetSection(
 ) {
     SeedPeek(BottomSheetDetent.Peek),
     SeedActions(BottomSheetDetent.Peek),
-    FirstRunHint(BottomSheetDetent.Peek),
     ImageCandidates(BottomSheetDetent.Peek),
     StyleChips(BottomSheetDetent.Peek),
     Contrast(BottomSheetDetent.Peek),
 
+    // b-527 The hint waits for the half detent, so the peek keeps its room for the chips and contrast.
+    FirstRunHint(BottomSheetDetent.Half),
     ContrastDetails(BottomSheetDetent.Half),
     StyleDetails(BottomSheetDetent.Half),
     Explainer(BottomSheetDetent.Half),
@@ -39,8 +40,9 @@ internal enum class SheetSection(
 
 /**
  * The sections a sheet resting at [detent] has in view. The peek holds the seed row, Pick and Image,
- * one scrolling row of style chips and the contrast levels, half adds the contrast readout, what
- * the chosen style does, the explainer and the Fine-tune button, and full the hero and the header.
+ * one scrolling row of style chips and the contrast levels, half adds the first run hint, the
+ * contrast readout, what the chosen style does, the explainer and the Fine-tune button, and full
+ * the hero and the header.
  * A phone on its side, [short], peeks at the seed row and Shuffle alone.
  */
 internal fun sheetSectionsInView(

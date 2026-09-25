@@ -40,7 +40,6 @@ private const val PHONE_LONG = 844
 private val Peek = listOf(
     SheetSection.SeedPeek,
     SheetSection.SeedActions,
-    SheetSection.FirstRunHint,
     SheetSection.ImageCandidates,
     SheetSection.StyleChips,
     SheetSection.Contrast,
@@ -48,6 +47,7 @@ private val Peek = listOf(
 
 private val Half = Peek +
     listOf(
+        SheetSection.FirstRunHint,
         SheetSection.ContrastDetails,
         SheetSection.StyleDetails,
         SheetSection.Explainer,

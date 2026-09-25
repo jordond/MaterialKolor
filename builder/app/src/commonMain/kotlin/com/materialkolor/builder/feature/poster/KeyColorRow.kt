@@ -7,15 +7,23 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.capability.ControlState
 import com.materialkolor.builder.domain.color.Argb
@@ -29,6 +37,7 @@ import com.materialkolor.builder.feature.picker.pickButtonFocus
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.keycolors_clear
+import com.materialkolor.builder.generated.resources.keycolors_edit
 import com.materialkolor.builder.generated.resources.keycolors_from_seed
 import com.materialkolor.builder.generated.resources.keycolors_label
 import com.materialkolor.builder.generated.resources.keycolors_name_error
@@ -45,7 +54,9 @@ import com.materialkolor.builder.generated.resources.keycolors_use_as_seed
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderHexField
 import com.materialkolor.builder.kit.control.BuilderIconButton
+import com.materialkolor.builder.kit.control.BuilderPressable
 import com.materialkolor.builder.kit.control.BuilderText
+import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -96,10 +107,12 @@ internal fun KeyColorRows(
 }
 
 /**
- * One key color. The field shows the color set by hand, or the key color the scheme derived from
- * the seed while there is none, and a paste or a typed color sets it as one undo entry. Beside it
- * sit Pick and either "From seed" or the button that hands the palette back to the seed. Clear
- * hands a keyboard user's focus to Pick as it goes.
+ * One key color as one slim row, its swatch, its name, its hex and Pick, the way board E draws it.
+ * The hex shows the color set by hand, or the key color the scheme derived from the seed while
+ * there is none, with a quiet "From seed" under the name. Clicking the hex, or tabbing onto it,
+ * turns it into a field, and a paste or a typed color sets it as one undo entry. The field turns
+ * back into text once focus leaves it. A color set by hand gets the button that hands the palette
+ * back to the seed beside Pick. Clear hands a keyboard user's focus to Pick as it goes.
  *
  * @param[enabled] Whether the target lets this palette be set.
  * @param[picks] Where each row's Pick button takes focus.
@@ -114,30 +127,43 @@ internal fun KeyColorRow(
     picks: KeyColorPicks,
     modifier: Modifier = Modifier,
 ) {
-    val spacing = LocalBuilderTokens.current.spacing
+    val tokens = LocalBuilderTokens.current
+    val spacing = tokens.spacing
     val input = LocalInputModeManager.current
     val stored = context.document.keyColors[slot]
     val derived = remember(context.result, slot) { context.result.ramps[slot, false].keyColor }
     val shown = stored ?: derived
     val name = stringResource(keyColorName(slot))
+    // b-527
+    var editing by remember(slot) { mutableStateOf(false) }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ColorSwatch(shown)
-            BuilderHexField(
-                value = shown,
-                onCommit = { argb, _ ->
-                    val change = DocumentChange.SetKeyColor(slot, argb)
-                    dispatcher.dispatch(WorkspaceAction.Edit(change, EditPhase.Discrete))
-                },
-                label = name,
-                errorMessage = messages::errorOf,
-                noteMessage = messages::noteOf,
-                modifier = Modifier.weight(1f),
-                enabled = enabled,
-            )
+            ColorSwatch(shown, size = tokens.iconSize)
+            if (editing && enabled) {
+                KeyColorField(
+                    value = shown,
+                    name = name,
+                    messages = messages,
+                    onCommit = { argb ->
+                        val change = DocumentChange.SetKeyColor(slot, argb)
+                        dispatcher.dispatch(WorkspaceAction.Edit(change, EditPhase.Discrete))
+                    },
+                    onLeave = { editing = false },
+                    modifier = Modifier.weight(1f),
+                )
+            } else {
+                Column(Modifier.weight(1f)) {
+                    BuilderText(text = name, style = BuilderTextStyle.Label, maxLines = 1)
+                    if (stored == null) {
+                        val fromSeed = stringResource(Res.string.keycolors_from_seed)
+                        BuilderText(text = fromSeed, emphasis = Emphasis.Secondary)
+                    }
+                }
+                KeyColorHex(color = shown, name = name, enabled = enabled, onEdit = { editing = true })
+            }
             BuilderIconButton(
                 onClick = {
                     dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.KeyColorOverride(slot), picks[slot]))
@@ -147,9 +173,7 @@ internal fun KeyColorRow(
                 modifier = pickButtonFocus(picks[slot]),
                 enabled = enabled,
             )
-            if (stored == null) {
-                BuilderText(text = stringResource(Res.string.keycolors_from_seed), emphasis = Emphasis.Secondary)
-            } else {
+            if (stored != null) {
                 BuilderIconButton(
                     onClick = {
                         input.handFocusTo(picks[slot])
@@ -166,6 +190,68 @@ internal fun KeyColorRow(
             PrimaryOverrideLine(context, dispatcher, stored, pick = picks[KeyColor.Primary])
         }
     }
+}
+
+/**
+ * A key color's hex as mono text, which turns into the field once clicked or focused. It reads out
+ * as Edit with the key color's name and its hex.
+ */
+@Composable
+private fun KeyColorHex(
+    color: Argb,
+    name: String,
+    enabled: Boolean,
+    onEdit: () -> Unit,
+) {
+    val hex = color.toHex()
+    BuilderPressable(
+        onClick = onEdit,
+        label = stringResource(Res.string.keycolors_edit, name, hex),
+        modifier = Modifier.onFocusChanged { focus -> if (focus.isFocused) onEdit() },
+        enabled = enabled,
+    ) {
+        BuilderText(
+            text = hex,
+            modifier = Modifier.padding(horizontal = LocalBuilderTokens.current.spacing.extraSmall),
+            style = BuilderTextStyle.Value,
+            maxLines = 1,
+        )
+    }
+}
+
+/**
+ * The field a key color's hex turns into, which takes focus as it comes in and calls [onLeave] once
+ * focus has left it again.
+ */
+@Composable
+private fun KeyColorField(
+    value: Argb,
+    name: String,
+    messages: HexMessages,
+    onCommit: (Argb) -> Unit,
+    onLeave: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val focus = remember { FocusRequester() }
+    // The field reports itself unfocused before it takes focus, which is no leave.
+    var held by remember { mutableStateOf(false) }
+    BuilderHexField(
+        value = value,
+        onCommit = { argb, _ -> onCommit(argb) },
+        label = name,
+        errorMessage = messages::errorOf,
+        noteMessage = messages::noteOf,
+        modifier = modifier
+            .focusRequester(focus)
+            .onFocusChanged { state ->
+                if (state.hasFocus) {
+                    held = true
+                } else if (held) {
+                    onLeave()
+                }
+            },
+    )
+    LaunchedEffect(focus) { focus.requestFocus() }
 }
 
 /**
@@ -210,19 +296,20 @@ private fun PrimaryOverrideLine(
 }
 
 /**
- * [color] as a small square ringed in the poster's ink, as big as the buttons beside it. It reads
- * out nothing, the hex beside it says the color.
+ * [color] as a small square ringed in the poster's ink, as big as the buttons beside it unless
+ * [size] says otherwise. It reads out nothing, the hex beside it says the color.
  */
 @Composable
 internal fun ColorSwatch(
     color: Argb,
     modifier: Modifier = Modifier,
+    size: Dp = LocalLayout.current.minTouchTarget,
 ) {
     val tokens = LocalBuilderTokens.current
     val shape = RoundedCornerShape(tokens.radius.small)
     Box(
         modifier = modifier
-            .size(LocalLayout.current.minTouchTarget)
+            .size(size)
             .background(color.toColor(), shape)
             .border(tokens.outlineWidth, tokens.borderStrong, shape),
     )

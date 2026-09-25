@@ -4,9 +4,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -14,6 +19,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.capability.Control
+import com.materialkolor.builder.domain.capability.Reason
 import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
@@ -57,7 +63,8 @@ import kotlin.math.floor
  * Enter or Space picks, since each pick is a new scheme. The lowest ratio and its grade sit on the
  * right of the label, and the pair they belong to is in the readout's tooltip and spoken name. The
  * readout rates the target's own pairs in the modes the preview shows, and a grade short of AA
- * carries a glyph as well as its words. A target that ignores contrast says why and takes no pick.
+ * carries a glyph as well as its words. A target that ignores contrast takes no pick, and says why
+ * under the Contrast info button.
  */
 @Composable
 internal fun ContrastSection(
@@ -88,46 +95,78 @@ internal fun ContrastSection(
             selectOnFocus = false,
             compact = true,
         ) { stop -> labels.getValue(stop) }
-        if (details) ContrastNotes(context)
     }
 }
 
 /**
  * What the contrast levels leave, for the phone sheet, which shows the levels alone at its peek and
- * this under them once it is dragged up. The label with its info button and the lowest ratio, and
- * why a target ignores contrast if it does.
+ * this under them once it is dragged up. The label with its info button and the lowest ratio.
  */
 @Composable
 internal fun ContrastDetails(
     context: PosterContext,
     modifier: Modifier = Modifier,
 ) {
-    val spacing = LocalBuilderTokens.current.spacing
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-        ContrastHeader(context)
-        ContrastNotes(context)
-    }
+    ContrastHeader(context, modifier)
 }
 
 /**
  * The Contrast label with its info button, and the lowest ratio with its grade on the right in line
- * with it.
+ * with it. Why the target treats contrast differently, if it does, opens with the explanation.
  */
 @Composable
-private fun ContrastHeader(context: PosterContext) {
+private fun ContrastHeader(
+    context: PosterContext,
+    modifier: Modifier = Modifier,
+) {
     // b-523
     val row = rememberLowestPair(context)
-    InfoLabel(label = stringResource(Res.string.contrast_label), topic = InfoTopic.Contrast) {
+    // b-527
+    ReasonInfoLabel(
+        label = stringResource(Res.string.contrast_label),
+        topic = InfoTopic.Contrast,
+        reason = context.capabilities[Control.Contrast].explanation,
+        modifier = modifier,
+    ) {
         LowestRatio(row, context.result.document, Modifier.weight(1f))
     }
 }
 
 /**
- * Why the target ignores contrast if it does.
+ * [InfoLabel] for a section the target treats differently. The [reason] opens under the section's
+ * explanation rather than standing under the section, so the skins that give one still fit the
+ * poster down to its Fine-tune button. The info button still offers it, and it reads out with the
+ * explanation once open. Without a reason this is [InfoLabel] itself.
  */
 @Composable
-private fun ContrastNotes(context: PosterContext) {
-    context.capabilities[Control.Contrast].explanation?.let { reason -> ReasonLine(reason) }
+internal fun ReasonInfoLabel(
+    label: String,
+    topic: InfoTopic,
+    reason: Reason?,
+    modifier: Modifier = Modifier,
+    end: @Composable RowScope.() -> Unit = {},
+) {
+    // b-527
+    if (reason == null) {
+        InfoLabel(label = label, topic = topic, modifier = modifier, end = end)
+        return
+    }
+    val spacing = LocalBuilderTokens.current.spacing
+    var open by rememberSaveable(topic) { mutableStateOf(false) }
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Eyebrow(label)
+            InfoButton(topic = topic, expanded = open, onClick = { open = !open })
+            end()
+        }
+        if (open) {
+            InfoNote(topic)
+            ReasonLine(reason)
+        }
+    }
 }
 
 /**
