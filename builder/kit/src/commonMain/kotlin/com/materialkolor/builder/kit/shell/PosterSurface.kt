@@ -7,7 +7,9 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import com.composeunstyled.theme.ThemeToken
@@ -62,24 +64,50 @@ public fun PosterSurface(
     val outer = LocalBuilderTokens.current
     // Every theme result brings a poster of its own, but the poster follows the seed alone. A new
     // paint re-themes the poster, which recomposes every control on it, so it is kept while the seed
-    // stays and an edit that leaves the seed alone never re-themes the poster.
-    val paint = remember(poster.seed) { PosterPaint(poster) }
+    // and the page stay and an edit that leaves the seed alone never re-themes the poster.
+    val kept = remember(poster.seed, poster.background) { poster }
+    val paint = remember(kept) { PosterPaint(kept) }
     val tokens = remember(paint, outer) { paint.builderTokens(outer) }
-    when (LocalSkin.current.library) {
-        Library.Material3 -> MaterialPoster(paint, tokens, content)
-        Library.Unstyled -> UnstyledPoster(paint, tokens, content)
-        Library.Fluent -> FluentPoster(poster, paint, tokens, content)
-        Library.Custom -> CustomPoster(paint, tokens, content)
+    CompositionLocalProvider(LocalPosterColors provides kept) {
+        when (LocalSkin.current.library) {
+            Library.Material3 -> MaterialPoster(paint, tokens, content)
+            Library.Unstyled -> UnstyledPoster(paint, tokens, content)
+            Library.Fluent -> FluentPoster(kept, paint, tokens, content)
+            Library.Custom -> CustomPoster(paint, tokens, content)
+        }
     }
 }
 
 /**
+ * Themes [content] with the poster around it turned over, so a sheet that stands on the poster
+ * reads as its inverse.
+ *
+ * The page is the poster's ink, and the ink is a light tone of the seed's ramp on a light seed or
+ * a dark one on a dark seed, from `PosterColors.inverse`. Every skin's controls inside follow it
+ * with no work of their own, the way they follow [PosterSurface]. Call it inside a
+ * [PosterSurface]. Inside another inverse it turns the poster back.
+ *
+ * @param[content] Whatever stands on the inverse poster.
+ */
+@Composable
+public fun InversePosterSurface(content: @Composable () -> Unit) {
+    val poster = LocalPosterColors.current
+    require(poster != null) { "InversePosterSurface turns a poster over, so call it inside a PosterSurface" }
+    PosterSurface(poster.inverse(), content)
+}
+
+/**
+ * The poster colours [PosterSurface] themes with, or null outside one.
+ */
+internal val LocalPosterColors: ProvidableCompositionLocal<PosterColors?> = staticCompositionLocalOf { null }
+
+/**
  * The handful of colours every skin's roles are cut from.
  *
- * @property[page] The exact seed.
- * @property[inkMuted] Muted ink, floored at 3 to 1 on the seed, so only for strokes and never text.
+ * @property[page] The exact seed, or the poster's ink on the inverse.
+ * @property[inkMuted] Muted ink, floored at 3 to 1 on the page, so only for strokes and never text.
  * @property[shade] The ramp's darkest tone, for shadows and the scrim role.
- * @property[isLight] Whether the seed is light, so ink is darker than the page.
+ * @property[isLight] Whether the page is light, so ink is darker than the page.
  */
 @Immutable
 private class PosterPaint(
@@ -395,7 +423,8 @@ private fun FluentPoster(
     tokens: BuilderTokens,
     content: @Composable () -> Unit,
 ) {
-    val colors = remember(poster.seed) { Colors(poster.ramp.toFluentShades(), darkMode = !poster.isLight) }
+    val colors =
+        remember(poster.seed, poster.isLight) { Colors(poster.ramp.toFluentShades(), darkMode = !poster.isLight) }
     val ink = remember(paint) { FluentPosterInk(ink = paint.ink, page = paint.page, outline = paint.outline) }
     FluentThemeConfiguration(colors = colors, typography = rememberFluentTypography()) {
         CompositionLocalProvider(

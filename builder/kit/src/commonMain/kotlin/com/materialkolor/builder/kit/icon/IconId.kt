@@ -49,4 +49,6 @@ public enum class IconId {
     Help,
     ExternalLink,
     History,
+    Code,
+    Sliders,
 }

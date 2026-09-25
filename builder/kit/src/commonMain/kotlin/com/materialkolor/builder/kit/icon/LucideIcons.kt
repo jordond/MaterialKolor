@@ -1,6 +1,7 @@
 package com.materialkolor.builder.kit.icon
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.composables.icons.lucide.Braces
 import com.composables.icons.lucide.Check
 import com.composables.icons.lucide.ChevronDown
 import com.composables.icons.lucide.ChevronLeft
@@ -36,6 +37,7 @@ import com.composables.icons.lucide.Search
 import com.composables.icons.lucide.Share
 import com.composables.icons.lucide.Share2
 import com.composables.icons.lucide.Shuffle
+import com.composables.icons.lucide.SlidersHorizontal
 import com.composables.icons.lucide.Smartphone
 import com.composables.icons.lucide.Sun
 import com.composables.icons.lucide.Tablet
@@ -96,5 +98,7 @@ internal object LucideIcons : BuilderIcons {
             IconId.Help -> Lucide.CircleHelp
             IconId.ExternalLink -> Lucide.ExternalLink
             IconId.History -> Lucide.History
+            IconId.Code -> Lucide.Braces
+            IconId.Sliders -> Lucide.SlidersHorizontal
         }
 }

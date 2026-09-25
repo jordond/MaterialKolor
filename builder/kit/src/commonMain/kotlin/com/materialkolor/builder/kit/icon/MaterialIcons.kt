@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 /**
  * The Material3 set, the Rounded Material Icons drawn from path data kept in this file.
  *
- * The data is hand copied so kit does not pull in the whole extended icon pack for 42 glyphs. Each
+ * The data is hand copied so kit does not pull in the whole extended icon pack for 44 glyphs. Each
  * glyph is built the first time it is asked for and kept after that, on the UI thread only.
  */
 internal object MaterialIcons : BuilderIcons {
@@ -476,6 +476,33 @@ private fun glyph(id: IconId): MaterialGlyph =
                 "c-0.13 -4.69 -4.05 -8.61 -8.74 -8.74ZM12.75 8c-0.41 0 -0.75 0.34 -0.75 0.75v3.68",
                 "c0 0.35 0.19 0.68 0.49 0.86l3.12 1.85c0.36 0.21 0.82 0.09 1.03 -0.26",
                 "c0.21 -0.36 0.09 -0.82 -0.26 -1.03l-2.88 -1.71v-3.4c0 -0.4 -0.34 -0.74 -0.75 -0.74Z",
+            ),
+        )
+        // Rounded.DataObject
+        IconId.Code -> MaterialGlyph(
+            path(
+                "M4 7v2c0 0.55 -0.45 1 -1 1h0c-0.55 0 -1 0.45 -1 1v2c0 0.55 0.45 1 1 1h0c0.55 0 1 0.45 1 1v2",
+                "c0 1.66 1.34 3 3 3h2c0.55 0 1 -0.45 1 -1v0c0 -0.55 -0.45 -1 -1 -1H7c-0.55 0 -1 -0.45 -1 -1v-2",
+                "c0 -1.3 -0.84 -2.42 -2 -2.83v-0.34C5.16 11.42 6 10.3 6 9V7c0 -0.55 0.45 -1 1 -1h2",
+                "c0.55 0 1 -0.45 1 -1v0c0 -0.55 -0.45 -1 -1 -1H7C5.34 4 4 5.34 4 7Z",
+            ),
+            path(
+                "M21 10c-0.55 0 -1 -0.45 -1 -1V7c0 -1.66 -1.34 -3 -3 -3h-2c-0.55 0 -1 0.45 -1 1v0",
+                "c0 0.55 0.45 1 1 1h2c0.55 0 1 0.45 1 1v2c0 1.3 0.84 2.42 2 2.83v0.34c-1.16 0.41 -2 1.52 -2 2.83",
+                "v2c0 0.55 -0.45 1 -1 1h-2c-0.55 0 -1 0.45 -1 1v0c0 0.55 0.45 1 1 1h2c1.66 0 3 -1.34 3 -3v-2",
+                "c0 -0.55 0.45 -1 1 -1h0c0.55 0 1 -0.45 1 -1v-2C22 10.45 21.55 10 21 10L21 10Z",
+            ),
+        )
+        // Rounded.Tune
+        IconId.Sliders -> MaterialGlyph(
+            path(
+                "M3 18c0 0.55 0.45 1 1 1h5v-2L4 17c-0.55 0 -1 0.45 -1 1ZM3 6c0 0.55 0.45 1 1 1h9L13 5L4 5",
+                "c-0.55 0 -1 0.45 -1 1ZM13 20v-1h7c0.55 0 1 -0.45 1 -1s-0.45 -1 -1 -1h-7v-1",
+                "c0 -0.55 -0.45 -1 -1 -1s-1 0.45 -1 1v4c0 0.55 0.45 1 1 1s1 -0.45 1 -1ZM7 10v1L4 11",
+                "c-0.55 0 -1 0.45 -1 1s0.45 1 1 1h3v1c0 0.55 0.45 1 1 1s1 -0.45 1 -1v-4c0 -0.55 -0.45 -1 -1 -1",
+                "s-1 0.45 -1 1ZM21 12c0 -0.55 -0.45 -1 -1 -1h-9v2h9c0.55 0 1 -0.45 1 -1ZM16 9",
+                "c0.55 0 1 -0.45 1 -1L17 7h3c0.55 0 1 -0.45 1 -1s-0.45 -1 -1 -1h-3L17 4c0 -0.55 -0.45 -1 -1 -1",
+                "s-1 0.45 -1 1v4c0 0.55 0.45 1 1 1Z",
             ),
         )
     }

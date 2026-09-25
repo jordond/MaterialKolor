@@ -61,6 +61,7 @@ private val LucideFallbacks: Set<IconId> = setOf(
     IconId.Keyboard,
     IconId.Help,
     IconId.History,
+    IconId.Code,
 )
 
 /**
