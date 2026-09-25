@@ -56,6 +56,10 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
  * ellipsis, so the glyph always keeps its room.
  * @param[size] How much room the drawn button takes. The touch target stays the layout's in either
  * size, reaching past a compact button's edges.
+ * @param[tonal] Fills a secondary or subtle button with the raised surface of whatever it stands on,
+ * the way Material's tonal button fills, so a quiet action still reads as a button on a coloured
+ * page. The ink keeps its contrast, since the raised surface is cut to carry it. Primary and danger
+ * buttons are filled already and draw the same either way.
  */
 @Composable
 public fun BuilderButton(
@@ -68,6 +72,7 @@ public fun BuilderButton(
     hint: String? = null,
     trailingIcon: IconId? = null,
     size: ButtonSize = ButtonSize.Regular,
+    tonal: Boolean = false,
 ) {
     when (LocalSkin.current.library) {
         Library.Material3 -> MaterialButton(
@@ -80,6 +85,7 @@ public fun BuilderButton(
             hint,
             trailingIcon,
             size,
+            tonal,
         )
         Library.Unstyled -> HeadlessButton(
             onClick,
@@ -92,8 +98,20 @@ public fun BuilderButton(
             hint,
             trailingIcon,
             size,
+            tonal,
         )
-        Library.Fluent -> FluentButton(onClick, label, modifier, emphasis, icon, enabled, hint, trailingIcon, size)
+        Library.Fluent -> FluentButton(
+            onClick,
+            label,
+            modifier,
+            emphasis,
+            icon,
+            enabled,
+            hint,
+            trailingIcon,
+            size,
+            tonal,
+        )
         Library.Custom -> HeadlessButton(
             onClick,
             label,
@@ -105,6 +123,7 @@ public fun BuilderButton(
             hint,
             trailingIcon,
             size,
+            tonal,
         )
     }
 }
@@ -161,10 +180,11 @@ internal fun HeadlessButton(
     hint: String? = null,
     trailingIcon: IconId? = null,
     size: ButtonSize = ButtonSize.Regular,
+    tonal: Boolean = false,
 ) {
     val compact = size == ButtonSize.Compact
     val iconSize = if (compact) CompactButtonIcon else LocalBuilderTokens.current.iconSize
-    val colors = style.colors(emphasis)
+    val colors = style.colors(emphasis, tonal)
     val interactionSource = remember { MutableInteractionSource() }
     Row(
         modifier = modifier
@@ -203,6 +223,15 @@ internal fun HeadlessButton(
         }
     }
 }
+
+/**
+ * Whether a button of [emphasis] takes the tonal fill it was asked for. Primary and danger buttons
+ * are filled already.
+ */
+internal fun takesTonalFill(
+    emphasis: Emphasis,
+    tonal: Boolean,
+): Boolean = tonal && (emphasis == Emphasis.Secondary || emphasis == Emphasis.Subtle)
 
 /**
  * How a button's label sits beside a [trailingIcon]. With one it gives way first, so the glyph keeps

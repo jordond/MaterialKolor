@@ -2,7 +2,6 @@ package com.materialkolor.builder.feature.poster
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -44,9 +43,10 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The top of the poster, the mark and wordmark, the Projects button with the open project's name and the
- * collapse button on one row. The 320 dp poster has no room for all three, so there the Projects
- * button takes a row of its own. Whether the project is saved shows on the Projects button, a check
- * once it is saved and a danger badge beside it when a save did not land.
+ * collapse button on one row. The 320 dp poster has no room for the wordmark as well, so there the
+ * mark stands alone and carries the wordmark as its name. Whether the project is saved shows on the
+ * Projects button, a turning glyph while it saves, a check once it is saved and a danger badge
+ * beside it when a save did not land.
  *
  * The phone sheet has no rail to collapse to, so it shows no collapse button.
  *
@@ -63,51 +63,49 @@ internal fun PosterHeader(
     val spacing = tokens.spacing
     val mode = LocalLayout.current.posterMode
     val collapsible = mode != PosterMode.Sheet
-    val projects: @Composable (Modifier) -> Unit = { projectsModifier ->
-        ProjectsButton(
-            projectName = context.projectName,
-            saveStatus = context.saveStatus,
-            dispatcher = dispatcher,
-            modifier = projectsModifier.then(triggerFocus(focus?.projects)),
-        )
-    }
-    val narrow = mode == PosterMode.Docked320
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
+    // b-526 The 320 dp poster keeps one row by dropping the wordmark, never the Projects button.
+    val markOnly = mode == PosterMode.Docked320
+    val wordmark = stringResource(Res.string.poster_wordmark)
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        // b-522 A tight gap, so a name of about a dozen letters shows whole in the compact pill.
+        horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // The mark sits close to the wordmark, so the project's name keeps the room it had.
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            // b-522 A tight gap, so a name of about a dozen letters shows whole in the compact pill.
-            horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall),
+            horizontalArrangement = Arrangement.spacedBy(HeaderMarkGap),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // The mark sits close to the wordmark, so the project's name keeps the room it had.
-            Row(
-                modifier = if (narrow) Modifier.weight(1f) else Modifier,
-                horizontalArrangement = Arrangement.spacedBy(HeaderMarkGap),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                BrandMark(
-                    colors = MarkColors.inked(ink = tokens.textStrong, page = tokens.canvas),
-                    size = HeaderMarkSize,
-                )
+            BrandMark(
+                colors = MarkColors.inked(ink = tokens.textStrong, page = tokens.canvas),
+                modifier = if (markOnly) Modifier.semantics { contentDescription = wordmark } else Modifier,
+                size = HeaderMarkSize,
+            )
+            if (!markOnly) {
                 BuilderText(
-                    text = stringResource(Res.string.poster_wordmark),
+                    text = wordmark,
                     style = BuilderTextStyle.Wordmark,
                     maxLines = 1,
                 )
             }
-            if (!narrow) {
-                // The project's name takes what the row has left, so a long one gives way first.
-                Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) { projects(Modifier) }
-            }
-            if (collapsible) {
-                PosterIconButton(
-                    icon = IconId.Collapse,
-                    description = stringResource(Res.string.poster_collapse),
-                    onClick = { dispatcher.dispatch(WorkspaceAction.SetPosterCollapsed(collapsed = true)) },
-                )
-            }
         }
-        if (narrow) projects(Modifier)
+        // The project's name takes what the row has left, so a long one gives way first.
+        Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+            ProjectsButton(
+                projectName = context.projectName,
+                saveStatus = context.saveStatus,
+                dispatcher = dispatcher,
+                modifier = triggerFocus(focus?.projects),
+            )
+        }
+        if (collapsible) {
+            PosterIconButton(
+                icon = IconId.Collapse,
+                description = stringResource(Res.string.poster_collapse),
+                onClick = { dispatcher.dispatch(WorkspaceAction.SetPosterCollapsed(collapsed = true)) },
+            )
+        }
     }
 }
 
@@ -127,9 +125,9 @@ internal fun SaveState(status: SaveStatus) {
 
 /**
  * The Projects button. It shows the open project's name and reads out as Projects, the name and
- * whether it is saved, so it never sounds like a title. A check at the end of the pill says the
- * project is saved, and a long name ends in an ellipsis so the check always shows. Before the
- * session has named a project it says Projects and nothing more.
+ * whether it is saved, so it never sounds like a title. A glyph at the end of the pill turns while
+ * the project saves and becomes a check once it is saved, and a long name ends in an ellipsis so the
+ * glyph always shows. Before the session has named a project it says Projects and nothing more.
  */
 @Composable
 private fun ProjectsButton(
@@ -155,6 +153,8 @@ private fun ProjectsButton(
             icon = IconId.Folder,
             trailingIcon = mark.glyph.takeIf { named },
             size = ButtonSize.Compact,
+            // b-526 Board E fills the pill with a quiet tint of the seed.
+            tonal = true,
         )
         if (named) SaveState(saveStatus)
     }
@@ -164,8 +164,8 @@ private fun ProjectsButton(
  * How the Projects button tells whether the open project is saved.
  *
  * @property[spoken] What the button reads out, Projects with the project's name and its save state.
- * @property[glyph] The glyph at the end of the button, a check once saved. None while a save is under way,
- * since the kit has no progress glyph, and none on a failed save, whose danger badge says it.
+ * @property[glyph] The glyph at the end of the button, a turning progress glyph while a save is under
+ * way and a check once saved. None on a failed save, whose danger badge says it.
  */
 @Immutable
 internal data class SaveMark(
@@ -179,7 +179,7 @@ internal data class SaveMark(
 internal fun saveMarkOf(status: SaveStatus): SaveMark =
     when (status) {
         SaveStatus.Idle -> SaveMark(Res.string.poster_projects_saved, IconId.Check)
-        SaveStatus.Pending -> SaveMark(Res.string.poster_projects_saving, glyph = null)
+        SaveStatus.Pending -> SaveMark(Res.string.poster_projects_saving, IconId.Progress)
         is SaveStatus.Failed -> SaveMark(Res.string.poster_projects_not_saved, glyph = null)
     }
 

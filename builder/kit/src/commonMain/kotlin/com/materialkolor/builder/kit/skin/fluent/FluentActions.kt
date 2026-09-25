@@ -49,6 +49,7 @@ import com.materialkolor.builder.kit.control.HeadlessProgress
 import com.materialkolor.builder.kit.control.ListRowContent
 import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.control.iconButtonSemantics
+import com.materialkolor.builder.kit.control.takesTonalFill
 import com.materialkolor.builder.kit.control.trailingLabel
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -266,9 +267,13 @@ internal fun FluentButton(
     hint: String? = null,
     trailingIcon: IconId? = null,
     size: ButtonSize = ButtonSize.Regular,
+    tonal: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val colors = fluentButtonColors(emphasis).schemeFor(interactionSource.collectVisualState(disabled = !enabled))
+    val own = fluentButtonColors(emphasis).schemeFor(interactionSource.collectVisualState(disabled = !enabled))
+    // A tonal button lays Fluent's own fill for the state over the raised surface, so hover still shows.
+    val raised = LocalBuilderTokens.current.panelRaised
+    val colors = if (takesTonalFill(emphasis, tonal)) own.copy(fillColor = own.fillColor.compositeOver(raised)) else own
     val compact = size == ButtonSize.Compact
     val iconSize = if (compact) CompactButtonIcon else LocalBuilderTokens.current.iconSize
     FluentButtonLayer(
@@ -384,13 +389,14 @@ internal fun FluentToggleButton(
     modifier: Modifier,
     icon: IconId?,
     enabled: Boolean,
+    name: String = label,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     ToggleButton(
         checked = checked,
         onCheckedChanged = onCheckedChange,
         modifier = modifier
-            .foldState(label, ControlState.Checked(checked), enabled)
+            .foldState(name, ControlState.Checked(checked), enabled)
             .semantics { toggleableState = ToggleableState(checked) }
             .fluentFeedback(interactionSource),
         disabled = !enabled,

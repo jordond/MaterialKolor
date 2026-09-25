@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.takesTonalFill
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
@@ -46,6 +47,7 @@ internal data class ButtonStyle(
     val secondary: ActionColors,
     val subtle: ActionColors,
     val danger: ActionColors,
+    val tonal: ActionColors,
 ) {
     fun colors(emphasis: Emphasis): ActionColors =
         when (emphasis) {
@@ -54,6 +56,14 @@ internal data class ButtonStyle(
             Emphasis.Subtle -> subtle
             Emphasis.Danger -> danger
         }
+
+    /**
+     * The colours of [emphasis], or the [tonal] fill for a secondary or subtle button that asks for it.
+     */
+    fun colors(
+        emphasis: Emphasis,
+        tonal: Boolean,
+    ): ActionColors = if (takesTonalFill(emphasis, tonal)) this.tonal else colors(emphasis)
 }
 
 /**
@@ -327,6 +337,7 @@ internal fun actionStyles(
             secondary = secondary,
             subtle = ActionColors(none, tokens.textMuted, none),
             danger = ActionColors(none, tokens.danger, tokens.danger),
+            tonal = ActionColors(tokens.panelRaised, tokens.textStrong, none),
         ),
         toggleButton = selectable,
         chip = selectable.copy(
