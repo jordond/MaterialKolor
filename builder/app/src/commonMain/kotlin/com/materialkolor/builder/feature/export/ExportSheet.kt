@@ -216,22 +216,24 @@ internal fun ExportSheet(
                 }
             }
         }
-        val spacing = LocalBuilderTokens.current.spacing
         // b-511
-        // The sheet keeps its own room from its edges, so the body, the tabs and the code share one edge.
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(spacing.medium),
-        ) {
-            // Its fields and buttons take focus themselves, so the area is no stop of its own.
-            BuilderScrollArea(Modifier.weight(1f, fill = false).fillMaxWidth(), tabStop = false) {
-                ExportHeader(state, capabilities, dispatcher, workspace, sheet.drafts)
-            }
-            if (ready != null) {
-                ExportFiles(ready, state.selectedPath, dispatcher, onCopy = { text -> copy(CopyKind.File, text) })
-            }
-            export.problems.forEach { problem ->
-                Notice(text = problemText(problem), icon = IconId.Error, emphasis = Emphasis.Danger)
+        // The whole body scrolls as one, and the code takes the height the rest leaves, so nothing is
+        // cut off mid row where the sheet runs short. Its fields and buttons take focus themselves, so
+        // the area is no stop of its own, and its scrollbar sits in the sheet's padding.
+        BoxWithConstraints(Modifier.fillMaxSize()) {
+            val viewport = constraints.maxHeight
+            BuilderScrollArea(Modifier.fillMaxSize(), tabStop = false, scrollbarInGutter = true) {
+                FillLastColumn(viewport = viewport, fillLast = picked != null) {
+                    ExportHeader(state, capabilities, dispatcher, workspace, sheet.drafts)
+                    export.problems.forEach { problem ->
+                        Notice(text = problemText(problem), icon = IconId.Error, emphasis = Emphasis.Danger)
+                    }
+                    if (ready != null) {
+                        ExportFiles(ready, state.selectedPath, dispatcher, onCopy = { text ->
+                            copy(CopyKind.File, text)
+                        })
+                    }
+                }
             }
         }
         // b-228aa
@@ -283,71 +285,6 @@ private class SheetCopies {
     var manualOpen: Boolean by mutableStateOf(false)
 }
 
-/** The theme's name, the project it belongs to and its seed, "AppTheme from Burnt Ember #D9653B". */
-@Composable
-private fun exportSubtitle(state: ExportModel.State): String {
-    val themeName = state.document.themeName
-    val seed = state.document.seed.toHex()
-    val project = state.projectName
-    return if (project.isBlank()) {
-        stringResource(Res.string.export_subtitle_unnamed, themeName, seed)
-    } else {
-        stringResource(Res.string.export_subtitle, themeName, project, seed)
-    }
-}
-
-/**
- * The note that every export is compile checked, with the copy and download buttons after it. They
- * share a row where the sheet is wide enough, and the buttons move under the note where it is not.
- */
-@Composable
-private fun ExportFooter(
-    materialKolorVersion: String?,
-    buttons: @Composable () -> Unit,
-) {
-    val spacing = LocalBuilderTokens.current.spacing
-    val note: @Composable (Modifier) -> Unit = { noteModifier ->
-        Row(
-            modifier = noteModifier,
-            horizontalArrangement = Arrangement.spacedBy(spacing.small),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            BuilderIcon(id = IconId.Check, contentDescription = null, emphasis = Emphasis.Secondary)
-            BuilderText(
-                text = if (materialKolorVersion == null) {
-                    stringResource(Res.string.export_checked_any)
-                } else {
-                    stringResource(Res.string.export_checked, materialKolorVersion)
-                },
-                emphasis = Emphasis.Secondary,
-            )
-        }
-    }
-    BoxWithConstraints(Modifier.fillMaxWidth()) {
-        if (maxWidth >= FOOTER_ROW_MIN_WIDTH) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(spacing.small),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                note(Modifier.weight(1f))
-                buttons()
-            }
-        } else {
-            Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-                note(Modifier)
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(spacing.small, Alignment.End),
-                    verticalArrangement = Arrangement.spacedBy(spacing.small),
-                ) { buttons() }
-            }
-        }
-    }
-}
-
-/** The narrowest the footer gets while its note and its buttons still share a row. */
-private val FOOTER_ROW_MIN_WIDTH = 600.dp
-
 /** The target, the mode, the Expressive warning and the options. */
 @Composable
 private fun ExportHeader(
@@ -397,9 +334,9 @@ private fun ExportHeader(
     }
 }
 
-/** The file tabs and the code of the file picked. */
+/** The file tabs and the code of the file picked, the code last so it can take the height left. */
 @Composable
-private fun ColumnScope.ExportFiles(
+private fun ExportFiles(
     export: ExportOutcome.Ready,
     selectedPath: String?,
     dispatcher: Dispatcher<ExportAction>,
@@ -417,7 +354,7 @@ private fun ColumnScope.ExportFiles(
         lines = file.lines,
         onCopy = { onCopy(file.text) },
         label = file.path.fileName(),
-        modifier = Modifier.weight(1f).fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
     )
 }
 

@@ -51,6 +51,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * @param[style] The skin's overlay style, for the thumb and the focus ring.
  * @param[modifier] Applied to the area.
  * @param[tabStop] Whether the area may be a Tab stop on the web at all.
+ * @param[fitContent] Whether the area is only as tall as what it holds, up to the height it may
+ * take, rather than all of that height. The scrollbar then takes the area's height instead of
+ * setting it.
  * @param[content] What scrolls.
  */
 @Composable
@@ -59,6 +62,7 @@ internal fun HeadlessScrollArea(
     style: OverlayStyle,
     modifier: Modifier,
     tabStop: Boolean = true,
+    fitContent: Boolean = false, // b-511
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val keys = if (tabStop && LocalWebKeyboard.current) Modifier.scrollAreaKeys(state, style) else Modifier
@@ -70,7 +74,15 @@ internal fun HeadlessScrollArea(
                 .padding(end = OverlayMetrics.thumbThickness + OverlayMetrics.thumbInset * 2),
             content = content,
         )
-        HeadlessVerticalScrollbar(state, style, Modifier.align(Alignment.CenterEnd).fillMaxHeight())
+        if (fitContent) {
+            // b-511
+            // Sized from the column, so the scrollbar never makes the area taller than what it holds.
+            Box(Modifier.matchParentSize(), contentAlignment = Alignment.CenterEnd) {
+                HeadlessVerticalScrollbar(state, style, Modifier.fillMaxHeight())
+            }
+        } else {
+            HeadlessVerticalScrollbar(state, style, Modifier.align(Alignment.CenterEnd).fillMaxHeight())
+        }
     }
 }
 
