@@ -176,6 +176,16 @@ internal object OverlayMetrics {
     val tooltipMaxWidth: Dp = 280.dp
 
     /**
+     * How long the pointer rests on a tooltip's anchor before the label shows.
+     */
+    const val tooltipDelayMillis: Long = 500L
+
+    /**
+     * How long a label stays once the pointer leaves, so the pointer can cross the gap onto it.
+     */
+    const val tooltipGraceMillis: Long = 100L
+
+    /**
      * The grab handle drawn on top of a bottom sheet.
      */
     val sheetHandleWidth: Dp = 32.dp
