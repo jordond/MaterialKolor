@@ -36,38 +36,47 @@ for (const route of ['/', '/t/AdllOwAAAAAT']) {
   });
 }
 
-// Both ways, so the first visit total means what the site fetches at boot and nothing else. A file
-// the page stops loading at boot has to move to `firstVisit.exclude` in the same change.
-test('the budget counts as first visit exactly what the site loads at boot', async ({ page }) => {
-  const responses = collectResponses(page);
-  await page.goto(site('/'));
-  await expect(page.locator('#cmp_a11y_root > *').first()).toBeAttached({ timeout: 30_000 });
-  await page.waitForLoadState('networkidle');
-  // Fonts and strings are asked for after the first frame, which can be after networkidle.
-  await settle(responses);
+// Both ways, so each engine's first visit total means what the site fetches at boot on that engine
+// and nothing else. A file the page stops loading at boot has to move to `firstVisit.exclude` in
+// the same change.
+for (const [engine, route] of [
+  ['wasm', '/'],
+  ['js', '/?engine=js'],
+] as const) {
+  test(`the budget counts as first visit on ${engine} exactly what the site loads at boot there`, async ({ page }) => {
+    const responses = collectResponses(page);
+    await page.goto(site(route));
+    await expect(page.locator('#cmp_a11y_root > *').first()).toBeAttached({ timeout: 30_000 });
+    await page.waitForLoadState('networkidle');
+    // Fonts and strings are asked for after the first frame, which can be after networkidle.
+    await settle(responses);
 
-  const counted = firstVisitFiles();
-  const origin = new URL(site('/')).origin;
-  const fetched = responses
-    .map((response) => new URL(response.url))
-    .filter((url) => url.origin === origin)
-    .map((url) => (url.pathname === '/' ? 'index.html' : url.pathname.slice(1)));
-  expect(fetched.filter((file) => !counted(file)), 'loaded at boot but not counted').toEqual([]);
-  const root = process.env.MK_E2E_SITE_DIR;
-  if (!root) throw new Error('MK_E2E_SITE_DIR is not set, the global setup did not run');
-  // String files load when a screen first reads them, so some load later than boot. They stay
-  // counted, which only makes the total stricter, and only this direction skips them.
-  const unfetched = siteFiles(root).filter((file) => counted(file) && !LAZY_STRINGS.test(file) && !fetched.includes(file));
-  expect(unfetched, 'counted but not loaded at boot').toEqual([]);
-});
+    const counted = firstVisitFiles(engine);
+    const origin = new URL(site('/')).origin;
+    const fetched = responses
+      .map((response) => new URL(response.url))
+      .filter((url) => url.origin === origin)
+      .map((url) => (url.pathname === '/' ? 'index.html' : url.pathname.slice(1)));
+    expect(fetched.filter((file) => !counted(file)), 'loaded at boot but not counted').toEqual([]);
+    const root = process.env.MK_E2E_SITE_DIR;
+    if (!root) throw new Error('MK_E2E_SITE_DIR is not set, the global setup did not run');
+    // String files load when a screen first reads them, so some load later than boot. They stay
+    // counted, which only makes the total stricter, and only this direction skips them.
+    const unfetched = siteFiles(root).filter((file) => counted(file) && !LAZY_STRINGS.test(file) && !fetched.includes(file));
+    expect(unfetched, 'counted but not loaded at boot').toEqual([]);
+  });
+}
 
-test('the page lists the hashed assets it boots with', async ({ page, request }) => {
+test('the page lists the hashed assets each engine boots with', async ({ page, request }) => {
   await page.goto(site('/'));
   const assets = JSON.parse((await page.locator('#mk-assets').textContent()) ?? '{}');
-  expect(assets.glue).toMatch(/^\/assets\/builder\.[0-9a-f]{16}\.js$/);
-  expect(assets.wasm).toHaveLength(2);
+  expect(assets.wasm.glue).toMatch(/^\/assets\/builder\.[0-9a-f]{16}\.js$/);
+  expect(assets.wasm.binaries).toHaveLength(2);
+  expect(assets.js.glue).toMatch(/^\/assets\/builder-js\.[0-9a-f]{16}\.js$/);
+  expect(assets.js.binaries).toEqual([expect.stringMatching(/^\/assets\/skiko\.[0-9a-f]{16}\.wasm$/)]);
   expect(assets.fonts.length).toBeGreaterThan(0);
-  for (const pathname of [assets.glue, ...assets.wasm, ...assets.fonts]) {
+  const listed = [assets.wasm.glue, ...assets.wasm.binaries, assets.js.glue, ...assets.js.binaries, ...assets.fonts];
+  for (const pathname of listed) {
     expect((await request.get(site(pathname))).status(), pathname).toBe(200);
   }
 });
@@ -115,11 +124,14 @@ function collectResponses(page: Page): { url: string; status: number }[] {
   return responses;
 }
 
-/** Whether `budget.json` counts a site file as part of first visit, read the way `check-budget.mjs` reads it. */
-function firstVisitFiles(): (file: string) => boolean {
+/**
+ * Whether `budget.json` counts a site file as part of [engine]'s first visit, the shared files and
+ * the engine's own, read the way `check-budget.mjs` reads it.
+ */
+function firstVisitFiles(engine: 'wasm' | 'js'): (file: string) => boolean {
   const budget = JSON.parse(readFileSync(path.resolve(__dirname, '../../web/budget.json'), 'utf8'));
   const skipped = (budget.skip as string[]).map(globToRegExp);
-  const counted = (budget.firstVisit.files as string[]).map(globToRegExp);
+  const counted = [...budget.firstVisit.files, ...budget.firstVisit.engines[engine].files].map(globToRegExp);
   const lazy = (budget.firstVisit.exclude as string[]).map(globToRegExp);
   return (file) =>
     !skipped.some((pattern) => pattern.test(file)) &&

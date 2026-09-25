@@ -1,8 +1,18 @@
 import { expect, test, type Page } from '@playwright/test';
 import { site } from './builder';
+import { BOOT_TIMEOUT_MS, seedField } from '../fixtures/workspace';
 
-// The static shell around the app. boot.js checks the browser and colors the splash before any app
+// The static shell around the app. boot.js picks the engine and colors the splash before any app
 // code loads. index.html carries the splash, the unsupported page and the error overlay.
+
+type Engine = 'wasm' | 'js';
+
+/** What `#mk-assets` lists, each engine's glue and wasm files and the fonts both load. */
+interface Assets {
+  wasm: { glue: string; binaries: string[] };
+  js: { glue: string; binaries: string[] };
+  fonts: string[];
+}
 
 /** The glue, the script boot.js adds last. Holding it keeps the page on the splash. */
 const GLUE = /\/assets\/builder\.[0-9a-f]{16}\.js$/;
@@ -116,12 +126,27 @@ test.describe('splash', () => {
   });
 });
 
+// A browser without WasmGC runs the JS engine rather than getting the unsupported page (D61).
+test('a browser without WasmGC boots the JS glue and reaches the workspace', async ({ page }) => {
+  await page.addInitScript(() => {
+    WebAssembly.validate = () => false;
+  });
+  const requests = collectRequests(page);
+  await page.goto(site('/'));
+
+  await expect(seedField(page)).toBeAttached({ timeout: BOOT_TIMEOUT_MS });
+  await expect(page.locator('#unsupported')).toBeHidden();
+  const assets = await readAssets(page);
+  expect(requests.filter((pathname) => pathname === assets.js.glue)).toHaveLength(1);
+  expect(requests.filter((pathname) => onlyIn(assets, 'wasm').includes(pathname))).toEqual([]);
+});
+
 test.describe('unsupported browsers', () => {
   const stubs: [string, () => void][] = [
     [
-      'without WasmGC',
+      'without WebAssembly',
       () => {
-        WebAssembly.validate = () => false;
+        delete (window as { WebAssembly?: unknown }).WebAssembly;
       },
     ],
     [
@@ -143,7 +168,7 @@ test.describe('unsupported browsers', () => {
 
       const unsupported = page.locator('#unsupported');
       await expect(unsupported).toBeVisible();
-      for (const floor of ['Chrome or Edge 119', 'Firefox 120', 'Safari 18.2', '#1A73E8']) {
+      for (const floor of ['Chrome or Edge 95', 'Firefox 100', 'Safari 15.2', '#1A73E8']) {
         await expect(unsupported).toContainText(floor);
       }
       await expect(unsupported.getByRole('link', { name: 'MaterialKolor on GitHub' })).toBeVisible();
@@ -155,21 +180,30 @@ test.describe('unsupported browsers', () => {
   }
 });
 
-test('boot adds no preload and fetches the glue, each wasm file and each font once', async ({ page }) => {
-  const requests = collectRequests(page);
-  await page.goto(site('/'));
-  await expect(page.locator('#splash')).toHaveCount(0, { timeout: 30_000 });
-  await settle(requests);
+for (const [engine, route, binaries] of [
+  ['wasm', '/', 2],
+  ['js', '/?engine=js', 1],
+] as const) {
+  test(`boot on ${engine} adds no preload and fetches its glue, each of its wasm files and each font once`, async ({
+    page,
+  }) => {
+    const requests = collectRequests(page);
+    await page.goto(site(route));
+    await expect(page.locator('#splash')).toHaveCount(0, { timeout: BOOT_TIMEOUT_MS });
+    await settle(requests);
 
-  expect(await page.locator('link[rel="preload"]').count()).toBe(0);
-  const assets = JSON.parse((await page.locator('#mk-assets').textContent()) ?? '{}');
-  expect(assets.wasm).toHaveLength(2);
-  expect(assets.fonts.length).toBeGreaterThan(0);
-  const expected: string[] = [assets.glue, ...assets.wasm, ...assets.fonts];
-  for (const pathname of expected) {
-    expect(requests.filter((request) => request === pathname), pathname).toHaveLength(1);
-  }
-});
+    expect(await page.locator('link[rel="preload"]').count()).toBe(0);
+    const assets = await readAssets(page);
+    expect(assets[engine].binaries).toHaveLength(binaries);
+    expect(assets.fonts.length).toBeGreaterThan(0);
+    const expected: string[] = [assets[engine].glue, ...assets[engine].binaries, ...assets.fonts];
+    for (const pathname of expected) {
+      expect(requests.filter((request) => request === pathname), pathname).toHaveLength(1);
+    }
+    const other = engine === 'wasm' ? 'js' : 'wasm';
+    expect(requests.filter((pathname) => onlyIn(assets, other).includes(pathname))).toEqual([]);
+  });
+}
 
 test.describe('error overlay', () => {
   test('shows on an uncaught error, holds focus and copies the details', async ({ page, context, browserName }) => {
@@ -194,6 +228,7 @@ test.describe('error overlay', () => {
       const details = await page.evaluate(() => navigator.clipboard.readText());
       expect(details).toContain('Error: Thrown by the shell spec');
       expect(details).toMatch(/^Build: builder\.[0-9a-f]{16}\.js$/m);
+      expect(details).toMatch(/^Engine: wasm$/m);
       expect(details).toContain(await page.evaluate(() => navigator.userAgent));
     }
   });
@@ -405,6 +440,17 @@ async function holdGlue(page: Page): Promise<() => void> {
 
 function rgb(argb: number): string {
   return `rgb(${(argb >> 16) & 0xff}, ${(argb >> 8) & 0xff}, ${argb & 0xff})`;
+}
+
+async function readAssets(page: Page): Promise<Assets> {
+  return JSON.parse((await page.locator('#mk-assets').textContent()) ?? '{}');
+}
+
+/** The glue and wasm files only [engine] loads, leaving out any the other engine shares. */
+function onlyIn(assets: Assets, engine: Engine): string[] {
+  const other = assets[engine === 'wasm' ? 'js' : 'wasm'];
+  const shared = [other.glue, ...other.binaries];
+  return [assets[engine].glue, ...assets[engine].binaries].filter((pathname) => !shared.includes(pathname));
 }
 
 /** The path of every request the page makes to the site. */
