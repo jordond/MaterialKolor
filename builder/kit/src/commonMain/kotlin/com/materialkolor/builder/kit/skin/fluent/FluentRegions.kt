@@ -2,6 +2,8 @@ package com.materialkolor.builder.kit.skin.fluent
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -60,10 +62,37 @@ internal fun FluentTopBarRegion(
         border = null,
     ) {
         FluentCommands(
-            modifier = Modifier.fillMaxSize().padding(horizontal = tokens.spacing.small),
-            gap = tokens.spacing.small,
+            // b-512
+            // The bar's own inset alone on the start edge, so the switcher stands next to the poster.
+            modifier = Modifier.fillMaxSize().padding(end = tokens.spacing.small),
+            gap = tokens.spacing.extraSmall,
             content = content,
         )
+    }
+}
+
+// b-512
+
+/**
+ * The preview window on the canvas, a `Layer` in the card's dress with Fluent's overlay corners,
+ * clipping what it holds to them.
+ */
+@Composable
+internal fun FluentWindowRegion(
+    modifier: Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    val tokens = LocalBuilderTokens.current
+    val colors = FluentTheme.colors
+    Layer(
+        modifier = modifier,
+        shape = FluentTheme.shapes.overlay,
+        color = colors.background.layer.default,
+        border = BorderStroke(tokens.outlineWidth, colors.stroke.card.default),
+        backgroundSizing = BackgroundSizing.InnerBorderEdge,
+        clipContent = true,
+    ) {
+        Box(content = content)
     }
 }
 

@@ -4,6 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -24,7 +26,10 @@ import com.materialkolor.builder.kit.shell.PanelSide
 import com.materialkolor.builder.kit.shell.ShellMetrics
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
-/** The header row Unstyled and Custom put at the top of the workspace, on the workspace ground. */
+/**
+ * The header row Unstyled and Custom put at the top of the workspace, on the workspace ground. Its
+ * first control stands just off the start edge, next to the poster, as design D has it.
+ */
 @Composable
 internal fun HeadlessTopBarRegion(
     modifier: Modifier,
@@ -36,8 +41,9 @@ internal fun HeadlessTopBarRegion(
             .fillMaxWidth()
             .height(ShellMetrics.topBarHeight)
             .background(tokens.panel)
-            .padding(horizontal = tokens.spacing.large),
-        horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
+            // b-512
+            .padding(start = tokens.spacing.extraSmall, end = tokens.spacing.large),
+        horizontalArrangement = Arrangement.spacedBy(tokens.spacing.extraSmall),
         verticalAlignment = Alignment.CenterVertically,
         content = content,
     )
@@ -59,6 +65,21 @@ internal fun HeadlessDockRegion(
         verticalAlignment = Alignment.CenterVertically,
         content = content,
     )
+}
+
+// b-512
+
+/**
+ * The preview window on the canvas in the skin's dialog dress, its corners, its shadow where the
+ * skin has one and its outline drawn over the edge of what it holds, which it clips to its corners.
+ */
+@Composable
+internal fun HeadlessWindowRegion(
+    style: OverlayStyle,
+    modifier: Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    Box(modifier = modifier.regionFrame(style, style.dialogShape), content = content)
 }
 
 /** A full height panel in the skin's panel dress, rounded on its inner edge. */

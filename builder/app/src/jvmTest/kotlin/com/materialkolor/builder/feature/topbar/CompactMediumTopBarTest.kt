@@ -51,6 +51,8 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.floats.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.longs.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.math.roundToInt
@@ -101,15 +103,21 @@ class CompactMediumTopBarTest {
     fun at1280_everySkin_fitsAndMeetsTheTouchTargets() = checkEverySkin(width = 1280)
 
     @Test
-    fun compact_showsTheMarkAndNameWithTheChipsUnderTheBar() =
+    fun compact_showsTheSwatchAndNameWithTheChipsUnderTheBar() =
         runDesktopComposeUiTest(width = 390, height = HEIGHT) {
             val graph = showRoot()
             val chosen = NAMES.getValue(LibraryChoice.of(graph.session.document.value))
+            val project = runBlocking { graph.session.projectName.first() }
 
             val bar = onNodeWithTag(TOP_BAR_TAG).fetchSemanticsNode().boundsInRoot
             val chips = onNodeWithTag(LIBRARY_CHIP_ROW_TAG).fetchSemanticsNode().boundsInRoot
             chips.top shouldBeGreaterThanOrEqual bar.bottom - 1f
-            onAllNodes(hasContentDescription("MaterialKolor") and InBar).fetchSemanticsNodes().size shouldBe 1
+            // b-512
+            // The project's name stands at the start of the bar, after its swatch, in place of a mark.
+            onAllNodes(hasText(project) and InBar).fetchSemanticsNodes().size shouldBe 1
+            onAllNodes(hasContentDescription("Export code") and hasClickAction() and InBar)
+                .fetchSemanticsNodes()
+                .size shouldBe 1
             onAllNodes(hasContentDescriptionExactly("$chosen, radio, selected") and InChips)
                 .fetchSemanticsNodes()
                 .size shouldBe 1

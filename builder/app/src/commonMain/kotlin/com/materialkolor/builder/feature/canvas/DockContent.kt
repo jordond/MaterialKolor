@@ -1,5 +1,7 @@
 package com.materialkolor.builder.feature.canvas
 
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -10,6 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.feature.poster.handFocusTo
@@ -46,8 +51,9 @@ import org.jetbrains.compose.resources.stringResource
  * The dock's tools in the skin's `DockRegion`, Light, Split and Dark, the device width, Inspect,
  * Vision and Fullscreen (F-19).
  *
- * A phone has no device width, its preview is always a phone (F-46), and its mode switch drops the
- * glyphs to fit. Fullscreen leaves through the floating exit instead of the dock. While the keyboard
+ * A phone has no device width, its preview is always a phone (F-46). Its dock keeps to one row, so
+ * the mode switch drops the glyphs and Inspect shows as a glyph alone. Fullscreen leaves through the
+ * floating exit instead of the dock. While the keyboard
  * is in use, focus comes back to the Fullscreen button when fullscreen ends, since the exit that held
  * it is gone, and to the Inspect toggle when Inspect ends, since the preview that held it lets go. A
  * pointer leaves the focus alone.
@@ -81,6 +87,9 @@ internal fun DockContent(
             selected = state.view.mode,
             onSelect = { mode -> dispatcher.dispatch(WorkspaceAction.SetPreviewMode(mode, origin = null)) },
             label = stringResource(Res.string.canvas_mode_label),
+            // b-512
+            // As wide as its options, so a row that shares its width out evenly leaves room for the tools.
+            modifier = Modifier.width(IntrinsicSize.Max),
             optionIcon = { mode -> if (compact) null else mode.icon },
             // Arrowing along the modes should not slide the handle at every stop.
             selectOnFocus = false,
@@ -92,13 +101,28 @@ internal fun DockContent(
                 onPick = { width -> dispatcher.dispatch(WorkspaceAction.SetDeviceWidth(width)) },
             )
         }
-        BuilderToggleButton(
-            checked = state.inspect,
-            onCheckedChange = { on -> dispatcher.dispatch(WorkspaceAction.SetInspect(on)) },
-            label = stringResource(Res.string.canvas_inspect),
-            modifier = Modifier.focusRequester(inspectToggle),
-            icon = IconId.Inspect,
-        )
+        val inspect = stringResource(Res.string.canvas_inspect)
+        if (compact) {
+            // b-512
+            // A phone's dock is one row of glyphs, so Inspect shows its state by its fill.
+            BuilderIconButton(
+                onClick = { dispatcher.dispatch(WorkspaceAction.SetInspect(!state.inspect)) },
+                icon = IconId.Inspect,
+                contentDescription = inspect,
+                modifier = Modifier
+                    .focusRequester(inspectToggle)
+                    .semantics { toggleableState = ToggleableState(state.inspect) },
+                emphasis = if (state.inspect) Emphasis.Primary else Emphasis.Subtle,
+            )
+        } else {
+            BuilderToggleButton(
+                checked = state.inspect,
+                onCheckedChange = { on -> dispatcher.dispatch(WorkspaceAction.SetInspect(on)) },
+                label = inspect,
+                modifier = Modifier.focusRequester(inspectToggle),
+                icon = IconId.Inspect,
+            )
+        }
         VisionMenu(
             vision = state.vision,
             onPick = { vision -> dispatcher.dispatch(WorkspaceAction.SetVision(vision)) },

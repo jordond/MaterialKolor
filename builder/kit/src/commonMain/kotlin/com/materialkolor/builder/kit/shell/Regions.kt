@@ -1,6 +1,7 @@
 package com.materialkolor.builder.kit.shell
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.control.BuilderToastHost
 import com.materialkolor.builder.kit.control.BuilderToastHostState
@@ -22,15 +24,18 @@ import com.materialkolor.builder.kit.skin.fluent.FluentDockRegion
 import com.materialkolor.builder.kit.skin.fluent.FluentPaletteFrame
 import com.materialkolor.builder.kit.skin.fluent.FluentPanelRegion
 import com.materialkolor.builder.kit.skin.fluent.FluentTopBarRegion
+import com.materialkolor.builder.kit.skin.fluent.FluentWindowRegion
 import com.materialkolor.builder.kit.skin.headless.HeadlessDockRegion
 import com.materialkolor.builder.kit.skin.headless.HeadlessPaletteFrame
 import com.materialkolor.builder.kit.skin.headless.HeadlessPanelRegion
 import com.materialkolor.builder.kit.skin.headless.HeadlessTopBarRegion
+import com.materialkolor.builder.kit.skin.headless.HeadlessWindowRegion
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.material.MaterialDockRegion
 import com.materialkolor.builder.kit.skin.material.MaterialPaletteFrame
 import com.materialkolor.builder.kit.skin.material.MaterialPanelRegion
 import com.materialkolor.builder.kit.skin.material.MaterialTopBarRegion
+import com.materialkolor.builder.kit.skin.material.MaterialWindowRegion
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /** Which edge of the workspace a panel stands on. Its other edge, the one facing the canvas, is its inner edge. */
@@ -61,9 +66,18 @@ public fun TopBarRegion(
     }
 }
 
+// b-512
+
 /**
- * The floating dock over the canvas. Material3 wears its `HorizontalFloatingToolbar`, the other
- * skins a toolbar row in their own overlay dress.
+ * The tallest a control in the [TopBarRegion] may stand. A field that floats its label over its top
+ * edge, such as Material's outlined dropdown, keeps that label inside the bar at this height.
+ */
+public val TopBarControlMaxHeight: Dp
+    get() = ShellMetrics.topBarControlHeight
+
+/**
+ * The dock, a compact toolbar centred under the preview. Material3 wears its
+ * `HorizontalFloatingToolbar`, the other skins a toolbar row in their own overlay dress.
  *
  * @param[modifier] Applied to the dock.
  * @param[content] The dock's tools, laid in a row.
@@ -78,6 +92,29 @@ public fun DockRegion(
         Library.Material3 -> MaterialDockRegion(modifier, content)
         Library.Unstyled, Library.Custom -> HeadlessDockRegion(overlayStyle(library), modifier, content)
         Library.Fluent -> FluentDockRegion(modifier, content)
+    }
+}
+
+// b-512
+
+/**
+ * The window the preview shows in on the canvas, rounded to the skin's large corners and set off
+ * the canvas by the skin's own shadow or outline. It clips what it holds to its corners, so a split
+ * wipes inside it. The caller sizes and places it.
+ *
+ * @param[modifier] Applied to the window, and where its size comes from.
+ * @param[content] The preview, filling the window.
+ */
+@Composable
+public fun PreviewWindowRegion(
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    val library = LocalSkin.current.library
+    when (library) {
+        Library.Material3 -> MaterialWindowRegion(modifier, content)
+        Library.Unstyled, Library.Custom -> HeadlessWindowRegion(overlayStyle(library), modifier, content)
+        Library.Fluent -> FluentWindowRegion(modifier, content)
     }
 }
 
