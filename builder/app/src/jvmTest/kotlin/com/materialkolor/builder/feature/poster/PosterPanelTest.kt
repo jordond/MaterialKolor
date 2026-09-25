@@ -292,9 +292,10 @@ class PosterPanelTest {
         runComposeUiTest {
             showPoster()
 
-            onNodeWithText("Pick").performClick()
+            // b-524 The test window gives the 320 poster, where Pick and Image go glyph only.
+            onNode(hasText("Pick") or hasContentDescription("Pick")).performClick()
             // Image opens a menu, and its Upload image row opens the image picker.
-            onNodeWithText("Image").performClick()
+            onNode(hasText("Image") or hasContentDescription("Image")).performClick()
             onNodeWithText("Upload image").performClick()
             waitForIdle()
 

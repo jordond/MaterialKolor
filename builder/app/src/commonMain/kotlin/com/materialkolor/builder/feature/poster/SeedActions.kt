@@ -67,7 +67,11 @@ internal fun SeedActions(
         ) {
             if (shuffle) ShuffleButton(context, dispatcher, Modifier.weight(1f))
             val pick = remember { FocusRequester() }
-            val openPicker = { dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.Seed, returnFocusTo = pick)) }
+            val openPicker = {
+                dispatcher.dispatch(
+                    WorkspaceAction.OpenPicker(PickerTarget.Seed, returnFocusTo = pick),
+                )
+            }
             if (narrow) {
                 PosterIconButton(
                     icon = IconId.Eyedropper,
@@ -161,4 +165,3 @@ internal fun Preferences.isLocked(lock: ShuffleLock): Boolean =
  * never matters once the seed itself is locked.
  */
 internal fun Preferences.shufflesNothing(): Boolean = seedLock && styleLock
-
