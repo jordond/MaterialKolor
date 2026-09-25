@@ -184,7 +184,7 @@ public data class ProjectViewState(
 @Serializable
 public enum class PreviewTab {
     /**
-     * A sample app wearing the theme.
+     * A sample app drawn in the theme.
      */
     @SerialName("App")
     App,

@@ -23,7 +23,7 @@ import androidx.compose.ui.input.key.type
  * key going down, since that is the only half the web's backing input hands on to Compose. Tab with
  * Ctrl, Alt or Meta held goes on to the field.
  *
- * Every multi-line field in the sample apps and galleries wears this. A single-line field already
+ * Every multi-line field in the sample apps and galleries uses this. A single-line field already
  * lets Tab through to the focus system.
  */
 internal fun Modifier.tabMovesFocus(focusManager: FocusManager): Modifier =

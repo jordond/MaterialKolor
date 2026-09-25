@@ -23,7 +23,7 @@ public interface BuilderIcons {
  * The icon set of the surrounding skin.
  *
  * Static for the same reason as `LocalSkin`, and with no default for the same reason as the
- * tokens. An icon drawn outside a skin would otherwise quietly wear the wrong set.
+ * tokens. An icon drawn outside a skin would otherwise quietly use the wrong set.
  */
 public val LocalBuilderIcons: ProvidableCompositionLocal<BuilderIcons> = staticCompositionLocalOf {
     error("No BuilderIcons provided")

@@ -102,7 +102,7 @@ internal fun PrimaryExplainerLine(
 
 /**
  * One of the card's two swatches, the seed and then primary. The seed sits on its own colour, so
- * it wears a ring in the poster's ink to show at all.
+ * it gets a ring in the poster's ink to show at all.
  */
 @Composable
 private fun TakeSwatch(

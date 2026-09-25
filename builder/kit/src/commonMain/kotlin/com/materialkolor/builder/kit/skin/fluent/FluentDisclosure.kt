@@ -51,7 +51,7 @@ import io.github.composefluent.FluentTheme
  * Fluent's own `Expander` takes its press on an inner header and again on a chevron button, two
  * stops for one control, and clips everything to its outline, which would cut the header's focus
  * ring. Here the whole header is one button that speaks its state, with expand and collapse actions
- * while it is enabled, and it wears the ring outside the outline. The content opens on the skin's
+ * while it is enabled, and it draws the ring outside the outline. The content opens on the skin's
  * motion, which reduced motion turns to a fade.
  */
 @Composable

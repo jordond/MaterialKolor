@@ -93,9 +93,9 @@ internal val LocalTileProbe: ProvidableCompositionLocal<((name: String) -> Unit)
 /**
  * The light and dark panes of the canvas, drawn through the same vision filter.
  *
- * @property[light] The pane wearing the light scheme, the start copy of a split.
- * @property[dark] The pane wearing the dark scheme.
- * @property[filter] The vision filter both wear, or null for none.
+ * @property[light] The pane in the light scheme, the start copy of a split.
+ * @property[dark] The pane in the dark scheme.
+ * @property[filter] The vision filter both are drawn through, or null for none.
  */
 @Immutable
 internal class PaneSpecs(

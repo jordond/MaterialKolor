@@ -15,7 +15,7 @@ import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.preview.split.PaneSpec
 
 /**
- * Every library a pane can wear, Material 3 once per flavour.
+ * Every library a pane can use, Material 3 once per flavour.
  */
 internal val PaneSkins: List<Skin> =
     Library.entries.map { library -> Skin(library, expressive = false) } + Skin(Library.Material3, expressive = true)

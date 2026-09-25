@@ -103,7 +103,7 @@ internal fun CanvasArea(
 }
 
 /**
- * The dock under the preview with preview mode, device width, inspect and vision, worn in a
+ * The dock under the preview with preview mode, device width, inspect and vision, drawn in a
  * `DockRegion` (F-19).
  */
 @Composable

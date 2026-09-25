@@ -85,7 +85,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
  * A Material3 switch with its label. The row is the target and carries the switch role, so the
- * switch itself takes no clicks. The row wears the focus ring and Material's own focus layer, clipped
+ * switch itself takes no clicks. The row has the focus ring and Material's own focus layer, clipped
  * to the ring's corners so the ripple and the layer stay inside it.
  */
 @Composable
@@ -131,7 +131,7 @@ internal fun MaterialSwitch(
 }
 
 /**
- * A Material3 checkbox with its label, the row being the target. The row wears the focus ring and
+ * A Material3 checkbox with its label, the row being the target. The row has the focus ring and
  * Material's own focus layer, clipped to the ring's corners like the switch.
  */
 @Composable
@@ -176,7 +176,7 @@ internal fun MaterialCheckbox(
 /**
  * The Material3 slider, with the builder's keys and snapping laid over it. Material draws no named
  * stops, so they only show through the snap. Material shows focus only by narrowing the thumb, so
- * the thumb wears the focus ring as well.
+ * the thumb gets the focus ring as well.
  */
 @Composable
 internal fun MaterialSlider(
@@ -253,7 +253,7 @@ internal fun MaterialField(
 
 /**
  * The poster's seed headline in Material3, headless text with the underline of a filled field. It
- * reads the surrounding tokens, so on the poster it wears the seed.
+ * reads the surrounding tokens, so on the poster it is drawn in the seed.
  */
 @Composable
 @ReadOnlyComposable
@@ -282,7 +282,7 @@ private val TabRingInset: Dp = TabIndicatorHeight + FocusRingOffset + FocusRingW
  *
  * Only the selected tab can take focus from Tab, so Tab enters and leaves the row in one step. The
  * arrow keys select the next or previous tab, wrapping at the ends, and move focus with it. The row
- * scrolls the selected tab into view. The focused tab wears the focus ring inside its own edge.
+ * scrolls the selected tab into view. The focused tab shows the focus ring inside its own edge.
  */
 @Composable
 internal fun <T> MaterialTabs(
@@ -341,7 +341,7 @@ internal fun <T> MaterialTabs(
 
 /**
  * A disclosure row as a Material3 list item, since Material has no disclosure of its own. The item
- * is a button that speaks its state, with expand and collapse actions while it is enabled. It wears
+ * is a button that speaks its state, with expand and collapse actions while it is enabled. It draws
  * the focus ring square, like a Material list row.
  */
 @Composable

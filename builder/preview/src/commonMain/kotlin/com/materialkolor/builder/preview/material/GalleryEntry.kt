@@ -88,7 +88,7 @@ private enum class GalleryDestination(
  * The Material 3 components gallery (F-21).
  *
  * Every card holds stock Material 3 components on their default colors, under the theme the pane
- * already wears, so the Expressive flavour shows the same set in its own shapes and motion, and
+ * already uses, so the Expressive flavour shows the same set in its own shapes and motion, and
  * then its own components after them in each group. Each component shows up enabled and disabled,
  * apart from the few Material 3 gives no disabled look.
  * Nothing in the gallery opens a popup or a dialog window, since on the web the first one takes

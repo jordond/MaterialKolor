@@ -120,7 +120,7 @@ internal class RingCapture(
 
     /**
      * The same capture with ring pixels looked for only within [reach] of the focused node. A tooltip
-     * that opens with focus can wear the focus colour, as Fluent's does, and this leaves it out.
+     * that opens with focus can use the focus colour, as Fluent's does, and this leaves it out.
      */
     fun nearFocused(reach: Dp): RingCapture =
         RingCapture(rings, before, after, focused, density, focused.inflate(reach.value * density))
@@ -180,7 +180,7 @@ internal class RingCapture(
  * Tab [presses] times so focus lands on the control, and captures the frame on both sides of the
  * last press.
  *
- * @param[document] The theme the skin wears, for a test that needs a seed or style far from the default.
+ * @param[document] The theme the skin uses, for a test that needs a seed or style far from the default.
  * @param[density] Pixels per dp. A small round control draws few whole ring pixels at 1, since the
  * edges of a curve are blended, so its test can draw at 2 instead of lowering the pixel line.
  * @param[ringColors] The colours a ring pixel may show, for a control whose own focus outline is its

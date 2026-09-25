@@ -290,7 +290,7 @@ private fun customActionStyles(tokens: BuilderTokens): ActionStyles {
 /**
  * One headless look, coloured from [tokens].
  *
- * Primary actions and anything switched on wear the accent. Status badges wear the status ink as a
+ * Primary actions and anything switched on use the accent. Status badges use the status ink as a
  * fill with the panel as their ink, which reads because the status inks are cut to read on a panel.
  */
 internal fun actionStyles(

@@ -83,7 +83,7 @@ import com.materialkolor.builder.preview.canvas.choose
 import androidx.compose.ui.semantics.Role as SemanticsRole
 
 // The Expressive cards of the Material 3 gallery (F-21), which join MaterialCards when the pane
-// wears the Expressive flavour. ExpressiveFeedback.kt keeps the samples of the Feedback cards.
+// uses the Expressive flavour. ExpressiveFeedback.kt keeps the samples of the Feedback cards.
 // Everything a sample remembers lives in DemoAppState under a "gallery." key, so both copies of a
 // split agree, and nothing opens a popup or a window (D40).
 

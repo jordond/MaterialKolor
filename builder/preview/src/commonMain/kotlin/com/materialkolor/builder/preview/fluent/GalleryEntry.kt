@@ -63,7 +63,7 @@ internal object FluentGalleryKeys {
  * The Fluent components gallery (F-21).
  *
  * Every card holds compose-fluent's own components on their default colors, under the Fluent theme
- * the pane already wears, and each shows up enabled and disabled apart from the few with nothing
+ * the pane already uses, and each shows up enabled and disabled apart from the few with nothing
  * to press. Nothing opens a popup, a window or a portal, since on the web the first one takes the
  * accessibility mirror over for good (D40). The slider's value tip, the dialog and the combo box
  * list are Fluent's popups, so the slider draws its own thumb, the dialog shows in place and the

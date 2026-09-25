@@ -112,7 +112,7 @@ private sealed interface CodePart {
  * every color literal. Lines are numbered, the text can be selected, long lines scroll sideways and
  * only the lines on screen are composed, so a 400 line file scrolls smoothly. Give it a bounded
  * height, since it scrolls its own lines. The code area is one focus stop, the selection's own, and
- * wears the focus ring outside its frame while it has focus. There the arrows, Page Up and Page Down
+ * shows the focus ring outside its frame while it has focus. There the arrows, Page Up and Page Down
  * scroll it without a pointer, and the copy keys copy what is selected.
  *
  * The copy button sits in the top corner on a band of the panel, so its focus ring never lands on

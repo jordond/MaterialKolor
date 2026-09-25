@@ -54,7 +54,7 @@ public enum class PanelSide {
 }
 
 /**
- * The top bar, 64 dp tall in every window class. Material3 wears its `TopAppBar`, the other skins a
+ * The top bar, 64 dp tall in every window class. Material3 uses its `TopAppBar`, the other skins a
  * plain header row on the workspace ground.
  *
  * @param[modifier] Applied to the bar.
@@ -82,7 +82,7 @@ public val TopBarControlMaxHeight: Dp
     get() = ShellMetrics.topBarControlHeight
 
 /**
- * The dock, a compact toolbar centred under the preview. Material3 wears its
+ * The dock, a compact toolbar centred under the preview. Material3 uses its
  * `HorizontalFloatingToolbar`, the other skins a toolbar row in their own overlay dress.
  *
  * @param[modifier] Applied to the dock.
@@ -185,7 +185,7 @@ public fun ToastRegion(
 
 /**
  * The command palette's frame. A centred dialog on Medium and Expanded, up to 560 dp wide on
- * Medium and 640 dp on Expanded, and a full width one on a phone. Material3 wears its dialog
+ * Medium and 640 dp on Expanded, and a full width one on a phone. Material3 uses its dialog
  * container, the other skins their dialog dress. The modal plumbing around it, the scrim and the
  * focus trap, is the caller's.
  *

@@ -29,7 +29,7 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 /**
- * The four libraries in the order the cycle wears them, Fluent between the others.
+ * The four libraries in the order the cycle switches to them, Fluent between the others.
  */
 private val Cycle: List<Library> = listOf(Library.Material3, Library.Unstyled, Library.Fluent, Library.Custom)
 
