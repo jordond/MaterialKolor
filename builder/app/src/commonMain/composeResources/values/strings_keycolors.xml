@@ -1,20 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The fine tune row with the key colors and the pinned roles. -->
-    <string name="keycolors_title">Core colors and pins</string>
-    <!-- Under the row's title while no key color or pin is set. -->
-    <string name="keycolors_summary_none">Everything follows the seed</string>
-    <!-- Under the row's title, how many key colors are set by hand. -->
+    <!-- In the Fine-tune button's summary, how many key colors are set by hand. -->
     <plurals name="keycolors_summary_set">
         <item quantity="one">%1$d key color set</item>
         <item quantity="other">%1$d key colors set</item>
     </plurals>
-    <!-- Under the row's title, how many roles are pinned. -->
+    <!-- In the Fine-tune button's summary, how many roles are pinned. -->
     <plurals name="keycolors_summary_pins">
         <item quantity="one">%1$d pinned role</item>
         <item quantity="other">%1$d pinned roles</item>
     </plurals>
-    <!-- Under the row's title when both are set. The arguments are the two counts above. -->
+    <!-- In the Fine-tune button's summary when both are set. The arguments are the two counts above. -->
     <string name="keycolors_summary_both">%1$s, %2$s</string>
 
     <!-- The label over the six key colors. -->

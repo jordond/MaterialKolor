@@ -34,6 +34,7 @@ import com.materialkolor.builder.feature.image.ImageSeedModel
 import com.materialkolor.builder.feature.image.ProvideImageSeeds
 import com.materialkolor.builder.feature.picker.PickerHost
 import com.materialkolor.builder.feature.poster.ExplainerHost
+import com.materialkolor.builder.feature.poster.FineTuneHost
 import com.materialkolor.builder.feature.poster.LocalPosterSheetState
 import com.materialkolor.builder.feature.poster.PosterFocus
 import com.materialkolor.builder.feature.poster.PosterPanel
@@ -294,6 +295,7 @@ internal fun WorkspaceScreen(
             ExportHost(state, dispatcher, returnFocusTo = focus.requester(TopBarControl.Export))
             ProjectsHost(state, dispatcher, returnFocusTo = posterFocus.projects.returnFocusTo)
             ExplainerHost(state, dispatcher, returnFocusTo = posterFocus.why.returnFocusTo)
+            FineTuneHost(state, dispatcher, returnFocusTo = posterFocus.fineTune.returnFocusTo) // b-524
             val shareReturn = posterFocus.shareReturn(state.panel, focus.requester(TopBarControl.Share))
             ShareHost(state, dispatcher, returnFocusTo = shareReturn)
             // A Medium bar short of room moves Commands into the overflow as a phone does.

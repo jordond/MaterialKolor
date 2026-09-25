@@ -26,6 +26,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -110,7 +111,8 @@ class FirstRunHintTest {
             showRoot()
             onNodeWithText(HINT).assertExists()
 
-            onNodeWithContentDescription("Close the hint").performClick()
+            // b-524 The hint sits at the poster's foot, under the fold at 800 tall.
+            onNodeWithContentDescription("Close the hint").performScrollTo().performClick()
             waitUntil { FIRST_RUN_HINT in workspace.state.value.preferences.dismissedHints }
             waitForIdle()
 
@@ -147,7 +149,8 @@ class FirstRunHintTest {
             showRoot()
             onNodeWithText(HINT).assertExists()
 
-            onNodeWithContentDescription("Close the hint").performClick()
+            // b-524 The hint sits at the poster's foot, under the fold at 800 tall.
+            onNodeWithContentDescription("Close the hint").performScrollTo().performClick()
             waitForIdle()
 
             onNodeWithText(HINT).assertDoesNotExist()

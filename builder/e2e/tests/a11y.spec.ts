@@ -53,22 +53,19 @@ test('the poster names its sections and their controls', async ({ page }) => {
   for (const name of ['Copy hex', 'Copy Kotlin', 'Shuffle', 'Pick', 'Image']) {
     await expect(button(page, name), name).toHaveCount(1);
   }
-  for (const lock of ['hue', 'style', 'seed']) {
-    await expect(button(page, new RegExp(`^Lock ${lock}, (checked|not checked)$`)), lock).toHaveCount(1);
-  }
   // Style
   await expect(label(page, 'Palette style')).toHaveCount(1);
   await expect(button(page, /^TonalSpot, .+, radio, selected$/)).toHaveCount(1);
   await expect(button(page, /, radio, not selected$/).first()).toBeAttached();
+  await expect(button(page, /^Keep the style when shuffling, checkbox, (checked|not checked)$/)).toHaveCount(1);
   // Contrast, one choice of the four named levels
   await expect(label(page, 'Contrast level')).toHaveCount(1);
   await expect(button(page, 'Standard, radio, selected')).toHaveCount(1);
   for (const level of ['Reduced', 'Medium', 'High']) {
     await expect(button(page, `${level}, radio, not selected`), level).toHaveCount(1);
   }
-  // Core colors and the target
-  await expect(button(page, /^Core colors and pins, .+, (collapsed|expanded)$/)).toHaveCount(1);
-  await expect(button(page, /^Spec, platform, extra colors and target options, .+, (collapsed|expanded)$/)).toHaveCount(1);
+  // Fine-tune, one button that sums up the sheet it opens
+  await expect(button(page, /^Fine-tune, .+/)).toHaveCount(1);
 });
 
 test('the dock names the preview mode, the device, Inspect, color vision and Fullscreen', async ({ page }) => {

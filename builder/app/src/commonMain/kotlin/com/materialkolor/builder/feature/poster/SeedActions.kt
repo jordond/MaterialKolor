@@ -18,23 +18,18 @@ import com.materialkolor.builder.feature.workspace.ShuffleLock
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.poster_all_locked
-import com.materialkolor.builder.generated.resources.poster_lock_hue
-import com.materialkolor.builder.generated.resources.poster_lock_seed
-import com.materialkolor.builder.generated.resources.poster_lock_style
 import com.materialkolor.builder.generated.resources.poster_pick
 import com.materialkolor.builder.generated.resources.poster_shuffle
 import com.materialkolor.builder.generated.resources.poster_shuffle_off
 import com.materialkolor.builder.generated.resources.poster_space
 import com.materialkolor.builder.kit.control.BuilderButton
-import com.materialkolor.builder.kit.control.BuilderText
-import com.materialkolor.builder.kit.control.BuilderToggleButton
 import com.materialkolor.builder.kit.control.BuilderTooltip
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.layout.PosterMode
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -45,10 +40,11 @@ import org.jetbrains.compose.resources.stringResource
  * draw, so Shuffle turns off and its tooltip and what it reads out say why. The Space keycap inside
  * it is a hint for a keyboard, so a touch screen leaves it out.
  *
- * The docked poster keeps its locks elsewhere, the style's by the style and the rest in Fine-tune.
+ * The locks live elsewhere, the style's by the style and the rest in Fine-tune. On the 320 poster
+ * Pick and Image draw as their glyphs alone, so the three still share one row, and read out the
+ * same.
  *
  * @param[shuffle] Whether Shuffle leads the row. The sheet's seed row already holds it.
- * @param[locks] Whether [ShuffleLocks] follow the actions.
  */
 @Composable
 internal fun SeedActions(
@@ -56,10 +52,11 @@ internal fun SeedActions(
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
     shuffle: Boolean = true,
-    // b-522 The docked poster no longer shows the locks here.
-    locks: Boolean = false,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
+    // b-524 Material's roomy buttons leave Image a row of its own at 320, so there the two go
+    // glyph only.
+    val narrow = LocalLayout.current.posterMode == PosterMode.Docked320
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         // A tight gap, so Material's roomy buttons share one row at 400 dp. A row too narrow for all
         // three wraps, and Shuffle then fills a row of its own.
@@ -70,15 +67,29 @@ internal fun SeedActions(
         ) {
             if (shuffle) ShuffleButton(context, dispatcher, Modifier.weight(1f))
             val pick = remember { FocusRequester() }
-            BuilderButton(
-                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.Seed, returnFocusTo = pick)) },
-                label = stringResource(Res.string.poster_pick),
-                modifier = pickButtonFocus(pick),
-                icon = IconId.Eyedropper,
-            )
-            ImageMenuButton(context, dispatcher)
+            val openPicker = {
+                dispatcher.dispatch(
+                    WorkspaceAction.OpenPicker(PickerTarget.Seed, returnFocusTo = pick),
+                )
+            }
+            if (narrow) {
+                PosterIconButton(
+                    icon = IconId.Eyedropper,
+                    description = stringResource(Res.string.poster_pick),
+                    onClick = openPicker,
+                    emphasis = Emphasis.Secondary,
+                    buttonModifier = pickButtonFocus(pick),
+                )
+            } else {
+                BuilderButton(
+                    onClick = openPicker,
+                    label = stringResource(Res.string.poster_pick),
+                    modifier = pickButtonFocus(pick),
+                    icon = IconId.Eyedropper,
+                )
+            }
+            ImageMenuButton(context, dispatcher, glyphOnly = narrow)
         }
-        if (locks) ShuffleLocks(context, dispatcher)
     }
 }
 
@@ -112,38 +123,6 @@ private fun ShuffleButton(
     val spoken = stringResource(Res.string.poster_shuffle_off, reason)
     BuilderTooltip(text = reason, modifier = modifier) {
         button(Modifier.fillMaxWidth().semantics { contentDescription = spoken })
-    }
-}
-
-/**
- * The three shuffle locks on one row, and why Shuffle is off once the seed and the style are both
- * locked. The label says lock, so the locks leave their glyph out and fit the row. The phone sheet
- * still shows it, and the docked poster no longer does.
- */
-@Composable
-internal fun ShuffleLocks(
-    context: PosterContext,
-    dispatcher: Dispatcher<WorkspaceAction>,
-    modifier: Modifier = Modifier,
-) {
-    val spacing = LocalBuilderTokens.current.spacing
-    val preferences = context.preferences
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(spacing.small),
-            verticalArrangement = Arrangement.spacedBy(spacing.small),
-        ) {
-            ShuffleLock.entries.forEach { lock ->
-                BuilderToggleButton(
-                    checked = preferences.isLocked(lock),
-                    onCheckedChange = { on -> dispatcher.dispatch(WorkspaceAction.SetLock(lock, on)) },
-                    label = stringResource(lockLabel(lock)),
-                )
-            }
-        }
-        if (preferences.shufflesNothing()) {
-            BuilderText(text = stringResource(Res.string.poster_all_locked), emphasis = Emphasis.Secondary)
-        }
     }
 }
 
@@ -186,10 +165,3 @@ internal fun Preferences.isLocked(lock: ShuffleLock): Boolean =
  * never matters once the seed itself is locked.
  */
 internal fun Preferences.shufflesNothing(): Boolean = seedLock && styleLock
-
-private fun lockLabel(lock: ShuffleLock): StringResource =
-    when (lock) {
-        ShuffleLock.Hue -> Res.string.poster_lock_hue
-        ShuffleLock.Style -> Res.string.poster_lock_style
-        ShuffleLock.Seed -> Res.string.poster_lock_seed
-    }

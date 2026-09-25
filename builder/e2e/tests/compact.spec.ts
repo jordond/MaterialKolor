@@ -5,7 +5,7 @@ import { settledBox, tap, type Box, type Point } from './touch';
 // The builder on a phone held upright, with a finger. The preview comes first, the library chips sit
 // under the top bar and the poster peeks from the bottom. Pick opens the picker as a sheet, where a
 // drag on the hue repaints the seed as the finger moves. Dragging the poster sheet to half reaches
-// the fine tune rows, and Export opens over the whole screen.
+// the Fine-tune button, and Export opens over the whole screen.
 
 const A11Y = '#cmp_a11y_root';
 
@@ -64,7 +64,7 @@ test('at 390 wide with a finger, a drag on the edge of the poster raises it to h
   await expect(button(page, 'Seed and theme controls, Half')).toBeAttached({ timeout: 15_000 });
 });
 
-test('at 390 wide with a finger, a drag on the half height poster reaches the fine tune rows', async ({
+test('at 390 wide with a finger, a drag on the half height poster reaches the Fine-tune button', async ({
   page,
   browserName,
 }) => {
@@ -81,8 +81,8 @@ test('at 390 wide with a finger, a drag on the half height poster reaches the fi
   await drag(cdp, inside, { x: inside.x, y: VIEWPORT.height / 3 });
   await expect(button(page, 'Seed and theme controls, Full')).toBeAttached({ timeout: 15_000 });
 
-  // The next drag scrolls the content up to the fine tune rows.
-  const fineTune = page.locator(A11Y).getByRole('button', { name: /^Core colors and pins/ }).first();
+  // The next drag scrolls the content up to the Fine-tune button.
+  const fineTune = page.locator(A11Y).getByRole('button', { name: /^Fine-tune, / }).first();
   await drag(cdp, inside, { x: inside.x, y: VIEWPORT.height / 3 });
   await expect.poll(() => inView(fineTune), { timeout: 15_000 }).toBe(true);
 });

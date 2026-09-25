@@ -62,9 +62,10 @@ import com.materialkolor.builder.kit.control.BuilderChoiceGroup
 import com.materialkolor.builder.kit.control.BuilderHexField
 import com.materialkolor.builder.kit.control.BuilderIconButton
 import com.materialkolor.builder.kit.control.BuilderText
-import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.layout.PosterMode
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.widget.SchemeChip
 import com.materialkolor.builder.kit.widget.SchemeChipFootprint
@@ -164,6 +165,9 @@ internal fun StyleDetails(
     val spacing = LocalBuilderTokens.current.spacing
     val selected = context.document.style
     var open by rememberSaveable { mutableStateOf(false) }
+    // b-524 Only the 400 poster has room for the line and the toggle side by side. The 320 poster
+    // and the phone sheet put the toggle under the line.
+    val stacked = LocalLayout.current.posterMode != PosterMode.Docked400
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
@@ -178,8 +182,9 @@ internal fun StyleDetails(
                 modifier = Modifier.weight(1f),
             )
             if (info) InfoButton(topic = InfoTopic.Style, expanded = open, onClick = { open = !open })
-            KeepStyleToggle(context, dispatcher) // b-523
+            if (!stacked) KeepStyleToggle(context, dispatcher) // b-523
         }
+        if (stacked) KeepStyleToggle(context, dispatcher)
         if (info && open) InfoNote(InfoTopic.Style)
         context.capabilities[Control.Style].explanation?.let { reason -> ReasonLine(reason) }
         if (selected == Style.Cmf) {
@@ -212,7 +217,7 @@ private fun StyleHeader(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            BuilderText(label, style = BuilderTextStyle.SectionLabel, maxLines = 1)
+            Eyebrow(label) // b-524
             if (note != null) SpecNote(note, Modifier.weight(1f))
         }
     } else {

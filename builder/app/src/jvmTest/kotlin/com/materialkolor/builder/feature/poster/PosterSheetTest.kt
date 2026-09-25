@@ -51,9 +51,7 @@ private val Half = Peek +
         SheetSection.ContrastDetails,
         SheetSection.StyleDetails,
         SheetSection.Explainer,
-        SheetSection.Locks,
-        SheetSection.CoreColors,
-        SheetSection.SpecExtras,
+        SheetSection.FineTune,
     )
 private val Full = Half + listOf(SheetSection.Hero, SheetSection.Header)
 

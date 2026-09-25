@@ -23,7 +23,6 @@ import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.feature.workspace.FineTuneSection
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -122,8 +121,7 @@ class FocusHandOffTest {
         runComposeUiTest {
             val pins = mapOf(Role.OnPrimary to RolePin(light = Argb(0xFFFFFF)))
             val harness = PosterHarness(Plain.copy(pins = pins))
-            harness.fineTune = FineTuneSection.KeyColors
-            showSection(harness) { context, dispatcher -> CoreColorsRow(context, dispatcher) }
+            showSection(harness) { context, dispatcher -> FineTuneContent(context, dispatcher) }
 
             pressWithKeyboard(onNodeWithContentDescription("Clear onPrimary, Light"))
 
@@ -135,8 +133,7 @@ class FocusHandOffTest {
     fun pinsClearAll_handsFocusToTheLastKeyColorsPick() =
         runComposeUiTest {
             val harness = PosterHarness(Plain.copy(pins = TwoPins))
-            harness.fineTune = FineTuneSection.KeyColors
-            showSection(harness) { context, dispatcher -> CoreColorsRow(context, dispatcher) }
+            showSection(harness) { context, dispatcher -> FineTuneContent(context, dispatcher) }
 
             pressWithKeyboard(onNodeWithText("Clear all"))
 

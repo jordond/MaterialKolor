@@ -144,8 +144,7 @@ internal fun SeedHero(
                 buttonModifier = triggerFocus(copyHex),
             )
             PosterIconButton(
-                // b-522 Swap to IconId.Code once B-520 lands it.
-                icon = IconId.Export,
+                icon = IconId.Code, // b-524
                 description = stringResource(Res.string.poster_copy_kotlin),
                 onClick = {
                     val copy = WorkspaceAction.CopyText(kotlinLiteralOf(seed), kotlinLabel, copyKotlin.requester)

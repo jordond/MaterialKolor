@@ -27,7 +27,6 @@ import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.feature.picker.PickerTarget
-import com.materialkolor.builder.feature.workspace.FineTuneSection
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -55,38 +54,7 @@ private const val NO_ROLES = "Pins set Material roles, which Fluent does not use
 private const val ACCENT_RAMP = "This moves the accent ramp, the only palette Fluent takes."
 
 @OptIn(ExperimentalTestApi::class)
-class CoreColorsRowTest {
-    @Test
-    fun row_title_opensAndClosesThroughTheWorkspace() =
-        runComposeUiTest {
-            val harness = PosterHarness(Plain.copy(keyColors = KeyColors(primary = Teal), pins = TwoPins))
-            showSection(harness) { context, dispatcher -> CoreColorsRow(context, dispatcher) }
-
-            onNodeWithText("1 key color set, 2 pinned roles").assertExists()
-            onNodeWithText("Key colors").assertDoesNotExist()
-
-            onNodeWithText("Core colors and pins").performClick()
-            waitForIdle()
-
-            harness.actions shouldBe listOf(WorkspaceAction.OpenFineTune(FineTuneSection.KeyColors))
-            onNodeWithText("Key colors").assertExists()
-            onNodeWithText("Pinned roles").assertExists()
-
-            onNodeWithText("Core colors and pins").performClick()
-            waitForIdle()
-
-            harness.actions.last() shouldBe WorkspaceAction.CloseFineTune
-            harness.undoEntries() shouldBe 0
-        }
-
-    @Test
-    fun row_nothingSet_saysTheSeedHasItAll() =
-        runComposeUiTest {
-            showSection(PosterHarness(Plain)) { context, dispatcher -> CoreColorsRow(context, dispatcher) }
-
-            onNodeWithText("Everything follows the seed").assertExists()
-        }
-
+class KeyColorsTest {
     @Test
     fun keyColor_unset_showsTheDerivedColorFromSeed() =
         runComposeUiTest {
@@ -240,8 +208,7 @@ class CoreColorsRowTest {
                 pins = TwoPins,
             )
             val harness = PosterHarness(document)
-            harness.fineTune = FineTuneSection.KeyColors
-            showSection(harness) { context, dispatcher -> CoreColorsRow(context, dispatcher) }
+            showSection(harness) { context, dispatcher -> FineTuneContent(context, dispatcher) }
 
             onNodeWithText(ONE_RAMP, substring = true).assertExists()
             onNodeWithText(NO_ROLES).assertExists()

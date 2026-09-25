@@ -48,7 +48,7 @@ internal class PosterHarness(
     val resolver = ThemeResolver()
     var document by mutableStateOf(document)
     var openPanel by mutableStateOf(openPanel)
-    var fineTune by mutableStateOf<FineTuneSection?>(null) // b-521
+    var fineTune by mutableStateOf<FineTuneSection?>(null)
 
     var preferences by mutableStateOf(Preferences())
 
@@ -63,7 +63,7 @@ internal class PosterHarness(
             is WorkspaceAction.EditWithReveal -> edit(action.change, EditPhase.Discrete)
             is WorkspaceAction.OpenPanel -> openPanel = action.panel
             WorkspaceAction.ClosePanel -> openPanel = null
-            is WorkspaceAction.OpenFineTune -> fineTune = action.section ?: FineTuneSection.Locks // b-521
+            is WorkspaceAction.OpenFineTune -> fineTune = action.section ?: FineTuneSection.Locks
             WorkspaceAction.CloseFineTune -> fineTune = null
             is WorkspaceAction.SetColorAnimation -> setColorAnimation(action.target, action.on)
             is WorkspaceAction.SetColorAnimationDuration -> setColorAnimationDuration(action.target, action.durationMs)

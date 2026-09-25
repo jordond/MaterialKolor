@@ -33,7 +33,9 @@ import com.materialkolor.builder.generated.resources.extras_amoled
 import com.materialkolor.builder.generated.resources.extras_motion_expressive
 import com.materialkolor.builder.generated.resources.extras_motion_label
 import com.materialkolor.builder.generated.resources.extras_motion_standard
-import com.materialkolor.builder.generated.resources.extras_title
+import com.materialkolor.builder.generated.resources.finetune_keep_hue_spoken
+import com.materialkolor.builder.generated.resources.finetune_keep_seed_spoken
+import com.materialkolor.builder.generated.resources.finetune_title
 import com.materialkolor.builder.generated.resources.history_title
 import com.materialkolor.builder.generated.resources.poster_all_locked
 import com.materialkolor.builder.generated.resources.poster_copied_hex
@@ -44,6 +46,7 @@ import com.materialkolor.builder.generated.resources.poster_lock_seed
 import com.materialkolor.builder.generated.resources.poster_lock_style
 import com.materialkolor.builder.generated.resources.poster_shuffle
 import com.materialkolor.builder.generated.resources.style_chip
+import com.materialkolor.builder.generated.resources.style_keep_spoken
 import com.materialkolor.builder.generated.resources.topbar_about
 import com.materialkolor.builder.generated.resources.topbar_commands
 import com.materialkolor.builder.generated.resources.topbar_github
@@ -195,9 +198,7 @@ internal fun seedCommands(
             ShuffleLock.Style -> Shortcut.StyleLock
             ShuffleLock.Seed -> null
         }
-        // b-522 The docked poster no longer holds the lock row. B-523 puts the style's by the style and
-        // B-524 the rest in Fine-tune, and each names its site again.
-        val site: ControlSite? = null
+        val site = lockSite(lock) // b-524
         list.add("lock.${lock.name}", CommandCategory.Seed, name, site, shortcut = shortcut, selected = on) {
             dispatcher.dispatch(WorkspaceAction.SetLock(lock, !on))
         }
@@ -212,6 +213,29 @@ internal fun seedCommands(
     val image = stringResource(Res.string.command_add_image)
     list.add("addImage", CommandCategory.Seed, image, imageSite, seedEntry, shortcut = Shortcut.AddImage) {
         dispatcher.dispatch(WorkspaceAction.OpenImagePicker)
+    }
+}
+
+/**
+ * Where [lock]'s control sits, the Style lock by the style and the other two in Fine-tune, each
+ * named the way it reads out.
+ */
+@Composable
+private fun lockSite(lock: ShuffleLock): ControlSite {
+    // b-524
+    val fineTune = stringResource(Res.string.finetune_title)
+    return when (lock) {
+        ShuffleLock.Hue -> ControlSite.Direct(
+            Region.Poster,
+            stringResource(Res.string.finetune_keep_hue_spoken),
+            fineTune,
+        )
+        ShuffleLock.Style -> ControlSite.Direct(Region.Poster, stringResource(Res.string.style_keep_spoken))
+        ShuffleLock.Seed -> ControlSite.Direct(
+            Region.Poster,
+            stringResource(Res.string.finetune_keep_seed_spoken),
+            fineTune,
+        )
     }
 }
 
@@ -298,7 +322,7 @@ internal fun targetCommands(
     state: WorkspaceModel.State,
     dispatcher: Dispatcher<WorkspaceAction>,
 ) {
-    val extras = stringResource(Res.string.extras_title)
+    val extras = stringResource(Res.string.finetune_title) // b-524
     val amoled = stringResource(Res.string.extras_amoled)
     val on = state.document.amoled
     list.add(

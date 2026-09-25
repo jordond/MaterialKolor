@@ -270,20 +270,20 @@ class PosterPanelTest {
         }
 
     @Test
-    fun shuffleLocks_lockToggle_setsThatLock() =
+    fun fineTuneLocks_lockToggle_setsThatLock() =
         runComposeUiTest {
-            // b-522 The docked poster no longer shows the locks, so they stand on their own here.
+            // b-524 The hue and seed locks live in Fine-tune, and the style's by the style.
             val harness = PosterHarness(ThemeDocument(seed = Seed))
-            harness.preferences = Preferences(hueLock = false, styleLock = true)
-            showSection(harness) { context, dispatcher -> ShuffleLocks(context, dispatcher) }
+            harness.preferences = Preferences(hueLock = false, seedLock = true)
+            showSection(harness) { context, dispatcher -> FineTuneContent(context, dispatcher) }
 
-            onNodeWithText("Lock hue").performClick()
-            onNodeWithText("Lock style").performClick()
+            onNodeWithContentDescription("Keep the hue when shuffling").performClick()
+            onNodeWithContentDescription("Keep the seed when shuffling").performClick()
             waitForIdle()
 
             harness.actions shouldBe listOf(
                 WorkspaceAction.SetLock(ShuffleLock.Hue, on = true),
-                WorkspaceAction.SetLock(ShuffleLock.Style, on = false),
+                WorkspaceAction.SetLock(ShuffleLock.Seed, on = false),
             )
         }
 
@@ -292,9 +292,10 @@ class PosterPanelTest {
         runComposeUiTest {
             showPoster()
 
-            onNodeWithText("Pick").performClick()
+            // b-524 The test window gives the 320 poster, where Pick and Image go glyph only.
+            onNode(hasText("Pick") or hasContentDescription("Pick")).performClick()
             // Image opens a menu, and its Upload image row opens the image picker.
-            onNodeWithText("Image").performClick()
+            onNode(hasText("Image") or hasContentDescription("Image")).performClick()
             onNodeWithText("Upload image").performClick()
             waitForIdle()
 
