@@ -1,7 +1,6 @@
 package com.materialkolor.builder.feature.poster
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,7 +27,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The seed as the sheet leads with it, the hex large with the seed's name and its HCT readout under
- * it, and a round Shuffle at the end. It is what a phone sees of the poster at rest, even on its
+ * it, or beside it where there is room, and a round Shuffle at the end. It is what a phone sees of the poster at rest, even on its
  * side (D38).
  *
  * The hex here only reads. Editing it is the hero's job further down the sheet.
@@ -54,7 +53,13 @@ internal fun SeedPeekRow(
         horizontalArrangement = Arrangement.spacedBy(spacing.medium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.weight(1f)) {
+        // The name and the readout go under the hex on an upright phone, and beside it on a phone
+        // on its side, whose peek only has room for one line.
+        FlowRow(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.spacedBy(spacing.medium),
+            itemVerticalAlignment = Alignment.CenterVertically,
+        ) {
             BasicText(text = seed.toHex(), style = hex, maxLines = 1, overflow = TextOverflow.Clip)
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(spacing.small),
