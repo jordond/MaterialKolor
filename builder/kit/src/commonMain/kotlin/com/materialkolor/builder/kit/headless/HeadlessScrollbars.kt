@@ -96,7 +96,7 @@ private fun Modifier.scrollAreaKeys(
     style: OverlayStyle,
 ): Modifier {
     val interactions = remember { MutableInteractionSource() }
-    val overflows by remember(state) { derivedStateOf { state.maxValue in 1 until Int.MAX_VALUE } }
+    val overflows by remember(state) { derivedStateOf { state.overflows } }
     var focused by remember { mutableStateOf(false) }
     val section = LocalBuilderTokens.current.spacing.section
     val step = with(LocalDensity.current) { section.toPx() }
@@ -119,6 +119,9 @@ private fun Modifier.scrollAreaKeys(
 
 /**
  * A vertical scrollbar for [state], drawn as a rounded thumb in the skin's thumb ink.
+ *
+ * It draws no thumb while everything fits, since a thumb as long as its track only reads as a
+ * stripe down the edge. The track keeps its room either way, so nothing moves as content grows.
  */
 @Composable
 internal fun HeadlessVerticalScrollbar(
@@ -126,17 +129,27 @@ internal fun HeadlessVerticalScrollbar(
     style: OverlayStyle,
     modifier: Modifier = Modifier,
 ) {
+    val overflows by remember(state) { derivedStateOf { state.overflows } }
     UnstyledVerticalScrollbar(
         scrollbarState = rememberScrollbarState(state),
         modifier = modifier
             .padding(OverlayMetrics.thumbInset)
             .width(OverlayMetrics.thumbThickness),
     ) {
-        Thumb(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(style.thumb, RoundedCornerShape(OverlayMetrics.thumbThickness / 2)),
-            thumbVisibility = ThumbVisibility.AlwaysVisible,
-        )
+        if (overflows) {
+            Thumb(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(style.thumb, RoundedCornerShape(OverlayMetrics.thumbThickness / 2)),
+                thumbVisibility = ThumbVisibility.AlwaysVisible,
+            )
+        }
     }
 }
+
+/**
+ * Whether there is more to show than fits. Before its first layout the state's range is unbounded,
+ * which counts as fitting.
+ */
+private val ScrollState.overflows: Boolean
+    get() = maxValue in 1 until Int.MAX_VALUE

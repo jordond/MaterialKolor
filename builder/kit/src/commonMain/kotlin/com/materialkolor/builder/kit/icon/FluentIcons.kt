@@ -19,6 +19,7 @@ import io.github.composefluent.icons.regular.Image
 import io.github.composefluent.icons.regular.Info
 import io.github.composefluent.icons.regular.MoreHorizontal
 import io.github.composefluent.icons.regular.Open
+import io.github.composefluent.icons.regular.Options
 import io.github.composefluent.icons.regular.Pin
 import io.github.composefluent.icons.regular.Search
 import io.github.composefluent.icons.regular.Share
@@ -54,6 +55,7 @@ internal object FluentIcons : BuilderIcons {
             IconId.Warning -> Icons.Regular.Warning
             IconId.Error -> Icons.Regular.ErrorCircle
             IconId.ExternalLink -> Icons.Regular.Open
+            IconId.Sliders -> Icons.Regular.Options
             IconId.Undo,
             IconId.Redo,
             IconId.Export,
@@ -75,6 +77,7 @@ internal object FluentIcons : BuilderIcons {
             IconId.Keyboard,
             IconId.Help,
             IconId.History,
+            IconId.Code,
             -> LucideIcons[id]
         }
 }
