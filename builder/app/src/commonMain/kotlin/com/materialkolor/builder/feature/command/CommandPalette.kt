@@ -65,15 +65,15 @@ import com.materialkolor.builder.generated.resources.palette_category_poster
 import com.materialkolor.builder.generated.resources.palette_category_roles
 import com.materialkolor.builder.generated.resources.palette_close
 import com.materialkolor.builder.generated.resources.palette_go_to
-import com.materialkolor.builder.generated.resources.palette_nothing
-import com.materialkolor.builder.generated.resources.palette_open_shared
-import com.materialkolor.builder.generated.resources.palette_query
 import com.materialkolor.builder.generated.resources.palette_hint_close
 import com.materialkolor.builder.generated.resources.palette_hint_move
 import com.materialkolor.builder.generated.resources.palette_hint_paste
 import com.materialkolor.builder.generated.resources.palette_hint_run
 import com.materialkolor.builder.generated.resources.palette_key_enter
 import com.materialkolor.builder.generated.resources.palette_keys_move
+import com.materialkolor.builder.generated.resources.palette_nothing
+import com.materialkolor.builder.generated.resources.palette_open_shared
+import com.materialkolor.builder.generated.resources.palette_query
 import com.materialkolor.builder.generated.resources.palette_recent
 import com.materialkolor.builder.generated.resources.palette_set_seed
 import com.materialkolor.builder.generated.resources.palette_show_on_ramp
@@ -262,7 +262,11 @@ private fun ColumnScope.PaletteBody(
             onDraftChange = model::type,
             onSubmit = { submit() },
         )
-        BuilderIconButton(onClick = onClose, icon = IconId.Close, contentDescription = stringResource(Res.string.palette_close))
+        BuilderIconButton(
+            onClick = onClose,
+            icon = IconId.Close,
+            contentDescription = stringResource(Res.string.palette_close),
+        )
     }
     BuilderScrollArea(Modifier.weight(1f, fill = false).height(ListHeight), tabStop = false) {
         if (rows.isEmpty()) {
@@ -288,7 +292,7 @@ private fun ColumnScope.PaletteBody(
                                     }
                                     event.pressed(Key.DirectionUp) -> {
                                         val previous = runnable.lastOrNull { other -> other < at }
-                                        if (previous == null) field.requestFocus() else requesters[previous].requestFocus()
+                                        (previous?.let(requesters::get) ?: field).requestFocus()
                                         true
                                     }
                                     else -> {

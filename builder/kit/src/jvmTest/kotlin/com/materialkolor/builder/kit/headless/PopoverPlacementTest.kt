@@ -25,7 +25,8 @@ class PopoverPlacementTest {
 
     @Test
     fun popover_atTheWindowsEdges_staysInsideAndFlipsAbove() {
-        provider.calculatePosition(IntRect(0, 20, 40, 60), window, LayoutDirection.Ltr, popover) shouldBe IntOffset(0, 60)
+        provider.calculatePosition(IntRect(0, 20, 40, 60), window, LayoutDirection.Ltr, popover) shouldBe
+            IntOffset(0, 60)
         provider.calculatePosition(IntRect(200, 540, 240, 580), window, LayoutDirection.Ltr, popover) shouldBe
             IntOffset(88, 340)
     }

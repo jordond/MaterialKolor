@@ -40,7 +40,9 @@ internal fun Keycaps(
     ) {
         keycapChords(keys).forEach { chord ->
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
-                chord.forEach { key -> Keycap { BuilderText(key, style = BuilderTextStyle.Value, emphasis = Emphasis.Secondary) } }
+                chord.forEach { key ->
+                    Keycap { BuilderText(key, style = BuilderTextStyle.Value, emphasis = Emphasis.Secondary) }
+                }
             }
         }
     }

@@ -48,7 +48,8 @@ class PaletteSearchTest {
             "Style" to listOf("style.TonalSpot"),
             "Preview" to listOf("tab.Contrast"),
         )
-        ranked.flatMap { group -> group.entries }.first().id shouldBe searchPalette(entries, "contrast", emptyList()).first().id
+        ranked.flatMap { group -> group.entries }.first().id shouldBe
+            searchPalette(entries, "contrast", emptyList()).first().id
     }
 
     // b-511

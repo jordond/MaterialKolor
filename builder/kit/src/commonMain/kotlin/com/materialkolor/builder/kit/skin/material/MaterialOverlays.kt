@@ -145,6 +145,7 @@ internal fun materialMenuStyle(): OverlayStyle =
     )
 
 // b-511
+
 /** The dress of a popover that holds more than a menu, Material's container with its large corner. */
 @Composable
 internal fun materialPopoverStyle(): OverlayStyle =

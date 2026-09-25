@@ -72,10 +72,22 @@ public fun BuilderListRow(
 ) {
     val row = ListRowContent(headline, supporting, icon, leading, onClick, selected, enabled, trailing, dense)
     when (LocalSkin.current.library) {
-        Library.Material3 -> if (dense) HeadlessListRow(row, materialDenseRowStyle(), modifier) else MaterialListRow(row, modifier)
-        Library.Unstyled -> HeadlessListRow(row, UnstyledActionStyles.listRow, modifier)
-        Library.Fluent -> FluentListRow(row, modifier)
-        Library.Custom -> HeadlessListRow(row, CustomActionStyles.listRow, modifier)
+        Library.Material3 -> {
+            if (dense) {
+                HeadlessListRow(row, materialDenseRowStyle(), modifier)
+            } else {
+                MaterialListRow(row, modifier)
+            }
+        }
+        Library.Unstyled -> {
+            HeadlessListRow(row, UnstyledActionStyles.listRow, modifier)
+        }
+        Library.Fluent -> {
+            FluentListRow(row, modifier)
+        }
+        Library.Custom -> {
+            HeadlessListRow(row, CustomActionStyles.listRow, modifier)
+        }
     }
 }
 

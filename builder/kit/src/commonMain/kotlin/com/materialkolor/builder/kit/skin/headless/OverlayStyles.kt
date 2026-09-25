@@ -139,6 +139,7 @@ internal object OverlayMetrics {
     val menuMaxHeight: Dp = 400.dp
 
     // b-511
+
     /** How far a modal side panel or end sheet keeps its header, body and footer from its edges. */
     val panelPadding: Dp = 24.dp
 

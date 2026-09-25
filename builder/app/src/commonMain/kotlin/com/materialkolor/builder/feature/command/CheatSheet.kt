@@ -130,7 +130,8 @@ internal fun CheatSheet(
                     )
                 }
                 ShortcutGroup.entries.forEach { group ->
-                    Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) { // b-511
+                    Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+                        // b-511
                         BuilderText(
                             text = stringResource(groupTitle(group)),
                             modifier = Modifier.semantics { heading() },
