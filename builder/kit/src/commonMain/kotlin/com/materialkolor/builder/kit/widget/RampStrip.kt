@@ -328,7 +328,10 @@ private fun Modifier.lightOnHover(
         awaitPointerEventScope {
             while (true) {
                 val event = awaitPointerEvent()
-                val x = event.changes.firstOrNull()?.position?.x
+                val x = event.changes
+                    .firstOrNull()
+                    ?.position
+                    ?.x
                 if (event.type == PointerEventType.Exit || x == null || size.width == 0) {
                     onLit(null)
                     continue

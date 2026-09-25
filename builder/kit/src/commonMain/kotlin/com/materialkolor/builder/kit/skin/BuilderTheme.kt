@@ -93,9 +93,15 @@ public fun BuilderTheme(
                     Library.Material3 -> {
                         MaterialSkinTheme(result.chrome(isDark), skin.expressive, reducedMotion, builder)
                     }
-                    Library.Unstyled -> UnstyledSkinTheme(result.chrome(isDark), isDark, reducedMotion, builder)
-                    Library.Fluent -> FluentSkinTheme(result.chrome(isDark), isDark, reducedMotion, builder)
-                    Library.Custom -> CustomSkinTheme(rememberChromeSlots(result), isDark, reducedMotion, builder)
+                    Library.Unstyled -> {
+                        UnstyledSkinTheme(result.chrome(isDark), isDark, reducedMotion, builder)
+                    }
+                    Library.Fluent -> {
+                        FluentSkinTheme(result.chrome(isDark), isDark, reducedMotion, builder)
+                    }
+                    Library.Custom -> {
+                        CustomSkinTheme(rememberChromeSlots(result), isDark, reducedMotion, builder)
+                    }
                 }
             }
         }
