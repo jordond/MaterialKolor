@@ -54,7 +54,13 @@ class InsetSheetTest {
                                 }
                             },
                         ) {
-                            Box(Modifier.testTag("trigger").size(40.dp).focusRequester(trigger).focusable())
+                            Box(
+                                Modifier
+                                    .testTag("trigger")
+                                    .size(40.dp)
+                                    .focusRequester(trigger)
+                                    .focusable(),
+                            )
                         }
                     }
                 }
