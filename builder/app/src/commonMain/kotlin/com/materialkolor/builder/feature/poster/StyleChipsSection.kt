@@ -165,8 +165,9 @@ internal fun StyleDetails(
     val spacing = LocalBuilderTokens.current.spacing
     val selected = context.document.style
     var open by rememberSaveable { mutableStateOf(false) }
-    // b-524 The 320 poster has no room for the line and the toggle side by side, so the toggle goes under it.
-    val stacked = LocalLayout.current.posterMode == PosterMode.Docked320
+    // b-524 Only the 400 poster has room for the line and the toggle side by side. The 320 poster
+    // and the phone sheet put the toggle under the line.
+    val stacked = LocalLayout.current.posterMode != PosterMode.Docked400
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),

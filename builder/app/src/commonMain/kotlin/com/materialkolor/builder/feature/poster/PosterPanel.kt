@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
@@ -282,10 +284,15 @@ private fun PosterContent(
         },
         modifier = modifier.fillMaxSize(),
     ) {
+        val scroll = rememberScrollState()
+        val tuning = !sheet && context.fineTune != null
+        // The sheet leaves the header and the hex in view above it, so a poster scrolled down to the
+        // Fine-tune button goes back to its top as the sheet rises.
+        LaunchedEffect(tuning) { if (tuning) scroll.animateScrollTo(0) }
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val viewport = maxHeight
             // The poster always holds controls, so the scroll area needs no tab stop of its own.
-            BuilderScrollArea(Modifier.fillMaxSize(), tabStop = false) {
+            BuilderScrollArea(Modifier.fillMaxSize(), state = scroll, tabStop = false) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
