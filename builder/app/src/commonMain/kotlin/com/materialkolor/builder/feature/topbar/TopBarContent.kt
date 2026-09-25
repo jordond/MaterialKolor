@@ -1,11 +1,6 @@
 package com.materialkolor.builder.feature.topbar
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -15,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
@@ -42,7 +36,6 @@ import com.materialkolor.builder.generated.resources.topbar_appearance_dark
 import com.materialkolor.builder.generated.resources.topbar_appearance_light
 import com.materialkolor.builder.generated.resources.topbar_appearance_system
 import com.materialkolor.builder.generated.resources.topbar_commands
-import com.materialkolor.builder.generated.resources.topbar_commands_tooltip
 import com.materialkolor.builder.generated.resources.topbar_export
 import com.materialkolor.builder.generated.resources.topbar_github
 import com.materialkolor.builder.generated.resources.topbar_help
@@ -50,15 +43,10 @@ import com.materialkolor.builder.generated.resources.topbar_more
 import com.materialkolor.builder.generated.resources.topbar_share
 import com.materialkolor.builder.generated.resources.topbar_shortcuts
 import com.materialkolor.builder.kit.control.BuilderButton
-import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderIconButton
 import com.materialkolor.builder.kit.control.BuilderMenu
 import com.materialkolor.builder.kit.control.BuilderMenuItem
 import com.materialkolor.builder.kit.control.BuilderPopover
-import com.materialkolor.builder.kit.control.BuilderPressable
-import com.materialkolor.builder.kit.control.BuilderText
-import com.materialkolor.builder.kit.control.BuilderTextStyle
-import com.materialkolor.builder.kit.control.BuilderTooltip
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -66,7 +54,6 @@ import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.shell.TopBarControlMaxHeight
 import com.materialkolor.builder.kit.shell.TopBarRegion
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -300,83 +287,6 @@ internal fun TopBarContent(
             dispatcher.dispatch(WorkspaceAction.EditWithReveal(expressiveStyleChange(state.document), origin = null))
         },
     )
-}
-
-/** An icon button under a tooltip that says what it does, the description unless [tooltip] says more. */
-@Composable
-private fun TopBarIconButton(
-    control: TopBarControl,
-    focus: TopBarFocus,
-    icon: IconId,
-    description: String,
-    onClick: () -> Unit,
-    tooltip: String = description,
-    enabled: Boolean = true,
-) {
-    BuilderTooltip(text = tooltip) {
-        BuilderIconButton(
-            onClick = onClick,
-            icon = icon,
-            contentDescription = description,
-            modifier = Modifier.topBarFocus(focus, control),
-            enabled = enabled,
-        )
-    }
-}
-
-// b-512
-
-/**
- * The command palette's button, a search glyph, and with [keycap] the palette's key beside it in a
- * keycap. It reads as Command palette either way, with the key in its tooltip.
- */
-@Composable
-private fun CommandsButton(
-    focus: TopBarFocus,
-    keycap: Boolean,
-    onClick: () -> Unit,
-) {
-    val description = stringResource(Res.string.topbar_commands)
-    val keys = Shortcut.Palette.text(LocalAppleKeys.current)
-    // b-315
-    val tooltip = stringResource(Res.string.topbar_commands_tooltip, keys)
-    if (!keycap) {
-        TopBarIconButton(
-            control = TopBarControl.Commands,
-            focus = focus,
-            icon = IconId.Search,
-            description = description,
-            tooltip = tooltip,
-            onClick = onClick,
-        )
-        return
-    }
-    val tokens = LocalBuilderTokens.current
-    val ink = tokens.textMuted
-    BuilderTooltip(text = tooltip) {
-        BuilderPressable(
-            onClick = onClick,
-            label = description,
-            modifier = Modifier.topBarFocus(focus, TopBarControl.Commands),
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = tokens.spacing.small),
-                horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                BuilderIcon(IconId.Search, contentDescription = null, tint = ink)
-                BuilderText(
-                    text = keys,
-                    modifier = Modifier
-                        .border(tokens.outlineWidth, tokens.border, RoundedCornerShape(tokens.radius.small))
-                        .padding(horizontal = tokens.spacing.extraSmall + tokens.spacing.extraSmall / 2),
-                    style = BuilderTextStyle.Value,
-                    color = ink,
-                    maxLines = 1,
-                )
-            }
-        }
-    }
 }
 
 // b-509

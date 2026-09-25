@@ -51,9 +51,9 @@ import org.jetbrains.compose.resources.stringResource
  * The dock's tools in the skin's `DockRegion`, Light, Split and Dark, the device width, Inspect,
  * Vision and Fullscreen (F-19).
  *
- * A phone has no device width, its preview is always a phone (F-46). Its dock fits one row, so the
- * mode switch drops the glyphs, Inspect shows as a glyph alone and Fullscreen stays with the F key.
- * Fullscreen leaves through the floating exit instead of the dock. While the keyboard
+ * A phone has no device width, its preview is always a phone (F-46). Its dock keeps to one row, so
+ * the mode switch drops the glyphs and Inspect shows as a glyph alone. Fullscreen leaves through the
+ * floating exit instead of the dock. While the keyboard
  * is in use, focus comes back to the Fullscreen button when fullscreen ends, since the exit that held
  * it is gone, and to the Inspect toggle when Inspect ends, since the preview that held it lets go. A
  * pointer leaves the focus alone.
@@ -71,9 +71,7 @@ internal fun DockContent(
     val wasFullscreen = remember { mutableStateOf(state.fullscreen) }
     LaunchedEffect(state.fullscreen) {
         val ended = wasFullscreen.value && !state.fullscreen
-        // b-512
-        // A phone's dock has no Fullscreen button to hand focus to.
-        if (ended && !compact) inputModes.handFocusTo(fullscreenButton) // b-315b
+        if (ended) inputModes.handFocusTo(fullscreenButton) // b-315b
         wasFullscreen.value = state.fullscreen
     }
     val inspectToggle = remember { FocusRequester() }
@@ -133,9 +131,7 @@ internal fun DockContent(
             onOpenChange = { open -> dispatcher.dispatch(WorkspaceAction.SetVisionMenuOpen(open)) },
             held = state.grayscaleHeld,
         )
-        // b-512
-        // A phone's dock holds the modes, Inspect and Vision alone (section 7). F still goes fullscreen.
-        if (!state.fullscreen && !compact) {
+        if (!state.fullscreen) {
             BuilderIconButton(
                 onClick = { dispatcher.dispatch(WorkspaceAction.ToggleFullscreen) },
                 icon = IconId.Fullscreen,

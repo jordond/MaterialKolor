@@ -2,10 +2,14 @@ package com.materialkolor.builder.feature.canvas
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -203,10 +207,14 @@ internal fun CanvasTabBody(
 // b-512
 
 /**
- * The preview window, standing the canvas's inset in from every edge of [modifier]'s room and as
- * tall as that room. It is as wide as [width]'s screen scaled to fit, down to 0.6, or the whole room
- * when the screen is wider than that or [width] is null. It is centred, and the canvas shows round
- * it. While Split shows, the window names each half at its top, beside the handle.
+ * The preview window, standing the canvas's inset in from the sides and the bottom of [modifier]'s
+ * room and taking the height left. It is as wide as [width]'s screen scaled to fit, down to 0.6, or
+ * the whole room when the screen is wider than that or [width] is null. It is centred, and the
+ * canvas shows round it.
+ *
+ * A band on the canvas right above the window names each half while Split shows, so the names
+ * never cover the app. The band keeps its height in Light and Dark too, so the window stays put
+ * when the mode changes.
  */
 @Composable
 private fun PreviewWindow(
@@ -216,11 +224,17 @@ private fun PreviewWindow(
     modifier: Modifier,
     content: @Composable () -> Unit,
 ) {
+    val spacing = LocalBuilderTokens.current.spacing
     val inset = canvasInset(LocalLayout.current.windowClass == WindowClass.Compact)
-    Box(modifier.fillMaxSize().padding(inset)) {
-        PreviewWindowRegion(Modifier.windowWidth(width)) {
-            content()
-            if (preview.shown == PreviewMode.Split) SplitTags(preview.split, specs.light.label, specs.dark.label)
+    Box(modifier.fillMaxSize().padding(start = inset, end = inset, bottom = inset, top = spacing.small)) {
+        Column(Modifier.windowWidth(width), verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+            SplitTags(
+                split = preview.split,
+                shown = preview.shown == PreviewMode.Split,
+                start = specs.light.label,
+                end = specs.dark.label,
+            )
+            PreviewWindowRegion(Modifier.fillMaxWidth().weight(1f)) { content() }
         }
     }
 }
@@ -249,53 +263,60 @@ private fun Modifier.windowWidth(width: DeviceWidth?): Modifier =
     }
 
 /**
- * The Light and Dark tags at the top of the window, each on its own side of the handle at [split],
- * which they follow as it moves without composing again. A tag with no room on its side stays out
- * of sight. Assistive tech skips them, since the handle already names both sides.
+ * The band of Light and Dark tags over the window, the Light tag just before the handle at [split]
+ * and the Dark tag just past it, which they follow as it moves without composing again. They show
+ * while [shown] holds, and a tag with no room on its side stays out of sight. The band is as tall as
+ * a tag either way. Assistive tech skips them, since the handle already names both sides.
  */
 @Composable
 private fun SplitTags(
     split: SplitState,
+    shown: Boolean,
     start: String,
     end: String,
 ) {
     val tokens = LocalBuilderTokens.current
-    val gap = tokens.spacing.medium
+    val gap = tokens.spacing.small
     Layout(
         content = {
-            WindowTag(start, container = tokens.textStrong, ink = tokens.panel)
-            WindowTag(end, container = tokens.panel, ink = tokens.textStrong)
+            WindowTag(start, container = tokens.panel, ink = tokens.textStrong, outline = tokens.border)
+            WindowTag(end, container = tokens.textStrong, ink = tokens.panel, outline = tokens.textStrong)
         },
-        modifier = Modifier.fillMaxSize().clearAndSetSemantics {},
+        modifier = Modifier.fillMaxWidth().clearAndSetSemantics {},
     ) { measurables, constraints ->
         val loose = constraints.copy(minWidth = 0, minHeight = 0)
         val tags = measurables.map { measurable -> measurable.measure(loose) }
+        val width = constraints.maxWidth
         val space = gap.roundToPx()
-        layout(constraints.maxWidth, constraints.maxHeight) {
+        layout(width, tags.maxOf { tag -> tag.height }) {
+            if (!shown) return@layout
             // Read while placing, so a drag of the handle only places the tags again.
-            val edge = (split.fraction * constraints.maxWidth).roundToInt()
+            val edge = (split.fraction * width).roundToInt()
             val startTag = tags[0]
             val endTag = tags[1]
             val startX = edge - space - startTag.width
-            if (startX >= space) startTag.placeRelative(startX, space)
+            if (startX >= 0) startTag.placeRelative(startX, 0)
             val endX = edge + space
-            if (endX + endTag.width <= constraints.maxWidth - space) endTag.placeRelative(endX, space)
+            if (endX + endTag.width <= width) endTag.placeRelative(endX, 0)
         }
     }
 }
 
-/** One of the window's small Light and Dark tags. */
+/** One of the small Light and Dark tags over the window. */
 @Composable
 private fun WindowTag(
     text: String,
     container: Color,
     ink: Color,
+    outline: Color,
 ) {
     val tokens = LocalBuilderTokens.current
+    val shape = RoundedCornerShape(tokens.radius.small)
     BuilderText(
         text = text,
         modifier = Modifier
-            .background(container, RoundedCornerShape(tokens.radius.small))
+            .border(tokens.outlineWidth, outline, shape)
+            .background(container, shape)
             .padding(horizontal = tokens.spacing.small, vertical = tokens.spacing.extraSmall / 2),
         style = BuilderTextStyle.Label,
         color = ink,
