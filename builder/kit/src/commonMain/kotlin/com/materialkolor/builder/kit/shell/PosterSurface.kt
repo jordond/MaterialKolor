@@ -65,13 +65,14 @@ public fun PosterSurface(
     // Every theme result brings a poster of its own, but the poster follows the seed alone. A new
     // paint re-themes the poster, which recomposes every control on it, so it is kept while the seed
     // and the page stay and an edit that leaves the seed alone never re-themes the poster.
-    val paint = remember(poster.seed, poster.background) { PosterPaint(poster) }
+    val kept = remember(poster.seed, poster.background) { poster }
+    val paint = remember(kept) { PosterPaint(kept) }
     val tokens = remember(paint, outer) { paint.builderTokens(outer) }
-    CompositionLocalProvider(LocalPosterColors provides poster) {
+    CompositionLocalProvider(LocalPosterColors provides kept) {
         when (LocalSkin.current.library) {
             Library.Material3 -> MaterialPoster(paint, tokens, content)
             Library.Unstyled -> UnstyledPoster(paint, tokens, content)
-            Library.Fluent -> FluentPoster(poster, paint, tokens, content)
+            Library.Fluent -> FluentPoster(kept, paint, tokens, content)
             Library.Custom -> CustomPoster(paint, tokens, content)
         }
     }
