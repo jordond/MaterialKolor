@@ -101,7 +101,7 @@ class CompactMediumTopBarTest {
     fun at1280_everySkin_fitsAndMeetsTheTouchTargets() = checkEverySkin(width = 1280)
 
     @Test
-    fun compact_showsTheSwatchAndNameWithTheChipsUnderTheBar() =
+    fun compact_showsTheMarkAndNameWithTheChipsUnderTheBar() =
         runDesktopComposeUiTest(width = 390, height = HEIGHT) {
             val graph = showRoot()
             val chosen = NAMES.getValue(LibraryChoice.of(graph.session.document.value))
@@ -110,7 +110,7 @@ class CompactMediumTopBarTest {
             val bar = onNodeWithTag(TOP_BAR_TAG).fetchSemanticsNode().boundsInRoot
             val chips = onNodeWithTag(LIBRARY_CHIP_ROW_TAG).fetchSemanticsNode().boundsInRoot
             chips.top shouldBeGreaterThanOrEqual bar.bottom - 1f
-            // The project's name stands at the start of the bar, after its swatch, in place of a mark.
+            // The project's name stands at the start of the bar, after the mark.
             onAllNodes(hasText(project) and InBar).fetchSemanticsNodes().size shouldBe 1
             onAllNodes(hasContentDescription("Export code") and hasClickAction() and InBar)
                 .fetchSemanticsNodes()

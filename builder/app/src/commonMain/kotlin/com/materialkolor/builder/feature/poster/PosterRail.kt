@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
@@ -21,12 +22,14 @@ import com.materialkolor.builder.generated.resources.poster_projects
 import com.materialkolor.builder.generated.resources.poster_rail_seed
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.kit.widget.BrandMark
+import com.materialkolor.builder.kit.widget.MarkColors
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The poster shrunk to its 72 dp strip, the seed swatch, Shuffle, Projects and the button that
- * opens the poster again. The workspace remembers the choice in the browser's preferences.
+ * The poster shrunk to its 72 dp strip, the mark, the seed swatch, Shuffle, Projects and the button
+ * that opens the poster again. The workspace remembers the choice in the browser's preferences.
  *
  * @param[focus] Where the projects drawer hands focus back once it closes.
  */
@@ -37,12 +40,18 @@ internal fun PosterRail(
     modifier: Modifier = Modifier,
     focus: PosterFocus? = null,
 ) {
-    val spacing = LocalBuilderTokens.current.spacing
+    val tokens = LocalBuilderTokens.current
+    val spacing = tokens.spacing
     Column(
         modifier = modifier.fillMaxSize().padding(vertical = spacing.medium),
         verticalArrangement = Arrangement.spacedBy(spacing.small),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        BrandMark(
+            colors = MarkColors.inked(ink = tokens.textStrong, page = tokens.canvas),
+            modifier = Modifier.padding(bottom = spacing.extraSmall),
+            size = RailMarkSize,
+        )
         SeedSwatch(description = stringResource(Res.string.poster_rail_seed, context.document.seed.toHex()))
         ShuffleIconButton(context, dispatcher)
         PosterIconButton(
@@ -80,3 +89,5 @@ internal fun SeedSwatch(
             .then(if (description == null) Modifier else Modifier.semantics { contentDescription = description }),
     )
 }
+
+private val RailMarkSize = 28.dp

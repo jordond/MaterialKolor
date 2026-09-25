@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="6 6 52 52" width="52" height="52" role="img" aria-label="MaterialKolor">
+  <title>MaterialKolor</title>
+  <g fill="none" stroke-width="12" stroke-linecap="round">
+    <path stroke="#a33e16" d="M24 32 46 52"/>
+    <path stroke="#e56e43" d="M24 32 46 12"/>
+    <path stroke="#ffb59c" d="M18 12v40"/>
+  </g>
+</svg>

@@ -308,6 +308,7 @@ test.describe('head', () => {
     ['link[rel="manifest"]', 'href', '/manifest.webmanifest'],
     ['link[rel="icon"][sizes="32x32"]', 'href', '/favicon-32x32.png'],
     ['link[rel="icon"][sizes="16x16"]', 'href', '/favicon-16x16.png'],
+    ['link[rel="icon"][type="image/svg+xml"]', 'href', '/favicon.svg'],
     ['link[rel="apple-touch-icon"]', 'href', '/apple-touch-icon.png'],
   ];
 
@@ -370,6 +371,7 @@ test.describe('head', () => {
 
     for (const [path, type] of [
       ['/favicon.ico', 'image/x-icon'],
+      ['/favicon.svg', 'image/svg+xml'],
       ['/favicon-16x16.png', 'image/png'],
       ['/favicon-32x32.png', 'image/png'],
       ['/apple-touch-icon.png', 'image/png'],

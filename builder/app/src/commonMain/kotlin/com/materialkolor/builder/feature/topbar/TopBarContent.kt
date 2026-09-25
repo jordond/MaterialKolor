@@ -67,7 +67,7 @@ import org.jetbrains.compose.resources.stringResource
  * shows Share with its label and the command palette with its key in a keycap, and turns both into
  * glyphs when that makes the room the segmented row needs. A Medium window keeps the dropdown's name
  * whole, moving History, then the command palette, then redo, then undo into the overflow until it
- * fits. Phones show the project's swatch and name with Share, Export as a glyph and the overflow,
+ * fits. Phones show the mark and the project's name with Share, Export as a glyph and the overflow,
  * which holds History, the command palette, undo and redo, and the libraries in a row of chips under
  * the bar.
  *

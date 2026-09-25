@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
@@ -34,12 +35,14 @@ import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.PosterMode
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.kit.widget.BrandMark
+import com.materialkolor.builder.kit.widget.MarkColors
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The top of the poster, the wordmark, the Projects button with the open project's name and the
+ * The top of the poster, the mark and wordmark, the Projects button with the open project's name and the
  * collapse button on one row. The 320 dp poster has no room for all three, so there the Projects
  * button takes a row of its own. Whether the project is saved shows under the hex, see [SeedHero].
  *
@@ -54,7 +57,8 @@ internal fun PosterHeader(
     modifier: Modifier = Modifier,
     focus: PosterFocus? = null,
 ) {
-    val spacing = LocalBuilderTokens.current.spacing
+    val tokens = LocalBuilderTokens.current
+    val spacing = tokens.spacing
     val mode = LocalLayout.current.posterMode
     val collapsible = mode != PosterMode.Sheet
     val projects: @Composable (Modifier) -> Unit = { projectsModifier ->
@@ -71,12 +75,22 @@ internal fun PosterHeader(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            BuilderText(
-                text = stringResource(Res.string.poster_wordmark),
+            // The mark sits close to the wordmark, so the project's name keeps the room it had.
+            Row(
                 modifier = if (narrow) Modifier.weight(1f) else Modifier,
-                style = BuilderTextStyle.Wordmark,
-                maxLines = 1,
-            )
+                horizontalArrangement = Arrangement.spacedBy(HeaderMarkGap),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                BrandMark(
+                    colors = MarkColors.inked(ink = tokens.textStrong, page = tokens.canvas),
+                    size = HeaderMarkSize,
+                )
+                BuilderText(
+                    text = stringResource(Res.string.poster_wordmark),
+                    style = BuilderTextStyle.Wordmark,
+                    maxLines = 1,
+                )
+            }
             if (!narrow) {
                 // The project's name takes what the row has left, so a long one gives way first.
                 Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) { projects(Modifier) }
@@ -187,3 +201,6 @@ internal fun PosterIconButton(
         )
     }
 }
+
+private val HeaderMarkSize = 18.dp
+private val HeaderMarkGap = 2.dp

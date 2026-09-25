@@ -1,4 +1,7 @@
-<img width="500px" src="art/materialkolor-logo.png" alt="logo"/>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="art/materialkolor-logo-dark.svg">
+  <img width="500" src="art/materialkolor-logo.svg" alt="MaterialKolor">
+</picture>
 <br />
 
 ![Maven Central](https://img.shields.io/maven-central/v/com.materialkolor/material-kolor)
