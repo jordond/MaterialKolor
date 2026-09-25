@@ -56,7 +56,6 @@ import com.materialkolor.builder.generated.resources.poster_source_typed
 import com.materialkolor.builder.kit.control.BuilderHexField
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
-import com.materialkolor.builder.kit.control.BuilderTooltip
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderType
@@ -70,8 +69,8 @@ import kotlin.math.roundToInt
  * seed's name sits large with the two copy buttons as icons at its end, and under that its hue,
  * chroma and tone spelled out.
  *
- * Where the seed came from lives in the field's tooltip and what it reads out. Only a seed from an
- * image says so on the readout line, by the file's name when it has one.
+ * Where the seed came from is read out after the field's name. Only a seed from an image says so
+ * on the readout line, by the file's name when it has one.
  *
  * The field shows the seed as stored, not as the target sees it. A commit lands as a typed seed,
  * one keystroke folding into the next in the history.
@@ -111,21 +110,21 @@ internal fun SeedHero(
     val hero = remember(type) { type.copy(posterHero = type.posterHero.merge(HeroType)) }
     Column(modifier) {
         InfoLabel(label = stringResource(Res.string.poster_seed), topic = InfoTopic.Seed)
-        BuilderTooltip(text = source, modifier = Modifier.fillMaxWidth()) {
-            CompositionLocalProvider(LocalBuilderType provides hero) {
-                BuilderHexField(
-                    value = seed,
-                    onCommit = { argb, _ ->
-                        val change = DocumentChange.SetSeed(argb, SeedSource.Typed)
-                        dispatcher.dispatch(WorkspaceAction.Edit(change, EditPhase.Discrete))
-                    },
-                    label = fieldName,
-                    errorMessage = messages::errorOf,
-                    noteMessage = messages::noteOf,
-                    modifier = Modifier.fillMaxWidth(),
-                    large = true,
-                )
-            }
+        // b-522 No tooltip over the field. A tooltip opens on keyboard focus and takes the Esc that
+        // puts the seed back, so the source rides in the field's name alone.
+        CompositionLocalProvider(LocalBuilderType provides hero) {
+            BuilderHexField(
+                value = seed,
+                onCommit = { argb, _ ->
+                    val change = DocumentChange.SetSeed(argb, SeedSource.Typed)
+                    dispatcher.dispatch(WorkspaceAction.Edit(change, EditPhase.Discrete))
+                },
+                label = fieldName,
+                errorMessage = messages::errorOf,
+                noteMessage = messages::noteOf,
+                modifier = Modifier.fillMaxWidth(),
+                large = true,
+            )
         }
         Row(
             modifier = Modifier.fillMaxWidth(),

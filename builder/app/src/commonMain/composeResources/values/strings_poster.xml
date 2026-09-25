@@ -36,7 +36,7 @@
     <!-- Names the copy in the "Copied ..." toast. -->
     <string name="poster_copied_kotlin">seed as Kotlin</string>
 
-    <!-- Where the seed came from, in the seed field's tooltip and read out after its name. -->
+    <!-- Where the seed came from, read out after the seed field's name. -->
     <string name="poster_source_typed">Typed in</string>
     <string name="poster_source_picked">Picked in the color picker</string>
     <string name="poster_source_eyedropper">Picked with the eyedropper</string>

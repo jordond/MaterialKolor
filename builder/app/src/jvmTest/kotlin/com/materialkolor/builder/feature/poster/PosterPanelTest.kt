@@ -216,7 +216,7 @@ class PosterPanelTest {
         runComposeUiTest {
             var document by mutableStateOf(ThemeDocument(seed = Seed, seedSource = SeedSource.Typed))
             showPoster(document = { document })
-            // b-522 The source moved into the field's tooltip and name, and only an image shows as text.
+            // b-522 The source moved into the field's name, and only an image shows as text.
             seedField().assert(hasContentDescription("Seed color, any format. Typed in"))
 
             document = document.copy(seedSource = SeedSource.Image("sunset.png"))
