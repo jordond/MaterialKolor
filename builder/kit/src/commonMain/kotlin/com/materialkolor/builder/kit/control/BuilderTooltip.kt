@@ -13,7 +13,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
  * A short label over [content], shown on hover and on keyboard focus alike, so nothing it says is
- * only there for a mouse (AR-03).
+ * only there for a mouse (AR-03). Focus a click leaves behind shows no label, the way it shows no
+ * focus ring, and a press on [content] closes the label until the pointer moves off (D58).
  *
  * A tooltip repeats what an icon means. It never holds the only copy of something, so an icon
  * button under it still needs its own content description. Material3 draws its plain tooltip, the

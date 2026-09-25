@@ -2,17 +2,22 @@ package com.materialkolor.builder.kit.skin
 
 import androidx.compose.foundation.ComposeFoundationFlags
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.engine.resolve.CustomSlotColors
 import com.materialkolor.builder.engine.resolve.ThemeResult
+import com.materialkolor.builder.kit.a11y.FocusVisibility
+import com.materialkolor.builder.kit.a11y.LocalFocusVisibility
+import com.materialkolor.builder.kit.a11y.trackFocusVisibility
 import com.materialkolor.builder.kit.headless.OverlayHost
 import com.materialkolor.builder.kit.headless.PageTextToolbarLocals
 import com.materialkolor.builder.kit.icon.BuilderIcons
@@ -46,6 +51,8 @@ import com.materialkolor.palettes.TonalPalette
  * in the page does not. The move takes the focused node out and puts it back, so after a switch
  * nothing in the page has focus until someone moves it again.
  *
+ * It also tracks whether focus moves by keyboard, so a click leaves no focus ring behind (D58).
+ *
  * @param[skin] The library and flavour to wear.
  * @param[result] The resolved document, read on the UI thread only like every result.
  * @param[isDark] Which mode of the chrome to draw.
@@ -70,18 +77,26 @@ public fun BuilderTheme(
             current()
         }
     }
+    // b-513
+    val focusVisibility = remember { FocusVisibility() }
     CompositionLocalProvider(
         LocalSkin provides skin,
         LocalBuilderType provides rememberBuilderType(),
         LocalReducedMotion provides reducedMotion,
+        LocalFocusVisibility provides focusVisibility, // b-513
     ) {
-        // b-219
-        OverlayHost {
-            when (skin.library) {
-                Library.Material3 -> MaterialSkinTheme(result.chrome(isDark), skin.expressive, reducedMotion, builder)
-                Library.Unstyled -> UnstyledSkinTheme(result.chrome(isDark), isDark, reducedMotion, builder)
-                Library.Fluent -> FluentSkinTheme(result.chrome(isDark), isDark, reducedMotion, builder)
-                Library.Custom -> CustomSkinTheme(rememberChromeSlots(result), isDark, reducedMotion, builder)
+        // b-513
+        Box(Modifier.trackFocusVisibility(focusVisibility), propagateMinConstraints = true) {
+            // b-219
+            OverlayHost {
+                when (skin.library) {
+                    Library.Material3 -> {
+                        MaterialSkinTheme(result.chrome(isDark), skin.expressive, reducedMotion, builder)
+                    }
+                    Library.Unstyled -> UnstyledSkinTheme(result.chrome(isDark), isDark, reducedMotion, builder)
+                    Library.Fluent -> FluentSkinTheme(result.chrome(isDark), isDark, reducedMotion, builder)
+                    Library.Custom -> CustomSkinTheme(rememberChromeSlots(result), isDark, reducedMotion, builder)
+                }
             }
         }
     }

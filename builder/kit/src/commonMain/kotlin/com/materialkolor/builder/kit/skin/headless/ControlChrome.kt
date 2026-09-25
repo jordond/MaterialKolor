@@ -14,7 +14,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
-import com.composeunstyled.focusRing
+import com.composeunstyled.outline
+import com.materialkolor.builder.kit.a11y.collectIsFocusVisibleAsState
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
@@ -56,6 +57,9 @@ internal fun Modifier.controlPress(
  * Draws the focus ring in [color] around [shape] while the control has keyboard focus (AR-01). It
  * stands [offset] off the control, [FocusRingOffset] unless the control asks for less. A negative
  * offset draws the ring inside the control, for one whose parent clips at its edge.
+ *
+ * Focus a pointer press leaves behind draws no ring, the way a browser's `:focus-visible` works,
+ * and the ring comes back with the next key press (D58).
  */
 @Composable
 internal fun Modifier.controlRing(
@@ -63,14 +67,11 @@ internal fun Modifier.controlRing(
     shape: Shape,
     color: Color = LocalBuilderTokens.current.focus,
     offset: Dp = FocusRingOffset,
-): Modifier =
-    focusRing(
-        interactionSource = interactionSource,
-        width = FocusRingWidth,
-        color = color,
-        shape = shape,
-        offset = offset,
-    )
+): Modifier {
+    // b-513
+    val shown by interactionSource.collectIsFocusVisibleAsState()
+    return if (shown) outline(width = FocusRingWidth, color = color, shape = shape, offset = offset) else this
+}
 
 /**
  * Grows the space the control takes to at least [size] on each side and centres the control in it.

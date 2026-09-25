@@ -44,6 +44,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.max
 import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.kit.a11y.LocalFocusVisibility
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
@@ -152,6 +153,7 @@ internal fun GamutTrack(
     val name = stateName(label, ControlState.Value(valueText), role = FoldedRole.Slider)
     val asText = LocalFoldsStateIntoName.current
     var focused by remember { mutableStateOf(false) }
+    val visibility = LocalFocusVisibility.current // b-513
     Box(
         modifier
             .fillMaxWidth()
@@ -175,7 +177,7 @@ internal fun GamutTrack(
             }.pointerInput(picker, channel, tokens, isRtl) { dragTrack(picker, channel, tokens, isRtl) }
             .drawWithCache {
                 val drawing = trackDrawing(trackPaint(channel, picker), tokens, isRtl)
-                onDrawBehind { drawTrack(drawing, picker, channel, focused) }
+                onDrawBehind { drawTrack(drawing, picker, channel, focused && visibility.isVisible) } // b-513
             },
     )
 }

@@ -6,7 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +27,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.Ramp
 import com.materialkolor.builder.engine.resolve.RampStep
+import com.materialkolor.builder.kit.a11y.collectIsFocusVisibleAsState
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
@@ -48,6 +50,7 @@ import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.ktx.contrastRatio
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /** How tall the continuous strip is. */
@@ -58,6 +61,9 @@ private val TickWidth: Dp = 2.dp
 
 /** The narrowest a stop can be and still carry its tone as a label. */
 private val LabeledStopWidth: Dp = 32.dp
+
+/** How far off a marker the pointer can rest on the strip and still light it. */
+private val MarkerReach: Dp = 6.dp
 
 /** The tone at and above which a stop is light enough to take the darkest stop as ink. */
 private const val LIGHT_TONE = 50
@@ -123,11 +129,19 @@ public data class RampMark(
  * below. Narrow rows fold the stops onto as many lines as it takes to keep every stop at the
  * layout's minimum touch target, and drop the tone labels, which the stops still read out.
  *
+ * A caller that names the markers its own way passes [labels] false and gets no names under the
+ * strip. It can light the markers at one rounded tone through [lit], and hear through [onLit] which
+ * tone the pointer rests on along the strip, so its names and the markers light up together.
+ *
  * @param[tones] The stops, darkest first, such as a [Ramp]'s steps.
  * @param[markers] Where roles landed on this palette.
  * @param[keyTone] The tone of the palette's key color.
  * @param[onCopyTone] Called with the stop that was pressed. The caller does the copying.
  * @param[modifier] Applied to the strip.
+ * @param[labels] Whether to name the markers under the strip.
+ * @param[lit] The rounded tone whose markers are drawn lit, or null for none.
+ * @param[onLit] Called with the rounded tone of the marker the pointer rests on, and null as it
+ * leaves, or null to not listen.
  */
 @Composable
 public fun RampStrip(
@@ -136,12 +150,15 @@ public fun RampStrip(
     keyTone: Double,
     onCopyTone: (RampStep) -> Unit,
     modifier: Modifier = Modifier,
+    labels: Boolean = true, // b-513
+    lit: Int? = null,
+    onLit: ((Int?) -> Unit)? = null,
 ) {
     val tokens = LocalBuilderTokens.current
     Column(modifier, verticalArrangement = Arrangement.spacedBy(tokens.spacing.small)) {
         RampStops(tones, onCopyTone)
-        ContinuousStrip(tones, markers, keyTone)
-        MarkerLabels(markers, keyTone)
+        ContinuousStrip(tones, markers, keyTone, lit, onLit)
+        if (labels) MarkerLabels(markers, keyTone)
     }
 }
 
@@ -208,7 +225,7 @@ private fun RampStop(
     val tokens = LocalBuilderTokens.current
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
-    val focused by interactionSource.collectIsFocusedAsState()
+    val focused by interactionSource.collectIsFocusVisibleAsState() // b-513
     val name = listOf(stringResource(Res.string.widget_tone, step.tone), step.argb.toHex()).joinToString(", ")
     val color = step.argb.toColor()
     val ink = if (step.tone >= LIGHT_TONE) darkest else lightest
@@ -252,12 +269,18 @@ private fun ceilDiv(
     size: Int,
 ): Int = (count + size - 1) / size
 
-/** The palette from 0 to 100 as one gradient, with a tick at every marker and a ring at the key tone. */
+/**
+ * The palette from 0 to 100 as one gradient, with a tick at every marker and a ring at the key tone.
+ * The ticks and the ring at the [lit] tone are drawn in the accent, and [onLit] hears which marker
+ * the pointer rests on.
+ */
 @Composable
 private fun ContinuousStrip(
     tones: List<RampStep>,
     markers: List<RampMark>,
     keyTone: Double,
+    lit: Int?,
+    onLit: ((Int?) -> Unit)?,
 ) {
     if (tones.size < 2) return
     val tokens = LocalBuilderTokens.current
@@ -270,21 +293,53 @@ private fun ContinuousStrip(
         Modifier
             .fillMaxWidth()
             .height(StripHeight)
+            .then(if (onLit == null) Modifier else Modifier.lightOnHover(markers, keyTone, onLit)) // b-513
             .clip(RoundedCornerShape(tokens.radius.small))
             .background(brush),
     ) {
         val tick = TickWidth.toPx()
         for (marker in markers) {
             val x = (marker.tone / TONE_RANGE).toFloat() * size.width
+            val ink = if (marker.tone.roundToInt() == lit) tokens.accent else tokens.textStrong // b-513
             drawLine(tokens.panel, Offset(x, 0f), Offset(x, size.height), strokeWidth = tick * 2)
-            drawLine(tokens.textStrong, Offset(x, 0f), Offset(x, size.height), strokeWidth = tick)
+            drawLine(ink, Offset(x, 0f), Offset(x, size.height), strokeWidth = tick)
         }
         val center = Offset((keyTone / TONE_RANGE).toFloat() * size.width, size.height / 2f)
         val radius = size.height / 2f - tick
         drawCircle(tokens.panel, radius, center, style = Stroke(tick * 2))
-        drawCircle(tokens.textStrong, radius, center, style = Stroke(tick))
+        val keyInk = if (keyTone.roundToInt() == lit) tokens.accent else tokens.textStrong
+        drawCircle(keyInk, radius, center, style = Stroke(tick))
     }
 }
+
+// b-513
+
+/**
+ * Tells [onLit] the rounded tone of the marker or key tone nearest the pointer as it moves along
+ * the strip, as long as one lies within [MarkerReach], and null once it leaves.
+ */
+private fun Modifier.lightOnHover(
+    markers: List<RampMark>,
+    keyTone: Double,
+    onLit: (Int?) -> Unit,
+): Modifier =
+    pointerInput(markers, keyTone, onLit) {
+        val tones = markers.map { marker -> marker.tone } + keyTone
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent()
+                val x = event.changes.firstOrNull()?.position?.x
+                if (event.type == PointerEventType.Exit || x == null || size.width == 0) {
+                    onLit(null)
+                    continue
+                }
+                val at = x / size.width * TONE_RANGE
+                val nearest = tones.minBy { tone -> abs(tone - at) }
+                val reach = MarkerReach.toPx() / size.width * TONE_RANGE
+                onLit(if (abs(nearest - at) <= reach) nearest.roundToInt() else null)
+            }
+        }
+    }
 
 /**
  * The names under the strip, each centred on its tone. A name that would run into the one before it

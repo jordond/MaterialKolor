@@ -24,6 +24,10 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.IntOffset
@@ -33,6 +37,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
+import com.materialkolor.builder.kit.a11y.LocalFocusVisibility
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.skin.headless.FocusRingOffset
@@ -49,9 +54,10 @@ import kotlin.math.max
 /**
  * A short label over [content], shown while the pointer rests on it and while it has keyboard focus.
  *
- * Focus shows it as readily as hover, so nothing it says is only there for a mouse (AR-03). The
- * pointer can move onto the label without it going away (WCAG 1.4.13). Esc hides it until the
- * pointer and focus have both left, and it never takes focus itself. Drawn in the page, the label
+ * Focus shows it as readily as hover, so nothing it says is only there for a mouse (AR-03). Focus
+ * a click left behind does not, the way the focus ring works (D58). The pointer can move onto the
+ * label without it going away (WCAG 1.4.13). Esc or a press on the anchor hides it until the pointer
+ * and focus have both left, and it never takes focus itself. Drawn in the page, the label
  * stays out of the semantics tree, since [content] already carries the name.
  *
  * The label keeps clear of the anchor's focus ring, and far enough off it that its own shadow falls
@@ -73,13 +79,15 @@ internal fun HeadlessTooltip(
     val hovered by interaction.collectIsHoveredAsState()
     var focused by remember { mutableStateOf(false) }
     var hidden by remember { mutableStateOf(false) }
-    val wanted = hovered || focused
+    // b-513
+    val wanted = hovered || (focused && LocalFocusVisibility.current.isVisible)
     LaunchedEffect(wanted) { if (!wanted) hidden = false }
     val visible = wanted && !hidden
     Box(
         modifier = modifier
             .hoverable(interaction)
             .onFocusChanged { state -> focused = state.hasFocus }
+            .pointerInput(Unit) { hideOnPress { hidden = true } } // b-513
             .onKeyEvent { event ->
                 val escape = visible && event.type == KeyEventType.KeyDown && event.key == Key.Escape
                 if (escape) hidden = true
@@ -88,6 +96,17 @@ internal fun HeadlessTooltip(
     ) {
         content()
         TooltipPopup(visible, text, style, interaction)
+    }
+}
+
+// b-513
+
+/** Calls [hide] as a pointer goes down anywhere on the anchor, before the anchor sees the press. */
+private suspend fun PointerInputScope.hideOnPress(hide: () -> Unit) {
+    awaitPointerEventScope {
+        while (true) {
+            if (awaitPointerEvent(PointerEventPass.Initial).type == PointerEventType.Press) hide()
+        }
     }
 }
 
