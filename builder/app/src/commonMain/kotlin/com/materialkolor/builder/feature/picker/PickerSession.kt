@@ -19,7 +19,7 @@ import com.materialkolor.builder.feature.workspace.WorkspaceAction
  * the last color once more as a release, which closes that step. Cancel sends back the value the
  * target stored when the session opened, "no override" and the seed's source included, and the
  * step it closes ends where it began, so nothing is left behind. Back, another panel and a swap to
- * another target put the value back the same way, while a switch to another project just drops the
+ * another target put the value back the same way, while a switch to another project drops the
  * session, since that document is gone.
  *
  * It only works out what to send. The caller dispatches the actions it hands back, in order.

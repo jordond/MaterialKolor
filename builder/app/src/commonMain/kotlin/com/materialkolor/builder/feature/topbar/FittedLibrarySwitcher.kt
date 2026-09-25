@@ -257,7 +257,7 @@ internal class WideBarFit {
     private var freed: Int = 0
 
     /**
-     * The room the row had just before the bar went compact, until the next measure prices the move.
+     * The room the row had just before the bar went compact, until the next measure takes the move into account.
      */
     private var roomBeforeCompact: Int? = null
 

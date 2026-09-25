@@ -13,7 +13,7 @@ import com.materialkolor.builder.engine.resolve.ThemeResult
  */
 internal sealed interface PickerTarget {
     /**
-     * The seed.
+     * The theme's seed color.
      */
     data object Seed : PickerTarget
 

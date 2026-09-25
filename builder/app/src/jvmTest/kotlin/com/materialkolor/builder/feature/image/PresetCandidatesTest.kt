@@ -28,7 +28,7 @@ import kotlin.test.Test
 private const val PIXEL_EDGE = 128
 
 /**
- * Keeps the preset candidates in `Presets.kt` honest. Each picture is decoded with Skia, scaled to
+ * Checks the preset candidates in `Presets.kt` against the extractor. Each picture is decoded with Skia, scaled to
  * 128 px the way an image the user brings is, and handed to the extractor again.
  */
 @OptIn(ExperimentalResourceApi::class)

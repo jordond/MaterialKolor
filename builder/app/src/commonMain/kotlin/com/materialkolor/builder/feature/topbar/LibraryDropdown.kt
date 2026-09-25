@@ -60,7 +60,7 @@ internal class MediumBarFit {
     private val freed = IntArray(MediumOverflowOrder.size)
 
     /**
-     * The room the dropdown had just before the last move, until the next measure prices the move.
+     * The room the dropdown had just before the last move, until the next measure takes the move into account.
      */
     private var roomBeforeMove: Int? = null
 

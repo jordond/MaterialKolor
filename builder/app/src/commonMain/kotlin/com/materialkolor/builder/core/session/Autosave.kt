@@ -27,7 +27,7 @@ import kotlinx.coroutines.withContext
  * that wants nothing written behind its back calls [cancelTimer] first, before it suspends.
  *
  * @param[scope] Where the writes run.
- * @param[delayMillis] How long things have to be quiet before a write.
+ * @param[delayMillis] How long values have to stop arriving before a write.
  * @param[keyOf] What a value replaces. Values with equal keys replace each other.
  * @param[write] Writes a value and says whether it landed.
  */
