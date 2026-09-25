@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.icon.LocalBuilderIcons
+import com.materialkolor.builder.kit.icon.glyphMotion
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
@@ -36,7 +37,8 @@ public fun BuilderIcon(
     Image(
         imageVector = LocalBuilderIcons.current[id],
         contentDescription = contentDescription,
-        modifier = modifier.size(size),
+        // b-526 A progress glyph turns while motion is on.
+        modifier = modifier.glyphMotion(id).size(size),
         colorFilter = ColorFilter.tint(ink),
     )
 }

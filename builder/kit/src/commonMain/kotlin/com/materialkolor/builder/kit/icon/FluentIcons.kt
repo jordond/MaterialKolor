@@ -5,6 +5,7 @@ import io.github.composefluent.icons.Icons
 import io.github.composefluent.icons.regular.Add
 import io.github.composefluent.icons.regular.ArrowDownload
 import io.github.composefluent.icons.regular.ArrowExpand
+import io.github.composefluent.icons.regular.ArrowSync
 import io.github.composefluent.icons.regular.Checkmark
 import io.github.composefluent.icons.regular.ChevronDown
 import io.github.composefluent.icons.regular.ChevronLeft
@@ -42,6 +43,7 @@ internal object FluentIcons : BuilderIcons {
             IconId.Image -> Icons.Regular.Image
             IconId.Pin -> Icons.Regular.Pin
             IconId.Info -> Icons.Regular.Info
+            IconId.InfoOutline -> Icons.Regular.Info
             IconId.ChevronDown -> Icons.Regular.ChevronDown
             IconId.ChevronLeft -> Icons.Regular.ChevronLeft
             IconId.ChevronRight -> Icons.Regular.ChevronRight
@@ -56,6 +58,7 @@ internal object FluentIcons : BuilderIcons {
             IconId.Error -> Icons.Regular.ErrorCircle
             IconId.ExternalLink -> Icons.Regular.Open
             IconId.Sliders -> Icons.Regular.Options
+            IconId.Progress -> Icons.Regular.ArrowSync
             IconId.Undo,
             IconId.Redo,
             IconId.Export,

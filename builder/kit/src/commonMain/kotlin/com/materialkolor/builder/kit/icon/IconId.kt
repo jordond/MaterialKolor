@@ -5,6 +5,9 @@ package com.materialkolor.builder.kit.icon
  *
  * Widgets ask for an [IconId] and the skin's [BuilderIcons] picks the glyph, so a Material3 undo
  * and a Lucide undo come out of the same call.
+ *
+ * [InfoOutline] is the info glyph drawn as an outline in every set, for a quiet button beside a
+ * label. [Progress] says some work is under way, and a `BuilderIcon` turns it while motion is on.
  */
 public enum class IconId {
     Undo,
@@ -24,6 +27,7 @@ public enum class IconId {
     Unlock,
     Pin,
     Info,
+    InfoOutline,
     ChevronDown,
     ChevronLeft,
     ChevronRight,
@@ -51,4 +55,5 @@ public enum class IconId {
     History,
     Code,
     Sliders,
+    Progress,
 }
