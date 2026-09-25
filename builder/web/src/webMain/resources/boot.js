@@ -1,9 +1,9 @@
-// Runs in the head, before the body is parsed and before anything paints. It checks the browser can
-// run the builder, colors the splash, keeps a few shortcuts from the browser and loads the app. It
-// reads mk:splash and the address and never writes storage. Kept to plain ES2015 so an old browser
-// still reaches the unsupported page. It adds no preloads. WebKit fetches an as=fetch preload with an
-// Origin header and the real request without one, so each file would download twice there, and the
-// glue's tag goes in during this same task.
+// Runs in the head, before the body is parsed and before anything paints. It picks the engine the
+// browser can run, wasm or JS, colors the splash, keeps a few shortcuts from the browser and loads
+// that engine's glue. It reads mk:splash and the address and never writes storage. Kept to plain
+// ES2015 so an old browser still reaches the unsupported page. It adds no preloads. WebKit fetches
+// an as=fetch preload with an Origin header and the real request without one, so each file would
+// download twice there, and the glue's tag goes in during this same task.
 (() => {
   // What the default document writes to mk:splash, and its seed, for a first visit. The shell spec
   // holds the two colors to what the app writes.
@@ -30,8 +30,9 @@
 
   const root = document.documentElement;
   const linkSeed = readLinkSeed();
+  const chosen = engine();
 
-  if (!supported()) {
+  if (chosen === null) {
     root.classList.add('mk-unsupported');
     whenParsed(() => {
       if (linkSeed === null) return;
@@ -41,29 +42,48 @@
     return;
   }
 
-  const assets = JSON.parse(document.getElementById('mk-assets').textContent);
-  const report = catchErrors(assets.glue.split('/').pop());
+  const assets = JSON.parse(document.getElementById('mk-assets').textContent)[chosen];
+  const report = catchErrors(assets.glue.split('/').pop(), chosen);
   paintSplash();
   window.addEventListener('keydown', keepBrowserShortcuts, true);
 
+  // One engine per visit. A glue that fails to load shows the overlay, it never falls back to the
+  // other one.
   const glue = document.createElement('script');
   glue.src = assets.glue;
   // A script that fails to load fires error on its own tag, which never reaches the window.
   glue.addEventListener('error', () => report(null, 'Could not load ' + assets.glue));
   document.head.appendChild(glue);
 
-  /** Whether this browser has WasmGC, legacy exception handling and WebGL 2. */
-  function supported() {
+  /**
+   * The engine this browser runs, 'wasm' or 'js', or null for none. Wasm needs WasmGC, legacy
+   * exception handling and WebGL 2. JS needs WebAssembly, for skiko, and WebGL 2. ?engine=js picks
+   * JS where it runs, and nothing keeps that choice past the visit.
+   */
+  function engine() {
     try {
-      if (typeof WebAssembly !== 'object' || !WebAssembly.validate(GATE_MODULE)) return false;
-      const gl = document.createElement('canvas').getContext('webgl2');
-      if (!gl) return false;
-      const context = gl.getExtension('WEBGL_lose_context');
-      if (context) context.loseContext();
-      return true;
+      if (typeof WebAssembly !== 'object' || !hasWebGl2()) return null;
+      if (new URLSearchParams(location.search).get('engine') === 'js') return 'js';
+      return hasWasmGc() ? 'wasm' : 'js';
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function hasWasmGc() {
+    try {
+      return WebAssembly.validate(GATE_MODULE);
     } catch (error) {
       return false;
     }
+  }
+
+  function hasWebGl2() {
+    const gl = document.createElement('canvas').getContext('webgl2');
+    if (!gl) return false;
+    const context = gl.getExtension('WEBGL_lose_context');
+    if (context) context.loseContext();
+    return true;
   }
 
   /**
@@ -174,15 +194,15 @@
   /**
    * Shows the error overlay on the first uncaught error or rejection, and returns the function
    * that shows it for an error the window never hears of. The details say what failed, where, in
-   * which browser and which build. They leave out the address, since a share code can carry a
-   * project name.
+   * which browser, which build and which engine. They leave out the address, since a share code can
+   * carry a project name.
    */
-  function catchErrors(build) {
+  function catchErrors(build, engine) {
     let shown = false;
     const show = (error, fallback) => {
       if (shown) return;
       shown = true;
-      const details = describe(error, fallback, build);
+      const details = describe(error, fallback, build, engine);
       whenParsed(() => showOverlay(details));
     };
     window.addEventListener('error', (event) => {
@@ -196,7 +216,7 @@
     return show;
   }
 
-  function describe(error, fallback, build) {
+  function describe(error, fallback, build, engine) {
     let message = fallback;
     let stack = '';
     try {
@@ -209,6 +229,7 @@
     return [
       'MaterialKolor Builder error',
       'Build: ' + build,
+      'Engine: ' + engine,
       'User agent: ' + navigator.userAgent,
       'Message: ' + message,
       'Stack:',
