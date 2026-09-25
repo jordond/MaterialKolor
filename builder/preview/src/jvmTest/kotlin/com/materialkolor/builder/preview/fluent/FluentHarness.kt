@@ -24,17 +24,23 @@ import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.split.PaneSpec
 
-/** The Fluent skin, the one that shows the Settings app. */
+/**
+ * The Fluent skin, the one that shows the Settings app.
+ */
 internal val FluentSkin: Skin = Skin(Library.Fluent, expressive = false)
 
-/** The frame the dock shows each device in, the kit's screen widths at the height of a first screen. */
+/**
+ * The frame the dock shows each device in, the kit's screen widths at the height of a first screen.
+ */
 internal val FluentFrames: Map<DeviceWidth, IntSize> = mapOf(
     DeviceWidth.Phone to IntSize(412, 900),
     DeviceWidth.Tablet to IntSize(840, 900),
     DeviceWidth.Desktop to IntSize(1280, 800),
 )
 
-/** A blue document that targets Fluent, so the contrast audit rates Fluent's own pairs. */
+/**
+ * A blue document that targets Fluent, so the contrast audit rates Fluent's own pairs.
+ */
 internal val FluentResult: ThemeResult =
     ThemeResolver().resolve(ThemeDocument(seed = Argb(0x1E88E5), library = Library.Fluent))
 
@@ -68,7 +74,9 @@ internal val ScrollbarArrow: SemanticsMatcher =
         SemanticsMatcher.keyNotDefined(SemanticsProperties.Role) and
         SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription)
 
-/** The Settings app in a Fluent pane of [spec], under the Fluent chrome, with motion frozen. */
+/**
+ * The Settings app in a Fluent pane of [spec], under the Fluent chrome, with motion frozen.
+ */
 @Composable
 internal fun FluentHarness(
     spec: PaneSpec,
@@ -83,7 +91,9 @@ internal fun FluentHarness(
     }
 }
 
-/** A state with every group open, the phone's menu open and the legend on, so every control shows. */
+/**
+ * A state with every group open, the phone's menu open and the legend on, so every control shows.
+ */
 internal fun everythingOpen(): DemoAppState =
     DemoAppState().apply {
         for (group in FluentGroup.entries) setOn(group.key, true)
@@ -91,7 +101,9 @@ internal fun everythingOpen(): DemoAppState =
         setOn(FluentShadesSwitch, true)
     }
 
-/** Everything the Settings app keeps in [DemoAppState], to tell whether anything changed. */
+/**
+ * Everything the Settings app keeps in [DemoAppState], to tell whether anything changed.
+ */
 internal fun DemoAppState.fluentSnapshot(): List<Any> =
     FluentSetting.entries.map { setting -> isOn(setting) } +
         FluentGroup.entries.map { group -> isOn(group.key) } +

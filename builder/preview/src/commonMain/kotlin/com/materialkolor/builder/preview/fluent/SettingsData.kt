@@ -18,19 +18,29 @@ import io.github.composefluent.icons.regular.Star
 
 // The Settings app's sample content. All of it is provisional copy for the owner to replace.
 
-/** The page the navigation shows as current, a choice in the demo state. */
+/**
+ * The page the navigation shows as current, a choice in the demo state.
+ */
 internal const val FluentPageChoice = "fluent.page"
 
-/** Whether the phone's navigation menu is open, a switch in the demo state. */
+/**
+ * Whether the phone's navigation menu is open, a switch in the demo state.
+ */
 internal const val FluentMenuSwitch = "fluent.menu"
 
-/** Whether the shade legend shows beside or over the page, a switch in the demo state. */
+/**
+ * Whether the shade legend shows beside or over the page, a switch in the demo state.
+ */
 internal const val FluentShadesSwitch = "fluent.shades"
 
-/** The settings page, a list both copies keep at the same place. */
+/**
+ * The settings page, a list both copies keep at the same place.
+ */
 internal const val FluentSettingsList = "fluent.settings"
 
-/** The words the Settings app shows outside its settings. */
+/**
+ * The words the Settings app shows outside its settings.
+ */
 internal object FluentCopy {
     const val Title = "Settings"
     const val Menu = "Navigation"
@@ -44,7 +54,9 @@ internal object FluentCopy {
         "system colors fixed."
 }
 
-/** The pages the navigation lists, in order. */
+/**
+ * The pages the navigation lists, in order.
+ */
 internal enum class FluentPage(
     val label: String,
     val icon: ImageVector,
@@ -58,14 +70,20 @@ internal enum class FluentPage(
     Update("Windows Update", Icons.Regular.ArrowSync),
 }
 
-/** The page the app opens on. */
+/**
+ * The page the app opens on.
+ */
 internal val FluentStartPage: FluentPage = FluentPage.Personalization
 
-/** The page [DemoAppState] has as current. */
+/**
+ * The page [DemoAppState] has as current.
+ */
 internal fun DemoAppState.fluentPage(): FluentPage =
     FluentPage.entries[choice(FluentPageChoice, FluentPage.entries.size, FluentStartPage.ordinal)]
 
-/** Make [page] the current one. */
+/**
+ * Make [page] the current one.
+ */
 internal fun DemoAppState.openFluentPage(page: FluentPage) {
     choose(FluentPageChoice, FluentPage.entries.size, page.ordinal)
 }
@@ -92,10 +110,14 @@ internal enum class FluentSetting(
     val key: String get() = "fluent.flipped.$name"
 }
 
-/** Whether [setting] is on. */
+/**
+ * Whether [setting] is on.
+ */
 internal fun DemoAppState.isOn(setting: FluentSetting): Boolean = isOn(setting.key) != setting.onAtFirst
 
-/** Turn [setting] on or off. */
+/**
+ * Turn [setting] on or off.
+ */
 internal fun DemoAppState.setOn(
     setting: FluentSetting,
     on: Boolean,
@@ -131,28 +153,40 @@ internal enum class FluentGroup(
     val key: String get() = "fluent.open.$name"
 }
 
-/** One entry of the settings page, a heading, a notice, a group or a single setting. */
+/**
+ * One entry of the settings page, a heading, a notice, a group or a single setting.
+ */
 internal sealed interface FluentEntry {
-    /** The words over a section. */
+    /**
+     * The words over a section.
+     */
     data class Heading(
         val title: String,
     ) : FluentEntry
 
-    /** The informational bar at the top of the page. */
+    /**
+     * The informational bar at the top of the page.
+     */
     data object Notice : FluentEntry
 
-    /** A group that opens. */
+    /**
+     * A group that opens.
+     */
     data class Group(
         val group: FluentGroup,
     ) : FluentEntry
 
-    /** A row with a switch. */
+    /**
+     * A row with a switch.
+     */
     data class Toggle(
         val setting: FluentSetting,
     ) : FluentEntry
 }
 
-/** The settings page from the top, a notice and then two sections of cards. */
+/**
+ * The settings page from the top, a notice and then two sections of cards.
+ */
 internal val FluentEntries: List<FluentEntry> = listOf(
     FluentEntry.Notice,
     FluentEntry.Heading("Colors"),

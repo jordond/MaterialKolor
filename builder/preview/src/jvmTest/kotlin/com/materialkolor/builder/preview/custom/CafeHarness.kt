@@ -45,17 +45,23 @@ import java.io.File
  */
 internal const val CafeScreenshotDir = "src/jvmTest/screenshots/cafe"
 
-/** The frame the dock shows each device in, the kit's screen widths at the height of a first screen. */
+/**
+ * The frame the dock shows each device in, the kit's screen widths at the height of a first screen.
+ */
 internal val CafeFrames: Map<DeviceWidth, IntSize> = mapOf(
     DeviceWidth.Phone to IntSize(412, 900),
     DeviceWidth.Tablet to IntSize(840, 900),
     DeviceWidth.Desktop to IntSize(1280, 800),
 )
 
-/** The chrome the cafe sits in, the Custom skin coloured from the red chrome document. */
+/**
+ * The chrome the cafe sits in, the Custom skin coloured from the red chrome document.
+ */
 private val CafeSkin: Skin = Skin(Library.Custom, expressive = false)
 
-/** The eight seeds of the sample's `AppThemeSeeds` as accents, in the sample's order (D25). */
+/**
+ * The eight seeds of the sample's `AppThemeSeeds` as accents, in the sample's order (D25).
+ */
 private val CafeSampleAccents: List<Accent> = listOf(
     Accent("Love", Argb(0xE05263)),
     Accent("Cold", Argb(0x3E92CC)),
@@ -67,7 +73,9 @@ private val CafeSampleAccents: List<Accent> = listOf(
     Accent("Chocolate", Argb(0x3F2212)),
 )
 
-/** The blue preview document with the sample's eight accents. */
+/**
+ * The blue preview document with the sample's eight accents.
+ */
 private val AccentResult: ThemeResult =
     ThemeResolver().resolve(ThemeDocument(seed = Argb(0x1E88E5), accents = CafeSampleAccents))
 
@@ -75,11 +83,15 @@ internal val AccentLightSpec: PaneSpec = PaneSpec(AccentResult, isDark = false, 
 
 internal val AccentDarkSpec: PaneSpec = PaneSpec(AccentResult, isDark = true, label = "Dark")
 
-/** How many accents the pane's document has. */
+/**
+ * How many accents the pane's document has.
+ */
 internal val PaneSpec.accentCount: Int
     get() = result.accents.families.size
 
-/** The four families F-20 wants on every first screen, any slot of each. */
+/**
+ * The four families F-20 wants on every first screen, any slot of each.
+ */
 internal val CafeFamilies: Map<String, Set<CustomSlot>> = mapOf(
     "primary" to setOf(
         CustomSlot.Primary,
@@ -104,18 +116,26 @@ internal val CafeFamilies: Map<String, Set<CustomSlot>> = mapOf(
     "error" to setOf(CustomSlot.Error, CustomSlot.OnError, CustomSlot.ErrorContainer, CustomSlot.OnErrorContainer),
 )
 
-/** Every surface level of the Custom slots, all of which F-20 wants on every first screen. */
+/**
+ * Every surface level of the Custom slots, all of which F-20 wants on every first screen.
+ */
 internal val CafeSurfaces: List<CustomSlot> =
     listOf(CustomSlot.Surface, CustomSlot.SurfaceRaised, CustomSlot.SurfaceSunken, CustomSlot.SurfaceInverse)
 
-/** The border slots, one of which F-20 wants on every first screen. */
+/**
+ * The border slots, one of which F-20 wants on every first screen.
+ */
 internal val CafeBorders: Set<CustomSlot> =
     setOf(CustomSlot.BorderFaint, CustomSlot.BorderSoft, CustomSlot.BorderStrong)
 
-/** The accent parts that fill an area, rather than ink text or a glyph on one. */
+/**
+ * The accent parts that fill an area, rather than ink text or a glyph on one.
+ */
 internal val CafeFills: Set<AccentPart> = setOf(AccentPart.Color, AccentPart.Container)
 
-/** Imports that open a popup, a window or an overlay, which on the web take the mirror over (D40). */
+/**
+ * Imports that open a popup, a window or an overlay, which on the web take the mirror over (D40).
+ */
 internal val CafePopupImports: List<String> = listOf(
     "com.materialkolor.builder.kit.control.BuilderMenu",
     "com.materialkolor.builder.kit.control.BuilderTooltip",
@@ -133,7 +153,9 @@ internal val CafePopupImports: List<String> = listOf(
  */
 internal val CafeEndlessMotion: Regex = Regex("""\b(rememberInfinite\w*Transition|infinite\w*Repeatable)\b""")
 
-/** The sources the cafe is drawn from, its entry and every Cafe file. */
+/**
+ * The sources the cafe is drawn from, its entry and every Cafe file.
+ */
 internal val CafeSources: List<File>
     get() {
         val folder = File("src/commonMain/kotlin/com/materialkolor/builder/preview/custom")
@@ -141,10 +163,14 @@ internal val CafeSources: List<File>
         return cafe.sortedBy { file -> file.name } + File(folder, "AppEntry.kt")
     }
 
-/** The slot groups a kit control of several options declares once for all of them. */
+/**
+ * The slot groups a kit control of several options declares once for all of them.
+ */
 private val CafeGroupRefs: Set<List<ColorRef>> = setOf(CustomComponent.Chip.refs)
 
-/** A state with the order open on a phone and the last order's confirmation showing. */
+/**
+ * A state with the order open on a phone and the last order's confirmation showing.
+ */
 internal fun cafeOrderOpen(): DemoAppState =
     DemoAppState().apply {
         setOn(PhoneOrderKey, true)
@@ -161,7 +187,9 @@ internal fun SemanticsNode.cafeDeclaresSlots(): Boolean {
     return holder != null && holder.config[PreviewRoles] in CafeGroupRefs
 }
 
-/** Every slot and accent declared by a node that shows at least partly on screen. */
+/**
+ * Every slot and accent declared by a node that shows at least partly on screen.
+ */
 internal fun SemanticsNodeInteractionsProvider.cafeRefsOnScreen(): List<ColorRef> {
     val screen = onRoot().fetchSemanticsNode().boundsInRoot
     return onAllNodes(SemanticsMatcher.keyIsDefined(PreviewRoles), useUnmergedTree = true)
@@ -170,13 +198,17 @@ internal fun SemanticsNodeInteractionsProvider.cafeRefsOnScreen(): List<ColorRef
         .flatMap { node -> node.config[PreviewRoles] }
 }
 
-/** Every distinct color the node is drawn in. */
+/**
+ * Every distinct color the node is drawn in.
+ */
 internal fun SemanticsNodeInteraction.captureToImagePixels(): Set<Int> =
     captureToImage().toPixelMap().let { map ->
         buildSet { for (x in 0 until map.width) for (y in 0 until map.height) add(map[x, y].toArgb()) }
     }
 
-/** The cafe in a pane of [spec], under a red Custom chrome, with motion frozen. */
+/**
+ * The cafe in a pane of [spec], under a red Custom chrome, with motion frozen.
+ */
 @Composable
 internal fun CafeHarness(
     spec: PaneSpec,
@@ -193,7 +225,9 @@ internal fun CafeHarness(
     }
 }
 
-/** The cafe on a tablet in a light and dark split, under a red Custom chrome, with motion frozen. */
+/**
+ * The cafe on a tablet in a light and dark split, under a red Custom chrome, with motion frozen.
+ */
 @Composable
 internal fun CafeSplitHarness(
     state: DemoAppState,

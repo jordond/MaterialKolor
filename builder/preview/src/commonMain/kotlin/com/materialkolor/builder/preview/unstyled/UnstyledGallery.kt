@@ -74,7 +74,9 @@ private val ProgressHeight = 6.dp
 private val Tabs = listOf("Overview", "Activity", "Settings")
 private val TabPanels = listOf("Three projects, one shared", "Harbour was edited today", "Only you can change these")
 
-/** A destination of the navigation list, the last one out of reach. */
+/**
+ * A destination of the navigation list, the last one out of reach.
+ */
 private enum class GalleryDestination(
     val label: String,
     val icon: ImageVector,
@@ -84,7 +86,9 @@ private enum class GalleryDestination(
     Team("Team", Lucide.Users),
 }
 
-/** A badge's words and how it is painted. */
+/**
+ * A badge's words and how it is painted.
+ */
 private enum class GalleryBadge(
     val label: String,
     val component: UnstyledGalleryComponent,
@@ -370,7 +374,9 @@ internal fun NavigationList(state: DemoAppState) {
     }
 }
 
-/** A destination with its icon, which reads whether it is the current one, on the web too. */
+/**
+ * A destination with its icon, which reads whether it is the current one, on the web too.
+ */
 @Composable
 private fun NavigationItem(
     destination: GalleryDestination,

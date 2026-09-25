@@ -80,13 +80,19 @@ import kotlin.test.Test
  */
 private const val GalleryScreenshotDir = "src/jvmTest/screenshots/gallery"
 
-/** The phone and desktop frames the gallery is checked at, at the height of a first screen. */
+/**
+ * The phone and desktop frames the gallery is checked at, at the height of a first screen.
+ */
 private val GalleryFrames: List<IntSize> = listOf(IntSize(412, 900), IntSize(1280, 800))
 
-/** The cards with nothing to press, or whose only control has no disabled look. */
+/**
+ * The cards with nothing to press, or whose only control has no disabled look.
+ */
 private val GalleryNoDisabled: Set<String> = setOf("Separators", "Scroll area", "Progress", "Tooltip", "Badges")
 
-/** The sources every Unstyled gallery card is drawn from. */
+/**
+ * The sources every Unstyled gallery card is drawn from.
+ */
 private val GallerySources: List<String> = listOf(
     "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled/GalleryEntry.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled/GalleryInputs.kt",
@@ -95,7 +101,9 @@ private val GallerySources: List<String> = listOf(
     "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled/UnstyledGallery.kt",
 )
 
-/** Words in the names of what opens a popup, a window or a portal, which on the web take the mirror over (D40). */
+/**
+ * Words in the names of what opens a popup, a window or a portal, which on the web take the mirror over (D40).
+ */
 private val GalleryPopupWords: List<String> =
     listOf("Popup", "Dialog", "Modal", "BottomSheet", "DropdownMenu", "Tooltip", "Portal")
 
@@ -119,7 +127,9 @@ private val GalleryKitImports: List<String> = listOf(
  */
 private val GalleryEndlessMotion: List<String> = listOf("rememberInfinite", "infiniteRepeat")
 
-/** The switches the gallery keeps in [DemoAppState]. */
+/**
+ * The switches the gallery keeps in [DemoAppState].
+ */
 private val GallerySwitches: List<String> = listOf(
     GalleryKeys.Favourite,
     GalleryKeys.Starred,
@@ -129,7 +139,9 @@ private val GallerySwitches: List<String> = listOf(
     GalleryKeys.Details,
 )
 
-/** The single choices the gallery keeps in [DemoAppState], each a switch per option. */
+/**
+ * The single choices the gallery keeps in [DemoAppState], each a switch per option.
+ */
 private val GalleryChoices: List<String> =
     listOf(GalleryKeys.Volume, GalleryKeys.Plan, GalleryKeys.Sort, GalleryKeys.Tab, GalleryKeys.Destination)
 
@@ -381,7 +393,9 @@ class UnstyledGalleryTest {
         }
 }
 
-/** What the web mirror hears from one control of each kind, with the gallery as it first shows. */
+/**
+ * What the web mirror hears from one control of each kind, with the gallery as it first shows.
+ */
 private val WebNames: List<String> = listOf(
     "Overview, tab, selected",
     "Activity, tab, not selected",
@@ -415,19 +429,27 @@ private val WebValueNames: List<String> = listOf(
     "Exporting, progress bar, 75%",
 )
 
-/** Wide enough for four columns and tall enough that every card composes. */
+/**
+ * Wide enough for four columns and tall enough that every card composes.
+ */
 private val GalleryWhole: Modifier = Modifier
     .wrapContentSize(Alignment.TopStart, unbounded = true)
     .requiredSize(1280.dp, 8000.dp)
 
-/** Anything a user can press, type into or drag. */
+/**
+ * Anything a user can press, type into or drag.
+ */
 private val GalleryInteractive: SemanticsMatcher =
     SemanticsMatcher("is interactive") { node -> node.galleryInteractive() }
 
-/** Anything that takes keyboard focus. */
+/**
+ * Anything that takes keyboard focus.
+ */
 private val GalleryFocusable: SemanticsMatcher = SemanticsMatcher.keyIsDefined(SemanticsActions.RequestFocus)
 
-/** A node named [name] exactly. */
+/**
+ * A node named [name] exactly.
+ */
 private fun named(name: String): SemanticsMatcher = hasContentDescription(name)
 
 private fun SemanticsNode.galleryInteractive(): Boolean =
@@ -445,18 +467,24 @@ private fun SemanticsNode.galleryDeclaresRoles(frames: Set<Int>): Boolean {
         generateSequence(holder.parent) { node -> node.parent }.any { node -> node.id in frames }
 }
 
-/** Every node under this one in the unmerged tree. */
+/**
+ * Every node under this one in the unmerged tree.
+ */
 private fun SemanticsNode.galleryDescendants(): List<SemanticsNode> =
     children.flatMap { child -> listOf(child) + child.galleryDescendants() }
 
-/** The frame of the card called [title], the node its title text sits in. */
+/**
+ * The frame of the card called [title], the node its title text sits in.
+ */
 private fun SemanticsNodeInteractionsProvider.galleryFrame(title: String): SemanticsNode =
     onAllNodes(hasText(title), useUnmergedTree = true)
         .fetchSemanticsNodes()
         .mapNotNull { text -> text.parent }
         .first { frame -> PreviewRoles in frame.config }
 
-/** Whether anything in the card called [title] declares roles, its frame aside. */
+/**
+ * Whether anything in the card called [title] declares roles, its frame aside.
+ */
 private fun SemanticsNodeInteractionsProvider.galleryCardDeclaresRoles(title: String): Boolean =
     galleryFrame(title).galleryDescendants().any { node -> PreviewRoles in node.config }
 
@@ -468,7 +496,9 @@ private fun String.isBannedInTheGallery(): Boolean {
         (startsWith("com.materialkolor.builder.kit.") && GalleryKitImports.none { allowed -> startsWith(allowed) })
 }
 
-/** Everything the gallery keeps in [DemoAppState], to tell whether anything changed. */
+/**
+ * Everything the gallery keeps in [DemoAppState], to tell whether anything changed.
+ */
 private fun DemoAppState.gallerySnapshot(): List<Any> {
     val picks = GalleryChoices.flatMap { group -> (0 until 12).map { option -> isOn("$group.$option") } }
     return picks + GallerySwitches.map { switch -> isOn(switch) } + isChecked(GalleryKeys.Newsletter) + text

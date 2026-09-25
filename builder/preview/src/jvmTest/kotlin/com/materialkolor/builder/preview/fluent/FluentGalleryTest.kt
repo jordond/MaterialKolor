@@ -70,7 +70,9 @@ import kotlin.test.Test
  */
 private const val GalleryScreenshotDir = "src/jvmTest/screenshots/fluent"
 
-/** The cards with nothing to press, or whose only control has no disabled look. */
+/**
+ * The cards with nothing to press, or whose only control has no disabled look.
+ */
 private val GalleryNoDisabled: Set<String> = setOf("Tabs", "Info bar", "Progress bar", "Progress ring", "Badges")
 
 @OptIn(ExperimentalTestApi::class)
@@ -356,7 +358,9 @@ class FluentGalleryTest {
         }
 }
 
-/** What the web mirror hears from one control of each kind, with the gallery as it first shows. */
+/**
+ * What the web mirror hears from one control of each kind, with the gallery as it first shows.
+ */
 private val WebNames: List<String> = listOf(
     "Bold, checkbox, not checked",
     "Bold, checkbox, not checked, disabled",

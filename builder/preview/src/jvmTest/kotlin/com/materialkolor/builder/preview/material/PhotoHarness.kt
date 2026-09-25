@@ -16,17 +16,23 @@ import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.split.PaneSpec
 
-/** The Material 3 skin in its Expressive flavour, the one that shows the photo app. */
+/**
+ * The Material 3 skin in its Expressive flavour, the one that shows the photo app.
+ */
 internal val PhotoSkin: Skin = Skin(Library.Material3, expressive = true)
 
-/** The frame the dock shows each device in, the kit's screen widths at the height of a first screen. */
+/**
+ * The frame the dock shows each device in, the kit's screen widths at the height of a first screen.
+ */
 internal val PhotoFrames: Map<DeviceWidth, IntSize> = mapOf(
     DeviceWidth.Phone to IntSize(412, 900),
     DeviceWidth.Tablet to IntSize(840, 900),
     DeviceWidth.Desktop to IntSize(1280, 800),
 )
 
-/** The four families F-20 wants on every first screen. */
+/**
+ * The four families F-20 wants on every first screen.
+ */
 internal val PhotoFamilies: Map<String, Set<Role>> = mapOf(
     "primary" to setOf(Role.Primary, Role.OnPrimary, Role.PrimaryContainer, Role.OnPrimaryContainer),
     "secondary" to setOf(Role.Secondary, Role.OnSecondary, Role.SecondaryContainer, Role.OnSecondaryContainer),
@@ -34,7 +40,9 @@ internal val PhotoFamilies: Map<String, Set<Role>> = mapOf(
     "error" to setOf(Role.Error, Role.OnError, Role.ErrorContainer, Role.OnErrorContainer),
 )
 
-/** The five container levels, four of which F-20 wants on every first screen. */
+/**
+ * The five container levels, four of which F-20 wants on every first screen.
+ */
 internal val PhotoContainerLevels: Set<Role> = setOf(
     Role.SurfaceContainerLowest,
     Role.SurfaceContainerLow,
@@ -77,7 +85,9 @@ private fun PhotoPane(
     PreviewPane(spec, modifier) { MaterialAppEntry(spec, state, width, expressive = true) }
 }
 
-/** Everything the photo app keeps in [DemoAppState], to tell whether anything changed. */
+/**
+ * Everything the photo app keeps in [DemoAppState], to tell whether anything changed.
+ */
 internal fun DemoAppState.photoSnapshot(): List<Any> {
     val picks = listOf(
         PhotoMemoryChoice to PhotoMemories.size,

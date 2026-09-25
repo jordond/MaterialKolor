@@ -26,10 +26,14 @@ internal enum class UnstyledGalleryComponent(
     ToggleButton(Role.Outline, Role.OnSurfaceVariant),
     CheckedToggleButton(Role.TertiaryContainer, Role.OnTertiaryContainer),
 
-    /** The container, the text, the label and the line under it, and the caret and focused line. */
+    /**
+     * The container, the text, the label and the line under it, and the caret and focused line.
+     */
     TextField(Role.SurfaceContainerHighest, Role.OnSurface, Role.OnSurfaceVariant, Role.Primary),
 
-    /** The filled part of the track and the thumb, then the rest of the track. */
+    /**
+     * The filled part of the track and the thumb, then the rest of the track.
+     */
     Slider(Role.Primary, Role.SurfaceContainerHighest),
     Checkbox(Role.Outline, Role.OnSurface),
     CheckedCheckbox(Role.Primary, Role.OnPrimary, Role.OnSurface),
@@ -38,7 +42,9 @@ internal enum class UnstyledGalleryComponent(
     RadioButton(Role.Outline, Role.OnSurface),
     SelectedRadioButton(Role.Primary, Role.OnSurface),
 
-    /** The outline, the label over the value, and the value. */
+    /**
+     * The outline, the label over the value, and the value.
+     */
     SelectField(Role.Outline, Role.OnSurfaceVariant, Role.OnSurface),
     Menu(Role.SurfaceContainerHighest, Role.OutlineVariant),
     MenuItem(Role.SurfaceContainerHighest, Role.OnSurface),
@@ -59,18 +65,24 @@ internal enum class UnstyledGalleryComponent(
     TertiaryBadge(Role.TertiaryContainer, Role.OnTertiaryContainer),
     ErrorBadge(Role.ErrorContainer, Role.OnErrorContainer),
 
-    /** Any disabled part, faded OnSurface on a fainter OnSurface container or outline. */
+    /**
+     * Any disabled part, faded OnSurface on a fainter OnSurface container or outline.
+     */
     Disabled(Role.OnSurface),
     ;
 
     val refs: List<ColorRef> = roles.map { role -> ColorRef.OfRole(role) }
 }
 
-/** Declare the roles [component] reads, for the role usage check and Inspect. */
+/**
+ * Declare the roles [component] reads, for the role usage check and Inspect.
+ */
 internal fun Modifier.previewRoles(component: UnstyledGalleryComponent): Modifier =
     previewRoles(*component.refs.toTypedArray())
 
-/** Declare the roles of [component] while [enabled], and of its [disabled] look otherwise. */
+/**
+ * Declare the roles of [component] while [enabled], and of its [disabled] look otherwise.
+ */
 internal fun Modifier.previewRoles(
     enabled: Boolean,
     component: UnstyledGalleryComponent,

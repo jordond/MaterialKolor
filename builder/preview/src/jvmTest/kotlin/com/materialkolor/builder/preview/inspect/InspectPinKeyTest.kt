@@ -26,13 +26,19 @@ import kotlin.test.Test
 
 // b-315b
 
-/** A declared element that counts its clicks. */
+/**
+ * A declared element that counts its clicks.
+ */
 private const val ELEMENT = "element"
 
-/** The line the card keyboard focus shows ends on. */
+/**
+ * The line the card keyboard focus shows ends on.
+ */
 private const val PIN_HINT = "Press Shift+Enter to pin this card"
 
-/** How many Tab presses it may take to reach something in the preview. */
+/**
+ * How many Tab presses it may take to reach something in the preview.
+ */
 private const val MAX_TABS = 8
 
 @OptIn(ExperimentalTestApi::class)
@@ -110,7 +116,9 @@ class InspectPinKeyTest {
             onNode(OnCard and hasText("Pin this role")).assertExists()
         }
 
-    /** Press Tab until [matcher] holds focus. */
+    /**
+     * Press Tab until [matcher] holds focus.
+     */
     private fun ComposeUiTest.tabTo(matcher: SemanticsMatcher) {
         var presses = 0
         while (onAllNodes(matcher and isFocused()).fetchSemanticsNodes().isEmpty()) {

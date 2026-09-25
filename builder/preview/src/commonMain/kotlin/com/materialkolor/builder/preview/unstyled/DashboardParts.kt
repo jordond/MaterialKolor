@@ -84,15 +84,23 @@ private const val PanelMillis = 200
 internal fun <T> panelMotion(): FiniteAnimationSpec<T> =
     if (LocalMotionFrozen.current || LocalReducedMotion.current) snap() else tween(PanelMillis)
 
-/** Where a floating part sits against the box it belongs to. */
+/**
+ * Where a floating part sits against the box it belongs to.
+ */
 internal enum class Overhang {
-    /** Under the box, lined up with its start edge. Align it to the bottom start. */
+    /**
+     * Under the box, lined up with its start edge. Align it to the bottom start.
+     */
     BelowStart,
 
-    /** Under the box, lined up with its end edge. Align it to the bottom end. */
+    /**
+     * Under the box, lined up with its end edge. Align it to the bottom end.
+     */
     BelowEnd,
 
-    /** Past the box's end edge, centered on it. Align it to the center end. */
+    /**
+     * Past the box's end edge, centered on it. Align it to the center end.
+     */
     After,
 }
 
@@ -119,7 +127,9 @@ internal fun Modifier.overhang(
         }
     }
 
-/** A short label on the inverse surface, shown in place by the control it names. */
+/**
+ * A short label on the inverse surface, shown in place by the control it names.
+ */
 @Composable
 internal fun DashboardTooltip(
     text: String,
@@ -151,7 +161,9 @@ internal class TooltipVisibility(
     val onEscape: Modifier,
 )
 
-/** The [TooltipVisibility] of the control that reports to [interactions]. */
+/**
+ * The [TooltipVisibility] of the control that reports to [interactions].
+ */
 @Composable
 internal fun tooltipVisibility(interactions: InteractionSource): TooltipVisibility {
     val hovered by interactions.collectIsHoveredAsState()
@@ -171,7 +183,9 @@ internal fun tooltipVisibility(interactions: InteractionSource): TooltipVisibili
     )
 }
 
-/** Where in its box a part floating [this] way is aligned. */
+/**
+ * Where in its box a part floating [this] way is aligned.
+ */
 internal val Overhang.alignment: Alignment
     get() = when (this) {
         Overhang.BelowStart -> Alignment.BottomStart
@@ -247,17 +261,25 @@ internal fun DashboardIconButton(
     }
 }
 
-/** How a labelled button is painted. */
+/**
+ * How a labelled button is painted.
+ */
 internal enum class ButtonStyle(
     val component: UnstyledComponent,
 ) {
-    /** The page's main action, on primary. */
+    /**
+     * The page's main action, on primary.
+     */
     Filled(UnstyledComponent.FilledButton),
 
-    /** A quieter action, outlined. */
+    /**
+     * A quieter action, outlined.
+     */
     Outlined(UnstyledComponent.OutlinedButton),
 
-    /** The way out of the alert, on error. */
+    /**
+     * The way out of the alert, on error.
+     */
     Alert(UnstyledComponent.AlertButton),
 }
 

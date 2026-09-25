@@ -107,7 +107,9 @@ internal fun CustomGalleryEntry(
     }
 }
 
-/** Every card of the Custom gallery, in the order they show within each group. */
+/**
+ * Every card of the Custom gallery, in the order they show within each group.
+ */
 internal val CustomCards: List<GalleryCard> = listOf(
     GalleryCard("Primary button", GalleryGroup.Actions) { ActionButtons(Emphasis.Primary, "Export", IconId.Export) },
     GalleryCard("Secondary button", GalleryGroup.Actions) { ActionButtons(Emphasis.Secondary, "Share", IconId.Share) },
@@ -147,7 +149,9 @@ private fun CustomGroupHeader(group: GalleryGroup) {
     )
 }
 
-/** The kit card a card's controls sit in, titled with the card's name. */
+/**
+ * The kit card a card's controls sit in, titled with the card's name.
+ */
 @Composable
 private fun CustomCardFrame(
     card: GalleryCard,
@@ -208,7 +212,9 @@ internal fun Disclosures(state: DemoAppState) {
     }
 }
 
-/** A dialog as it looks open, laid out in place rather than over a scrim (D40). */
+/**
+ * A dialog as it looks open, laid out in place rather than over a scrim (D40).
+ */
 @Composable
 internal fun InlineDialog(state: DemoAppState) {
     val tokens = LocalBuilderTokens.current
@@ -248,7 +254,9 @@ internal fun InlineDialog(state: DemoAppState) {
     }
 }
 
-/** A bottom sheet at its peek, drawn in place rather than over the page (D40). */
+/**
+ * A bottom sheet at its peek, drawn in place rather than over the page (D40).
+ */
 @Composable
 internal fun InlineSheet(state: DemoAppState) {
     val tokens = LocalBuilderTokens.current
@@ -291,7 +299,9 @@ internal fun InlineSheet(state: DemoAppState) {
     }
 }
 
-/** The kit gives tabs no disabled look, so every tab is enabled. */
+/**
+ * The kit gives tabs no disabled look, so every tab is enabled.
+ */
 @Composable
 internal fun Tabs(state: DemoAppState) {
     BuilderTabs(
@@ -346,7 +356,9 @@ internal fun NavigationList(state: DemoAppState) {
     }
 }
 
-/** Badges hold nothing to press, so none is disabled. */
+/**
+ * Badges hold nothing to press, so none is disabled.
+ */
 @Composable
 internal fun Badges() {
     GalleryColumn {
@@ -380,7 +392,9 @@ private val BadgeStatus.component: CustomComponent
         BadgeStatus.Danger -> CustomComponent.DangerBadge
     }
 
-/** A determinate bar over an indeterminate one. Neither has anything to press. */
+/**
+ * A determinate bar over an indeterminate one. Neither has anything to press.
+ */
 @Composable
 internal fun Progress() {
     GalleryColumn {
@@ -389,7 +403,9 @@ internal fun Progress() {
     }
 }
 
-/** A tooltip as it looks shown, drawn in place under its anchor rather than in a popup (D40). */
+/**
+ * A tooltip as it looks shown, drawn in place under its anchor rather than in a popup (D40).
+ */
 @Composable
 internal fun InlineTooltip() {
     val tokens = LocalBuilderTokens.current
@@ -412,7 +428,9 @@ internal fun InlineTooltip() {
     }
 }
 
-/** A toast as it looks raised, drawn in place rather than in the overlay host's top slot. */
+/**
+ * A toast as it looks raised, drawn in place rather than in the overlay host's top slot.
+ */
 @Composable
 internal fun InlineToast(state: DemoAppState) {
     val tokens = LocalBuilderTokens.current

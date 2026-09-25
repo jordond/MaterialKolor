@@ -19,11 +19,15 @@ import com.materialkolor.builder.preview.split.PaneSpec
 // The colors the cafe paints itself, where each comes from and the names Inspect gives them.
 // The kit controls declare theirs through CustomComponent in CustomGallery.kt.
 
-/** Declare the Custom slots an element paints, for the role usage check and Inspect. */
+/**
+ * Declare the Custom slots an element paints, for the role usage check and Inspect.
+ */
 internal fun Modifier.previewRoles(vararg slots: CustomSlot): Modifier =
     previewRoles(*slots.map { slot -> ColorRef.OfSlot(slot) }.toTypedArray())
 
-/** Declare the fill and the ink of [pair]. */
+/**
+ * Declare the fill and the ink of [pair].
+ */
 internal fun Modifier.previewRoles(pair: CafePair): Modifier = previewRoles(pair.fill.ref, pair.ink.ref)
 
 /**
@@ -37,14 +41,18 @@ internal class CafeInk(
     val ref: ColorRef,
 )
 
-/** A fill and the ink that reads on it. */
+/**
+ * A fill and the ink that reads on it.
+ */
 @Immutable
 internal class CafePair(
     val fill: CafeInk,
     val ink: CafeInk,
 )
 
-/** One scheme family of the Custom slots, which an accent falls back to. */
+/**
+ * One scheme family of the Custom slots, which an accent falls back to.
+ */
 internal enum class SlotFamily(
     val color: CustomSlot,
     val onColor: CustomSlot,
@@ -92,21 +100,29 @@ internal class CafeColors(
     private val accents: AccentFamilies,
     private val isDark: Boolean,
 ) {
-    /** The color [slot] resolved to. */
+    /**
+     * The color [slot] resolved to.
+     */
     fun slot(slot: CustomSlot): CafeInk = CafeInk(identity[slot], ColorRef.OfSlot(slot))
 
-    /** The fill [fill] with the ink [ink] on it. */
+    /**
+     * The fill [fill] with the ink [ink] on it.
+     */
     fun pair(
         fill: CustomSlot,
         ink: CustomSlot,
     ): CafePair = CafePair(slot(fill), slot(ink))
 
-    /** The container of [accent] and the ink on it, for something the size of a tag or larger. */
+    /**
+     * The container of [accent] and the ink on it, for something the size of a tag or larger.
+     */
     fun container(accent: CafeAccent): CafePair =
         accentPair(accent, AccentPart.Container, AccentPart.OnContainer)
             ?: pair(accent.fallback.container, accent.fallback.onContainer)
 
-    /** The color of [accent] and the ink on it, for a small mark. */
+    /**
+     * The color of [accent] and the ink on it, for a small mark.
+     */
     fun mark(accent: CafeAccent): CafePair =
         accentPair(accent, AccentPart.Color, AccentPart.OnColor)
             ?: pair(accent.fallback.color, accent.fallback.onColor)
@@ -131,7 +147,9 @@ internal class CafeColors(
     override fun hashCode(): Int = 31 * (31 * identity.hashCode() + accents.hashCode()) + isDark.hashCode()
 }
 
-/** The cafe's colors for [spec], read inside the pane's Custom theme. */
+/**
+ * The cafe's colors for [spec], read inside the pane's Custom theme.
+ */
 @Composable
 internal fun rememberCafeColors(spec: PaneSpec): CafeColors {
     val identity = LocalBuilderIdentity.current

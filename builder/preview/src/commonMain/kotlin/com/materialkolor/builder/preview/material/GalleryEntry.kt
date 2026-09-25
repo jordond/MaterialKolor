@@ -64,7 +64,9 @@ import androidx.compose.ui.semantics.Role as SemanticsRole
 // MaterialGallery.kt keeps the samples of the Actions, Inputs and Selection cards, and
 // GalleryFeedback.kt those of the Feedback cards.
 
-/** The padding inside a dialog, which Material 3 does not publish. */
+/**
+ * The padding inside a dialog, which Material 3 does not publish.
+ */
 private val DialogPadding = 24.dp
 
 private val Places = listOf(
@@ -121,7 +123,9 @@ internal fun MaterialGalleryEntry(
     }
 }
 
-/** Every card of the Material 3 gallery, in the order they show within each group. */
+/**
+ * Every card of the Material 3 gallery, in the order they show within each group.
+ */
 internal val MaterialCards: List<GalleryCard> = listOf(
     GalleryCard("Filled button", GalleryGroup.Actions) { FilledButtons() },
     GalleryCard("Tonal button", GalleryGroup.Actions) { TonalButtons() },
@@ -167,7 +171,9 @@ private fun MaterialGroupHeader(group: GalleryGroup) {
     )
 }
 
-/** The outlined frame a card's components sit in, titled with the card's name. */
+/**
+ * The outlined frame a card's components sit in, titled with the card's name.
+ */
 @Composable
 private fun MaterialCardFrame(
     card: GalleryCard,
@@ -248,7 +254,9 @@ internal fun ListItems() {
     }
 }
 
-/** An alert dialog as it looks open, laid out in place rather than in a window (D40). */
+/**
+ * An alert dialog as it looks open, laid out in place rather than in a window (D40).
+ */
 @Composable
 internal fun InlineDialog(state: DemoAppState) {
     val understood = state.isChecked(UnderstoodKey)
@@ -367,7 +375,9 @@ internal fun NavigationRails(state: DemoAppState) {
     }
 }
 
-/** Material 3 gives tabs no disabled look, so every tab is enabled. */
+/**
+ * Material 3 gives tabs no disabled look, so every tab is enabled.
+ */
 @Composable
 internal fun Tabs(state: DemoAppState) {
     val picked = state.tabIndex.coerceIn(0, TabLabels.lastIndex)
@@ -386,11 +396,15 @@ internal fun Tabs(state: DemoAppState) {
 
 private const val UnderstoodKey = "gallery.dialog.understood"
 
-/** The destination the navigation samples show selected, never the disabled last one. */
+/**
+ * The destination the navigation samples show selected, never the disabled last one.
+ */
 private fun pickedDestination(state: DemoAppState): GalleryDestination =
     GalleryDestination.entries[state.selectedItem.coerceIn(0, GalleryDestination.entries.size - 2)]
 
-/** A card's enabled copy and its disabled one, sharing the row. */
+/**
+ * A card's enabled copy and its disabled one, sharing the row.
+ */
 @Composable
 private fun CardPair(content: @Composable RowScope.(enabled: Boolean) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(Gap)) {

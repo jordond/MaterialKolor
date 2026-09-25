@@ -81,10 +81,14 @@ private class PreviewRolesNode(
      */
     private var key: Any? = null
 
-    /** Whether focus is on this element or inside it, kept while Inspect is off for when it comes on. */
+    /**
+     * Whether focus is on this element or inside it, kept while Inspect is off for when it comes on.
+     */
     private var focused = false
 
-    /** Hears about every placement, so it is only delegated to while Inspect is on. */
+    /**
+     * Hears about every placement, so it is only delegated to while Inspect is on.
+     */
     private var positions: PositionNode? = null
 
     override fun onAttach() {
@@ -138,7 +142,9 @@ private class PreviewRolesNode(
         record()
     }
 
-    /** Write where this element is into the registry, if Inspect is on and it has been placed. */
+    /**
+     * Write where this element is into the registry, if Inspect is on and it has been placed.
+     */
     private fun record() {
         val registry = registry ?: return
         val key = key ?: return
@@ -161,7 +167,9 @@ private class PreviewRolesNode(
         if (focused) registry.focus(key, focused = true)
     }
 
-    /** Passes each placement of the element on while Inspect is on, and the moment it stops being placed. */
+    /**
+     * Passes each placement of the element on while Inspect is on, and the moment it stops being placed.
+     */
     private inner class PositionNode :
         Modifier.Node(),
         GlobalPositionAwareModifierNode,

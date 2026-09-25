@@ -148,8 +148,12 @@ class DemoAppStateTest {
     private fun LazyListState.position(): Pair<Int, Int> = firstVisibleItemIndex to firstVisibleItemScrollOffset
 }
 
-/** The finger on the dark copy. */
+/**
+ * The finger on the dark copy.
+ */
 private const val DARK = 0
 
-/** The finger on the light copy. */
+/**
+ * The finger on the light copy.
+ */
 private const val LIGHT = 1

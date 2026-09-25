@@ -29,26 +29,36 @@ import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.split.PaneSpec
 import androidx.compose.ui.semantics.Role as SemanticsRole
 
-/** The frame the dock shows each device in, the kit's screen widths at the height of a first screen. */
+/**
+ * The frame the dock shows each device in, the kit's screen widths at the height of a first screen.
+ */
 internal val DashboardFrames: Map<DeviceWidth, IntSize> = mapOf(
     DeviceWidth.Phone to IntSize(412, 900),
     DeviceWidth.Tablet to IntSize(840, 900),
     DeviceWidth.Desktop to IntSize(1280, 800),
 )
 
-/** The order status button, which is the only dropdown on the page. */
+/**
+ * The order status button, which is the only dropdown on the page.
+ */
 internal val StatusButton: SemanticsMatcher =
     hasClickAction() and SemanticsMatcher.expectValue(SemanticsProperties.Role, SemanticsRole.DropdownList)
 
-/** The pick of the status menu that keeps [filter], in any copy. */
+/**
+ * The pick of the status menu that keeps [filter], in any copy.
+ */
 internal fun menuItem(filter: OrderFilter): SemanticsMatcher =
     SemanticsMatcher.expectValue(SemanticsProperties.Role, SemanticsRole.RadioButton) and
         hasAnyDescendant(hasText(filter.label))
 
-/** The icon button named [label], which off the web goes by its label alone. */
+/**
+ * The icon button named [label], which off the web goes by its label alone.
+ */
 internal fun iconButton(label: String): SemanticsMatcher = hasClickAction() and hasContentDescription(label)
 
-/** Every panel open, so the menu, a phone's navigation and, when [drawer], the token panel are on screen too. */
+/**
+ * Every panel open, so the menu, a phone's navigation and, when [drawer], the token panel are on screen too.
+ */
 internal fun DemoAppState.openEverything(drawer: Boolean = true) {
     setOn(DashboardDrawerSwitch, drawer)
     setOn(DashboardMenuSwitch, true)

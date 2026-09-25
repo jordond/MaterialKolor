@@ -31,13 +31,19 @@ import kotlin.math.roundToInt
 // them runs a clock of Material's own, which would ignore frozen motion, reduced motion and a hidden
 // tab (MO-10). Material gives progress no disabled look.
 
-/** How far along the determinate samples are. */
+/**
+ * How far along the determinate samples are.
+ */
 private const val ExpressiveAmount = 0.6f
 
-/** How long the looping loading indicator takes to morph through its shapes and back. */
+/**
+ * How long the looping loading indicator takes to morph through its shapes and back.
+ */
 private const val LoadingLoopMillis = 2800
 
-/** Where the loop rests whenever it may not move, halfway through the shapes. */
+/**
+ * Where the loop rests whenever it may not move, halfway through the shapes.
+ */
 private const val StillPhase = 0.25f
 
 /**
@@ -74,7 +80,9 @@ internal fun LoadingIndicators() {
     }
 }
 
-/** A circular and a linear wavy indicator, their waves holding still. */
+/**
+ * A circular and a linear wavy indicator, their waves holding still.
+ */
 @Composable
 internal fun WavyProgressIndicators() {
     val folds = foldsValueIntoName
@@ -120,7 +128,9 @@ private fun rememberLoadingPhase(): State<Float> =
         rememberLoopPhase(periodMillis = LoadingLoopMillis, frozenPhase = StillPhase)
     }
 
-/** How far through its shapes the looping indicator is at [phase], out to the last and back. */
+/**
+ * How far through its shapes the looping indicator is at [phase], out to the last and back.
+ */
 internal fun loadingShapes(phase: Float): Float = 1f - abs(2f * phase - 1f)
 
 private fun percentOf(amount: Float): String = "${(amount * 100).roundToInt()}%"

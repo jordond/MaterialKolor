@@ -74,24 +74,36 @@ import kotlin.test.Test
  */
 private const val GalleryScreenshotDir = "src/jvmTest/screenshots/gallery"
 
-/** The chrome the gallery sits in, the Custom skin coloured from the red chrome document. */
+/**
+ * The chrome the gallery sits in, the Custom skin coloured from the red chrome document.
+ */
 private val GallerySkin: Skin = Skin(Library.Custom, expressive = false)
 
-/** The phone and desktop frames the gallery is checked at, at the height of a first screen. */
+/**
+ * The phone and desktop frames the gallery is checked at, at the height of a first screen.
+ */
 private val GalleryFrames: List<IntSize> = listOf(IntSize(412, 900), IntSize(1280, 800))
 
-/** How many columns of 280 dp cards, 16 dp apart, fit across each frame's width. */
+/**
+ * How many columns of 280 dp cards, 16 dp apart, fit across each frame's width.
+ */
 private val GalleryColumns: Map<Int, Int> = mapOf(412 to 1, 1280 to 4)
 
-/** Wide enough for four columns and tall enough that every card composes. */
+/**
+ * Wide enough for four columns and tall enough that every card composes.
+ */
 private val GalleryWhole: Modifier = Modifier
     .wrapContentSize(Alignment.TopStart, unbounded = true)
     .requiredSize(1280.dp, 8000.dp)
 
-/** The cards whose kit control has no disabled look, or that hold nothing to press. */
+/**
+ * The cards whose kit control has no disabled look, or that hold nothing to press.
+ */
 private val GalleryNoDisabled: Set<String> = setOf("Tabs", "Badges", "Progress", "Tooltip", "Toast")
 
-/** Imports that open a popup, a window or an overlay, which on the web take the mirror over (D40). */
+/**
+ * Imports that open a popup, a window or an overlay, which on the web take the mirror over (D40).
+ */
 private val GalleryPopupImports: List<String> = listOf(
     "com.materialkolor.builder.kit.control.BuilderMenu",
     "com.materialkolor.builder.kit.control.BuilderTooltip",
@@ -105,7 +117,9 @@ private val GalleryPopupImports: List<String> = listOf(
     "com.materialkolor.builder.kit.widget.SwatchTile",
 )
 
-/** The sources every Custom gallery card is drawn from. */
+/**
+ * The sources every Custom gallery card is drawn from.
+ */
 private val GallerySources: List<String> = listOf(
     "src/commonMain/kotlin/com/materialkolor/builder/preview/custom/GalleryEntry.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/preview/custom/CustomGallery.kt",
@@ -320,11 +334,15 @@ class CustomGalleryTest {
         }
 }
 
-/** Anything a user can press, type into or drag. */
+/**
+ * Anything a user can press, type into or drag.
+ */
 private val GalleryInteractive: SemanticsMatcher =
     SemanticsMatcher("is interactive") { node -> node.galleryInteractive() }
 
-/** Anything that takes keyboard focus. */
+/**
+ * Anything that takes keyboard focus.
+ */
 private val GalleryFocusable: SemanticsMatcher = SemanticsMatcher.keyIsDefined(SemanticsActions.RequestFocus)
 
 private fun SemanticsNode.galleryInteractive(): Boolean =
@@ -343,18 +361,24 @@ private fun SemanticsNode.galleryDeclaresRoles(frames: Set<Int>): Boolean {
         generateSequence(holder.parent) { node -> node.parent }.any { node -> node.id in frames }
 }
 
-/** Every node under this one in the unmerged tree. */
+/**
+ * Every node under this one in the unmerged tree.
+ */
 private fun SemanticsNode.galleryDescendants(): List<SemanticsNode> =
     children.flatMap { child -> listOf(child) + child.galleryDescendants() }
 
-/** The frame of the card called [title], the node its title text sits in. */
+/**
+ * The frame of the card called [title], the node its title text sits in.
+ */
 private fun SemanticsNodeInteractionsProvider.galleryFrame(title: String): SemanticsNode =
     onAllNodes(hasText(title), useUnmergedTree = true)
         .fetchSemanticsNodes()
         .mapNotNull { text -> text.parent }
         .first { frame -> PreviewRoles in frame.config }
 
-/** Whether anything in the card called [title] declares roles, its frame aside. */
+/**
+ * Whether anything in the card called [title] declares roles, its frame aside.
+ */
 private fun SemanticsNodeInteractionsProvider.galleryCardDeclaresRoles(title: String): Boolean =
     galleryFrame(title).galleryDescendants().any { node -> PreviewRoles in node.config }
 
@@ -372,7 +396,9 @@ private fun SemanticsNodeInteractionsProvider.galleryRowsOnScreen(composed: Set<
         .size
 }
 
-/** The Custom gallery in a pane of [spec], under a red Custom chrome, with motion frozen. */
+/**
+ * The Custom gallery in a pane of [spec], under a red Custom chrome, with motion frozen.
+ */
 @Composable
 private fun GalleryHarness(
     spec: PaneSpec,

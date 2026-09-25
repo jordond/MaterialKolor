@@ -120,7 +120,9 @@ internal class PreviewIdentity(
 ) {
     private val colors: Map<CustomSlot, Color> = colors.toMap()
 
-    /** The color [slot] resolved to. */
+    /**
+     * The color [slot] resolved to.
+     */
     operator fun get(slot: CustomSlot): Color = colors.getValue(slot)
 
     override fun equals(other: Any?): Boolean = this === other || (other is PreviewIdentity && colors == other.colors)
@@ -130,7 +132,9 @@ internal class PreviewIdentity(
     override fun toString(): String = "PreviewIdentity($colors)"
 
     companion object {
-        /** The Custom slots of [spec]'s result in its mode. */
+        /**
+         * The Custom slots of [spec]'s result in its mode.
+         */
         fun of(spec: PaneSpec): PreviewIdentity =
             PreviewIdentity(
                 spec.result.customSlots
@@ -140,7 +144,9 @@ internal class PreviewIdentity(
     }
 }
 
-/** The Custom slots of the surrounding pane, which only a Custom pane provides. */
+/**
+ * The Custom slots of the surrounding pane, which only a Custom pane provides.
+ */
 internal val LocalPreviewIdentity: ProvidableCompositionLocal<PreviewIdentity> = staticCompositionLocalOf {
     error("No PreviewIdentity provided, only a Custom pane has one")
 }
@@ -160,7 +166,9 @@ internal object PreviewIndication : IndicationNodeFactory {
     override fun hashCode(): Int = -1
 }
 
-/** The three colors every pane sets up before its library theme, whatever the library. */
+/**
+ * The three colors every pane sets up before its library theme, whatever the library.
+ */
 @Immutable
 private class PaneInk(
     val background: Color,
@@ -272,7 +280,9 @@ private fun FluentPane(
     )
 }
 
-/** Draw the pane through a layer whose paint carries [filter], or leave it be when there is none. */
+/**
+ * Draw the pane through a layer whose paint carries [filter], or leave it be when there is none.
+ */
 private fun Modifier.paneFilter(filter: ColorMatrix?): Modifier {
     if (filter == null) return this
     return drawWithCache {
@@ -341,7 +351,9 @@ private fun Map<Role, RoleEntry>.toColorScheme(): ColorScheme =
         onTertiaryFixedVariant = color(Role.OnTertiaryFixedVariant),
     )
 
-/** Every role as the MaterialKolor token of the same name. */
+/**
+ * Every role as the MaterialKolor token of the same name.
+ */
 private fun Map<Role, RoleEntry>.toThemeValues(): Map<ThemeToken<Color>, Color> =
     Role.entries.associate { role -> role.token to color(role) }
 

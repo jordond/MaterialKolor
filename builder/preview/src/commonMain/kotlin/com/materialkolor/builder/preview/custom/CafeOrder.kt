@@ -42,7 +42,9 @@ import kotlinx.coroutines.launch
 
 // The order, as a pane beside the menu on a tablet or desktop and in place of the menu on a phone.
 
-/** The order on the surface beside the menu, its lines scrolling over the total and the buttons. */
+/**
+ * The order on the surface beside the menu, its lines scrolling over the total and the buttons.
+ */
 @Composable
 internal fun OrderPane(
     state: DemoAppState,
@@ -72,7 +74,9 @@ internal fun OrderPane(
     }
 }
 
-/** The order's title and how it is had. */
+/**
+ * The order's title and how it is had.
+ */
 internal fun LazyListScope.orderHead(
     state: DemoAppState,
     focus: OrderFocus,
@@ -94,7 +98,9 @@ internal fun LazyListScope.orderHead(
     }
 }
 
-/** A line for each drink in the order, or a note that it is empty. */
+/**
+ * A line for each drink in the order, or a note that it is empty.
+ */
 internal fun LazyListScope.orderLines(state: DemoAppState) {
     val lines = state.orderLines()
     if (lines.isEmpty()) {
@@ -131,7 +137,9 @@ private fun OrderLine(
     }
 }
 
-/** Clear and Place order, with the confirmation of the last order drawn in place above them. */
+/**
+ * Clear and Place order, with the confirmation of the last order drawn in place above them.
+ */
 @Composable
 internal fun OrderActions(
     state: DemoAppState,
@@ -211,7 +219,9 @@ private fun OrderPlaced(
     }
 }
 
-/** A button of the order that disables itself or goes away once it is pressed. */
+/**
+ * A button of the order that disables itself or goes away once it is pressed.
+ */
 internal enum class OrderButton {
     Clear,
     PlaceOrder,
@@ -233,7 +243,9 @@ internal class OrderFocus(
     val dismiss: FocusRequester = FocusRequester()
     val orderType: FocusRequester = FocusRequester()
 
-    /** The button of this copy that holds focus. Plain, since nothing draws from it. */
+    /**
+     * The button of this copy that holds focus. Plain, since nothing draws from it.
+     */
     private var holding: OrderButton? = null
 
     fun onFocusChanged(
@@ -265,14 +277,18 @@ internal class OrderFocus(
     }
 }
 
-/** An [OrderFocus] for this copy of the order. */
+/**
+ * An [OrderFocus] for this copy of the order.
+ */
 @Composable
 internal fun rememberOrderFocus(): OrderFocus {
     val scope = rememberCoroutineScope()
     return remember(scope) { OrderFocus(scope) }
 }
 
-/** Lets [focus] know whether [button] holds focus. */
+/**
+ * Lets [focus] know whether [button] holds focus.
+ */
 private fun Modifier.tracked(
     focus: OrderFocus,
     button: OrderButton,

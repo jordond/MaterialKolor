@@ -51,12 +51,18 @@ public class PaneSpec(
  * A single pane is always the start copy.
  */
 public enum class PaneSide {
-    /** The copy assistive tech and the keyboard reach, drawn from the start edge to the handle. */
+    /**
+     * The copy assistive tech and the keyboard reach, drawn from the start edge to the handle.
+     */
     Start,
 
-    /** The clipped copy past the handle, only there for the eye and the pointer. */
+    /**
+     * The clipped copy past the handle, only there for the eye and the pointer.
+     */
     End,
 }
 
-/** The side of the split the surrounding pane is on. */
+/**
+ * The side of the split the surrounding pane is on.
+ */
 internal val LocalPaneSide: ProvidableCompositionLocal<PaneSide> = staticCompositionLocalOf { PaneSide.Start }

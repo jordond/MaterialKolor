@@ -19,54 +19,84 @@ import com.materialkolor.builder.preview.inspect.previewRoles
 internal enum class ExpressiveComponent(
     vararg roles: Role,
 ) {
-    /** A medium or large flexible top app bar, which turns to the container level as it collapses. */
+    /**
+     * A medium or large flexible top app bar, which turns to the container level as it collapses.
+     */
     FlexibleTopAppBar(Role.Surface, Role.OnSurface, Role.OnSurfaceVariant, Role.SurfaceContainer),
 
-    /** A toggle button, tonal when off and filled when on. */
+    /**
+     * A toggle button, tonal when off and filled when on.
+     */
     ToggleButton(Role.SurfaceContainer, Role.OnSurfaceVariant, Role.Primary, Role.OnPrimary),
 
-    /** The button of a floating action button menu, which fills in as its menu opens. */
+    /**
+     * The button of a floating action button menu, which fills in as its menu opens.
+     */
     ToggleFloatingActionButton(Role.PrimaryContainer, Role.OnPrimaryContainer, Role.Primary, Role.OnPrimary),
 
-    /** One item of an open floating action button menu. */
+    /**
+     * One item of an open floating action button menu.
+     */
     FloatingActionButtonMenuItem(Role.PrimaryContainer, Role.OnPrimaryContainer),
 
-    /** A determinate wavy progress bar, its wave on the track. */
+    /**
+     * A determinate wavy progress bar, its wave on the track.
+     */
     LinearWavyProgressIndicator(Role.Primary, Role.SecondaryContainer),
 
-    /** A wide navigation rail, collapsed or expanded but never modal. */
+    /**
+     * A wide navigation rail, collapsed or expanded but never modal.
+     */
     WideNavigationRail(Role.Surface, Role.OnSurface),
 
-    /** One destination of a wide navigation rail. */
+    /**
+     * One destination of a wide navigation rail.
+     */
     WideNavigationRailItem(Role.SecondaryContainer, Role.OnSecondaryContainer, Role.Secondary, Role.OnSurfaceVariant),
 
-    /** The short navigation bar along the bottom of a phone. */
+    /**
+     * The short navigation bar along the bottom of a phone.
+     */
     ShortNavigationBar(Role.SurfaceContainer, Role.OnSurface),
 
-    /** One destination of a short navigation bar. */
+    /**
+     * One destination of a short navigation bar.
+     */
     ShortNavigationBarItem(Role.SecondaryContainer, Role.OnSecondaryContainer, Role.Secondary, Role.OnSurfaceVariant),
 
-    /** A circular wavy progress indicator, its wave on the track. */
+    /**
+     * A circular wavy progress indicator, its wave on the track.
+     */
     CircularWavyProgressIndicator(Role.Primary, Role.SecondaryContainer),
 
-    /** A loading indicator on no container, its shape in the primary color. */
+    /**
+     * A loading indicator on no container, its shape in the primary color.
+     */
     LoadingIndicator(Role.Primary),
 
-    /** A loading indicator on its own container. */
+    /**
+     * A loading indicator on its own container.
+     */
     ContainedLoadingIndicator(Role.PrimaryContainer, Role.OnPrimaryContainer),
 
-    /** A standard floating toolbar, whose buttons take the content color it sets. */
+    /**
+     * A standard floating toolbar, whose buttons take the content color it sets.
+     */
     FloatingToolbar(Role.SurfaceContainer, Role.OnSurface),
     ;
 
     val refs: List<ColorRef> = roles.map { role -> ColorRef.OfRole(role) }
 }
 
-/** Declare the roles [component] paints on its default colors, for the role usage check and Inspect. */
+/**
+ * Declare the roles [component] paints on its default colors, for the role usage check and Inspect.
+ */
 internal fun Modifier.previewRoles(component: ExpressiveComponent): Modifier =
     previewRoles(*component.refs.toTypedArray())
 
-/** Declare the roles of [component] while [enabled], and of its [disabled] look otherwise. */
+/**
+ * Declare the roles of [component] while [enabled], and of its [disabled] look otherwise.
+ */
 internal fun Modifier.previewRoles(
     enabled: Boolean,
     component: ExpressiveComponent,

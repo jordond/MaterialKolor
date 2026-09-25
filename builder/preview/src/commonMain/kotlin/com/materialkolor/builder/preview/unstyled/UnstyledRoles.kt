@@ -52,7 +52,9 @@ internal enum class DashboardToken(
     Scrim(MaterialKolorTokens.scrim, Role.Scrim),
 }
 
-/** The color the pane's Unstyled theme holds for this token. */
+/**
+ * The color the pane's Unstyled theme holds for this token.
+ */
 internal val DashboardToken.color: Color
     @Composable get() = Theme[MaterialKolorTokens.colors][token]
 
@@ -101,10 +103,14 @@ internal enum class UnstyledComponent(
     val refs: List<ColorRef> = roles.map { role -> ColorRef.OfRole(role) }
 }
 
-/** Declare the roles [component] reads, for the role usage check and Inspect. */
+/**
+ * Declare the roles [component] reads, for the role usage check and Inspect.
+ */
 internal fun Modifier.previewRoles(component: UnstyledComponent): Modifier =
     previewRoles(*component.refs.toTypedArray())
 
-/** Declare [roles] of the scheme, for a part whose colors come from its data. */
+/**
+ * Declare [roles] of the scheme, for a part whose colors come from its data.
+ */
 internal fun Modifier.previewRoles(vararg roles: Role): Modifier =
     previewRoles(*roles.map { role -> ColorRef.OfRole(role) }.toTypedArray())

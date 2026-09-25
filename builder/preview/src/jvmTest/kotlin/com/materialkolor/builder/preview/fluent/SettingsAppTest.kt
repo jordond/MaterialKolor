@@ -71,11 +71,15 @@ private const val FluentScreenshotDir = "src/jvmTest/screenshots/fluent"
 
 private const val FluentSourceDir = "src/commonMain/kotlin/com/materialkolor/builder/preview/fluent"
 
-/** The files of the Settings app, which the gallery's sources are not. */
+/**
+ * The files of the Settings app, which the gallery's sources are not.
+ */
 private val SettingsSources: Set<String> =
     setOf("SettingsApp.kt", "SettingsData.kt", "ShadeMapping.kt", "FluentRoles.kt", "AppEntry.kt")
 
-/** What the Settings app's sources never name, anything that opens outside the layout or an endless clock. */
+/**
+ * What the Settings app's sources never name, anything that opens outside the layout or an endless clock.
+ */
 private val SettingsBannedWords: List<String> = listOf(
     "androidx.compose.ui.window",
     "Popup",
@@ -87,7 +91,9 @@ private val SettingsBannedWords: List<String> = listOf(
     "infiniteRepeat",
 )
 
-/** What the web mirror hears from one control of each kind, with the app as it first shows on a tablet. */
+/**
+ * What the web mirror hears from one control of each kind, with the app as it first shows on a tablet.
+ */
 private val SettingsWebNames: List<String> = listOf(
     "Transparency effects, switch, on",
     "Show badges on taskbar apps, switch, on",
@@ -98,11 +104,15 @@ private val SettingsWebNames: List<String> = listOf(
     "Accent shades, checkbox, not checked",
 )
 
-/** The switch of a setting that starts on. */
+/**
+ * The switch of a setting that starts on.
+ */
 private val TransparencySwitch: SemanticsMatcher =
     isToggleable() and hasContentDescription(FluentSetting.Transparency.title)
 
-/** The header of the accent color group. */
+/**
+ * The header of the accent color group.
+ */
 private val AccentGroupHeader: SemanticsMatcher =
     hasClickAction() and hasContentDescription(FluentGroup.AccentColor.title)
 
@@ -364,7 +374,9 @@ class SettingsAppTest {
     }
 }
 
-/** Every shade the elements declared on the first screen paint, in the mode [isDark] picks. */
+/**
+ * Every shade the elements declared on the first screen paint, in the mode [isDark] picks.
+ */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.shadesOnScreen(isDark: Boolean): Set<FluentShade> {
     val screen = onRoot().fetchSemanticsNode().boundsInRoot

@@ -77,7 +77,9 @@ internal fun GalleryCheckBox(
     }
 }
 
-/** Fluent's radio buttons, each under a layer that picks it with the radio role and names it for the web. */
+/**
+ * Fluent's radio buttons, each under a layer that picks it with the radio role and names it for the web.
+ */
 @Composable
 internal fun RadioButtons(state: DemoAppState) {
     val picked = state.choice(FluentGalleryKeys.Delivery, DeliveryOptions.size)

@@ -46,10 +46,14 @@ import com.materialkolor.builder.kit.control.foldedExpandedName
 import com.materialkolor.builder.kit.control.foldedSelectedName
 import com.materialkolor.builder.preview.canvas.DemoAppState
 
-/** The bar's height once the feed has scrolled under it. */
+/**
+ * The bar's height once the feed has scrolled under it.
+ */
 private val BarCollapsedHeight = TopAppBarDefaults.MediumAppBarCollapsedHeight
 
-/** The bar's height over the top of the feed, with room for the subtitle. */
+/**
+ * The bar's height over the top of the feed, with room for the subtitle.
+ */
 private val BarExpandedHeight = TopAppBarDefaults.MediumFlexibleAppBarWithSubtitleExpandedHeight
 
 /**
@@ -163,7 +167,9 @@ private fun rememberBarFollowing(list: LazyListState): TopAppBarState {
     return bar
 }
 
-/** How far the bar collapses, as a negative height offset, for a feed scrolled to [index] and [offset]. */
+/**
+ * How far the bar collapses, as a negative height offset, for a feed scrolled to [index] and [offset].
+ */
 private fun collapseOf(
     index: Int,
     offset: Int,
@@ -191,7 +197,9 @@ private fun PhotoBottomBar() {
     }
 }
 
-/** A wide rail, never the modal one. Its width never changes while it shows, so both copies agree. */
+/**
+ * A wide rail, never the modal one. Its width never changes while it shows, so both copies agree.
+ */
 @Composable
 private fun PhotoRail(expanded: Boolean) {
     val rail = rememberWideNavigationRailState(

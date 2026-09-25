@@ -42,10 +42,14 @@ import com.composeunstyled.UnstyledHorizontalSeparator
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.preview.canvas.DemoAppState
 
-/** The height of the top bar, which the phone's navigation opens under. */
+/**
+ * The height of the top bar, which the phone's navigation opens under.
+ */
 internal val TopBarHeight = 64.dp
 
-/** How wide the token side panel is, docked or not. */
+/**
+ * How wide the token side panel is, docked or not.
+ */
 internal val DrawerWidth = 300.dp
 
 private const val ScrimAlpha = 0.32f

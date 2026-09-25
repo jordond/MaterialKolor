@@ -44,10 +44,14 @@ internal enum class MaterialComponent(
     val refs: List<ColorRef> = roles.map { role -> ColorRef.OfRole(role) }
 }
 
-/** Declare the roles [component] reads on its default colors, for the role usage check and Inspect. */
+/**
+ * Declare the roles [component] reads on its default colors, for the role usage check and Inspect.
+ */
 internal fun Modifier.previewRoles(component: MaterialComponent): Modifier =
     previewRoles(*component.refs.toTypedArray())
 
-/** Declare [roles] of the Material 3 scheme, for an element that passes its colors itself. */
+/**
+ * Declare [roles] of the Material 3 scheme, for an element that passes its colors itself.
+ */
 internal fun Modifier.previewRoles(vararg roles: Role): Modifier =
     previewRoles(*roles.map { role -> ColorRef.OfRole(role) }.toTypedArray())

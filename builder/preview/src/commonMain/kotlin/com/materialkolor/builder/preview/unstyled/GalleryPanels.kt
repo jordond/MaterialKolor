@@ -53,7 +53,9 @@ import androidx.compose.ui.semantics.Role as SemanticsRole
 private val RowHeight = 36.dp
 private val SortOrders = listOf("Newest", "Oldest", "Name", "Size")
 
-/** One row of the menu, and whether it runs or is greyed out. */
+/**
+ * One row of the menu, and whether it runs or is greyed out.
+ */
 private enum class MenuAction(
     val label: String,
     val icon: ImageVector,
@@ -109,7 +111,9 @@ internal fun InPlaceSelect(state: DemoAppState) {
     }
 }
 
-/** The field of a select, its label over its value, that opens and closes its list. */
+/**
+ * The field of a select, its label over its value, that opens and closes its list.
+ */
 @Composable
 private fun SelectField(
     label: String,
@@ -203,7 +207,9 @@ private fun MenuButton(
     )
 }
 
-/** The raised panel the menu and the select's list show on, in place in the card. */
+/**
+ * The raised panel the menu and the select's list show on, in place in the card.
+ */
 @Composable
 private fun InPlacePanel(
     modifier: Modifier = Modifier,

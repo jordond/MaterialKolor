@@ -73,7 +73,9 @@ import androidx.compose.ui.semantics.Role as SemanticsRole
 // a "gallery." key, so both copies of a split agree. Where a component has no enabled and disabled
 // pair, the last option of its set is the disabled one.
 
-/** The stops on both sliders, 0 to 10. */
+/**
+ * The stops on both sliders, 0 to 10.
+ */
 private const val SliderStops = 11
 private const val SliderTop = SliderStops - 1f
 
@@ -170,7 +172,9 @@ internal fun IconButtons() {
     }
 }
 
-/** Material 3 gives floating action buttons no disabled look, so only the enabled ones show. */
+/**
+ * Material 3 gives floating action buttons no disabled look, so only the enabled ones show.
+ */
 @Composable
 internal fun FloatingActionButtons() {
     Row(horizontalArrangement = Arrangement.spacedBy(SectionGap), verticalAlignment = Alignment.CenterVertically) {
@@ -183,7 +187,9 @@ internal fun FloatingActionButtons() {
     }
 }
 
-/** Collapses to its icon and back on each click. It has no disabled look either. */
+/**
+ * Collapses to its icon and back on each click. It has no disabled look either.
+ */
 @Composable
 internal fun ExtendedFab(state: DemoAppState) {
     val collapsed = state.isOn(FabCollapsedKey)
@@ -406,7 +412,9 @@ internal fun InputChips(state: DemoAppState) {
     }
 }
 
-/** A menu as it looks open, drawn in place rather than in a popup (D40). */
+/**
+ * A menu as it looks open, drawn in place rather than in a popup (D40).
+ */
 @Composable
 internal fun InlineMenu(state: DemoAppState) {
     val picked = state.choice(SortKey, SortOrders.size)
@@ -446,7 +454,9 @@ private const val SeatKey = "gallery.seat"
 private const val PeriodKey = "gallery.period"
 private const val SortKey = "gallery.sort"
 
-/** Lays its content out in a row that wraps when the card is narrow. */
+/**
+ * Lays its content out in a row that wraps when the card is narrow.
+ */
 @Composable
 private fun Wrapping(content: @Composable FlowRowScope.() -> Unit) {
     FlowRow(
@@ -457,7 +467,9 @@ private fun Wrapping(content: @Composable FlowRowScope.() -> Unit) {
     )
 }
 
-/** A component's enabled copy and then its disabled one, in a row that wraps. */
+/**
+ * A component's enabled copy and then its disabled one, in a row that wraps.
+ */
 @Composable
 internal fun EnabledAndDisabled(content: @Composable (enabled: Boolean) -> Unit) {
     Wrapping {
@@ -466,7 +478,9 @@ internal fun EnabledAndDisabled(content: @Composable (enabled: Boolean) -> Unit)
     }
 }
 
-/** Two text fields sharing the gallery's text, and a disabled one holding a fixed value. */
+/**
+ * Two text fields sharing the gallery's text, and a disabled one holding a fixed value.
+ */
 @Composable
 private fun TextFieldPair(
     state: DemoAppState,

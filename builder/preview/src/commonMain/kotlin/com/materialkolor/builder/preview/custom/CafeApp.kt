@@ -47,13 +47,19 @@ import com.materialkolor.builder.preview.inspect.previewRoles
 // The cafe's frame, its header and the layout for each device width. CafeMenu.kt draws the
 // categories and the drinks, CafeOrder.kt the order.
 
-/** The width of the category column and the order pane beside the menu on a tablet. */
+/**
+ * The width of the category column and the order pane beside the menu on a tablet.
+ */
 private val TabletSides = 232.dp to 280.dp
 
-/** The width of the category column and the order pane beside the menu on a desktop. */
+/**
+ * The width of the category column and the order pane beside the menu on a desktop.
+ */
 private val DesktopSides = 264.dp to 340.dp
 
-/** How many drinks a desktop lays side by side. */
+/**
+ * How many drinks a desktop lays side by side.
+ */
 private const val DesktopMenuColumns = 2
 
 private val StoreMarkSize = 40.dp
@@ -144,7 +150,9 @@ private fun CafePanes(
     }
 }
 
-/** The store's name and hours on the raised surface, with when an order made now is ready. */
+/**
+ * The store's name and hours on the raised surface, with when an order made now is ready.
+ */
 @Composable
 private fun CafeHeader(colors: CafeColors) {
     val tokens = LocalBuilderTokens.current
@@ -177,7 +185,9 @@ private fun CafeHeader(colors: CafeColors) {
     }
 }
 
-/** The store's cup on a primary disc. */
+/**
+ * The store's cup on a primary disc.
+ */
 @Composable
 private fun StoreMark(colors: CafeColors) {
     val mark = colors.pair(CustomSlot.Primary, CustomSlot.OnPrimary)
@@ -192,7 +202,9 @@ private fun StoreMark(colors: CafeColors) {
     }
 }
 
-/** How long an order made now takes, on the tertiary container. */
+/**
+ * How long an order made now takes, on the tertiary container.
+ */
 @Composable
 private fun ReadyPill(colors: CafeColors) {
     val tokens = LocalBuilderTokens.current
@@ -242,7 +254,9 @@ internal fun OrderTotal(
     }
 }
 
-/** A Lucide glyph in [tint], standing beside a label that already says what it means. */
+/**
+ * A Lucide glyph in [tint], standing beside a label that already says what it means.
+ */
 @Composable
 internal fun CafeGlyph(
     icon: ImageVector,
@@ -257,6 +271,8 @@ internal fun CafeGlyph(
     )
 }
 
-/** The rounded shape the cafe's own panels are cut to. */
+/**
+ * The rounded shape the cafe's own panels are cut to.
+ */
 @Composable
 internal fun cafePanelShape(): RoundedCornerShape = RoundedCornerShape(LocalBuilderTokens.current.radius.medium)

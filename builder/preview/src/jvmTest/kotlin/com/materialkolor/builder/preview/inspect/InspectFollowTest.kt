@@ -31,13 +31,19 @@ import io.kotest.matchers.shouldBe
 import kotlin.math.roundToInt
 import kotlin.test.Test
 
-/** How many rows the scrolling list has, far more than fit. */
+/**
+ * How many rows the scrolling list has, far more than fit.
+ */
 private const val ROWS = 100
 
-/** The row the card is pinned to. */
+/**
+ * The row the card is pinned to.
+ */
 private const val PINNED_ROW = 2
 
-/** The element in the light copy of a split. */
+/**
+ * The element in the light copy of a split.
+ */
 private const val LIGHT = "light"
 
 @OptIn(ExperimentalTestApi::class)
@@ -142,7 +148,9 @@ class InspectFollowTest {
         check()
     }
 
-    /** Whether the Inspect outline runs down the start edge of [element], checked halfway down. */
+    /**
+     * Whether the Inspect outline runs down the start edge of [element], checked halfway down.
+     */
     private fun ComposeUiTest.outlined(element: DpRect): Boolean {
         val preview = onNodeWithTag(PREVIEW_TAG).getBoundsInRoot()
         val image = onNodeWithTag(PREVIEW_TAG).captureToImage().toPixelMap()

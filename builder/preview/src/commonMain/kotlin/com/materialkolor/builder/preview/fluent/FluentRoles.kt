@@ -24,7 +24,9 @@ import io.github.composefluent.Shades
 // match no row of the audit and its Inspect card would show no contrast badge. Only the shade
 // legend declares shades, one per swatch.
 
-/** The accent fill and the on-accent ink on it, the one Fluent pair the contrast audit rates. */
+/**
+ * The accent fill and the on-accent ink on it, the one Fluent pair the contrast audit rates.
+ */
 internal val FluentAccentRefs: List<ColorRef> =
     listOf(ColorRef.OfFluentText(FluentText.OnAccentPrimary), ColorRef.OfRole(Role.Primary))
 
@@ -45,10 +47,14 @@ internal fun Modifier.fluentAccentRoles(text: FluentText = FluentText.OnAccentPr
  */
 internal fun Modifier.fluentNeutralRoles(): Modifier = previewRoles()
 
-/** Declare one swatch of the shade legend, the only place a Fluent shade is declared as itself. */
+/**
+ * Declare one swatch of the shade legend, the only place a Fluent shade is declared as itself.
+ */
 internal fun Modifier.fluentShadeRoles(shade: FluentShade): Modifier = previewRoles(ColorRef.OfFluentShade(shade))
 
-/** The shade the accent fill takes in the mode [isDark] picks. */
+/**
+ * The shade the accent fill takes in the mode [isDark] picks.
+ */
 internal fun fillAccentShade(isDark: Boolean): FluentShade = if (isDark) FluentShade.Light2 else FluentShade.Dark1
 
 /**
@@ -63,7 +69,9 @@ internal fun ColorRef.paintedShade(isDark: Boolean): FluentShade? =
         else -> null
     }
 
-/** The color [shade] takes in [shades]. */
+/**
+ * The color [shade] takes in [shades].
+ */
 internal fun Shades.color(shade: FluentShade): Color =
     when (shade) {
         FluentShade.Dark3 -> dark3

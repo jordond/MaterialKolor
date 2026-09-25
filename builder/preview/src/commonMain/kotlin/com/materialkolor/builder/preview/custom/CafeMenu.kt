@@ -57,7 +57,9 @@ private val HeartRingOffset = 2.dp
 private val DotSize = 10.dp
 private val StampSize = 12.dp
 
-/** The categories as a list with the stamp card under them, beside the menu on a tablet or desktop. */
+/**
+ * The categories as a list with the stamp card under them, beside the menu on a tablet or desktop.
+ */
 @Composable
 internal fun CategoryColumn(
     state: DemoAppState,
@@ -87,7 +89,9 @@ internal fun CategoryColumn(
     }
 }
 
-/** The categories as chips, above the menu on a phone. */
+/**
+ * The categories as chips, above the menu on a phone.
+ */
 @Composable
 internal fun CategoryChips(state: DemoAppState) {
     BuilderChoiceChips(
@@ -99,7 +103,9 @@ internal fun CategoryChips(state: DemoAppState) {
     ) { category -> category.label }
 }
 
-/** The category's colour as a dot, beside its name in the list. */
+/**
+ * The category's colour as a dot, beside its name in the list.
+ */
 @Composable
 private fun CategoryDot(
     category: CafeCategory,
@@ -109,7 +115,9 @@ private fun CategoryDot(
     Box(Modifier.previewRoles(dot.ref).size(DotSize).background(dot.color, CircleShape))
 }
 
-/** The drinks of the chosen category under its banner, in [columns] columns. */
+/**
+ * The drinks of the chosen category under its banner, in [columns] columns.
+ */
 @Composable
 internal fun MenuPane(
     state: DemoAppState,
@@ -135,7 +143,9 @@ internal fun MenuPane(
     }
 }
 
-/** The chosen category's name and line on its accent's container. */
+/**
+ * The chosen category's name and line on its accent's container.
+ */
 @Composable
 internal fun CategoryBanner(
     category: CafeCategory,
@@ -165,7 +175,9 @@ internal fun CategoryBanner(
     }
 }
 
-/** The stamps collected towards a free drink, on the secondary container. */
+/**
+ * The stamps collected towards a free drink, on the secondary container.
+ */
 @Composable
 internal fun StampCard(
     colors: CafeColors,
@@ -207,7 +219,9 @@ internal fun StampCard(
     }
 }
 
-/** One drink on a card, with its tags, its favourite mark, its price and a button to add it. */
+/**
+ * One drink on a card, with its tags, its favourite mark, its price and a button to add it.
+ */
 @Composable
 internal fun MenuItemCard(
     item: CafeItem,
@@ -251,7 +265,9 @@ internal fun MenuItemCard(
     }
 }
 
-/** The drink's category glyph on the category's container. */
+/**
+ * The drink's category glyph on the category's container.
+ */
 @Composable
 private fun ItemThumb(
     category: CafeCategory,
@@ -269,7 +285,9 @@ private fun ItemThumb(
     }
 }
 
-/** A short label on [pair]'s fill, with a glyph in front when there is one. */
+/**
+ * A short label on [pair]'s fill, with a glyph in front when there is one.
+ */
 @Composable
 private fun CafeTag(
     label: String,

@@ -171,7 +171,9 @@ private fun StatusMenu(
     }
 }
 
-/** The column names on the table's highest container. */
+/**
+ * The column names on the table's highest container.
+ */
 @Composable
 internal fun TableHeader(modifier: Modifier = Modifier) {
     val muted = DashboardToken.OnSurfaceVariant.color
@@ -201,7 +203,9 @@ internal fun TableHeader(modifier: Modifier = Modifier) {
     }
 }
 
-/** One order on the lowest container, rounded off at the foot of the table when [last]. */
+/**
+ * One order on the lowest container, rounded off at the foot of the table when [last].
+ */
 @Composable
 internal fun OrderRow(
     order: Order,
@@ -236,7 +240,9 @@ internal fun OrderRow(
     }
 }
 
-/** Where an order stands, filled from its family or outlined when it has none. */
+/**
+ * Where an order stands, filled from its family or outlined when it has none.
+ */
 @Composable
 private fun StatusMark(status: OrderStatus) {
     val container = status.container

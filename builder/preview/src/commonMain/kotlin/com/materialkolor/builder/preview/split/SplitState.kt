@@ -38,16 +38,22 @@ public class SplitState(
             state.floatValue = value.coerceIn(0f, 1f)
         }
 
-    /** Put the handle back in the middle. */
+    /**
+     * Put the handle back in the middle.
+     */
     public fun reset() {
         fraction = HALF
     }
 
     internal companion object {
-        /** Where a split opens and where a reset puts it. */
+        /**
+         * Where a split opens and where a reset puts it.
+         */
         const val HALF: Float = 0.5f
 
-        /** How far one arrow key moves the handle. */
+        /**
+         * How far one arrow key moves the handle.
+         */
         const val STEP: Float = 0.05f
     }
 }
@@ -91,7 +97,9 @@ public class SplitShape(
         return Outline.Rectangle(rect)
     }
 
-    /** How far from the start edge the handle sits along [extent], rounded to a whole pixel. */
+    /**
+     * How far from the start edge the handle sits along [extent], rounded to a whole pixel.
+     */
     private fun wholePixel(extent: Float): Float = (extent * fraction).roundToInt().toFloat()
 
     override fun equals(other: Any?): Boolean =

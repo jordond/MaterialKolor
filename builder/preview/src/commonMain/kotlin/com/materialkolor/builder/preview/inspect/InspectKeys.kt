@@ -27,7 +27,9 @@ internal class InspectKey(
     val shift: Boolean,
     val name: StringResource,
 ) {
-    /** Whether [event] is this key, going down or up, with Shift held as it needs and nothing else. */
+    /**
+     * Whether [event] is this key, going down or up, with Shift held as it needs and nothing else.
+     */
     fun matches(event: KeyEvent): Boolean =
         event.key == key &&
             event.isShiftPressed == shift &&

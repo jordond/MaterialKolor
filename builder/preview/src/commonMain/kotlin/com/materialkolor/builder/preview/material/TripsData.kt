@@ -14,7 +14,9 @@ import com.composables.icons.lucide.Sun
 import com.composables.icons.lucide.User
 import com.materialkolor.builder.domain.model.Role
 
-/** The switch that keeps maps on the device, shared by both copies of a split. */
+/**
+ * The switch that keeps maps on the device, shared by both copies of a split.
+ */
 internal const val OfflineMapsSwitch: String = "trips.offlineMaps"
 
 /**
@@ -27,13 +29,19 @@ internal enum class TripTint(
     val container: Role,
     val content: Role,
 ) {
-    /** The primary container, for the trip coming up next. */
+    /**
+     * The primary container, for the trip coming up next.
+     */
     Primary(Role.PrimaryContainer, Role.OnPrimaryContainer),
 
-    /** The tertiary container. */
+    /**
+     * The tertiary container.
+     */
     Tertiary(Role.TertiaryContainer, Role.OnTertiaryContainer),
 
-    /** The highest surface container, for trips further out. */
+    /**
+     * The highest surface container, for trips further out.
+     */
     Neutral(Role.SurfaceContainerHighest, Role.OnSurfaceVariant),
 }
 
@@ -71,7 +79,9 @@ internal class Trip(
     val plan: List<PlanStop> = emptyList(),
 )
 
-/** Every trip, the one coming up next first. */
+/**
+ * Every trip, the one coming up next first.
+ */
 internal val Trips: List<Trip> = listOf(
     Trip(
         name = "Lisbon, Portugal",
@@ -100,17 +110,25 @@ internal val Trips: List<Trip> = listOf(
 internal enum class TripFilter(
     val label: String,
 ) {
-    /** Every trip still to come, which is all of them. */
+    /**
+     * Every trip still to come, which is all of them.
+     */
     Upcoming("Upcoming"),
 
-    /** Trips already taken, none yet. */
+    /**
+     * Trips already taken, none yet.
+     */
     Past("Past"),
 
-    /** Trips other travellers share. */
+    /**
+     * Trips other travellers share.
+     */
     Shared("Shared"),
     ;
 
-    /** The trips this filter keeps, paired with their place in [Trips]. */
+    /**
+     * The trips this filter keeps, paired with their place in [Trips].
+     */
     fun trips(): List<IndexedValue<Trip>> =
         Trips.withIndex().filter { (_, trip) ->
             when (this) {
@@ -121,7 +139,9 @@ internal enum class TripFilter(
         }
 
     companion object {
-        /** The filter at [index], the first one for an index out of range. */
+        /**
+         * The filter at [index], the first one for an index out of range.
+         */
         fun at(index: Int): TripFilter = entries.getOrElse(index) { Upcoming }
     }
 }
@@ -159,13 +179,19 @@ internal enum class PackingItem(
     val key: String = "trips.packing.$name"
 }
 
-/** The trip scene's own canvas, which the drawing stretches to fit. */
+/**
+ * The trip scene's own canvas, which the drawing stretches to fit.
+ */
 internal val SceneSize: Size = Size(480f, 184f)
 
-/** Where the sun sits on [SceneSize]. */
+/**
+ * Where the sun sits on [SceneSize].
+ */
 internal val SceneSun: Offset = Offset(360f, 70f)
 
-/** How big the sun is on [SceneSize]. */
+/**
+ * How big the sun is on [SceneSize].
+ */
 internal const val SceneSunRadius: Float = 34f
 
 /**

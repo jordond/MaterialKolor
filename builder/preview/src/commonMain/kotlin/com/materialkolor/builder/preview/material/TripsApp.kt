@@ -71,10 +71,14 @@ private val ThumbShape = RoundedCornerShape(14.dp)
 private val TabletListWidth = 340.dp
 private val DesktopListWidth = 360.dp
 
-/** The space between the rail and the trip list. */
+/**
+ * The space between the rail and the trip list.
+ */
 private val RailGap = 4.dp
 
-/** Half the space between two trip rows. */
+/**
+ * Half the space between two trip rows.
+ */
 private val RowGap = 2.dp
 
 /**
@@ -158,10 +162,14 @@ private fun TripsPanes(
     }
 }
 
-/** Where the open trip sits in [Trips], clamped so a stale index still opens one. */
+/**
+ * Where the open trip sits in [Trips], clamped so a stale index still opens one.
+ */
 private fun openTrip(state: DemoAppState): Int = state.selectedItem.coerceIn(Trips.indices)
 
-/** The rounded low container the open trip sits on. */
+/**
+ * The rounded low container the open trip sits on.
+ */
 private fun Modifier.tripPane(color: Color): Modifier =
     clip(PaneShape).background(color).previewRoles(Role.SurfaceContainerLow, Role.OnSurface)
 
@@ -191,7 +199,9 @@ private fun NewTripButton(modifier: Modifier = Modifier) {
     }
 }
 
-/** The header, search, filters, the trips [filter] keeps with the [open] one selected, and offline maps. */
+/**
+ * The header, search, filters, the trips [filter] keeps with the [open] one selected, and offline maps.
+ */
 private fun LazyListScope.tripList(
     state: DemoAppState,
     filter: TripFilter,
@@ -334,7 +344,9 @@ private fun TripThumb(trip: Trip) {
     }
 }
 
-/** The offline maps switch on a card at the lowest container level, a setting for every trip. */
+/**
+ * The offline maps switch on a card at the lowest container level, a setting for every trip.
+ */
 @Composable
 private fun OfflineMaps(state: DemoAppState) {
     val on = state.isOn(OfflineMapsSwitch)

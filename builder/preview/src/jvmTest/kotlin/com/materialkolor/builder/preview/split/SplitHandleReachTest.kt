@@ -18,7 +18,9 @@ import kotlin.test.Test
 
 // b-406
 
-/** The line and grip the handle draws, the kit's section spacing, whatever it reaches. */
+/**
+ * The line and grip the handle draws, the kit's section spacing, whatever it reaches.
+ */
 private val Drawn: Dp = 32.dp
 
 @OptIn(ExperimentalTestApi::class)

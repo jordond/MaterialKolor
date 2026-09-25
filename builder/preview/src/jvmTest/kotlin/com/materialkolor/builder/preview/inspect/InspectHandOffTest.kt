@@ -32,16 +32,24 @@ import kotlin.test.Test
 
 // b-315b
 
-/** The element in the light copy of a split, with nothing in the dark copy. */
+/**
+ * The element in the light copy of a split, with nothing in the dark copy.
+ */
 private const val LIGHT = "light"
 
-/** The first action of a pinned card, so its presence means a card is pinned. */
+/**
+ * The first action of a pinned card, so its presence means a card is pinned.
+ */
 private const val PIN_ROLE = "Pin this role"
 
-/** How many rows the scrolling list has, far more than fit. */
+/**
+ * How many rows the scrolling list has, far more than fit.
+ */
 private const val ROWS = 100
 
-/** How many Tab presses it may take to reach the card from the preview. */
+/**
+ * How many Tab presses it may take to reach the card from the preview.
+ */
 private const val MAX_TABS = 8
 
 @OptIn(ExperimentalTestApi::class)
@@ -102,7 +110,9 @@ class InspectHandOffTest {
             leaves shouldBe 1
         }
 
-    /** Pin the element tagged [tag] with a click, then Tab until an action on its card holds focus. */
+    /**
+     * Pin the element tagged [tag] with a click, then Tab until an action on its card holds focus.
+     */
     private fun ComposeUiTest.pinAndTabIntoTheCard(tag: String) {
         onNodeWithTag(tag).performClick()
         waitForIdle()
@@ -116,7 +126,9 @@ class InspectHandOffTest {
     }
 }
 
-/** A small element declaring a role pair. */
+/**
+ * A small element declaring a role pair.
+ */
 @Composable
 private fun Element(modifier: Modifier) {
     Box(modifier.size(40.dp).previewRoles(*PrimaryPair))

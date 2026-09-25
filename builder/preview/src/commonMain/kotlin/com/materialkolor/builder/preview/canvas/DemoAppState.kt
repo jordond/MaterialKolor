@@ -26,23 +26,33 @@ import kotlinx.coroutines.launch
  */
 @Stable
 public class DemoAppState {
-    /** The item the screen has open or highlighted. */
+    /**
+     * The item the screen has open or highlighted.
+     */
     public var selectedItem: Int by mutableIntStateOf(0)
 
-    /** The tab the screen shows. */
+    /**
+     * The tab the screen shows.
+     */
     public var tabIndex: Int by mutableIntStateOf(0)
 
-    /** What the screen's text field holds. */
+    /**
+     * What the screen's text field holds.
+     */
     public var text: String by mutableStateOf("")
 
     private val switches = mutableStateMapOf<String, Boolean>()
     private val checkboxes = mutableStateMapOf<String, Boolean>()
     private val mirrors = mutableMapOf<String, ScrollMirror>()
 
-    /** Whether the switch called [switch] is on, off until someone flips it. */
+    /**
+     * Whether the switch called [switch] is on, off until someone flips it.
+     */
     public fun isOn(switch: String): Boolean = switches[switch] ?: false
 
-    /** Turn the switch called [switch] on or off. */
+    /**
+     * Turn the switch called [switch] on or off.
+     */
     public fun setOn(
         switch: String,
         on: Boolean,
@@ -50,10 +60,14 @@ public class DemoAppState {
         switches[switch] = on
     }
 
-    /** Whether the checkbox called [checkbox] is checked, unchecked until someone ticks it. */
+    /**
+     * Whether the checkbox called [checkbox] is checked, unchecked until someone ticks it.
+     */
     public fun isChecked(checkbox: String): Boolean = checkboxes[checkbox] ?: false
 
-    /** Tick or clear the checkbox called [checkbox]. */
+    /**
+     * Tick or clear the checkbox called [checkbox].
+     */
     public fun setChecked(
         checkbox: String,
         checked: Boolean,
@@ -80,19 +94,25 @@ public class DemoAppState {
     }
 }
 
-/** Where a list is scrolled to. */
+/**
+ * Where a list is scrolled to.
+ */
 private data class ListPosition(
     val index: Int,
     val offset: Int,
 )
 
-/** The list that scrolled last and where it got to. */
+/**
+ * The list that scrolled last and where it got to.
+ */
 private class ScrollLead(
     val source: LazyListState,
     val position: ListPosition,
 )
 
-/** Keeps every copy of one list at the position of the copy that scrolled last. */
+/**
+ * Keeps every copy of one list at the position of the copy that scrolled last.
+ */
 @Stable
 private class ScrollMirror {
     var lead: ScrollLead? by mutableStateOf(null)

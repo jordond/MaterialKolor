@@ -11,7 +11,9 @@ import androidx.compose.ui.platform.TextToolbarStatus
 
 // What every gallery puts around its text fields, so none of them opens a popup on the web (D40).
 
-/** A text toolbar that never shows, standing in for the web's, which opens in a popup (D40). */
+/**
+ * A text toolbar that never shows, standing in for the web's, which opens in a popup (D40).
+ */
 internal object GalleryHiddenTextToolbar : TextToolbar {
     override val status: TextToolbarStatus = TextToolbarStatus.Hidden
 

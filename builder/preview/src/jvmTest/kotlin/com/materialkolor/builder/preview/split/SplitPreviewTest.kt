@@ -72,7 +72,9 @@ class SplitPreviewTest {
     @Test
     fun click_onEitherSideRightToLeft_landsOnTheVisibleCopyAndFlipsBoth() = clickEitherSide(LayoutDirection.Rtl)
 
-    /** Click the end side then the start side, wherever [direction] puts them. */
+    /**
+     * Click the end side then the start side, wherever [direction] puts them.
+     */
     private fun clickEitherSide(direction: LayoutDirection) =
         runComposeUiTest {
             val state = DemoAppState()

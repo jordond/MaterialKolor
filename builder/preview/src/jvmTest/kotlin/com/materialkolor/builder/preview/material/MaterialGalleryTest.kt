@@ -73,22 +73,32 @@ import kotlin.test.Test
  */
 private const val GalleryScreenshotDir = "src/jvmTest/screenshots/gallery"
 
-/** The phone and desktop frames the gallery is checked at, at the height of a first screen. */
+/**
+ * The phone and desktop frames the gallery is checked at, at the height of a first screen.
+ */
 private val GalleryFrames: List<IntSize> = listOf(IntSize(412, 900), IntSize(1280, 800))
 
-/** How many columns of 280 dp cards, 16 dp apart, fit across each frame's width. */
+/**
+ * How many columns of 280 dp cards, 16 dp apart, fit across each frame's width.
+ */
 private val GalleryColumns: Map<Int, Int> = mapOf(412 to 1, 1280 to 4)
 
-/** Wide enough for four columns and tall enough that every card composes. */
+/**
+ * Wide enough for four columns and tall enough that every card composes.
+ */
 private val GalleryWhole: Modifier = Modifier
     .wrapContentSize(Alignment.TopStart, unbounded = true)
     .requiredSize(1280.dp, 8000.dp)
 
-/** The cards whose component Material 3 gives no disabled look, or that hold nothing to press. */
+/**
+ * The cards whose component Material 3 gives no disabled look, or that hold nothing to press.
+ */
 private val GalleryNoDisabled: Set<String> =
     setOf("Floating action button", "Extended FAB", "Tabs", "Progress indicators", "Snackbar", "Tooltips")
 
-/** Imports that open a popup or a window, which on the web take the accessibility mirror over (D40). */
+/**
+ * Imports that open a popup or a window, which on the web take the accessibility mirror over (D40).
+ */
 private val GalleryPopupImports: List<String> = listOf(
     "androidx.compose.material3.DropdownMenu",
     "androidx.compose.material3.ExposedDropdownMenuBox",
@@ -104,7 +114,9 @@ private val GalleryPopupImports: List<String> = listOf(
     "androidx.compose.material3.OutlinedTextField",
 )
 
-/** The sources every gallery card is drawn from, and the Trips screen that holds the note. */
+/**
+ * The sources every gallery card is drawn from, and the Trips screen that holds the note.
+ */
 private val GallerySources: List<String> = listOf(
     "src/commonMain/kotlin/com/materialkolor/builder/preview/canvas/ComponentsTab.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/GalleryEntry.kt",
@@ -305,7 +317,9 @@ class MaterialGalleryTest {
         }
 }
 
-/** Anything a user can press, type into or drag. */
+/**
+ * Anything a user can press, type into or drag.
+ */
 private val GalleryInteractive: SemanticsMatcher =
     SemanticsMatcher("is interactive") { node -> node.galleryInteractive() }
 
@@ -322,11 +336,15 @@ private fun SemanticsNode.galleryDeclaresRoles(): Boolean {
     return onlyDragged && parent?.let { slider -> PreviewRoles in slider.config } == true
 }
 
-/** Every node under this one in the unmerged tree. */
+/**
+ * Every node under this one in the unmerged tree.
+ */
 private fun SemanticsNode.galleryDescendants(): List<SemanticsNode> =
     children.flatMap { child -> listOf(child) + child.galleryDescendants() }
 
-/** The frame of the card called [title], the node its title text sits in. */
+/**
+ * The frame of the card called [title], the node its title text sits in.
+ */
 private fun SemanticsNodeInteractionsProvider.galleryFrame(title: String): SemanticsNode =
     onAllNodes(hasText(title), useUnmergedTree = true)
         .fetchSemanticsNodes()
@@ -347,11 +365,15 @@ private fun SemanticsNodeInteractionsProvider.galleryRowsOnScreen(composed: Set<
         .size
 }
 
-/** Whether anything in the card called [title] declares roles, its frame aside. */
+/**
+ * Whether anything in the card called [title] declares roles, its frame aside.
+ */
 private fun SemanticsNodeInteractionsProvider.galleryCardDeclaresRoles(title: String): Boolean =
     galleryFrame(title).galleryDescendants().any { node -> PreviewRoles in node.config }
 
-/** A text toolbar that counts how often it is asked to show, where the web's would open a popup. */
+/**
+ * A text toolbar that counts how often it is asked to show, where the web's would open a popup.
+ */
 private class GalleryToolbarProbe : TextToolbar {
     var shown: Int = 0
         private set
@@ -371,7 +393,9 @@ private class GalleryToolbarProbe : TextToolbar {
     override fun hide() = Unit
 }
 
-/** The Material 3 gallery in a pane of [spec], under the chrome, with motion frozen. */
+/**
+ * The Material 3 gallery in a pane of [spec], under the chrome, with motion frozen.
+ */
 @Composable
 private fun GalleryHarness(
     spec: PaneSpec,

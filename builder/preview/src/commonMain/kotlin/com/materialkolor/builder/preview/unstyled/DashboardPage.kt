@@ -60,10 +60,14 @@ private val LegendDot = 8.dp
 private val ProgressHeight = 6.dp
 private val MetricIconSize = 32.dp
 
-/** Under this width the metric cards go two to a row instead of four. */
+/**
+ * Under this width the metric cards go two to a row instead of four.
+ */
 private val FourCardWidth = 600.dp
 
-/** How many lines divide the chart's height. */
+/**
+ * How many lines divide the chart's height.
+ */
 private const val GridLines = 4
 
 /**
@@ -105,7 +109,9 @@ internal fun DashboardPage(
     }
 }
 
-/** Export and New report, in the top bar when there is room and on the page of a phone. */
+/**
+ * Export and New report, in the top bar when there is room and on the page of a phone.
+ */
 @Composable
 internal fun PageActions(modifier: Modifier = Modifier) {
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(Gap)) {
@@ -203,7 +209,9 @@ private fun PayoutAlert(
     }
 }
 
-/** The metric cards, four to a row when they fit and two when not. */
+/**
+ * The metric cards, four to a row when they fit and two when not.
+ */
 @Composable
 private fun MetricCards(
     metrics: List<Metric>,
@@ -286,7 +294,9 @@ private fun MetricCard(
     }
 }
 
-/** Revenue against the range before, as pairs of bars drawn once. Nothing on it moves. */
+/**
+ * Revenue against the range before, as pairs of bars drawn once. Nothing on it moves.
+ */
 @Composable
 private fun RevenueChart(
     points: List<ChartPoint>,
@@ -342,7 +352,9 @@ private fun RevenueChart(
     }
 }
 
-/** A legend's dot, painted from [token] and declaring its role, and its label. */
+/**
+ * A legend's dot, painted from [token] and declaring its role, and its label.
+ */
 @Composable
 private fun LegendEntry(
     label: String,
@@ -361,7 +373,9 @@ private fun LegendEntry(
     }
 }
 
-/** Grid lines, then per slot the previous range's bar on the start side and the current one after it. */
+/**
+ * Grid lines, then per slot the previous range's bar on the start side and the current one after it.
+ */
 private fun DrawScope.drawChart(
     points: List<ChartPoint>,
     current: Color,
