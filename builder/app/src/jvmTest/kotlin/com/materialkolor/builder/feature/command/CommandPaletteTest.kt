@@ -387,7 +387,11 @@ class CommandPaletteTest {
             waitForIdle()
 
             harness.workspace.state.value.panel shouldBe Panel.Palette
-            waitUntil { named("Saved") }
+            // b-522 The poster's Projects button carries the save state now, and the open palette keeps
+            // the poster out of the tree, so the button reads once the palette has closed.
+            onNode(isRoot() and hasAnyDescendant(CommandsButton)).performKeyInput { pressKey(Key.Escape) }
+            val saved = hasContentDescription(", saved", substring = true) and InWorkspace
+            waitUntil { onAllNodes(saved, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
         }
 
     @Test

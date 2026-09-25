@@ -89,7 +89,7 @@ class PosterFocusTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             showRoot()
             waitUntil { projectName().isNotBlank() }
-            val projects = onNodeWithContentDescription("Projects, ${projectName()}")
+            val projects = onNodeWithContentDescription("Projects, ${projectName()}, ", substring = true)
 
             projects.performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
@@ -165,7 +165,7 @@ class PosterFocusTest {
             platform.environment.storageAvailable = false
             showRoot()
             waitUntil { projectName().isNotBlank() }
-            val projects = onNodeWithContentDescription("Projects, ${projectName()}")
+            val projects = onNodeWithContentDescription("Projects, ${projectName()}, ", substring = true)
 
             projects.performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
@@ -184,7 +184,8 @@ class PosterFocusTest {
             platform.environment.storageAvailable = false
             showRoot()
             waitUntil { projectName().isNotBlank() }
-            onNodeWithContentDescription("Projects, ${projectName()}").performSemanticsAction(SemanticsActions.OnClick)
+            onNodeWithContentDescription("Projects, ${projectName()}, ", substring = true)
+                .performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
             onNodeWithText("Get a link").performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()

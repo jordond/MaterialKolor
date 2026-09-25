@@ -1,15 +1,12 @@
 package com.materialkolor.builder.feature.poster
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,9 +31,10 @@ import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.generated.resources.Res
-import com.materialkolor.builder.generated.resources.about_first_run_hint
 import com.materialkolor.builder.generated.resources.about_first_run_hint_close
+import com.materialkolor.builder.generated.resources.poster_first_run_hint
 import com.materialkolor.builder.kit.control.BuilderText
+import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
@@ -79,8 +77,9 @@ internal fun showsFirstRunHint(
         FIRST_RUN_HINT !in sessionDismissedHints
 
 /**
- * The one hint a first visit gets, a card on the poster in the poster's ink with a close button.
- * No tour follows it.
+ * The one hint a first visit gets, one plain line in the poster's ink with a close button at its
+ * end. No tour follows it. The Space keycap on Shuffle and the shortcuts entry in the top bar say
+ * the rest.
  *
  * Closing it from the keyboard hands focus on to the next control on the poster first, so focus
  * never drops out of the poster with the card. A click leaves focus where it was.
@@ -92,22 +91,23 @@ internal fun FirstRunHint(
     modifier: Modifier = Modifier,
 ) {
     if (!showsFirstRunHint(context.preferences, context.projectName, context.sessionDismissedHints)) return
-    val tokens = LocalBuilderTokens.current
-    val spacing = tokens.spacing
+    val spacing = LocalBuilderTokens.current.spacing
     val focusManager = LocalFocusManager.current
     var closeFocused by remember { mutableStateOf(false) }
     // A mouse press would focus Close on its way to the click. While a press that starts elsewhere
     // is down, Close turns that focus away, so the click leaves focus where it was.
     var pressFromElsewhere by remember { mutableStateOf(false) }
+    // b-522 No card, just the line, so it sits quietly over Fine-tune.
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .border(tokens.outlineWidth, tokens.borderStrong, RoundedCornerShape(tokens.radius.medium))
-            .padding(start = spacing.large, top = spacing.small, end = spacing.small, bottom = spacing.small),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(spacing.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        BuilderText(text = stringResource(Res.string.about_first_run_hint), modifier = Modifier.weight(1f))
+        BuilderText(
+            text = stringResource(Res.string.poster_first_run_hint),
+            modifier = Modifier.weight(1f),
+            style = BuilderTextStyle.Label,
+        )
         PosterIconButton(
             icon = IconId.Close,
             description = stringResource(Res.string.about_first_run_hint_close),

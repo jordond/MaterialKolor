@@ -280,9 +280,11 @@ class ShortcutsTest {
                 harness.workspace.setLock(ShuffleLock.Style, true)
             }
             waitForIdle()
-            val hint = hasText("The seed and the style are both locked, so Shuffle has nothing to change")
-            // The poster says it under its buttons all along, once it has caught up with the locks.
-            waitUntil { onAllNodes(hint, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+            val reason = "The seed and the style are both locked, so Shuffle has nothing to change"
+            val hint = hasText(reason)
+            // b-522 The poster's Shuffle reads it out all along, once it has caught up with the locks.
+            val shuffleSaysWhy = hasContentDescription(reason, substring = true)
+            waitUntil { onAllNodes(shuffleSaysWhy).fetchSemanticsNodes().isNotEmpty() }
             val before = onAllNodes(hint, useUnmergedTree = true).fetchSemanticsNodes().size
             val seed = seed()
 

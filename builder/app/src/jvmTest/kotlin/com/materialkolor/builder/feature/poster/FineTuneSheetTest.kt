@@ -19,7 +19,6 @@ import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.feature.workspace.FineTuneSection
-import com.materialkolor.builder.feature.workspace.ShuffleLock
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.kit.control.BuilderInsetSheetHost
 import com.materialkolor.builder.kit.shell.InversePosterSurface
@@ -96,7 +95,7 @@ class FineTuneSheetTest {
         }
 
     @Test
-    fun sheet_openedAtTheLocks_showsTheHueAndSeedLocksOnly() =
+    fun sheet_openedAtTheLocks_leavesTheStyleLockToTheStyle() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val harness = PosterHarness(Plain)
             harness.fineTune = FineTuneSection.Locks
@@ -109,11 +108,9 @@ class FineTuneSheetTest {
             waitForIdle()
 
             onNodeWithText("Shuffle keeps").assertIsDisplayed()
+            onNodeWithContentDescription("Keep the hue when shuffling").assertIsDisplayed()
+            onNodeWithContentDescription("Keep the seed when shuffling").assertIsDisplayed()
             onNodeWithContentDescription("Keep the style when shuffling").assertDoesNotExist()
-            onNodeWithContentDescription("Keep the hue when shuffling").performClick()
-            waitForIdle()
-
-            harness.actions.last() shouldBe WorkspaceAction.SetLock(ShuffleLock.Hue, true)
         }
 
     private companion object {

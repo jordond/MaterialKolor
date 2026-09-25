@@ -110,7 +110,7 @@ internal fun ColumnScope.PosterSheet(
     SheetSection.entries.forEach { section ->
         when (section) {
             SheetSection.SeedPeek -> SeedPeekRow(context, dispatcher)
-            SheetSection.SeedActions -> SeedActions(context, dispatcher, shuffle = false, locks = false)
+            SheetSection.SeedActions -> SeedActions(context, dispatcher, shuffle = false)
             SheetSection.FirstRunHint -> FirstRunHint(context, dispatcher)
             SheetSection.ImageCandidates -> ImageCandidateRow(context, dispatcher)
             SheetSection.StyleChips -> StyleChipsSection(context, dispatcher, scrolling = true, details = false)

@@ -4,13 +4,13 @@
     <string name="poster_wordmark">MaterialKolor</string>
     <!-- The Projects button, when the session has not named a project yet. -->
     <string name="poster_projects">Projects</string>
-    <!-- What the Projects button reads out once a project is open. The argument is the project's name. -->
-    <string name="poster_projects_named">Projects, %1$s</string>
-    <!-- Beside the Projects button, while the latest changes are saved. -->
-    <string name="poster_saved">Saved</string>
-    <!-- Beside the Projects button, while a save is waiting or under way. -->
-    <string name="poster_saving">Saving</string>
-    <!-- Beside the Projects button, when the last save did not land. -->
+    <!-- What the Projects button reads out while the latest changes are saved. The argument is the project's name. -->
+    <string name="poster_projects_saved">Projects, %1$s, saved</string>
+    <!-- What the Projects button reads out while a save is waiting or under way. The argument is the project's name. -->
+    <string name="poster_projects_saving">Projects, %1$s, saving</string>
+    <!-- What the Projects button reads out when the last save did not land. The argument is the project's name. -->
+    <string name="poster_projects_not_saved">Projects, %1$s, not saved</string>
+    <!-- The badge beside the Projects button when the last save did not land. -->
     <string name="poster_save_failed">Not saved</string>
     <!-- The header button that shrinks the poster to its rail. -->
     <string name="poster_collapse">Collapse the poster</string>
@@ -21,8 +21,10 @@
     <string name="poster_seed">Seed</string>
     <!-- The seed field's name, read out since the big hex shows no label. -->
     <string name="poster_seed_field">Seed color, any format</string>
-    <!-- The seed's hue, chroma and tone, each rounded. -->
-    <string name="poster_hct">H %1$d · C %2$d · T %3$d</string>
+    <!-- The seed field's name with where the seed came from after it. The first argument is poster_seed_field, the second one of the poster_source strings. -->
+    <string name="poster_seed_field_source">%1$s. %2$s</string>
+    <!-- The seed's hue, chroma and tone, each rounded, set in capitals like a spec sheet. -->
+    <string name="poster_hct">HUE %1$d · CHROMA %2$d · TONE %3$d</string>
     <!-- The button that copies the seed as hex. -->
     <string name="poster_copy_hex">Copy hex</string>
     <!-- The button that copies the seed as a Compose color. -->
@@ -32,15 +34,19 @@
     <!-- Names the copy in the "Copied ..." toast. -->
     <string name="poster_copied_kotlin">seed as Kotlin</string>
 
-    <!-- Where the seed came from, shown beside its name. -->
-    <string name="poster_source_typed">Typed</string>
-    <string name="poster_source_picked">Picked</string>
-    <string name="poster_source_eyedropper">Eyedropper</string>
+    <!-- Where the seed came from, read out after the seed field's name. -->
+    <string name="poster_source_typed">Typed in</string>
+    <string name="poster_source_picked">Picked in the color picker</string>
+    <string name="poster_source_eyedropper">Picked with the eyedropper</string>
     <string name="poster_source_shuffled">Shuffled</string>
-    <string name="poster_source_preset">Preset</string>
+    <string name="poster_source_preset">From a preset</string>
     <string name="poster_source_image">From an image</string>
     <!-- The argument is the image's file name. -->
     <string name="poster_source_image_named">From %1$s</string>
+    <!-- After the seed's readout when the seed came from an image with no file name. -->
+    <string name="poster_readout_image">from an image</string>
+    <!-- After the seed's readout when the seed came from an image. The argument is the image's file name. -->
+    <string name="poster_readout_image_named">from %1$s</string>
 
     <!-- Under the seed field, about text that is not a color. -->
     <string name="poster_hex_empty">Type a color</string>
@@ -64,8 +70,13 @@
     <string name="poster_lock_hue">Lock hue</string>
     <string name="poster_lock_style">Lock style</string>
     <string name="poster_lock_seed">Lock seed</string>
-    <!-- Shown while the seed and the style are both locked. -->
+    <!-- Why Shuffle is off while the seed and the style are both locked, in its tooltip and the command palette. -->
     <string name="poster_all_locked">The seed and the style are both locked, so Shuffle has nothing to change</string>
+    <!-- What the Shuffle button reads out while it is off. The argument is poster_all_locked. -->
+    <string name="poster_shuffle_off">Shuffle. %1$s</string>
+
+    <!-- The one hint on a first visit, a single line near the foot of the poster. The tests check it word for word. -->
+    <string name="poster_first_run_hint">Paste a color or drop an image anywhere.</string>
 
     <!-- The seed swatch on the rail. The argument is the seed's hex. -->
     <string name="poster_rail_seed">Seed %1$s</string>

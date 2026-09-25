@@ -25,6 +25,7 @@ import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.resolve.SchemeInputs
 import com.materialkolor.builder.feature.poster.ContrastStop
 import com.materialkolor.builder.feature.poster.PosterContext
+import com.materialkolor.builder.feature.poster.PosterIconButton
 import com.materialkolor.builder.feature.poster.rememberThemeResolver
 import com.materialkolor.builder.feature.poster.styleName
 import com.materialkolor.builder.feature.workspace.Panel
@@ -77,12 +78,16 @@ internal const val STARTER_SKELETON_TAG: String = "image-starter-skeleton"
  * Presets and starters opens [PresetPicker] as `Panel.Presets`, so Back closes it, and a preset or
  * starter chosen there lands behind a crossfade as one undo entry. The picker hands the focus back
  * to this button once it closes.
+ *
+ * @param[glyphOnly] Whether the button draws its glyph alone, where the row is short of room. It
+ * reads out the same.
  */
 @Composable
 internal fun ImageMenuButton(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
+    glyphOnly: Boolean = false, // b-524
 ) {
     var menu by remember { mutableStateOf(false) }
     val close = { dispatcher.dispatch(WorkspaceAction.ClosePanel) }
@@ -100,12 +105,22 @@ internal fun ImageMenuButton(
         ),
     )
     BuilderMenu(expanded = menu, onDismissRequest = { menu = false }, items = items, modifier = modifier) {
-        BuilderButton(
-            onClick = { menu = true },
-            label = stringResource(Res.string.poster_image),
-            modifier = Modifier.focusRequester(button),
-            icon = IconId.Image,
-        )
+        if (glyphOnly) {
+            PosterIconButton(
+                icon = IconId.Image,
+                description = stringResource(Res.string.poster_image),
+                onClick = { menu = true },
+                emphasis = Emphasis.Secondary,
+                buttonModifier = Modifier.focusRequester(button),
+            )
+        } else {
+            BuilderButton(
+                onClick = { menu = true },
+                label = stringResource(Res.string.poster_image),
+                modifier = Modifier.focusRequester(button),
+                icon = IconId.Image,
+            )
+        }
     }
     PresetPicker(
         visible = context.openPanel == Panel.Presets,
