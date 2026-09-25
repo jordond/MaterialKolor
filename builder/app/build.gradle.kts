@@ -11,7 +11,6 @@ plugins {
     alias(libs.plugins.buildKonfig)
     alias(libs.plugins.compose.hot.reload)
     alias(libs.plugins.kotlinx.serialization)
-    alias(libs.plugins.roborazzi)
 }
 
 // The Compose plugin arrives through the convention plugin, so this script has no generated
@@ -92,7 +91,6 @@ kotlin {
         jvmTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.compose.ui.test)
-            implementation(libs.roborazzi.compose.desktop)
         }
 
         // S10 has to hold in the browser too, so one Compose UI test runs in headless Chrome.
