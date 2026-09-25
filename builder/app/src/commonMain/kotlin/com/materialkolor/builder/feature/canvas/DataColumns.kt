@@ -21,6 +21,8 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.canvas_mode_dark
@@ -36,13 +38,18 @@ import org.jetbrains.compose.resources.stringResource
 /** Tags each panel a data tab lays its content on, for tests to read its surface. */
 internal const val DATA_PANEL_TAG: String = "data-panel"
 
+// b-513
+
+/** The floating dock's height, which the last panel of a tab scrolls clear of. */
+private val DockHeight: Dp = 64.dp
+
 /**
  * The light and dark columns a data tab lays out for [mode], in the tab's one scroll area, drawn
  * through [filter].
  *
  * Split puts Light and Dark side by side under their names, or Light above Dark in a Compact
  * window. Light or Dark shows that column alone. Each column's content sits on a panel, where the
- * skin's focus ring holds its contrast.
+ * skin's focus ring holds its contrast. The last panel scrolls clear of the floating dock.
  *
  * @param[mode] Which modes to show.
  * @param[filter] The vision filter the canvas is drawn through, or null for none.
@@ -67,7 +74,10 @@ internal fun DataColumns(
     val compact = LocalLayout.current.windowClass == WindowClass.Compact
     BuilderScrollArea(modifier.fillMaxSize().visionFilter(filter), tabStop = tabStop) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(spacing.large),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = spacing.large, top = spacing.large, end = spacing.large)
+                .padding(bottom = spacing.large * 2 + DockHeight), // b-513
             verticalArrangement = Arrangement.spacedBy(spacing.section),
         ) {
             top?.invoke(this)

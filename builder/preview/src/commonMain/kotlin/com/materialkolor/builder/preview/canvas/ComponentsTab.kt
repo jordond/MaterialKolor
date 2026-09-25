@@ -1,11 +1,14 @@
 package com.materialkolor.builder.preview.canvas
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
@@ -31,6 +34,14 @@ import com.materialkolor.builder.preview.unstyled.UnstyledGalleryEntry
 
 /** The narrowest a gallery card gets (F-21). The grid fits as many columns above it as it can. */
 private val MinCardWidth = 280.dp
+
+// b-513
+
+/**
+ * The room under the grid's last row the floating dock takes, the dock's 64 dp and the 16 dp it
+ * floats above the canvas edge, so the last row scrolls clear of it.
+ */
+private val DockClearance = 80.dp
 
 /** What each gallery card tells [LocalCompositionProbe] as it composes, followed by its title. */
 internal const val GALLERY_CARD: String = "GalleryCard/"
@@ -92,7 +103,8 @@ internal class GalleryCard(
  * The grid is a lazy column of rows, so only the rows on screen compose, and its scroll position
  * can come from [DemoAppState.rememberListState], which keeps both copies of a split at the same
  * place. A lazy grid has no such mirror. Every card takes an equal share of its row and none gets
- * narrower than 280 dp unless the pane itself is.
+ * narrower than 280 dp unless the pane itself is. The cards of a row stretch to the tallest one, so
+ * a row leaves no holes, and the grid ends clear of the floating dock.
  *
  * It measures its room itself rather than through `BoxWithConstraints`, and the lazy column reads
  * the column count as it builds its rows. So a canvas that changes width every frame, as it does
@@ -104,7 +116,7 @@ internal class GalleryCard(
  * @param[gap] The space around the grid and between its cards.
  * @param[modifier] Applied to the gallery.
  * @param[header] Draws the header of a group.
- * @param[card] Draws one card, with the modifier that sizes it to its column.
+ * @param[card] Draws one card, with the modifier that sizes it to its column and its row.
  */
 @Composable
 internal fun GalleryGrid(
@@ -127,7 +139,7 @@ internal fun GalleryGrid(
     LazyColumn(
         state = listState,
         modifier = modifier.measureColumns(room, gap).fillMaxSize(),
-        contentPadding = PaddingValues(gap),
+        contentPadding = PaddingValues(start = gap, top = gap, end = gap, bottom = gap + DockClearance), // b-513
         verticalArrangement = Arrangement.spacedBy(gap),
     ) {
         // Read here, as the lazy column builds its rows, so a new count rebuilds them without a recomposition.
@@ -136,9 +148,13 @@ internal fun GalleryGrid(
             item(key = "group.${group.name}", contentType = "header") { header(group) }
             for (row in members.chunked(columns)) {
                 item(key = "cards.${row.first().title}", contentType = "cards") {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(gap)) {
+                    // b-513
+                    Row(
+                        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                        horizontalArrangement = Arrangement.spacedBy(gap),
+                    ) {
                         for (shown in row) {
-                            key(shown.title) { GalleryCell(shown, card, Modifier.weight(1f)) }
+                            key(shown.title) { GalleryCell(shown, card, Modifier.weight(1f).fillMaxHeight()) }
                         }
                         repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
                     }
