@@ -187,16 +187,14 @@ internal class WorkspaceModel(
         updateView { view -> view.copy(deviceWidth = width) }
     }
 
-    // b-521
     /**
      * Open the Fine-tune sheet at [section], or at its top, the locks, when [section] is null.
      */
     fun openFineTune(section: FineTuneSection? = null) {
-        updateState { state -> state.copy(fineTune = section ?: FineTuneSection.Locks) }
+        updateState { state -> state.copy(fineTune = section ?: FineTuneSection.Locks) } // b-521
     }
 
-    // b-521
-    fun closeFineTune() {
+    fun closeFineTune() { // b-521
         updateState { state -> state.copy(fineTune = null) }
     }
 
@@ -433,12 +431,12 @@ internal class WorkspaceModel(
         fun withDocument(document: ThemeDocument): State =
             if (document == this.document) this else copy(document = document, capabilities = capabilitiesOf(document))
 
-        // b-521
         /**
          * This state counting [generation] projects, with the Fine-tune sheet shut when that is
          * another project than the one shown.
          */
         fun withGeneration(generation: Int): State =
+            // b-521
             if (generation == projectGeneration) this else copy(projectGeneration = generation, fineTune = null)
     }
 

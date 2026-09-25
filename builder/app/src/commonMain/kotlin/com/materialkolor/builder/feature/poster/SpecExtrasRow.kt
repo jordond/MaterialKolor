@@ -36,9 +36,12 @@ internal fun SpecExtrasRow(
     val spacing = LocalBuilderTokens.current.spacing
     BuilderDisclosure(
         // b-521 shim, B-524 replaces
-        expanded = context.fineTune in setOf(FineTuneSection.Spec, FineTuneSection.Accents, FineTuneSection.TargetOptions),
+        expanded =
+            context.fineTune in setOf(FineTuneSection.Spec, FineTuneSection.Accents, FineTuneSection.TargetOptions),
         onExpandedChange = { open ->
-            dispatcher.dispatch(if (open) WorkspaceAction.OpenFineTune(FineTuneSection.Spec) else WorkspaceAction.CloseFineTune)
+            dispatcher.dispatch(
+                if (open) WorkspaceAction.OpenFineTune(FineTuneSection.Spec) else WorkspaceAction.CloseFineTune,
+            )
         },
         title = stringResource(Res.string.extras_title),
         modifier = modifier,

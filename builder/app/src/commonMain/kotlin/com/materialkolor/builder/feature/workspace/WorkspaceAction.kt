@@ -144,20 +144,18 @@ internal sealed interface WorkspaceAction {
         val collapsed: Boolean,
     ) : WorkspaceAction
 
-    // b-521
     /**
      * Open the Fine-tune sheet at [section], or at its top when [section] is null. It stays open for
      * this session only and nothing saves it.
      */
     data class OpenFineTune(
-        val section: FineTuneSection? = null,
+        val section: FineTuneSection? = null, // b-521
     ) : WorkspaceAction
 
-    // b-521
     /**
      * Close the Fine-tune sheet.
      */
-    data object CloseFineTune : WorkspaceAction
+    data object CloseFineTune : WorkspaceAction // b-521
 
     /**
      * Open [panel] over the workspace.
@@ -307,7 +305,6 @@ internal enum class ShuffleLock {
     Seed,
 }
 
-// b-521
 /**
  * The sections of the Fine-tune sheet, which the command palette and the inspect overlay open it at.
  * Locks sits at the sheet's top, so opening there is opening the sheet as it starts.
@@ -316,7 +313,7 @@ internal enum class FineTuneSection {
     /**
      * What a shuffle keeps, the Hue and Seed locks.
      */
-    Locks,
+    Locks, // b-521
 
     /**
      * The key colors beside the seed.

@@ -36,7 +36,9 @@ internal fun CoreColorsRow(
         // b-521 shim, B-524 replaces
         expanded = context.fineTune in setOf(FineTuneSection.KeyColors, FineTuneSection.Pins),
         onExpandedChange = { open ->
-            dispatcher.dispatch(if (open) WorkspaceAction.OpenFineTune(FineTuneSection.KeyColors) else WorkspaceAction.CloseFineTune)
+            dispatcher.dispatch(
+                if (open) WorkspaceAction.OpenFineTune(FineTuneSection.KeyColors) else WorkspaceAction.CloseFineTune,
+            )
         },
         title = stringResource(Res.string.keycolors_title),
         modifier = modifier,

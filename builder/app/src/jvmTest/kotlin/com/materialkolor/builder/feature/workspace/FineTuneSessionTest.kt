@@ -70,7 +70,8 @@ class FineTuneSessionTest {
     fun anotherProject_shutsTheSheet_andTheSameOneKeepsItOpen() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             with(harness) { show() }
-            val open = harness.workspace.state.value.copy(fineTune = FineTuneSection.KeyColors)
+            val open = harness.workspace.state.value
+                .copy(fineTune = FineTuneSection.KeyColors)
 
             open.withGeneration(open.projectGeneration).fineTune shouldBe FineTuneSection.KeyColors
             open.withGeneration(open.projectGeneration + 1).fineTune shouldBe null
