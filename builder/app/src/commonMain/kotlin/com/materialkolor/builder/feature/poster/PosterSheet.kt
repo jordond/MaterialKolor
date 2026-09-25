@@ -40,7 +40,8 @@ internal enum class SheetSection(
 /**
  * The sections a sheet resting at [detent] has in view. The peek holds the seed row, Pick and Image,
  * one scrolling row of style chips and the contrast levels, half adds the contrast readout, what
- * the chosen style does, the explainer and the Fine-tune button, and full the hero and the header. A phone on its side, [short], peeks at the seed row and Shuffle alone.
+ * the chosen style does, the explainer and the Fine-tune button, and full the hero and the header.
+ * A phone on its side, [short], peeks at the seed row and Shuffle alone.
  */
 internal fun sheetSectionsInView(
     detent: BottomSheetDetent,

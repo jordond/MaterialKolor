@@ -126,7 +126,8 @@ public enum class ButtonSize {
 }
 
 /**
- * How tall a compact button draws, in every skin.
+ * How tall a compact button draws in Material and the headless skins. Fluent keeps its own
+ * 32 dp control height, which is already about as short.
  */
 internal val CompactButtonHeight: Dp = 34.dp
 
