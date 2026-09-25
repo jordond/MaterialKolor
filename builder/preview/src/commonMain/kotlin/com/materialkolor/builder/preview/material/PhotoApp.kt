@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -36,6 +37,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Plus
 import com.composables.icons.lucide.Search
@@ -229,6 +231,9 @@ private fun PhotoRail(expanded: Boolean) {
 /**
  * The create button, which opens its menu upward in the layout. Picking an item closes it again.
  * Back is the app's own, so the menu listens for no back press.
+ *
+ * The menu always gets at least a pixel of height. Given none, as on a screen too short for the
+ * feed, Material's menu shows and hides its last item every frame and never settles.
  */
 @Composable
 private fun CreateMenu(
@@ -250,7 +255,7 @@ private fun CreateMenu(
                 Icon(icon, contentDescription = null, modifier = Modifier.animateIcon({ checkedProgress }))
             }
         },
-        modifier = modifier,
+        modifier = modifier.requiredHeightIn(min = 1.dp),
     ) {
         for (action in PhotoCreate.entries) {
             FloatingActionButtonMenuItem(
