@@ -4,11 +4,10 @@ import path from 'node:path';
 import { clickMiddle, pressBareCanvas } from '../tests/builder';
 import { servePerfSite, type PerfSite } from './serve-compressed';
 
-// b-504
-// The perf run against the budgets of spec 8.2 (PB-01 to PB-11) and spike S3's bar for a resolve.
+// The perf run against the budgets in `budgets.json`.
 // It only reports. Each number lands in `report/perf-report.json` and `report/summary.md` with its
 // budget, and a number it cannot take is null with the reason. Nothing here fails over a slow number,
-// only over a run that could not start. PB-01 is gated by checkBudget in builder/web.
+// only over a run that could not start. `first-visit-bytes` is gated by checkBudget in builder/web.
 //
 // Timings come from the page's own clock. The app leaves `mk:` marks through `Environment.mark`, a
 // wrapper around `requestAnimationFrame` times the work Compose does in each frame, and the Event
@@ -69,14 +68,14 @@ test('a cold and a repeat visit at 9 Mbps and 60 ms RTT', async ({ browser }) =>
     uploadThroughput: (config.network.downloadMbps * 1_000_000) / 8,
   });
 
-  await measure(['PB-02', 'PB-03b', 'PB-10'], async () => {
+  await measure(['splash-paint', 'first-frame-throttled', 'other-origin-requests'], async () => {
     const cold = await visit(page);
-    take('PB-02', cold.fcp, 'The splash is plain HTML and CSS, so its first paint is the page first contentful paint.');
-    take('PB-03b', cold.firstFrame);
-    take('PB-10', cold.otherOrigins);
+    take('splash-paint', cold.fcp, 'The splash is plain HTML and CSS, so its first paint is the page first contentful paint.');
+    take('first-frame-throttled', cold.firstFrame);
+    take('other-origin-requests', cold.otherOrigins);
   });
-  await measure(['PB-04'], async () => {
-    take('PB-04', (await visit(page)).firstFrame, 'The same tab opens the page again, so the hashed assets come from the cache.');
+  await measure(['repeat-visit-frame'], async () => {
+    take('repeat-visit-frame', (await visit(page)).firstFrame, 'The same tab opens the page again, so the hashed assets come from the cache.');
   });
   await context.close();
 });
@@ -86,14 +85,14 @@ test('a broadband visit, then seed changes, drags, a library switch and a photo'
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
 
-  await measure(['PB-01', 'PB-03a'], async () => {
+  await measure(['first-visit-bytes', 'first-frame-broadband'], async () => {
     const cold = await visit(page);
-    take('PB-01', cold.bytes, `Encoded body bytes of every response before the first frame, sent as ${[...site.encodings].join(' and ')}.`);
-    take('PB-03a', cold.firstFrame, 'Served from this machine with no throttling.');
+    take('first-visit-bytes', cold.bytes, `Encoded body bytes of every response before the first frame, sent as ${[...site.encodings].join(' and ')}.`);
+    take('first-frame-broadband', cold.firstFrame, 'Served from this machine with no throttling.');
   });
   await expect(page.locator(A11Y).getByRole('textbox', { name: /^Seed color/ })).toHaveCount(1, { timeout: 30_000 });
 
-  await measure(['S3'], async () => {
+  await measure(['theme-resolve'], async () => {
     await pressBareCanvas(page);
     const since = await now(page);
     for (let change = 0; change < SEED_CHANGES; change++) {
@@ -103,15 +102,14 @@ test('a broadband visit, then seed changes, drags, a library switch and a photo'
     const durations = resolveDurations(await marks(page), since);
     if (durations.length === 0) throw new Error('No mk:resolve-start and mk:resolve pair came');
     take(
-      'S3',
+      'theme-resolve',
       p95(durations),
       `${durations.length} resolves over ${SEED_CHANGES} shuffles of the seed. The page clock ticks in 0.1 ms steps.`,
     );
   });
 
-  await measure(['PB-05'], async () => {
-    // b-507
-    // Contrast is four choices now (D53), so the drag that changes the whole theme every frame is
+  await measure(['seed-drag-frame-work'], async () => {
+    // Contrast is four choices now, so the drag that changes the whole theme every frame is
     // the seed picker's. Its hue moves the seed on each step, and Esc cancels the picker after.
     const pick = page.locator(A11Y).getByRole('button', { name: 'Pick', exact: true });
     await expect(pick).toHaveCount(1, { timeout: 10_000 });
@@ -121,20 +119,20 @@ test('a broadband visit, then seed changes, drags, a library switch and a photo'
     await expect(page.locator(A11Y).getByRole('button', { name: 'Done', exact: true })).toHaveCount(0, {
       timeout: 10_000,
     });
-    take('PB-05', p95(frames.work), `The seed picker's hue track. ${framesNote(frames)}`);
+    take('seed-drag-frame-work', p95(frames.work), `The seed picker's hue track. ${framesNote(frames)}`);
   });
 
-  await measure(['PB-11a', 'PB-11b'], async () => {
+  await measure(['split-drag-frame-work', 'split-drag-recompositions'], async () => {
     const frames = await dragAcross(page, page.locator(A11Y).getByText(/^Split, \d+% Light$/, { exact: true }), 0);
-    take('PB-11a', p95(frames.work), framesNote(frames));
+    take('split-drag-frame-work', p95(frames.work), framesNote(frames));
     take(
-      'PB-11b',
+      'split-drag-recompositions',
       null,
       'The page cannot see recompositions. SplitHandle reads the split only in placement and drawing, which its JVM tests hold.',
     );
   });
 
-  await measure(['PB-09'], async () => {
+  await measure(['switch-reveal-fps'], async () => {
     // The first switch to Fluent also loads its face and builds its skin, so it is timed on its own
     // and the reveal is timed on the second.
     const first = await switchLibrary(page, '4');
@@ -143,14 +141,14 @@ test('a broadband visit, then seed changes, drags, a library switch and a photo'
     await switchLibrary(page, '1');
     const firstWorst = Math.max(0, ...intervalsOf(first.frames)).toFixed(1);
     take(
-      'PB-09',
+      'switch-reveal-fps',
       fps(frames.busy),
       `The second switch to Fluent, key 4, frames with work until ${REVEAL_MS} ms after it landed. ` +
         `${framesNote(frames)} The first switch's worst frame took ${firstWorst} ms.`,
     );
   });
 
-  await measure(['PB-06a', 'PB-06b'], async () => {
+  await measure(['photo-candidates', 'photo-thumbnail'], async () => {
     await page.route('**/__perf/photo-12mp.jpg', (route) =>
       route.fulfill({ contentType: 'image/jpeg', body: readFileSync(PHOTO) }),
     );
@@ -177,24 +175,23 @@ test('a broadband visit, then seed changes, drags, a library switch and a photo'
     const first = (name: string) => after.find((mark) => mark.name === name)?.time ?? null;
     const extract = first('mk:extract');
     const thumbnail = first('mk:thumbnail');
-    take('PB-06a', extract === null ? null : extract - since, 'From the drop event to the candidates in the image model.');
-    take('PB-06b', thumbnail === null ? null : thumbnail - since, 'From the drop event to the thumbnail in the image model.');
+    take('photo-candidates', extract === null ? null : extract - since, 'From the drop event to the candidates in the image model.');
+    take('photo-thumbnail', thumbnail === null ? null : thumbnail - since, 'From the drop event to the thumbnail in the image model.');
   });
 
-  await measure(['PB-08'], async () => {
+  await measure(['slowest-interaction'], async () => {
     const durations = await page.evaluate(() => window.__mkPerf!.interactions);
     if (durations.length === 0) throw new Error('The Event Timing API gave no interaction');
-    take('PB-08', Math.max(...durations), `The slowest of ${durations.length} interactions over 16 ms, clicks and keys.`);
+    take('slowest-interaction', Math.max(...durations), `The slowest of ${durations.length} interactions over 16 ms, clicks and keys.`);
   });
 
-  await measure(['PB-07'], async () => {
-    // b-507
+  await measure(['heap'], async () => {
     // A forced collection first, so the reading is what stays alive rather than how long ago the
     // last collection ran. Without it the same build read anywhere from 34 to 105 MB.
     await cdp.send('HeapProfiler.collectGarbage');
     const heap = (await cdp.send('Runtime.getHeapUsage')) as { usedSize: number; backingStorageSize?: number };
     take(
-      'PB-07',
+      'heap',
       heap.usedSize + (heap.backingStorageSize ?? 0),
       'Used JS heap after a forced collection, which holds the wasm GC objects, plus array buffer storage, which holds Skia memory. Desktop, not mobile.',
     );
