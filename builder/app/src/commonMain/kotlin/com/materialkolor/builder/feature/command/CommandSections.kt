@@ -195,7 +195,9 @@ internal fun seedCommands(
             ShuffleLock.Style -> Shortcut.StyleLock
             ShuffleLock.Seed -> null
         }
-        val site = ControlSite.Direct(Region.Poster, name)
+        // b-522 The docked poster no longer holds the lock row. B-523 puts the style's by the style and
+        // B-524 the rest in Fine-tune, and each names its site again.
+        val site: ControlSite? = null
         list.add("lock.${lock.name}", CommandCategory.Seed, name, site, shortcut = shortcut, selected = on) {
             dispatcher.dispatch(WorkspaceAction.SetLock(lock, !on))
         }

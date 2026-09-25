@@ -41,7 +41,8 @@ class ActionRegistryTest {
 
             missingSites(harness).joinToString("\n") shouldBe ""
             val withoutControl = harness.commands.filter { command -> command.site == null }
-            withoutControl.map { command -> command.id } shouldBe listOf("save")
+            // b-522 The locks have no docked control until B-523 and B-524 give them one again.
+            withoutControl.map { command -> command.id } shouldBe listOf("lock.Hue", "lock.Style", "lock.Seed", "save")
         }
 
     @Test
