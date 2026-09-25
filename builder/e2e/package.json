@@ -5,7 +5,8 @@
   "scripts": {
     "test": "playwright test",
     "fixtures": "node fixtures/make-photo.mjs",
-    "perf": "playwright test --config perf/playwright.config.ts"
+    "perf": "playwright test --config perf/playwright.config.ts",
+    "pr-screenshot": "playwright test --config preview/playwright.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

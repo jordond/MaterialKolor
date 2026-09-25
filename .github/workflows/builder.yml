@@ -2,11 +2,6 @@ name: Builder
 
 on:
   workflow_dispatch:
-    inputs:
-      record:
-        description: 'Record the screenshot baselines and upload them as an artifact instead of verifying'
-        type: boolean
-        default: false
   push:
     branches:
       - main
@@ -207,8 +202,8 @@ jobs:
           npm run typecheck
           npm test
 
-  screenshots:
-    name: "Screenshots"
+  ui-tests:
+    name: "UI tests"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -225,37 +220,15 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      - name: Screenshots
-        env:
-          RECORD: ${{ inputs.record }}
-        run: |
-          tasks=()
-          for module in kit preview app; do
-            if [ "$RECORD" = "true" ]; then
-              tasks+=(":builder:$module:recordRoborazziJvm")
-            elif find "builder/$module/src/jvmTest/screenshots" -name '*.png' 2>/dev/null | grep -q .; then
-              tasks+=(":builder:$module:verifyRoborazziJvm")
-            else
-              echo "builder/$module has no committed baselines yet, so it is compared instead of verified."
-              tasks+=(":builder:$module:compareRoborazziJvm")
-            fi
-          done
-          ./gradlew "${tasks[@]}"
+      - name: Kit, preview and app tests
+        run: ./gradlew :builder:kit:jvmTest :builder:preview:jvmTest :builder:app:jvmTest
 
-      - name: Upload the recorded screenshots
-        if: inputs.record
-        uses: actions/upload-artifact@v7
-        with:
-          name: screenshots
-          path: builder/*/src/jvmTest/screenshots/**/*.png
-          if-no-files-found: error
-
-      - name: Upload the screenshot comparison
+      - name: Upload the test reports
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: screenshot-comparison
-          path: builder/*/build/outputs/roborazzi
+          name: ui-test-reports
+          path: builder/*/build/reports/tests/jvmTest
           if-no-files-found: ignore
 
   preview:
@@ -291,7 +264,20 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: builder/worker/package-lock.json
+          cache-dependency-path: |
+            builder/e2e/package-lock.json
+            builder/worker/package-lock.json
+
+      # It lands in the site as pr-screenshot.png, so the preview version serves it and the comment
+      # below can show it. A failed screenshot leaves the preview up and says so in the comment.
+      - name: Screenshot the preview
+        id: screenshot
+        continue-on-error: true
+        working-directory: builder/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm run pr-screenshot
 
       - name: Upload a preview version
         id: upload
@@ -329,6 +315,8 @@ jobs:
             | **This commit** | ${{ steps.upload.outputs.version }} |
             | **Commit** | ${{ github.event.pull_request.head.sha }} |
 
+            ${{ steps.screenshot.outcome == 'success' && format('![The builder at this commit]({0}/pr-screenshot.png)', steps.upload.outputs.version) || '_The screenshot failed, see the Screenshot the preview step in the logs._' }}
+
             Built as the staging site, so its share links and link cards point at staging.materialkolor.com.
 
             _Updates on every push to this pull request._
@@ -350,9 +338,9 @@ jobs:
 
   staging:
     name: "Staging"
-    needs: [ test, compile-check, site, worker, screenshots ]
+    needs: [ test, ui-tests, compile-check, site, worker ]
     if: >-
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.record))
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
       && (github.ref == 'refs/heads/next' || github.ref == 'refs/heads/feat/builder-v2')
     runs-on: ubuntu-latest
     concurrency:
@@ -426,7 +414,7 @@ jobs:
 
   production:
     name: "Production"
-    needs: [ release, test, compile-check, site, worker, screenshots ]
+    needs: [ release, test, ui-tests, compile-check, site, worker ]
     runs-on: ubuntu-latest
     concurrency:
       group: builder-production
