@@ -41,9 +41,9 @@ import com.materialkolor.builder.generated.resources.poster_hex_unrecognized
 import com.materialkolor.builder.generated.resources.poster_note_alpha
 import com.materialkolor.builder.generated.resources.poster_note_both
 import com.materialkolor.builder.generated.resources.poster_note_clamped
-import com.materialkolor.builder.generated.resources.poster_seed
 import com.materialkolor.builder.generated.resources.poster_readout_image
 import com.materialkolor.builder.generated.resources.poster_readout_image_named
+import com.materialkolor.builder.generated.resources.poster_seed
 import com.materialkolor.builder.generated.resources.poster_seed_field
 import com.materialkolor.builder.generated.resources.poster_seed_field_source
 import com.materialkolor.builder.generated.resources.poster_source_eyedropper
