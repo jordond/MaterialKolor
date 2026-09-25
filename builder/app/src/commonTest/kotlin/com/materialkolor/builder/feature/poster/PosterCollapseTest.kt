@@ -56,7 +56,6 @@ class PosterCollapseTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
-    // b-406g
     @Test
     fun setPosterCollapsed_onTheNarrowRail_opensForTheSessionAndStoresNothing() =
         runTest {

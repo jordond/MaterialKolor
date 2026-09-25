@@ -49,7 +49,6 @@ public data class Preferences(
     public val persistRequested: Boolean = false,
     @SerialName("exportPrefs")
     public val exportPrefs: Map<ExportTarget, ExportPrefs> = emptyMap(),
-    // b-315
     @SerialName("singleKeyShortcuts")
     public val singleKeyShortcuts: Boolean = true,
 ) {

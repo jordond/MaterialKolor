@@ -178,8 +178,8 @@ private fun GalleryExpander(
 }
 
 /**
- * Fluent's content dialog as it looks open, laid out in place rather than in a popup (D40). Delete
- * waits for the box to be ticked, and either button puts the box back.
+ * Fluent's content dialog as it looks open, laid out in place rather than in a popup. Delete waits
+ * for the box to be ticked, and either button puts the box back.
  */
 @Composable
 internal fun InPlaceDialog(state: DemoAppState) {

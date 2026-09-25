@@ -46,15 +46,11 @@ internal object WebFileSaver : FileSaver {
         return outcome(shareBrowserFiles(shared))
     }
 
-    // b-310
-
     /**
      * Asked each time, since a convertible can swap its finger for a mouse while the page is open.
      */
     override val canShareLink: Boolean
         get() = pageCanShareLink()
-
-    // b-310
 
     /**
      * Open the share sheet with the link, or fail when the page has none. A dismissed sheet is success.

@@ -201,7 +201,6 @@ class PosterSurfaceTest {
             label shouldBe fluentLabel
         }
 
-    // pf-1
     @Test
     fun posterSurface_newPosterOnTheSameSeed_recomposesNothingUnderIt() {
         for ((name, skin) in ShellSkins) {
@@ -242,8 +241,6 @@ class PosterSurfaceTest {
             clicks shouldBe 1
         }
 }
-
-// pf-1
 
 /**
  * How many times [Counted] ran.

@@ -6,7 +6,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.js.ExperimentalWasmJsInterop
 
-// pf-3
 // The builder warms up for its first switch to Fluent in idle time after the first frame, a step at
 // a time, and waits here before each step so none lands on someone's input.
 

@@ -1,16 +1,14 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { openBuilder, wantHooks } from './builder';
 
-// b-217c
-// Tab inside the canvas (R-B-210). Spike S11 saw WebKit bounce Tab between the canvas's first two
-// stops. Compose focus never reaches the page (D40, P5), so the specs type after each move and read
-// through the accessibility mirror where the text went. Keys go in one at a time with a pause, so
-// each lands after the focus move before it.
+// Tab inside the canvas. WebKit was seen to bounce Tab between the canvas's first two stops. Compose
+// focus never reaches the page, so the specs type after each move and read through the accessibility
+// mirror where the text went. Keys go in one at a time with a pause, so each lands after the focus
+// move before it.
 
 /** The gallery's text fields. Their labels are their text in the mirror, so they have no `aria-label`. */
 const FIELDS = '#cmp_a11y_root [contenteditable]:not([aria-label])';
 
-// b-227
 // The Filled and Outlined cards each hold a "Destination" field and a disabled "Origin" one, in
 // that order in `FIELDS`. Both "Destination" fields show the gallery's one text.
 const FILLED = 0;
@@ -57,7 +55,7 @@ test('one Tab leaves a gallery text field', async ({ page }) => {
 });
 
 test('one Tab from the Filled field lands in the Outlined one', async ({ page }) => {
-  // This is what looked like the first Tab staying put (B-217c). Focus does move, but into the
+  // This is what looked like the first Tab staying put. Focus does move, but into the
   // Outlined "Destination" field, which shows the same text. So a key typed next shows up in both,
   // at the end in Chromium, which moves the caret there when the text is set, and at the start in
   // WebKit, where a field that never had focus keeps its caret at 0.
@@ -79,7 +77,6 @@ test('one Tab from the Filled field lands in the Outlined one', async ({ page })
     .toBe(true);
 });
 
-// b-227
 // The Trips note is the one multi-line field in the sample apps. On its own it would type Tab as a
 // character, so the preview moves focus on Tab and Shift+Tab instead.
 for (const key of ['Tab', 'Shift+Tab']) {

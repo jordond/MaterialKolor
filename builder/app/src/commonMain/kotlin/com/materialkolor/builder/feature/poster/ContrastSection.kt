@@ -47,28 +47,27 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.math.floor
 
 /**
- * The contrast level with the lowest text pair it leaves (F-12).
+ * The contrast level with the lowest text pair it leaves.
  *
- * Contrast is one of the four levels the library names, offered as one choice (D53) on a single
- * row that fills the poster's width. A pick is one discrete edit. The arrow keys only move the
- * focus, and Enter or Space picks, since each pick is a new scheme. The lowest ratio and its badge
- * sit on the right of the label, and the pair it belongs to on a line under the levels. The readout
- * rates the target's own pairs in the modes the preview shows, and its badge carries an icon as
- * well as its words. A target that ignores contrast says why and takes no pick.
+ * Contrast is one of the four levels the library names, offered as one choice on a single row that
+ * fills the poster's width. A pick is one discrete edit. The arrow keys only move the focus, and
+ * Enter or Space picks, since each pick is a new scheme. The lowest ratio and its badge sit on the
+ * right of the label, and the pair it belongs to on a line under the levels. The readout rates the
+ * target's own pairs in the modes the preview shows, and its badge carries an icon as well as its
+ * words. A target that ignores contrast says why and takes no pick.
  */
 @Composable
 internal fun ContrastSection(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
-    details: Boolean = true, // b-510
+    details: Boolean = true,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val selected = ContrastStop.of(context.document.contrast)
     val state = context.capabilities[Control.Contrast]
     val labels = ContrastStop.entries.associateWith { stop -> stringResource(stop.label) }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-        // b-510
         if (details) ContrastHeader(context)
         BuilderSegmented(
             options = ContrastStop.entries,
@@ -89,8 +88,6 @@ internal fun ContrastSection(
         if (details) ContrastNotes(context)
     }
 }
-
-// b-510
 
 /**
  * What the contrast levels leave, for the phone sheet, which shows the levels alone at its peek and
@@ -215,7 +212,7 @@ internal enum class ContrastStop(
 
     companion object {
         /**
-         * The named level nearest [level], which is [level] itself in any document (D53).
+         * The named level nearest [level], which is [level] itself in any document.
          */
         fun of(level: ContrastLevel): ContrastStop {
             val nearest = level.snapped()

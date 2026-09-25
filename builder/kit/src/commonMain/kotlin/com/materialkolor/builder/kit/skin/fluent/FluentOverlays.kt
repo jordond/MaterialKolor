@@ -6,13 +6,12 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.token.BuilderTokens
 
-// fluent-placeholder
-
 /**
  * The overlays drawn the way Windows draws its flyouts, over the headless layer.
  *
  * Flyouts sit on the raised grey with a hairline and a soft shadow, and tooltips and toasts stay on
- * the same grey rather than inverting. B-403 swaps these for the real Fluent components.
+ * the same grey rather than inverting. Fluent's own flyouts, dialogs and tooltips all open a popup,
+ * so the skin draws these in their place.
  */
 internal fun fluentOverlayStyle(tokens: BuilderTokens): OverlayStyle {
     val hairline = BorderStroke(tokens.outlineWidth, tokens.border)
@@ -24,7 +23,7 @@ internal fun fluentOverlayStyle(tokens: BuilderTokens): OverlayStyle {
         popoverShape = RoundedCornerShape(tokens.radius.small),
         dialogShape = RoundedCornerShape(tokens.radius.small),
         panelRadius = tokens.radius.small,
-        drawerRadius = tokens.radius.small, // b-511
+        drawerRadius = tokens.radius.small,
         divider = tokens.border,
         shadow = 8.dp,
         scrim = tokens.scrim,

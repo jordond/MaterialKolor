@@ -233,7 +233,7 @@ class ShareCodecCorruptionTest {
 
     /**
      * Decodes [code] and, when it reads cleanly, checks it writes back to exactly the same text, or
-     * to the same text with its contrast on the nearest named level when it held one in between (D53).
+     * to the same text with its contrast on the nearest named level when it held one in between.
      */
     private fun assertStable(code: String) {
         val result = ShareCodec.decode(code)

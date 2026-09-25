@@ -33,7 +33,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The poster's own frame, the seed page with design D's corners, lifted when it floats.
+ * The poster's own frame, the seed page with large rounded corners, lifted when it floats.
  *
  * With a [contentWidth] the content is laid out at that width whatever the frame's, so an opening
  * panel is revealed by the frame rather than squeezed by it. Without one it fills the frame.
@@ -57,7 +57,7 @@ internal fun PosterPanel(
             .background(style.surface)
             .semantics {
                 paneTitle = label
-                // The web mirror drops the pane title, so there the panel is named by its text (D37).
+                // The web mirror drops the pane title, so there the panel is named by its text.
                 if (asText) roleLessName(label, asText = true)
             },
     ) {
@@ -75,7 +75,7 @@ internal fun posterOverlayStyle(tokens: BuilderTokens): OverlayStyle =
     customOverlayStyle(tokens.copy(panelRaised = tokens.panel))
 
 /**
- * The rail opens with the panel arrival motion and closes with the exit, and snaps under reduced motion (MO-05).
+ * The rail opens with the panel arrival motion and closes with the exit, and snaps under reduced motion.
  */
 @Composable
 internal fun posterSpec(opening: Boolean): AnimationSpec<Float> {

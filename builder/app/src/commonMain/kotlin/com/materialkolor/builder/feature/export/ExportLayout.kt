@@ -25,8 +25,6 @@ import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import org.jetbrains.compose.resources.stringResource
 
-// b-511
-
 /**
  * The theme's name, the project it belongs to and its seed, "AppTheme from Burnt Ember #D9653B".
  */

@@ -103,7 +103,7 @@ private const val AA_LARGE = 3.0
  * passes a null [contrast] and the contrast line stays hidden. It reads out as a button
  * named like "primary, #6750A4, tone 40". A [pinned] role shows a pin beside its name and reads out
  * pinned as its state. The web hears only the name, so there the ratio, the badge and the pinned
- * state travel in it, as in "primary, #6750A4, tone 40, 6.4:1, AA, pinned" (D37, F-22).
+ * state travel in it, as in "primary, #6750A4, tone 40, 6.4:1, AA, pinned".
  *
  * The copy button does not depend on hover alone. It shows on a touch screen, while the
  * swatch or the button has keyboard focus, and while a mouse is over the swatch. Keyboard focus rings
@@ -257,7 +257,7 @@ internal fun copyBandSide(layout: LayoutInfo): Dp =
 /**
  * A widget's copy button with its tooltip, on a band of the panel color. The band is always there,
  * so the button's focus ring lands on the panel whatever the button sits over, a swatch's color or
- * the code ground, and stands 3 to 1 from it all the way round (AR-01, S5 rerun). It is
+ * the code ground, and stands 3 to 1 from it all the way round. It is
  * [copyBandSide] square in every skin, so a widget can keep that much room free of text.
  *
  * @param[label] The button's name and its tooltip.
@@ -361,7 +361,7 @@ internal fun Color.hex(): String = Argb(toArgb()).toHex()
 /**
  * The hairline a pressable widget draws in place of a skin's indication, strong while a mouse is
  * over it. It stays under keyboard focus, and [controlRing] rings the widget outside it, so the ring
- * never lies on the widget's own edge (S5 rerun).
+ * never lies on the widget's own edge.
  */
 @Composable
 internal fun Modifier.widgetHairline(

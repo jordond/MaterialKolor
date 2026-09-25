@@ -31,7 +31,7 @@ import com.materialkolor.builder.kit.skin.headless.ActionSweep
  * Material's linear bar, or in the expressive flavour Material's wavy one ([ExpressiveProgress]).
  *
  * Material's own indeterminate bar runs a clock of its own, which ignores frozen motion, reduced
- * motion and a hidden tab (MO-10). So the indeterminate bar is Material's determinate one held at
+ * motion and a hidden tab. So the indeterminate bar is Material's determinate one held at
  * zero, which draws the whole track, with the sweep drawn from [rememberSweepPhase] in the slot
  * Material leaves for its stop indicator.
  */
@@ -68,7 +68,7 @@ internal fun MaterialProgress(
  * Material's expressive bar, the wavy one, whose wave rises while the work is under way.
  *
  * The wave stands still. A moving wave runs a clock of Material's own, which ignores frozen motion,
- * reduced motion and a hidden tab like the linear bar's (MO-10). Material's bar also reads its amount
+ * reduced motion and a hidden tab like the linear bar's. Material's bar also reads its amount
  * inside its semantics, so an amount that moved every frame would rebuild them every frame. While
  * nobody can tell how far along the work is, the bar is drawn here instead, the sweep from
  * [rememberSweepPhase] between two stretches of track, in Material's strokes and gaps, under

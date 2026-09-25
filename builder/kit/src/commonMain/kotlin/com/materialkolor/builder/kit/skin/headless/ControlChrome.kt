@@ -40,8 +40,8 @@ internal val FocusRingWidth: Dp = 2.dp
 internal val FocusRingOffset: Dp = 2.dp
 
 /**
- * Shrinks the control while it is pressed, by the skin's press scale over the skin's press timing
- * (MO-06). Reduced motion sets the scale to one, so nothing moves. A disabled control keeps its size.
+ * Shrinks the control while it is pressed, by the skin's press scale over the skin's press timing.
+ * Reduced motion sets the scale to one, so nothing moves. A disabled control keeps its size.
  */
 @Composable
 internal fun Modifier.controlPress(
@@ -62,12 +62,12 @@ internal fun Modifier.controlPress(
 }
 
 /**
- * Draws the focus ring in [color] around [shape] while the control has keyboard focus (AR-01). It
+ * Draws the focus ring in [color] around [shape] while the control has keyboard focus. It
  * stands [offset] off the control, [FocusRingOffset] unless the control asks for less. A negative
  * offset draws the ring inside the control, for one whose parent clips at its edge.
  *
  * Focus a pointer press leaves behind draws no ring, the way a browser's `:focus-visible` works,
- * and the ring comes back with the next key press (D58).
+ * and the ring comes back with the next key press.
  */
 @Composable
 internal fun Modifier.controlRing(
@@ -76,7 +76,6 @@ internal fun Modifier.controlRing(
     color: Color = LocalBuilderTokens.current.focus,
     offset: Dp = FocusRingOffset,
 ): Modifier {
-    // b-513
     val shown by interactionSource.collectIsFocusVisibleAsState()
     return if (shown) outline(width = FocusRingWidth, color = color, shape = shape, offset = offset) else this
 }
@@ -85,7 +84,7 @@ internal fun Modifier.controlRing(
  * Grows the space the control takes to at least [size] on each side and centres the control in it.
  *
  * Put it after the modifier that takes the input, so a press anywhere in the grown box counts, and
- * before the modifiers that draw, so the control keeps its own size on screen (AR-04).
+ * before the modifiers that draw, so the control keeps its own size on screen.
  */
 internal fun Modifier.controlTouchTarget(size: Dp): Modifier =
     layout { measurable, constraints ->

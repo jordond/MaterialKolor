@@ -67,7 +67,7 @@ private const val WIDTH = 1280
 private const val HEIGHT = 800
 
 /**
- * The F-35 hint, word for word.
+ * The first run hint, word for word.
  */
 private const val HINT = "Paste a color, drop an image, or press Space to shuffle. Press ? for shortcuts."
 
@@ -81,14 +81,11 @@ private const val PULSE_DONE_MS = 1_000L
  */
 private const val PULSE_MIDWAY_MS = 150L
 
-// b-314a
-
 /**
  * Preferences a newer build wrote, which every write from this build is turned down over.
  */
 private const val NEWER_PREFS = """{"schema":999,"data":{}}"""
 
-// b-314
 @OptIn(ExperimentalTestApi::class)
 class FirstRunHintTest {
     private val platform = FakePlatform()
@@ -143,7 +140,6 @@ class FirstRunHintTest {
             onNodeWithText(HINT).assertDoesNotExist()
         }
 
-    // b-314a
     @Test
     fun close_whenStorageTurnsTheWriteDown_keepsTheHintShutForTheSession() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
@@ -200,7 +196,6 @@ class FirstRunHintTest {
             harness.actions shouldContain WorkspaceAction.DismissHint(FIRST_RUN_HINT)
         }
 
-    // b-314a
     @Test
     fun closeWithAClick_leavesFocusWhereItWas() =
         runComposeUiTest {

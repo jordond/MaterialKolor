@@ -128,7 +128,7 @@ private fun themeFile(input: ExportInput): GeneratedFile {
             }
             FrozenMode.entries.forEach { mode -> property(schemeName(variant, mode), schemeCall(variant, mode)) }
         }
-        themeFunction(input, dynamicColor = input.writesAndroidDynamicColor) { themeBody(input) } // b-111c
+        themeFunction(input, dynamicColor = input.writesAndroidDynamicColor) { themeBody(input) }
     }
 }
 
@@ -138,13 +138,12 @@ private fun themeFile(input: ExportInput): GeneratedFile {
  */
 private fun BodyScope.themeBody(input: ExportInput) {
     val hasAccents = input.resolved.accents.isNotEmpty()
-    // b-111c
     val dynamicColor = input.writesAndroidDynamicColor
     val literal = themeCall(input)
     val theme = if (dynamicColor) androidDynamicColorBranch(input, literal) else literal
 
     if (hasAccents) assign(EXTENDED_COLORS, byMode(EXTENDED_LIGHT, EXTENDED_DARK))
-    if (dynamicColor) assignContext() // b-111c
+    if (dynamicColor) assignContext()
     if (hasAccents || dynamicColor) blankLine()
 
     if (hasAccents) {

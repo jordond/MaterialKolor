@@ -58,7 +58,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  * instead, and this tab's saves wait until [resolveConflict] settles it. A newer save from the other
  * tab while the conflict is up takes the conflict's place and is never taken in silently.
  *
- * A conflict never loses anyone's work (D36). When this tab has to save with a conflict up, on
+ * A conflict never loses anyone's work. When this tab has to save with a conflict up, on
  * [flush] or before it opens another project, it keeps its own document. The other tab gets that
  * save as an ordinary change from another tab, a conflict there if it edited lately or an undo step
  * otherwise, so its work can still be brought back.
@@ -71,7 +71,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  * lands after a delete is dropped by the repository, and the session does not notice.
  *
  * Preference writes, the last open project and what a legacy link asked for, are best effort. A
- * full storage is ignored there, with no prune and no retry (D33).
+ * full storage is ignored there, with no prune and no retry.
  *
  * @param[colorsOf] The thumbnail and splash colors of a theme.
  * @param[sharedThemeName] What a theme from a link without a name is saved as.
@@ -118,13 +118,11 @@ internal class ProjectSession(
     private val autosave = Autosave(scope, keyOf = { save -> save.project }, write = writes::write)
     private val viewAutosave = Autosave(scope, keyOf = { pending -> pending.project }, write = writes::writeView)
 
-    // b-501b
     // The splash last written, so a change of appearance can write it again. The UI thread writes it
     // and the app scope reads it, and on the web both are the one thread.
     private var splash: BootSplash? = null
 
     init {
-        // b-501b
         // A reload right after the appearance changes paints the new one, with no edit in between.
         scope.launch {
             preferences.preferences.collect { prefs ->
@@ -170,8 +168,6 @@ internal class ProjectSession(
      * Whether the open project is saved. A failure comes after the repository pruned and tried again.
      */
     val saveStatus: StateFlow<SaveStatus> = writes.status
-
-    // b-216b
 
     /**
      * The open project's name, the one its next save writes. It follows renames and other tabs.
@@ -251,10 +247,8 @@ internal class ProjectSession(
         moveTo(steps.redo() ?: return)
     }
 
-    // b-508
-
     /**
-     * Move to [cursor] in the [timeline] at once, as that many undos or redos in one go (D55). It saves
+     * Move to [cursor] in the [timeline] at once, as that many undos or redos in one go. It saves
      * and counts as an edit the way Undo does. A cursor past the steps does nothing, since a click from
      * a list that another tab's change just moved can be stale, and nor does the one the history is at.
      */
@@ -350,8 +344,6 @@ internal class ProjectSession(
             error
         }
 
-    // b-310
-
     /**
      * Save a project opened from a link now rather than on its first edit, for "Save to my
      * projects", along with anything else waiting. A project that is saved already only flushes.
@@ -421,8 +413,6 @@ internal class ProjectSession(
         val sequence = writes.nextSave()
         autosave.schedule(PendingSave(current.value, sequence, document, HistoryRecord(steps.persisted()), colors))
     }
-
-    // b-501b
 
     /**
      * Keep [colors] for the next boot's splash, with the seed and the chrome's appearance.

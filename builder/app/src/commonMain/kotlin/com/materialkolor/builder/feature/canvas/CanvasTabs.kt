@@ -81,8 +81,6 @@ internal const val DEVICE_SCREEN_TAG: String = "canvas-device-screen"
 internal val LocalCanvasProbe: ProvidableCompositionLocal<((tab: PreviewTab) -> Unit)?> =
     staticCompositionLocalOf { null }
 
-// pf-1
-
 /**
  * Told the name of each swatch or ramp a data tab composes, each time it composes it, or null, which
  * it always is outside tests. Tests provide it to prove an edit composes again only what it changed.
@@ -138,11 +136,9 @@ internal fun CanvasTabs(
         onSelect = onSelect,
         label = { tab -> names.getValue(tab) },
         modifier = modifier,
-        variant = TabsVariant.Canvas, // b-512
+        variant = TabsVariant.Canvas,
     )
 }
-
-// b-512
 
 /**
  * How far the tabs and the preview window stand in from the canvas's edges.
@@ -183,7 +179,6 @@ internal fun CanvasTabBody(
             probe?.invoke(PreviewTab.App)
             // One scroll for both copies, so a screen wider than the canvas scrolls as one.
             val scroll = rememberScrollState()
-            // b-512
             PreviewWindow(deviceWidth, preview, specs, modifier) {
                 PreviewCopies(preview, specs, Modifier) { spec ->
                     DeviceScreen(deviceWidth, scroll) { AppTab(spec, appState, deviceWidth) }
@@ -192,7 +187,6 @@ internal fun CanvasTabBody(
         }
         PreviewTab.Components -> {
             probe?.invoke(PreviewTab.Components)
-            // b-512
             PreviewWindow(width = null, preview, specs, modifier) {
                 PreviewCopies(preview, specs, Modifier) { spec -> ComponentsTab(spec, componentsState) }
             }
@@ -211,8 +205,6 @@ internal fun CanvasTabBody(
         }
     }
 }
-
-// b-512
 
 /**
  * The preview window, standing the canvas's inset in from the sides and the bottom of [modifier]'s

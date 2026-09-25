@@ -46,8 +46,8 @@ import com.materialkolor.builder.kit.skin.headless.scrimExit
  * A modal layer over the page, the ground every dialog, side panel and sheet stands on.
  *
  * It lives in a focusable layer of its own, a dialog window or a modal layer of the overlay host,
- * so Tab stays inside it until it closes (AR-09). In the host the page under it also leaves the
- * semantics tree while it is open (AR-11). Esc and a click on the veil both ask to close it. Focus
+ * so Tab stays inside it until it closes. In the host the page under it also leaves the
+ * semantics tree while it is open. Esc and a click on the veil both ask to close it. Focus
  * moves to the first thing inside that can take it, or to the panel itself when nothing can, and
  * once the layer is gone it goes back to [returnFocusTo]. The layer stays up while [content]
  * animates out, and [content] animates itself through `animateEnterExit`.
@@ -82,7 +82,6 @@ internal fun HeadlessModal(
         }
         return
     }
-    // b-315d
     // A dialog window has no layer of the host around it to hand the page's keys on.
     val keys = LocalOverlayKeys.current
     Dialog(
@@ -109,7 +108,7 @@ private fun ModalLayer(
     scrim: Color,
     contentAlignment: Alignment,
     content: @Composable AnimatedVisibilityScope.() -> Unit,
-    keys: ((KeyEvent) -> Boolean)? = null, // b-315d
+    keys: ((KeyEvent) -> Boolean)? = null,
 ) {
     AnimatedVisibility(
         visibleState = state,
@@ -120,7 +119,7 @@ private fun ModalLayer(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .overlayKeys { keys } // b-315d
+                .overlayKeys { keys }
                 .onKeyEvent { event ->
                     val escape = event.type == KeyEventType.KeyDown && event.key == Key.Escape
                     if (escape) dismiss()
@@ -172,7 +171,7 @@ internal fun ReturnFocusWhenGone(
  * Names a modal pane, a dialog, a sheet or a side panel, by its [title], which is its pane title.
  *
  * The web mirror in CMP 1.12.1 carries neither the pane title nor a dialog role, so there the pane
- * also reads its title with the dialog's role word as its text, "Delete theme?, dialog" (D37, D40),
+ * also reads its title with the dialog's role word as its text, "Delete theme?, dialog",
  * and [modalTitle] keeps the title the pane shows from being read twice. Drop both once CMP mirrors
  * `dialog` and `paneTitle`, and recheck that on the CMP 1.13 bump.
  */

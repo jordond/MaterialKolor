@@ -11,7 +11,6 @@ import kotlin.js.Promise
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-// b-221c
 class WebEnvironmentTest {
     @Test
     fun announceFillsThePageLiveRegionAfterAFrame(): Promise<JsAny?> {
@@ -24,7 +23,6 @@ class WebEnvironmentTest {
         }
     }
 
-    // b-505
     @Test
     fun siteOriginIsThePagesOwn() {
         assertEquals(window.location.origin, WebEnvironment().siteOrigin)

@@ -253,7 +253,7 @@ internal data class MatchExactly(
 
 /**
  * Builds the explainer's words from HCT values, as string keys and numbers so a test can check
- * them and a translation can reorder them (F-16).
+ * them and a translation can reorder them.
  */
 internal object ExplainerText {
     /**

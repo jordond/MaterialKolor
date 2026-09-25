@@ -29,7 +29,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  *
  * It draws nothing of its own but the press and the focus ring every skin's buttons show, so what it
  * holds is the whole control. It reads as a button named [label], and on the web a disabled one says
- * so in its name, "Open the eyedropper, disabled" (D37). What it holds is only drawn and reads as
+ * so in its name, "Open the eyedropper, disabled". What it holds is only drawn and reads as
  * nothing, since [label] already says what pressing it does. A card whose own text should be read
  * out is a [BuilderCard] with a click instead.
  *

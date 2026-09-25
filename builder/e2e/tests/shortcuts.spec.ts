@@ -1,8 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { clickMiddle, openBuilder, pressBareCanvas, SETTLE_MS, wantHooks } from './builder';
 
-// b-315
-// The page's keyboard map on the real builder (F-34), read from the page's accessibility tree. Keys
+// The page's keyboard map on the real builder, read from the page's accessibility tree. Keys
 // only reach the page once it has focus, so each test first presses the bare canvas, which also
 // hands focus to the page's focus holder.
 //
@@ -37,7 +36,6 @@ test('l typed in the seed field sets no lock', async ({ page }) => {
 
   await clickMiddle(page, field);
   await page.keyboard.type('l');
-  // b-315a
   // The l showing in the field says the key has been handled, the page's shortcuts included.
   await expect.poll(() => seedText(page), { timeout: 10_000 }).toContain('l');
   expect(await lockState(page)).toBe(unlocked);
@@ -60,7 +58,6 @@ test('? opens the cheat sheet, and while it is open single keys and Space stay i
 
   await page.keyboard.press('l');
   await page.keyboard.press('Space');
-  // b-315a
   // Focus stayed in the dialog, so it is still open and Esc still reaches it. Esc closing it also
   // says the two keys before it have been handled.
   await expect(note).toHaveCount(1);
@@ -82,7 +79,6 @@ test('Cmd or Ctrl with K, S and O belong to the page, and K opens the palette pa
   await page.keyboard.press(`${primary}+s`);
   await page.keyboard.press(`${primary}+k`);
   await expect.poll(() => openOverlay(page), { timeout: 10_000 }).toBe('Palette');
-  // b-315d
   // The router names the palette on the key, before the palette has drawn, so its search field
   // showing is what says it is open. The palette owns the keyboard then, so Esc closes it first, and
   // its pane leaving the page's tree says focus is back on the page. Until then a key goes to the
@@ -96,8 +92,6 @@ test('Cmd or Ctrl with K, S and O belong to the page, and K opens the palette pa
 
   expect(await seenKeys(page)).toEqual(['s true', 'k true', 'o true']);
 });
-
-// b-315d
 
 test('inside the palette, Cmd or Ctrl with S and O never reach the browser, and S saves', async ({ page }) => {
   await openBuilder(page);
@@ -131,7 +125,6 @@ test('after a number key switches the library, Space and V work with no click', 
   await expect(visionRow).toHaveCount(0);
 
   await page.keyboard.press('3');
-  // b-406
   // The top bar's Undo names the switch once it has landed, and the page moves into the new skin then.
   // The keys reach the page again once the canvas holds focus with that label still in place.
   await expect.poll(() => switchLanded(page), { timeout: 10_000 }).toBe(true);

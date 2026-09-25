@@ -4,11 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
 
-// b-406g
-
 /**
  * For tests only. Draws the overlays in [content] inside the page on the JVM, the way the web draws
- * them (D40), so a test outside the kit can tap and key through a menu or a select without a desktop
+ * them, so a test outside the kit can tap and key through a menu or a select without a desktop
  * window of its own.
  *
  * Every kit overlay then renders into the `OverlayHost` that `BuilderTheme` puts at the root, so put

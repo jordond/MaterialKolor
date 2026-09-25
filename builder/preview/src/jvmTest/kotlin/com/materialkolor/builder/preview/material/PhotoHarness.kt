@@ -31,7 +31,7 @@ internal val PhotoFrames: Map<DeviceWidth, IntSize> = mapOf(
 )
 
 /**
- * The four families F-20 wants on every first screen.
+ * The four families every first screen has to use.
  */
 internal val PhotoFamilies: Map<String, Set<Role>> = mapOf(
     "primary" to setOf(Role.Primary, Role.OnPrimary, Role.PrimaryContainer, Role.OnPrimaryContainer),
@@ -41,7 +41,7 @@ internal val PhotoFamilies: Map<String, Set<Role>> = mapOf(
 )
 
 /**
- * The five container levels, four of which F-20 wants on every first screen.
+ * The five container levels, four of which every first screen has to use.
  */
 internal val PhotoContainerLevels: Set<Role> = setOf(
     Role.SurfaceContainerLowest,

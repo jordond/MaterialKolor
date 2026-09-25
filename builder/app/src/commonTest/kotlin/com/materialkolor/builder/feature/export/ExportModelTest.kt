@@ -197,7 +197,6 @@ class ExportModelTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
-    // b-505
     @Test
     fun shareLink_onStaging_opensOnStagingInEveryFile() =
         runTest {

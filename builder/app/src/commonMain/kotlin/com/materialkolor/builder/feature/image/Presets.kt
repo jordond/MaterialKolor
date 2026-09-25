@@ -31,7 +31,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 
 /**
- * A preset image or a starter theme, one of the ready made seeds the Image menu offers (F-09).
+ * A preset image or a starter theme, one of the ready made seeds the Image menu offers.
  *
  * The document keeps only the [id], as `SeedSource.Preset`, so an id names the same preset for good.
  * It is never renamed and never handed to another preset, even once the one it named is gone.
@@ -165,7 +165,6 @@ internal object Presets {
 
     init {
         require(all.map { preset -> preset.id }.toSet().size == all.size) { "Every preset needs an id of its own" }
-        // b-311d
         require(starters.all { starter -> starter.contrast in ContrastLevel.Stops }) {
             "Every starter's contrast sits on a named stop, so its card can name it"
         }

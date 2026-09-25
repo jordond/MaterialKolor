@@ -28,8 +28,6 @@ import com.materialkolor.builder.preview.inspect.INSPECT_CARD_TAG
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-315b
-
 /**
  * What the Trips app's floating action button reads as.
  */

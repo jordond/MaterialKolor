@@ -62,11 +62,11 @@ import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The primary explainer (F-16), open while `state.panel` is [Panel.Explainer]. It sits over the
- * workspace rather than in the poster, so it opens over the rail too.
+ * The primary explainer, open while `state.panel` is [Panel.Explainer]. It sits over the workspace
+ * rather than in the poster, so it opens over the rail too.
  *
- * @param[returnFocusTo] The Why button that opened it, which gets focus back once it closes
- * (AR-09), or null while no Why is on screen.
+ * @param[returnFocusTo] The Why button that opened it, which gets focus back once it closes, or
+ * null while no Why is on screen.
  */
 @Composable
 internal fun ExplainerHost(
@@ -123,7 +123,6 @@ private fun ExplainerBody(
         val dark = ExplainerText.sentences(PrimaryFacts.of(result, isDark = true))
         (light + dark).distinct()
     }
-    // b-503b
     // The body scrolls in the height the title and Close leave, so Match exactly at its foot stays in
     // reach in a short window. Its buttons take the focus, so the area needs no Tab stop of its own.
     BuilderScrollArea(tabStop = false) {

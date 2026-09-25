@@ -34,7 +34,6 @@ kotlin {
     }
 }
 
-// b-220
 // The interop tests are plain DOM checks with no Compose scene. `wasmJsBrowserTest` runs them in
 // headless Chrome, the same way `:builder:app` runs its browser test.
 kotlin {

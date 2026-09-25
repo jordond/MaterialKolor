@@ -56,22 +56,22 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 /**
- * The seed as the poster's headline (F-05). The hex is a real field that edits in place, and under
- * it one line holds the seed's name, its HCT readout, where it came from and whether the project is
- * saved, with the two copy buttons as icons at its end.
+ * The seed as the poster's headline. The hex is a real field that edits in place, and under it one
+ * line holds the seed's name, its HCT readout, where it came from and whether the project is saved,
+ * with the two copy buttons as icons at its end.
  *
  * The field shows the seed as stored, not as the target sees it. A commit lands as a typed seed,
  * one keystroke folding into the next in the history.
  *
  * @param[focus] Holds the copy buttons, which a refused copy's manual copy dialog hands focus back
- * to while the hero still shows them (AR-09).
+ * to while the hero still shows them.
  */
 @Composable
 internal fun SeedHero(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
-    focus: PosterFocus? = null, // b-306c
+    focus: PosterFocus? = null,
 ) {
     val seed = context.document.seed
     val spacing = LocalBuilderTokens.current.spacing
@@ -79,16 +79,13 @@ internal fun SeedHero(
     val hct = remember(seed) { HctReadout.of(seed).rounded() }
     val hexLabel = stringResource(Res.string.poster_copied_hex)
     val kotlinLabel = stringResource(Res.string.poster_copied_kotlin)
-    // b-221f
     // A refused copy opens the manual copy dialog, which hands focus back to the button pressed.
-    // b-306c
     // The workspace's triggers count the buttons on screen, so the dialog asks nothing of a hero
     // that left while it was open. Without them the hero keeps its own.
     val own = remember { PosterFocus() }
     val triggers = focus ?: own
     val copyHex = triggers.copyHex
     val copyKotlin = triggers.copyKotlin
-    // b-510
     Column(modifier) {
         InfoLabel(label = stringResource(Res.string.poster_seed), topic = InfoTopic.Seed)
         BuilderHexField(
@@ -125,13 +122,13 @@ internal fun SeedHero(
                     maxLines = 1,
                 )
                 BuilderBadge(label = sourceLabel(context.document.seedSource).text())
-                SaveState(context.saveStatus) // b-510
+                SaveState(context.saveStatus)
             }
             PosterIconButton(
                 icon = IconId.Copy,
                 description = stringResource(Res.string.poster_copy_hex),
                 onClick = { dispatcher.dispatch(WorkspaceAction.CopyText(seed.toHex(), hexLabel, copyHex.requester)) },
-                buttonModifier = triggerFocus(copyHex), // b-306c
+                buttonModifier = triggerFocus(copyHex),
             )
             PosterIconButton(
                 icon = IconId.Export,
@@ -140,7 +137,7 @@ internal fun SeedHero(
                     val copy = WorkspaceAction.CopyText(kotlinLiteralOf(seed), kotlinLabel, copyKotlin.requester)
                     dispatcher.dispatch(copy)
                 },
-                buttonModifier = triggerFocus(copyKotlin), // b-306c
+                buttonModifier = triggerFocus(copyKotlin),
             )
         }
     }

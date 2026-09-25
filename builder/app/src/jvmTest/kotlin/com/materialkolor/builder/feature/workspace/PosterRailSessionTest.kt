@@ -22,8 +22,6 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-406g
-
 private const val HEIGHT = 800
 
 /**
@@ -38,7 +36,7 @@ private const val COLLAPSE = "Collapse the poster"
 
 /**
  * Below 840 dp at Medium the poster starts as the rail every session and opens over the canvas when
- * asked (spec section 7). The stored collapse only rules the docked poster.
+ * asked. The stored collapse only rules the docked poster.
  */
 @OptIn(ExperimentalTestApi::class)
 class PosterRailSessionTest {

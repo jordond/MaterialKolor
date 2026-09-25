@@ -13,7 +13,6 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-// b-501b
 // What the session leaves for the next boot's splash, the chrome, the seed and the appearance.
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProjectSessionSplashTest : SessionTestBase() {

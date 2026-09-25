@@ -298,7 +298,6 @@ class ControlFlowTest {
         }
     }
 
-    // b-111b
     @Test
     fun index_memberKey_writesTheKeyInBrackets() {
         val value = ref("properties").index(ref("ThemeTokens").member("colors"))

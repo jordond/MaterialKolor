@@ -36,14 +36,14 @@ import com.materialkolor.builder.kit.generated.resources.state_selected
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Whether a control's state has to travel in its accessible name (D37).
+ * Whether a control's state has to travel in its accessible name.
  *
  * The web mirror in CMP 1.12.1 builds each element from the merged semantics node. It writes the
  * role, the content description as `aria-label`, the text as the element's own text,
  * `contenteditable` and test tags. Selected, toggle state, state description and disabled never
  * reach the page. So where this is set the kit folds the state into the content description of the
  * control's merged node, and the label is read once with its state. It folds in the role's word
- * too where a click handler hides the role or the mirror has none for it (P3, D40), and it names a
+ * too where a click handler hides the role or the mirror has none for it, and it names a
  * node with no role through its text, since screen readers drop an `aria-label` there
  * ([roleLessName]). The Compose semantics stay in place everywhere, for when CMP 1.13 carries them
  * across.
@@ -97,8 +97,8 @@ internal sealed interface ControlState {
 
 /**
  * A role the web mirror loses. CMP 1.12.1 lets a click handler replace the role, so every clickable
- * reads as a button there (P3), and it has no role at all for a slider, a progress bar or a dialog.
- * While that stands the role's word travels in the name (D40).
+ * reads as a button there, and it has no role at all for a slider, a progress bar or a dialog.
+ * While that stands the role's word travels in the name.
  */
 internal enum class FoldedRole {
     /**
@@ -308,7 +308,7 @@ internal fun stateName(
  * @param[enabled] Whether the control takes input.
  * @param[words] The state words, for a control that already loaded them for its own state
  * description. Left null, they load only when the fold is on.
- * @param[role] The role the web loses for this control (P3), or null for one it keeps.
+ * @param[role] The role the web loses for this control, or null for one it keeps.
  */
 @Composable
 internal fun Modifier.foldState(
@@ -389,8 +389,8 @@ internal fun Modifier.shownChoiceName(
  * Names a node that plays no role, such as a slider, a progress bar or a group of options.
  *
  * Where [asText] is set, on the web, the name goes in as text. The mirror keeps an `aria-label` on
- * a plain element, but ARIA forbids a name there and screen readers drop it, while both keep text
- * (S5 answer 1). Elsewhere it stays the content description.
+ * a plain element, but ARIA forbids a name there and screen readers drop it, while both keep text.
+ * Elsewhere it stays the content description.
  */
 internal fun SemanticsPropertyReceiver.roleLessName(
     name: String,

@@ -162,7 +162,7 @@ private fun String.legacyColor(): Argb? {
 }
 
 /**
- * Any double the old builder could have written, at the named level nearest it (D53).
+ * Any double the old builder could have written, at the named level nearest it.
  */
 private fun String.legacyContrast(): ContrastLevel? {
     val value = toDoubleOrNull() ?: return null

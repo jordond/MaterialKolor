@@ -35,10 +35,10 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The poster sections an info button explains (F-36).
+ * The poster sections an info button explains.
  *
  * The docs have no builder pages yet, so a topic carries no link. Help lists every topic in one
- * dialog, and once the owner settles the help pages they live under `HELP_PAGES_URL` (b-314).
+ * dialog, and once the owner settles the help pages they live under `HELP_PAGES_URL`.
  */
 internal enum class InfoTopic {
     Seed,
@@ -114,7 +114,7 @@ internal fun InfoLabel(
 
 /**
  * The glyph that opens [topic]'s explanation. It reads out as the question it answers, and as
- * expanded or collapsed with the explanation (D37).
+ * expanded or collapsed with the explanation.
  *
  * @param[topic] What it explains.
  * @param[expanded] Whether the explanation is showing.

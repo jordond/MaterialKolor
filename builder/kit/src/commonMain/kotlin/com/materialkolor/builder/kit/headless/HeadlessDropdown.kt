@@ -80,7 +80,7 @@ import kotlin.math.max
 
 /**
  * Whether a menu or a select opened here comes up in a window of its own, as it does on the desktop,
- * rather than in the page the way the web draws it (D40). A pick that changes the skin waits for such
+ * rather than in the page the way the web draws it. A pick that changes the skin waits for such
  * a window to close first, and anywhere else it can act at once.
  */
 public val menusOpenAsWindows: Boolean
@@ -119,7 +119,7 @@ internal fun HeadlessDropdown(
     minWidth: Dp = OverlayMetrics.menuMinWidth,
     initialFocus: FocusRequester? = null,
     returnFocusTo: FocusRequester? = null,
-    popover: Boolean = false, // b-511
+    popover: Boolean = false,
     content: @Composable ColumnScope.(close: () -> Unit) -> Unit,
 ) {
     val inTree = LocalOverlaysInTree.current
@@ -131,7 +131,6 @@ internal fun HeadlessDropdown(
     val host = inTreeOverlayHost()
     val tokens = LocalBuilderTokens.current
     val density = LocalDensity.current
-    // b-511
     // A popover measures its gap from the edge it draws, inside the room the list keeps for its shadow.
     val gap = with(density) { (if (popover) OverlayMetrics.popoverGap else tokens.spacing.extraSmall).roundToPx() }
     val inset = if (popover) with(density) { tokens.spacing.small.roundToPx() } else 0
@@ -208,7 +207,7 @@ internal fun DropdownList(
     minWidth: Dp = OverlayMetrics.menuMinWidth,
     modifier: Modifier = Modifier,
     listModifier: Modifier = Modifier,
-    padding: Dp = LocalBuilderTokens.current.spacing.extraSmall, // b-511
+    padding: Dp = LocalBuilderTokens.current.spacing.extraSmall,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
@@ -233,9 +232,9 @@ internal fun DropdownList(
  * One row of a dropdown.
  *
  * A row that knows whether it is [selected] carries a check next to its label while it is the
- * current one, so the selection never rests on colour alone (AR-03). A row without is a plain
+ * current one, so the selection never rests on colour alone. A row without is a plain
  * command. On the web a row folds its role word into its name, "menu item" or, for [asOption],
- * "option", then its state and the disabled note (D37, D40).
+ * "option", then its state and the disabled note.
  */
 @Composable
 internal fun HeadlessDropdownItem(
@@ -406,7 +405,7 @@ internal fun <T> HeadlessSelect(
 /**
  * A select drawn open where it stands, its field over the list of [HeadlessSelect] with nothing
  * floating. The field only shows the choice, so Tab goes straight to the options. On the web it
- * plays no role and reads as text, "Style, Vibrant" (D40).
+ * plays no role and reads as text, "Style, Vibrant".
  */
 @Composable
 internal fun <T> HeadlessSelectPanel(
@@ -420,7 +419,6 @@ internal fun <T> HeadlessSelectPanel(
 ) {
     val current = optionLabel(selected)
     Column(modifier.width(IntrinsicSize.Max)) {
-        // b-230c
         SelectField(
             label = label,
             current = current,
@@ -438,7 +436,7 @@ internal fun <T> HeadlessSelectPanel(
 /**
  * A select's field, its label over the choice and a chevron after them, at the far end when the
  * field is wider than they are. It reads as a dropdown list whose state is the choice, and [action]
- * makes it one. On the web its name carries the role word, "Style, pop-up button, Tonal spot" (D40),
+ * makes it one. On the web its name carries the role word, "Style, pop-up button, Tonal spot",
  * unless [modifier] starts with [shownChoiceName] for a field that only shows the choice.
  */
 @Composable
@@ -512,8 +510,8 @@ private fun <T> HeadlessSelectRows(
  */
 internal class DropdownPositionProvider(
     private val gap: Int,
-    private val alignEnd: Boolean = false, // b-511
-    private val inset: Int = 0, // b-511
+    private val alignEnd: Boolean = false,
+    private val inset: Int = 0,
 ) : PopupPositionProvider {
     override fun calculatePosition(
         anchorBounds: IntRect,

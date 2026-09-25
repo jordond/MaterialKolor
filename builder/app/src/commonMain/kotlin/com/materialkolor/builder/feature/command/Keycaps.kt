@@ -20,8 +20,6 @@ import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
-// b-511
-
 /**
  * [keys] drawn as keycaps, the way [Shortcut.text] writes them. "Ctrl+Shift+Z, Ctrl+Y" shows a cap
  * for each key, the keys of one chord close together and the chords further apart. It reads out as

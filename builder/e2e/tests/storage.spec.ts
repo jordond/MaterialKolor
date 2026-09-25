@@ -15,7 +15,6 @@ test.describe('storage', () => {
     const reader = await context.newPage();
     await openBuilder(writer);
     await openBuilder(reader);
-    // b-314
     // A fresh page pulses the library switcher once and stores that it did. Let both pages finish
     // that first and count only the changes after it.
     await settlePulse(writer);
@@ -38,7 +37,7 @@ test.describe('storage', () => {
     expect(userHints(await hook(reader, 'readHints'))).toBe('from-writer');
     const arrivedAt = await reader.evaluate(() => (window as any).__storageAt as number);
     testInfo.annotations.push({ type: 'storage event ms', description: (arrivedAt - sentAt).toFixed(1) });
-    console.log(`[S8] ${testInfo.project.name} storage event after ${(arrivedAt - sentAt).toFixed(1)} ms`);
+    console.log(`[storage] ${testInfo.project.name} storage event after ${(arrivedAt - sentAt).toFixed(1)} ms`);
 
     // One write is one event, however long the reader waits.
     await reader.waitForTimeout(250);
@@ -47,11 +46,11 @@ test.describe('storage', () => {
 
   test('a write to full storage comes back as QuotaExceeded', async ({ page }) => {
     await openBuilder(page);
-    await settlePulse(page); // b-314
+    await settlePulse(page);
     expect(await hook(page, 'storageAvailable')).toBe('true');
     const filled = await fillStorage(page);
     expect(await hook(page, 'addHint', 'no-room')).toBe('QuotaExceeded');
-    expect(userHints(await hook(page, 'readHints'))).toBe(''); // b-314
+    expect(userHints(await hook(page, 'readHints'))).toBe('');
 
     await page.evaluate((count) => {
       for (let index = 0; index < count; index++) localStorage.removeItem(`fill:${index}`);
@@ -61,7 +60,6 @@ test.describe('storage', () => {
 
   test('an unreadable record is set aside and the user is told once', async ({ page }) => {
     await openBuilder(page);
-    // b-314
     // The pulse stores its hint once, so it goes first and never writes over the broken record.
     await settlePulse(page);
     await page.evaluate(() => localStorage.setItem('mk:prefs', 'not json'));
@@ -103,12 +101,10 @@ test.describe('storage', () => {
 /** The toast that says unreadable data was moved aside, `projects_problem_set_aside`. */
 const SET_ASIDE = 'couldn’t be read, so it was set aside';
 
-/** The banner that asks for a reload once a newer build saved data here, `projects_newer_data` (D41). */
+/** The banner that asks for a reload once a newer build saved data here, `projects_newer_data`. */
 const NEWER_DATA = 'A newer version of the builder saved some of your work here';
 
-// b-314
-
-/** The hint the builder dismisses by itself once the library switcher has pulsed (F-35). */
+/** The hint the builder dismisses by itself once the library switcher has pulsed. */
 const SWITCHER_PULSE = 'switcher-pulse';
 
 /** Longer than the pulse takes in any skin, so a page that started one has stored it. */

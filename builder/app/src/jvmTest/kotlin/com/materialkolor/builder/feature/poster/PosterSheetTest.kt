@@ -31,10 +31,8 @@ import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 
-// b-406
-
 /**
- * A phone, upright or on its side (D38).
+ * A phone, upright or on its side.
  */
 private const val PHONE_SHORT = 390
 private const val PHONE_LONG = 844
@@ -48,7 +46,6 @@ private val Peek = listOf(
     SheetSection.Contrast,
 )
 
-// b-510
 private val Half = Peek +
     listOf(
         SheetSection.ContrastDetails,

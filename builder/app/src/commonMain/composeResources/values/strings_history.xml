@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- b-509 -->
     <!-- The top bar button, its overflow menu item and its palette command, which open the list of every change made this session. -->
     <string name="history_title">History</string>
     <!-- The tooltip over the History button, with its shortcut, such as "H". -->

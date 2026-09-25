@@ -16,7 +16,6 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import kotlin.test.Test
 
-// pf-1
 @OptIn(ExperimentalTestApi::class)
 class ChromeSlotsTest {
     private val resolver = ThemeResolver()

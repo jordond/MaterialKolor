@@ -358,7 +358,7 @@ internal fun FilterChips(state: DemoAppState) {
 }
 
 /**
- * A select as it looks open, its field over its list, drawn in place rather than in a popup (D40).
+ * A select as it looks open, its field over its list, drawn in place rather than in a popup.
  * The disabled select under it is the kit's own, which never opens.
  */
 @Composable
@@ -405,7 +405,7 @@ internal fun InlineSelect(state: DemoAppState) {
 }
 
 /**
- * A menu as it looks open, drawn in place rather than in a popup (D40).
+ * A menu as it looks open, drawn in place rather than in a popup.
  */
 @Composable
 internal fun InlineMenu(state: DemoAppState) {

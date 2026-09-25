@@ -85,16 +85,16 @@ internal object GalleryKeys {
 }
 
 /**
- * The Unstyled components gallery (F-21).
+ * The Unstyled components gallery.
  *
  * Every card holds Compose Unstyled primitives the gallery styles itself from the pane's
  * `MaterialKolorTokens`, the way the dashboard does, so each part names the tokens it paints for
  * Inspect. Each control shows up enabled and disabled, apart from the few that hold nothing to
  * press. Nothing opens a popup, a window or a portal, since on the web the first one takes the
- * accessibility mirror over for good (D40). The menu, the select's list and the tooltips show in
- * place. The gallery swallows right-button presses and hands its text fields a toolbar that never
- * shows, like the other galleries, and a state that changes goes into the name on the web through
- * the kit's fold modifiers (D37).
+ * accessibility mirror over for good. The menu, the select's list and the tooltips show in place.
+ * The gallery swallows right-button presses and hands its text fields a toolbar that never shows,
+ * like the other galleries, and a state that changes goes into the name on the web through the
+ * kit's fold modifiers.
  *
  * @param[spec] The pane the gallery is drawn in.
  * @param[state] What the gallery's controls remember, shared by both copies.

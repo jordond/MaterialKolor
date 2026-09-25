@@ -15,7 +15,7 @@ class CapabilitiesTest {
     )
 
     /**
-     * The five matrix columns, in the order the spec lists them.
+     * The five matrix columns, in the order each row of [matrix] lists its cells.
      */
     private val columns = listOf(
         Column(name = "M3", library = Library.Material3, expressive = false),
@@ -36,7 +36,7 @@ class CapabilitiesTest {
     private fun no(reason: Reason) = ControlState.Disabled(reason)
 
     /**
-     * Spec section 4, one row per control and one cell per column.
+     * One row per control and one cell per column.
      *
      * Written with the style on Cmf at the 2026 spec, which is the one context where the Cmf
      * second seed and the platform picker both show. The rows that move with style and spec have

@@ -38,8 +38,6 @@ internal fun onPageHide(listener: () -> Unit): Unit =
     }""",
     )
 
-// b-314
-
 /**
  * The browser's user agent, which a bug report quotes to say where it came from.
  */

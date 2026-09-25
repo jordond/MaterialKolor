@@ -10,8 +10,6 @@ import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.LocalBuilderType
 
-// pf-3
-
 /**
  * The skin a Fluent warm-up uses.
  */

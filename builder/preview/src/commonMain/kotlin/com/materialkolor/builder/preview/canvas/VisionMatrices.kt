@@ -3,7 +3,7 @@ package com.materialkolor.builder.preview.canvas
 import androidx.compose.ui.graphics.ColorMatrix
 
 /**
- * The color matrices the canvas draws through to simulate color vision deficiencies (F-25).
+ * The color matrices the canvas draws through to simulate color vision deficiencies.
  *
  * The three dichromacies are Machado, Oliveira and Fernandes 2009 at severity 1.0, and
  * achromatopsia weighs every color with the Rec. 709 luminance weights. Each is three rows of red,

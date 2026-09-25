@@ -66,7 +66,7 @@ class DocumentArb(
     fun nextArgb(): Argb = Argb(random.nextInt())
 
     /**
-     * One of the four contrast levels a document holds (D53).
+     * One of the four contrast levels a document holds.
      */
     fun nextContrast(): ContrastLevel = ContrastLevel.Stops.random(random)
 

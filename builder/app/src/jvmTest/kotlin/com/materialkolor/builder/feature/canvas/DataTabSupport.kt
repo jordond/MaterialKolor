@@ -53,7 +53,7 @@ internal class TabActions {
 @Composable
 internal fun DataTabTheme(
     result: ThemeResult,
-    skin: Skin = Skin(Library.Material3, expressive = false), // b-308ba
+    skin: Skin = Skin(Library.Material3, expressive = false),
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(

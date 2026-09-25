@@ -58,7 +58,7 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * names a role reads it off `MaterialKolors`, which applies AMOLED to dark mode only, and a pin then
  * replaces it in its own mode. A slot cut off a ramp takes the scheme's palette at its tone, or at
  * the document's custom tone for that mode. Accents follow the Material 3 dynamic export's chain.
- * Keep the two in step or the export stops matching the preview, which B-117's parity gate checks.
+ * Keep the two in step or the export stops matching the preview, which `ExportParityTest` checks.
  */
 public object CustomDynamic {
     /**
@@ -262,7 +262,7 @@ internal fun slotValue(
  * `CustomSlotColors.resolve` works it out.
  *
  * A custom tone moves a ramp slot, or sets an on color's own tone with no contrast search. It never
- * moves a role slot (D27), since a role is moved with a pin.
+ * moves a role slot, since a role is moved with a pin.
  */
 private fun sourceOf(
     resolution: SlotResolution,

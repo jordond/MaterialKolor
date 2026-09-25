@@ -16,8 +16,6 @@ import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.shell.TopBarRegion
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
-// b-406
-
 /**
  * The top bar on a phone, the project's swatch and name on the start edge and [actions] on the end
  * edge, Share, Export and the overflow menu. The library chips sit in a row of their own under it,
@@ -33,13 +31,12 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 @Composable
 internal fun CompactTopBar(
     projectName: String,
-    seed: Argb, // b-512
+    seed: Argb,
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
     TopBarRegion(modifier) {
-        // b-512
         // The name already says whose swatch it is, so the swatch is only drawn.
         Box(
             Modifier

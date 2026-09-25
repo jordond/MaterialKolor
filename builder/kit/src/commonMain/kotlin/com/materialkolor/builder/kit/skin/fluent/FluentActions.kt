@@ -247,7 +247,7 @@ internal fun FluentButton(
     emphasis: Emphasis,
     icon: IconId?,
     enabled: Boolean,
-    hint: String? = null, // b-510
+    hint: String? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val colors = fluentButtonColors(emphasis).schemeFor(interactionSource.collectVisualState(disabled = !enabled))
@@ -271,7 +271,7 @@ internal fun FluentButton(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             FluentLabel(label, icon)
-            if (hint != null) ButtonKeycap(hint, LocalContentColor.current) // b-510
+            if (hint != null) ButtonKeycap(hint, LocalContentColor.current)
         }
     }
 }
@@ -348,7 +348,7 @@ private fun FluentButtonLayer(
  *
  * Fluent marks it selected rather than on, so the on or off state goes on beside it for whatever
  * reads a checkbox's state. It shows a check in place of its icon while it is on, so on and off
- * never differ by fill alone (AR-03).
+ * never differ by fill alone.
  */
 @Composable
 internal fun FluentToggleButton(

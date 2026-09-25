@@ -83,7 +83,7 @@ internal class TextToolbarMenu(
 )
 
 /**
- * The text selection toolbar where overlays render in the page (D40).
+ * The text selection toolbar where overlays render in the page.
  *
  * Foundation's web toolbar opens in a popup, which would take the web mirror over, so the root
  * [OverlayHost] provides this one in its place and draws its menu last, over every layer and the

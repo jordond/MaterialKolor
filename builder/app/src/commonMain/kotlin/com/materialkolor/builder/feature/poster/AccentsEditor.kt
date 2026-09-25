@@ -93,12 +93,12 @@ private const val ACCENT_TONE_STEP = 1f
 private const val MAX_ACCENT_TONE = 100
 
 /**
- * The document's extra colors (F-17). Each one has its name, its seed with Pick and "Harmonize with
- * seed", the four colors it makes in the modes the preview shows with their contrast, Show on ramp
- * to see its ramp on the Palettes tab, its four tones and the contrast its on colors clear.
+ * The document's extra colors. Each one has its name, its seed with Pick and "Harmonize with seed",
+ * the four colors it makes in the modes the preview shows with their contrast, Show on ramp to see
+ * its ramp on the Palettes tab, its four tones and the contrast its on colors clear.
  *
  * It lists the document as stored, since the theme the target resolves has no extra colors at all
- * on a target that takes none (D35). There the list stays on screen without input and says why. Add
+ * on a target that takes none. There the list stays on screen without input and says why. Add
  * appends the first free `accentN`, a little further round the hue circle from the seed for each
  * one already there, and stays, turned off, once the theme holds as many as an export takes. Add
  * hands a keyboard user's focus to the new color's name field once its row is there, and Remove to
@@ -224,7 +224,6 @@ private fun AccentRow(
                 modifier = Modifier.weight(1f),
                 enabled = enabled,
             )
-            // b-307
             val pick = remember { FocusRequester() }
             BuilderIconButton(
                 onClick = { dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.Accent(index), pick)) },

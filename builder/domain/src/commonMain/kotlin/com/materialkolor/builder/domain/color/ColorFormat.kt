@@ -7,7 +7,7 @@ import kotlin.math.pow
 import kotlin.math.roundToLong
 
 /**
- * The ways the color picker can write a color out, one per option of its format switch (F-06).
+ * The ways the color picker can write a color out, one per option of its format switch.
  *
  * Every format writes text that [ColorInput.parse] reads back to the same color, so a field can show
  * a color in any of them and take typed edits in the same form.

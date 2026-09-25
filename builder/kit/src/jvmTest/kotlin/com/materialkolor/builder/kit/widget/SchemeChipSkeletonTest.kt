@@ -31,7 +31,7 @@ private const val ChipTag = "chip"
  * its two tones and comes back down the way it went up, so half a pulse lands on the tone it
  * started from.
  */
-private const val QuarterPulseMillis = 300L // b-311c
+private const val QuarterPulseMillis = 300L
 
 @OptIn(ExperimentalTestApi::class)
 class SchemeChipSkeletonTest {

@@ -70,7 +70,7 @@ private val SwatchMinWidth: Dp = 152.dp
 private const val BLACK_INK_TONE = 50.0
 
 /**
- * The Roles tab, every color role of [result] with the tone and contrast it resolved to (F-22).
+ * The Roles tab, every color role of [result] with the tone and contrast it resolved to.
  *
  * Each mode lists the Accent, Surface, Fixed and Outline and inverse roles, then the key colors
  * and the accents, the same groups for every target. In Split it shows light and dark as two
@@ -177,7 +177,7 @@ private fun roleSwatch(
         argb = entry.argb,
         ink = ink,
         tone = entry.tone,
-        contrast = when { // b-513
+        contrast = when {
             onPair != null -> result.ratio(ColorRef.OfRole(onPair), ColorRef.OfRole(role), isDark)
             under != null -> result.ratio(ColorRef.OfRole(role), ColorRef.OfRole(under), isDark)
             else -> null
@@ -224,7 +224,7 @@ private fun accentSwatch(
         argb = argb,
         ink = family[partner.part, isDark].toColor(),
         tone = HctReadout.of(argb).tone,
-        contrast = if (onFill) { // b-513
+        contrast = if (onFill) {
             result.ratio(ColorRef.OfAccent(partner), ColorRef.OfAccent(slot), isDark)
         } else {
             result.ratio(ColorRef.OfAccent(slot), ColorRef.OfAccent(partner), isDark)

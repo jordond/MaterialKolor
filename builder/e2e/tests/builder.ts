@@ -44,8 +44,6 @@ export async function hook(page: Page, name: string, argument = ''): Promise<str
   return page.evaluate(([hookName, hookArgument]) => window.__mk![hookName](hookArgument), [name, argument]);
 }
 
-// b-302
-
 /** Open [path] and wait until the browser API hooks are up too. */
 export async function openWithBrowserApis(page: Page, path = '/'): Promise<void> {
   await openBuilder(page, path);
@@ -60,8 +58,6 @@ export async function gesture(page: Page, action: string): Promise<void> {
   await hook(page, 'gesture', action);
   await page.click('#mk-e2e-gesture');
 }
-
-// b-315c
 
 /**
  * Paste [text] and [files] on the page, into a text field, into a text field in a shadow root the
@@ -103,8 +99,6 @@ export async function dispatchPaste(
     { text, names: files, into },
   );
 }
-
-// b-315d
 
 /** Long enough for a key or a press to reach Compose and settle. */
 export const SETTLE_MS = 300;

@@ -32,7 +32,7 @@
     <string name="keycolors_pick">Pick %1$s</string>
     <!-- Hands a key color back to the seed. The argument is the key color's name. -->
     <string name="keycolors_clear">Clear %1$s</string>
-    <!-- Under a primary key color set by hand (D12). -->
+    <!-- Under a primary key color set by hand. -->
     <string name="keycolors_primary_only">This moves only the primary palette. The seed still drives the rest.</string>
     <!-- The same line for Fluent, which takes no palette but the primary. -->
     <string name="keycolors_primary_only_fluent">This moves the accent ramp, the only palette Fluent takes.</string>

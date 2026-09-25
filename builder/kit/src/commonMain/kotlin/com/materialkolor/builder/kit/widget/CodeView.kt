@@ -117,14 +117,15 @@ private sealed interface CodePart {
  *
  * The copy button sits in the top corner on a band of the panel, so its focus ring never lands on
  * the code ground ([CopyButton]). The lines run on past their end by the band's width, so scrolling
- * sideways to the end brings the last of every line out from under it. Selecting text takes a part of the file, the button takes
- * all of it, byte for byte. On the web a finger does not select, since the selection's handles would
- * take the page's accessibility mirror over (D45), so there the button is how a finger copies. A
- * mouse still selects. On a touch screen with a keyboard a key brings selection back and the code
- * area keeps its focus. No key selects on its own, so a keyboard copies all of it with the button.
+ * sideways to the end brings the last of every line out from under it. Selecting text takes a part
+ * of the file, the button takes all of it, byte for byte. On the web a finger does not select, since
+ * the selection's handles would take the page's accessibility mirror over, so there the button is
+ * how a finger copies. A mouse still selects. On a touch screen with a keyboard a key brings
+ * selection back and the code area keeps its focus. No key selects on its own, so a keyboard copies
+ * all of it with the button.
  *
  * On the web the list of lines goes by [label], since the page reads it as a list and a list with
- * no name is announced as nothing but a list (S5 row 33).
+ * no name is announced as nothing but a list.
  *
  * @param[lines] The file as lines of tokens, as in `GeneratedFile.lines`.
  * @param[onCopy] Called when the copy button is pressed. The caller does the copying.
@@ -191,7 +192,6 @@ public fun CodeView(
     ) {
         // The selection is its own focus target and asks for focus when a drag starts, so it is the
         // one stop. The scroll keys and the focus flag go on its modifier, ahead of that target.
-        // b-228a
         TouchlessSelectionContainer(
             modifier = Modifier
                 .fillMaxSize()

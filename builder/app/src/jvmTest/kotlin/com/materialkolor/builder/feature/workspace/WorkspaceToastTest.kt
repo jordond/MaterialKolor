@@ -28,7 +28,6 @@ private const val PAST_SHORT_MILLIS = 6_000L
 
 @OptIn(ExperimentalTestApi::class)
 class WorkspaceToastTest {
-    // b-310aa
     @Test
     fun showToast_withAnActionAndALongDuration_reachesTheToastsAndItsActionRunsOnClick() =
         runComposeUiTest {

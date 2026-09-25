@@ -10,8 +10,8 @@ class CodedEnumTest {
     /**
      * Every enum in the model that carries codes, listed by hand.
      *
-     * Common code cannot go looking for them, so a slice that adds a [CodedEnum] adds it here in
-     * the same change. An enum that is missing from this list has its codes checked by nothing.
+     * Common code cannot go looking for them, so a change that adds a [CodedEnum] adds it here too.
+     * An enum that is missing from this list has its codes checked by nothing.
      */
     private val codedEnums: Map<String, List<CodedEnum>> = mapOf(
         "Style" to Style.entries,

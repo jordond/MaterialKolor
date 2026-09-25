@@ -1,6 +1,5 @@
 import type { Page } from '@playwright/test';
 
-// b-311
 // Files a page makes for itself and the drops and pastes that carry them, copied from
 // `browser-apis.spec.ts` so the image seeding specs stand on their own.
 

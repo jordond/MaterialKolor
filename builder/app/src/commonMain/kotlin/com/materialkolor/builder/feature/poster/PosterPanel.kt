@@ -42,7 +42,7 @@ import dev.stateholder.dispatcher.Dispatcher
  * What every part of the poster reads, gathered once for the frame.
  *
  * @property[document] The document as stored, so the seed shows as it was typed. Anything that
- * shows what the target makes of it reads [result] instead (D35).
+ * shows what the target makes of it reads [result] instead.
  * @property[result] The theme resolved for the document's target.
  * @property[capabilities] How each control shows up for the document's target, style and spec.
  * @property[preferences] What this browser remembers, the shuffle locks among it.
@@ -63,23 +63,21 @@ internal data class PosterContext(
     val preferences: Preferences,
     val projectName: String,
     val saveStatus: SaveStatus,
-    // b-304
     val openPanel: Panel? = null,
     val visibleModes: PreviewMode = PreviewMode.Split,
-    // b-305
     val openFineTuneRows: Set<FineTuneRow> = emptySet(),
-    val sessionDismissedHints: Set<String> = emptySet(), // b-314a
+    val sessionDismissedHints: Set<String> = emptySet(),
 )
 
 /**
  * The poster, the seed as the hero with the style, contrast and fine tune rows under it, or the
- * seed strip when [rail] is true (F-66).
+ * seed strip when [rail] is true.
  *
  * The shell already stands it inside `PosterSurface`, so everything here reads the poster's ink
  * from the surrounding tokens and only the shapes follow the skin.
  *
  * @param[focus] The buttons that open a panel over the workspace, which the panel hands focus back
- * to once it closes (AR-09).
+ * to once it closes.
  */
 @Composable
 internal fun PosterPanel(
@@ -87,17 +85,15 @@ internal fun PosterPanel(
     rail: Boolean,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
-    focus: PosterFocus? = null, // b-221f
+    focus: PosterFocus? = null,
 ) {
-    val context = rememberPosterContext(state) // b-221f
+    val context = rememberPosterContext(state)
     if (rail) {
         PosterRail(context, dispatcher, modifier, focus)
     } else {
         PosterContent(context, dispatcher, focus, modifier)
     }
 }
-
-// b-221f
 
 /**
  * What the poster reads from [state] this frame, with the theme resolved at the root. The poster
@@ -113,12 +109,10 @@ internal fun rememberPosterContext(state: WorkspaceModel.State): PosterContext {
         state.preferences,
         state.projectName,
         state.saveStatus,
-        // b-304
         state.panel,
         state.view.mode,
-        // b-305
         state.view.openFineTuneRows,
-        state.sessionDismissedHints, // b-314a
+        state.sessionDismissedHints,
     ) {
         PosterContext(
             document = state.document,
@@ -127,19 +121,17 @@ internal fun rememberPosterContext(state: WorkspaceModel.State): PosterContext {
             preferences = state.preferences,
             projectName = state.projectName,
             saveStatus = state.saveStatus,
-            // b-304
             openPanel = state.panel,
             visibleModes = state.view.mode,
-            // b-305
             openFineTuneRows = state.view.openFineTuneRows,
-            sessionDismissedHints = state.sessionDismissedHints, // b-314a
+            sessionDismissedHints = state.sessionDismissedHints,
         )
     }
 }
 
 /**
  * The poster buttons that open a panel or a dialog over the workspace, which get focus back once it
- * has gone (AR-09). The workspace holds it, since those sit over the poster rather than in it.
+ * has gone. The workspace holds it, since those sit over the poster rather than in it.
  */
 @Stable
 internal class PosterFocus {
@@ -152,8 +144,6 @@ internal class PosterFocus {
      * The explainer line's Why button.
      */
     val why: PanelTrigger = PanelTrigger()
-
-    // b-306c
 
     /**
      * The hero's Copy hex button, which a refused copy's manual copy dialog hands focus back to.
@@ -178,12 +168,10 @@ internal class PosterFocus {
         }
 }
 
-// b-306c
-
 /**
- * Where the share dialog hands focus back once it closes (AR-09). Opened from the projects
- * drawer's Get a link it goes back to the Projects button that opened the drawer, since the dialog
- * took the drawer's place, and otherwise to [shareButton] in the top bar.
+ * Where the share dialog hands focus back once it closes. Opened from the projects drawer's Get a
+ * link it goes back to the Projects button that opened the drawer, since the dialog took the
+ * drawer's place, and otherwise to [shareButton] in the top bar.
  *
  * @param[panel] The panel open now, whose changes say what the dialog replaced.
  */
@@ -250,8 +238,8 @@ internal fun triggerFocus(trigger: PanelTrigger?): Modifier {
 }
 
 /**
- * The open poster, one column that scrolls. Docked it runs in the order F-66 lists, and in the
- * phone sheet in the order the sheet's detents show it.
+ * The open poster, one column that scrolls. Docked it runs from the header down to the fine tune
+ * rows, and in the phone sheet in the order the sheet's detents show it.
  */
 @Composable
 private fun PosterContent(
@@ -265,24 +253,21 @@ private fun PosterContent(
     val sheet = mode == PosterMode.Sheet
     // The sheet's handle already stands above its content, so the sheet starts close under it.
     val top = if (sheet) spacing.extraSmall else spacing.extraLarge
-    // b-510
-    // 24 at 400 wide, a little under the design's 28 so Shuffle, Pick and Image share a row with
+    // 24 at 400 wide, a little under 28 so Shuffle, Pick and Image share a row with
     // Material's roomy buttons. The narrower poster and the sheet keep 20, so five chips a row fit.
     val side = if (mode == PosterMode.Docked400) spacing.extraLarge else spacing.large + spacing.extraSmall
-    // b-305
     // The poster always holds controls, so the scroll area needs no tab stop of its own.
     BuilderScrollArea(modifier.fillMaxSize(), tabStop = false) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = side, top = top, end = side, bottom = spacing.extraLarge),
-            // b-510
             // A gap inside a group. Each group adds its own room on top, see PosterGroupGap. The
             // sheet packs its peek tighter, so the contrast levels still show at rest.
             verticalArrangement = Arrangement.spacedBy(if (sheet) spacing.small else spacing.medium),
         ) {
             if (sheet) {
-                PosterSheet(context, dispatcher, focus) // b-406
+                PosterSheet(context, dispatcher, focus)
             } else {
                 DockedSections(context, dispatcher, focus)
             }
@@ -291,8 +276,8 @@ private fun PosterContent(
 }
 
 /**
- * The docked poster, the header and the hero on top as F-66 lists it, grouped the way the design
- * spaces it. The seed, the style, the contrast and the fine tune rows each start a group.
+ * The docked poster, the header and the hero on top, then the rest in groups. The seed, the style,
+ * the contrast and the fine tune rows each start a group.
  */
 @Composable
 private fun ColumnScope.DockedSections(
@@ -300,12 +285,12 @@ private fun ColumnScope.DockedSections(
     dispatcher: Dispatcher<WorkspaceAction>,
     focus: PosterFocus?,
 ) {
-    val group = Modifier.padding(top = PosterGroupGap) // b-510
+    val group = Modifier.padding(top = PosterGroupGap)
     PosterHeader(context, dispatcher, focus = focus)
-    SeedHero(context, dispatcher, modifier = group, focus = focus) // b-306c
+    SeedHero(context, dispatcher, modifier = group, focus = focus)
     SeedActions(context, dispatcher, modifier = Modifier.padding(top = LocalBuilderTokens.current.spacing.extraSmall))
-    FirstRunHint(context, dispatcher) // b-314
-    ImageCandidateRow(context, dispatcher) // b-311
+    FirstRunHint(context, dispatcher)
+    ImageCandidateRow(context, dispatcher)
     PrimaryExplainerLine(context, dispatcher, why = focus?.why)
     StyleChipsSection(context, dispatcher, modifier = group)
     ContrastSection(context, dispatcher, modifier = group)
@@ -313,11 +298,9 @@ private fun ColumnScope.DockedSections(
     SpecExtrasRow(context, dispatcher)
 }
 
-// b-510
-
 /**
  * The room a group adds over the gap inside one, so groups stand about 24 dp apart and the parts of
- * one about 12, as the design spaces the poster.
+ * one about 12.
  */
 internal val PosterGroupGap: Dp
     @Composable get() = LocalBuilderTokens.current.spacing.medium

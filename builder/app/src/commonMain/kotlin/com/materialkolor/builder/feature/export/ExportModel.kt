@@ -60,10 +60,10 @@ internal const val ZIP_MIME = "application/zip"
  * nothing.
  *
  * Every header and the README link back with the link Share gives, [shareLink], which carries the
- * project name (F-32, D26). The package name stays out of it.
+ * project name. The package name stays out of it.
  *
  * The model never copies or saves anything itself. Browsers only allow that inside the click, so
- * the sheet calls [clipboard] and [files] straight from its click handler (R-B-302).
+ * the sheet calls [clipboard] and [files] straight from its click handler.
  *
  * @property[clipboard] Where Copy and Copy all write.
  * @property[files] Where Download zip and Share files go.
@@ -80,7 +80,6 @@ internal class ExportModel(
     private val generator: ExportGenerator,
     val clipboard: Clipboard,
     val files: FileSaver,
-    // b-505
     private val environment: Environment,
 ) : StateViewModel<ExportModel.State>(
         State(document = session.document.value, preferences = preferences.preferences.value),
@@ -91,7 +90,7 @@ internal class ExportModel(
      * The MaterialKolor version every export is built and checked against.
      */
     val materialKolorVersion: String
-        get() = versions.materialKolor // b-511
+        get() = versions.materialKolor
     private var memo: Memo? = null
 
     init {

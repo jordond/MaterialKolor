@@ -85,14 +85,14 @@ private enum class GalleryDestination(
 }
 
 /**
- * The Material 3 components gallery (F-21).
+ * The Material 3 components gallery.
  *
  * Every card holds stock Material 3 components on their default colors, under the theme the pane
  * already uses, so the Expressive flavour shows the same set in its own shapes and motion, and
  * then its own components after them in each group. Each component shows up enabled and disabled,
  * apart from the few Material 3 gives no disabled look.
  * Nothing in the gallery opens a popup or a dialog window, since on the web the first one takes
- * the accessibility mirror over for good (D40). Menus, dialogs and tooltips are drawn in place.
+ * the accessibility mirror over for good. Menus, dialogs and tooltips are drawn in place.
  * The text fields would open a context menu on a right click and a text toolbar on a long press,
  * both popups, so the gallery swallows right-button presses and hands its text fields a toolbar
  * that never shows. Copy and paste still work from the keyboard.
@@ -255,7 +255,7 @@ internal fun ListItems() {
 }
 
 /**
- * An alert dialog as it looks open, laid out in place rather than in a window (D40).
+ * An alert dialog as it looks open, laid out in place rather than in a window.
  */
 @Composable
 internal fun InlineDialog(state: DemoAppState) {

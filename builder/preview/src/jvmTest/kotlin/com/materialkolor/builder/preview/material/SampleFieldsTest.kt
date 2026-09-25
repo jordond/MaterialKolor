@@ -23,12 +23,8 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-228b
-
 private const val MaterialTag = "material"
 private const val SampleTag = "sample"
-
-// b-228c
 
 /**
  * Past the focus animations of the label and the indicator, and inside the caret's first blink.
@@ -37,7 +33,7 @@ private const val FocusSettleMillis = 300L
 
 /**
  * The sample fields are Material3's own fields put together from their parts, so the handles can be
- * kept off on the web (D45). Off the web they draw pixel for pixel what Material3's fields draw.
+ * kept off on the web. Off the web they draw pixel for pixel what Material3's fields draw.
  */
 @OptIn(ExperimentalTestApi::class)
 class SampleFieldsTest {

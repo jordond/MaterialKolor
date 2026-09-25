@@ -104,7 +104,6 @@ internal fun EyedropperThumbnail(
 ) {
     val radius = LocalBuilderTokens.current.radius
     val focus = remember { FocusRequester() }
-    // b-311d
     BuilderCard(
         modifier = Modifier.focusRequester(focus),
         onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.ImageEyedropper)) },
@@ -127,7 +126,7 @@ internal fun EyedropperThumbnail(
 }
 
 /**
- * The image eyedropper (F-08, AR-07), a dialog over [picture] with a loupe that follows the pointer.
+ * The image eyedropper, a dialog over [picture] with a loupe that follows the pointer.
  *
  * A click takes the exact color of the pixel under it as the seed, keeping [source], and closes the
  * dialog. Esc, Cancel and a click on the veil close it and change nothing. It only answers a
@@ -169,7 +168,6 @@ internal fun ImageEyedropper(
             )
         },
     ) {
-        // b-311d
         // The picture takes the height the line and the buttons leave, so the buttons stay on screen.
         Column(
             modifier = Modifier.leaveRoomBelow(dialogButtonRoom()),

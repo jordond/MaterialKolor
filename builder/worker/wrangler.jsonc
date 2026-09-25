@@ -17,7 +17,6 @@
   "rules": [{ "type": "Data", "globs": ["**/*.bin"], "fallthrough": false }],
   // Production, which builder.yml deploys from a builder/<version> tag.
   "routes": [{ "pattern": "materialkolor.com", "custom_domain": true }],
-  // b-505
   // The account comes from CLOUDFLARE_ACCOUNT_ID in CI, so it is never named here.
   "env": {
     // The Worker `materialkolor-builder-staging`, which builder.yml deploys from a staging site build.

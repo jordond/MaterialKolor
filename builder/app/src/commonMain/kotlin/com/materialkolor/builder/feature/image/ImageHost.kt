@@ -24,7 +24,7 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
 import org.jetbrains.compose.resources.getString
 
 /**
- * Taking a seed from an image, whether picked, dropped or pasted, and the drop overlay (F-08).
+ * Taking a seed from an image, whether picked, dropped or pasted, and the drop overlay.
  *
  * It is always composed, so what [model] makes of an image reaches the workspace even with no
  * panel open. A seed lands behind a crossfade as one undo entry, with a toast that can undo it,
@@ -35,7 +35,7 @@ internal fun ImageHost(
     state: WorkspaceModel.State,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
-    model: ImageSeedModel = metroViewModel(), // b-311
+    model: ImageSeedModel = metroViewModel(),
 ) {
     ImageHostContent(
         model = model,
@@ -83,7 +83,6 @@ internal fun ImageHostContent(
         model.results.collect { result -> dispatchResult(result, undo) { workspace } }
     }
     val dragging by model.images.dragging.collectAsState()
-    // b-311a
     // The picker owns the window while it is open, and a drop then goes nowhere.
     if (dragging && !picking) DropOverlay(modifier)
 }
@@ -103,7 +102,6 @@ private suspend fun dispatchResult(
             val before = workspace()
             val made = result.change.apply(before.document)
             // A seed that changes nothing makes no undo entry, and an Undo would take another one.
-            // b-311c
             val seedUndo = if (made == before.document) null else SeedUndo(before.document, made, before.project)
             if (seedUndo != null) {
                 undo.current?.end()

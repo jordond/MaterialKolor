@@ -43,26 +43,25 @@ import org.jetbrains.compose.resources.stringResource
  * collapse button on one row. The 320 dp poster has no room for all three, so there the Projects
  * button takes a row of its own. Whether the project is saved shows under the hex, see [SeedHero].
  *
- * The phone sheet has no rail to collapse to, so it shows no collapse button (D38).
+ * The phone sheet has no rail to collapse to, so it shows no collapse button.
  *
- * @param[focus] Where the projects drawer hands focus back once it closes (AR-09).
+ * @param[focus] Where the projects drawer hands focus back once it closes.
  */
 @Composable
 internal fun PosterHeader(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
-    focus: PosterFocus? = null, // b-221f
+    focus: PosterFocus? = null,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val mode = LocalLayout.current.posterMode
     val collapsible = mode != PosterMode.Sheet
-    // b-510
     val projects: @Composable (Modifier) -> Unit = { projectsModifier ->
         ProjectsButton(
             projectName = context.projectName,
             dispatcher = dispatcher,
-            modifier = projectsModifier.then(triggerFocus(focus?.projects)), // b-221f
+            modifier = projectsModifier.then(triggerFocus(focus?.projects)),
         )
     }
     val narrow = mode == PosterMode.Docked320
@@ -94,11 +93,9 @@ internal fun PosterHeader(
     }
 }
 
-// b-510
-
 /**
  * Whether the open project is saved, as small words. Saved and saving read in the muted ink, and a
- * failed save keeps its badge and warning glyph so it never rests on colour alone (AR-03).
+ * failed save keeps its badge and warning glyph so it never rests on colour alone.
  */
 @Composable
 internal fun SaveState(status: SaveStatus) {
@@ -127,14 +124,13 @@ private fun ProjectsButton(
         onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Projects)) },
         label = if (named) projectName else stringResource(Res.string.poster_projects),
         modifier = if (spoken == null) modifier else modifier.semantics { contentDescription = spoken },
-        emphasis = Emphasis.Subtle, // b-510
+        emphasis = Emphasis.Subtle,
         icon = IconId.Folder,
     )
 }
 
 /**
- * What the header's badge says about a save, in words and a glyph so it never rests on color
- * alone (AR-03).
+ * What the header's badge says about a save, in words and a glyph so it never rests on color alone.
  *
  * @property[label] The status in words.
  * @property[status] What the badge reports, which picks its color.
@@ -163,7 +159,7 @@ internal fun saveBadgeOf(status: SaveStatus): SaveBadge =
  *
  * @param[modifier] Applied to the tooltip around the button.
  * @param[expanded] Whether the panel the button shows and hides is open, or null for a button that
- * discloses nothing (D37).
+ * discloses nothing.
  * @param[buttonModifier] Applied to the button itself, such as the requester a panel hands focus
  * back to.
  */
@@ -176,7 +172,6 @@ internal fun PosterIconButton(
     emphasis: Emphasis = Emphasis.Subtle,
     enabled: Boolean = true,
     tooltip: String = description,
-    // b-221f
     expanded: Boolean? = null,
     buttonModifier: Modifier = Modifier,
 ) {

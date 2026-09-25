@@ -43,8 +43,6 @@ import io.kotest.matchers.string.shouldNotBeBlank
 import java.awt.datatransfer.DataFlavor
 import kotlin.test.Test
 
-// b-228aa
-
 /**
  * The key held with A and C, Command on a Mac and Control everywhere else, as the desktop reads it.
  */
@@ -52,9 +50,9 @@ private val ShortcutKey: Key =
     if (System.getProperty("os.name").orEmpty().startsWith("Mac")) Key.MetaLeft else Key.CtrlLeft
 
 /**
- * D45. Where overlays render in the page the code view and text over several lines swap their
- * selection container out while a finger is in use and back for a mouse or a key, and focus stays
- * where it was through the swap.
+ * Where overlays render in the page the code view and text over several lines swap their selection
+ * container out while a finger is in use and back for a mouse or a key, and focus stays where it was
+ * through the swap.
  */
 @OptIn(ExperimentalTestApi::class)
 class TouchlessSelectionTest {

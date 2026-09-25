@@ -15,7 +15,7 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
  * The command palette and the shortcut cheat sheet, open while `state.panel` is `Panel.Palette` or
  * `Panel.CheatSheet`. The global shortcuts sit on the page root, see [rememberShortcuts].
  *
- * @param[returnFocusTo] Where each of its panels hands focus once it closes (AR-09).
+ * @param[returnFocusTo] Where each of its panels hands focus once it closes.
  */
 @Composable
 internal fun CommandHost(
@@ -25,7 +25,6 @@ internal fun CommandHost(
     returnFocusTo: (Panel) -> FocusRequester? = { null },
     shortcuts: ShortcutsModel = metroViewModel(),
 ) {
-    // b-315a
     CommandPalette(
         visible = state.panel == Panel.Palette,
         state = state,

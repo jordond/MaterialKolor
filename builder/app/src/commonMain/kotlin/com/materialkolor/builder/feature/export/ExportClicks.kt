@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
  * [clipboard], then hands [onResult] what the clipboard said.
  *
  * Browsers only let a page write the clipboard inside the click, so the write is the first
- * suspension and it starts before this returns (R-B-302). Call it straight from `onClick`, or from
+ * suspension and it starts before this returns. Call it straight from `onClick`, or from
  * a dispatcher that runs its block in the click, with no hop through the model before it.
  */
 internal fun CoroutineScope.launchCopy(
@@ -30,8 +30,7 @@ internal fun CoroutineScope.launchCopy(
  * or saves it otherwise, then hands [onResult] how it went.
  *
  * Which one was settled before the click, so a share that fails never turns into a download. Like
- * [launchCopy], the save or the share is the first suspension and it starts before this returns
- * (R-B-302).
+ * [launchCopy], the save or the share is the first suspension and it starts before this returns.
  */
 internal fun CoroutineScope.launchZip(
     files: FileSaver,

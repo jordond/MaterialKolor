@@ -60,18 +60,17 @@ internal object FluentGalleryKeys {
 }
 
 /**
- * The Fluent components gallery (F-21).
+ * The Fluent components gallery.
  *
  * Every card holds compose-fluent's own components on their default colors, under the Fluent theme
  * the pane already uses, and each shows up enabled and disabled apart from the few with nothing
  * to press. Nothing opens a popup, a window or a portal, since on the web the first one takes the
- * accessibility mirror over for good (D40). The slider's value tip, the dialog and the combo box
- * list are Fluent's popups, so the slider draws its own thumb, the dialog shows in place and the
- * combo box stays out. A control whose own clickable no modifier reaches, or which reports the
- * wrong role, sits under a [FluentOverlaid] layer that takes its place. The gallery swallows
- * right-button presses and hands its text box a toolbar that never shows, like the other
- * galleries, and a state that changes goes into the name on the web through the kit's fold
- * modifiers (D37).
+ * accessibility mirror over for good. The slider's value tip, the dialog and the combo box list
+ * are Fluent's popups, so the slider draws its own thumb, the dialog shows in place and the combo
+ * box stays out. A control whose own clickable no modifier reaches, or which reports the wrong
+ * role, sits under a [FluentOverlaid] layer that takes its place. The gallery swallows right-button
+ * presses and hands its text box a toolbar that never shows, like the other galleries, and a state
+ * that changes goes into the name on the web through the kit's fold modifiers.
  *
  * @param[spec] The pane the gallery is drawn in.
  * @param[state] What the gallery's controls remember, shared by both copies.

@@ -33,7 +33,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Shuffle, Pick and Image, with the shuffle locks under them (F-10).
+ * Shuffle, Pick and Image, with the shuffle locks under them.
  *
  * Shuffle only asks. The workspace draws the next seed with the locks applied and lands it as one
  * undo entry behind a crossfade. With the seed and the style both locked there is nothing left to
@@ -49,20 +49,18 @@ internal fun SeedActions(
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
     shuffle: Boolean = true,
-    locks: Boolean = true, // b-510
+    locks: Boolean = true,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val preferences = context.preferences
     val nothingToShuffle = preferences.shufflesNothing()
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-        // b-510
         // The three share one row at 400 dp in every skin, with a tight gap Material's roomy buttons need.
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(spacing.extraSmall),
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
             if (shuffle) {
-                // b-510
                 val space = stringResource(Res.string.poster_space)
                 BuilderButton(
                     onClick = { dispatcher.dispatch(WorkspaceAction.Shuffle(origin = null)) },
@@ -72,7 +70,6 @@ internal fun SeedActions(
                     hint = if (LocalLayout.current.coarsePointer) null else space,
                 )
             }
-            // b-307
             val pick = remember { FocusRequester() }
             BuilderButton(
                 onClick = { dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.Seed, returnFocusTo = pick)) },
@@ -80,13 +77,11 @@ internal fun SeedActions(
                 modifier = pickButtonFocus(pick),
                 icon = IconId.Eyedropper,
             )
-            ImageMenuButton(context, dispatcher) // b-311b
+            ImageMenuButton(context, dispatcher)
         }
-        if (locks) ShuffleLocks(context, dispatcher) // b-510
+        if (locks) ShuffleLocks(context, dispatcher)
     }
 }
-
-// b-510
 
 /**
  * The three shuffle locks on one row, and why Shuffle is off once the seed and the style are both

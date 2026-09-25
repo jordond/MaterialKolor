@@ -94,7 +94,7 @@ private val Modes: List<String> = listOf("Light", "Split", "Dark")
 private val CallerWidths: List<Dp?> = listOf(160.dp, 240.dp, 360.dp, 480.dp, 720.dp, null)
 
 /**
- * The files this slice draws the expressive chrome in, which may never start an endless clock.
+ * The files the expressive chrome is drawn in, which may never start an endless clock.
  */
 private val ChromeSources: List<String> = listOf(
     "src/commonMain/kotlin/com/materialkolor/builder/kit/skin/material/MaterialSegmented.kt",
@@ -129,7 +129,7 @@ private val HasToggleState: SemanticsMatcher = SemanticsMatcher.keyIsDefined(Sem
 
 /**
  * The expressive chrome of the Material3 skin, each part checked in both flavours, so the flat one
- * keeps what it had and the expressive one swaps only what it should (B-402c).
+ * keeps what it had and the expressive one swaps only what it should.
  */
 @OptIn(ExperimentalTestApi::class)
 class MaterialExpressiveChromeTest {

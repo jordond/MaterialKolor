@@ -2,7 +2,6 @@
 declare namespace Cloudflare {
   interface Env {
     ASSETS: Fetcher;
-    // b-505
     /** The `X-Robots-Tag` every response built here carries, `noindex` on staging and unset on production. */
     ROBOTS_TAG?: string;
   }

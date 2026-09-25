@@ -38,7 +38,7 @@ public val CanvasContentCap: Dp = 1400.dp
 /**
  * Below this height a window held with a coarse pointer is a phone on its side, and gets the sheet.
  */
-public val ShortHeightBreakpoint: Dp = 480.dp // b-209a
+public val ShortHeightBreakpoint: Dp = 480.dp
 
 /**
  * The three widths the builder lays itself out for.
@@ -80,7 +80,7 @@ public enum class WindowClass {
 
 /**
  * How the poster panel is shown, which is the one piece of geometry that changes at four widths
- * rather than three. A phone on its side is Medium by width but still gets the sheet (D38).
+ * rather than three. A phone on its side is Medium by width but still gets the sheet.
  */
 public enum class PosterMode {
     /**
@@ -120,7 +120,7 @@ public enum class PosterMode {
             coarsePointer: Boolean,
         ): PosterMode =
             if (heightDp < ShortHeightBreakpoint && coarsePointer) {
-                Sheet // b-209a
+                Sheet
             } else {
                 when (windowClass) {
                     WindowClass.Compact -> Sheet
@@ -157,7 +157,7 @@ public data class LayoutInfo(
      * How the poster panel is shown.
      */
     public val posterMode: PosterMode
-        get() = PosterMode.of(windowClass, widthDp, heightDp, coarsePointer) // b-209a
+        get() = PosterMode.of(windowClass, widthDp, heightDp, coarsePointer)
 
     /**
      * The smallest a tappable thing is allowed to be.

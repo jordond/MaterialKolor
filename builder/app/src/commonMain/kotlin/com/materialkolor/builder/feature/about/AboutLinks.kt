@@ -5,8 +5,8 @@ package com.materialkolor.builder.feature.about
 /**
  * Where the builder's help pages live, or null while there are none.
  *
- * The owner decides F-36, whether the builder gets pages of its own and where. Until then this stays
- * null and Help offers no docs button, so nothing links to pages that do not exist yet.
+ * The owner has yet to decide whether the builder gets pages of its own and where. Until then this
+ * stays null and Help offers no docs button, so nothing links to pages that do not exist yet.
  */
 internal val HELP_PAGES_URL: String? = null
 

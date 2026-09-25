@@ -15,11 +15,9 @@ import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.ShortHeightBreakpoint
 import dev.stateholder.dispatcher.Dispatcher
 
-// b-406
-
 /**
  * The poster's sections in the phone sheet, in the order the sheet shows them, each with the
- * detent that first brings it into view (D38).
+ * detent that first brings it into view.
  */
 internal enum class SheetSection(
     val detent: BottomSheetDetent,
@@ -31,11 +29,10 @@ internal enum class SheetSection(
     StyleChips(BottomSheetDetent.Peek),
     Contrast(BottomSheetDetent.Peek),
 
-    // b-510
     ContrastDetails(BottomSheetDetent.Half),
     StyleDetails(BottomSheetDetent.Half),
     Explainer(BottomSheetDetent.Half),
-    Locks(BottomSheetDetent.Half), // b-510
+    Locks(BottomSheetDetent.Half),
     CoreColors(BottomSheetDetent.Half),
     SpecExtras(BottomSheetDetent.Half),
     Hero(BottomSheetDetent.Full),
@@ -87,7 +84,7 @@ internal class PosterSheetView(
         get() = sheet?.targetDetent ?: BottomSheetDetent.Peek
 
     /**
-     * Whether this is a phone on its side, where the peek only has room for the seed row (D38).
+     * Whether this is a phone on its side, where the peek only has room for the seed row.
      */
     val short: Boolean
         get() = layout.heightDp < ShortHeightBreakpoint && layout.coarsePointer
@@ -116,19 +113,18 @@ internal fun ColumnScope.PosterSheet(
     SheetSection.entries.forEach { section ->
         when (section) {
             SheetSection.SeedPeek -> SeedPeekRow(context, dispatcher)
-            SheetSection.SeedActions -> SeedActions(context, dispatcher, shuffle = false, locks = false) // b-510
-            SheetSection.FirstRunHint -> FirstRunHint(context, dispatcher) // b-314
-            SheetSection.ImageCandidates -> ImageCandidateRow(context, dispatcher) // b-311
-            // b-510
+            SheetSection.SeedActions -> SeedActions(context, dispatcher, shuffle = false, locks = false)
+            SheetSection.FirstRunHint -> FirstRunHint(context, dispatcher)
+            SheetSection.ImageCandidates -> ImageCandidateRow(context, dispatcher)
             SheetSection.StyleChips -> StyleChipsSection(context, dispatcher, scrolling = true, details = false)
-            SheetSection.Contrast -> ContrastSection(context, dispatcher, details = false) // b-510
-            SheetSection.ContrastDetails -> ContrastDetails(context) // b-510
-            SheetSection.StyleDetails -> StyleDetails(context, dispatcher, info = true) // b-510
+            SheetSection.Contrast -> ContrastSection(context, dispatcher, details = false)
+            SheetSection.ContrastDetails -> ContrastDetails(context)
+            SheetSection.StyleDetails -> StyleDetails(context, dispatcher, info = true)
             SheetSection.Explainer -> PrimaryExplainerLine(context, dispatcher, why = focus?.why)
-            SheetSection.Locks -> ShuffleLocks(context, dispatcher) // b-510
+            SheetSection.Locks -> ShuffleLocks(context, dispatcher)
             SheetSection.CoreColors -> CoreColorsRow(context, dispatcher)
             SheetSection.SpecExtras -> SpecExtrasRow(context, dispatcher)
-            SheetSection.Hero -> SeedHero(context, dispatcher, focus = focus) // b-306c
+            SheetSection.Hero -> SeedHero(context, dispatcher, focus = focus)
             SheetSection.Header -> PosterHeader(context, dispatcher, focus = focus)
         }
     }

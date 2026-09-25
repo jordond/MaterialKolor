@@ -21,7 +21,7 @@ internal enum class TopBarControl {
     Commands,
     Undo,
     Redo,
-    History, // b-509
+    History,
     Share,
     Export,
     More,
@@ -29,7 +29,7 @@ internal enum class TopBarControl {
 
 /**
  * Remembers which top bar control has focus, so a skin switch that rebuilds the controls in
- * another library's components hands focus back to the same one (F-03).
+ * another library's components hands focus back to the same one.
  *
  * A switch moves the whole workspace, which takes focus away before the new skin has composed. So
  * a control that loses focus is only forgotten a frame later, unless something has taken or given
@@ -80,7 +80,7 @@ internal class TopBarFocus(
 
     /**
      * Puts focus back on [control] after it was rebuilt in another form at a new width, the library
-     * switcher turning from its segmented row into its dropdown or back (b-231). Only a control that
+     * switcher turning from its segmented row into its dropdown or back. Only a control that
      * had focus a moment ago takes it, so a resize never pulls focus into the top bar.
      */
     fun restoreAfterRefit(control: TopBarControl) {

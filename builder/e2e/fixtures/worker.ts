@@ -3,7 +3,6 @@ import { existsSync } from 'node:fs';
 import { createServer } from 'node:net';
 import path from 'node:path';
 
-// b-503
 // The Worker in front of the site, run by `wrangler dev` for the specs that need what only it
 // serves, the per-theme link meta of `/t/<code>`. Everything else runs on the global setup's server.
 // It serves the site `wrangler.jsonc` names, `builder/web/build/site`.

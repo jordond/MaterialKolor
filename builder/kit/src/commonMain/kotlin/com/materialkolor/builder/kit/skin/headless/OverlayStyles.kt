@@ -78,8 +78,8 @@ internal class OverlayStyle(
     val popoverShape: Shape,
     val dialogShape: Shape,
     val panelRadius: Dp,
-    val drawerRadius: Dp, // b-511
-    val divider: Color, // b-511
+    val drawerRadius: Dp,
+    val divider: Color,
     val shadow: Dp,
     val scrim: Color,
     val itemShape: Shape,
@@ -95,7 +95,7 @@ internal class OverlayStyle(
     val toastContent: Color,
     val toastBorder: BorderStroke?,
     val thumb: Color,
-    val panelTitle: TextStyle? = null, // b-511
+    val panelTitle: TextStyle? = null,
 )
 
 /**
@@ -117,8 +117,8 @@ internal const val UnstyledSelectedAlpha: Float = 0.1f
 /**
  * The sizes every skin gives its overlays alike.
  *
- * B-218 reviewed them as token requests. Every skin gives each one the same value, so none of them
- * became a builder token. A size that starts to differ by skin moves to the tokens then.
+ * Every skin gives each one the same value, so none of them became a builder token. A size that
+ * starts to differ by skin moves to the tokens then.
  */
 internal object OverlayMetrics {
     /**
@@ -145,7 +145,7 @@ internal object OverlayMetrics {
     /**
      * The widest a side panel gets, and how much of a narrower screen it takes.
      */
-    val sidePanelWidth: Dp = 380.dp // b-511
+    val sidePanelWidth: Dp = 380.dp
     val sidePanelNarrowFraction: Float = 0.85f
 
     /**
@@ -154,8 +154,6 @@ internal object OverlayMetrics {
     val menuMinWidth: Dp = 160.dp
     val menuMaxWidth: Dp = 360.dp
     val menuMaxHeight: Dp = 400.dp
-
-    // b-511
 
     /**
      * How far a modal side panel or end sheet keeps its header, body and footer from its edges.
@@ -203,7 +201,7 @@ internal fun unstyledOverlayStyle(tokens: BuilderTokens): OverlayStyle {
         popoverShape = RoundedCornerShape(tokens.radius.small),
         dialogShape = RoundedCornerShape(tokens.radius.small),
         panelRadius = 0.dp,
-        drawerRadius = tokens.radius.small, // b-511
+        drawerRadius = tokens.radius.small,
         divider = tokens.border,
         shadow = 0.dp,
         scrim = tokens.scrim,
@@ -235,7 +233,7 @@ internal fun customOverlayStyle(tokens: BuilderTokens): OverlayStyle =
         popoverShape = RoundedCornerShape(tokens.radius.medium),
         dialogShape = RoundedCornerShape(tokens.radius.large),
         panelRadius = tokens.radius.large,
-        drawerRadius = tokens.radius.large, // b-511
+        drawerRadius = tokens.radius.large,
         divider = tokens.border,
         shadow = 8.dp,
         scrim = tokens.scrim,
@@ -264,7 +262,7 @@ internal enum class PanelEdge {
 }
 
 /**
- * A menu or a tooltip scaling up from 0.96 with a fade, or only the fade under reduced motion (MO-05).
+ * A menu or a tooltip scaling up from 0.96 with a fade, or only the fade under reduced motion.
  */
 @Composable
 internal fun popoverEnter(): EnterTransition {
@@ -284,7 +282,7 @@ internal fun popoverExit(): ExitTransition {
 }
 
 /**
- * A panel sliding in from [edge], or only fading under reduced motion (MO-05).
+ * A panel sliding in from [edge], or only fading under reduced motion.
  */
 @Composable
 internal fun panelEnter(edge: PanelEdge): EnterTransition {
@@ -369,7 +367,7 @@ internal fun Modifier.overlayFeedback(
 ): Modifier {
     val hovered by interactionSource.collectIsHoveredAsState()
     val focused by interactionSource.collectIsFocusedAsState()
-    val ringed by interactionSource.collectIsFocusVisibleAsState() // b-513
+    val ringed by interactionSource.collectIsFocusVisibleAsState()
     val ground = when {
         !enabled -> Color.Transparent
         selected -> style.selected

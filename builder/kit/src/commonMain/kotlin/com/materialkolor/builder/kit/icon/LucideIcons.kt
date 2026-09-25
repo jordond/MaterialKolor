@@ -95,6 +95,6 @@ internal object LucideIcons : BuilderIcons {
             IconId.Keyboard -> Lucide.Keyboard
             IconId.Help -> Lucide.CircleHelp
             IconId.ExternalLink -> Lucide.ExternalLink
-            IconId.History -> Lucide.History // b-508
+            IconId.History -> Lucide.History
         }
 }

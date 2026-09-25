@@ -142,8 +142,7 @@ internal object GamutLimit {
  * and [EditPhase.Released] once when it lets go. The arrows move one and ten with Shift, Page Up and
  * Page Down move ten, Home and End jump to the ends, and each of those reports
  * [EditPhase.Discrete]. The track reads out as a slider named [label]. On the web it has no role,
- * so its role word and value fold into the name, "Hue, slider, 299" (D37, D40), and the name goes
- * in as text (S5).
+ * so its role word and value fold into the name, "Hue, slider, 299", and the name goes in as text.
  */
 @Composable
 internal fun GamutTrack(
@@ -159,7 +158,7 @@ internal fun GamutTrack(
     val name = stateName(label, ControlState.Value(valueText), role = FoldedRole.Slider)
     val asText = LocalFoldsStateIntoName.current
     var focused by remember { mutableStateOf(false) }
-    val visibility = LocalFocusVisibility.current // b-513
+    val visibility = LocalFocusVisibility.current
     Box(
         modifier
             .fillMaxWidth()
@@ -183,7 +182,7 @@ internal fun GamutTrack(
             }.pointerInput(picker, channel, tokens, isRtl) { dragTrack(picker, channel, tokens, isRtl) }
             .drawWithCache {
                 val drawing = trackDrawing(trackPaint(channel, picker), tokens, isRtl)
-                onDrawBehind { drawTrack(drawing, picker, channel, focused && visibility.isVisible) } // b-513
+                onDrawBehind { drawTrack(drawing, picker, channel, focused && visibility.isVisible) }
             },
     )
 }
@@ -390,7 +389,7 @@ private fun CacheDrawScope.trackDrawing(
  *
  * The thumb always sits in a halo of the panel color, [ThumbHaloReach] rim widths past its edge, so
  * its focus ring lands on the panel and never on the track. Drawn only with focus the halo would
- * leave the ring over the track's colors, which the focus color can match (AR-01, S5 rerun).
+ * leave the ring over the track's colors, which the focus color can match.
  */
 private fun DrawScope.drawTrack(
     drawing: TrackDrawing,

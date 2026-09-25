@@ -70,10 +70,10 @@ internal const val STARTER_CHIP_TAG: String = "image-starter-chip"
 internal const val STARTER_SKELETON_TAG: String = "image-starter-skeleton"
 
 /**
- * The Image button, which opens a menu of the two ways to seed from a picture (F-08, F-09).
+ * The Image button, which opens a menu of the two ways to seed from a picture.
  *
  * Upload image opens the platform picker. Browsers only open it inside the click, so the row's click
- * dispatches `OpenImagePicker` and the workspace starts the pick before the click returns (R-B-302).
+ * dispatches `OpenImagePicker` and the workspace starts the pick before the click returns.
  * Presets and starters opens [PresetPicker] as `Panel.Presets`, so Back closes it, and a preset or
  * starter chosen there lands behind a crossfade as one undo entry. The picker hands the focus back
  * to this button once it closes.
@@ -95,7 +95,7 @@ internal fun ImageMenuButton(
         ),
         BuilderMenuItem(
             label = stringResource(Res.string.image_menu_presets),
-            onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Presets)) }, // b-311d
+            onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Presets)) },
             icon = IconId.Image,
         ),
     )
@@ -107,7 +107,6 @@ internal fun ImageMenuButton(
             icon = IconId.Image,
         )
     }
-    // b-311d
     PresetPicker(
         visible = context.openPanel == Panel.Presets,
         document = context.result.document,
@@ -123,7 +122,7 @@ internal fun ImageMenuButton(
 }
 
 /**
- * The preset pictures and the starter themes, each a card that chooses it (F-09).
+ * The preset pictures and the starter themes, each a card that chooses it.
  *
  * A picture sets only the seed, to its strongest color, and the row under the seed actions then
  * offers its other colors. A starter sets the seed, the style and the contrast. Neither touches the
@@ -162,7 +161,6 @@ internal fun PresetPicker(
             )
         },
     ) {
-        // b-311d
         // The cards take the focus themselves, so the list needs no Tab stop of its own. It scrolls
         // in the height the title and the buttons leave, so the buttons stay on screen.
         BuilderScrollArea(Modifier.leaveRoomBelow(dialogButtonRoom()), tabStop = false) {
@@ -181,7 +179,7 @@ internal fun PresetPicker(
                     title = stringResource(Res.string.image_presets_starters),
                     line = stringResource(Res.string.image_presets_starters_line),
                 ) {
-                    StarterCards(document, isDark, onChoose) // b-311d
+                    StarterCards(document, isDark, onChoose)
                 }
             }
         }
@@ -245,8 +243,6 @@ private fun PresetPicture(preset: Preset.Image) {
         modifier = Modifier.size(SchemeChipFootprint).clip(RoundedCornerShape(radius.small)),
     )
 }
-
-// b-311d
 
 /**
  * A card for each starter, with the scheme the starter makes of [document] drawn as a chip. The

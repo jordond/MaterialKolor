@@ -71,7 +71,7 @@ internal const val CONTRAST_ROW_TAG: String = "contrast-row"
 
 /**
  * The Contrast tab, every pair the audit of [result] rates for its target in the modes [mode]
- * shows (F-24).
+ * shows.
  *
  * A row shows both colors, the pair's names, its WCAG 2.2 ratio and its badge, and says why a
  * failing pair fails and what to try. Failures only hides the pairs that pass, and a mode left
@@ -147,7 +147,7 @@ private fun PairRow(
         modifier = Modifier
             .fillMaxWidth()
             .clearAndSetSemantics {
-                // A row has no role, so the web mirror would drop a name. Its text is read instead (S5).
+                // A row has no role, so the web mirror would drop a name. Its text is read instead.
                 text = AnnotatedString(description)
                 testTag = CONTRAST_ROW_TAG
             }.padding(vertical = spacing.small),

@@ -11,9 +11,9 @@ import androidx.compose.ui.semantics.semantics
  *
  * Put it on the node that takes the toggle, after its `toggleable` with the checkbox role. Off the
  * web [name] becomes the node's content description, and the toggleable reports the role and
- * whether it is on. The web mirror drops that state and reads every clickable as a button (P3), so
+ * whether it is on. The web mirror drops that state and reads every clickable as a button, so
  * there the checkbox word and the state travel in the name instead, as in "Favourite Flat white,
- * checkbox, checked" (D37).
+ * checkbox, checked".
  *
  * @param[name] What the toggle stands for, read out as its name.
  * @param[checked] Whether it is on.
@@ -35,8 +35,8 @@ public fun Modifier.foldedToggleName(
  *
  * Put it on the node that takes the switch, after its `toggleable` with the switch role. Off the web
  * [name] becomes the node's content description, and the toggleable reports the role and whether it
- * is on. The web mirror drops that state and reads every clickable as a button (P3), so there the
- * switch word and the state travel in the name instead, as in "Wi-Fi, switch, on" (D37).
+ * is on. The web mirror drops that state and reads every clickable as a button, so there the
+ * switch word and the state travel in the name instead, as in "Wi-Fi, switch, on".
  *
  * @param[name] What the switch turns on and off, read out as its name.
  * @param[checked] Whether it is on.

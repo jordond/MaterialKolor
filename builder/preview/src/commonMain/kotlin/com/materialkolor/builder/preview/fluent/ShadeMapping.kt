@@ -29,7 +29,7 @@ import kotlin.math.roundToInt
 /**
  * The shade legend, the seven accent shades Fluent cuts from the pane's primary ramp, in order
  * from darkest to lightest, each with its color, its tone and where the real controls paint it in
- * this mode (F-03, F-44).
+ * this mode.
  *
  * Every swatch declares its own shade, which makes the legend the one place Light1 shows, since no
  * Fluent control paints it. Under the swatches sits the note that Fluent keeps its neutrals and

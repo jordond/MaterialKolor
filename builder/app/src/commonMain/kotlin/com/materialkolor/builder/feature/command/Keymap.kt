@@ -108,7 +108,7 @@ internal data class Chord(
 }
 
 /**
- * How the cheat sheet groups the shortcuts, in the order of the spec's keyboard map.
+ * How the cheat sheet groups the shortcuts, in the order it shows the groups.
  */
 internal enum class ShortcutGroup {
     General,
@@ -118,7 +118,7 @@ internal enum class ShortcutGroup {
 }
 
 /**
- * The keyboard map (spec section 6), each shortcut with the chords that press it.
+ * The keyboard map, each shortcut with the chords that press it.
  *
  * Shortcuts marked [inFields] fire while a text field has focus. The rest stay out of the way of
  * typing, and every single key, Space included, can be turned off in the cheat sheet.
@@ -132,7 +132,7 @@ internal enum class Shortcut(
     val group: ShortcutGroup,
     val chords: List<Chord>,
     val inFields: Boolean = false,
-    val inRegistry: Boolean = true, // b-315c
+    val inRegistry: Boolean = true,
 ) {
     Palette(ShortcutGroup.General, listOf(Chord(physical(Key.K, "K"), primary = true)), inFields = true),
     CheatSheet(ShortcutGroup.General, listOf(Chord(ChordKey.Typed('?', Key.Slash, usShift = true)))),
@@ -161,7 +161,7 @@ internal enum class Shortcut(
             Chord(physical(Key.Y, "Y"), primary = true),
         ),
     ),
-    History(ShortcutGroup.Theme, listOf(Chord(physical(Key.H, "H")))), // b-509
+    History(ShortcutGroup.Theme, listOf(Chord(physical(Key.H, "H")))),
 
     // Only Cmd or Ctrl+O fires in a field, never P on its own.
     Projects(
@@ -176,8 +176,7 @@ internal enum class Shortcut(
     Fullscreen(ShortcutGroup.Preview, listOf(Chord(physical(Key.F, "F")))),
     Poster(ShortcutGroup.Preview, listOf(Chord(physical(Key.Backslash, "\\"), primary = true)), inFields = true),
 
-    // b-315c
-    VisionMenu(ShortcutGroup.Preview, listOf(Chord(physical(Key.V, "V")))), // b-315d
+    VisionMenu(ShortcutGroup.Preview, listOf(Chord(physical(Key.V, "V")))),
     Grayscale(ShortcutGroup.Preview, listOf(Chord(physical(Key.B, "B"))), inRegistry = false),
     ;
 

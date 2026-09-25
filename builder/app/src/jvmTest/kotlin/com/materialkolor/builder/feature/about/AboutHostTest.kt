@@ -62,8 +62,6 @@ import kotlin.test.Test
 private const val WIDTH = 1280
 private const val HEIGHT = 800
 
-// b-314a
-
 /**
  * The first line of both OFL texts, under the copyright lines.
  */
@@ -74,7 +72,6 @@ private const val OFL_HEADING = "SIL OPEN FONT LICENSE Version 1.1"
  */
 private val BUILDER_VERSION_LINE = "Builder ${BuildKonfig.BUILDER_VERSION}"
 
-// b-314
 @OptIn(ExperimentalTestApi::class, KitTestApi::class)
 class AboutHostTest {
     private val platform = FakePlatform()
@@ -93,7 +90,6 @@ class AboutHostTest {
             onNodeWithText("MaterialKolor ${BuildKonfig.MATERIAL_KOLOR_VERSION}").assertExists()
         }
 
-    // b-314a
     @Test
     fun about_withTheWebKeyboard_listIsATabStop() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
@@ -290,7 +286,6 @@ class AboutHostTest {
                 LocalUriHandler provides uriHandler,
             ) {
                 workspace = metroViewModel()
-                // b-314a
                 if (webKeyboard) {
                     ProvideWebKeyboardForTest { Root(graph) }
                 } else {

@@ -44,9 +44,9 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The roles pinned to colors of their own, one row per pinned mode with its clear, then Clear all
- * (F-15). It lists the document as stored, so a target that ignores pins still shows them, says
- * why in place of the notice and lets none of them go.
+ * The roles pinned to colors of their own, one row per pinned mode with its clear, then Clear all.
+ * It lists the document as stored, so a target that ignores pins still shows them, says why in
+ * place of the notice and lets none of them go.
  *
  * A clear hands a keyboard user's focus to the next pin's clear, or the previous one at the end of
  * the list. With the list gone it goes to the last key color's Pick in [picks].

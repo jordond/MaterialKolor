@@ -25,7 +25,6 @@ private const val WAIT_MILLIS = 10_000L
  */
 private const val PAUSES = 3
 
-// pf-3
 @OptIn(ExperimentalTestApi::class)
 class FluentWarmUpTest {
     private val platform = FakePlatform()

@@ -32,7 +32,6 @@ describe('a route that throws', () => {
   });
 });
 
-// b-505
 describe('the robots tag', () => {
   const staging = { ...env, ROBOTS_TAG: 'noindex' } as Env;
   const card = `/og/${namedCode([...new TextEncoder().encode('Robots')])}.png`;

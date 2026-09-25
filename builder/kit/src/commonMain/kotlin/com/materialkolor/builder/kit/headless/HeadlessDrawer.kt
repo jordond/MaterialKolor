@@ -81,8 +81,8 @@ internal fun HeadlessDrawer(
     style: OverlayStyle,
     returnFocusTo: FocusRequester?,
     modifier: Modifier = Modifier,
-    subtitle: String? = null, // b-511
-    footer: (@Composable () -> Unit)? = null, // b-511
+    subtitle: String? = null,
+    footer: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     require(edge != PanelEdge.Bottom) { "A drawer pins to the start or the end, sheets own the bottom" }
@@ -91,7 +91,7 @@ internal fun HeadlessDrawer(
     HeadlessModal(visible, onDismissRequest, style.scrim, alignment, returnFocusTo) {
         BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = alignment) {
             val fullWidth = widthFraction >= 1f
-            val shape = drawerShape(edge, if (fullWidth) 0.dp else style.drawerRadius) // b-511
+            val shape = drawerShape(edge, if (fullWidth) 0.dp else style.drawerRadius)
             Column(
                 modifier = modifier
                     .animateEnterExit(enter = panelEnter(edge), exit = panelExit(edge))
@@ -104,7 +104,6 @@ internal fun HeadlessDrawer(
                     .modalPane(title)
                     .keepTaps(),
             ) {
-                // b-511
                 val padding = OverlayMetrics.panelPadding
                 HeadlessPanelHeader(title, closeLabel, onDismissRequest, style, subtitle)
                 Column(
@@ -147,7 +146,7 @@ internal fun HeadlessPanelHeader(
     closeLabel: String,
     onClose: () -> Unit,
     style: OverlayStyle,
-    subtitle: String? = null, // b-511
+    subtitle: String? = null,
 ) {
     val tokens = LocalBuilderTokens.current
     val padding = OverlayMetrics.panelPadding
@@ -196,7 +195,7 @@ private fun PanelFooter(
 }
 
 /**
- * A square close button as big as the touch target the layout asks for (AR-04).
+ * A square close button as big as the touch target the layout asks for.
  */
 @Composable
 internal fun HeadlessCloseButton(

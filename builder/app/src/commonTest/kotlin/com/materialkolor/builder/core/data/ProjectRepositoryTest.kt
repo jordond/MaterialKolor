@@ -282,7 +282,6 @@ class ProjectRepositoryTest {
             listedIds() shouldBe listOf(record.id)
         }
 
-    // b-310aa
     @Test
     fun delete_onlyTheHistoryFromANewerBuild_isTurnedDownAndWritesNothing() =
         runTest {

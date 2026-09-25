@@ -5,7 +5,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-315a
 class PaletteSearchTest {
     private val entries = listOf(
         entry("motionScheme.Expressive", "Motion scheme, Expressive", "Target options"),
@@ -34,7 +33,6 @@ class PaletteSearchTest {
         )
     }
 
-    // b-511
     @Test
     fun groups_leadWithRecents_thenEachCategoryWhereItsBestRowStood() {
         val rows = searchPalette(entries, "", recents = listOf("shuffle", "style.Vibrant"))
@@ -52,7 +50,6 @@ class PaletteSearchTest {
             searchPalette(entries, "contrast", emptyList()).first().id
     }
 
-    // b-511
     @Test
     fun keycapChords_splitChordsAtCommasAndKeysAtPlusSigns() {
         keycapChords("Ctrl+Shift+Z, Ctrl+Y") shouldBe listOf(listOf("Ctrl", "Shift", "Z"), listOf("Ctrl", "Y"))

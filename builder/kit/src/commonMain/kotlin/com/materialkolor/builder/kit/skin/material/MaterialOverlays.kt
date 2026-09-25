@@ -83,7 +83,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * The Material3 style for the headless overlays.
  *
  * It styles the overlays Material has no component for, the side panel, the end sheet, the bottom
- * sheet with three detents and the scroll area. Where overlays render in the page (D40) it also
+ * sheet with three detents and the scroll area. Where overlays render in the page it also
  * styles the headless tooltip that stands in for `PlainTooltip`, and through [materialMenuStyle]
  * the menu and the select's list that stand in for `DropdownMenu`. The dialog there draws Material's
  * own dialog container over the headless modal, whose veil reads `tokens.scrim` directly rather
@@ -109,7 +109,6 @@ internal fun materialOverlayStyle(
         popoverShape = popoverShape,
         dialogShape = shapes.extraLarge,
         panelRadius = LocalBuilderTokens.current.radius.medium,
-        // b-511
         // Material's extra large corner, as its side sheet and its dialogs use it.
         drawerRadius = LocalBuilderTokens.current.radius.large,
         divider = colors.outlineVariant,
@@ -128,7 +127,7 @@ internal fun materialOverlayStyle(
         toastContent = colors.inverseOnSurface,
         toastBorder = null,
         thumb = colors.outline,
-        panelTitle = MaterialTheme.typography.headlineSmall, // b-511
+        panelTitle = MaterialTheme.typography.headlineSmall,
     )
 }
 
@@ -147,8 +146,6 @@ internal fun materialMenuStyle(): OverlayStyle =
         popoverShape = MenuDefaults.shape,
         shadow = MenuDefaults.ShadowElevation,
     )
-
-// b-511
 
 /**
  * The style of a popover that holds more than a menu, Material's container with its large corner.
@@ -200,7 +197,7 @@ private fun tonal(
  * something inside has already taken it, a field that asks for it as it opens, and Esc closes it
  * even where the platform does not turn Esc into back.
  *
- * `AlertDialog` always opens a window of its own, so where overlays render in the page (D40) it
+ * `AlertDialog` always opens a window of its own, so where overlays render in the page it
  * gives way to [MaterialPageDialog].
  */
 @OptIn(ExperimentalComposeUiApi::class)
@@ -211,7 +208,7 @@ internal fun MaterialDialog(
     title: String,
     returnFocusTo: FocusRequester?,
     modifier: Modifier,
-    frame: DialogFrame, // b-511
+    frame: DialogFrame,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     if (LocalOverlaysInTree.current) {
@@ -251,7 +248,7 @@ internal fun MaterialDialog(
 }
 
 /**
- * Material's dialog container over the headless modal, for where overlays render in the page (D40).
+ * Material's dialog container over the headless modal, for where overlays render in the page.
  *
  * It takes the container colour, shape and tonal elevation of `AlertDialogDefaults` and Material's
  * headline for the title, and moves with the kit's motion. The headless modal holds focus inside,
@@ -296,7 +293,7 @@ private fun MaterialPageDialog(
                 CompositionLocalProvider(
                     LocalContentColor provides AlertDialogDefaults.textContentColor,
                     LocalTextStyle provides typography.bodyMedium,
-                ) { Column(Modifier.weight(1f, fill = false), content = content) } // b-230c
+                ) { Column(Modifier.weight(1f, fill = false), content = content) }
                 val actions = frame.actions
                 if (actions != null) {
                     Row(
@@ -312,7 +309,7 @@ private fun MaterialPageDialog(
 }
 
 /**
- * Material's `DropdownMenu` under [anchor]. Where overlays render in the page (D40) the same rows
+ * Material's `DropdownMenu` under [anchor]. Where overlays render in the page the same rows
  * sit in the headless dropdown in Material's menu container, since `DropdownMenu` always opens a
  * popup.
  */
@@ -406,7 +403,7 @@ private fun MaterialMenuRows(
  * Material's plain tooltip. It is persistent, so a tooltip shown by keyboard focus stays until focus
  * leaves rather than timing out under the reader.
  *
- * `TooltipBox` always opens a popup, so where overlays render in the page (D40) the headless
+ * `TooltipBox` always opens a popup, so where overlays render in the page the headless
  * tooltip draws the label in Material's inverse colours, out of the semantics tree.
  *
  * `TooltipBox` puts the modifier it is given on the anchor inside a box of its own, where a

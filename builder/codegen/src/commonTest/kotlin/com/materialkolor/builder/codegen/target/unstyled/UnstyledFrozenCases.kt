@@ -109,7 +109,6 @@ class UnstyledFrozenTest {
         assertTrue(entry("onBrandContainer", brand.dark.onContainer) in colors.mapBlock("darkColors"), colors)
     }
 
-    // b-111c
     @Test
     fun unstyledFrozen_allContrastsWithAccents_carriesEveryAccentInEveryMap() {
         val input = UnstyledFrozenCases.AccentsPinsAmoled.with(prefs = frozenPrefs(FrozenVariants.AllContrasts)).input

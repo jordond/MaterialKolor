@@ -80,7 +80,6 @@ class ShareDialogTest : SessionTestBase() {
             done.shouldBeEmpty()
         }
 
-    // b-228b
     @Test
     fun copy_thatFailsOnATouchScreen_withoutASheet_sendsAFingerBackToCopy() =
         runComposeUiTest {
@@ -118,7 +117,6 @@ class ShareDialogTest : SessionTestBase() {
             done.shouldBeEmpty()
         }
 
-    // b-228c
     @Test
     fun copyAndShare_thatBothFailOnATouchScreen_sendAFingerBackToCopy() {
         for (copyFirst in listOf(true, false)) {
@@ -175,8 +173,6 @@ class ShareDialogTest : SessionTestBase() {
             onAllNodes(hasText("Copy link")).assertCountEquals(0)
         }
 
-    // b-228aa
-    // b-511
     // One line in a field of its own that scrolls inside, with Copy link beside it, so a long link
     // never runs past the dialog's padding. A finger still copies it all with Copy link.
     @Test

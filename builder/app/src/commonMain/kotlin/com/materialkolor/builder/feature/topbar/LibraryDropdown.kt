@@ -27,15 +27,13 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-// b-406
-
 /**
  * The top bar buttons a Medium window moves into the overflow menu when the library dropdown needs
  * their room, in the order they go. History goes first, since its list opens under the overflow
  * button just as well, and Undo is the last to leave, since it gets the most use.
  */
 internal val MediumOverflowOrder: List<TopBarControl> =
-    listOf(TopBarControl.History, TopBarControl.Commands, TopBarControl.Redo, TopBarControl.Undo) // b-509
+    listOf(TopBarControl.History, TopBarControl.Commands, TopBarControl.Redo, TopBarControl.Undo)
 
 /**
  * How many of [MediumOverflowOrder] the Medium top bar has moved into its overflow menu, so the
@@ -123,7 +121,6 @@ internal fun LibraryDropdown(
     val shownMoved = fit.moved
     val widest = remember { WidestTrigger() }
     if (report != null) SideEffect { report.segmented = false }
-    // b-406g
     // Where the menu is a window of its own, on the desktop, the pick waits for it to finish leaving,
     // since a skin switch that closes the window while the bar is being measured crashes the scene.
     // In the page, on the web, the pick switches at once.
@@ -154,7 +151,7 @@ internal fun LibraryDropdown(
         val shown = subcompose(TriggerSlot.Shown) {
             LibrarySwitcher(
                 selected = selected,
-                onSwitch = pick, // b-406g
+                onSwitch = pick,
                 modifier = switcherModifier,
                 segmented = false,
             )
@@ -189,8 +186,6 @@ private fun SubcomposeMeasureScope.naturalWidth(
     return probe.maxOfOrNull { measurable -> measurable.measure(room).width } ?: 0
 }
 
-// b-512
-
 /**
  * Draws what it holds scaled down from its top start corner, just enough to stand no taller than
  * [max], and takes up only the scaled size. Something that fits already is left as it is. Presses
@@ -215,8 +210,6 @@ internal fun Modifier.shrinkToHeight(max: Dp): Modifier =
             }
         }
     }
-
-// b-406g
 
 /**
  * How long a menu window takes to leave, in frame time, with room to spare for Material's springs.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# V-07. Checks a deployed builder the way a browser sees it. The wasm has to arrive brotli-compressed
+# Checks a deployed builder the way a browser sees it. The wasm has to arrive brotli-compressed
 # and cached for good, and staging has to carry noindex while production must not. Each request is a
 # GET rather than a HEAD, since the edge only compresses a response that has a body, and each one
 # retries, since the first request to a new custom domain can fail while its certificate is issued.

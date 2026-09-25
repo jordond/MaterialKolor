@@ -11,8 +11,8 @@ import kotlin.test.Test
 
 /**
  * A disabled select still reads as a disabled pop-up button on the web, in every skin. The web
- * mirror reads a node with a click as a button (D40 P3), so a trigger with no click reads as a bare
- * group, which Material's did once its menu anchor was disabled (S5 row 10, gap G).
+ * mirror reads a node with a click as a button, so a trigger with no click reads as a bare group,
+ * which Material's did once its menu anchor was disabled.
  */
 @OptIn(ExperimentalTestApi::class, KitTestApi::class)
 class DisabledSelectWebRoleTest {

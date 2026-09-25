@@ -40,10 +40,10 @@ private val CalmerSeed = Argb(0xE53935)
 
 private const val EXPLAINER_TITLE = "Why primary differs from your seed"
 
-private const val SHARE_TITLE = "Share this theme" // b-306c
+private const val SHARE_TITLE = "Share this theme"
 
 /**
- * The panels the poster opens hand focus back to the button that opened them (AR-09).
+ * The panels the poster opens hand focus back to the button that opened them.
  */
 @OptIn(ExperimentalTestApi::class)
 class PosterFocusTest {
@@ -126,7 +126,6 @@ class PosterFocusTest {
             onNodeWithContentDescription("Copy Kotlin").assertIsFocused()
         }
 
-    // b-306c
     @Test
     fun manualCopy_posterCollapsedWhileOpen_doneStillCloses() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
@@ -143,7 +142,6 @@ class PosterFocusTest {
             onNodeWithText("Copy it yourself").assertDoesNotExist()
         }
 
-    // b-306c
     @Test
     fun share_openedFromTheDrawersGetALink_handsFocusBackToProjects() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
@@ -163,7 +161,6 @@ class PosterFocusTest {
             projects.assertIsFocused()
         }
 
-    // b-306c
     @Test
     fun share_openedFromTheTopBarAfterTheDrawer_handsFocusBackToTheTopBar() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {

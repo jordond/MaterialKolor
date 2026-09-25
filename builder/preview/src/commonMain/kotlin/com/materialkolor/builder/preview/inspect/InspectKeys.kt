@@ -12,8 +12,6 @@ import com.materialkolor.builder.preview.generated.resources.Res
 import com.materialkolor.builder.preview.generated.resources.inspect_pin_key
 import org.jetbrains.compose.resources.StringResource
 
-// b-315b
-
 /**
  * A key Inspect listens for, pressed with Shift or without and with no other modifier held.
  *

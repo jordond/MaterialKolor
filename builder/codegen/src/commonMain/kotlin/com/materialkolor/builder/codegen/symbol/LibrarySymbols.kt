@@ -18,7 +18,6 @@ public object Symbols {
     public val Unit: Symbol = Symbol("kotlin", "Unit", SymbolKind.Class)
     public val OptIn: Symbol = Symbol("kotlin", "OptIn", SymbolKind.Annotation)
 
-    // b-111b
     public val Map: Symbol = Symbol("kotlin.collections", "Map", SymbolKind.Class)
     public val MapOf: Symbol = Symbol("kotlin.collections", "mapOf", SymbolKind.Function)
 
@@ -47,7 +46,6 @@ public object Symbols {
     public val ExperimentalMaterial3ExpressiveApi: Symbol =
         Symbol(MATERIAL3, "ExperimentalMaterial3ExpressiveApi", SymbolKind.Annotation)
 
-    // b-111c
     // Android only, for the wallpaper colors an Android export can switch to.
 
     public val Build: Symbol = Symbol("android.os", "Build", SymbolKind.Class)
@@ -68,7 +66,6 @@ public object Symbols {
     public val ContrastThreshold: Symbol = Symbol(KOLOR_KTX, "ContrastThreshold", SymbolKind.Class)
     public val RememberDynamicScheme: Symbol = Symbol(KOLOR_KTX, "rememberDynamicScheme", SymbolKind.Function)
 
-    // b-112b
     public val MaterialKolors: Symbol = Symbol(KOLOR, "MaterialKolors", SymbolKind.Class)
 
     // MaterialKolor Material 3.
@@ -91,7 +88,6 @@ public object Symbols {
     public val BuildThemeV2: Symbol = Symbol(UNSTYLED_THEME, "buildThemeV2", SymbolKind.Function)
     public val ThemeToken: Symbol = Symbol(UNSTYLED_THEME, "ThemeToken", SymbolKind.Class)
 
-    // b-111b
     public val ThemeProperty: Symbol = Symbol(UNSTYLED_THEME, "ThemeProperty", SymbolKind.Class)
     public val UnstyledColorScheme: Symbol = Symbol(UNSTYLED_THEME, "ColorScheme", SymbolKind.Class)
 

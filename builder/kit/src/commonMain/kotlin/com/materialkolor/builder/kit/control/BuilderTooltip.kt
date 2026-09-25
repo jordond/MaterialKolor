@@ -13,8 +13,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
  * A short label over [content], shown on hover and on keyboard focus alike, so nothing it says is
- * only there for a mouse (AR-03). Focus a click leaves behind shows no label, the way it shows no
- * focus ring, and a press on [content] closes the label until the pointer moves off (D58).
+ * only there for a mouse. Focus a click leaves behind shows no label, the way it shows no
+ * focus ring, and a press on [content] closes the label until the pointer moves off.
  *
  * A tooltip repeats what an icon means. It never holds the only copy of something, so an icon
  * button under it still needs its own content description. Material3 draws its plain tooltip, the
@@ -35,7 +35,6 @@ public fun BuilderTooltip(
     when (overlayLibrary()) {
         Library.Material3 -> MaterialTooltip(text, modifier, content)
         Library.Unstyled -> HeadlessTooltip(text, unstyledOverlayStyle(tokens), modifier, content)
-        // fluent-placeholder
         Library.Fluent -> HeadlessTooltip(text, fluentOverlayStyle(tokens), modifier, content)
         Library.Custom -> HeadlessTooltip(text, customOverlayStyle(tokens), modifier, content)
     }

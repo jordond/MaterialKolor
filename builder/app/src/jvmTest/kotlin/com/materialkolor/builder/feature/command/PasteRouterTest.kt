@@ -21,10 +21,8 @@ private const val HEIGHT = 800
 private val Purple = Argb(0xFF6750A4.toInt())
 private val Blue = Argb(0xFF1A73E8.toInt())
 
-// b-315c
-
 /**
- * Text pasted with nothing editable focused, on the whole builder (F-05, F-32).
+ * Text pasted with nothing editable focused, on the whole builder.
  */
 @OptIn(ExperimentalTestApi::class)
 class PasteRouterTest {
@@ -84,7 +82,6 @@ class PasteRouterTest {
             named("Open the shared theme?") shouldBe false
         }
 
-    // b-315d
     @Test
     fun pasteWithTheVisionMenuOpen_changesNothing() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {

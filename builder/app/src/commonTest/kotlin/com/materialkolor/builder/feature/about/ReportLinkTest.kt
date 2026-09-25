@@ -12,7 +12,6 @@ import io.kotest.matchers.string.shouldStartWith
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlin.test.Test
 
-// b-314
 class ReportLinkTest {
     @Test
     fun reportUrl_anyDetails_opensANewIssueWithTheTitleLeftEmpty() {

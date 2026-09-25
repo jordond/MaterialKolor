@@ -89,8 +89,8 @@ internal fun TextFields(state: DemoAppState) {
  * A single line field on the gallery's own filled look, built from the foundation field and a
  * decoration of the gallery's own, so its inner text goes through the kit's
  * [InnerTextWithoutHandles]. On the web a long press on its text then puts up no selection
- * handles, which would take the page's accessibility mirror over (D45). Compose Unstyled's own
- * field keeps its inner text to itself, so it has no place for that.
+ * handles, which would take the page's accessibility mirror over. Compose Unstyled's own field
+ * keeps its inner text to itself, so it has no place for that.
  */
 @Composable
 private fun GalleryTextField(

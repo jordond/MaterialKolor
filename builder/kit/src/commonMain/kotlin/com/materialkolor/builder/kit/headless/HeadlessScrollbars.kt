@@ -44,8 +44,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  *
  * The thumb stays on screen rather than fading while idle, so how much is left to read never
  * depends on moving the pointer first. On the web the area is also a Tab stop while it has more
- * to show than fits, with the kit's focus ring, and the arrows and Page Up and Page Down scroll it
- * (S5 row 22).
+ * to show than fits, with the kit's focus ring, and the arrows and Page Up and Page Down scroll it.
  *
  * @param[state] The scroll position, hoisted so a caller can jump to a section.
  * @param[style] The skin's overlay style, for the thumb and the focus ring.
@@ -62,7 +61,7 @@ internal fun HeadlessScrollArea(
     style: OverlayStyle,
     modifier: Modifier,
     tabStop: Boolean = true,
-    fitContent: Boolean = false, // b-511
+    fitContent: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val keys = if (tabStop && LocalWebKeyboard.current) Modifier.scrollAreaKeys(state, style) else Modifier
@@ -75,7 +74,6 @@ internal fun HeadlessScrollArea(
             content = content,
         )
         if (fitContent) {
-            // b-511
             // Sized from the column, so the scrollbar never makes the area taller than what it holds.
             Box(Modifier.matchParentSize(), contentAlignment = Alignment.CenterEnd) {
                 HeadlessVerticalScrollbar(state, style, Modifier.fillMaxHeight())

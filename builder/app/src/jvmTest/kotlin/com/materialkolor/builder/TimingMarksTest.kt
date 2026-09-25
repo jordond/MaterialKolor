@@ -28,7 +28,6 @@ private const val WIDTH = 1280
 private const val HEIGHT = 800
 private const val WAIT_MILLIS = 5_000L
 
-// b-504
 @OptIn(ExperimentalTestApi::class)
 class TimingMarksTest {
     private val platform = FakePlatform()

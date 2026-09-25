@@ -78,7 +78,7 @@ internal data class SelectableStyle(
  * @property[endRingOffset] How far the focus ring stands off the rounded end of the first and the
  * last option. Where an end option is as round as the frame's end, a ring at the usual offset
  * follows the frame's own outline and cannot be told from it, so the frame's inset takes it just
- * outside (S5 rows 8 and 35). Its top and bottom keep the usual offset, in line with the rings of
+ * outside. Its top and bottom keep the usual offset, in line with the rings of
  * the options between.
  */
 @Immutable

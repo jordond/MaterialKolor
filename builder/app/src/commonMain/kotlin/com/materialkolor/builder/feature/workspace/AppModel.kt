@@ -30,13 +30,13 @@ import kotlinx.coroutines.launch
  * that opens the first project.
  *
  * The chrome's appearance comes from the preferences and the system, never from the preview mode,
- * and nothing here writes the preview mode (F-04). The skin is not held here. The root derives it
- * from the same collected document it resolves the theme from, so there is one skin source.
+ * and nothing here writes the preview mode. The skin is not held here. The root derives it from the
+ * same collected document it resolves the theme from, so there is one skin source.
  *
- * It also keeps what the banners above the workspace say for the whole session (F-38). Why the
- * address did not open what it asked for, until it is dismissed. A full storage, from the save that
- * failed after the repository made room until a save lands. No storage at all, until its banner is
- * closed. Where a reload does nothing, data a newer build saved, until its banner is dismissed.
+ * It also keeps what the banners above the workspace say for the whole session. Why the address did
+ * not open what it asked for, until it is dismissed. A full storage, from the save that failed
+ * after the repository made room until a save lands. No storage at all, until its banner is closed.
+ * Where a reload does nothing, data a newer build saved, until its banner is dismissed.
  */
 @Stable
 @Inject
@@ -54,8 +54,8 @@ internal class AppModel(
             systemDark = environment.prefersDark.value,
             systemReducedMotion = environment.reducedMotion.value,
             coarsePointer = environment.coarsePointer.value,
-            storageUnavailable = !environment.storageAvailable, // b-314b
-            canReload = environment.canReload, // b-314ba
+            storageUnavailable = !environment.storageAvailable,
+            canReload = environment.canReload,
         ),
     ) {
     private var booted = false
@@ -67,13 +67,11 @@ internal class AppModel(
         environment.prefersDark.mergeState { state, dark -> state.copy(systemDark = dark) }
         environment.reducedMotion.mergeState { state, reduced -> state.copy(systemReducedMotion = reduced) }
         environment.coarsePointer.mergeState { state, coarse -> state.copy(coarsePointer = coarse) }
-        // b-221c
         // Undispatched, since a hidden page may never run another task and the autosave waiting
         // would be lost with the tab.
         viewModelScope.launch(Dispatchers.Unconfined) {
             environment.pageHides.collect { session.flush() }
         }
-        // b-314b
         session.saveStatus.mergeState { state, status ->
             state.copy(storageFull = storageFullAfter(state.storageFull, status))
         }
@@ -91,11 +89,9 @@ internal class AppModel(
         booted = true
         val notice = session.boot(router.initial)
         router.replaceHome()
-        val openedDefaults = session.document.value == ThemeDocument.Default // b-314b
+        val openedDefaults = session.document.value == ThemeDocument.Default
         updateState { state -> state.copy(bootNotice = notice, openedDefaults = openedDefaults) }
     }
-
-    // b-314b
 
     /**
      * Put the boot notice away for the rest of the session.
@@ -111,8 +107,6 @@ internal class AppModel(
         updateState { state -> state.copy(storageUnavailableDismissed = true) }
     }
 
-    // b-314ba
-
     /**
      * Put the banner about a newer build's data away for the rest of the session.
      */
@@ -122,15 +116,15 @@ internal class AppModel(
 
     /**
      * Load the address the page opened on again, the link a newer build wrote for example, so a
-     * newer build can read it. The address bar says `/` by now (D15), so the path comes from the
-     * route read at boot.
+     * newer build can read it. The address bar says `/` by now, so the path comes from the route
+     * read at boot.
      */
     fun reloadLink() {
         environment.reload(pathOf(router.initial))
     }
 
     /**
-     * Load the builder again at `/`, so a newer build picks up the data it saved here (D41).
+     * Load the builder again at `/`, so a newer build picks up the data it saved here.
      */
     fun reloadHome() {
         environment.reload(HOME_PATH)
@@ -167,12 +161,10 @@ internal class AppModel(
         val systemReducedMotion: Boolean,
         val coarsePointer: Boolean,
         val bootNotice: BootNotice? = null,
-        // b-314b
         val openedDefaults: Boolean = false,
         val storageFull: Boolean = false,
         val storageUnavailable: Boolean = false,
         val storageUnavailableDismissed: Boolean = false,
-        // b-314ba
         val canReload: Boolean = false,
         val newerDataDismissed: Boolean = false,
     ) {
@@ -197,8 +189,6 @@ internal class AppModel(
             }
     }
 }
-
-// b-314b
 
 /**
  * Whether storage is full after [status], given it was [full] before. A save that is waiting says

@@ -77,7 +77,6 @@ class ExportSheetTest {
             announced shouldBe emptyList()
         }
 
-    // b-221c
     @Test
     fun copy_eachTimeItWorks_readsCopiedOutOnce() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
@@ -122,7 +121,6 @@ class ExportSheetTest {
             exportButtons().forEach { button -> button.assertIsEnabled() }
         }
 
-    // b-221ca
     @Test
     fun invalidPackageDraft_collapsingOptions_letsTheExportThrough() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
@@ -160,7 +158,6 @@ class ExportSheetTest {
             onAllNodesWithText("is not a package name", substring = true).assertCountEquals(0)
         }
 
-    // b-221f
     @Test
     fun packageDraft_escBeforeItsEchoes_neverMovesTheText() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
@@ -341,7 +338,7 @@ class ExportSheetTest {
         files: FakeFileSaver,
         coarsePointer: Boolean,
         preferences: Preferences = Preferences(),
-        echoes: MutableList<() -> Unit>? = null, // b-221f
+        echoes: MutableList<() -> Unit>? = null,
     ) {
         val document = ThemeDocument.Default
         var state by mutableStateOf(ExportModel.State(document = document, preferences = preferences))
@@ -375,7 +372,6 @@ class ExportSheetTest {
                             files = files,
                             dispatcher = rememberDispatcher<ExportAction> { action ->
                                 exported += action
-                                // b-221f
                                 if (action is ExportAction.SetPackageName && echoes != null) {
                                     val target = state.target
                                     echoes += {

@@ -35,15 +35,13 @@ public fun BuilderScrollArea(
     modifier: Modifier = Modifier,
     state: ScrollState = rememberScrollState(),
     tabStop: Boolean = true,
-    fitContent: Boolean = false, // b-511
-    scrollbarInGutter: Boolean = false, // b-511
+    fitContent: Boolean = false,
+    scrollbarInGutter: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val area = if (scrollbarInGutter) modifier.bleedEnd(ScrollbarRoom) else modifier
     HeadlessScrollArea(state, overlayStyle(LocalSkin.current.library), area, tabStop, fitContent, content)
 }
-
-// b-511
 
 /**
  * How much room the scrollbar keeps at the end of the area, its thumb and the gap on either side.

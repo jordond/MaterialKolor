@@ -4,8 +4,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.input.InputModeManager
 
-// b-306c
-
 /**
  * Moves the focus to [target] ahead of a button that is about to remove itself, while the keyboard
  * is in use, so the user carries on from somewhere close by. A button that goes while it holds the

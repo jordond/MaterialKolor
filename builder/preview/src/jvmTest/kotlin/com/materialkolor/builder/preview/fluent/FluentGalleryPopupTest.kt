@@ -39,7 +39,7 @@ private val GallerySources: List<String> = listOf(
 
 /**
  * Words in the names of what opens a popup, a window or a portal, which on the web take the mirror
- * over (D40). Fluent's side and top navigation carry tooltips, and its menu items flyouts.
+ * over. Fluent's side and top navigation carry tooltips, and its menu items flyouts.
  */
 private val GalleryPopupWords: List<String> = listOf(
     "Popup",
@@ -61,7 +61,8 @@ private val GalleryPopupWords: List<String> = listOf(
 
 /**
  * Fluent's own parts the gallery must not use. Its slider's thumb opens a popup while dragged, its
- * text field keeps its inner text out of the D45 lever, and its expander animates past frozen motion.
+ * text field keeps its inner text away from the kit's `InnerTextWithoutHandles`, and its expander
+ * animates past frozen motion.
  */
 private val GalleryBannedFluent: Set<String> = setOf(
     "io.github.composefluent.component.Slider",
@@ -70,7 +71,7 @@ private val GalleryBannedFluent: Set<String> = setOf(
 )
 
 /**
- * What the gallery may take from the kit, its motion, the fold modifiers and the text lever of D45.
+ * What the gallery may take from the kit, its motion, the fold modifiers and `InnerTextWithoutHandles`.
  */
 private val GalleryKitImports: List<String> = listOf(
     "com.materialkolor.builder.kit.motion.",
@@ -91,7 +92,7 @@ private val EndlessProgress = Regex("""\bProgress(Bar|Ring)\((?!\s*progress\b)""
 
 /**
  * The Fluent gallery never opens a popup, a window or a portal, which on the web take the mirror
- * over (D40), and never loops.
+ * over, and never loops.
  */
 @OptIn(ExperimentalTestApi::class)
 class FluentGalleryPopupTest {

@@ -51,10 +51,8 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-// b-314b
-
 /**
- * The one stack of banners below the top bar, wired to the models that raise them (F-38).
+ * The one stack of banners below the top bar, wired to the models that raise them.
  *
  * The app model says why the address did not open what it asked for and how storage is doing, and
  * the projects model says whether another tab clashed, whether the theme is saved yet and whether a
@@ -75,7 +73,7 @@ internal fun WorkspaceBanners(
     WorkspaceBanners(
         app = appState,
         projects = projectsState,
-        drawerOpen = state.panel == Panel.Projects, // b-314ba
+        drawerOpen = state.panel == Panel.Projects,
         onAction = { action ->
             when (action) {
                 is BannerAction.ResolveConflict -> {
@@ -106,7 +104,6 @@ internal fun WorkspaceBanners(
                 BannerAction.ReloadHome -> {
                     app.reloadHome()
                 }
-                // b-314ba
                 BannerAction.DismissNewerData -> {
                     app.dismissNewerData()
                 }
@@ -115,8 +112,6 @@ internal fun WorkspaceBanners(
         modifier = modifier,
     )
 }
-
-// b-314ba
 
 /**
  * The banners [app] and [projects] raise, drawn as one stack, with every button handing what it
@@ -237,8 +232,6 @@ internal sealed interface BannerAction {
      */
     data object ReloadHome : BannerAction
 
-    // b-314ba
-
     /**
      * Put the banner about a newer build's data away, where a reload does nothing.
      */
@@ -266,7 +259,6 @@ internal fun workspaceBanners(
         if (app.storageUnavailable && !app.storageUnavailableDismissed && !drawerOpen) {
             add(WorkspaceBanner.StorageUnavailable)
         }
-        // b-314ba
         if (projects.transient && projects.storageAvailable && !app.storageFull) add(WorkspaceBanner.UnsavedTheme)
         if (projects.newerData && !app.newerDataDismissed) add(WorkspaceBanner.NewerData)
     }
@@ -292,7 +284,7 @@ private fun bootBanner(app: AppModel.State): WorkspaceBanner? {
 @Composable
 internal fun BannerStack(
     banners: List<WorkspaceBanner>,
-    canReload: Boolean, // b-314ba
+    canReload: Boolean,
     onAction: (BannerAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -311,7 +303,6 @@ internal fun BannerStack(
         ) {
             banners.forEach { banner ->
                 key(banner) {
-                    // b-314ba
                     AnnounceOnce(stringResource(messageOf(banner)))
                     Banner(banner, canReload, onAction)
                 }
@@ -319,8 +310,6 @@ internal fun BannerStack(
         }
     }
 }
-
-// b-314ba
 
 /**
  * Reads [message] out once through [LocalAnnouncer] as its banner shows up. A recomposition or a
@@ -354,7 +343,7 @@ private fun messageOf(banner: WorkspaceBanner): StringResource =
 @Composable
 private fun Banner(
     banner: WorkspaceBanner,
-    canReload: Boolean, // b-314ba
+    canReload: Boolean,
     onAction: (BannerAction) -> Unit,
 ) {
     when (banner) {
@@ -377,7 +366,6 @@ private fun Banner(
         }
         WorkspaceBanner.NewerVersion -> {
             BootNoticeBanner(messageOf(banner), onAction, icon = IconId.Info) {
-                // b-314ba
                 if (canReload) {
                     BuilderButton(
                         onClick = { onAction(BannerAction.ReloadLink) },
@@ -400,7 +388,6 @@ private fun Banner(
             SharedLinkBanner(onSave = { onAction(BannerAction.SaveTheme) })
         }
         WorkspaceBanner.NewerData -> {
-            // b-314ba
             if (canReload) {
                 NewerDataBanner(onReload = { onAction(BannerAction.ReloadHome) })
             } else {

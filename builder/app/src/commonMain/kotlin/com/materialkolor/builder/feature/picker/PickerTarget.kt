@@ -45,8 +45,6 @@ internal sealed interface PickerTarget {
     data object CmfSeed : PickerTarget
 }
 
-// b-307
-
 /**
  * The control that says whether [this] takes input on the document's target.
  */

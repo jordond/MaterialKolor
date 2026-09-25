@@ -26,16 +26,16 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The poster shrunk to its 72 dp strip, the seed swatch, Shuffle, Projects and the button that
- * opens the poster again (F-66). The workspace remembers the choice in the browser's preferences.
+ * opens the poster again. The workspace remembers the choice in the browser's preferences.
  *
- * @param[focus] Where the projects drawer hands focus back once it closes (AR-09).
+ * @param[focus] Where the projects drawer hands focus back once it closes.
  */
 @Composable
 internal fun PosterRail(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
-    focus: PosterFocus? = null, // b-221f
+    focus: PosterFocus? = null,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     Column(
@@ -49,7 +49,7 @@ internal fun PosterRail(
             icon = IconId.Folder,
             description = stringResource(Res.string.poster_projects),
             onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Projects)) },
-            buttonModifier = triggerFocus(focus?.projects), // b-221f
+            buttonModifier = triggerFocus(focus?.projects),
         )
         PosterIconButton(
             icon = IconId.Expand,
@@ -73,7 +73,6 @@ internal fun SeedSwatch(
     modifier: Modifier = Modifier,
 ) {
     val tokens = LocalBuilderTokens.current
-    // b-510
     Box(
         modifier = modifier
             .size(tokens.iconSize + tokens.spacing.medium)

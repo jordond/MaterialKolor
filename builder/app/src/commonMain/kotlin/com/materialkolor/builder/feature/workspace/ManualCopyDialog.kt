@@ -26,14 +26,14 @@ import org.jetbrains.compose.resources.stringResource
 private const val MANUAL_COPY_HEIGHT_FRACTION = 0.5f
 
 /**
- * The text a copy the browser refused was for, to select and copy by hand (F-26). The export sheet
- * and the poster's copy buttons both open it, and neither says Copied when it does.
+ * The text a copy the browser refused was for, to select and copy by hand. The export sheet and the
+ * poster's copy buttons both open it, and neither says Copied when it does.
  *
- * A hex or a Kotlin literal from the poster is one line, which a finger selects too. A file from the
- * export sheet is several, which on the web only a mouse selects (D45). So on a touch
- * screen the hint sends a finger to [saveLabel], the sheet's zip button, or else back to Copy.
+ * A hex or a Kotlin literal from the poster is one line, which a finger selects too. A file from
+ * the export sheet is several, which on the web only a mouse selects. So on a touch screen the hint
+ * sends a finger to [saveLabel], the sheet's zip button, or else back to Copy.
  *
- * @param[returnFocusTo] The copy button that opened it, which gets focus back once it closes (AR-09).
+ * @param[returnFocusTo] The copy button that opened it, which gets focus back once it closes.
  * @param[saveLabel] The label of the button that saves the files another way, when there is one.
  */
 @Composable
@@ -41,11 +41,10 @@ internal fun ManualCopyDialog(
     visible: Boolean,
     text: String,
     onDismissRequest: () -> Unit,
-    returnFocusTo: FocusRequester? = null, // b-221f
-    saveLabel: String? = null, // b-228aa
+    returnFocusTo: FocusRequester? = null,
+    saveLabel: String? = null,
 ) {
     val layout = LocalLayout.current
-    // b-228aa
     // Only the web reports a coarse pointer, so this is a finger on the web.
     val fingerCannotSelect = layout.coarsePointer && text.any { char -> char == '\n' || char == '\r' }
     val hint = when {
@@ -57,7 +56,7 @@ internal fun ManualCopyDialog(
         visible = visible,
         onDismissRequest = onDismissRequest,
         title = stringResource(Res.string.workspace_manual_copy_title),
-        returnFocusTo = returnFocusTo, // b-221f
+        returnFocusTo = returnFocusTo,
         actions = {
             BuilderButton(
                 onClick = onDismissRequest,
@@ -68,7 +67,6 @@ internal fun ManualCopyDialog(
     ) {
         BuilderText(text = hint, emphasis = Emphasis.Secondary)
         BuilderScrollArea(Modifier.heightIn(max = layout.heightDp * MANUAL_COPY_HEIGHT_FRACTION)) {
-            // b-228a
             SelectableText(text = text, style = BuilderTextStyle.Value)
         }
     }

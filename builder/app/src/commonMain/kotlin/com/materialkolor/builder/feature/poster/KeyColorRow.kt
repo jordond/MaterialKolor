@@ -55,8 +55,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The six key colors, each set by hand or still coming from the seed, with Reset all under them
- * (F-14).
+ * The six key colors, each set by hand or still coming from the seed, with Reset all under them.
  *
  * A target that ignores a palette keeps its row on screen but takes no input there, and says why
  * once under the rows. Fluent still takes the primary, which moves its accent ramp.
@@ -141,7 +140,6 @@ internal fun KeyColorRow(
             )
             BuilderIconButton(
                 onClick = {
-                    // b-307
                     dispatcher.dispatch(WorkspaceAction.OpenPicker(PickerTarget.KeyColorOverride(slot), picks[slot]))
                 },
                 icon = IconId.Eyedropper,
@@ -172,10 +170,10 @@ internal fun KeyColorRow(
 
 /**
  * Under a primary set by hand, the reminder that it moves only the primary palette while the seed
- * keeps the rest (D12), and Use as seed for anyone who wants that color to drive everything. Use
- * as seed makes it the seed and hands the primary back to it, as one undo entry, and hands a
- * keyboard user's focus to [pick] as the line goes. Fluent takes no other palette, so there the
- * reminder says the primary moves the accent ramp instead.
+ * keeps the rest, and Use as seed for anyone who wants that color to drive everything. Use as seed
+ * makes it the seed and hands the primary back to it, as one undo entry, and hands a keyboard
+ * user's focus to [pick] as the line goes. Fluent takes no other palette, so there the reminder
+ * says the primary moves the accent ramp instead.
  */
 @Composable
 private fun PrimaryOverrideLine(

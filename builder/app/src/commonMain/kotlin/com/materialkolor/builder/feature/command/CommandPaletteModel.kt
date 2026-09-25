@@ -121,8 +121,6 @@ internal fun searchPalette(
         ).map { (entry, _) -> entry }
 }
 
-// b-511
-
 /**
  * A run of the palette's rows under one header.
  *

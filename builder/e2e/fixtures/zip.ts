@@ -1,6 +1,5 @@
 import { inflateRawSync } from 'node:zlib';
 
-// b-503
 // Just enough of a zip reader for the export spec: the central directory's entries, stored or
 // deflated, read back to their bytes.
 

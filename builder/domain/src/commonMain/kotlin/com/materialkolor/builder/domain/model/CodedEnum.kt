@@ -8,8 +8,8 @@ package com.materialkolor.builder.domain.model
  * Codes are never reused, even when an entry is dropped.
  *
  * Every enum that implements this is listed by hand in `CodedEnumTest`, because common code cannot
- * go looking for them. A slice that adds one adds it to that list in the same change, otherwise its
- * codes go unchecked.
+ * go looking for them. A change that adds one adds it to that list too, otherwise its codes go
+ * unchecked.
  *
  * @property[code] The number the codec writes for this entry, unique within its enum.
  */

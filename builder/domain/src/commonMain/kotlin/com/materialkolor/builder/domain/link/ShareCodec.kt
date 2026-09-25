@@ -67,7 +67,7 @@ public sealed interface DecodeResult {
  * in the same order, and pins and custom tones go out in code order, so equal documents give equal
  * codes. Reading is just as strict and refuses anything the writer would never produce, which
  * means a code that reads cleanly writes back to itself. The one exception is a contrast between
- * the four named levels, which older codes can carry and which reads as the nearest level (D53).
+ * the four named levels, which older codes can carry and which reads as the nearest level.
  *
  * A document that passes [validateAccents] and holds a named contrast level comes back from its
  * code unchanged apart from its seed source. The writer refuses more than [MAX_ACCENTS] accents or an accent name over

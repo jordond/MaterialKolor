@@ -13,8 +13,8 @@ import com.materialkolor.builder.preview.split.PaneSpec
  * The Custom sample app, the cafe ordering app.
  *
  * The app is built from the builder's own kit controls under [CustomPaneTheme], so they use the
- * pane's Custom slots and not the chrome's. Nothing in it opens a popup, a dialog or an overlay
- * (D40), a confirmation is drawn in place.
+ * pane's Custom slots and not the chrome's. Nothing in it opens a popup, a dialog or an overlay. A
+ * confirmation is drawn in place.
  *
  * @param[spec] The pane the app is drawn in.
  * @param[state] What the app remembers, shared by both copies.

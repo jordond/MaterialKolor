@@ -13,7 +13,6 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-// b-508
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProjectSessionTimelineTest : SessionTestBase() {
     @Test

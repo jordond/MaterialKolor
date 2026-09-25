@@ -45,7 +45,6 @@ import kotlin.test.Test
 private const val WIDTH = 1280
 private const val HEIGHT = 800
 
-// b-221c
 @OptIn(ExperimentalTestApi::class)
 class BuilderRootTest {
     private val platform = FakePlatform()
@@ -99,7 +98,6 @@ class BuilderRootTest {
 
     @Test
     fun librarySwitcher_arrowMovesFocusOnlyAndEnterSwitchesAsOneUndoEntry() =
-        // b-231
         // Wide enough for the segmented switcher beside the top bar's full actions.
         runDesktopComposeUiTest(width = 1600, height = HEIGHT) {
             val graph = showRoot()
@@ -145,7 +143,6 @@ class BuilderRootTest {
             onNodeWithContentDescription("Share").assertIsFocused()
         }
 
-    // b-221ca
     @Test
     fun posterCopy_writesTheClipboardBeforeTheClickReturns() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {

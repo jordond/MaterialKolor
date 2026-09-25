@@ -1,11 +1,10 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { clickMiddle, openBuilder, wantHooks } from './builder';
 
-// b-504
-// The accessibility smoke of AR-11, role and name for the top bar, the poster's sections, the dock,
-// the canvas tabs, the export sheet and the split handle, plus one dialog that holds focus (D50).
+// The accessibility smoke, role and name for the top bar, the poster's sections, the dock, the
+// canvas tabs, the export sheet and the split handle, plus one dialog that holds focus.
 // Everything is read through Compose's accessibility mirror. The mirror writes every clickable as a
-// button, so a control's role and state go in its name (D37), "App, tab, selected". A group label or
+// button, so a control's role and state go in its name, "App, tab, selected". A group label or
 // a slider has no role there, so its name is a text node. The mirror has no slider role at all, so
 // the split handle's role is left to the JVM semantics tests and only its name and value are read here.
 
@@ -35,7 +34,7 @@ test('the top bar names every action', async ({ page }) => {
     'Command palette',
     /^Undo(, disabled)?$/,
     /^Redo(, disabled)?$/,
-    /^History$/, // b-509
+    /^History$/,
     'Share',
     'Export code',
     'More options',
@@ -61,7 +60,7 @@ test('the poster names its sections and their controls', async ({ page }) => {
   await expect(label(page, 'Palette style')).toHaveCount(1);
   await expect(button(page, /^TonalSpot, .+, radio, selected$/)).toHaveCount(1);
   await expect(button(page, /, radio, not selected$/).first()).toBeAttached();
-  // Contrast, one choice of the four named levels (D53)
+  // Contrast, one choice of the four named levels
   await expect(label(page, 'Contrast level')).toHaveCount(1);
   await expect(button(page, 'Standard, radio, selected')).toHaveCount(1);
   for (const level of ['Reduced', 'Medium', 'High']) {
@@ -123,7 +122,7 @@ test('Tab stays inside the export sheet and comes back around to its first field
   const fields = [field(page, 'Package name'), field(page, 'Theme name')];
   const boxes = await Promise.all(fields.map(boxOf));
 
-  // Compose focus never reaches the page (D40, P5). A text field that has focus is the one thing
+  // Compose focus never reaches the page. A text field that has focus is the one thing
   // that shows, as the backing input laid over it, so each stop is read by where that input sits.
   const stops: string[] = [];
   for (let press = 0; press < TAB_PRESSES; press++) {
@@ -144,7 +143,7 @@ test('the split handle says how much light shows, follows a drag, and the hidden
   const handle = text(page, /^Split, \d+% Light$/);
 
   await expect(text(page, 'Split, 50% Light')).toHaveCount(1);
-  // AR-12. The two copies of a split draw the same app, and only one is in the mirror.
+  // The two copies of a split draw the same app, and only one is in the mirror.
   await expect(button(page, /^Notifications, /)).toHaveCount(1);
 
   const box = await boxOf(handle);

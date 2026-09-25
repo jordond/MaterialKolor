@@ -15,7 +15,6 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.skin.Skin
 import kotlin.test.Test
 
-// b-511
 @OptIn(ExperimentalTestApi::class)
 class ScrollAreaFitTest {
     @Test

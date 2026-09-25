@@ -108,7 +108,6 @@ class ImageSeedModelTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
-    // b-311a
     // Through the workspace model, where the host's reveal lands each seed, on the session's clock.
 
     @Test
@@ -304,8 +303,6 @@ class ImageSeedModelTest : SessionTestBase() {
                 .shouldBeNull()
             harness.clearAndJoin()
         }
-
-    // b-311a
 
     @Test
     fun pickerOpening_stopsTheImageOnItsWay() =

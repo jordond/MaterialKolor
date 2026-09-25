@@ -134,11 +134,9 @@ internal fun previewCommands(
         shortcut = Shortcut.Fullscreen,
         selected = state.fullscreen,
     ) { dispatcher.dispatch(WorkspaceAction.ToggleFullscreen) }
-    // b-406g
     val mode = LocalLayout.current.posterMode
     val collapsed = state.posterCollapsed(mode)
     val poster = stringResource(if (collapsed) Res.string.poster_expand else Res.string.poster_collapse)
-    // b-406
     // The phone's sheet has no collapse button, so there only the keys and the palette ask for it.
     val sheet = mode == PosterMode.Sheet
     list.add(
@@ -151,7 +149,7 @@ internal fun previewCommands(
 }
 
 /**
- * The device widths, which phones never get, since their preview is always a phone (F-46).
+ * The device widths, which phones never get, since their preview is always a phone.
  */
 @Composable
 @NonRestartableComposable
@@ -194,7 +192,6 @@ private fun visionCommands(
     dispatcher: Dispatcher<WorkspaceAction>,
 ) {
     val menu = stringResource(Res.string.canvas_vision_button, stringResource(visionName(state.vision)))
-    // b-315d
     // The held B has no command, since a toggle would only repeat the Achromatopsia row below.
     list.add(
         id = "visionMenu",

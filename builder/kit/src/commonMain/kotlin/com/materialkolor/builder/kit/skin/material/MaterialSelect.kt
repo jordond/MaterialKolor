@@ -45,9 +45,9 @@ import com.materialkolor.builder.kit.icon.IconId
  * Material's exposed dropdown, a read only outlined field over a `DropdownMenu`.
  *
  * On the web the field reads as a button named like every skin's select field, "Style, pop-up
- * button, Tonal spot", rather than as an editable text box (S5 row 10, [MaterialChoiceField]).
+ * button, Tonal spot", rather than as an editable text box ([MaterialChoiceField]).
  *
- * Where overlays render in the page (D40) the field stays and the options open in the headless
+ * Where overlays render in the page the field stays and the options open in the headless
  * dropdown in Material's menu container, as wide as the field, with focus on the chosen option.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,7 +77,6 @@ internal fun <T> MaterialSelect(
         onExpandedChange = { open -> expanded = open && enabled },
         modifier = modifier,
     ) {
-        // b-228a
         MaterialChoiceField(
             current = current,
             label = label,
@@ -131,22 +130,19 @@ internal fun <T> MaterialSelectPanel(
 ) {
     val current = optionLabel(selected)
     Column(modifier.width(IntrinsicSize.Max)) {
-        // b-228a
         MaterialChoiceField(
             current = current,
             label = label,
             modifier = Modifier
                 .fillMaxWidth()
                 .focusProperties { canFocus = false },
-            opens = false, // b-230c
+            opens = false,
         )
         DropdownList(materialMenuStyle(), modifier = Modifier.fillMaxWidth()) {
             MaterialSelectRows(options, selected, optionLabel, onSelect, selectedRow = null)
         }
     }
 }
-
-// b-228a
 
 /**
  * The choice in Material's read only outlined field with its chevron. The field keeps its own
@@ -155,13 +151,13 @@ internal fun <T> MaterialSelectPanel(
  *
  * It reads as a dropdown list whose state is the choice. On the web the mirror would read the text
  * field inside as an editable text box, so there the field's own semantics are cleared. A field
- * that [opens] its menu is named by [selectFieldName], with the disabled note while it is disabled
- * (S5 row 10). The menu anchor comes in [modifier], outside what is cleared, so its click and its
- * dropdown list role stay, and the mirror reads the two as a button (P3). A disabled anchor adds
- * neither, so the disabled field sets them itself, a click that does nothing, and still reads as a
- * button the way the headless select's does rather than as a bare group. A field over an open panel
- * only shows the choice and reads as text through [shownChoiceName]. The text field and its handle
- * lever (D45) are left as they are.
+ * that [opens] its menu is named by [selectFieldName], with the disabled note while it is disabled.
+ * The menu anchor comes in [modifier], outside what is cleared, so its click and its dropdown list
+ * role stay, and the mirror reads the two as a button. A disabled anchor adds neither, so the
+ * disabled field sets them itself, a click that does nothing, and still reads as a button the way
+ * the headless select's does rather than as a bare group. A field over an open panel only shows
+ * the choice and reads as text through [shownChoiceName]. The text field and the clip that keeps
+ * its touch selection handles off are left as they are.
  */
 @Composable
 private fun MaterialChoiceField(
@@ -172,7 +168,6 @@ private fun MaterialChoiceField(
     opens: Boolean = true,
 ) {
     var shown by remember { mutableStateOf(TextFieldValue(current)) }
-    // b-230c
     val named = when {
         !LocalFoldsStateIntoName.current -> {
             Modifier.semantics {

@@ -42,33 +42,33 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderType
 
 /**
- * The diameter of the colored circle, design D.
+ * The diameter of the colored circle.
  */
-internal val SchemeChipDiameter: Dp = 46.dp // b-311a
+internal val SchemeChipDiameter: Dp = 46.dp
 
 /**
  * The width of the ring around a chosen chip.
  */
-internal val SchemeChipRingWidth: Dp = 2.dp // b-311a
+internal val SchemeChipRingWidth: Dp = 2.dp
 
 /**
  * The gap between the circle and its ring.
  */
-internal val SchemeChipRingGap: Dp = 2.dp // b-311a
+internal val SchemeChipRingGap: Dp = 2.dp
 
 /**
  * A scheme at a glance, for the style picker, the seed candidates and the project list.
  *
- * Design D draws a circle with [primary] across the top half, [secondaryContainer] in the bottom
+ * It draws a circle with [primary] across the top half, [secondaryContainer] in the bottom
  * left and [tertiaryContainer] in the bottom right. The colors are passed in, so the chip never
  * resolves a scheme itself.
  *
  * It reads out as a radio button named [label] with its selected state, and shows [tooltip] on
- * hover and focus, [label] unless it says more. The chosen chip carries a ring and a check, so the choice never rests
- * on color alone. Keyboard focus rings it outside its hairline, on whatever it sits on, so the ring
- * never lies on the chip's own edge (S5 rerun). Place it inside a selectable group so assistive
- * technology hears the set. Inside
- * something that is itself the control, the other [SchemeChip], with no click, only shows the scheme.
+ * hover and focus, [label] unless it says more. The chosen chip carries a ring and a check, so the
+ * choice never rests on color alone. Keyboard focus rings it outside its hairline, on whatever it
+ * sits on, so the ring never lies on the chip's own edge. Place it inside a selectable group so
+ * assistive technology hears the set. Inside something that is itself the control, the other
+ * [SchemeChip], with no click, only shows the scheme.
  *
  * @param[primary] The top half.
  * @param[secondaryContainer] The bottom left quarter.
@@ -88,7 +88,7 @@ public fun SchemeChip(
     onClick: () -> Unit,
     label: String,
     modifier: Modifier = Modifier,
-    tooltip: String = label, // b-510
+    tooltip: String = label,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
@@ -113,8 +113,6 @@ public fun SchemeChip(
         )
     }
 }
-
-// b-230c
 
 /**
  * A scheme at a glance that only shows it, for a chip drawn inside something that is itself the
@@ -181,8 +179,6 @@ private fun SchemeChipFace(
     }
 }
 
-// b-510
-
 /**
  * A chip's name, set under it on one line in the builder's label type at [SchemeChipNameSize]. A
  * name too long for the width it is given steps down in size until it fits, so a row of equal cells
@@ -220,7 +216,7 @@ public fun SchemeChipName(
 }
 
 /**
- * How big a chip's name is set, design D.
+ * How big a chip's name is set.
  */
 internal val SchemeChipNameSize: TextUnit = 11.sp
 

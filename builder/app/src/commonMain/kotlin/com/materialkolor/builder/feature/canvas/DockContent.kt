@@ -49,9 +49,9 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The dock's tools in the skin's `DockRegion`, Light, Split and Dark, the device width, Inspect,
- * Vision and Fullscreen (F-19).
+ * Vision and Fullscreen.
  *
- * A phone has no device width, its preview is always a phone (F-46). Its dock keeps to one row, so
+ * A phone has no device width, its preview is always a phone. Its dock keeps to one row, so
  * the mode switch drops the glyphs and Inspect shows as a glyph alone. Fullscreen leaves through the
  * floating exit instead of the dock. While the keyboard
  * is in use, focus comes back to the Fullscreen button when fullscreen ends, since the exit that held
@@ -71,14 +71,14 @@ internal fun DockContent(
     val wasFullscreen = remember { mutableStateOf(state.fullscreen) }
     LaunchedEffect(state.fullscreen) {
         val ended = wasFullscreen.value && !state.fullscreen
-        if (ended) inputModes.handFocusTo(fullscreenButton) // b-315b
+        if (ended) inputModes.handFocusTo(fullscreenButton)
         wasFullscreen.value = state.fullscreen
     }
     val inspectToggle = remember { FocusRequester() }
     val wasInspecting = remember { mutableStateOf(state.inspect) }
     LaunchedEffect(state.inspect) {
         val ended = wasInspecting.value && !state.inspect
-        if (ended) inputModes.handFocusTo(inspectToggle) // b-315b
+        if (ended) inputModes.handFocusTo(inspectToggle)
         wasInspecting.value = state.inspect
     }
     DockRegion(modifier) {
@@ -87,7 +87,6 @@ internal fun DockContent(
             selected = state.view.mode,
             onSelect = { mode -> dispatcher.dispatch(WorkspaceAction.SetPreviewMode(mode, origin = null)) },
             label = stringResource(Res.string.canvas_mode_label),
-            // b-512
             // As wide as its options, so a row that shares its width out evenly leaves room for the tools.
             modifier = Modifier.width(IntrinsicSize.Max),
             optionIcon = { mode -> if (compact) null else mode.icon },
@@ -103,7 +102,6 @@ internal fun DockContent(
         }
         val inspect = stringResource(Res.string.canvas_inspect)
         if (compact) {
-            // b-512
             // A phone's dock is one row of glyphs, so Inspect shows its state by its fill.
             BuilderIconButton(
                 onClick = { dispatcher.dispatch(WorkspaceAction.SetInspect(!state.inspect)) },
@@ -126,7 +124,6 @@ internal fun DockContent(
         VisionMenu(
             vision = state.vision,
             onPick = { vision -> dispatcher.dispatch(WorkspaceAction.SetVision(vision)) },
-            // b-315c
             open = state.visionMenuOpen,
             onOpenChange = { open -> dispatcher.dispatch(WorkspaceAction.SetVisionMenuOpen(open)) },
             held = state.grayscaleHeld,
@@ -143,7 +140,7 @@ internal fun DockContent(
 }
 
 /**
- * The floating pill that leaves fullscreen and brings the poster and the top bar back (F-19). While
+ * The floating pill that leaves fullscreen and brings the poster and the top bar back. While
  * the keyboard is in use it takes focus as it arrives, since the Fullscreen button that had it is
  * gone.
  */
@@ -154,7 +151,7 @@ internal fun FullscreenExit(
 ) {
     val inputModes = LocalInputModeManager.current
     val pill = remember { FocusRequester() }
-    LaunchedEffect(pill) { inputModes.handFocusTo(pill) } // b-315b
+    LaunchedEffect(pill) { inputModes.handFocusTo(pill) }
     BuilderButton(
         onClick = { dispatcher.dispatch(WorkspaceAction.ToggleFullscreen) },
         label = stringResource(Res.string.canvas_fullscreen_exit),
@@ -165,7 +162,7 @@ internal fun FullscreenExit(
 }
 
 /**
- * The device width button and its menu of Phone, Tablet and Desktop (F-46).
+ * The device width button and its menu of Phone, Tablet and Desktop.
  */
 @Composable
 private fun DeviceWidthMenu(

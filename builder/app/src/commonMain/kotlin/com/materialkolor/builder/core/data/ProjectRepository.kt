@@ -108,8 +108,8 @@ internal class ProjectRepository(
      * only, and its record is left as it is.
      *
      * The session that has the project open holds a record of its own. It has to take the new name
-     * into that record, or its next autosave writes the old name back. B-215 or the session owner
-     * wires that.
+     * into that record, or its next autosave writes the old name back, so every rename goes through
+     * `ProjectSession.rename`.
      */
     suspend fun rename(
         id: String,
@@ -152,7 +152,7 @@ internal class ProjectRepository(
      * storage the text can stay under its key and go with the project.
      *
      * When a newer build saved the record, the history or the view state, it reads as missing or
-     * empty here but is left where it is (D41). The delete is turned down with [Deletion.NewerBuild]
+     * empty here but is left where it is. The delete is turned down with [Deletion.NewerBuild]
      * before anything is written, since removing it would lose it for good and an undo from here
      * could not put it back.
      */
@@ -276,7 +276,7 @@ internal class ProjectRepository(
 
     /**
      * Whether a newer build saved the record, the history or the view state of project [id], which
-     * this build leaves where they are (D41). Asking only reads.
+     * this build leaves where they are. Asking only reads.
      */
     suspend fun fromNewerBuild(id: String): Boolean =
         projectStore(id).fromNewerBuild() || historyStore(id).fromNewerBuild() || viewStore(id).fromNewerBuild()
@@ -376,7 +376,7 @@ internal sealed interface Deletion {
     data object NotListed : Deletion
 
     /**
-     * A newer build saved the project, so this one leaves it where it is (D41).
+     * A newer build saved the project, so this one leaves it where it is.
      */
     data object NewerBuild : Deletion
 

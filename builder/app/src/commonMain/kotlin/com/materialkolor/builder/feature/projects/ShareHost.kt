@@ -22,7 +22,7 @@ import org.jetbrains.compose.resources.stringResource
  * now. A copy that lands closes it with a toast, a share that lands closes it quietly. The link is
  * only worked out while the dialog is open.
  *
- * @param[returnFocusTo] The button that opened the dialog, which gets focus back once it closes (AR-09).
+ * @param[returnFocusTo] The button that opened the dialog, which gets focus back once it closes.
  */
 @Composable
 internal fun ShareHost(

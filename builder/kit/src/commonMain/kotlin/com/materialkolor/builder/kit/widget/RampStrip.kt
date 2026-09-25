@@ -164,7 +164,7 @@ public fun RampStrip(
     keyTone: Double,
     onCopyTone: (RampStep) -> Unit,
     modifier: Modifier = Modifier,
-    labels: Boolean = true, // b-513
+    labels: Boolean = true,
     lit: Int? = null,
     onLit: ((Int?) -> Unit)? = null,
 ) {
@@ -241,7 +241,7 @@ private fun RampStop(
     val tokens = LocalBuilderTokens.current
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
-    val focused by interactionSource.collectIsFocusVisibleAsState() // b-513
+    val focused by interactionSource.collectIsFocusVisibleAsState()
     val name = listOf(stringResource(Res.string.widget_tone, step.tone), step.argb.toHex()).joinToString(", ")
     val color = step.argb.toColor()
     val ink = if (step.tone >= LIGHT_TONE) darkest else lightest
@@ -311,14 +311,14 @@ private fun ContinuousStrip(
         Modifier
             .fillMaxWidth()
             .height(StripHeight)
-            .then(if (onLit == null) Modifier else Modifier.lightOnHover(markers, keyTone, onLit)) // b-513
+            .then(if (onLit == null) Modifier else Modifier.lightOnHover(markers, keyTone, onLit))
             .clip(RoundedCornerShape(tokens.radius.small))
             .background(brush),
     ) {
         val tick = TickWidth.toPx()
         for (marker in markers) {
             val x = (marker.tone / TONE_RANGE).toFloat() * size.width
-            val ink = if (marker.tone.roundToInt() == lit) tokens.accent else tokens.textStrong // b-513
+            val ink = if (marker.tone.roundToInt() == lit) tokens.accent else tokens.textStrong
             drawLine(tokens.panel, Offset(x, 0f), Offset(x, size.height), strokeWidth = tick * 2)
             drawLine(ink, Offset(x, 0f), Offset(x, size.height), strokeWidth = tick)
         }
@@ -329,8 +329,6 @@ private fun ContinuousStrip(
         drawCircle(keyInk, radius, center, style = Stroke(tick))
     }
 }
-
-// b-513
 
 /**
  * Tells [onLit] the rounded tone of the marker or key tone nearest the pointer as it moves along

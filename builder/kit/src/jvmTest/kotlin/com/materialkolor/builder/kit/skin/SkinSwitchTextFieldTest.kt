@@ -17,8 +17,8 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import kotlin.test.Test
 
 /**
- * D44. A library switch moves the builder in the same frame it re-styles a text field in a lazy
- * list, as when the Trips app is on screen. Without `BuilderTheme` turning the text field min-size
+ * A library switch moves the builder in the same frame it re-styles a text field in a lazy list, as
+ * when the Trips app is on screen. Without `BuilderTheme` turning the text field min-size
  * optimisation off, the scene dies on dispose.
  */
 @OptIn(ExperimentalTestApi::class)

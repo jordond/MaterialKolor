@@ -84,15 +84,14 @@ internal class TabsStyle(
 )
 
 /**
- * A row of tabs over Compose Unstyled's tab group, scrolling sideways when the tabs do not fit
- * (spec section 7).
+ * A row of tabs over Compose Unstyled's tab group, scrolling sideways when the tabs do not fit.
  *
  * Focus roves. Only the selected tab sits in the Tab order, the arrow keys move focus along the row
  * in reading order and wrap at the ends, Home and End jump, and focusing a tab selects it and
  * scrolls it into view. Each tab has the tab role and its selected state.
  *
  * The row clips where it scrolls, so its ends sit inside the scroll and keep the focus ring's reach
- * free. The first and last tab then ring on every side, as the others do (S5 row 9).
+ * free. The first and last tab then ring on every side, as the others do.
  */
 @Composable
 internal fun <T> HeadlessTabs(

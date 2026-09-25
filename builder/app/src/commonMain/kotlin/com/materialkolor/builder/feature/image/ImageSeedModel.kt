@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 
 /**
- * Takes a seed from an image, picked, dropped or pasted (F-08).
+ * Takes a seed from an image, picked, dropped or pasted.
  *
  * Each image shows skeleton chips at once, its thumbnail once it decodes, and its candidates once
  * the extractor has scored them, with a `yield()` between the stages so a frame can land. The top

@@ -189,7 +189,7 @@ internal fun TextBoxes(state: DemoAppState) {
 /**
  * A single line text box with Fluent's own decoration, built from the foundation field so its
  * inner text goes through the kit's [InnerTextWithoutHandles]. On the web a long press on its text
- * then puts up no selection handles, which would take the page's accessibility mirror over (D45).
+ * then puts up no selection handles, which would take the page's accessibility mirror over.
  * Fluent's own `TextField` keeps its inner text to itself, so it has no place for that.
  */
 @Composable
@@ -247,7 +247,7 @@ internal fun Sliders(state: DemoAppState) {
 
 /**
  * Fluent's slider on its own rail and track, with a thumb drawn here. Fluent's thumb opens its
- * value tip in a popup while it is dragged, so it stays out (D40).
+ * value tip in a popup while it is dragged, so it stays out.
  *
  * Fluent's slider only moves its thumb for a drag, so the value is taken when the drag ends and the
  * slider starts afresh at each new stop. That also moves it when the other copy of a split or a key

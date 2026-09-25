@@ -33,7 +33,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 /**
  * Material's `TopAppBar` on the workspace ground. The contents take the title slot and all of its
  * width, and the bar leaves the window insets to the shell around it. The row reaches back over the
- * bar's title inset, so the first control stands just off the bar's start edge as design D has it.
+ * bar's title inset, so the first control stands just off the bar's start edge.
  */
 @Composable
 internal fun MaterialTopBarRegion(
@@ -44,7 +44,6 @@ internal fun MaterialTopBarRegion(
     TopAppBar(
         title = {
             Row(
-                // b-512
                 modifier = Modifier.pullStart(TitleInset - tokens.spacing.extraSmall).fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(tokens.spacing.extraSmall),
                 verticalAlignment = Alignment.CenterVertically,
@@ -70,15 +69,12 @@ internal fun MaterialDockRegion(
     HorizontalFloatingToolbar(
         expanded = true,
         modifier = modifier,
-        // b-512
         colors = FloatingToolbarDefaults.standardFloatingToolbarColors(
             toolbarContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         ),
         content = content,
     )
 }
-
-// b-512
 
 /**
  * How far in from its start edge a `TopAppBar` with no navigation icon starts its title.

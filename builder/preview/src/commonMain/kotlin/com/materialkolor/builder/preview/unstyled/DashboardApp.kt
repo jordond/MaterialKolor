@@ -55,7 +55,7 @@ internal val DrawerWidth = 300.dp
 private const val ScrimAlpha = 0.32f
 
 /**
- * The web dashboard, the Unstyled sample app of the App tab (F-20).
+ * The web dashboard, the Unstyled sample app of the App tab.
  *
  * Every part is a Compose Unstyled primitive colored from the MaterialKolor tokens of the pane's
  * theme, the way an app on `material-kolor-unstyled` would draw. Everything the app remembers

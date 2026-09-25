@@ -46,8 +46,6 @@ private const val HEIGHT = 800
  */
 private const val DRAG_MOVES = 20
 
-// b-509b
-
 /**
  * A Medium window whose top bar has moved History into More.
  */
@@ -63,12 +61,10 @@ private const val SWITCH_FRAMES = 4
  */
 private const val SHIFT_FRAMES = 6
 
-// b-509
-
 /**
- * The History list on the keyboard, drawn in the page the way the web draws it (D40), where Esc and
- * the focus hand back behave as people meet them, and in a popup window of its own as the desktop
- * draws it.
+ * The History list on the keyboard, drawn in the page the way the web draws it, where Esc and the
+ * focus hand back behave as people meet them, and in a popup window of its own as the desktop draws
+ * it.
  */
 @OptIn(ExperimentalTestApi::class)
 class TimelineTest {
@@ -121,21 +117,18 @@ class TimelineTest {
             focusedRow().assertIsSelected().assert(hasText("Start"))
         }
 
-    // b-509
     @Test
     fun timeline_popupJumpOntoFluent_staysOpenWithFocusOnTheCurrentStep() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             popupJumpOntoFluent(historyInBar = true)
         }
 
-    // b-509b
     @Test
     fun timeline_popupFromMoreJumpOntoFluent_staysOpenWithFocusOnTheCurrentStep() =
         runDesktopComposeUiTest(width = TIGHT_WIDTH, height = HEIGHT) {
             popupJumpOntoFluent(historyInBar = false)
         }
 
-    // b-509b
     @Test
     fun timeline_escOnAnyFrameOfAJumpAcrossALibrarySwitch_closesTheList() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
@@ -151,7 +144,6 @@ class TimelineTest {
             lost.shouldBeEmpty()
         }
 
-    // b-509
     @Test
     fun timeline_dragRunningWhileOpen_readsTheNewestSwatchOnceItHoldsStill() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
@@ -180,7 +172,6 @@ class TimelineTest {
             reads shouldBe filled + 1
         }
 
-    // b-509b
     @Test
     fun timeline_rowTakingAnotherStepAtCapacity_readsItsSwatchWithoutWaitingToHoldStill() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
@@ -204,8 +195,6 @@ class TimelineTest {
     private fun ComposeUiTest.boot() {
         with(harness) { show(inTree = true) }
     }
-
-    // b-509b
 
     /**
      * Opens the list in a popup window, the desktop's own overlays, and jumps from Start onto a

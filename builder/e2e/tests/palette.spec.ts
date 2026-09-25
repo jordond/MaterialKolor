@@ -1,8 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { clickMiddle, openBuilder, pressBareCanvas, wantHooks } from './builder';
 
-// b-315a
-// The command palette on the real builder (F-33), opened with Cmd or Ctrl+K and read from the page's
+// The command palette on the real builder, opened with Cmd or Ctrl+K and read from the page's
 // accessibility tree. Keys only reach the page once it has focus, so each test first presses the bare
 // canvas, which hands focus to the page's focus holder.
 //
@@ -42,7 +41,6 @@ test('a typed hex leads with setting the seed to it', async ({ page }) => {
   await expect.poll(() => seedText(page), { timeout: 10_000 }).toMatch(/0B6E4F/i);
 });
 
-// b-315d
 test('Esc then Cmd or Ctrl+O opens Projects in the history, and Back closes it', async ({ page }) => {
   await openBuilder(page);
   await openPalette(page);

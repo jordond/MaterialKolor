@@ -354,8 +354,6 @@ public class ContrastAudit internal constructor(
     }
 }
 
-// b-308
-
 /**
  * Rate [pair] in the mode [isDark] picks, the same way the audit rates its own pairs.
  *

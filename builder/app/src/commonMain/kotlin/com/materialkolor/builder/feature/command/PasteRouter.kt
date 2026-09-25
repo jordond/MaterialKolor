@@ -41,10 +41,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 
-// b-315c
-
 /**
- * Text pasted while nothing editable has focus, read by [classify] (F-05, F-32).
+ * Text pasted while nothing editable has focus, read by [classify].
  *
  * A color and a share link or code come out of [pasted] for the workspace to act on once. Anything
  * else is left alone, a style name included, and so is every paste while a panel or the dock's Vision
@@ -92,9 +90,9 @@ internal class PasteRouter(
  * Acts on what [PasteRouter] reads out of a paste. It is always composed beside the other overlays,
  * so a paste reaches the workspace with no panel open.
  *
- * A color sets the seed behind a crossfade as one undo entry, with a toast that can undo it (F-05). A
+ * A color sets the seed behind a crossfade as one undo entry, with a toast that can undo it. A
  * share link or code asks first, in a toast whose Open opens the theme it carries and toasts why when
- * it cannot (F-32).
+ * it cannot.
  */
 @Composable
 internal fun PasteHost(
@@ -106,7 +104,7 @@ internal fun PasteHost(
     PasteHostContent(
         model = model,
         dispatcher = dispatcher,
-        panelOpen = state.panel != null || state.visionMenuOpen, // b-315d
+        panelOpen = state.panel != null || state.visionMenuOpen,
         project = state.projectGeneration,
         document = state.document,
         openShared = share::openShared,

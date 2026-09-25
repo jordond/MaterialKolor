@@ -28,7 +28,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
  * The header row Unstyled and Custom put at the top of the workspace, on the workspace ground. Its
- * first control stands just off the start edge, next to the poster, as design D has it.
+ * first control stands just off the start edge, next to the poster.
  */
 @Composable
 internal fun HeadlessTopBarRegion(
@@ -41,7 +41,6 @@ internal fun HeadlessTopBarRegion(
             .fillMaxWidth()
             .height(ShellMetrics.topBarHeight)
             .background(tokens.panel)
-            // b-512
             .padding(start = tokens.spacing.extraSmall, end = tokens.spacing.large),
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.extraSmall),
         verticalAlignment = Alignment.CenterVertically,
@@ -68,8 +67,6 @@ internal fun HeadlessDockRegion(
         content = content,
     )
 }
-
-// b-512
 
 /**
  * The preview window on the canvas in the skin's dialog style, its corners, its shadow where the

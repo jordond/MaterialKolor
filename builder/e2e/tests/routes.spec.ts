@@ -2,12 +2,11 @@ import { expect, test, type Page } from '@playwright/test';
 import { wantHooks } from './builder';
 import { LAND_TIMEOUT_MS, onPage, openOverlay, openWorkspace, pressKeyFor, typeSeed } from '../fixtures/workspace';
 
-// b-503
-// The address bar through real edits and panels (D15, spec 2.3). An edit never moves the address or
+// The address bar through real edits and panels. An edit never moves the address or
 // adds a history entry, and a panel pushes exactly one entry at the same address, which Back pops.
 // router.spec.ts drives the router's own hooks; here the keys and the seed field do it.
 
-/** The Export sheet's title in the mirror, the dialog fold (D40). */
+/** The Export sheet's title in the mirror, the dialog fold. */
 const EXPORT_DIALOG = /^Export code, dialog/;
 
 test.beforeEach(async ({ context }) => {

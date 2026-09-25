@@ -46,11 +46,11 @@ class DefaultArgumentsTest {
                 Symbols.RememberDynamicMaterialThemeState,
                 Symbols.RememberFluentColors,
                 Symbols.DynamicColorSchemes,
-                Symbols.RememberDynamicScheme, // b-112
+                Symbols.RememberDynamicScheme,
                 Symbols.OnTone,
                 Symbols.RememberTonalPalette,
                 Symbols.Harmonize,
-                Symbols.MaterialKolors, // b-112c
+                Symbols.MaterialKolors,
             ),
             DefaultArguments.all.keys,
         )

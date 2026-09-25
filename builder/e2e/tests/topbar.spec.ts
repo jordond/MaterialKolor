@@ -1,7 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { openBuilder, wantHooks } from './builder';
 
-// b-231
 // The top bar gives its end-edge actions their full size first, so More options stays reachable on
 // a 1280 wide desktop window, where the library switcher used to squeeze it to nothing.
 

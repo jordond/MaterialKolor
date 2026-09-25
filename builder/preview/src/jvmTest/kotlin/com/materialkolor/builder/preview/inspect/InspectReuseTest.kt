@@ -20,8 +20,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-315b
-
 /**
  * How many rows the scrolling list has, far more than fit.
  */

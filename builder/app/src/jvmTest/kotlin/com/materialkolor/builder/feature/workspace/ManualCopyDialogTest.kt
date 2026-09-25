@@ -14,8 +14,6 @@ import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
 import kotlin.test.Test
 
-// b-228aa
-
 private const val FILE = "val primary = Color(0xFF6750A4)\nval onPrimary = Color(0xFFFFFFFF)"
 
 private const val HEX = "#6750A4"
@@ -23,7 +21,7 @@ private const val HEX = "#6750A4"
 private const val SELECT_HINT = "Select the text below"
 
 /**
- * The manual copy dialog's hint (F-26, D45). A finger on the web cannot select text over several
+ * The manual copy dialog's hint. A finger on the web cannot select text over several
  * lines, so there the hint sends it to the zip button or back to Copy, and everywhere else it says
  * to select the text.
  */

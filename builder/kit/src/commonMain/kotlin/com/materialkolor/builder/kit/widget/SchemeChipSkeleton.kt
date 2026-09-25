@@ -38,7 +38,7 @@ public val SchemeChipFootprint: Dp =
  *
  * It takes the chip's room and draws the chip's circle pulsing between the two border tones, so
  * nothing moves when the real chip replaces it. The pulse runs on [rememberLoopPhase], so it holds
- * still while motion is frozen or the tab is hidden, and reduced motion holds it still too (MO-10).
+ * still while motion is frozen or the tab is hidden, and reduced motion holds it still too.
  *
  * It takes no focus and reads as nothing. Whatever waits on it says what is loading, once for the
  * whole group.

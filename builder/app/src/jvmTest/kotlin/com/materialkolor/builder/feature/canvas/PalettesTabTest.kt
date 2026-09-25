@@ -69,7 +69,6 @@ class PalettesTabTest {
 
             onNodeWithText("Same in light and dark").assertExists()
             for (title in PaletteTitles.values) onAllNodesWithText(title).assertCountEquals(1)
-            // b-513
             onNode(hasMark("primary") and hasMark("surfaceTint") and hasAnyAncestor(hasContentDescription("Light")))
                 .assertExists()
             onNode(hasMark("primary") and hasAnyAncestor(hasContentDescription("Dark"))).assertExists()
@@ -101,7 +100,7 @@ class PalettesTabTest {
             for (title in PaletteTitles.values) onAllNodesWithText(title).assertCountEquals(1)
             onAllNodesWithText("Brand").assertCountEquals(1)
             for (part in listOf("color", "onColor", "container", "onContainer")) {
-                onAllNodes(hasMark(part)).assertCountEquals(1) // b-513
+                onAllNodes(hasMark(part)).assertCountEquals(1)
             }
             onNodeWithText("Same in light and dark").assertDoesNotExist()
         }
@@ -113,7 +112,6 @@ class PalettesTabTest {
             showPalettes(result, PreviewMode.Split)
 
             onAllNodesWithText("Brand").assertCountEquals(1)
-            // b-513
             onNode(hasMark("container") and hasAnyAncestor(hasContentDescription("Light"))).assertExists()
             onNode(hasMark("container") and hasAnyAncestor(hasContentDescription("Dark"))).assertExists()
         }
@@ -180,7 +178,6 @@ class PalettesTabTest {
             onNodeWithText("Brand container sits on this ramp").assertIsDisplayed()
         }
 
-    // b-308ba
     @Test
     fun highlight_anEditAfterIt_leavesTheScrollAlone() =
         runDesktopComposeUiTest(width = TABS_PHONE, height = TABS_HEIGHT) {
@@ -288,7 +285,6 @@ class PalettesTabTest {
             state.view.tab shouldBe PreviewTab.Palettes
             onNodeWithText("primary sits on this ramp").assertIsDisplayed()
             onNode(hasTestTag(PICKED_RAMP_TAG) and hasAnyDescendant(hasText("Primary"))).assertExists()
-            // b-308ba
             announced shouldBe listOf("primary sits on this ramp")
             val first = result.ramps[KeyColor.Primary, false].steps.first()
             val stop = "tone ${first.tone}, ${first.argb.toHex()}"
@@ -311,8 +307,6 @@ class PalettesTabTest {
         return actions
     }
 }
-
-// b-513
 
 /**
  * A tag under a ramp, as in "40 · primary, surfaceTint", that names [name] among what landed on its tone.

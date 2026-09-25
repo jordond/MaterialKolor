@@ -17,9 +17,8 @@ import kotlin.math.abs
  * saved theme drift when it is written and read back, so the document keeps whole hundredths and
  * [toDouble] does the division on the way into the engine.
  *
- * A document only ever holds one of the four named [Stops] (D53). Links and saved projects written
- * before that can carry a level in between, and [snapped] moves them onto the nearest one as they
- * are read.
+ * A document only ever holds one of the four named [Stops]. Links and saved projects written before
+ * that can carry a level in between, and [snapped] moves them onto the nearest one as they are read.
  *
  * @property[hundredths] The level in hundredths, from -100 to 100.
  */

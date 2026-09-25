@@ -6,8 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 
-// b-315d
-
 /**
  * Hears every key pressed inside an overlay opened below it, on the key's way down and before the
  * overlay's own controls, and says whether it took the key.

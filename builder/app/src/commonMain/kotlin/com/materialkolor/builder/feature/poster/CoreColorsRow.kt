@@ -23,7 +23,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The fine tune row "Core colors and pins", the key colors and the roles pinned to colors of their
- * own (F-14, F-15). The project remembers whether it is open, and its summary counts what is set.
+ * own. The project remembers whether it is open, and its summary counts what is set.
  */
 @Composable
 internal fun CoreColorsRow(
@@ -39,11 +39,10 @@ internal fun CoreColorsRow(
         },
         title = stringResource(Res.string.keycolors_title),
         modifier = modifier,
-        flush = true, // b-510
+        flush = true,
         summary = coreColorsSummary(context.document),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
-            // b-306
             val picks = remember { KeyColorPicks() }
             KeyColorRows(context, dispatcher, picks = picks)
             PinnedRoles(context, dispatcher, picks = picks)

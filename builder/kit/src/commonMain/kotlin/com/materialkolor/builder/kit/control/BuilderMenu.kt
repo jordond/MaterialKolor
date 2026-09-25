@@ -38,7 +38,7 @@ public class BuilderMenuItem(
  *
  * Esc and a click outside close it, focus starts on the first row, and each row reads as a button,
  * or as an option that is selected or not when its item says so. On the web, where every row reads
- * as a button, the menu item word travels in its name, "Duplicate, menu item" (D40). Material3
+ * as a button, the menu item word travels in its name, "Duplicate, menu item". Material3
  * draws its own `DropdownMenu`, the other skins the headless dropdown.
  *
  * @param[expanded] Whether the menu is open.
@@ -56,7 +56,6 @@ public fun BuilderMenu(
     anchor: @Composable () -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
-    // b-221b
     when (overlayLibrary()) {
         Library.Material3 -> MaterialMenu(expanded, onDismissRequest, items, modifier, anchor)
         Library.Unstyled -> HeadlessMenu(
@@ -67,7 +66,6 @@ public fun BuilderMenu(
             modifier,
             anchor,
         )
-        // fluent-placeholder
         Library.Fluent -> HeadlessMenu(expanded, onDismissRequest, items, fluentOverlayStyle(tokens), modifier, anchor)
         Library.Custom -> HeadlessMenu(expanded, onDismissRequest, items, customOverlayStyle(tokens), modifier, anchor)
     }

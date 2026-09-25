@@ -69,7 +69,7 @@ internal fun <T> FluentSegmented(
     optionIcon: (T) -> IconId?,
     selectOnFocus: Boolean,
     optionLabel: (T) -> String,
-    compact: Boolean = false, // b-510
+    compact: Boolean = false,
 ) {
     val selectedIndex = options.indexOf(selected)
     val focus = rememberRadioGroupFocus(options.size, selectedIndex)
@@ -117,7 +117,7 @@ internal fun <T> FluentSegmented(
                     },
                     text = {
                         if (compact) {
-                            FittedLabel(name, LocalContentColor.current) // b-510
+                            FittedLabel(name, LocalContentColor.current)
                         } else {
                             BuilderText(
                                 name,
@@ -132,8 +132,6 @@ internal fun <T> FluentSegmented(
         }
     }
 }
-
-// b-510
 
 /**
  * The glyph an option shows, a check while chosen, none at all in a compact row.

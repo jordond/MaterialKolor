@@ -99,7 +99,7 @@ class CoreColorsRowTest {
             waitForIdle()
 
             val pick = WorkspaceAction.OpenPicker(PickerTarget.KeyColorOverride(KeyColor.Tertiary))
-            val sent = harness.actions.single() as WorkspaceAction.OpenPicker // b-307
+            val sent = harness.actions.single() as WorkspaceAction.OpenPicker
             sent.returnFocusTo shouldNotBe null
             sent.copy(returnFocusTo = null) shouldBe pick
         }

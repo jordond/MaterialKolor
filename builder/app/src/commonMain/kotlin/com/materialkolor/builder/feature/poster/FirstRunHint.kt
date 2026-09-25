@@ -45,10 +45,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.stringResource
 
-// b-314
-
 /**
- * The first visit hint, by the id its dismissal is kept under (F-35).
+ * The first visit hint, by the id its dismissal is kept under.
  */
 internal const val FIRST_RUN_HINT = "first-run"
 
@@ -58,8 +56,8 @@ internal const val FIRST_RUN_HINT = "first-run"
 internal const val SWITCHER_PULSE_HINT = "switcher-pulse"
 
 /**
- * Whether the first visit hint shows (F-35). It never comes back once it was closed or the first
- * export is done.
+ * Whether the first visit hint shows. It never comes back once it was closed or the first export is
+ * done.
  *
  * It waits for boot to open a project, and boot reads the stored preferences before it opens one.
  * The dismissal read here comes from the repository's flow instead, and nothing orders that flow
@@ -73,7 +71,7 @@ internal const val SWITCHER_PULSE_HINT = "switcher-pulse"
 internal fun showsFirstRunHint(
     preferences: Preferences,
     projectName: String,
-    sessionDismissedHints: Set<String>, // b-314a
+    sessionDismissedHints: Set<String>,
 ): Boolean =
     projectName.isNotEmpty() &&
         !preferences.firstExportDone &&
@@ -98,7 +96,6 @@ internal fun FirstRunHint(
     val spacing = tokens.spacing
     val focusManager = LocalFocusManager.current
     var closeFocused by remember { mutableStateOf(false) }
-    // b-314a
     // A mouse press would focus Close on its way to the click. While a press that starts elsewhere
     // is down, Close turns that focus away, so the click leaves focus where it was.
     var pressFromElsewhere by remember { mutableStateOf(false) }
@@ -120,7 +117,7 @@ internal fun FirstRunHint(
             },
             buttonModifier = Modifier
                 .onFocusChanged { focusState -> closeFocused = focusState.isFocused }
-                .focusProperties { canFocus = !pressFromElsewhere } // b-314a
+                .focusProperties { canFocus = !pressFromElsewhere }
                 .pointerInput(Unit) {
                     awaitEachGesture {
                         awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
@@ -134,8 +131,8 @@ internal fun FirstRunHint(
 }
 
 /**
- * The library switcher's pulse beside the first visit hint (F-35). It plays once per browser while
- * the hint shows, then puts itself away.
+ * The library switcher's pulse beside the first visit hint. It plays once per browser while the
+ * hint shows, then puts itself away.
  */
 @Composable
 internal fun Modifier.switcherPulse(
@@ -143,7 +140,7 @@ internal fun Modifier.switcherPulse(
     dispatcher: Dispatcher<WorkspaceAction>,
 ): Modifier {
     val preferences = state.preferences
-    val sessionDismissed = state.sessionDismissedHints // b-314a
+    val sessionDismissed = state.sessionDismissedHints
     val pulsing = showsFirstRunHint(preferences, state.projectName, sessionDismissed) &&
         SWITCHER_PULSE_HINT !in preferences.dismissedHints &&
         SWITCHER_PULSE_HINT !in sessionDismissed

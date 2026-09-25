@@ -65,7 +65,7 @@ private const val DesktopMenuColumns = 2
 private val StoreMarkSize = 40.dp
 
 /**
- * The cafe ordering app, the Custom sample app of the App tab (F-20).
+ * The cafe ordering app, the Custom sample app of the App tab.
  *
  * Everything the app remembers lives in [state], so the two copies of a split agree. A phone gets
  * one column, the stamp card, the categories and the drinks, with the order a tap away on the bar

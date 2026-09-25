@@ -24,7 +24,7 @@ private const val WAIT_MILLIS = 5_000L
 
 /**
  * The Undo on an image seed's toast only ever undoes that seed, and the toast goes once the
- * document has moved on (R-B-311).
+ * document has moved on.
  */
 @OptIn(ExperimentalTestApi::class)
 class ImageUndoToastTest {

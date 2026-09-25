@@ -27,13 +27,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import com.materialkolor.builder.kit.headless.InnerTextWithoutHandles
 
-// b-228b
-
 /**
  * Material3's single line filled text field, put together from the parts `TextField` is made of, the
  * foundation field inside Material's filled decoration box. It looks and reads the same as
  * `TextField` with the same arguments, but on the web a long press on its text puts up no selection
- * handles, which would take the page's accessibility mirror over (D45).
+ * handles, which would take the page's accessibility mirror over.
  *
  * @param[value] The text in the field.
  * @param[onValueChange] Called with the text as it is typed.
@@ -70,7 +68,7 @@ internal fun SampleTextField(
  * Material3's single line outlined text field, put together from the parts `OutlinedTextField` is
  * made of, the foundation field inside Material's outlined decoration box. It looks and reads the
  * same as `OutlinedTextField` with the same arguments, but on the web a long press on its text puts
- * up no selection handles, which would take the page's accessibility mirror over (D45).
+ * up no selection handles, which would take the page's accessibility mirror over.
  *
  * @param[value] The text in the field.
  * @param[onValueChange] Called with the text as it is typed.

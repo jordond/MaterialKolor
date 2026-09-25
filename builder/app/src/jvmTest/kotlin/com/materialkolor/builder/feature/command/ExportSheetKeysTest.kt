@@ -21,10 +21,8 @@ import kotlin.test.Test
 private const val WIDTH = 1280
 private const val HEIGHT = 800
 
-// b-315c
-
 /**
- * C and Shift+C inside the export sheet copy its files, from inside the key press (R-B-302).
+ * C and Shift+C inside the export sheet copy its files, from inside the key press.
  */
 @OptIn(ExperimentalTestApi::class)
 class ExportSheetKeysTest {

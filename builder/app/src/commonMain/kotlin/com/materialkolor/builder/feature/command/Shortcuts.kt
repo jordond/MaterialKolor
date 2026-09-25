@@ -82,8 +82,6 @@ internal class ShortcutsModel(
      */
     val apple: Boolean = isApple(environment.browser)
 
-    // b-315c
-
     /**
      * Emits when the page goes out of sight, which lets go of a held B whose release never comes.
      */
@@ -92,7 +90,7 @@ internal class ShortcutsModel(
     /**
      * The form the top bar's library switcher shows, which the registry reads.
      */
-    val switcherForm: SwitcherFormState = SwitcherFormState() // b-315d
+    val switcherForm: SwitcherFormState = SwitcherFormState()
 
     /**
      * Turn the single-key shortcuts on or off, in every tab of this browser.
@@ -136,12 +134,12 @@ internal class ShortcutFocus {
     /**
      * Whether single keys are on, kept here for the keys a panel takes itself.
      */
-    internal var singleKeys: Boolean = true // b-315c
+    internal var singleKeys: Boolean = true
 
     /**
      * The page's handling of a key pressed inside an overlay, which the page root never hears.
      */
-    internal var overlayKey: (KeyEvent) -> Boolean = { false } // b-315d
+    internal var overlayKey: (KeyEvent) -> Boolean = { false }
 
     private var fromKeys = false
 
@@ -195,7 +193,7 @@ internal class ShortcutFocus {
 
 /**
  * Tells the input modes the keyboard is in use, as Tab does, so a control that hands focus on after
- * a shortcut does so the way it does for a Tab user (R-B-217d). Every shortcut calls it first.
+ * a shortcut does so the way it does for a Tab user. Every shortcut calls it first.
  */
 internal fun InputModeManager.useKeyboard() {
     requestInputMode(InputMode.Keyboard)
@@ -212,7 +210,7 @@ internal fun ShortcutScope(
     model: ShortcutsModel = metroViewModel(),
     content: @Composable () -> Unit,
 ) {
-    val overlayKeys = remember(focus) { { event: KeyEvent -> focus.overlayKey(event) } } // b-315d
+    val overlayKeys = remember(focus) { { event: KeyEvent -> focus.overlayKey(event) } }
     val interceptor = remember(focus) {
         PlatformTextInputInterceptor { request, nextHandler ->
             focus.textSessions++
@@ -227,15 +225,13 @@ internal fun ShortcutScope(
     InterceptPlatformTextInput(interceptor) {
         CompositionLocalProvider(
             LocalAppleKeys provides model.apple,
-            LocalShortcutFocus provides focus, // b-315c
-            LocalOverlayKeys provides overlayKeys, // b-315d
-            LocalSwitcherForm provides model.switcherForm, // b-315d
+            LocalShortcutFocus provides focus,
+            LocalOverlayKeys provides overlayKeys,
+            LocalSwitcherForm provides model.switcherForm,
             content = content,
         )
     }
 }
-
-// b-315c
 
 /**
  * The page's [ShortcutFocus], for the panels that take keys of their own, or null outside the page.
@@ -288,7 +284,7 @@ internal class PanelShortcuts(
 }
 
 /**
- * The page root's modifier, the focus holder with the keyboard map (spec section 6) on it.
+ * The page root's modifier, the focus holder with the keyboard map on it.
  *
  * Keys arrive as they bubble up from the focused control, so a control that takes a key, a button
  * taking Space say, keeps it. Undo and Redo wait the same way, so a field keeps its own text undo.
@@ -320,9 +316,7 @@ internal fun rememberShortcuts(
     val latestState by rememberUpdatedState(state)
     val inputModes = LocalInputModeManager.current
     val scope = rememberCoroutineScope()
-    // b-315d
     ClaimFocusWhenNowhere(focus, state.panel, LocalSkin.current.library, state.visionMenuOpen)
-    // b-315c
     val singleKeys = state.preferences.singleKeyShortcuts
     SideEffect { focus.singleKeys = singleKeys }
     val grayscale = remember { HeldKey() }
@@ -351,7 +345,7 @@ internal fun rememberShortcuts(
     fun claimIfNowhere() {
         scope.launch {
             repeat(SETTLE_FRAMES) { withFrameNanos { } }
-            val open = latestState.panel != null || latestState.visionMenuOpen // b-315d
+            val open = latestState.panel != null || latestState.visionMenuOpen
             if (!focus.pageHasFocus && !open) focus.focusHolder()
         }
     }
@@ -359,7 +353,6 @@ internal fun rememberShortcuts(
     fun escape(): Boolean {
         inputModes.useKeyboard()
         return when {
-            // b-315d
             // In the frames between the key that opened a panel and the panel taking focus.
             latestState.panel != null -> {
                 dispatcher.dispatch(WorkspaceAction.ClosePanel)
@@ -402,7 +395,6 @@ internal fun rememberShortcuts(
         event: KeyEvent,
         preview: Boolean,
     ): Boolean {
-        // b-315c
         // B lets go on its way down, whatever holds focus by then, and leaves the key to it.
         if (event.type == KeyEventType.KeyUp && event.key == Key.B && preview) letGoOfGrayscale()
         if (event.type != KeyEventType.KeyDown) return false
@@ -411,7 +403,6 @@ internal fun rememberShortcuts(
         val (shortcut, chord) = Shortcut.match(event, model.apple, singleKeys) ?: return false
         if (preview != shortcut.firesInFields(chord)) return false
         if (focus.typing && !shortcut.firesInFields(chord)) return false
-        // b-315c
         if (!shortcut.inRegistry) {
             inputModes.useKeyboard()
             dockKey(shortcut)
@@ -420,7 +411,6 @@ internal fun rememberShortcuts(
         return runCommand(shortcut)
     }
 
-    // b-315d
     fun onOverlayKey(event: KeyEvent): Boolean {
         if (event.type != KeyEventType.KeyDown) return false
         val (shortcut, chord) = Shortcut.match(event, model.apple) ?: return false
@@ -440,7 +430,7 @@ internal fun rememberShortcuts(
                 focus.pageHasFocus = focusState.hasFocus
                 focus.holderFocused = focusState.isFocused
                 if (!focusState.isFocused) focus.armed = false
-                if (!focusState.isFocused) letGoOfGrayscale() // b-315c
+                if (!focusState.isFocused) letGoOfGrayscale()
             }.focusProperties { canFocus = focus.armed }
             .focusRequester(focus.holder)
             .focusTarget()
@@ -450,7 +440,7 @@ internal fun rememberShortcuts(
 /**
  * The page's shortcuts that an overlay hands on, since each would otherwise reach the browser.
  */
-private val OVERLAY_SHORTCUTS = setOf(Shortcut.Save, Shortcut.Projects) // b-315d
+private val OVERLAY_SHORTCUTS = setOf(Shortcut.Save, Shortcut.Projects)
 
 /**
  * Hands focus to the holder after boot, after a panel closed and after a library switch, when
@@ -483,7 +473,6 @@ private fun ClaimFocusWhenNowhere(
         repeat(SETTLE_FRAMES) { withFrameNanos { } }
         if (!focus.pageHasFocus && !menuOpen) focus.focusHolder()
     }
-    // b-315d
     val lastLibrary = remember { mutableStateOf(library) }
     LaunchedEffect(library) {
         if (lastLibrary.value == library) return@LaunchedEffect

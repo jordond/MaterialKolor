@@ -69,7 +69,7 @@ private enum class MenuAction(
 
 /**
  * A select whose list of options opens in place under its field, in the card's own layout and not
- * in a popup (D40). The field says whether the list is open, and each option whether it is the one
+ * in a popup. The field says whether the list is open, and each option whether it is the one
  * chosen, on the web too. A pick closes the list. It starts open, so the card shows the list.
  */
 @Composable
@@ -152,8 +152,8 @@ private fun SelectField(
 
 /**
  * A menu that opens in place under its button, pushing what follows down rather than floating over
- * it, since a popup would take the web mirror over (D40). A pick or a second press closes it. It
- * starts open, so the card shows the menu.
+ * it, since a popup would take the web mirror over. A pick or a second press closes it. It starts
+ * open, so the card shows the menu.
  */
 @Composable
 internal fun InPlaceMenu(state: DemoAppState) {

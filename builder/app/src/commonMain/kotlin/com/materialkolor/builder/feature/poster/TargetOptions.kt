@@ -26,8 +26,8 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The options only some export targets have (F-18), AMOLED dark, the motion scheme and the export's
- * color animation. Each shows only for the targets that have it, and color animation only while the
+ * The options only some export targets have, AMOLED dark, the motion scheme and the export's color
+ * animation. Each shows only for the targets that have it, and color animation only while the
  * target's export runs dynamic. The label over them goes too when none of them shows, and it asks
  * [showsColorAnimation] the same as the option does, so it never stands over nothing.
  */

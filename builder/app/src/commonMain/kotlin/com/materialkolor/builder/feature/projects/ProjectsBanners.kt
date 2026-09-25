@@ -30,7 +30,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * Another tab saved the open project while this one was editing it. Load latest takes the other
- * tab's save as an undo step, and Keep mine keeps this tab's document (D36).
+ * tab's save as an undo step, and Keep mine keeps this tab's document.
  */
 @Composable
 internal fun ConflictBanner(
@@ -64,13 +64,13 @@ internal fun ConflictBanner(
 internal fun StorageUnavailableBanner(
     onGetLink: () -> Unit,
     modifier: Modifier = Modifier,
-    onClose: (() -> Unit)? = null, // b-314b
+    onClose: (() -> Unit)? = null,
 ) {
     ProjectBanner(
         icon = IconId.Warning,
         message = stringResource(Res.string.projects_storage_unavailable),
         modifier = modifier,
-        onClose = onClose, // b-314b
+        onClose = onClose,
     ) {
         BuilderButton(
             onClick = onGetLink,
@@ -82,7 +82,7 @@ internal fun StorageUnavailableBanner(
 
 /**
  * A newer version of the builder saved some of the data here, and this one leaves it alone until a
- * reload picks it up (D41). Reload loads the builder again at `/`.
+ * reload picks it up. Reload loads the builder again at `/`.
  *
  * @param[onReload] What Reload does, or null where a reload does nothing and the button stays out.
  * @param[onDismiss] Puts the banner away from a Dismiss button, or null for a banner without one.
@@ -90,15 +90,14 @@ internal fun StorageUnavailableBanner(
 @Composable
 internal fun NewerDataBanner(
     modifier: Modifier = Modifier,
-    onReload: (() -> Unit)? = null, // b-314b
-    onDismiss: (() -> Unit)? = null, // b-314ba
+    onReload: (() -> Unit)? = null,
+    onDismiss: (() -> Unit)? = null,
 ) {
     ProjectBanner(
         icon = IconId.Info,
         message = stringResource(Res.string.projects_newer_data),
         modifier = modifier,
     ) {
-        // b-314ba
         if (onDismiss != null) {
             BuilderButton(
                 onClick = onDismiss,
@@ -106,7 +105,6 @@ internal fun NewerDataBanner(
                 emphasis = Emphasis.Subtle,
             )
         }
-        // b-314b
         if (onReload != null) {
             BuilderButton(
                 onClick = onReload,
@@ -129,7 +127,7 @@ internal fun ProjectBanner(
     icon: IconId,
     message: String,
     modifier: Modifier = Modifier,
-    onClose: (() -> Unit)? = null, // b-314b
+    onClose: (() -> Unit)? = null,
     actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
@@ -141,7 +139,6 @@ internal fun ProjectBanner(
             ) {
                 BuilderIcon(icon, contentDescription = null)
                 BuilderText(text = message, modifier = Modifier.weight(1f))
-                // b-314b
                 if (onClose != null) {
                     BuilderIconButton(
                         onClick = onClose,

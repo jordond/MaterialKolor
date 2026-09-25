@@ -129,8 +129,8 @@ internal fun PlatformServices.exposeBrowserApisToE2e() {
     exposeE2eHook("detailPixel") { at -> image?.detail?.pixelAt(at).orEmpty() }
 }
 
-// Each stage timed apart for spike S7, the browser's decode, scale and read, then the copy into
-// Kotlin and Skia.
+// Each stage timed apart for the e2e decode timing, the browser's decode, scale and read, then the
+// copy into Kotlin and Skia.
 private suspend fun profile(file: File): String {
     val started = pageMillis()
     val scaled = scale(file) ?: return "None"

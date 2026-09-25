@@ -72,7 +72,7 @@ private val CopyModifierKey: Key =
 
 /**
  * The widgets ring when Tab lands on them, in every skin, with the ring standing 3 to 1 from what
- * it sits on all the way round (AR-01, S5 rows 30, 32 and 33, and the partial rings of the rerun).
+ * it sits on all the way round.
  */
 @OptIn(ExperimentalTestApi::class)
 class WidgetFocusRingTest {
@@ -99,7 +99,7 @@ class WidgetFocusRingTest {
 
     /**
      * The copy button sits on a band of the panel, so its ring lands on the panel and not on the code
-     * ground, which the focus color does not clear in every skin (S5 gap 5).
+     * ground, which the focus color does not clear in every skin.
      */
     @Test
     fun codeView_copyButton_ringsOnItsBandAllTheWayRound() {

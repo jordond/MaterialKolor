@@ -2,8 +2,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 import { dispatchPaste, openBuilder, wantHooks } from './builder';
 import { installFileMakers } from './image-files';
 
-// b-315c
-// Text pasted with nothing editable focused on the real builder (F-05, F-32), read from the page's
+// Text pasted with nothing editable focused on the real builder, read from the page's
 // accessibility tree. A color sets the seed with an undo toast, and a share link asks to open.
 
 const A11Y = '#cmp_a11y_root';

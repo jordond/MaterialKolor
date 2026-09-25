@@ -1,8 +1,7 @@
 import { expect, test, type Page, type Request } from '@playwright/test';
 import { openBuilder, wantHooks } from './builder';
 
-// b-504
-// Cloudflare Web Analytics loads only after the first frame and sets no cookie (D13, PB-10). The
+// Cloudflare Web Analytics loads only after the first frame and sets no cookie. The
 // site the e2e run builds has no token, so it never asks for the beacon. The token test adds the
 // `#mk-config` tag a site built with `builder.analyticsToken` carries, and stands in for Cloudflare.
 

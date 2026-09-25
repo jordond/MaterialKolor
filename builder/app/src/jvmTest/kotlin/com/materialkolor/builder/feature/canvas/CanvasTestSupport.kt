@@ -91,7 +91,7 @@ internal class CanvasHost(
             is WorkspaceAction.SetVision -> state.copy(vision = action.vision)
             is WorkspaceAction.SetInspect -> state.copy(inspect = action.on)
             WorkspaceAction.ToggleFullscreen -> state.copy(fullscreen = !state.fullscreen)
-            is WorkspaceAction.SetVisionMenuOpen -> state.copy(visionMenuOpen = action.open) // b-315c
+            is WorkspaceAction.SetVisionMenuOpen -> state.copy(visionMenuOpen = action.open)
             else -> state
         }
 }

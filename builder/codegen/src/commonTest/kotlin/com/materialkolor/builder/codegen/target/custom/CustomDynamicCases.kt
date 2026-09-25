@@ -40,7 +40,7 @@ internal object CustomDynamicCases {
 
     /**
      * A tone on two ramp slots, one moved in light mode only and one moved to the same tone in both,
-     * and a tone on a role slot, which the export ignores (D27).
+     * and a tone on a role slot, which the export ignores.
      */
     val CustomTones: Fixture = Fixtures.Default.with(
         document = ThemeDocument.Default.copy(

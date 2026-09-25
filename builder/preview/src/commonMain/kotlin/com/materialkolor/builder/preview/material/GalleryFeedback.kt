@@ -99,7 +99,7 @@ internal fun Snackbars(state: DemoAppState) {
 
 /**
  * A plain tooltip over the button it labels and a rich tooltip, both drawn in place rather than
- * in a popup (D40). Tooltips have no disabled look.
+ * in a popup. Tooltips have no disabled look.
  */
 @Composable
 internal fun InlineTooltips(state: DemoAppState) {

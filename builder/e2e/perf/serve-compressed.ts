@@ -3,7 +3,6 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 
-// b-504
 // The site the way the host hands it to a browser, for the perf run only. Each file goes out brotli
 // or gzip compressed by what the browser accepts, with the host's cache rules, so a throttled load
 // moves the bytes a real one would and a repeat visit comes from the cache. The e2e server in

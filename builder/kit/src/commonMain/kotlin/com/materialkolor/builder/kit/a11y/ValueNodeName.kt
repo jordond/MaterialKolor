@@ -15,7 +15,7 @@ import org.jetbrains.compose.resources.stringResource
  * Whether a node that plays no role carries its value in its name here. Read it in composition and
  * hand it to [valueNodeName].
  *
- * It holds on the web (D37). The web mirror in CMP 1.12.1 drops a state description, and screen
+ * It holds on the web. The web mirror in CMP 1.12.1 drops a state description, and screen
  * readers drop an `aria-label` on an element with no role, while both keep text.
  */
 public val foldsValueIntoName: Boolean

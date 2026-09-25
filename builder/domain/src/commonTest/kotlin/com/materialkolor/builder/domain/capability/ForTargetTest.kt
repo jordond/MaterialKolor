@@ -70,7 +70,7 @@ class ForTargetTest {
     private val blank = ThemeDocument(seed = full.seed)
 
     /**
-     * What each target clears off [full], written out from the spec. The reason is the one the
+     * What each target clears off [full], written out by hand. The reason is the one the capability
      * table gives, or null for a row that is hidden without one.
      */
     private val cleared: Map<ExportTarget, Map<Field, Reason?>> = mapOf(

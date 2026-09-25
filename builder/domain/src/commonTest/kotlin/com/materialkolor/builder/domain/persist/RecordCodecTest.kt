@@ -33,7 +33,6 @@ class RecordCodecTest {
         assertRoundTrip(HistoryRecord.Codec, HistoryRecord())
     }
 
-    // b-508
     @Test
     fun historyRecord_schemaZeroWithoutTimes_decodesWithNullTimes() {
         // A history the way builds before step times saved it, with no "at" on any step.
@@ -81,7 +80,7 @@ class RecordCodecTest {
         val expected = """{"schema":0,"data":{"appearance":"System","motion":"System","hueLock":false,""" +
             """"styleLock":true,"seedLock":false,"dismissedHints":[],"firstExportDone":false,""" +
             """"posterCollapsed":false,"lastProjectId":null,"persistRequested":false,"exportPrefs":{},""" +
-            """"singleKeyShortcuts":true}}""" // b-315
+            """"singleKeyShortcuts":true}}"""
 
         assertEquals(expected, Preferences.Codec.encode(Preferences()))
     }

@@ -20,7 +20,7 @@ private val PaneSkin = Skin(Library.Custom, expressive = false)
  * A preview pane sits inside the builder's chrome, and a kit control reads the skin, identity,
  * tokens and motion of the nearest theme above it. Without this that is the chrome, so a kit
  * control in a Custom pane would paint in the chrome's colours. Inside this the controls use
- * [slots] exactly as the document resolved them. Where overlays render in the page (D40) the pane
+ * [slots] exactly as the document resolved them. Where overlays render in the page the pane
  * has an overlay host of its own, clipped to the pane, so its menus and dialogs stay inside the
  * pane's clip and filters, and a modal in the pane clears the pane rather than the whole builder.
  * That host clips to [content], so [content] has to fill the pane. A popover in the pane only sees

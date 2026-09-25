@@ -26,7 +26,6 @@ for (const route of ['/', '/t/AdllOwAAAAAT']) {
     expect(own.filter((response) => response.status !== 200)).toEqual([]);
     const loaded = own.map((response) => new URL(response.url).pathname);
     expect(loaded[0]).toBe(route);
-    // b-501
     // boot.js is the one script at the root. It is not hashed, so the host serves it no-cache.
     const outside = loaded.filter((pathname) => /\.(js|wasm)$/.test(pathname) && !pathname.startsWith('/assets/'));
     expect(outside).toEqual(['/boot.js']);

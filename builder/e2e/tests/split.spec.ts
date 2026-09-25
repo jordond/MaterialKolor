@@ -2,8 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { wantHooks } from './builder';
 import { dragSplit, LAND_TIMEOUT_MS, onPage, openWorkspace, SPLIT_HANDLE } from '../fixtures/workspace';
 
-// b-503
-// Dragging the preview's split handle (flow 5.1, X4). The split follows the pointer, and on Chromium,
+// Dragging the preview's split handle. The split follows the pointer, and on Chromium,
 // the one engine with the Long Animation Frames API, no frame of the drag runs long.
 
 test.beforeEach(async ({ context }) => {

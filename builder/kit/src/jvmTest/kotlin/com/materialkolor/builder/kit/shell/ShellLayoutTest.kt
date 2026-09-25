@@ -56,7 +56,7 @@ private val ShellTopBar = 64.dp
 private val ShellSkin = Skin(Library.Material3, expressive = false)
 
 /**
- * One window from the spec's table and the poster treatment it calls for.
+ * One window size and the poster treatment the shell gives it.
  */
 private class ShellWindow(
     val width: Int,
@@ -76,7 +76,7 @@ private val ShellWindows = listOf(
     ShellWindow(1280, PosterMode.Docked400),
     ShellWindow(1600, PosterMode.Docked400),
     ShellWindow(1920, PosterMode.Docked400),
-    // Phones on their side, Medium by width, and a short desktop window that keeps its dock (D38).
+    // Phones on their side, Medium by width, and a short desktop window that keeps its dock.
     ShellWindow(844, PosterMode.Sheet, height = 390, coarsePointer = true, peek = 96.dp),
     ShellWindow(915, PosterMode.Sheet, height = 412, coarsePointer = true, peek = 96.dp),
     ShellWindow(1280, PosterMode.Docked400, height = 450),

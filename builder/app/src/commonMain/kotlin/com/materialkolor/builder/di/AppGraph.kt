@@ -26,8 +26,6 @@ internal interface AppGraph : ViewModelGraph {
      */
     val environment: Environment
 
-    // b-216
-
     /**
      * The open project, for the root's theme result.
      */

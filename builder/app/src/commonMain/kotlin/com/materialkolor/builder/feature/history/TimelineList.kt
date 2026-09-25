@@ -58,16 +58,14 @@ import com.materialkolor.dynamiccolor.DynamicScheme
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.stringResource
 
-// b-509
-
 /**
- * The History list, every step of the session newest first with Start at the bottom (D55, D57).
+ * The History list, every step of the session newest first with Start at the bottom.
  *
  * Each row shows a swatch of what the step left, what the step did and how long ago. The row the
  * theme is at carries the row's check and a Current badge. The rows above it were undone, so their
- * swatches fade and their second line says so in words too (AR-03). A click, Enter or Space on a row
- * jumps there at once with no animation (MO-07), the list stays open so someone can hop between
- * steps while the preview changes behind it, and each jump is read out through the announcer.
+ * swatches fade and their second line says so in words too. A click, Enter or Space on a row jumps
+ * there at once with no animation, the list stays open so someone can hop between steps while the
+ * preview changes behind it, and each jump is read out through the announcer.
  *
  * The page never hears a key pressed in here, so the list takes Undo and Redo itself and moves
  * focus to the row the history lands on, and H closes it. A jump across a library switch moves the
@@ -139,7 +137,7 @@ internal fun TimelineList(
                     headline = headline,
                     supporting = entry?.let { step -> supportingText(step, timeline.now, undone) },
                     document = entry?.after ?: timeline.start,
-                    origin = entry?.before ?: timeline.start, // b-509b
+                    origin = entry?.before ?: timeline.start,
                     position = count - index,
                     current = current,
                     undone = undone,
@@ -234,7 +232,6 @@ private fun StepSwatch(
 ) {
     val resolver = rememberThemeResolver()
     val probe = LocalSwatchReadProbe.current
-    // b-509b
     val colors by key(origin) {
         produceState<SwatchColors?>(null, document, resolver) {
             // A new document for the row starts this over, so a step that moves on every frame is not read.
@@ -331,7 +328,6 @@ private fun FocusFollowsTheHistory(
         // A row this list does not show yet has no node to take focus, and that is fine.
         runCatching { currentRow.requestFocus() }
     }
-    // b-509b
     val library = LocalSkin.current.library
     val lastLibrary = remember { LibraryHolder(library) }
     SideEffect {

@@ -38,7 +38,7 @@ private const val TERTIARY_FIELD = "Tertiary seed, any format"
 /**
  * How many frames the chip drag test moves the seed for.
  */
-private const val DRAG_FRAMES = 4 // pf-1
+private const val DRAG_FRAMES = 4
 
 @OptIn(ExperimentalTestApi::class)
 class StyleChipsTest {
@@ -65,7 +65,6 @@ class StyleChipsTest {
             asked shouldHaveSize Style.entries.size * 2
         }
 
-    // pf-1
     @Test
     fun chips_aSchemeChange_drawsOneChipAFrameAndAllOnceItSettles() =
         runComposeUiTest {

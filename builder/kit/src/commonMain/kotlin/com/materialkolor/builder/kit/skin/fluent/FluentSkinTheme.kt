@@ -68,7 +68,7 @@ private fun FluentChrome(
     val dialogs = remember { ContentDialogHostState() }
     FluentThemeConfiguration(
         colors = colors,
-        typography = rememberFluentTypography(), // b-404
+        typography = rememberFluentTypography(),
         useAcrylicPopup = false,
         contentDialogHostState = dialogs,
         content = content,

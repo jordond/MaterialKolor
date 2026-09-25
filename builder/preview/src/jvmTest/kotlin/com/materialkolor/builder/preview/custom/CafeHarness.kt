@@ -54,7 +54,7 @@ internal val CafeFrames: Map<DeviceWidth, IntSize> = mapOf(
 private val CafeSkin: Skin = Skin(Library.Custom, expressive = false)
 
 /**
- * The eight seeds of the sample's `AppThemeSeeds` as accents, in the sample's order (D25).
+ * The eight seeds of the sample's `AppThemeSeeds` as accents, in the sample's order.
  */
 private val CafeSampleAccents: List<Accent> = listOf(
     Accent("Love", Argb(0xE05263)),
@@ -84,7 +84,7 @@ internal val PaneSpec.accentCount: Int
     get() = result.accents.families.size
 
 /**
- * The four families F-20 wants on every first screen, any slot of each.
+ * The four families every first screen has to use, any slot of each.
  */
 internal val CafeFamilies: Map<String, Set<CustomSlot>> = mapOf(
     "primary" to setOf(
@@ -111,13 +111,13 @@ internal val CafeFamilies: Map<String, Set<CustomSlot>> = mapOf(
 )
 
 /**
- * Every surface level of the Custom slots, all of which F-20 wants on every first screen.
+ * Every surface level of the Custom slots, all of which every first screen has to use.
  */
 internal val CafeSurfaces: List<CustomSlot> =
     listOf(CustomSlot.Surface, CustomSlot.SurfaceRaised, CustomSlot.SurfaceSunken, CustomSlot.SurfaceInverse)
 
 /**
- * The border slots, one of which F-20 wants on every first screen.
+ * The border slots, one of which every first screen has to use.
  */
 internal val CafeBorders: Set<CustomSlot> =
     setOf(CustomSlot.BorderFaint, CustomSlot.BorderSoft, CustomSlot.BorderStrong)
@@ -128,7 +128,7 @@ internal val CafeBorders: Set<CustomSlot> =
 internal val CafeFills: Set<AccentPart> = setOf(AccentPart.Color, AccentPart.Container)
 
 /**
- * Imports that open a popup, a window or an overlay, which on the web take the mirror over (D40).
+ * Imports that open a popup, a window or an overlay, which on the web take the mirror over.
  */
 internal val CafePopupImports: List<String> = listOf(
     "com.materialkolor.builder.kit.control.BuilderMenu",
@@ -142,7 +142,7 @@ internal val CafePopupImports: List<String> = listOf(
 )
 
 /**
- * A call that loops for ever, an infinite transition or an infinite repeat (F-20). The names are
+ * A call that loops for ever, an infinite transition or an infinite repeat. The names are
  * split by a wildcard so the builder's architecture scan does not read this pattern as a call.
  */
 internal val CafeEndlessMotion: Regex = Regex("""\b(rememberInfinite\w*Transition|infinite\w*Repeatable)\b""")

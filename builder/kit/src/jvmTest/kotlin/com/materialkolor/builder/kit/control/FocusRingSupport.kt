@@ -59,7 +59,7 @@ private const val RingFrameTag = "ring-frame"
 private const val RingStartTag = "ring-start"
 
 /**
- * How far a channel has to move for S5 to count the pixel as changed.
+ * How far a channel has to move for a pixel to count as changed.
  */
 private const val MovedBy = 24f / 255f
 
@@ -320,9 +320,9 @@ internal fun RingCapture.sideBands(
 /**
  * Checks that the ring colour stands 3 to 1 from what every ring pixel covered, so no stretch of the
  * ring lies on a ground it matches. [shouldRingEverySide] lets a side through on a handful of 3 to 1
- * pixels, which is how the thumbs, the scheme chip and the copy buttons of the S5 rerun rang only
- * part of the way round. Each pixel is judged by the ring colour it shows rather than its own, so a
- * blended edge pixel on a ground the ring clears by a hair does not fail it.
+ * pixels, which is how the thumbs, the scheme chip and the copy buttons once rang only part of the
+ * way round. Each pixel is judged by the ring colour it shows rather than its own, so a blended edge
+ * pixel on a ground the ring clears by a hair does not fail it.
  */
 internal fun RingCapture.shouldRingAllTheWayRound() {
     val matched = candidates.filter { point ->

@@ -40,11 +40,10 @@ public fun BuilderDisclosure(
     modifier: Modifier = Modifier,
     summary: String? = null,
     enabled: Boolean = true,
-    flush: Boolean = false, // b-510
+    flush: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val library = LocalSkin.current.library
-    // b-510
     if (flush && library != Library.Fluent) {
         HeadlessDisclosure(
             expanded = expanded,
@@ -91,8 +90,6 @@ public fun BuilderDisclosure(
         }
     }
 }
-
-// b-510
 
 /**
  * A disclosure with no box of its own, a hairline over it and its title at the column's edge.

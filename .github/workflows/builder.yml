@@ -158,7 +158,6 @@ jobs:
         run: |
           npm ci
           npx playwright install --with-deps chromium
-          # b-503
           # boot.spec.ts boots a theme link from wrangler dev, the one server that writes its meta.
           npm --prefix ../worker ci
 

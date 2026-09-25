@@ -29,7 +29,6 @@ class HistoryEntryJsonTest {
         assertEquals(entries, json.decodeFromString(serializer, text))
     }
 
-    // b-508
     @Test
     fun historyEntry_withTime_roundTrips() {
         val arb = DocumentArb()
@@ -60,7 +59,7 @@ class HistoryEntryJsonTest {
     @Test
     fun historyEntry_keys_stayWhereSavedHistoriesExpectThem() {
         val wireNames = listOf(
-            HistoryEntry.serializer().descriptor to listOf("before", "after", "label", "at"), // b-508
+            HistoryEntry.serializer().descriptor to listOf("before", "after", "label", "at"),
             ChangeLabel.serializer().descriptor to listOf("kind", "detail"),
         )
 

@@ -18,11 +18,9 @@ import kotlin.test.Test
 
 private val Plain = ThemeDocument(seed = Argb(0x6750A4))
 
-// b-306c
-
 /**
  * The hero's copy buttons count as on screen only while the hero shows them, so the manual copy
- * dialog a refused copy opens hands focus back to nothing once they have gone (AR-09).
+ * dialog a refused copy opens hands focus back to nothing once they have gone.
  */
 @OptIn(ExperimentalTestApi::class)
 class CopyFocusTest {

@@ -14,7 +14,7 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The banner over a theme that is not saved yet, until it is. Most came from a link, but one storage
  * turned down when a new project started is not saved either, so the wording fits both. The first
- * edit saves it on its own, and Save to my projects saves it straight away (architecture 4.2).
+ * edit saves it on its own, and Save to my projects saves it straight away.
  */
 @Composable
 internal fun SharedLinkBanner(

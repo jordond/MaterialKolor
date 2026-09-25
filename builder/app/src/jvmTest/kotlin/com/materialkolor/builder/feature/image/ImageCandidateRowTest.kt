@@ -54,7 +54,7 @@ private const val ADD_AGAIN = "Add the image again"
 private const val DROP = "Drop to pull colors from this image"
 private const val MOSTLY_GRAY = "This image is mostly gray, so its colors are quiet"
 private const val WAIT_MILLIS = 5_000L
-private const val ELSEWHERE = "elsewhere" // b-311c
+private const val ELSEWHERE = "elsewhere"
 
 @OptIn(ExperimentalTestApi::class)
 class ImageCandidateRowTest {
@@ -186,8 +186,6 @@ class ImageCandidateRowTest {
             store.clear()
         }
 
-    // b-311a
-
     @Test
     fun dropOverlay_staysAwayWhileThePickerIsOpen() =
         runComposeUiTest {
@@ -263,8 +261,6 @@ class ImageCandidateRowTest {
             mainClock.autoAdvance = true
             store.clear()
         }
-
-    // b-311c
 
     @Test
     fun focusTabbedAwayWhileAnImageDecodes_staysWhereTheUserPutIt() =
@@ -369,7 +365,7 @@ class ImageCandidateRowTest {
     private fun ComposeUiTest.showRow(
         harness: PosterHarness,
         picking: Boolean = false,
-        elsewhere: Boolean = false, // b-311c
+        elsewhere: Boolean = false,
     ) {
         showSection(harness) { context, dispatcher ->
             placeholder = LocalBuilderTokens.current.border
@@ -378,7 +374,6 @@ class ImageCandidateRowTest {
             CompositionLocalProvider(LocalImageSeeds provides seeds, LocalMotionFrozen provides true) {
                 ImageCandidateRow(context, dispatcher)
             }
-            // b-311c
             // Somewhere else to put the focus, after the row.
             if (elsewhere) Box(Modifier.size(1.dp).testTag(ELSEWHERE).focusable())
             ImageHostContent(

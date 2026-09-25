@@ -64,8 +64,6 @@ internal fun redoText(
     return stringResource(Res.string.topbar_redo_change, changeText(label, choice))
 }
 
-// b-509
-
 /**
  * What the History list calls the step [entry], such as "Library change to Fluent". The value named
  * is the one the step landed on, read from its own result and never from the document on screen, so

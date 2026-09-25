@@ -13,7 +13,7 @@ import kotlinx.serialization.KSerializer
  * [ProjectRecord.Codec] and [Preferences.Codec].
  *
  * @param[settle] What a record that read cleanly passes through before it is handed out, such as
- * moving a contrast between the named levels onto the nearest one (D53).
+ * moving a contrast between the named levels onto the nearest one.
  */
 public class RecordCodec<T> internal constructor(
     private val serializer: KSerializer<T>,

@@ -28,7 +28,7 @@ class ShareVectorsTest {
     }
 
     /**
-     * A vector with a contrast between the named levels, such as -37, opens at the nearest one (D53).
+     * A vector with a contrast between the named levels, such as -37, opens at the nearest one.
      */
     @Test
     fun shareVectors_everyCode_decodesToItsDocument() {

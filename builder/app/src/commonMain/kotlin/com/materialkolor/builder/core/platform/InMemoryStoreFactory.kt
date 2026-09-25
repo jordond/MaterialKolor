@@ -46,7 +46,6 @@ class InMemoryStoreFactory(
     private val deleteFailures = MutableStateFlow<List<StoreError>>(emptyList())
     private val beforeUpdates = MutableStateFlow<Map<String, suspend () -> Unit>>(emptyMap())
 
-    // b-301a
     private val newerReported = MutableStateFlow<Set<String>>(emptySet())
 
     override val externalChanges: Flow<StorageKey> = otherTabs.asSharedFlow()
@@ -122,7 +121,6 @@ class InMemoryStoreFactory(
         StorageKeys.parse(key)?.let(otherTabs::tryEmit)
     }
 
-    // b-301a
     private fun report(quarantined: Quarantined) {
         if (quarantined.reason == QuarantineReason.NewerSchema) {
             var first = false
@@ -173,7 +171,6 @@ class InMemoryStoreFactory(
             return if (refused) StoreError.Unavailable else null
         }
 
-        // b-310aa
         override suspend fun fromNewerBuild(): Boolean {
             val text = texts.value[key] ?: return false
             val outcome = codec.decode(text)
@@ -203,7 +200,6 @@ class InMemoryStoreFactory(
                 is DecodeOutcome.Ok -> {
                     Reading(outcome.value, stored, quarantined = null)
                 }
-                // b-301a
                 is DecodeOutcome.Quarantine if outcome.reason == QuarantineReason.NewerSchema -> {
                     Reading(default, stored, Quarantined(key, outcome.reason), refused = true)
                 }

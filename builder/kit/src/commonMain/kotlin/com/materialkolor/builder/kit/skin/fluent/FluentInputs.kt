@@ -76,7 +76,6 @@ internal object FluentInputStyles {
         get() = heroFieldStyle(LocalBuilderTokens.current, underline = 2.dp, shape = FluentTheme.shapes.control)
 }
 
-// fluent-placeholder
 // The slider stays headless, since Fluent's own opens a popup while it drags, and keeps its first style.
 @Composable
 internal fun FluentSlider(
@@ -104,7 +103,7 @@ internal fun FluentSlider(
 
 /**
  * The headless field in Fluent's text box look. Fluent's own text field bakes in its decoration,
- * with no room for the kit's clip that keeps touch selection handles off the web (D45).
+ * with no room for the kit's clip that keeps touch selection handles off the web.
  */
 @Composable
 internal fun FluentField(

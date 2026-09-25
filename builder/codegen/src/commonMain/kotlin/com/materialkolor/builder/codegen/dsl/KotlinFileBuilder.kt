@@ -50,7 +50,6 @@ public class KotlinFileScope internal constructor(
     private val blocks = mutableListOf<Block>()
     private val symbols = mutableListOf<Symbol>()
 
-    // b-109
     // What this file declares, class members included, so an import that would shadow one of them fails.
     private val declaredNames = mutableSetOf<String>()
 
@@ -143,7 +142,7 @@ public class KotlinFileScope internal constructor(
     }
 
     private fun declare(declaration: Declaration) {
-        declaredNames += declaration.names // b-109
+        declaredNames += declaration.names
         symbols += declaration.symbols
 
         val writer = CodeWriter()
@@ -194,7 +193,6 @@ public class KotlinFileScope internal constructor(
                     "${clashing.joinToString(" and ")}. Generated code writes simple names and the " +
                     "DSL has no import alias yet."
             }
-            // b-109
             // An import beats a declaration of the same name, so the file's own one would never be called.
             require(simpleName !in declaredNames) {
                 "Cannot import ${clashing.single()} into $packageName, which declares its own $simpleName. " +
@@ -413,8 +411,6 @@ public class BodyScope internal constructor() {
         statements += Statement(prefix, value)
     }
 
-    // b-111b
-
     /**
      * `target = value`, which sets something that already exists, as in
      * `properties[ThemeTokens.colors] = lightColors` or `colorSchemeTransitionSpec = tween(300)`.
@@ -467,7 +463,7 @@ public class BodyScope internal constructor() {
 internal class Statement(
     val prefix: List<Token>,
     val value: Expression?,
-    val prefixSymbols: List<Symbol> = emptyList(), // b-111b
+    val prefixSymbols: List<Symbol> = emptyList(),
 )
 
 /**

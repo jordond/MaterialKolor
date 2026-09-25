@@ -30,8 +30,6 @@ import com.materialkolor.builder.preview.split.SplitState
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-315b
-
 /**
  * The element in the light copy of a split, with nothing in the dark copy.
  */

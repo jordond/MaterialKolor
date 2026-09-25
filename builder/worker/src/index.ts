@@ -13,7 +13,6 @@ export default {
     const { pathname } = new URL(request.url);
     if (request.method !== 'GET' && request.method !== 'HEAD') return env.ASSETS.fetch(request);
     if (!pathname.startsWith('/t/') && !pathname.startsWith('/og/')) return env.ASSETS.fetch(request);
-    // b-505
     return withRobotsTag(await linkPreview(request, env, context, pathname), env.ROBOTS_TAG);
   },
 } satisfies ExportedHandler<Env>;

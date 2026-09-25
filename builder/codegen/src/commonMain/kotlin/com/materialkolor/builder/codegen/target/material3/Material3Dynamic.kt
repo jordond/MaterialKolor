@@ -71,8 +71,6 @@ private const val STATE = "state"
 private const val SCHEME = "scheme"
 private const val EXTENDED_COLORS = "extendedColors"
 
-// b-112
-
 /**
  * The key colors in the order the theme functions take them, which is also the order `Color.kt` lists them.
  */
@@ -102,11 +100,9 @@ private fun colorFile(input: ExportInput): GeneratedFile {
     }
 }
 
-// b-112
-
 /**
  * `Color.kt` of every dynamic export. Unstyled writes it as it is, and Fluent writes it less its
- * accent seeds and the key colors R1 hides.
+ * accent seeds and every key color but the primary.
  */
 internal fun dynamicColorFile(input: ExportInput): GeneratedFile = colorFile(input)
 
@@ -124,7 +120,7 @@ private fun themeFile(input: ExportInput): GeneratedFile {
         header(Header.lines(input, ExportMode.Dynamic))
         function(name = input.document.themeName, annotations = annotations) {
             parameter(IS_DARK, Symbols.Boolean, default = call(Symbols.IsSystemInDarkTheme))
-            if (input.writesAndroidDynamicColor) dynamicColorParameter() // b-111c
+            if (input.writesAndroidDynamicColor) dynamicColorParameter()
             parameter(CONTENT, lambdaType(annotations = listOf(Symbols.Composable)))
             body { themeBody(input, expressive) }
         }
@@ -145,7 +141,7 @@ private fun BodyScope.themeBody(
     val document = input.document
     val hasAccents = document.accents.isNotEmpty()
     val hasPins = document.pins.isNotEmpty()
-    val dynamicColor = input.writesAndroidDynamicColor // b-111c
+    val dynamicColor = input.writesAndroidDynamicColor
 
     if (hasAccents) {
         assign(
@@ -170,11 +166,11 @@ private fun BodyScope.themeBody(
             },
         )
     }
-    if (dynamicColor) assignContext() // b-111c
+    if (dynamicColor) assignContext()
     if (hasAccents || hasPins || dynamicColor) blankLine()
 
     val generated = themeCall(input, expressive, withState = hasPins)
-    val theme = if (dynamicColor) androidDynamicColorBranch(input, generated) else generated // b-111c
+    val theme = if (dynamicColor) androidDynamicColorBranch(input, generated) else generated
     if (hasAccents) {
         call(Symbols.CompositionLocalProvider) {
             argument(infix(ref(LOCAL_EXTENDED_COLORS), "provides", ref(EXTENDED_COLORS)))
@@ -301,15 +297,11 @@ internal fun platformExpression(platform: SchemePlatform): Expression {
  */
 private fun ThemeDocument.tertiarySeedForCmf(): Argb? = cmfTertiarySeed.takeIf { style == Style.Cmf }
 
-// b-112
-
 /**
  * The theme function's parameter for this key color, as in `neutralVariant`.
  */
 internal val KeyColor.parameterName: String
     get() = name.replaceFirstChar { char -> char.lowercaseChar() }
-
-// b-112b
 
 /**
  * The `ColorScheme` property for this role, as in `surfaceContainerHigh`.

@@ -67,7 +67,6 @@ class InMemoryStoreFactoryTest {
             factory.textAt(StorageKeys.quarantine(StorageKeys.PREFS, MOVED_AT)) shouldBe BROKEN
         }
 
-    // b-301a
     @Test
     fun get_newerSchemaText_leavesItInPlaceAndReportsItOnce() =
         runTest {
@@ -86,7 +85,6 @@ class InMemoryStoreFactoryTest {
             factory.keys shouldBe setOf(StorageKeys.PREFS)
         }
 
-    // b-310aa
     @Test
     fun fromNewerBuild_eachKindOfRecord_isTrueOnlyForANewerSchemaAndOnlyReads() =
         runTest {
@@ -107,7 +105,6 @@ class InMemoryStoreFactoryTest {
             reported shouldBe emptyList()
         }
 
-    // b-310aa
     @Test
     fun update_overNewerSchemaText_neverRunsItsBlock() =
         runTest {
@@ -123,7 +120,6 @@ class InMemoryStoreFactoryTest {
             ran shouldBe false
         }
 
-    // b-301a
     @Test
     fun update_overNewerSchemaText_isRefusedAndLeavesTheText() =
         runTest {

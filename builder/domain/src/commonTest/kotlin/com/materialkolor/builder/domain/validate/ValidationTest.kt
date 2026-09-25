@@ -146,7 +146,7 @@ class ValidationTest {
             listOf(
                 ValidationError.AccentNameDuplicate(2, "brand"),
                 ValidationError.AccentNameDuplicate(3, "brand"),
-                ValidationError.AccentNameCaseClash(4, "Brand"), // b-110
+                ValidationError.AccentNameCaseClash(4, "Brand"),
             ),
             validateAccents(accents),
         )
@@ -194,8 +194,6 @@ class ValidationTest {
 
         assertEquals(untouched, document)
     }
-
-    // b-110
 
     @Test
     fun validateAccents_namesDifferingOnlyInCase_isACaseClash() {

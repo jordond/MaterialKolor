@@ -7,11 +7,9 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-311c
-
 /**
  * The Undo on an image seed's toast ends as soon as the document is somewhere the seed did not put
- * it, even when no frame ever showed the seed itself (R-B-311a).
+ * it, even when no frame ever showed the seed itself.
  */
 class SeedUndoTest {
     private val before = ThemeDocument(seed = Argb(0xFF6750A4.toInt()))

@@ -199,7 +199,6 @@ class HistoryTest {
         assertFalse(session.history.canUndo)
     }
 
-    // b-307
     @Test
     fun history_presetSeedPutBackAfterADrag_leavesNoEntry() {
         val session = Session()
@@ -213,7 +212,6 @@ class HistoryTest {
         assertEquals(ChangeLabel(ChangeKind.Preset, detail = "plum"), session.history.undoLabel)
     }
 
-    // b-311c
     @Test
     fun history_imageSeedPutBackAfterADrag_leavesNoEntry() {
         val session = Session()
@@ -267,7 +265,6 @@ class HistoryTest {
         assertFalse(session.history.canRedo)
     }
 
-    // b-307a
     @Test
     fun history_dragThroughTheStartThatLandsElsewhere_throwsAwayRedo() {
         val session = Session()
@@ -422,8 +419,6 @@ class HistoryTest {
         assertEquals(2, session.history.persisted().size)
     }
 
-    // b-311a
-
     @Test
     fun history_newImageSeedRightAfterASeedEdit_isItsOwnStep() {
         val session = Session()
@@ -451,7 +446,6 @@ class HistoryTest {
         assertEquals(ThemeDocument.Default, session.history.undo())
     }
 
-    // b-311c
     @Test
     fun history_seedEditRightAfterAnImageSeed_isItsOwnStep() {
         listOf(SeedSource.Typed, SeedSource.Shuffled, SeedSource.Eyedropper).forEach { next ->

@@ -10,7 +10,7 @@ import androidx.compose.runtime.withFrameNanos
 private const val NanosPerMilli = 1_000_000L
 
 /**
- * The one clock the builder is allowed to loop on (MO-10).
+ * The one clock the builder is allowed to loop on.
  *
  * Returns a phase that walks from zero to one every [periodMillis] and starts over. Read it inside
  * a draw or `graphicsLayer` lambda so the loop costs a frame, not a recomposition.

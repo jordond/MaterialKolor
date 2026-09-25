@@ -64,7 +64,6 @@ class ProjectsDrawerTest {
             onAllSearchFields().assertCountEquals(1)
         }
 
-    // b-310aa
     @Test
     fun search_typing_narrowsTheListWithoutACommit() =
         runComposeUiTest {

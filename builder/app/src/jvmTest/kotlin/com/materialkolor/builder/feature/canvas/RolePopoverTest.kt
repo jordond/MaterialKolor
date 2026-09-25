@@ -54,7 +54,6 @@ class RolePopoverTest {
             actions.sent.last() shouldBe WorkspaceAction.ShowOnRamp(RampTarget.OfRole(Role.Primary, isDark = false))
         }
 
-    // b-308ba
     @Test
     fun copy_handsFocusBackToTheTile() =
         runDesktopComposeUiTest(width = TABS_WIDE, height = TABS_HEIGHT) {

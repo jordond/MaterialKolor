@@ -20,10 +20,8 @@ import kotlin.test.Test
 private val Start = Argb(0xFFD9653B.toInt())
 private const val WAIT_MILLIS = 5_000L
 
-// b-315c
-
 /**
- * The Undo on a pasted color's toast only ever undoes that color (F-05).
+ * The Undo on a pasted color's toast only ever undoes that color.
  */
 @OptIn(ExperimentalTestApi::class)
 class PasteUndoTest {

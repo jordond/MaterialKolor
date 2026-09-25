@@ -66,7 +66,7 @@ private const val SidewaysPresses = 80
 
 /**
  * The copy band never covers what it sits beside. A swatch keeps the band's room free of its lines,
- * and a code view lets its lines run on past the band, in every skin (R-B-230b).
+ * and a code view lets its lines run on past the band, in every skin.
  */
 @OptIn(ExperimentalTestApi::class)
 class CopyBandTest {

@@ -48,9 +48,9 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The card under the seed actions that says how primary reads next to the seed, the seed and primary
- * side by side, the line and a Why link to the explainer on one row (F-16). It stays away while primary sits within 2 of the seed in hue,
- * chroma and tone, pins included.
+ * The card under the seed actions that says how primary reads next to the seed, the seed and
+ * primary side by side, the line and a Why link to the explainer on one row. It stays away while
+ * primary sits within 2 of the seed in hue, chroma and tone, pins included.
  *
  * Why opens the explainer, which [ExplainerHost] shows over the workspace so it opens over the rail
  * too, and it hands focus back to Why once it closes.
@@ -62,7 +62,7 @@ internal fun PrimaryExplainerLine(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
-    why: PanelTrigger? = null, // b-221f
+    why: PanelTrigger? = null,
 ) {
     val tokens = LocalBuilderTokens.current
     val spacing = tokens.spacing
@@ -71,7 +71,6 @@ internal fun PrimaryExplainerLine(
     val primary = result.roles[Role.Primary, false].argb
     val take = remember(result) { ExplainerText.take(HctReadout.of(seed), HctReadout.of(primary)) }
     if (take == null) return
-    // b-510
     val card = RoundedCornerShape(tokens.radius.medium)
     Row(
         modifier = modifier
@@ -97,8 +96,6 @@ internal fun PrimaryExplainerLine(
         )
     }
 }
-
-// b-510
 
 /**
  * One of the card's two swatches, the seed and then primary. The seed sits on its own colour, so

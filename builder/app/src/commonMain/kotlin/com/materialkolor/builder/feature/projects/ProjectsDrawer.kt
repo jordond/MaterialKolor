@@ -31,8 +31,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The projects drawer (F-30), a side panel over the poster at Medium and Expanded and the whole
- * screen at Compact.
+ * The projects drawer, a side panel over the poster at Medium and Expanded and the whole screen at
+ * Compact.
  *
  * It lists every saved project newest first, with New and Copy this one above them and a search once
  * there are more than [SEARCH_THRESHOLD] that narrows the list as it is typed. Without storage a banner says nothing will be kept and
@@ -55,7 +55,7 @@ internal fun ProjectsDrawer(
     onGetLink: () -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    returnFocusTo: FocusRequester? = null, // b-221f
+    returnFocusTo: FocusRequester? = null,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     var renaming by remember { mutableStateOf<String?>(null) }
@@ -67,9 +67,8 @@ internal fun ProjectsDrawer(
         onDismissRequest = onDismissRequest,
         title = stringResource(Res.string.projects_title),
         modifier = modifier,
-        returnFocusTo = returnFocusTo, // b-221f
+        returnFocusTo = returnFocusTo,
     ) {
-        // b-511
         // The panel keeps its own room from its edges, so the buttons and the rows line up with the title.
         Column(
             modifier = Modifier.padding(bottom = spacing.medium),
@@ -104,7 +103,7 @@ internal fun ProjectsDrawer(
         }
         BuilderScrollArea(modifier = Modifier.weight(1f)) {
             Column(
-                modifier = Modifier.selectableGroup().padding(vertical = spacing.small), // b-511
+                modifier = Modifier.selectableGroup().padding(vertical = spacing.small),
                 verticalArrangement = Arrangement.spacedBy(spacing.small),
             ) {
                 val shown = state.shown

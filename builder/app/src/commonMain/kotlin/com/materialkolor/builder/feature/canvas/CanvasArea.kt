@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterNotNull
 
 /**
- * The color vision the canvas simulates (F-25). Nothing remembers it across a reload.
+ * The color vision the canvas simulates. Nothing remembers it across a reload.
  */
 internal enum class VisionSimulation {
     None,
@@ -45,20 +45,18 @@ internal enum class VisionSimulation {
     Achromatopsia,
 }
 
-// b-315c
-
 /**
- * What the canvas shows for this simulation, grayscale while B is [held] (F-25).
+ * What the canvas shows for this simulation, grayscale while B is [held].
  */
 internal fun VisionSimulation.whileHeld(held: Boolean): VisionSimulation =
     if (held) VisionSimulation.Achromatopsia else this
 
 /**
- * The preview and its tabs (F-19), the active tab kept clear of [contentPadding].
+ * The preview and its tabs, the active tab kept clear of [contentPadding].
  *
  * The tabs run along the top and only the one showing composes. App and Components each get one
  * [DemoAppState], made here above the tab switch, so both copies of a split share it and it lives
- * through a tab switch. On a phone the app is always framed as a phone (F-46).
+ * through a tab switch. On a phone the app is always framed as a phone.
  */
 @Composable
 internal fun CanvasArea(
@@ -72,9 +70,8 @@ internal fun CanvasArea(
     val preview = rememberPreviewSplit(state.view.mode, state.view.splitFraction) { fraction ->
         dispatcher.dispatch(WorkspaceAction.SetSplitFraction(fraction))
     }
-    val specs = rememberPaneSpecs(state.vision.whileHeld(state.grayscaleHeld)) // b-315c
+    val specs = rememberPaneSpecs(state.vision.whileHeld(state.grayscaleHeld))
     val compact = LocalLayout.current.windowClass == WindowClass.Compact
-    // b-512
     // The tabs start at the canvas's own inset, as the preview window below them does.
     val inset = canvasInset(compact)
     Column(modifier.fillMaxSize()) {
@@ -91,9 +88,7 @@ internal fun CanvasArea(
                 specs = specs,
                 appState = appState,
                 componentsState = componentsState,
-                // b-308
                 dispatcher = dispatcher,
-                // b-308b
                 rampHighlight = state.rampHighlight,
                 generation = state.projectGeneration,
                 deviceWidth = if (compact) DeviceWidth.Phone else state.view.deviceWidth,
@@ -104,7 +99,7 @@ internal fun CanvasArea(
 
 /**
  * The dock under the preview with preview mode, device width, inspect and vision, drawn in a
- * `DockRegion` (F-19).
+ * `DockRegion`.
  */
 @Composable
 internal fun CanvasDock(
@@ -121,12 +116,12 @@ internal fun CanvasDock(
 private const val MAX_UNCONFIRMED = 32
 
 /**
- * How long the handle has to rest before where it rests is saved, so a drag saves once (F-19).
+ * How long the handle has to rest before where it rests is saved, so a drag saves once.
  */
 internal const val HANDLE_SETTLE_MILLIS = 250L
 
 /**
- * Where the split handle sits and what the canvas composes for the preview mode (F-19, MO-03).
+ * Where the split handle sits and what the canvas composes for the preview mode.
  *
  * Light and Dark compose one copy. A switch first slides the handle to the matching edge, the end
  * edge for Light so the light copy fills the canvas, or back to where Split left it, and only then

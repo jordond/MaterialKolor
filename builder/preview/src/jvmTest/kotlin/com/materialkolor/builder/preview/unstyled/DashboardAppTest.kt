@@ -65,7 +65,7 @@ import kotlin.test.Test
 private const val DashboardSourceDir = "src/commonMain/kotlin/com/materialkolor/builder/preview/unstyled"
 
 /**
- * The four families F-20 wants on every screen.
+ * The four families every screen has to use.
  */
 private val DashboardFamilies: Map<String, Set<Role>> = mapOf(
     "primary" to setOf(Role.Primary, Role.OnPrimary, Role.PrimaryContainer, Role.OnPrimaryContainer),

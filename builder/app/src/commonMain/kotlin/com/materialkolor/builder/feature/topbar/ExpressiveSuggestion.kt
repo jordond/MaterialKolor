@@ -20,7 +20,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * Offers the Expressive style on the 2025 spec after a switch to Expressive left the document on
- * something else (F-03).
+ * something else.
  *
  * Nothing changes until someone presses Apply. Keep mine, Esc and a click on the veil all leave
  * the document as it is.
@@ -63,7 +63,7 @@ internal fun ExpressiveSuggestion(
 
 /**
  * Whether [change], taking the document from [before] to [after], is a switch onto Expressive that
- * should offer the Expressive style (F-03). Only a library switch raises it, never an undo, an
+ * should offer the Expressive style. Only a library switch raises it, never an undo, an
  * import or a shuffle.
  */
 internal fun raisesExpressiveSuggestion(

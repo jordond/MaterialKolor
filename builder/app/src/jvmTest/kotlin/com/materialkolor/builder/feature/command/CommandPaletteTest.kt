@@ -54,14 +54,12 @@ import kotlin.test.Test
 private const val WIDTH = 1280
 private const val HEIGHT = 800
 
-// b-315a
 @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
 class CommandPaletteTest {
     private val harness = CommandHarness()
     private val platform = harness.platform
     private var categories: Map<CommandCategory, String> = emptyMap()
 
-    // b-511
     // The category is the header over the row now, and the keys are keycaps at its end.
     @Test
     fun everyCommand_listsUnderItsCategoryWithItsKeys_andADisabledOneWithItsReason() =
@@ -69,7 +67,6 @@ class CommandPaletteTest {
             boot()
             openPalette()
             val apple = isApple(platform.environment.browser)
-            // b-315d
             // All but its own row, which would only open what is already open.
             val palette = harness.command("palette")
             onAllNodes(rowMatcher(palette.label)).fetchSemanticsNodes().size shouldBe 0
@@ -341,8 +338,6 @@ class CommandPaletteTest {
             harness.graph.session.document.value.seed shouldNotBe seed
         }
 
-    // b-315d
-
     /**
      * On the desktop the palette is a window of its own, so the page's holder keeps focus in the
      * page's window, the way it does on the web in the frames before the palette takes focus.
@@ -474,4 +469,4 @@ private val PaletteRow: SemanticsMatcher =
  * The top bar's Commands button, which only the page's own window holds.
  */
 private val CommandsButton: SemanticsMatcher =
-    hasClickAction() and hasContentDescription("Command palette") and !InPalette // b-315d
+    hasClickAction() and hasContentDescription("Command palette") and !InPalette

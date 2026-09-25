@@ -39,7 +39,6 @@ internal object Material3DynamicCases {
         ),
     )
 
-    // b-111c
     private val AndroidDynamicColor: ExportPrefs = ExportPrefs(multiplatform = false, androidDynamicColor = true)
 
     private val plain: List<Fixture> = listOf(
@@ -63,7 +62,6 @@ internal object Material3DynamicCases {
                 "expressive-dynamic-default" to ExpressiveDefault.input,
                 "expressive-dynamic-tonal-spot-2021" to Fixtures.ExpressiveOnTonalSpot2021.input,
                 "expressive-dynamic-pins" to ExpressivePins.input,
-                // b-111c
                 "material3-dynamic-android-dynamic-color" to
                     Fixtures.AndroidOnly.with(prefs = AndroidDynamicColor).input,
                 "expressive-dynamic-android-dynamic-color" to ExpressiveDefault
@@ -165,14 +163,12 @@ class Material3DynamicTest {
     fun material3Dynamic_accents_harmonizeOnlyWhenAsked() {
         val extended = Material3Dynamic.files(Fixtures.ThreeAccents.input).last().text
 
-        // b-110a
         val harmonized = "rememberTonalPalette(\n        seed = BrandSeed,\n        harmonizeWith = seedColor,\n    )"
         assertTrue(harmonized in extended, extended)
         assertTrue("rememberTonalPalette(seed = SuccessSeed)" in extended, extended)
         assertTrue("threshold = ContrastThreshold.WCAG_AAA_NORMAL_TEXT" in extended, extended)
     }
 
-    // b-111c
     @Test
     fun material3Dynamic_androidDynamicColor_branchesAroundTheGeneratedTheme() {
         val theme = theme(Material3DynamicCases.all.getValue("expressive-dynamic-android-dynamic-color"))
@@ -188,7 +184,6 @@ class Material3DynamicTest {
         assertTrue(provider in 0..<branch, theme)
     }
 
-    // b-111c
     @Test
     fun material3Dynamic_androidDynamicColor_changesNothingInAMultiplatformExport() {
         Material3DynamicCases.all.values.filter { input -> input.prefs.multiplatform }.forEach { input ->

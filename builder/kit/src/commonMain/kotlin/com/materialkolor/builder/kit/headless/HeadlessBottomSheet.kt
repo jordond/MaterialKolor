@@ -83,7 +83,7 @@ import kotlin.math.roundToInt
  * lowest detent that shows it (WCAG 2.4.11). A scrolling body raises the sheet before it scrolls up,
  * and hands a drag back down to the sheet once it has scrolled to its top, the way Material's sheet
  * does. The sheet rises with the panel arrival motion and sinks with the panel exit motion, and
- * snaps under reduced motion (MO-05).
+ * snaps under reduced motion.
  *
  * @param[state] The sheet's detent.
  * @param[label] The sheet's name, read on the handle and as the pane title.
@@ -156,7 +156,7 @@ internal fun HeadlessBottomSheet(
  *
  * It takes a press across the sheet's whole width, while its highlight and focus ring stand in from
  * the sides by the sheet's corner radius. The sheet clips to its rounded top, which would cut a ring
- * drawn out to its edges on the left and right (S5 row 28).
+ * drawn out to its edges on the left and right.
  */
 @Composable
 private fun SheetHandle(

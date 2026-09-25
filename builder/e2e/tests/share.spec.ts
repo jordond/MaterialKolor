@@ -2,8 +2,7 @@ import { expect, test } from '@playwright/test';
 import { openBuilder, wantHooks } from './builder';
 import { button, labelled, openWorkspace, press, seedText, storedProjects } from '../fixtures/workspace';
 
-// b-503
-// Opening a shared link (flow 5.6, F-32). A link opens as a theme that is not in the projects until
+// Opening a shared link. A link opens as a theme that is not in the projects until
 // it is saved, the same link again then opens that project rather than a copy, and a link from the
 // old builder keeps its dark preview.
 
@@ -13,7 +12,7 @@ const LINK = '/t/AWdQpAAAAABw';
 /** The banner button that keeps a theme opened from a link, `share_transient_save`. */
 const SAVE = 'Save to my projects';
 
-/** An old builder link, as the spec writes it. */
+/** An old builder link, with the query the old builder wrote. */
 const LEGACY = '/?color_seed=FF6750A4&dark_mode=true&style=Vibrant';
 
 test.beforeEach(async ({ context }) => {

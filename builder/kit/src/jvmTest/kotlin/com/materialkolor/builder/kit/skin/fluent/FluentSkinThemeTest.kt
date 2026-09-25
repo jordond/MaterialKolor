@@ -60,11 +60,11 @@ private val LucideFallbacks: Set<IconId> = setOf(
     IconId.Expand,
     IconId.Keyboard,
     IconId.Help,
-    IconId.History, // b-508
+    IconId.History,
 )
 
 /**
- * Every kit file B-403 and B-403b own, the ones a Fluent swap can reach.
+ * Every kit file a Fluent swap can reach.
  */
 private val FluentOwned: List<String> = listOf(
     "skin/fluent/FluentSkinTheme.kt",
@@ -90,7 +90,7 @@ private val FluentOwned: List<String> = listOf(
 
 /**
  * What opens a window of its own or runs a loop that ignores reduced motion. Overlays draw in the
- * page (D40), and the progress bar keeps its own loop, so none of these belong in a Fluent file.
+ * page, and the progress bar keeps its own loop, so none of these belong in a Fluent file.
  */
 private val WindowsAndLoops: List<Regex> = listOf(
     Regex("""androidx\.compose\.ui\.window\.Popup"""),

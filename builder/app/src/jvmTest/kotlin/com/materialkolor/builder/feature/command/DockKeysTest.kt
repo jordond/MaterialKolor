@@ -21,10 +21,8 @@ import kotlin.test.Test
 private const val WIDTH = 1280
 private const val HEIGHT = 800
 
-// b-315c
-
 /**
- * V opens the dock's Vision menu, and a held B shows the canvas in grayscale (F-25, section 6).
+ * V opens the dock's Vision menu, and a held B shows the canvas in grayscale.
  */
 @OptIn(ExperimentalTestApi::class)
 class DockKeysTest {
@@ -40,7 +38,6 @@ class DockKeysTest {
     fun v_opensTheVisionMenuWithFocusInIt_andClosingItHandsFocusBackToItsButton() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             with(harness) { show() }
-            // b-315d
             // The switch moves the page into the new skin, and the holder takes focus back once it has.
             runOnUiThread { harness.workspace.edit(LibraryChoice.Unstyled.change, EditPhase.Discrete) }
             waitForIdle()
@@ -57,7 +54,6 @@ class DockKeysTest {
             onNode(hasContentDescription("Color vision, None") and InWorkspace).assertIsFocused()
         }
 
-    // b-315d
     @Test
     fun aNumberKey_thenSpaceAndV_workWithNoClick() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {

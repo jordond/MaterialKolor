@@ -4,8 +4,6 @@ import com.materialkolor.builder.domain.capability.forTarget
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportTarget
 
-// b-505
-
 /**
  * Where the builder is served, and so where its links point unless the page says otherwise.
  */
@@ -20,7 +18,7 @@ public const val SHARE_URL_PREFIX: String = "$SITE_ORIGIN/t/"
  * The link to [document] called [projectName], the one Share gives and every export links back with.
  * It opens on [origin], so a link made on staging opens on staging.
  *
- * The code carries the document and the name and nothing else (D26), so an export option such as the
+ * The code carries the document and the name and nothing else, so an export option such as the
  * package name never ends up in it. A document whose own accents do not fit in a code links to what
  * its target sees instead, still under [projectName], which for Fluent leaves the accents out. When
  * that does not fit either there is no link, and this is null.

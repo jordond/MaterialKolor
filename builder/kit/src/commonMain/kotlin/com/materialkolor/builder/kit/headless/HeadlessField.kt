@@ -165,14 +165,14 @@ internal fun Modifier.fieldCommits(
     draft: FieldDraft,
     onCommit: () -> Unit,
     onRevert: () -> Unit,
-    onSubmit: (() -> Unit)? = null, // b-315a
+    onSubmit: (() -> Unit)? = null,
 ): Modifier =
     onPreviewKeyEvent { event ->
         if (event.type != KeyEventType.KeyDown || draft.composing) return@onPreviewKeyEvent false
         when (event.key) {
             Key.Enter, Key.NumPadEnter -> {
                 onCommit()
-                onSubmit?.invoke() // b-315a
+                onSubmit?.invoke()
                 true
             }
             Key.Escape -> {
@@ -243,7 +243,6 @@ internal fun HeadlessField(
                         .fieldBox(style, edge, interactions),
                     contentAlignment = Alignment.CenterStart,
                 ) {
-                    // b-228a
                     InnerTextWithoutHandles(text)
                 }
                 if (message != null) {

@@ -10,8 +10,8 @@ import com.materialkolor.builder.engine.resolve.ThemeResult
  * What one preview pane draws.
  *
  * [result] has to be resolved from `document.forTarget(target)`, never from the raw document, so a
- * setting the target turns off never shows in its preview (D35). The canvas does that before it
- * builds a spec. A pane never resolves anything itself, it only reads [result].
+ * setting the target turns off never shows in its preview. The canvas does that before it builds a
+ * spec. A pane never resolves anything itself, it only reads [result].
  *
  * @property[result] The resolved theme for the target the preview shows.
  * @property[isDark] Which mode of [result] the pane is drawn in.

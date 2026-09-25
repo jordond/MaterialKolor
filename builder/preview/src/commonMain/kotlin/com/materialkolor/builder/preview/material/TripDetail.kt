@@ -280,16 +280,13 @@ private fun NoteCard(state: DemoAppState) {
         modifier = Modifier.fillMaxWidth().previewRoles(Role.SurfaceContainerLowest, Role.OnSurface),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
     ) {
-        // b-228b
         // One line, since on a field over several lines a long press on the web would put up selection
-        // handles, popups that take the accessibility mirror over (D45).
-        // b-228c
-        // When D45 drops the note goes back to `minLines = 2`, together with `tabMovesFocus` below.
+        // handles, popups that take the accessibility mirror over. When a popup on the web stops taking
+        // the mirror over, the note goes back to `minLines = 2`, together with `tabMovesFocus` below.
         SampleOutlinedTextField(
             value = state.text,
             onValueChange = { text -> state.text = text },
             label = "Note for the group",
-            // b-227
             modifier = Modifier
                 .padding(SectionGap)
                 .fillMaxWidth()

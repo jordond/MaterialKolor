@@ -8,7 +8,6 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-315
 class PastedTextTest {
     private val code = ShareCodec.encode(ThemeDocument.Default, projectName = "Mine")
 

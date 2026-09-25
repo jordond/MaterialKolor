@@ -48,8 +48,6 @@ internal sealed interface RampTarget {
     ) : RampTarget
 }
 
-// b-308b
-
 /**
  * What Show on ramp last asked for, with the project it was asked in.
  *

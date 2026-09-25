@@ -65,7 +65,7 @@ internal const val PICKED_RAMP_TAG: String = "picked-ramp"
 
 /**
  * The Palettes tab, the tonal palettes the roles of [result] are drawn from and one ramp per
- * accent (F-23).
+ * accent.
  *
  * Each ramp's stops copy their hex when pressed, and its markers show the tones the roles or the
  * accent's four colors picked. Under the ramp one tag per tone names what landed there, and the
@@ -101,7 +101,6 @@ internal fun PalettesTab(
     val layout = remember(result, mode) { rampLayout(result, mode) }
     val target = highlight?.takeIf { shown -> shown.generation == generation }?.target
     val picked = remember(result, target) { target?.let { wanted -> result.pick(wanted) } }
-    // b-308ba
     val requesters = remember { PickedRequesters() }
     val announcer = LocalAnnouncer.current
     LaunchedEffect(highlight) {
@@ -126,8 +125,6 @@ internal fun PalettesTab(
         for (entry in layout.mode(isDark)) RampBlock(entry, entry.title(result), picked, requesters, dispatcher)
     }
 }
-
-// b-308ba
 
 /**
  * How the tab reaches the picked ramp, to scroll it into view and to focus its first stop.
@@ -221,14 +218,13 @@ private data class PickedRamp(
     val source: RampSource,
     val isDark: Boolean,
     val name: String,
-    val bothModes: Boolean, // b-308ba
+    val bothModes: Boolean,
 ) {
     /**
      * Whether [entry] is the ramp this picks out. A shared ramp stands for either mode, and so does
      * one that is the same in both, so it still shows in the mode it was not picked in.
      */
-    fun matches(entry: RampEntry): Boolean =
-        entry.source == source && (bothModes || (entry.isDark ?: isDark) == isDark) // b-308ba
+    fun matches(entry: RampEntry): Boolean = entry.source == source && (bothModes || (entry.isDark ?: isDark) == isDark)
 }
 
 /**
@@ -335,8 +331,6 @@ private fun ThemeResult.pick(target: RampTarget): PickedRamp? =
         }
     }
 
-// b-308ba
-
 /**
  * Whether the ramp of [palette] has the same stops in light and dark, as every ramp has under 2021.
  */
@@ -354,12 +348,12 @@ private fun ThemeResult.sameInBothModes(palette: KeyColor): Boolean =
 @Composable
 private fun RampBlock(
     entry: RampEntry,
-    title: String, // pf-1
+    title: String,
     picked: PickedRamp?,
     requesters: PickedRequesters,
     dispatcher: Dispatcher<WorkspaceAction>,
 ) {
-    LocalTileProbe.current?.invoke(title) // pf-1
+    LocalTileProbe.current?.invoke(title)
     val tokens = LocalBuilderTokens.current
     val shown = picked?.takeIf { pick -> pick.matches(entry) }
     val labels = entry.steps.associate { step ->
@@ -368,28 +362,26 @@ private fun RampBlock(
     val onCopyTone = { step: RampStep ->
         dispatcher.dispatch(WorkspaceAction.CopyText(step.argb.toHex(), labels.getValue(step.tone)))
     }
-    // b-513
     val markers = remember(entry) { entry.marks.map { mark -> RampMark(mark.name, mark.tone) } }
     var lit by remember { mutableStateOf<Int?>(null) }
     val onLit = remember { { tone: Int? -> lit = tone } }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .then(if (shown != null) Modifier.bringIntoViewRequester(requesters.view) else Modifier) // b-308ba
+            .then(if (shown != null) Modifier.bringIntoViewRequester(requesters.view) else Modifier)
             .then(if (shown != null) Modifier.testTag(PICKED_RAMP_TAG) else Modifier)
             .border(
-                width = tokens.highlightWidth, // b-308ba
+                width = tokens.highlightWidth,
                 color = if (shown != null) tokens.accent else Color.Transparent,
                 shape = RoundedCornerShape(tokens.radius.small),
             ).padding(tokens.spacing.small),
         verticalArrangement = Arrangement.spacedBy(tokens.spacing.small),
     ) {
-        RampTitle(title, entry.keyTone, lit, onLit) // b-513
+        RampTitle(title, entry.keyTone, lit, onLit)
         if (shown != null) BuilderText(stringResource(Res.string.tabs_ramp_shown, shown.name))
-        // b-308ba
         val strip = if (shown != null) Modifier.focusRequester(requesters.focus) else Modifier
         RampStrip(entry.steps, markers, entry.keyTone, onCopyTone, strip, labels = false, lit = lit, onLit = onLit)
-        ModeTags(entry.marks, lit, onLit) // b-513
+        ModeTags(entry.marks, lit, onLit)
     }
 }
 

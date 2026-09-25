@@ -69,8 +69,8 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The shortcut cheat sheet (F-34), every shortcut in the keymap grouped the way the spec's keyboard
- * map runs, written with this platform's Cmd or Ctrl.
+ * The shortcut cheat sheet, every shortcut in the keymap under its [ShortcutGroup], written with
+ * this platform's Cmd or Ctrl.
  *
  * It holds the switch that turns single-key shortcuts off (WCAG 2.1.4) and one line for screen
  * reader users, whose single keys only reach the page in focus mode. While a panel such as this one
@@ -78,7 +78,7 @@ import org.jetbrains.compose.resources.stringResource
  *
  * @param[singleKeys] Whether single-key shortcuts are on.
  * @param[returnFocusTo] Where focus goes once it closes, the overflow button that opened it, or the
- * page's focus holder when `?` did (AR-09).
+ * page's focus holder when `?` did.
  */
 @Composable
 internal fun CheatSheet(
@@ -107,11 +107,9 @@ internal fun CheatSheet(
         },
     ) {
         BuilderScrollArea(Modifier.heightIn(max = layout.heightDp * ABOUT_HEIGHT_FRACTION)) {
-            // b-511
             // Clear of the scrollbar, so the keycaps at the end of each row never touch it.
             Column(Modifier.padding(end = spacing.large), verticalArrangement = Arrangement.spacedBy(spacing.large)) {
                 Column(verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
-                    // b-511
                     // Across the sheet's width, so the label stands clear of the switch the way each
                     // shortcut stands clear of its keys.
                     BuilderSwitch(
@@ -131,7 +129,6 @@ internal fun CheatSheet(
                 }
                 ShortcutGroup.entries.forEach { group ->
                     Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-                        // b-511
                         BuilderText(
                             text = stringResource(groupTitle(group)),
                             modifier = Modifier.semantics { heading() },
@@ -165,7 +162,7 @@ private fun ShortcutRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BuilderText(text = label, modifier = Modifier.weight(1f))
-        Keycaps(keys) // b-511
+        Keycaps(keys)
     }
 }
 
@@ -203,7 +200,7 @@ internal fun shortcutLabel(shortcut: Shortcut): StringResource =
         Shortcut.Save -> Res.string.command_key_save
         Shortcut.Undo -> Res.string.command_key_undo
         Shortcut.Redo -> Res.string.command_key_redo
-        Shortcut.History -> Res.string.command_key_history // b-509
+        Shortcut.History -> Res.string.command_key_history
         Shortcut.Projects -> Res.string.command_key_projects
         Shortcut.NewProject -> Res.string.command_key_new_project
         Shortcut.Inspect -> Res.string.command_key_inspect
@@ -211,7 +208,6 @@ internal fun shortcutLabel(shortcut: Shortcut): StringResource =
         Shortcut.DeviceWidth -> Res.string.command_key_device_width
         Shortcut.Fullscreen -> Res.string.command_key_fullscreen
         Shortcut.Poster -> Res.string.command_key_poster
-        // b-315c
         Shortcut.VisionMenu -> Res.string.command_key_vision_menu
         Shortcut.Grayscale -> Res.string.command_key_grayscale
     }

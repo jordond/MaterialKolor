@@ -104,7 +104,6 @@ class ReservedNamesTest {
         assertEquals(ReservedNames.of(ExportTarget.Material3), ReservedNames.of(ExportTarget.Material3Expressive))
     }
 
-    // b-111
     @Test
     fun clashes_customAccentNamedLikeASlotOrADeclaration_isReported() {
         val document = ThemeDocument.Default.copy(
@@ -147,7 +146,6 @@ class ReservedNamesTest {
         }
     }
 
-    // b-111
     @Test
     fun clashes_fluentThemeNamedAfterEitherShadeSet_isReported() {
         listOf("LightThemeShades", "DarkThemeShades").forEach { name ->
@@ -157,13 +155,12 @@ class ReservedNamesTest {
         }
     }
 
-    // b-111
     @Test
     fun of_frozenTargets_coverEveryNameTheFrozenExportsImport() {
         val exports = Material3FrozenCases.all.mapValues { (_, input) -> input to Material3Frozen.files(input) } +
             FluentFrozenCases.all.mapValues { (_, input) -> input to FluentFrozen.files(input) } +
             CustomFrozenCases.all.mapValues { (_, input) -> input to CustomFrozen.files(input) } +
-            UnstyledFrozenCases.all.mapValues { (_, input) -> input to UnstyledFrozen.files(input) } // b-111b
+            UnstyledFrozenCases.all.mapValues { (_, input) -> input to UnstyledFrozen.files(input) }
 
         exports.forEach { (case, export) ->
             val (input, files) = export
@@ -177,7 +174,6 @@ class ReservedNamesTest {
         }
     }
 
-    // b-111b
     @Test
     fun clashes_unstyledAccentsWhoseFlattenedTokensMeet_reportTheLaterOne() {
         listOf("OnBrand", "BrandContainer").forEach { other ->

@@ -38,8 +38,8 @@ import kotlin.time.Clock
  * however it got there.
  *
  * The model is the one collector of [StoreFactory.quarantined]. A record from a newer build raises
- * a banner asking for a reload (D41), and text that could not be read at all raises a toast saying
- * it was set aside.
+ * a banner asking for a reload, and text that could not be read at all raises a toast saying it was
+ * set aside.
  */
 @Stable
 @Inject
@@ -152,7 +152,6 @@ internal class ProjectsModel(
                     if (state.value.openId == id) moveOffDeleted(id)
                 }
                 Deletion.NotListed -> {
-                    // b-221f
                     // The list no longer holds it, so nothing was removed and there is nothing to undo or report.
                 }
                 Deletion.NewerBuild -> {
@@ -289,7 +288,7 @@ internal enum class ProjectsProblem {
     NotDeleted,
 
     /**
-     * A newer build saved the project, so only a reload can delete it (D41).
+     * A newer build saved the project, so only a reload can delete it.
      */
     NotDeletedNewer,
     NotRestored,

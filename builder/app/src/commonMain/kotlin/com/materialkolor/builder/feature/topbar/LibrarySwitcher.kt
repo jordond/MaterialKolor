@@ -66,7 +66,7 @@ internal enum class LibraryChoice(
 
 /**
  * Whether a switch to Expressive should suggest the Expressive style on the 2025 spec, which holds
- * when the style has no 2025 form or the spec is 2021 (F-03).
+ * when the style has no 2025 form or the spec is 2021.
  */
 internal fun suggestsExpressiveStyle(document: ThemeDocument): Boolean =
     EffectiveSpec.of(style = document.style, requested = document.spec) != SpecVersion.Spec2025
@@ -86,7 +86,7 @@ internal fun LibrarySwitcher(
     document: ThemeDocument,
     onSwitch: (choice: LibraryChoice, origin: Offset) -> Unit,
     modifier: Modifier = Modifier,
-    segmented: Boolean = LocalLayout.current.windowClass == WindowClass.Expanded, // b-231
+    segmented: Boolean = LocalLayout.current.windowClass == WindowClass.Expanded,
 ) {
     LibrarySwitcher(
         selected = LibraryChoice.of(document),
@@ -120,7 +120,7 @@ internal fun LibrarySwitcher(
             onSelect = onSelect,
             label = label,
             modifier = tracked,
-            selectOnFocus = false, // b-221c
+            selectOnFocus = false,
             optionLabel = { choice -> names.getValue(choice) },
         )
     } else {
@@ -152,7 +152,7 @@ internal fun libraryName(choice: LibraryChoice): String =
 
 /**
  * Where the last press on the switcher landed. Plain fields, since only a pick reads them and
- * nothing draws from them. The phone's chip row keeps one too (b-406).
+ * nothing draws from them. The phone's chip row keeps one too.
  */
 internal class RevealOrigin {
     var bounds: Rect = Rect.Zero

@@ -2,8 +2,7 @@ import { expect, test, type CDPSession, type Locator, type Page } from '@playwri
 import { openBuilder, reloadBuilder, wantHooks } from './builder';
 import { longPressAt, mirrorButton, openBy, settledBox, settledMirror, tap, type Box, type Point } from './touch';
 
-// b-224
-// The text toolbar the kit draws in the page for a touch selection (D40). A long press on a field
+// The text toolbar the kit draws in the page for a touch selection. A long press on a field
 // shows it, and Paste reads the clipboard inside the tap's own user activation. Chromium only, since
 // Playwright drives the long press through a CDP session.
 //
@@ -12,10 +11,9 @@ import { longPressAt, mirrorButton, openBy, settledBox, settledMirror, tap, type
 //
 // The row is found by its pixels, the part of the page that changed above or below the field, and
 // each button by the gaps between the labels. That dates from when a long press put up foundation's
-// selection handles, popups that took the mirror over for good (D40), and it still works now that
-// the handles stay off on the web (D45).
+// selection handles, popups that took the mirror over for good, and it still works now that the
+// handles stay off on the web.
 //
-// b-228c
 // Under a full parallel run the page can take a while to settle and to draw the row, so every long
 // press waits for its field to hold still first, and the row counts as found only once it shows all
 // the labels it should. The preview's own sample fields have their spec in `sample-fields.spec.ts`.
@@ -72,10 +70,9 @@ test('Copy from the toolbar puts the selection on the clipboard', async ({ page,
   expect(text).toContain(copied);
 });
 
-// b-228
-// Spike S13. A long press used to put up foundation's selection handles, popups that took the
-// mirror over for good (D40). With the handles kept out of a field on the web, the mirror keeps the
-// page through the long press and still hears the seed the Paste puts in.
+// A long press used to put up foundation's selection handles, popups that took the mirror over for
+// good. With the handles kept out of a field on the web, the mirror keeps the page through the long
+// press and still hears the seed the Paste puts in.
 test('the mirror keeps the page through a long press and hears the paste after it', async ({ page, context }) => {
   await openBuilder(page);
   await page.evaluate((text) => navigator.clipboard.writeText(text), PASTED);
@@ -86,21 +83,19 @@ test('the mirror keeps the page through a long press and hears the paste after i
 
   const row = await longPressForRow(page, cdp, box);
   const during = await settledMirror(page);
-  console.log(`b-228 mirror nodes: before ${before}, after the long press ${during}`);
+  console.log(`Mirror nodes: before ${before}, after the long press ${during}`);
   expect(during).toBeGreaterThan(before * 0.8);
 
   await tap(cdp, row.button('Paste'));
   await expect
     .poll(async () => (await seedField(page)).textContent(), { timeout: 10_000 })
     .toContain(PASTED);
-  console.log(`b-228 mirror nodes after the paste: ${await settledMirror(page)}`);
+  console.log(`Mirror nodes after the paste: ${await settledMirror(page)}`);
 });
 
-// b-228a
-// D45 reaches the text the builder shows for copying by hand too. A refused copy's hex sits in a read
-// only field, where a long press brings up Copy with no handles, and the export code takes no
-// selection from a finger at all. Each keeps the mirror through a long press.
-// b-228aa
+// The handles stay off the text the builder shows for copying by hand too. A refused copy's hex sits
+// in a read only field, where a long press brings up Copy with no handles, and the export code takes
+// no selection from a finger at all. Each keeps the mirror through a long press.
 // The share link wraps like the export code, so a phone shows all of it, and a finger copies it
 // with Copy link or Share rather than by selecting.
 
@@ -114,7 +109,7 @@ test('a long press on the share link keeps the mirror', async ({ page, context }
 
   await longPressAt(page, cdp, { x: box.x + 24, y: box.y + box.height / 2 });
   const after = await settledMirror(page);
-  console.log(`b-228a mirror nodes in the share dialog: before ${before}, after the long press ${after}`);
+  console.log(`Mirror nodes in the share dialog: before ${before}, after the long press ${after}`);
   expect(after).toBeGreaterThan(before * 0.8);
 });
 
@@ -134,7 +129,7 @@ test('a long press on the text of a refused copy keeps the mirror and shows Copy
   const row = await longPressForRow(page, cdp, hex, { readOnly: true, at });
   expect(row.labels).toEqual(READ_ONLY_ROW);
   const after = await settledMirror(page);
-  console.log(`b-228a mirror nodes in the manual copy dialog: before ${before}, after the long press ${after}`);
+  console.log(`Mirror nodes in the manual copy dialog: before ${before}, after the long press ${after}`);
   expect(after).toBeGreaterThan(before * 0.8);
 });
 
@@ -148,7 +143,7 @@ test('a long press on the export code keeps the mirror', async ({ page, context 
 
   await longPressAt(page, cdp, { x: box.x + 120, y: box.y + 44 });
   const after = await settledMirror(page);
-  console.log(`b-228a mirror nodes on the export sheet: before ${before}, after the long press ${after}`);
+  console.log(`Mirror nodes on the export sheet: before ${before}, after the long press ${after}`);
   expect(after).toBeGreaterThan(before * 0.8);
 });
 

@@ -6,7 +6,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 /**
  * Reads a short message out to assistive technology without moving focus.
  *
- * On the web the Compose `liveRegion` never reaches the page (D40), so the kit hands what it has to
+ * On the web the Compose `liveRegion` never reaches the page, so the kit hands what it has to
  * say to the app's own live region through this instead. A toast is the kit's one caller.
  */
 public fun interface Announcer {

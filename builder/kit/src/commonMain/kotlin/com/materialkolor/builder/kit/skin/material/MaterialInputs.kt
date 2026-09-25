@@ -277,8 +277,7 @@ private val TabIndicatorHeight: Dp = 3.dp
 private val TabRingInset: Dp = TabIndicatorHeight + FocusRingOffset + FocusRingWidth
 
 /**
- * A Material3 primary tab row that scrolls sideways (spec section 7), with roving focus, which
- * Material leaves out.
+ * A Material3 primary tab row that scrolls sideways, with roving focus, which Material leaves out.
  *
  * Only the selected tab can take focus from Tab, so Tab enters and leaves the row in one step. The
  * arrow keys select the next or previous tab, wrapping at the ends, and move focus with it. The row

@@ -70,7 +70,7 @@ class ShareVectorsWriter {
                 vectors.forEach { vector ->
                     val code = ShareCodec.encode(vector.document, vector.projectName)
                     val decoded = ShareCodec.decode(code)
-                    // A contrast between the named levels reads as the nearest one (D53).
+                    // A contrast between the named levels reads as the nearest one.
                     val opened = vector.document.copy(contrast = vector.document.contrast.snapped())
                     check(decoded == DecodeResult.Ok(opened, vector.projectName)) { vector.label }
                     val entry =

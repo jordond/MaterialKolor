@@ -22,7 +22,7 @@ buildkonfig {
 
     defaultConfigs {
         buildConfigField(STRING, "BUILDER_VERSION", libs.versions.builder.version.get(), const = true)
-        // The one place the exported MaterialKolor version is named (D9).
+        // The one place the exported MaterialKolor version is named.
         buildConfigField(STRING, "MATERIAL_KOLOR_VERSION", libs.versions.materialKolorExport.get(), const = true)
         buildConfigField(STRING, "FLUENT_VERSION", libs.versions.fluent.get(), const = true)
         buildConfigField(STRING, "COMPOSE_UNSTYLED_VERSION", libs.versions.composeUnstyled.get(), const = true)
@@ -78,12 +78,10 @@ kotlin {
             implementation(libs.filekit.dialogs)
         }
 
-        // b-215a
         commonMain.dependencies {
             implementation(libs.compose.resources)
         }
 
-        // b-214
         commonTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)
         }
@@ -93,7 +91,7 @@ kotlin {
             implementation(libs.compose.ui.test)
         }
 
-        // S10 has to hold in the browser too, so one Compose UI test runs in headless Chrome.
+        // The app graph has to keep one view model in the browser too, so one Compose UI test runs in headless Chrome.
         wasmJsTest.dependencies {
             implementation(libs.compose.ui.test)
         }
@@ -104,14 +102,12 @@ composeExtension.extensions.getByType<DesktopExtension>().application {
     mainClass = "com.materialkolor.builder.desktop.MainKt"
 }
 
-// b-215a
 // The session's strings are the first in this module. `Res` stays internal like the rest.
 composeExtension.extensions.getByType<org.jetbrains.compose.resources.ResourcesExtension>().apply {
     packageOfResClass = "com.materialkolor.builder.generated.resources"
     publicResClass = false
 }
 
-// b-223
 // ArchitectureTest reads every builder module's Kotlin sources straight off disk, so they are inputs
 // of the JVM test task. Without this a cached pass can hide a new violation in another module.
 tasks.named<Test>("jvmTest") {
@@ -127,14 +123,12 @@ tasks.named<Test>("jvmTest") {
         .withPropertyName("builderSources")
 }
 
-// b-216
 // stateholder 3.1.0 ships Java 21 bytecode, so the JVM tests and the desktop `run` task start on a
 // 21 launcher while the module still compiles for 17.
 val java21Launcher = javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(21)) }
 tasks.withType<Test>().configureEach {
     javaLauncher.set(java21Launcher)
 }
-// b-216b
 // Compose registers `run` after evaluation and points it at the JDK Gradle runs on. This swaps in the
 // 21 launcher when the task is configured, so only a build that runs the desktop app looks it up.
 afterEvaluate {

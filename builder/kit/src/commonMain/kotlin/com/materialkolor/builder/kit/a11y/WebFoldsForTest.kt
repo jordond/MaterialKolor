@@ -9,9 +9,9 @@ import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
  * check what its controls read on the web without a browser.
  *
  * Inside it every kit control and every folded name modifier reads the way the web mirror hears it,
- * with the role word, the state and the disabled note in the name, "Dark mode, switch, off" (D37,
- * D40). A value node reads its value in its text, as [foldsValueIntoName] tells it to. The web's
- * keyboard habits stay off.
+ * with the role word, the state and the disabled note in the name, "Dark mode, switch, off". A value
+ * node reads its value in its text, as [foldsValueIntoName] tells it to. The web's keyboard habits
+ * stay off.
  *
  * Only the names follow the web. Overlays still open as windows of their own on the JVM, not in the
  * tree the way the web draws them, since this leaves `LocalOverlaysInTree` off.

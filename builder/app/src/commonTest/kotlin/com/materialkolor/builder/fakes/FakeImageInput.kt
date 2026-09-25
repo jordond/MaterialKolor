@@ -33,8 +33,6 @@ internal class FakeImageInput : ImageInput {
 
     override val drops: Flow<ImageHandle> = dropped.receiveAsFlow()
 
-    // b-302a
-
     /**
      * Whether files are over the builder. A test sets it to show or hide the drop overlay.
      */
@@ -44,8 +42,6 @@ internal class FakeImageInput : ImageInput {
         picks++
         return picked
     }
-
-    // b-311
 
     /**
      * Holds every decode until it completes, when a test sets it. Null lets decodes through at once.

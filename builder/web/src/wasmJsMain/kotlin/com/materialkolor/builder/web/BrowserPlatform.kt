@@ -29,7 +29,6 @@ internal object BrowserPlatform : PlatformServices {
     override val pastes: PasteInput = WebPasteInput
     override val environment: Environment = WebEnvironment()
 
-    // b-302
     init {
         exposeBrowserApisToE2e()
     }

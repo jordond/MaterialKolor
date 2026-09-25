@@ -28,8 +28,7 @@ public val LocalBuilderMotion: ProvidableCompositionLocal<BuilderMotion> = stati
 public val LocalMotionFrozen: ProvidableCompositionLocal<Boolean> = staticCompositionLocalOf { false }
 
 /**
- * True when the user asked for less motion, either through the browser or the in app override
- * (F-37).
+ * True when the user asked for less motion, either through the browser or the in app override.
  *
  * The skin reads it once and provides the reduced motion set through [LocalBuilderMotion]. Read
  * this directly only where a component has to drop a movement entirely rather than shorten it.

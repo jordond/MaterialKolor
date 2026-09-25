@@ -57,7 +57,7 @@ public fun BuilderTextField(
     enabled: Boolean = true,
     style: BuilderTextStyle = BuilderTextStyle.Body,
     onDraftChange: ((String) -> Unit)? = null,
-    onSubmit: ((String) -> Unit)? = null, // b-315a
+    onSubmit: ((String) -> Unit)? = null,
 ) {
     val draft = rememberFieldDraft(value)
     val problem = if (draft.dirty) error(draft.text) else null
@@ -77,7 +77,7 @@ public fun BuilderTextField(
         },
         modifier = modifier,
         onEdit = { text -> onDraftChange?.invoke(text) },
-        onSubmit = onSubmit?.let { submit -> { submit(draft.text) } }, // b-315a
+        onSubmit = onSubmit?.let { submit -> { submit(draft.text) } },
     )
 }
 
@@ -85,7 +85,7 @@ public fun BuilderTextField(
  * Draws [draft] in the surrounding skin. The large field is the poster's seed headline, which every
  * skin draws as headless text with its own underline.
  *
- * On the web the field node is named [label], with the disabled note while it is disabled (D37).
+ * On the web the field node is named [label], with the disabled note while it is disabled.
  * Material's field is otherwise nameless there, since its editable text overwrites the label, and
  * the page marks every field editable, disabled or not.
  *
@@ -104,7 +104,7 @@ internal fun SkinField(
     onCommit: () -> Unit,
     modifier: Modifier,
     onEdit: (String) -> Unit = {},
-    onSubmit: (() -> Unit)? = null, // b-315a
+    onSubmit: (() -> Unit)? = null,
 ) {
     val field = modifier
         .fieldCommits(draft, onCommit, onRevert = { onEdit(draft.text) }, onSubmit = onSubmit)

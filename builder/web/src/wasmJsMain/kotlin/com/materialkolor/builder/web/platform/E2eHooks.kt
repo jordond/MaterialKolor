@@ -106,7 +106,6 @@ internal fun Environment.exposeToE2e() {
     exposeE2eHook("pageHides") { hides.toString() }
     exposeE2eAction("hideSplash") { hideSplash() }
     exposeE2eAction("setThemeColor") { hex -> setThemeColor(Argb.fromHex(hex)) }
-    // b-501b
     // Light, dark and seed hexes, then an appearance, `#000000,#ffffff,#d9653b,Dark`.
     exposeE2eAction("writeSplash") { text ->
         val parts = text.split(",")

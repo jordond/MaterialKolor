@@ -50,8 +50,6 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-314b
-
 private const val CONFLICT = "This project changed in another tab"
 private const val INVALID_LINK = "That link didn’t work, so your last theme is open instead."
 private const val INVALID_LINK_DEFAULTS = "That link didn’t work, so you’re starting from the defaults."
@@ -126,11 +124,9 @@ private val CASES = listOf(
         WorkspaceBanner.NewerData,
         NEWER_DATA,
         listOf("Reload" to BannerAction.ReloadHome),
-        absent = listOf("Dismiss"), // b-314ba
+        absent = listOf("Dismiss"),
     ),
 )
-
-// b-314ba
 
 /**
  * The banners that ask for a reload, where a reload does nothing.
@@ -163,7 +159,6 @@ class WorkspaceBannersTest {
             assertCases(CASES, canReload = true)
         }
 
-    // b-314ba
     @Test
     fun withoutReload_theNewerBannersSayTheirTextAndOfferDismissOnly() =
         runComposeUiTest {
@@ -219,7 +214,6 @@ class WorkspaceBannersTest {
             onNodeWithText("Elsewhere").assertIsFocused()
         }
 
-    // b-314ba
     @Test
     fun aBannerShowingUp_isReadOutOnceInTheOrderItCame() =
         runComposeUiTest {
@@ -261,7 +255,6 @@ class WorkspaceBannersTest {
             announced shouldBe listOf(CONFLICT, STORAGE_FULL, CONFLICT)
         }
 
-    // b-314ba
     @Test
     fun conflictBanner_eachButton_settlesTheClashItsOwnWay() =
         runComposeUiTest {
@@ -279,7 +272,6 @@ class WorkspaceBannersTest {
             )
         }
 
-    // b-314ba
     @Test
     fun saveBanner_savesOnceAndGoesOnceTheThemeIsSaved() =
         runComposeUiTest {
@@ -308,7 +300,6 @@ class WorkspaceBannersTest {
             onAllNodes(hasText("Save to my projects")).assertCountEquals(0)
         }
 
-    // b-314ba
     @Test
     fun newerDataBanner_asksForAReload() =
         runComposeUiTest {
@@ -357,8 +348,6 @@ class WorkspaceBannersTest {
 
     private fun ComposeUiTest.button(label: String) =
         if (label == "Close") onNodeWithContentDescription(label) else onNodeWithText(label)
-
-    // b-314ba
 
     /**
      * Shows each of [cases] alone and checks what it says, what it leaves out and what its buttons ask for.
@@ -423,8 +412,6 @@ class WorkspaceBannersTest {
         override val viewModelStore: ViewModelStore = ViewModelStore()
     }
 }
-
-// b-314ba
 
 /**
  * An app state with nothing to say, on a platform where a reload works.

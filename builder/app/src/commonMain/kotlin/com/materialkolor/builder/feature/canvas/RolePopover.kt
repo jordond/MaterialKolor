@@ -80,18 +80,18 @@ internal fun RolePopover(
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
 ) {
-    LocalTileProbe.current?.invoke(swatch.name) // pf-1
+    LocalTileProbe.current?.invoke(swatch.name)
     var open by remember { mutableStateOf(false) }
-    val tile = remember { FocusRequester() } // b-308ba
+    val tile = remember { FocusRequester() }
     val copyHex = WorkspaceAction.CopyText(
         text = swatch.argb.toHex(),
         label = stringResource(Res.string.tabs_copied_hex, swatch.name),
-        returnFocusTo = tile, // b-308ba
+        returnFocusTo = tile,
     )
     val copyKotlin = WorkspaceAction.CopyText(
         text = kotlinLiteralOf(swatch.argb),
         label = stringResource(Res.string.tabs_copied_kotlin, swatch.name),
-        returnFocusTo = tile, // b-308ba
+        returnFocusTo = tile,
     )
     val items = buildList {
         add(
@@ -126,7 +126,7 @@ internal fun RolePopover(
             contrast = swatch.contrast,
             onCopy = { dispatcher.dispatch(copyHex) },
             onClick = { open = true },
-            modifier = Modifier.fillMaxWidth().focusRequester(tile), // b-308ba
+            modifier = Modifier.fillMaxWidth().focusRequester(tile),
             pinned = swatch.pinned,
         )
     }

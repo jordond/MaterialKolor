@@ -4,10 +4,8 @@ package com.materialkolor.builder.web.interop
 
 import kotlin.js.ExperimentalWasmJsInterop
 
-// b-504
-
 /**
- * Cloudflare Web Analytics, which sets no cookies and loads once the first frame is up (D13, PB-10).
+ * Cloudflare Web Analytics, which sets no cookies and loads once the first frame is up.
  *
  * The token comes from the page. A site built with the Gradle property `builder.analyticsToken`, or
  * with `CF_WEB_ANALYTICS_TOKEN` in the environment when that is absent, carries it in `index.html` as

@@ -466,7 +466,6 @@ private fun glyph(id: IconId): MaterialGlyph =
             ),
             autoMirror = true,
         )
-        // b-508
         // Rounded.History
         IconId.History -> MaterialGlyph(
             path(

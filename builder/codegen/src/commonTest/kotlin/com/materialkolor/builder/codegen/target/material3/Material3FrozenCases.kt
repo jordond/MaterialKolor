@@ -44,10 +44,7 @@ internal object Material3FrozenCases {
         prefs = frozenPrefs(),
     )
 
-    // b-111c
     private val AndroidDynamicColor: ExportPrefs = frozenPrefs().copy(multiplatform = false, androidDynamicColor = true)
-
-    // b-112c
 
     /**
      * Accents with the wallpaper colors, which no golden covers.
@@ -79,7 +76,6 @@ internal object Material3FrozenCases {
                 document = ExpressiveDocument.copy(motionScheme = MotionSchemeChoice.Standard),
                 prefs = frozenPrefs(FrozenVariants.AllContrasts),
             ).input,
-        // b-111c
         "material3-frozen-android-dynamic-color" to Fixtures.Default.with(prefs = AndroidDynamicColor).input,
     )
 
@@ -175,7 +171,6 @@ class Material3FrozenTest {
         assertTrue("LocalExtendedColors provides extendedColors" in withAccents[1].text)
     }
 
-    // b-111c
     @Test
     fun material3Frozen_androidDynamicColor_fallsBackToTheLiteralScheme() {
         val theme = theme(Material3FrozenCases.all.getValue("material3-frozen-android-dynamic-color"))
@@ -200,7 +195,6 @@ class Material3FrozenTest {
         assertTrue(expected in theme, theme)
     }
 
-    // b-111c
     @Test
     fun material3Frozen_androidDynamicColor_changesNothingInAMultiplatformExport() {
         Material3FrozenCases.all.values.filter { input -> input.prefs.multiplatform }.forEach { input ->
@@ -210,13 +204,11 @@ class Material3FrozenTest {
         }
     }
 
-    // b-112c
     @Test
     fun material3Frozen_accentsWithAndroidDynamicColor_provideAroundTheBranch() {
         assertProvidesAroundTheBranch(Material3FrozenCases.AccentsAndroidDynamicColor, themeCall = "MaterialTheme(")
     }
 
-    // b-112c
     @Test
     fun material3Frozen_expressiveAccentsWithAndroidDynamicColor_provideAroundTheBranch() {
         assertProvidesAroundTheBranch(

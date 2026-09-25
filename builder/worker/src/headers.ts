@@ -32,7 +32,6 @@ export function withSiteHeaders(
   return new Response(body, { status, headers });
 }
 
-// b-505
 /**
  * [response] with an `X-Robots-Tag` of [tag], or as it is when there is no tag. Staging sets one in
  * wrangler.jsonc, since the noindex rule in its `_headers` never reaches a response built here.

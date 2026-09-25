@@ -89,7 +89,7 @@ public object ReservedNames {
             if (document.themeName.folded() in forTheme) add(ReservedNameClash.ThemeName(document.themeName))
             document.accents.forEachIndexed { index, accent ->
                 val taken = accent.name.folded() in forAccents ||
-                    (target == ExportTarget.Unstyled && flattenedClash(document.accents, index)) // b-111b
+                    (target == ExportTarget.Unstyled && flattenedClash(document.accents, index))
                 if (taken) add(ReservedNameClash.AccentName(index, accent.name))
             }
         }
@@ -101,9 +101,9 @@ public object ReservedNames {
     private fun topLevel(target: ExportTarget): Set<String> =
         when (target) {
             ExportTarget.Material3, ExportTarget.Material3Expressive -> Material3Symbols.names() + Material3Declared
-            ExportTarget.Unstyled -> UnstyledSymbols.names() + UnstyledDeclared // b-111b
-            ExportTarget.Fluent -> FluentSymbols.names() + FluentDeclared // b-111
-            ExportTarget.Custom -> CommonSymbols.names() + CustomDeclared + CustomDynamicNames // b-111, b-112b
+            ExportTarget.Unstyled -> UnstyledSymbols.names() + UnstyledDeclared
+            ExportTarget.Fluent -> FluentSymbols.names() + FluentDeclared
+            ExportTarget.Custom -> CommonSymbols.names() + CustomDeclared + CustomDynamicNames
         }
 
     /**
@@ -116,14 +116,12 @@ public object ReservedNames {
                 emptySet()
             }
             ExportTarget.Unstyled -> {
-                UnstyledTokens // b-111b
+                UnstyledTokens
             }
             ExportTarget.Custom -> {
                 CustomMembers
             }
         }
-
-    // b-111b
 
     /**
      * Whether the accent at [index] shares one of its four flattened token names with a library token
@@ -191,7 +189,6 @@ private val Material3Symbols: List<Symbol> =
             Symbols.DynamicMaterialExpressiveTheme,
             Symbols.DynamicMaterialThemeState,
             Symbols.RememberDynamicMaterialThemeState,
-            // b-111c
             Symbols.Build,
             Symbols.LocalContext,
             Symbols.DynamicDarkColorScheme,
@@ -214,7 +211,7 @@ private val UnstyledSymbols: List<Symbol> =
             Symbols.MaterialKolorTokens,
             Symbols.BuildThemeV2,
             Symbols.ThemeToken,
-            Symbols.ThemeProperty, // b-111b
+            Symbols.ThemeProperty,
             Symbols.UnstyledColorScheme,
             Symbols.Map,
             Symbols.MapOf,
@@ -229,8 +226,6 @@ private val FluentSymbols: List<Symbol> =
             Symbols.FluentColors,
             Symbols.FluentShades,
         )
-
-// b-111
 
 /**
  * What the Custom export declares.
@@ -247,8 +242,6 @@ private val CustomMembers: Set<String> = CustomSlot.entries.mapTo(mutableSetOf()
  */
 private val FluentDeclared: Set<String> = setOf(LIGHT_THEME_SHADES, DARK_THEME_SHADES)
 
-// b-111b
-
 /**
  * What the Unstyled frozen export declares, the tokens object and a light and dark map per contrast.
  */
@@ -256,8 +249,6 @@ private val UnstyledDeclared: Set<String> =
     ContrastVariant.entries.flatMapTo(mutableSetOf(THEME_TOKENS)) { variant ->
         FrozenMode.entries.map { mode -> colorsName(variant, mode) }
     }
-
-// b-112
 
 /**
  * The token names an Unstyled accent cannot take, all 63 `MaterialKolorTokens` and `colors`.
@@ -285,8 +276,6 @@ internal val UnstyledTokens: Set<String> =
             "textSecondaryAndTertiaryInverseDisabled",
             "textHintInverse",
         )
-
-// b-112b
 
 /**
  * The Custom dynamic export's names beyond the frozen set that can clash.

@@ -78,7 +78,6 @@ internal fun generalCommands(
 ) {
     val more = stringResource(Res.string.topbar_more)
     val palette = stringResource(Res.string.topbar_commands)
-    // b-406
     val inOverflow = list.windowClass == WindowClass.Compact || TopBarControl.Commands in list.overflowed
     val paletteSite = if (inOverflow) {
         ControlSite.MenuItem(Region.TopBar, more, palette)
@@ -140,7 +139,6 @@ internal fun historyCommands(
         shortcut = Shortcut.Redo,
         disabledBecause = nothingToRedo.takeUnless { state.history.canRedo },
     ) { dispatcher.dispatch(WorkspaceAction.Redo) }
-    // b-509
     // The list always opens, with only Start in it before the first change.
     val history = stringResource(Res.string.history_title)
     list.add(
@@ -159,7 +157,7 @@ internal fun historyCommands(
 private fun topBarSite(
     list: CommandList,
     name: String,
-    control: TopBarControl, // b-406
+    control: TopBarControl,
 ): ControlSite =
     if (list.windowClass == WindowClass.Compact || control in list.overflowed) {
         ControlSite.MenuItem(Region.TopBar, stringResource(Res.string.topbar_more), name)
@@ -233,7 +231,6 @@ internal fun libraryAndStyleCommands(
     val switcher = stringResource(Res.string.topbar_library)
     LibraryChoice.entries.forEachIndexed { index, choice ->
         val name = stringResource(libraryName(choice))
-        // b-315d
         // Wherever the switcher shows them, as it measured itself, which on a wide window depends on
         // the room the top bar's actions leave it.
         val site = if (list.librarySegmented) {
@@ -249,8 +246,7 @@ internal fun libraryAndStyleCommands(
             shortcut = LIBRARY_KEYS[index],
             selected = choice == current,
         ) {
-            // b-503a
-            // From the switcher, as a press on it would (flow 5.3, MO-04).
+            // The new skin reveals from the switcher, as a press on it would.
             if (choice != current) {
                 dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin = list.switcherOrigin()))
             }

@@ -120,26 +120,27 @@ import org.jetbrains.compose.resources.stringResource
 import com.materialkolor.builder.domain.model.Style as PaletteStyle
 
 /**
- * The command palette (F-33), every command of the registry behind one search field, open while
+ * The command palette, every command of the registry behind one search field, open while
  * `state.panel` is `Panel.Palette`.
  *
  * Typing filters the rows as it goes, by label, group and a few other words for each. Text the
  * palette understands leads the list, a color to set the seed to, a share link or code to open, or
  * a style's name. A role's name offers to show it on its ramp, and a poster section's name offers to
- * go to it (AR-10). With nothing typed the commands come in the registry's order, the ones run
- * lately first. A command that cannot run keeps its row, which says why instead of its keys.
+ * go to it, since the browser's own find cannot see text drawn on the canvas. With nothing typed the
+ * commands come in the registry's order, the ones run lately first. A command that cannot run keeps
+ * its row, which says why instead of its keys.
  *
  * The search field leads, with the rows under it in groups, the ones run lately under Recent while
  * nothing is typed and the rest under their categories. Each row shows its keys as keycaps at its end,
  * and a footer shows the keys that move, run and close.
  *
  * Enter runs the top row that can run from inside the key press, so a copy or a share still counts
- * as the user's own (R-B-302). Down moves from the field into the rows and Up from the first row
+ * as the user's own. Down moves from the field into the rows and Up from the first row
  * back. Esc throws away a typed search, and a second Esc closes. A row that opens a panel takes the
  * palette's place, and any other closes the palette before it runs.
  *
  * @param[returnFocusTo] Where focus goes once it closes, the Commands button that opened it, or the
- * page's focus holder when Cmd or Ctrl+K did (AR-09).
+ * page's focus holder when Cmd or Ctrl+K did.
  */
 @Composable
 internal fun CommandPalette(
@@ -157,7 +158,6 @@ internal fun CommandPalette(
     val runner = remember(dispatcher) { PaletteRunner(dispatcher) }
     // The dialog keeps this much clear around its panel, so the panel itself comes out at the width.
     val margin = LocalBuilderTokens.current.spacing.large
-    // b-406
     // The widths the kit's palette frame gives each window class, full width on a phone.
     val sized = when (LocalLayout.current.windowClass) {
         WindowClass.Compact -> modifier.fillMaxWidth()
@@ -171,9 +171,8 @@ internal fun CommandPalette(
         title = stringResource(Res.string.palette_title),
         modifier = sized,
         returnFocusTo = returnFocusTo,
-        titleShown = false, // b-511
+        titleShown = false,
     ) {
-        // b-315d
         // Only the dialog's content builds the registry, so a closed palette costs a workspace change
         // nothing, drag frames included.
         val commands = actionRegistry(state, runner, scope = scope)
@@ -202,7 +201,6 @@ private fun ColumnScope.PaletteBody(
     val entries = paletteEntries(state, commands, runner)
     val styleNames = PaletteStyle.entries.associateWith { style -> stringResource(styleName(style)) }
     val understood = understoodEntries(palette.query, entries, runner, onOpenShared)
-    // b-511
     val recentTitle = stringResource(Res.string.palette_recent)
 
     fun groupsFor(latest: CommandPaletteModel.State): List<PaletteGroup> {
@@ -234,7 +232,6 @@ private fun ColumnScope.PaletteBody(
     }
 
     val spacing = LocalBuilderTokens.current.spacing
-    // b-511
     Row(
         horizontalArrangement = Arrangement.spacedBy(spacing.small),
         verticalAlignment = Alignment.CenterVertically,
@@ -307,12 +304,9 @@ private fun ColumnScope.PaletteBody(
         }
     }
     PaletteFooter()
-    // b-511
     // The search field leads, so it takes focus as the palette opens.
     LaunchedEffect(field) { field.requestFocus() }
 }
-
-// b-511
 
 /**
  * A group's header over its rows, read as a heading.
@@ -510,7 +504,7 @@ private fun understoodEntries(
 }
 
 /**
- * Every one of [commands] as a row, then the poster's sections and the roles (AR-10).
+ * Every one of [commands] as a row, then the poster's sections and the roles.
  */
 @Composable
 private fun paletteEntries(
@@ -521,7 +515,6 @@ private fun paletteEntries(
     val apple = LocalAppleKeys.current
     val categories = CommandCategory.entries.associateWith { category -> stringResource(category.title) }
     val words = paletteWords()
-    // b-315d
     // Its own row would only open what is already open.
     val rows = commands.filter { command -> command.shortcut != Shortcut.Palette }.map { command ->
         PaletteEntry(
@@ -593,7 +586,7 @@ private val WORDS: Map<String, StringResource> = mapOf(
     "appearance" to Res.string.palette_words_appearance,
     "motion" to Res.string.palette_words_motion,
     "vision" to Res.string.palette_words_vision,
-    "visionMenu" to Res.string.palette_words_vision, // b-315d
+    "visionMenu" to Res.string.palette_words_vision,
     "deviceWidth" to Res.string.palette_words_device,
     "cheatSheet" to Res.string.palette_words_keys,
     "singleKeys" to Res.string.palette_words_keys,

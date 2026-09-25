@@ -26,7 +26,7 @@ import kotlin.math.floor
 import kotlin.math.roundToInt
 
 /**
- * The least share of each side's middle a ring has to cover, the bar the S5 probe holds it to.
+ * The least share of each side's middle a ring has to cover.
  */
 internal const val SideCoverageNeeded: Double = 0.5
 
@@ -87,7 +87,7 @@ internal class PageOverlays {
 }
 
 /**
- * Draws [content] with its overlays in the page, the way the web draws them (D40), in a host of its
+ * Draws [content] with its overlays in the page, the way the web draws them, in a host of its
  * own with room over the content for a tooltip. The host clips at its edge like a preview pane's, so
  * it keeps room round the content for the ring too, and is wide enough for a bubble over a small
  * anchor.
@@ -121,11 +121,10 @@ internal fun InThePage(
 }
 
 /**
- * How much of the middle half of each side of [around] the ring covers at 3 to 1, the way the S5
- * probe measures it. A row of the left or the right side counts when a ring pixel lies on it within
- * that side's band, and a column of the top or the bottom side the same way. The bands are the
- * [SideBands] [shouldRingEverySide] looks in, so a side reads zero where the ring is cut or sits
- * under something.
+ * How much of the middle half of each side of [around] the ring covers at 3 to 1. A row of the left
+ * or the right side counts when a ring pixel lies on it within that side's band, and a column of the
+ * top or the bottom side the same way. The bands are the [SideBands] [shouldRingEverySide] looks in,
+ * so a side reads zero where the ring is cut or sits under something.
  */
 internal fun RingCapture.sideCoverage(
     reach: Dp = 8.dp,
@@ -143,7 +142,7 @@ internal fun RingCapture.sideCoverage(
 }
 
 /**
- * The side coverage in the probe's order, top, right, bottom and left, with the lowest ratio drawn.
+ * The side coverage in the order top, right, bottom and left, with the lowest ratio drawn.
  */
 internal fun RingCapture.coverageLine(
     reach: Dp = 8.dp,
@@ -154,9 +153,9 @@ internal fun RingCapture.coverageLine(
 }
 
 /**
- * Checks that the ring covers at least [least] of the middle of every side of [around] at 3 to 1,
- * the S5 probe's side rule. [shouldRingEverySide] lets a side through on one pixel, and this does
- * not, so a ring cut at a clip or shaded by a bubble fails here.
+ * Checks that the ring covers at least [least] of the middle of every side of [around] at 3 to 1.
+ * [shouldRingEverySide] lets a side through on one pixel, and this does not, so a ring cut at a clip
+ * or shaded by a bubble fails here.
  */
 internal fun RingCapture.shouldCoverEverySide(
     least: Double = SideCoverageNeeded,

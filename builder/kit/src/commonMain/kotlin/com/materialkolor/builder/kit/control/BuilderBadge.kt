@@ -52,7 +52,7 @@ public enum class BadgeStatus {
  * A short read only label that reports a status, such as AA beside a contrast pair.
  *
  * The colour always comes with [label] and an optional [icon], so the status never rests on colour
- * alone (AR-03). The label and the icon read out as one.
+ * alone. The label and the icon read out as one.
  *
  * @param[label] The status in words. A blank label draws nothing, since the colour must never stand
  * alone.

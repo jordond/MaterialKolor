@@ -2,9 +2,8 @@ import { expect, test, type CDPSession, type Locator, type Page } from '@playwri
 import { openBuilder, wantHooks } from './builder';
 import { boxOf, longPressAt, mirrorButton, settledBox, settledMirror, tap, type Point } from './touch';
 
-// b-228b
 // The preview's own sample fields keep the mirror through a long press too, Material3's filled and
-// outlined text fields in the gallery and the Trips note (D45). The gallery hands its fields a toolbar
+// outlined text fields in the gallery and the Trips note. The gallery hands its fields a toolbar
 // that never shows, so no row comes up there. Instead each field takes a word before the long press,
 // since a long press on an empty field selects nothing, and another after it, which only replaces
 // the first if the long press selected it, and only reaches the mirror while the mirror is alive.
@@ -68,7 +67,6 @@ async function longPressKeepsMirror(page: Page, cdp: CDPSession, field: Locator,
   // The first touch after the mouse goes unheard in Chromium through CDP, so a tap goes first.
   await tap(cdp, await wordIn(field));
   await page.waitForTimeout(SETTLE_MS);
-  // b-228c
   // Under load the tap is sometimes heard after all, and the field it focused has to be left again.
   await leaveFields(page);
   const word = await wordIn(field);
@@ -76,7 +74,7 @@ async function longPressKeepsMirror(page: Page, cdp: CDPSession, field: Locator,
 
   await longPressAt(page, cdp, word);
   const after = await settledMirror(page);
-  console.log(`b-228b mirror nodes on ${what}: before ${before}, after the long press ${after}`);
+  console.log(`Mirror nodes on ${what}: before ${before}, after the long press ${after}`);
   expect(after).toBeGreaterThan(before * 0.8);
 
   await page.keyboard.type(SAMPLE_REPLACEMENT);
@@ -148,7 +146,6 @@ async function typeInTripsNote(page: Page): Promise<Locator> {
 
 /** Waits for [field] to be laid out, clicks into it with the mouse and types the word. */
 async function typeInto(page: Page, field: Locator): Promise<Locator> {
-  // b-228c
   // A scroll that is still running moves the field after its box is read.
   const box = await settledBox(field);
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);

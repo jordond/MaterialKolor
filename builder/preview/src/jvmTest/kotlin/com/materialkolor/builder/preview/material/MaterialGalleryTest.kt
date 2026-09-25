@@ -86,7 +86,7 @@ private val GalleryNoDisabled: Set<String> =
     setOf("Floating action button", "Extended FAB", "Tabs", "Progress indicators", "Snackbar", "Tooltips")
 
 /**
- * Imports that open a popup or a window, which on the web take the accessibility mirror over (D40).
+ * Imports that open a popup or a window, which on the web take the accessibility mirror over.
  */
 private val GalleryPopupImports: List<String> = listOf(
     "androidx.compose.material3.DropdownMenu",
@@ -97,8 +97,7 @@ private val GalleryPopupImports: List<String> = listOf(
     "androidx.compose.material3.TimePickerDialog",
     "androidx.compose.material3.TooltipBox",
     "androidx.compose.material3.ModalBottomSheet",
-    // b-228b
-    // Their touch selection handles are popups too, so the gallery draws them from their parts (D45).
+    // Their touch selection handles are popups too, so the gallery draws them from their parts.
     "androidx.compose.material3.TextField",
     "androidx.compose.material3.OutlinedTextField",
 )
@@ -111,8 +110,7 @@ private val GallerySources: List<String> = listOf(
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/GalleryEntry.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/MaterialGallery.kt",
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/GalleryFeedback.kt",
-    "src/commonMain/kotlin/com/materialkolor/builder/preview/material/SampleFields.kt", // b-228b
-    // b-228c
+    "src/commonMain/kotlin/com/materialkolor/builder/preview/material/SampleFields.kt",
     // The Trips note is a sample field too, so the text field ban reaches it.
     "src/commonMain/kotlin/com/materialkolor/builder/preview/material/TripDetail.kt",
 )

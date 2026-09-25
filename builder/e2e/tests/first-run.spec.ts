@@ -18,14 +18,12 @@ import {
   typeSeed,
 } from '../fixtures/workspace';
 
-// b-314
-// The one hint a first visit gets (F-35), read from the page's accessibility tree. A dismissal kept
+// The one hint a first visit gets, read from the page's accessibility tree. A dismissal kept
 // in storage has to hold through a reload.
 
 /** The hint, word for word, `about_first_run_hint`. */
 const HINT = 'Paste a color, drop an image, or press Space to shuffle. Press ? for shortcuts.';
 
-// b-314a
 /**
  * The poster's Projects button once boot has opened a project. It reads "Projects" and the project's
  * name, and only "Projects" before that. The hint shows in the same frame the name does.
@@ -41,7 +39,6 @@ test.describe('first run', () => {
     await openBuilder(page);
 
     await expect(onPage(page, HINT)).toHaveCount(1, { timeout: 30_000 });
-    // b-314a
     // The boot signal the next test waits on is there beside the hint.
     await expect(page.locator(NAMED_PROJECTS).first()).toBeAttached();
   });
@@ -58,8 +55,7 @@ test.describe('first run', () => {
   });
 });
 
-// b-503
-// The whole first run (flow 5.1). A typed seed, a drag of the split, Inspect over the app's floating
+// The whole first run. A typed seed, a drag of the split, Inspect over the app's floating
 // button, three shuffles and two undos, then Theme.kt copied from Export, which retires the hint.
 
 test('the first run, from a typed seed to a copied Theme.kt, retires the hint for good', async ({

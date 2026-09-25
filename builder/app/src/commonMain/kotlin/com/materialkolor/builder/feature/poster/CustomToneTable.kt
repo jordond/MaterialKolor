@@ -39,7 +39,7 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 /**
- * The Custom slots cut from a palette by tone, the only ones the table moves (D27).
+ * The Custom slots cut from a palette by tone, the only ones the table moves.
  */
 internal val ToneSlots: List<CustomSlot> =
     CustomSlot.entries.filter { slot -> slot.resolution !is SlotResolution.FromRole }
@@ -55,8 +55,8 @@ private val ToneRange: ClosedFloatingPointRange<Float> = 0f..100f
 private const val TONE_STEP = 1f
 
 /**
- * The Custom target's tone table (F-18, D27), a row for each slot cut from a palette by tone. A
- * slot that follows a role moves with that role, so it has no row.
+ * The Custom target's tone table, a row for each slot cut from a palette by tone. A slot that
+ * follows a role moves with that role, so it has no row.
  *
  * Each row names the slot the way the code does and shows it in both modes, with a light and a dark
  * slider. A drag moves the preview every frame and lets go as one undo entry, and moving one mode
@@ -145,7 +145,7 @@ private fun ToneSlider(
     val drag = remember { PendingTone() }
     val stored = context.document.customTones[slot]
     val color = context.result.customSlots[slot, isDark]
-    val tone = (if (isDark) stored?.dark else stored?.light) ?: slot.resolution.ownTone(isDark, color) // b-306c
+    val tone = (if (isDark) stored?.dark else stored?.light) ?: slot.resolution.ownTone(isDark, color)
     val name = ColorRef.OfSlot(slot).readoutName(context.document)
     val label = stringResource(if (isDark) Res.string.extras_tone_dark else Res.string.extras_tone_light, name)
     val value = if (isDark) Res.string.extras_tone_value_dark else Res.string.extras_tone_value_light
@@ -195,8 +195,8 @@ private fun CustomTone?.withTone(
 /**
  * The tone a slot nobody moved sits at in the mode [isDark] picks. A ramp slot is cut at its
  * resolution's tone. An on-color only reads against that tone, and a tone set on it moves the
- * on-color itself (D22), so its own tone is measured off [color], the color the target resolved
- * for it. A role has none.
+ * on-color itself, so its own tone is measured off [color], the color the target resolved for it. A
+ * role has none.
  */
 internal fun SlotResolution.ownTone(
     isDark: Boolean,
@@ -204,7 +204,7 @@ internal fun SlotResolution.ownTone(
 ): Int =
     when (this) {
         is SlotResolution.FromRamp -> if (isDark) dark else light
-        is SlotResolution.OnRamp -> HctReadout.of(color).tone.roundToInt() // b-306c
+        is SlotResolution.OnRamp -> HctReadout.of(color).tone.roundToInt()
         is SlotResolution.FromRole -> error("A slot that follows a role has no tone of its own")
     }
 

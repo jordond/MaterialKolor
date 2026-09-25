@@ -116,7 +116,6 @@ internal fun ProjectRow(
                     modifier = Modifier
                         .clearAndSetSemantics {}
                         .focusProperties { canFocus = false }
-                        // b-511
                         // The thumbnail is the row's control and shows its state, so the name draws no
                         // ground of its own under the pointer.
                         .clickable(interactionSource = null, indication = null, onClick = openThis),
@@ -229,7 +228,6 @@ private fun RowMenu(
     }
 }
 
-// b-509
 @Composable
 internal fun ageText(age: ProjectAge): String =
     when (age) {

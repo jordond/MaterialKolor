@@ -33,8 +33,6 @@ import com.materialkolor.builder.preview.split.SplitState
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-315b
-
 /**
  * A declared element near the start of a row wider than the preview.
  */

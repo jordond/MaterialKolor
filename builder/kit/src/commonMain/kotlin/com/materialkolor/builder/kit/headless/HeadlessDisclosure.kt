@@ -77,7 +77,6 @@ internal class DisclosureStyle(
     val headerPadding: PaddingValues,
     val contentPadding: PaddingValues,
     val focus: Color,
-    // b-510
     val rule: Color = Color.Transparent,
     val ruleWidth: Dp = 0.dp,
     val title: BuilderTextStyle = BuilderTextStyle.Label,
@@ -146,7 +145,7 @@ internal fun HeadlessDisclosure(
         expanded = expanded,
         onExpandedChange = onExpandedChange,
         modifier = modifier
-            .topRule(style.rule, style.ruleWidth) // b-510
+            .topRule(style.rule, style.ruleWidth)
             .background(style.container, style.shape)
             .border(style.outlineWidth, style.outline, style.shape),
     ) {
@@ -221,8 +220,6 @@ private fun DisclosureHeading(
         DisclosureChevron(expanded)
     }
 }
-
-// b-510
 
 /**
  * A hairline of [color] across the top edge, or nothing while [width] is zero.

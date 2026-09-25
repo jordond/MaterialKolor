@@ -15,12 +15,12 @@ import dev.stateholder.extensions.collectAsState
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 /**
- * The export sheet, open while `state.panel` is `Panel.Export` (F-26).
+ * The export sheet, open while `state.panel` is `Panel.Export`.
  *
  * Closing it closes the panel, which drops the history entry opening it added, so Back closes it
  * too. The files are only generated while the sheet shows.
  *
- * @param[returnFocusTo] The button that opened the sheet, which gets focus back once it closes (AR-09).
+ * @param[returnFocusTo] The button that opened the sheet, which gets focus back once it closes.
  */
 @Composable
 internal fun ExportHost(
@@ -44,6 +44,6 @@ internal fun ExportHost(
         workspace = dispatcher,
         modifier = modifier,
         returnFocusTo = returnFocusTo,
-        materialKolorVersion = model.materialKolorVersion, // b-511
+        materialKolorVersion = model.materialKolorVersion,
     )
 }

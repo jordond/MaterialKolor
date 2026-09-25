@@ -16,11 +16,9 @@ const BLUE_LINK = '/t/ARpz6A';
 const LIGHT = 0xff102030 | 0;
 const DARK = 0xff405060 | 0;
 const BLUE = 0xff1a73e8 | 0;
-// b-501b
 const DEFAULT_SEED = 0xffd9653b | 0;
 
 test.describe('splash', () => {
-  // b-501b
   // An mk:splash from before the seed and the appearance were stored still paints.
   test('paints an older mk:splash, chrome only, for each scheme with a neutral poster', async ({ page }) => {
     await storeSplash(page, { light: LIGHT, dark: DARK });
@@ -47,7 +45,6 @@ test.describe('splash', () => {
     expect(await splash(page)).toMatchObject({ chrome: rgb(LIGHT), poster: 'rgb(217, 101, 59)', hex: '"#D9653B"' });
   });
 
-  // b-501b
   test('paints a forced appearance whatever the page scheme, with the stored seed', async ({ page }) => {
     await storeSplash(page, { light: LIGHT, dark: DARK, seed: BLUE, appearance: 'dark' });
     await holdGlue(page);
@@ -104,7 +101,6 @@ test.describe('splash', () => {
     await expect.poll(() => page.evaluate(() => localStorage.getItem('mk:splash')), { timeout: 30_000 }).not.toBeNull();
     const written = JSON.parse((await page.evaluate(() => localStorage.getItem('mk:splash')))!);
     expect({ light, dark }).toEqual({ light: rgb(written.light), dark: rgb(written.dark) });
-    // b-501b
     expect({ seed: written.seed, appearance: written.appearance }).toEqual({ seed: DEFAULT_SEED, appearance: 'system' });
 
     await expect(page.locator('#splash')).toHaveCount(0, { timeout: 30_000 });
@@ -232,7 +228,6 @@ test.describe('error overlay', () => {
   });
 });
 
-// b-501b
 test.describe('head', () => {
   const origin = 'https://materialkolor.com';
   const description =

@@ -40,8 +40,6 @@ internal fun fluentFontFamily(): FontFamily =
         Font(Res.font.Selawik_Semibold, FontWeight.SemiBold),
     )
 
-// pf-3
-
 /**
  * The face Fluent's type scale takes in place of Selawik, or null to use Selawik.
  *
@@ -55,7 +53,6 @@ internal val LocalFluentStandInFace: ProvidableCompositionLocal<FontFamily?> = s
 @Composable
 internal fun rememberFluentTypography(): Typography {
     val scale = FluentTheme.typography
-    // pf-3
     val standIn = LocalFluentStandInFace.current
     val face = standIn ?: fluentFontFamily()
     return remember(face, scale) { scale.inFace(face) }

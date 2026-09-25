@@ -1,8 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { openBuilder, wantHooks } from './builder';
 
-// b-307
-// The seed's color picker with the browser's eyedropper (F-06, F-07). The eyedropper is a stand-in
+// The seed's color picker with the browser's eyedropper. The eyedropper is a stand-in
 // the test resolves with a color or closes with Esc, the way browser-apis.spec.ts drives it, so the
 // spec runs in every browser. Compose draws on a canvas, so buttons are found in the accessibility
 // mirror and clicked where they sit.

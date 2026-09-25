@@ -16,7 +16,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  *
  * The field reads as a dropdown list whose state is the chosen option, and each option reads as a
  * radio button that knows whether it is selected. On the web the field reads as a button named
- * "Style, pop-up button, Tonal spot" and each option as "Vibrant, option, not selected" (D40). The
+ * "Style, pop-up button, Tonal spot" and each option as "Vibrant, option, not selected". The
  * chosen option also carries a check, so the choice never rests on colour alone. The field fills
  * the width it is given. Material3 draws its exposed dropdown, the other skins the headless select.
  *
@@ -40,7 +40,6 @@ public fun <T> BuilderSelect(
 ) {
     require(selected in options) { "The selected option $selected is not one of the options" }
     val tokens = LocalBuilderTokens.current
-    // b-221b
     when (overlayLibrary()) {
         Library.Material3 -> MaterialSelect(label, options, selected, onSelect, optionLabel, enabled, modifier)
         Library.Unstyled -> HeadlessSelect(
@@ -53,7 +52,6 @@ public fun <T> BuilderSelect(
             unstyledOverlayStyle(tokens),
             modifier,
         )
-        // fluent-placeholder
         Library.Fluent -> HeadlessSelect(
             label,
             options,

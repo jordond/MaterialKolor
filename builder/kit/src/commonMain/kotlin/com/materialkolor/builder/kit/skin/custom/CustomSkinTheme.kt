@@ -20,7 +20,7 @@ import com.materialkolor.builder.kit.skin.headless.ScrimAlpha
 import com.materialkolor.builder.kit.token.BuilderTokens
 
 /**
- * The builder's own identity, every slot of the Custom target in one mode (D5).
+ * The builder's own identity, every slot of the Custom target in one mode.
  *
  * The Custom skin is the builder themed with the same recipe it exports, so its widgets reach for
  * the pressed, raised, sunken and shadow slots here where the neutral tokens have no name for them.

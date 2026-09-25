@@ -56,12 +56,12 @@ public data class BuilderTokens(
     public val success: Color,
     public val warning: Color,
     public val danger: Color,
-    public val scrim: Color, // b-218
+    public val scrim: Color,
     public val radius: BuilderRadii = BuilderRadii(),
     public val spacing: BuilderSpacing = BuilderSpacing(),
-    public val iconSize: Dp = 20.dp, // b-202a
+    public val iconSize: Dp = 20.dp,
     public val outlineWidth: Dp = 1.dp,
-    public val highlightWidth: Dp = 2.dp, // b-308ba
+    public val highlightWidth: Dp = 2.dp,
 )
 
 /**
@@ -100,7 +100,7 @@ public class CodePalette(
 }
 
 /**
- * Corner radii. Design D puts the poster panel and the canvas frame on [large].
+ * Corner radii. The poster panel and the canvas frame use [large].
  *
  * @property[small] Chips, fields and small buttons.
  * @property[medium] Cards and rows inside a panel.
@@ -118,7 +118,7 @@ public data class BuilderRadii(
  *
  * @property[extraSmall] The gap inside a chip or between an icon and its label.
  * @property[small] The gap between controls in a row.
- * @property[medium] The margin around a panel's content, and the panel's own margin in design D.
+ * @property[medium] The margin around a panel's content, and the panel's own margin.
  * @property[large] The gap between groups of controls.
  * @property[extraLarge] The gap between a heading and what it heads.
  * @property[section] The gap between sections of a panel.

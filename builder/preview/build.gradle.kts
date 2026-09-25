@@ -25,7 +25,6 @@ kotlin {
             implementation(libs.composeUnstyled.theming)
             implementation(libs.lucide)
 
-            // b-405
             implementation(materialKolor("fluent"))
             implementation(libs.fluent)
         }

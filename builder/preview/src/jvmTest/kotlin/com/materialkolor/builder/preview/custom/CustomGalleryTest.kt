@@ -90,7 +90,7 @@ private val GalleryWhole: Modifier = Modifier
 private val GalleryNoDisabled: Set<String> = setOf("Tabs", "Badges", "Progress", "Tooltip", "Toast")
 
 /**
- * Imports that open a popup, a window or an overlay, which on the web take the mirror over (D40).
+ * Imports that open a popup, a window or an overlay, which on the web take the mirror over.
  */
 private val GalleryPopupImports: List<String> = listOf(
     "com.materialkolor.builder.kit.control.BuilderMenu",

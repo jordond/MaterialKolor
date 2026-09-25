@@ -172,8 +172,7 @@ class OpenPanelsTest {
 
     /**
      * The open list spans its field, less the edge it keeps round itself for its shadow, whether the
-     * field's label or an option is the wider, and the panel holds its width from frame to frame
-     * (R-B-221d).
+     * field's label or an option is the wider, and the panel holds its width from frame to frame.
      */
     @Test
     fun selectPanel_everySkin_listSpansItsFieldAndHoldsItsWidth() =

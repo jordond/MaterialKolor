@@ -30,8 +30,6 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
-// b-513
-
 /**
  * A marker on a ramp, what picked a tone there and in which mode.
  *

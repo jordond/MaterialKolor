@@ -3,7 +3,6 @@ import path from 'node:path';
 import { expect, type Locator, type Page } from '@playwright/test';
 import { openBuilder } from '../tests/builder';
 
-// b-503
 // What the flow specs share. Compose draws on a canvas, so every control is found in the page's
 // accessibility mirror and pressed where the canvas draws it. Every wait here waits on something the
 // page shows or stores, never on a fixed time.
@@ -222,7 +221,6 @@ export async function scrollTo(page: Page, target: Locator, over: Locator): Prom
         await page.mouse.wheel(0, 120);
         return false;
       },
-      // b-503b
       // WebKit moves the mirror only once a scroll settles, so each turn waits for that.
       { timeout: LAND_TIMEOUT_MS, intervals: [500] },
     )

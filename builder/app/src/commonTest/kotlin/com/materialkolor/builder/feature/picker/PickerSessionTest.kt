@@ -38,7 +38,6 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-// b-307
 @OptIn(ExperimentalCoroutinesApi::class)
 class PickerSessionTest : SessionTestBase() {
     private val harness = ViewModelHarness()
@@ -242,7 +241,6 @@ class PickerSessionTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
-    // b-307a
     @Test
     fun controlTurningUnusableMidSession_restoresTheValueAndCloses() =
         runTest {

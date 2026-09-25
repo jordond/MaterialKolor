@@ -25,8 +25,6 @@ import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.BuilderType
 import com.materialkolor.builder.kit.token.LocalBuilderType
 
-// b-231
-
 /**
  * The top bar as a whole, for tests that check how its controls sit.
  */
@@ -44,11 +42,9 @@ internal const val LIBRARY_SWITCHER_TAG: String = "top-bar-library-switcher"
 internal val LocalSwitcherFitProbe: ProvidableCompositionLocal<(() -> Unit)?> =
     staticCompositionLocalOf { null }
 
-// b-315d
-
 /**
  * The form the library switcher shows, which the command registry reads to say where each library
- * sits (P6), the segmented row or a row of the dropdown.
+ * sits, the segmented row or a row of the dropdown.
  */
 @Stable
 internal class SwitcherFormState {
@@ -57,24 +53,18 @@ internal class SwitcherFormState {
      */
     var segmented: Boolean? by mutableStateOf(null)
 
-    // b-406
-
     /**
      * The top bar buttons the bar has moved into its overflow menu, all three on a phone.
      */
     var overflowed: Set<TopBarControl> by mutableStateOf(emptySet())
 
-    // b-503a
-
     /**
      * The middle of the switcher where it was last placed, in root coordinates, or null before it has
-     * been. A library key reveals the new skin from here (flow 5.3). A plain field, since only a
+     * been. A library key reveals the new skin from here. A plain field, since only a
      * shortcut reads it and nothing draws from it.
      */
     var origin: Offset? = null
 }
-
-// b-503a
 
 /**
  * Keeps [report]'s origin on the middle of the switcher this goes on. Nothing when [report] is null.
@@ -116,19 +106,18 @@ internal fun FittedLibrarySwitcher(
     modifier: Modifier = Modifier,
     switcherModifier: Modifier = Modifier,
     onRefit: () -> Unit = {},
-    onFit: (needed: Int, room: Int) -> Unit = { _, _ -> }, // b-512
+    onFit: (needed: Int, room: Int) -> Unit = { _, _ -> },
 ) {
     val wide = LocalLayout.current.windowClass == WindowClass.Expanded
     val skin = LocalSkin.current
     val type = LocalBuilderType.current
     val labels = LibraryChoice.entries.map { choice -> libraryName(choice) }
     val probe = LocalSwitcherFitProbe.current
-    val report = LocalSwitcherForm.current // b-315d
+    val report = LocalSwitcherForm.current
     val fit = remember { SwitcherFit() }
     SubcomposeLayout(modifier) { constraints ->
         val loose = constraints.copy(minWidth = 0, minHeight = 0)
         val key = FitKey(loose, selected, skin, type, labels, density, fontScale)
-        // b-512
         val needed = if (wide) {
             fit.width(key) {
                 probe?.invoke()
@@ -146,7 +135,7 @@ internal fun FittedLibrarySwitcher(
             // A form's slot composes afresh each time the switcher changes to it.
             val changedForm = remember { refit }
             if (changedForm) LaunchedEffect(Unit) { onRefit() }
-            if (report != null) SideEffect { report.segmented = segmented } // b-315d
+            if (report != null) SideEffect { report.segmented = segmented }
             LibrarySwitcher(
                 selected = selected,
                 onSwitch = onSwitch,
@@ -181,7 +170,6 @@ private fun SubcomposeMeasureScope.segmentedWidth(
         )
     }
     val natural = probe.maxOfOrNull { measurable ->
-        // b-509
         // A row that shares its width out evenly, as Fluent's does, needs its widest option's room for
         // every option. Its intrinsic width counts that, and a measure with no end to the room does not.
         val shared = measurable.maxIntrinsicWidth(constraints.maxHeight)
@@ -231,8 +219,6 @@ private class SwitcherFit {
         return width
     }
 }
-
-// b-512
 
 /**
  * Whether a wide top bar shows Share and the command palette in their compact forms, a glyph each,

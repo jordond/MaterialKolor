@@ -38,14 +38,14 @@ import org.jetbrains.compose.resources.stringResource
  * anything storage turns down raises a toast of its own.
  *
  * @param[returnFocusTo] The Projects button that opened the drawer, which gets focus back once it
- * closes (AR-09).
+ * closes.
  */
 @Composable
 internal fun ProjectsHost(
     state: WorkspaceModel.State,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
-    returnFocusTo: FocusRequester? = null, // b-221f
+    returnFocusTo: FocusRequester? = null,
     model: ProjectsModel = metroViewModel(),
 ) {
     val projects by model.collectAsState()
@@ -63,8 +63,8 @@ internal fun ProjectsHost(
         },
         onGetLink = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Share)) },
         onDismissRequest = { dispatcher.dispatch(WorkspaceAction.ClosePanel) },
-        modifier = modifier, // b-314b
-        returnFocusTo = returnFocusTo, // b-221f
+        modifier = modifier,
+        returnFocusTo = returnFocusTo,
     )
     projects.lastDeletion?.let { deleted ->
         UndoToast(deleted, dispatcher) { undone -> model.handle(ProjectsAction.UndoDelete(undone)) }

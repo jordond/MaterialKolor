@@ -29,7 +29,7 @@ import kotlin.math.roundToInt
 
 // The samples of the Expressive Feedback cards of ExpressiveCards in ExpressiveGallery.kt. None of
 // them runs a clock of Material's own, which would ignore frozen motion, reduced motion and a hidden
-// tab (MO-10). Material gives progress no disabled look.
+// tab. Material gives progress no disabled look.
 
 /**
  * How far along the determinate samples are.

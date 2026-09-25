@@ -95,7 +95,6 @@ public fun PreviewPane(
     ) {
         PaneLocals(ink) {
             when (skin.library) {
-                // b-306
                 Library.Material3 -> MaterialPane(roles, skin.expressive, spec.result.document.motionScheme, content)
                 Library.Unstyled -> UnstyledPane(roles, spec.isDark, ink, content)
                 Library.Fluent -> FluentPane(spec, content)
@@ -205,7 +204,7 @@ private fun PaneLocals(
 private fun MaterialPane(
     roles: Map<Role, RoleEntry>,
     expressive: Boolean,
-    motion: MotionSchemeChoice, // b-306
+    motion: MotionSchemeChoice,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = remember(roles) { roles.toColorScheme() }
@@ -214,7 +213,6 @@ private fun MaterialPane(
     if (expressive) {
         MaterialExpressiveTheme(
             colorScheme = colorScheme,
-            // b-306
             // The document's motion scheme, so the preview moves the way the export will.
             motionScheme = if (motion == MotionSchemeChoice.Standard) {
                 MotionScheme.standard()

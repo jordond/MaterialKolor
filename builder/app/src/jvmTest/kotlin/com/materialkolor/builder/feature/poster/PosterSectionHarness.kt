@@ -50,10 +50,8 @@ internal class PosterHarness(
     var openPanel by mutableStateOf(openPanel)
     var openFineTuneRows by mutableStateOf(emptySet<FineTuneRow>())
 
-    // b-306b
     var preferences by mutableStateOf(Preferences())
 
-    // b-314
     var projectName by mutableStateOf("")
     private val history = History()
     private var now = 0L
@@ -66,10 +64,8 @@ internal class PosterHarness(
             is WorkspaceAction.OpenPanel -> openPanel = action.panel
             WorkspaceAction.ClosePanel -> openPanel = null
             is WorkspaceAction.SetFineTuneRowOpen -> setRowOpen(action.row, action.open)
-            // b-306b
             is WorkspaceAction.SetColorAnimation -> setColorAnimation(action.target, action.on)
             is WorkspaceAction.SetColorAnimationDuration -> setColorAnimationDuration(action.target, action.durationMs)
-            // b-314
             is WorkspaceAction.DismissHint -> dismissHint(action.id)
             else -> Unit
         }
@@ -84,8 +80,6 @@ internal class PosterHarness(
     ) {
         openFineTuneRows = if (open) openFineTuneRows + row else openFineTuneRows - row
     }
-
-    // b-306b
 
     /**
      * Turns color animation on or off in the export options of [target] alone, as the workspace does.
@@ -116,8 +110,6 @@ internal class PosterHarness(
     ) {
         preferences = preferences.withExportPrefs(target, block(preferences.exportPrefsFor(target)))
     }
-
-    // b-314
 
     /**
      * Keeps [id] closed, the way the preferences repository does.
@@ -166,8 +158,8 @@ internal fun ComposeUiTest.showSection(
             document = document,
             result = result,
             capabilities = capabilitiesOf(document),
-            preferences = harness.preferences, // b-306b
-            projectName = harness.projectName, // b-314
+            preferences = harness.preferences,
+            projectName = harness.projectName,
             saveStatus = SaveStatus.Idle,
             openPanel = harness.openPanel,
             visibleModes = PreviewMode.Split,

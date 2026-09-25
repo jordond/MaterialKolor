@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The share dialog (F-32), the link to the theme as it is now with a way to send it.
+ * The share dialog, the link to the theme as it is now with a way to send it.
  *
  * The link shows on one line in a read only field that scrolls inside the dialog, with Copy link
  * beside it. On a touch screen with a share sheet Share is the dialog's action as well. Each starts
@@ -66,7 +66,7 @@ import org.jetbrains.compose.resources.stringResource
  * @param[onDone] Called with how a copy or share that worked went, [ShareOutcome.Copied] or
  *   [ShareOutcome.Shared].
  * @param[onDismissRequest] Called when the dialog asks to close.
- * @param[returnFocusTo] The button that opened the dialog, which gets focus back once it closes (AR-09).
+ * @param[returnFocusTo] The button that opened the dialog, which gets focus back once it closes.
  */
 @Composable
 internal fun ShareDialog(
@@ -81,7 +81,6 @@ internal fun ShareDialog(
     returnFocusTo: FocusRequester? = null,
 ) {
     val scope = rememberCoroutineScope()
-    // b-228c
     // The copy and the share that failed, the latest last, while the dialog says so.
     var failed by remember(link, visible) { mutableStateOf(emptyList<ShareOutcome>()) }
 
@@ -121,7 +120,6 @@ internal fun ShareDialog(
                 BuilderText(text = stringResource(Res.string.share_unavailable))
             } else {
                 BuilderText(text = stringResource(Res.string.share_body))
-                // b-511
                 // One line that scrolls inside its field, so the dialog keeps its padding however long
                 // the link is. A finger copies with Copy link or Share.
                 Row(
@@ -147,8 +145,6 @@ internal fun ShareDialog(
         }
     }
 }
-
-// b-511
 
 /**
  * [link] on one line in a read only field with an outline, as tall as the button beside it, scrolling
@@ -179,13 +175,11 @@ private fun LinkField(
     }
 }
 
-// b-228b
-
 /**
  * What the dialog says when [outcome], a copy or share, did not land. With a mouse that is to copy
- * the link by hand. A finger on the web cannot select the wrapped link (D45), so on a touch screen
- * it sends the finger to the other button when there are two, or back to Copy link. Once Copy link
- * and Share have [bothFailed], it sends the finger back to Copy link.
+ * the link by hand. A finger on the web cannot select the wrapped link, so on a touch screen it
+ * sends the finger to the other button when there are two, or back to Copy link. Once Copy link and
+ * Share have [bothFailed], it sends the finger back to Copy link.
  */
 @Composable
 private fun manualText(
@@ -197,7 +191,6 @@ private fun manualText(
     if (!LocalLayout.current.coarsePointer) return stringResource(Res.string.share_manual)
     val copy = stringResource(Res.string.share_copy)
     return when {
-        // b-228c
         bothFailed -> stringResource(Res.string.share_manual_touch_again, copy)
         outcome == ShareOutcome.ShareFailed -> stringResource(Res.string.share_manual_touch_instead, copy)
         sharesToSheet -> stringResource(Res.string.share_manual_touch_instead, stringResource(Res.string.share_send))

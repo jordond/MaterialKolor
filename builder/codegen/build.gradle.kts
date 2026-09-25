@@ -10,13 +10,11 @@ kotlin {
     }
 }
 
-// b-109
 // The golden tests compare by default. Pass -Pgolden.update=true to rewrite the goldens and their hashes instead.
 tasks.named<Test>("jvmTest") {
     systemProperty("golden.update", providers.gradleProperty("golden.update").getOrElse("false"))
 }
 
-// b-114
 // Lays every golden case into the fixture projects of builder/codegen-check, which compiles them against the local
 // modules with `./gradlew -p builder/codegen-check compileKotlinJvm`.
 tasks.register<JavaExec>("writeCompileFixtures") {

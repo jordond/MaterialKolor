@@ -3,8 +3,6 @@ package com.materialkolor.builder.feature.topbar
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-512
-
 class WideBarFitTest {
     @Test
     fun refit_rowShortOfRoom_goesCompactAndOpensOutOnlyOnceTheRowFitsBesideTheWideForms() {

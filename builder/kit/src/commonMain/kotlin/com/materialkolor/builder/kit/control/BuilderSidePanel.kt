@@ -44,8 +44,8 @@ public fun BuilderSidePanel(
     modifier: Modifier = Modifier,
     closeLabel: String = stringResource(Res.string.close),
     returnFocusTo: FocusRequester? = null,
-    subtitle: String? = null, // b-511
-    footer: (@Composable () -> Unit)? = null, // b-511
+    subtitle: String? = null,
+    footer: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val compact = when (LocalLayout.current.windowClass) {

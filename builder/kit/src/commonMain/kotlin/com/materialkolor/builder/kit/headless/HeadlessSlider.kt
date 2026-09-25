@@ -84,7 +84,7 @@ internal class SliderStyle(
  * What a slider does with input, whichever skin draws it.
  *
  * A drag lands on a named stop when it ends up within [snapDistance] of one. Keys never snap, so an
- * arrow press next to a stop still moves one [step] (AR-07).
+ * arrow press next to a stop still moves one [step].
  *
  * @property[range] The values the slider covers.
  * @property[step] How far one arrow press moves.
@@ -195,9 +195,9 @@ internal fun Modifier.sliderKeys(
 
 /**
  * The slider's name, spoken value and set-progress action. On the web [name] carries the value and
- * the disabled state too, from [stateName], since the mirror drops both (AR-10, D37). The slider
- * has no role there, so [name] carries the slider's role word as well, "Contrast, slider, 0.50"
- * (D40), and with [nameAsText] it goes in as text (S5 answer 1).
+ * the disabled state too, from [stateName], since the mirror drops both. The slider has no role
+ * there, so [name] carries the slider's role word as well, "Contrast, slider, 0.50", and with
+ * [nameAsText] it goes in as text.
  *
  * Set-progress replaces the one the slider underneath brings, since this modifier sits outside it
  * and the outer one wins. Like the keys it never snaps to a stop. It clamps the target into the
@@ -239,7 +239,7 @@ internal fun sliderValueDescription(value: Float): String {
 /**
  * How far the panel colored halo around the thumb reaches. It fills the gap between the thumb and
  * where its focus ring goes and runs one ring's width past it, so where the ring crosses the track
- * it sits on the panel rather than on the accent (AR-01).
+ * it sits on the panel rather than on the accent.
  */
 private val ThumbHaloWidth: Dp = FocusRingOffset + FocusRingWidth * 2
 
@@ -249,7 +249,7 @@ private val ThumbHaloWidth: Dp = FocusRingOffset + FocusRingWidth * 2
  * Drags report every frame and snap to [SliderRules.stops], letting go reports once. Keys go
  * through [sliderKeys]. The thumb always sits in its [thumbHalo], focused or not, so the ring it
  * shows with focus covers the panel and not the track, and stands 3 to 1 from what it covers all
- * the way round (S5 rerun).
+ * the way round.
  */
 @Composable
 internal fun HeadlessSlider(

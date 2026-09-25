@@ -19,7 +19,6 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlin.test.Test
 
-// pf-1
 @OptIn(ExperimentalTestApi::class)
 class DataTabTilesTest {
     private val material = ThemeDocument.Default.copy(library = Library.Material3, expressive = false)

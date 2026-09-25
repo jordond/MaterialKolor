@@ -59,7 +59,7 @@ private val BarCollapsedHeight = TopAppBarDefaults.MediumAppBarCollapsedHeight
 private val BarExpandedHeight = TopAppBarDefaults.MediumFlexibleAppBarWithSubtitleExpandedHeight
 
 /**
- * The photo app, the Material 3 Expressive sample app of the App tab (F-20).
+ * The photo app, the Material 3 Expressive sample app of the App tab.
  *
  * A flexible top bar over the library feed, which opens with a carousel of memories, a button group
  * of toggle buttons, a backup card with wavy progress and a grid of photos drawn from the scheme.

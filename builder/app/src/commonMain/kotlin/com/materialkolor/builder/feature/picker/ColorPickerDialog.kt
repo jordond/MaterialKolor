@@ -25,7 +25,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The color picker in a dialog, the HCT tracks with Pick from screen under them where the browser
- * has an eyedropper, then Cancel and Done (F-06, F-07).
+ * has an eyedropper, then Cancel and Done.
  *
  * Every color the tracks or the eyedropper reach goes to [onPick], whatever the gesture, and the
  * caller files them as one session. Esc and a click on the veil cancel, except while the browser's

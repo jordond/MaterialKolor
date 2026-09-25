@@ -54,8 +54,6 @@ internal const val IS_DARK_PARAMETER: String = "isDark"
  */
 internal const val CONTENT_PARAMETER: String = "content"
 
-// b-111c
-
 /**
  * The theme function's switch for the wallpaper colors, which only an Android export that asks for them has.
  */
@@ -108,8 +106,6 @@ internal fun AccentFamilyValues.colorsIn(mode: FrozenMode): AccentColors =
         FrozenMode.Dark -> dark
     }
 
-// b-111c
-
 /**
  * Every role's color in [mode], at the contrast variant this table was resolved at.
  */
@@ -139,7 +135,7 @@ internal fun KotlinFileScope.themeFunction(
 ) {
     function(name = input.document.themeName, annotations = listOf(Symbols.Composable)) {
         parameter(IS_DARK_PARAMETER, Symbols.Boolean, default = call(Symbols.IsSystemInDarkTheme))
-        if (dynamicColor) dynamicColorParameter() // b-111c
+        if (dynamicColor) dynamicColorParameter()
         parameter(CONTENT_PARAMETER, lambdaType(annotations = listOf(Symbols.Composable)))
         body(statements)
     }
@@ -173,16 +169,12 @@ internal fun colorFamilyValue(colors: AccentColors): Expression {
 
 private fun accentPropertyName(name: String): String = name.replaceFirstChar { char -> char.lowercaseChar() }
 
-// b-111c
-
 /**
  * `dynamicColor: Boolean = true`, which goes right after `isDark`.
  */
 internal fun FunctionScope.dynamicColorParameter() {
     parameter(DYNAMIC_COLOR_PARAMETER, Symbols.Boolean, default = Literals.boolean(true))
 }
-
-// b-112c
 
 /**
  * The arguments that decide a scheme, in the order the called function declares them.

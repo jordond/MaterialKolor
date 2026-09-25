@@ -46,7 +46,6 @@ import kotlin.test.Test
 private const val WIDTH = 1280
 private const val HEIGHT = 800
 
-// b-315
 @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
 class ShortcutsTest {
     private val harness = CommandHarness()
@@ -160,7 +159,6 @@ class ShortcutsTest {
             waitUntil { named("Saved") }
             keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.O) } }
             harness.workspace.state.value.panel shouldBe Panel.Projects
-            // b-315a
             // An open panel owns the keyboard, so the field takes focus again before Ctrl+K.
             runOnUiThread { harness.workspace.closePanel() }
             waitForIdle()
@@ -368,7 +366,6 @@ class ShortcutsTest {
         after.panel shouldBe null
         after.inspect shouldBe false
         after.fullscreen shouldBe false
-        // b-315c
         after.visionMenuOpen shouldBe false
         after.grayscaleHeld shouldBe false
         platform.clipboard.texts shouldBe emptyList()
@@ -395,10 +392,9 @@ private val SINGLE_KEYS = listOf(
     Key.U,
     Key.W,
     Key.F,
-    // b-315c
     Key.V,
     Key.B,
-    Key.H, // b-509
+    Key.H,
 )
 
 private val SHIFTED_KEYS = listOf(Key.L, Key.D, Key.C, Key.N, Key.Slash)

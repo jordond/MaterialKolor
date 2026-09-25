@@ -20,6 +20,6 @@ internal fun overlayStyle(library: Library): OverlayStyle =
     when (library) {
         Library.Material3 -> materialOverlayStyle()
         Library.Unstyled -> unstyledOverlayStyle(LocalBuilderTokens.current)
-        Library.Fluent -> fluentOverlayStyle(LocalBuilderTokens.current) // fluent-placeholder
+        Library.Fluent -> fluentOverlayStyle(LocalBuilderTokens.current)
         Library.Custom -> customOverlayStyle(LocalBuilderTokens.current)
     }

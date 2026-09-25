@@ -9,7 +9,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-// b-315c
 @OptIn(ExperimentalCoroutinesApi::class)
 class FakePasteInputTest {
     private val input = FakePasteInput()

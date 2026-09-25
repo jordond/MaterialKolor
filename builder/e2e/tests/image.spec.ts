@@ -4,8 +4,7 @@ import { dispatchDrag, dispatchPaste, installFileMakers } from './image-files';
 import path from 'node:path';
 import { button, press, pressFor, scrollTo, seedText, storedDocument } from '../fixtures/workspace';
 
-// b-311
-// Seeding from an image on the real builder (F-08). A drop or a paste goes through the browser's
+// Seeding from an image on the real builder. A drop or a paste goes through the browser's
 // decode and the extractor, lands as the seed with an undo toast, and the poster offers the other
 // candidates as chips. A file that is not an image only says so. The page reads through the
 // accessibility mirror, where the chip group's name goes in as text.
@@ -58,8 +57,7 @@ test('a pasted image seeds the theme', async ({ page }) => {
   await expect(onPage(page, CANDIDATES)).toHaveCount(1);
 });
 
-// b-503
-// Image to theme (flow 5.2) with the 12 MP fixture photo. The drag says what a drop does, the drop
+// Image to theme with the 12 MP fixture photo. The drag says what a drop does, the drop
 // seeds the theme, another chip swaps the seed, and Match exactly in the explainer pins primary.
 
 /** The fixture photo, served to the page from this address. */
@@ -88,7 +86,6 @@ test('a dropped photo seeds the theme, another chip swaps it, and Match exactly 
   await scrollTo(page, why, poster);
   const explainer = onPage(page, 'Why primary differs from your seed');
   await pressFor(page, why, explainer);
-  // b-503b
   // Match exactly sits at the foot of the explainer, which scrolls over the poster rather than in it.
   const match = button(page, 'Match exactly');
   await scrollTo(page, match, explainer);

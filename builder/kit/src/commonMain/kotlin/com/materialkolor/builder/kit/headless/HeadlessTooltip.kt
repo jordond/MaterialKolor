@@ -55,14 +55,14 @@ import kotlin.math.max
 /**
  * A short label over [content], shown while the pointer rests on it and while it has keyboard focus.
  *
- * Focus shows it as readily as hover, so nothing it says is only there for a mouse (AR-03). Focus
- * a click left behind does not, the way the focus ring works (D58). The pointer can move onto the
+ * Focus shows it as readily as hover, so nothing it says is only there for a mouse. Focus
+ * a click left behind does not, the way the focus ring works. The pointer can move onto the
  * label without it going away (WCAG 1.4.13). Esc or a press on the anchor hides it until the pointer
  * and focus have both left, and it never takes focus itself. Drawn in the page, the label
  * stays out of the semantics tree, since [content] already carries the name.
  *
  * The label keeps clear of the anchor's focus ring, and far enough off it that its own shadow falls
- * short of the ring too, so a focused anchor rings whole under it (S5 rows 23, 30, 31 and 33).
+ * short of the ring too, so a focused anchor rings whole under it.
  *
  * @param[text] The label.
  * @param[style] The skin's overlay style.
@@ -80,7 +80,6 @@ internal fun HeadlessTooltip(
     val hovered by interaction.collectIsHoveredAsState()
     var focused by remember { mutableStateOf(false) }
     var hidden by remember { mutableStateOf(false) }
-    // b-513
     val visibility = LocalFocusVisibility.current
     val focusShows by remember(visibility) { derivedStateOf { focused && visibility.isVisible } }
     val wanted = hovered || focusShows
@@ -90,7 +89,7 @@ internal fun HeadlessTooltip(
         modifier = modifier
             .hoverable(interaction)
             .onFocusChanged { state -> focused = state.hasFocus }
-            .pointerInput(Unit) { hideOnPress { hidden = true } } // b-513
+            .pointerInput(Unit) { hideOnPress { hidden = true } }
             .onKeyEvent { event ->
                 val escape = visible && event.type == KeyEventType.KeyDown && event.key == Key.Escape
                 if (escape) hidden = true
@@ -101,8 +100,6 @@ internal fun HeadlessTooltip(
         TooltipPopup(visible, text, style, interaction)
     }
 }
-
-// b-513
 
 /**
  * Calls [hide] as a pointer goes down anywhere on the anchor, before the anchor sees the press.

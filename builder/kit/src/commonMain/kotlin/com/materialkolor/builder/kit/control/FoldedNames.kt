@@ -8,7 +8,7 @@ import androidx.compose.ui.semantics.stateDescription
 
 // The siblings of [foldedToggleName] for controls an app draws for itself, where kit controls do
 // not fit. Each names its node the way the kit's own control of that kind reads, off the web and on
-// it, where the mirror drops the state and reads every clickable as a button (P3, D37, D40).
+// it, where the mirror drops the state and reads every clickable as a button.
 
 /**
  * Names a button that shows and hides a panel of its own, such as a row that opens its details,

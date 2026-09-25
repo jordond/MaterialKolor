@@ -39,17 +39,14 @@ class BuilderWebPlugin : Plugin<Project> {
         with(target) {
             val rewriteIndexHtml = tasks.register<RewriteIndexHtml>("rewriteIndexHtml") {
                 group = SITE_GROUP
-                // b-501
                 description = "Fills the asset list in index.html that boot.js boots from."
                 dependsOn(DISTRIBUTION_TASK)
                 distribution.set(distributionDirectory())
                 index.set(layout.buildDirectory.file("site-parts/index.html"))
             }
 
-            // b-505
             val siteEnvironment = providers.gradleProperty("site.env").orElse("production")
 
-            // b-504
             // Public, since the beacon sends it from every page. Empty leaves analytics out of the site.
             val siteAnalyticsToken = providers
                 .gradleProperty("builder.analyticsToken")
@@ -58,7 +55,6 @@ class BuilderWebPlugin : Plugin<Project> {
 
             val writeHeaders = tasks.register<WriteHeaders>("writeHeaders") {
                 group = SITE_GROUP
-                // b-501b
                 description = "Writes the host's _headers and robots.txt files."
                 environment.set(siteEnvironment)
                 outputDirectory.set(layout.buildDirectory.dir("site-parts/host"))
@@ -71,9 +67,7 @@ class BuilderWebPlugin : Plugin<Project> {
                 distribution.set(distributionDirectory())
                 index.set(rewriteIndexHtml.flatMap { task -> task.index })
                 host.set(writeHeaders.flatMap { task -> task.outputDirectory })
-                // b-505
                 origin.set(siteEnvironment.map(::siteOrigin))
-                // b-504
                 analyticsToken.set(siteAnalyticsToken)
                 site.set(layout.buildDirectory.dir("site"))
             }
@@ -96,7 +90,6 @@ class BuilderWebPlugin : Plugin<Project> {
         layout.dir(tasks.named(DISTRIBUTION_TASK, Sync::class.java).map(Sync::getDestinationDir))
 }
 
-// b-501
 /**
  * Fills the `#mk-assets` placeholder in the distribution's `index.html` with the hashed glue and
  * wasm under `/assets/` and the fonts the first frame asks for.
@@ -132,7 +125,6 @@ abstract class RewriteIndexHtml : DefaultTask() {
             .sorted()
             .toList()
 
-        // b-501
         val html = root.resolve("index.html").readText()
         val placeholder = ASSETS_ELEMENT.findAll(html).singleOrNull()
             ?: throw GradleException("index.html needs one #mk-assets placeholder, update rewriteIndexHtml")
@@ -174,7 +166,6 @@ abstract class WriteHeaders : DefaultTask() {
         directory.deleteRecursively()
         directory.mkdirs()
         directory.resolve("_headers").writeText(headers(staging))
-        // b-501b
         // Production lets every crawler in. There is no sitemap yet, so robots.txt names none.
         val robots = if (staging) "User-agent: *\nDisallow: /\n" else "User-agent: *\nAllow: /\n"
         directory.resolve("robots.txt").writeText(robots)
@@ -253,15 +244,11 @@ abstract class AssembleSite : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val host: DirectoryProperty
 
-    // b-505
-
     /**
      * Where the site is served, which the page's canonical link and link cards name.
      */
     @get:Input
     abstract val origin: Property<String>
-
-    // b-504
 
     /**
      * The Cloudflare Web Analytics token the page reads from `#mk-config`, empty for none.
@@ -288,16 +275,13 @@ abstract class AssembleSite : DefaultTask() {
             }
             file.copyTo(output.resolve(target))
         }
-        // b-505
         // Every page and card URL in the head of index.html starts with the production origin.
         output.resolve("index.html").writeText(index.get().asFile.readText().replace(PRODUCTION_ORIGIN, origin.get()))
-        // b-504
         addConfig(output.resolve("index.html"))
         host.get().asFile.listFiles().orEmpty().forEach { file -> file.copyTo(output.resolve(file.name)) }
         if (origin.get() != PRODUCTION_ORIGIN) checkNoProductionOrigin(output)
     }
 
-    // b-504
     // The page's own settings go in ahead of boot.js, and only when there is one to give, so a site
     // built with no token has no #mk-config and never loads the beacon.
     private fun addConfig(page: File) {
@@ -310,7 +294,6 @@ abstract class AssembleSite : DefaultTask() {
         page.writeText(page.readText().replace(BOOT_TAG, config + BOOT_TAG))
     }
 
-    // b-505
     // A staging page that still names production would hand production its link previews and search
     // results, so any host file that does fails the build rather than going out.
     private fun checkNoProductionOrigin(output: File) {
@@ -327,7 +310,6 @@ abstract class AssembleSite : DefaultTask() {
     }
 }
 
-// b-505
 /**
  * Where a site built with `site.env` set to [environment] is served from.
  */
@@ -353,9 +335,7 @@ private const val BUILDER_RESOURCES = "com.materialkolor."
  */
 private const val LAZY_FONT_PREFIX = "Selawik"
 
-// b-501
 private const val BOOT_TAG = "<script src=\"/boot.js\"></script>"
-// b-504
 private val ANALYTICS_TOKEN = Regex("[A-Za-z0-9_-]+")
 private val ASSETS_ELEMENT = Regex("""<script type="application/json" id="mk-assets">[^<]*</script>""")
 

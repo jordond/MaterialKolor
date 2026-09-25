@@ -26,7 +26,7 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The color picker, open while `state.panel` is `Panel.Picker` on `state.pickerTarget` (F-06).
+ * The color picker, open while `state.panel` is `Panel.Picker` on `state.pickerTarget`.
  *
  * It holds the picker's session and sends its edits through [dispatcher], so the workspace keeps
  * the document, the history and the capabilities in step. Whatever closes the picker other than
@@ -38,14 +38,14 @@ import org.jetbrains.compose.resources.stringResource
  * Projects or Share and opening either one closes the picker first.
  *
  * @param[returnFocusTo] The Pick button that opened the picker, which gets focus back once it closes
- * while it is still on screen (AR-09).
+ * while it is still on screen.
  */
 @Composable
 internal fun PickerHost(
     state: WorkspaceModel.State,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
-    returnFocusTo: FocusRequester? = null, // b-307
+    returnFocusTo: FocusRequester? = null,
     model: PickerModel = metroViewModel(),
 ) {
     val session = remember { PickerSession() }

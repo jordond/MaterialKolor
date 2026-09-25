@@ -34,7 +34,7 @@ internal const val ShellRootTag = "shell-root"
 internal const val ShellPosterLabel = "Seed and theme controls"
 
 /**
- * The design reference's seed, a mid tone orange that sits close to the ink floor.
+ * A mid tone orange seed that sits close to the ink floor.
  */
 internal val ShellPosterColors: PosterColors = PosterColors.of(Argb(0xD9653B))
 

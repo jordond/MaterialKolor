@@ -50,8 +50,6 @@ import com.materialkolor.builder.generated.resources.style_tooltip_tonal_spot
 import com.materialkolor.builder.generated.resources.style_tooltip_vibrant
 import org.jetbrains.compose.resources.StringResource
 
-// b-510
-
 /**
  * What [style] is called under its chip, in words with spaces, as in "Tonal Spot".
  */

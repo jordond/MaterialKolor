@@ -81,7 +81,7 @@ public fun <T> BuilderSegmented(
     enabled: Boolean = true,
     optionIcon: (T) -> IconId? = { null },
     selectOnFocus: Boolean = true,
-    compact: Boolean = false, // b-510
+    compact: Boolean = false,
     optionLabel: (T) -> String,
 ) {
     when (LocalSkin.current.library) {
@@ -161,7 +161,7 @@ internal fun <T> HeadlessSegmented(
     optionIcon: (T) -> IconId? = { null },
     selectOnFocus: Boolean = true,
     optionLabel: (T) -> String,
-    compact: Boolean = false, // b-510
+    compact: Boolean = false,
 ) {
     val target = LocalLayout.current.primaryTouchTarget
     val spacing = LocalBuilderTokens.current.spacing
@@ -192,7 +192,6 @@ internal fun <T> HeadlessSegmented(
             horizontalArrangement = Arrangement.spacedBy(option.gap, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // b-510
             if (compact) {
                 FittedLabel(optionLabel(value), colors.content)
             } else {
@@ -203,8 +202,6 @@ internal fun <T> HeadlessSegmented(
         }
     }
 }
-
-// b-510
 
 /**
  * An option's label on one line in the builder's label type, stepping down in size until it fits
@@ -239,8 +236,6 @@ private val FittedLabelMinSize: TextUnit = 10.sp
  * How far each step down takes a compact row's label.
  */
 private val FittedLabelStep: TextUnit = 0.5.sp
-
-// b-230d
 
 /**
  * The outline the focus ring follows round [value]. At either end of the row it reaches the style's

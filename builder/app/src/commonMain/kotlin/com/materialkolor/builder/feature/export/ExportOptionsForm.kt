@@ -71,7 +71,7 @@ private val DURATIONS_MS = listOf(150, 300, 500, 1000)
 
 /**
  * What is wrong with the package and theme name drafts right now, for the sheet to hold the export
- * back on (R-B-309). A draft that is fine is in the export already, so only a wrong one is kept.
+ * back on. A draft that is fine is in the export already, so only a wrong one is kept.
  */
 @Stable
 internal class DraftProblems {
@@ -101,13 +101,13 @@ private enum class ProjectKind {
 }
 
 /**
- * The export options (F-27), each shown only where the target and the mode use it.
+ * The export options, each shown only where the target and the mode use it.
  *
  * Contrast levels only matter to a frozen export, which writes every color out, and color animation
  * only to a dynamic one. The wallpaper colors branch is for an Android only Material 3 theme. The
  * package and the theme name go out as they are typed, so the export is always built from what the
  * fields show. A draft that is not valid stays in its field, says what is wrong under it and lands
- * in [drafts], which holds the export back (R-B-309). The theme name goes to the document, so it
+ * in [drafts], which holds the export back. The theme name goes to the document, so it
  * travels with the project and its share link, while every other option stays in this browser under
  * the target.
  *
@@ -125,13 +125,11 @@ internal fun ExportOptionsForm(
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val prefs = state.prefs
-    // b-511
-    // Laid out like the design, the two names side by side and the switches sharing rows, so the
-    // options fit a 900 dp sheet with the code under them.
+    // The two names side by side and the switches sharing rows, so the options fit a 900 dp sheet
+    // with the code under them.
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
         NamePair(
             first = { fieldModifier ->
-                // b-221f
                 // Each target keeps its own package, so a switch starts the field over on the new one's.
                 key(state.target) {
                     PackageField(
@@ -219,8 +217,6 @@ internal fun ExportOptionsForm(
         }
     }
 }
-
-// b-511
 
 /**
  * Two fields side by side, each half the width, or one over the other where the form is narrower
@@ -332,7 +328,6 @@ private fun LiveField(
     supportingText: String? = null,
     modifier: Modifier = Modifier,
 ) {
-    // b-221f
     // The committed text the field keeps while its drafts are out, or null while it follows value.
     var held by remember { mutableStateOf<String?>(null) }
     var focused by remember { mutableStateOf(false) }

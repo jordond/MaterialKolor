@@ -88,7 +88,7 @@ public class InspectActions(
 )
 
 /**
- * The preview [content] with Inspect over it while [on] (F-44).
+ * The preview [content] with Inspect over it while [on].
  *
  * Off, it only provides a null [LocalInspectRegistry], so the content pays nothing. On, it provides
  * a registry and watches the pointer ahead of the content. The element under the pointer gets an
@@ -148,7 +148,7 @@ public fun InspectOverlay(
                 state.width = coordinates.size.width
             }.focusRing(holdsFocus, inputModes, tokens.focus, tokens.highlightWidth)
             .inspectPointer(state, currentShown, split, layoutDirection, tokens.spacing.section, focus)
-            .onPreviewKeyEvent { event -> state.onPinKey(event, currentShown.value, inputModes) } // b-315b
+            .onPreviewKeyEvent { event -> state.onPinKey(event, currentShown.value, inputModes) }
             .onKeyEvent { event -> state.onEscape(event, focus, inputModes) { leave() } }
             .focusRequester(focus)
             .onFocusChanged { focusState -> holdsFocus.value = focusState.isFocused }
@@ -210,8 +210,6 @@ internal class InspectOverlayState {
      * Where the card sits in this layout, or null while none shows. Only the pointer reads it.
      */
     var card: Rect? = null
-
-    // b-315b
 
     /**
      * Whether focus is on the card or inside it, so dropping the pin hands focus to the layout first.
@@ -505,7 +503,6 @@ private fun BoxScope.InspectFindings(
     val target = pinned ?: hovered ?: if (keyboard) focusedTarget.value else null
     if (target == null) return
     val tokens = LocalBuilderTokens.current
-    // b-315b
     val firstAction = remember(state) { FocusRequester() }
     LaunchedEffect(state, pinned, state.focusActions) {
         if (pinned == null || !state.focusActions) return@LaunchedEffect

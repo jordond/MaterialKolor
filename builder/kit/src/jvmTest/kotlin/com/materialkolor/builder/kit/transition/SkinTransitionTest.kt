@@ -309,8 +309,6 @@ class SkinTransitionTest {
             harness.transition.snapshot.size shouldNotBe IntSize.Zero
         }
 
-    // pf-3
-
     @Test
     fun warmUp_drawsTheSampleUnderTheLiveFrame_thenLetsItGo() =
         runComposeUiTest {

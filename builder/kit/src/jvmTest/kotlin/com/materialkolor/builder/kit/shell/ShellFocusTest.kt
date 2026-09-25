@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 import kotlin.test.Test
 
 /**
- * The regions in the order AR-01 wants Tab to reach them.
+ * The regions in the order Tab has to reach them.
  */
 private val ShellReadingOrder = listOf(ShellTopBarTag, ShellPosterTag, ShellCanvasTag, ShellDockTag)
 
@@ -81,7 +81,7 @@ class ShellFocusTest {
 
     @Test
     fun tab_posterSheetAtHalfAndFull_skipsWhatTheSheetCoversUntilItSinksToPeek() {
-        // A phone held upright, and one on its side with the short peek (D38).
+        // A phone held upright, and one on its side with the short peek.
         val windows = listOf(Triple(412, 900, false), Triple(844, 390, true))
         // Tab from the poster, in the order it reaches each stop the first time.
         val reachable = mapOf(

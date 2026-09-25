@@ -1,9 +1,8 @@
 name: Builder nightly
 
-# b-504
-# The perf run against the budgets in spec 8.2, once a night on feat/builder-v2 and on next. It only
-# reports, it never fails a branch over a slow number. PB-01 is gated in the Builder workflow by
-# checkBudget instead.
+# The perf run against the budgets in builder/e2e/perf/budgets.json, once a night on feat/builder-v2
+# and on next. It only reports, it never fails a branch over a slow number. The first visit bytes are
+# gated in the Builder workflow by checkBudget instead.
 #
 # A schedule only fires from the default branch, so the nightly run starts once this file reaches
 # main. Until then run it by hand. Either way each job checks its branch out by name, whatever branch

@@ -58,8 +58,6 @@ import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-231
-
 private const val HEIGHT = 800
 
 /**
@@ -128,7 +126,6 @@ class TopBarFitTest {
             onAllNodes(hasText("Fluent") and InSwitcher).fetchSemanticsNodes().size shouldBe 1
         }
 
-    // b-509
     @Test
     fun switcher_fluentAt1280BesideHistory_fitsWholeOrFallsBackToTheDropdown() =
         runDesktopComposeUiTest(width = 1280, height = HEIGHT) {
@@ -181,7 +178,6 @@ class TopBarFitTest {
     fun switcher_unfocusedAcrossTheFitBoundary_takesNoFocus() =
         runDesktopComposeUiTest(width = ROOMY_WIDTH, height = HEIGHT) {
             val barWidth = showBar(barWidth = ROW_ROOM)
-            // b-512
             // Share shows its label while the row fits and a glyph once it does not, and focus follows it.
             val share = (hasContentDescription("Share") or hasText("Share")) and hasClickAction() and InBar
             onNode(share).requestFocus()
@@ -269,7 +265,6 @@ class TopBarFitTest {
      */
     private fun ComposeUiTest.controls(): List<Pair<String, Rect>> {
         val switcher = onAllNodes(hasTestTag(LIBRARY_SWITCHER_TAG)).fetchSemanticsNodes()
-        // b-512
         // Share and Export code show as labels or as glyphs, so either name counts.
         val actions = listOf("Command palette", "Undo", "Redo", "Share", "More options").flatMap { name ->
             val named = hasContentDescription(name, substring = true) or hasText(name)

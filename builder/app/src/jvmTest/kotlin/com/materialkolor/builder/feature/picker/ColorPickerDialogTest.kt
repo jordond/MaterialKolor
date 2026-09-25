@@ -29,7 +29,6 @@ import kotlin.test.Test
 private const val WIDTH = 1280
 private const val HEIGHT = 800
 
-// b-307
 @OptIn(ExperimentalTestApi::class)
 class ColorPickerDialogTest {
     private val platform = FakePlatform()

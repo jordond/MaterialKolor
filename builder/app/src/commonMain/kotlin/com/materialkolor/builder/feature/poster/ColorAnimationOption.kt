@@ -27,9 +27,9 @@ private val AnimationDurationsMs: List<Int> = listOf(150, 300, 500, 1000)
 
 /**
  * Whether the poster offers the export's color animation for the document's target. It does while
- * the target animates at all (X18) and its export runs dynamic, since a frozen export writes fixed
- * colors with nothing to animate. The option and the "Target options" label over it both ask here,
- * so the label never stands over nothing.
+ * the target animates at all and its export runs dynamic, since a frozen export writes fixed colors
+ * with nothing to animate. The option and the "Target options" label over it both ask here, so the
+ * label never stands over nothing.
  */
 internal fun PosterContext.showsColorAnimation(): Boolean =
     capabilities[Control.ColorAnimation].shown &&
@@ -41,7 +41,7 @@ internal fun PosterContext.showsColorAnimation(): Boolean =
 private fun PosterContext.exportTarget(): ExportTarget = ExportTarget.of(document.library, document.expressive)
 
 /**
- * Whether the exported theme animates between color changes, and for how long (X18).
+ * Whether the exported theme animates between color changes, and for how long.
  *
  * It sets the export options this browser remembers for the document's target, the ones the export
  * sheet shows, and leaves every other target's alone. They live outside the document, so a change is

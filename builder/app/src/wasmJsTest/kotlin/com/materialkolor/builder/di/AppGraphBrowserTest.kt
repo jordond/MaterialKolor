@@ -35,8 +35,9 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlin.test.Test
 
 /**
- * S10 in the browser. Runs in headless Chrome through `wasmJsBrowserTest`, on the wasm Compose
- * runtime and the view model store the Compose scene provides, the same one `ComposeViewport` uses.
+ * The app graph keeps one view model across recompositions in the browser too. Runs in headless
+ * Chrome through `wasmJsBrowserTest`, on the wasm Compose runtime and the view model store the
+ * Compose scene provides, the same one `ComposeViewport` uses.
  */
 @OptIn(ExperimentalTestApi::class)
 class AppGraphBrowserTest {
@@ -104,13 +105,10 @@ private object TestFileSaver : FileSaver {
 
     override suspend fun shareFiles(files: List<OutgoingFile>): Result<Unit> = Result.success(Unit)
 
-    // b-302a
     override fun canShare(files: List<OutgoingFile>): Boolean = false
 
-    // b-310
     override val canShareLink: Boolean = false
 
-    // b-310
     override suspend fun shareLink(
         url: String,
         title: String,
@@ -120,7 +118,6 @@ private object TestFileSaver : FileSaver {
 private object TestImageInput : ImageInput {
     override val drops: Flow<ImageHandle> = emptyFlow()
 
-    // b-302a
     override val dragging: StateFlow<Boolean> = MutableStateFlow(false)
 
     override suspend fun pick(): ImageHandle? = null
@@ -146,28 +143,21 @@ private object TestEnvironment : Environment {
 
     override fun setThemeColor(argb: Argb) = Unit
 
-    // b-501b
     override fun writeSplash(splash: BootSplash) = Unit
 
     override suspend fun requestPersist(): Boolean = false
 
-    // b-215a
     override fun readTabProject(): String? = null
 
     override fun writeTabProject(id: String?) = Unit
 
-    // b-301
     override val pageHides: Flow<Unit> = emptyFlow()
 
-    // b-221c
     override fun announce(message: String) = Unit
 
-    // b-314
     override val browser: String = "TestBrowser/1.0"
 
-    // b-314b
     override fun reload(path: String) = Unit
 
-    // b-314ba
     override val canReload: Boolean = true
 }

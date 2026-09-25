@@ -72,8 +72,6 @@ public fun TopBarRegion(
     }
 }
 
-// b-512
-
 /**
  * The tallest a control in the [TopBarRegion] may stand. A field that floats its label over its top
  * edge, such as Material's outlined dropdown, keeps that label inside the bar at this height.
@@ -100,8 +98,6 @@ public fun DockRegion(
         Library.Fluent -> FluentDockRegion(modifier, content)
     }
 }
-
-// b-512
 
 /**
  * The window the preview shows in on the canvas, rounded to the skin's large corners and set off

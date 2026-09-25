@@ -42,7 +42,7 @@ import com.materialkolor.palettes.TonalPalette
  * Themes [content] with [skin], coloured from [result].
  *
  * Every skin draws from the chrome schemes of [result], which floor contrast at the standard level
- * and leave pins and AMOLED out, so the builder stays readable whatever the document does (P7). No
+ * and leave pins and AMOLED out, so the builder stays readable whatever the document does. No
  * skin generates anything. Each one provides [LocalSkin], the builder's type, its tokens, its
  * motion and its icons.
  *
@@ -51,12 +51,12 @@ import com.materialkolor.palettes.TonalPalette
  * in the page does not. The move takes the focused node out and puts it back, so after a switch
  * nothing in the page has focus until someone moves it again.
  *
- * It also tracks whether focus moves by keyboard, so a click leaves no focus ring behind (D58).
+ * It also tracks whether focus moves by keyboard, so a click leaves no focus ring behind.
  *
  * @param[skin] The library and flavour to use.
  * @param[result] The resolved document, read on the UI thread only like every result.
  * @param[isDark] Which mode of the chrome to draw.
- * @param[reducedMotion] Swap every skin's motion for the reduced set (F-37).
+ * @param[reducedMotion] Swap every skin's motion for the reduced set.
  * @param[content] The builder.
  */
 @Composable
@@ -67,27 +67,22 @@ public fun BuilderTheme(
     reducedMotion: Boolean,
     content: @Composable () -> Unit,
 ) {
-    // d44
     remember { textFieldMinSizeOptimizationOff }
     val current by rememberUpdatedState(content)
     val builder = remember {
         movableContentOf {
-            // b-224
             PageTextToolbarLocals()
             current()
         }
     }
-    // b-513
     val focusVisibility = remember { FocusVisibility() }
     CompositionLocalProvider(
         LocalSkin provides skin,
         LocalBuilderType provides rememberBuilderType(),
         LocalReducedMotion provides reducedMotion,
-        LocalFocusVisibility provides focusVisibility, // b-513
+        LocalFocusVisibility provides focusVisibility,
     ) {
-        // b-513
         Box(Modifier.trackFocusVisibility(focusVisibility), propagateMinConstraints = true) {
-            // b-219
             OverlayHost {
                 when (skin.library) {
                     Library.Material3 -> {
@@ -108,8 +103,6 @@ public fun BuilderTheme(
     }
 }
 
-// pf-1
-
 /**
  * The chrome's Custom slots, kept for as long as the chrome schemes stay.
  *
@@ -125,13 +118,11 @@ internal fun rememberChromeSlots(result: ThemeResult): CustomSlotColors {
     return remember(light, dark) { result.chromeCustomSlots }
 }
 
-// d44
-
 /**
- * Turns the text field min-size optimisation off, once and before any builder content composes
- * (D44). In CMP 1.12.1 a skin switch that moves [BuilderTheme]'s content in the same frame it
- * re-styles a text field in a lazy list crashes the scene, since the field's size node reads a
- * composition local while detached. Drop it when CMP fixes it.
+ * Turns the text field min-size optimisation off, once and before any builder content composes. In
+ * CMP 1.12.1 a skin switch that moves [BuilderTheme]'s content in the same frame it re-styles a text
+ * field in a lazy list crashes the scene, since the field's size node reads a composition local
+ * while detached. Drop it when CMP fixes it.
  */
 @OptIn(ExperimentalFoundationApi::class)
 private val textFieldMinSizeOptimizationOff: Unit =

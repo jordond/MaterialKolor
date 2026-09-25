@@ -32,7 +32,9 @@ import com.materialkolor.builder.preview.split.LocalCompositionProbe
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.unstyled.UnstyledGalleryEntry
 
-/** The narrowest a gallery card gets (F-21). The grid fits as many columns above it as it can. */
+/**
+ * The narrowest a gallery card gets. The grid fits as many columns above it as it can.
+ */
 private val MinCardWidth = 280.dp
 
 /** What each gallery card tells [LocalCompositionProbe] as it composes, followed by its title. */
@@ -65,7 +67,9 @@ public fun ComponentsTab(
     }
 }
 
-/** The six groups every gallery sorts its cards into (F-21), in the order they show. */
+/**
+ * The six groups every gallery sorts its cards into, in the order they show.
+ */
 internal enum class GalleryGroup {
     Actions,
     Inputs,
@@ -90,7 +94,7 @@ internal class GalleryCard(
 )
 
 /**
- * A gallery's cards under their group headers, in as many columns as fit (F-21).
+ * A gallery's cards under their group headers, in as many columns as fit.
  *
  * The grid is a lazy column of rows, so only the rows on screen compose, and its scroll position
  * can come from [DemoAppState.rememberListState], which keeps both copies of a split at the same
@@ -140,7 +144,6 @@ internal fun GalleryGrid(
             item(key = "group.${group.name}", contentType = "header") { header(group) }
             for (row in members.chunked(columns)) {
                 item(key = "cards.${row.first().title}", contentType = "cards") {
-                    // b-513
                     Row(
                         modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
                         horizontalArrangement = Arrangement.spacedBy(gap),

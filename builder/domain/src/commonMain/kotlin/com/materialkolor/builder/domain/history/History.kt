@@ -15,7 +15,7 @@ import com.materialkolor.builder.domain.model.ThemeDocument
  * them. A step that ends where it started, such as a picker that was opened and then cancelled,
  * leaves nothing behind.
  *
- * The steps form one line with a [cursor] in it (D55). The steps before the cursor are applied and
+ * The steps form one line with a [cursor] in it. The steps before the cursor are applied and
  * can be undone, and the ones after it were undone and can be redone. Undo and redo move the cursor
  * by one, and [jumpTo] moves it straight to any step, as that many undos or redos in one go. A jump
  * is not a step of its own. Nothing after the cursor is lost until the next real edit, which drops
@@ -34,7 +34,6 @@ public class History(
     private val undone = ArrayDeque<HistoryEntry>()
     private var last: LastRecord? = null
 
-    // b-307
     // What could be redone before the open drag started, handed back if the drag ends where it began.
     private var parked: List<HistoryEntry>? = null
 
@@ -65,8 +64,6 @@ public class History(
      */
     public val redoLabel: ChangeLabel?
         get() = undone.lastOrNull()?.label
-
-    // b-508
 
     /**
      * Every step, oldest first. The applied ones come first and the undone ones follow in the order
@@ -110,7 +107,7 @@ public class History(
         phase: EditPhase,
         now: Long,
     ) {
-        if (canFold(change, phase, now, before)) { // b-311a
+        if (canFold(change, phase, now, before)) {
             fold(after, change, phase, now)
         } else {
             push(before, after, change, phase, now)
@@ -124,7 +121,7 @@ public class History(
         val entry = done.removeLastOrNull() ?: return null
         undone.addLast(entry)
         last = null
-        parked = null // b-307
+        parked = null
         trimmed = null
         return entry.before
     }
@@ -136,12 +133,10 @@ public class History(
         val entry = undone.removeLastOrNull() ?: return null
         done.addLast(entry)
         last = null
-        parked = null // b-307
+        parked = null
         trimmed = null
         return entry.after
     }
-
-    // b-508
 
     /**
      * Puts the cursor [cursor] steps in and returns the document to show there, or null when it sits
@@ -175,15 +170,14 @@ public class History(
         change: DocumentChange,
         phase: EditPhase,
         now: Long,
-        before: ThemeDocument, // b-311a
+        before: ThemeDocument,
     ): Boolean {
         val previous = last ?: return false
         if (previous.coalesceKey != change.coalesceKey) return false
-        // b-307
         // A release closes its drag even when the change never merges, so a preset seed put back
         // after a drag leaves no second step.
         if (phase == EditPhase.Released && previous.phase == EditPhase.Dragging) return true
-        if (!change.merges || !previous.merges || change.crossesAnImage(before)) return false // b-311a b-311c
+        if (!change.merges || !previous.merges || change.crossesAnImage(before)) return false
         return when (phase) {
             EditPhase.Dragging -> {
                 previous.phase == EditPhase.Dragging
@@ -203,10 +197,10 @@ public class History(
         phase: EditPhase,
         now: Long,
     ) {
-        val entry = done.removeLast().copy(after = after, label = change.label, at = now) // b-508
+        val entry = done.removeLast().copy(after = after, label = change.label, at = now)
         if (entry.after == entry.before) {
             last = null
-            parked?.let(undone::addAll) // b-307
+            parked?.let(undone::addAll)
             parked = null
             trimmed?.let(done::addFirst)
             trimmed = null
@@ -214,7 +208,7 @@ public class History(
         }
         done.addLast(entry)
         last = LastRecord(change.coalesceKey, change.merges, phase, now)
-        if (phase != EditPhase.Dragging) parked = null // b-307
+        if (phase != EditPhase.Dragging) parked = null
     }
 
     private fun push(
@@ -225,11 +219,10 @@ public class History(
         now: Long,
     ) {
         if (after == before) return
-        // b-307
         // A drag keeps what could be redone aside until it lands somewhere new.
         parked = undone.toList().takeIf { phase == EditPhase.Dragging && it.isNotEmpty() }
         undone.clear()
-        done.addLast(HistoryEntry(before = before, after = after, label = change.label, at = now)) // b-508
+        done.addLast(HistoryEntry(before = before, after = after, label = change.label, at = now))
         // The done steps never pass capacity before a push, so at most one goes.
         trimmed = if (done.size > CAPACITY) done.removeFirst() else null
         last = LastRecord(change.coalesceKey, change.merges, phase, now)
@@ -264,8 +257,6 @@ public class History(
         public const val MERGE_WINDOW_MILLIS: Long = 600
     }
 }
-
-// b-311a b-311c
 
 /**
  * Whether this sets the seed from a new image, or from anything else over a seed [before] took from

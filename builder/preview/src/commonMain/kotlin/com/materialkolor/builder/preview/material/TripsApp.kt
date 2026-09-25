@@ -82,7 +82,7 @@ private val RailGap = 4.dp
 private val RowGap = 2.dp
 
 /**
- * The Trips travel app, the Material 3 sample app of the App tab (F-20).
+ * The Trips travel app, the Material 3 sample app of the App tab.
  *
  * Everything the app remembers lives in [state], so the two copies of a split agree. A phone gets
  * the trip list with the open trip under it, in one scrolling column. A tablet or desktop gets a

@@ -2,8 +2,6 @@ package com.materialkolor.builder.kit.token
 
 import com.materialkolor.builder.kit.generated.resources.Res
 
-// b-314
-
 /**
  * The fonts the kit ships, each under the SIL Open Font License 1.1.
  *
@@ -27,7 +25,7 @@ public enum class ShippedFont(
      * The face Fluent's own components are set in. It ships as a renamed subset, Builder Fluent
      * Sans, since the license reserves the name Selawik.
      */
-    Selawik("files/OFL-Selawik.txt"), // b-404a
+    Selawik("files/OFL-Selawik.txt"),
 }
 
 /**

@@ -19,7 +19,7 @@ import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import org.jetbrains.compose.resources.getString
 
 /**
- * Share links, out and in (F-32).
+ * Share links, out and in.
  *
  * A link carries every field of the document, target included, and the project name, built the
  * same way as the link every export points back with ([shareLink]). The package name and the
@@ -38,7 +38,6 @@ internal class ShareController(
     private val session: ProjectSession,
     private val clipboard: Clipboard,
     private val files: FileSaver,
-    // b-505
     private val environment: Environment,
 ) : ViewModel() {
     /**
@@ -76,7 +75,7 @@ internal class ShareController(
 
     /**
      * Open the theme a share [code] carries, or the saved project that already holds it. The paste
-     * routing (B-315) calls this.
+     * routing and the command palette call this.
      *
      * @return Why the code could not be opened, [BootNotice.NewerVersion] or [BootNotice.InvalidLink],
      *   or null when it was.

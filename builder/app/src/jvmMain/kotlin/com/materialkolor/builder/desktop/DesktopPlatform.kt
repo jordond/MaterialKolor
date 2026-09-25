@@ -67,13 +67,10 @@ private object DesktopFileSaver : FileSaver {
 
     override suspend fun shareFiles(files: List<OutgoingFile>): Result<Unit> = notOnDesktop()
 
-    // b-302a
     override fun canShare(files: List<OutgoingFile>): Boolean = false
 
-    // b-310
     override val canShareLink: Boolean = false
 
-    // b-310
     override suspend fun shareLink(
         url: String,
         title: String,
@@ -83,7 +80,6 @@ private object DesktopFileSaver : FileSaver {
 private object DesktopImageInput : ImageInput {
     override val drops: Flow<ImageHandle> = emptyFlow()
 
-    // b-302a
     override val dragging: StateFlow<Boolean> = MutableStateFlow(false)
 
     override suspend fun pick(): ImageHandle? = null
@@ -111,12 +107,10 @@ private object DesktopEnvironment : Environment {
 
     override fun setThemeColor(argb: Argb) = Unit
 
-    // b-501b
     override fun writeSplash(splash: BootSplash) = Unit
 
     override suspend fun requestPersist(): Boolean = false
 
-    // b-215a
     // A window has no reload, so the tab's project only has to last as long as the window.
     @Volatile
     private var tabProject: String? = null
@@ -127,24 +121,19 @@ private object DesktopEnvironment : Environment {
         tabProject = id
     }
 
-    // b-301
     // A window is never hidden the way a tab is, and closing it ends the session anyway.
     override val pageHides: Flow<Unit> = emptyFlow()
 
-    // b-221c
-    // The desktop build is for development only (D2), so it reads nothing out.
+    // The desktop build is for development only, so it reads nothing out.
     override fun announce(message: String) = Unit
 
-    // b-314
     override val browser: String =
         "Java ${System.getProperty("java.version")} (${System.getProperty("java.vm.name")}), " +
             "${System.getProperty("os.name")} ${System.getProperty("os.version")} ${System.getProperty("os.arch")}"
 
-    // b-314b
     // A window has no page to load again, and its build is the only one there is.
     override fun reload(path: String) = Unit
 
-    // b-314ba
     override val canReload: Boolean = false
 }
 

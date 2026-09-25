@@ -116,8 +116,6 @@ public sealed interface ValidationError {
         public val bytes: Int,
     ) : ValidationError
 
-    // b-110
-
     /**
      * An accent's name matches one listed before it once case is ignored, as `brand` and `Brand`
      * do. Both would generate the same `onBrand`.

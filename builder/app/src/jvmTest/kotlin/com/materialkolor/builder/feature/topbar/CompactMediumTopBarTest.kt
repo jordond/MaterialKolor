@@ -58,8 +58,6 @@ import javax.imageio.ImageIO
 import kotlin.math.roundToInt
 import kotlin.test.Test
 
-// b-406
-
 private const val HEIGHT = 800
 
 /** How long a dropdown pick may take to reach the document, its menu's exit included. */
@@ -112,7 +110,6 @@ class CompactMediumTopBarTest {
             val bar = onNodeWithTag(TOP_BAR_TAG).fetchSemanticsNode().boundsInRoot
             val chips = onNodeWithTag(LIBRARY_CHIP_ROW_TAG).fetchSemanticsNode().boundsInRoot
             chips.top shouldBeGreaterThanOrEqual bar.bottom - 1f
-            // b-512
             // The project's name stands at the start of the bar, after its swatch, in place of a mark.
             onAllNodes(hasText(project) and InBar).fetchSemanticsNodes().size shouldBe 1
             onAllNodes(hasContentDescription("Export code") and hasClickAction() and InBar)
@@ -171,8 +168,6 @@ class CompactMediumTopBarTest {
             LibraryChoice.of(graph.session.document.value) shouldBe target
         }
 
-    // b-406g
-
     /**
      * The keys the kit's own select tests drive. The list opens on the chosen library, Tab walks the
      * options and Enter picks. Up and Down walk them too since P-M4b, which the kit's
@@ -203,8 +198,6 @@ class CompactMediumTopBarTest {
 
             LibraryChoice.of(graph.session.document.value) shouldBe next
         }
-
-    // b-406g
 
     /** Material's own exposed dropdown, opened in a desktop window of its own, still picks by tap. */
     @Test
@@ -296,8 +289,6 @@ class CompactMediumTopBarTest {
         val names = onAllNodes(hasClickAction() and InBar).fetchSemanticsNodes().map { node -> node.name() }
         return "$names beside a switcher $switcher dp wide"
     }
-
-    // b-406g
 
     /**
      * Waits for the document to reach [choice]. A pick from the dropdown lands once its menu has left,

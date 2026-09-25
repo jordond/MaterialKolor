@@ -68,9 +68,9 @@
 
   /**
    * Keeps the browser from saving the page, opening a file or starting its own search on Cmd or Ctrl
-   * with S, O or K (B-501c). Compose hears a key typed in a text field a frame late, too late to stop
-   * these itself, so this stops them first. It never stops the key going on, since Compose still runs
-   * the builder's own command for it. Cmd on an Apple system and Ctrl elsewhere, as the app's keymap.
+   * with S, O or K. Compose hears a key typed in a text field a frame late, too late to stop these
+   * itself, so this stops them first. It never stops the key going on, since Compose still runs the
+   * builder's own command for it. Cmd on an Apple system and Ctrl elsewhere, as the app's keymap.
    */
   function keepBrowserShortcuts(event) {
     const primary = APPLE.test(navigator.userAgent) ? event.metaKey : event.ctrlKey;
@@ -172,7 +172,7 @@
   }
 
   /**
-   * Shows the error overlay on the first uncaught error or rejection (F-38), and returns the function
+   * Shows the error overlay on the first uncaught error or rejection, and returns the function
    * that shows it for an error the window never hears of. The details say what failed, where, in
    * which browser and which build. They leave out the address, since a share code can carry a
    * project name.

@@ -70,7 +70,8 @@ private fun ringsFor(dark: Boolean): (@Composable () -> List<Color>)? {
 }
 
 /**
- * Tabs onto [content] in the Fluent skin, light and dark, and checks the ring every way the S5 probe does.
+ * Tabs onto [content] in the Fluent skin, light and dark, and checks that the ring covers every side
+ * and stands 3 to 1 from what it covers all the way round.
  */
 @OptIn(ExperimentalTestApi::class)
 internal fun ringsInBothModes(

@@ -27,9 +27,8 @@ private val Modes: List<String> = listOf("Light", "Split", "Dark")
 
 /**
  * The Fluent segmented control, switch, checkbox, tabs, disclosure and icon button, the controls
- * B-403b moved onto Fluent's components. Each rings on every side at 3 to 1 on keyboard focus in
- * both modes, and on the web folds its role and state into the name of the node that takes the
- * press.
+ * built on Fluent's components. Each rings on every side at 3 to 1 on keyboard focus in both modes,
+ * and on the web folds its role and state into the name of the node that takes the press.
  */
 @OptIn(ExperimentalTestApi::class)
 class FluentControlsTest {

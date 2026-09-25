@@ -47,7 +47,6 @@ internal class WebEnvironment : Environment {
 
     override val storageAvailable: Boolean = localStorageWorks()
 
-    // b-301
     private val hides = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     override val pageHides: Flow<Unit> = hides.asSharedFlow()
 
@@ -56,7 +55,6 @@ internal class WebEnvironment : Environment {
         exposeToE2e()
     }
 
-    // b-302
     // The eyedropper only opens inside a click, and it opens before this first suspends, so start
     // this undispatched from the click handler. Esc comes back as null and changes nothing.
     override suspend fun pickScreenColor(): Argb? {
@@ -69,8 +67,6 @@ internal class WebEnvironment : Environment {
 
     override fun setThemeColor(argb: Argb) = writeThemeColor(argb.toHex())
 
-    // b-501b
-
     /**
      * Keep [splash] under `mk:splash` as [BootSplash.toJson] for `boot.js`, which paints it before
      * any code loads. A full or blocked storage means the next boot shows the default splash.
@@ -81,37 +77,28 @@ internal class WebEnvironment : Environment {
 
     override suspend fun requestPersist(): Boolean = requestPersistentStorage()
 
-    // b-215a
     override fun readTabProject(): String? = sessionStorageRead(TAB_PROJECT_KEY)
 
     override fun writeTabProject(id: String?) = sessionStorageWrite(TAB_PROJECT_KEY, id)
 
-    // b-221c
     override fun announce(message: String) = A11yLiveRegion.announce(message)
 
-    // b-314
     override val browser: String = userAgent()
 
-    // b-314b
     override fun reload(path: String) = assignLocation(path)
 
-    // b-314ba
     override val canReload: Boolean = true
 
-    // b-505
     // The page's own origin, as the Worker does for link previews, so each deploy links to itself.
     override val siteOrigin: String = locationOrigin() ?: SITE_ORIGIN
 
-    // b-504
-    // Analytics waits for the first frame, so only the builder's own files are on the critical
-    // path (PB-10).
+    // Analytics waits for the first frame, so only the builder's own files are on the critical path.
     override fun mark(name: String) {
         performanceMark(name)
         if (name == TimingMarks.FIRST_FRAME) Analytics.load()
     }
 }
 
-// b-504
 // Only the newest mark of each name stays in the buffer, so the resolves of a long session do not
 // pile up there. A PerformanceObserver still sees every one, which is how the perf run reads them.
 private fun performanceMark(name: String): Unit =
@@ -122,7 +109,6 @@ private fun performanceMark(name: String): Unit =
     }""",
     )
 
-// b-314b
 // Goes through history like a click on a link would, so back returns to the page it left.
 private fun assignLocation(path: String): Unit = js("window.location.assign(path)")
 

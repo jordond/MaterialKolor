@@ -205,7 +205,6 @@ internal fun ExtendedFab(state: DemoAppState) {
 @Composable
 internal fun FilledTextFields(state: DemoAppState) {
     TextFieldPair(state) { enabled, value, onValueChange, label ->
-        // b-228b
         SampleTextField(
             value = value,
             onValueChange = onValueChange,
@@ -219,7 +218,6 @@ internal fun FilledTextFields(state: DemoAppState) {
 @Composable
 internal fun OutlinedTextFields(state: DemoAppState) {
     TextFieldPair(state) { enabled, value, onValueChange, label ->
-        // b-228b
         SampleOutlinedTextField(
             value = value,
             onValueChange = onValueChange,
@@ -413,7 +411,7 @@ internal fun InputChips(state: DemoAppState) {
 }
 
 /**
- * A menu as it looks open, drawn in place rather than in a popup (D40).
+ * A menu as it looks open, drawn in place rather than in a popup.
  */
 @Composable
 internal fun InlineMenu(state: DemoAppState) {

@@ -35,7 +35,7 @@ public fun SkinTransitionHost(
         propagateMinConstraints = true,
     ) {
         content()
-        WarmUpSlot(transition) // pf-3
+        WarmUpSlot(transition)
     }
 }
 
@@ -54,7 +54,6 @@ private fun Modifier.skinReveal(transition: SkinTransition): Modifier =
             }
 
             val progress = transition.progress.value
-            // pf-3
             // A warm-up step waits for any reveal to end, so the old frame stays in the snapshot.
             val warm = transition.warmPass
             if (warm != null && progress >= 1f) {

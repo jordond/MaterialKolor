@@ -39,7 +39,7 @@ private const val RingTolerance = 0.02f
 
 /**
  * Every control rings when Tab lands on it, in every skin, with enough of the ring standing out 3 to 1
- * from what it covers (AR-01, S5 F6). Material3 keeps its own focus layers, so only ring pixels count.
+ * from what it covers. Material3 keeps its own focus layers, so only ring pixels count.
  */
 @OptIn(ExperimentalTestApi::class)
 class FocusRingTest {
@@ -175,10 +175,10 @@ class FocusRingTest {
 
     /**
      * A field's own focus outline counts as its ring when it stands 3 to 1 from what it covered and
-     * from what lies beside it (owner ruling on S5 gap 4). Material3 draws it in primary and Custom
-     * in its accent, 2 dp over a 1 dp resting edge. Where it covers that edge it stands less, so only
-     * its 3 to 1 pixels count, and those run along every side. Fluent underlines a focused field
-     * instead, which marks one side only, so it rings the box as well and has a test of its own.
+     * from what lies beside it. Material3 draws it in primary and Custom in its accent, 2 dp over a
+     * 1 dp resting edge. Where it covers that edge it stands less, so only its 3 to 1 pixels count,
+     * and those run along every side. Fluent underlines a focused field instead, which marks one side
+     * only, so it rings the box as well and has a test of its own.
      */
     @Test
     fun field_ownFocusOutline_ringsOnEverySide() {
@@ -203,7 +203,7 @@ class FocusRingTest {
 
     /**
      * Fluent's underline marks the bottom side only, so its field draws the focus ring round the box
-     * beside it, in the focus colour like every other Fluent control (S5 gap 4).
+     * beside it, in the focus colour like every other Fluent control.
      */
     @Test
     fun field_fluent_ringsBesideItsUnderlineAllTheWayRound() {

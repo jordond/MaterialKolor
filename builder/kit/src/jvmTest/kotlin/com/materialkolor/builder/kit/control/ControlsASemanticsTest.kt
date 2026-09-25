@@ -269,7 +269,6 @@ class ControlsASemanticsTest {
             }
         }
 
-    // b-225
     @Test
     fun badge_blankLabel_drawsNothingInsteadOfFailing() =
         runComposeUiTest {

@@ -28,10 +28,8 @@ import dev.stateholder.dispatcher.rememberDispatcher
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-314b
-
 /**
- * A download the browser blocks says so in a toast and never counts as an export (F-38).
+ * A download the browser blocks says so in a toast and never counts as an export.
  */
 @OptIn(ExperimentalTestApi::class)
 class ExportDownloadBlockedTest {

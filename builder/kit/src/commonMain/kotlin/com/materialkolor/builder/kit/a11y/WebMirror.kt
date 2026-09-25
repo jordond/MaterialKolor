@@ -5,7 +5,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 
 /**
  * Whether assistive technology reads the page through the web mirror of CMP 1.12.1 rather than the
- * Compose semantics themselves (D37, D40).
+ * Compose semantics themselves.
  *
  * The kit works around the mirror in two ways that end at different times, so each has a local of
  * its own that starts from this. The state fold in the accessible name goes once CMP mirrors state.

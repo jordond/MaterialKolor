@@ -27,8 +27,8 @@ import dev.stateholder.dispatcher.Dispatcher
 private val InspectTabs: Set<PreviewTab> = setOf(PreviewTab.App, PreviewTab.Components)
 
 /**
- * The layer around the canvas tab body that Inspect works through (F-44), which also saves the
- * split handle when a pointer lets go.
+ * The layer around the canvas tab body that Inspect works through, which also saves the split
+ * handle when a pointer lets go.
  *
  * Inspect is live on App and Components while `state.inspect` is on, and the pinned card's actions
  * go out through [dispatcher]. Pin this role pins the role in the mode it was inspected in, Show on
@@ -52,7 +52,6 @@ internal fun InspectLayer(
                 val mode = if (isDark) PinMode.Dark else PinMode.Light
                 dispatcher.dispatch(WorkspaceAction.Edit(DocumentChange.SetPin(role, mode, argb), EditPhase.Discrete))
             },
-            // b-308b
             // A role or an accent is picked out on its ramp. Any other color only opens the tab.
             onShowOnRamp = { ref, isDark ->
                 val target = ref.rampTarget(isDark)
@@ -81,8 +80,6 @@ internal fun InspectLayer(
         content = content,
     )
 }
-
-// b-308b
 
 /**
  * Where Show on ramp takes this color in the mode [isDark] picks, or null for a color on no ramp of the tab.

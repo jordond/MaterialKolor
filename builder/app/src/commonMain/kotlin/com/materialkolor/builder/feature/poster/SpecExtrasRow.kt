@@ -20,9 +20,9 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The fine tune row "Spec, platform, extra colors and target options" (F-13, F-17, F-18). The
- * project remembers whether it is open, and its summary names the spec the scheme is built with and
- * counts the extra colors.
+ * The fine tune row "Spec, platform, extra colors and target options". The project remembers
+ * whether it is open, and its summary names the spec the scheme is built with and counts the extra
+ * colors.
  *
  * Each part asks the target how it shows up. A hidden one takes no room, a disabled one stays on
  * screen and says why, and a working one carries its note when the target has one.
@@ -41,7 +41,7 @@ internal fun SpecExtrasRow(
         },
         title = stringResource(Res.string.extras_title),
         modifier = modifier,
-        flush = true, // b-510
+        flush = true,
         summary = specExtrasSummary(context.document),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {

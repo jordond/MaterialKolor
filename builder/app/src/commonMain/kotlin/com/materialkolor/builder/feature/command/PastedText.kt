@@ -11,7 +11,7 @@ import com.materialkolor.builder.domain.model.Style as PaletteStyle
 
 /**
  * What a piece of pasted or typed text is to the builder, for the command palette and for a paste
- * outside any text field (F-05, F-32, F-33).
+ * outside any text field.
  */
 internal sealed interface PastedText {
     /**

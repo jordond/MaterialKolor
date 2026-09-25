@@ -44,7 +44,7 @@ import io.github.composefluent.component.Text
  * It is the bar's own frame, a clear `Layer` with the bar's padding and Fluent's ink, rather than
  * Fluent's `CommandBar`. That one keeps its overflow button composed off screen even when nothing
  * overflows, a nameless button that a screen reader and the page's mirror still find, and the
- * overflow opens as a popup (D40). The library switcher inside is the kit's Fluent segmented
+ * overflow opens as a popup. The library switcher inside is the kit's Fluent segmented
  * control, which draws its own frame so its focus ring is never clipped.
  */
 @Composable
@@ -62,7 +62,6 @@ internal fun FluentTopBarRegion(
         border = null,
     ) {
         FluentCommands(
-            // b-512
             // The bar's own inset alone on the start edge, so the switcher stands next to the poster.
             modifier = Modifier.fillMaxSize().padding(end = tokens.spacing.small),
             gap = tokens.spacing.extraSmall,
@@ -70,8 +69,6 @@ internal fun FluentTopBarRegion(
         )
     }
 }
-
-// b-512
 
 /**
  * The preview window on the canvas, a `Layer` in the card's style with Fluent's overlay corners,

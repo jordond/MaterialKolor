@@ -6,8 +6,6 @@ import kotlinx.coroutines.launch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-// b-315d
-
 /**
  * The router against a history whose moves the test lands, holds back or drops.
  */

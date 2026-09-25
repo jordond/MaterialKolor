@@ -14,10 +14,8 @@ import {
   typeSeed,
 } from '../fixtures/workspace';
 
-// b-503
-// Two tabs on one project (F-30). An edit in one tab puts a banner in the other, which offers Load
+// Two tabs on one project. An edit in one tab puts a banner in the other, which offers Load
 // latest and Keep mine. storage.spec.ts covers the storage event underneath through the hooks.
-// b-503b
 // The banner only comes up in a tab that edited in the last 2 s, so neither edit is lost. A tab that
 // was only looking takes the other tab's edit as an undo step, the way ProjectSession says.
 
@@ -51,8 +49,7 @@ test('an edit in one tab offers the other the latest while it drags, and Load la
   // The reader holds an extra color's tone slider and keeps it moving. Each step is an edit that
   // saves nothing until it lets go, so the writer's save lands in a tab that edited in the last 2 s
   // however busy the machine, and the writer never hears from the reader.
-  // b-507
-  // Contrast is four choices now (D53). The seed picker's drag stops once the other tab takes the
+  // Contrast is four choices now. The seed picker's drag stops once the other tab takes the
   // keys, its save then comes in as an undo step, so the writer adds the extra color and the reader
   // takes it in before it holds the slider.
   await openTargetRow(writer);

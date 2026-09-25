@@ -40,7 +40,7 @@ import org.jetbrains.compose.resources.stringResource
 internal const val VISION_LABEL_TAG: String = "canvas-vision-label"
 
 /**
- * The dock's Vision menu, None and the four simulations (F-25).
+ * The dock's Vision menu, None and the four simulations.
  *
  * The button names the simulation in use, and while one is on its name shows beside the button too,
  * so nobody mistakes the filtered canvas for the theme. While B is held both name Achromatopsia, the
@@ -60,7 +60,6 @@ internal const val VISION_LABEL_TAG: String = "canvas-vision-label"
 internal fun VisionMenu(
     vision: VisionSimulation,
     onPick: (VisionSimulation) -> Unit,
-    // b-315c
     open: Boolean,
     onOpenChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -74,7 +73,6 @@ internal fun VisionMenu(
             icon = if (option == vision) IconId.Check else null,
         )
     }
-    // b-315c
     // A menu in a popup window hands focus back to nothing, so the button asks for it once it closes.
     val button = remember { FocusRequester() }
     val inputModes = LocalInputModeManager.current

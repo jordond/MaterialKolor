@@ -74,7 +74,7 @@ internal object FluentIcons : BuilderIcons {
             IconId.Expand,
             IconId.Keyboard,
             IconId.Help,
-            IconId.History, // b-508
+            IconId.History,
             -> LucideIcons[id]
         }
 }

@@ -16,7 +16,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-// b-310aa
 class WebStoreFactoryTest {
     private val factory = WebStoreFactory(now = { MOVED_AT })
     private val store = factory.create(StorageKeys.PREFS, Preferences.Codec, Preferences())

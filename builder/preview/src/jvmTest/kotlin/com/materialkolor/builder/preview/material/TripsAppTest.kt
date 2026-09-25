@@ -64,7 +64,7 @@ private val TripsFrames: Map<DeviceWidth, IntSize> = mapOf(
 )
 
 /**
- * The four families F-20 wants on every screen.
+ * The four families every screen has to use.
  */
 private val TripsFamilies: Map<String, Set<Role>> = mapOf(
     "primary" to setOf(Role.Primary, Role.OnPrimary, Role.PrimaryContainer, Role.OnPrimaryContainer),

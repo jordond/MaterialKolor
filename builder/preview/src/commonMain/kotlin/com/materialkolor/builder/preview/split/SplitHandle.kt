@@ -88,7 +88,6 @@ internal fun SplitHandle(
         if (extent > 0) split.fraction += delta / extent
     }
     val thickness = tokens.spacing.section
-    // b-406
     // A phone or a finger gets a thumb sized reach round the same drawn line and grip.
     val layout = LocalLayout.current
     val touch = layout.windowClass == WindowClass.Compact || layout.coarsePointer
@@ -123,7 +122,6 @@ internal fun SplitHandle(
                     val extent = size().along(horizontal)
                     val fromStart = extent * split.fraction - handleStart(extent, split.fraction, thickness.roundToPx())
                     val along = if (isRtl && horizontal) thickness.toPx() - fromStart else fromStart
-                    // b-406
                     val edge = ((reach - thickness) / 2).roundToPx().toFloat()
                     val sideways = if (horizontal) edge else 0f
                     val upDown = if (horizontal) 0f else edge

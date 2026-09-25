@@ -131,7 +131,7 @@ class ComponentsTabTest {
             mainClock.autoAdvance = true
             waitForIdle()
 
-            // Before B-217c the grid called its lazy column inside a BoxWithConstraints, and with the
+            // The grid used to call its lazy column inside a BoxWithConstraints, and with the
             // probe beside that call it fired 19 times over this sweep. A probe in the rows' builder
             // fires once then as now, so it cannot tell the two apart. The cards composed 12 times
             // then as now, only those that change rows.

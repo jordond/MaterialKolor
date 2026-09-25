@@ -53,14 +53,13 @@ The script prints the brotli version it ran with, since another version can diff
 
 ## What a skin costs
 
-A skin has no line of its own. All skins ship in the one app wasm (D1, architecture 2), so a skin is
-paid for out of the app wasm limit, the initial fonts total for any font it brings, and the first
-visit total. Its cost is the brotli size at the head of the change that adds it minus the brotli
-size at that change's merge base, per file and for first visit, both measured as above on full
-production builds of the whole site. It is not a delta against a stand-in, a build with other
-parts left out, or any partial build. Such a delta depends on what the stand-in already pulls in,
-and spike S1 measured the same Fluent code at 446 KB against one stand-in and 220 KB against
-another.
+A skin has no line of its own. All skins ship in the one app wasm, so a skin is paid for out of
+the app wasm limit, the initial fonts total for any font it brings, and the first visit total. Its
+cost is the brotli size at the head of the change that adds it minus the brotli size at that
+change's merge base, per file and for first visit, both measured as above on full production builds
+of the whole site. It is not a delta against a stand-in, a build with other parts left out, or any
+partial build. Such a delta depends on what the stand-in already pulls in, and the same Fluent code
+once measured 446 KB against one stand-in and 220 KB against another.
 
 ## Changing the numbers
 

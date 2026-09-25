@@ -14,7 +14,6 @@ internal class FakeEnvironment(
     override val tabId: String = "tab",
     override var eyeDropperAvailable: Boolean = false,
     override var storageAvailable: Boolean = true,
-    // b-505
     override val siteOrigin: String = SITE_ORIGIN,
 ) : Environment {
     override val prefersDark: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -48,14 +47,10 @@ internal class FakeEnvironment(
      */
     val themeColors: MutableList<Argb> = mutableListOf()
 
-    // b-501b
-
     /**
      * Every splash written, oldest first.
      */
     val splashes: MutableList<BootSplash> = mutableListOf()
-
-    // b-307
 
     /**
      * How many times the eye dropper was opened.
@@ -96,9 +91,6 @@ internal class FakeEnvironment(
         tabProject = id
     }
 
-    // b-301
-    // b-221c
-
     /**
      * Emit on this to hide the page, as closing the tab would.
      */
@@ -113,10 +105,7 @@ internal class FakeEnvironment(
         announcements += message
     }
 
-    // b-314
     override val browser: String = FAKE_BROWSER
-
-    // b-314b
 
     /**
      * Every path the page was asked to reload at, oldest first.
@@ -127,14 +116,10 @@ internal class FakeEnvironment(
         reloads += path
     }
 
-    // b-314ba
-
     /**
      * Whether a reload loads anything, true as on the web.
      */
     override var canReload: Boolean = true
-
-    // b-504
 
     /**
      * Every timing mark left, oldest first.

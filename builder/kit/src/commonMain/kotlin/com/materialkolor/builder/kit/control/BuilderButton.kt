@@ -58,7 +58,7 @@ public fun BuilderButton(
     emphasis: Emphasis = Emphasis.Secondary,
     icon: IconId? = null,
     enabled: Boolean = true,
-    hint: String? = null, // b-510
+    hint: String? = null,
 ) {
     when (LocalSkin.current.library) {
         Library.Material3 -> MaterialButton(onClick, label, modifier, emphasis, icon, enabled, hint)
@@ -98,7 +98,7 @@ internal fun HeadlessButton(
     emphasis: Emphasis = Emphasis.Secondary,
     icon: IconId? = null,
     enabled: Boolean = true,
-    hint: String? = null, // b-510
+    hint: String? = null,
 ) {
     val colors = style.colors(emphasis)
     val interactionSource = remember { MutableInteractionSource() }
@@ -123,11 +123,9 @@ internal fun HeadlessButton(
     ) {
         if (icon != null) BuilderIcon(icon, contentDescription = null, tint = colors.content)
         BuilderText(label, style = BuilderTextStyle.Label, color = colors.content, maxLines = 1)
-        if (hint != null) ButtonKeycap(hint, colors.content) // b-510
+        if (hint != null) ButtonKeycap(hint, colors.content)
     }
 }
-
-// b-510
 
 /**
  * A key drawn as a keycap inside a button, in [ink] on a faint wash of it. It only shows, since the
@@ -163,7 +161,7 @@ private const val KeycapWash: Float = 0.16f
 private val KeycapInset: Dp = 2.dp
 
 /**
- * How big a keycap sets its key, smaller than the label beside it as the design has it.
+ * How big a keycap sets its key, smaller than the label beside it.
  */
 private val KeycapSize: TextUnit = 11.sp
 

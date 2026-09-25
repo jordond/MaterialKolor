@@ -45,16 +45,14 @@ import kotlin.time.Duration.Companion.milliseconds
 private val CaptureTimeout = 100.milliseconds
 
 /**
- * The longest a reveal holds the old frame while the app waits on a skin font (architecture 6.11).
+ * The longest a reveal holds the old frame while the app waits on a skin font.
  */
 private val FontWaitTimeout = 300.milliseconds
 
 /**
  * How long a warm-up step waits for the host to draw it before the warm-up gives up.
  */
-private val WarmUpTimeout = 2000.milliseconds // pf-3
-
-// b-503a
+private val WarmUpTimeout = 2000.milliseconds
 
 /**
  * The most one frame moves a reveal on. A browser can take hundreds of milliseconds to compose a new
@@ -64,7 +62,7 @@ private val WarmUpTimeout = 2000.milliseconds // pf-3
 private val MaxFrameStep = 50.milliseconds
 
 /**
- * What the reveal draws the old frame from (spike S4).
+ * What the reveal draws the old frame from.
  *
  * A recorded layer is the cheap path, but it may point at nested layers live rather than copying
  * them, and a skin that adds render effects can make it drift. The bitmap path rasterizes the
@@ -85,9 +83,9 @@ public enum class SnapshotMode {
 /**
  * How the old frame gives way to the new one.
  *
- * The library switch plays [Circle] out of the switcher (MO-04). Every other discrete change, a
- * preset, a chip, a shuffle, a style or an image candidate, plays [Crossfade] (MO-02). Reduced
- * motion turns either one into the short crossfade.
+ * The library switch plays [Circle] out of the switcher. Every other discrete change, a preset, a
+ * chip, a shuffle, a style or an image candidate, plays [Crossfade]. Reduced motion turns either
+ * one into the short crossfade.
  */
 @Immutable
 public sealed interface RevealStyle {
@@ -110,7 +108,7 @@ public sealed interface RevealStyle {
 
 /**
  * The reveal that plays on every discrete change, such as a library switch, the light and dark
- * toggle, a style chip, a preset, a shuffle or an image candidate (F-03, MO-02, MO-04).
+ * toggle, a style chip, a preset, a shuffle or an image candidate.
  *
  * Call [reveal] with a [RevealStyle] and the change. The host draws one more frame of the old UI
  * into a layer, the change applies, and the old frame gives way to the new one, either behind a
@@ -124,11 +122,8 @@ public class SkinTransition internal constructor(
     internal val snapshot: GraphicsLayer,
     private val scope: CoroutineScope,
     private val environment: () -> RevealEnvironment,
-    // pf-3
     internal val warmLayer: GraphicsLayer,
 ) {
-    // pf-3
-
     /**
      * What the host composes off screen while a warm-up runs, null otherwise.
      */
@@ -162,14 +157,14 @@ public class SkinTransition internal constructor(
     /**
      * Zero while the old frame covers everything, one once it is gone. Only draw reads it.
      */
-    internal val progress: MutableFloatState = mutableFloatStateOf(1f) // b-503a
+    internal val progress: MutableFloatState = mutableFloatStateOf(1f)
 
     private val switching = Mutex()
 
     /**
      * The reveal's animation while it plays, which the next reveal cuts short.
      */
-    private var playing: Job? = null // b-503a
+    private var playing: Job? = null
 
     /**
      * Applies [change] behind a reveal in the given [style].
@@ -199,7 +194,7 @@ public class SkinTransition internal constructor(
         change: () -> Unit,
     ) {
         val animation = switching.withLock {
-            playing?.cancel() // b-503a
+            playing?.cancel()
             progress.value = 1f
             val environment = environment()
             if (environment.frozen || !environment.tabVisible) {
@@ -238,8 +233,6 @@ public class SkinTransition internal constructor(
         }
         animation.join()
     }
-
-    // pf-3
 
     /**
      * Draws once, under the live frame, what the first reveals will draw, so the browser has its GPU
@@ -313,8 +306,6 @@ public class SkinTransition internal constructor(
             warmPass = null
         }
     }
-
-    // b-503a
 
     /**
      * Moves [progress] from zero to one on [spec], a frame at a time, each frame by the time since the
@@ -412,13 +403,12 @@ internal data class RevealEnvironment(
  * It picks up the skin's motion, [LocalMotionFrozen], [LocalReducedMotion] and [LocalTabVisible]
  * from where it is called, so call it inside the skin.
  *
- * @param[mode] What the reveal draws the old frame from. B-005 measures both and may change the
- * default.
+ * @param[mode] What the reveal draws the old frame from.
  */
 @Composable
 public fun rememberSkinTransition(mode: SnapshotMode = SnapshotMode.Layer): SkinTransition {
     val snapshot = rememberGraphicsLayer()
-    val warmLayer = rememberGraphicsLayer() // pf-3
+    val warmLayer = rememberGraphicsLayer()
     val scope = rememberCoroutineScope()
     val environment = rememberUpdatedState(
         RevealEnvironment(

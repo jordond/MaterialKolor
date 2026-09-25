@@ -30,7 +30,7 @@ private const val TEXT_RATIO = 4.5
 class PosterInkTest {
     /**
      * Poster text is set in the strong and the muted text roles, and the surface inks both from
-     * [PosterColors]. Muted text takes the ink too (D39), so both have to read on every seed.
+     * [PosterColors]. Muted text takes the ink too, so both have to read on every seed.
      */
     @Test
     fun posterText_hundredSeedsInEverySkin_holdsBodyTextContrastOnTheSeed() =

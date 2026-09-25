@@ -16,7 +16,7 @@ import com.materialkolor.builder.domain.model.ThemeDocument
  * @property[project] The generation of the project it lands in.
  */
 internal class SeedUndo(
-    private val before: ThemeDocument, // b-311c
+    private val before: ThemeDocument,
     private val made: ThemeDocument,
     private val project: Int,
 ) {
@@ -50,7 +50,7 @@ internal class SeedUndo(
         when {
             over -> Unit
             project != this.project -> end()
-            document != before && document != made -> end() // b-311c
+            document != before && document != made -> end()
         }
     }
 

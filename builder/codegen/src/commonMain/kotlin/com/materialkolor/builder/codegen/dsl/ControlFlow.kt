@@ -157,8 +157,6 @@ public fun Expression.member(name: String): Expression = access(this, plainToken
  */
 public fun Expression.member(symbol: Symbol): Expression = access(this, plainToken(symbol.simpleName), listOf(symbol))
 
-// b-111b
-
 /**
  * `receiver[key]`, as in `properties[ThemeTokens.colors]`, written on one line.
  */

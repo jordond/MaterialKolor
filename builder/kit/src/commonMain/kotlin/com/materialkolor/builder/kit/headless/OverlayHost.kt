@@ -57,7 +57,7 @@ import com.materialkolor.builder.kit.skin.LocalSkin
 import kotlinx.coroutines.flow.drop
 
 /**
- * Whether overlays draw inside the page rather than in a popup or dialog window of their own (D40).
+ * Whether overlays draw inside the page rather than in a popup or dialog window of their own.
  *
  * The web accessibility mirror in CMP 1.12.1 follows a single semantics owner. Every `Popup` and
  * `Dialog` brings an owner of its own and takes the whole mirror over, and once it closes the mirror
@@ -145,7 +145,7 @@ internal class OverlayLayer(
     /**
      * The keys the place it was opened from hears first, from [LocalOverlayKeys].
      */
-    var keys: ((KeyEvent) -> Boolean)? = null // b-315d
+    var keys: ((KeyEvent) -> Boolean)? = null
 }
 
 /**
@@ -268,7 +268,7 @@ internal class OverlayHostState {
  * The host an overlay opening here renders into, or null where overlays open windows of their own.
  *
  * Ask only once the overlay opens. With the switch on and no host it fails, the way a missing
- * `LocalLayout` does, since a window would take the web mirror over (D40). A closed anchor never
+ * `LocalLayout` does, since a window would take the web mirror over. A closed anchor never
  * asks, so offscreen and preview compositions without a host still compose.
  */
 @Composable
@@ -309,7 +309,7 @@ internal fun overlayLibrary(): Library {
  * It sits once at the root, inside `BuilderTheme`. A nested theme reuses the host it is already under,
  * and with the switch off the host steps aside and [content] is laid out as it would be without it.
  * While a modal is open the page and every layer under it leave the Tab order and the semantics
- * tree (AR-11), and they come back once it closes. A popover keeps Tab to itself the same way but
+ * tree, and they come back once it closes. A popover keeps Tab to itself the same way but
  * leaves the page readable. The toasts in the top slot stay readable under both, and Tab reaches
  * them from a modal but not from a popover.
  *
@@ -396,7 +396,7 @@ internal fun OverlayPortal(
     layer.placement = placement
     layer.onDismissRequest = onDismissRequest
     layer.open = open
-    layer.keys = LocalOverlayKeys.current // b-315d
+    layer.keys = LocalOverlayKeys.current
     DisposableEffect(host, layer) {
         val stack = if (layer.kind == OverlayKind.Top) host.top else host.layers
         stack.add(layer)
@@ -471,7 +471,7 @@ private fun OverlayLayerContent(
                 layer.hasFocus = state.hasFocus
                 if (letGo && layer.kind == OverlayKind.Top) host.topLostFocus()
             }.then(modifier)
-            .overlayKeys { layer.keys } // b-315d
+            .overlayKeys { layer.keys }
             .then(if (dismiss != null) Modifier.dismissOnEscape(layer) else Modifier),
     ) {
         if (dismiss != null) {
@@ -479,7 +479,6 @@ private fun OverlayLayerContent(
         }
         CompositionLocalProvider(context) {
             CompositionLocalProvider(LocalOverlayLayer provides layer) {
-                // b-315e
                 LayerComposition {
                     val placement = layer.placement
                     if (placement == null) layer.content() else AnchoredOverlay(placement, layer.content)
@@ -488,8 +487,6 @@ private fun OverlayLayerContent(
         }
     }
 }
-
-// b-315e
 
 /**
  * Composes a layer's [content] in a composition of its own, made as the layer is first measured,

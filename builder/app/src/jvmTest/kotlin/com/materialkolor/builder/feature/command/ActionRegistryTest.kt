@@ -26,7 +26,6 @@ import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-315
 @OptIn(ExperimentalTestApi::class)
 class ActionRegistryTest {
     /**
@@ -53,7 +52,6 @@ class ActionRegistryTest {
 
             val shortcuts = harness.commands.mapNotNull { command -> command.shortcut }
 
-            // b-315c
             // The held B works the dock straight from the keys.
             shortcuts.sorted() shouldBe Shortcut.entries.filter { shortcut -> shortcut.inRegistry }.sorted()
             harness.commands
@@ -62,13 +60,11 @@ class ActionRegistryTest {
                 .size shouldBe harness.commands.size
         }
 
-    // b-406
     @Test
     fun medium_findsEachCommandsControlWhereTheRegistrySays() =
         runDesktopComposeUiTest(width = 800, height = HEIGHT) {
             val harness = CommandHarness()
             with(harness) { show() }
-            // b-406g
             // Below 840 dp the poster starts as the rail, so the walk opens it over the canvas first.
             runOnUiThread { harness.workspace.setPosterCollapsed(false, PosterMode.Rail72) }
             waitForIdle()
@@ -77,7 +73,6 @@ class ActionRegistryTest {
             missingSites(harness).joinToString("\n") shouldBe ""
         }
 
-    // b-406
     @Test
     fun compact_findsEachCommandsControlWhereTheRegistrySaysButTheDeviceWidths() =
         runDesktopComposeUiTest(width = 400, height = HEIGHT) {
@@ -89,8 +84,6 @@ class ActionRegistryTest {
             ids.filter { id -> id.startsWith("deviceWidth") }.shouldBeEmpty()
             missingSites(harness).joinToString("\n") shouldBe ""
         }
-
-    // b-406
 
     /**
      * The Medium bar moves History, Commands, Redo and Undo into the overflow when the library dropdown needs
@@ -219,7 +212,6 @@ class ActionRegistryTest {
         val described = onAllNodes(hasContentDescription(name) and clickable)
         val shown = onAllNodes(hasText(name) and clickable)
         val node = (if (described.fetchSemanticsNodes().isEmpty()) shown else described).onFirst()
-        // b-231
         if (name == MORE_OPTIONS) node.performClick() else node.performSemanticsAction(SemanticsActions.OnClick)
         waitForIdle()
     }
@@ -230,12 +222,12 @@ private const val HEIGHT = 800
 /**
  * The top bar's overflow button, which opens most of the menu sites.
  */
-private const val MORE_OPTIONS = "More options" // b-231
+private const val MORE_OPTIONS = "More options"
 
 /**
- * The commands whose buttons sit in the top bar or its overflow, depending on the room (b-406).
+ * The commands whose buttons sit in the top bar or its overflow, depending on the room.
  */
-private val TOP_BAR_IDS = setOf("palette", "undo", "redo", "history", "share", "export") // b-509
+private val TOP_BAR_IDS = setOf("palette", "undo", "redo", "history", "share", "export")
 
 /**
  * Every command id the registry has at Expanded on the default theme.
@@ -249,7 +241,7 @@ private val EXPECTED_IDS = listOf(
     "github",
     "undo",
     "redo",
-    "history", // b-509
+    "history",
     "shuffle",
     "lock.Hue",
     "lock.Style",
@@ -276,7 +268,7 @@ private val EXPECTED_IDS = listOf(
     "deviceWidth.Phone",
     "deviceWidth.Tablet",
     "deviceWidth.Desktop",
-    "visionMenu", // b-315d
+    "visionMenu",
     "vision.None",
     "vision.Achromatopsia",
     "fullscreen",

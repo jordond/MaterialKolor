@@ -72,7 +72,7 @@ import org.jetbrains.compose.resources.stringResource
  * the bar.
  *
  * The History list opens in a popover under the History button, or under the overflow button once
- * History has moved there (D57). It stays open while someone jumps between steps and hands focus
+ * History has moved there. It stays open while someone jumps between steps and hands focus
  * back to whatever opened it, the page itself when the H key did. A jump can switch the skin, whose
  * top bar draws its buttons somewhere new, so both buttons move there with the list still open.
  *
@@ -90,9 +90,8 @@ internal fun TopBarContent(
     focus: TopBarFocus = rememberTopBarFocus(),
 ) {
     var menuOpen by remember { mutableStateOf(false) }
-    val currentRow = remember { FocusRequester() } // b-509
+    val currentRow = remember { FocusRequester() }
     val windowClass = LocalLayout.current.windowClass
-    // b-406
     val fit = remember { MediumBarFit() }
     val overflowed = when (windowClass) {
         WindowClass.Compact -> MediumOverflowOrder.toSet()
@@ -103,7 +102,6 @@ internal fun TopBarContent(
     if (report != null) SideEffect { report.overflowed = overflowed }
     // The switcher changes form with the window class, so focus it held follows it to the new one.
     LaunchedEffect(windowClass) { focus.restoreAfterRefit(TopBarControl.Library) }
-    // b-512
     // A wide bar shows Share's label and the palette's keycap while the segmented switcher still fits.
     val wideFit = remember { WideBarFit() }
     val wideForms = windowClass == WindowClass.Expanded && !wideFit.compact
@@ -115,16 +113,14 @@ internal fun TopBarContent(
     val selected = LibraryChoice.of(state.document)
     val switcherModifier = Modifier
         .testTag(LIBRARY_SWITCHER_TAG)
-        // b-512
         // A dropdown's floating label stays inside the bar.
         .shrinkToHeight(TopBarControlMaxHeight)
         .topBarFocus(focus, TopBarControl.Library)
-        .switcherPulse(state, dispatcher) // b-314
-        .reportSwitcherOrigin(report) // b-503a
+        .switcherPulse(state, dispatcher)
+        .reportSwitcherOrigin(report)
     val onSwitch = { choice: LibraryChoice, origin: Offset ->
         dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin))
     }
-    // b-509
     // The list hangs from More once History has moved into it, with More kept in one place either way.
     val moreButton = rememberMovable {
         HistoryPopover(
@@ -148,7 +144,6 @@ internal fun TopBarContent(
             }
         }
     }
-    // b-509
     val historyButton = rememberMovable {
         HistoryPopover(
             expanded = state.panel == Panel.History,
@@ -171,7 +166,6 @@ internal fun TopBarContent(
     }
     val actions: @Composable () -> Unit = {
         val share = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Share)) }
-        // b-512
         if (wideForms) {
             BuilderButton(
                 onClick = share,
@@ -189,7 +183,6 @@ internal fun TopBarContent(
             )
         }
         val export = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Export)) }
-        // b-512
         // A phone's bar has room for the glyph alone, still named Export code.
         if (windowClass == WindowClass.Compact) {
             BuilderIconButton(
@@ -208,19 +201,16 @@ internal fun TopBarContent(
                 icon = IconId.Export,
             )
         }
-        moreButton() // b-509
+        moreButton()
     }
 
     if (windowClass == WindowClass.Compact) {
-        // b-406
         Column(modifier) {
-            // b-512
             CompactTopBar(state.projectName, state.document.seed, Modifier.testTag(TOP_BAR_TAG)) { actions() }
             LibraryChipRow(selected = selected, onSwitch = onSwitch, switcherModifier = switcherModifier)
         }
     } else {
         TopBarRegion(modifier.testTag(TOP_BAR_TAG)) {
-            // b-231
             // The actions take their full width first, since a row measures its weighted child last, and
             // the switcher gets what is left, so More options is never squeezed.
             if (windowClass == WindowClass.Medium) {
@@ -232,7 +222,6 @@ internal fun TopBarContent(
                     switcherModifier = switcherModifier,
                 )
             } else {
-                // b-512
                 val shownCompact = wideFit.compact
                 FittedLibrarySwitcher(
                     selected = selected,
@@ -246,7 +235,7 @@ internal fun TopBarContent(
             if (TopBarControl.Commands !in overflowed) {
                 CommandsButton(
                     focus = focus,
-                    keycap = wideForms, // b-512
+                    keycap = wideForms,
                     onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Palette)) },
                 )
             }
@@ -270,7 +259,7 @@ internal fun TopBarContent(
                     onClick = { dispatcher.dispatch(WorkspaceAction.Redo) },
                 )
             }
-            if (TopBarControl.History !in overflowed) historyButton() // b-509
+            if (TopBarControl.History !in overflowed) historyButton()
             actions()
         }
     }
@@ -289,12 +278,10 @@ internal fun TopBarContent(
     )
 }
 
-// b-509
-
 /**
  * The History list in a popover under [anchor], open while [expanded] holds. Focus starts on the
  * step the theme is at, through [currentRow], and goes back to the anchor once the list closes, or
- * to the page when the H key opened it (AR-09).
+ * to the page when the H key opened it.
  */
 @Composable
 private fun HistoryPopover(
@@ -314,8 +301,6 @@ private fun HistoryPopover(
         if (timeline != null) TimelineList(timeline, dispatcher, currentRow)
     }
 }
-
-// b-509
 
 /**
  * [content] as movable content, so wherever the skin's top bar draws it next it moves there with all
@@ -337,7 +322,7 @@ private fun rememberMovable(content: @Composable () -> Unit): @Composable () -> 
 private fun overflowItems(
     state: WorkspaceModel.State,
     dispatcher: Dispatcher<WorkspaceAction>,
-    overflowed: Set<TopBarControl>, // b-406
+    overflowed: Set<TopBarControl>,
     uriHandler: UriHandler,
 ): List<BuilderMenuItem> {
     val appearance = state.preferences.appearance
@@ -345,7 +330,7 @@ private fun overflowItems(
         BuilderMenuItem(
             label = stringResource(appearanceLabel(option)),
             onClick = { dispatcher.dispatch(WorkspaceAction.SetAppearance(option)) },
-            icon = option.icon, // b-512
+            icon = option.icon,
             selected = option == appearance,
         )
     }
@@ -379,7 +364,6 @@ private fun overflowItems(
                 ),
             )
         }
-        // b-509
         if (TopBarControl.History in overflowed) {
             add(
                 BuilderMenuItem(
@@ -395,7 +379,7 @@ private fun overflowItems(
         listOf(
             BuilderMenuItem(
                 label = stringResource(Res.string.topbar_help),
-                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Help)) }, // b-314
+                onClick = { dispatcher.dispatch(WorkspaceAction.OpenPanel(Panel.Help)) },
                 icon = IconId.Help,
             ),
             BuilderMenuItem(
@@ -422,8 +406,6 @@ private fun appearanceLabel(appearance: Appearance): StringResource =
         Appearance.Light -> Res.string.topbar_appearance_light
         Appearance.Dark -> Res.string.topbar_appearance_dark
     }
-
-// b-512
 
 /**
  * The glyph an appearance row shows, so its text starts where the other rows' text does.

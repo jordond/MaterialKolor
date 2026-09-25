@@ -79,7 +79,7 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * How long Copy shows as Copied after it worked (F-26).
+ * How long Copy shows as Copied after it worked.
  */
 internal const val COPIED_MILLIS = 1_200L
 
@@ -92,7 +92,7 @@ private enum class CopyKind {
 }
 
 /**
- * The export sheet (F-26). The target, the mode and the options on top, the files under them, and
+ * The export sheet. The target, the mode and the options on top, the files under them, and
  * Copy file, Copy all and Download zip at the bottom.
  *
  * It is an end panel at 60% of the window from 840 dp up, which takes in Expanded, and the full
@@ -100,9 +100,9 @@ private enum class CopyKind {
  * top bar makes, so the app re-skins behind the sheet.
  *
  * Every copy, download and share starts inside the click, with the platform call as its first
- * suspension, and the text and the zip are ready before the click (R-B-302). A copy that worked
+ * suspension, and the text and the zip are ready before the click. A copy that worked
  * turns its button into Copied for [COPIED_MILLIS] and reads Copied out, since a screen reader never
- * hears a label change (AR-06). One the browser refused opens a dialog to copy from by hand, and
+ * hears a label change. One the browser refused opens a dialog to copy from by hand, and
  * never says Copied. On a touch screen whose share sheet takes the zip, the zip goes to the share
  * sheet, and anywhere else it downloads. A share sheet someone closes counts as done.
  *
@@ -110,7 +110,7 @@ private enum class CopyKind {
  * field in the sheet takes input.
  *
  * While the package or the theme name field holds a draft that is not valid, the sheet says what is
- * wrong in place of the files and Copy file, Copy all and Download wait for it (R-B-309).
+ * wrong in place of the files and Copy file, Copy all and Download wait for it.
  *
  * @param[visible] Whether the sheet is open.
  * @param[state] The export model's state.
@@ -121,7 +121,7 @@ private enum class CopyKind {
  * @param[files] Where the zip goes.
  * @param[dispatcher] Takes the option changes.
  * @param[workspace] Takes the target switch, the theme name, closing and toasts.
- * @param[returnFocusTo] The button that opened the sheet, which gets focus back once it closes (AR-09).
+ * @param[returnFocusTo] The button that opened the sheet, which gets focus back once it closes.
  */
 @Composable
 internal fun ExportSheet(
@@ -135,10 +135,9 @@ internal fun ExportSheet(
     workspace: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
     returnFocusTo: FocusRequester? = null,
-    materialKolorVersion: String? = null, // b-511
+    materialKolorVersion: String? = null,
 ) {
-    val keys = rememberPanelShortcuts() // b-315c
-    // b-511
+    val keys = rememberPanelShortcuts()
     // The footer and the body share what the copies did, so it lives here. Each opening starts it
     // over, a draft problem from the last time included.
     val sheet = remember(visible) { SheetCopies() }
@@ -174,9 +173,9 @@ internal fun ExportSheet(
         onDismissRequest = { workspace.dispatch(WorkspaceAction.ClosePanel) },
         title = stringResource(Res.string.export_title),
         presentation = SheetPresentation.of(LocalLayout.current),
-        modifier = modifier.then(keys.modifier), // b-315c
+        modifier = modifier.then(keys.modifier),
         returnFocusTo = returnFocusTo,
-        subtitle = exportSubtitle(state), // b-511
+        subtitle = exportSubtitle(state),
         footer = {
             val export = sheetExport(state, outcomeOf, sheet.drafts)
             val picked = export.picked
@@ -201,7 +200,6 @@ internal fun ExportSheet(
         val export = sheetExport(state, outcomeOf, sheet.drafts)
         val ready = export.ready
         val picked = export.picked
-        // b-315c
         // C copies the file picked and Shift+C every file, as Copy file and Copy all do.
         SideEffect {
             keys.onShortcut = { shortcut ->
@@ -220,7 +218,6 @@ internal fun ExportSheet(
                 }
             }
         }
-        // b-511
         // The whole body scrolls as one, and the code takes the height the rest leaves, so nothing is
         // cut off mid row where the sheet runs short. Its fields and buttons take focus themselves, so
         // the area is no stop of its own, and its scrollbar sits in the sheet's padding.
@@ -240,7 +237,6 @@ internal fun ExportSheet(
                 }
             }
         }
-        // b-228aa
         val zipLabel = if (zipShares(ready, files)) Res.string.export_share else Res.string.export_download
         ManualCopyDialog(
             visible = sheet.manualOpen,
@@ -250,8 +246,6 @@ internal fun ExportSheet(
         )
     }
 }
-
-// b-511
 
 /**
  * What the sheet hands out right now. [ready] is the export once nothing holds it back, [problems]
@@ -264,7 +258,7 @@ private class SheetExport(
 )
 
 /**
- * The export of [state], held back while a draft in [drafts] is not valid (R-B-309). Only the parts
+ * The export of [state], held back while a draft in [drafts] is not valid. Only the parts
  * of the sheet that show ask for it, so a closed sheet generates nothing.
  */
 private fun sheetExport(
@@ -398,7 +392,7 @@ private fun ZipButton(
     workspace: Dispatcher<WorkspaceAction>,
 ) {
     val scope = rememberCoroutineScope()
-    val share = zipShares(ready, files) // b-228aa
+    val share = zipShares(ready, files)
     BuilderButton(
         onClick = {
             if (ready == null) return@BuilderButton
@@ -417,8 +411,6 @@ private fun ZipButton(
         enabled = ready != null,
     )
 }
-
-// b-228aa
 
 /**
  * Whether the zip goes to the share sheet rather than a download, as on a touch screen whose sheet

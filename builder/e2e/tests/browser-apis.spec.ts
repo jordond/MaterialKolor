@@ -4,8 +4,8 @@ import path from 'node:path';
 import { dispatchPaste, gesture, hook, openWithBrowserApis, wantHooks } from './builder';
 
 // The clipboard, downloads, the share sheet, images from the picker, drops and pastes, and the
-// eyedropper, driven through the shell's test hooks while the app is still a placeholder. Spike S7
-// times the image decode, and spike S9 is the clipboard and download tests in WebKit.
+// eyedropper, driven through the shell's test hooks while the app is still a placeholder. The decode test
+// times the image decode, and the log lines say what the clipboard and downloads did in each browser.
 
 const PHOTO = path.resolve(__dirname, '../fixtures/photo-12mp.jpg');
 
@@ -45,13 +45,12 @@ test.describe('clipboard', () => {
     await expect.poll(() => hook(page, 'outcome', 'copy')).not.toBe('Pending');
     const outcome = await hook(page, 'outcome', 'copy');
     expect(outcome === 'Done' || outcome.startsWith('Failed ')).toBe(true);
-    console.log(`[S9] ${testInfo.project.name} clipboard write outside a click: ${outcome}`);
+    console.log(`[clipboard] ${testInfo.project.name} clipboard write outside a click: ${outcome}`);
   });
 });
 
 test.describe('download', () => {
   test('a download carries the bytes and revokes its URL 30 s later', async ({ page }, testInfo) => {
-    // b-227
     // The installed clock runs with real time until it is paused, so the 30 s start at the click and a
     // busy machine can spend over a second of them before the test jumps ahead. The wrapper notes the
     // page's clock when the URL is made, and the test pauses the clock a second short of the revoke
@@ -93,7 +92,7 @@ test.describe('download', () => {
     expect(await revoked()).not.toContain(created[0].url);
     await page.clock.runFor(2_000);
     expect(await revoked()).toContain(created[0].url);
-    console.log(`[S9] ${testInfo.project.name} Blob download with the URL revoked 30 s later: saved`);
+    console.log(`[download] ${testInfo.project.name} Blob download with the URL revoked 30 s later: saved`);
   });
 });
 
@@ -299,7 +298,7 @@ test.describe('images', () => {
     expect(await targets()).toEqual(['TEXTAREA true', 'TEXTAREA true']);
   });
 
-  test('S7 a 12 MP JPEG decodes and scales well inside 150 ms', async ({ page }, testInfo) => {
+  test('a 12 MP JPEG decodes and scales well inside 150 ms', async ({ page }, testInfo) => {
     await openWithBrowserApis(page);
     await pickPhoto(page);
     const runs: Record<string, number | boolean>[] = [];
@@ -314,8 +313,8 @@ test.describe('images', () => {
       runs.map((run) => run[field] as number).sort((a, b) => a - b)[Math.floor(runs.length / 2)];
     const summary = ['decode', 'scale', 'read', 'copy', 'total'].map((field) => `${field} ${median(field)}`).join(', ');
     const resized = runs.every((run) => run.resized === true);
-    testInfo.annotations.push({ type: 'S7 median ms', description: `${summary}, resize options honored ${resized}` });
-    console.log(`[S7] ${testInfo.project.name} ${summary} ms, resize options honored ${resized}`);
+    testInfo.annotations.push({ type: 'decode median ms', description: `${summary}, resize options honored ${resized}` });
+    console.log(`[decode] ${testInfo.project.name} ${summary} ms, resize options honored ${resized}`);
     expect(runs.every((run) => typeof run.total === 'number')).toBe(true);
   });
 });

@@ -171,17 +171,17 @@ public fun rememberBuilderToastHostState(): BuilderToastHostState = remember { B
  * Stacks the toasts of [state] at the bottom centre of the space it is given, newest at the bottom.
  *
  * The stack is one polite live region that is always there, even with no toast in it, so a screen
- * reader hears each toast arrive and reads it once it has finished what it was saying (AR-06). On
- * the web, where controls fold their state into their names (D37), that live region never reaches
+ * reader hears each toast arrive and reads it once it has finished what it was saying. On
+ * the web, where controls fold their state into their names, that live region never reaches
  * the page, so each toast is read out once through [LocalAnnouncer] instead, a modal open or not. A
  * toast goes by itself after its duration, and its action closes it. The countdown waits while the
  * pointer rests on a toast or focus is inside it, and picks up with the time it had left (WCAG
  * 2.2.1), so a keyboard user on Undo never loses the toast under them. Material3 draws each toast
  * as a `Snackbar`, Fluent as an `InfoBar` and the other skins as a headless toast. Where overlays
- * render in the page (D40) the stack is drawn in the overlay host's top slot over the space it is
- * given, so a toast raised from
- * inside a dialog or a sheet shows over its veil rather than under it, and its action joins the
- * dialog's Tab cycle. When a toast goes with focus on its action, focus goes back into the dialog.
+ * render in the page the stack is drawn in the overlay host's top slot over the space it is given,
+ * so a toast raised from inside a dialog or a sheet shows over its veil rather than under it, and
+ * its action joins the dialog's Tab cycle. When a toast goes with focus on its action, focus goes
+ * back into the dialog.
  *
  * @param[state] The toasts to show.
  * @param[modifier] Applied to the host, which fills the space it is given without taking any
@@ -257,7 +257,6 @@ private fun ToastEntry(
         when (library) {
             Library.Material3 -> MaterialToast(toast, onAction, holds)
             Library.Unstyled -> HeadlessToast(toast, onAction, unstyledOverlayStyle(tokens), holds)
-            // b-404
             Library.Fluent -> FluentToast(toast.message, toast.actionLabel, onAction, holds)
             Library.Custom -> HeadlessToast(toast, onAction, customOverlayStyle(tokens), holds)
         }

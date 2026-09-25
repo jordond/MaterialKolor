@@ -56,7 +56,7 @@ private const val REDO_EXPRESSIVE = "Redo library change to Expressive"
 /**
  * A desktop window wide enough for the segmented switcher in every skin, beside the full actions.
  */
-private const val WIDTH = 1600 // b-231
+private const val WIDTH = 1600
 private const val HEIGHT = 800
 
 /**
@@ -214,7 +214,6 @@ class TopBarContentTest {
             onNodeWithText("Export code").assertIsFocused()
         }
 
-    // b-221f
     @Test
     fun appearanceRows_inTheMoreMenu_onlyTheChosenOneIsSelected() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {

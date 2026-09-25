@@ -122,7 +122,7 @@ public enum class CustomSlot(
     /**
      * The keyboard focus ring. Light mode cuts tone 50, which holds 3 to 1 on every surface step
      * the kit rings on whatever the seed, since a tone fixes the luminance. Tone 60 stood only 2.7
-     * to 1 on the sunken step (D46). Dark mode keeps tone 60.
+     * to 1 on the sunken step. Dark mode keeps tone 60.
      */
     @SerialName("focusRing")
     FocusRing(code = 47, resolution = SlotResolution.FromRamp(TonalRamp.Primary, light = 50, dark = 60)),

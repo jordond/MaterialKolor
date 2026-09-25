@@ -53,9 +53,9 @@ private const val THRESHOLD = "threshold"
  *
  * The families match the builder's own preview in the engine's `AccentFamily`, though not by making
  * the same calls. The engine calls `harmonize` and then `TonalPalette.from`, while the export calls
- * `rememberTonalPalette`, whose body in core is that same chain. Parity rests on that body, and
- * B-117's parity gate checks it. Each mode then cuts its color and container out of the ramp, with
- * `onTone` finding the content color on top of each. Keep the two in step or the export stops
+ * `rememberTonalPalette`, whose body in core is that same chain. Parity rests on that body, and the
+ * engine's `ExportParityTest` checks it. Each mode then cuts its color and container out of the ramp,
+ * with `onTone` finding the content color on top of each. Keep the two in step or the export stops
  * matching the preview.
  *
  * The families snap from light to dark rather than animating, even when the theme animates.
@@ -111,8 +111,6 @@ internal fun KotlinFileScope.extendedColorsDeclarations(
 internal val Accent.seedName: String
     get() = name.replaceFirstChar { char -> char.uppercaseChar() } + "Seed"
 
-// b-112
-
 /**
  * The local holding an accent's ramp. The suffix keeps an accent called `isDark` or `seedColor`
  * from shadowing the parameter of the same name.
@@ -162,8 +160,6 @@ private fun KotlinFileScope.rememberExtendedColors(accents: List<Accent>) {
     }
 }
 
-// b-112b
-
 /**
  * `brandPalette.colorFamily(tone = ..., containerTone = ...)`, at the accent's tones for each mode.
  */
@@ -177,8 +173,6 @@ internal fun familyOf(accent: Accent): Expression =
         ) { threshold -> thresholdExpression(threshold) }
     }
 
-// b-112b
-
 /**
  * `if (isDark) 80 else 40`, or just the tone when both modes use the same one.
  */
@@ -191,8 +185,6 @@ internal fun toneExpression(
     } else {
         ifElse(condition = ref(IS_DARK), whenTrue = Literals.int(dark), whenFalse = Literals.int(light))
     }
-
-// b-112b
 
 /**
  * The private helper that cuts one family out of a ramp.
@@ -234,8 +226,6 @@ private fun onToneCall(tone: String): Expression =
         argument(ref(tone))
         argument(ref(THRESHOLD))
     }
-
-// b-112
 
 /**
  * The core threshold for a document threshold, the same mapping the engine uses.

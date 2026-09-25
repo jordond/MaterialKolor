@@ -17,11 +17,10 @@ import {
   typeSeed,
 } from '../fixtures/workspace';
 
-// b-503
-// Save and return (flow 5.5). Autosave keeps the edit and its undo history through a reload, and the
+// Save and return. Autosave keeps the edit and its undo history through a reload, and the
 // Projects panel renames, duplicates and deletes, with the delete undone from its toast.
 
-/** The Projects panel's title in the mirror, the dialog fold (D40). */
+/** The Projects panel's title in the mirror, the dialog fold. */
 const PROJECTS_DIALOG = /^Projects, dialog/;
 
 test.beforeEach(async ({ context }) => {
@@ -62,7 +61,6 @@ test('Projects renames, duplicates, switches and deletes, and the toast undoes t
   const copy = (await storedProjects(page)).find((project) => project.id !== original.id)!;
 
   await pressFor(page, labelled(page, `${copy.name}, radio, not selected`), labelled(page, `Projects, ${copy.name}`));
-  // b-503b
   // Opening a project closes the panel, so the delete opens it again.
   await expect(onPage(page, PROJECTS_DIALOG)).toHaveCount(0, { timeout: LAND_TIMEOUT_MS });
   await pressKeyFor(page, 'p', onPage(page, PROJECTS_DIALOG));
@@ -78,7 +76,7 @@ test('Projects renames, duplicates, switches and deletes, and the toast undoes t
   );
 });
 
-/** An item of an open menu, by the name the web folds its role into (D40). */
+/** An item of an open menu, by the name the web folds its role into. */
 function menuItem(page: Page, name: string) {
   return labelled(page, `${name}, `).or(button(page, name));
 }

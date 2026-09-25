@@ -113,7 +113,7 @@ private const val MaterialScrimAlpha = 0.32f
 
 /**
  * Material's own springs for everything that moves, and the builder's fenced tweens for the reveal,
- * the crossfade and the panels, which the skin transition times itself against (D23, B-206).
+ * the crossfade and the panels, which the skin transition times itself against.
  */
 private class MaterialBuilderMotion(
     private val scheme: MotionScheme,

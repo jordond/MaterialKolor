@@ -71,22 +71,21 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * About, open while `state.panel` is [Panel.About] (F-36, F-37).
+ * About, open while `state.panel` is [Panel.About].
  *
  * It names both versions and what the builder is for, holds the motion override, says what stays
  * private, credits what the builder is made from, and ends with GitHub, Report a problem and Copy
  * details. A report never carries the project's name, since issues are public. When the browser
  * refuses Copy details, the workspace opens the details to copy by hand.
  *
- * @param[returnFocusTo] The overflow button that opened it, which gets focus back once it closes
- * (AR-09).
+ * @param[returnFocusTo] The overflow button that opened it, which gets focus back once it closes.
  */
 @Composable
 internal fun AboutHost(
     state: WorkspaceModel.State,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
-    returnFocusTo: FocusRequester? = null, // b-314
+    returnFocusTo: FocusRequester? = null,
     model: AboutModel = metroViewModel(),
 ) {
     val layout = LocalLayout.current
@@ -106,7 +105,6 @@ internal fun AboutHost(
     ) {
         // The dialog's body only composes while it is open, so an edit never works out a link here.
         val details = rememberReportDetails(state.document, model.browser, model.siteOrigin)
-        // b-314a
         // The intro, the privacy note, the library lines and an opened license hold no control, so
         // the list keeps its own Tab stop for the keyboard to scroll them on the web, as Help does.
         BuilderScrollArea(Modifier.heightIn(max = layout.heightDp * ABOUT_HEIGHT_FRACTION)) {
@@ -178,8 +176,8 @@ private fun AboutSection(
 }
 
 /**
- * The motion override (F-37). The arrows only move the focus, so the chrome changes how it moves on
- * Enter or Space rather than on every step past an option.
+ * The motion override. The arrows only move the focus, so the chrome changes how it moves on Enter
+ * or Space rather than on every step past an option.
  */
 @Composable
 private fun MotionChoice(
@@ -233,7 +231,7 @@ private fun Credits() {
 @Composable
 internal fun FontLicense(
     font: ShippedFont,
-    read: suspend (ShippedFont) -> String = ::readFontLicense, // b-314a
+    read: suspend (ShippedFont) -> String = ::readFontLicense,
 ) {
     var open by rememberSaveable(font) { mutableStateOf(false) }
     val license = stringResource(Res.string.about_font_license)
@@ -241,9 +239,8 @@ internal fun FontLicense(
         expanded = open,
         onExpandedChange = { expanded -> open = expanded },
         title = stringResource(fontName(font)),
-        summary = fontSummary(font, license), // b-404a
+        summary = fontSummary(font, license),
     ) {
-        // b-314a
         // Null once the read failed. An error thrown in here would stop the whole UI on wasm.
         val text by produceState<String?>("", font) {
             value = runCatching { read(font) }
@@ -266,10 +263,8 @@ private fun fontName(font: ShippedFont): StringResource =
     when (font) {
         ShippedFont.BricolageGrotesque -> Res.string.about_font_bricolage
         ShippedFont.JetBrainsMono -> Res.string.about_font_jetbrains_mono
-        ShippedFont.Selawik -> Res.string.about_font_selawik // b-404a
+        ShippedFont.Selawik -> Res.string.about_font_selawik
     }
-
-// b-404a
 
 /**
  * What stands under [font]'s name, the [license] and, for a subset that ships under another name,

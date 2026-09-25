@@ -56,8 +56,6 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
-// b-308b
-
 /**
  * The Inspect card for [target]. It names the mode, then each color the element declared with its
  * hex and tone, then the ratio and badge of the first pair the audit rates, or of a role and the
@@ -70,17 +68,16 @@ internal fun InspectCard(
     pinned: Boolean,
     result: ThemeResult,
     actions: InspectActions,
-    firstAction: FocusRequester, // b-315b
+    firstAction: FocusRequester,
     pinHint: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val refs = target.roles // b-217d
+    val refs = target.roles
     val isDark = target.isDark
     val colors = remember(result, refs, isDark) { refs.map { ref -> result.inspectColor(ref, isDark) } }
-    // b-308b
     val rated = remember(result, refs, isDark) {
         result.audit.firstRated(refs, isDark)
-            ?: result.rateOnPair(refs, isDark) // b-308ba
+            ?: result.rateOnPair(refs, isDark)
     }
     BuilderCard(modifier.testTag(INSPECT_CARD_TAG)) {
         BuilderText(
@@ -268,8 +265,6 @@ internal fun ContrastAudit.firstRated(
     }
     return null
 }
-
-// b-308ba
 
 /**
  * The first two of [refs] where one role is drawn on the other, rated as text over it in the mode

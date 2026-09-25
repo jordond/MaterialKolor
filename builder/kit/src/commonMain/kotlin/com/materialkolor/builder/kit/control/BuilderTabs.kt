@@ -20,8 +20,6 @@ import com.materialkolor.builder.kit.skin.material.MaterialTabs
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.github.composefluent.FluentTheme
 
-// b-512
-
 /**
  * How a row of [BuilderTabs] looks.
  */
@@ -32,7 +30,7 @@ public enum class TabsVariant {
     Standard,
 
     /**
-     * The canvas tabs of design D. Pills in every skin but Unstyled, which keeps its underline, each
+     * The canvas tabs. Pills in every skin but Unstyled, which keeps its underline, each
      * drawn in the skin's colours and shapes, and starting at the row's own start edge.
      */
     Canvas,
@@ -61,12 +59,11 @@ public fun <T> BuilderTabs(
     onSelect: (T) -> Unit,
     label: (T) -> String,
     modifier: Modifier = Modifier,
-    variant: TabsVariant = TabsVariant.Standard, // b-512
+    variant: TabsVariant = TabsVariant.Standard,
 ) {
     require(selected in tabs) { "The selected tab $selected is not one of $tabs" }
     val skin = LocalSkin.current
     if (variant == TabsVariant.Canvas) {
-        // b-512
         val style = when (skin.library) {
             Library.Material3 -> if (skin.expressive) expressiveCanvasTabs() else materialCanvasTabs()
             Library.Unstyled -> unstyledCanvasTabs()
@@ -83,8 +80,6 @@ public fun <T> BuilderTabs(
         Library.Custom -> HeadlessTabs(tabs, selected, onSelect, label, CustomInputStyles.tabs, modifier)
     }
 }
-
-// b-512
 
 /**
  * Material's canvas tabs, a tonal pill holding the tabs with the chosen one lifted to the lightest surface.

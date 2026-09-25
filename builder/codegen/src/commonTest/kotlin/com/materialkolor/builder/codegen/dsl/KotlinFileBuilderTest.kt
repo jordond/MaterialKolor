@@ -281,7 +281,6 @@ class KotlinFileBuilderTest {
         assertEquals(expected, file.text)
     }
 
-    // b-111b
     @Test
     fun kotlinFile_reassign_writesTheTargetAndImportsItsSymbols() {
         val file = kotlinFile(path = "Theme.kt", packageName = "com.example") {
@@ -383,7 +382,6 @@ class KotlinFileBuilderTest {
         assertTrue("com.materialkolor.ktx.Color" in message, message)
     }
 
-    // b-109
     @Test
     fun kotlinFile_declaredNameMatchesAnImport_failsNamingTheImport() {
         val failure = assertFailsWith<IllegalArgumentException> {
@@ -403,7 +401,6 @@ class KotlinFileBuilderTest {
         assertTrue("declares its own MaterialTheme" in message, message)
     }
 
-    // b-109
     @Test
     fun kotlinFile_declaredNameMatchesASamePackageSymbol_writesTheFile() {
         val neighbour = Symbol("com.example", "SeedColor", SymbolKind.Property)

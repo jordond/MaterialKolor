@@ -11,11 +11,10 @@ import {
   storedDocument,
 } from '../fixtures/workspace';
 
-// b-403b
 // The shell in the Fluent skin, whose tabs, segmented rows, switches, checkboxes and disclosures are
 // Fluent's own components. The number keys switch the library, 4 to Fluent and 1 back to Material 3,
 // and the page keeps running with no error. On the web the mirror loses a tab's role and state, so the
-// Fluent tab carries both in its name the way every skin's tab does (D37).
+// Fluent tab carries both in its name the way every skin's tab does.
 
 const A11Y = '#cmp_a11y_root';
 
@@ -50,8 +49,7 @@ test('4 switches the shell to Fluent and 1 back, with no page error and the tab 
   expect(errors).toEqual([]);
 });
 
-// b-503
-// Switch library (flow 5.3). 3, 4 and 2 move the library to Unstyled, Fluent and Expressive, and 2
+// Switch library. 3, 4 and 2 move the library to Unstyled, Fluent and Expressive, and 2
 // on TonalSpot 2021 suggests the Expressive style on the 2025 spec, which Apply sets as one undo.
 
 test('3, 4 and 2 switch the library, and Apply takes the Expressive suggestion as one undo', async ({ page }) => {
@@ -66,7 +64,6 @@ test('3, 4 and 2 switch the library, and Apply takes the Expressive suggestion a
   const suggestion = onPage(page, /^Use the Expressive style\?/);
   await pressKeyUntil(page, '3', () => undoNames('Unstyled'));
   await pressKeyUntil(page, '4', () => undoNames('Fluent'));
-  // b-503a
   // The 2 opens the suggestion with the switch, and the suggestion is modal, so the mirror hides the
   // top bar's Undo and the tab row the canvas is focused by until it closes. The suggestion showing
   // is what says the 2 landed, and each try waits for it as long as a switch may take to land, so

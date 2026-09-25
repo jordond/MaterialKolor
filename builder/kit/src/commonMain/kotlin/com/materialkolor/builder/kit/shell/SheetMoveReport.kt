@@ -5,8 +5,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import com.materialkolor.builder.kit.control.BottomSheetState
 
-// b-406g
-
 /**
  * Reports the poster sheet's rise under a drag on its content as scrolled, so the web keeps the
  * finger rather than handing the drag to the browser.

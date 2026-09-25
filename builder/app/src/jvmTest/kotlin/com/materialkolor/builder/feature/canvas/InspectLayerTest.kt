@@ -139,7 +139,6 @@ class InspectLayerTest {
 
             onNode(OnCard and hasText("Show on ramp")).performClick()
             waitForIdle()
-            // b-308b
             host.actions.last() shouldBe
                 WorkspaceAction.ShowOnRamp(RampTarget.OfRole(Role.PrimaryContainer, isDark = false))
             host.state.inspect shouldBe true

@@ -45,8 +45,6 @@ public class ThemeResult internal constructor(
      */
     public val ramps: RampSet by lazy { RampSet.from(light, dark) }
 
-    // b-116
-
     /**
      * Every accent of the document as a family, in the document's order.
      */
@@ -56,8 +54,6 @@ public class ThemeResult internal constructor(
      * Every slot of the Custom target in both modes, with the document's custom tones moved in.
      */
     public val customSlots: CustomSlotColors by lazy { CustomSlotColors.from(document, light, dark, roles) }
-
-    // b-202
 
     /**
      * Every slot of the Custom target cut from the [chrome] schemes, for the builder's own Custom skin.

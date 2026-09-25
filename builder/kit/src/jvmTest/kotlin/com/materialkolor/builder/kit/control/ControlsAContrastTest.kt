@@ -71,7 +71,7 @@ class ControlsAContrastTest {
 
 /**
  * The pairs the headless actions add on top of the skin's own text pairs. Status badges put the
- * panel ink on a status fill, and the focus ring has to stand out from the panel by 3 to 1 (AR-01).
+ * panel ink on a status fill, and the focus ring has to stand out from the panel by 3 to 1.
  */
 private fun BuilderTokens.actionPairs(): List<InkPair> =
     listOf(

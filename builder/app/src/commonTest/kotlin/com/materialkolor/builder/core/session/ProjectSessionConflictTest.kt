@@ -17,7 +17,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
 /**
- * Conflicts with other tabs and what happens to waiting saves when the open project changes (D36).
+ * Conflicts with other tabs and what happens to waiting saves when the open project changes.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProjectSessionConflictTest : SessionTestBase() {

@@ -49,7 +49,7 @@ private val RowOption: SemanticsMatcher = hasRole(Role.RadioButton) and hasAnyAn
 /**
  * The expressive segmented row's focus ring, which its neighbours must never paint over, with the
  * web's keyboard habits on and off. With them on each option sits in a box of its own to keep the
- * written order, which is where a raised option used to rise over nothing (R-B-402c).
+ * written order, which is where a raised option used to rise over nothing.
  */
 @OptIn(ExperimentalTestApi::class)
 class MaterialSegmentedRingTest {

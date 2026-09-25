@@ -12,7 +12,6 @@ kotlin {
             implementation(materialKolor("palette"))
             implementation(libs.kotlinx.coroutines.core)
 
-            // b-115
             // Core takes and returns Compose colors but keeps Compose UI to itself, and the mapping
             // hands an Argb out as a Color, so the graphics types are part of this module's surface.
             api(libs.compose.ui)
@@ -20,14 +19,12 @@ kotlin {
             api(libs.kotlinx.collections)
         }
 
-        // b-115
         // The role tables are checked against what the Material 3 module builds for the same scheme.
         jvmTest.dependencies {
             implementation(materialKolor("material3"))
             implementation(libs.compose.material3)
         }
 
-        // b-117
         // The export parity gate checks the engine against every library adapter an export calls.
         // The expressive theme is composed to read its own defaults, hence the UI test runtime.
         // Unstyled and Fluent only reach compile time in their modules, so the tests add them.
@@ -40,9 +37,8 @@ kotlin {
             implementation(project.extensions.getByType<org.jetbrains.compose.ComposeExtension>().dependencies.desktop.currentOs)
         }
 
-        // b-114
         // The export parity gate generates each export and holds its colors to the preview. The Material 3 module
-        // it builds the dynamic scheme with is already on the test classpath from b-115.
+        // it builds the dynamic scheme with is already on the test classpath for the role table checks.
         jvmTest.dependencies {
             implementation(project(":builder:codegen"))
         }

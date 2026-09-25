@@ -72,7 +72,7 @@ internal enum class SlotFamily(
 
 /**
  * The eight accents the cafe has a place for, in the order of the sample's `AppThemeSeeds`, so the
- * document's accent at index i is the entry at ordinal i (D25).
+ * document's accent at index i is the entry at ordinal i.
  *
  * Love marks favourites, Cold and Warm tag how a drink is served and the five drinks colour their
  * categories. Past the document's accents each one falls back to [fallback].

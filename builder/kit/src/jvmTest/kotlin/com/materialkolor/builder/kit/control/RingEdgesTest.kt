@@ -33,16 +33,15 @@ import kotlin.test.Test
 private val PosterSeeds: List<Argb> = listOf(Argb(0xF2E6A0), Argb(0x1B2A4A))
 
 /**
- * The rings the second S5 rerun found cut, shaded or matched at their edges, each checked side by
- * side against the probe's rule in every skin. The ring covers at least half the middle of every
- * side at 3 to 1 (gaps A to F).
+ * The rings once found cut, shaded or matched at their edges, each checked side by side in every
+ * skin. The ring covers at least half the middle of every side at 3 to 1.
  */
 @OptIn(ExperimentalTestApi::class)
 class RingEdgesTest {
     /**
      * The poster's headline marks focus with a line under it, one side only, so it rings too. On the
-     * poster the ring takes the poster's ink, which has to stand 3 to 1 from the seed (gap A). The
-     * caret is ink as well and sits over the edge of the text, so the ring is judged outside the box.
+     * poster the ring takes the poster's ink, which has to stand 3 to 1 from the seed. The caret is
+     * ink as well and sits over the edge of the text, so the ring is judged outside the box.
      */
     @Test
     fun heroField_onALightAndADarkPoster_everySkin_ringsAllTheWayRound() {
@@ -74,7 +73,7 @@ class RingEdgesTest {
     }
 
     /**
-     * The row clips where it scrolls, and its ends keep room for the end tabs' rings (gap B).
+     * The row clips where it scrolls, and its ends keep room for the end tabs' rings.
      */
     @Test
     fun tabs_firstAndLastTab_everySkin_ringOnEverySide() {
@@ -94,8 +93,8 @@ class RingEdgesTest {
 
     /**
      * A tooltip that opens with focus sits clear of the anchor's ring, its shadow included, so the
-     * ring's top shows whole under the bubble (gap C). The anchor stands low enough in the window for
-     * the shadow to fall as far as it does on a page.
+     * ring's top shows whole under the bubble. The anchor stands low enough in the window for the
+     * shadow to fall as far as it does on a page.
      */
     @Test
     fun tooltip_inThePage_everySkin_leavesTheAnchorRingWhole() =
@@ -136,7 +135,7 @@ class RingEdgesTest {
         }
 
     /**
-     * The sheet clips to its rounded top, and the handle's ring stands in from its sides (gap E).
+     * The sheet clips to its rounded top, and the handle's ring stands in from its sides.
      */
     @Test
     fun bottomSheet_handle_everySkin_ringsOnEverySideInsideTheSheet() =
@@ -152,7 +151,7 @@ class RingEdgesTest {
 
     /**
      * An end option as round as the frame rings outside the frame's own outline, where a whole pixel
-     * shows at one pixel per dp as well as at two (gap F).
+     * shows at one pixel per dp as well as at two.
      */
     @Test
     fun segmented_firstAndLastOption_everySkin_ringOnEverySideAtOneAndTwoPixelsPerDp() {
@@ -181,7 +180,7 @@ class RingEdgesTest {
     /**
      * An end option's ring stands the style's end offset off its rounded end alone. Its straight top
      * and bottom run in line with a middle option's ring, and its other end stands where a middle
-     * option's does (R-B-230d).
+     * option's does.
      */
     @Test
     fun segmented_endOption_headlessSkins_ringsFurtherOffTheRoundedEndOnly() {

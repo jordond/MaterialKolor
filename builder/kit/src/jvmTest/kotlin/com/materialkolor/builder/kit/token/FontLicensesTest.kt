@@ -5,7 +5,6 @@ import io.kotest.matchers.string.shouldStartWith
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-// b-314
 class FontLicensesTest {
     @Test
     fun readFontLicense_bricolageGrotesque_isTheOflWithItsOwnCopyright() =

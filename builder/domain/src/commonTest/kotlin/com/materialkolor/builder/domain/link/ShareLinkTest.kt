@@ -41,7 +41,6 @@ class ShareLinkTest {
         assertNull(shareLink(document, "Harbour"))
     }
 
-    // b-505
     @Test
     fun shareLink_anotherOrigin_opensThere() {
         val document = ThemeDocument(seed = SEED)

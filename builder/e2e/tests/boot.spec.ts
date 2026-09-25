@@ -5,9 +5,8 @@ import { wantHooks } from './builder';
 import { startWorker, workerMissing, type Worker } from '../fixtures/worker';
 import { A11Y, BOOT_TIMEOUT_MS, labelled, openWorkspace, seedField, seedText, shareVectors } from '../fixtures/workspace';
 
-// b-503
 // Boot from a share code the builder's parts agree on (`builder/fixtures/share-codes.json`). It opens
-// with the code's seed and style, and the address bar goes back to `/` (D15). The Worker's own theme
+// with the code's seed and style, and the address bar goes back to `/`. The Worker's own theme
 // page is booted from `wrangler dev`, the one server that writes a link's meta.
 
 test.beforeEach(async ({ context }) => {
@@ -15,7 +14,7 @@ test.beforeEach(async ({ context }) => {
 });
 
 test.describe('share codes', () => {
-  // One code with every section set stands for the lot (D50). The codec's own tests read each one.
+  // One code with every section set stands for the lot. The codec's own tests read each one.
   for (const vector of shareVectors().filter((vector) => vector.label === 'every section at once')) {
     test(`boots with the seed and style of ${vector.label}`, async ({ page }) => {
       await openWorkspace(page, `/t/${vector.code}`);

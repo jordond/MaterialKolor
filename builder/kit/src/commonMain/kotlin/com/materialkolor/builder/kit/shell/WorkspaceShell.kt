@@ -51,7 +51,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The sizes the shell gives its regions in every skin, design D's geometry.
+ * The sizes the shell gives its regions in every skin.
  *
  * Like the overlay metrics they are the same in every skin, so none of them is a builder token. The
  * margins and the corner radii come from the tokens.
@@ -76,8 +76,6 @@ internal object ShellMetrics {
      * The top bar, in every window class.
      */
     val topBarHeight: Dp = 64.dp
-
-    // b-512
 
     /**
      * The tallest a control in the top bar stands, clear of the bar's edges by 4 dp each.
@@ -118,7 +116,7 @@ internal fun sheetClearance(
 /**
  * The workspace laid out for the space it is in, the poster, the top bar, the canvas and the dock.
  *
- * The geometry comes from `LocalLayout` and is the same in every skin (design D). On Expanded the
+ * The geometry comes from `LocalLayout` and is the same in every skin. On Expanded the
  * poster docks at 400 dp and on Medium at 320 dp from 840 dp, and both collapse to the 72 dp rail.
  * Below 840 dp it is the rail, which opens over the canvas. On a phone, upright or on its side, it
  * lives in a bottom sheet with the dock floating above its peek. The poster keeps its seed coloured
@@ -127,7 +125,7 @@ internal fun sheetClearance(
  * the content, so the dock covers none of it. Only on a phone does the dock float, over the canvas
  * above the poster's peek.
  *
- * Tab walks the regions in reading order in every layout (AR-01), the top bar, the poster, the
+ * Tab walks the regions in reading order in every layout, the top bar, the poster, the
  * canvas and then the dock.
  *
  * The shell only places the slots. The skin owned regions, `TopBarRegion` and `DockRegion` among
@@ -164,14 +162,11 @@ public fun WorkspaceShell(
     dock: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     sheetState: BottomSheetState = rememberBottomSheetState(),
-    // b-217
     fullscreen: Boolean = false,
-    // b-217
     fullscreenExit: @Composable () -> Unit = {},
     overlays: @Composable () -> Unit = {},
 ) {
     val mode = LocalLayout.current.posterMode
-    // b-217
     val exit = if (fullscreen) fullscreenExit else null
     val room = remember { ShellRoom() }
     Box(modifier.fillMaxSize().background(LocalBuilderTokens.current.panel)) {
@@ -210,11 +205,9 @@ private fun SheetShell(
 ) {
     val tokens = LocalBuilderTokens.current
     val layout = LocalLayout.current
-    // b-217
     val fullscreen = fullscreenExit != null
-    val peek = if (fullscreen) 0.dp else posterPeekHeight(layout) // b-217
+    val peek = if (fullscreen) 0.dp else posterPeekHeight(layout)
     val clearance = PaddingValues(
-        // b-217
         bottom = if (fullscreen) tokens.spacing.large + ShellMetrics.dockHeight else sheetClearance(layout, tokens),
     )
     // The frame stands a margin off the bottom edge in fullscreen, and on the edge otherwise.
@@ -226,7 +219,7 @@ private fun SheetShell(
         if (cover.dockUnder(sheetState, BottomSheetDetent.Half)) BottomSheetDetent.Half else BottomSheetDetent.Full
     }
     val handle = remember { FocusRequester() }
-    val moves = remember(sheetState) { SheetMoveReport(sheetState) } // b-406g
+    val moves = remember(sheetState) { SheetMoveReport(sheetState) }
     LaunchedEffect(sheetState, fullscreen) {
         if (fullscreen) return@LaunchedEffect
         var resting = sheetState.targetDetent
@@ -247,11 +240,11 @@ private fun SheetShell(
                     focused = { inside -> cover.topBarFocused = inside },
                 ),
             ) {
-                if (fullscreenExit == null) topBar() else FullscreenExitStrip(fullscreenExit) // b-217
+                if (fullscreenExit == null) topBar() else FullscreenExitStrip(fullscreenExit)
             }
         },
         poster = {
-            if (!fullscreen) { // b-217
+            if (!fullscreen) {
                 PosterSurface(posterColors) {
                     HeadlessBottomSheet(
                         state = sheetState,
@@ -277,9 +270,7 @@ private fun SheetShell(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = tokens.spacing.medium)
-                    // b-217
                     .padding(top = tokens.spacing.extraSmall, bottom = if (fullscreen) tokens.spacing.medium else 0.dp),
-                // b-217
                 shape = if (fullscreen) {
                     RoundedCornerShape(tokens.radius.large)
                 } else {
@@ -343,19 +334,18 @@ private fun DockedShell(
     )
     val posterWidth = { lerp(ShellMetrics.railWidth, openWidth, openness) }
     val roomWidth = if (floats) ({ ShellMetrics.railWidth }) else posterWidth
-    // b-217
     val fullscreen = fullscreenExit != null
     ShellLayout(
-        start = { if (fullscreen) 0.dp else roomWidth() + margin * 2 }, // b-217
+        start = { if (fullscreen) 0.dp else roomWidth() + margin * 2 },
         toasts = ToastInsets(
             start = { if (fullscreen) margin else posterWidth() + margin * 2 },
             end = margin,
             bottom = margin + tokens.spacing.large + ShellMetrics.dockHeight,
         ),
         room = room,
-        topBar = { if (fullscreenExit == null) topBar() else FullscreenExitStrip(fullscreenExit) }, // b-217
+        topBar = { if (fullscreenExit == null) topBar() else FullscreenExitStrip(fullscreenExit) },
         poster = {
-            if (!fullscreen) { // b-217
+            if (!fullscreen) {
                 PosterSurface(posterColors) {
                     PosterPanel(
                         modifier = Modifier
@@ -375,11 +365,10 @@ private fun DockedShell(
             CanvasFrame(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = if (fullscreen) margin else 0.dp) // b-217
+                    .padding(start = if (fullscreen) margin else 0.dp)
                     .padding(end = margin, bottom = margin),
                 shape = RoundedCornerShape(tokens.radius.large),
                 canvas = { canvas(PaddingValues()) },
-                // b-512
                 dockBelow = {
                     Box(Modifier.padding(top = tokens.spacing.small, bottom = tokens.spacing.large)) { dock() }
                 },
@@ -387,8 +376,6 @@ private fun DockedShell(
         },
     )
 }
-
-// b-217
 
 /**
  * The strip across the top that holds [exit] at its end while the top bar is away, so the canvas
@@ -460,14 +447,13 @@ private fun CanvasFrame(
     modifier: Modifier,
     shape: Shape,
     canvas: @Composable () -> Unit,
-    dockBelow: (@Composable () -> Unit)? = null, // b-512
+    dockBelow: (@Composable () -> Unit)? = null,
     floating: @Composable BoxScope.() -> Unit = {},
 ) {
     Box(
         modifier = modifier.clip(shape).background(LocalBuilderTokens.current.canvas),
         contentAlignment = Alignment.TopCenter,
     ) {
-        // b-512
         Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Box(Modifier.weight(1f).widthIn(max = LocalLayout.current.canvasMaxWidth).fillMaxWidth()) { canvas() }
             dockBelow?.invoke()

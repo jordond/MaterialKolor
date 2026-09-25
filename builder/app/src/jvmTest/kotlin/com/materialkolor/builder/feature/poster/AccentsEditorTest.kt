@@ -254,7 +254,6 @@ class AccentsEditorTest {
             onNodeWithText("Show brand on ramp").performClick()
             waitForIdle()
 
-            // b-307
             val pick = harness.actions.first() as WorkspaceAction.OpenPicker
             pick.returnFocusTo shouldNotBe null
             listOf(pick.copy(returnFocusTo = null)) + harness.actions.drop(1) shouldBe listOf(

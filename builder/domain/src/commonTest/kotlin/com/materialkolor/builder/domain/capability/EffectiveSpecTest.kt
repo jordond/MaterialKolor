@@ -11,7 +11,7 @@ import kotlin.test.assertTrue
 
 class EffectiveSpecTest {
     /**
-     * The S1 table, the effective spec for each style when 2021, 2025 or 2026 is requested.
+     * The effective spec for each style when 2021, 2025 or 2026 is requested.
      *
      * A 2026 request on a style with a 2025 form lands on 2025, the same fallback the color
      * engine does.

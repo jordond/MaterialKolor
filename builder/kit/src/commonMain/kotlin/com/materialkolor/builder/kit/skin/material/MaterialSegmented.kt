@@ -90,7 +90,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  *
  * Material raises the chosen button over its neighbours, and the web mirror reads the page in that
  * order, so the chosen option would come last. On the web each button sits in a box of its own,
- * which keeps the options in the order they are written (S5 row 8).
+ * which keeps the options in the order they are written.
  */
 @Composable
 internal fun <T> MaterialSegmented(
@@ -103,7 +103,7 @@ internal fun <T> MaterialSegmented(
     optionIcon: (T) -> IconId?,
     selectOnFocus: Boolean,
     optionLabel: (T) -> String,
-    compact: Boolean = false, // b-510
+    compact: Boolean = false,
 ) {
     val selectedIndex = options.indexOf(selected)
     val focus = rememberRadioGroupFocus(options.size, selectedIndex)
@@ -123,7 +123,6 @@ internal fun <T> MaterialSegmented(
         )
         return
     }
-    // b-510
     if (compact) {
         HeadlessSegmented(
             options = options,
@@ -199,7 +198,7 @@ internal fun <T> MaterialSegmented(
 
 /**
  * The expressive row, Material's connected toggle buttons laid out by hand. Material's own button
- * group folds whatever does not fit into an overflow menu, a popup the web may not open (D40), and
+ * group folds whatever does not fit into an overflow menu, a popup the web may not open, and
  * nothing turns that off, so the row takes only the group's connected shapes.
  *
  * Each option still reads as a radio button with the radio group's roving focus over it, where the
@@ -207,7 +206,7 @@ internal fun <T> MaterialSegmented(
  * the fill and the rounder shape, so the choice never rests on colour alone. The row draws the
  * focused option's ring over every option ([RowRing]).
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class) // b-510
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun <T> ExpressiveSegmented(
     options: List<T>,
@@ -220,7 +219,7 @@ private fun <T> ExpressiveSegmented(
     selectOnFocus: Boolean,
     optionLabel: (T) -> String,
     focus: RadioGroupFocus,
-    compact: Boolean = false, // b-510
+    compact: Boolean = false,
 ) {
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val folds = LocalFoldsStateIntoName.current
@@ -274,7 +273,6 @@ private fun <T> ExpressiveSegmented(
                                 .controlPress(interactionSource),
                             enabled = enabled,
                             shapes = shapes,
-                            // b-510
                             contentPadding = if (compact) {
                                 CompactPadding
                             } else {
@@ -285,7 +283,7 @@ private fun <T> ExpressiveSegmented(
                             interactionSource = interactionSource,
                         ) {
                             if (compact) {
-                                FittedLabel(name, LocalContentColor.current) // b-510
+                                FittedLabel(name, LocalContentColor.current)
                             } else {
                                 ExpressiveLabel(name, if (isSelected) IconId.Check else optionIcon(value))
                             }
@@ -296,8 +294,6 @@ private fun <T> ExpressiveSegmented(
         }
     }
 }
-
-// b-510
 
 /**
  * An expressive option's glyph, if any, and its label.
@@ -327,7 +323,7 @@ private fun ExpressiveLabel(
 private val CompactPadding: PaddingValues = PaddingValues(horizontal = 4.dp)
 
 /**
- * Material's compact row as a track, the design's look for the poster's contrast levels. The track
+ * Material's compact row as a track, the look of the poster's contrast levels. The track
  * takes the raised fill and the chosen option the accent pill, with nothing round the others.
  */
 @Composable
@@ -375,7 +371,7 @@ private fun connectedShapes(
  *
  * A ring stands off its option and reaches past the gap into the neighbours, and a neighbour drawn
  * after it covers that stretch. Raising the focused option over them does not help, because siblings
- * are read in the order they are drawn, so the web would read the focused option last (S5 row 8).
+ * are read in the order they are drawn, so the web would read the focused option last.
  * Drawing the ring from the row keeps every option where it is written.
  */
 @Stable

@@ -2,8 +2,7 @@ import { expect, test, type CDPSession, type Locator, type Page } from '@playwri
 import { openBuilder, wantHooks } from './builder';
 import { settledBox, tap, type Box, type Point } from './touch';
 
-// b-406
-// Flow 5.7 on a phone held upright, with a finger. The preview comes first, the library chips sit
+// The builder on a phone held upright, with a finger. The preview comes first, the library chips sit
 // under the top bar and the poster peeks from the bottom. Pick opens the picker as a sheet, where a
 // drag on the hue repaints the seed as the finger moves. Dragging the poster sheet to half reaches
 // the fine tune rows, and Export opens over the whole screen.
@@ -65,7 +64,6 @@ test('at 390 wide with a finger, a drag on the edge of the poster raises it to h
   await expect(button(page, 'Seed and theme controls, Half')).toBeAttached({ timeout: 15_000 });
 });
 
-// b-406g
 test('at 390 wide with a finger, a drag on the half height poster reaches the fine tune rows', async ({
   page,
   browserName,

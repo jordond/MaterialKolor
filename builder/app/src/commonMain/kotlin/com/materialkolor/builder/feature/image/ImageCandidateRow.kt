@@ -57,7 +57,7 @@ import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The image under the seed actions and the colors it offered (F-08).
+ * The image under the seed actions and the colors it offered.
  *
  * While an image is on its way the row shows its thumbnail, once it has one, beside skeleton chips,
  * whatever the seed came from. Once the seed comes from an image the row shows a chip for each
@@ -79,14 +79,13 @@ internal fun ImageCandidateRow(
     val seeds = LocalImageSeeds.current
     val source = context.document.seedSource
     val arriving = seeds.arriving?.takeIf { arriving -> arriving.lands != source }
-    // b-311a b-311c
     // Read in the frame the row changes over, before what it showed leaves and the focus goes with it.
     val focus = remember { RowFocus() }
-    val preset = Presets.imageOf(source) // b-311b
+    val preset = Presets.imageOf(source)
     val shows = when {
         arriving != null -> RowContent.Arriving
         source is SeedSource.Image -> RowContent.Candidates
-        preset != null -> RowContent.Preset // b-311b
+        preset != null -> RowContent.Preset
         else -> RowContent.None
     }
     val refocus = remember(shows, arriving?.id) { focus.handOver() }
@@ -100,7 +99,6 @@ internal fun ImageCandidateRow(
             val newest = seeds.newest?.takeIf { newest -> newest.source == source }
             CandidateRow(context, source, newest, dispatcher, rowModifier, refocus)
         }
-        // b-311b
         preset != null -> {
             PresetRow(context, preset, dispatcher, rowModifier, refocus)
         }
@@ -119,7 +117,6 @@ private fun ArrivingRow(
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val reading = stringResource(Res.string.image_reading)
-    // b-311c
     val column = remember { FocusRequester() }
     if (refocus) LaunchedEffect(Unit) { column.requestFocus() }
     Column(
@@ -167,7 +164,7 @@ private fun CandidateRow(
                 icon = IconId.Image,
             )
         } else {
-            EyedropperThumbnail(newest.thumbnail, newest.detail, source, context.openPanel, dispatcher) // b-311b
+            EyedropperThumbnail(newest.thumbnail, newest.detail, source, context.openPanel, dispatcher)
         }
         CandidateChips(context, source.candidates, source, dispatcher, Modifier.focusRequester(chips))
         if (newest?.mostlyGray == true) {
@@ -175,8 +172,6 @@ private fun CandidateRow(
         }
     }
 }
-
-// b-311b
 
 /**
  * A preset picture's seed, the picture over its candidate chips. A chip keeps the preset as the seed
@@ -202,8 +197,6 @@ private fun PresetRow(
     }
 }
 
-// b-311b
-
 /**
  * One chip per candidate, drawn the way a style chip is, from the scheme the candidate makes in the
  * document's style. The schemes resolve one per frame, so a new image never costs five in one. A
@@ -223,7 +216,7 @@ private fun CandidateChips(
     val inputs = remember(candidates, base) {
         candidates.map { candidate -> SchemeInputs.from(base.copy(seed = candidate)) }
     }
-    val colors = rememberCandidateColors(candidates, inputs, isDark, resolver) // b-311c
+    val colors = rememberCandidateColors(candidates, inputs, isDark, resolver)
     val selected = context.document.seed
     val choose = { candidate: Argb, origin: Rect? ->
         val change = DocumentChange.SetSeed(candidate, source)
@@ -268,12 +261,11 @@ private fun CandidateChips(
  */
 @Composable
 internal fun rememberCandidateColors(
-    chips: List<Any>, // b-311d
+    chips: List<Any>,
     inputs: List<SchemeInputs>,
     isDark: Boolean,
     resolver: ThemeResolver,
 ): List<CandidateColors?> {
-    // b-311c
     val colors = remember(chips) { mutableStateListOf<CandidateColors?>() }
     val next = remember(chips) { NextChip() }
     LaunchedEffect(inputs, isDark, resolver) {
@@ -309,8 +301,6 @@ private fun Thumbnail(bitmap: ImageBitmap) {
     )
 }
 
-// b-311d
-
 /**
  * The three colors a candidate chip is drawn in.
  */
@@ -337,10 +327,8 @@ private class RowFocus {
      * Whether the focus was in the row as it changed over to show something else, which starts the
      * next thing it shows afresh. Its own focus events say soon enough whether it has the focus.
      */
-    fun handOver(): Boolean = inRow.also { inRow = false } // b-311c
+    fun handOver(): Boolean = inRow.also { inRow = false }
 }
-
-// b-311c
 
 /**
  * What the row shows, whose change hands the focus over.
@@ -348,7 +336,7 @@ private class RowFocus {
 private enum class RowContent {
     Arriving,
     Candidates,
-    Preset, // b-311b
+    Preset,
     None,
 }
 

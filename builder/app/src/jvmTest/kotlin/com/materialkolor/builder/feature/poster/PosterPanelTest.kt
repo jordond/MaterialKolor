@@ -65,7 +65,7 @@ import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
 
 /**
- * The seed field's pause before it commits (F-05).
+ * The seed field's pause before it commits.
  */
 private const val COMMIT_DELAY = 400L
 
@@ -78,7 +78,7 @@ private const val PHONE_WIDTH = 400
 private const val PHONE_HEIGHT = 800
 
 /**
- * The phone the sheet peek is checked on, upright and on its side (D38).
+ * The phone the sheet peek is checked on, upright and on its side.
  */
 private const val PEEK_PHONE_SHORT = 390
 private const val PEEK_PHONE_LONG = 844
@@ -236,7 +236,6 @@ class PosterPanelTest {
             onNodeWithContentDescription("Copy Kotlin").performClick()
             waitForIdle()
 
-            // b-221f
             // Each copy also carries its own button, for the manual copy dialog to hand focus back to.
             val copies = actions.map { action -> (action as WorkspaceAction.CopyText).copy(returnFocusTo = null) }
             copies shouldBe listOf(
@@ -286,13 +285,11 @@ class PosterPanelTest {
             showPoster()
 
             onNodeWithText("Pick").performClick()
-            // b-311b
             // Image opens a menu, and its Upload image row opens the image picker.
             onNodeWithText("Image").performClick()
             onNodeWithText("Upload image").performClick()
             waitForIdle()
 
-            // b-307
             // Pick also carries its own button, for the picker to hand focus back to.
             val pick = actions.first() as WorkspaceAction.OpenPicker
             pick.returnFocusTo shouldNotBe null
@@ -419,7 +416,6 @@ class PosterPanelTest {
             onNodeWithText("Read more in the docs").assertDoesNotExist()
         }
 
-    // b-221f
     @Test
     fun infoButton_seed_readsCollapsedThenExpandedOnceOpened() =
         runComposeUiTest {
@@ -514,7 +510,6 @@ class PosterPanelTest {
         inPeek.shouldNotBeEmpty()
     }
 
-    // b-304
     private fun ComposeUiTest.seedField() =
         onNode(hasSetTextAction() and hasContentDescription("Seed color, any format"))
 

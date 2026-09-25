@@ -50,11 +50,9 @@ internal sealed interface WorkspaceAction {
      */
     data object Redo : WorkspaceAction
 
-    // b-508
-
     /**
      * Move straight to the step [cursor] of the history, as that many undos or redos in one go. Zero
-     * is the document before the oldest step. A jump is not a step of its own (D55).
+     * is the document before the oldest step. A jump is not a step of its own.
      */
     data class JumpTo(
         val cursor: Int,
@@ -79,11 +77,11 @@ internal sealed interface WorkspaceAction {
      * Open the color picker on [target].
      *
      * @property[returnFocusTo] The Pick button that asked, which gets focus back once the picker
-     * closes (AR-09), or null for none.
+     * closes, or null for none.
      */
     data class OpenPicker(
         val target: PickerTarget,
-        val returnFocusTo: FocusRequester? = null, // b-307
+        val returnFocusTo: FocusRequester? = null,
     ) : WorkspaceAction
 
     /**
@@ -97,8 +95,6 @@ internal sealed interface WorkspaceAction {
     data class SetPreviewTab(
         val tab: PreviewTab,
     ) : WorkspaceAction
-
-    // b-217aa
 
     /**
      * Show the preview light, dark or split, behind a reveal out of [origin] if there is one. It
@@ -173,12 +169,12 @@ internal sealed interface WorkspaceAction {
      * Put [text] on the clipboard and say so, naming what it was with [label].
      *
      * @property[returnFocusTo] The button that asked, which gets focus back once the manual copy
-     * dialog a refused copy opens has closed (AR-09), or null for none.
+     * dialog a refused copy opens has closed, or null for none.
      */
     data class CopyText(
         val text: String,
         val label: String,
-        val returnFocusTo: FocusRequester? = null, // b-221f
+        val returnFocusTo: FocusRequester? = null,
     ) : WorkspaceAction
 
     /**
@@ -219,16 +215,12 @@ internal sealed interface WorkspaceAction {
      */
     data object DismissExpressiveSuggestion : WorkspaceAction
 
-    // b-308
-
     /**
      * Show the Palettes tab with the ramp [target] sits on picked out.
      */
     data class ShowOnRamp(
         val target: RampTarget,
     ) : WorkspaceAction
-
-    // b-306b
 
     /**
      * Turn the exported theme's color animation on or off in the export options this browser keeps
@@ -247,8 +239,6 @@ internal sealed interface WorkspaceAction {
         val durationMs: Int,
     ) : WorkspaceAction
 
-    // b-311a
-
     /**
      * Show [toast] and hand [onShown] a way to take it back before its time is up, for a toast that
      * only holds while something else does, such as an Undo for the edit still on top.
@@ -258,8 +248,6 @@ internal sealed interface WorkspaceAction {
         val onShown: (withdraw: () -> Unit) -> Unit,
     ) : WorkspaceAction
 
-    // b-315c
-
     /**
      * Open the dock's Vision menu or close it. Nothing saves it.
      */
@@ -268,7 +256,7 @@ internal sealed interface WorkspaceAction {
     ) : WorkspaceAction
 
     /**
-     * Show the canvas in grayscale while B is held, or let go (F-25). Nothing saves it.
+     * Show the canvas in grayscale while B is held, or let go. Nothing saves it.
      */
     data class HoldGrayscale(
         val held: Boolean,
@@ -287,10 +275,10 @@ internal enum class Panel {
     Picker,
     Explainer,
     Share,
-    ImageEyedropper, // b-311b
-    Presets, // b-311d
-    Help, // b-314
-    History, // b-508
+    ImageEyedropper,
+    Presets,
+    Help,
+    History,
 }
 
 /**

@@ -27,7 +27,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 
 /**
- * Whether focus is being moved from the keyboard, the way a browser decides `:focus-visible` (D58).
+ * Whether focus is being moved from the keyboard, the way a browser decides `:focus-visible`.
  *
  * A key press turns it on and a pointer press turns it off. So a ring shows on whatever Tab or an
  * arrow reaches, and not on the button a click leaves focused. Focus a panel moves as it opens

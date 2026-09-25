@@ -36,7 +36,7 @@ private val Plain = ThemeDocument(seed = Argb(0x6750A4))
 
 private const val TITLE = "Spec, platform, extra colors and target options"
 
-private const val CLASSIC_ONLY = "This style only exists in the 2021 spec." // b-306c
+private const val CLASSIC_ONLY = "This style only exists in the 2021 spec."
 
 private const val COMES_BACK = "Your 2025 spec comes back as soon as you pick a style that has it."
 
@@ -310,7 +310,6 @@ class SpecExtrasRowTest {
             harness.undoEntries() shouldBe 1
         }
 
-    // b-306c
     @Test
     fun toneTable_onRampSlot_startsAtTheOnColorsOwnToneNotItsBackground() {
         val onRamp = SlotResolution.OnRamp(TonalRamp.Primary, light = 40, dark = 80)

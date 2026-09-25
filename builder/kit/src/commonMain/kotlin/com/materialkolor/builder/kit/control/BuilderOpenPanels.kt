@@ -33,7 +33,6 @@ public fun BuilderMenuPanel(
     when (LocalSkin.current.library) {
         Library.Material3 -> MaterialMenuPanel(items, modifier)
         Library.Unstyled -> HeadlessMenuPanel(items, unstyledOverlayStyle(tokens), modifier)
-        // fluent-placeholder
         Library.Fluent -> HeadlessMenuPanel(items, fluentOverlayStyle(tokens), modifier)
         Library.Custom -> HeadlessMenuPanel(items, customOverlayStyle(tokens), modifier)
     }
@@ -77,7 +76,6 @@ public fun <T> BuilderSelectPanel(
             unstyledOverlayStyle(tokens),
             modifier,
         )
-        // fluent-placeholder
         Library.Fluent -> HeadlessSelectPanel(
             label,
             options,

@@ -10,7 +10,7 @@ import androidx.compose.ui.focus.focusRequester
 /**
  * The Pick buttons on screen, each known by the focus requester it sends with `OpenPicker`.
  *
- * The picker hands focus back only to a button that still stands (AR-09), the rule `PanelTrigger`
+ * The picker hands focus back only to a button that still stands, the rule `PanelTrigger`
  * keeps for the poster. A Pick button that left meanwhile, with the poster folded to its rail or
  * its accent removed, gets no request.
  */

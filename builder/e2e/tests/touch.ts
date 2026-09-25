@@ -1,6 +1,5 @@
 import { expect, type CDPSession, type Locator, type Page } from '@playwright/test';
 
-// b-228c
 // What the touch specs share, a finger through a Chromium CDP session, the mirror's buttons and the
 // mirror's size. `text-toolbar.spec.ts` and `sample-fields.spec.ts` both import it.
 

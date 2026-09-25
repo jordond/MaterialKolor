@@ -62,8 +62,6 @@ internal data class HistoryState(
     val redoLabel: ChangeLabel? = null,
 )
 
-// b-508
-
 /**
  * Every step of the open project's history for the History list, a snapshot the session builds when
  * asked. [HistoryState] goes out on every frame of a drag, so the steps stay out of it.
@@ -130,7 +128,6 @@ internal data class SessionColors(
     val previewColors: List<Argb>,
     val splashLight: Argb,
     val splashDark: Argb,
-    // b-501b
     val splashSeed: Argb,
 ) {
     init {

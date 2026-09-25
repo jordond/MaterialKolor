@@ -28,8 +28,6 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 import kotlin.test.Test
 
-// b-404a
-
 /**
  * How long the checks give a reveal, well inside the 300 ms it waits on a font at most.
  */

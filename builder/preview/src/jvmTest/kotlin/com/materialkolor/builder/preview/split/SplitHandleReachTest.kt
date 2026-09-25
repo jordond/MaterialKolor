@@ -16,8 +16,6 @@ import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-406
-
 /**
  * The line and grip the handle draws, the kit's section spacing, whatever it reaches.
  */

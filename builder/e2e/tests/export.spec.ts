@@ -17,12 +17,11 @@ import {
   typeSeed,
 } from '../fixtures/workspace';
 
-// b-503
-// Export (flow 5.4). The zip holds every file the sheet shows, its Kotlin byte for byte the codegen's
+// Export. The zip holds every file the sheet shows, its Kotlin byte for byte the codegen's
 // golden for the default theme, and the package stays across a seed change, a reload and a new
 // project. first-run.spec.ts copies a file to the clipboard.
 
-/** The Export sheet's title in the mirror, the dialog fold (D40). */
+/** The Export sheet's title in the mirror, the dialog fold. */
 const EXPORT_DIALOG = /^Export code, dialog/;
 
 /** The codegen's golden for the default seed on Material 3, Dynamic, the builder's first theme. */
@@ -36,7 +35,6 @@ test.beforeEach(async ({ context }) => {
 });
 
 test('Download zip holds every file the sheet shows, its Kotlin as the golden has it', async ({ page }) => {
-  // b-503b
   // WebKit raises the download too. The zip starts inside the press, as Safari asks.
   await openSheet(page);
   const tabs = await fileTabs(page);

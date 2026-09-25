@@ -68,7 +68,7 @@ interface Router {
  *
  * A record that is missing reads as its default. One that no longer decodes is set aside under its
  * quarantine key and also reads as the default, so user data is never dropped silently. One written
- * by a newer build stays where it is, reads as the default and turns down every update (D41).
+ * by a newer build stays where it is, reads as the default and turns down every update.
  *
  * A failed write comes back as a [StoreError] rather than the `Result` that [Clipboard] and
  * [FileSaver] use, because store failures are a closed set the UI branches on (a full quota shows
@@ -95,18 +95,14 @@ interface Store<T> {
      */
     suspend fun update(block: (T) -> T): StoreError?
 
-    // b-310aa
-
     /**
      * Whether a newer build wrote the record, so this one reads its default and turns down every
-     * update to it (D41).
+     * update to it.
      *
      * Asking only reads. Nothing is moved aside or reported on [StoreFactory.quarantined], and a
      * record that is missing, readable or unreadable answers false.
      */
     suspend fun fromNewerBuild(): Boolean
-
-    // b-214
 
     /**
      * Remove the record, so it reads as its default again.
@@ -134,11 +130,9 @@ interface StoreFactory {
      */
     val externalChanges: Flow<StorageKey>
 
-    // b-214
-
     /**
      * Records a store could not read, each reported once. Unreadable text has been moved to its
-     * quarantine key by then, while a record from a newer build is left in place (D41).
+     * quarantine key by then, while a record from a newer build is left in place.
      *
      * Reports found before anything collects are kept until the first collector comes, and each
      * report reaches exactly one collector. The web store keeps to this too, since boot reads the
@@ -166,8 +160,6 @@ enum class StoreError {
  * The system clipboard.
  */
 interface Clipboard {
-    // b-302a
-
     /**
      * Put [text] on the clipboard. A failure means it did not land.
      *
@@ -195,8 +187,6 @@ class OutgoingFile(
  * Downloads and the share sheet.
  */
 interface FileSaver {
-    // b-302a
-
     /**
      * Save [bytes] as [name] through the platform's download or save dialog.
      *
@@ -210,14 +200,10 @@ interface FileSaver {
         mime: String,
     ): Result<Unit>
 
-    // b-302a
-
     /**
      * Whether the share sheet takes the kinds of file an export makes here, so Share is worth offering.
      */
     val canShareFiles: Boolean
-
-    // b-302a
 
     /**
      * Whether the share sheet takes [files] here, answered without suspending.
@@ -226,8 +212,6 @@ interface FileSaver {
      * [save] after a share fails, because by then the click is spent in Safari.
      */
     fun canShare(files: List<OutgoingFile>): Boolean
-
-    // b-302a
 
     /**
      * Hand [files] to the share sheet.
@@ -238,15 +222,11 @@ interface FileSaver {
      */
     suspend fun shareFiles(files: List<OutgoingFile>): Result<Unit>
 
-    // b-310
-
     /**
      * Whether a share link goes to the share sheet here rather than the clipboard, on a touch
      * screen whose browser has one. Read it in the click, before anything suspends.
      */
     val canShareLink: Boolean
-
-    // b-310
 
     /**
      * Hand the link [url] called [title] to the share sheet.
@@ -285,7 +265,6 @@ class DecodedImage(
     val height: Int,
     val pixels: IntArray,
     val thumbnail: ImageBitmap,
-    // b-302
     val detail: ImageBitmap,
 )
 
@@ -293,8 +272,6 @@ class DecodedImage(
  * Images coming in from a picker or a drop.
  */
 interface ImageInput {
-    // b-302a
-
     /**
      * Open the platform picker. Null when the user closes it without choosing, or when there is no
      * click to open it in.
@@ -305,8 +282,6 @@ interface ImageInput {
      */
     suspend fun pick(): ImageHandle?
 
-    // b-302a
-
     /**
      * Files dropped anywhere on the builder, images or not, so [decode] can turn down the rest.
      */
@@ -316,8 +291,6 @@ interface ImageInput {
      * Read [handle]. Null when it is not an image the platform can read, or one too big to read safely.
      */
     suspend fun decode(handle: ImageHandle): DecodedImage?
-
-    // b-302a
 
     /**
      * Whether files are being dragged over the builder right now, for the drop overlay.
@@ -335,8 +308,6 @@ sealed interface Paste {
     data class Text(
         val text: String,
     ) : Paste
-
-    // b-302a
 
     /**
      * Pasted files, usually a screenshot. Files that are not images come too, for [ImageInput.decode] to turn down.
@@ -377,8 +348,6 @@ interface Environment {
      */
     val eyeDropperAvailable: Boolean
 
-    // b-302a
-
     /**
      * Let the user pick a color off the screen. Null when they cancel.
      *
@@ -397,8 +366,6 @@ interface Environment {
      * Tint the browser chrome, the `theme-color` meta tag on the web.
      */
     fun setThemeColor(argb: Argb)
-
-    // b-501b
 
     /**
      * Remember [splash] so the next boot paints it before any code loads.
@@ -420,8 +387,6 @@ interface Environment {
      */
     val storageAvailable: Boolean
 
-    // b-215a
-
     /**
      * The project this tab had open, kept through a reload and gone with the tab. Null when there is none.
      */
@@ -431,8 +396,6 @@ interface Environment {
      * Remember [id] as the project this tab has open, or forget it with null.
      */
     fun writeTabProject(id: String?)
-
-    // b-301
 
     /**
      * Emits when the page goes out of sight, hidden behind another tab, closed or put in the back and
@@ -444,16 +407,12 @@ interface Environment {
      */
     val pageHides: Flow<Unit>
 
-    // b-221c
-
     /**
      * Read [message] out to a screen reader once, without moving focus. The web writes it into the
-     * page's own live region, since the Compose semantics mirror never reads a live region out (D40).
+     * page's own live region, since the Compose semantics mirror never reads a live region out.
      * Elsewhere it does nothing.
      */
     fun announce(message: String)
-
-    // b-314
 
     /**
      * The browser and the system it runs on, the way a bug report names them. The web gives the
@@ -461,23 +420,17 @@ interface Environment {
      */
     val browser: String
 
-    // b-314b
-
     /**
      * Load the page again at [path], so a newer build can read what this one cannot. The web goes
      * there with `location.assign`. The desktop build has no page to load, so it does nothing.
      */
     fun reload(path: String)
 
-    // b-314ba
-
     /**
      * Whether [reload] loads anything here. The web does, and the desktop build has no page to load,
      * so a banner there leaves its Reload out.
      */
     val canReload: Boolean
-
-    // b-505
 
     /**
      * Where share links and the links in exports open. The web gives the page's own origin, so a
@@ -486,8 +439,6 @@ interface Environment {
     val siteOrigin: String
         get() = SITE_ORIGIN
 
-    // b-504
-
     /**
      * Leave the timing mark [name], one of [TimingMarks], for the perf run to read. The web calls
      * `performance.mark`, and its first frame mark also loads the analytics beacon. Elsewhere it
@@ -495,8 +446,6 @@ interface Environment {
      */
     fun mark(name: String) = Unit
 }
-
-// b-504
 
 /**
  * The names [Environment.mark] leaves, in the `mk:` namespace the rest of the page uses. The perf run
@@ -530,8 +479,6 @@ object TimingMarks {
     const val EXTRACT: String = "mk:extract"
 }
 
-// b-501b
-
 /**
  * What the next boot's splash paints before any code loads, the chrome, the poster and whether the
  * chrome is dark.
@@ -564,11 +511,9 @@ data class BootSplash(
     }
 }
 
-// b-214
-
 /**
  * A record a store could not read, so the user can be told and nothing is lost. Unreadable text is
- * moved to its quarantine key, and a record from a newer build is left where it is (D41).
+ * moved to its quarantine key, and a record from a newer build is left where it is.
  *
  * @property[key] Where the record was stored.
  * @property[reason] Why it could not be read.

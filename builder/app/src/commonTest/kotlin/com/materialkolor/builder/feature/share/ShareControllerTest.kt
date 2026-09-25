@@ -70,7 +70,6 @@ class ShareControllerTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
-    // b-505
     @Test
     fun link_onStaging_opensOnStaging() =
         runTest {

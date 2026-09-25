@@ -25,7 +25,7 @@ import kotlinx.collections.immutable.toImmutableList
  * One accent of the document, worked out into its four colors for both modes.
  *
  * The exported `ExtendedColors.kt` builds its ramp with `rememberTonalPalette`, whose body in core
- * is the chain below, and B-117's parity gate checks the two agree. The seed is pulled toward the
+ * is the chain below, and `ExportParityTest` checks the two agree. The seed is pulled toward the
  * theme seed with `harmonize` when the accent asks for it, a ramp is built from the result, and each
  * mode cuts its color and container off that ramp with `toneColor`. The two on colors come from
  * `onTone` at the accent's own threshold. Change one without the other and the preview stops
@@ -43,8 +43,6 @@ public class AccentFamily internal constructor(
     public val light: AccentColors,
     public val dark: AccentColors,
 ) {
-    // b-308b
-
     /**
      * The family's ramp at every tone in [RampSet.Tones], darkest first, laid out like a scheme
      * palette's steps. Both modes cut from this one ramp.

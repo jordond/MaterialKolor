@@ -6,7 +6,6 @@ import com.materialkolor.builder.domain.persist.Appearance
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-501b
 // boot.js reads this text before any app code runs, so its shape is held here to the letter.
 class BootSplashTest {
     @Test

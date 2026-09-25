@@ -36,7 +36,7 @@ private val RingGrounds: List<CustomSlot> =
 
 /**
  * The Custom focus color stands 3 to 1 from every ground the kit draws a ring on, in both modes, for
- * any seed and style (D46).
+ * any seed and style.
  */
 class CustomFocusRingTest {
     @Test

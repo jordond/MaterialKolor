@@ -81,8 +81,6 @@ private fun startShare(files: JsArray<File>): Promise<JsString?> =
     }""",
     )
 
-// b-310
-
 /**
  * Whether a link is worth handing to the share sheet rather than the clipboard, which is when the
  * page has `navigator.share` and the main pointer is a finger. Desktop browsers with Web Share get
@@ -99,8 +97,6 @@ internal fun pageCanShareLink(): Boolean =
         }
     }""",
     )
-
-// b-310
 
 /**
  * Hand the link [url] called [title] to the share sheet. Returns why it did not go, or null when it

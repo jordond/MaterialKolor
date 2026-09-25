@@ -55,7 +55,7 @@ internal fun formsCaseFiles(): List<GeneratedFile> =
                 receiver = type(Symbols.ColorScheme),
             )
             toFamily()
-            swapTones() // b-111b
+            swapTones()
             appTheme()
         },
     )
@@ -116,7 +116,6 @@ private fun KotlinFileScope.toFamily() {
     }
 }
 
-// b-111b
 private fun KotlinFileScope.swapTones() {
     function(name = "swapTones", visibility = Visibility.Private) {
         parameter("tones", type("IntArray"))

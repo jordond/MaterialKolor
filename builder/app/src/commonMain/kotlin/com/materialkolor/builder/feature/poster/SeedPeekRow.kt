@@ -27,8 +27,8 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The seed as the sheet leads with it, the hex large with the seed's name and its HCT readout under
- * it, or beside it where there is room, and a round Shuffle at the end. It is what a phone sees of the poster at rest, even on its
- * side (D38).
+ * it, or beside it where there is room, and a round Shuffle at the end. It is what a phone sees of
+ * the poster at rest, even on its side.
  *
  * The hex here only reads. Editing it is the hero's job further down the sheet.
  */
@@ -42,7 +42,6 @@ internal fun SeedPeekRow(
     val tokens = LocalBuilderTokens.current
     val spacing = tokens.spacing
     val hct = remember(seed) { HctReadout.of(seed).rounded() }
-    // b-510
     val hex = LocalBuilderType.current.posterHero.merge(
         color = tokens.textStrong,
         fontSize = PeekHexSize,
@@ -82,10 +81,8 @@ internal fun SeedPeekRow(
     }
 }
 
-// b-510
-
 /**
- * How big the peek sets the hex, the phone design's size, under the docked hero's 72.
+ * How big the peek sets the hex, half the docked hero's 72.
  */
 private val PeekHexSize: TextUnit = 36.sp
 

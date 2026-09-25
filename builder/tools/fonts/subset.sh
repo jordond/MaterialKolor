@@ -2,7 +2,7 @@
 #
 # Rebuilds the two builder faces that ship in :builder:kit.
 #
-# Design D asks for Bricolage Grotesque on the poster, the wordmark and the chrome, and JetBrains
+# The builder uses Bricolage Grotesque on the poster, the wordmark and the chrome, and JetBrains
 # Mono on values and code. Both are OFL. The upstream files carry every script and every axis, so
 # they are far too heavy for a wasm site. This script cuts them down to Latin and to the one axis
 # the builder actually varies, weight.
@@ -69,7 +69,7 @@ jetbrains_axes="wght 100 to 800"
 brand_features='kern,ccmp,mark,mkmk,locl'
 mono_features='kern,ccmp,mark,mkmk,locl'
 
-# Budget from architecture 6.11, per face, brotli compressed.
+# Budget per face, brotli compressed.
 budget_bytes=$((40 * 1024))
 
 echo "Working in $work_dir"
@@ -118,8 +118,7 @@ pyftsubset "$work_dir/jetbrains.ttf" \
     --name-legacy \
     --notdef-outline
 
-# b-404
-# Selawik stands in for Segoe UI on the Fluent skin (architecture 6.11). It ships as static faces,
+# Selawik stands in for Segoe UI on the Fluent skin. It ships as static faces,
 # and Fluent's type scale only sets Regular and SemiBold, so those two are cut to the same Latin
 # range. The release is a tag with a zip, pinned by its checksum.
 #

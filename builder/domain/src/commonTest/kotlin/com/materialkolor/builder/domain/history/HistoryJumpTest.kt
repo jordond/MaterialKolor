@@ -14,7 +14,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-// b-508
 class HistoryJumpTest {
     @Test
     fun jumpTo_olderStep_returnsItsAfterAndKeepsLaterStepsToRedo() {

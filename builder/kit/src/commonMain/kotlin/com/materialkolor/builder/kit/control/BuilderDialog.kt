@@ -36,9 +36,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  *
  * The title is the dialog's name. While it is open, focus starts inside it and Tab cannot leave
  * it, even with no actions to focus. Esc and a click on the veil call
- * [onDismissRequest], and once it has gone focus goes back to [returnFocusTo] (AR-09). It scales up
+ * [onDismissRequest], and once it has gone focus goes back to [returnFocusTo]. It scales up
  * from 0.96 with a fade, or only fades under reduced motion. Material3 draws its `AlertDialog`, the
- * other skins the headless dialog. Where overlays render in the page (D40) Material3 draws its own
+ * other skins the headless dialog. Where overlays render in the page Material3 draws its own
  * dialog container over the headless modal instead.
  *
  * @param[visible] Whether the dialog is open.
@@ -63,13 +63,12 @@ public fun BuilderDialog(
     title: String,
     modifier: Modifier = Modifier,
     returnFocusTo: FocusRequester? = null,
-    titleShown: Boolean = true, // b-511
-    actions: (@Composable RowScope.() -> Unit)? = null, // b-511
+    titleShown: Boolean = true,
+    actions: (@Composable RowScope.() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val frame = DialogFrame(titleShown, actions)
     val tokens = LocalBuilderTokens.current
-    // b-221b
     when (overlayLibrary()) {
         Library.Material3 -> {
             MaterialDialog(visible, onDismissRequest, title, returnFocusTo, modifier, frame, content)
@@ -86,7 +85,6 @@ public fun BuilderDialog(
                 content,
             )
         }
-        // fluent-placeholder
         Library.Fluent -> {
             HeadlessDialog(
                 visible,
@@ -147,7 +145,7 @@ private fun HeadlessDialog(
             if (frame.titleShown) {
                 BuilderText(title, Modifier.modalTitle(), style = BuilderTextStyle.Title, color = style.content)
             }
-            Column(Modifier.weight(1f, fill = false), content = content) // b-230c
+            Column(Modifier.weight(1f, fill = false), content = content)
             val actions = frame.actions
             if (actions != null) {
                 Row(
@@ -160,8 +158,6 @@ private fun HeadlessDialog(
         }
     }
 }
-
-// b-511
 
 /**
  * What a dialog shows around its body, whether its title shows and the row of actions, if any.

@@ -281,6 +281,6 @@ public enum class FineTuneRow {
 }
 
 /**
- * This document with its contrast on the nearest named level (D53).
+ * This document with its contrast on the nearest named level.
  */
 private fun ThemeDocument.snapped(): ThemeDocument = copy(contrast = contrast.snapped())

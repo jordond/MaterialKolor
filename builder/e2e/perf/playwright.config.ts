@@ -1,7 +1,6 @@
 import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 
-// b-504
 // The nightly perf run, `npm run perf`. One worker on Chromium, so the timings do not compete with
 // each other. It reuses the e2e global setup, which checks the built site and names its folder.
 export default defineConfig({

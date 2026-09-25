@@ -134,8 +134,6 @@ public object DefaultArguments {
         platform = defaultPlatform(),
     )
 
-    // b-112
-
     /**
      * Core's own `rememberDynamicScheme`, which the Unstyled export calls when it writes its schemes
      * out and the Fluent export calls when it maps the shades itself. Core spells its style default
@@ -168,8 +166,6 @@ public object DefaultArguments {
     public val HarmonizeMatchSaturation: DefaultArgument<Boolean> =
         DefaultArgument("matchSaturation", false, "false")
 
-    // b-112b
-
     /**
      * Whether the `MaterialKolors` constructor drops dark surfaces to black.
      */
@@ -185,13 +181,13 @@ public object DefaultArguments {
             RememberDynamicMaterialThemeState,
             RememberFluentColors,
             DynamicColorSchemes,
-            RememberDynamicScheme, // b-112
+            RememberDynamicScheme,
         ).associate { defaults -> defaults.function to defaults.arguments } +
             mapOf(
                 Symbols.OnTone to listOf(OnToneThreshold),
                 Symbols.RememberTonalPalette to listOf(RememberTonalPaletteHarmonizeWith),
                 Symbols.Harmonize to listOf(HarmonizeMatchSaturation),
-                Symbols.MaterialKolors to listOf(MaterialKolorsIsAmoled), // b-112c
+                Symbols.MaterialKolors to listOf(MaterialKolorsIsAmoled),
             )
 
     private fun tonalSpot(): DefaultArgument<Style> =

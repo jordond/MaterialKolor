@@ -30,7 +30,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  *
  * Each option draws its own selectable node, with its role and selected state, and puts the
  * modifier it is handed on that node, or on a wrapper around it with no focus of its own. The
- * group's name goes in as text on the web, where the group has no role (S5 answer 1).
+ * group's name goes in as text on the web, where the group has no role.
  *
  * Use [BuilderChoiceChips] where a label is all an option shows.
  *
@@ -55,7 +55,7 @@ public fun <T> BuilderChoiceGroup(
     label: String,
     modifier: Modifier = Modifier,
     selectOnFocus: Boolean = true,
-    columns: Int = 0, // b-510
+    columns: Int = 0,
     option: @Composable (value: T, isSelected: Boolean, optionModifier: Modifier) -> Unit,
 ) {
     val selectedIndex = options.indexOf(selected)
@@ -78,7 +78,6 @@ public fun <T> BuilderChoiceGroup(
             option(options[index], index == selectedIndex, optionModifier)
         }
     }
-    // b-510
     if (columns > 0) {
         ChoiceGrid(options.size, columns, group, rowGap = spacing.medium, each)
         return
@@ -92,8 +91,6 @@ public fun <T> BuilderChoiceGroup(
         options.indices.forEach { index -> each(index) }
     }
 }
-
-// b-510
 
 /**
  * [count] options in rows of [columns] equal cells, each option at the top centre of its cell. A

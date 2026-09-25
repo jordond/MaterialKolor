@@ -60,7 +60,6 @@ public fun PosterSurface(
     content: @Composable () -> Unit,
 ) {
     val outer = LocalBuilderTokens.current
-    // pf-1
     // Every theme result brings a poster of its own, but the poster follows the seed alone. A new
     // paint re-themes the poster, which recomposes every control on it, so it is kept while the seed
     // stays and an edit that leaves the seed alone never re-themes the poster.
@@ -104,7 +103,7 @@ private const val ShadeTone = 0
  *
  * No status hue is sure to read on every seed, so success, warning and danger all take the ink.
  * The poster says what a state means in words. Muted text takes the ink too, since muted ink is
- * only floored at 3 to 1 on the seed (D39).
+ * only floored at 3 to 1 on the seed.
  */
 private fun PosterPaint.builderTokens(outer: BuilderTokens): BuilderTokens =
     outer.copy(
@@ -396,7 +395,7 @@ private fun FluentPoster(
     tokens: BuilderTokens,
     content: @Composable () -> Unit,
 ) {
-    val colors = remember(poster.seed) { Colors(poster.ramp.toFluentShades(), darkMode = !poster.isLight) } // pf-1
+    val colors = remember(poster.seed) { Colors(poster.ramp.toFluentShades(), darkMode = !poster.isLight) }
     val ink = remember(paint) { FluentPosterInk(ink = paint.ink, page = paint.page, outline = paint.outline) }
     FluentThemeConfiguration(colors = colors, typography = rememberFluentTypography()) {
         CompositionLocalProvider(

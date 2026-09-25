@@ -7,7 +7,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-511
 class PopoverPlacementTest {
     private val window = IntSize(400, 600)
     private val popover = IntSize(160, 200)

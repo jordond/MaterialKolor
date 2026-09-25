@@ -37,7 +37,7 @@ import org.jetbrains.compose.resources.stringResource
 private val RevisedSpecs = listOf(SpecVersion.Spec2021, SpecVersion.Spec2025)
 
 /**
- * The spec and the platform (F-13).
+ * The spec and the platform.
  *
  * The choice shows the spec the scheme is really built with. A style with a 2025 form offers 2021
  * and 2025, a style without one shows the same choice off on 2021 and says so, and Cmf shows its

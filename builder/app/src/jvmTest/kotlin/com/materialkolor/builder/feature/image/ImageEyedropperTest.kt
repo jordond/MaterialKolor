@@ -76,8 +76,6 @@ class ImageEyedropperTest {
             onNodeWithText("Pick any spot", substring = true).assertDoesNotExist()
         }
 
-    // b-311d
-
     @Test
     fun rowLeaving_closesTheEyedropper_soNoPanelIsLeftOpen() =
         runComposeUiTest {

@@ -35,13 +35,12 @@ import org.jetbrains.compose.resources.stringResource
 internal const val ABOUT_HEIGHT_FRACTION = 0.6f
 
 /**
- * Help, open while `state.panel` is [Panel.Help] (F-36). It gathers every info button's question
- * and answer from the poster in one list, so they can be read without hunting for the buttons.
+ * Help, open while `state.panel` is [Panel.Help]. It gathers every info button's question and
+ * answer from the poster in one list, so they can be read without hunting for the buttons.
  *
  * It offers the help pages only once [HELP_PAGES_URL] names them.
  *
- * @param[returnFocusTo] The overflow button that opened it, which gets focus back once it closes
- * (AR-09).
+ * @param[returnFocusTo] The overflow button that opened it, which gets focus back once it closes.
  */
 @Composable
 internal fun HelpHost(

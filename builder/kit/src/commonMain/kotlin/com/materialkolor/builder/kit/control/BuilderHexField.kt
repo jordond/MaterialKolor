@@ -27,7 +27,7 @@ import kotlinx.coroutines.delay
 
 /**
  * A color field that reads anything `ColorInput` does, from `#6750A4` to `oklch(0.6 0.1 280)` or a CSS
- * name (F-05).
+ * name.
  *
  * It commits on Enter, on leaving the field, or [CommitDelayMillis] after the last keystroke that
  * left a valid color. Text that is not a color shows an error and never commits. Esc puts back the
@@ -46,7 +46,7 @@ import kotlinx.coroutines.delay
  * @param[noteMessage] What to say under the field about what had to change to read the color. Only
  * asked about a set with at least one note in it, and the words depend on what the color is for.
  * @param[modifier] Applied to the field.
- * @param[large] Draw it as the poster's 72 sp seed headline (F-66), which shows no label. A color
+ * @param[large] Draw it as the poster's 72 sp seed headline, which shows no label. A color
  * that would not fit the width the field is offered at 72 sp is set smaller until it does.
  * @param[enabled] Whether the field takes input.
  */
@@ -105,15 +105,12 @@ public fun BuilderHexField(
         field(type.value, modifier)
         return
     }
-    // b-510
     // The caller's modifier stays on the field, which fills the width the box is offered.
     BoxWithConstraints {
         val fitted = rememberFittedHero(draft.text, type.posterHero, maxWidth)
         field(fitted, modifier)
     }
 }
-
-// b-510
 
 /**
  * [hero] set small enough for [text] to fit on one line in [width], never larger than it is and
@@ -159,6 +156,6 @@ private val HeroCaretRoom: Dp = 4.dp
 private const val HeroMinScale: Float = 0.4f
 
 /**
- * How long the field waits after the last valid keystroke before it commits (F-05).
+ * How long the field waits after the last valid keystroke before it commits.
  */
 internal const val CommitDelayMillis: Long = 400L

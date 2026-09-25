@@ -68,15 +68,14 @@ private enum class GalleryDestination(
 }
 
 /**
- * The Custom components gallery (F-21).
+ * The Custom components gallery.
  *
  * Every card holds the builder's own kit controls under [CustomPaneTheme], so they use the
  * pane's Custom slots and not the chrome's. Each control shows up enabled and disabled, apart from
  * the few the kit gives no disabled look. Nothing in the gallery opens a popup, a dialog or an
- * overlay, since on the web a window takes the accessibility mirror over for good (D40). Menus,
- * the select's list, the dialog, the sheet, the tooltip and the toast are drawn in place. Right
- * presses are swallowed and the text fields get a toolbar that never shows, as in the Material 3
- * gallery.
+ * overlay, since on the web a window takes the accessibility mirror over for good. Menus, the
+ * select's list, the dialog, the sheet, the tooltip and the toast are drawn in place. Right presses
+ * are swallowed and the text fields get a toolbar that never shows, as in the Material 3 gallery.
  *
  * @param[spec] The pane the gallery is drawn in.
  * @param[state] What the gallery's controls remember, shared by both copies.
@@ -213,7 +212,7 @@ internal fun Disclosures(state: DemoAppState) {
 }
 
 /**
- * A dialog as it looks open, laid out in place rather than over a scrim (D40).
+ * A dialog as it looks open, laid out in place rather than over a scrim.
  */
 @Composable
 internal fun InlineDialog(state: DemoAppState) {
@@ -255,7 +254,7 @@ internal fun InlineDialog(state: DemoAppState) {
 }
 
 /**
- * A bottom sheet at its peek, drawn in place rather than over the page (D40).
+ * A bottom sheet at its peek, drawn in place rather than over the page.
  */
 @Composable
 internal fun InlineSheet(state: DemoAppState) {
@@ -404,7 +403,7 @@ internal fun Progress() {
 }
 
 /**
- * A tooltip as it looks shown, drawn in place under its anchor rather than in a popup (D40).
+ * A tooltip as it looks shown, drawn in place under its anchor rather than in a popup.
  */
 @Composable
 internal fun InlineTooltip() {

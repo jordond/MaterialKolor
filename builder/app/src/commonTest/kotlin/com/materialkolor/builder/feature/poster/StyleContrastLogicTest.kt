@@ -39,7 +39,6 @@ class StyleContrastLogicTest {
         specSupport(Style.Cmf) shouldBe Res.string.style_spec_cmf
     }
 
-    // b-510
     @Test
     fun specTag_eachTheme_tagsOnlyTheChipsThatMoveItToAnotherSpec() {
         val classic = Style.entries.filter { style -> EffectiveSpec.offered(style) == setOf(SpecVersion.Spec2021) }

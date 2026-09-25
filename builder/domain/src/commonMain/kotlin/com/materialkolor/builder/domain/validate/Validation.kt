@@ -58,7 +58,7 @@ public fun validateAccents(accents: List<Accent>): List<ValidationError> =
             if (bytes > MAX_ACCENT_NAME_BYTES) add(ValidationError.AccentNameTooLong(index, name, bytes))
             if (!seen.add(name)) add(ValidationError.AccentNameDuplicate(index, name))
         }
-        addAll(accentNameClashes(accents)) // b-110
+        addAll(accentNameClashes(accents))
     }
 
 /**
@@ -100,7 +100,6 @@ internal fun String.isKotlinIdentifier(): Boolean {
 
 private fun String.utf8Size(): Int = encodeToByteArray().size
 
-// b-110
 // An export names each accent's family after it with the first letter lowered, and its on colors with
 // "on" in front, so two names that only differ in case, or a name that is also a scheme role, collide.
 // Lowering the first letter can also turn a name like `Object` into a keyword.

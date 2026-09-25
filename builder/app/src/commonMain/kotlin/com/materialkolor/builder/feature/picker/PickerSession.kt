@@ -12,7 +12,7 @@ import com.materialkolor.builder.feature.workspace.WorkspaceAction
 
 /**
  * The color picker's session, from the moment it opens on a target until Done, Cancel or anything
- * else closes it (F-06, F-07). One session is one undo entry.
+ * else closes it. One session is one undo entry.
  *
  * While it is open every color, from a drag, a key, a typed value or the eyedropper, goes out as a
  * drag, so the preview repaints on each and the history folds them all into one step. Done sends

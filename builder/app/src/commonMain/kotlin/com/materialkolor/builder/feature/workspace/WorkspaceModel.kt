@@ -63,32 +63,28 @@ import kotlin.random.Random
 internal class WorkspaceModel(
     private val session: ProjectSession,
     private val preferences: PreferencesRepository,
-    // b-221c
     // Where the poster's copy buttons write, straight from the click with no hop through here.
     val clipboard: Clipboard,
     private val router: Router,
     private val resolver: ThemeResolver,
 ) : StateViewModel<WorkspaceModel.State>(
         State(
-            document = session.shown.value.document, // b-229
-            capabilities = capabilitiesOf(session.shown.value.document), // b-229
+            document = session.shown.value.document,
+            capabilities = capabilitiesOf(session.shown.value.document),
             history = session.history.value,
             view = session.viewState.value,
             preferences = preferences.preferences.value,
             saveStatus = session.saveStatus.value,
-            // b-221c
-            projectGeneration = session.shown.value.generation, // b-229
+            projectGeneration = session.shown.value.generation,
         ),
     ) {
     init {
-        // b-221c
-        // b-229
         // The session publishes the document and its project's number as one value, so no state here
         // ever pairs one project's document with another project's number, whatever order things run in.
         session.shown.mergeState { state, shown ->
-            state.withDocument(shown.document).copy(projectGeneration = shown.generation).withTimeline() // b-508
+            state.withDocument(shown.document).copy(projectGeneration = shown.generation).withTimeline()
         }
-        session.history.mergeState { state, history -> state.copy(history = history).withTimeline() } // b-508
+        session.history.mergeState { state, history -> state.copy(history = history).withTimeline() }
         session.viewState.mergeState { state, view -> state.copy(view = view) }
         preferences.preferences.mergeState { state, prefs -> state.copy(preferences = prefs) }
         router.overlayPops.mergeState { state, _ -> state.copy(panel = null, pickerTarget = null, timeline = null) }
@@ -135,8 +131,6 @@ internal class WorkspaceModel(
         syncSession(expressiveSuggestion = false)
     }
 
-    // b-508
-
     /**
      * Move straight to the step [cursor] of the history, and put the Expressive suggestion away as Undo does.
      */
@@ -176,11 +170,11 @@ internal class WorkspaceModel(
 
     fun setPreviewTab(tab: PreviewTab) {
         updateView { view -> view.copy(tab = tab) }
-        updateState { state -> state.copy(rampHighlight = null) } // b-308
+        updateState { state -> state.copy(rampHighlight = null) }
     }
 
     /**
-     * Only the preview's mode moves. The chrome keeps its appearance (F-04).
+     * Only the preview's mode moves. The chrome keeps its appearance.
      */
     fun setPreviewMode(mode: PreviewMode) {
         updateView { view -> view.copy(mode = mode) }
@@ -211,8 +205,6 @@ internal class WorkspaceModel(
         updateState { state -> state.copy(inspect = on) }
     }
 
-    // b-315c
-
     fun setVisionMenuOpen(open: Boolean) {
         updateState { state -> state.copy(visionMenuOpen = open) }
     }
@@ -238,7 +230,7 @@ internal class WorkspaceModel(
                 .copy(
                     panel = panel,
                     pickerTarget = null,
-                    fullscreen = state.fullscreen && panel != Panel.History, // b-508
+                    fullscreen = state.fullscreen && panel != Panel.History,
                 ).withTimeline()
         }
     }
@@ -261,7 +253,7 @@ internal class WorkspaceModel(
     }
 
     /**
-     * Only the chrome's appearance moves. The preview keeps its mode (F-04).
+     * Only the chrome's appearance moves. The preview keeps its mode.
      */
     fun setAppearance(appearance: Appearance) {
         updatePreferences { prefs -> prefs.copy(appearance = appearance) }
@@ -274,8 +266,6 @@ internal class WorkspaceModel(
     fun setPosterCollapsed(collapsed: Boolean) {
         updatePreferences { prefs -> prefs.copy(posterCollapsed = collapsed) }
     }
-
-    // b-406g
 
     /**
      * Collapse or open the poster shown in [mode]. On the narrow Medium rail the poster opens over the
@@ -306,13 +296,10 @@ internal class WorkspaceModel(
     }
 
     fun dismissHint(id: String) {
-        // b-314a
         // The tab keeps the dismissal as well, so the hint stays shut when storage turns the write down.
         updateState { state -> state.copy(sessionDismissedHints = state.sessionDismissedHints + id) }
         updatePreferences { prefs -> prefs.copy(dismissedHints = prefs.dismissedHints + id) }
     }
-
-    // b-308
 
     /**
      * Show the Palettes tab with the ramp of [target] picked out, until the next tab switch. The
@@ -327,20 +314,18 @@ internal class WorkspaceModel(
      * Read the session back into the state at once, so nothing waits on a collector.
      */
     private fun syncSession(expressiveSuggestion: Boolean) {
-        val shown = session.shown.value // b-229
+        val shown = session.shown.value
         val history = session.history.value
         updateState { state ->
             state
                 .withDocument(shown.document)
                 .copy(
-                    projectGeneration = shown.generation, // b-229
+                    projectGeneration = shown.generation,
                     history = history,
                     expressiveSuggestion = expressiveSuggestion,
-                ).withTimeline() // b-508
+                ).withTimeline()
         }
     }
-
-    // b-508
 
     /**
      * This state with the session's steps while the History list is open, and without them once it is
@@ -382,7 +367,7 @@ internal class WorkspaceModel(
      * belongs to one project can tell a new project from an edit. Both come from the session's one
      * `shown` value, so the pair holds whatever order the collectors run in.
      * @property[expressiveSuggestion] Whether the top bar offers the Expressive style on the 2025
-     * spec after a switch to Expressive (F-03).
+     * spec after a switch to Expressive.
      * @property[rampHighlight] What the Palettes tab picks out after Show on ramp, with the project
      * it was picked in, or null. A tab switch clears it and nothing saves it.
      * @property[sessionDismissedHints] The hints closed in this tab, kept beside the stored ones so
@@ -409,16 +394,14 @@ internal class WorkspaceModel(
         val fullscreen: Boolean = false,
         val projectName: String = "",
         val saveStatus: SaveStatus = SaveStatus.Idle,
-        // b-221c
         val projectGeneration: Int = 0,
         val expressiveSuggestion: Boolean = false,
-        val rampHighlight: RampHighlight? = null, // b-308
-        val sessionDismissedHints: Set<String> = emptySet(), // b-314a
-        // b-315c
+        val rampHighlight: RampHighlight? = null,
+        val sessionDismissedHints: Set<String> = emptySet(),
         val visionMenuOpen: Boolean = false,
         val grayscaleHeld: Boolean = false,
-        val posterOverCanvas: Boolean = false, // b-406g
-        val timeline: Timeline? = null, // b-508
+        val posterOverCanvas: Boolean = false,
+        val timeline: Timeline? = null,
     ) {
         /**
          * What [document] exports to.
@@ -426,12 +409,9 @@ internal class WorkspaceModel(
         val target: ExportTarget
             get() = ExportTarget.of(document.library, document.expressive)
 
-        // b-406g
-
         /**
          * Whether the poster shows as the rail in [mode]. Below 840 dp at Medium it starts as the rail
-         * and opens over the canvas when asked (spec section 7), and a docked poster keeps the stored
-         * choice.
+         * and opens over the canvas when asked, and a docked poster keeps the stored choice.
          */
         fun posterCollapsed(mode: PosterMode): Boolean =
             if (mode == PosterMode.Rail72) !posterOverCanvas else preferences.posterCollapsed
@@ -442,8 +422,6 @@ internal class WorkspaceModel(
         fun withDocument(document: ThemeDocument): State =
             if (document == this.document) this else copy(document = document, capabilities = capabilitiesOf(document))
     }
-
-    // b-306b
 
     /**
      * Turn color animation on or off in the export options of [target] alone. The document and its

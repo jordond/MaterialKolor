@@ -91,14 +91,14 @@ private val GallerySources: List<String> = listOf(
 )
 
 /**
- * Words in the names of what opens a popup, a window or a portal, which on the web take the mirror over (D40).
+ * Words in the names of what opens a popup, a window or a portal, which on the web take the mirror over.
  */
 private val GalleryPopupWords: List<String> =
     listOf("Popup", "Dialog", "Modal", "BottomSheet", "DropdownMenu", "Tooltip", "Portal")
 
 /**
  * What the gallery may take from the kit, its motion, the fold modifiers, the value node names and
- * the text lever of D45.
+ * `InnerTextWithoutHandles`.
  */
 private val GalleryKitImports: List<String> = listOf(
     "com.materialkolor.builder.kit.motion.",

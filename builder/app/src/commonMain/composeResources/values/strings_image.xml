@@ -21,7 +21,6 @@
     <!-- After a reload the image itself is gone and only its colors are left. -->
     <string name="image_add_again">Add the image again</string>
 
-    <!-- b-311b -->
     <!-- The menu the Image button opens. -->
     <string name="image_menu_upload">Upload image</string>
     <string name="image_menu_presets">Presets and starters</string>
@@ -35,7 +34,6 @@
     <string name="image_presets_close">Close</string>
     <!-- One starter card. The arguments are its name and its style. -->
     <string name="image_starter_card">%1$s, %2$s</string>
-    <!-- b-311d -->
     <!-- One starter card whose contrast is not Standard. The arguments are its name, its style and its contrast. -->
     <string name="image_starter_card_contrast">%1$s, %2$s, %3$s contrast</string>
     <!-- The old builder never named its pictures. -->

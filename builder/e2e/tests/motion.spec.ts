@@ -3,8 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { wantHooks } from './builder';
 import { button, focusCanvas, LAND_TIMEOUT_MS, openWorkspace } from '../fixtures/workspace';
 
-// b-503
-// Motion on a library switch (MO-04, F-37, X4). The new skin reveals from the switcher in a circle,
+// Motion on a library switch. The new skin reveals from the switcher in a circle,
 // and under reduced motion it crossfades instead. A small copy of every frame the page draws tells
 // the two apart. Mid reveal some cells of the canvas are already the new skin while others are
 // still the old one, and a crossfade moves every cell together.
@@ -44,7 +43,6 @@ test('with motion a library switch reveals from the switcher', async ({ page }) 
 
 test.describe('frozen motion', () => {
   test('a frozen switch to each library looks the same every time', async ({ page }, testInfo) => {
-    // b-503a
     // A screenshot differs by engine and system, so the baselines are kept for the ones they were
     // made on, Chromium on macOS so far. `--update-snapshots` on another makes its own.
     test.skip(

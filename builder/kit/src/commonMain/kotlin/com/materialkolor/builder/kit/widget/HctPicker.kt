@@ -34,7 +34,7 @@ import kotlin.math.roundToInt
 
 /**
  * The HCT color picker behind the seed, the key colors, the pins, the accents and the second seed
- * of a Cmf theme (F-06).
+ * of a Cmf theme.
  *
  * Three tracks set hue, chroma and tone, each drawn as the colors it reaches with what sRGB cannot
  * show shaded. Under them sits a format switch with a field that shows and takes the color as hex,

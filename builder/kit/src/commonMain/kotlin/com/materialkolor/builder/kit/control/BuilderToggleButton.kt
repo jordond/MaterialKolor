@@ -84,7 +84,7 @@ public fun BuilderToggleButton(
 
 /**
  * A toggle button drawn from [style], filled while it is on. It shows a check in place of its icon
- * while it is on, so on and off never differ by fill alone (AR-03).
+ * while it is on, so on and off never differ by fill alone.
  */
 @Composable
 internal fun HeadlessToggleButton(

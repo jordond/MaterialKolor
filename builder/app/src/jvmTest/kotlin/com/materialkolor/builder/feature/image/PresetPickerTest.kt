@@ -147,8 +147,6 @@ class PresetPickerTest {
             onNodeWithContentDescription(EYEDROPPER).assertDoesNotExist()
         }
 
-    // b-311d
-
     @Test
     fun presets_openAsAPanel_andBackClosesThem_handingTheFocusBackToImage() =
         runComposeUiTest {

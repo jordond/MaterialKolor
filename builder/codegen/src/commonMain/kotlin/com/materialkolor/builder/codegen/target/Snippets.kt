@@ -54,7 +54,7 @@ internal class Dependency(
  * MaterialKolor at all, so Material 3, Expressive and Custom get no snippet. In either mode an
  * Unstyled export needs the Compose Unstyled theming library, which `material-kolor-unstyled` leaves
  * to the app on JVM and Android, and a Fluent export needs Compose Fluent. Every MaterialKolor module
- * is named at the one pinned version (D9).
+ * is named at the one pinned version.
  */
 internal object Snippets {
     /**
@@ -104,7 +104,7 @@ internal object Snippets {
         }
 
     /**
-     * The R9 note for [target], or null when the target runs everywhere Compose does.
+     * The note on the platforms [target] cannot run on, or null when it runs everywhere Compose does.
      */
     fun platformNote(target: ExportTarget): String? =
         when (target) {

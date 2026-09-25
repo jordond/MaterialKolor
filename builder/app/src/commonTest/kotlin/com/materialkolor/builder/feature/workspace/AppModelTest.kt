@@ -30,10 +30,8 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-// b-314b
-
 /**
- * The boot notices and the storage banners the app model keeps for the session (F-38), booted the
+ * The boot notices and the storage banners the app model keeps for the session, booted the
  * way the root boots it, from the route a [FakeRouter] read.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -204,7 +202,6 @@ class AppModelTest : SessionTestBase() {
         )
         val projects = ProjectsModel.State(open = ProjectRef.Transient("code"), conflict = true, newerData = true)
 
-        // b-314ba
         // The storage full banner keeps the unsaved theme's away, so the rest stack without it.
         workspaceBanners(app, projects) shouldBe listOf(
             WorkspaceBanner.Conflict,
@@ -221,8 +218,6 @@ class AppModelTest : SessionTestBase() {
             WorkspaceBanner.NewerData,
         )
     }
-
-    // b-314ba
 
     @Test
     fun storageFull_hidesTheUnsavedThemeUntilASaveLands() =

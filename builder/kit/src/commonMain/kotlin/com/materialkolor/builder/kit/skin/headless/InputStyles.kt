@@ -302,7 +302,7 @@ internal class FieldStyle(
 /**
  * The poster's seed headline, which reads as a heading until it has focus and then shows a line
  * under it in the skin's shape. The line marks one side only, so keyboard focus also rings the
- * headline in the focus colour, the way Fluent's field does (S5 row 36). It reads the surrounding
+ * headline in the focus colour, the way Fluent's field does. It reads the surrounding
  * tokens, so on the poster it is drawn in the seed and the ring takes the poster's ink.
  */
 internal fun heroFieldStyle(

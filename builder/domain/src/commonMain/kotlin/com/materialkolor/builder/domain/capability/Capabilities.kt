@@ -268,7 +268,7 @@ private fun rolePins(target: ExportTarget): ControlState =
         ExportTarget.Material3Expressive,
         ExportTarget.Custom,
         -> enabled
-        // v-02 B-112 checked the explicit-scheme export, so Unstyled pins stay on.
+        // The explicit-scheme export carries pins, so Unstyled pins stay on.
         ExportTarget.Unstyled -> enabled
         ExportTarget.Fluent -> ControlState.Disabled(Reason.FluentUsesNoRoles)
     }
@@ -300,7 +300,7 @@ private fun colorAnimation(target: ExportTarget): ControlState =
         ExportTarget.Unstyled,
         ExportTarget.Fluent,
         -> enabled
-        // Hidden until F-56 gives the Custom export somewhere to animate.
+        // Hidden until the Custom export has somewhere to animate.
         ExportTarget.Custom -> hidden
     }
 

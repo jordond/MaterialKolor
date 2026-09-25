@@ -1,10 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 import { openBuilder, wantHooks } from './builder';
 
-// b-314b
-// The boot notices F-38 asks for, read from the page's accessibility tree and dismissed by clicking
-// their buttons where Compose draws them. Boot has already opened the builder under each one, and the
-// address bar says `/` by then (D15).
+// The boot notices, read from the page's accessibility tree and dismissed by clicking their buttons
+// where Compose draws them. Boot has already opened the builder under each one, and the address bar
+// says `/` by then.
 
 /** `banners_unknown_path`, word for word. */
 const UNKNOWN_PATH = 'There’s no page at that address, so here’s the builder.';

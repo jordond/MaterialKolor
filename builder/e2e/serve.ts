@@ -17,7 +17,6 @@ const TYPES: Record<string, string> = {
   '.otf': 'font/otf',
   '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=utf-8',
-  // b-501b
   '.webmanifest': 'application/manifest+json',
 };
 

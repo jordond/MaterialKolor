@@ -126,7 +126,6 @@ class RolesTabTest {
                 .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription))
         }
 
-    // b-308ba
     // Custom light, whose focus ring reads on the panel but not on the canvas.
     @Test
     fun columns_sitOnThePanelSurface() =

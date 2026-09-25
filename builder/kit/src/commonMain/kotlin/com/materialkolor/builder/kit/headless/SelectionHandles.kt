@@ -26,13 +26,11 @@ import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.offset
 import com.materialkolor.builder.kit.layout.LocalLayout
 
-// b-228a
-
 /**
  * Keeps foundation's touch selection handles off a single line field's text where overlays render
- * in the page (D45), and changes nothing anywhere else.
+ * in the page, and changes nothing anywhere else.
  *
- * The handles are popups, and a popup takes the web mirror over for good (D40). Foundation only
+ * The handles are popups, and a popup takes the web mirror over for good. Foundation only
  * puts a handle up while its foot, which sits on the bottom edge of its line, lies inside the part
  * of the text its clipping parents leave visible. So the text is clipped one pixel short of its own
  * bottom and the pixel is given back as layout, which leaves the field its size and hides nothing
@@ -40,8 +38,8 @@ import com.materialkolor.builder.kit.layout.LocalLayout
  * widens it, and the page's text toolbar still shows over it.
  *
  * It is built on public API but leans on two foundation internals, the handle visibility test in
- * `CoreTextField` and the handle position `TextFieldSelectionManager` hands it. The b-228 e2e test
- * in `text-toolbar.spec.ts` trips when either moves. Drop it when CMP fixes the single-owner
+ * `CoreTextField` and the handle position `TextFieldSelectionManager` hands it. The long press
+ * cases in `text-toolbar.spec.ts` trip when either moves. Drop it when CMP fixes the single-owner
  * listener, together with the in-page overlays.
  *
  * The clip costs the text its bottom pixel, so while the field has focus the caret and the
@@ -66,12 +64,10 @@ internal fun Modifier.withoutSelectionHandles(enabled: Boolean = overlaysInTree)
         }
 }
 
-// b-228b
-
 /**
  * Holds the inner text of a single line field the kit does not draw, such as a preview's Material3
  * sample field, so foundation puts up no touch selection handles on it where overlays render in the
- * page (D45). Anywhere else it only holds the text.
+ * page. Anywhere else it only holds the text.
  *
  * Build the field from its parts, a foundation field inside a decoration box, and hand this the
  * inner text the decoration box is given. It goes on nothing bigger, and a multi-line field is out
@@ -79,9 +75,9 @@ internal fun Modifier.withoutSelectionHandles(enabled: Boolean = overlaysInTree)
  * selection highlight each lose their bottom pixel.
  *
  * It leans on the same two foundation internals as [withoutSelectionHandles], the handle visibility
- * test in `CoreTextField` and the handle position `TextFieldSelectionManager` hands it. The b-228b
- * e2e cases in `sample-fields.spec.ts`, a long press on the gallery's filled and outlined text fields
- * and on the Trips note, trip when either moves, as do the b-228 cases in `text-toolbar.spec.ts`.
+ * test in `CoreTextField` and the handle position `TextFieldSelectionManager` hands it. The e2e cases
+ * in `sample-fields.spec.ts`, a long press on the gallery's filled and outlined text fields and on
+ * the Trips note, trip when either moves, as do the long press cases in `text-toolbar.spec.ts`.
  * Drop it when CMP fixes the single-owner listener, together with the in-page overlays.
  *
  * @param[innerTextField] The inner text a decoration box is given.
@@ -93,7 +89,7 @@ public fun InnerTextWithoutHandles(innerTextField: @Composable () -> Unit) {
 }
 
 /**
- * A selection container that leaves a finger out where overlays render in the page (D45), for text
+ * A selection container that leaves a finger out where overlays render in the page, for text
  * over several lines, which [withoutSelectionHandles] cannot reach.
  *
  * Foundation's selection container puts up both of its handle popups once a finger has selected in

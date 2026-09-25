@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// b-315
 @OptIn(ExperimentalTestApi::class)
 class KeymapTest {
     @Test

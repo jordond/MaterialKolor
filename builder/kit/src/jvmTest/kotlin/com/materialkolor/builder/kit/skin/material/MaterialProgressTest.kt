@@ -48,7 +48,7 @@ private val BarWidth = 320.dp
 /**
  * The Material3 skin's progress bar, the expressive flavour most of all. Its bar fills the width it
  * is given, and while nobody can tell how far along the work is its semantics hold still as the sweep
- * moves (R-B-402c, D40).
+ * moves.
  */
 @OptIn(ExperimentalTestApi::class)
 class MaterialProgressTest {

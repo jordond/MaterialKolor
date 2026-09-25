@@ -36,7 +36,7 @@ internal class PreferencesRepository(
      *
      * Returns the reason the write did not land, or null when it did. Unlike a project write, a full
      * storage comes back as [StoreError.QuotaExceeded] straight away, with nothing pruned and no
-     * second try. B-215 decides whether preference writes go through the project repository's prune.
+     * second try, since preference writes are best effort.
      */
     suspend fun update(block: (Preferences) -> Preferences): StoreError? = store.update(block)
 
@@ -55,8 +55,6 @@ internal class PreferencesRepository(
         target: ExportTarget,
         block: (ExportPrefs) -> ExportPrefs,
     ): StoreError? = store.update { prefs -> prefs.withExportPrefs(target, block(prefs.exportPrefsFor(target))) }
-
-    // b-215
 
     /**
      * The preferences as they are stored right now, for boot, before [preferences] has caught up.

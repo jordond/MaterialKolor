@@ -236,7 +236,6 @@ class WorkspaceModelTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
-    // b-508
     @Test
     fun openPanel_history_carriesTheTimelineAndLeavesFullscreen() =
         runTest {
@@ -353,7 +352,6 @@ class WorkspaceModelTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
-    // b-221c
     @Test
     fun pageHide_afterAnEdit_writesTheRecordBeforeAnythingElseRuns() =
         runTest {
@@ -418,8 +416,6 @@ class WorkspaceModelTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
-    // b-221f
-    // b-229
     @Test
     fun projectGeneration_standardMain_neverPairsADocumentWithAnotherProjectsNumber() =
         runTest {
@@ -427,15 +423,12 @@ class WorkspaceModelTest : SessionTestBase() {
             projectsNeverMix(StandardTestDispatcher(testScheduler))
         }
 
-    // b-229
     @Test
     fun projectGeneration_unconfinedMain_neverPairsADocumentWithAnotherProjectsNumber() =
         runTest {
             // The model's collectors run inside the session's own update, before show() returns.
             projectsNeverMix(UnconfinedTestDispatcher(testScheduler))
         }
-
-    // b-229
 
     /**
      * Show three more projects with [main] as the model's dispatcher and check that every state the

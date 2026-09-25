@@ -69,8 +69,7 @@ internal object SessionBindings {
             projects = projects,
             preferences = preferences,
             environment = environment,
-            // b-216b
-            // The thumbnail and the splash show the theme as its own target sees it (D35).
+            // The thumbnail and the splash show the theme as its own target sees it.
             colorsOf = { document ->
                 val target = ExportTarget.of(document.library, document.expressive)
                 resolver.resolve(document.forTarget(target)).sessionColors(document.seed)
@@ -87,7 +86,6 @@ internal object SessionBindings {
  */
 private val PREVIEW_ROLES: List<Role> = listOf(Role.Primary, Role.Secondary, Role.Tertiary, Role.SurfaceVariant)
 
-// b-501b
 private fun ThemeResult.sessionColors(seed: Argb): SessionColors =
     SessionColors(
         previewColors = PREVIEW_ROLES.map { role -> roles[role, false].argb },

@@ -8,7 +8,6 @@ import com.materialkolor.builder.core.platform.OutgoingFile
  */
 internal class FakeFileSaver(
     override var canShareFiles: Boolean = false,
-    // b-310
     override var canShareLink: Boolean = false,
 ) : FileSaver {
     /**
@@ -34,20 +33,15 @@ internal class FakeFileSaver(
 
     override suspend fun shareFiles(files: List<OutgoingFile>): Result<Unit> = attempt { shared += files }
 
-    // b-310
-
     /**
      * Every link handed to the share sheet, with its title, oldest first.
      */
     val sharedLinks: MutableList<Pair<String, String>> = mutableListOf()
 
-    // b-310
     override suspend fun shareLink(
         url: String,
         title: String,
     ): Result<Unit> = attempt { sharedLinks += url to title }
-
-    // b-302a
 
     /**
      * Follows [canShareFiles], so a test that turns sharing on gets it for every batch.

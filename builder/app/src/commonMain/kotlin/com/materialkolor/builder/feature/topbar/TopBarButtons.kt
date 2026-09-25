@@ -47,8 +47,6 @@ internal fun TopBarIconButton(
     }
 }
 
-// b-512
-
 /**
  * The command palette's button, a search glyph, and with [keycap] the palette's key beside it in a
  * keycap. It reads as Command palette either way, with the key in its tooltip.
@@ -61,7 +59,6 @@ internal fun CommandsButton(
 ) {
     val description = stringResource(Res.string.topbar_commands)
     val keys = Shortcut.Palette.text(LocalAppleKeys.current)
-    // b-315
     val tooltip = stringResource(Res.string.topbar_commands_tooltip, keys)
     if (!keycap) {
         TopBarIconButton(

@@ -29,7 +29,6 @@ import kotlin.test.Test
 private const val Field = "field"
 private const val Elsewhere = "elsewhere"
 
-// b-315a
 @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
 class TextFieldSubmitTest {
     @Test

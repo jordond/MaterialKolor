@@ -80,9 +80,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  */
 
 /**
- * Turns Material's own touch target rule off, so [materialFeedback] grows the footprint instead
- * (AR-04). Material grows it inside the component, which would put the press scale and the focus
- * ring around the grown footprint rather than the control.
+ * Turns Material's own touch target rule off, so [materialFeedback] grows the footprint instead.
+ * Material grows it inside the component, which would put the press scale and the focus ring
+ * around the grown footprint rather than the control.
  */
 @Composable
 internal fun MaterialTarget(content: @Composable () -> Unit) {
@@ -112,7 +112,7 @@ internal fun Modifier.materialFeedback(
 private fun RowScope.MaterialLabel(
     label: String,
     icon: IconId?,
-    hint: String? = null, // b-510
+    hint: String? = null,
 ) {
     val ink = LocalContentColor.current
     if (icon != null) {
@@ -120,14 +120,11 @@ private fun RowScope.MaterialLabel(
         Spacer(Modifier.width(ButtonDefaults.IconSpacing))
     }
     BuilderText(label, style = BuilderTextStyle.Label, color = ink, maxLines = 1)
-    // b-510
     if (hint != null) {
         Spacer(Modifier.width(HintSpacing))
         ButtonKeycap(hint, ink)
     }
 }
-
-// b-510
 
 /**
  * Room round a button with a keycap, Material's small button start and a tight end the keycap fills.
@@ -147,7 +144,7 @@ internal fun MaterialButton(
     emphasis: Emphasis,
     icon: IconId?,
     enabled: Boolean,
-    hint: String? = null, // b-510
+    hint: String? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val decorated = modifier
@@ -157,7 +154,6 @@ internal fun MaterialButton(
     MaterialTarget {
         when (emphasis) {
             Emphasis.Primary -> {
-                // b-510
                 val padding = if (hint == null) ButtonDefaults.ContentPadding else HintPadding
                 Button(
                     onClick,
@@ -392,17 +388,17 @@ internal fun MaterialListRow(
             .controlRing(interactionSource, RectangleShape)
     }
     ListItem(
-        headlineContent = { ListRowHeadline(row.headline, LocalContentColor.current) }, // b-511
+        headlineContent = { ListRowHeadline(row.headline, LocalContentColor.current) },
         modifier = modifier
             .listRowInput(row, interactionSource, indication = ripple())
             .listRowState(row)
             .then(feedback),
         supportingContent = row.supporting?.let { text ->
-            { ListRowSupporting(text, LocalContentColor.current) } // b-511
+            { ListRowSupporting(text, LocalContentColor.current) }
         },
         leadingContent = row.icon?.let { id ->
             { BuilderIcon(id, contentDescription = null, tint = LocalContentColor.current) }
-        } ?: row.leading, // b-508
+        } ?: row.leading,
         trailingContent = if (current || row.trailing != null) {
             {
                 Row(

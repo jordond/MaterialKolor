@@ -9,8 +9,6 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import kotlin.test.Test
 
-// b-315e
-
 /**
  * An open menu's rows follow their labels in every skin with overlays in the page, a label that
  * lands as the host first draws the menu included. On the web a string still loading lands that

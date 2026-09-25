@@ -53,7 +53,6 @@ internal class WebRouter(
     private val waitingPushes = ArrayDeque<String>()
     private var homeWaiting = false
 
-    // b-315d
     // Backs given up on whose move may still come, how many moves have come, so a wait that a move
     // ended gives nothing up, and how many times backs were given up, so only the last one expires.
     private var lateBacks = 0
@@ -102,7 +101,7 @@ internal class WebRouter(
         if (popped > 0) {
             val ours = minOf(popped, pendingBacks)
             pendingBacks -= ours
-            val late = minOf(popped - ours, lateBacks) // b-315d
+            val late = minOf(popped - ours, lateBacks)
             lateBacks -= late
             val closed = minOf(popped - ours - late, opened)
             opened -= closed
@@ -126,8 +125,6 @@ internal class WebRouter(
         }
         while (waitingPushes.isNotEmpty()) pushOverlay(waitingPushes.removeFirst())
     }
-
-    // b-315d
 
     // Gives the backs on their way up once no move has come for a while, unless a move came since.
     private fun waitForMove() {

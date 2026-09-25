@@ -20,9 +20,9 @@ import io.kotest.assertions.withClue
 import kotlin.test.Test
 
 /**
- * The widgets whose rings the second S5 rerun found under a tooltip bubble, with the bubble showing
- * in the page the way the web draws it. The ring covers at least half the middle of every side at 3
- * to 1 and stands 3 to 1 from what it covers all the way round (S5 rows 30, 31 and 33, gaps C and D).
+ * The widgets whose rings once sat under a tooltip bubble, with the bubble showing in the page the
+ * way the web draws it. The ring covers at least half the middle of every side at 3 to 1 and stands
+ * 3 to 1 from what it covers all the way round.
  */
 @OptIn(ExperimentalTestApi::class)
 class WidgetRingEdgesTest {

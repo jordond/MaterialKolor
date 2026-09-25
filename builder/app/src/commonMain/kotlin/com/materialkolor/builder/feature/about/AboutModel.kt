@@ -26,8 +26,6 @@ internal class AboutModel(
      */
     val browser: String = environment.browser
 
-    // b-505
-
     /**
      * Where the theme link in a report opens.
      */

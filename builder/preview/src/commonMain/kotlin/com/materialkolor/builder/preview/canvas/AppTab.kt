@@ -12,7 +12,7 @@ import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.unstyled.UnstyledAppEntry
 
 /**
- * The App tab, the sample app of the library [LocalSkin] names (F-20).
+ * The App tab, the sample app of the library [LocalSkin] names.
  *
  * Call it inside a [PreviewPane] for [spec], once per copy of a split.
  *

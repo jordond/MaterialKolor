@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The one hint on a first visit, word for word from F-35. -->
+    <!-- The one hint on a first visit. The tests check it word for word. -->
     <string name="about_first_run_hint">Paste a color, drop an image, or press Space to shuffle. Press ? for shortcuts.</string>
     <!-- The button that closes the first visit hint for good. -->
     <string name="about_first_run_hint_close">Close the hint</string>
 
-    <!-- The Help dialog, every info button's question and answer in one place (F-36). -->
+    <!-- The Help dialog, every info button's question and answer in one place. -->
     <string name="about_help_title">Help</string>
     <!-- The button that opens the builder's help pages, shown only once they exist. -->
     <string name="about_help_pages">Open the help pages</string>
     <string name="about_close">Close</string>
 
-    <!-- The About dialog (F-36). -->
+    <!-- The About dialog. -->
     <string name="about_title">About</string>
     <!-- The builder's own version, such as "Builder 2.0.0". -->
     <string name="about_builder_version">Builder %1$s</string>
     <!-- The MaterialKolor version every export uses, such as "MaterialKolor 6.0.0". -->
     <string name="about_material_kolor_version">MaterialKolor %1$s</string>
     <string name="about_what">Grow a Material color scheme from one seed color, try it on sample screens, and take the code home to your app.</string>
-    <!-- The motion override (F-37), read out before the choice. Named after F-37, so it never reads as the Extras motion scheme. -->
+    <!-- The motion override, read out before the choice. Named Reduced motion, so it never reads as the Extras motion scheme. -->
     <string name="about_motion">Reduced motion</string>
     <string name="about_motion_system">System</string>
     <string name="about_motion_reduce">Reduce</string>
     <string name="about_motion_full">Full</string>
 
-    <!-- Provisional until the owner signs off the wording (F-36). -->
+    <!-- Provisional until the owner signs off the wording. -->
     <string name="about_privacy_title">Privacy</string>
     <string name="about_privacy">Your projects stay in this browser and the builder sets no cookies. When a character is missing from the builder’s own fonts, the browser may load a fallback font from fonts.gstatic.com. Visits are counted with Cloudflare Web Analytics, which sets no cookies.</string>
 
-    <!-- Provisional credits and licenses, until the owner signs off the list (F-36). -->
+    <!-- Provisional credits and licenses, until the owner signs off the list. -->
     <string name="about_credits_title">Credits and licenses</string>
     <string name="about_credits">Made by Jordon de Hoog and everyone who has worked on MaterialKolor. The color science is Google’s Material Color Utilities.</string>
     <string name="about_font_bricolage">Bricolage Grotesque</string>

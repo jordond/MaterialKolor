@@ -45,18 +45,16 @@ import com.materialkolor.builder.kit.widget.widgetGoldenColorFile
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import kotlin.test.Test
 
-// b-228a
-
 /**
  * Tags the field under the long press.
  */
 private const val FieldTag = "field"
 
 /**
- * D45. A touch long press on a field puts up no selection handle where overlays render in the page,
- * since the handles are popups that would take the web mirror over, and the page's text toolbar
- * still shows. With overlays in windows of their own the handles come up as ever, which shows the
- * test would see them.
+ * A touch long press on a field puts up no selection handle where overlays render in the page, since
+ * the handles are popups that would take the web mirror over, and the page's text toolbar still
+ * shows. With overlays in windows of their own the handles come up as ever, which shows the test
+ * would see them.
  */
 @OptIn(ExperimentalTestApi::class)
 class SelectionHandlesTest {
@@ -97,7 +95,6 @@ class SelectionHandlesTest {
             onAllNodes(isSelectionHandle()).fetchSemanticsNodes().size shouldBeGreaterThan 0
         }
 
-    // b-228aa
     // Foundation keeps the handles down until the finger lifts, and a lift on the field is a click
     // that opens the select and drops the selection. So the finger slides off the field first.
     @Test
@@ -167,7 +164,6 @@ class SelectionHandlesTest {
             onAllNodes(isSelectionHandle()).fetchSemanticsNodes().size shouldBeGreaterThan 0
         }
 
-    // b-228b
     @Test
     fun innerTextWithoutHandles_inTree_takesALongPressWithNoHandleAndShowsTheRow() =
         forEachSkin { _, skin ->

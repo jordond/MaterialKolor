@@ -10,7 +10,7 @@
     <string name="workspace_manual_copy_title">Copy it yourself</string>
     <string name="workspace_manual_copy_hint">The browser did not let the builder use the clipboard. Select the text below and copy it from there.</string>
     <string name="workspace_manual_copy_done">Done</string>
-    <!-- The hint in its place on a touch screen, where a finger cannot select text over several lines (D45). The argument is the export sheet's zip button, such as "Download zip". -->
+    <!-- The hint in its place on a touch screen, where a finger cannot select text over several lines. The argument is the export sheet's zip button, such as "Download zip". -->
     <string name="workspace_manual_copy_hint_touch_save">The browser did not let the builder use the clipboard, and a finger cannot select text over several lines here. Close this and use %1$s to get the files instead.</string>
     <string name="workspace_manual_copy_hint_touch">The browser did not let the builder use the clipboard, and a finger cannot select text over several lines here. Close this and try Copy again.</string>
 </resources>

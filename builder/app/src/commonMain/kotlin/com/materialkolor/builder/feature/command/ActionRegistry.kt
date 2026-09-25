@@ -54,7 +54,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * Something the builder can do, the one place both the shortcuts and the command palette run it
- * from (F-33, P6).
+ * from.
  *
  * @property[id] Stays the same across languages and compositions, for recents and tests.
  * @property[category] The group the palette lists it under.
@@ -66,7 +66,7 @@ import org.jetbrains.compose.resources.stringResource
  * @property[selected] Whether the option it picks, or the switch it flips, is on now. Null for one
  * that is neither.
  * @property[run] Does it, straight away. Copies, saves and shares start their platform call before
- * this returns (R-B-302), so call it from inside the key press or the click.
+ * this returns, so call it from inside the key press or the click.
  */
 internal class Command(
     val id: String,
@@ -129,7 +129,7 @@ internal enum class Region {
 }
 
 /**
- * Where the control that does the same as a [Command] sits, found by its accessible name (P6).
+ * Where the control that does the same as a [Command] sits, found by its accessible name.
  */
 internal sealed interface ControlSite {
     val region: Region
@@ -177,9 +177,9 @@ internal sealed interface ControlSite {
 internal class CommandList(
     private val reasons: Map<Reason, String>,
     val windowClass: WindowClass,
-    val librarySegmented: Boolean, // b-315d
-    val overflowed: Set<TopBarControl> = emptySet(), // b-406
-    val switcherOrigin: () -> Offset? = { null }, // b-503a
+    val librarySegmented: Boolean,
+    val overflowed: Set<TopBarControl> = emptySet(),
+    val switcherOrigin: () -> Offset? = { null },
 ) {
     private val commands = mutableListOf<Command>()
 
@@ -190,7 +190,7 @@ internal class CommandList(
         get() = commands
 
     /**
-     * Add a command whose control state [control] decides. A hidden control adds nothing (P6).
+     * Add a command whose control state [control] decides. A hidden control adds nothing.
      */
     fun add(
         id: String,
@@ -232,15 +232,13 @@ internal fun actionRegistry(
     share: ShareController = metroViewModel(),
     export: ExportModel = metroViewModel(),
     shortcuts: ShortcutsModel = metroViewModel(),
-    scope: CoroutineScope = rememberCoroutineScope(), // b-315d
+    scope: CoroutineScope = rememberCoroutineScope(),
 ): List<Command> {
-    LocalRegistryBuilds.current?.invoke() // b-315d
+    LocalRegistryBuilds.current?.invoke()
     val latest by rememberUpdatedState(state)
     val reasons = Reason.entries.associateWith { reason -> stringResource(reasonText(reason)) }
     val windowClass = LocalLayout.current.windowClass
-    // b-315d
     val segmented = shortcuts.switcherForm.segmented ?: (windowClass == WindowClass.Expanded)
-    // b-406, b-503a
     val list = CommandList(reasons, windowClass, segmented, shortcuts.switcherForm.overflowed) {
         shortcuts.switcherForm.origin
     }
@@ -304,8 +302,6 @@ internal fun actionRegistry(
     appearanceCommands(list, state, dispatcher)
     return list.all
 }
-
-// b-315d
 
 /**
  * Told each time a registry builds, or null, which it always is outside tests. Tests provide it to

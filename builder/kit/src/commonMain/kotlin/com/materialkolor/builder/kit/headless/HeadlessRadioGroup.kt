@@ -44,7 +44,7 @@ import com.materialkolor.builder.kit.control.roleLessName
  * same width, the width of the widest one, unless [modifier] stretches the group, and then the
  * options share the stretched width evenly.
  *
- * The group's name goes in as text on the web, where the group has no role (S5 answer 1).
+ * The group's name goes in as text on the web, where the group has no role.
  *
  * @param[options] What there is to choose from.
  * @param[selected] The current choice. One that is not among [options] leaves nothing chosen.

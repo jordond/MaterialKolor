@@ -63,12 +63,12 @@ public fun BuilderListRow(
     modifier: Modifier = Modifier,
     supporting: String? = null,
     icon: IconId? = null,
-    leading: (@Composable () -> Unit)? = null, // b-508
+    leading: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     selected: Boolean? = null,
     enabled: Boolean = true,
     trailing: (@Composable () -> Unit)? = null,
-    dense: Boolean = false, // b-511
+    dense: Boolean = false,
 ) {
     val row = ListRowContent(headline, supporting, icon, leading, onClick, selected, enabled, trailing, dense)
     when (LocalSkin.current.library) {
@@ -98,12 +98,12 @@ internal class ListRowContent(
     val headline: String,
     val supporting: String?,
     val icon: IconId?,
-    val leading: (@Composable () -> Unit)?, // b-508
+    val leading: (@Composable () -> Unit)?,
     val onClick: (() -> Unit)?,
     val selected: Boolean?,
     val enabled: Boolean,
     val trailing: (@Composable () -> Unit)?,
-    val dense: Boolean = false, // b-511
+    val dense: Boolean = false,
 ) {
     init {
         require(icon == null || leading == null) { "A row takes an icon or a leading slot, not both" }
@@ -143,7 +143,7 @@ internal fun Modifier.listRowInput(
 }
 
 /**
- * On the web, a pressable row's current state and its disabled note in its name (D37). A row with
+ * On the web, a pressable row's current state and its disabled note in its name. A row with
  * neither keeps the name its text gives it, trailing slot included.
  */
 @Composable
@@ -179,23 +179,21 @@ internal fun HeadlessListRow(
             .listRowState(row)
             .then(pressableFeedback)
             .actionSurface(colors, style.shape, style.borderWidth)
-            .heightIn(min = if (row.dense) OverlayMetrics.denseRowHeight else style.minHeight) // b-511
+            .heightIn(min = if (row.dense) OverlayMetrics.denseRowHeight else style.minHeight)
             .padding(horizontal = style.horizontalPadding, vertical = style.verticalPadding),
         horizontalArrangement = Arrangement.spacedBy(style.gap),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (row.icon != null) BuilderIcon(row.icon, contentDescription = null, tint = colors.content)
-        row.leading?.invoke() // b-508
+        row.leading?.invoke()
         Column(Modifier.weight(1f)) {
-            ListRowHeadline(row.headline, colors.content) // b-511
+            ListRowHeadline(row.headline, colors.content)
             if (row.supporting != null) ListRowSupporting(row.supporting, style.supporting)
         }
         if (row.selected == true) BuilderIcon(IconId.Check, contentDescription = null, tint = colors.content)
         row.trailing?.invoke()
     }
 }
-
-// b-511
 
 /**
  * A row's main line, larger and firmer than the line under it, in every skin.

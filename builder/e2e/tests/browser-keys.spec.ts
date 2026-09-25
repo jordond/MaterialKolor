@@ -1,7 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { openBuilder, wantHooks } from './builder';
 
-// b-501c
 // Browser shortcuts typed into a text field. Compose hears a key typed in a field a frame late, so
 // the boot script stops the browser's own Cmd or Ctrl with S, O and K before anything else hears
 // them, and leaves every other key alone. A listener added after the page's own reads

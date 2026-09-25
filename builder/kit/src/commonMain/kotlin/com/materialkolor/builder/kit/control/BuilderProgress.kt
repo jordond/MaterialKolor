@@ -62,7 +62,7 @@ public fun BuilderProgress(
 /**
  * Names a progress bar and, when [progress] is known, states it as a whole percentage. On the web
  * the bar has no role, so its role word and the percentage ride in the name, "Exporting, progress
- * bar, 40%" (D37, D40), and the name goes in as text (S5 answer 1).
+ * bar, 40%", and the name goes in as text.
  */
 @Composable
 internal fun Modifier.progressLabel(
@@ -87,7 +87,7 @@ private const val StillPhase = 0.5f
  * The phase of an indeterminate sweep, zero as it enters the track and one as it leaves.
  *
  * It runs on [rememberLoopPhase], so it holds still while motion is frozen or the tab is hidden.
- * Reduced motion holds it still as well (MO-10), resting on a partial bar so the work never looks
+ * Reduced motion holds it still as well, resting on a partial bar so the work never looks
  * finished.
  */
 @Composable

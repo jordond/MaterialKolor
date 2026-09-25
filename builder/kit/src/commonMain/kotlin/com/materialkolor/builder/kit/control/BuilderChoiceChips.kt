@@ -26,12 +26,12 @@ import com.materialkolor.builder.kit.skin.material.MaterialChoiceChips
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
- * A row of chips where exactly one is chosen, such as the palette styles (AR-02).
+ * A row of chips where exactly one is chosen, such as the palette styles.
  *
  * It reads out as a radio group named [label], each chip a radio button with its selected state. Tab
  * lands on the chosen chip, the arrow keys move the choice and wrap at either end, and Home and End
  * jump to the first and last chip. The chosen chip carries a check as well as its fill, so the
- * choice never rests on colour alone (AR-03). The row wraps onto more lines when it runs out of
+ * choice never rests on colour alone. The row wraps onto more lines when it runs out of
  * width.
  *
  * Where every choice costs something, such as a reskin and an undo entry, turn [selectOnFocus] off.

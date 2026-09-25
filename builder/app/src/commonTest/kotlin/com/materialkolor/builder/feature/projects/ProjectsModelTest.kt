@@ -122,7 +122,6 @@ class ProjectsModelTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
-    // b-310aa
     @Test
     fun delete_theOpenProjectANewerBuildSaved_leavesItOpenAndSaysSo() =
         runTest {

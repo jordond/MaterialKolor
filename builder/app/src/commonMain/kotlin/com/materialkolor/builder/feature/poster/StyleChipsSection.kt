@@ -80,30 +80,27 @@ import org.jetbrains.compose.resources.stringResource
  */
 internal typealias StyleSchemeLookup = (inputs: SchemeInputs, isDark: Boolean) -> DynamicScheme
 
-// pf-1
-
 /**
  * What the chips wait on before each chip as they catch up, the next frame in the app.
  */
 internal typealias ChipPause = suspend () -> Unit
 
 /**
- * The palette style chips, each a small picture of what that style makes of the seed (F-11).
+ * The palette style chips, each a small picture of what that style makes of the seed.
  *
- * Each chip asks the shared resolver for its own scheme, so the chips share the cache the open theme
- * sits in and the current style's chip costs nothing. They all draw at once the first time. After
- * that a change to the scheme brings them up to date one chip a frame, so a drag that moves the
- * seed or the contrast every frame never generates ten schemes inside one (PB-05). A
- * click or Enter picks a style behind a reveal from the chip, as one undo entry. The arrow keys walk
- * the chips without picking one, and hover and focus only bring up the chip's tooltip, so the rest
- * of the app keeps the style it has. Picking Cmf brings up its tertiary seed.
+ * Each chip asks the shared resolver for its own scheme, so the chips share the cache the open
+ * theme sits in and the current style's chip costs nothing. They all draw at once the first time.
+ * After that a change to the scheme brings them up to date one chip a frame, so a drag that moves
+ * the seed or the contrast every frame never generates ten schemes inside one. A click or Enter
+ * picks a style behind a reveal from the chip, as one undo entry. The arrow keys walk the chips
+ * without picking one, and hover and focus only bring up the chip's tooltip, so the rest of the app
+ * keeps the style it has. Picking Cmf brings up its tertiary seed.
  */
 @Composable
 internal fun StyleChipsSection(
     context: PosterContext,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
-    // b-510
     scrolling: Boolean = false,
     details: Boolean = true,
 ) {
@@ -133,26 +130,22 @@ internal fun StyleChips(
     dispatcher: Dispatcher<WorkspaceAction>,
     lookup: StyleSchemeLookup,
     modifier: Modifier = Modifier,
-    pause: ChipPause = NextFrame, // pf-1
-    // b-510
+    pause: ChipPause = NextFrame,
     scrolling: Boolean = false,
     details: Boolean = true,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val selected = context.document.style
-    // pf-1
     val isDark = context.visibleModes == PreviewMode.Dark
     val shelf = rememberChipShelf(context.result.document, isDark, lookup, pause)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-        StyleHeader(selected, plain = scrolling) // b-510
+        StyleHeader(selected, plain = scrolling)
         StyleChipRow(selected, context.document, shelf, scrolling) { style, origin ->
             dispatcher.dispatch(WorkspaceAction.EditWithReveal(DocumentChange.SetStyle(style), origin))
         }
-        if (details) StyleDetails(context, dispatcher) // b-510
+        if (details) StyleDetails(context, dispatcher)
     }
 }
-
-// b-510
 
 /**
  * What the chosen style does with the seed, why the target treats it differently if it does, and
@@ -190,8 +183,6 @@ internal fun StyleDetails(
         }
     }
 }
-
-// b-510
 
 /**
  * The Style label with its info button and, while the chosen style runs in one spec whatever the
@@ -252,7 +243,7 @@ private fun StyleChipRow(
         label = stringResource(Res.string.style_chips),
         modifier = if (scrolling) Modifier.horizontalScroll(rememberScrollState()) else Modifier,
         selectOnFocus = false,
-        columns = if (scrolling) 0 else ChipColumns, // b-510
+        columns = if (scrolling) 0 else ChipColumns,
     ) { style, isSelected, optionModifier ->
         StyleChip(
             style = style,
@@ -267,7 +258,7 @@ private fun StyleChipRow(
 }
 
 /**
- * How many chips each row of the grid holds, two rows for the ten styles as the design has it.
+ * How many chips each row of the grid holds, two rows for the ten styles.
  */
 private const val ChipColumns = 5
 
@@ -286,12 +277,11 @@ private fun StyleChip(
     modifier: Modifier = Modifier,
     cell: Modifier = Modifier,
 ) {
-    val colors = shelf[style] // pf-1
+    val colors = shelf[style]
     val bounds = remember { ChipBounds() }
     val name = stringResource(styleName(style))
     val shown = stringResource(styleDisplayName(style))
     val hint = stringResource(styleTooltip(style))
-    // b-510
     Column(cell, horizontalAlignment = Alignment.CenterHorizontally) {
         SchemeChip(
             primary = colors.primary,
@@ -339,8 +329,6 @@ private class ChipBounds {
     var rect: Rect = Rect.Zero
 }
 
-// pf-1
-
 /**
  * The chip colours of [document] in the mode [isDark] picks, drawn all at once the first time and
  * brought up to date one chip per [pause] after that.
@@ -361,7 +349,7 @@ private fun rememberChipShelf(
 
 /**
  * The colours each style chip shows, kept apart from the document so a change to it never draws a
- * chip inside the frame that brings it (PB-05).
+ * chip inside the frame that brings it.
  *
  * Each chip remembers what it was drawn from. [catchUp] draws again every chip the document has moved
  * on from, the one left waiting longest first, and pauses before each. A drag that moves the scheme
@@ -469,9 +457,8 @@ private fun CmfSeedField(
     val messages = rememberHexMessages()
     val input = LocalInputModeManager.current
     val field = remember { FocusRequester() }
-    val pick = remember { FocusRequester() } // b-307
+    val pick = remember { FocusRequester() }
     Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-        // b-307
         Row(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalAlignment = Alignment.CenterVertically,

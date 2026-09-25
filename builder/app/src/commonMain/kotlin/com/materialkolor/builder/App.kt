@@ -81,7 +81,6 @@ import kotlinx.coroutines.flow.map
 fun BuilderApp(
     platform: PlatformServices,
     motionFrozen: Boolean = false,
-    // pf-3
     awaitIdle: (suspend () -> Unit)? = null,
 ) {
     val graph = remember(platform) { createGraphFactory<AppGraph.Factory>().create(platform) }
@@ -100,8 +99,6 @@ internal val LocalThemeResult: ProvidableCompositionLocal<ThemeResult> = composi
     error("No ThemeResult provided")
 }
 
-// b-304
-
 /**
  * The resolver behind [LocalThemeResult], for the few places that need a scheme the open theme does
  * not hold, such as the style chips. It belongs to the UI thread. Null outside the app root.
@@ -109,8 +106,8 @@ internal val LocalThemeResult: ProvidableCompositionLocal<ThemeResult> = composi
 internal val LocalThemeResolver: ProvidableCompositionLocal<ThemeResolver?> = staticCompositionLocalOf { null }
 
 /**
- * The one theme result per frame, derived from the collected [document] as its own target sees it
- * (D35). A setting the target turns off never reaches the chrome or the preview.
+ * The one theme result per frame, derived from the collected [document] as its own target sees it.
+ * A setting the target turns off never reaches the chrome or the preview.
  *
  * @param[environment] Marks each resolve's start and end for the perf run. None by default.
  */
@@ -118,17 +115,14 @@ internal val LocalThemeResolver: ProvidableCompositionLocal<ThemeResolver?> = st
 internal fun rememberThemeResult(
     document: State<ThemeDocument>,
     resolver: ThemeResolver,
-    // b-504
     environment: Environment? = null,
 ): State<ThemeResult> =
     remember(document, resolver, environment) {
         derivedStateOf {
             val stored = document.value
-            // b-504
             environment?.mark(TimingMarks.RESOLVE_START)
             resolver
                 .resolve(stored.forTarget(ExportTarget.of(stored.library, stored.expressive)))
-                // b-504
                 .also { environment?.mark(TimingMarks.RESOLVE) }
         }
     }
@@ -147,7 +141,7 @@ internal fun rememberSkin(document: State<ThemeDocument>): State<Skin> =
  * The workspace state is collected once, here, and the theme result and the skin come from its own
  * document. So no frame pairs a new document with the old colors or the old skin, and the workspace
  * draws the state the colors were resolved from. The kit keeps the content movable across a library
- * switch (D44), so the reveal that is playing, the toasts and every scroll position survive it (F-03).
+ * switch, so the reveal that is playing, the toasts and every scroll position survive it.
  *
  * @param[awaitIdle] Waits for an idle moment. With it the builder warms up for its first switch to
  * Fluent once the first frame is up. None by default, and no warm-up then.
@@ -158,45 +152,37 @@ internal fun BuilderRoot(
     graph: AppGraph,
     model: AppModel = metroViewModel(),
     workspaceModel: WorkspaceModel = metroViewModel(),
-    // pf-3
     awaitIdle: (suspend () -> Unit)? = null,
     probe: @Composable (state: WorkspaceModel.State) -> Unit = {},
 ) {
     val state by model.collectAsState()
-    // b-221c
     val workspace = workspaceModel.collectAsState()
     val document = remember(workspace) { derivedStateOf { workspace.value.document } }
-    // b-504
     val environment = graph.environment
     val result by rememberThemeResult(document, graph.themeResolver, environment)
     val skin by rememberSkin(document)
     val announcer = remember(environment) { Announcer { message -> environment.announce(message) } }
-    val firstFrame = remember { CompletableDeferred<Unit>() } // pf-3
+    val firstFrame = remember { CompletableDeferred<Unit>() }
 
     LaunchedEffect(model) {
         model.boot()
         withFrameNanos {}
         environment.hideSplash()
-        // b-504
         environment.mark(TimingMarks.FIRST_FRAME)
-        firstFrame.complete(Unit) // pf-3
+        firstFrame.complete(Unit)
     }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { model.flush() }
-    // b-504
     ImageMarkEffects(environment)
 
     CompositionLocalProvider(
         LocalThemeResult provides result,
-        // b-304
         LocalThemeResolver provides graph.themeResolver,
-        // b-221c
         LocalAnnouncer provides announcer,
     ) {
         BuilderTheme(skin = skin, result = result, isDark = state.isDark, reducedMotion = state.reducedMotion) {
             ThemeColorEffect(environment)
             ProvideBuilderLayout(coarsePointer = state.coarsePointer, modifier = Modifier.fillMaxSize()) {
                 val transition = rememberSkinTransition()
-                // pf-3
                 if (awaitIdle != null) FluentWarmUpEffect(transition, firstFrame, awaitIdle, workspace) { state.isDark }
                 SkinTransitionHost(transition = transition, modifier = Modifier.fillMaxSize()) {
                     // Read in here, so the content the kit moves sees the same state as the colors
@@ -211,15 +197,13 @@ internal fun BuilderRoot(
 }
 
 /**
- * Tints the browser's own chrome with the surface the shell stands on (F-04).
+ * Tints the browser's own chrome with the surface the shell stands on.
  */
 @Composable
 private fun ThemeColorEffect(environment: Environment) {
     val surface = Argb(LocalBuilderTokens.current.panel.toArgb())
     LaunchedEffect(environment, surface) { environment.setThemeColor(surface) }
 }
-
-// b-504
 
 /**
  * Leaves the perf run's two timing marks for each image the user brings in, when its thumbnail is in
@@ -247,8 +231,6 @@ private fun ImageMarkEffects(
     }
 }
 
-// pf-3
-
 /**
  * An announcer that says nothing, so a warm-up never reads out what the page already did.
  */
@@ -258,9 +240,9 @@ private val SilentAnnouncer = Announcer { }
  * Warms the page up for the first switch to Fluent, once, after [firstFrame] and in idle time.
  *
  * The first switch compiled some forty GPU programs in one frame, which took a second on a loaded
- * machine (PB-09). This composes the workspace in Fluent off screen and has [transition] draw it
- * under the live frame a step at a time, waiting on [awaitIdle] before each stage. When the page
- * already shows Fluent only the reveal's own clips over the live frame are warmed.
+ * machine. This composes the workspace in Fluent off screen and has [transition] draw it under the
+ * live frame a step at a time, waiting on [awaitIdle] before each stage. When the page already
+ * shows Fluent only the reveal's own clips over the live frame are warmed.
  *
  * @param[isDark] Which mode the chrome shows, read when the sample composes.
  */

@@ -2,11 +2,10 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 import { wantHooks } from './builder';
 import { button, LAND_TIMEOUT_MS, openWorkspace, press, pressKeyUntil, typeSeed } from '../fixtures/workspace';
 
-// b-509
-// The History list (D55, D57). Three library switches make three steps, and a click on a row goes
-// straight to its step, across skins, with the list still open and the mirror keeping up with each
-// skin it redraws in (D40). Undo names the step the theme is at, the rows after it read undone, and
-// the next real edit drops them.
+// The History list. Three library switches make three steps, and a click on a row goes straight to
+// its step, across skins, with the list still open and the mirror keeping up with each skin it
+// redraws in. Undo names the step the theme is at, the rows after it read undone, and the next real
+// edit drops them.
 
 /** A seed nothing else in the flow lands on, so its step is the only one that names it. */
 const NEW_SEED = '#2E7D32';

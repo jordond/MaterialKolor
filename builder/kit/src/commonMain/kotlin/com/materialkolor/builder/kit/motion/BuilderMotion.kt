@@ -10,20 +10,20 @@ import androidx.compose.runtime.Immutable
 /**
  * How long each kind of change takes, in milliseconds.
  *
- * The three base steps are the Unstyled and Custom scale from MO-09. Material3 and Fluent keep
+ * The three base steps are the scale the Unstyled and Custom skins move on. Material3 and Fluent keep
  * their own curves but still report their timings here, so a test or a screenshot run can reason
  * about any skin the same way.
  *
  * @property[quick] A colour, an opacity or anything else that only fades.
  * @property[standard] The default spatial move, a chip sliding or a row reordering.
- * @property[slow] A move that crosses the canvas, such as the split wipe handle (MO-03).
- * @property[reveal] The circle that grows out of the library switcher (MO-04).
- * @property[panelEnter] Panels, sheets and the poster collapse arriving (MO-05).
- * @property[panelExit] The same things leaving, which is always quicker than arriving. Decision D23
- * keeps it under the 250 to 350 ms arrival band, so it has a band of its own.
- * @property[popover] A menu or tooltip scaling in (MO-05).
- * @property[press] The press scale (MO-06).
- * @property[reducedCrossfade] What a discrete change costs under reduced motion (F-37).
+ * @property[slow] A move that crosses the canvas, such as the split wipe handle.
+ * @property[reveal] The circle that grows out of the library switcher.
+ * @property[panelEnter] Panels, sheets and the poster collapse arriving.
+ * @property[panelExit] The same things leaving, which is always quicker than arriving. It stays
+ * under the 250 to 350 ms arrival band, so it has a band of its own.
+ * @property[popover] A menu or tooltip scaling in.
+ * @property[press] The press scale.
+ * @property[reducedCrossfade] What a discrete change costs under reduced motion.
  */
 @Immutable
 public data class BuilderDurations(
@@ -40,7 +40,7 @@ public data class BuilderDurations(
     init {
         require(reveal in 400..450) { "The skin reveal runs 400 to 450 ms, got $reveal" }
         require(panelEnter in 250..350) { "Panels arrive in 250 to 350 ms, got $panelEnter" }
-        require(panelExit in 150..250) { "Panels leave in 150 to 250 ms (D23), got $panelExit" }
+        require(panelExit in 150..250) { "Panels leave in 150 to 250 ms, got $panelExit" }
         require(popover in 125..200) { "Popovers arrive in 125 to 200 ms, got $popover" }
         require(reducedCrossfade <= 150) { "Reduced motion crossfades in 150 ms or less, got $reducedCrossfade" }
     }
@@ -67,7 +67,7 @@ public object BuilderEasing {
 }
 
 /**
- * How far a press shrinks whatever was pressed (MO-06).
+ * How far a press shrinks whatever was pressed.
  */
 public const val PressScale: Float = 0.97f
 
@@ -137,7 +137,7 @@ public interface BuilderMotion {
 }
 
 /**
- * The tween set the Unstyled and Custom skins use (MO-09).
+ * The tween set the Unstyled and Custom skins use.
  *
  * Material3 builds its own from `MotionScheme` and Fluent from `FluentDuration`, both of them
  * reporting the same [durations] so the rest of the builder does not have to care.
@@ -146,7 +146,7 @@ public fun tweenBuilderMotion(durations: BuilderDurations = BuilderDurations()):
     TweenBuilderMotion(durations)
 
 /**
- * The set every skin falls back to under reduced motion (F-37, MO-10).
+ * The set every skin falls back to under reduced motion.
  *
  * Nothing moves. Discrete changes crossfade inside [BuilderDurations.reducedCrossfade] and
  * everything spatial snaps.

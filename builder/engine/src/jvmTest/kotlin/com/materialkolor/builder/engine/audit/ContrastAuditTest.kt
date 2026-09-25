@@ -210,8 +210,6 @@ class ContrastAuditTest {
         assertEquals(AuditSuggestion.MoveSlotTone, pressed.suggestion)
     }
 
-    // b-308
-
     @Test
     fun themeResultRate_pairTheAuditHas_equalsTheAuditRow() {
         val result = ThemeResolver().resolve(document)

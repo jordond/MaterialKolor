@@ -90,7 +90,7 @@ class CustomSlotTest {
     /**
      * Where every slot gets its color before an override is applied.
      *
-     * Checked by hand, one slot at a time. B-115 builds its export against these tones, so a tone
+     * Checked by hand, one slot at a time. The Custom export is built against these tones, so a tone
      * that drifts here drifts in every custom theme anyone exports.
      */
     private val slotResolutions = mapOf(
@@ -188,7 +188,7 @@ class CustomSlotTest {
 
         val document = ThemeDocument.Default.copy(customTones = mapOf(CustomSlot.TextMuted to moved))
 
-        // Decision D22 hangs the tone on the slot it is attached to, so no neighbour follows it.
+        // A custom tone hangs on the slot it is attached to, so no neighbour follows it.
         assertEquals(moved, document.customTones[CustomSlot.TextMuted])
         assertEquals(40, resolution.light, "The slot's own light tone followed the override")
         assertEquals(70, resolution.dark, "The slot's own dark tone followed the override")
@@ -197,7 +197,7 @@ class CustomSlotTest {
 
     @Test
     fun customSlot_retiredCodes_areCarriedByNothing() {
-        // The Love, Cold and Warm families and the five drinks left in B-102b and became accents.
+        // The Love, Cold and Warm families and the five drinks were dropped as slots and became accents.
         // A link shared before that still carries these numbers, so nothing may claim one again.
         val retired = listOf(18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 41, 42, 43, 44, 45)
 

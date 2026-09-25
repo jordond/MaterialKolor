@@ -63,7 +63,6 @@ class ShellFullscreenTest {
                         // A phone floats the dock over the canvas.
                         dock.bottom shouldBeLessThan canvas.bottom
                     } else {
-                        // b-512
                         // Everywhere else it sits under the canvas and covers none of it.
                         dock.top shouldBeGreaterThanOrEqualTo canvas.bottom
                         dock.bottom shouldBeLessThan FullscreenHeight.dp

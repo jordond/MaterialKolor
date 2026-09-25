@@ -27,13 +27,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.sp
 import com.materialkolor.builder.kit.headless.InnerTextWithoutHandles
 
-// b-228a
-
 /**
  * Material3's single line outlined text field, put together from the parts `OutlinedTextField` is
  * made of, the foundation field inside Material's outlined decoration box. It looks and reads the
  * same as `OutlinedTextField` with the same arguments, but its inner text goes without the touch
- * selection handles where overlays render in the page (D45), which `OutlinedTextField` gives no way
+ * selection handles where overlays render in the page, which `OutlinedTextField` gives no way
  * to reach.
  *
  * `OutlinedTextField` also names an error field "Invalid input" when nothing else does. Every

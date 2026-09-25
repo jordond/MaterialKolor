@@ -23,8 +23,6 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderType
 import org.jetbrains.compose.resources.stringResource
 
-// b-228a
-
 /**
  * Text someone may have to select and copy by hand, such as a link, or a hex the clipboard turned
  * down.
@@ -32,10 +30,10 @@ import org.jetbrains.compose.resources.stringResource
  * One line shows in a read only field with no box of its own, so it reads like the text around it.
  * A mouse and the keys select in it, and a long press selects a word and brings up the page's text
  * toolbar with Copy and Select all. On the web it puts up no selection handles, since a handle would
- * take the page's accessibility mirror over (D45).
+ * take the page's accessibility mirror over.
  *
  * Text over several lines, or a line passed with [singleLine] off, wraps inside a selection
- * container. On the web a finger does not select there (D45), so the caller gives a finger a button
+ * container. On the web a finger does not select there, so the caller gives a finger a button
  * that copies. A mouse selects and the copy keys copy what it selected, but no key selects there on
  * its own.
  *

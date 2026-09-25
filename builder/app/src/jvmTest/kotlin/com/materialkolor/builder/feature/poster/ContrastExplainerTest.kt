@@ -47,7 +47,6 @@ class ContrastExplainerTest {
             val fg = row.pair.foreground.readoutName(document)
             val bg = row.pair.background.readoutName(document)
 
-            // b-510
             onNodeWithText("${ratioText(row.ratio)}:1").assertExists()
             onNodeWithText("$fg on $bg, in $mode").assertExists()
         }
@@ -135,7 +134,6 @@ class ContrastExplainerTest {
 
             val onPrimary = expected.onPrimaryLight.toHex()
             onNodeWithText("Pins primary ${Seed.toHex()} and onPrimary $onPrimary in light mode").assertExists()
-            // b-503b
             // The explainer scrolls, and Match exactly sits at its foot.
             onNodeWithText("Match exactly").performScrollTo().performClick()
             waitForIdle()
@@ -163,8 +161,6 @@ class ContrastExplainerTest {
             onNodeWithText("Small text on primary will be hard to read.").assertExists()
         }
 }
-
-// b-221f
 
 /**
  * The explainer line with the explainer the workspace hosts over it, as the two sit on screen.

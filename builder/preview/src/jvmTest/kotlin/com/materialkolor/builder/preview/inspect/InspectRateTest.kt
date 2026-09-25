@@ -27,7 +27,6 @@ class InspectRateTest {
         result.rateOnPair(refs, isDark = true) shouldBe result.rate(pair, isDark = true)
     }
 
-    // b-308ba
     @Test
     fun rateOnPair_onRoleDeclaredFirst_stillRatesItOverItsRole() {
         val result = ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4), library = Library.Custom))
