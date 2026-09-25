@@ -64,10 +64,10 @@ import com.materialkolor.builder.kit.control.ListRowContent
 import com.materialkolor.builder.kit.control.ListRowHeadline
 import com.materialkolor.builder.kit.control.ListRowSupporting
 import com.materialkolor.builder.kit.control.foldState
-import com.materialkolor.builder.kit.control.trailingLabel
 import com.materialkolor.builder.kit.control.iconButtonSemantics
 import com.materialkolor.builder.kit.control.listRowInput
 import com.materialkolor.builder.kit.control.listRowState
+import com.materialkolor.builder.kit.control.trailingLabel
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.controlPress
