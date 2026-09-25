@@ -225,9 +225,17 @@ private fun lockSite(lock: ShuffleLock): ControlSite {
     // b-524
     val fineTune = stringResource(Res.string.finetune_title)
     return when (lock) {
-        ShuffleLock.Hue -> ControlSite.Direct(Region.Poster, stringResource(Res.string.finetune_keep_hue_spoken), fineTune)
+        ShuffleLock.Hue -> ControlSite.Direct(
+            Region.Poster,
+            stringResource(Res.string.finetune_keep_hue_spoken),
+            fineTune,
+        )
         ShuffleLock.Style -> ControlSite.Direct(Region.Poster, stringResource(Res.string.style_keep_spoken))
-        ShuffleLock.Seed -> ControlSite.Direct(Region.Poster, stringResource(Res.string.finetune_keep_seed_spoken), fineTune)
+        ShuffleLock.Seed -> ControlSite.Direct(
+            Region.Poster,
+            stringResource(Res.string.finetune_keep_seed_spoken),
+            fineTune,
+        )
     }
 }
 
