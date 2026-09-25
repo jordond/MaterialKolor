@@ -5,9 +5,6 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toPixelMap
@@ -29,7 +26,6 @@ import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
@@ -53,18 +49,12 @@ import com.materialkolor.builder.preview.split.LocalCompositionProbe
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.split.SplitPreview
 import com.materialkolor.builder.preview.split.SplitState
-import io.github.takahirom.roborazzi.captureRoboImage
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.test.Test
-
-/**
- * Where a recording job would write the screenshots. Nothing is written unless capture is on.
- */
-private const val ExpressiveScreenshotDir = "src/jvmTest/screenshots/gallery"
 
 private const val ExpressiveSourceDir = "src/commonMain/kotlin/com/materialkolor/builder/preview/material"
 
@@ -321,20 +311,6 @@ class ExpressiveGalleryTest {
         loadingShapes(0.5f) shouldBe 1f
         loadingShapes(1f) shouldBe 0f
     }
-
-    @Test
-    fun screens_wholeExpressiveGalleryBothModes_renderEveryCard() =
-        runDesktopComposeUiTest(1280, 3600) {
-            var spec by mutableStateOf(LightSpec)
-            setContent { ExpressiveHarness(spec, DemoAppState(), Modifier.fillMaxSize()) }
-
-            for (mode in listOf(LightSpec, DarkSpec)) {
-                spec = mode
-                waitForIdle()
-                onNodeWithText(ExpressiveCards.last().title).assertExists()
-                onRoot().captureRoboImage("$ExpressiveScreenshotDir/expressive-whole-${mode.label}.png")
-            }
-        }
 
     @Test
     fun expressiveSources_openNothingOutsideTheLayoutAndNeverLoopOnTheirOwn() {

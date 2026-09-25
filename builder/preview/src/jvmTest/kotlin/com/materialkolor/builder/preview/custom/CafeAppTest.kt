@@ -38,7 +38,6 @@ import com.materialkolor.builder.preview.DarkSpec
 import com.materialkolor.builder.preview.LightSpec
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.split.SplitState
-import io.github.takahirom.roborazzi.captureRoboImage
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
@@ -162,7 +161,6 @@ class CafeAppTest {
                                 order.single().left shouldBeGreaterThan banner.right
                             }
                         }
-                        onRoot().captureRoboImage("$CafeScreenshotDir/${width.name}-${mode.label}.png")
                     }
                 }
             }

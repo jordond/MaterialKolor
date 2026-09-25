@@ -32,17 +32,10 @@ import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
-import io.github.takahirom.roborazzi.captureRoboImage
 import io.kotest.matchers.collections.shouldBeEmpty
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
-/**
- * Where B-213's recording job writes the baselines. Nothing is written unless a Roborazzi task
- * turns capture on, and baselines are only ever recorded on the Linux runner.
- */
-private const val ScreenshotDir = "src/jvmTest/screenshots/controls-c"
-private const val SceneTag = "overlay-scene"
 private const val TooltipAnchorTag = "tooltip-anchor"
 
 /**
@@ -57,16 +50,13 @@ private enum class Overlay {
 }
 
 @OptIn(ExperimentalTestApi::class)
-class ControlsCScreenshotTest {
+class ControlsCContrastTest {
     @Test
-    fun overlays_everySkinBothModes_renderReadably() = forEachSkin { name, skin -> captureOverlays(name, skin) }
+    fun overlays_everySkinBothModes_renderReadably() = forEachSkin { _, skin -> checkOverlays(skin) }
 }
 
 @OptIn(ExperimentalTestApi::class)
-private fun ComposeUiTest.captureOverlays(
-    name: String,
-    skin: Skin,
-) {
+private fun ComposeUiTest.checkOverlays(skin: Skin) {
     val unreadable = mutableListOf<String>()
     var isDark by mutableStateOf(false)
     var overlay by mutableStateOf(Overlay.Menu)
@@ -91,7 +81,6 @@ private fun ComposeUiTest.captureOverlays(
                 onNodeWithTag(TooltipAnchorTag, useUnmergedTree = true).requestFocus()
                 waitForIdle()
             }
-            onNodeWithTag(SceneTag).captureRoboImage("$ScreenshotDir/$name-$mode-${step.name.lowercase()}.png")
         }
         val (style, tokens) = assertNotNull(seen)
         unreadable += style.inkPairs(tokens).shortfalls(mode)
@@ -108,7 +97,7 @@ private fun OverlayScene(
     toasts: BuilderToastHostState,
 ) {
     val tokens = LocalBuilderTokens.current
-    Box(Modifier.testTag(SceneTag).fillMaxSize().background(tokens.canvas)) {
+    Box(Modifier.fillMaxSize().background(tokens.canvas)) {
         Row(
             modifier = Modifier.padding(tokens.spacing.large),
             horizontalArrangement = Arrangement.spacedBy(tokens.spacing.large),

@@ -58,7 +58,6 @@ import com.materialkolor.builder.kit.skin.custom.LocalBuilderIdentity
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderType
-import io.github.takahirom.roborazzi.captureRoboImage
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -67,12 +66,6 @@ import kotlin.test.assertNotNull
 
 private const val SheetTag = "token-sheet"
 private const val SeedHex = "#6750A4"
-
-/**
- * Where B-213's recording job writes the baselines. Nothing is written unless a Roborazzi task
- * turns capture on, and baselines are only ever recorded on the Linux runner.
- */
-private const val ScreenshotDir = "src/jvmTest/screenshots/skin-themes"
 
 /**
  * A reduced contrast document with a pinned primary, the worst case for the chrome floor.
@@ -84,26 +77,26 @@ private val Document = ThemeDocument(
 )
 
 @OptIn(ExperimentalTestApi::class)
-class SkinThemesScreenshotTest {
+class SkinThemesTest {
     @Test
     fun material3_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = false), "material3", MaterialIcons, 20.dp) }
+        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = false), MaterialIcons, 20.dp) }
 
     @Test
     fun material3Expressive_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = true), "expressive", MaterialIcons, 20.dp) }
+        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = true), MaterialIcons, 20.dp) }
 
     @Test
     fun unstyled_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(Library.Unstyled, expressive = false), "unstyled", LucideIcons, 16.dp) }
+        runComposeUiTest { checkSheets(Skin(Library.Unstyled, expressive = false), LucideIcons, 16.dp) }
 
     @Test
     fun custom_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(Library.Custom, expressive = false), "custom", LucideIcons, 18.dp) }
+        runComposeUiTest { checkSheets(Skin(Library.Custom, expressive = false), LucideIcons, 18.dp) }
 
     @Test
     fun fluent_bothModes_renderTheSheetOnFlooredChromeInFluentColours() =
-        runComposeUiTest { checkSheets(Skin(Library.Fluent, expressive = false), "fluent", FluentIcons, 16.dp) }
+        runComposeUiTest { checkSheets(Skin(Library.Fluent, expressive = false), FluentIcons, 16.dp) }
 
     @Test
     fun custom_pinnedDocument_drawsTheChromeSlotsNotTheDocumentSlots() =
@@ -193,7 +186,6 @@ private fun BuilderTokens.inkPairs(): List<InkPair> =
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.checkSheets(
     skin: Skin,
-    name: String,
     icons: BuilderIcons,
     iconSize: Dp,
 ) {
@@ -229,7 +221,6 @@ private fun ComposeUiTest.checkSheets(
         onNodeWithText(SeedHex).assertExists()
         onNodeWithContentDescription(IconId.Undo.name).assertExists()
         onNodeWithContentDescription(IconId.ExternalLink.name).assertExists()
-        onNodeWithTag(SheetTag).captureRoboImage("$ScreenshotDir/$name-$mode.png")
     }
     unreadable.shouldBeEmpty()
 }

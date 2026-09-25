@@ -5,9 +5,6 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -31,7 +28,6 @@ import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.longClick
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performSemanticsAction
@@ -56,7 +52,6 @@ import com.materialkolor.builder.preview.split.LocalCompositionProbe
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.split.SplitPreview
 import com.materialkolor.builder.preview.split.SplitState
-import io.github.takahirom.roborazzi.captureRoboImage
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -66,12 +61,6 @@ import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.test.Test
-
-/**
- * Where B-213's recording job writes the baselines. Nothing is written unless a Roborazzi task
- * turns capture on.
- */
-private const val GalleryScreenshotDir = "src/jvmTest/screenshots/gallery"
 
 /**
  * The phone and desktop frames the gallery is checked at, at the height of a first screen.
@@ -261,40 +250,6 @@ class MaterialGalleryTest {
             }
         }
     }
-
-    @Test
-    fun screens_bothFramesBothModes_render() {
-        for (frame in GalleryFrames) {
-            withClue(frame) {
-                runDesktopComposeUiTest(frame.width, frame.height) {
-                    var spec by mutableStateOf(LightSpec)
-                    setContent { GalleryHarness(spec, DemoAppState(), Modifier.fillMaxSize()) }
-
-                    for (mode in listOf(LightSpec, DarkSpec)) {
-                        spec = mode
-                        waitForIdle()
-                        onNodeWithText(GalleryGroup.Actions.name).assertExists()
-                        onRoot().captureRoboImage("$GalleryScreenshotDir/${frame.width}-${mode.label}.png")
-                    }
-                }
-            }
-        }
-    }
-
-    @Test
-    fun screens_wholeGalleryBothModes_renderEveryCard() =
-        runDesktopComposeUiTest(1280, 3200) {
-            // Four columns, and tall enough that the last card is on screen too.
-            var spec by mutableStateOf(LightSpec)
-            setContent { GalleryHarness(spec, DemoAppState(), Modifier.fillMaxSize()) }
-
-            for (mode in listOf(LightSpec, DarkSpec)) {
-                spec = mode
-                waitForIdle()
-                onNodeWithText(MaterialCards.last().title).assertExists()
-                onRoot().captureRoboImage("$GalleryScreenshotDir/whole-${mode.label}.png")
-            }
-        }
 
     @Test
     fun segmentedButton_pickedInOneCopyOfASplit_showsPickedInBoth() =

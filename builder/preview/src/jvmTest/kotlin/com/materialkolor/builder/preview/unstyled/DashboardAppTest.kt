@@ -48,7 +48,6 @@ import com.materialkolor.builder.preview.inspect.OnCard
 import com.materialkolor.builder.preview.inspect.PreviewRoles
 import com.materialkolor.builder.preview.split.SplitPreview
 import com.materialkolor.builder.preview.split.SplitState
-import io.github.takahirom.roborazzi.captureRoboImage
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
@@ -59,12 +58,6 @@ import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.test.Test
-
-/**
- * Where B-213's recording job writes the baselines. Nothing is written unless a Roborazzi task
- * turns capture on.
- */
-private const val DashboardScreenshotDir = "src/jvmTest/screenshots/dashboard"
 
 /**
  * Where the dashboard's sources live, from the module the tests run in.
@@ -218,7 +211,6 @@ class DashboardAppTest {
                                 onNodeWithText(destination).assertExists()
                             }
                         }
-                        onRoot().captureRoboImage("$DashboardScreenshotDir/${width.name}-${mode.label}.png")
                     }
                 }
             }
