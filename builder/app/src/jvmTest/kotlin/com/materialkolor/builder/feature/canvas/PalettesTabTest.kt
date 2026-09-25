@@ -5,8 +5,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
@@ -16,6 +19,7 @@ import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onAllNodes
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -66,8 +70,10 @@ class PalettesTabTest {
 
             onNodeWithText("Same in light and dark").assertExists()
             for (title in PaletteTitles.values) onAllNodesWithText(title).assertCountEquals(1)
-            onNodeWithText("primary light").assertExists()
-            onNodeWithText("primary dark").assertExists()
+            // b-513
+            onNode(hasMark("primary") and hasMark("surfaceTint") and hasAnyAncestor(hasContentDescription("Light")))
+                .assertExists()
+            onNode(hasMark("primary") and hasAnyAncestor(hasContentDescription("Dark"))).assertExists()
             onNodeWithText("Light").assertDoesNotExist()
             onNodeWithText("Dark").assertDoesNotExist()
         }
@@ -96,7 +102,7 @@ class PalettesTabTest {
             for (title in PaletteTitles.values) onAllNodesWithText(title).assertCountEquals(1)
             onAllNodesWithText("Brand").assertCountEquals(1)
             for (part in listOf("color", "onColor", "container", "onContainer")) {
-                onAllNodesWithText(part).assertCountEquals(1)
+                onAllNodes(hasMark(part)).assertCountEquals(1) // b-513
             }
             onNodeWithText("Same in light and dark").assertDoesNotExist()
         }
@@ -108,8 +114,9 @@ class PalettesTabTest {
             showPalettes(result, PreviewMode.Split)
 
             onAllNodesWithText("Brand").assertCountEquals(1)
-            onNodeWithText("container light").assertExists()
-            onNodeWithText("container dark").assertExists()
+            // b-513
+            onNode(hasMark("container") and hasAnyAncestor(hasContentDescription("Light"))).assertExists()
+            onNode(hasMark("container") and hasAnyAncestor(hasContentDescription("Dark"))).assertExists()
         }
 
     @Test
@@ -305,6 +312,16 @@ class PalettesTabTest {
         return actions
     }
 }
+
+// b-513
+
+/** A tag under a ramp, as in "40 · primary, surfaceTint", that names [name] among what landed on its tone. */
+private fun hasMark(name: String): SemanticsMatcher =
+    SemanticsMatcher("a tone tag naming $name") { node ->
+        node.config.getOrNull(SemanticsProperties.Text).orEmpty().any { text ->
+            name in text.text.substringAfter(" · ", missingDelimiterValue = "").split(", ")
+        }
+    }
 
 /** The heading over each palette's ramp. */
 internal val PaletteTitles: Map<KeyColor, String> = mapOf(
