@@ -18,8 +18,10 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * A modal panel along the start edge, the projects drawer.
  *
- * It is 320 dp wide, or 85% of a narrower screen, and takes the whole screen at Compact. A header
- * holds its title and a close button. It keeps focus inside while it is open, closes on Esc and on
+ * It is 380 dp wide, or 85% of a narrower screen, and takes the whole screen at Compact. A header
+ * holds its title, an optional [subtitle] and a close button, and an optional [footer] sits along
+ * the bottom under a hairline. The header, the body and the footer keep the same room from the
+ * panel's edges, and the inner corners take the skin's panel rounding. It keeps focus inside while it is open, closes on Esc and on
  * the veil, and hands focus back to [returnFocusTo] once it has gone. It slides in from the start
  * edge, or only fades under reduced motion. Material3 has no side sheet, so it wears Material's colours and shapes over the
  * headless drawer like every other skin.
@@ -30,7 +32,9 @@ import org.jetbrains.compose.resources.stringResource
  * @param[modifier] Applied to the panel.
  * @param[closeLabel] What the close button says to assistive technology.
  * @param[returnFocusTo] The trigger that opened the panel.
- * @param[content] The panel's body, below the header.
+ * @param[subtitle] A quieter line under the title, or null for none.
+ * @param[footer] What sits along the bottom, such as the panel's actions, or null for no footer.
+ * @param[content] The panel's body, between the header and the footer.
  */
 @Composable
 public fun BuilderSidePanel(
@@ -40,6 +44,8 @@ public fun BuilderSidePanel(
     modifier: Modifier = Modifier,
     closeLabel: String = stringResource(Res.string.close),
     returnFocusTo: FocusRequester? = null,
+    subtitle: String? = null, // b-511
+    footer: (@Composable () -> Unit)? = null, // b-511
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val compact = when (LocalLayout.current.windowClass) {
@@ -57,6 +63,8 @@ public fun BuilderSidePanel(
         style = overlayStyle(LocalSkin.current.library),
         returnFocusTo = returnFocusTo,
         modifier = modifier,
+        subtitle = subtitle,
+        footer = footer,
         content = content,
     )
 }

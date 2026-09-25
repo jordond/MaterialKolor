@@ -34,6 +34,31 @@ class PaletteSearchTest {
         )
     }
 
+    // b-511
+    @Test
+    fun groups_leadWithRecents_thenEachCategoryWhereItsBestRowStood() {
+        val rows = searchPalette(entries, "", recents = listOf("shuffle", "style.Vibrant"))
+
+        val groups = paletteGroups(rows, recents = listOf("shuffle", "style.Vibrant"), recentTitle = "Recent")
+        val ranked = paletteGroups(searchPalette(entries, "contrast", emptyList()), emptyList(), "Recent")
+
+        groups.map { group -> group.title to group.entries.map { entry -> entry.id } } shouldBe listOf(
+            "Recent" to listOf("shuffle", "style.Vibrant"),
+            "Target options" to listOf("motionScheme.Expressive"),
+            "Style" to listOf("style.TonalSpot"),
+            "Preview" to listOf("tab.Contrast"),
+        )
+        ranked.flatMap { group -> group.entries }.first().id shouldBe
+            searchPalette(entries, "contrast", emptyList()).first().id
+    }
+
+    // b-511
+    @Test
+    fun keycapChords_splitChordsAtCommasAndKeysAtPlusSigns() {
+        keycapChords("Ctrl+Shift+Z, Ctrl+Y") shouldBe listOf(listOf("Ctrl", "Shift", "Z"), listOf("Ctrl", "Y"))
+        keycapChords("?") shouldBe listOf(listOf("?"))
+    }
+
     @Test
     fun search_findsByOtherWordsAndCategory_andDropsWhatDoesNotMatch() {
         val surprise = searchPalette(entries, "surprise", recents = emptyList())

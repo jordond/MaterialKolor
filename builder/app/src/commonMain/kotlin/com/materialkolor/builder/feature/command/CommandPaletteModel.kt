@@ -113,6 +113,36 @@ internal fun searchPalette(
         ).map { (entry, _) -> entry }
 }
 
+// b-511
+
+/**
+ * A run of the palette's rows under one header.
+ *
+ * @property[title] The header, the rows' category or the recent group's name.
+ * @property[entries] The rows, in the order the search ranked them.
+ */
+@Immutable
+internal class PaletteGroup(
+    val title: String,
+    val entries: List<PaletteEntry>,
+)
+
+/**
+ * [rows] under their headers. The rows in [recents] lead under [recentTitle], and the rest go under
+ * their categories, each group where its best row stood and each row in its own order inside it. So
+ * the row a search ranks first still comes first, and Enter runs the top row that shows.
+ */
+internal fun paletteGroups(
+    rows: List<PaletteEntry>,
+    recents: List<String>,
+    recentTitle: String,
+): List<PaletteGroup> {
+    val recentIds = recents.toSet()
+    val (recent, rest) = rows.partition { entry -> entry.id in recentIds }
+    val lead = if (recent.isEmpty()) emptyList() else listOf(PaletteGroup(recentTitle, recent))
+    return lead + rest.groupBy { entry -> entry.category }.map { (title, entries) -> PaletteGroup(title, entries) }
+}
+
 /** How well [query] matches [entry], the label counting most, or null when it does not. */
 private fun matchScore(
     query: String,

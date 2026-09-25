@@ -1,6 +1,7 @@
 package com.materialkolor.builder.feature.export
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.core.platform.Clipboard
 import com.materialkolor.builder.core.platform.FileSaver
@@ -36,6 +39,8 @@ import com.materialkolor.builder.generated.resources.export_blocked_extra_colors
 import com.materialkolor.builder.generated.resources.export_blocked_package
 import com.materialkolor.builder.generated.resources.export_blocked_taken
 import com.materialkolor.builder.generated.resources.export_blocked_theme_name
+import com.materialkolor.builder.generated.resources.export_checked
+import com.materialkolor.builder.generated.resources.export_checked_any
 import com.materialkolor.builder.generated.resources.export_copied
 import com.materialkolor.builder.generated.resources.export_copy_all
 import com.materialkolor.builder.generated.resources.export_copy_file
@@ -49,6 +54,8 @@ import com.materialkolor.builder.generated.resources.export_options_summary
 import com.materialkolor.builder.generated.resources.export_save_failed
 import com.materialkolor.builder.generated.resources.export_share
 import com.materialkolor.builder.generated.resources.export_share_failed
+import com.materialkolor.builder.generated.resources.export_subtitle
+import com.materialkolor.builder.generated.resources.export_subtitle_unnamed
 import com.materialkolor.builder.generated.resources.export_title
 import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.control.BuilderButton
@@ -124,8 +131,40 @@ internal fun ExportSheet(
     workspace: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
     returnFocusTo: FocusRequester? = null,
+    materialKolorVersion: String? = null, // b-511
 ) {
     val keys = rememberPanelShortcuts() // b-315c
+    // b-511
+    // The footer and the body share what the copies did, so it lives here. Each opening starts it
+    // over, a draft problem from the last time included.
+    val sheet = remember(visible) { SheetCopies() }
+    val scope = rememberCoroutineScope()
+    val announcer = LocalAnnouncer.current
+    val copiedWords = stringResource(Res.string.export_copied)
+    LaunchedEffect(sheet, sheet.copies) {
+        if (sheet.copied == null) return@LaunchedEffect
+        delay(COPIED_MILLIS)
+        sheet.copied = null
+    }
+
+    fun copy(
+        kind: CopyKind,
+        text: String,
+    ) {
+        scope.launchCopy(clipboard, text) { result ->
+            if (result.isSuccess) {
+                sheet.copied = kind
+                sheet.copies++
+                announcer.announce(copiedWords)
+                dispatcher.dispatch(ExportAction.Exported)
+            } else {
+                sheet.copied = null
+                sheet.manualText = text
+                sheet.manualOpen = true
+            }
+        }
+    }
+
     BuilderSheet(
         visible = visible,
         onDismissRequest = { workspace.dispatch(WorkspaceAction.ClosePanel) },
@@ -133,46 +172,33 @@ internal fun ExportSheet(
         presentation = SheetPresentation.of(LocalLayout.current),
         modifier = modifier.then(keys.modifier), // b-315c
         returnFocusTo = returnFocusTo,
-    ) {
-        val scope = rememberCoroutineScope()
-        val announcer = LocalAnnouncer.current
-        val copiedWords = stringResource(Res.string.export_copied)
-        val drafts = remember { DraftProblems() }
-        var copied by remember { mutableStateOf<CopyKind?>(null) }
-        var copies by remember { mutableIntStateOf(0) }
-        var manualText by remember { mutableStateOf("") }
-        var manualOpen by remember { mutableStateOf(false) }
-        LaunchedEffect(copies) {
-            if (copied == null) return@LaunchedEffect
-            delay(COPIED_MILLIS)
-            copied = null
-        }
-
-        fun copy(
-            kind: CopyKind,
-            text: String,
-        ) {
-            scope.launchCopy(clipboard, text) { result ->
-                if (result.isSuccess) {
-                    copied = kind
-                    copies++
-                    announcer.announce(copiedWords)
-                    dispatcher.dispatch(ExportAction.Exported)
-                } else {
-                    copied = null
-                    manualText = text
-                    manualOpen = true
-                }
+        subtitle = exportSubtitle(state), // b-511
+        footer = {
+            val export = sheetExport(state, outcomeOf, sheet.drafts)
+            val picked = export.picked
+            val ready = export.ready
+            ExportFooter(materialKolorVersion) {
+                CopyButton(
+                    copied = sheet.copied == CopyKind.File,
+                    label = stringResource(Res.string.export_copy_file),
+                    enabled = picked != null,
+                    onClick = { if (picked != null) copy(CopyKind.File, picked.text) },
+                )
+                CopyButton(
+                    copied = sheet.copied == CopyKind.All,
+                    label = stringResource(Res.string.export_copy_all),
+                    enabled = ready != null,
+                    onClick = { if (ready != null) copy(CopyKind.All, ready.allText) },
+                )
+                ZipButton(ready, files, dispatcher, workspace)
             }
-        }
-
-        val outcome = outcomeOf(state)
-        val draftProblems = drafts.all
-        val ready = (outcome as? ExportOutcome.Ready)?.takeIf { draftProblems.isEmpty() }
-        val problems = (draftProblems + (outcome as? ExportOutcome.Blocked)?.problems.orEmpty()).distinct()
+        },
+    ) {
+        val export = sheetExport(state, outcomeOf, sheet.drafts)
+        val ready = export.ready
+        val picked = export.picked
         // b-315c
         // C copies the file picked and Shift+C every file, as Copy file and Copy all do.
-        val picked = ready?.fileAt(state.selectedPath)
         SideEffect {
             keys.onShortcut = { shortcut ->
                 when {
@@ -191,53 +217,136 @@ internal fun ExportSheet(
             }
         }
         val spacing = LocalBuilderTokens.current.spacing
-        // b-221f
-        // The sheet clips at its edge, so the body stands 4 dp in, a focus ring's offset plus its width,
-        // and the code view's ring shows on all four sides.
+        // b-511
+        // The sheet keeps its own room from its edges, so the body, the tabs and the code share one edge.
         Column(
-            modifier = Modifier.fillMaxSize().padding(horizontal = spacing.extraSmall),
+            modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(spacing.medium),
         ) {
             // Its fields and buttons take focus themselves, so the area is no stop of its own.
             BuilderScrollArea(Modifier.weight(1f, fill = false).fillMaxWidth(), tabStop = false) {
-                ExportHeader(state, capabilities, dispatcher, workspace, drafts)
+                ExportHeader(state, capabilities, dispatcher, workspace, sheet.drafts)
             }
             if (ready != null) {
                 ExportFiles(ready, state.selectedPath, dispatcher, onCopy = { text -> copy(CopyKind.File, text) })
             }
-            problems.forEach { problem ->
+            export.problems.forEach { problem ->
                 Notice(text = problemText(problem), icon = IconId.Error, emphasis = Emphasis.Danger)
-            }
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(spacing.small),
-                verticalArrangement = Arrangement.spacedBy(spacing.small),
-            ) {
-                val file = ready?.let { export -> export.fileAt(state.selectedPath) }
-                CopyButton(
-                    copied = copied == CopyKind.File,
-                    label = stringResource(Res.string.export_copy_file),
-                    enabled = file != null,
-                    onClick = { if (file != null) copy(CopyKind.File, file.text) },
-                )
-                CopyButton(
-                    copied = copied == CopyKind.All,
-                    label = stringResource(Res.string.export_copy_all),
-                    enabled = ready != null,
-                    onClick = { if (ready != null) copy(CopyKind.All, ready.allText) },
-                )
-                ZipButton(ready, files, dispatcher, workspace)
             }
         }
         // b-228aa
         val zipLabel = if (zipShares(ready, files)) Res.string.export_share else Res.string.export_download
         ManualCopyDialog(
-            visible = manualOpen,
-            text = manualText,
-            onDismissRequest = { manualOpen = false },
+            visible = sheet.manualOpen,
+            text = sheet.manualText,
+            onDismissRequest = { sheet.manualOpen = false },
             saveLabel = stringResource(zipLabel),
         )
     }
 }
+
+// b-511
+
+/**
+ * What the sheet hands out right now. [ready] is the export once nothing holds it back, [problems]
+ * what does, and [picked] the file whose tab is open.
+ */
+private class SheetExport(
+    val ready: ExportOutcome.Ready?,
+    val problems: List<ExportProblem>,
+    val picked: GeneratedFile?,
+)
+
+/**
+ * The export of [state], held back while a draft in [drafts] is not valid (R-B-309). Only the parts
+ * of the sheet that show ask for it, so a closed sheet generates nothing.
+ */
+private fun sheetExport(
+    state: ExportModel.State,
+    outcomeOf: (ExportModel.State) -> ExportOutcome,
+    drafts: DraftProblems,
+): SheetExport {
+    val outcome = outcomeOf(state)
+    val draftProblems = drafts.all
+    val ready = (outcome as? ExportOutcome.Ready)?.takeIf { draftProblems.isEmpty() }
+    val problems = (draftProblems + (outcome as? ExportOutcome.Blocked)?.problems.orEmpty()).distinct()
+    return SheetExport(ready, problems, ready?.fileAt(state.selectedPath))
+}
+
+/** What the copies did while the sheet is open, and what the option fields say is wrong. */
+@Stable
+private class SheetCopies {
+    val drafts = DraftProblems()
+    var copied: CopyKind? by mutableStateOf(null)
+    var copies: Int by mutableIntStateOf(0)
+    var manualText: String by mutableStateOf("")
+    var manualOpen: Boolean by mutableStateOf(false)
+}
+
+/** The theme's name, the project it belongs to and its seed, "AppTheme from Burnt Ember #D9653B". */
+@Composable
+private fun exportSubtitle(state: ExportModel.State): String {
+    val themeName = state.document.themeName
+    val seed = state.document.seed.toHex()
+    val project = state.projectName
+    return if (project.isBlank()) {
+        stringResource(Res.string.export_subtitle_unnamed, themeName, seed)
+    } else {
+        stringResource(Res.string.export_subtitle, themeName, project, seed)
+    }
+}
+
+/**
+ * The note that every export is compile checked, with the copy and download buttons after it. They
+ * share a row where the sheet is wide enough, and the buttons move under the note where it is not.
+ */
+@Composable
+private fun ExportFooter(
+    materialKolorVersion: String?,
+    buttons: @Composable () -> Unit,
+) {
+    val spacing = LocalBuilderTokens.current.spacing
+    val note: @Composable (Modifier) -> Unit = { noteModifier ->
+        Row(
+            modifier = noteModifier,
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            BuilderIcon(id = IconId.Check, contentDescription = null, emphasis = Emphasis.Secondary)
+            BuilderText(
+                text = if (materialKolorVersion == null) {
+                    stringResource(Res.string.export_checked_any)
+                } else {
+                    stringResource(Res.string.export_checked, materialKolorVersion)
+                },
+                emphasis = Emphasis.Secondary,
+            )
+        }
+    }
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        if (maxWidth >= FOOTER_ROW_MIN_WIDTH) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(spacing.small),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                note(Modifier.weight(1f))
+                buttons()
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+                note(Modifier)
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(spacing.small, Alignment.End),
+                    verticalArrangement = Arrangement.spacedBy(spacing.small),
+                ) { buttons() }
+            }
+        }
+    }
+}
+
+/** The narrowest the footer gets while its note and its buttons still share a row. */
+private val FOOTER_ROW_MIN_WIDTH = 600.dp
 
 /** The target, the mode, the Expressive warning and the options. */
 @Composable

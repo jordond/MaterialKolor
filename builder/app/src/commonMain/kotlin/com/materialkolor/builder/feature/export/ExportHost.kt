@@ -44,5 +44,6 @@ internal fun ExportHost(
         workspace = dispatcher,
         modifier = modifier,
         returnFocusTo = returnFocusTo,
+        materialKolorVersion = model.materialKolorVersion, // b-511
     )
 }

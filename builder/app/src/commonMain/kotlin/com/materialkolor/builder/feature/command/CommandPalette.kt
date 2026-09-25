@@ -1,16 +1,27 @@
 package com.materialkolor.builder.feature.command
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
@@ -24,6 +35,12 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.audit.ColorRef
@@ -40,6 +57,7 @@ import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.accents_label
+import com.materialkolor.builder.generated.resources.command_key_esc
 import com.materialkolor.builder.generated.resources.contrast_label
 import com.materialkolor.builder.generated.resources.extras_targets_label
 import com.materialkolor.builder.generated.resources.keycolors_label
@@ -47,10 +65,16 @@ import com.materialkolor.builder.generated.resources.palette_category_poster
 import com.materialkolor.builder.generated.resources.palette_category_roles
 import com.materialkolor.builder.generated.resources.palette_close
 import com.materialkolor.builder.generated.resources.palette_go_to
+import com.materialkolor.builder.generated.resources.palette_hint_close
+import com.materialkolor.builder.generated.resources.palette_hint_move
+import com.materialkolor.builder.generated.resources.palette_hint_paste
+import com.materialkolor.builder.generated.resources.palette_hint_run
+import com.materialkolor.builder.generated.resources.palette_key_enter
+import com.materialkolor.builder.generated.resources.palette_keys_move
 import com.materialkolor.builder.generated.resources.palette_nothing
 import com.materialkolor.builder.generated.resources.palette_open_shared
 import com.materialkolor.builder.generated.resources.palette_query
-import com.materialkolor.builder.generated.resources.palette_row_keys
+import com.materialkolor.builder.generated.resources.palette_recent
 import com.materialkolor.builder.generated.resources.palette_set_seed
 import com.materialkolor.builder.generated.resources.palette_show_on_ramp
 import com.materialkolor.builder.generated.resources.palette_title
@@ -73,13 +97,16 @@ import com.materialkolor.builder.generated.resources.palette_words_vision
 import com.materialkolor.builder.generated.resources.pins_label
 import com.materialkolor.builder.generated.resources.poster_seed
 import com.materialkolor.builder.generated.resources.style_label
-import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderDialog
+import com.materialkolor.builder.kit.control.BuilderIcon
+import com.materialkolor.builder.kit.control.BuilderIconButton
 import com.materialkolor.builder.kit.control.BuilderListRow
 import com.materialkolor.builder.kit.control.BuilderScrollArea
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextField
+import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
@@ -101,6 +128,10 @@ import com.materialkolor.builder.domain.model.Style as PaletteStyle
  * a style's name. A role's name offers to show it on its ramp, and a poster section's name offers to
  * go to it (AR-10). With nothing typed the commands come in the registry's order, the ones run
  * lately first. A command that cannot run keeps its row, which says why instead of its keys.
+ *
+ * The search field leads, with the rows under it in groups, the ones run lately under Recent while
+ * nothing is typed and the rest under their categories. Each row shows its keys as keycaps at its end,
+ * and a footer shows the keys that move, run and close.
  *
  * Enter runs the top row that can run from inside the key press, so a copy or a share still counts
  * as the user's own (R-B-302). Down moves from the field into the rows and Up from the first row
@@ -140,7 +171,7 @@ internal fun CommandPalette(
         title = stringResource(Res.string.palette_title),
         modifier = sized,
         returnFocusTo = returnFocusTo,
-        actions = { BuilderButton(onClick = close, label = stringResource(Res.string.palette_close)) },
+        titleShown = false, // b-511
     ) {
         // b-315d
         // Only the dialog's content builds the registry, so a closed palette costs a workspace change
@@ -152,6 +183,7 @@ internal fun CommandPalette(
             runner = runner,
             model = model,
             onOpenShared = { code -> scope.openShared(share, code, dispatcher) },
+            onClose = close,
         )
     }
 }
@@ -163,13 +195,23 @@ private fun ColumnScope.PaletteBody(
     runner: PaletteRunner,
     model: CommandPaletteModel,
     onOpenShared: (code: String) -> Unit,
+    onClose: () -> Unit,
 ) {
     DisposableEffect(model) { onDispose { model.clear() } }
     val palette by model.collectAsState()
     val entries = paletteEntries(state, commands, runner)
     val styleNames = PaletteStyle.entries.associateWith { style -> stringResource(styleName(style)) }
     val understood = understoodEntries(palette.query, entries, runner, onOpenShared)
-    val rows = paletteRows(palette.query, palette.recents, entries, styleNames, understood)
+    // b-511
+    val recentTitle = stringResource(Res.string.palette_recent)
+
+    fun groupsFor(latest: CommandPaletteModel.State): List<PaletteGroup> {
+        val found = paletteRows(latest.query, latest.recents, entries, styleNames, understood)
+        return paletteGroups(found, if (latest.query.isBlank()) latest.recents else emptyList(), recentTitle)
+    }
+
+    val groups = groupsFor(palette)
+    val rows = groups.flatMap { group -> group.entries }
     val requesters = remember(rows.size) { List(rows.size) { FocusRequester() } }
     val field = remember { FocusRequester() }
     val runnable = rows.indices.filter { index -> rows[index].state == CommandState.Enabled }
@@ -186,84 +228,220 @@ private fun ColumnScope.PaletteBody(
         val current = if (latest.query == palette.query) {
             rows
         } else {
-            paletteRows(latest.query, latest.recents, entries, styleNames, understood)
+            groupsFor(latest).flatMap { group -> group.entries }
         }
         current.firstOrNull { entry -> entry.state == CommandState.Enabled }?.let(::run)
     }
 
-    BuilderTextField(
-        value = palette.committed,
-        onCommit = model::commit,
-        label = stringResource(Res.string.palette_query),
-        modifier = Modifier
-            .fillMaxWidth()
-            .focusRequester(field)
-            .onPreviewKeyEvent { event ->
-                val first = runnable.firstOrNull()
-                if (!event.pressed(Key.DirectionDown) || first == null) return@onPreviewKeyEvent false
-                requesters[first].requestFocus()
-                true
-            }
-            // Esc on a search the field already committed, which the field lets through, empties it.
-            .onKeyEvent { event ->
-                val typed = model.state.value.query
-                if (!event.pressed(Key.Escape) || typed.isEmpty()) return@onKeyEvent false
-                model.clear()
-                true
-            },
-        onDraftChange = model::type,
-        onSubmit = { submit() },
-    )
+    val spacing = LocalBuilderTokens.current.spacing
+    // b-511
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(spacing.small),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        BuilderTextField(
+            value = palette.committed,
+            onCommit = model::commit,
+            label = stringResource(Res.string.palette_query),
+            modifier = Modifier
+                .weight(1f)
+                .focusRequester(field)
+                .onPreviewKeyEvent { event ->
+                    val first = runnable.firstOrNull()
+                    if (!event.pressed(Key.DirectionDown) || first == null) return@onPreviewKeyEvent false
+                    requesters[first].requestFocus()
+                    true
+                }
+                // Esc on a search the field already committed, which the field lets through, empties it.
+                .onKeyEvent { event ->
+                    val typed = model.state.value.query
+                    if (!event.pressed(Key.Escape) || typed.isEmpty()) return@onKeyEvent false
+                    model.clear()
+                    true
+                },
+            onDraftChange = model::type,
+            onSubmit = { submit() },
+        )
+        BuilderIconButton(
+            onClick = onClose,
+            icon = IconId.Close,
+            contentDescription = stringResource(Res.string.palette_close),
+        )
+    }
     BuilderScrollArea(Modifier.weight(1f, fill = false).height(ListHeight), tabStop = false) {
         if (rows.isEmpty()) {
             BuilderText(stringResource(Res.string.palette_nothing), emphasis = Emphasis.Secondary)
         }
-        rows.forEachIndexed { index, entry ->
-            key(entry.id) {
-                BuilderListRow(
-                    headline = entry.label,
-                    modifier = Modifier
-                        .focusRequester(requesters[index])
-                        .onKeyEvent { event ->
-                            when {
-                                event.pressed(Key.DirectionDown) -> {
-                                    runnable.firstOrNull { other -> other > index }?.let { next ->
-                                        requesters[next].requestFocus()
+        var index = 0
+        groups.forEach { group ->
+            GroupHeader(group.title)
+            group.entries.forEach { entry ->
+                val at = index++
+                key(entry.id) {
+                    PaletteRow(
+                        entry = entry,
+                        modifier = Modifier
+                            .focusRequester(requesters[at])
+                            .onKeyEvent { event ->
+                                when {
+                                    event.pressed(Key.DirectionDown) -> {
+                                        runnable.firstOrNull { other -> other > at }?.let { next ->
+                                            requesters[next].requestFocus()
+                                        }
+                                        true
                                     }
-                                    true
+                                    event.pressed(Key.DirectionUp) -> {
+                                        val previous = runnable.lastOrNull { other -> other < at }
+                                        (previous?.let(requesters::get) ?: field).requestFocus()
+                                        true
+                                    }
+                                    else -> {
+                                        false
+                                    }
                                 }
-                                event.pressed(Key.DirectionUp) -> {
-                                    val previous = runnable.lastOrNull { other -> other < index }
-                                    if (previous == null) field.requestFocus() else requesters[previous].requestFocus()
-                                    true
-                                }
-                                else -> {
-                                    false
-                                }
-                            }
-                        },
-                    supporting = supportingLine(entry),
-                    onClick = { run(entry) },
-                    selected = entry.selected,
-                    enabled = entry.state == CommandState.Enabled,
-                )
+                            },
+                        onClick = { run(entry) },
+                    )
+                }
+            }
+        }
+    }
+    PaletteFooter()
+    // b-511
+    // The search field leads, so it takes focus as the palette opens.
+    LaunchedEffect(field) { field.requestFocus() }
+}
+
+// b-511
+
+/** A group's header over its rows, read as a heading. */
+@Composable
+private fun GroupHeader(title: String) {
+    val spacing = LocalBuilderTokens.current.spacing
+    BuilderText(
+        text = title,
+        modifier = Modifier
+            .padding(start = spacing.medium, top = spacing.small, bottom = spacing.extraSmall)
+            .semantics { heading() },
+        style = BuilderTextStyle.SectionLabel,
+        emphasis = Emphasis.Secondary,
+    )
+}
+
+/**
+ * One command as a row, its name as the main line and its keys as keycaps at its end. A command that
+ * cannot run says why under its name instead.
+ */
+@Composable
+private fun PaletteRow(
+    entry: PaletteEntry,
+    modifier: Modifier,
+    onClick: () -> Unit,
+) {
+    val state = entry.state
+    val keys = entry.keys
+    BuilderListRow(
+        headline = entry.label,
+        modifier = modifier,
+        supporting = (state as? CommandState.Disabled)?.reason,
+        onClick = onClick,
+        selected = entry.selected,
+        enabled = state == CommandState.Enabled,
+        trailing = if (state == CommandState.Enabled && keys != null) {
+            { Keycaps(keys) }
+        } else {
+            null
+        },
+        dense = true,
+    )
+}
+
+/**
+ * The keys that move, run and close, and what else the field takes, along the bottom. Where the
+ * palette is wide enough they share one line with the paste note at its end, and anywhere else they
+ * wrap.
+ */
+@Composable
+private fun PaletteFooter() {
+    val tokens = LocalBuilderTokens.current
+    val spacing = tokens.spacing
+    val hints: @Composable () -> Unit = {
+        FooterHint(stringResource(Res.string.palette_hint_move), stringResource(Res.string.palette_keys_move)) {
+            Keycap { KeyGlyph(Modifier.rotate(UP_TURN_DEGREES)) }
+            Keycap { KeyGlyph() }
+        }
+        val enter = stringResource(Res.string.palette_key_enter)
+        FooterHint(stringResource(Res.string.palette_hint_run), enter) { KeyName(enter) }
+        val esc = stringResource(Res.string.command_key_esc)
+        FooterHint(stringResource(Res.string.palette_hint_close), esc) { KeyName(esc) }
+    }
+    val paste = stringResource(Res.string.palette_hint_paste)
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+        Box(Modifier.fillMaxWidth().height(tokens.outlineWidth).background(tokens.border))
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            if (maxWidth >= FooterRowMinWidth) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(spacing.medium),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    hints()
+                    BuilderText(
+                        text = paste,
+                        modifier = Modifier.weight(1f),
+                        emphasis = Emphasis.Secondary,
+                        textAlign = TextAlign.End,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            } else {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(spacing.medium),
+                    verticalArrangement = Arrangement.spacedBy(spacing.small),
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                ) {
+                    hints()
+                    BuilderText(paste, emphasis = Emphasis.Secondary)
+                }
             }
         }
     }
 }
 
-/** The line under a row, its group and its keys, or why it cannot run. */
+/** The narrowest the footer gets while its hints and the paste note still share a line. */
+private val FooterRowMinWidth: Dp = 560.dp
+
+/** One key hint in the footer, its keycaps then what they do, read as [keys] and then [hint]. */
 @Composable
-private fun supportingLine(entry: PaletteEntry): String =
-    when (val state = entry.state) {
-        is CommandState.Disabled -> {
-            state.reason
-        }
-        CommandState.Enabled -> {
-            val keys = entry.keys
-            if (keys == null) entry.category else stringResource(Res.string.palette_row_keys, entry.category, keys)
-        }
+private fun FooterHint(
+    hint: String,
+    keys: String,
+    caps: @Composable () -> Unit,
+) {
+    Row(
+        modifier = Modifier.clearAndSetSemantics { contentDescription = "$keys $hint" },
+        horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.small),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.extraSmall)) { caps() }
+        BuilderText(hint, emphasis = Emphasis.Secondary)
     }
+}
+
+/** The arrow on a Down keycap, or on an Up one turned by [modifier]. */
+@Composable
+private fun KeyGlyph(modifier: Modifier = Modifier) {
+    BuilderIcon(IconId.ChevronDown, null, modifier, emphasis = Emphasis.Secondary, size = KeycapGlyphSize)
+}
+
+/** How far the Down arrow turns to point up. */
+private const val UP_TURN_DEGREES = 180f
+
+/** A keycap holding a key's name. */
+@Composable
+private fun KeyName(name: String) {
+    Keycap { BuilderText(name, style = BuilderTextStyle.Value, emphasis = Emphasis.Secondary) }
+}
 
 /** What the palette understood [query] to be, first, then the rows the search finds in [entries]. */
 private fun paletteRows(

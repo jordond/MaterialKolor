@@ -47,7 +47,10 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * @param[modifier] Applied to the dialog panel.
  * @param[returnFocusTo] The trigger that opened the dialog. Attach it to the trigger with
  * `Modifier.focusRequester`.
- * @param[actions] The buttons along the bottom, the confirming one last.
+ * @param[titleShown] Whether the title shows at the top. A dialog whose first control says what it
+ * is, such as a search field, hides it and still goes by it.
+ * @param[actions] The buttons along the bottom, the confirming one last, or null for no row of
+ * actions.
  * @param[content] The body. It takes at most the height the title and the actions leave, in every
  * skin, so a picture or a list in it gets what is left and the actions stay on screen, on a phone on
  * its side as well. A list that sits over more of the body takes `Modifier.weight(1f, fill = false)`
@@ -60,14 +63,16 @@ public fun BuilderDialog(
     title: String,
     modifier: Modifier = Modifier,
     returnFocusTo: FocusRequester? = null,
-    actions: @Composable RowScope.() -> Unit = {},
+    titleShown: Boolean = true, // b-511
+    actions: (@Composable RowScope.() -> Unit)? = null, // b-511
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val frame = DialogFrame(titleShown, actions)
     val tokens = LocalBuilderTokens.current
     // b-221b
     when (overlayLibrary()) {
         Library.Material3 -> {
-            MaterialDialog(visible, onDismissRequest, title, returnFocusTo, modifier, actions, content)
+            MaterialDialog(visible, onDismissRequest, title, returnFocusTo, modifier, frame, content)
         }
         Library.Unstyled -> {
             HeadlessDialog(
@@ -77,7 +82,7 @@ public fun BuilderDialog(
                 unstyledOverlayStyle(tokens),
                 returnFocusTo,
                 modifier,
-                actions,
+                frame,
                 content,
             )
         }
@@ -90,7 +95,7 @@ public fun BuilderDialog(
                 fluentOverlayStyle(tokens),
                 returnFocusTo,
                 modifier,
-                actions,
+                frame,
                 content,
             )
         }
@@ -102,7 +107,7 @@ public fun BuilderDialog(
                 customOverlayStyle(tokens),
                 returnFocusTo,
                 modifier,
-                actions,
+                frame,
                 content,
             )
         }
@@ -118,7 +123,7 @@ private fun HeadlessDialog(
     style: OverlayStyle,
     returnFocusTo: FocusRequester?,
     modifier: Modifier,
-    actions: @Composable RowScope.() -> Unit,
+    frame: DialogFrame,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
@@ -137,14 +142,32 @@ private fun HeadlessDialog(
                 .padding(tokens.spacing.extraLarge),
             verticalArrangement = Arrangement.spacedBy(tokens.spacing.large),
         ) {
-            BuilderText(title, Modifier.modalTitle(), style = BuilderTextStyle.Title, color = style.content)
+            if (frame.titleShown) {
+                BuilderText(title, Modifier.modalTitle(), style = BuilderTextStyle.Title, color = style.content)
+            }
             Column(Modifier.weight(1f, fill = false), content = content) // b-230c
-            Row(
-                modifier = Modifier.align(Alignment.End),
-                horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
-                verticalAlignment = Alignment.CenterVertically,
-                content = actions,
-            )
+            val actions = frame.actions
+            if (actions != null) {
+                Row(
+                    modifier = Modifier.align(Alignment.End),
+                    horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
+                    verticalAlignment = Alignment.CenterVertically,
+                    content = actions,
+                )
+            }
         }
     }
 }
+
+// b-511
+
+/**
+ * What a dialog shows around its body, whether its title shows and the row of actions, if any.
+ *
+ * @property[titleShown] Whether the title shows at the top.
+ * @property[actions] The buttons along the bottom, or null for none.
+ */
+internal class DialogFrame(
+    val titleShown: Boolean,
+    val actions: (@Composable RowScope.() -> Unit)?,
+)

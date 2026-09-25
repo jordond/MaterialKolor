@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -49,6 +50,8 @@ import com.materialkolor.builder.kit.token.BuilderTokens
  * @property[popoverShape] Menus, tooltips and toasts.
  * @property[dialogShape] A dialog panel.
  * @property[panelRadius] The rounding on the inner edge of a side panel or the top of a sheet.
+ * @property[drawerRadius] The rounding on the inner corners of a modal side panel or end sheet.
+ * @property[divider] The hairline over a panel's footer.
  * @property[shadow] How far a popover or a panel floats.
  * @property[scrim] The veil behind a dialog, a panel or a sheet.
  * @property[itemShape] A row inside a menu, or a small button inside a panel.
@@ -64,6 +67,7 @@ import com.materialkolor.builder.kit.token.BuilderTokens
  * @property[toastContent] Ink on [toast].
  * @property[toastBorder] The outline of a toast, or null for none.
  * @property[thumb] A scrollbar thumb, and the grab handle of a sheet.
+ * @property[panelTitle] The type of a panel's title, or null for the builder's own title type.
  */
 @Immutable
 internal class OverlayStyle(
@@ -74,6 +78,8 @@ internal class OverlayStyle(
     val popoverShape: Shape,
     val dialogShape: Shape,
     val panelRadius: Dp,
+    val drawerRadius: Dp, // b-511
+    val divider: Color, // b-511
     val shadow: Dp,
     val scrim: Color,
     val itemShape: Shape,
@@ -89,6 +95,7 @@ internal class OverlayStyle(
     val toastContent: Color,
     val toastBorder: BorderStroke?,
     val thumb: Color,
+    val panelTitle: TextStyle? = null, // b-511
 )
 
 /** How much of the canvas shows through the veil behind a modal overlay, on the skins that veil with it. */
@@ -124,13 +131,24 @@ internal object OverlayMetrics {
     val sheetPeekHeight: Dp = 96.dp
 
     /** The widest a side panel gets, and how much of a narrower screen it takes. */
-    val sidePanelWidth: Dp = 320.dp
+    val sidePanelWidth: Dp = 380.dp // b-511
     val sidePanelNarrowFraction: Float = 0.85f
 
     /** The narrowest, the widest and the tallest a dropdown list gets. */
     val menuMinWidth: Dp = 160.dp
     val menuMaxWidth: Dp = 360.dp
     val menuMaxHeight: Dp = 400.dp
+
+    // b-511
+
+    /** How far a modal side panel or end sheet keeps its header, body and footer from its edges. */
+    val panelPadding: Dp = 24.dp
+
+    /** How far a popover hangs under its anchor, from the anchor to the popover's own edge. */
+    val popoverGap: Dp = 8.dp
+
+    /** How tall a row stands in a long list inside an overlay, such as the command palette's. */
+    val denseRowHeight: Dp = 44.dp
 
     /** The widest a tooltip gets before its label wraps. */
     val tooltipMaxWidth: Dp = 280.dp
@@ -155,6 +173,8 @@ internal fun unstyledOverlayStyle(tokens: BuilderTokens): OverlayStyle {
         popoverShape = RoundedCornerShape(tokens.radius.small),
         dialogShape = RoundedCornerShape(tokens.radius.small),
         panelRadius = 0.dp,
+        drawerRadius = tokens.radius.small, // b-511
+        divider = tokens.border,
         shadow = 0.dp,
         scrim = tokens.scrim,
         itemShape = RoundedCornerShape(tokens.radius.small),
@@ -183,6 +203,8 @@ internal fun customOverlayStyle(tokens: BuilderTokens): OverlayStyle =
         popoverShape = RoundedCornerShape(tokens.radius.medium),
         dialogShape = RoundedCornerShape(tokens.radius.large),
         panelRadius = tokens.radius.large,
+        drawerRadius = tokens.radius.large, // b-511
+        divider = tokens.border,
         shadow = 8.dp,
         scrim = tokens.scrim,
         itemShape = RoundedCornerShape(tokens.radius.small),

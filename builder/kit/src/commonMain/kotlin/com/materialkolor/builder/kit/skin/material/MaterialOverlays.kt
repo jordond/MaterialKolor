@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.AlertDialog
@@ -58,6 +57,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderMenuItem
 import com.materialkolor.builder.kit.control.BuilderToast
+import com.materialkolor.builder.kit.control.DialogFrame
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.foldMenuRow
 import com.materialkolor.builder.kit.headless.DropdownList
@@ -71,6 +71,8 @@ import com.materialkolor.builder.kit.headless.modalPane
 import com.materialkolor.builder.kit.headless.modalTitle
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
+import com.materialkolor.builder.kit.skin.headless.ActionColors
+import com.materialkolor.builder.kit.skin.headless.ListRowStyle
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.popoverEnter
@@ -107,6 +109,10 @@ internal fun materialOverlayStyle(
         popoverShape = popoverShape,
         dialogShape = shapes.extraLarge,
         panelRadius = LocalBuilderTokens.current.radius.medium,
+        // b-511
+        // Material's extra large corner, as its side sheet and its dialogs wear it.
+        drawerRadius = LocalBuilderTokens.current.radius.large,
+        divider = colors.outlineVariant,
         shadow = shadow,
         scrim = LocalBuilderTokens.current.scrim,
         itemShape = shapes.extraSmall,
@@ -122,6 +128,7 @@ internal fun materialOverlayStyle(
         toastContent = colors.inverseOnSurface,
         toastBorder = null,
         thumb = colors.outline,
+        panelTitle = MaterialTheme.typography.headlineSmall, // b-511
     )
 }
 
@@ -136,6 +143,39 @@ internal fun materialMenuStyle(): OverlayStyle =
         popoverShape = MenuDefaults.shape,
         shadow = MenuDefaults.ShadowElevation,
     )
+
+// b-511
+
+/** The dress of a popover that holds more than a menu, Material's container with its large corner. */
+@Composable
+internal fun materialPopoverStyle(): OverlayStyle =
+    materialOverlayStyle(
+        surface = MaterialTheme.colorScheme.surfaceContainer,
+        popoverShape = MaterialTheme.shapes.large,
+        shadow = MenuDefaults.ShadowElevation,
+    )
+
+/**
+ * A dense list row in Material's colours, drawn the way Material draws a menu's rows, for a long list
+ * inside an overlay such as the command palette. The current row takes the secondary container, as a
+ * Material list row does.
+ */
+@Composable
+internal fun materialDenseRowStyle(): ListRowStyle {
+    val colors = MaterialTheme.colorScheme
+    val spacing = LocalBuilderTokens.current.spacing
+    return ListRowStyle(
+        shape = MaterialTheme.shapes.medium,
+        minHeight = OverlayMetrics.denseRowHeight,
+        horizontalPadding = spacing.medium,
+        verticalPadding = spacing.extraSmall,
+        gap = spacing.medium,
+        borderWidth = 0.dp,
+        idle = ActionColors(Color.Transparent, colors.onSurface, Color.Transparent),
+        selected = ActionColors(colors.secondaryContainer, colors.onSecondaryContainer, Color.Transparent),
+        supporting = colors.onSurfaceVariant,
+    )
+}
 
 /** [color] lifted by [elevation] the way a Material `Surface` tints the plain surface colour. */
 @Composable
@@ -163,11 +203,11 @@ internal fun MaterialDialog(
     title: String,
     returnFocusTo: FocusRequester?,
     modifier: Modifier,
-    actions: @Composable RowScope.() -> Unit,
+    frame: DialogFrame, // b-511
     content: @Composable ColumnScope.() -> Unit,
 ) {
     if (LocalOverlaysInTree.current) {
-        MaterialPageDialog(visible, onDismissRequest, title, returnFocusTo, modifier, actions, content)
+        MaterialPageDialog(visible, onDismissRequest, title, returnFocusTo, modifier, frame, content)
         return
     }
     ReturnFocusWhenGone(visible, returnFocusTo)
@@ -180,7 +220,7 @@ internal fun MaterialDialog(
             Row(
                 modifier = Modifier.focusRequester(firstAction),
                 horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.small),
-                content = actions,
+                content = frame.actions ?: {},
             )
         },
         modifier = modifier
@@ -191,7 +231,11 @@ internal fun MaterialDialog(
                 if (escape) onDismissRequest()
                 escape
             },
-        title = { Text(title, Modifier.modalTitle()) },
+        title = if (frame.titleShown) {
+            { Text(title, Modifier.modalTitle()) }
+        } else {
+            null
+        },
         text = { Column(content = content) },
         properties = DialogProperties(animateTransition = !LocalReducedMotion.current),
     )
@@ -212,7 +256,7 @@ private fun MaterialPageDialog(
     title: String,
     returnFocusTo: FocusRequester?,
     modifier: Modifier,
-    actions: @Composable RowScope.() -> Unit,
+    frame: DialogFrame,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
@@ -233,22 +277,27 @@ private fun MaterialPageDialog(
                 modifier = Modifier.padding(tokens.spacing.extraLarge),
                 verticalArrangement = Arrangement.spacedBy(tokens.spacing.large),
             ) {
-                Text(
-                    text = title,
-                    modifier = Modifier.modalTitle(),
-                    color = AlertDialogDefaults.titleContentColor,
-                    style = typography.headlineSmall,
-                )
+                if (frame.titleShown) {
+                    Text(
+                        text = title,
+                        modifier = Modifier.modalTitle(),
+                        color = AlertDialogDefaults.titleContentColor,
+                        style = typography.headlineSmall,
+                    )
+                }
                 CompositionLocalProvider(
                     LocalContentColor provides AlertDialogDefaults.textContentColor,
                     LocalTextStyle provides typography.bodyMedium,
                 ) { Column(Modifier.weight(1f, fill = false), content = content) } // b-230c
-                Row(
-                    modifier = Modifier.align(Alignment.End),
-                    horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
-                    verticalAlignment = Alignment.CenterVertically,
-                    content = actions,
-                )
+                val actions = frame.actions
+                if (actions != null) {
+                    Row(
+                        modifier = Modifier.align(Alignment.End),
+                        horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
+                        verticalAlignment = Alignment.CenterVertically,
+                        content = actions,
+                    )
+                }
             }
         }
     }

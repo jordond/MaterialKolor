@@ -20,6 +20,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
@@ -60,8 +61,10 @@ class CommandPaletteTest {
     private val platform = harness.platform
     private var categories: Map<CommandCategory, String> = emptyMap()
 
+    // b-511
+    // The category is the header over the row now, and the keys are keycaps at its end.
     @Test
-    fun everyCommand_listsWithItsCategoryAndKeys_andADisabledOneWithItsReason() =
+    fun everyCommand_listsUnderItsCategoryWithItsKeys_andADisabledOneWithItsReason() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             boot()
             openPalette()
@@ -70,15 +73,26 @@ class CommandPaletteTest {
             // All but its own row, which would only open what is already open.
             val palette = harness.command("palette")
             onAllNodes(rowMatcher(palette.label)).fetchSemanticsNodes().size shouldBe 0
+            val headers = onAllNodes(isHeading() and InPalette).fetchSemanticsNodes()
 
             val missing = harness.commands.filter { command -> command.id != palette.id }.filter { command ->
                 val category = categories.getValue(command.category)
                 val keys = command.shortcut?.text(apple)
-                val supporting = when (val state = command.state) {
-                    is CommandState.Disabled -> state.reason
-                    CommandState.Enabled -> if (keys == null) category else "$category · $keys"
+                val shows = when (val state = command.state) {
+                    is CommandState.Disabled -> rowMatcher(command.label, state.reason)
+                    CommandState.Enabled -> rowMatcher(command.label) and
+                        (keys?.let(::hasContentDescription) ?: PaletteRow)
                 }
-                row(command.label, supporting).fetchSemanticsNodes().isEmpty()
+                onAllNodes(shows).fetchSemanticsNodes().none { node ->
+                    val header = headers
+                        .filter { each -> each.positionInRoot.y < node.positionInRoot.y }
+                        .maxByOrNull { each -> each.positionInRoot.y }
+                    header
+                        ?.config
+                        ?.get(SemanticsProperties.Text)
+                        ?.first()
+                        ?.text == category
+                }
             }
 
             missing.map { command -> command.id } shouldBe emptyList()
@@ -438,11 +452,6 @@ class CommandPaletteTest {
                     .text
             }
 
-    private fun ComposeUiTest.row(
-        label: String,
-        supporting: String,
-    ) = onAllNodes(rowMatcher(label, supporting))
-
     private fun rowMatcher(
         label: String,
         supporting: String? = null,
@@ -457,7 +466,7 @@ private val InPalette: SemanticsMatcher = hasAnyAncestor(
 )
 
 private val PaletteRow: SemanticsMatcher =
-    hasClickAction() and InPalette and !hasSetTextAction() and !hasText("Close")
+    hasClickAction() and InPalette and !hasSetTextAction() and !hasText("Close") and !hasContentDescription("Close")
 
 /** The top bar's Commands button, which only the page's own window holds. */
 private val CommandsButton: SemanticsMatcher =

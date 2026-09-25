@@ -3,7 +3,9 @@ package com.materialkolor.builder.feature.command
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -105,12 +107,18 @@ internal fun CheatSheet(
         },
     ) {
         BuilderScrollArea(Modifier.heightIn(max = layout.heightDp * ABOUT_HEIGHT_FRACTION)) {
-            Column(verticalArrangement = Arrangement.spacedBy(spacing.large)) {
+            // b-511
+            // Clear of the scrollbar, so the keycaps at the end of each row never touch it.
+            Column(Modifier.padding(end = spacing.large), verticalArrangement = Arrangement.spacedBy(spacing.large)) {
                 Column(verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
+                    // b-511
+                    // Across the sheet's width, so the label stands clear of the switch the way each
+                    // shortcut stands clear of its keys.
                     BuilderSwitch(
                         checked = singleKeys,
                         onCheckedChange = onSingleKeysChange,
                         label = stringResource(Res.string.command_single_keys),
+                        modifier = Modifier.fillMaxWidth(),
                     )
                     BuilderText(
                         text = stringResource(Res.string.command_single_keys_note),
@@ -122,7 +130,8 @@ internal fun CheatSheet(
                     )
                 }
                 ShortcutGroup.entries.forEach { group ->
-                    Column(verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+                        // b-511
                         BuilderText(
                             text = stringResource(groupTitle(group)),
                             modifier = Modifier.semantics { heading() },
@@ -154,7 +163,7 @@ private fun ShortcutRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BuilderText(text = label, modifier = Modifier.weight(1f))
-        BuilderText(text = keys, emphasis = Emphasis.Secondary)
+        Keycaps(keys) // b-511
     }
 }
 

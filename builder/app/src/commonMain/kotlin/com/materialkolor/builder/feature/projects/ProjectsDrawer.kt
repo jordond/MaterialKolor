@@ -69,8 +69,10 @@ internal fun ProjectsDrawer(
         modifier = modifier,
         returnFocusTo = returnFocusTo, // b-221f
     ) {
+        // b-511
+        // The panel keeps its own room from its edges, so the buttons and the rows line up with the title.
         Column(
-            modifier = Modifier.padding(horizontal = spacing.large).padding(bottom = spacing.medium),
+            modifier = Modifier.padding(bottom = spacing.medium),
             verticalArrangement = Arrangement.spacedBy(spacing.medium),
         ) {
             if (!state.storageAvailable) StorageUnavailableBanner(onGetLink)
@@ -102,7 +104,7 @@ internal fun ProjectsDrawer(
         }
         BuilderScrollArea(modifier = Modifier.weight(1f)) {
             Column(
-                modifier = Modifier.selectableGroup().padding(horizontal = spacing.large, vertical = spacing.small),
+                modifier = Modifier.selectableGroup().padding(vertical = spacing.small), // b-511
                 verticalArrangement = Arrangement.spacedBy(spacing.small),
             ) {
                 val shown = state.shown

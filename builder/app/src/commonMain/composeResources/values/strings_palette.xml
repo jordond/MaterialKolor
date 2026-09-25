@@ -7,8 +7,17 @@
     <!-- Where the rows go while nothing matches the search. -->
     <string name="palette_nothing">Nothing matches</string>
     <string name="palette_close">Close</string>
-    <!-- The line under a row, its group then its keys, such as "Seed · Space". -->
-    <string name="palette_row_keys">%1$s · %2$s</string>
+    <!-- The header over the commands run lately, while nothing is typed. -->
+    <string name="palette_recent">Recent</string>
+    <!-- The footer's key hints, each after its keycaps, and the line about pasting. -->
+    <string name="palette_hint_move">to move</string>
+    <string name="palette_hint_run">to run</string>
+    <string name="palette_hint_close">to close</string>
+    <string name="palette_hint_paste">Paste a color or a link to open it</string>
+    <!-- What the arrow keycaps read as, before "to move". -->
+    <string name="palette_keys_move">Up or Down</string>
+    <!-- The key name for Enter on its keycap. -->
+    <string name="palette_key_enter">Enter</string>
 
     <!-- A row for text the palette understands. The argument is the color as #RRGGBB. -->
     <string name="palette_set_seed">Set seed to %1$s</string>
