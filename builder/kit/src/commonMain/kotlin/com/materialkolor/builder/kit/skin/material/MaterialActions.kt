@@ -49,6 +49,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BadgeStatus
@@ -63,6 +64,7 @@ import com.materialkolor.builder.kit.control.ListRowContent
 import com.materialkolor.builder.kit.control.ListRowHeadline
 import com.materialkolor.builder.kit.control.ListRowSupporting
 import com.materialkolor.builder.kit.control.foldState
+import com.materialkolor.builder.kit.control.trailingLabel
 import com.materialkolor.builder.kit.control.iconButtonSemantics
 import com.materialkolor.builder.kit.control.listRowInput
 import com.materialkolor.builder.kit.control.listRowState
@@ -113,16 +115,28 @@ private fun RowScope.MaterialLabel(
     label: String,
     icon: IconId?,
     hint: String? = null,
+    trailingIcon: IconId? = null,
 ) {
     val ink = LocalContentColor.current
     if (icon != null) {
         BuilderIcon(icon, contentDescription = null, tint = ink)
         Spacer(Modifier.width(ButtonDefaults.IconSpacing))
     }
-    BuilderText(label, style = BuilderTextStyle.Label, color = ink, maxLines = 1)
+    BuilderText(
+        text = label,
+        modifier = trailingLabel(trailingIcon),
+        style = BuilderTextStyle.Label,
+        color = ink,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
     if (hint != null) {
         Spacer(Modifier.width(HintSpacing))
         ButtonKeycap(hint, ink)
+    }
+    if (trailingIcon != null) {
+        Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+        BuilderIcon(trailingIcon, contentDescription = null, tint = ink)
     }
 }
 
@@ -145,12 +159,13 @@ internal fun MaterialButton(
     icon: IconId?,
     enabled: Boolean,
     hint: String? = null,
+    trailingIcon: IconId? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val decorated = modifier
         .foldState(label, null, enabled)
         .materialFeedback(interactionSource, ButtonDefaults.shape)
-    val content: @Composable RowScope.() -> Unit = { MaterialLabel(label, icon, hint) }
+    val content: @Composable RowScope.() -> Unit = { MaterialLabel(label, icon, hint, trailingIcon) }
     MaterialTarget {
         when (emphasis) {
             Emphasis.Primary -> {

@@ -25,6 +25,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.control.BuilderIcon
@@ -43,6 +44,7 @@ import com.materialkolor.builder.kit.control.HeadlessProgress
 import com.materialkolor.builder.kit.control.ListRowContent
 import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.control.iconButtonSemantics
+import com.materialkolor.builder.kit.control.trailingLabel
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
@@ -90,10 +92,18 @@ private fun Modifier.fluentFeedback(interactionSource: MutableInteractionSource)
 private fun FluentLabel(
     label: String,
     icon: IconId?,
+    textModifier: Modifier = Modifier,
 ) {
     val ink = LocalContentColor.current
     if (icon != null) BuilderIcon(icon, contentDescription = null, tint = ink)
-    BuilderText(label, style = BuilderTextStyle.Label, color = ink, maxLines = 1)
+    BuilderText(
+        text = label,
+        modifier = textModifier,
+        style = BuilderTextStyle.Label,
+        color = ink,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
 
 /**
@@ -248,6 +258,7 @@ internal fun FluentButton(
     icon: IconId?,
     enabled: Boolean,
     hint: String? = null,
+    trailingIcon: IconId? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val colors = fluentButtonColors(emphasis).schemeFor(interactionSource.collectVisualState(disabled = !enabled))
@@ -270,8 +281,11 @@ internal fun FluentButton(
             horizontalArrangement = Arrangement.spacedBy(ButtonDefaults.iconSpacing, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            FluentLabel(label, icon)
+            FluentLabel(label, icon, trailingLabel(trailingIcon))
             if (hint != null) ButtonKeycap(hint, LocalContentColor.current)
+            if (trailingIcon != null) {
+                BuilderIcon(trailingIcon, contentDescription = null, tint = LocalContentColor.current)
+            }
         }
     }
 }
