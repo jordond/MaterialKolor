@@ -153,7 +153,9 @@ abstract class RewriteIndexHtml : DefaultTask() {
     private fun jsonString(value: String): String = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 }
 
-/** Writes the host files that sit beside `index.html`. */
+/**
+ * Writes the host files that sit beside `index.html`.
+ */
 abstract class WriteHeaders : DefaultTask() {
     @get:Input
     abstract val environment: Property<String>
@@ -235,7 +237,9 @@ abstract class CheckBudget : DefaultTask() {
     }
 }
 
-/** Copies the distribution into the site layout, hashed files under `/assets/`. */
+/**
+ * Copies the distribution into the site layout, hashed files under `/assets/`.
+ */
 abstract class AssembleSite : DefaultTask() {
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -251,13 +255,17 @@ abstract class AssembleSite : DefaultTask() {
 
     // b-505
 
-    /** Where the site is served, which the page's canonical link and link cards name. */
+    /**
+     * Where the site is served, which the page's canonical link and link cards name.
+     */
     @get:Input
     abstract val origin: Property<String>
 
     // b-504
 
-    /** The Cloudflare Web Analytics token the page reads from `#mk-config`, empty for none. */
+    /**
+     * The Cloudflare Web Analytics token the page reads from `#mk-config`, empty for none.
+     */
     @get:Input
     abstract val analyticsToken: Property<String>
 
@@ -320,7 +328,9 @@ abstract class AssembleSite : DefaultTask() {
 }
 
 // b-505
-/** Where a site built with `site.env` set to [environment] is served from. */
+/**
+ * Where a site built with `site.env` set to [environment] is served from.
+ */
 private fun siteOrigin(environment: String): String =
     when (environment) {
         "production" -> PRODUCTION_ORIGIN
@@ -338,7 +348,9 @@ private const val ASSETS = "assets"
 private const val RESOURCES = "composeResources"
 private const val BUILDER_RESOURCES = "com.materialkolor."
 
-/** Fonts the app loads later, left out of the boot list. Selawik waits for the first switch to Fluent. */
+/**
+ * Fonts the app loads later, left out of the boot list. Selawik waits for the first switch to Fluent.
+ */
 private const val LAZY_FONT_PREFIX = "Selawik"
 
 // b-501
@@ -347,7 +359,9 @@ private const val BOOT_TAG = "<script src=\"/boot.js\"></script>"
 private val ANALYTICS_TOKEN = Regex("[A-Za-z0-9_-]+")
 private val ASSETS_ELEMENT = Regex("""<script type="application/json" id="mk-assets">[^<]*</script>""")
 
-/** A name webpack gave a content hash, matching `webpack.config.d/output.js`. */
+/**
+ * A name webpack gave a content hash, matching `webpack.config.d/output.js`.
+ */
 private val HASHED = Regex("""\.[0-9a-f]{16}\.""")
 private val GLUE = Regex("""builder\.[0-9a-f]{16}\.js""")
 
