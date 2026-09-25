@@ -1,8 +1,8 @@
 # MaterialKolor Builder
 
-The Compose Multiplatform app behind [materialkolor.com](https://materialkolor.com). Pick a seed color, tune the
-scheme, preview it in Material 3, Compose Unstyled or Compose Fluent, and export the code. It ships on the web as
-wasm, and the same app runs on the desktop for development.
+The Compose Multiplatform app behind [materialkolor.com](https://materialkolor.com). Pick a seed
+color, tune the scheme, preview it in Material 3, Compose Unstyled or Compose Fluent, and export the
+code.
 
 ## Modules
 
@@ -37,10 +37,10 @@ wasm, and the same app runs on the desktop for development.
 
 ## MaterialKolor source
 
-By default the builder depends on the MaterialKolor modules in this repo, so a library change shows up right away.
-Pass `-Pmaterialkolor.useLocal=false` to build against the published modules at `materialKolorExport` instead, the
-version every export pins. Production is always built that way, so the builder draws each theme with the same library
-the exported code compiles against.
+By default, the builder depends on the MaterialKolor modules in this repo, so a library change shows
+up right away. Pass `-Pmaterialkolor.useLocal=false` to build against the published modules at
+`materialKolorExport` instead, the version every export pins. Production is always built that way,
+so the builder draws each theme with the same library the exported code compiles against.
 
 ## Running the site
 
@@ -65,26 +65,24 @@ cd builder/worker && npm ci && npm test
 ```
 
 The codegen goldens live in `builder/codegen/src/jvmTest/resources/golden`. Rewrite them with
-`./gradlew :builder:codegen:jvmTest -Pgolden.update=true`, then review the diff. To check that every golden still
-compiles, run `./gradlew :builder:codegen:writeCompileFixtures` and then
+`./gradlew :builder:codegen:jvmTest -Pgolden.update=true`, then review the diff. To check that every
+golden still compiles, run `./gradlew :builder:codegen:writeCompileFixtures` and then
 `./gradlew -p builder/codegen-check compileKotlinJvm`.
 
 Every pull request's preview comment shows a screenshot of the builder at that commit, taken by
 `npm run pr-screenshot` in `builder/e2e`.
 
-`./gradlew :builder:web:checkBudget` measures the assembled site against `builder/web/budget.json`. See
-`builder/web/BUDGET.md` for how the numbers are measured.
-
 ## Deploys
 
-Everything deploys from the Builder workflow (`.github/workflows/builder.yml`) to Cloudflare Workers.
+Everything deploys from the Builder workflow (`.github/workflows/builder.yml`) to Cloudflare
+Workers.
 
-- **Pull requests** from this repo upload a preview version of the staging Worker and comment its URL on the pull
-  request. The comment updates on every push.
-- **Staging** at [staging.materialkolor.com](https://staging.materialkolor.com) deploys on every push to `next`.
-  It is built with `-Psite.env=staging`, so it is never indexed and its share links stay on staging. It uses the
-  MaterialKolor modules in this repo, as pull request previews do.
-- **Production** at [materialkolor.com](https://materialkolor.com) deploys from a `builder/<version>` tag. The tag
-  must match `builder-version` in `gradle/libs.versions.toml`, and the MaterialKolor version the exports pin
-  (`materialKolorExport`) must already be on Maven Central. Everything on a tag, tests included, builds against
-  that published version.
+- **Pull requests** from this repo upload a preview version of the staging Worker and comment its
+  URL on the pull request. The comment updates on every push.
+- **Staging** at [staging.materialkolor.com](https://staging.materialkolor.com) deploys on every
+  push to `next`. It is built with `-Psite.env=staging`, so it is never indexed and its share links
+  stay on staging. It uses the MaterialKolor modules in this repo, as pull request previews do.
+- **Production** at [materialkolor.com](https://materialkolor.com) deploys from a
+  `builder/<version>` tag. The tag must match `builder-version` in `gradle/libs.versions.toml`, and
+  the MaterialKolor version the exports pin (`materialKolorExport`) must already be on Maven
+  Central. Everything on a tag, tests included, builds against that published version.

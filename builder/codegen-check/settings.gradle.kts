@@ -1,6 +1,5 @@
 // The compile check of the builder's export. `./gradlew :builder:codegen:writeCompileFixtures` lays every golden
 // case into a project under build/fixtures, one per target and mode, and this build compiles them against the
-// local MaterialKolor modules, since the 6.0.0 coordinates the exports name are not published yet.
 pluginManagement {
     repositories {
         gradlePluginPortal()

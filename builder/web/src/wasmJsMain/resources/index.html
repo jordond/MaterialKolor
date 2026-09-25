@@ -5,12 +5,6 @@
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MaterialKolor Builder</title>
-    <!--
-      What search engines and link previews read. The host rewrites og:title, og:description,
-      og:image, twitter:image, theme-color and the canonical link for a theme link, so each of them
-      is one tag. The app sets both theme-color tags to its chrome once it runs. A staging site build
-      swaps the production origin in every URL here for the staging one.
-    -->
     <meta
       name="description"
       content="Build a Compose color theme from one seed color or a photo. Preview it in Material 3, Expressive, Unstyled and Fluent, then export code that compiles."
@@ -61,7 +55,6 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <!-- The site build fills this with the hashed glue, wasm and fonts. boot.js reads it. -->
     <script type="application/json" id="mk-assets">{"glue":"/builder.js","wasm":[],"fonts":[]}</script>
     <script src="/boot.js"></script>
     <style>
@@ -355,7 +348,6 @@
   <body>
     <div id="app"></div>
     <div id="splash">
-      <!-- For crawlers and screen readers until the app is up. It leaves with the splash. -->
       <div class="mk-visually-hidden">
         <h1>MaterialKolor Builder</h1>
         <p>
@@ -407,7 +399,7 @@
         aria-describedby="error-message"
       >
         <h2 id="error-title">Something went wrong</h2>
-        <p id="error-message">Your work is saved. Reload.</p>
+        <p id="error-message">Check the console for logs, or try reloading.</p>
         <p id="error-status" role="status"></p>
         <textarea id="error-details" aria-label="Error details" readonly hidden></textarea>
         <div class="mk-error-actions">

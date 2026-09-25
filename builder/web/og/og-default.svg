@@ -1,10 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <!--
-    The site's default link card, og-default.png. render.sh draws it with the kit's Bricolage
-    Grotesque. Every color comes from the default document, seed #D9653B with the tonal spot style
-    and the 2021 spec, light scheme. The poster is the seed, then primary, primary container,
-    secondary, tertiary, tertiary container and on surface.
-  -->
   <rect width="1200" height="630" fill="#FFF8F6" />
   <g font-family="Bricolage Grotesque">
     <text x="72" y="152" font-size="84" font-weight="700" fill="#231917">MaterialKolor Builder</text>

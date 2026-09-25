@@ -19,19 +19,17 @@ fun main() {
     // Resources load from the site root, so a page opened on /t/<code> does not look for them under /t/.
     configureWebResources { resourcePathMapping { path -> "/$path" } }
 
-    // Read once at boot, before the router can rewrite the address, and never a setting.
     val frozen = motionFrozen(locationQuery(), browserIsAutomated())
     ComposeViewport(VIEWPORT_ID) {
         BuilderApp(BrowserPlatform, motionFrozen = frozen, awaitIdle = ::awaitIdle)
     }
 
-    // The viewport element outlives `ComposeViewport` clearing its children, so both hooks can go
-    // on it now even if Skiko is not ready yet.
     val viewport = document.getElementById(VIEWPORT_ID)
     if (viewport != null) {
         MirrorRoot.install(viewport)
         FocusRepair.install(viewport)
     }
+
     A11yLiveRegion.install()
 }
 

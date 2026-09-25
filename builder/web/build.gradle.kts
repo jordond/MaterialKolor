@@ -1,8 +1,5 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
-// The site shell. It is the one module that talks to the browser, so it has a single target and
-// skips the builder convention, which would add a JVM target it has no use for. The web convention
-// only adds the site tasks, `assembleSite` and `checkBudget` among them.
 plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.compose)
@@ -17,7 +14,12 @@ kotlin {
             commonWebpackConfig {
                 outputFileName = "builder.js"
             }
+
+            testTask {
+                useKarma { useChromeHeadless() }
+            }
         }
+
         binaries.executable()
     }
 
@@ -31,22 +33,7 @@ kotlin {
             implementation(libs.kotlinx.browser)
             implementation(libs.kermit)
         }
-    }
-}
 
-// The interop tests are plain DOM checks with no Compose scene. `wasmJsBrowserTest` runs them in
-// headless Chrome, the same way `:builder:app` runs its browser test.
-kotlin {
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser {
-            testTask {
-                useKarma { useChromeHeadless() }
-            }
-        }
-    }
-
-    sourceSets {
         wasmJsTest.dependencies {
             implementation(kotlin("test"))
         }
