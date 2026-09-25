@@ -45,7 +45,6 @@ import com.materialkolor.builder.preview.inspect.PreviewRoles
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.split.SplitPreview
 import com.materialkolor.builder.preview.split.SplitState
-import io.github.takahirom.roborazzi.captureRoboImage
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
@@ -54,12 +53,6 @@ import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
-
-/**
- * Where B-213's recording job writes the baselines. Nothing is written unless a Roborazzi task
- * turns capture on.
- */
-private const val TripsScreenshotDir = "src/jvmTest/screenshots/trips"
 
 /**
  * The frame the dock shows each device in, the kit's screen widths at the height of a first screen.
@@ -169,7 +162,6 @@ class TripsAppTest {
                             title.left shouldBeGreaterThan row.right
                             onNodeWithText("Explore").assertExists()
                         }
-                        onRoot().captureRoboImage("$TripsScreenshotDir/${width.name}-${mode.label}.png")
                     }
                 }
             }

@@ -4,7 +4,6 @@ import org.jetbrains.compose.resources.ResourcesExtension
 
 plugins {
     id("materialkolor.builder.compose")
-    alias(libs.plugins.roborazzi)
 }
 
 // The Compose plugin arrives through the convention plugin, so this script has no generated
@@ -37,7 +36,6 @@ kotlin {
         jvmTest.dependencies {
             implementation(libs.compose.ui.test)
             implementation(composeExtension.dependencies.desktop.currentOs)
-            implementation(libs.roborazzi.compose.desktop)
             implementation(libs.kotlinx.coroutines.test)
         }
     }

@@ -69,8 +69,8 @@ The codegen goldens live in `builder/codegen/src/jvmTest/resources/golden`. Rewr
 compiles, run `./gradlew :builder:codegen:writeCompileFixtures` and then
 `./gradlew -p builder/codegen-check compileKotlinJvm`.
 
-Screenshot baselines only come from CI. Dispatch the Builder workflow with `record` checked and commit the PNGs it
-uploads.
+Every pull request's preview comment shows a screenshot of the builder at that commit, taken by
+`npm run pr-screenshot` in `builder/e2e`.
 
 `./gradlew :builder:web:checkBudget` measures the assembled site against `builder/web/budget.json`. See
 `builder/web/BUDGET.md` for how the numbers are measured.

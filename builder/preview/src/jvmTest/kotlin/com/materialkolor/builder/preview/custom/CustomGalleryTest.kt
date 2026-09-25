@@ -5,9 +5,6 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
@@ -26,7 +23,6 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.longClick
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTextReplacement
@@ -45,7 +41,6 @@ import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.ChromeResult
-import com.materialkolor.builder.preview.DarkSpec
 import com.materialkolor.builder.preview.LightSpec
 import com.materialkolor.builder.preview.PreviewResult
 import com.materialkolor.builder.preview.canvas.ComponentsTab
@@ -56,7 +51,6 @@ import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.inspect.PreviewRoles
 import com.materialkolor.builder.preview.split.LocalCompositionProbe
 import com.materialkolor.builder.preview.split.PaneSpec
-import io.github.takahirom.roborazzi.captureRoboImage
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
@@ -67,12 +61,6 @@ import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.test.Test
-
-/**
- * Where B-213's recording job writes the baselines. Nothing is written unless a Roborazzi task
- * turns capture on.
- */
-private const val GalleryScreenshotDir = "src/jvmTest/screenshots/gallery"
 
 /**
  * The chrome the gallery sits in, the Custom skin coloured from the red chrome document.
@@ -298,40 +286,6 @@ class CustomGalleryTest {
             }
         }
     }
-
-    @Test
-    fun screens_bothFramesBothModes_render() {
-        for (frame in GalleryFrames) {
-            withClue(frame) {
-                runDesktopComposeUiTest(frame.width, frame.height) {
-                    var spec by mutableStateOf(LightSpec)
-                    setContent { GalleryHarness(spec, DemoAppState(), Modifier.fillMaxSize()) }
-
-                    for (mode in listOf(LightSpec, DarkSpec)) {
-                        spec = mode
-                        waitForIdle()
-                        onNodeWithText(GalleryGroup.Actions.name).assertExists()
-                        onRoot().captureRoboImage("$GalleryScreenshotDir/custom-${frame.width}-${mode.label}.png")
-                    }
-                }
-            }
-        }
-    }
-
-    @Test
-    fun screens_wholeGalleryBothModes_renderEveryCard() =
-        runDesktopComposeUiTest(1280, 2400) {
-            // Four columns, and tall enough that the last card is on screen too.
-            var spec by mutableStateOf(LightSpec)
-            setContent { GalleryHarness(spec, DemoAppState(), Modifier.fillMaxSize()) }
-
-            for (mode in listOf(LightSpec, DarkSpec)) {
-                spec = mode
-                waitForIdle()
-                onNodeWithText(CustomCards.last().title).assertExists()
-                onRoot().captureRoboImage("$GalleryScreenshotDir/custom-whole-${mode.label}.png")
-            }
-        }
 }
 
 /**

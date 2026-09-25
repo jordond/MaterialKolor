@@ -40,12 +40,6 @@ import java.io.File
 // The frames, documents and harness CafeAppTest checks the cafe with.
 
 /**
- * Where B-213's recording job writes the baselines. Nothing is written unless a Roborazzi task
- * turns capture on.
- */
-internal const val CafeScreenshotDir = "src/jvmTest/screenshots/cafe"
-
-/**
  * The frame the dock shows each device in, the kit's screen widths at the height of a first screen.
  */
 internal val CafeFrames: Map<DeviceWidth, IntSize> = mapOf(

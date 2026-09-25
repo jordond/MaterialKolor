@@ -30,7 +30,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
 
 /**
- * Every skin the controls dispatch to, named for the screenshots.
+ * Every skin the controls dispatch to, each named so a failure says which one.
  */
 internal val ControlSkins: List<Pair<String, Skin>> = listOf(
     "material3" to Skin(Library.Material3, expressive = false),

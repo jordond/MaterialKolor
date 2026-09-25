@@ -39,23 +39,15 @@ import com.materialkolor.builder.kit.skin.material.materialHeroFieldStyle
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.github.composefluent.scheme.VisualState
-import io.github.takahirom.roborazzi.captureRoboImage
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
-private const val SheetTag = "controls-b-sheet"
 private const val ErrorField = "error-field"
 
-/**
- * Where B-213's recording job writes the baselines. Nothing is written unless a Roborazzi task
- * turns capture on, and baselines are only ever recorded on the Linux runner.
- */
-private const val ScreenshotDir = "src/jvmTest/screenshots/controls-b"
-
 @OptIn(ExperimentalTestApi::class)
-class ControlsBScreenshotTest {
+class ControlsBContrastTest {
     @Test
     fun material3_bothModes_drawEveryInputReadably() = checkSheets(SkinVariant.Material3)
 
@@ -108,7 +100,6 @@ private fun checkSheets(variant: SkinVariant) =
             onNodeWithTag(ErrorField).performTextReplacement("#12345")
             waitForIdle()
             unreadable += assertNotNull(seen).inkPairs().shortfalls(mode)
-            onNodeWithTag(SheetTag).captureRoboImage("$ScreenshotDir/${variant.name.lowercase()}-$mode.png")
         }
         withClue(variant.name) { unreadable.shouldBeEmpty() }
     }
@@ -243,7 +234,6 @@ private fun ControlsSheet() {
     val tokens = LocalBuilderTokens.current
     Column(
         modifier = Modifier
-            .testTag(SheetTag)
             .background(tokens.canvas)
             .padding(tokens.spacing.medium),
     ) {

@@ -51,7 +51,6 @@ import com.materialkolor.builder.preview.inspect.OnCard
 import com.materialkolor.builder.preview.inspect.PreviewRoles
 import com.materialkolor.builder.preview.inspect.firstRated
 import com.materialkolor.builder.preview.split.SplitState
-import io.github.takahirom.roborazzi.captureRoboImage
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainAll
@@ -62,12 +61,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.test.Test
-
-/**
- * Where a recording job would write the screenshots. Nothing is written unless a Roborazzi task
- * turns capture on, and the preview keeps no baselines.
- */
-private const val FluentScreenshotDir = "src/jvmTest/screenshots/fluent"
 
 private const val FluentSourceDir = "src/commonMain/kotlin/com/materialkolor/builder/preview/fluent"
 
@@ -218,7 +211,6 @@ class SettingsAppTest {
                         } else {
                             title.left shouldBeGreaterThan pages.single().boundsInRoot.right
                         }
-                        onRoot().captureRoboImage("$FluentScreenshotDir/app-${width.name}-${mode.label}.png")
                     }
                 }
             }

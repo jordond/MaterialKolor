@@ -40,7 +40,6 @@ materialKolorExport = "6.0.0"
 metro = "1.4.4"
 lucide = "1.1.0"
 filekit = "0.16.0"
-roborazzi = "1.75.0"
 
 [libraries]
 gradlePlugin-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -89,7 +88,6 @@ metrox-viewmodel = { module = "dev.zacsweers.metro:metrox-viewmodel", version.re
 metrox-viewmodel-compose = { module = "dev.zacsweers.metro:metrox-viewmodel-compose", version.ref = "metro" }
 filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
 filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
-roborazzi-compose-desktop = { module = "io.github.takahirom.roborazzi:roborazzi-compose-desktop", version.ref = "roborazzi" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 
 [bundles]
@@ -120,4 +118,3 @@ compose-hot-reload = { id = "org.jetbrains.compose.hot-reload", version.ref = "c
 
 # Builder v2
 metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
-roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }

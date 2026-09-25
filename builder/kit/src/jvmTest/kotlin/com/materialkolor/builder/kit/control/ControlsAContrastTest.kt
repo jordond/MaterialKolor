@@ -17,10 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -37,17 +35,9 @@ import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
-import io.github.takahirom.roborazzi.captureRoboImage
 import io.kotest.matchers.collections.shouldBeEmpty
 import kotlin.test.Test
 import kotlin.test.assertNotNull
-
-private const val SheetTag = "controls-a"
-
-/**
- * Where the recording job writes the baselines. Nothing is written unless a Roborazzi task turns capture on.
- */
-private const val ScreenshotDir = "src/jvmTest/screenshots/controls-a"
 
 private val SheetLayout = LayoutInfo.of(widthDp = 1280.dp, heightDp = 800.dp)
 
@@ -57,26 +47,26 @@ private val SheetLayout = LayoutInfo.of(widthDp = 1280.dp, heightDp = 800.dp)
 private val CompactLayout = LayoutInfo.of(widthDp = 400.dp, heightDp = 800.dp)
 
 @OptIn(ExperimentalTestApi::class)
-class ControlsAScreenshotTest {
+class ControlsAContrastTest {
     @Test
     fun material3_bothModes_renderEveryControlEnabledAndDisabled() =
-        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = false), "material3") }
+        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = false)) }
 
     @Test
     fun material3Expressive_bothModes_renderEveryControlEnabledAndDisabled() =
-        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = true), "expressive") }
+        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = true)) }
 
     @Test
     fun unstyled_bothModes_renderEveryControlEnabledAndDisabled() =
-        runComposeUiTest { checkSheets(Skin(Library.Unstyled, expressive = false), "unstyled") }
+        runComposeUiTest { checkSheets(Skin(Library.Unstyled, expressive = false)) }
 
     @Test
     fun custom_bothModes_renderEveryControlEnabledAndDisabled() =
-        runComposeUiTest { checkSheets(Skin(Library.Custom, expressive = false), "custom") }
+        runComposeUiTest { checkSheets(Skin(Library.Custom, expressive = false)) }
 
     @Test
     fun fluentPlaceholder_bothModes_renderEveryControlEnabledAndDisabled() =
-        runComposeUiTest { checkSheets(Skin(Library.Fluent, expressive = false), "fluent") }
+        runComposeUiTest { checkSheets(Skin(Library.Fluent, expressive = false)) }
 }
 
 /**
@@ -94,10 +84,7 @@ private fun BuilderTokens.actionPairs(): List<InkPair> =
     )
 
 @OptIn(ExperimentalTestApi::class)
-private fun ComposeUiTest.checkSheets(
-    skin: Skin,
-    name: String,
-) {
+private fun ComposeUiTest.checkSheets(skin: Skin) {
     val unreadable = mutableListOf<String>()
     var isDark by mutableStateOf(false)
     var compact by mutableStateOf(false)
@@ -120,17 +107,14 @@ private fun ComposeUiTest.checkSheets(
         waitForIdle()
         val mode = if (dark) "dark" else "light"
         unreadable += assertNotNull(tokens).actionPairs().shortfalls(mode)
-        onNodeWithTag(SheetTag).captureRoboImage("$ScreenshotDir/$name-$mode.png")
     }
     compact = true
     for (dark in listOf(false, true)) {
         isDark = dark
         waitForIdle()
-        // The ring has to hug the button, not the 48 dp footprint around it.
+        // Focus Share so the compact pass draws the ring as well.
         onNodeWithText("Share").requestFocus()
         waitForIdle()
-        val mode = if (dark) "dark" else "light"
-        onNodeWithTag(SheetTag).captureRoboImage("$ScreenshotDir/$name-compact-$mode.png")
     }
     unreadable.shouldBeEmpty()
 }
@@ -143,7 +127,6 @@ private fun ControlSheet() {
     val tokens = LocalBuilderTokens.current
     Column(
         modifier = Modifier
-            .testTag(SheetTag)
             .background(tokens.canvas)
             .padding(tokens.spacing.medium),
     ) {
@@ -233,7 +216,6 @@ private fun CompactSheet() {
     val tokens = LocalBuilderTokens.current
     Column(
         modifier = Modifier
-            .testTag(SheetTag)
             .width(360.dp)
             .background(tokens.panel)
             .padding(tokens.spacing.medium),

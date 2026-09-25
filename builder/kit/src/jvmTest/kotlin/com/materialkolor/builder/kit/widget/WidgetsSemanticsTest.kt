@@ -91,7 +91,7 @@ import kotlin.test.Test
 internal val WidgetDocument: ThemeDocument = ThemeDocument(seed = Argb(0x6750A4))
 
 /**
- * Every skin the widgets are drawn in, named for the screenshots.
+ * Every skin the widgets are drawn in, each named so a failure says which one.
  */
 internal val WidgetSkins: List<Pair<String, Skin>> = ControlSkins
 

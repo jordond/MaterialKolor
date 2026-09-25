@@ -32,8 +32,7 @@
         "org.jetbrains.kotlinx:kotlinx-browser{/,}**",
         "dev.zacsweers.metro{/,}**",
         "com.composables:icons-lucide{/,}**",
-        "io.github.vinceglb{/,}**",
-        "io.github.takahirom.roborazzi{/,}**"
+        "io.github.vinceglb{/,}**"
       ]
     }
   ]

@@ -67,7 +67,7 @@ internal val PickerSeed: Argb = Argb(0x6750A4)
 internal val PickerWidth: Dp = 440.dp
 
 /**
- * Every skin the picker is drawn in, named for the screenshots.
+ * Every skin the picker is drawn in, each named so a failure says which one.
  */
 internal val PickerSkins: List<Pair<String, Skin>> = ControlSkins
 
