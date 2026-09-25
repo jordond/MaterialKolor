@@ -143,7 +143,7 @@ internal class PageTextToolbar : TextToolbar {
 
     /**
      * The locals of the skin the builder is drawn in, which the host above the skin cannot see.
-     * The row wears that skin's menu dress, and until they arrive nothing is drawn.
+     * The row takes that skin's menu styling, and until they arrive nothing is drawn.
      */
     var locals: CompositionLocalContext? by mutableStateOf(null)
 

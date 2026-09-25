@@ -105,7 +105,7 @@ private const val AA_LARGE = 3.0
  * pinned as its state. The web hears only the name, so there the ratio, the badge and the pinned
  * state travel in it, as in "primary, #6750A4, tone 40, 6.4:1, AA, pinned" (D37, F-22).
  *
- * The copy button is a visible button, not a hover trick. It shows on a touch screen, while the
+ * The copy button does not depend on hover alone. It shows on a touch screen, while the
  * swatch or the button has keyboard focus, and while a mouse is over the swatch. Keyboard focus rings
  * the swatch on the panel around it, where the focus color holds 3 to 1.
  *
