@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,7 +81,9 @@ internal fun HeadlessTooltip(
     var focused by remember { mutableStateOf(false) }
     var hidden by remember { mutableStateOf(false) }
     // b-513
-    val wanted = hovered || (focused && LocalFocusVisibility.current.isVisible)
+    val visibility = LocalFocusVisibility.current
+    val focusShows by remember(visibility) { derivedStateOf { focused && visibility.isVisible } }
+    val wanted = hovered || focusShows
     LaunchedEffect(wanted) { if (!wanted) hidden = false }
     val visible = wanted && !hidden
     Box(
