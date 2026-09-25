@@ -18,7 +18,7 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * A modal panel along the start edge, the projects drawer.
  *
- * It is 320 dp wide, or 85% of a narrower screen, and takes the whole screen at Compact. A header
+ * It is 380 dp wide, or 85% of a narrower screen, and takes the whole screen at Compact. A header
  * holds its title, an optional [subtitle] and a close button, and an optional [footer] sits along
  * the bottom under a hairline. The header, the body and the footer keep the same room from the
  * panel's edges, and the inner corners take the skin's panel rounding. It keeps focus inside while it is open, closes on Esc and on

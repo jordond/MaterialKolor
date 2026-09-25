@@ -3,6 +3,7 @@ package com.materialkolor.builder.feature.command
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
@@ -38,6 +39,8 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.audit.ColorRef
@@ -349,30 +352,60 @@ private fun PaletteRow(
     )
 }
 
-/** The keys that move, run and close, and what else the field takes, along the bottom. */
+/**
+ * The keys that move, run and close, and what else the field takes, along the bottom. Where the
+ * palette is wide enough they share one line with the paste note at its end, and anywhere else they
+ * wrap.
+ */
 @Composable
 private fun PaletteFooter() {
     val tokens = LocalBuilderTokens.current
     val spacing = tokens.spacing
+    val hints: @Composable () -> Unit = {
+        FooterHint(stringResource(Res.string.palette_hint_move), stringResource(Res.string.palette_keys_move)) {
+            Keycap { KeyGlyph(Modifier.rotate(UP_TURN_DEGREES)) }
+            Keycap { KeyGlyph() }
+        }
+        val enter = stringResource(Res.string.palette_key_enter)
+        FooterHint(stringResource(Res.string.palette_hint_run), enter) { KeyName(enter) }
+        val esc = stringResource(Res.string.command_key_esc)
+        FooterHint(stringResource(Res.string.palette_hint_close), esc) { KeyName(esc) }
+    }
+    val paste = stringResource(Res.string.palette_hint_paste)
     Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
         Box(Modifier.fillMaxWidth().height(tokens.outlineWidth).background(tokens.border))
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(spacing.large),
-            verticalArrangement = Arrangement.spacedBy(spacing.small),
-            itemVerticalAlignment = Alignment.CenterVertically,
-        ) {
-            FooterHint(stringResource(Res.string.palette_hint_move), stringResource(Res.string.palette_keys_move)) {
-                Keycap { KeyGlyph(Modifier.rotate(UP_TURN_DEGREES)) }
-                Keycap { KeyGlyph() }
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            if (maxWidth >= FooterRowMinWidth) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(spacing.medium),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    hints()
+                    BuilderText(
+                        text = paste,
+                        modifier = Modifier.weight(1f),
+                        emphasis = Emphasis.Secondary,
+                        textAlign = TextAlign.End,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            } else {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(spacing.medium),
+                    verticalArrangement = Arrangement.spacedBy(spacing.small),
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                ) {
+                    hints()
+                    BuilderText(paste, emphasis = Emphasis.Secondary)
+                }
             }
-            val enter = stringResource(Res.string.palette_key_enter)
-            FooterHint(stringResource(Res.string.palette_hint_run), enter) { KeyName(enter) }
-            val esc = stringResource(Res.string.command_key_esc)
-            FooterHint(stringResource(Res.string.palette_hint_close), esc) { KeyName(esc) }
-            BuilderText(stringResource(Res.string.palette_hint_paste), emphasis = Emphasis.Secondary)
         }
     }
 }
+
+/** The narrowest the footer gets while its hints and the paste note still share a line. */
+private val FooterRowMinWidth: Dp = 560.dp
 
 /** One key hint in the footer, its keycaps then what they do, read as [keys] and then [hint]. */
 @Composable

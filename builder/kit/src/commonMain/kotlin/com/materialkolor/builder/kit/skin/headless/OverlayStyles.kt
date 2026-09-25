@@ -130,7 +130,7 @@ internal object OverlayMetrics {
     val sheetPeekHeight: Dp = 96.dp
 
     /** The widest a side panel gets, and how much of a narrower screen it takes. */
-    val sidePanelWidth: Dp = 320.dp
+    val sidePanelWidth: Dp = 380.dp // b-511
     val sidePanelNarrowFraction: Float = 0.85f
 
     /** The narrowest, the widest and the tallest a dropdown list gets. */

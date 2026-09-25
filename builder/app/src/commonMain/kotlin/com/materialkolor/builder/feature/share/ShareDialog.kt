@@ -4,8 +4,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -122,10 +125,11 @@ internal fun ShareDialog(
                 // One line that scrolls inside its field, so the dialog keeps its padding however long
                 // the link is. A finger copies with Copy link or Share.
                 Row(
+                    modifier = Modifier.height(IntrinsicSize.Min),
                     horizontalArrangement = Arrangement.spacedBy(spacing.small),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    LinkField(link, Modifier.weight(1f))
+                    LinkField(link, Modifier.weight(1f).fillMaxHeight())
                     BuilderButton(
                         onClick = { send(copy) },
                         label = stringResource(Res.string.share_copy),
@@ -146,7 +150,10 @@ internal fun ShareDialog(
 
 // b-511
 
-/** [link] on one line in a read only field with an outline, scrolling inside it when it is long. */
+/**
+ * [link] on one line in a read only field with an outline, as tall as the button beside it, scrolling
+ * inside it when it is long.
+ */
 @Composable
 private fun LinkField(
     link: String,
