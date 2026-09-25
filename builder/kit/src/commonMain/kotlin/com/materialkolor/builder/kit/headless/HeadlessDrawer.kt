@@ -1,6 +1,7 @@
 package com.materialkolor.builder.kit.headless
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -38,12 +40,14 @@ import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.PanelEdge
 import com.materialkolor.builder.kit.skin.headless.overlayFeedback
 import com.materialkolor.builder.kit.skin.headless.panelEnter
 import com.materialkolor.builder.kit.skin.headless.panelExit
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.kit.token.LocalBuilderType
 
 /**
  * A panel pinned to one edge of the page, over a veil. The projects drawer and the export sheet
@@ -59,7 +63,11 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * @param[style] The skin's overlay style.
  * @param[returnFocusTo] The trigger that opened the panel.
  * @param[modifier] Applied to the panel.
- * @param[content] The panel's body, below the header.
+ * @param[subtitle] A quieter line under the title, or null for none.
+ * @param[footer] What sits along the bottom under a hairline, such as the panel's actions, or null
+ * for no footer.
+ * @param[content] The panel's body, between the header and the footer. It takes the height they
+ * leave and stands [OverlayMetrics.panelPadding] in from the sides.
  */
 @Composable
 internal fun HeadlessDrawer(
@@ -73,6 +81,8 @@ internal fun HeadlessDrawer(
     style: OverlayStyle,
     returnFocusTo: FocusRequester?,
     modifier: Modifier = Modifier,
+    subtitle: String? = null, // b-511
+    footer: (@Composable () -> Unit)? = null, // b-511
     content: @Composable ColumnScope.() -> Unit,
 ) {
     require(edge != PanelEdge.Bottom) { "A drawer pins to the start or the end, sheets own the bottom" }
@@ -81,7 +91,7 @@ internal fun HeadlessDrawer(
     HeadlessModal(visible, onDismissRequest, style.scrim, alignment, returnFocusTo) {
         BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = alignment) {
             val fullWidth = widthFraction >= 1f
-            val shape = drawerShape(edge, if (fullWidth) 0.dp else style.panelRadius)
+            val shape = drawerShape(edge, if (fullWidth) 0.dp else style.drawerRadius) // b-511
             Column(
                 modifier = modifier
                     .animateEnterExit(enter = panelEnter(edge), exit = panelExit(edge))
@@ -94,8 +104,18 @@ internal fun HeadlessDrawer(
                     .modalPane(title)
                     .keepTaps(),
             ) {
-                HeadlessPanelHeader(title, closeLabel, onDismissRequest, style)
-                content()
+                // b-511
+                val padding = OverlayMetrics.panelPadding
+                HeadlessPanelHeader(title, closeLabel, onDismissRequest, style, subtitle)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(horizontal = padding)
+                        .padding(bottom = if (footer == null) padding else 0.dp),
+                    content = content,
+                )
+                if (footer != null) PanelFooter(style, footer)
             }
         }
     }
@@ -114,31 +134,60 @@ private fun drawerShape(
         else -> RoundedCornerShape(topStart = radius, bottomStart = radius)
     }
 
-/** A panel's title with its close button, the first stop for the keyboard inside the panel. */
+/**
+ * A panel's title with its close button, the first stop for the keyboard inside the panel, and
+ * [subtitle] under them when there is one. The close button sits on the title's line, and the whole
+ * header keeps [OverlayMetrics.panelPadding] from the panel's edges.
+ */
 @Composable
 internal fun HeadlessPanelHeader(
     title: String,
     closeLabel: String,
     onClose: () -> Unit,
     style: OverlayStyle,
+    subtitle: String? = null, // b-511
 ) {
     val tokens = LocalBuilderTokens.current
-    Row(
+    val padding = OverlayMetrics.panelPadding
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = tokens.spacing.large, end = tokens.spacing.small, top = tokens.spacing.small),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
+            .padding(start = padding, end = padding, top = padding, bottom = tokens.spacing.large),
+        verticalArrangement = Arrangement.spacedBy(tokens.spacing.extraSmall),
     ) {
-        BuilderText(
-            text = title,
-            modifier = Modifier.weight(1f).modalTitle(),
-            style = BuilderTextStyle.Title,
-            color = style.content,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        HeadlessCloseButton(closeLabel, onClose, style)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
+        ) {
+            val type = LocalBuilderType.current
+            BasicText(
+                text = title,
+                modifier = Modifier.weight(1f).modalTitle(),
+                style = (style.panelTitle ?: type.title).merge(color = style.content),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            HeadlessCloseButton(closeLabel, onClose, style)
+        }
+        if (subtitle != null) {
+            BuilderText(text = subtitle, style = BuilderTextStyle.Body, color = style.muted)
+        }
+    }
+}
+
+/** A panel's footer, under a hairline and in from the edges as far as the header. */
+@Composable
+private fun PanelFooter(
+    style: OverlayStyle,
+    content: @Composable () -> Unit,
+) {
+    val tokens = LocalBuilderTokens.current
+    val padding = OverlayMetrics.panelPadding
+    Column(
+        Modifier.fillMaxWidth().padding(start = padding, end = padding, top = tokens.spacing.large, bottom = padding),
+    ) {
+        Box(Modifier.fillMaxWidth().height(tokens.outlineWidth).background(style.divider))
+        Box(Modifier.fillMaxWidth().padding(top = tokens.spacing.large)) { content() }
     }
 }
 

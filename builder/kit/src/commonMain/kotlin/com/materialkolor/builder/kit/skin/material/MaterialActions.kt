@@ -57,6 +57,8 @@ import com.materialkolor.builder.kit.control.CardDisabledNote
 import com.materialkolor.builder.kit.control.ControlState
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.ListRowContent
+import com.materialkolor.builder.kit.control.ListRowHeadline
+import com.materialkolor.builder.kit.control.ListRowSupporting
 import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.control.iconButtonSemantics
 import com.materialkolor.builder.kit.control.listRowInput
@@ -357,15 +359,13 @@ internal fun MaterialListRow(
             .controlRing(interactionSource, RectangleShape)
     }
     ListItem(
-        headlineContent = {
-            BuilderText(row.headline, style = BuilderTextStyle.Label, color = LocalContentColor.current)
-        },
+        headlineContent = { ListRowHeadline(row.headline, LocalContentColor.current) }, // b-511
         modifier = modifier
             .listRowInput(row, interactionSource, indication = ripple())
             .listRowState(row)
             .then(feedback),
         supportingContent = row.supporting?.let { text ->
-            { BuilderText(text, style = BuilderTextStyle.Body, color = LocalContentColor.current) }
+            { ListRowSupporting(text, LocalContentColor.current) } // b-511
         },
         leadingContent = row.icon?.let { id ->
             { BuilderIcon(id, contentDescription = null, tint = LocalContentColor.current) }

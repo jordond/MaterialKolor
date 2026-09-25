@@ -116,7 +116,10 @@ internal fun ProjectRow(
                     modifier = Modifier
                         .clearAndSetSemantics {}
                         .focusProperties { canFocus = false }
-                        .clickable(onClick = openThis),
+                        // b-511
+                        // The thumbnail is the row's control and shows its state, so the name draws no
+                        // ground of its own under the pointer.
+                        .clickable(interactionSource = null, indication = null, onClick = openThis),
                     style = BuilderTextStyle.Label,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

@@ -105,6 +105,9 @@ public val menusOpenAsWindows: Boolean
  * @param[minWidth] The narrowest the list may be, the anchor's width for a select.
  * @param[initialFocus] The row that takes focus when the list opens, the selected option for a select.
  * @param[returnFocusTo] The trigger or the field that opened the list.
+ * @param[popover] Whether it hangs as a popover rather than a list, [OverlayMetrics.popoverGap] under
+ * the anchor with its end lined up with the anchor's end, and [OverlayMetrics.popoverGap] of room
+ * inside its edge.
  * @param[content] The rows. A row calls `close` rather than [onDismissRequest], so the list lets go of
  * the page at once and a row that moves focus there keeps it.
  */
@@ -116,6 +119,7 @@ internal fun HeadlessDropdown(
     minWidth: Dp = OverlayMetrics.menuMinWidth,
     initialFocus: FocusRequester? = null,
     returnFocusTo: FocusRequester? = null,
+    popover: Boolean = false, // b-511
     content: @Composable ColumnScope.(close: () -> Unit) -> Unit,
 ) {
     val inTree = LocalOverlaysInTree.current
@@ -126,8 +130,13 @@ internal fun HeadlessDropdown(
     if (!shown) return
     val host = inTreeOverlayHost()
     val tokens = LocalBuilderTokens.current
-    val gap = with(LocalDensity.current) { tokens.spacing.extraSmall.roundToPx() }
-    val provider = remember(gap) { DropdownPositionProvider(gap) }
+    val density = LocalDensity.current
+    // b-511
+    // A popover measures its gap from the edge it draws, inside the room the list keeps for its shadow.
+    val gap = with(density) { (if (popover) OverlayMetrics.popoverGap else tokens.spacing.extraSmall).roundToPx() }
+    val inset = if (popover) with(density) { tokens.spacing.small.roundToPx() } else 0
+    val provider = remember(gap, inset, popover) { DropdownPositionProvider(gap, alignEnd = popover, inset = inset) }
+    val padding = if (popover) OverlayMetrics.popoverGap else tokens.spacing.extraSmall
     val layer = remember { OverlayLayer(OverlayKind.Popover) }
     val close = {
         layer.open = false
@@ -136,7 +145,9 @@ internal fun HeadlessDropdown(
     val list: @Composable () -> Unit = {
         AnimatedVisibility(visibleState = state, enter = popoverEnter(), exit = popoverExit()) {
             val focus = remember { OverlayFocus() }
-            DropdownList(style, minWidth, listModifier = rowKeys().then(focus.modifier)) { this.content(close) }
+            DropdownList(style, minWidth, listModifier = rowKeys().then(focus.modifier), padding = padding) {
+                this.content(close)
+            }
             LaunchedEffect(Unit) { focus.enter(initialFocus) }
         }
     }
@@ -188,6 +199,7 @@ private fun rowKeys(): Modifier {
  * @param[modifier] Applied to the container, outside the room it keeps for its shadow.
  * @param[listModifier] Applied to the scrolling list inside its edge, where the open list keeps
  * focus in.
+ * @param[padding] The room between the container's edge and the rows.
  * @param[content] The rows.
  */
 @Composable
@@ -196,6 +208,7 @@ internal fun DropdownList(
     minWidth: Dp = OverlayMetrics.menuMinWidth,
     modifier: Modifier = Modifier,
     listModifier: Modifier = Modifier,
+    padding: Dp = LocalBuilderTokens.current.spacing.extraSmall, // b-511
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
@@ -211,7 +224,7 @@ internal fun DropdownList(
             .heightIn(max = OverlayMetrics.menuMaxHeight)
             .verticalScroll(rememberScrollState())
             .then(listModifier)
-            .padding(tokens.spacing.extraSmall),
+            .padding(padding),
         content = content,
     )
 }
@@ -480,9 +493,19 @@ private fun <T> HeadlessSelectRows(
     }
 }
 
-/** Under the anchor and lined up with its start, or above it when the window runs out below. */
+/**
+ * Under the anchor and lined up with its start, or with its end when [alignEnd], or above it when
+ * the window runs out below, and always inside the window.
+ *
+ * @param[gap] How far the list keeps from the anchor.
+ * @param[alignEnd] Whether the list lines up with the anchor's end rather than its start.
+ * @param[inset] How far the list draws inside its own bounds, the room it keeps for its shadow, so
+ * [gap] and the alignment measure from the edge it draws.
+ */
 internal class DropdownPositionProvider(
     private val gap: Int,
+    private val alignEnd: Boolean = false, // b-511
+    private val inset: Int = 0, // b-511
 ) : PopupPositionProvider {
     override fun calculatePosition(
         anchorBounds: IntRect,
@@ -490,17 +513,18 @@ internal class DropdownPositionProvider(
         layoutDirection: LayoutDirection,
         popupContentSize: IntSize,
     ): IntOffset {
-        val start = if (layoutDirection == LayoutDirection.Ltr) {
-            anchorBounds.left
+        val leftEdge = (layoutDirection == LayoutDirection.Ltr) != alignEnd
+        val start = if (leftEdge) {
+            anchorBounds.left - inset
         } else {
-            anchorBounds.right - popupContentSize.width
+            anchorBounds.right - popupContentSize.width + inset
         }
         val x = start.coerceIn(0, max(0, windowSize.width - popupContentSize.width))
-        val below = anchorBounds.bottom + gap
+        val below = anchorBounds.bottom + gap - inset
         val y = if (below + popupContentSize.height <= windowSize.height) {
             below
         } else {
-            max(0, anchorBounds.top - gap - popupContentSize.height)
+            max(0, anchorBounds.top - gap + inset - popupContentSize.height)
         }
         return IntOffset(x, y)
     }

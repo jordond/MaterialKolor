@@ -24,6 +24,8 @@ internal fun fluentOverlayStyle(tokens: BuilderTokens): OverlayStyle {
         popoverShape = RoundedCornerShape(tokens.radius.small),
         dialogShape = RoundedCornerShape(tokens.radius.small),
         panelRadius = tokens.radius.small,
+        drawerRadius = tokens.radius.small, // b-511
+        divider = tokens.border,
         shadow = 8.dp,
         scrim = tokens.scrim,
         itemShape = RoundedCornerShape(FluentItemRadius),

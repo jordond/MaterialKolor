@@ -29,7 +29,6 @@ import com.materialkolor.builder.kit.skin.Skin
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.floats.shouldBeLessThanOrEqual
-import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -173,8 +172,11 @@ class ShareDialogTest : SessionTestBase() {
         }
 
     // b-228aa
+    // b-511
+    // One line in a field of its own that scrolls inside, with Copy link beside it, so a long link
+    // never runs past the dialog's padding. A finger still copies it all with Copy link.
     @Test
-    fun link_onAPhone_wrapsSoAllOfItShows() =
+    fun link_onAPhone_staysOnOneLineInsideItsField() =
         runDesktopComposeUiTest(width = PHONE_WIDTH, height = PHONE_HEIGHT) {
             showDialog(link = LONG_LINK)
 
@@ -182,12 +184,15 @@ class ShareDialogTest : SessionTestBase() {
             link.assertIsDisplayed()
             val layouts = mutableListOf<TextLayoutResult>()
             link.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action -> action(layouts) }
-            val layout = layouts.single()
-            layout.lineCount shouldBeGreaterThan 1
-            layout.hasVisualOverflow shouldBe false
-            layout.getLineEnd(layout.lineCount - 1) shouldBe LONG_LINK.length
-            link.fetchSemanticsNode().boundsInRoot.right shouldBeLessThanOrEqual PHONE_WIDTH.toFloat()
+            layouts.single().lineCount shouldBe 1
+            val field = link.fetchSemanticsNode().boundsInRoot
+            val copy = onNode(hasText("Copy link")).fetchSemanticsNode().boundsInRoot
+            field.right shouldBeLessThanOrEqual copy.left
+            copy.right shouldBeLessThanOrEqual PHONE_WIDTH.toFloat()
             onNode(hasContentDescription("Share link")).assertExists()
+            onNode(hasText("Copy link")).performClick()
+            waitForIdle()
+            copied shouldBe listOf(LONG_LINK)
         }
 
     @Test

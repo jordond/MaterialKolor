@@ -35,10 +35,11 @@ public enum class SheetPresentation {
  * A modal sheet for a task that needs more room than a dialog, such as export.
  *
  * The caller picks [presentation] from `LocalLayout`, usually with [SheetPresentation.of]. The
- * sheet has a header with its title and a close button, keeps focus inside while it is open,
- * closes on Esc and on the veil, and hands focus back to [returnFocusTo] once it has gone. It
- * slides in from the end edge, or only fades under reduced motion. Material3 has no side sheet, so
- * every skin draws the headless drawer in its own dress.
+ * sheet has a header with its title, an optional [subtitle] and a close button, and an optional
+ * [footer] along the bottom under a hairline, all three the same room in from the sheet's edges. It
+ * keeps focus inside while it is open, closes on Esc and on the veil, and hands focus back to
+ * [returnFocusTo] once it has gone. It slides in from the end edge, or only fades under reduced
+ * motion. Material3 has no side sheet, so every skin draws the headless drawer in its own dress.
  *
  * @param[visible] Whether the sheet is open.
  * @param[onDismissRequest] Called when the sheet asks to close.
@@ -47,7 +48,9 @@ public enum class SheetPresentation {
  * @param[modifier] Applied to the sheet panel.
  * @param[closeLabel] What the close button says to assistive technology.
  * @param[returnFocusTo] The trigger that opened the sheet.
- * @param[content] The sheet's body, below the header.
+ * @param[subtitle] A quieter line under the title, or null for none.
+ * @param[footer] What sits along the bottom, such as the sheet's actions, or null for no footer.
+ * @param[content] The sheet's body, between the header and the footer.
  */
 @Composable
 public fun BuilderSheet(
@@ -58,6 +61,8 @@ public fun BuilderSheet(
     modifier: Modifier = Modifier,
     closeLabel: String = stringResource(Res.string.close),
     returnFocusTo: FocusRequester? = null,
+    subtitle: String? = null, // b-511
+    footer: (@Composable () -> Unit)? = null, // b-511
     content: @Composable ColumnScope.() -> Unit,
 ) {
     HeadlessDrawer(
@@ -74,6 +79,8 @@ public fun BuilderSheet(
         style = overlayStyle(LocalSkin.current.library),
         returnFocusTo = returnFocusTo,
         modifier = modifier,
+        subtitle = subtitle,
+        footer = footer,
         content = content,
     )
 }

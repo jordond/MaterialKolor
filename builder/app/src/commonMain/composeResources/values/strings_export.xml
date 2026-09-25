@@ -2,6 +2,10 @@
 <resources>
     <!-- The export sheet's title. -->
     <string name="export_title">Export code</string>
+    <!-- The line under the title. The arguments are the theme's name, the project's name and the seed as #RRGGBB. -->
+    <string name="export_subtitle">%1$s from %2$s %3$s</string>
+    <!-- The same line for a project with no name. The arguments are the theme's name and the seed. -->
+    <string name="export_subtitle_unnamed">%1$s from %2$s</string>
 
     <!-- The Dynamic or Frozen choice in the sheet's header. -->
     <string name="export_mode">Mode</string>
@@ -47,5 +51,8 @@
     <string name="export_download">Download zip</string>
     <string name="export_share">Share files</string>
     <string name="export_save_failed">Could not save the zip</string>
+    <!-- The note beside the buttons. The argument is a MaterialKolor version, such as 6.0.0. -->
+    <string name="export_checked">Every export is compile-checked against MaterialKolor %1$s</string>
+    <string name="export_checked_any">Every export is compile-checked against MaterialKolor</string>
     <string name="export_share_failed">Could not share the zip</string>
 </resources>

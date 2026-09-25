@@ -13,13 +13,15 @@ import com.materialkolor.builder.kit.headless.overlayLibrary
 import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.unstyledOverlayStyle
-import com.materialkolor.builder.kit.skin.material.materialMenuStyle
+import com.materialkolor.builder.kit.skin.material.materialPopoverStyle
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 // b-508
 
 /**
  * A popover that opens under [anchor], holds whatever it is given and stays open while it is used.
+ * It hangs 8 dp under the anchor with its end lined up with the anchor's end, and moves along to
+ * stay inside the window.
  *
  * A [BuilderMenu] closes as soon as a row is chosen. This one never closes on a pick, so a list
  * inside can be picked from again and again with the popover still up. Esc and a click outside call
@@ -29,7 +31,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * inside already moved it elsewhere. Where overlays render in the page (D40) it opens in the overlay
  * host, and anywhere else in a focusable popup.
  *
- * Material3 draws it in Material's menu container and the other skins in their own popover dress.
+ * Material3 draws it in Material's container with its large corner and a menu's shadow, and the other
+ * skins in their own popover dress. Each keeps 8 dp of room inside its edge.
  *
  * @param[expanded] Whether the popover is open.
  * @param[onDismissRequest] Called when the popover asks to close. It must set [expanded] to false,
@@ -52,7 +55,7 @@ public fun BuilderPopover(
 ) {
     val tokens = LocalBuilderTokens.current
     val style = when (overlayLibrary()) {
-        Library.Material3 -> materialMenuStyle()
+        Library.Material3 -> materialPopoverStyle() // b-511
         Library.Unstyled -> unstyledOverlayStyle(tokens)
         Library.Fluent -> fluentOverlayStyle(tokens)
         Library.Custom -> customOverlayStyle(tokens)
@@ -66,6 +69,7 @@ public fun BuilderPopover(
             style = style,
             initialFocus = initialFocus,
             returnFocusTo = returnFocusTo ?: trigger,
+            popover = true, // b-511
         ) { _ -> content() }
     }
 }

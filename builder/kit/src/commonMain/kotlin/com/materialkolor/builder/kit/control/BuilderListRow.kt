@@ -9,13 +9,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -23,6 +26,7 @@ import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.fluent.FluentListRow
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
 import com.materialkolor.builder.kit.skin.headless.ListRowStyle
+import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.headless.actionSurface
 import com.materialkolor.builder.kit.skin.headless.controlPress
@@ -30,6 +34,8 @@ import com.materialkolor.builder.kit.skin.headless.controlRing
 import com.materialkolor.builder.kit.skin.headless.controlTouchTarget
 import com.materialkolor.builder.kit.skin.headless.enabledAlpha
 import com.materialkolor.builder.kit.skin.material.MaterialListRow
+import com.materialkolor.builder.kit.skin.material.materialDenseRowStyle
+import com.materialkolor.builder.kit.token.LocalBuilderType
 
 /**
  * One row of a list, such as a saved project.
@@ -48,6 +54,8 @@ import com.materialkolor.builder.kit.skin.material.MaterialListRow
  * @param[selected] Whether this is the current row, or null for a list with no current row.
  * @param[enabled] Whether a pressable row can be pressed.
  * @param[trailing] Something at the end, such as a badge or an icon button of its own.
+ * @param[dense] Whether the row stands about 44 dp tall in every skin, for a long list inside an
+ * overlay such as the command palette. Material3 then draws its rows the way it draws a menu's.
  */
 @Composable
 public fun BuilderListRow(
@@ -60,10 +68,11 @@ public fun BuilderListRow(
     selected: Boolean? = null,
     enabled: Boolean = true,
     trailing: (@Composable () -> Unit)? = null,
+    dense: Boolean = false, // b-511
 ) {
-    val row = ListRowContent(headline, supporting, icon, leading, onClick, selected, enabled, trailing)
+    val row = ListRowContent(headline, supporting, icon, leading, onClick, selected, enabled, trailing, dense)
     when (LocalSkin.current.library) {
-        Library.Material3 -> MaterialListRow(row, modifier)
+        Library.Material3 -> if (dense) HeadlessListRow(row, materialDenseRowStyle(), modifier) else MaterialListRow(row, modifier)
         Library.Unstyled -> HeadlessListRow(row, UnstyledActionStyles.listRow, modifier)
         Library.Fluent -> FluentListRow(row, modifier)
         Library.Custom -> HeadlessListRow(row, CustomActionStyles.listRow, modifier)
@@ -80,6 +89,7 @@ internal class ListRowContent(
     val selected: Boolean?,
     val enabled: Boolean,
     val trailing: (@Composable () -> Unit)?,
+    val dense: Boolean = false, // b-511
 ) {
     init {
         require(icon == null || leading == null) { "A row takes an icon or a leading slot, not both" }
@@ -153,7 +163,7 @@ internal fun HeadlessListRow(
             .listRowState(row)
             .then(pressableFeedback)
             .actionSurface(colors, style.shape, style.borderWidth)
-            .heightIn(min = style.minHeight)
+            .heightIn(min = if (row.dense) OverlayMetrics.denseRowHeight else style.minHeight) // b-511
             .padding(horizontal = style.horizontalPadding, vertical = style.verticalPadding),
         horizontalArrangement = Arrangement.spacedBy(style.gap),
         verticalAlignment = Alignment.CenterVertically,
@@ -161,12 +171,30 @@ internal fun HeadlessListRow(
         if (row.icon != null) BuilderIcon(row.icon, contentDescription = null, tint = colors.content)
         row.leading?.invoke() // b-508
         Column(Modifier.weight(1f)) {
-            BuilderText(row.headline, style = BuilderTextStyle.Label, color = colors.content)
-            if (row.supporting != null) {
-                BuilderText(row.supporting, style = BuilderTextStyle.Body, color = style.supporting)
-            }
+            ListRowHeadline(row.headline, colors.content) // b-511
+            if (row.supporting != null) ListRowSupporting(row.supporting, style.supporting)
         }
         if (row.selected == true) BuilderIcon(IconId.Check, contentDescription = null, tint = colors.content)
         row.trailing?.invoke()
     }
+}
+
+// b-511
+
+/** A row's main line, larger and firmer than the line under it, in every skin. */
+@Composable
+internal fun ListRowHeadline(
+    text: String,
+    color: Color,
+) {
+    BasicText(text, style = LocalBuilderType.current.body.merge(color = color, fontWeight = FontWeight.Medium))
+}
+
+/** A row's quieter second line, under its [ListRowHeadline]. */
+@Composable
+internal fun ListRowSupporting(
+    text: String,
+    color: Color,
+) {
+    BasicText(text, style = LocalBuilderType.current.label.merge(color = color, fontWeight = FontWeight.Normal))
 }

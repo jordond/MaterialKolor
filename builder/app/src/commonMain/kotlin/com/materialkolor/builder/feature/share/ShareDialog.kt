@@ -1,13 +1,26 @@
 package com.materialkolor.builder.feature.share
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.share_body
 import com.materialkolor.builder.generated.resources.share_copy
@@ -25,6 +38,7 @@ import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.widget.SelectableText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -34,8 +48,9 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The share dialog (F-32), the link to the theme as it is now with a way to send it.
  *
- * On a touch screen with a share sheet Share comes first and Copy link sits beside it, elsewhere
- * Copy link is the one action. Each starts its platform call inside the click, undispatched, so the
+ * The link shows on one line in a read only field that scrolls inside the dialog, with Copy link
+ * beside it. On a touch screen with a share sheet Share is the dialog's action as well. Each starts
+ * its platform call inside the click, undispatched, so the
  * browser still counts the click as the user's. When the clipboard or the sheet turns the link down
  * the dialog stays open and says to copy it by hand, or on a touch screen which button to try, and
  * it never claims a copy that did not land.
@@ -83,16 +98,8 @@ internal fun ShareDialog(
         title = stringResource(Res.string.share_title),
         modifier = modifier,
         returnFocusTo = returnFocusTo,
-        actions = {
-            if (link != null) {
-                BuilderButton(
-                    onClick = { send(copy) },
-                    label = stringResource(Res.string.share_copy),
-                    emphasis = if (sharesToSheet) Emphasis.Secondary else Emphasis.Primary,
-                    icon = IconId.Copy,
-                )
-            }
-            if (link != null && sharesToSheet) {
+        actions = if (link != null && sharesToSheet) {
+            {
                 BuilderButton(
                     onClick = { send(share) },
                     label = stringResource(Res.string.share_send),
@@ -100,25 +107,68 @@ internal fun ShareDialog(
                     icon = IconId.Share,
                 )
             }
+        } else {
+            null
         },
     ) {
-        if (link == null) {
-            BuilderText(text = stringResource(Res.string.share_unavailable))
-        } else {
-            BuilderText(text = stringResource(Res.string.share_body))
-            // b-228a
-            // b-228aa
-            // Wrapped, so a phone shows the whole link. A finger copies with Copy link or Share.
-            SelectableText(
-                text = link,
-                style = BuilderTextStyle.Code,
-                label = stringResource(Res.string.share_link_name),
-                singleLine = false,
-            )
+        val spacing = LocalBuilderTokens.current.spacing
+        val copyFocus = remember { FocusRequester() }
+        Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+            if (link == null) {
+                BuilderText(text = stringResource(Res.string.share_unavailable))
+            } else {
+                BuilderText(text = stringResource(Res.string.share_body))
+                // b-511
+                // One line that scrolls inside its field, so the dialog keeps its padding however long
+                // the link is. A finger copies with Copy link or Share.
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(spacing.small),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    LinkField(link, Modifier.weight(1f))
+                    BuilderButton(
+                        onClick = { send(copy) },
+                        label = stringResource(Res.string.share_copy),
+                        modifier = Modifier.focusRequester(copyFocus),
+                        emphasis = if (sharesToSheet) Emphasis.Secondary else Emphasis.Primary,
+                        icon = IconId.Copy,
+                    )
+                }
+                // Copy link takes focus as the dialog opens, as it did while it was the dialog's action.
+                LaunchedEffect(copyFocus) { copyFocus.requestFocus() }
+            }
+            failed.lastOrNull()?.let { outcome ->
+                BuilderText(text = manualText(outcome, failed.size > 1, sharesToSheet), emphasis = Emphasis.Danger)
+            }
         }
-        failed.lastOrNull()?.let { outcome ->
-            BuilderText(text = manualText(outcome, failed.size > 1, sharesToSheet), emphasis = Emphasis.Danger)
-        }
+    }
+}
+
+// b-511
+
+/** [link] on one line in a read only field with an outline, scrolling inside it when it is long. */
+@Composable
+private fun LinkField(
+    link: String,
+    modifier: Modifier = Modifier,
+) {
+    val tokens = LocalBuilderTokens.current
+    val shape = RoundedCornerShape(tokens.radius.small)
+    Box(
+        modifier = modifier
+            .heightIn(min = LocalLayout.current.primaryTouchTarget)
+            .border(tokens.outlineWidth, tokens.borderStrong, shape)
+            .clip(shape)
+            .padding(horizontal = tokens.spacing.medium),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        SelectableText(
+            text = link,
+            modifier = Modifier.fillMaxWidth(),
+            style = BuilderTextStyle.Code,
+            label = stringResource(Res.string.share_link_name),
+            singleLine = true,
+        )
     }
 }
 

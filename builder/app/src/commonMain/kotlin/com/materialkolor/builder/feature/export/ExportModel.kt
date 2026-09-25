@@ -84,6 +84,10 @@ internal class ExportModel(
         State(document = session.document.value, preferences = preferences.preferences.value),
     ) {
     private val exports = ExportResolver(themes = resolver)
+
+    /** The MaterialKolor version every export is built and checked against. */
+    val materialKolorVersion: String
+        get() = versions.materialKolor // b-511
     private var memo: Memo? = null
 
     init {
