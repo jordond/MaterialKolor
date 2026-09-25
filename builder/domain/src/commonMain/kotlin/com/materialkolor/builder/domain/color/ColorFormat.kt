@@ -13,16 +13,24 @@ import kotlin.math.roundToLong
  * a color in any of them and take typed edits in the same form.
  */
 public enum class ColorFormat {
-    /** Red as `#FF0000`. */
+    /**
+     * Red as `#FF0000`.
+     */
     Hex,
 
-    /** Red as `rgb(255 0 0)`, each channel from 0 to 255. */
+    /**
+     * Red as `rgb(255 0 0)`, each channel from 0 to 255.
+     */
     Rgb,
 
-    /** Red as `hsl(0 100% 50%)`, the hue in degrees, then saturation and lightness as percentages. */
+    /**
+     * Red as `hsl(0 100% 50%)`, the hue in degrees, then saturation and lightness as percentages.
+     */
     Hsl,
 
-    /** Red as about `oklch(0.62796 0.25768 29.234)`, lightness from 0 to 1, then chroma, then the hue in degrees. */
+    /**
+     * Red as about `oklch(0.62796 0.25768 29.234)`, lightness from 0 to 1, then chroma, then the hue in degrees.
+     */
     Oklch,
 }
 
@@ -107,10 +115,14 @@ internal fun srgbToHsl(rgb: Rgb): Hsl {
     return Hsl(hue = sixths * DegreesPerSixth, saturation = saturation, lightness = lightness)
 }
 
-/** This color in HSL. */
+/**
+ * This color in HSL.
+ */
 internal fun Argb.toHsl(): Hsl = srgbToHsl(toSrgb())
 
-/** This number rounded to [decimals] places, with trailing zeros and a bare point left off. */
+/**
+ * This number rounded to [decimals] places, with trailing zeros and a bare point left off.
+ */
 private fun Double.toDecimalText(decimals: Int): String {
     val scale = 10.0.pow(decimals).toLong()
     val scaled = (this * scale).roundToLong()
@@ -130,7 +142,9 @@ private const val Percent: Double = 100.0
 
 private const val DegreesPerSixth: Double = 60.0
 
-/** Two decimals keep every channel within a fraction of an eight bit step, so HSL text round trips. */
+/**
+ * Two decimals keep every channel within a fraction of an eight bit step, so HSL text round trips.
+ */
 private const val HslDecimals: Int = 2
 
 /**

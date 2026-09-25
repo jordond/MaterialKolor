@@ -63,15 +63,21 @@ public enum class OnColorThreshold(
     override val code: Int,
     public val ratio: Double,
 ) : CodedEnum {
-    /** WCAG AA for body text. */
+    /**
+     * WCAG AA for body text.
+     */
     @SerialName("AaNormal")
     AaNormal(code = 0, ratio = 4.5),
 
-    /** WCAG AA for large text, the looser of the two AA rules. */
+    /**
+     * WCAG AA for large text, the looser of the two AA rules.
+     */
     @SerialName("AaLarge")
     AaLarge(code = 1, ratio = 3.0),
 
-    /** WCAG AAA, the strictest of the three. */
+    /**
+     * WCAG AAA, the strictest of the three.
+     */
     @SerialName("Aaa")
     Aaa(code = 2, ratio = 7.0),
 }

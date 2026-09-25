@@ -6,10 +6,14 @@ import com.materialkolor.builder.domain.persist.ExportTarget
 
 // b-505
 
-/** Where the builder is served, and so where its links point unless the page says otherwise. */
+/**
+ * Where the builder is served, and so where its links point unless the page says otherwise.
+ */
 public const val SITE_ORIGIN: String = "https://materialkolor.com"
 
-/** Where a share code opens its theme on [SITE_ORIGIN], and where every export links back to. */
+/**
+ * Where a share code opens its theme on [SITE_ORIGIN], and where every export links back to.
+ */
 public const val SHARE_URL_PREFIX: String = "$SITE_ORIGIN/t/"
 
 /**
@@ -31,7 +35,9 @@ public fun shareLink(
     return code?.let { fitted -> "$origin/t/$fitted" }
 }
 
-/** The share code for [document], or null when its accents do not fit in one. */
+/**
+ * The share code for [document], or null when its accents do not fit in one.
+ */
 private fun codeOrNull(
     document: ThemeDocument,
     projectName: String,

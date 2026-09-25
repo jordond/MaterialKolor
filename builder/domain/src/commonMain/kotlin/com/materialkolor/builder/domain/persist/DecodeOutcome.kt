@@ -28,15 +28,23 @@ public sealed interface DecodeOutcome<out T> {
  * Why a stored record was set aside instead of read.
  */
 public enum class QuarantineReason {
-    /** The text is not JSON, or not an envelope with a schema and data. */
+    /**
+     * The text is not JSON, or not an envelope with a schema and data.
+     */
     Unreadable,
 
-    /** A newer builder wrote it, in a schema this one has no steps for yet. */
+    /**
+     * A newer builder wrote it, in a schema this one has no steps for yet.
+     */
     NewerSchema,
 
-    /** A migration step could not make sense of the data it was handed. */
+    /**
+     * A migration step could not make sense of the data it was handed.
+     */
     MigrationFailed,
 
-    /** The data went through every step and still does not fit the record. */
+    /**
+     * The data went through every step and still does not fit the record.
+     */
     WrongShape,
 }

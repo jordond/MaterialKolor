@@ -17,43 +17,63 @@ import kotlinx.serialization.Serializable
 public enum class Style(
     override val code: Int,
 ) : CodedEnum {
-    /** A calm theme, sedated colors that are not particularly chromatic. */
+    /**
+     * A calm theme, sedated colors that are not particularly chromatic.
+     */
     @SerialName("TonalSpot")
     TonalSpot(code = 0),
 
-    /** Slightly more chromatic than [Monochrome]. */
+    /**
+     * Slightly more chromatic than [Monochrome].
+     */
     @SerialName("Neutral")
     Neutral(code = 1),
 
-    /** A loud theme, colorfulness is at its maximum for the primary palette. */
+    /**
+     * A loud theme, colorfulness is at its maximum for the primary palette.
+     */
     @SerialName("Vibrant")
     Vibrant(code = 2),
 
-    /** A playful theme, the seed's hue does not appear in the result. */
+    /**
+     * A playful theme, the seed's hue does not appear in the result.
+     */
     @SerialName("Expressive")
     Expressive(code = 3),
 
-    /** A playful theme built from a spread of hues. */
+    /**
+     * A playful theme built from a spread of hues.
+     */
     @SerialName("Rainbow")
     Rainbow(code = 4),
 
-    /** A playful theme built from a wider spread of hues than [Rainbow]. */
+    /**
+     * A playful theme built from a wider spread of hues than [Rainbow].
+     */
     @SerialName("FruitSalad")
     FruitSalad(code = 5),
 
-    /** Black, white and gray only. */
+    /**
+     * Black, white and gray only.
+     */
     @SerialName("Monochrome")
     Monochrome(code = 6),
 
-    /** Keeps the seed itself in the primary container, with a complementary tertiary. */
+    /**
+     * Keeps the seed itself in the primary container, with a complementary tertiary.
+     */
     @SerialName("Fidelity")
     Fidelity(code = 7),
 
-    /** Keeps the seed itself in the primary container, with an analogous tertiary. */
+    /**
+     * Keeps the seed itself in the primary container, with an analogous tertiary.
+     */
     @SerialName("Content")
     Content(code = 8),
 
-    /** The 2026 color, material and finish style, which takes a second seed for its tertiary. */
+    /**
+     * The 2026 color, material and finish style, which takes a second seed for its tertiary.
+     */
     @SerialName("Cmf")
     Cmf(code = 9),
 }

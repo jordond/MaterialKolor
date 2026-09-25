@@ -14,7 +14,9 @@ public object ColorNames {
         return entries.minBy { entry -> entry.oklab.distanceSquaredTo(target) }.name
     }
 
-    /** Every name with its color, in the order [ColorNameData] lists them. */
+    /**
+     * Every name with its color, in the order [ColorNameData] lists them.
+     */
     internal val entries: List<NamedColor> by lazy {
         ColorNameData.flatMap { line -> line.split(", ").map(::namedColorOf) }
     }

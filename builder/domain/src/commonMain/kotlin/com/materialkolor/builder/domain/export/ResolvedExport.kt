@@ -37,13 +37,19 @@ public data class ResolvedExport(
  * The contrast a frozen export writes a variant of the theme at.
  */
 public enum class ContrastVariant {
-    /** The contrast the document is set to. */
+    /**
+     * The contrast the document is set to.
+     */
     Standard,
 
-    /** The medium contrast variant. */
+    /**
+     * The medium contrast variant.
+     */
     Medium,
 
-    /** The high contrast variant. */
+    /**
+     * The high contrast variant.
+     */
     High,
 }
 

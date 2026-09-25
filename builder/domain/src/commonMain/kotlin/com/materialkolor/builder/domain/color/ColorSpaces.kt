@@ -34,7 +34,9 @@ internal data class Oklab(
     val a: Double,
     val b: Double,
 ) {
-    /** The squared distance to [other], which is enough to find the nearest of several colors. */
+    /**
+     * The squared distance to [other], which is enough to find the nearest of several colors.
+     */
     fun distanceSquaredTo(other: Oklab): Double {
         val dl = l - other.l
         val da = a - other.a
@@ -80,7 +82,9 @@ internal class GamutMapped(
  * The OKLab matrices are Björn Ottosson's, the same ones CSS Color 4 uses.
  */
 internal object ColorSpaces {
-    /** Undo the sRGB transfer curve for one channel. */
+    /**
+     * Undo the sRGB transfer curve for one channel.
+     */
     fun srgbToLinear(channel: Double): Double =
         if (channel <= 0.04045) channel / 12.92 else ((channel + 0.055) / 1.055).pow(2.4)
 
@@ -160,7 +164,9 @@ internal object ColorSpaces {
         return GamutMapped(srgbToArgb(oklchToSrgb(color.copy(c = fits))), clamped = true)
     }
 
-    /** Round gamma encoded channels to eight bits, clipping whatever rounding error is left. */
+    /**
+     * Round gamma encoded channels to eight bits, clipping whatever rounding error is left.
+     */
     fun srgbToArgb(rgb: Rgb): Argb {
         val red = rgb.red.toByteChannel()
         val green = rgb.green.toByteChannel()
@@ -173,7 +179,9 @@ internal object ColorSpaces {
         return Rgb(linearToSrgb(linear.red), linearToSrgb(linear.green), linearToSrgb(linear.blue))
     }
 
-    /** True when clipping would not change any channel once it is rounded to eight bits. */
+    /**
+     * True when clipping would not change any channel once it is rounded to eight bits.
+     */
     private fun Rgb.fitsEightBits(): Boolean = red.fitsEightBits() && green.fitsEightBits() && blue.fitsEightBits()
 
     private fun Double.fitsEightBits(): Boolean = this * ChannelMax >= -0.5 && this * ChannelMax < ChannelMax + 0.5
@@ -181,10 +189,14 @@ internal object ColorSpaces {
     private fun Double.toByteChannel(): Int = (this * ChannelMax).roundToInt().coerceIn(0, ChannelMax.toInt())
 }
 
-/** This color as gamma encoded sRGB channels from 0.0 to 1.0. */
+/**
+ * This color as gamma encoded sRGB channels from 0.0 to 1.0.
+ */
 internal fun Argb.toSrgb(): Rgb = Rgb(red / ChannelMax, green / ChannelMax, blue / ChannelMax)
 
-/** This color in OKLab, the space [ColorNames] measures distance in. */
+/**
+ * This color in OKLab, the space [ColorNames] measures distance in.
+ */
 internal fun Argb.toOklab(): Oklab {
     val srgb = toSrgb()
     return ColorSpaces.linearToOklab(
@@ -202,8 +214,12 @@ private const val FullTurn: Double = 360.0
 
 private const val DegreesPerRadian: Double = 180.0 / PI
 
-/** Past any chroma sRGB can show, so the search starts from a sane upper bound however large the input. */
+/**
+ * Past any chroma sRGB can show, so the search starts from a sane upper bound however large the input.
+ */
 private const val MaxSearchChroma: Double = 0.5
 
-/** Enough halvings of [MaxSearchChroma] to land well under one eight bit step. */
+/**
+ * Enough halvings of [MaxSearchChroma] to land well under one eight bit step.
+ */
 private const val GamutSearchSteps: Int = 24

@@ -4,13 +4,19 @@ import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.ThemeDocument
 
-/** The most accents an export carries. */
+/**
+ * The most accents an export carries.
+ */
 public const val MAX_ACCENTS: Int = 8
 
-/** The longest an accent name may be, in UTF-8 bytes. */
+/**
+ * The longest an accent name may be, in UTF-8 bytes.
+ */
 public const val MAX_ACCENT_NAME_BYTES: Int = 24
 
-/** The longest a project name may be, in UTF-8 bytes. */
+/**
+ * The longest a project name may be, in UTF-8 bytes.
+ */
 public const val MAX_PROJECT_NAME_BYTES: Int = 48
 
 /**

@@ -18,22 +18,34 @@ public enum class Reason(
      */
     FluentOneRamp(key = "reason_fluent_one_ramp"),
 
-    /** R2. For Fluent, style only changes the chroma of the accent ramp. */
+    /**
+     * R2. For Fluent, style only changes the chroma of the accent ramp.
+     */
     FluentStyleChroma(key = "reason_fluent_style_chroma"),
 
-    /** R3. Fluent's text colors are fixed and its ramps ignore contrast. */
+    /**
+     * R3. Fluent's text colors are fixed and its ramps ignore contrast.
+     */
     FluentFixedText(key = "reason_fluent_fixed_text"),
 
-    /** R4. Contrast changes role-based slots. Slots picked by tone keep their tones. */
+    /**
+     * R4. Contrast changes role-based slots. Slots picked by tone keep their tones.
+     */
     ToneSlotsKeepTones(key = "reason_tone_slots_keep_tones"),
 
-    /** R5. Pins set Material roles, which Fluent does not use. */
+    /**
+     * R5. Pins set Material roles, which Fluent does not use.
+     */
     FluentUsesNoRoles(key = "reason_fluent_uses_no_roles"),
 
-    /** R6. The Unstyled adapter has no AMOLED switch yet. It arrives with F-56. */
+    /**
+     * R6. The Unstyled adapter has no AMOLED switch yet. It arrives with F-56.
+     */
     UnstyledNoAmoled(key = "reason_unstyled_no_amoled"),
 
-    /** R8. Fluent has no place for extra colors in v1. */
+    /**
+     * R8. Fluent has no place for extra colors in v1.
+     */
     FluentNoAccents(key = "reason_fluent_no_accents"),
 
     /**
@@ -42,6 +54,8 @@ public enum class Reason(
      */
     PlatformLimits(key = "reason_platform_limits"),
 
-    /** R10. The 2025 Dim roles stay hidden in v1 until a library module exposes them (OQ-6). */
+    /**
+     * R10. The 2025 Dim roles stay hidden in v1 until a library module exposes them (OQ-6).
+     */
     DimRolesUnexposed(key = "reason_dim_roles_unexposed"),
 }

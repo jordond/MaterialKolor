@@ -235,19 +235,27 @@ public enum class Role(
 public enum class RoleGroup(
     override val code: Int,
 ) : CodedEnum {
-    /** The accent families and their containers, error included. */
+    /**
+     * The accent families and their containers, error included.
+     */
     @SerialName("Accent")
     Accent(code = 0),
 
-    /** Backgrounds, the surface steps and what reads on them. */
+    /**
+     * Backgrounds, the surface steps and what reads on them.
+     */
     @SerialName("Surface")
     Surface(code = 1),
 
-    /** The fixed accents, the ones that hold their tone across both modes. */
+    /**
+     * The fixed accents, the ones that hold their tone across both modes.
+     */
     @SerialName("Fixed")
     Fixed(code = 2),
 
-    /** Outlines, the scrim and the inverse roles. */
+    /**
+     * Outlines, the scrim and the inverse roles.
+     */
     @SerialName("OutlineInverse")
     OutlineInverse(code = 3),
 }

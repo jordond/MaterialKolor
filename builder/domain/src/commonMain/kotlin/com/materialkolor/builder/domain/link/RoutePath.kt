@@ -7,7 +7,9 @@ package com.materialkolor.builder.domain.link
  * history states on the same URL, so these few are every route there is.
  */
 public sealed interface Route {
-    /** The builder itself, with nothing to import. */
+    /**
+     * The builder itself, with nothing to import.
+     */
     public data object Home : Route
 
     /**

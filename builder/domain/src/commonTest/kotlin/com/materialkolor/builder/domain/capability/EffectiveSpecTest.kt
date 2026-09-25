@@ -29,7 +29,9 @@ class EffectiveSpecTest {
         Style.Cmf to listOf(Spec2026, Spec2026, Spec2026),
     )
 
-    /** What the spec control lets someone pick, per style. */
+    /**
+     * What the spec control lets someone pick, per style.
+     */
     private val offered: Map<Style, Set<SpecVersion>> = mapOf(
         Style.TonalSpot to setOf(Spec2021, Spec2025),
         Style.Neutral to setOf(Spec2021, Spec2025),

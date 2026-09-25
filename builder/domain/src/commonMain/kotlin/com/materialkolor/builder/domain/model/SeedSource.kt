@@ -13,22 +13,30 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 public sealed interface SeedSource {
-    /** Typed in as hex. */
+    /**
+     * Typed in as hex.
+     */
     @Serializable
     @SerialName("Typed")
     public data object Typed : SeedSource
 
-    /** Chosen in the color picker. */
+    /**
+     * Chosen in the color picker.
+     */
     @Serializable
     @SerialName("Picked")
     public data object Picked : SeedSource
 
-    /** Lifted off the screen with the eyedropper. */
+    /**
+     * Lifted off the screen with the eyedropper.
+     */
     @Serializable
     @SerialName("Eyedropper")
     public data object Eyedropper : SeedSource
 
-    /** Rolled at random. */
+    /**
+     * Rolled at random.
+     */
     @Serializable
     @SerialName("Shuffled")
     public data object Shuffled : SeedSource

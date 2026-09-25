@@ -14,7 +14,9 @@ class CapabilitiesTest {
         val expressive: Boolean,
     )
 
-    /** The five matrix columns, in the order the spec lists them. */
+    /**
+     * The five matrix columns, in the order the spec lists them.
+     */
     private val columns = listOf(
         Column(name = "M3", library = Library.Material3, expressive = false),
         Column(name = "M3 Expressive", library = Library.Material3, expressive = true),
@@ -64,7 +66,9 @@ class CapabilitiesTest {
         Control.DimRoles to List(columns.size) { hidden(Reason.DimRolesUnexposed) },
     )
 
-    /** The rows whose cells move with the style or the effective spec. */
+    /**
+     * The rows whose cells move with the style or the effective spec.
+     */
     private val contextRows = setOf(Control.CmfSecondSeed, Control.Platform)
 
     private fun Column.capabilities(

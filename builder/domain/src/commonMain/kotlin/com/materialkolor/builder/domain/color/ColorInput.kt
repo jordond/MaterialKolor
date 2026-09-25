@@ -65,10 +65,14 @@ public sealed interface ParseResult {
  * Something [ColorInput.parse] changed so the color would fit, worth telling the person who typed it.
  */
 public enum class ParseNote {
-    /** The text asked for some transparency, and a seed is always opaque. */
+    /**
+     * The text asked for some transparency, and a seed is always opaque.
+     */
     AlphaDropped,
 
-    /** A value was out of range, or an `oklch()` color was outside sRGB, and was pulled back inside. */
+    /**
+     * A value was out of range, or an `oklch()` color was outside sRGB, and was pulled back inside.
+     */
     Clamped,
 }
 
@@ -76,22 +80,34 @@ public enum class ParseNote {
  * Why [ColorInput.parse] could not read some text as a color.
  */
 public enum class InvalidReason {
-    /** There is no text, or only whitespace. */
+    /**
+     * There is no text, or only whitespace.
+     */
     Empty,
 
-    /** Hex with the wrong number of digits, or with something in it that is not a hex digit. */
+    /**
+     * Hex with the wrong number of digits, or with something in it that is not a hex digit.
+     */
     BadHex,
 
-    /** A function the field knows, such as `rgb()`, with the wrong number or kind of values, or left unclosed. */
+    /**
+     * A function the field knows, such as `rgb()`, with the wrong number or kind of values, or left unclosed.
+     */
     BadArguments,
 
-    /** Something written like a function that the field does not know, such as `hwb()`. */
+    /**
+     * Something written like a function that the field does not know, such as `hwb()`.
+     */
     UnknownFunction,
 
-    /** A word that is not one of the CSS named colors. */
+    /**
+     * A word that is not one of the CSS named colors.
+     */
     UnknownName,
 
-    /** Text that does not look like any of the accepted forms. */
+    /**
+     * Text that does not look like any of the accepted forms.
+     */
     Unrecognized,
 }
 
@@ -358,7 +374,9 @@ private class Quantity(
 
 private const val ByteMax: Double = 255.0
 
-/** What `100%` chroma means in `oklch()`, from CSS Color 4. */
+/**
+ * What `100%` chroma means in `oklch()`, from CSS Color 4.
+ */
 private const val OklchChromaAtFullPercent: Double = 0.4
 
 private val HexDigits = Regex("[0-9a-f]+")

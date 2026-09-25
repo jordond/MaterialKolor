@@ -26,7 +26,9 @@ internal fun interface MigrationStep {
 internal class Migrations(
     private val steps: List<MigrationStep>,
 ) {
-    /** The schema this builder writes. */
+    /**
+     * The schema this builder writes.
+     */
     val current: Int
         get() = steps.size
 
@@ -42,7 +44,9 @@ internal class Migrations(
     }
 
     companion object {
-        /** For a record that is still in its first shape. */
+        /**
+         * For a record that is still in its first shape.
+         */
         val None: Migrations = Migrations(emptyList())
     }
 }

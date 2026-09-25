@@ -129,5 +129,7 @@ internal val OneColorToMany: MigrationStep =
         JsonObject(data - "color" + ("colors" to JsonArray(listOf(color))))
     }
 
-/** Reads and writes a [Swatch] at schema 1, declared after its step so the step is set up in time. */
+/**
+ * Reads and writes a [Swatch] at schema 1, declared after its step so the step is set up in time.
+ */
 internal val SwatchCodec: RecordCodec<Swatch> = RecordCodec(Swatch.serializer(), Migrations(listOf(OneColorToMany)))

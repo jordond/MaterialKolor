@@ -20,7 +20,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 class ForTargetTest {
-    /** A document field [ThemeDocument.forTarget] can clear, read off a document. */
+    /**
+     * A document field [ThemeDocument.forTarget] can clear, read off a document.
+     */
     private enum class Field(
         val read: (ThemeDocument) -> Any?,
     ) {
@@ -62,7 +64,9 @@ class ForTargetTest {
         customTones = mapOf(CustomSlot.PrimaryPressed to CustomTone(light = 35)),
     )
 
-    /** The same document with every field on its default, which is what a cleared field reads. */
+    /**
+     * The same document with every field on its default, which is what a cleared field reads.
+     */
     private val blank = ThemeDocument(seed = full.seed)
 
     /**
@@ -97,7 +101,9 @@ class ForTargetTest {
         ),
     )
 
-    /** The reasons with no document field, which the KDoc of [ThemeDocument.forTarget] names. */
+    /**
+     * The reasons with no document field, which the KDoc of [ThemeDocument.forTarget] names.
+     */
     private val withoutField = setOf(
         Reason.FluentStyleChroma,
         Reason.ToneSlotsKeepTones,
@@ -194,7 +200,9 @@ class ForTargetTest {
         }
     }
 
-    /** Every reason the table gives a disabled or hidden control for [target] on the context of [full]. */
+    /**
+     * Every reason the table gives a disabled or hidden control for [target] on the context of [full].
+     */
     private fun reasonsTurningOff(target: ExportTarget): Set<Reason> {
         val library = when (target) {
             ExportTarget.Material3,

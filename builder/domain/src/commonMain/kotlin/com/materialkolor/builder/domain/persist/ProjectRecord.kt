@@ -32,7 +32,9 @@ public data class ProjectRecord(
     public val writerTab: String,
 ) {
     public companion object {
-        /** Reads and writes a [ProjectRecord], reading its contrast at the nearest named level. */
+        /**
+         * Reads and writes a [ProjectRecord], reading its contrast at the nearest named level.
+         */
         public val Codec: RecordCodec<ProjectRecord> =
             RecordCodec(serializer(), Migrations.None) { record -> record.copy(document = record.document.snapped()) }
     }
@@ -52,7 +54,9 @@ public data class ProjectIndex(
     public val projects: List<ProjectMeta> = emptyList(),
 ) {
     public companion object {
-        /** Reads and writes a [ProjectIndex]. */
+        /**
+         * Reads and writes a [ProjectIndex].
+         */
         public val Codec: RecordCodec<ProjectIndex> = RecordCodec(serializer(), Migrations.None)
     }
 }
@@ -92,7 +96,9 @@ public data class ProjectMeta(
     }
 
     public companion object {
-        /** How many colors a project thumbnail shows. */
+        /**
+         * How many colors a project thumbnail shows.
+         */
         public const val PREVIEW_COLORS: Int = 4
     }
 }
@@ -115,7 +121,9 @@ public data class HistoryRecord(
     }
 
     public companion object {
-        /** Reads and writes a [HistoryRecord], reading each step's contrast at the nearest named level. */
+        /**
+         * Reads and writes a [HistoryRecord], reading each step's contrast at the nearest named level.
+         */
         public val Codec: RecordCodec<HistoryRecord> =
             RecordCodec(serializer(), Migrations.None) { record ->
                 HistoryRecord(
@@ -158,10 +166,14 @@ public data class ProjectViewState(
     }
 
     public companion object {
-        /** Where the divider sits until someone moves it, halfway across. */
+        /**
+         * Where the divider sits until someone moves it, halfway across.
+         */
         public const val DEFAULT_SPLIT_FRACTION: Float = 0.5f
 
-        /** Reads and writes a [ProjectViewState]. */
+        /**
+         * Reads and writes a [ProjectViewState].
+         */
         public val Codec: RecordCodec<ProjectViewState> = RecordCodec(serializer(), Migrations.None)
     }
 }
@@ -171,23 +183,33 @@ public data class ProjectViewState(
  */
 @Serializable
 public enum class PreviewTab {
-    /** A sample app wearing the theme. */
+    /**
+     * A sample app wearing the theme.
+     */
     @SerialName("App")
     App,
 
-    /** The components gallery. */
+    /**
+     * The components gallery.
+     */
     @SerialName("Components")
     Components,
 
-    /** Every color role with its value. */
+    /**
+     * Every color role with its value.
+     */
     @SerialName("Roles")
     Roles,
 
-    /** The tonal palettes the roles are drawn from. */
+    /**
+     * The tonal palettes the roles are drawn from.
+     */
     @SerialName("Palettes")
     Palettes,
 
-    /** How each pair of roles scores for contrast. */
+    /**
+     * How each pair of roles scores for contrast.
+     */
     @SerialName("Contrast")
     Contrast,
 }
@@ -197,15 +219,21 @@ public enum class PreviewTab {
  */
 @Serializable
 public enum class PreviewMode {
-    /** The light scheme alone. */
+    /**
+     * The light scheme alone.
+     */
     @SerialName("Light")
     Light,
 
-    /** Light and dark side by side, what a project opens with. */
+    /**
+     * Light and dark side by side, what a project opens with.
+     */
     @SerialName("Split")
     Split,
 
-    /** The dark scheme alone. */
+    /**
+     * The dark scheme alone.
+     */
     @SerialName("Dark")
     Dark,
 }
@@ -215,15 +243,21 @@ public enum class PreviewMode {
  */
 @Serializable
 public enum class DeviceWidth {
-    /** A phone held upright. */
+    /**
+     * A phone held upright.
+     */
     @SerialName("Phone")
     Phone,
 
-    /** A tablet, what a project opens with. */
+    /**
+     * A tablet, what a project opens with.
+     */
     @SerialName("Tablet")
     Tablet,
 
-    /** A desktop window. */
+    /**
+     * A desktop window.
+     */
     @SerialName("Desktop")
     Desktop,
 }
@@ -233,14 +267,20 @@ public enum class DeviceWidth {
  */
 @Serializable
 public enum class FineTuneRow {
-    /** The key colors set by hand. */
+    /**
+     * The key colors set by hand.
+     */
     @SerialName("CoreColors")
     CoreColors,
 
-    /** The extra roles a newer spec adds. */
+    /**
+     * The extra roles a newer spec adds.
+     */
     @SerialName("SpecExtras")
     SpecExtras,
 }
 
-/** This document with its contrast on the nearest named level (D53). */
+/**
+ * This document with its contrast on the nearest named level (D53).
+ */
 private fun ThemeDocument.snapped(): ThemeDocument = copy(contrast = contrast.snapped())

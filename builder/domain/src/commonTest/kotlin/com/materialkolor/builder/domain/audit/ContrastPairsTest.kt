@@ -12,13 +12,19 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class ContrastPairsTest {
-    /** The libraries that read Material roles directly. */
+    /**
+     * The libraries that read Material roles directly.
+     */
     private val roleLibraries = listOf(Library.Material3, Library.Unstyled)
 
-    /** Every library a document can pin roles and add accents on. */
+    /**
+     * Every library a document can pin roles and add accents on.
+     */
     private val pinnableLibraries = listOf(Library.Material3, Library.Unstyled, Library.Custom)
 
-    /** Roles nothing is drawn on and that need no contrast of their own. */
+    /**
+     * Roles nothing is drawn on and that need no contrast of their own.
+     */
     private val unratedRoles = setOf(Role.Scrim, Role.SurfaceTint, Role.OutlineVariant)
 
     private val surfaceLevels = listOf(

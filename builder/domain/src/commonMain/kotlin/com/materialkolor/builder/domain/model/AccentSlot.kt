@@ -32,15 +32,23 @@ public data class AccentSlot(
 public enum class AccentPart(
     override val code: Int,
 ) : CodedEnum {
-    /** The family's own color. */
+    /**
+     * The family's own color.
+     */
     Color(code = 0),
 
-    /** The color that reads on [Color]. */
+    /**
+     * The color that reads on [Color].
+     */
     OnColor(code = 1),
 
-    /** The family's container, the quieter surface of the pair. */
+    /**
+     * The family's container, the quieter surface of the pair.
+     */
     Container(code = 2),
 
-    /** The color that reads on [Container]. */
+    /**
+     * The color that reads on [Container].
+     */
     OnContainer(code = 3),
 }
