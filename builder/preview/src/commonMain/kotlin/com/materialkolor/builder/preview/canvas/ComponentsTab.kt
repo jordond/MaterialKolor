@@ -35,14 +35,6 @@ import com.materialkolor.builder.preview.unstyled.UnstyledGalleryEntry
 /** The narrowest a gallery card gets (F-21). The grid fits as many columns above it as it can. */
 private val MinCardWidth = 280.dp
 
-// b-513
-
-/**
- * The room under the grid's last row the floating dock takes, the dock's 64 dp and the 16 dp it
- * floats above the canvas edge, so the last row scrolls clear of it.
- */
-private val DockClearance = 80.dp
-
 /** What each gallery card tells [LocalCompositionProbe] as it composes, followed by its title. */
 internal const val GALLERY_CARD: String = "GalleryCard/"
 
@@ -104,7 +96,7 @@ internal class GalleryCard(
  * can come from [DemoAppState.rememberListState], which keeps both copies of a split at the same
  * place. A lazy grid has no such mirror. Every card takes an equal share of its row and none gets
  * narrower than 280 dp unless the pane itself is. The cards of a row stretch to the tallest one, so
- * a row leaves no holes, and the grid ends clear of the floating dock.
+ * a row leaves no holes.
  *
  * It measures its room itself rather than through `BoxWithConstraints`, and the lazy column reads
  * the column count as it builds its rows. So a canvas that changes width every frame, as it does
@@ -139,7 +131,7 @@ internal fun GalleryGrid(
     LazyColumn(
         state = listState,
         modifier = modifier.measureColumns(room, gap).fillMaxSize(),
-        contentPadding = PaddingValues(start = gap, top = gap, end = gap, bottom = gap + DockClearance), // b-513
+        contentPadding = PaddingValues(gap),
         verticalArrangement = Arrangement.spacedBy(gap),
     ) {
         // Read here, as the lazy column builds its rows, so a new count rebuilds them without a recomposition.
