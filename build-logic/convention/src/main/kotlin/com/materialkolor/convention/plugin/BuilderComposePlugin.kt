@@ -1,6 +1,6 @@
 package com.materialkolor.convention.plugin
 
-import com.materialkolor.convention.BuilderWasmRuntime
+import com.materialkolor.convention.BuilderWebRuntime
 import com.materialkolor.convention.configureBuilderCompose
 import com.materialkolor.convention.configureBuilderModule
 import org.gradle.api.Plugin
@@ -20,7 +20,7 @@ class BuilderComposePlugin : Plugin<Project> {
             apply("org.jetbrains.kotlin.plugin.compose")
         }
 
-        target.configureBuilderModule(BuilderWasmRuntime.Browser)
+        target.configureBuilderModule(BuilderWebRuntime.Browser)
         target.configureBuilderCompose()
     }
 }

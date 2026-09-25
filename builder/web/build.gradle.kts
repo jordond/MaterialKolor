@@ -23,8 +23,23 @@ kotlin {
         binaries.executable()
     }
 
+    // The fallback for browsers without WasmGC, same glue name and test runner as wasmJs.
+    js {
+        browser {
+            commonWebpackConfig {
+                outputFileName = "builder.js"
+            }
+
+            testTask {
+                useKarma { useChromeHeadless() }
+            }
+        }
+
+        binaries.executable()
+    }
+
     sourceSets {
-        wasmJsMain.dependencies {
+        webMain.dependencies {
             implementation(project(":builder:app"))
 
             implementation(libs.compose.runtime)
@@ -34,7 +49,7 @@ kotlin {
             implementation(libs.kermit)
         }
 
-        wasmJsTest.dependencies {
+        webTest.dependencies {
             implementation(kotlin("test"))
         }
     }

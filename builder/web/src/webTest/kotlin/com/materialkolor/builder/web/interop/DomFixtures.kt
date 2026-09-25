@@ -48,5 +48,4 @@ internal fun dropFocus() {
  */
 internal val ShadowRoot.focused: Element? get() = activeElementOf(this)
 
-@JsFun("(root) => root.activeElement")
-private external fun activeElementOf(root: ShadowRoot): Element?
+private fun activeElementOf(root: ShadowRoot): Element? = js("root.activeElement")
