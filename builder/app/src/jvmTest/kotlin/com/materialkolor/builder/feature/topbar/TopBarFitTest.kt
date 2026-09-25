@@ -259,9 +259,11 @@ class TopBarFitTest {
         // Share and Export code show as labels or as glyphs, so either name counts.
         val actions = listOf("Command palette", "Undo", "Redo", "Share", "More options").flatMap { name ->
             val named = hasContentDescription(name, substring = true) or hasText(name)
-            onAllNodes(named and hasClickAction() and InBar).fetchSemanticsNodes().map { node -> name to node.boundsInRoot }
+            val nodes = onAllNodes(named and hasClickAction() and InBar).fetchSemanticsNodes()
+            nodes.map { node -> name to node.boundsInRoot }
         }
-        val export = onAllNodes((hasText("Export code") or hasContentDescription("Export code")) and hasClickAction() and InBar)
+        val exportNamed = hasText("Export code") or hasContentDescription("Export code")
+        val export = onAllNodes(exportNamed and hasClickAction() and InBar)
             .fetchSemanticsNodes()
             .map { node -> "Export code" to node.boundsInRoot }
         return switcher.map { node -> "Library" to node.boundsInRoot } + actions + export
