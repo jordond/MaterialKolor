@@ -3,12 +3,19 @@
 
 package com.example.theme
 
+import com.composeunstyled.theme.ColorScheme
 import com.composeunstyled.theme.buildThemeV2
-import com.materialkolor.unstyled.dynamicColorSchemes
+import com.materialkolor.unstyled.MaterialKolorTokens
+import com.materialkolor.unstyled.rememberDynamicLightDarkColors
 
 val AppTheme = buildThemeV2 {
-    dynamicColorSchemes(
+    val (light, dark) = rememberDynamicLightDarkColors(
         seedColor = SeedColor,
         primary = Primary,
     )
+    properties[MaterialKolorTokens.colors] = light
+
+    colorScheme(ColorScheme.Dark) {
+        properties[MaterialKolorTokens.colors] = dark
+    }
 }

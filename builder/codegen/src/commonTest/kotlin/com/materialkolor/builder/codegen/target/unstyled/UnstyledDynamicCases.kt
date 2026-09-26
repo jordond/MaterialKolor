@@ -83,7 +83,9 @@ class UnstyledDynamicTest {
     fun unstyledDynamic_default_writesOnlyTheSeed() {
         val theme = theme(Fixtures.Default.unstyled().input)
 
-        assertTrue("val AppTheme = buildThemeV2 { dynamicColorSchemes(seedColor = SeedColor) }" in theme, theme)
+        assertTrue("val (light, dark) = rememberDynamicLightDarkColors(seedColor = SeedColor)" in theme, theme)
+        assertTrue("properties[MaterialKolorTokens.colors] = light" in theme, theme)
+        assertTrue("properties[MaterialKolorTokens.colors] = dark" in theme, theme)
         assertFalse(TRANSITION in theme, theme)
     }
 
@@ -93,9 +95,9 @@ class UnstyledDynamicTest {
             val theme = theme(input)
             val explicit = input.document.pins.isNotEmpty() || input.document.accents.isNotEmpty()
 
-            assertEquals(!explicit, "dynamicColorSchemes(" in theme, case)
+            assertEquals(!explicit, "rememberDynamicLightDarkColors(" in theme, case)
             assertEquals(if (explicit) 2 else 0, theme.occurrences("rememberDynamicScheme("), case)
-            assertEquals(if (explicit) 1 else 0, theme.occurrences("colorScheme(ColorScheme.Dark)"), case)
+            assertEquals(1, theme.occurrences("colorScheme(ColorScheme.Dark)"), case)
         }
     }
 

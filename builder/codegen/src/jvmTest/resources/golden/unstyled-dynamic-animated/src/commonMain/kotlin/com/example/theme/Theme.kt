@@ -4,11 +4,18 @@
 package com.example.theme
 
 import androidx.compose.animation.core.tween
+import com.composeunstyled.theme.ColorScheme
 import com.composeunstyled.theme.buildThemeV2
-import com.materialkolor.unstyled.dynamicColorSchemes
+import com.materialkolor.unstyled.MaterialKolorTokens
+import com.materialkolor.unstyled.rememberDynamicLightDarkColors
 
 val AppTheme = buildThemeV2 {
     colorSchemeTransitionSpec = tween(durationMillis = 500)
 
-    dynamicColorSchemes(seedColor = SeedColor)
+    val (light, dark) = rememberDynamicLightDarkColors(seedColor = SeedColor)
+    properties[MaterialKolorTokens.colors] = light
+
+    colorScheme(ColorScheme.Dark) {
+        properties[MaterialKolorTokens.colors] = dark
+    }
 }

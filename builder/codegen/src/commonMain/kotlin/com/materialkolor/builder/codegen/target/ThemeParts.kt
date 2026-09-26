@@ -182,7 +182,7 @@ internal fun FunctionScope.dynamicColorParameter() {
  * The seed is always written, and each overridden palette goes in beside it rather than replacing
  * it, so the seed still drives every palette the document leaves alone. [seed] is `SeedColor`, or
  * the parameter a wrapper hands it on through. [isDark] is left out when it is null, as it is for
- * `dynamicColorSchemes`, which writes both modes itself. The motion scheme and AMOLED only go in
+ * `rememberDynamicLightDarkColors`, which builds both modes itself. The motion scheme and AMOLED only go in
  * when [defaults] has them, and without [withContrast] the contrast level stays out, which is how
  * Fluent writes its shades.
  */

@@ -80,9 +80,9 @@ public object Symbols {
 
     // MaterialKolor Unstyled, and the Compose Unstyled theming it plugs into.
 
-    public val DynamicColorSchemes: Symbol = Symbol(KOLOR_UNSTYLED, "dynamicColorSchemes", SymbolKind.Function)
-    public val DynamicColors: Symbol = Symbol(KOLOR_UNSTYLED, "dynamicColors", SymbolKind.Function)
-    public val ThemeValues: Symbol = Symbol(KOLOR_UNSTYLED, "themeValues", SymbolKind.Function)
+    public val RememberDynamicLightDarkColors: Symbol =
+        Symbol(KOLOR_UNSTYLED, "rememberDynamicLightDarkColors", SymbolKind.Function)
+    public val RememberDynamicColors: Symbol = Symbol(KOLOR_UNSTYLED, "rememberDynamicColors", SymbolKind.Function)
     public val ToThemeValues: Symbol = Symbol(KOLOR_UNSTYLED, "toThemeValues", SymbolKind.Function)
     public val MaterialKolorTokens: Symbol = Symbol(KOLOR_UNSTYLED, "MaterialKolorTokens", SymbolKind.Class)
     public val BuildThemeV2: Symbol = Symbol(UNSTYLED_THEME, "buildThemeV2", SymbolKind.Function)

@@ -204,9 +204,8 @@ private val Material3Declared: Set<String> =
 private val UnstyledSymbols: List<Symbol> =
     CommonSymbols +
         listOf(
-            Symbols.DynamicColorSchemes,
-            Symbols.DynamicColors,
-            Symbols.ThemeValues,
+            Symbols.RememberDynamicLightDarkColors,
+            Symbols.RememberDynamicColors,
             Symbols.ToThemeValues,
             Symbols.MaterialKolorTokens,
             Symbols.BuildThemeV2,

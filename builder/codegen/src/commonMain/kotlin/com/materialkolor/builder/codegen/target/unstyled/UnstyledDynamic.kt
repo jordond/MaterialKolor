@@ -38,10 +38,10 @@ import com.materialkolor.builder.domain.persist.ExportTarget
  * It writes the same `Color.kt` as the Material 3 dynamic export, `Theme.kt` with a `buildThemeV2`
  * theme, and `Tokens.kt` with four tokens per accent when the theme has accents.
  *
- * A theme with neither pins nor accents hands everything to `dynamicColorSchemes`. A theme with
- * either writes both schemes out and lays its own tokens over each, because `colorScheme` replaces
- * the dark override it is handed rather than adding to it, so a second dark block would undo the
- * one `dynamicColorSchemes` sets. Unstyled has no AMOLED switch yet, so AMOLED is never written.
+ * A theme with neither pins nor accents takes both modes from `rememberDynamicLightDarkColors`, the
+ * light values as the base and the dark values in the `ColorScheme.Dark` block. A theme with either
+ * builds both schemes itself and lays its own tokens over each. Unstyled has no AMOLED switch yet,
+ * so AMOLED is never written.
  */
 public object UnstyledDynamic {
     /**
@@ -60,6 +60,8 @@ private const val TRANSITION_SPEC = "colorSchemeTransitionSpec"
 private const val PROPERTIES = "properties"
 private const val LIGHT_SCHEME = "lightScheme"
 private const val DARK_SCHEME = "darkScheme"
+private const val LIGHT_COLORS = "light"
+private const val DARK_COLORS = "dark"
 
 private fun themeFile(input: ExportInput): GeneratedFile {
     val document = input.document
@@ -77,10 +79,7 @@ private fun themeFile(input: ExportInput): GeneratedFile {
                         blankLine()
                     }
                     if (document.pins.isEmpty() && document.accents.isEmpty()) {
-                        val defaults = DefaultArguments.DynamicColorSchemes
-                        call(Symbols.DynamicColorSchemes, multiline = document.overridesScheme(defaults)) {
-                            schemeArguments(document, defaults, seed = ref(SEED_COLOR), isDark = null)
-                        }
+                        generatedSchemes(document)
                     } else {
                         explicitSchemes(document)
                     }
@@ -91,12 +90,31 @@ private fun themeFile(input: ExportInput): GeneratedFile {
 }
 
 /**
+ * `val (light, dark) = rememberDynamicLightDarkColors(...)`, with the light values as the base and
+ * the dark values as the dark override.
+ */
+private fun BodyScope.generatedSchemes(document: ThemeDocument) {
+    val defaults = DefaultArguments.RememberDynamicLightDarkColors
+    val colors = colorsProperty()
+
+    destructure(
+        names = listOf(LIGHT_COLORS, DARK_COLORS),
+        value = callOf(Symbols.RememberDynamicLightDarkColors, multiline = document.overridesScheme(defaults)) {
+            schemeArguments(document, defaults, seed = ref(SEED_COLOR), isDark = null)
+        },
+    )
+    reassign(colors, ref(LIGHT_COLORS))
+    blankLine()
+    darkOverride { reassign(colors, ref(DARK_COLORS)) }
+}
+
+/**
  * Both schemes, the accent ramps, and the light values as the base with the dark values as the
  * dark override, each with the pins and accents of that mode laid over it and remembered the way
- * `dynamicColorSchemes` remembers its own.
+ * `rememberDynamicLightDarkColors` remembers its own.
  */
 private fun BodyScope.explicitSchemes(document: ThemeDocument) {
-    val colors = ref(PROPERTIES).index(ref(Symbols.MaterialKolorTokens).member(COLORS_PROPERTY))
+    val colors = colorsProperty()
 
     listOf(false, true).forEach { isDark ->
         assign(
@@ -115,9 +133,22 @@ private fun BodyScope.explicitSchemes(document: ThemeDocument) {
     blankLine()
     reassign(colors, rememberedValues(document, isDark = false))
     blankLine()
+    darkOverride { reassign(colors, rememberedValues(document, isDark = true)) }
+}
+
+/**
+ * `properties[MaterialKolorTokens.colors]`, where both modes put their values.
+ */
+private fun colorsProperty(): Expression =
+    ref(PROPERTIES).index(ref(Symbols.MaterialKolorTokens).member(COLORS_PROPERTY))
+
+/**
+ * `colorScheme(ColorScheme.Dark) { ... }`, the block that holds the dark values.
+ */
+private fun BodyScope.darkOverride(build: BodyScope.() -> Unit) {
     call("colorScheme") {
         argument(ref(Symbols.UnstyledColorScheme).member("Dark"))
-        trailingLambda { reassign(colors, rememberedValues(document, isDark = true)) }
+        trailingLambda { build() }
     }
 }
 

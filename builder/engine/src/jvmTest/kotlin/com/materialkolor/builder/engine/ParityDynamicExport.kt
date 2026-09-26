@@ -82,13 +82,20 @@ internal class DynamicExport private constructor(
     /**
      * The pins and accent tokens an explicit Unstyled export lays over the mode [isDark] picks. The
      * light values sit before `colorScheme(ColorScheme.Dark)` and the dark ones in it, and each has
-     * to come off the scheme built for that mode.
+     * to come off the scheme built for that mode. An export without pins or accents only has to put
+     * each half of `rememberDynamicLightDarkColors` in its own mode.
      */
     private fun unstyledValues(isDark: Boolean): Map<String, Argb> {
-        if (call.function == "dynamicColorSchemes") return emptyMap()
         val darkBlock = source.text.indexOf(DARK_BLOCK).takeIf { index -> index >= 0 }
             ?: source.fail("The export never opens $DARK_BLOCK")
         val section = if (isDark) source.text.substring(darkBlock) else source.text.substring(0, darkBlock)
+        if (call.function == "rememberDynamicLightDarkColors") {
+            val values = if (isDark) "dark" else "light"
+            if ("$COLORS_PROPERTY = $values\n" !in section) {
+                source.fail("The ${modeOf(isDark)} values are not the $values half of rememberDynamicLightDarkColors")
+            }
+            return emptyMap()
+        }
         val schemes = ThemeValues.findAll(section).map { match -> match.groupValues[1] }.toList()
         val scheme = schemes.singleOrNull()
             ?: source.fail("The ${modeOf(isDark)} values read toThemeValues() off $schemes, not one scheme")
@@ -240,6 +247,7 @@ internal class DynamicExport private constructor(
         }
 
         private const val DARK_BLOCK = "colorScheme(ColorScheme.Dark)"
+        private const val COLORS_PROPERTY = "properties[MaterialKolorTokens.colors]"
         private const val TO_SHADES = "toShades"
         private val PinnedScheme = Regex("""^\{ (\w+) -> (\w+)\.copy\(.*\) \}$""")
         private val ThemeValues = Regex("""\b(\w+)\.toThemeValues\(\)""")

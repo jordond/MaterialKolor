@@ -126,8 +126,8 @@ public object DefaultArguments {
         platform = defaultPlatform(),
     )
 
-    public val DynamicColorSchemes: SchemeDefaults = SchemeDefaults(
-        function = Symbols.DynamicColorSchemes,
+    public val RememberDynamicLightDarkColors: SchemeDefaults = SchemeDefaults(
+        function = Symbols.RememberDynamicLightDarkColors,
         style = tonalSpot(),
         contrastLevel = standardContrast(),
         specVersion = defaultSpec(),
@@ -180,7 +180,7 @@ public object DefaultArguments {
             DynamicMaterialExpressiveTheme,
             RememberDynamicMaterialThemeState,
             RememberFluentColors,
-            DynamicColorSchemes,
+            RememberDynamicLightDarkColors,
             RememberDynamicScheme,
         ).associate { defaults -> defaults.function to defaults.arguments } +
             mapOf(

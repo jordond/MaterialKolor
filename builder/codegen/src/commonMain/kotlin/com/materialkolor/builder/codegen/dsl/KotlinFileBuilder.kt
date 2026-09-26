@@ -412,6 +412,33 @@ public class BodyScope internal constructor() {
     }
 
     /**
+     * A local destructuring `val`, as in `val (light, dark) = rememberDynamicLightDarkColors(...)`.
+     */
+    public fun destructure(
+        names: List<String>,
+        value: Expression,
+    ) {
+        require(names.size > 1) { "A destructuring declaration needs at least two names" }
+        val prefix = buildList {
+            add(keywordToken("val"))
+            add(spaceToken)
+            add(punctuationToken("("))
+            names.forEachIndexed { index, name ->
+                if (index > 0) {
+                    add(punctuationToken(","))
+                    add(spaceToken)
+                }
+                add(plainToken(name))
+            }
+            add(punctuationToken(")"))
+            add(spaceToken)
+            add(punctuationToken("="))
+            add(spaceToken)
+        }
+        statements += Statement(prefix, value)
+    }
+
+    /**
      * `target = value`, which sets something that already exists, as in
      * `properties[ThemeTokens.colors] = lightColors` or `colorSchemeTransitionSpec = tween(300)`.
      */

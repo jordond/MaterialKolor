@@ -179,7 +179,7 @@ internal class SchemeCall(
                 "rememberDynamicMaterialThemeState",
                 "DynamicMaterialExpressiveTheme",
             ),
-            ExportTarget.Unstyled to listOf("dynamicColorSchemes", "rememberDynamicScheme"),
+            ExportTarget.Unstyled to listOf("rememberDynamicLightDarkColors", "rememberDynamicScheme"),
             ExportTarget.Fluent to listOf("rememberFluentColors", "rememberDynamicScheme"),
             ExportTarget.Custom to listOf("rememberDynamicScheme"),
         )
