@@ -56,8 +56,7 @@ private val NoActions: InspectActions =
 @OptIn(ExperimentalTestApi::class)
 class InspectOverlayTest {
     @Test
-    fun pressOnTheCard_neverReachesThePreviewUnderIt() =
-        pressOnTheCardStaysOnIt()
+    fun pressOnTheCard_neverReachesThePreviewUnderIt() = pressOnTheCardStaysOnIt()
 
     /**
      * Pin the card to a small element with a clickable one beside it, where the card lands, then

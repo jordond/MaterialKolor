@@ -3,6 +3,8 @@ package com.materialkolor.builder.preview.custom
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -39,8 +41,6 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.MaterialTheme
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.LightSpec
 import com.materialkolor.builder.preview.PreviewResult
@@ -63,7 +63,6 @@ import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.test.Test
-
 
 /**
  * The phone and desktop frames the gallery is checked at, at the height of a first screen.

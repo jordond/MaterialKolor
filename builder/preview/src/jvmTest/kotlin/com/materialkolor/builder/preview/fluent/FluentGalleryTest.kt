@@ -319,7 +319,11 @@ class FluentGalleryTest {
             val state = DemoAppState().apply { setOn(FluentGalleryKeys.Wifi, true) }
             setContent {
                 CompositionLocalProvider(LocalMotionFrozen provides true) {
-                    Inspecting(shown = PreviewMode.Light, split = remember { SplitState() }, expressive = ShellExpressive) {
+                    Inspecting(
+                        shown = PreviewMode.Light,
+                        split = remember { SplitState() },
+                        expressive = ShellExpressive,
+                    ) {
                         PreviewPane(FluentLightSpec, Modifier.fillMaxSize()) { ComponentsTab(FluentLightSpec, state) }
                     }
                 }

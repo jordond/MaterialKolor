@@ -161,7 +161,12 @@ internal fun BuilderRoot(
         LocalThemeResolver provides graph.themeResolver,
         LocalAnnouncer provides announcer,
     ) {
-        BuilderTheme(expressive = ShellExpressive, result = result, isDark = state.isDark, reducedMotion = state.reducedMotion) {
+        BuilderTheme(
+            expressive = ShellExpressive,
+            result = result,
+            isDark = state.isDark,
+            reducedMotion = state.reducedMotion,
+        ) {
             ThemeColorEffect(environment)
             ProvideBuilderLayout(coarsePointer = state.coarsePointer, modifier = Modifier.fillMaxSize()) {
                 val transition = rememberSkinTransition(SnapshotMode.Bitmap)

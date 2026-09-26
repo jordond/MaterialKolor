@@ -244,7 +244,6 @@ class PreviewPaneTest {
         }
 }
 
-
 /**
  * The primary color a pane in [library] hands out.
  */

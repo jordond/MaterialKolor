@@ -1,14 +1,9 @@
 package com.materialkolor.builder.kit.control
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.ui.unit.Dp
-import com.materialkolor.builder.kit.headless.HeadlessBottomSheet
-import com.materialkolor.builder.kit.shell.posterDetentNames
-import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,18 +15,23 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.kit.headless.HeadlessBottomSheet
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
+import com.materialkolor.builder.kit.shell.posterDetentNames
+import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.SkinTestTheme
+import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
 

@@ -203,7 +203,6 @@ private val TripsFrames: Map<DeviceWidth, IntSize> = mapOf(
     DeviceWidth.Desktop to IntSize(1280, 800),
 )
 
-
 /**
  * The blue preview document with eight accents, twice as many as there are trips.
  */

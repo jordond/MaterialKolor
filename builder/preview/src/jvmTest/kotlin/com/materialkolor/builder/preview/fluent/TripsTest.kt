@@ -267,7 +267,11 @@ class TripsTest {
             val state = DemoAppState().apply { setOn(OfflineMapsSwitch, true) }
             setContent {
                 CompositionLocalProvider(LocalMotionFrozen provides true) {
-                    Inspecting(shown = PreviewMode.Light, split = remember { SplitState() }, expressive = ShellExpressive) {
+                    Inspecting(
+                        shown = PreviewMode.Light,
+                        split = remember { SplitState() },
+                        expressive = ShellExpressive,
+                    ) {
                         PreviewPane(FluentLightSpec, Modifier.fillMaxSize()) {
                             FluentAppEntry(FluentLightSpec, state, DeviceWidth.Phone)
                         }
