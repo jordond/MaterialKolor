@@ -84,7 +84,7 @@ internal fun specTag(
  * The one spec [style] runs in whatever the document asks for, or null for a style that follows
  * the spec asked for. The Style label names it while that style is chosen.
  */
-internal fun forcedSpec(style: Style): SpecVersion? = EffectiveSpec.offered(style).singleOrNull()
+internal fun forcedSpec(style: Style): SpecVersion? = EffectiveSpec.forms(style).singleOrNull() // B-535
 
 /**
  * What [style] is called, the way the library spells it.
@@ -141,7 +141,7 @@ internal fun styleDescription(style: Style): StringResource =
  * The specs [style] runs in, as its chip's tooltip says them.
  */
 internal fun specSupport(style: Style): StringResource {
-    val offered = EffectiveSpec.offered(style)
+    val offered = EffectiveSpec.forms(style) // B-535
     return when {
         SpecVersion.Spec2026 in offered -> Res.string.style_spec_cmf
         SpecVersion.Spec2025 in offered -> Res.string.style_spec_revised

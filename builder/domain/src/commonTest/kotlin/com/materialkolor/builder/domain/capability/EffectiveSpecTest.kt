@@ -30,9 +30,9 @@ class EffectiveSpecTest {
     )
 
     /**
-     * What the spec control lets someone pick, per style.
+     * The specs each style has a form in.
      */
-    private val offered: Map<Style, Set<SpecVersion>> = mapOf(
+    private val forms: Map<Style, Set<SpecVersion>> = mapOf(
         Style.TonalSpot to setOf(Spec2021, Spec2025),
         Style.Neutral to setOf(Spec2021, Spec2025),
         Style.Vibrant to setOf(Spec2021, Spec2025),
@@ -45,11 +45,28 @@ class EffectiveSpecTest {
         Style.Cmf to setOf(Spec2026),
     )
 
+    /**
+     * What the spec control lets someone pick, per style. 2026 is offered on every one.
+     */
+    private val offered: Map<Style, Set<SpecVersion>> = mapOf(
+        Style.TonalSpot to setOf(Spec2021, Spec2025, Spec2026),
+        Style.Neutral to setOf(Spec2021, Spec2025, Spec2026),
+        Style.Vibrant to setOf(Spec2021, Spec2025, Spec2026),
+        Style.Expressive to setOf(Spec2021, Spec2025, Spec2026),
+        Style.Rainbow to setOf(Spec2021, Spec2026),
+        Style.FruitSalad to setOf(Spec2021, Spec2026),
+        Style.Monochrome to setOf(Spec2021, Spec2026),
+        Style.Fidelity to setOf(Spec2021, Spec2026),
+        Style.Content to setOf(Spec2021, Spec2026),
+        Style.Cmf to setOf(Spec2026),
+    )
+
     private val requests = listOf(Spec2021, Spec2025, Spec2026)
 
     @Test
     fun tables_everyStyle_hasARow() {
         assertEquals(Style.entries.toSet(), effective.keys)
+        assertEquals(Style.entries.toSet(), forms.keys)
         assertEquals(Style.entries.toSet(), offered.keys)
         assertEquals(SpecVersion.entries, requests)
     }
@@ -71,11 +88,18 @@ class EffectiveSpecTest {
     }
 
     @Test
-    fun of_anyRequest_landsOnASpecTheStyleOffers() {
+    fun forms_everyStyle_matchesTheTable() {
+        for ((style, specs) in forms) {
+            assertEquals(specs, EffectiveSpec.forms(style), style.name)
+        }
+    }
+
+    @Test
+    fun of_anyRequest_landsOnASpecTheStyleHasAFormIn() {
         for (style in Style.entries) {
             for (requested in SpecVersion.entries) {
                 val spec = EffectiveSpec.of(style, requested)
-                assertTrue(spec in EffectiveSpec.offered(style), "$style ran $spec, which it does not offer")
+                assertTrue(spec in EffectiveSpec.forms(style), "$style ran $spec, which it has no form in")
             }
         }
     }

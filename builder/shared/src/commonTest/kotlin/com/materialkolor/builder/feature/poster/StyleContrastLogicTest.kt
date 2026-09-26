@@ -41,8 +41,9 @@ class StyleContrastLogicTest {
 
     @Test
     fun specTag_eachTheme_tagsOnlyTheChipsThatMoveItToAnotherSpec() {
-        val classic = Style.entries.filter { style -> EffectiveSpec.offered(style) == setOf(SpecVersion.Spec2021) }
-        val revised = Style.entries.filter { style -> SpecVersion.Spec2025 in EffectiveSpec.offered(style) }
+        // B-535
+        val classic = Style.entries.filter { style -> EffectiveSpec.forms(style) == setOf(SpecVersion.Spec2021) }
+        val revised = Style.entries.filter { style -> SpecVersion.Spec2025 in EffectiveSpec.forms(style) }
 
         fun tags(document: ThemeDocument): Map<Style, SpecVersion> =
             Style.entries.mapNotNull { style -> specTag(style, document)?.let { spec -> style to spec } }.toMap()
