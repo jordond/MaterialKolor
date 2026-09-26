@@ -22,6 +22,7 @@ import com.materialkolor.builder.codegen.target.material3.platformExpression
 import com.materialkolor.builder.codegen.target.material3.specExpression
 import com.materialkolor.builder.codegen.target.material3.styleExpression
 import com.materialkolor.builder.codegen.text.Literals
+import com.materialkolor.builder.domain.capability.EffectiveSpec
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.export.AccentColors
 import com.materialkolor.builder.domain.export.AccentFamilyValues
@@ -30,6 +31,7 @@ import com.materialkolor.builder.domain.export.ResolvedExport
 import com.materialkolor.builder.domain.export.RoleTable
 import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.Role
+import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.ThemeDocument
 
 // The pieces more than one target writes. The theme function serves every frozen export and the
@@ -184,7 +186,7 @@ internal fun FunctionScope.dynamicColorParameter() {
  * the parameter a wrapper hands it on through. [isDark] is left out when it is null, as it is for
  * `rememberDynamicLightDarkColors`, which builds both modes itself. The motion scheme and AMOLED only go in
  * when [defaults] has them, and without [withContrast] the contrast level stays out, which is how
- * Fluent writes its shades.
+ * Fluent writes its shades. The spec is the one the style runs ([runningSpec]).
  */
 internal fun ArgumentsScope.schemeArguments(
     document: ThemeDocument,
@@ -211,6 +213,14 @@ internal fun ArgumentsScope.schemeArguments(
             Literals.decimal(contrast.hundredths)
         }
     }
-    optionalArgument(defaults.specVersion, document.spec) { spec -> specExpression(spec) }
+    optionalArgument(defaults.specVersion, document.runningSpec) { spec -> specExpression(spec) }
     optionalArgument(defaults.platform, document.platform) { platform -> platformExpression(platform) }
 }
+
+/**
+ * The spec the scheme runs, which is what an export writes. The library falls back the same way
+ * for a style without the spec it is handed, so writing the spec the document asks for would name
+ * one the scheme never uses.
+ */
+internal val ThemeDocument.runningSpec: SpecVersion
+    get() = EffectiveSpec.of(style = style, requested = spec)

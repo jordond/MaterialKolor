@@ -110,7 +110,6 @@ class TopBarContentTest {
             graph.session.document.value.expressive shouldBe true
 
             mainClock.autoAdvance = true
-            onNodeWithText("Keep mine").performClick()
             waitForIdle()
             graph.session.history.value.undoLabel shouldBe ChangeLabel(ChangeKind.Library, detail = "Material3")
             onNodeWithContentDescription(UNDO_EXPRESSIVE).performClick()
@@ -126,6 +125,7 @@ class TopBarContentTest {
     fun expressiveSuggestion_afterAFlipOnThe2021Spec_changesNothingWithoutAClick() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val graph = showRoot()
+            moveOntoThe2021Spec(graph)
 
             onNodeWithText("Expressive").performClick()
             waitForIdle()
@@ -181,6 +181,7 @@ class TopBarContentTest {
     fun expressiveSuggestion_apply_movesStyleAndSpecAsOneUndoEntry() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val graph = showRoot()
+            moveOntoThe2021Spec(graph)
 
             onNodeWithText("Expressive").performClick()
             waitForIdle()
@@ -259,6 +260,18 @@ class TopBarContentTest {
         waitUntil { platform.environment.splashHidden }
         waitForIdle()
         return graph
+    }
+
+    /**
+     * Moves the theme onto the 2021 spec, where turning Expressive on raises the suggestion.
+     */
+    private fun ComposeUiTest.moveOntoThe2021Spec(graph: AppGraph) {
+        runOnIdle {
+            val document = graph.session.document.value
+                .copy(spec = SpecVersion.Spec2021)
+            graph.session.edit(DocumentChange.Replace(document), EditPhase.Discrete)
+        }
+        waitForIdle()
     }
 
     private fun workspaceState(

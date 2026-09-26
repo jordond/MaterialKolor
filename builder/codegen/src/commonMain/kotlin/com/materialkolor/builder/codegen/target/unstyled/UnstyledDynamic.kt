@@ -23,6 +23,7 @@ import com.materialkolor.builder.codegen.target.material3.paletteName
 import com.materialkolor.builder.codegen.target.material3.seedName
 import com.materialkolor.builder.codegen.target.material3.thresholdExpression
 import com.materialkolor.builder.codegen.target.propertyName
+import com.materialkolor.builder.codegen.target.runningSpec
 import com.materialkolor.builder.codegen.target.schemeArguments
 import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.text.Literals
@@ -174,7 +175,7 @@ private fun ThemeDocument.overridesScheme(defaults: SchemeDefaults): Boolean =
     KeyColorOrder.any { keyColor -> keyColors[keyColor] != null } ||
         !defaults.style.isDefault(style) ||
         !defaults.contrastLevel.isDefault(contrast) ||
-        !defaults.specVersion.isDefault(spec) ||
+        !defaults.specVersion.isDefault(runningSpec) ||
         !defaults.platform.isDefault(platform)
 
 /**

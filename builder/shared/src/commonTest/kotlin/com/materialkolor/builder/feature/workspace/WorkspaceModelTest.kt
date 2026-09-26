@@ -15,6 +15,7 @@ import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.link.ShareCodec
 import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.PreviewMode
@@ -139,7 +140,7 @@ class WorkspaceModelTest : SessionTestBase() {
             val (session, preferences) = session()
             booted(session)
             val workspace = workspaceModel(session, preferences)
-            workspace.edit(DocumentChange.SetLibrary(Library.Fluent, expressive = false), EditPhase.Discrete)
+            workspace.edit(DocumentChange.Replace(fluentOn2021(workspace)), EditPhase.Discrete)
             workspace.state.value.expressiveSuggestion shouldBe false
 
             workspace.edit(DocumentChange.SetLibrary(Library.Material3, expressive = true), EditPhase.Discrete)
@@ -162,6 +163,7 @@ class WorkspaceModelTest : SessionTestBase() {
             val (session, preferences) = session()
             booted(session)
             val workspace = workspaceModel(session, preferences)
+            workspace.edit(DocumentChange.SetSpec(SpecVersion.Spec2021), EditPhase.Discrete)
             workspace.edit(DocumentChange.SetLibrary(Library.Material3, expressive = true), EditPhase.Discrete)
             val document = workspace.state.value.document
             workspace.state.value.expressiveSuggestion shouldBe true
@@ -269,7 +271,7 @@ class WorkspaceModelTest : SessionTestBase() {
             val (session, preferences) = session()
             booted(session)
             val workspace = workspaceModel(session, preferences)
-            workspace.edit(DocumentChange.SetLibrary(Library.Fluent, expressive = false), EditPhase.Discrete)
+            workspace.edit(DocumentChange.Replace(fluentOn2021(workspace)), EditPhase.Discrete)
             workspace.edit(DocumentChange.SetLibrary(Library.Material3, expressive = true), EditPhase.Discrete)
             workspace.state.value.expressiveSuggestion shouldBe true
             workspace.openPanel(Panel.History)
@@ -490,6 +492,14 @@ class WorkspaceModelTest : SessionTestBase() {
         )
         harness.clearAndJoin()
     }
+
+    /**
+     * The workspace's theme on Fluent and the 2021 spec, so a switch back onto Expressive raises the
+     * suggestion.
+     */
+    private fun fluentOn2021(workspace: WorkspaceModel): ThemeDocument =
+        workspace.state.value.document
+            .copy(library = Library.Fluent, spec = SpecVersion.Spec2021)
 
     private fun appModel(
         session: ProjectSession,

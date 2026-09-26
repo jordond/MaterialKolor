@@ -9,6 +9,7 @@ import com.materialkolor.builder.domain.model.CustomTone
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.SlotResolution
+import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.model.TonalRamp
 import com.materialkolor.builder.engine.mapping.toColor
@@ -23,7 +24,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class CustomSlotColorsTest {
-    private val document = ThemeDocument(seed = Argb(0x6750A4))
+    /**
+     * On the 2021 spec, the one the custom theme sample builds with.
+     */
+    private val document = ThemeDocument(seed = Argb(0x6750A4), spec = SpecVersion.Spec2021)
 
     @Test
     fun from_defaultDocument_matchesTheSampleRecipe() {

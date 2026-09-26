@@ -17,7 +17,10 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class LegacyQueryTest {
-    private val default = ThemeDocument.Default
+    /**
+     * What an old link starts from, the default theme on the old builder's 2021 spec.
+     */
+    private val default = ThemeDocument.Default.copy(spec = SpecVersion.Spec2021)
 
     @Test
     fun parse_emptyQuery_isTheDefaultDocument() {
@@ -113,6 +116,12 @@ class LegacyQueryTest {
         assertEquals(SpecVersion.Spec2025, LegacyQuery.parse("color_spec=SPEC_2025").document.spec)
         assertEquals(SpecVersion.Spec2026, LegacyQuery.parse("color_spec=SPEC_2026").document.spec)
         assertEquals(SpecVersion.Spec2021, LegacyQuery.parse("color_spec=Spec2025").document.spec)
+    }
+
+    @Test
+    fun parse_noColorSpec_staysOn2021ThoughANewThemeAsksForTheNewest() {
+        assertEquals(SpecVersion.Spec2026, ThemeDocument.Default.spec)
+        assertEquals(SpecVersion.Spec2021, LegacyQuery.parse("color_seed=FF6750A4").document.spec)
     }
 
     @Test

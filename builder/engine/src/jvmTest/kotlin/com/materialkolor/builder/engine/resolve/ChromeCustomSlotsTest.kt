@@ -6,6 +6,7 @@ import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.CustomTone
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RolePin
+import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.ThemeDocument
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -36,7 +37,8 @@ class ChromeCustomSlotsTest {
     @Test
     fun chromeCustomSlots_reducedContrastOnly_matchTheStandardSlots() {
         val resolver = ThemeResolver()
-        val standard = resolver.resolve(ThemeDocument(seed = Argb(0x6750A4)))
+        // The 2021 spec, where reduced contrast moves the slots in both modes for this seed.
+        val standard = resolver.resolve(ThemeDocument(seed = Argb(0x6750A4), spec = SpecVersion.Spec2021))
         val reduced = resolver.resolve(standard.document.copy(contrast = ContrastLevel.Reduced))
 
         assertNotEquals(standard.customSlots.light, reduced.customSlots.light)

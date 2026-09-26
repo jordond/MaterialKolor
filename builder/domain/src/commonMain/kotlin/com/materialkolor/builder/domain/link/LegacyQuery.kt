@@ -44,7 +44,7 @@ public object LegacyQuery {
      * The theme and settings [query] describes, with or without its leading `?`. Never throws.
      */
     public fun parse(query: String): LegacyImport {
-        var legacy = LegacyImport(ThemeDocument.Default, previewMode = null, packageName = null)
+        var legacy = LegacyImport(LegacyDefault, previewMode = null, packageName = null)
         for ((key, value) in segments(query)) legacy = legacy.applying(key, value) ?: legacy
         return legacy
     }
@@ -55,6 +55,12 @@ public object LegacyQuery {
      */
     internal fun recognizes(query: String): Boolean = segments(query).isNotEmpty()
 }
+
+/**
+ * The theme an old link starts from. The old builder left the spec out of a link on 2021, its
+ * default, so a link without one still means 2021 now that a new theme asks for the newest.
+ */
+private val LegacyDefault: ThemeDocument = ThemeDocument.Default.copy(spec = SpecVersion.Spec2021)
 
 /**
  * Every key the old builder wrote into a link.

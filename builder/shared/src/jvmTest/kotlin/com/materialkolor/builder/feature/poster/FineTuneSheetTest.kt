@@ -36,7 +36,7 @@ class FineTuneSheetTest {
         runComposeUiTest {
             showSection(PosterHarness(Plain)) { context, dispatcher -> FineTuneButton(context, dispatcher) }
 
-            onNodeWithContentDescription("Fine-tune, Colors from seed · 2021 spec").assertExists()
+            onNodeWithContentDescription("Fine-tune, Colors from seed · 2025 spec").assertExists()
         }
 
     @Test

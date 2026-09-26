@@ -17,6 +17,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.kit.icon.IconId
@@ -27,10 +28,12 @@ import io.kotest.matchers.floats.shouldBeGreaterThan
 import kotlin.test.Test
 
 /**
- * A seed and style whose Material3 primary and secondary sit far apart, so the tab ring under the
- * primary focus layer drifts off the secondary focus colour by more than the ring tolerance.
+ * A seed, style and spec whose Material3 primary and secondary sit far apart, so the tab ring
+ * under the primary focus layer drifts off the secondary focus colour by more than the ring
+ * tolerance.
  */
-private val FarApartDocument: ThemeDocument = ThemeDocument(seed = Argb(0x0000FF), style = Style.Vibrant)
+private val FarApartDocument: ThemeDocument =
+    ThemeDocument(seed = Argb(0x0000FF), style = Style.Vibrant, spec = SpecVersion.Spec2021)
 
 /**
  * How far the focus layer has to pull the ring for [FarApartDocument] to test anything.

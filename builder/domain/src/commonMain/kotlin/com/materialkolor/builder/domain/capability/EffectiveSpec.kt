@@ -41,10 +41,10 @@ public object EffectiveSpec {
         }
 
     /**
-     * The specs the control lets someone pick for [style].
+     * The specs [style] has a form in, the ones the control lets someone pick.
      *
-     * A 2021 only style offers just 2021, and the control shows 2025 disabled beside it. Cmf
-     * offers just 2026, shown as a fixed badge.
+     * The control shows all three specs for every style and turns off the ones missing here. A 2021
+     * only style offers just 2021, and Cmf offers just 2026.
      */
     public fun offered(style: Style): Set<SpecVersion> =
         when (availability(style)) {

@@ -24,7 +24,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -36,7 +36,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAAAAT",
+            "code": "AdllOyAAAADd",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -59,7 +59,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -71,7 +71,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": "Acme",
-            "code": "AdllOwAAABAEQWNtZVA",
+            "code": "AdllOyAAABAEQWNtZV0",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -94,7 +94,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -106,7 +106,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AWdQpAAAAABw",
+            "code": "AWdQpCAAAAC-",
             "seedHex": "#6750A4",
             "library": "Material3",
             "style": "TonalSpot"
@@ -129,7 +129,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -141,7 +141,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AR46XwAAAACU",
+            "code": "AR46XyAAAABa",
             "seedHex": "#1E3A5F",
             "library": "Material3",
             "style": "TonalSpot"
@@ -164,7 +164,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "Neutral",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -176,7 +176,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "ASlXZgEAAABB",
+            "code": "ASlXZiEAAACP",
             "seedHex": "#295766",
             "library": "Material3",
             "style": "Neutral"
@@ -199,7 +199,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "Vibrant",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -211,7 +211,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "ATR0bQIAAAAX",
+            "code": "ATR0bSIAAADZ",
             "seedHex": "#34746D",
             "library": "Material3",
             "style": "Vibrant"
@@ -234,7 +234,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "Expressive",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -246,7 +246,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AT-RdAMAAADo",
+            "code": "AT-RdCMAAAAm",
             "seedHex": "#3F9174",
             "library": "Material3",
             "style": "Expressive"
@@ -269,7 +269,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "Rainbow",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -281,7 +281,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AUquewQAAAAS",
+            "code": "AUqueyQAAADc",
             "seedHex": "#4AAE7B",
             "library": "Material3",
             "style": "Rainbow"
@@ -304,7 +304,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "FruitSalad",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -316,7 +316,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AVXLggUAAACc",
+            "code": "AVXLgiUAAABS",
             "seedHex": "#55CB82",
             "library": "Material3",
             "style": "FruitSalad"
@@ -339,7 +339,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "Monochrome",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -351,7 +351,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AWDoiQYAAACB",
+            "code": "AWDoiSYAAABP",
             "seedHex": "#60E889",
             "library": "Material3",
             "style": "Monochrome"
@@ -374,7 +374,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "Fidelity",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -386,7 +386,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AWwFkAcAAAAi",
+            "code": "AWwFkCcAAADs",
             "seedHex": "#6C0590",
             "library": "Material3",
             "style": "Fidelity"
@@ -409,7 +409,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "Content",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -421,7 +421,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AXcilwgAAABi",
+            "code": "AXcilygAAACs",
             "seedHex": "#772297",
             "library": "Material3",
             "style": "Content"
@@ -444,7 +444,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "Cmf",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -456,7 +456,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AYI_ngkAAABE",
+            "code": "AYI_nikAAACK",
             "seedHex": "#823F9E",
             "library": "Material3",
             "style": "Cmf"
@@ -514,7 +514,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": "#386A20",
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -526,7 +526,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAAAI4aiAU",
+            "code": "AdllOyAAAAI4aiC1",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -584,7 +584,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": true,
                 "accents": [],
@@ -596,7 +596,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllO4AAAAAi",
+            "code": "AdllO6AAAADs",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -619,7 +619,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": -100,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -631,7 +631,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAnAAO",
+            "code": "AdllOyAAnADA",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -654,7 +654,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 50,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -666,7 +666,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAMgDA",
+            "code": "AdllOyAAMgAO",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -689,7 +689,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 100,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -701,7 +701,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAZACy",
+            "code": "AdllOyAAZAB8",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -724,7 +724,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": -37,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -736,7 +736,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAA2wA-",
+            "code": "AdllOyAA2wDw",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -759,7 +759,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -771,7 +771,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwABAAB4",
+            "code": "AdllOyABAAC2",
             "seedHex": "#D9653B",
             "library": "Unstyled",
             "style": "TonalSpot"
@@ -794,7 +794,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -806,7 +806,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwACAADF",
+            "code": "AdllOyACAAAL",
             "seedHex": "#D9653B",
             "library": "Fluent",
             "style": "TonalSpot"
@@ -829,7 +829,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -841,7 +841,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwADAACu",
+            "code": "AdllOyADAABg",
             "seedHex": "#D9653B",
             "library": "Custom",
             "style": "TonalSpot"
@@ -864,7 +864,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -876,7 +876,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAEAAC4",
+            "code": "AdllOyAEAAB2",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -899,7 +899,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -911,7 +911,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAAAEBAGWOPg",
+            "code": "AdllOyAAAAEBAGWOUA",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -934,7 +934,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -946,7 +946,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAAAE_ECAwIEBgMGCQQIDAUKDwYMEgrw",
+            "code": "AdllOyAAAAE_ECAwIEBgMGCQQIDAUKDwYMEg6g",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -969,7 +969,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [
@@ -996,7 +996,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAAAQBAekeYwVicmFuZEM",
+            "code": "AdllOyAAAAQBAekeYwVicmFuZIE",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -1019,7 +1019,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [
@@ -1046,7 +1046,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAAAQBBjhqIAZzdGF0dXMjVUsZAkI",
+            "code": "AdllOyAAAAQBBjhqIAZzdGF0dXMjVUsZAoo",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -1069,7 +1069,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [
@@ -1096,7 +1096,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAAAQBBekeYwVicmFuZAG1",
+            "code": "AdllOyAAAAQBBekeYwVicmFuZAH1",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -1119,7 +1119,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [
@@ -1146,7 +1146,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAAAQBAekeYwZjcsOobWUj",
+            "code": "AdllOyAAAAQBAekeYwZjcsOobWVj",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -1169,7 +1169,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [
@@ -1224,7 +1224,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAAAQDAekeYwVicmFuZAY4aiAGc3RhdHVzI1VLGQIBAGWOBGluZm93",
+            "code": "AdllOyAAAAQDAekeYwVicmFuZAY4aiAGc3RhdHVzI1VLGQIBAGWOBGluZm_I",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -1247,7 +1247,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -1264,7 +1264,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAAAgBAAFnUKSa",
+            "code": "AdllOyAAAAgBAAFnUKS5",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -1287,7 +1287,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -1312,7 +1312,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAAAgDDwIAAAAWA7MmHvK4tS8BfVJgvA",
+            "code": "AdllOyAAAAgDDwIAAAAWA7MmHvK4tS8BfVJg-Q",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -1335,7 +1335,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -1347,7 +1347,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAACABAD4",
+            "code": "AdllOyAAACABAAU",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -1370,7 +1370,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -1382,7 +1382,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": null,
-            "code": "AdllOwAAACAECkJyYW5kVGhlbWWu",
+            "code": "AdllOyAAACAECkJyYW5kVGhlbWXu",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -1405,7 +1405,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -1434,7 +1434,7 @@ internal val SHARE_VECTORS_JSON: String =
                 }
             },
             "projectName": null,
-            "code": "AdllOwADACACBAQc_x__CigyPDD___o",
+            "code": "AdllOyADACACBAQc_x__CigyPDD__6E",
             "seedHex": "#D9653B",
             "library": "Custom",
             "style": "TonalSpot"
@@ -1457,7 +1457,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -1469,7 +1469,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-            "code": "AdllOwAAABAweHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh47g",
+            "code": "AdllOyAAABAweHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4xw",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"
@@ -1492,7 +1492,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "style": "TonalSpot",
                 "cmfTertiarySeed": null,
                 "contrast": 0,
-                "spec": "Spec2021",
+                "spec": "Spec2026",
                 "platform": "Phone",
                 "amoled": false,
                 "accents": [],
@@ -1504,7 +1504,7 @@ internal val SHARE_VECTORS_JSON: String =
                 "customTones": {}
             },
             "projectName": "Café Olé ☕",
-            "code": "AdllOwAAABAOQ2Fmw6kgT2zDqSDimJU-",
+            "code": "AdllOyAAABAOQ2Fmw6kgT2zDqSDimJW4",
             "seedHex": "#D9653B",
             "library": "Material3",
             "style": "TonalSpot"

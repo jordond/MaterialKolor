@@ -28,6 +28,7 @@ import com.materialkolor.builder.domain.capability.forTarget
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.canvas.TestOwner
@@ -127,6 +128,9 @@ class BuilderRootTest {
     fun expressiveSwitch_enterFlipsItAsOneUndoEntryAndGetsFocusBackFromTheSuggestion() =
         runDesktopComposeUiTest(width = 1600, height = HEIGHT) {
             val graph = showRoot()
+            // The suggestion only comes up on the 2021 spec, so the theme moves there first.
+            runOnUiThread { workspace.edit(DocumentChange.SetSpec(SpecVersion.Spec2021), EditPhase.Discrete) }
+            waitForIdle()
             val start = graph.session.document.value
             val expressive = hasText("Expressive") and hasAnyAncestor(hasTestTag(TOP_BAR_TAG))
 
@@ -134,7 +138,6 @@ class BuilderRootTest {
             onNode(isFocused()).performKeyInput { pressKey(Key.Enter) }
             waitForIdle()
             graph.session.document.value.expressive shouldBe true
-            // The default theme is on the 2021 spec, so the suggestion comes up and hands focus back.
             onNodeWithText("Keep mine").performClick()
             waitForIdle()
             onNode(expressive).assertIsFocused()
@@ -142,6 +145,8 @@ class BuilderRootTest {
             runOnUiThread { workspace.undo() }
             waitForIdle()
             graph.session.document.value shouldBe start
+            runOnUiThread { workspace.undo() }
+            waitForIdle()
             graph.session.history.value.canUndo shouldBe false
         }
 

@@ -96,7 +96,8 @@ class ExplainerTextTest {
 
     @Test
     fun sentences_expressive_turnsTheHue() {
-        val result = resolver.resolve(ThemeDocument(seed = seed, style = Style.Expressive))
+        // The 2021 form turns the hue, the 2025 form keeps this seed's.
+        val result = resolver.resolve(ThemeDocument(seed = seed, style = Style.Expressive, spec = SpecVersion.Spec2021))
 
         val keys = ExplainerText.sentences(PrimaryFacts.of(result, isDark = false)).map { sentence -> sentence.key }
 

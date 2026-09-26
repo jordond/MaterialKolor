@@ -18,10 +18,11 @@ import com.materialkolor.builder.generated.resources.extras_platform_watch
 import com.materialkolor.builder.generated.resources.extras_spec_2021
 import com.materialkolor.builder.generated.resources.extras_spec_2025
 import com.materialkolor.builder.generated.resources.extras_spec_2026
+import com.materialkolor.builder.generated.resources.extras_spec_2026_cmf
 import com.materialkolor.builder.generated.resources.extras_spec_classic_only
+import com.materialkolor.builder.generated.resources.extras_spec_cmf_only
 import com.materialkolor.builder.generated.resources.extras_spec_comes_back
 import com.materialkolor.builder.generated.resources.extras_spec_label
-import com.materialkolor.builder.kit.control.BuilderBadge
 import com.materialkolor.builder.kit.control.BuilderSegmented
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
@@ -32,18 +33,14 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The two specs a style with a 2025 form offers, in the order the choice shows them.
- */
-private val RevisedSpecs = listOf(SpecVersion.Spec2021, SpecVersion.Spec2025)
-
-/**
  * The spec and the platform.
  *
- * The choice shows the spec the scheme is really built with. A style with a 2025 form offers 2021
- * and 2025, a style without one shows the same choice off on 2021 and says so, and Cmf shows its
- * one spec as a badge. Changing the style never touches the spec the document asked for, so a 2025
- * asked for under a 2021 only style comes back with the next style that has it, and the control
- * says as much while it waits. The platform only shows where the effective spec has one.
+ * The choice shows all three specs with the one the scheme is really built with chosen, and turns
+ * off the specs the style has no form in with a line saying why. A style with a 2025 form offers
+ * 2021 and 2025, a 2021 only style offers just 2021, and Cmf offers just 2026. Changing the style
+ * never touches the spec the document asked for, so a 2025 asked for under a 2021 only style comes
+ * back with the next style that has it, and the control says as much while it waits. The platform
+ * only shows where the effective spec has one.
  */
 @Composable
 internal fun SpecPlatformControl(
@@ -67,7 +64,7 @@ internal fun SpecPlatformControl(
 }
 
 /**
- * The spec choice for the document's style, or the badge for a style with only one spec.
+ * The spec choice for the document's style, with the specs it has no form in turned off.
  */
 @Composable
 private fun SpecChoice(
@@ -83,35 +80,40 @@ private fun SpecChoice(
     val names = SpecVersion.entries.associateWith { spec -> stringResource(specName(spec)) }
     Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         InfoLabel(label = label, topic = InfoTopic.Spec)
-        if (SpecVersion.Spec2026 in offered) {
-            BuilderBadge(label = names.getValue(SpecVersion.Spec2026))
-        } else {
-            val revised = SpecVersion.Spec2025 in offered
-            BuilderSegmented(
-                options = RevisedSpecs,
-                selected = effective,
-                onSelect = { spec ->
-                    if (spec != effective) {
-                        dispatcher.dispatch(WorkspaceAction.Edit(DocumentChange.SetSpec(spec), EditPhase.Discrete))
-                    }
-                },
-                label = label,
-                enabled = enabled && revised,
-                optionLabel = { spec -> names.getValue(spec) },
-            )
-            if (!revised) ClassicOnlyLines(asked2025 = document.spec == SpecVersion.Spec2025)
-        }
+        BuilderSegmented(
+            options = SpecVersion.entries,
+            selected = effective,
+            onSelect = { spec ->
+                if (spec != effective) {
+                    dispatcher.dispatch(WorkspaceAction.Edit(DocumentChange.SetSpec(spec), EditPhase.Discrete))
+                }
+            },
+            label = label,
+            enabled = enabled,
+            optionEnabled = { spec -> spec in offered },
+            optionLabel = { spec -> names.getValue(spec) },
+        )
+        OffSpecLines(offered = offered, asked2025 = document.spec == SpecVersion.Spec2025)
     }
 }
 
 /**
- * Why the choice is off for a 2021 only style and, while the document asks for 2025, that it comes
- * back with the next style that has it.
+ * Why the specs missing from [offered] are off. Under a 2021 only style it also says, while the
+ * document asks for 2025, that 2025 comes back with the next style that has it.
  */
 @Composable
-private fun ClassicOnlyLines(asked2025: Boolean) {
-    BuilderText(text = stringResource(Res.string.extras_spec_classic_only), emphasis = Emphasis.Secondary)
-    if (asked2025) {
+private fun OffSpecLines(
+    offered: Set<SpecVersion>,
+    asked2025: Boolean,
+) {
+    val classicOnly = offered.singleOrNull() == SpecVersion.Spec2021
+    val reason = when {
+        classicOnly -> Res.string.extras_spec_classic_only
+        SpecVersion.Spec2026 in offered -> Res.string.extras_spec_cmf_only
+        else -> Res.string.extras_spec_2026_cmf
+    }
+    BuilderText(text = stringResource(reason), emphasis = Emphasis.Secondary)
+    if (classicOnly && asked2025) {
         BuilderText(text = stringResource(Res.string.extras_spec_comes_back), emphasis = Emphasis.Secondary)
     }
 }

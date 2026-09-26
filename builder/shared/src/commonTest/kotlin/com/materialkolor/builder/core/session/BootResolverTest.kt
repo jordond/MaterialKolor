@@ -3,6 +3,7 @@ package com.materialkolor.builder.core.session
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.Route
 import com.materialkolor.builder.domain.link.ShareCodec
+import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.PreviewMode
@@ -84,7 +85,8 @@ class BootResolverTest {
 
         val plan = resolve(Route.Legacy(query), projects = listOf(forest))
 
-        val document = ThemeDocument(seed = Argb(0xFF1565C0.toInt()))
+        // An old link that names no spec is on 2021, the old builder's default.
+        val document = ThemeDocument(seed = Argb(0xFF1565C0.toInt()), spec = SpecVersion.Spec2021)
         plan shouldBe BootPlan(
             start = BootStart.Shared(ShareCodec.encode(document), document, projectName = null),
             previewMode = PreviewMode.Dark,
@@ -95,8 +97,9 @@ class BootResolverTest {
     @Test
     fun resolve_legacyQueryForASavedTheme_reopensItAndKeepsTheLightPreview() {
         val query = "color_seed=FF1565C0&dark_mode=false"
+        val saved = record("ocean", ocean.document.copy(spec = SpecVersion.Spec2021))
 
-        resolve(Route.Legacy(query), projects = listOf(ocean)) shouldBe BootPlan(BootStart.Reopen("ocean"))
+        resolve(Route.Legacy(query), projects = listOf(saved)) shouldBe BootPlan(BootStart.Reopen("ocean"))
     }
 
     @Test

@@ -11,7 +11,6 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.MotionSchemeChoice
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
-import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportPrefs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,7 +26,7 @@ import kotlin.test.assertTrue
  */
 internal object Material3DynamicCases {
     private val ExpressiveDefault: Fixture = Fixtures.Default.with(
-        document = ThemeDocument.Default.copy(expressive = true, style = Style.Expressive, spec = SpecVersion.Spec2025),
+        document = Fixtures.Base.copy(expressive = true, style = Style.Expressive, spec = SpecVersion.Spec2025),
     )
 
     private val ExpressivePins: Fixture = Fixtures.Pins.with(
@@ -137,6 +136,17 @@ class Material3DynamicTest {
     }
 
     @Test
+    fun material3Dynamic_spec_writesTheOneTheStyleRuns() {
+        val newest = Fixtures.Default.input.document
+            .copy(spec = SpecVersion.Spec2026)
+        val tonalSpot = theme(Fixtures.Default.with(document = newest).input)
+        val rainbow = theme(Fixtures.Default.with(document = newest.copy(style = Style.Rainbow)).input)
+
+        assertTrue("specVersion = ColorSpec.SpecVersion.SPEC_2025," in tonalSpot, tonalSpot)
+        assertFalse("specVersion =" in rainbow, rainbow)
+    }
+
+    @Test
     fun material3Dynamic_contrastLevel_isWrittenWithoutDoubleToString() {
         assertTrue("contrastLevel = -1.0," in theme(Fixtures.ReducedContrast.input))
         assertTrue("contrastLevel = 1.0," in theme(Fixtures.HighContrast.input))
@@ -196,7 +206,7 @@ class Material3DynamicTest {
     @Test
     fun material3Dynamic_otherLibrary_isRefused() {
         val fluent = Fixtures.input(
-            document = ThemeDocument.Default.copy(library = Library.Fluent),
+            document = Fixtures.Base.copy(library = Library.Fluent),
             prefs = ExportPrefs(),
         )
 

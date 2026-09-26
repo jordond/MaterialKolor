@@ -22,7 +22,8 @@ import kotlinx.serialization.Serializable
  * @property[style] The palette style the scheme is generated with.
  * @property[cmfTertiarySeed] The second seed the [Style.Cmf] style reads for its tertiary palette.
  * @property[contrast] How much contrast the scheme is generated with.
- * @property[spec] The Material spec the scheme is generated against.
+ * @property[spec] The Material spec the scheme is generated against. A new theme asks for 2026, the
+ * newest, so every style starts on the newest spec it has.
  * @property[platform] The device the scheme is tuned for.
  * @property[amoled] Whether dark mode drops its surfaces to true black.
  * @property[accents] Extra color families the theme owns.
@@ -48,7 +49,7 @@ public data class ThemeDocument(
     @SerialName("contrast")
     public val contrast: ContrastLevel = ContrastLevel.Standard,
     @SerialName("spec")
-    public val spec: SpecVersion = SpecVersion.Spec2021,
+    public val spec: SpecVersion = SpecVersion.Spec2026,
     @SerialName("platform")
     public val platform: SchemePlatform = SchemePlatform.Phone,
     @SerialName("amoled")

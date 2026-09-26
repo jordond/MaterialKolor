@@ -36,6 +36,10 @@ private const val CLASSIC_ONLY = "This style only exists in the 2021 spec."
 
 private const val COMES_BACK = "Your 2025 spec comes back as soon as you pick a style that has it."
 
+private const val CMF_ONLY = "This style only exists in the 2026 spec."
+
+private const val CMF_SPEC = "The 2026 spec is only for Cmf."
+
 private const val AMOLED = "AMOLED dark mode"
 
 private const val NO_AMOLED = "The Unstyled adapter has no AMOLED switch yet."
@@ -45,22 +49,24 @@ private const val LIGHT_TONE = "primaryPressed light tone"
 @OptIn(ExperimentalTestApi::class)
 class OutputOptionsTest {
     @Test
-    fun spec_revisedStyle_offersBothAndSetsTheSpecAsOneEntry() =
+    fun spec_revisedStyle_startsOn2025WithTheCmfSpecOffAndSetsTheSpecAsOneEntry() =
         runComposeUiTest {
             val harness = PosterHarness(Plain)
             showSection(harness) { context, dispatcher -> SpecPlatformControl(context, dispatcher) }
 
-            onNodeWithText("2021").assertIsSelected()
-            onNodeWithText("2025").assertIsEnabled()
+            onNodeWithText("2025").assertIsSelected()
+            onNodeWithText("2021").assertIsEnabled()
+            onNodeWithText("2026").assertIsNotEnabled()
+            onNodeWithText(CMF_SPEC).assertExists()
             onNodeWithText(CLASSIC_ONLY).assertDoesNotExist()
 
-            onNodeWithText("2025").performClick()
+            onNodeWithText("2021").performClick()
             waitForIdle()
 
             harness.actions shouldBe listOf(
-                WorkspaceAction.Edit(DocumentChange.SetSpec(SpecVersion.Spec2025), EditPhase.Discrete),
+                WorkspaceAction.Edit(DocumentChange.SetSpec(SpecVersion.Spec2021), EditPhase.Discrete),
             )
-            onNodeWithText("2025").assertIsSelected()
+            onNodeWithText("2021").assertIsSelected()
             harness.undoEntries() shouldBe 1
         }
 
@@ -72,6 +78,7 @@ class OutputOptionsTest {
 
             onNodeWithText("2021").assertIsSelected()
             onNodeWithText("2025").assertIsNotEnabled()
+            onNodeWithText("2026").assertIsNotEnabled()
             onNodeWithText(CLASSIC_ONLY).assertExists()
             onNodeWithText(COMES_BACK).assertExists()
 
@@ -86,7 +93,7 @@ class OutputOptionsTest {
         }
 
     @Test
-    fun spec_classicStyleAsking2021_saysWhyWithoutPromisingAnything() =
+    fun spec_classicStyleOnTheDefault_saysWhyWithoutPromisingAnything() =
         runComposeUiTest {
             showSection(PosterHarness(Plain.copy(style = Style.Fidelity))) { context, dispatcher ->
                 SpecPlatformControl(context, dispatcher)
@@ -97,21 +104,24 @@ class OutputOptionsTest {
         }
 
     @Test
-    fun spec_cmf_isAFixed2026Badge() =
+    fun spec_cmf_shows2026ChosenWithTheOtherTwoOff() =
         runComposeUiTest {
-            showSection(PosterHarness(Plain.copy(style = Style.Cmf))) { context, dispatcher ->
+            showSection(
+                PosterHarness(Plain.copy(style = Style.Cmf, spec = SpecVersion.Spec2021)),
+            ) { context, dispatcher ->
                 SpecPlatformControl(context, dispatcher)
             }
 
-            onNodeWithText("2026").assertExists()
-            onNodeWithText("2021").assertDoesNotExist()
-            onNodeWithText("2025").assertDoesNotExist()
+            onNodeWithText("2026").assertIsSelected()
+            onNodeWithText("2021").assertIsNotEnabled()
+            onNodeWithText("2025").assertIsNotEnabled()
+            onNodeWithText(CMF_ONLY).assertExists()
         }
 
     @Test
     fun platform_showsOnlyAt2025AndSetsThePlatform() =
         runComposeUiTest {
-            val harness = PosterHarness(Plain)
+            val harness = PosterHarness(Plain.copy(spec = SpecVersion.Spec2021))
             showSection(harness) { context, dispatcher -> SpecPlatformControl(context, dispatcher) }
 
             onNodeWithText("Phone").assertDoesNotExist()
