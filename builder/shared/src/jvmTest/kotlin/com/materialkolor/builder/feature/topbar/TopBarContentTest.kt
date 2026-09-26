@@ -23,7 +23,7 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.materialkolor.builder.BuilderRoot
-import com.materialkolor.builder.ShellSkin
+import com.materialkolor.builder.ShellExpressive
 import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.edit.ChangeKind
@@ -43,8 +43,6 @@ import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.feature.workspace.workspaceStateOf
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.stateholder.dispatcher.rememberDispatcher
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
@@ -78,7 +76,7 @@ class TopBarContentTest {
             setContent {
                 val dispatcher = rememberDispatcher<WorkspaceAction> {}
                 BuilderTheme(
-                    skin = Skin(library = SkinLibrary.Custom, expressive = false),
+                    expressive = false,
                     result = ThemeResolver().resolve(document),
                     isDark = false,
                     reducedMotion = false,
@@ -229,7 +227,7 @@ class TopBarContentTest {
             setContent {
                 val dispatcher = rememberDispatcher<WorkspaceAction> {}
                 BuilderTheme(
-                    skin = ShellSkin,
+                    expressive = ShellExpressive,
                     result = ThemeResolver().resolve(document),
                     isDark = false,
                     reducedMotion = true,

@@ -19,7 +19,7 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.Chrome
-import com.materialkolor.builder.preview.ShellChrome
+import com.materialkolor.builder.preview.ShellExpressive
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.split.PaneSpec
@@ -81,7 +81,7 @@ internal fun FluentHarness(
     modifier: Modifier,
 ) {
     CompositionLocalProvider(LocalMotionFrozen provides true) {
-        Chrome(ShellChrome) {
+        Chrome(ShellExpressive) {
             PreviewPane(spec, modifier) { FluentAppEntry(spec, state, width) }
         }
     }

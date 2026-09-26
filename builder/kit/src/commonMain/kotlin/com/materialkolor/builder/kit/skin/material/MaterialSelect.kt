@@ -1,8 +1,5 @@
 package com.materialkolor.builder.kit.skin.material
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -35,7 +31,6 @@ import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.control.foldOption
 import com.materialkolor.builder.kit.control.selectFieldName
-import com.materialkolor.builder.kit.control.shownChoiceName
 import com.materialkolor.builder.kit.headless.DropdownList
 import com.materialkolor.builder.kit.headless.HeadlessDropdown
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
@@ -115,48 +110,17 @@ internal fun <T> MaterialSelect(
 }
 
 /**
- * Material's exposed dropdown drawn open where it stands, its outlined field over the rows of
- * [MaterialSelect] in Material's menu container, with nothing floating. The field only shows the
- * choice and takes no focus, so Tab goes straight to the options.
- */
-@Composable
-internal fun <T> MaterialSelectPanel(
-    label: String,
-    options: List<T>,
-    selected: T,
-    onSelect: (T) -> Unit,
-    optionLabel: (T) -> String,
-    modifier: Modifier,
-) {
-    val current = optionLabel(selected)
-    Column(modifier.width(IntrinsicSize.Max)) {
-        MaterialChoiceField(
-            current = current,
-            label = label,
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusProperties { canFocus = false },
-            opens = false,
-        )
-        DropdownList(materialMenuStyle(), modifier = Modifier.fillMaxWidth()) {
-            MaterialSelectRows(options, selected, optionLabel, onSelect, selectedRow = null)
-        }
-    }
-}
-
-/**
  * The choice in Material's read only outlined field with its chevron. The field keeps its own
  * selection, as `OutlinedTextField` does for text, so a tap that moves the caret recomposes the field
  * alone and not the menu box around it, which would drop the tap that opens the menu.
  *
  * It reads as a dropdown list whose state is the choice. On the web the mirror would read the text
- * field inside as an editable text box, so there the field's own semantics are cleared. A field
- * that [opens] its menu is named by [selectFieldName], with the disabled note while it is disabled.
+ * field inside as an editable text box, so there the field's own semantics are cleared and the field
+ * is named by [selectFieldName], with the disabled note while it is disabled.
  * The menu anchor comes in [modifier], outside what is cleared, so its click and its dropdown list
  * role stay, and the mirror reads the two as a button. A disabled anchor adds neither, so the
  * disabled field sets them itself, a click that does nothing, and still reads as a button the way
- * the headless select's does rather than as a bare group. A field over an open panel only shows
- * the choice and reads as text through [shownChoiceName]. The text field and the clip that keeps
+ * the headless select's does rather than as a bare group. The text field and the clip that keeps
  * its touch selection handles off are left as they are.
  */
 @Composable
@@ -165,30 +129,23 @@ private fun MaterialChoiceField(
     label: String,
     modifier: Modifier,
     enabled: Boolean = true,
-    opens: Boolean = true,
 ) {
     var shown by remember { mutableStateOf(TextFieldValue(current)) }
-    val named = when {
-        !LocalFoldsStateIntoName.current -> {
-            Modifier.semantics {
+    val named = if (!LocalFoldsStateIntoName.current) {
+        Modifier.semantics {
+            role = Role.DropdownList
+            stateDescription = current
+        }
+    } else {
+        val name = selectFieldName(label, current, enabled)
+        Modifier.clearAndSetSemantics {
+            contentDescription = name
+            stateDescription = current
+            if (!enabled) {
+                disabled()
                 role = Role.DropdownList
-                stateDescription = current
+                onClick { false }
             }
-        }
-        opens -> {
-            val name = selectFieldName(label, current, enabled)
-            Modifier.clearAndSetSemantics {
-                contentDescription = name
-                stateDescription = current
-                if (!enabled) {
-                    disabled()
-                    role = Role.DropdownList
-                    onClick { false }
-                }
-            }
-        }
-        else -> {
-            Modifier.shownChoiceName(label, current)
         }
     }
     MaterialOutlinedField(

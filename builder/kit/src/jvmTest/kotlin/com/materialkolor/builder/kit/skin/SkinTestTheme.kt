@@ -18,7 +18,7 @@ internal fun SkinTestTheme(
     reducedMotion: Boolean,
     content: @Composable () -> Unit,
 ) {
-    BuilderTheme(skin, result, isDark, reducedMotion) {
+    BuilderTheme(skin.expressive, result, isDark, reducedMotion) {
         when (skin.library) {
             SkinLibrary.Material3 -> content()
             SkinLibrary.Custom -> CustomPaneTheme(result.customSlots, isDark, reducedMotion, content)

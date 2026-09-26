@@ -36,8 +36,6 @@ import com.materialkolor.builder.kit.control.rememberBuilderToastHostState
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.stateholder.dispatcher.Dispatcher
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
@@ -164,7 +162,7 @@ private fun Themed(
         LocalCanvasProbe provides probe,
     ) {
         BuilderTheme(
-            skin = Skin(SkinLibrary.Material3, expressive = false),
+            expressive = false,
             result = result,
             isDark = false,
             reducedMotion = false,

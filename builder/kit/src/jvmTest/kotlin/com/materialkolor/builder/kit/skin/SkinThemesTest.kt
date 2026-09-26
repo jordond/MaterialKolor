@@ -88,7 +88,7 @@ class SkinThemesTest {
                 val result = remember { ThemeResolver().resolve(Document) }
                 for (expressive in listOf(false, true)) {
                     BuilderTheme(
-                        Skin(SkinLibrary.Material3, expressive),
+                        expressive,
                         result,
                         isDark = false,
                         reducedMotion = false,
@@ -154,7 +154,7 @@ private fun ComposeUiTest.checkSheets(
     setContent {
         val result = remember { ThemeResolver().resolve(Document) }
         CompositionLocalProvider(LocalMotionFrozen provides true) {
-            BuilderTheme(skin, result, isDark, reducedMotion = false) {
+            BuilderTheme(skin.expressive, result, isDark, reducedMotion = false) {
                 seen = Seen(
                     skin = LocalSkin.current,
                     tokens = LocalBuilderTokens.current,

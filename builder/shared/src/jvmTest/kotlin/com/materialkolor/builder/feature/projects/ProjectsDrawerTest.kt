@@ -34,8 +34,6 @@ import com.materialkolor.builder.kit.control.BuilderToastHost
 import com.materialkolor.builder.kit.control.BuilderToastHostState
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.stateholder.dispatcher.rememberDispatcher
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
@@ -282,7 +280,7 @@ class ProjectsDrawerTest {
 private fun Themed(content: @Composable () -> Unit) {
     val document = ThemeDocument.Default
     BuilderTheme(
-        skin = Skin(library = SkinLibrary.Material3, expressive = false),
+        expressive = false,
         result = ThemeResolver().resolve(document),
         isDark = false,
         reducedMotion = true,

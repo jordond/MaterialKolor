@@ -36,8 +36,6 @@ import com.materialkolor.builder.kit.layout.CanvasContentCap
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.PosterMode
 import com.materialkolor.builder.kit.layout.WideBreakpoint
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
@@ -53,7 +51,6 @@ private const val ShellPaletteTag = "shell-palette"
 private val ShellMargin = 12.dp
 private val ShellDockLift = 16.dp
 private val ShellTopBar = 64.dp
-private val ShellSkin = Skin(SkinLibrary.Material3, expressive = false)
 
 /**
  * One window size and the poster treatment the shell gives it.
@@ -91,7 +88,7 @@ class ShellLayoutTest {
                 shellTest(case.width, case.height) {
                     var mode: PosterMode? = null
                     setContent {
-                        ShellHarness(ShellSkin, coarsePointer = case.coarsePointer) {
+                        ShellHarness(coarsePointer = case.coarsePointer) {
                             mode = LocalLayout.current.posterMode
                             ShellUnderTest(collapsed = case.mode == PosterMode.Rail72)
                         }
@@ -144,7 +141,7 @@ class ShellLayoutTest {
     @Test
     fun canvas_fromWideBreakpoint_capsItsContentAndCentresIt() =
         shellTest(1920) {
-            setContent { ShellHarness(ShellSkin) { ShellUnderTest(collapsed = false) } }
+            setContent { ShellHarness { ShellUnderTest(collapsed = false) } }
             waitForIdle()
 
             val frameStart = ShellMargin + 400.dp + ShellMargin
@@ -157,7 +154,7 @@ class ShellLayoutTest {
     @Test
     fun canvas_belowWideBreakpoint_fillsItsFrame() =
         shellTest(1280) {
-            setContent { ShellHarness(ShellSkin) { ShellUnderTest(collapsed = false) } }
+            setContent { ShellHarness { ShellUnderTest(collapsed = false) } }
             waitForIdle()
 
             shellBounds(ShellCanvasTag).width shouldBe 1280.dp - 424.dp - ShellMargin
@@ -176,7 +173,7 @@ class ShellLayoutTest {
                 shellTest(case.width, case.height) {
                     var padding: PaddingValues? = null
                     setContent {
-                        ShellHarness(ShellSkin, coarsePointer = case.coarsePointer) {
+                        ShellHarness(coarsePointer = case.coarsePointer) {
                             ShellUnderTest(collapsed = false, onCanvasPadding = { padding = it })
                         }
                     }
@@ -195,7 +192,7 @@ class ShellLayoutTest {
             withClue("$width dp") {
                 shellTest(width) {
                     var rail: Boolean? = null
-                    setContent { ShellHarness(ShellSkin) { ShellUnderTest(collapsed = true, onRail = { rail = it }) } }
+                    setContent { ShellHarness { ShellUnderTest(collapsed = true, onRail = { rail = it }) } }
                     waitForIdle()
 
                     rail shouldBe true
@@ -208,7 +205,7 @@ class ShellLayoutTest {
     @Test
     fun posterOpened_narrowMedium_floatsOverTheCanvas() =
         shellTest(600) {
-            setContent { ShellHarness(ShellSkin) { ShellUnderTest(collapsed = false) } }
+            setContent { ShellHarness { ShellUnderTest(collapsed = false) } }
             waitForIdle()
 
             shellBounds(ShellPosterTag).width shouldBe 320.dp
@@ -221,7 +218,7 @@ class ShellLayoutTest {
             withClue("reduced motion $reduced") {
                 shellTest(1280) {
                     var collapsed by mutableStateOf(false)
-                    setContent { ShellHarness(ShellSkin, reducedMotion = reduced) { ShellUnderTest(collapsed) } }
+                    setContent { ShellHarness(reducedMotion = reduced) { ShellUnderTest(collapsed) } }
                     waitForIdle()
 
                     mainClock.autoAdvance = false
@@ -249,7 +246,7 @@ class ShellLayoutTest {
             var rail: Boolean? = null
             var slotWidth = 0
             setContent {
-                ShellHarness(ShellSkin) {
+                ShellHarness {
                     ShellUnderTest(collapsed, onRail = { rail = it }, onPosterWidth = { slotWidth = it })
                 }
             }
@@ -278,7 +275,7 @@ class ShellLayoutTest {
         shellTest(1280) {
             var tokens: BuilderTokens? = null
             setContent {
-                ShellHarness(ShellSkin) {
+                ShellHarness {
                     tokens = LocalBuilderTokens.current
                     ShellUnderTest(collapsed = false)
                 }
@@ -309,7 +306,7 @@ class ShellLayoutTest {
             withClue("$width dp") {
                 shellTest(width) {
                     setContent {
-                        ShellHarness(ShellSkin) {
+                        ShellHarness {
                             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 PaletteFrame(Modifier.testTag(ShellPaletteTag)) {
                                     Box(Modifier.fillMaxWidth().height(40.dp))

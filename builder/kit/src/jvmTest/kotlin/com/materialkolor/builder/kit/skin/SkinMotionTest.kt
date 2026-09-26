@@ -30,7 +30,7 @@ class SkinMotionTest {
                 val result = remember { ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4))) }
                 for (expressive in listOf(false, true)) {
                     BuilderTheme(
-                        Skin(SkinLibrary.Material3, expressive),
+                        expressive,
                         result,
                         isDark = false,
                         reducedMotion = false,

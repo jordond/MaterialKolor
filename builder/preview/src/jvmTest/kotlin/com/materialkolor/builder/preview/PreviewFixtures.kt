@@ -11,8 +11,6 @@ import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.preview.split.PaneSpec
 
 /**
@@ -35,9 +33,10 @@ internal val PaneLibraries: List<PaneLibrary> =
 internal fun PaneSpec.on(pane: PaneLibrary): PaneSpec = on(pane.library, pane.expressive)
 
 /**
- * The chrome the builder draws around every pane, Material 3 Expressive whatever the pane's library.
+ * Whether the chrome the builder draws around every pane is Expressive, which it is whatever the
+ * pane's library.
  */
-internal val ShellChrome: Skin = Skin(SkinLibrary.Material3, expressive = true)
+internal const val ShellExpressive: Boolean = true
 
 /**
  * A blue document for the preview, far from the chrome's red.
@@ -74,7 +73,8 @@ internal val DarkSpec: PaneSpec = PaneSpec(PreviewResult, isDark = true, label =
 internal val DesktopLayout: LayoutInfo = LayoutInfo(1280.dp, 800.dp)
 
 /**
- * The builder's chrome in [skin], coloured from the red chrome document and laid out in [layout].
+ * The builder's chrome, Expressive when [expressive], coloured from the red chrome document and laid
+ * out in [layout].
  *
  * The app always measures its workspace and provides the layout, and parts of the preview such as
  * the split handle read it, so the chrome here provides one too. A layout provided around the
@@ -82,11 +82,11 @@ internal val DesktopLayout: LayoutInfo = LayoutInfo(1280.dp, 800.dp)
  */
 @Composable
 internal fun Chrome(
-    skin: Skin = Skin(SkinLibrary.Material3, expressive = false),
+    expressive: Boolean = false,
     layout: LayoutInfo = DesktopLayout,
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(LocalLayout provides layout) {
-        BuilderTheme(skin, ChromeResult, isDark = false, reducedMotion = true, content = content)
+        BuilderTheme(expressive, ChromeResult, isDark = false, reducedMotion = true, content = content)
     }
 }

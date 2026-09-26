@@ -53,8 +53,6 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.shell.PosterSurface
 import com.materialkolor.builder.kit.shell.WorkspaceShell
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.stateholder.dispatcher.rememberDispatcher
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -464,7 +462,7 @@ class PosterPanelTest {
             val result = remember(shown) { resolver.resolve(shown) }
             val state = workspaceState(shown, preferences, projectName, saveStatus())
             BuilderTheme(
-                skin = Skin(library = SkinLibrary.Material3, expressive = false),
+                expressive = false,
                 result = result,
                 isDark = false,
                 reducedMotion = true,
