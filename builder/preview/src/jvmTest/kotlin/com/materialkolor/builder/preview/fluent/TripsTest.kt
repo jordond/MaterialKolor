@@ -12,12 +12,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollToKeyAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isOn
@@ -29,6 +31,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
@@ -150,7 +153,7 @@ class TripsTest {
                         .filterNot { node -> (NavigationShield or ScrollbarArrow or UnderAnOverlay).matches(node) }
                     controls.shouldNotBeEmpty()
                     controls
-                        .filter { node -> PreviewRoles !in node.config }
+                        .filterNot { node -> node.declaresItsRoles() }
                         .map { node -> "${node.boundsInRoot} ${node.config}" }
                         .shouldBeEmpty()
                 }
@@ -259,7 +262,7 @@ class TripsTest {
 
     @Test
     fun inspect_clickOnASwitch_pinsItsColorsAndNeverReachesTheApp() =
-        runComposeUiTest {
+        runDesktopComposeUiTest(412, 900) {
             val state = DemoAppState().apply { setOn(OfflineMapsSwitch, true) }
             setContent {
                 CompositionLocalProvider(LocalMotionFrozen provides true) {
@@ -270,6 +273,9 @@ class TripsTest {
                     }
                 }
             }
+            waitForIdle()
+            // The inspector keeps the pane short, so the list scrolls the switch into view first.
+            onNode(hasScrollToKeyAction()).performScrollToKey("offline")
             waitForIdle()
             val before = state.tripsSnapshot()
 
@@ -364,6 +370,23 @@ private fun ComposeUiTest.shadesOnScreen(isDark: Boolean): Set<FluentShade> {
         .flatMap { node -> node.config[PreviewRoles] }
         .mapNotNull { ref: ColorRef -> ref.paintedShade(isDark) }
         .toSet()
+}
+
+/**
+ * How far a control's clickable may sit inside the part that declares its colors, in pixels.
+ */
+private const val DeclaredPartSlack = 4f
+
+/**
+ * Whether the node declares its colors, itself or through the part of the same control that its
+ * modifier reaches. A Fluent button keeps its clickable on a row inside that part, which has the
+ * row's bounds, where a card or a pane round the control is larger.
+ */
+private fun SemanticsNode.declaresItsRoles(): Boolean {
+    val holder = generateSequence(this) { node -> node.parent }.firstOrNull { node -> PreviewRoles in node.config }
+    return holder != null &&
+        holder.boundsInRoot.width - boundsInRoot.width <= DeclaredPartSlack &&
+        holder.boundsInRoot.height - boundsInRoot.height <= DeclaredPartSlack
 }
 
 /**
