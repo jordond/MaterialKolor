@@ -257,6 +257,7 @@ private fun StackedBody(
         val space = gap.roundToPx()
         val width = constraints.maxWidth
         val least = if (constraints.hasBoundedWidth) width else 0
+
         fun upTo(height: Int) = Constraints(minWidth = least, maxWidth = width, maxHeight = height)
         val bounded = constraints.hasBoundedHeight
         val action = actionParts.firstOrNull()?.measure(upTo(constraints.maxHeight))

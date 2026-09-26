@@ -99,6 +99,7 @@ class ShareHostTest : SessionTestBase() {
             session.rename(id, "Harbour").shouldBeNull()
             val controller =
                 ShareController(session, FakeClipboard(), FakeFileSaver(), FakeEnvironment(), FakeLinkCardSource())
+
             suspend fun savedName() =
                 projects.index
                     .first()

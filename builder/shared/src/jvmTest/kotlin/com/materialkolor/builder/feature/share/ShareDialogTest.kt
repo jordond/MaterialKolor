@@ -242,7 +242,12 @@ class ShareDialogTest : SessionTestBase() {
                     assertInside()
                     val card = cardNode.fetchSemanticsNode().boundsInWindow
                     val button = copy.fetchSemanticsNode().boundsInWindow
-                    if (split) button.left shouldBeGreaterThan card.right else button.top shouldBeGreaterThan card.bottom
+                    if (split) {
+                        button.left shouldBeGreaterThan card.right
+                    } else {
+                        button.top shouldBeGreaterThan
+                            card.bottom
+                    }
 
                     copy.performClick()
                     waitForIdle()
