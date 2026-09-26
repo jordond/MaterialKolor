@@ -54,7 +54,6 @@ import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.kit.headless.LocalOverlayKeys
-import com.materialkolor.builder.kit.skin.LocalSkin
 import dev.stateholder.dispatcher.Dispatcher
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -316,7 +315,7 @@ internal fun rememberShortcuts(
     val latestState by rememberUpdatedState(state)
     val inputModes = LocalInputModeManager.current
     val scope = rememberCoroutineScope()
-    ClaimFocusWhenNowhere(focus, state.panel, LocalSkin.current.library, state.visionMenuOpen)
+    ClaimFocusWhenNowhere(focus, state.panel, state.document.library, state.visionMenuOpen)
     val singleKeys = state.preferences.singleKeyShortcuts
     SideEffect { focus.singleKeys = singleKeys }
     val grayscale = remember { HeldKey() }
@@ -447,9 +446,8 @@ private val OVERLAY_SHORTCUTS = setOf(Shortcut.Save, Shortcut.Projects)
  * nothing on the page has it by then. Two frames go by first, so a panel's own hand-off lands
  * before this looks, and so does a top bar control taking focus back after a switch.
  *
- * A switch moves the whole page into the new skin's components, which drops the focused node, and
- * the move lands with the skin's library rather than with the key that asked for it, so this keys
- * on [library] the way it keys on [panel].
+ * A switch that did not come through the switcher's focused option can leave focus nowhere, so this
+ * keys on [library] the way it keys on [panel].
  *
  * Focus that leaves the page while no panel is open is left alone, since on the desktop a menu's
  * popup takes it the same way, and a menu in the page's own overlay host keeps it by its trap. The

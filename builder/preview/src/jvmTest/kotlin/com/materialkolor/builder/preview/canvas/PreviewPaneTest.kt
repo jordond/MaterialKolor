@@ -9,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorMatrix
@@ -32,13 +31,13 @@ import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.ThemeResolver
-import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.custom.LocalBuilderIdentity
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.LightSpec
 import com.materialkolor.builder.preview.PaneSkins
 import com.materialkolor.builder.preview.PreviewResult
+import com.materialkolor.builder.preview.on
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.unstyled.MaterialKolorTokens
 import io.kotest.assertions.withClue
@@ -67,10 +66,11 @@ class PreviewPaneTest {
             withClue(skin) {
                 runComposeUiTest {
                     val seen = Seen()
+                    val spec = LightSpec.on(skin.library, skin.expressive)
                     setContent {
                         Chrome(skin) {
                             seen.chromePrimary = primaryOf(skin.library, inPane = false)
-                            PreviewPane(LightSpec) {
+                            PreviewPane(spec) {
                                 seen.panePrimary = primaryOf(skin.library, inPane = true)
                                 seen.materialContent = MaterialContentColor.current
                                 seen.unstyledContent = UnstyledContentColor.current
@@ -80,14 +80,18 @@ class PreviewPaneTest {
                     waitForIdle()
 
                     val expectedPrimary = if (skin.library == Library.Custom) {
-                        PreviewResult.customSlots[CustomSlot.Primary, false].toColor()
+                        spec.result.customSlots[CustomSlot.Primary, false].toColor()
                     } else {
-                        PreviewResult.roles[Role.Primary, false].argb.toColor()
+                        spec.result.roles[Role.Primary, false]
+                            .argb
+                            .toColor()
                     }
                     val expectedContent = if (skin.library == Library.Custom) {
-                        PreviewResult.customSlots[CustomSlot.OnSurface, false].toColor()
+                        spec.result.customSlots[CustomSlot.OnSurface, false].toColor()
                     } else {
-                        PreviewResult.roles[Role.OnBackground, false].argb.toColor()
+                        spec.result.roles[Role.OnBackground, false]
+                            .argb
+                            .toColor()
                     }
                     seen.panePrimary shouldBe expectedPrimary
                     seen.chromePrimary shouldNotBe expectedPrimary
@@ -106,8 +110,7 @@ class PreviewPaneTest {
             amoled = true,
             pins = mapOf(Role.Primary to RolePin(light = pin, dark = pin)),
         )
-        val result = ThemeResolver().resolve(document)
-        val dark = PaneSpec(result, isDark = true, label = "Dark")
+        val dark = PaneSpec(ThemeResolver().resolve(document), isDark = true, label = "Dark")
         val skins = listOf(
             Skin(Library.Material3, expressive = false),
             Skin(Library.Material3, expressive = true),
@@ -120,7 +123,7 @@ class PreviewPaneTest {
                     var background: Color? = null
                     setContent {
                         Chrome(skin) {
-                            PreviewPane(dark) {
+                            PreviewPane(dark.on(skin.library, skin.expressive)) {
                                 if (skin.library == Library.Unstyled) {
                                     val colors = Theme[MaterialKolorTokens.colors]
                                     primary = colors[MaterialKolorTokens.primary]
@@ -152,7 +155,10 @@ class PreviewPaneTest {
                     setContent {
                         Chrome(skin) {
                             chrome = MaterialTheme.typography.bodyLarge
-                            PreviewPane(LightSpec) { pane = MaterialTheme.typography.bodyLarge }
+                            PreviewPane(LightSpec.on(skin.library, skin.expressive)) {
+                                pane =
+                                    MaterialTheme.typography.bodyLarge
+                            }
                         }
                     }
                     waitForIdle()
@@ -173,7 +179,9 @@ class PreviewPaneTest {
         for ((choice, motion) in expected) {
             withClue(choice) {
                 runComposeUiTest {
-                    val result = ThemeResolver().resolve(ThemeDocument(seed = Argb(0x1E88E5), motionScheme = choice))
+                    val result = ThemeResolver().resolve(
+                        ThemeDocument(seed = Argb(0x1E88E5), expressive = true, motionScheme = choice),
+                    )
                     var seen: MotionScheme? = null
                     setContent {
                         Chrome(Skin(Library.Material3, expressive = true)) {
@@ -198,10 +206,8 @@ class PreviewPaneTest {
                     var clicks = 0
                     setContent {
                         Chrome(Skin(Library.Unstyled, expressive = false)) {
-                            CompositionLocalProvider(LocalSkin provides skin) {
-                                PreviewPane(LightSpec) {
-                                    Box(Modifier.size(40.dp).testTag("tap").clickable { clicks++ })
-                                }
+                            PreviewPane(LightSpec.on(skin.library, skin.expressive)) {
+                                Box(Modifier.size(40.dp).testTag("tap").clickable { clicks++ })
                             }
                         }
                     }

@@ -24,7 +24,6 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.model.Library
-import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.preview.custom.CustomGalleryEntry
 import com.materialkolor.builder.preview.fluent.FluentGalleryEntry
 import com.materialkolor.builder.preview.material.MaterialGalleryEntry
@@ -44,7 +43,7 @@ internal const val GALLERY_CARD: String = "GalleryCard/"
 internal const val GALLERY_GRID: String = "GalleryGrid"
 
 /**
- * The Components tab, a curated gallery of the library [LocalSkin] names.
+ * The Components tab, a curated gallery of the library [spec] targets.
  *
  * Call it inside a [PreviewPane] for [spec], once per copy of a split.
  *
@@ -58,8 +57,8 @@ public fun ComponentsTab(
     state: DemoAppState,
     modifier: Modifier = Modifier,
 ) {
-    val skin = LocalSkin.current
-    when (skin.library) {
+    val document = spec.result.document
+    when (document.library) {
         Library.Material3 -> MaterialGalleryEntry(spec, state, modifier)
         Library.Unstyled -> UnstyledGalleryEntry(spec, state, modifier)
         Library.Fluent -> FluentGalleryEntry(spec, state, modifier)

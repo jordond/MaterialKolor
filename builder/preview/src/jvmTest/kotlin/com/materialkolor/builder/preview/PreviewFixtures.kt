@@ -26,6 +26,21 @@ internal val PaneSkins: List<Skin> =
 internal val PreviewResult: ThemeResult = ThemeResolver().resolve(ThemeDocument(seed = Argb(0x1E88E5)))
 
 /**
+ * This pane drawn in [library], from the same document otherwise. A pane draws the library its
+ * document targets, whatever the chrome around it is.
+ */
+internal fun PaneSpec.on(
+    library: Library,
+    expressive: Boolean = false,
+): PaneSpec =
+    PaneSpec(
+        result = ThemeResolver().resolve(result.document.copy(library = library, expressive = expressive)),
+        isDark = isDark,
+        label = label,
+        filter = filter,
+    )
+
+/**
  * A red document for the builder's own chrome.
  */
 internal val ChromeResult: ThemeResult = ThemeResolver().resolve(ThemeDocument(seed = Argb(0xFF0000)))

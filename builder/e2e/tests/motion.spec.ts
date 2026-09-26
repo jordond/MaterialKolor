@@ -3,10 +3,10 @@ import { expect, test, type Page } from '@playwright/test';
 import { wantHooks } from './builder';
 import { button, focusCanvas, LAND_TIMEOUT_MS, openWorkspace } from '../fixtures/workspace';
 
-// Motion on a library switch. The new skin reveals from the switcher in a circle,
-// and under reduced motion it crossfades instead. A small copy of every frame the page draws tells
-// the two apart. Mid reveal some cells of the canvas are already the new skin while others are
-// still the old one, and a crossfade moves every cell together.
+// Motion on a library switch. The new preview and colors reveal from the switcher in a circle,
+// and under reduced motion they crossfade instead. A small copy of every frame the page draws tells
+// the two apart. Mid reveal some cells of the canvas are already new while others are still old,
+// and a crossfade moves every cell together.
 
 /** The canvas copy is this many cells across and down. */
 const CELLS = [32, 18] as const;
@@ -107,7 +107,7 @@ function compare(frames: number[][]): Frames {
 /**
  * Runs in the page before it loads. Wraps `requestAnimationFrame` so, once `mkCopy.start()` has run,
  * each frame the page draws is scaled down to [cells] and kept, read straight after the page's own
- * callback while the canvas still holds what it drew. The first frame after the key is the old skin,
+ * callback while the canvas still holds what it drew. The first frame after the key is the old library,
  * since the reveal and the crossfade both start from a copy of it.
  */
 function copyFrames([across, down]: readonly [number, number]): void {

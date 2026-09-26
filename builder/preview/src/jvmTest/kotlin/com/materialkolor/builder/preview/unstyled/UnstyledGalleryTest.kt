@@ -58,6 +58,7 @@ import com.materialkolor.builder.preview.inspect.INSPECT_CARD_TAG
 import com.materialkolor.builder.preview.inspect.Inspecting
 import com.materialkolor.builder.preview.inspect.OnCard
 import com.materialkolor.builder.preview.inspect.PreviewRoles
+import com.materialkolor.builder.preview.on
 import com.materialkolor.builder.preview.split.LocalCompositionProbe
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.split.SplitState
@@ -332,7 +333,8 @@ class UnstyledGalleryTest {
                         split = remember { SplitState() },
                         skin = Skin(Library.Unstyled, expressive = false),
                     ) {
-                        PreviewPane(LightSpec, Modifier.fillMaxSize()) { ComponentsTab(LightSpec, state) }
+                        val unstyled = remember { LightSpec.on(Library.Unstyled) }
+                        PreviewPane(unstyled, Modifier.fillMaxSize()) { ComponentsTab(unstyled, state) }
                     }
                 }
             }
@@ -492,10 +494,11 @@ private fun GalleryHarness(
     }
     CompositionLocalProvider(LocalMotionFrozen provides true, LocalCompositionProbe provides probe) {
         Chrome(Skin(Library.Unstyled, expressive = false)) {
+            val unstyled = remember(spec) { spec.on(Library.Unstyled) }
             if (webFolds) {
-                ProvideWebFoldsForTest { PreviewPane(spec, modifier) { ComponentsTab(spec, state) } }
+                ProvideWebFoldsForTest { PreviewPane(unstyled, modifier) { ComponentsTab(unstyled, state) } }
             } else {
-                PreviewPane(spec, modifier) { ComponentsTab(spec, state) }
+                PreviewPane(unstyled, modifier) { ComponentsTab(unstyled, state) }
             }
         }
     }

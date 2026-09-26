@@ -20,17 +20,12 @@ private const val WIDTH = 1280
 private const val HEIGHT = 800
 private const val WAIT_MILLIS = 10_000L
 
-/**
- * One pause before the sample composes, one before its steps and one before the live frame's.
- */
-private const val PAUSES = 3
-
 @OptIn(ExperimentalTestApi::class)
-class FluentWarmUpTest {
+class RevealWarmUpTest {
     private val platform = FakePlatform()
 
     @Test
-    fun idleHook_warmsFluentUpOnceAfterTheFirstFrame_outOfTheSemanticsTree() =
+    fun idleHook_warmsTheRevealUpOnceAfterTheFirstFrame_outOfTheSemanticsTree() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val gate = Channel<Unit>(Channel.UNLIMITED)
             var pauses = 0
@@ -44,17 +39,11 @@ class FluentWarmUpTest {
             val clickable = onAllNodes(hasClickAction()).fetchSemanticsNodes().size
 
             gate.trySend(Unit)
-            waitUntil(timeoutMillis = WAIT_MILLIS) { pauses == 2 }
-            waitForIdle()
-            onAllNodes(hasClickAction()).fetchSemanticsNodes().size shouldBe clickable
-
-            repeat(PAUSES - 1) { gate.trySend(Unit) }
-            waitUntil(timeoutMillis = WAIT_MILLIS) { pauses == PAUSES }
             waitForIdle()
             mainClock.advanceTimeBy(1_000)
             waitForIdle()
 
-            pauses shouldBe PAUSES
+            pauses shouldBe 1
             firstFrameBeforeWarmUp shouldBe true
             onAllNodes(hasClickAction()).fetchSemanticsNodes().size shouldBe clickable
         }

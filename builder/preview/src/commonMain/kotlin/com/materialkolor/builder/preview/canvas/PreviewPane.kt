@@ -38,7 +38,6 @@ import com.materialkolor.builder.domain.model.MotionSchemeChoice
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.RoleEntry
-import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.preview.split.LocalCompositionProbe
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.fluent.toFluentColors
@@ -53,7 +52,7 @@ import com.composeunstyled.LocalTextStyle as UnstyledTextStyle
 import com.composeunstyled.theme.ColorScheme as UnstyledColorScheme
 
 /**
- * One copy of the preview, drawn in a fresh theme of the library [LocalSkin] names.
+ * One copy of the preview, drawn in a fresh theme of the library [spec] targets.
  *
  * Every color comes from `spec.result`, the role tables for Material 3 and Unstyled so AMOLED and
  * the document's pins show, the Custom slots for Custom and the primary ramp of the mode's scheme
@@ -74,11 +73,11 @@ public fun PreviewPane(
     content: @Composable () -> Unit,
 ) {
     LocalCompositionProbe.current?.invoke("PreviewPane/${spec.label}")
-    val skin = LocalSkin.current
+    val document = spec.result.document
     val roles = spec.result.roles.mode(spec.isDark)
     // Only a Custom pane reads the Custom slots, so no other pane works them out.
-    val identity = remember(skin.library, spec.result, spec.isDark) {
-        if (skin.library == Library.Custom) PreviewIdentity.of(spec) else null
+    val identity = remember(spec.result, spec.isDark) {
+        if (document.library == Library.Custom) PreviewIdentity.of(spec) else null
     }
     val ink = remember(roles, identity) {
         if (identity == null) {
@@ -94,8 +93,8 @@ public fun PreviewPane(
         propagateMinConstraints = true,
     ) {
         PaneLocals(ink) {
-            when (skin.library) {
-                Library.Material3 -> MaterialPane(roles, skin.expressive, spec.result.document.motionScheme, content)
+            when (document.library) {
+                Library.Material3 -> MaterialPane(roles, document.expressive, document.motionScheme, content)
                 Library.Unstyled -> UnstyledPane(roles, spec.isDark, ink, content)
                 Library.Fluent -> FluentPane(spec, content)
                 Library.Custom -> CompositionLocalProvider(

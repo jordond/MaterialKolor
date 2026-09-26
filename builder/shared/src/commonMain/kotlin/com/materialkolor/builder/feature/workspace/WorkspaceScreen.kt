@@ -272,7 +272,7 @@ internal fun WorkspaceScreen(
     shortcutFocus: ShortcutFocus? = null,
 ) {
     // Share and Export hand focus back to the buttons that opened them once they close.
-    val focus = rememberTopBarFocus()
+    val focus = rememberTopBarFocus(state.document.library)
     // The poster reads where its phone sheet rests, to know which of its sections are in view.
     val sheetState = rememberBottomSheetState()
     WorkspaceShell(

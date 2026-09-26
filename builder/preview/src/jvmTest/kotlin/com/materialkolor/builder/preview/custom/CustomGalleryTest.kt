@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
@@ -49,6 +50,7 @@ import com.materialkolor.builder.preview.canvas.GALLERY_CARD
 import com.materialkolor.builder.preview.canvas.GalleryGroup
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.inspect.PreviewRoles
+import com.materialkolor.builder.preview.on
 import com.materialkolor.builder.preview.split.LocalCompositionProbe
 import com.materialkolor.builder.preview.split.PaneSpec
 import io.kotest.assertions.withClue
@@ -366,7 +368,8 @@ private fun GalleryHarness(
     CompositionLocalProvider(LocalMotionFrozen provides true, LocalCompositionProbe provides probe) {
         Chrome(GallerySkin) {
             ProvideBuilderLayout(modifier = modifier) {
-                PreviewPane(spec, Modifier.fillMaxSize()) { ComponentsTab(spec, state) }
+                val custom = remember(spec) { spec.on(Library.Custom) }
+                PreviewPane(custom, Modifier.fillMaxSize()) { ComponentsTab(custom, state) }
             }
         }
     }

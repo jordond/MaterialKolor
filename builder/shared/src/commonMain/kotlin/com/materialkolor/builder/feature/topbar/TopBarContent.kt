@@ -27,7 +27,6 @@ import com.materialkolor.builder.feature.poster.switcherPulse
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
-import com.materialkolor.builder.feature.workspace.skinOf
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.history_title
 import com.materialkolor.builder.generated.resources.history_tooltip
@@ -53,7 +52,6 @@ import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.shell.TopBarControlMaxHeight
 import com.materialkolor.builder.kit.shell.TopBarRegion
-import com.materialkolor.builder.kit.skin.LocalSkin
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -74,22 +72,20 @@ import org.jetbrains.compose.resources.stringResource
  *
  * The History list opens in a popover under the History button, or under the overflow button once
  * History has moved there. It stays open while someone jumps between steps and hands focus
- * back to whatever opened it, the page itself when the H key did. A jump can switch the skin, whose
- * top bar draws its buttons somewhere new, so both buttons move there with the list still open.
+ * back to whatever opened it, the page itself when the H key did.
  *
  * A library switch, or a flip of the Expressive switch, goes through the reveal from the control that
- * made it as one undo entry. What has to outlive a skin switch, the open menu and which control has
- * focus, is held here, outside the skin's own top bar region, and [focus] comes from the workspace,
- * which hands Share and Export focus back when their panels close. The Expressive suggestion is the
- * model's, raised with the flip it follows. It shows once the skin has caught up with the document,
- * so it first draws in the new skin, and hands focus back to the Expressive switch.
+ * made it as one undo entry. The bar keeps its own skin across a switch. [focus] comes from the
+ * workspace, which hands Share and Export focus back when their panels close, and puts focus back on
+ * the switcher when a switch leaves it nowhere. The Expressive suggestion is the model's, raised with
+ * the flip it follows, and hands focus back to the Expressive switch.
  */
 @Composable
 internal fun TopBarContent(
     state: WorkspaceModel.State,
     dispatcher: Dispatcher<WorkspaceAction>,
     modifier: Modifier = Modifier,
-    focus: TopBarFocus = rememberTopBarFocus(),
+    focus: TopBarFocus = rememberTopBarFocus(state.document.library),
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     val currentRow = remember { FocusRequester() }
@@ -284,11 +280,8 @@ internal fun TopBarContent(
         }
     }
 
-    // A library switch can still reach this a composition before the kit moves it into the new
-    // skin, so the suggestion waits for the skin the document asks for.
-    val inDocumentSkin = LocalSkin.current == skinOf(state.document)
     ExpressiveSuggestion(
-        visible = state.expressiveSuggestion && inDocumentSkin,
+        visible = state.expressiveSuggestion,
         returnFocusTo = focus.requester(TopBarControl.Expressive),
         onKeepMine = { dispatcher.dispatch(WorkspaceAction.DismissExpressiveSuggestion) },
         onApply = {

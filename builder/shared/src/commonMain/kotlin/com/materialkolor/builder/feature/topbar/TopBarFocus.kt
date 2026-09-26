@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import com.materialkolor.builder.kit.skin.LocalSkin
+import com.materialkolor.builder.domain.model.Library
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -92,18 +92,18 @@ internal class TopBarFocus(
 }
 
 /**
- * A [TopBarFocus] that puts focus back after every skin switch. Call it outside the skin's top bar
- * region so it lives across the switch. The library switcher asks for focus back itself when a
- * resize changes its form, through [TopBarFocus.restoreAfterRefit].
+ * A [TopBarFocus] that puts focus back after every switch to another [library]. The switcher only
+ * lets its picked option take focus, so a switch that did not come through the focused option, a
+ * number key or a screen reader's click, leaves focus nowhere. The library switcher asks for focus
+ * back itself when a resize changes its form, through [TopBarFocus.restoreAfterRefit].
  */
 @Composable
-internal fun rememberTopBarFocus(): TopBarFocus {
+internal fun rememberTopBarFocus(library: Library): TopBarFocus {
     val scope = rememberCoroutineScope()
     val focus = remember(scope) { TopBarFocus(scope) }
-    val skin = LocalSkin.current
-    val restore = remember(skin) { focus.focused }
-    LaunchedEffect(skin) {
-        // A flavor switch within one library keeps the controls, and focus with them.
+    val restore = remember(library) { focus.focused }
+    LaunchedEffect(library) {
+        // A switch that kept focus where it was needs nothing.
         val control = restore?.takeIf { control -> control != focus.holding } ?: return@LaunchedEffect
         // A control this width does not show has no node to take focus, and that is fine.
         runCatching { focus.requester(control).requestFocus() }

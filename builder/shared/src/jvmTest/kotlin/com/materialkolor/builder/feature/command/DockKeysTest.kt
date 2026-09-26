@@ -29,19 +29,14 @@ class DockKeysTest {
     private val harness = CommandHarness()
 
     /**
-     * On the Unstyled skin, whose menu takes focus into its rows in a popup window the way every skin's
-     * does in the page on the web. Material's own popup menu on the desktop leaves its rows unfocused.
-     * Esc reaches a popup window through the window, where a test cannot press it, so a pick closes
-     * the menu here. Both close it the same way, through `onDismissRequest`.
+     * With overlays in the page, as the web draws them, where the menu takes focus into its rows.
+     * Material's own popup menu on the desktop leaves its rows unfocused. A pick closes the menu here
+     * the way Esc does, through `onDismissRequest`.
      */
     @Test
     fun v_opensTheVisionMenuWithFocusInIt_andClosingItHandsFocusBackToItsButton() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            with(harness) { show() }
-            // The switch moves the page into the new skin, and the holder takes focus back once it has.
-            runOnUiThread { harness.workspace.edit(LibraryChoice.Unstyled.change, EditPhase.Discrete) }
-            waitForIdle()
-            harness.workspace.state.value.document.library shouldBe Library.Unstyled
+            with(harness) { show(inTree = true) }
 
             keys { pressKey(Key.V) }
 

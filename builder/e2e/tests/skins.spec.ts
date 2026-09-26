@@ -11,10 +11,9 @@ import {
   storedDocument,
 } from '../fixtures/workspace';
 
-// The shell in the Fluent skin, whose tabs, segmented rows, switches, checkboxes and disclosures are
-// Fluent's own components. The number keys switch the library, 3 to Fluent and 1 back to Material 3,
-// and the page keeps running with no error. On the web the mirror loses a tab's role and state, so the
-// Fluent tab carries both in its name the way every skin's tab does.
+// A library switch changes the preview and never the shell, which stays Material 3 Expressive. The
+// number keys switch the library, 3 to Fluent and 1 back to Material 3, and the page keeps running
+// with no error and the shell's tabs keep their folded names.
 
 const A11Y = '#cmp_a11y_root';
 
@@ -28,7 +27,7 @@ test.beforeEach(async ({ context }) => {
   await wantHooks(context);
 });
 
-test('3 switches the shell to Fluent and 1 back, with no page error and the tab name folded', async ({ page }) => {
+test('3 switches the library to Fluent and 1 back, with no page error and the shell tab names kept', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await openBuilder(page);

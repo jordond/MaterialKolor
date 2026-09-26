@@ -11,7 +11,6 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
@@ -29,36 +28,20 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.resolve.ThemeResult
-import com.materialkolor.builder.feature.canvas.CanvasArea
-import com.materialkolor.builder.feature.canvas.CanvasDock
 import com.materialkolor.builder.feature.image.ImageSeedModel
-import com.materialkolor.builder.feature.image.ProvideImageSeeds
-import com.materialkolor.builder.feature.poster.LocalPosterSheetState
-import com.materialkolor.builder.feature.poster.PosterFocus
-import com.materialkolor.builder.feature.poster.PosterPanel
-import com.materialkolor.builder.feature.topbar.TopBarContent
-import com.materialkolor.builder.feature.topbar.rememberTopBarFocus
 import com.materialkolor.builder.feature.workspace.AppModel
-import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.feature.workspace.WorkspaceScreen
-import com.materialkolor.builder.feature.workspace.skinOf
 import com.materialkolor.builder.kit.a11y.Announcer
 import com.materialkolor.builder.kit.a11y.LocalAnnouncer
-import com.materialkolor.builder.kit.control.rememberBottomSheetState
-import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.shell.WorkspaceShell
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.fluent.FluentWarmUpTheme
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.transition.SkinTransition
 import com.materialkolor.builder.kit.transition.SkinTransitionHost
 import com.materialkolor.builder.kit.transition.rememberSkinTransition
-import dev.stateholder.dispatcher.rememberDispatcher
 import dev.stateholder.extensions.collectAsState
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
@@ -128,23 +111,22 @@ internal fun rememberThemeResult(
     }
 
 /**
- * The skin of the collected [document]. It reads the same state as [rememberThemeResult], so a
- * library switch or its undo never draws a frame of new colors in the old skin.
+ * The skin of the builder's own controls, whatever library the open project targets.
+ *
+ * A library switch changes the preview and the colors, never the controls around them, since a
+ * whole new set of controls on every switch was too jarring.
  */
-@Composable
-internal fun rememberSkin(document: State<ThemeDocument>): State<Skin> =
-    remember(document) { derivedStateOf { skinOf(document.value) } }
+internal val ShellSkin: Skin = Skin(library = Library.Material3, expressive = true)
 
 /**
- * Themes the workspace with the skin and colors of the open project.
+ * Themes the workspace in [ShellSkin] with the colors of the open project.
  *
- * The workspace state is collected once, here, and the theme result and the skin come from its own
- * document. So no frame pairs a new document with the old colors or the old skin, and the workspace
- * draws the state the colors were resolved from. The kit keeps the content movable across a library
- * switch, so the reveal that is playing, the toasts and every scroll position survive it.
+ * The workspace state is collected once, here, and the theme result comes from its own document. So
+ * no frame pairs a new document with the old colors, and the workspace draws the state the colors
+ * were resolved from.
  *
- * @param[awaitIdle] Waits for an idle moment. With it the builder warms up for its first switch to
- * Fluent once the first frame is up. None by default, and no warm-up then.
+ * @param[awaitIdle] Waits for an idle moment. With it the builder warms up the reveal a library
+ * switch plays once the first frame is up. None by default, and no warm-up then.
  * @param[probe] Drawn over the workspace with the state it was handed, for tests. Nothing by default.
  */
 @Composable
@@ -160,7 +142,6 @@ internal fun BuilderRoot(
     val document = remember(workspace) { derivedStateOf { workspace.value.document } }
     val environment = graph.environment
     val result by rememberThemeResult(document, graph.themeResolver, environment)
-    val skin by rememberSkin(document)
     val announcer = remember(environment) { Announcer { message -> environment.announce(message) } }
     val firstFrame = remember { CompletableDeferred<Unit>() }
 
@@ -179,14 +160,12 @@ internal fun BuilderRoot(
         LocalThemeResolver provides graph.themeResolver,
         LocalAnnouncer provides announcer,
     ) {
-        BuilderTheme(skin = skin, result = result, isDark = state.isDark, reducedMotion = state.reducedMotion) {
+        BuilderTheme(skin = ShellSkin, result = result, isDark = state.isDark, reducedMotion = state.reducedMotion) {
             ThemeColorEffect(environment)
             ProvideBuilderLayout(coarsePointer = state.coarsePointer, modifier = Modifier.fillMaxSize()) {
                 val transition = rememberSkinTransition()
-                if (awaitIdle != null) FluentWarmUpEffect(transition, firstFrame, awaitIdle, workspace) { state.isDark }
+                if (awaitIdle != null) RevealWarmUpEffect(transition, firstFrame, awaitIdle)
                 SkinTransitionHost(transition = transition, modifier = Modifier.fillMaxSize()) {
-                    // Read in here, so the content the kit moves sees the same state as the colors
-                    // provided above it. Read in the root, a move can pair it with the old colors.
                     val shown = workspace.value
                     WorkspaceScreen(state = shown, transition = transition, model = workspaceModel)
                     probe(shown)
@@ -232,75 +211,17 @@ private fun ImageMarkEffects(
 }
 
 /**
- * An announcer that says nothing, so a warm-up never reads out what the page already did.
- */
-private val SilentAnnouncer = Announcer { }
-
-/**
- * Warms the page up for the first switch to Fluent, once, after [firstFrame] and in idle time.
- *
- * The first switch compiled some forty GPU programs in one frame, which took a second on a loaded
- * machine. This composes the workspace in Fluent off screen and has [transition] draw it under the
- * live frame a step at a time, waiting on [awaitIdle] before each stage. When the page already
- * shows Fluent only the reveal's own clips over the live frame are warmed.
- *
- * @param[isDark] Which mode the chrome shows, read when the sample composes.
+ * Warms up the reveal a library switch plays, once, after [firstFrame] and in idle time, so the
+ * browser has the circle's and the crossfade's GPU programs ready before the first switch.
  */
 @Composable
-private fun FluentWarmUpEffect(
+private fun RevealWarmUpEffect(
     transition: SkinTransition,
     firstFrame: Deferred<Unit>,
     awaitIdle: suspend () -> Unit,
-    workspace: State<WorkspaceModel.State>,
-    isDark: () -> Boolean,
 ) {
-    val skin by rememberUpdatedState(LocalSkin.current)
     LaunchedEffect(transition) {
         firstFrame.await()
-        val sample: (@Composable () -> Unit)? = if (skin.library == Library.Fluent) {
-            null
-        } else {
-            // No ramp highlight, since the palettes tab asks for focus when it shows one.
-            { FluentWorkspaceSample(workspace.value.copy(rampHighlight = null), isDark()) }
-        }
-        transition.warmUp(sample, awaitIdle)
-    }
-}
-
-/**
- * The workspace as the first switch to Fluent draws it, the poster, the top bar, the canvas and the
- * dock, without the panels and toasts over them.
- *
- * Every action goes to a dispatcher that drops it and every announcement to one that says nothing,
- * and the focus holders are its own, so nothing here reaches the live workspace. The caller hands it
- * a state with no ramp highlight, because the palettes tab moves focus to a highlighted ramp.
- */
-@Composable
-private fun FluentWorkspaceSample(
-    state: WorkspaceModel.State,
-    isDark: Boolean,
-) {
-    val dispatcher = rememberDispatcher<WorkspaceAction> { }
-    val result = LocalThemeResult.current
-    FluentWarmUpTheme(result, isDark) {
-        CompositionLocalProvider(LocalAnnouncer provides SilentAnnouncer) {
-            val focus = rememberTopBarFocus()
-            val posterFocus = remember { PosterFocus() }
-            val sheetState = rememberBottomSheetState()
-            WorkspaceShell(
-                posterColors = result.poster,
-                posterCollapsed = state.posterCollapsed(LocalLayout.current.posterMode),
-                poster = { rail ->
-                    CompositionLocalProvider(LocalPosterSheetState provides sheetState) {
-                        ProvideImageSeeds(state) { PosterPanel(state, rail, dispatcher, focus = posterFocus) }
-                    }
-                },
-                topBar = { TopBarContent(state, dispatcher, focus = focus) },
-                canvas = { contentPadding -> CanvasArea(state, contentPadding, dispatcher) },
-                dock = { CanvasDock(state, dispatcher) },
-                sheetState = sheetState,
-                fullscreen = state.fullscreen,
-            )
-        }
+        transition.warmUp(sample = null, pause = awaitIdle)
     }
 }
