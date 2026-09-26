@@ -159,7 +159,10 @@ private fun TripsPanes(
         displayMode = if (expanded) NavigationDisplayMode.Left else NavigationDisplayMode.LeftCompact,
         state = navigation,
         expandedButton = {
-            val slot = if (expanded) Modifier.padding(horizontal = TripsLayout.RailGap) else Modifier.size(RailButtonSize)
+            val slot = when {
+                expanded -> Modifier.padding(horizontal = TripsLayout.RailGap)
+                else -> Modifier.size(RailButtonSize)
+            }
             Box(slot.focusGroup(), contentAlignment = Alignment.Center) { NewTripButton(iconOnly = !expanded) }
         },
     ) {
@@ -287,7 +290,10 @@ private fun LazyListScope.tripList(
 
 @Composable
 private fun TripsHeader() {
-    Row(Modifier.fillMaxWidth().padding(start = TripsLayout.TextInset), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        Modifier.fillMaxWidth().padding(start = TripsLayout.TextInset),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Text("Trips", Modifier.weight(1f), style = FluentTheme.typography.title)
         Box {
             SubtleButton(onClick = {}, modifier = Modifier.fluentNeutralRoles(), iconOnly = true) {
@@ -385,7 +391,11 @@ private fun TripRow(
                     TripThumb(trip, shades)
                     Column {
                         Text(trip.name, style = FluentTheme.typography.bodyStrong)
-                        Text(trip.dates, style = FluentTheme.typography.caption, color = FluentTheme.colors.text.text.secondary)
+                        Text(
+                            trip.dates,
+                            style = FluentTheme.typography.caption,
+                            color = FluentTheme.colors.text.text.secondary,
+                        )
                     }
                 }
             },

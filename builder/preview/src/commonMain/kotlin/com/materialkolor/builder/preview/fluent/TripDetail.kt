@@ -204,7 +204,11 @@ private fun PackingCard(state: DemoAppState) {
         Column(Modifier.padding(TripsLayout.SectionGap), verticalArrangement = Arrangement.spacedBy(TripsLayout.Gap)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Packing", Modifier.weight(1f), style = FluentTheme.typography.subtitle)
-                Text("$packed of ${items.size}", color = colors.text.text.secondary, style = FluentTheme.typography.caption)
+                Text(
+                    "$packed of ${items.size}",
+                    color = colors.text.text.secondary,
+                    style = FluentTheme.typography.caption,
+                )
             }
             // The determinate bar, since the endless one would loop past frozen motion.
             ProgressBar(
