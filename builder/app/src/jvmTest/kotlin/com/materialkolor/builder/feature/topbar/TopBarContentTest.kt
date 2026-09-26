@@ -264,8 +264,7 @@ class TopBarContentTest {
     private fun workspaceState(
         document: ThemeDocument,
         history: HistoryState,
-    ): WorkspaceModel.State =
-        workspaceStateOf(document = document, history = history)
+    ): WorkspaceModel.State = workspaceStateOf(document = document, history = history)
 
     private class TestOwner : ViewModelStoreOwner {
         override val viewModelStore: ViewModelStore = ViewModelStore()
