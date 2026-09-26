@@ -11,11 +11,11 @@ import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.audit.ColorRef
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.PreviewResult
 import com.materialkolor.builder.preview.split.SplitState
@@ -43,7 +43,7 @@ internal fun Inspecting(
     shown: PreviewMode,
     split: SplitState,
     onLeave: () -> Unit = {},
-    skin: Skin = Skin(Library.Material3, expressive = false),
+    skin: Skin = Skin(SkinLibrary.Material3, expressive = false),
     content: @Composable () -> Unit,
 ) {
     val actions = remember {

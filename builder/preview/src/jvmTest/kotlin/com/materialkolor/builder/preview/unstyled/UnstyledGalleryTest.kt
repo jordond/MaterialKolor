@@ -1,5 +1,6 @@
 package com.materialkolor.builder.preview.unstyled
 
+import com.materialkolor.builder.preview.ShellChrome
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
@@ -45,7 +46,6 @@ import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.kit.a11y.KitTestApi
 import com.materialkolor.builder.kit.a11y.ProvideWebFoldsForTest
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.DarkSpec
 import com.materialkolor.builder.preview.LightSpec
@@ -331,7 +331,7 @@ class UnstyledGalleryTest {
                     Inspecting(
                         shown = PreviewMode.Light,
                         split = remember { SplitState() },
-                        skin = Skin(Library.Unstyled, expressive = false),
+                        skin = ShellChrome,
                     ) {
                         val unstyled = remember { LightSpec.on(Library.Unstyled) }
                         PreviewPane(unstyled, Modifier.fillMaxSize()) { ComponentsTab(unstyled, state) }
@@ -477,7 +477,7 @@ private fun DemoAppState.gallerySnapshot(): List<Any> {
 }
 
 /**
- * The Unstyled gallery in a pane of [spec], under the Unstyled chrome, with motion frozen. With
+ * The Unstyled gallery in a pane of [spec], under the shell chrome, with motion frozen. With
  * [webFolds] the kit's fold modifiers fold state into names as they do on the web.
  */
 @OptIn(KitTestApi::class)
@@ -493,7 +493,7 @@ private fun GalleryHarness(
         { where: String -> if (where.startsWith(GALLERY_CARD)) titles += where.removePrefix(GALLERY_CARD) }
     }
     CompositionLocalProvider(LocalMotionFrozen provides true, LocalCompositionProbe provides probe) {
-        Chrome(Skin(Library.Unstyled, expressive = false)) {
+        Chrome(ShellChrome) {
             val unstyled = remember(spec) { spec.on(Library.Unstyled) }
             if (webFolds) {
                 ProvideWebFoldsForTest { PreviewPane(unstyled, modifier) { ComponentsTab(unstyled, state) } }

@@ -1,5 +1,6 @@
 package com.materialkolor.builder.preview.unstyled
 
+import com.materialkolor.builder.preview.ShellChrome
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -26,11 +27,9 @@ import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.audit.ColorRef
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.LightSpec
 import com.materialkolor.builder.preview.canvas.DemoAppState
@@ -228,7 +227,7 @@ private fun String.isBannedInTrips(): Boolean {
 }
 
 /**
- * The Trips app in an Unstyled pane of [spec], under the Unstyled chrome, with motion frozen.
+ * The Trips app in an Unstyled pane of [spec], under the shell chrome, with motion frozen.
  */
 @Composable
 private fun TripsHarness(
@@ -238,7 +237,7 @@ private fun TripsHarness(
     modifier: Modifier,
 ) {
     CompositionLocalProvider(LocalMotionFrozen provides true) {
-        Chrome(Skin(Library.Unstyled, expressive = false)) {
+        Chrome(ShellChrome) {
             PreviewPane(spec, modifier) { UnstyledAppEntry(spec, state, width) }
         }
     }

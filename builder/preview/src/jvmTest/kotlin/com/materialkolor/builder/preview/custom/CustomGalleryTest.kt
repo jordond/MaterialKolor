@@ -40,6 +40,7 @@ import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.ChromeResult
 import com.materialkolor.builder.preview.LightSpec
@@ -67,7 +68,7 @@ import kotlin.test.Test
 /**
  * The chrome the gallery sits in, the Custom skin coloured from the red chrome document.
  */
-private val GallerySkin: Skin = Skin(Library.Custom, expressive = false)
+private val GallerySkin: Skin = Skin(SkinLibrary.Custom, expressive = false)
 
 /**
  * The phone and desktop frames the gallery is checked at, at the height of a first screen.

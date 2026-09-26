@@ -1,5 +1,6 @@
 package com.materialkolor.builder.preview.fluent
 
+import com.materialkolor.builder.preview.ShellChrome
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
@@ -318,7 +319,7 @@ class FluentGalleryTest {
             val state = DemoAppState().apply { setOn(FluentGalleryKeys.Wifi, true) }
             setContent {
                 CompositionLocalProvider(LocalMotionFrozen provides true) {
-                    Inspecting(shown = PreviewMode.Light, split = remember { SplitState() }, skin = FluentSkin) {
+                    Inspecting(shown = PreviewMode.Light, split = remember { SplitState() }, skin = ShellChrome) {
                         PreviewPane(FluentLightSpec, Modifier.fillMaxSize()) { ComponentsTab(FluentLightSpec, state) }
                     }
                 }
