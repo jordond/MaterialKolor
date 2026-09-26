@@ -109,7 +109,9 @@ class TripsTest {
                             .shouldBeEmpty()
                         (TripsSurfaces intersect slots).size shouldBeGreaterThanOrEqual 3
                         (TripsBorders intersect slots).size shouldBeGreaterThanOrEqual 1
-                        if (spec.result.accents.families.isEmpty()) {
+                        if (spec.result.accents.families
+                                .isEmpty()
+                        ) {
                             refs.filterIsInstance<ColorRef.OfAccent>().shouldBeEmpty()
                         }
                     }
@@ -227,7 +229,8 @@ private val AccentDocument: ThemeDocument = ThemeDocument(
     ),
 )
 
-private val AccentLightSpec: PaneSpec = PaneSpec(ThemeResolver().resolve(AccentDocument), isDark = false, label = "Light")
+private val AccentLightSpec: PaneSpec =
+    PaneSpec(ThemeResolver().resolve(AccentDocument), isDark = false, label = "Light")
 
 private val AccentDarkSpec: PaneSpec = PaneSpec(ThemeResolver().resolve(AccentDocument), isDark = true, label = "Dark")
 
