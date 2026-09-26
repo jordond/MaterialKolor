@@ -5,9 +5,9 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -46,6 +46,11 @@ private val TwoPins = mapOf(
     Role.Surface to RolePin(light = Argb(0xFAFAFA)),
 )
 
+/**
+ * A key color's hex while the color comes from the seed, which it reads out.
+ */
+private val FromSeed = hasContentDescription(", from seed", substring = true)
+
 private const val NOTICE = "Pinned roles don’t follow the seed"
 
 private const val ONE_RAMP = "Fluent builds one accent ramp from the primary palette"
@@ -62,7 +67,7 @@ class KeyColorsTest {
             val harness = PosterHarness(Plain)
             showSection(harness) { context, dispatcher -> KeyColorRows(context, dispatcher) }
 
-            onAllNodesWithText("From seed").fetchSemanticsNodes().size shouldBe KeyColor.entries.size
+            onAllNodes(FromSeed).fetchSemanticsNodes().size shouldBe KeyColor.entries.size
             onNodeWithText("Reset all").assertDoesNotExist()
             onNodeWithContentDescription("Pick Tertiary").performClick()
             waitForIdle()
@@ -86,7 +91,7 @@ class KeyColorsTest {
             derived shouldNotBe Seed
             // b-527 The hex shows as text until it is pressed, then as the field.
             onAllNodes(hasSetTextAction()).fetchSemanticsNodes().shouldBeEmpty()
-            onNodeWithContentDescription("Edit Tertiary, ${derived.toHex()}").performClick()
+            onNodeWithContentDescription("Edit Tertiary, ${derived.toHex()}, from seed").performClick()
             waitForIdle()
             onNode(hasSetTextAction()).assert(hasText(derived.toHex()))
         }
@@ -97,12 +102,12 @@ class KeyColorsTest {
             val harness = PosterHarness(Plain.copy(keyColors = KeyColors(secondary = Teal)))
             showSection(harness) { context, dispatcher -> KeyColorRows(context, dispatcher) }
 
-            onAllNodesWithText("From seed").fetchSemanticsNodes().size shouldBe 5
+            onAllNodes(FromSeed).fetchSemanticsNodes().size shouldBe 5
             onNodeWithContentDescription("Clear Secondary").performClick()
             waitForIdle()
 
             harness.document.keyColors.secondary shouldBe null
-            onAllNodesWithText("From seed").fetchSemanticsNodes().size shouldBe KeyColor.entries.size
+            onAllNodes(FromSeed).fetchSemanticsNodes().size shouldBe KeyColor.entries.size
             harness.undoEntries() shouldBe 1
         }
 
