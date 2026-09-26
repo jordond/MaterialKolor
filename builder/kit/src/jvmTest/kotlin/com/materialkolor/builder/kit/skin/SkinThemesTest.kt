@@ -31,11 +31,9 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
-import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
@@ -46,12 +44,10 @@ import com.materialkolor.builder.kit.control.shortfalls
 import com.materialkolor.builder.kit.icon.BuilderIcons
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.icon.LocalBuilderIcons
-import com.materialkolor.builder.kit.icon.LucideIcons
 import com.materialkolor.builder.kit.icon.MaterialIcons
 import com.materialkolor.builder.kit.motion.BuilderDurations
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.skin.custom.LocalBuilderIdentity
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderType
@@ -84,34 +80,6 @@ class SkinThemesTest {
         runComposeUiTest { checkSheets(Skin(SkinLibrary.Material3, expressive = true), MaterialIcons, 20.dp) }
 
     @Test
-    fun custom_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(SkinLibrary.Custom, expressive = false), LucideIcons, 18.dp) }
-
-    @Test
-    fun custom_pinnedDocument_drawsTheChromeSlotsNotTheDocumentSlots() =
-        runComposeUiTest {
-            var seen: Color? = null
-            var expected: Color? = null
-            var pinned: Color? = null
-            setContent {
-                val result = remember { ThemeResolver().resolve(Document) }
-                BuilderTheme(
-                    Skin(SkinLibrary.Custom, expressive = false),
-                    result,
-                    isDark = false,
-                    reducedMotion = false,
-                ) {
-                    seen = LocalBuilderIdentity.current[CustomSlot.Primary]
-                    expected = result.chromeCustomSlots[CustomSlot.Primary, false].toColor()
-                    pinned = result.customSlots[CustomSlot.Primary, false].toColor()
-                }
-            }
-
-            assertNotNull(seen) shouldBe expected
-            seen shouldNotBe pinned
-        }
-
-    @Test
     fun material3_libraryText_isSetInTheBrandFace() =
         runComposeUiTest {
             val seen = mutableMapOf<String, FontFamily?>()
@@ -120,7 +88,7 @@ class SkinThemesTest {
                 val result = remember { ThemeResolver().resolve(Document) }
                 for (expressive in listOf(false, true)) {
                     BuilderTheme(
-                        Skin(SkinLibrary.Material3, expressive),
+                        expressive,
                         result,
                         isDark = false,
                         reducedMotion = false,
@@ -186,7 +154,7 @@ private fun ComposeUiTest.checkSheets(
     setContent {
         val result = remember { ThemeResolver().resolve(Document) }
         CompositionLocalProvider(LocalMotionFrozen provides true) {
-            BuilderTheme(skin, result, isDark, reducedMotion = false) {
+            BuilderTheme(skin.expressive, result, isDark, reducedMotion = false) {
                 seen = Seen(
                     skin = LocalSkin.current,
                     tokens = LocalBuilderTokens.current,

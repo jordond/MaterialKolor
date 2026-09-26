@@ -36,8 +36,6 @@ import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.transition.SkinTransition
 import com.materialkolor.builder.kit.transition.SkinTransitionHost
@@ -112,15 +110,17 @@ internal fun rememberThemeResult(
     }
 
 /**
- * The skin of the builder's own controls, whatever library the open project targets.
+ * Whether the builder's own controls use Material 3 Expressive, whatever library the open project
+ * targets.
  *
  * A library switch changes the preview and the colors, never the controls around them, since a
  * whole new set of controls on every switch was too jarring.
  */
-internal val ShellSkin: Skin = Skin(library = SkinLibrary.Material3, expressive = true)
+internal const val ShellExpressive: Boolean = true
 
 /**
- * Themes the workspace in [ShellSkin] with the colors of the open project.
+ * Themes the workspace in Material 3 Expressive, per [ShellExpressive], with the colors of the open
+ * project.
  *
  * The workspace state is collected once, here, and the theme result comes from its own document. So
  * no frame pairs a new document with the old colors, and the workspace draws the state the colors
@@ -161,7 +161,12 @@ internal fun BuilderRoot(
         LocalThemeResolver provides graph.themeResolver,
         LocalAnnouncer provides announcer,
     ) {
-        BuilderTheme(skin = ShellSkin, result = result, isDark = state.isDark, reducedMotion = state.reducedMotion) {
+        BuilderTheme(
+            expressive = ShellExpressive,
+            result = result,
+            isDark = state.isDark,
+            reducedMotion = state.reducedMotion,
+        ) {
             ThemeColorEffect(environment)
             ProvideBuilderLayout(coarsePointer = state.coarsePointer, modifier = Modifier.fillMaxSize()) {
                 val transition = rememberSkinTransition(SnapshotMode.Bitmap)

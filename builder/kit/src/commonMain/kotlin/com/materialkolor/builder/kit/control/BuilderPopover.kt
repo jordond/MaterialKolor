@@ -8,11 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import com.materialkolor.builder.kit.headless.HeadlessDropdown
-import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.SkinLibrary
-import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
 import com.materialkolor.builder.kit.skin.material.materialPopoverStyle
-import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
  * A popover that opens under [anchor], holds whatever it is given and stays open while it is used.
@@ -27,8 +23,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * inside already moved it elsewhere. Where overlays render in the page it opens in the overlay
  * host, and anywhere else in a focusable popup.
  *
- * Material3 draws it in Material's container with its large corner and a menu's shadow, and the other
- * skins in their own popover style. Each keeps 8 dp of room inside its edge.
+ * It stands in Material's container with its large corner and a menu's shadow, and keeps 8 dp of
+ * room inside its edge.
  *
  * @param[expanded] Whether the popover is open.
  * @param[onDismissRequest] Called when the popover asks to close. It must set [expanded] to false,
@@ -49,11 +45,7 @@ public fun BuilderPopover(
     anchor: @Composable () -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val tokens = LocalBuilderTokens.current
-    val style = when (LocalSkin.current.library) {
-        SkinLibrary.Material3 -> materialPopoverStyle()
-        SkinLibrary.Custom -> customOverlayStyle(tokens)
-    }
+    val style = materialPopoverStyle()
     val trigger = remember { FocusRequester() }
     Box(modifier.focusRequester(trigger)) {
         anchor()

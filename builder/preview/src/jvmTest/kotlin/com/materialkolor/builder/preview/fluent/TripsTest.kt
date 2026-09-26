@@ -44,7 +44,7 @@ import com.materialkolor.builder.kit.a11y.KitTestApi
 import com.materialkolor.builder.kit.a11y.ProvideWebFoldsForTest
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.Chrome
-import com.materialkolor.builder.preview.ShellChrome
+import com.materialkolor.builder.preview.ShellExpressive
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.inspect.INSPECT_CARD_TAG
@@ -267,7 +267,11 @@ class TripsTest {
             val state = DemoAppState().apply { setOn(OfflineMapsSwitch, true) }
             setContent {
                 CompositionLocalProvider(LocalMotionFrozen provides true) {
-                    Inspecting(shown = PreviewMode.Light, split = remember { SplitState() }, skin = ShellChrome) {
+                    Inspecting(
+                        shown = PreviewMode.Light,
+                        split = remember { SplitState() },
+                        expressive = ShellExpressive,
+                    ) {
                         PreviewPane(FluentLightSpec, Modifier.fillMaxSize()) {
                             FluentAppEntry(FluentLightSpec, state, DeviceWidth.Phone)
                         }
@@ -295,7 +299,7 @@ class TripsTest {
             val state = DemoAppState()
             setContent {
                 CompositionLocalProvider(LocalMotionFrozen provides true) {
-                    Chrome(ShellChrome) {
+                    Chrome(ShellExpressive) {
                         ProvideWebFoldsForTest {
                             PreviewPane(FluentLightSpec, Modifier.size(840.dp, 1400.dp)) {
                                 FluentAppEntry(FluentLightSpec, state, DeviceWidth.Tablet)

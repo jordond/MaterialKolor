@@ -55,7 +55,6 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.materialkolor.builder.kit.control.BuilderIcon
-import com.materialkolor.builder.kit.control.BuilderMenuItem
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
@@ -64,7 +63,6 @@ import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.foldMenuRow
 import com.materialkolor.builder.kit.control.foldOption
 import com.materialkolor.builder.kit.control.foldState
-import com.materialkolor.builder.kit.control.shownChoiceName
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
@@ -275,64 +273,6 @@ internal fun HeadlessDropdownItem(
 }
 
 /**
- * A menu of commands under [anchor], closing itself once a row is chosen.
- */
-@Composable
-internal fun HeadlessMenu(
-    expanded: Boolean,
-    onDismissRequest: () -> Unit,
-    items: List<BuilderMenuItem>,
-    style: OverlayStyle,
-    modifier: Modifier,
-    anchor: @Composable () -> Unit,
-) {
-    val trigger = remember { FocusRequester() }
-    Box(modifier.focusRequester(trigger)) {
-        anchor()
-        HeadlessDropdown(expanded, onDismissRequest, style, returnFocusTo = trigger) { close ->
-            HeadlessMenuRows(items, style, close)
-        }
-    }
-}
-
-/**
- * A menu drawn open where it stands, the rows of [HeadlessMenu] in its list with nothing floating.
- */
-@Composable
-internal fun HeadlessMenuPanel(
-    items: List<BuilderMenuItem>,
-    style: OverlayStyle,
-    modifier: Modifier,
-) {
-    DropdownList(style, modifier = modifier) { HeadlessMenuRows(items, style, close = {}) }
-}
-
-/**
- * One row per item, each calling [close] before it runs its item.
- */
-@Composable
-private fun HeadlessMenuRows(
-    items: List<BuilderMenuItem>,
-    style: OverlayStyle,
-    close: () -> Unit,
-) {
-    for (item in items) {
-        HeadlessDropdownItem(
-            label = item.label,
-            onClick = {
-                close()
-                item.onClick()
-            },
-            style = style,
-            icon = item.icon,
-            emphasis = item.emphasis,
-            enabled = item.enabled,
-            selected = item.selected,
-        )
-    }
-}
-
-/**
  * A field showing the chosen option, opening the list of the rest.
  *
  * The field reads as a dropdown list with the chosen option as its state, and each option reads as
@@ -392,41 +332,9 @@ internal fun <T> HeadlessSelect(
 }
 
 /**
- * A select drawn open where it stands, its field over the list of [HeadlessSelect] with nothing
- * floating. The field only shows the choice, so Tab goes straight to the options. On the web it
- * plays no role and reads as text, "Style, Vibrant".
- */
-@Composable
-internal fun <T> HeadlessSelectPanel(
-    label: String,
-    options: List<T>,
-    selected: T,
-    onSelect: (T) -> Unit,
-    optionLabel: (T) -> String,
-    style: OverlayStyle,
-    modifier: Modifier,
-) {
-    val current = optionLabel(selected)
-    Column(modifier.width(IntrinsicSize.Max)) {
-        SelectField(
-            label = label,
-            current = current,
-            enabled = true,
-            style = style,
-            modifier = Modifier.shownChoiceName(label, current).fillMaxWidth(),
-            action = Modifier.semantics(mergeDescendants = true) { role = Role.DropdownList },
-        )
-        DropdownList(style, modifier = Modifier.fillMaxWidth()) {
-            HeadlessSelectRows(options, selected, optionLabel, onSelect, style, selectedRow = null)
-        }
-    }
-}
-
-/**
  * A select's field, its label over the choice and a chevron after them, at the far end when the
  * field is wider than they are. It reads as a dropdown list whose state is the choice, and [action]
- * makes it one. On the web its name carries the role word, "Style, pop-up button, Tonal spot",
- * unless [modifier] starts with [shownChoiceName] for a field that only shows the choice.
+ * makes it one. On the web its name carries the role word, "Style, pop-up button, Tonal spot".
  */
 @Composable
 private fun SelectField(

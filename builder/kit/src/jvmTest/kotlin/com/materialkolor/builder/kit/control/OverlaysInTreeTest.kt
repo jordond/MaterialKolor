@@ -153,8 +153,8 @@ class OverlaysInTreeTest {
     @Test
     fun menu_eachWay_opensOnTheFirstRowAndChoosingOneCloses() =
         hostEachWay { skin, inTree ->
-            // Material3 in windows keeps its own DropdownMenu, which leaves focus on the popup itself.
-            val firstRowFocused = inTree || skin.library != SkinLibrary.Material3
+            // In windows Material keeps its own DropdownMenu, which leaves focus on the popup itself.
+            val firstRowFocused = inTree
             var open by mutableStateOf(true)
             var chosen: String? = null
             setContent {
@@ -479,7 +479,7 @@ class OverlaysInTreeTest {
         runComposeUiTest {
             val failure = shouldThrow<IllegalStateException> {
                 setContent {
-                    HostOverlays(Skin(SkinLibrary.Custom, expressive = false), inTree = true) {
+                    HostOverlays(Skin(SkinLibrary.Material3, expressive = false), inTree = true) {
                         CompositionLocalProvider(LocalOverlayHost provides null) {
                             BuilderDialog(true, {}, "Rename") { BuilderText("Sunset") }
                         }

@@ -37,7 +37,6 @@ import com.materialkolor.builder.kit.control.BuilderMenuItem
 import com.materialkolor.builder.kit.control.BuilderToast
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.foldMenuRow
-import com.materialkolor.builder.kit.headless.DropdownList
 import com.materialkolor.builder.kit.headless.HeadlessDropdown
 import com.materialkolor.builder.kit.headless.HeadlessTooltip
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
@@ -92,9 +91,6 @@ internal fun materialOverlayStyle(
         tooltip = colors.inverseSurface,
         tooltipContent = colors.inverseOnSurface,
         tooltipBorder = null,
-        toast = colors.inverseSurface,
-        toastContent = colors.inverseOnSurface,
-        toastBorder = null,
         thumb = colors.outline,
         panelTitle = MaterialTheme.typography.headlineSmall,
     )
@@ -190,18 +186,6 @@ internal fun MaterialMenu(
             MaterialMenuRows(items, onDismissRequest)
         }
     }
-}
-
-/**
- * Material's menu drawn open where it stands, the rows of [MaterialMenu] in Material's menu
- * container, with nothing floating.
- */
-@Composable
-internal fun MaterialMenuPanel(
-    items: List<BuilderMenuItem>,
-    modifier: Modifier,
-) {
-    DropdownList(materialMenuStyle(), modifier = modifier) { MaterialMenuRows(items, onDismissRequest = {}) }
 }
 
 @Composable

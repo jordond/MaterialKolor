@@ -143,7 +143,7 @@ class RingEdgesTest {
         forEachSkin { _, skin ->
             val capture = tabOntoRing(skin) {
                 Box(Modifier.size(360.dp, 240.dp)) {
-                    BuilderBottomSheet(rememberBottomSheetState(), label = "Poster") { BuilderText("Poster body") }
+                    TestBottomSheet(rememberBottomSheetState(), label = "Poster") { BuilderText("Poster body") }
                 }
             }
             capture.shouldShowRing()

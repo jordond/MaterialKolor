@@ -17,8 +17,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.height
 import androidx.compose.ui.unit.width
 import com.materialkolor.builder.engine.resolve.ThemeResolver
-import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinTestTheme
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
@@ -112,5 +112,5 @@ private fun RunningHarness(
     content: @Composable () -> Unit,
 ) {
     val result = remember { ThemeResolver().resolve(WidgetDocument) }
-    BuilderTheme(skin, result, isDark = false, reducedMotion = reducedMotion, content = content)
+    SkinTestTheme(skin, result, isDark = false, reducedMotion = reducedMotion, content = content)
 }

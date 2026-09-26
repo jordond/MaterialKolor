@@ -3,6 +3,8 @@ package com.materialkolor.builder.preview.custom
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -39,10 +41,7 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.preview.Chrome
-import com.materialkolor.builder.preview.ChromeResult
 import com.materialkolor.builder.preview.LightSpec
 import com.materialkolor.builder.preview.PreviewResult
 import com.materialkolor.builder.preview.canvas.ComponentsTab
@@ -64,11 +63,6 @@ import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.test.Test
-
-/**
- * The chrome the gallery sits in, the Custom skin coloured from the red chrome document.
- */
-private val GallerySkin: Skin = Skin(SkinLibrary.Custom, expressive = false)
 
 /**
  * The phone and desktop frames the gallery is checked at, at the height of a first screen.
@@ -169,18 +163,28 @@ class CustomGalleryTest {
         }
 
     @Test
-    fun gallery_underARedCustomChrome_paintsThePanesSlots() =
+    fun gallery_underARedChrome_paintsThePanesSlots() =
         runDesktopComposeUiTest(1280, 800) {
-            setContent { GalleryHarness(LightSpec, DemoAppState(), Modifier.fillMaxSize()) }
+            var chromeScheme: ColorScheme? = null
+            setContent {
+                GalleryHarness(LightSpec, DemoAppState(), Modifier.fillMaxSize(), onChrome = { chromeScheme = it })
+            }
             waitForIdle()
 
             val pixels = onRoot().captureToImage().toPixelMap().let { map ->
                 buildSet { for (x in 0 until map.width) for (y in 0 until map.height) add(map[x, y].toArgb()) }
             }
-            for (slot in listOf(CustomSlot.Primary, CustomSlot.SurfaceSunken, CustomSlot.Surface)) {
+            val scheme = checkNotNull(chromeScheme)
+            // Each pane slot beside the chrome role it would have leaked from.
+            val pairs = listOf(
+                CustomSlot.Primary to scheme.primary,
+                CustomSlot.SurfaceSunken to scheme.surfaceContainerLow,
+                CustomSlot.Surface to scheme.surface,
+            )
+            for ((slot, chromeRole) in pairs) {
                 withClue(slot) {
                     val pane = PreviewResult.customSlots[slot, false].toColor().toArgb()
-                    val chrome = ChromeResult.chromeCustomSlots[slot, false].toColor().toArgb()
+                    val chrome = chromeRole.toArgb()
                     (pane != chrome) shouldBe true
                     pixels shouldContain pane
                     pixels shouldNotContain chrome
@@ -354,7 +358,8 @@ private fun SemanticsNodeInteractionsProvider.galleryRowsOnScreen(composed: Set<
 }
 
 /**
- * The Custom gallery in a pane of [spec], under a red Custom chrome, with motion frozen.
+ * The Custom gallery in a pane of [spec], under the red chrome, with motion frozen. [onChrome] hears
+ * the chrome's own colour scheme, read outside the pane.
  */
 @Composable
 private fun GalleryHarness(
@@ -362,12 +367,14 @@ private fun GalleryHarness(
     state: DemoAppState,
     modifier: Modifier,
     composed: MutableSet<String>? = null,
+    onChrome: (ColorScheme) -> Unit = {},
 ) {
     val probe: ((String) -> Unit)? = composed?.let { titles ->
         { where: String -> if (where.startsWith(GALLERY_CARD)) titles += where.removePrefix(GALLERY_CARD) }
     }
     CompositionLocalProvider(LocalMotionFrozen provides true, LocalCompositionProbe provides probe) {
-        Chrome(GallerySkin) {
+        Chrome {
+            onChrome(MaterialTheme.colorScheme)
             ProvideBuilderLayout(modifier = modifier) {
                 val custom = remember(spec) { spec.on(Library.Custom) }
                 PreviewPane(custom, Modifier.fillMaxSize()) { ComponentsTab(custom, state) }

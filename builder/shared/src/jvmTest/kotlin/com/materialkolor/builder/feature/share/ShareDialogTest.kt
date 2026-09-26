@@ -34,8 +34,6 @@ import com.materialkolor.builder.fakes.FakeFileSaver
 import com.materialkolor.builder.fakes.FakeLinkCardSource
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.floats.shouldBeLessThanOrEqual
@@ -310,7 +308,7 @@ class ShareDialogTest : SessionTestBase() {
     ) {
         setContent {
             BuilderTheme(
-                skin = Skin(library = SkinLibrary.Material3, expressive = false),
+                expressive = false,
                 result = ThemeResolver().resolve(ThemeDocument.Default),
                 isDark = false,
                 reducedMotion = true,

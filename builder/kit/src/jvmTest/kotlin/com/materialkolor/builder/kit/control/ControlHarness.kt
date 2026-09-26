@@ -3,6 +3,7 @@ package com.materialkolor.builder.kit.control
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -14,18 +15,23 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
+import com.materialkolor.builder.kit.headless.HeadlessBottomSheet
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.skin.BuilderTheme
+import com.materialkolor.builder.kit.shell.posterDetentNames
+import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.SkinLibrary
+import com.materialkolor.builder.kit.skin.SkinTestTheme
+import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
 
@@ -59,7 +65,7 @@ internal fun ControlsHarness(
 ) {
     val result = remember { ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4))) }
     CompositionLocalProvider(LocalMotionFrozen provides true) {
-        BuilderTheme(skin, result, isDark, reducedMotion = false) {
+        SkinTestTheme(skin, result, isDark, reducedMotion = false) {
             ProvideBuilderLayout(modifier = Modifier.fillMaxSize()) { content() }
         }
     }
@@ -135,7 +141,7 @@ internal fun SkinnedPanel(
 ) {
     val result = remember { ThemeResolver().resolve(Document) }
     CompositionLocalProvider(LocalMotionFrozen provides true, LocalLayout provides Desktop) {
-        BuilderTheme(variant.skin, result, isDark, reducedMotion = false) {
+        SkinTestTheme(variant.skin, result, isDark, reducedMotion = false) {
             Box(Modifier.background(LocalBuilderTokens.current.panel).padding(16.dp)) {
                 content()
             }
@@ -153,4 +159,28 @@ internal fun forEverySkin(block: ComposeUiTest.(SkinVariant) -> Unit) {
             withClue(variant.name) { block(variant) }
         }
     }
+}
+
+/**
+ * The headless bottom sheet in the surrounding skin's overlay style, named by the kit's detent
+ * names, the way the shell draws the poster's sheet.
+ */
+@Composable
+internal fun TestBottomSheet(
+    state: BottomSheetState,
+    label: String,
+    modifier: Modifier = Modifier,
+    detentLabel: (BottomSheetDetent) -> String = posterDetentNames(),
+    peekHeight: Dp = OverlayMetrics.sheetPeekHeight,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    HeadlessBottomSheet(
+        state = state,
+        label = label,
+        detentLabel = detentLabel,
+        peekHeight = peekHeight,
+        style = overlayStyle(LocalSkin.current.library),
+        modifier = modifier,
+        content = content,
+    )
 }

@@ -3,16 +3,11 @@ package com.materialkolor.builder.kit.skin.material
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.MaterialTheme
@@ -22,11 +17,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.kit.shell.PanelSide
 import com.materialkolor.builder.kit.shell.ShellMetrics
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
@@ -116,59 +109,3 @@ internal fun MaterialWindowRegion(
         Box(content = content)
     }
 }
-
-/**
- * A Material surface in the side panel's style, rounded on its inner edge like Material's side sheet.
- */
-@Composable
-internal fun MaterialPanelRegion(
-    side: PanelSide,
-    modifier: Modifier,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    val style = materialOverlayStyle()
-    Surface(
-        modifier = modifier.fillMaxHeight(),
-        shape = innerEdgeShape(side, style.panelRadius),
-        color = style.surface,
-        shadowElevation = style.shadow,
-    ) {
-        Column(content = content)
-    }
-}
-
-/**
- * Material's dialog container, its shape, colour and tonal elevation.
- */
-@Composable
-internal fun MaterialPaletteFrame(
-    modifier: Modifier,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    val tokens = LocalBuilderTokens.current
-    Surface(
-        modifier = modifier,
-        shape = AlertDialogDefaults.shape,
-        color = AlertDialogDefaults.containerColor,
-        tonalElevation = AlertDialogDefaults.TonalElevation,
-    ) {
-        Column(
-            modifier = Modifier.padding(tokens.spacing.large),
-            verticalArrangement = Arrangement.spacedBy(tokens.spacing.small),
-            content = content,
-        )
-    }
-}
-
-/**
- * A shape rounded by [radius] only on the edge that faces the canvas, the end edge of a panel on
- * the start side and the other way round.
- */
-private fun innerEdgeShape(
-    side: PanelSide,
-    radius: Dp,
-): Shape =
-    when (side) {
-        PanelSide.Start -> RoundedCornerShape(topEnd = radius, bottomEnd = radius)
-        PanelSide.End -> RoundedCornerShape(topStart = radius, bottomStart = radius)
-    }

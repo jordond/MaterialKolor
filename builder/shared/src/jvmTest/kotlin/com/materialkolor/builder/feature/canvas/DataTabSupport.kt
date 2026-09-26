@@ -14,8 +14,6 @@ import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.stateholder.dispatcher.Dispatcher
 
 /**
@@ -53,7 +51,6 @@ internal class TabActions {
 @Composable
 internal fun DataTabTheme(
     result: ThemeResult,
-    skin: Skin = Skin(SkinLibrary.Material3, expressive = false),
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(
@@ -61,7 +58,7 @@ internal fun DataTabTheme(
         LocalThemeResult provides result,
     ) {
         BuilderTheme(
-            skin = skin,
+            expressive = false,
             result = result,
             isDark = false,
             reducedMotion = false,

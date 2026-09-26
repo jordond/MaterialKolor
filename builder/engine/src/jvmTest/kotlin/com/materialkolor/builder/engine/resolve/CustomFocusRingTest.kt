@@ -46,13 +46,12 @@ class CustomFocusRingTest {
             for (seed in Seeds) {
                 for (style in Style.entries) {
                     val result = resolver.resolve(ThemeDocument(seed = seed, style = style))
-                    for (slots in listOf(result.customSlots, result.chromeCustomSlots)) {
-                        for (isDark in listOf(false, true)) {
-                            val ring = slots[CustomSlot.FocusRing, isDark].toColor()
-                            for (ground in RingGrounds) {
-                                val ratio = ring.contrastRatio(slots[ground, isDark].toColor())
-                                if (ratio < RingContrast) add("${seed.toHex()} $style dark $isDark on $ground $ratio")
-                            }
+                    val slots = result.customSlots
+                    for (isDark in listOf(false, true)) {
+                        val ring = slots[CustomSlot.FocusRing, isDark].toColor()
+                        for (ground in RingGrounds) {
+                            val ratio = ring.contrastRatio(slots[ground, isDark].toColor())
+                            if (ratio < RingContrast) add("${seed.toHex()} $style dark $isDark on $ground $ratio")
                         }
                     }
                 }

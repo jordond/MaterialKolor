@@ -17,12 +17,12 @@ private val ShellFrameWidths = listOf(390, 1280)
 class ShellOverflowTest {
     @Test
     fun emptyShell_everySkin_rendersAtPhoneAndDesktopWidths() {
-        for ((name, skin) in ShellSkins) {
+        for ((name, expressive) in ShellFlavours) {
             for (width in ShellFrameWidths) {
                 withClue("$name at $width dp") {
                     runSkikoComposeUiTest(size = Size(width.toFloat(), ShellFrameHeight.toFloat())) {
                         setContent {
-                            ShellHarness(skin) {
+                            ShellHarness(expressive) {
                                 WorkspaceShell(
                                     posterColors = ShellPosterColors,
                                     posterCollapsed = false,

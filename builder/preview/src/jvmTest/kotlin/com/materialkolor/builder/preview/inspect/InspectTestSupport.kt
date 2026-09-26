@@ -14,8 +14,6 @@ import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.PreviewResult
 import com.materialkolor.builder.preview.split.SplitState
@@ -36,14 +34,14 @@ internal val PrimaryPair: Array<ColorRef> = arrayOf(ColorRef.OfRole(Role.Primary
 internal val OnCard: SemanticsMatcher = hasAnyAncestor(hasTestTag(INSPECT_CARD_TAG))
 
 /**
- * Inspect on over [content] in a 600 by 400 dp preview, in the chrome of [skin], Material unless given.
+ * Inspect on over [content] in a 600 by 400 dp preview, in the Expressive chrome when [expressive].
  */
 @Composable
 internal fun Inspecting(
     shown: PreviewMode,
     split: SplitState,
     onLeave: () -> Unit = {},
-    skin: Skin = Skin(SkinLibrary.Material3, expressive = false),
+    expressive: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val actions = remember {
@@ -55,7 +53,7 @@ internal fun Inspecting(
             onLeave = onLeave,
         )
     }
-    Chrome(skin) {
+    Chrome(expressive) {
         ProvideBuilderLayout(modifier = Modifier.size(600.dp, 400.dp)) {
             InspectOverlay(
                 on = true,

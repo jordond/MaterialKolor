@@ -48,7 +48,7 @@ import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.DarkSpec
 import com.materialkolor.builder.preview.LightSpec
-import com.materialkolor.builder.preview.ShellChrome
+import com.materialkolor.builder.preview.ShellExpressive
 import com.materialkolor.builder.preview.canvas.ComponentsTab
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.GALLERY_CARD
@@ -331,7 +331,7 @@ class UnstyledGalleryTest {
                     Inspecting(
                         shown = PreviewMode.Light,
                         split = remember { SplitState() },
-                        skin = ShellChrome,
+                        expressive = ShellExpressive,
                     ) {
                         val unstyled = remember { LightSpec.on(Library.Unstyled) }
                         PreviewPane(unstyled, Modifier.fillMaxSize()) { ComponentsTab(unstyled, state) }
@@ -493,7 +493,7 @@ private fun GalleryHarness(
         { where: String -> if (where.startsWith(GALLERY_CARD)) titles += where.removePrefix(GALLERY_CARD) }
     }
     CompositionLocalProvider(LocalMotionFrozen provides true, LocalCompositionProbe provides probe) {
-        Chrome(ShellChrome) {
+        Chrome(ShellExpressive) {
             val unstyled = remember(spec) { spec.on(Library.Unstyled) }
             if (webFolds) {
                 ProvideWebFoldsForTest { PreviewPane(unstyled, modifier) { ComponentsTab(unstyled, state) } }

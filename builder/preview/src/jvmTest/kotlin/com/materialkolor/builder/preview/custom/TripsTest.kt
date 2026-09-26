@@ -40,8 +40,6 @@ import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.LightSpec
 import com.materialkolor.builder.preview.canvas.DemoAppState
@@ -206,11 +204,6 @@ private val TripsFrames: Map<DeviceWidth, IntSize> = mapOf(
 )
 
 /**
- * The chrome the app sits in, the Custom skin coloured from the red chrome document.
- */
-private val TripsSkin: Skin = Skin(SkinLibrary.Custom, expressive = false)
-
-/**
  * The blue preview document with eight accents, twice as many as there are trips.
  */
 private val AccentDocument: ThemeDocument = ThemeDocument(
@@ -337,7 +330,7 @@ private fun SemanticsNodeInteractionsProvider.tripsRefsOnScreen(): List<ColorRef
 }
 
 /**
- * The Trips app in a Custom pane of [spec], under a red Custom chrome, with motion frozen.
+ * The Trips app in a Custom pane of [spec], under the red chrome, with motion frozen.
  */
 @Composable
 private fun TripsHarness(
@@ -347,7 +340,7 @@ private fun TripsHarness(
     modifier: Modifier,
 ) {
     CompositionLocalProvider(LocalMotionFrozen provides true) {
-        Chrome(TripsSkin) {
+        Chrome {
             ProvideBuilderLayout(modifier = modifier) {
                 PreviewPane(spec, Modifier.fillMaxSize()) { CustomAppEntry(spec, state, width) }
             }

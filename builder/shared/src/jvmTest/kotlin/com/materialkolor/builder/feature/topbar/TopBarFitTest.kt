@@ -31,7 +31,7 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.materialkolor.builder.BuilderRoot
-import com.materialkolor.builder.ShellSkin
+import com.materialkolor.builder.ShellExpressive
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
@@ -330,7 +330,7 @@ class TopBarFitTest {
         setContent {
             val dispatcher = rememberDispatcher<WorkspaceAction> {}
             BuilderTheme(
-                skin = ShellSkin,
+                expressive = ShellExpressive,
                 result = ThemeResolver().resolve(document),
                 isDark = false,
                 reducedMotion = true,

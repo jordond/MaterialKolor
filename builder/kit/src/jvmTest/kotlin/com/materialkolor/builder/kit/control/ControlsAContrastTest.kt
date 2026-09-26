@@ -30,9 +30,9 @@ import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.SkinLibrary
+import com.materialkolor.builder.kit.skin.SkinTestTheme
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -87,7 +87,7 @@ private fun ComposeUiTest.checkSheets(skin: Skin) {
             LocalMotionFrozen provides true,
             LocalLayout provides if (compact) CompactLayout else SheetLayout,
         ) {
-            BuilderTheme(skin, result, isDark, reducedMotion = false) {
+            SkinTestTheme(skin, result, isDark, reducedMotion = false) {
                 tokens = LocalBuilderTokens.current
                 if (compact) CompactSheet() else ControlSheet()
             }

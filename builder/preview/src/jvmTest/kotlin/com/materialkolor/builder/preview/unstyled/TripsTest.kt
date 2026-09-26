@@ -33,7 +33,7 @@ import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.LightSpec
-import com.materialkolor.builder.preview.ShellChrome
+import com.materialkolor.builder.preview.ShellExpressive
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.inspect.PreviewRoles
@@ -240,7 +240,7 @@ private fun TripsHarness(
     modifier: Modifier,
 ) {
     CompositionLocalProvider(LocalMotionFrozen provides true) {
-        Chrome(ShellChrome) {
+        Chrome(ShellExpressive) {
             val unstyled = remember(spec) { spec.on(Library.Unstyled) }
             PreviewPane(unstyled, modifier) { UnstyledAppEntry(unstyled, state, width) }
         }

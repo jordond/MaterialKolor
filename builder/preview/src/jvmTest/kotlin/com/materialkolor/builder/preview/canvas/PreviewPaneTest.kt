@@ -31,9 +31,6 @@ import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.ThemeResolver
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
-import com.materialkolor.builder.kit.skin.custom.LocalBuilderIdentity
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.LightSpec
 import com.materialkolor.builder.preview.PaneLibraries
@@ -69,10 +66,9 @@ class PreviewPaneTest {
                 runComposeUiTest {
                     val seen = Seen()
                     val spec = LightSpec.on(pane)
-                    val chrome = chromeFor(pane)
                     setContent {
-                        Chrome(chrome) {
-                            seen.chromePrimary = chromePrimaryOf(chrome)
+                        Chrome(pane.expressive) {
+                            seen.chromePrimary = MaterialTheme.colorScheme.primary
                             PreviewPane(spec) {
                                 seen.panePrimary = panePrimaryOf(pane.library)
                                 seen.materialContent = MaterialContentColor.current
@@ -125,7 +121,7 @@ class PreviewPaneTest {
                     var primary: Color? = null
                     var background: Color? = null
                     setContent {
-                        Chrome(chromeFor(pane)) {
+                        Chrome(pane.expressive) {
                             PreviewPane(dark.on(pane)) {
                                 if (pane.library == Library.Unstyled) {
                                     val colors = Theme[MaterialKolorTokens.colors]
@@ -155,7 +151,7 @@ class PreviewPaneTest {
                     var chrome: TextStyle? = null
                     var pane: TextStyle? = null
                     setContent {
-                        Chrome(Skin(SkinLibrary.Material3, expressive)) {
+                        Chrome(expressive) {
                             chrome = MaterialTheme.typography.bodyLarge
                             PreviewPane(LightSpec.on(Library.Material3, expressive)) {
                                 pane =
@@ -186,7 +182,7 @@ class PreviewPaneTest {
                     )
                     var seen: MotionScheme? = null
                     setContent {
-                        Chrome(Skin(SkinLibrary.Material3, expressive = true)) {
+                        Chrome(expressive = true) {
                             PreviewPane(PaneSpec(result, isDark = false, label = "Light")) {
                                 seen = MaterialTheme.motionScheme
                             }
@@ -207,7 +203,7 @@ class PreviewPaneTest {
                 runComposeUiTest {
                     var clicks = 0
                     setContent {
-                        Chrome(Skin(SkinLibrary.Material3, expressive = true)) {
+                        Chrome(expressive = true) {
                             PreviewPane(LightSpec.on(pane)) {
                                 Box(Modifier.size(40.dp).testTag("tap").clickable { clicks++ })
                             }
@@ -247,27 +243,6 @@ class PreviewPaneTest {
             }
         }
 }
-
-/**
- * The chrome a test draws [pane] under, Custom for a Custom pane and Material 3 in the pane's flavour
- * for the rest, the two skins the builder's chrome has.
- */
-private fun chromeFor(pane: PaneLibrary): Skin =
-    if (pane.library == Library.Custom) {
-        Skin(SkinLibrary.Custom, expressive = false)
-    } else {
-        Skin(SkinLibrary.Material3, pane.expressive)
-    }
-
-/**
- * The primary color the chrome in [skin] hands out.
- */
-@Composable
-private fun chromePrimaryOf(skin: Skin): Color =
-    when (skin.library) {
-        SkinLibrary.Material3 -> MaterialTheme.colorScheme.primary
-        SkinLibrary.Custom -> LocalBuilderIdentity.current[CustomSlot.Primary]
-    }
 
 /**
  * The primary color a pane in [library] hands out.

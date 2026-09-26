@@ -53,13 +53,13 @@ class PosterSurfaceTest {
 
     @Test
     fun posterSurface_fiftySeeds_inkHoldsOnTheSeedInEverySkin() {
-        for ((name, skin) in ShellSkins) {
+        for ((name, expressive) in ShellFlavours) {
             withClue(name) {
                 runComposeUiTest {
                     var seed by mutableStateOf(ShellSeeds.first())
                     var inks: List<ShellInk> = emptyList()
                     setContent {
-                        ShellHarness(skin) {
+                        ShellHarness(expressive) {
                             val poster = remember(seed) { PosterColors.of(seed) }
                             PosterSurface(poster) { inks = shellInks(poster) }
                         }
@@ -86,12 +86,12 @@ class PosterSurfaceTest {
 
     @Test
     fun posterSurface_everySkin_standsOnTheExactSeed() {
-        for ((name, skin) in ShellSkins) {
+        for ((name, expressive) in ShellFlavours) {
             withClue(name) {
                 runComposeUiTest {
                     var grounds: List<Color> = emptyList()
                     setContent {
-                        ShellHarness(skin) {
+                        ShellHarness(expressive) {
                             PosterSurface(ShellPosterColors) {
                                 grounds =
                                     shellInks(ShellPosterColors).map { pair -> pair.ground }
@@ -108,13 +108,13 @@ class PosterSurfaceTest {
 
     @Test
     fun posterSurface_newPosterOnTheSameSeed_recomposesNothingUnderIt() {
-        for ((name, skin) in ShellSkins) {
+        for ((name, expressive) in ShellFlavours) {
             withClue(name) {
                 runComposeUiTest {
                     var poster by mutableStateOf(ShellPosterColors)
                     val count = CompositionCount()
                     setContent {
-                        ShellHarness(skin) { PosterSurface(poster) { Counted(count) } }
+                        ShellHarness(expressive) { PosterSurface(poster) { Counted(count) } }
                     }
                     waitForIdle()
                     val before = count.value

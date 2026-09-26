@@ -10,8 +10,6 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import kotlin.test.Test
 
 private const val FILE = "val primary = Color(0xFF6750A4)\nval onPrimary = Color(0xFFFFFFFF)"
@@ -68,7 +66,7 @@ class ManualCopyDialogTest {
     ) {
         setContent {
             BuilderTheme(
-                skin = Skin(library = SkinLibrary.Material3, expressive = false),
+                expressive = false,
                 result = ThemeResolver().resolve(ThemeDocument.Default),
                 isDark = false,
                 reducedMotion = true,

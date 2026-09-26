@@ -125,7 +125,7 @@ private fun OverlayScene(
                 }
             }
             Box(Modifier.width(360.dp).fillMaxHeight()) {
-                BuilderBottomSheet(rememberBottomSheetState(BottomSheetDetent.Half), label = "Poster") {
+                TestBottomSheet(rememberBottomSheetState(BottomSheetDetent.Half), label = "Poster") {
                     BuilderText("#6750A4", Modifier.padding(tokens.spacing.large), style = BuilderTextStyle.PosterHero)
                 }
             }
@@ -161,7 +161,6 @@ private fun OverlayStyle.inkPairs(tokens: BuilderTokens): List<InkPair> =
         InkPair("muted on field", muted, field, 4.5),
         InkPair("content on field", content, field, 4.5),
         InkPair("tooltip ink", tooltipContent, tooltip, 4.5),
-        InkPair("toast ink", toastContent, toast, 4.5),
         InkPair("focus on surface", focus, surface, 3.0),
         InkPair("thumb on surface", thumb, surface, 3.0),
     )

@@ -17,7 +17,7 @@ import com.materialkolor.builder.kit.a11y.KitTestApi
 import com.materialkolor.builder.kit.a11y.ProvideWebFoldsForTest
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.Chrome
-import com.materialkolor.builder.preview.ShellChrome
+import com.materialkolor.builder.preview.ShellExpressive
 import com.materialkolor.builder.preview.canvas.ComponentsTab
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.GALLERY_CARD
@@ -132,7 +132,7 @@ internal fun GalleryHarness(
         { where: String -> if (where.startsWith(GALLERY_CARD)) titles += where.removePrefix(GALLERY_CARD) }
     }
     CompositionLocalProvider(LocalMotionFrozen provides true, LocalCompositionProbe provides probe) {
-        Chrome(ShellChrome) {
+        Chrome(ShellExpressive) {
             if (webFolds) {
                 ProvideWebFoldsForTest { PreviewPane(spec, modifier) { ComponentsTab(spec, state) } }
             } else {
