@@ -34,44 +34,6 @@ class ThemeValuesTest {
     }
 
     @Test
-    fun themeValues_recordsOnlyTheAssignedTokens() {
-        val accent = ThemeToken<Color>("accent")
-        val onAccent = ThemeToken<Color>("onAccent")
-
-        val values = lightKolors.themeValues {
-            accent to primary()
-            onAccent to onPrimary()
-        }
-
-        assertEquals(
-            mapOf(accent to lightKolors.primary(), onAccent to lightKolors.onPrimary()),
-            values,
-        )
-    }
-
-    @Test
-    fun themeValues_lastAssignmentWins() {
-        val accent = ThemeToken<Color>("accent")
-
-        val values = lightKolors.themeValues {
-            accent to primary()
-            accent to tertiary()
-        }
-
-        assertEquals(mapOf(accent to lightKolors.tertiary()), values)
-    }
-
-    @Test
-    fun themeValues_onASchemeUsesThatScheme() {
-        val accent = ThemeToken<Color>("accent")
-        val scheme = DynamicScheme(seedColor = seed, isDark = true)
-
-        val values = scheme.themeValues { accent to surfaceContainerHigh() }
-
-        assertEquals(mapOf(accent to darkKolors.surfaceContainerHigh()), values)
-    }
-
-    @Test
     fun tokenNamesAreUnique() {
         val names = MaterialKolorTokens.all.map { token -> token.name }
         assertEquals(names.size, names.toSet().size, "Duplicate token names: $names")

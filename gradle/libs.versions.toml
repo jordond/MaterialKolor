@@ -19,6 +19,7 @@ dokka = "2.2.0"
 publish = "0.37.0"
 colormath = "3.7.0"
 composeUnstyled = "2.10.0"
+lucide = "1.1.0"
 fluent = "v0.1.0"
 poko = "0.23.2"
 errorProneAnnotations = "2.50.0"
@@ -68,6 +69,8 @@ compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-mu
 compose-ui-test = { module = "org.jetbrains.compose.ui:ui-test", version.ref = "compose-multiplatform" }
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
 composeUnstyled-theming = { module = "com.composables:composeunstyled-theming", version.ref = "composeUnstyled" }
+composeUnstyled = { module = "com.composables:composeunstyled", version.ref = "composeUnstyled" }
+lucide = { module = "com.composables:icons-lucide", version.ref = "lucide" }
 fluent = { module = "io.github.compose-fluent:fluent", version.ref = "fluent" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "androidx-activity" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
