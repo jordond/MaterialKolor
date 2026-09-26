@@ -112,6 +112,7 @@ internal class ProjectSession(
         now = now,
         tracker = tracker,
         state = _state,
+        setConflict = { conflict -> _state.update { state -> state.copy(conflict = conflict) } },
         showing = { current.value },
         showTheirs = { document -> showStep(document, clearConflict = true) },
         commit = ::commit,

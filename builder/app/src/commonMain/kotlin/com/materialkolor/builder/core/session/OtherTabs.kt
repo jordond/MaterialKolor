@@ -4,9 +4,8 @@ import com.materialkolor.builder.core.data.ProjectRepository
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ProjectRecord
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
 /**
@@ -28,7 +27,8 @@ import kotlinx.coroutines.launch
  * @param[tabId] This tab, so its own saves coming back are left alone.
  * @param[scope] The app scope, where other tabs' saves are watched.
  * @param[now] The time in epoch milliseconds, for the conflict window.
- * @param[state] The session's one state, which this writes the conflict into.
+ * @param[state] The session's one state, read for the document showing and the conflict.
+ * @param[setConflict] Puts up a conflict, or clears it with null, in the session's state.
  * @param[showing] The project the session shows now.
  * @param[showTheirs] Shows another tab's document as the newest step and clears the conflict in the
  * same write.
@@ -40,7 +40,8 @@ internal class OtherTabs(
     private val scope: CoroutineScope,
     private val now: () -> Long,
     private val tracker: EditTracker,
-    private val state: MutableStateFlow<SessionState>,
+    private val state: StateFlow<SessionState>,
+    private val setConflict: (Conflict?) -> Unit,
     private val showing: () -> OpenProject,
     private val showTheirs: (ThemeDocument) -> Unit,
     private val commit: (ThemeDocument) -> Unit,
@@ -65,7 +66,8 @@ internal class OtherTabs(
         val conflict = state.value.conflict ?: return
         val open = showing()
         if (keepMine) {
-            val mine = state.updateAndGet { state -> state.copy(conflict = null) }.document
+            setConflict(null)
+            val mine = state.value.document
             open.facts.update { facts -> facts.copy(held = conflict.theirs) }
             commit(mine)
         } else {
@@ -93,11 +95,11 @@ internal class OtherTabs(
             IncomingSave.Ignore -> {}
             IncomingSave.Matches -> {
                 open.facts.update { facts -> facts.copy(name = incoming.name, held = incoming) }
-                state.update { state -> state.copy(conflict = null) }
+                setConflict(null)
             }
             IncomingSave.RaiseConflict -> {
                 open.facts.update { facts -> facts.copy(name = incoming.name) }
-                state.update { state -> state.copy(conflict = Conflict(incoming)) }
+                setConflict(Conflict(incoming))
             }
             IncomingSave.Adopt -> {
                 adopt(open, incoming)
