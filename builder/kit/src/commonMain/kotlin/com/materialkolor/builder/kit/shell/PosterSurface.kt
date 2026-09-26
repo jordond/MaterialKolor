@@ -11,29 +11,23 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.poster.PosterColors
-import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.StatusColors
 import com.materialkolor.builder.kit.skin.builderCodePalette
-import com.materialkolor.builder.kit.skin.custom.BuilderIdentity
-import com.materialkolor.builder.kit.skin.custom.LocalBuilderIdentity
 import com.materialkolor.builder.kit.skin.headless.ScrimAlpha
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.ktx.toneColor
 
 /**
- * Themes [content] with the active skin, re-coloured from [poster], so the controls on the poster
- * stand on the seed in the seed's own tones.
+ * Themes [content] with the shell's Material skin, re-coloured from [poster], so the controls on
+ * the poster stand on the seed in the seed's own tones.
  *
- * The poster is content rather than chrome. It keeps its seed coloured look in every skin, and only
- * the shapes of its controls follow the skin. One exhaustive `when` re-provides the skin's theme the
- * way `BuilderTheme` does. Material3 gets a `ColorScheme` mapped from the poster rather than
- * generated, and Custom gets an identity cut from the same colours. Both branches also override the
- * builder tokens, so a builder widget on the poster reads ink on the seed too.
+ * The poster is content rather than chrome. It keeps its seed coloured look, and only the shapes of
+ * its controls follow the skin. It re-provides a `MaterialTheme` over a `ColorScheme` mapped from
+ * the poster rather than generated, and overrides the builder tokens, so a builder widget on the
+ * poster reads ink on the seed too.
  *
  * Nothing here paints. The shell lays the page under it.
  *
@@ -53,10 +47,7 @@ public fun PosterSurface(
     val paint = remember(kept) { PosterPaint(kept) }
     val tokens = remember(paint, outer) { paint.builderTokens(outer) }
     CompositionLocalProvider(LocalPosterColors provides kept) {
-        when (LocalSkin.current.library) {
-            SkinLibrary.Material3 -> MaterialPoster(paint, tokens, content)
-            SkinLibrary.Custom -> CustomPoster(paint, tokens, content)
-        }
+        MaterialPoster(paint, tokens, content)
     }
 }
 
@@ -65,8 +56,8 @@ public fun PosterSurface(
  * reads as its inverse.
  *
  * The page is the poster's ink, and the ink is a light tone of the seed's ramp on a light seed or
- * a dark one on a dark seed, from `PosterColors.inverse`. Every skin's controls inside follow it
- * with no work of their own, the way they follow [PosterSurface]. Call it inside a
+ * a dark one on a dark seed, from `PosterColors.inverse`. The controls inside follow it with no
+ * work of their own, the way they follow [PosterSurface]. Call it inside a
  * [PosterSurface]. Inside another inverse it turns the poster back.
  *
  * @param[content] Whatever stands on the inverse poster.
@@ -84,7 +75,7 @@ public fun InversePosterSurface(content: @Composable () -> Unit) {
 internal val LocalPosterColors: ProvidableCompositionLocal<PosterColors?> = staticCompositionLocalOf { null }
 
 /**
- * The handful of colours every skin's roles are cut from.
+ * The handful of colours the poster's roles are cut from.
  *
  * @property[page] The exact seed, or the poster's ink on the inverse.
  * @property[inkMuted] Muted ink, floored at 3 to 1 on the page, so only for strokes and never text.
@@ -139,14 +130,6 @@ private fun PosterPaint.builderTokens(outer: BuilderTokens): BuilderTokens =
         danger = ink,
         scrim = page.copy(alpha = ScrimAlpha),
     )
-
-@Composable
-private fun ProvidePosterTokens(
-    tokens: BuilderTokens,
-    content: @Composable () -> Unit,
-) {
-    CompositionLocalProvider(LocalBuilderTokens provides tokens, content = content)
-}
 
 /**
  * A `MaterialTheme` over the poster's scheme, keeping the skin's shapes, type and motion.
@@ -226,64 +209,3 @@ private fun PosterPaint.colorScheme(): ColorScheme =
         onTertiaryFixed = ink,
         onTertiaryFixedVariant = ink,
     )
-
-/**
- * The Custom skin with an identity cut from the poster, so Custom widgets reach for seed tones.
- */
-@Composable
-private fun CustomPoster(
-    paint: PosterPaint,
-    tokens: BuilderTokens,
-    content: @Composable () -> Unit,
-) {
-    val identity = remember(paint) {
-        BuilderIdentity(CustomSlot.entries.associateWith { slot -> paint.slot(slot) })
-    }
-    CompositionLocalProvider(LocalBuilderIdentity provides identity) {
-        ProvidePosterTokens(tokens, content)
-    }
-}
-
-/**
- * Which poster colour each Custom slot takes, on the same lines as the Material roles.
- */
-private fun PosterPaint.slot(slot: CustomSlot): Color =
-    when (slot) {
-        CustomSlot.Primary,
-        CustomSlot.PrimaryPressed,
-        CustomSlot.PrimaryRaised,
-        CustomSlot.OnPrimaryContainer,
-        CustomSlot.Secondary,
-        CustomSlot.OnSecondaryContainer,
-        CustomSlot.Tertiary,
-        CustomSlot.OnTertiaryContainer,
-        CustomSlot.Error,
-        CustomSlot.OnErrorContainer,
-        CustomSlot.SurfaceInverse,
-        CustomSlot.OnSurface,
-        CustomSlot.TextStrong,
-        CustomSlot.BorderStrong,
-        CustomSlot.FocusRing,
-        CustomSlot.TextMuted,
-        -> ink
-        CustomSlot.OnPrimary,
-        CustomSlot.OnSecondary,
-        CustomSlot.OnTertiary,
-        CustomSlot.OnError,
-        CustomSlot.Surface,
-        CustomSlot.OnSurfaceInverse,
-        -> page
-        CustomSlot.PrimaryContainer,
-        CustomSlot.SecondaryContainer,
-        CustomSlot.TertiaryContainer,
-        CustomSlot.ErrorContainer,
-        CustomSlot.SurfaceRaised,
-        -> raised
-        CustomSlot.SurfaceSunken -> sunken
-        CustomSlot.BorderFaint,
-        CustomSlot.BorderSoft,
-        -> outline
-        CustomSlot.Scrim,
-        CustomSlot.Shadow,
-        -> shade
-    }

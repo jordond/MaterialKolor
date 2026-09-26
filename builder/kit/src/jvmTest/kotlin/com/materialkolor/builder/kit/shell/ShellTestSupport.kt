@@ -44,7 +44,6 @@ internal val ShellPosterColors: PosterColors = PosterColors.of(Argb(0xD9653B))
 internal val ShellSkins: List<Pair<String, Skin>> = listOf(
     "material3" to Skin(SkinLibrary.Material3, expressive = false),
     "expressive" to Skin(SkinLibrary.Material3, expressive = true),
-    "custom" to Skin(SkinLibrary.Custom, expressive = false),
 )
 
 /**
