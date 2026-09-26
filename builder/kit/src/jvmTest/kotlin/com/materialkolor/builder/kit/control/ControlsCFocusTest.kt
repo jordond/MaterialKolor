@@ -71,7 +71,7 @@ class ControlsCFocusTest {
                 ControlsHarness(skin) {
                     Box(Modifier.size(400.dp, 600.dp)) {
                         state = rememberBottomSheetState()
-                        BuilderBottomSheet(state, label = "Poster") {
+                        TestBottomSheet(state, label = "Poster") {
                             OverlayTestButton("top")
                             Spacer(Modifier.height(120.dp))
                             OverlayTestButton("middle")
@@ -100,7 +100,7 @@ class ControlsCFocusTest {
         forEachSkin { _, skin ->
             setContent {
                 ControlsHarness(skin) {
-                    BuilderBottomSheet(
+                    TestBottomSheet(
                         state = rememberBottomSheetState(),
                         label = "Poster",
                         detentLabel = { detent -> "Poster at ${detent.name.lowercase()}" },

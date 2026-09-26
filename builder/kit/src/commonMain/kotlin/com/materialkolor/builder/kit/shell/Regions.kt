@@ -2,10 +2,8 @@ package com.materialkolor.builder.kit.shell
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
@@ -16,29 +14,11 @@ import com.materialkolor.builder.kit.control.BuilderToastHost
 import com.materialkolor.builder.kit.control.BuilderToastHostState
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.PosterMode
-import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.material.MaterialDockRegion
-import com.materialkolor.builder.kit.skin.material.MaterialPaletteFrame
-import com.materialkolor.builder.kit.skin.material.MaterialPanelRegion
 import com.materialkolor.builder.kit.skin.material.MaterialTopBarRegion
 import com.materialkolor.builder.kit.skin.material.MaterialWindowRegion
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
-
-/**
- * Which edge of the workspace a panel stands on. Its other edge, the one facing the canvas, is its inner edge.
- */
-public enum class PanelSide {
-    /**
-     * The poster's edge, where the projects drawer opens.
-     */
-    Start,
-
-    /**
-     * The far edge, where the export panel opens.
-     */
-    End,
-}
 
 /**
  * The top bar, 64 dp tall in every window class, drawn as Material's `TopAppBar`.
@@ -93,23 +73,6 @@ public fun PreviewWindowRegion(
 }
 
 /**
- * A full height panel standing on [side], such as the export panel or the projects drawer. Its
- * inner edge takes Material's panel rounding. The caller sizes it.
- *
- * @param[side] The edge the panel stands on.
- * @param[modifier] Applied to the panel, and where its width comes from.
- * @param[content] The panel's contents, laid in a column.
- */
-@Composable
-public fun PanelRegion(
-    side: PanelSide,
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    MaterialPanelRegion(side, modifier, content)
-}
-
-/**
  * Where the toasts of [state] land. Lay it over the whole shell, in the shell's `overlays`.
  *
  * They stack at the bottom of the canvas frame, past the poster as it is drawn, docked, as the rail
@@ -144,26 +107,4 @@ public fun ToastRegion(
             )
         }
     }
-}
-
-/**
- * The command palette's frame. A centred dialog on Medium and Expanded, up to 560 dp wide on
- * Medium and 640 dp on Expanded, and a full width one on a phone, in Material's dialog container.
- * The modal plumbing around it, the scrim and the focus trap, is the caller's.
- *
- * @param[modifier] Applied to the frame.
- * @param[content] The query field and the results, laid in a column.
- */
-@Composable
-public fun PaletteFrame(
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    val widest = ShellMetrics.paletteWideWidth
-    val sized = when (LocalLayout.current.windowClass) {
-        WindowClass.Compact -> modifier.fillMaxWidth()
-        WindowClass.Medium -> modifier.widthIn(min = OverlayMetrics.dialogMinWidth, max = OverlayMetrics.dialogMaxWidth)
-        WindowClass.Expanded -> modifier.widthIn(min = OverlayMetrics.dialogMinWidth, max = widest)
-    }
-    MaterialPaletteFrame(sized, content)
 }

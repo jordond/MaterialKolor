@@ -1,6 +1,12 @@
 package com.materialkolor.builder.kit.control
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.ui.unit.Dp
+import com.materialkolor.builder.kit.headless.HeadlessBottomSheet
+import com.materialkolor.builder.kit.shell.posterDetentNames
+import com.materialkolor.builder.kit.skin.LocalSkin
+import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -153,4 +159,28 @@ internal fun forEverySkin(block: ComposeUiTest.(SkinVariant) -> Unit) {
             withClue(variant.name) { block(variant) }
         }
     }
+}
+
+/**
+ * The headless bottom sheet in the surrounding skin's overlay style, named by the kit's detent
+ * names, the way the shell draws the poster's sheet.
+ */
+@Composable
+internal fun TestBottomSheet(
+    state: BottomSheetState,
+    label: String,
+    modifier: Modifier = Modifier,
+    detentLabel: (BottomSheetDetent) -> String = posterDetentNames(),
+    peekHeight: Dp = OverlayMetrics.sheetPeekHeight,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    HeadlessBottomSheet(
+        state = state,
+        label = label,
+        detentLabel = detentLabel,
+        peekHeight = peekHeight,
+        style = overlayStyle(LocalSkin.current.library),
+        modifier = modifier,
+        content = content,
+    )
 }

@@ -125,7 +125,7 @@ private fun OverlayScene(
                 }
             }
             Box(Modifier.width(360.dp).fillMaxHeight()) {
-                BuilderBottomSheet(rememberBottomSheetState(BottomSheetDetent.Half), label = "Poster") {
+                TestBottomSheet(rememberBottomSheetState(BottomSheetDetent.Half), label = "Poster") {
                     BuilderText("#6750A4", Modifier.padding(tokens.spacing.large), style = BuilderTextStyle.PosterHero)
                 }
             }

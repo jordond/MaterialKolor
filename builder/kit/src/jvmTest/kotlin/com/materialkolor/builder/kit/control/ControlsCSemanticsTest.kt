@@ -195,7 +195,7 @@ class ControlsCSemanticsTest {
             setContent {
                 ControlsHarness(skin) {
                     state = rememberBottomSheetState()
-                    BuilderBottomSheet(state, label = "Poster") { BuilderText("#6750A4") }
+                    TestBottomSheet(state, label = "Poster") { BuilderText("#6750A4") }
                 }
             }
             val handle = onNode(hasContentDescription("Poster") and hasRole(Role.Button))

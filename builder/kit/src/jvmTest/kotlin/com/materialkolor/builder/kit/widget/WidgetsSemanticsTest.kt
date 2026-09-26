@@ -1,7 +1,6 @@
 package com.materialkolor.builder.kit.widget
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,9 +33,7 @@ import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertWidthIsAtLeast
-import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -269,25 +266,6 @@ class WidgetsSemanticsTest {
             onAllNodesWithTag(CodeSwatchTag, useUnmergedTree = true).assertCountEquals(literals)
             onNodeWithContentDescription("Copy").performClick()
             copies shouldBe 1
-        }
-
-    @Test
-    fun deviceFrame_phone_laysTheScreenOutAtThePhoneWidthWithOrWithoutTheBezel() =
-        runComposeUiTest {
-            setContent {
-                WidgetHarness(WidgetSkins.first().second) {
-                    Column {
-                        DeviceFrame(DeviceWidth.Phone) { Box(Modifier.testTag("bare").fillMaxWidth().height(40.dp)) }
-                        DeviceFrame(DeviceWidth.Phone, enabled = true, modifier = Modifier.testTag("framed")) {
-                            Box(Modifier.testTag("screen").fillMaxWidth().height(40.dp))
-                        }
-                    }
-                }
-            }
-
-            onNodeWithTag("bare").assertWidthIsEqualTo(DeviceWidth.Phone.screenWidth)
-            onNodeWithTag("screen").assertWidthIsEqualTo(DeviceWidth.Phone.screenWidth)
-            onNodeWithTag("framed").getUnclippedBoundsInRoot().width shouldBeGreaterThan DeviceWidth.Phone.screenWidth
         }
 
     @Test

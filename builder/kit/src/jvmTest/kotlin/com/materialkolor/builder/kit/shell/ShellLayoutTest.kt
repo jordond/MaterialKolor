@@ -3,14 +3,12 @@ package com.materialkolor.builder.kit.shell
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -47,7 +45,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 private const val ShellHeight = 900
-private const val ShellPaletteTag = "shell-palette"
 private val ShellMargin = 12.dp
 private val ShellDockLift = 16.dp
 private val ShellTopBar = 64.dp
@@ -299,28 +296,6 @@ class ShellLayoutTest {
                 }
             }
         }
-
-    @Test
-    fun paletteFrame_perWindowClass_takesTheSpecWidth() {
-        for ((width, expected) in listOf(390 to 390.dp, 840 to 560.dp, 1280 to 640.dp)) {
-            withClue("$width dp") {
-                shellTest(width) {
-                    setContent {
-                        ShellHarness {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                PaletteFrame(Modifier.testTag(ShellPaletteTag)) {
-                                    Box(Modifier.fillMaxWidth().height(40.dp))
-                                }
-                            }
-                        }
-                    }
-                    waitForIdle()
-
-                    shellBounds(ShellPaletteTag).width shouldBe expected
-                }
-            }
-        }
-    }
 }
 
 /**
