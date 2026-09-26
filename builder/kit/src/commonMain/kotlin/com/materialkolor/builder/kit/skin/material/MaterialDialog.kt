@@ -128,7 +128,9 @@ internal fun MaterialDialog(
             properties = DialogProperties(animateTransition = !LocalReducedMotion.current),
         )
     }
-    LaunchedEffect(Unit) { if (!focusInside.value) firstAction.requestFocus() }
+    // The wide panel only has a row for the requester when there are actions.
+    val hasRow = frame.actions != null || frame.maxWidth <= OverlayMetrics.dialogMaxWidth
+    LaunchedEffect(Unit) { if (!focusInside.value && hasRow) firstAction.requestFocus() }
 }
 
 /**
