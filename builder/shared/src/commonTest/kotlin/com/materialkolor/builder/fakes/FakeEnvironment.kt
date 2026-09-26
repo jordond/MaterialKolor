@@ -4,6 +4,7 @@ import com.materialkolor.builder.core.platform.BootSplash
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.SITE_ORIGIN
+import com.materialkolor.builder.domain.persist.DeviceWidth
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -19,6 +20,11 @@ internal class FakeEnvironment(
     override val prefersDark: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val reducedMotion: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val coarsePointer: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    /**
+     * The width a new project frames its preview at, a tablet unless a test says otherwise.
+     */
+    override var defaultDeviceWidth: DeviceWidth = DeviceWidth.Tablet
 
     /**
      * What the eye dropper picks next, null for a cancel.

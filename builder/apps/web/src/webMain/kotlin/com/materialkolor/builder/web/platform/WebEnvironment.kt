@@ -7,6 +7,7 @@ import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.TimingMarks
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.SITE_ORIGIN
+import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.StorageKeys
 import com.materialkolor.builder.web.interop.A11yLiveRegion
 import com.materialkolor.builder.web.interop.Analytics
@@ -16,6 +17,7 @@ import com.materialkolor.builder.web.interop.localStorageWrite
 import com.materialkolor.builder.web.interop.locationOrigin
 import com.materialkolor.builder.web.interop.mediaQueryState
 import com.materialkolor.builder.web.interop.onPageHide
+import com.materialkolor.builder.web.interop.pageDeviceWidth
 import com.materialkolor.builder.web.interop.pageHasEyeDropper
 import com.materialkolor.builder.web.interop.pickColorOnScreen
 import com.materialkolor.builder.web.interop.requestPersistentStorage
@@ -39,6 +41,7 @@ internal class WebEnvironment : Environment {
     override val prefersDark: StateFlow<Boolean> = mediaQueryState("(prefers-color-scheme: dark)")
     override val reducedMotion: StateFlow<Boolean> = mediaQueryState("(prefers-reduced-motion: reduce)")
     override val coarsePointer: StateFlow<Boolean> = mediaQueryState("(pointer: coarse)")
+    override val defaultDeviceWidth: DeviceWidth = pageDeviceWidth()
     override val eyeDropperAvailable: Boolean = pageHasEyeDropper()
 
     // Fresh on every load and never stored. A duplicated tab copies sessionStorage, so an id kept

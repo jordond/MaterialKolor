@@ -15,6 +15,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
+import kotlin.random.Random
 
 /**
  * The storage, the environment and the helpers every [ProjectSession] test shares.
@@ -36,6 +37,7 @@ abstract class SessionTestBase {
             sharedThemeName = { SHARED_THEME },
             scope = backgroundScope,
             now = { testScheduler.currentTime },
+            random = Random(0),
         )
         return session to preferences
     }

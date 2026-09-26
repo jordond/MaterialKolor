@@ -22,6 +22,7 @@ import com.materialkolor.builder.core.platform.Router
 import com.materialkolor.builder.core.platform.StoreFactory
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.Route
+import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.feature.workspace.AppModel
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
@@ -133,6 +134,7 @@ private object TestEnvironment : Environment {
     override val prefersDark: StateFlow<Boolean> = MutableStateFlow(false)
     override val reducedMotion: StateFlow<Boolean> = MutableStateFlow(false)
     override val coarsePointer: StateFlow<Boolean> = MutableStateFlow(false)
+    override val defaultDeviceWidth: DeviceWidth = DeviceWidth.Tablet
     override val eyeDropperAvailable: Boolean = false
     override val tabId: String = "test"
     override val storageAvailable: Boolean = false
