@@ -41,7 +41,7 @@ import com.materialkolor.builder.kit.token.BuilderTokens
  * How one skin styles the headless overlays.
  *
  * Every colour comes from the skin's tokens or its library theme. The veil is the skin's scrim
- * token, its canvas on the headless skins and Material's scrim role on Material3.
+ * token, its canvas on Custom and Material's scrim role on Material3.
  *
  * @property[surface] Menus, dialogs, panels and sheets.
  * @property[content] Ink on [surface].

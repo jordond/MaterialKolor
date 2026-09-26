@@ -45,9 +45,8 @@ import org.jetbrains.compose.resources.stringResource
  * title that sums up what the sheet holds, the key colors and pins set, the spec and the extra
  * colors.
  *
- * It is drawn as an outline in the poster's ink with no fill, the way board E draws it. Material's
- * is a pill and the other skins keep the corner their controls have. It reads out as its title and
- * that line. The sheet it opens hands focus back to it through [trigger] once it closes.
+ * It is drawn as a pill outlined in the poster's ink with no fill, the way board E draws it. It reads
+ * out as its title and that line. The sheet it opens hands focus back to it through [trigger] once it closes.
  *
  * @param[trigger] The poster's Fine-tune trigger, or null where nothing hands focus back.
  */
