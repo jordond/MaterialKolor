@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,7 @@ import com.materialkolor.sample.customtheme.theme.AppTheme
 import com.materialkolor.sample.customtheme.theme.AppThemeMode
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
 import com.materialkolor.sample.customtheme.ui.component.PageScrollbar
+import com.materialkolor.sample.customtheme.ui.component.cropMarks
 import com.materialkolor.sample.customtheme.ui.palette.PaletteSection
 import com.materialkolor.sample.customtheme.ui.tasks.TasksSection
 import com.materialkolor.sample.shared.model.AppSection
@@ -40,10 +42,12 @@ public fun SampleApp(store: SampleStore = rememberSampleStore()) {
         mode = state.mode.toAppThemeMode(),
     ) {
         val colors = LocalAppColors.current
-        val selection = TextSelectionColors(
-            handleColor = colors.primary,
-            backgroundColor = colors.primary.copy(alpha = SELECTION_ALPHA),
-        )
+        val selection = remember(colors) {
+            TextSelectionColors(
+                handleColor = colors.pink,
+                backgroundColor = colors.highlight,
+            )
+        }
 
         CompositionLocalProvider(LocalTextSelectionColors provides selection) {
             Page(
@@ -65,20 +69,21 @@ private fun Page(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.surface),
+            .background(colors.paper),
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scroll)
-                .padding(24.dp),
+                .padding(horizontal = 48.dp, vertical = 40.dp),
         ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(24.dp),
+                verticalArrangement = Arrangement.spacedBy(36.dp),
                 modifier = Modifier
-                    .widthIn(max = 720.dp)
-                    .fillMaxWidth(),
+                    .widthIn(max = 820.dp)
+                    .fillMaxWidth()
+                    .cropMarks(colors.inkSoft),
             ) {
                 Header(
                     state = state,
@@ -92,6 +97,8 @@ private fun Page(
                     )
                     AppSection.Palette -> PaletteSection()
                 }
+
+                ColorBar()
             }
         }
 
@@ -111,5 +118,3 @@ private fun ThemeMode.toAppThemeMode(): AppThemeMode =
         ThemeMode.Light -> AppThemeMode.Light
         ThemeMode.Dark -> AppThemeMode.Dark
     }
-
-private const val SELECTION_ALPHA = 0.3f

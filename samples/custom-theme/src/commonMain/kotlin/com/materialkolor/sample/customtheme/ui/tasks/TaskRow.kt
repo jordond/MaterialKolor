@@ -1,10 +1,10 @@
 package com.materialkolor.sample.customtheme.ui.tasks
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,10 +20,12 @@ import com.materialkolor.sample.customtheme.theme.LocalAppColors
 import com.materialkolor.sample.customtheme.ui.component.Accent
 import com.materialkolor.sample.customtheme.ui.component.AppType
 import com.materialkolor.sample.customtheme.ui.component.Checkbox
-import com.materialkolor.sample.customtheme.ui.component.Chip
 import com.materialkolor.sample.customtheme.ui.component.Glyph
 import com.materialkolor.sample.customtheme.ui.component.IconButton
+import com.materialkolor.sample.customtheme.ui.component.Stamp
 import com.materialkolor.sample.customtheme.ui.component.Text
+import com.materialkolor.sample.customtheme.ui.component.highlighter
+import com.materialkolor.sample.customtheme.ui.component.ink
 import com.materialkolor.sample.shared.model.Task
 import com.materialkolor.sample.shared.model.TaskTag
 import com.materialkolor.sample.shared.state.SampleAction
@@ -40,31 +42,34 @@ internal fun TaskRow(
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     Row(
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(18.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
             .hoverable(interactionSource)
-            .then(if (isHovered) Modifier.background(colors.onSurface.copy(alpha = HOVER_ALPHA)) else Modifier)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .then(if (isHovered) Modifier.ink(colors.paperShade, colors) else Modifier)
+            .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Checkbox(
             checked = task.isDone,
             onCheckedChange = { dispatch(SampleAction.ToggleTask(task.id)) },
         )
 
-        Text(
-            text = task.title,
-            style = AppType.Body,
-            color = if (task.isDone) colors.textMuted else colors.textStrong,
-            textDecoration = if (task.isDone) TextDecoration.LineThrough else null,
-            maxLines = 1,
-            modifier = Modifier.weight(1f),
-        )
+        Box(modifier = Modifier.weight(1f)) {
+            Text(
+                text = task.title,
+                style = AppType.Body,
+                color = if (task.isDone) colors.inkSoft else colors.ink,
+                textDecoration = if (task.isDone) TextDecoration.LineThrough else null,
+                maxLines = 1,
+                modifier = if (task.isDone) Modifier.highlighter(colors.highlight, colors) else Modifier,
+            )
+        }
 
-        Chip(
+        Stamp(
             text = SampleCopy.label(task.tag),
             accent = task.tag.accent(colors),
+            tilt = Tilts[(task.id % Tilts.size).toInt()],
         )
 
         IconButton(
@@ -77,9 +82,9 @@ internal fun TaskRow(
 
 internal fun TaskTag.accent(colors: AppColors): Accent =
     when (this) {
-        TaskTag.Personal -> Accent(container = colors.loveContainer, content = colors.onLoveContainer)
-        TaskTag.Work -> Accent(container = colors.coldContainer, content = colors.onColdContainer)
-        TaskTag.Errand -> Accent(container = colors.warmContainer, content = colors.onWarmContainer)
+        TaskTag.Personal -> Accent(container = colors.pink, content = colors.onPink)
+        TaskTag.Work -> Accent(container = colors.blue, content = colors.onBlue)
+        TaskTag.Errand -> Accent(container = colors.yellow, content = colors.onYellow)
     }
 
-private const val HOVER_ALPHA = 0.04f
+private val Tilts = listOf(-3f, 2f, -1.5f, 2.5f, -2f)

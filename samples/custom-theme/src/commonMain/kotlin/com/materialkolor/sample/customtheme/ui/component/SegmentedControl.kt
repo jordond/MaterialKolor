@@ -1,6 +1,5 @@
 package com.materialkolor.sample.customtheme.ui.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
@@ -30,23 +31,20 @@ internal fun <T> SegmentedControl(
     accent: ((T) -> Accent)? = null,
 ) {
     val colors = LocalAppColors.current
-    val primary = Accent(container = colors.primaryContainer, content = colors.onPrimaryContainer)
+    val primary = Accent(container = colors.primary, content = colors.onPrimary)
 
     Row(
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .height(ControlHeight)
-            .clip(AppShapes.Control)
-            .background(colors.surfaceSunken)
-            .border(1.dp, colors.borderFaint, AppShapes.Control)
-            .padding(3.dp),
+            .border(Rule, colors.ink),
     ) {
-        for (option in options) {
+        options.forEachIndexed { index, option ->
             Segment(
                 text = label(option),
                 badge = badge?.invoke(option),
                 isSelected = option == selected,
+                isFirst = index == 0,
                 accent = accent?.invoke(option) ?: primary,
                 onClick = { onSelect(option) },
             )
@@ -59,34 +57,42 @@ private fun Segment(
     text: String,
     badge: String?,
     isSelected: Boolean,
+    isFirst: Boolean,
     accent: Accent,
     onClick: () -> Unit,
 ) {
     val colors = LocalAppColors.current
     val interactionSource = remember { MutableInteractionSource() }
     val state = interactionSource.collectControlState()
-    val content = if (isSelected) accent.content else colors.textMuted
-    val shape = AppShapes.Inner
+    val content = if (isSelected) accent.content else colors.ink
+    val fill = when {
+        isSelected -> accent.container
+        state.isHovered || state.isPressed -> colors.paperShade
+        else -> null
+    }
 
     Row(
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxHeight()
-            .clip(shape)
-            .then(if (isSelected) Modifier.background(accent.container) else Modifier)
-            .veil(tint = content, state = state)
-            .selectable(
+            .then(if (fill != null) Modifier.ink(fill, colors) else Modifier)
+            .drawBehind {
+                if (!isFirst) {
+                    val x = Rule.toPx() / 2
+                    drawLine(colors.ink, Offset(x, 0f), Offset(x, size.height), Rule.toPx())
+                }
+            }.selectable(
                 selected = isSelected,
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick,
             ).pointerHoverIcon(PointerIcon.Hand)
-            .focusRing(state = state, color = colors.focusRing, shape = shape)
-            .padding(horizontal = 12.dp),
+            .focusRing(state = state, color = colors.blue, shape = RectangleShape)
+            .padding(horizontal = 14.dp),
     ) {
         Text(
-            text = text,
+            text = text.uppercase(),
             style = AppType.Label,
             color = content,
         )

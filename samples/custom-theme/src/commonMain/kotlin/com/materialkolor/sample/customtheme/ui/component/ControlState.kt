@@ -1,6 +1,7 @@
 package com.materialkolor.sample.customtheme.ui.component
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -12,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 
 @Immutable
@@ -19,14 +21,7 @@ internal data class ControlState(
     val isHovered: Boolean,
     val isPressed: Boolean,
     val isFocused: Boolean,
-) {
-    val veilAlpha: Float
-        get() = when {
-            isPressed -> PRESSED_ALPHA
-            isHovered -> HOVERED_ALPHA
-            else -> 0f
-        }
-}
+)
 
 @Composable
 internal fun InteractionSource.collectControlState(): ControlState {
@@ -36,16 +31,28 @@ internal fun InteractionSource.collectControlState(): ControlState {
     return ControlState(isHovered = isHovered, isPressed = isPressed, isFocused = isFocused)
 }
 
-internal fun Modifier.veil(
-    tint: Color,
-    state: ControlState,
-): Modifier = if (state.veilAlpha > 0f) background(tint.copy(alpha = state.veilAlpha)) else this
+/**
+ * How far a control's second ink pass sits from its first. Hovering knocks it further off register, and pressing
+ * squeezes the passes back into line, the way a print press would.
+ */
+@Composable
+internal fun ControlState.animateShift(rest: DpOffset): DpOffset {
+    val scale = when {
+        isPressed -> 0f
+        isHovered -> HOVER_SHIFT_SCALE
+        else -> 1f
+    }
+    val x by animateDpAsState(targetValue = rest.x * scale, animationSpec = spring())
+    val y by animateDpAsState(targetValue = rest.y * scale, animationSpec = spring())
+    return DpOffset(x, y)
+}
 
 internal fun Modifier.focusRing(
     state: ControlState,
     color: Color,
     shape: Shape,
-): Modifier = if (state.isFocused) border(2.dp, color, shape) else this
+): Modifier = if (state.isFocused) border(Rule, color, shape) else this
 
-private const val HOVERED_ALPHA = 0.08f
-private const val PRESSED_ALPHA = 0.14f
+internal val ControlShift: DpOffset = DpOffset(5.dp, 5.dp)
+
+private const val HOVER_SHIFT_SCALE = 1.6f

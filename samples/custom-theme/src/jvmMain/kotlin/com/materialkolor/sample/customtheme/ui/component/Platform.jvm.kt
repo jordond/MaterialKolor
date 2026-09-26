@@ -4,10 +4,10 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.ScrollbarStyle
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
@@ -25,10 +25,10 @@ internal actual fun PageScrollbar(
         style = ScrollbarStyle(
             minimalHeight = 32.dp,
             thickness = 8.dp,
-            shape = CircleShape,
+            shape = RectangleShape,
             hoverDurationMillis = 300,
-            unhoverColor = colors.textMuted.copy(alpha = 0.35f),
-            hoverColor = colors.textMuted.copy(alpha = 0.7f),
+            unhoverColor = colors.inkSoft.copy(alpha = 0.35f),
+            hoverColor = colors.inkSoft.copy(alpha = 0.7f),
         ),
     )
 }

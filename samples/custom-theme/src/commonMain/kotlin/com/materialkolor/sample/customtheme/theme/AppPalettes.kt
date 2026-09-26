@@ -1,119 +1,62 @@
 package com.materialkolor.sample.customtheme.theme
 
-import androidx.compose.ui.graphics.Color
 import com.materialkolor.MaterialKolors
 import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.ktx.onTone
 import com.materialkolor.ktx.toneColor
 import com.materialkolor.palettes.TonalPalette
 
-internal data class AppPalettes(
-    val love: TonalPalette,
-    val cold: TonalPalette,
-    val warm: TonalPalette,
-    val coffee: TonalPalette,
-    val matcha: TonalPalette,
-    val iced: TonalPalette,
-    val tea: TonalPalette,
-    val chocolate: TonalPalette,
-)
-
 /**
- * Fold the scheme and the extra palettes into the flat record the app reads.
- *
- * The four Material families come from roles, because roles already solve the accent and container
- * problem and there is no reason to redo that work. Everything Material has no name for, the three
- * app-owned families, the pressed and raised states, the surface and border steps, the decorative
- * drink colors, is a tone this theme picks off a ramp. Each of those tones gets its content color
- * from [onTone] rather than a handwritten table.
+ * The scheme generated from the seed plus a ramp for the paper and each spot ink.
  */
-internal fun AppPalettes.toColors(scheme: DynamicScheme): AppColors {
+public data class AppPalettes(
+    public val scheme: DynamicScheme,
+    public val stock: TonalPalette,
+    public val pink: TonalPalette,
+    public val blue: TonalPalette,
+    public val yellow: TonalPalette,
+) {
+    internal val tones: PrintTones = PrintTones(isDark = scheme.isDark)
+}
+
+internal fun AppPalettes.toColors(): AppColors {
     val kolors = MaterialKolors(scheme)
-    val tones = ThemeTones(isDark = scheme.isDark)
-    val neutral = scheme.neutralPalette
-    val neutralVariant = scheme.neutralVariantPalette
-    val primaryRamp = scheme.primaryPalette
 
     return AppColors(
         isLight = !scheme.isDark,
+        paper = stock.toneColor(tones.paper),
+        paperShade = stock.toneColor(tones.paperShade),
+        paperEdge = stock.toneColor(tones.paperEdge),
+        ink = scheme.primaryPalette.toneColor(tones.ink),
+        inkSoft = scheme.neutralVariantPalette.toneColor(tones.inkSoft),
         primary = kolors.primary(),
         onPrimary = kolors.onPrimary(),
-        primaryContainer = kolors.primaryContainer(),
-        onPrimaryContainer = kolors.onPrimaryContainer(),
-        primaryPressed = primaryRamp.toneColor(tones.pressed),
-        primaryRaised = primaryRamp.toneColor(tones.raised),
-        secondary = kolors.secondary(),
-        onSecondary = kolors.onSecondary(),
-        secondaryContainer = kolors.secondaryContainer(),
-        onSecondaryContainer = kolors.onSecondaryContainer(),
-        tertiary = kolors.tertiary(),
-        onTertiary = kolors.onTertiary(),
-        tertiaryContainer = kolors.tertiaryContainer(),
-        onTertiaryContainer = kolors.onTertiaryContainer(),
         error = kolors.error(),
         onError = kolors.onError(),
-        errorContainer = kolors.errorContainer(),
-        onErrorContainer = kolors.onErrorContainer(),
-        love = love.toneColor(tones.accent),
-        onLove = love.onTone(tones.accent),
-        loveContainer = love.toneColor(tones.container),
-        onLoveContainer = love.onTone(tones.container),
-        cold = cold.toneColor(tones.accent),
-        onCold = cold.onTone(tones.accent),
-        coldContainer = cold.toneColor(tones.container),
-        onColdContainer = cold.onTone(tones.container),
-        warm = warm.toneColor(tones.accent),
-        onWarm = warm.onTone(tones.accent),
-        warmContainer = warm.toneColor(tones.container),
-        onWarmContainer = warm.onTone(tones.container),
-        surface = kolors.surface(),
-        surfaceRaised = neutral.toneColor(tones.surfaceRaised),
-        surfaceSunken = neutral.toneColor(tones.surfaceSunken),
-        surfaceInverse = kolors.inverseSurface(),
-        onSurface = kolors.onSurface(),
-        onSurfaceInverse = kolors.inverseOnSurface(),
-        textStrong = neutralVariant.toneColor(tones.textStrong),
-        textMuted = neutralVariant.toneColor(tones.textMuted),
-        borderFaint = neutralVariant.toneColor(tones.borderFaint),
-        borderSoft = neutralVariant.toneColor(tones.borderSoft),
-        borderStrong = neutralVariant.toneColor(tones.borderStrong),
-        drinkCoffee = coffee.toneColor(DECORATIVE_TONE),
-        drinkMatcha = matcha.toneColor(DECORATIVE_TONE),
-        drinkIced = iced.toneColor(DECORATIVE_TONE),
-        drinkTea = tea.toneColor(DECORATIVE_TONE),
-        drinkChoc = chocolate.toneColor(DECORATIVE_TONE),
+        pink = pink.toneColor(tones.pink),
+        onPink = pink.onTone(tones.pink),
+        blue = blue.toneColor(tones.blue),
+        onBlue = blue.onTone(tones.blue),
+        yellow = yellow.toneColor(tones.yellow),
+        onYellow = yellow.onTone(tones.yellow),
+        highlight = yellow.toneColor(tones.highlight),
         scrim = kolors.scrim(),
-        focusRing = primaryRamp.toneColor(FOCUS_RING_TONE),
-        shadow = kolors.shadow(),
     )
 }
 
-private class ThemeTones(
+internal class PrintTones(
     isDark: Boolean,
 ) {
-    val accent = if (isDark) 80 else 40
-    val container = if (isDark) 30 else 90
+    val paper = if (isDark) 7 else 95
+    val paperShade = if (isDark) 12 else 90
+    val paperEdge = if (isDark) 30 else 78
 
-    val pressed = if (isDark) 70 else 32
-    val raised = if (isDark) 88 else 46
+    val ink = if (isDark) 92 else 18
+    val inkSoft = if (isDark) 70 else 42
 
-    val surfaceRaised = if (isDark) 12 else 100
-    val surfaceSunken = if (isDark) 4 else 94
+    val pink = if (isDark) 65 else 64
+    val blue = if (isDark) 62 else 46
+    val yellow = if (isDark) 85 else 88
 
-    val textStrong = if (isDark) 90 else 10
-    val textMuted = if (isDark) 70 else 40
-
-    val borderFaint = if (isDark) 22 else 92
-    val borderSoft = if (isDark) 32 else 85
-    val borderStrong = if (isDark) 65 else 55
+    val highlight = if (isDark) 30 else 88
 }
-
-/**
- * One tone that reads on a light and a dark surface, so the drink colors never change with mode.
- */
-private const val DECORATIVE_TONE = 50
-
-/**
- * The focus ring is the same accent tone in both modes, so focus never moves when the mode does.
- */
-private const val FOCUS_RING_TONE = 60

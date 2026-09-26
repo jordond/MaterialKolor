@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -15,18 +14,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.materialkolor.sample.customtheme.theme.LocalAppColors
-import com.materialkolor.sample.customtheme.ui.component.AppShapes
 import com.materialkolor.sample.customtheme.ui.component.AppType
 import com.materialkolor.sample.customtheme.ui.component.Button
 import com.materialkolor.sample.customtheme.ui.component.ButtonStyle
 import com.materialkolor.sample.customtheme.ui.component.Glyph
 import com.materialkolor.sample.customtheme.ui.component.Icon
 import com.materialkolor.sample.customtheme.ui.component.ProgressBar
+import com.materialkolor.sample.customtheme.ui.component.Rule
 import com.materialkolor.sample.customtheme.ui.component.SegmentedControl
 import com.materialkolor.sample.customtheme.ui.component.Text
+import com.materialkolor.sample.customtheme.ui.component.halftone
+import com.materialkolor.sample.customtheme.ui.component.perforation
 import com.materialkolor.sample.shared.model.TaskFilter
 import com.materialkolor.sample.shared.state.SampleAction
 import com.materialkolor.sample.shared.state.SampleState
@@ -41,14 +42,14 @@ internal fun TasksSection(
     val colors = LocalAppColors.current
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(24.dp),
+        verticalArrangement = Arrangement.spacedBy(32.dp),
         modifier = modifier,
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
-                text = SampleCopy.summary(done = state.doneCount, total = state.totalCount),
-                style = AppType.BodyStrong,
-                color = colors.textStrong,
+                text = SampleCopy.summary(done = state.doneCount, total = state.totalCount).uppercase(),
+                style = AppType.Heading,
+                color = colors.ink,
             )
 
             ProgressBar(progress = state.progress)
@@ -59,7 +60,7 @@ internal fun TasksSection(
             dispatch = dispatch,
         )
 
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
             SegmentedControl(
                 options = TaskFilter.entries,
                 selected = state.filter,
@@ -83,6 +84,9 @@ internal fun TasksSection(
     }
 }
 
+/**
+ * The list is a sheet of coupons on a blue halftone shadow, each task torn off along a perforation.
+ */
 @Composable
 private fun TaskList(
     state: SampleState,
@@ -93,25 +97,23 @@ private fun TaskList(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(AppShapes.Card)
-            .background(colors.surfaceRaised)
-            .border(1.dp, colors.borderFaint, AppShapes.Card),
+            .halftone(color = colors.blue, colors = colors, offset = SheetShadow) { _, _ -> SHADOW_COVERAGE }
+            .background(colors.paper)
+            .border(Rule, colors.ink),
     ) {
         if (state.visibleTasks.isEmpty()) {
             EmptyState(filter = state.filter)
         }
 
-        state.visibleTasks.forEachIndexed { index, task ->
+        for (task in state.visibleTasks) {
             key(task.id) {
-                if (index > 0) Divider()
                 TaskRow(
                     task = task,
                     dispatch = dispatch,
+                    modifier = Modifier.perforation(colors.inkSoft),
                 )
             }
         }
-
-        Divider()
 
         Footer(
             state = state,
@@ -131,29 +133,31 @@ private fun EmptyState(filter: TaskFilter) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 32.dp),
+            .padding(vertical = 40.dp)
+            .perforation(colors.inkSoft),
     ) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(colors.surfaceSunken),
+                .size(64.dp)
+                .halftone(color = colors.pink, colors = colors, shape = CircleShape, cell = 5.dp) { _, _ ->
+                    EMPTY_COVERAGE
+                },
         ) {
             Icon(
                 glyph = glyph,
-                color = colors.textMuted,
-                modifier = Modifier.size(20.dp),
+                color = colors.ink,
+                modifier = Modifier.size(24.dp),
             )
         }
 
         Text(
-            text = SampleCopy.empty(filter),
-            style = AppType.Body,
-            color = colors.textMuted,
+            text = SampleCopy.empty(filter).uppercase(),
+            style = AppType.Label,
+            color = colors.inkSoft,
         )
     }
 }
@@ -169,13 +173,12 @@ private fun Footer(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .background(colors.surface)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Text(
-            text = SampleCopy.remaining(state.activeCount),
-            style = AppType.Body,
-            color = colors.textMuted,
+            text = SampleCopy.remaining(state.activeCount).uppercase(),
+            style = AppType.Label,
+            color = colors.inkSoft,
             modifier = Modifier.weight(1f),
         )
 
@@ -188,12 +191,7 @@ private fun Footer(
     }
 }
 
-@Composable
-private fun Divider() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(1.dp)
-            .background(LocalAppColors.current.borderFaint),
-    )
-}
+private val SheetShadow = DpOffset(10.dp, 10.dp)
+
+private const val SHADOW_COVERAGE = 0.35f
+private const val EMPTY_COVERAGE = 0.3f

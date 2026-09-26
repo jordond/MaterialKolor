@@ -354,10 +354,10 @@ fun AppTheme(seed: Color, isDark: Boolean, content: @Composable () -> Unit) {
 }
 ```
 
-[`samples/custom-theme`](samples/custom-theme) is a working version of that. Seven accent families
-instead of three, pressed and raised states, three surface steps, a border ramp and five decorative
-category colors, all from one seed plus eight accent seeds. It builds the [Tasks sample](#samples)
-on Compose Foundation alone, and its Palette tab shows every color the theme generates.
+[`samples/custom-theme`](samples/custom-theme) is a working version of that, styled as a risograph
+print. A paper stock, a key ink and three spot inks, each a ramp built from its own seed and pulled
+towards yours, next to the primary and error roles. It builds the [Tasks sample](#samples) on
+Compose Foundation alone, and its Palette tab shows every ramp and the tone the theme prints at.
 
 Run it with `./gradlew :samples:custom-theme:run`.
 

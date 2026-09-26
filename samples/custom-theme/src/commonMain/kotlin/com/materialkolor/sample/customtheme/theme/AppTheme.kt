@@ -30,6 +30,9 @@ public enum class AppThemeMode {
 public val LocalAppColors: ProvidableCompositionLocal<AppColors> =
     staticCompositionLocalOf { error("No AppColors provided, wrap the content in AppTheme.") }
 
+public val LocalAppPalettes: ProvidableCompositionLocal<AppPalettes> =
+    staticCompositionLocalOf { error("No AppPalettes provided, wrap the content in AppTheme.") }
+
 @Composable
 public fun AppTheme(
     seed: Color,
@@ -37,9 +40,32 @@ public fun AppTheme(
     seeds: AppThemeSeeds = AppThemeSeeds.Default,
     content: @Composable () -> Unit,
 ) {
-    val target = rememberAppColors(seed = seed, isDark = mode.isDark(), seeds = seeds)
+    val palettes = rememberAppPalettes(seed = seed, isDark = mode.isDark(), seeds = seeds)
+    val target = remember(palettes) { palettes.toColors() }
     val colors = animateAppColors(target)
-    CompositionLocalProvider(LocalAppColors provides colors, content = content)
+
+    CompositionLocalProvider(
+        LocalAppPalettes provides palettes,
+        LocalAppColors provides colors,
+        content = content,
+    )
+}
+
+@Composable
+public fun rememberAppPalettes(
+    seed: Color,
+    isDark: Boolean,
+    seeds: AppThemeSeeds = AppThemeSeeds.Default,
+): AppPalettes {
+    val scheme = rememberDynamicScheme(seedColor = seed, isDark = isDark)
+    val stock = rememberTonalPalette(seed = seeds.stock, harmonizeWith = seed)
+    val pink = rememberTonalPalette(seed = seeds.pink, harmonizeWith = seed)
+    val blue = rememberTonalPalette(seed = seeds.blue, harmonizeWith = seed)
+    val yellow = rememberTonalPalette(seed = seeds.yellow, harmonizeWith = seed)
+
+    return remember(scheme, stock, pink, blue, yellow) {
+        AppPalettes(scheme = scheme, stock = stock, pink = pink, blue = blue, yellow = yellow)
+    }
 }
 
 @Composable
@@ -48,17 +74,6 @@ public fun rememberAppColors(
     isDark: Boolean,
     seeds: AppThemeSeeds = AppThemeSeeds.Default,
 ): AppColors {
-    val scheme = rememberDynamicScheme(seedColor = seed, isDark = isDark)
-    val palettes = AppPalettes(
-        love = rememberTonalPalette(seed = seeds.love, harmonizeWith = seed),
-        cold = rememberTonalPalette(seed = seeds.cold, harmonizeWith = seed),
-        warm = rememberTonalPalette(seed = seeds.warm, harmonizeWith = seed),
-        coffee = rememberTonalPalette(seed = seeds.coffee, harmonizeWith = seed),
-        matcha = rememberTonalPalette(seed = seeds.matcha, harmonizeWith = seed),
-        iced = rememberTonalPalette(seed = seeds.iced, harmonizeWith = seed),
-        tea = rememberTonalPalette(seed = seeds.tea, harmonizeWith = seed),
-        chocolate = rememberTonalPalette(seed = seeds.chocolate, harmonizeWith = seed),
-    )
-
-    return remember(scheme, palettes) { palettes.toColors(scheme) }
+    val palettes = rememberAppPalettes(seed = seed, isDark = isDark, seeds = seeds)
+    return remember(palettes) { palettes.toColors() }
 }
