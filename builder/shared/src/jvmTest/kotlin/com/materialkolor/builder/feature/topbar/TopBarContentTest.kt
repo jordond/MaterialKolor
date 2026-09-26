@@ -1,6 +1,5 @@
 package com.materialkolor.builder.feature.topbar
 
-import com.materialkolor.builder.ShellSkin
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -22,6 +21,7 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.materialkolor.builder.BuilderRoot
+import com.materialkolor.builder.ShellSkin
 import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.edit.ChangeKind

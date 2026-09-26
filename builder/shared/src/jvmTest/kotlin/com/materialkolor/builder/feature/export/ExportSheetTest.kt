@@ -1,6 +1,5 @@
 package com.materialkolor.builder.feature.export
 
-import com.materialkolor.builder.ShellSkin
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -23,6 +22,7 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import com.materialkolor.builder.ShellSkin
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.dsl.Language
 import com.materialkolor.builder.codegen.dsl.Token

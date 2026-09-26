@@ -95,7 +95,12 @@ class SkinThemesTest {
             var pinned: Color? = null
             setContent {
                 val result = remember { ThemeResolver().resolve(Document) }
-                BuilderTheme(Skin(SkinLibrary.Custom, expressive = false), result, isDark = false, reducedMotion = false) {
+                BuilderTheme(
+                    Skin(SkinLibrary.Custom, expressive = false),
+                    result,
+                    isDark = false,
+                    reducedMotion = false,
+                ) {
                     seen = LocalBuilderIdentity.current[CustomSlot.Primary]
                     expected = result.chromeCustomSlots[CustomSlot.Primary, false].toColor()
                     pinned = result.customSlots[CustomSlot.Primary, false].toColor()
@@ -114,7 +119,12 @@ class SkinThemesTest {
             setContent {
                 val result = remember { ThemeResolver().resolve(Document) }
                 for (expressive in listOf(false, true)) {
-                    BuilderTheme(Skin(SkinLibrary.Material3, expressive), result, isDark = false, reducedMotion = false) {
+                    BuilderTheme(
+                        Skin(SkinLibrary.Material3, expressive),
+                        result,
+                        isDark = false,
+                        reducedMotion = false,
+                    ) {
                         brand = LocalBuilderType.current.body.fontFamily
                         val typography = MaterialTheme.typography
                         seen["m3 expressive=$expressive bodyLarge"] = typography.bodyLarge.fontFamily

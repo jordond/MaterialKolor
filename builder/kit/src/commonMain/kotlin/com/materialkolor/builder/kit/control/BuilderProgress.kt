@@ -28,8 +28,8 @@ import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
 import com.materialkolor.builder.kit.skin.headless.ProgressStyle
 import com.materialkolor.builder.kit.skin.headless.ProgressSweep
 import com.materialkolor.builder.kit.skin.material.MaterialProgress
-import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
 
 /**
  * A bar that shows how far along some work is, or only that it is running.

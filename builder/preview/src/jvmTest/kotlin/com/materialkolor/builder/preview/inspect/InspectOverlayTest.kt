@@ -1,6 +1,5 @@
 package com.materialkolor.builder.preview.inspect
 
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -22,6 +21,7 @@ import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.PreviewResult
 import com.materialkolor.builder.preview.split.SplitState

@@ -1,6 +1,5 @@
 package com.materialkolor.builder.preview.fluent
 
-import com.materialkolor.builder.preview.ShellChrome
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -20,6 +19,7 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.Chrome
+import com.materialkolor.builder.preview.ShellChrome
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.split.PaneSpec

@@ -1,6 +1,5 @@
 package com.materialkolor.builder.preview.fluent
 
-import com.materialkolor.builder.preview.ShellChrome
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
@@ -18,6 +17,7 @@ import com.materialkolor.builder.kit.a11y.KitTestApi
 import com.materialkolor.builder.kit.a11y.ProvideWebFoldsForTest
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.Chrome
+import com.materialkolor.builder.preview.ShellChrome
 import com.materialkolor.builder.preview.canvas.ComponentsTab
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.GALLERY_CARD

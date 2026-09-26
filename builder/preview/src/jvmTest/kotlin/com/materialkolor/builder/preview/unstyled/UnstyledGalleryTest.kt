@@ -1,6 +1,5 @@
 package com.materialkolor.builder.preview.unstyled
 
-import com.materialkolor.builder.preview.ShellChrome
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
@@ -49,6 +48,7 @@ import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.DarkSpec
 import com.materialkolor.builder.preview.LightSpec
+import com.materialkolor.builder.preview.ShellChrome
 import com.materialkolor.builder.preview.canvas.ComponentsTab
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.GALLERY_CARD

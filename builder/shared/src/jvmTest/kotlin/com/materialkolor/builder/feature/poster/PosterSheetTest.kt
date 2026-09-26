@@ -1,6 +1,5 @@
 package com.materialkolor.builder.feature.poster
 
-import com.materialkolor.builder.ShellSkin
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -11,6 +10,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import com.materialkolor.builder.LocalThemeResult
+import com.materialkolor.builder.ShellSkin
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.feature.workspace.WorkspaceAction

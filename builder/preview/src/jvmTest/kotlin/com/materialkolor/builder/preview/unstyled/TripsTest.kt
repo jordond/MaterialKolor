@@ -1,12 +1,12 @@
 package com.materialkolor.builder.preview.unstyled
 
-import com.materialkolor.builder.preview.ShellChrome
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
@@ -27,17 +27,17 @@ import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.audit.ColorRef
-import com.materialkolor.builder.domain.model.Role
-import com.materialkolor.builder.preview.on
 import com.materialkolor.builder.domain.model.Library
-import androidx.compose.runtime.remember
+import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.LightSpec
+import com.materialkolor.builder.preview.ShellChrome
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.inspect.PreviewRoles
+import com.materialkolor.builder.preview.on
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.trips.OfflineMapsSwitch
 import com.materialkolor.builder.preview.trips.PackingItem

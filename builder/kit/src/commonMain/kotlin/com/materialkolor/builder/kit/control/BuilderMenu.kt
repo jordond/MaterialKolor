@@ -56,6 +56,13 @@ public fun BuilderMenu(
     val tokens = LocalBuilderTokens.current
     when (LocalSkin.current.library) {
         SkinLibrary.Material3 -> MaterialMenu(expanded, onDismissRequest, items, modifier, anchor)
-        SkinLibrary.Custom -> HeadlessMenu(expanded, onDismissRequest, items, customOverlayStyle(tokens), modifier, anchor)
+        SkinLibrary.Custom -> HeadlessMenu(
+            expanded,
+            onDismissRequest,
+            items,
+            customOverlayStyle(tokens),
+            modifier,
+            anchor,
+        )
     }
 }
