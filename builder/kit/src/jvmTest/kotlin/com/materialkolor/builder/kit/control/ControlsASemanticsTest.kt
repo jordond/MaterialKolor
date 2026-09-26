@@ -46,7 +46,6 @@ import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.SkinTestTheme
 import com.materialkolor.builder.kit.token.LocalBuilderTokens

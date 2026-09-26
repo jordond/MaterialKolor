@@ -31,11 +31,9 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
-import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
@@ -46,12 +44,10 @@ import com.materialkolor.builder.kit.control.shortfalls
 import com.materialkolor.builder.kit.icon.BuilderIcons
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.icon.LocalBuilderIcons
-import com.materialkolor.builder.kit.icon.LucideIcons
 import com.materialkolor.builder.kit.icon.MaterialIcons
 import com.materialkolor.builder.kit.motion.BuilderDurations
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.skin.custom.LocalBuilderIdentity
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderType

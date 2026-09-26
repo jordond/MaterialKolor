@@ -55,7 +55,6 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.materialkolor.builder.kit.control.BuilderIcon
-import com.materialkolor.builder.kit.control.BuilderMenuItem
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.ControlState
@@ -64,7 +63,6 @@ import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.foldMenuRow
 import com.materialkolor.builder.kit.control.foldOption
 import com.materialkolor.builder.kit.control.foldState
-import com.materialkolor.builder.kit.control.shownChoiceName
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics

@@ -1,33 +1,11 @@
 package com.materialkolor.builder.kit.control
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
-import com.materialkolor.builder.kit.headless.HeadlessModal
-import com.materialkolor.builder.kit.headless.keepTaps
-import com.materialkolor.builder.kit.headless.modalPane
-import com.materialkolor.builder.kit.headless.modalTitle
-import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.SkinLibrary
-import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
-import com.materialkolor.builder.kit.skin.headless.OverlayStyle
-import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
-import com.materialkolor.builder.kit.skin.headless.popoverEnter
-import com.materialkolor.builder.kit.skin.headless.popoverExit
 import com.materialkolor.builder.kit.skin.material.MaterialDialog
-import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
  * A modal dialog with a title, a body and a row of actions.
