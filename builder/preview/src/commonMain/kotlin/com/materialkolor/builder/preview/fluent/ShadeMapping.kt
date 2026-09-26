@@ -26,6 +26,11 @@ import io.github.composefluent.background.Layer
 import io.github.composefluent.component.Text
 import kotlin.math.roundToInt
 
+private const val LegendTitle = "Where your accent goes"
+private const val LegendNote = "Only the accent follows your theme. Fluent keeps its neutrals, text colors and " +
+    "system colors fixed."
+private const val AccentFillUse = "Switches that are on, accent buttons, the current page"
+
 /**
  * The shade legend, the seven accent shades Fluent cuts from the pane's primary ramp, in order
  * from darkest to lightest, each with its color, its tone and where the real controls paint it in
@@ -50,12 +55,12 @@ internal fun ShadeMapping(
             modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(FluentCopy.LegendTitle, style = FluentTheme.typography.subtitle)
+            Text(LegendTitle, style = FluentTheme.typography.subtitle)
             for (shade in FluentShade.entries) {
                 ShadeRow(shade, shades.color(shade), spec.isDark)
             }
             Text(
-                text = FluentCopy.LegendNote,
+                text = LegendNote,
                 style = FluentTheme.typography.caption,
                 color = FluentTheme.colors.text.text.secondary,
             )
@@ -92,3 +97,18 @@ private fun ShadeRow(
         }
     }
 }
+
+/**
+ * Where the real Fluent controls paint each shade in each mode, from how compose-fluent builds its
+ * colors out of the seven shades.
+ */
+private fun FluentShade.usage(isDark: Boolean): String =
+    when (this) {
+        FluentShade.Dark3 -> if (isDark) "Not used in dark mode" else "Secondary accent text"
+        FluentShade.Dark2 -> if (isDark) "Accent acrylic backdrop" else "Accent text and links"
+        FluentShade.Dark1 -> if (isDark) "Accent acrylic fill" else AccentFillUse
+        FluentShade.Base -> "Selected text highlight"
+        FluentShade.Light1 -> "Not drawn by any control today"
+        FluentShade.Light2 -> if (isDark) AccentFillUse else "Not used in light mode"
+        FluentShade.Light3 -> if (isDark) "Accent text and links" else "Accent acrylic fill"
+    }

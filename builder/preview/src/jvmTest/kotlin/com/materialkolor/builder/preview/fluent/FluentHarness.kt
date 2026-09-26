@@ -23,9 +23,10 @@ import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.split.PaneSpec
+import com.materialkolor.builder.preview.trips.TripsDestination
 
 /**
- * The Fluent skin, the one that shows the Settings app.
+ * The Fluent skin, the one that shows the Fluent Trips app.
  */
 internal val FluentSkin: Skin = Skin(Library.Fluent, expressive = false)
 
@@ -57,16 +58,16 @@ internal val UnderAnOverlay: SemanticsMatcher =
 
 /**
  * The layer compose-fluent lays under a compact or open navigation menu, which swallows a click so
- * it never reaches the page. It is no control of its own and declares nothing, the pages on it do.
+ * it never reaches the page. It is no control of its own and declares nothing, the destinations on it do.
  * The app keeps it out of the Tab order, so it never takes focus, though compose-fluent 0.1.0 still
  * leaves its click action in the tree.
  */
 internal val NavigationShield: SemanticsMatcher =
-    hasClickAction() and hasAnyDescendant(hasContentDescription(FluentPage.Home.label))
+    hasClickAction() and hasAnyDescendant(hasContentDescription(TripsDestination.Explore.label))
 
 /**
  * The arrows of the scrollbar compose-fluent puts beside its navigation menu, which do nothing while
- * the menu fits. They have no role and no name, and the Settings app has no disabled control.
+ * the menu fits. They have no role and no name, and Trips has no disabled control.
  */
 internal val ScrollbarArrow: SemanticsMatcher =
     hasClickAction() and
@@ -75,7 +76,7 @@ internal val ScrollbarArrow: SemanticsMatcher =
         SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription)
 
 /**
- * The Settings app in a Fluent pane of [spec], under the Fluent chrome, with motion frozen.
+ * The Trips app in a Fluent pane of [spec], under the Fluent chrome, with motion frozen.
  */
 @Composable
 internal fun FluentHarness(
@@ -90,21 +91,3 @@ internal fun FluentHarness(
         }
     }
 }
-
-/**
- * A state with every group open, the phone's menu open and the legend on, so every control shows.
- */
-internal fun everythingOpen(): DemoAppState =
-    DemoAppState().apply {
-        for (group in FluentGroup.entries) setOn(group.key, true)
-        setOn(FluentMenuSwitch, true)
-        setOn(FluentShadesSwitch, true)
-    }
-
-/**
- * Everything the Settings app keeps in [DemoAppState], to tell whether anything changed.
- */
-internal fun DemoAppState.fluentSnapshot(): List<Any> =
-    FluentSetting.entries.map { setting -> isOn(setting) } +
-        FluentGroup.entries.map { group -> isOn(group.key) } +
-        listOf(fluentPage(), isOn(FluentMenuSwitch), isOn(FluentShadesSwitch))

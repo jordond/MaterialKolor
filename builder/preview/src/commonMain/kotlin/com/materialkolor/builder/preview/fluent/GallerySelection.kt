@@ -34,6 +34,14 @@ import io.github.composefluent.component.Text
 // The samples of the Selection cards of FluentCards in GalleryEntry.kt. Where a component has no
 // enabled and disabled pair, the last option of its set is the disabled one.
 
+/**
+ * What Fluent's switch says beside itself, in the gallery and in Trips.
+ */
+internal object SwitcherCopy {
+    const val On = "On"
+    const val Off = "Off"
+}
+
 private val DeliveryOptions = listOf("Standard", "Express", "Overnight")
 private val ViewOptions = listOf("Day", "Week", "Month")
 
@@ -155,7 +163,7 @@ private fun GallerySwitch(
             Switcher(
                 checked = on,
                 onCheckStateChange = {},
-                text = if (on) FluentCopy.On else FluentCopy.Off,
+                text = if (on) SwitcherCopy.On else SwitcherCopy.Off,
                 textBefore = true,
                 enabled = enabled,
                 interactionSource = interactions,

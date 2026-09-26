@@ -17,7 +17,7 @@ import com.materialkolor.builder.kit.motion.LocalMotionFrozen
  * Shows or hides a panel with the skin's panel motion, growing along the width when [horizontal]
  * and along the height otherwise. Under frozen motion it shows or hides at once.
  *
- * The Settings app's legend and expanders and the gallery's expanders all open this way.
+ * The gallery's expanders open this way.
  */
 @Composable
 internal fun PanelMotion(
