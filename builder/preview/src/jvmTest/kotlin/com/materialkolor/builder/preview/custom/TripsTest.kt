@@ -97,7 +97,7 @@ class TripsTest {
     fun slots_everyDeviceWidthFirstScreen_showWhatF20AsksWithOrWithoutAccents() {
         for ((width, frame) in TripsFrames) {
             for (spec in listOf(LightSpec, AccentLightSpec)) {
-                withClue("$width ${spec.result.accents.families.size} accents") {
+                withClue("$width ${spec.accentCount} accents") {
                     runDesktopComposeUiTest(frame.width, frame.height) {
                         setContent { TripsHarness(spec, DemoAppState(), width, Modifier.fillMaxSize()) }
 
@@ -109,9 +109,7 @@ class TripsTest {
                             .shouldBeEmpty()
                         (TripsSurfaces intersect slots).size shouldBeGreaterThanOrEqual 3
                         (TripsBorders intersect slots).size shouldBeGreaterThanOrEqual 1
-                        if (spec.result.accents.families
-                                .isEmpty()
-                        ) {
+                        if (spec.accentCount == 0) {
                             refs.filterIsInstance<ColorRef.OfAccent>().shouldBeEmpty()
                         }
                     }
@@ -233,6 +231,12 @@ private val AccentLightSpec: PaneSpec =
     PaneSpec(ThemeResolver().resolve(AccentDocument), isDark = false, label = "Light")
 
 private val AccentDarkSpec: PaneSpec = PaneSpec(ThemeResolver().resolve(AccentDocument), isDark = true, label = "Dark")
+
+/**
+ * How many accents the pane's document has.
+ */
+private val PaneSpec.accentCount: Int
+    get() = result.accents.families.size
 
 /**
  * The four families every first screen has to use, any slot of each.
