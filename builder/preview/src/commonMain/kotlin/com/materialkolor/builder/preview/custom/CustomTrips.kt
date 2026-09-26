@@ -49,6 +49,7 @@ import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.inspect.previewRoles
@@ -273,7 +274,7 @@ private fun NotificationsButton(colors: CustomColors) {
     BuilderPressable(
         onClick = {},
         label = "Notifications, 2 new",
-        modifier = Modifier.previewRoles(*painted.toTypedArray()),
+        modifier = Modifier.size(LocalLayout.current.primaryTouchTarget).previewRoles(*painted.toTypedArray()),
         shape = CircleShape,
     ) {
         TripGlyph(Lucide.Bell, ink.color)
