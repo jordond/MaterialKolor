@@ -11,28 +11,25 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.LocalThemeResolver
 import com.materialkolor.builder.domain.capability.Control
+import com.materialkolor.builder.domain.capability.Reason
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.KeyColor
@@ -140,7 +137,7 @@ internal fun StyleChips(
     val isDark = context.visibleModes == PreviewMode.Dark
     val shelf = rememberChipShelf(context.result.document, isDark, lookup, pause)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-        StyleHeader(selected, plain = scrolling)
+        StyleHeader(selected, plain = scrolling, reason = context.capabilities[Control.Style].explanation)
         StyleChipRow(selected, context.document, shelf, scrolling) { style, origin ->
             dispatcher.dispatch(WorkspaceAction.EditWithReveal(DocumentChange.SetStyle(style), origin))
         }
@@ -150,10 +147,11 @@ internal fun StyleChips(
 
 /**
  * What the chosen style does with the seed with the Keep on shuffle toggle at the end of that line,
- * why the target treats it differently if it does, and the second seed while the style is Cmf.
+ * and the second seed while the style is Cmf.
  *
  * @param[info] Whether the line carries the Style info button, for the phone sheet, whose peek
- * labels the chips without one to leave room for the contrast levels.
+ * labels the chips without one to leave room for the contrast levels. Its explanation says why the
+ * target treats the style differently, if it does, as the Style label's does on the docked poster.
  */
 @Composable
 internal fun StyleDetails(
@@ -185,8 +183,11 @@ internal fun StyleDetails(
             if (!stacked) KeepStyleToggle(context, dispatcher) // b-523
         }
         if (stacked) KeepStyleToggle(context, dispatcher)
-        if (info && open) InfoNote(InfoTopic.Style)
-        context.capabilities[Control.Style].explanation?.let { reason -> ReasonLine(reason) }
+        if (info && open) {
+            InfoNote(InfoTopic.Style)
+            // b-527 Why the target treats the style differently opens with the explanation.
+            context.capabilities[Control.Style].explanation?.let { reason -> ReasonLine(reason) }
+        }
         if (selected == Style.Cmf) {
             CmfSeedField(context, dispatcher)
         }
@@ -195,12 +196,15 @@ internal fun StyleDetails(
 
 /**
  * The Style label with its info button and, while the chosen style runs in one spec whatever the
- * theme asks for, a note on the right naming that spec.
+ * theme asks for, a note on the right naming that spec. The info button's explanation carries
+ * [reason], why the target treats the style differently. A [plain] label has no info button, and
+ * the sheet's [StyleDetails] carries both instead.
  */
 @Composable
 private fun StyleHeader(
     selected: Style,
     plain: Boolean,
+    reason: Reason?,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val label = stringResource(Res.string.style_label)
@@ -221,7 +225,8 @@ private fun StyleHeader(
             if (note != null) SpecNote(note, Modifier.weight(1f))
         }
     } else {
-        InfoLabel(label = label, topic = InfoTopic.Style) {
+        // b-527
+        ReasonInfoLabel(label = label, topic = InfoTopic.Style, reason = reason) {
             if (note != null) SpecNote(note, Modifier.weight(1f))
         }
     }
@@ -259,15 +264,20 @@ private fun StyleChipRow(
     val tags = remember(document.style, document.spec) {
         Style.entries.associateWith { style -> specTag(style, document) }
     }
+    val spacing = LocalBuilderTokens.current.spacing
     // A row that scrolls gives each chip a cell of its own width, since it has no width to share.
-    val cell = if (scrolling) Modifier.width(SchemeChipFootprint + LocalBuilderTokens.current.spacing.small) else null
+    val cell = if (scrolling) Modifier.width(SchemeChipFootprint + spacing.small) else null
+    // b-527 The 320 poster's grid reaches into the poster's side room, so each cell is wide enough
+    // for the longest name, Monochrome, at the chip name's smallest size.
+    val narrow = LocalLayout.current.posterMode == PosterMode.Docked320
+    val grid = if (narrow) Modifier.sideBleed(spacing.medium) else Modifier
     BuilderChoiceGroup(
         options = Style.entries,
         selected = selected,
         // The keys only move the focus here, so a pick that ever comes this way has no chip to reveal from.
         onSelect = { style -> if (style != selected) onChoose(style, null) },
         label = stringResource(Res.string.style_chips),
-        modifier = if (scrolling) Modifier.horizontalScroll(rememberScrollState()) else Modifier,
+        modifier = if (scrolling) Modifier.horizontalScroll(rememberScrollState()) else grid,
         selectOnFocus = false,
         columns = if (scrolling) 0 else ChipColumns,
     ) { style, isSelected, optionModifier ->
@@ -279,6 +289,7 @@ private fun StyleChipRow(
             onChoose = { origin -> if (style != selected) onChoose(style, origin) },
             modifier = optionModifier,
             cell = cell ?: Modifier,
+            named = !scrolling,
         )
     }
 }
@@ -289,9 +300,32 @@ private fun StyleChipRow(
 private const val ChipColumns = 5
 
 /**
+ * Lays the content out [bleed] wider on each side than the room it is given, centred on that room,
+ * so it reaches into the padding around it.
+ */
+private fun Modifier.sideBleed(bleed: Dp): Modifier =
+    layout { measurable, constraints ->
+        if (!constraints.hasBoundedWidth) {
+            val placeable = measurable.measure(constraints)
+            return@layout layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+        }
+        val extra = bleed.roundToPx()
+        val wide = constraints.copy(
+            minWidth = constraints.minWidth + extra * 2,
+            maxWidth = constraints.maxWidth + extra * 2,
+        )
+        val placeable = measurable.measure(wide)
+        layout(placeable.width - extra * 2, placeable.height) { placeable.place(-extra, 0) }
+    }
+
+/**
  * One chip, drawn from the scheme [style] makes of the document's seed in the mode the preview
  * shows, as [shelf] has it now, with the style's name under it. A chip that would move the theme to
  * another spec names that spec, [tag], under its name, and its tooltip lists every spec it runs in.
+ *
+ * @param[named] Whether the name and the spec show under the chip. The phone sheet's peek draws the
+ * chips alone, the way the phone board does, so the contrast levels fit under them. The chip still
+ * reads out its name, and its tooltip names the specs.
  */
 @Composable
 private fun StyleChip(
@@ -302,6 +336,7 @@ private fun StyleChip(
     onChoose: (origin: Offset) -> Unit,
     modifier: Modifier = Modifier,
     cell: Modifier = Modifier,
+    named: Boolean = true,
 ) {
     val colors = shelf[style]
     val bounds = remember { ChipBounds() }
@@ -324,6 +359,8 @@ private fun StyleChip(
                 .onGloballyPositioned { coordinates -> bounds.rect = coordinates.boundsInRoot() },
             tooltip = stringResource(Res.string.style_chip_tooltip, shown, hint, stringResource(specSupport(style))),
         )
+        // b-527
+        if (!named) return@Column
         SchemeChipName(name = shown, modifier = Modifier.fillMaxWidth())
         if (tag != null) {
             BuilderBadge(
@@ -335,135 +372,10 @@ private fun StyleChip(
 }
 
 /**
- * The three colors a chip is drawn in, read from its scheme once.
- */
-private class ChipColors(
-    val primary: Color,
-    val secondaryContainer: Color,
-    val tertiaryContainer: Color,
-) {
-    companion object {
-        fun of(scheme: DynamicScheme): ChipColors =
-            ChipColors(Color(scheme.primary), Color(scheme.secondaryContainer), Color(scheme.tertiaryContainer))
-    }
-}
-
-/**
  * Where a chip sits in the root, which a pick reveals from. Only a pick reads it.
  */
 private class ChipBounds {
     var rect: Rect = Rect.Zero
-}
-
-/**
- * The chip colours of [document] in the mode [isDark] picks, drawn all at once the first time and
- * brought up to date one chip per [pause] after that.
- */
-@Composable
-private fun rememberChipShelf(
-    document: ThemeDocument,
-    isDark: Boolean,
-    lookup: StyleSchemeLookup,
-    pause: ChipPause,
-): ChipShelf {
-    val shelf = remember { ChipShelf(document, isDark, lookup) }
-    val currentLookup by rememberUpdatedState(lookup)
-    val currentPause by rememberUpdatedState(pause)
-    LaunchedEffect(shelf, document, isDark) { shelf.catchUp(document, isDark, currentLookup, currentPause) }
-    return shelf
-}
-
-/**
- * The colours each style chip shows, kept apart from the document so a change to it never draws a
- * chip inside the frame that brings it.
- *
- * Each chip remembers what it was drawn from. [catchUp] draws again every chip the document has moved
- * on from, the one left waiting longest first, and pauses before each. A drag that moves the scheme
- * every frame starts a new catch up every frame, so the chips take turns, each a few frames behind at
- * most, and all of them are current again about ten frames after the drag stops.
- *
- * The pause is a frame rather than a `yield`, since on the web Compose runs a yielded effect again
- * inside the same frame.
- */
-@Stable
-private class ChipShelf(
-    document: ThemeDocument,
-    isDark: Boolean,
-    lookup: StyleSchemeLookup,
-) {
-    /**
-     * What each chip was last drawn from. Only the catch up reads it.
-     */
-    private val drawnFrom = mutableMapOf<Style, ChipKey>()
-
-    /**
-     * When each chip was last drawn, counted in draws, so the longest waiting goes first.
-     */
-    private val drawnAt = mutableMapOf<Style, Int>()
-    private var draws = 0
-
-    private val shown: Map<Style, MutableState<ChipColors>> =
-        Style.entries.associateWith { style ->
-            mutableStateOf(draw(style, ChipKey.of(document, style, isDark), lookup))
-        }
-
-    /**
-     * The colours [style]'s chip shows now.
-     */
-    operator fun get(style: Style): ChipColors = shown.getValue(style).value
-
-    /**
-     * Draws again every chip [document] in the mode [isDark] picks has moved on from, pausing before each.
-     */
-    suspend fun catchUp(
-        document: ThemeDocument,
-        isDark: Boolean,
-        lookup: StyleSchemeLookup,
-        pause: ChipPause,
-    ) {
-        val behind = Style.entries
-            .map { style -> style to ChipKey.of(document, style, isDark) }
-            .filter { (style, key) -> drawnFrom[style] != key }
-            .sortedBy { (style, _) -> drawnAt.getValue(style) }
-        for ((style, key) in behind) {
-            pause()
-            shown.getValue(style).value = draw(style, key, lookup)
-        }
-    }
-
-    private fun draw(
-        style: Style,
-        key: ChipKey,
-        lookup: StyleSchemeLookup,
-    ): ChipColors {
-        drawnFrom[style] = key
-        drawnAt[style] = draws++
-        return ChipColors.of(lookup(key.inputs, key.isDark))
-    }
-}
-
-/**
- * Waits for the next frame, so a catch up draws one chip a frame.
- */
-private val NextFrame: ChipPause = { withFrameNanos {} }
-
-/**
- * What one chip is drawn from.
- *
- * @property[inputs] The scheme inputs its style makes of the document.
- * @property[isDark] The mode the preview shows.
- */
-private data class ChipKey(
-    val inputs: SchemeInputs,
-    val isDark: Boolean,
-) {
-    companion object {
-        fun of(
-            document: ThemeDocument,
-            style: Style,
-            isDark: Boolean,
-        ): ChipKey = ChipKey(SchemeInputs.from(document.copy(style = style)), isDark)
-    }
 }
 
 /**

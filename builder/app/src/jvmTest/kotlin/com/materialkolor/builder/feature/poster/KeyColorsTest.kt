@@ -28,6 +28,7 @@ import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.feature.picker.PickerTarget
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
@@ -83,7 +84,11 @@ class KeyColorsTest {
                 .keyColor
 
             derived shouldNotBe Seed
-            onAllNodes(hasSetTextAction())[KeyColor.Tertiary.ordinal].assert(hasText(derived.toHex()))
+            // b-527 The hex shows as text until it is pressed, then as the field.
+            onAllNodes(hasSetTextAction()).fetchSemanticsNodes().shouldBeEmpty()
+            onNodeWithContentDescription("Edit Tertiary, ${derived.toHex()}").performClick()
+            waitForIdle()
+            onNode(hasSetTextAction()).assert(hasText(derived.toHex()))
         }
 
     @Test
@@ -107,7 +112,9 @@ class KeyColorsTest {
             val harness = PosterHarness(Plain)
             showSection(harness) { context, dispatcher -> KeyColorRows(context, dispatcher) }
 
-            val field = onAllNodes(hasSetTextAction())[KeyColor.Secondary.ordinal]
+            onNodeWithContentDescription("Edit Secondary", substring = true).performClick()
+            waitForIdle()
+            val field = onNode(hasSetTextAction())
             field.requestFocus()
             field.performTextReplacement("#80FF0000")
             field.performKeyInput { pressKey(Key.Enter) }

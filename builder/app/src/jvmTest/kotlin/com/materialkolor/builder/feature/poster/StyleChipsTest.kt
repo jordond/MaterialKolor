@@ -189,6 +189,9 @@ class StyleChipsTest {
             onNodeWithText(TERTIARY_FIELD, useUnmergedTree = true).assertExists()
             onAllNodes(hasSetTextAction()).fetchSemanticsNodes().shouldBeEmpty()
             onNodeWithText("Fluent builds one accent ramp", substring = true).assertExists()
+            // b-527 Why Fluent treats the style differently opens with the Style explanation.
+            onNodeWithContentDescription("What is a style?", substring = true).performClick()
+            waitForIdle()
             onNodeWithText("For Fluent, the style only changes the chroma of the accent ramp.").assertExists()
         }
 

@@ -3,7 +3,9 @@ package com.materialkolor.builder.feature.poster
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Library
@@ -21,6 +23,8 @@ private const val FLUENT_FIXED = "Fluent’s text colors are fixed and its ramps
 
 private const val TONES_KEPT = "Contrast changes the slots that follow a role. Slots picked by tone keep their tones."
 
+private const val CONTRAST_INFO = "What does contrast change?"
+
 @OptIn(ExperimentalTestApi::class)
 class ContrastSectionTest {
     @Test
@@ -31,6 +35,10 @@ class ContrastSectionTest {
             }
 
             Levels.forEach { level -> onNodeWithText(level).assertIsNotEnabled() }
+            // b-527 The reason opens with the Contrast explanation.
+            onNodeWithText(FLUENT_FIXED).assertDoesNotExist()
+            onNodeWithContentDescription(CONTRAST_INFO, substring = true).performClick()
+            waitForIdle()
             onNodeWithText(FLUENT_FIXED).assertExists()
         }
 
@@ -42,6 +50,8 @@ class ContrastSectionTest {
             }
 
             Levels.forEach { level -> onNodeWithText(level).assertIsEnabled() }
+            onNodeWithContentDescription(CONTRAST_INFO, substring = true).performClick()
+            waitForIdle()
             onNodeWithText(TONES_KEPT).assertExists()
         }
 }

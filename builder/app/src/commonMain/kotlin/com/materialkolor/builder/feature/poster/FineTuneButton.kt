@@ -1,17 +1,23 @@
 package com.materialkolor.builder.feature.poster
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.capability.EffectiveSpec
 import com.materialkolor.builder.domain.model.KeyColor
+import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
@@ -25,11 +31,12 @@ import com.materialkolor.builder.generated.resources.finetune_title
 import com.materialkolor.builder.generated.resources.keycolors_summary_both
 import com.materialkolor.builder.generated.resources.keycolors_summary_pins
 import com.materialkolor.builder.generated.resources.keycolors_summary_set
-import com.materialkolor.builder.kit.control.BuilderCard
 import com.materialkolor.builder.kit.control.BuilderIcon
+import com.materialkolor.builder.kit.control.BuilderPressable
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.pluralStringResource
@@ -40,8 +47,9 @@ import org.jetbrains.compose.resources.stringResource
  * title that sums up what the sheet holds, the key colors and pins set, the spec and the extra
  * colors.
  *
- * It reads out as its title and that line. The sheet it opens hands focus back to it through
- * [trigger] once it closes.
+ * It is drawn as an outline in the poster's ink with no fill, the way board E draws it. Material's
+ * is a pill and the other skins keep the corner their controls have. It reads out as its title and
+ * that line. The sheet it opens hands focus back to it through [trigger] once it closes.
  *
  * @param[trigger] The poster's Fine-tune trigger, or null where nothing hands focus back.
  */
@@ -52,18 +60,33 @@ internal fun FineTuneButton(
     modifier: Modifier = Modifier,
     trigger: PanelTrigger? = null,
 ) {
-    val spacing = LocalBuilderTokens.current.spacing
+    val tokens = LocalBuilderTokens.current
+    val spacing = tokens.spacing
     val title = stringResource(Res.string.finetune_title)
     val summary = fineTuneSummary(context.document)
     val name = stringResource(Res.string.finetune_button, title, summary)
-    BuilderCard(
+    // b-527
+    val shape = if (LocalSkin.current.library == Library.Material3) {
+        RoundedCornerShape(percent = PILL_PERCENT)
+    } else {
+        RoundedCornerShape(tokens.radius.small)
+    }
+    BuilderPressable(
+        onClick = { dispatcher.dispatch(WorkspaceAction.OpenFineTune()) },
+        label = name,
         modifier = modifier
             .fillMaxWidth()
             .then(triggerFocus(trigger))
-            .semantics { contentDescription = name },
-        onClick = { dispatcher.dispatch(WorkspaceAction.OpenFineTune()) },
+            // The pressable keeps its content out of the tree, so the button carries the words it
+            // shows itself, the way a card button does.
+            .semantics { this[SemanticsProperties.Text] = listOf(AnnotatedString(title), AnnotatedString(summary)) },
+        shape = shape,
     ) {
         Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(FineTuneOutline, tokens.textStrong, shape)
+                .padding(horizontal = spacing.large, vertical = spacing.medium),
             horizontalArrangement = Arrangement.spacedBy(spacing.medium),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -77,6 +100,16 @@ internal fun FineTuneButton(
         }
     }
 }
+
+/**
+ * How thick the button's outline is drawn, board E's line, a little heavier than a field's.
+ */
+private val FineTuneOutline = 1.5.dp
+
+/**
+ * The corner of a pill, half its height.
+ */
+private const val PILL_PERCENT = 50
 
 /**
  * The line under the button's title. The key colors and pins set, or that the colors come from the
