@@ -23,6 +23,9 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -419,5 +422,34 @@ class ProjectSessionTest : SessionTestBase() {
             val saved = projects.load(id).shouldNotBeNull()
             saved.name shouldBe before
             saved.document.amoled shouldBe true
+        }
+
+    @Test
+    fun open_twoProjects_neverPublishesADocumentWithTheOtherProjectsRefOrView() =
+        runTest {
+            val (session) = session()
+            val first = booted(session)
+            session.edit(DocumentChange.Replace(OCEAN), EditPhase.Discrete)
+            session.updateView { view -> view.copy(mode = PreviewMode.Dark) }
+            settle()
+            session.newProject(copyCurrent = false)
+            val second = session.project.value
+                .shouldBeInstanceOf<ProjectRef.Persisted>()
+                .id
+            session.edit(DocumentChange.Replace(FOREST), EditPhase.Discrete)
+            settle()
+            val seen = mutableListOf<SessionState>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { session.state.toList(seen) }
+
+            session.open(first)
+            session.open(second)
+            runCurrent()
+
+            val expected = mapOf(
+                ProjectRef.Persisted(first) to (OCEAN to PreviewMode.Dark),
+                ProjectRef.Persisted(second) to (FOREST to PreviewMode.Split),
+            )
+            seen.map { state -> state.project }.toSet() shouldBe expected.keys
+            seen.forEach { state -> (state.document to state.view.mode) shouldBe expected[state.project] }
         }
 }
