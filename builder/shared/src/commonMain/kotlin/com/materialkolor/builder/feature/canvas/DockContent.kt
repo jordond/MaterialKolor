@@ -48,15 +48,14 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The dock's tools in the skin's `DockRegion`, Light, Split and Dark, the device width, Inspect,
- * Vision and Fullscreen.
+ * The dock's tools in the skin's `DockRegion`, Inspect first, then Light, Split and Dark, the device
+ * width, Vision and Fullscreen. Tab walks them in that order too.
  *
- * A phone has no device width, its preview is always a phone. Its dock keeps to one row, so
- * the mode switch drops the glyphs and Inspect shows as a glyph alone. Fullscreen leaves through the
- * floating exit instead of the dock. While the keyboard
- * is in use, focus comes back to the Fullscreen button when fullscreen ends, since the exit that held
- * it is gone, and to the Inspect toggle when Inspect ends, since the preview that held it lets go. A
- * pointer leaves the focus alone.
+ * A phone has no device width, its preview is always a phone. Its dock keeps to one row in the same
+ * order, so Inspect shows as a glyph alone and the mode switch drops the glyphs. Fullscreen leaves
+ * through the floating exit instead of the dock. While the keyboard is in use, focus comes back to
+ * the Fullscreen button when fullscreen ends, since the exit that held it is gone, and to the Inspect
+ * toggle when Inspect ends, since the preview that held it lets go. A pointer leaves the focus alone.
  */
 @Composable
 internal fun DockContent(
@@ -82,24 +81,6 @@ internal fun DockContent(
         wasInspecting.value = state.inspect
     }
     DockRegion(modifier) {
-        BuilderSegmented(
-            options = PreviewMode.entries,
-            selected = state.view.mode,
-            onSelect = { mode -> dispatcher.dispatch(WorkspaceAction.SetPreviewMode(mode, origin = null)) },
-            label = stringResource(Res.string.canvas_mode_label),
-            // As wide as its options, so a row that shares its width out evenly leaves room for the tools.
-            modifier = Modifier.width(IntrinsicSize.Max),
-            optionIcon = { mode -> if (compact) null else mode.icon },
-            // Arrowing along the modes should not slide the handle at every stop.
-            selectOnFocus = false,
-            optionLabel = { mode -> modes.getValue(mode) },
-        )
-        if (!compact) {
-            DeviceWidthMenu(
-                width = state.view.deviceWidth,
-                onPick = { width -> dispatcher.dispatch(WorkspaceAction.SetDeviceWidth(width)) },
-            )
-        }
         val inspect = stringResource(Res.string.canvas_inspect)
         if (compact) {
             // A phone's dock is one row of glyphs, so Inspect shows its state by its fill.
@@ -119,6 +100,24 @@ internal fun DockContent(
                 label = inspect,
                 modifier = Modifier.focusRequester(inspectToggle),
                 icon = IconId.Inspect,
+            )
+        }
+        BuilderSegmented(
+            options = PreviewMode.entries,
+            selected = state.view.mode,
+            onSelect = { mode -> dispatcher.dispatch(WorkspaceAction.SetPreviewMode(mode, origin = null)) },
+            label = stringResource(Res.string.canvas_mode_label),
+            // As wide as its options, so a row that shares its width out evenly leaves room for the tools.
+            modifier = Modifier.width(IntrinsicSize.Max),
+            optionIcon = { mode -> if (compact) null else mode.icon },
+            // Arrowing along the modes should not slide the handle at every stop.
+            selectOnFocus = false,
+            optionLabel = { mode -> modes.getValue(mode) },
+        )
+        if (!compact) {
+            DeviceWidthMenu(
+                width = state.view.deviceWidth,
+                onPick = { width -> dispatcher.dispatch(WorkspaceAction.SetDeviceWidth(width)) },
             )
         }
         VisionMenu(
