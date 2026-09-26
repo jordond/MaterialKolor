@@ -300,7 +300,10 @@ internal class ProjectSession(
         val shown = _state.value
         flushAll()
         if (copyCurrent) return startNew(shown.document, shown.view)
-        val taken = projects.index.first().projects.mapTo(mutableSetOf()) { meta -> meta.name }
+        val taken = projects.index
+            .first()
+            .projects
+            .mapTo(mutableSetOf()) { meta -> meta.name }
         startNew(ThemeDocument.Default.copy(seed = starterSeed(taken, random)), newView())
     }
 

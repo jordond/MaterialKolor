@@ -26,7 +26,8 @@ internal fun pageDeviceWidth(): DeviceWidth {
     }
 }
 
-private val PhoneAgent = Regex("iPhone|iPod|Android.+Mobile|Windows Phone|IEMobile|BlackBerry|Opera Mini", RegexOption.IGNORE_CASE)
+private val PhoneAgent =
+    Regex("iPhone|iPod|Android.+Mobile|Windows Phone|IEMobile|BlackBerry|Opera Mini", RegexOption.IGNORE_CASE)
 
 private val TabletAgent = Regex("iPad|Android|Tablet|Silk|Kindle|PlayBook", RegexOption.IGNORE_CASE)
 
