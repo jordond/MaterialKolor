@@ -3,29 +3,9 @@ package com.materialkolor.sample.customtheme.theme
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.MaterialKolors
 import com.materialkolor.dynamiccolor.DynamicScheme
-import com.materialkolor.ktx.DynamicScheme
-import com.materialkolor.ktx.from
-import com.materialkolor.ktx.harmonize
 import com.materialkolor.ktx.onTone
 import com.materialkolor.ktx.toneColor
 import com.materialkolor.palettes.TonalPalette
-
-/**
- * Build the whole theme from one seed color and the accent seeds.
- *
- * @param[seed] The color the scheme is generated from.
- * @param[isDark] Whether to build the dark theme or the light one.
- * @param[seeds] The accent seeds the theme owns on top of [seed].
- * @return The full set of theme colors.
- */
-public fun appColors(
-    seed: Color,
-    isDark: Boolean,
-    seeds: AppThemeSeeds = AppThemeSeeds.Default,
-): AppColors {
-    val scheme = DynamicScheme(seedColor = seed, isDark = isDark)
-    return AppPalettes.from(seed = seed, seeds = seeds).toColors(scheme)
-}
 
 internal data class AppPalettes(
     val love: TonalPalette,
@@ -36,24 +16,7 @@ internal data class AppPalettes(
     val iced: TonalPalette,
     val tea: TonalPalette,
     val chocolate: TonalPalette,
-) {
-    companion object {
-        fun from(
-            seed: Color,
-            seeds: AppThemeSeeds,
-        ): AppPalettes =
-            AppPalettes(
-                love = TonalPalette.from(seeds.love.harmonize(seed)),
-                cold = TonalPalette.from(seeds.cold.harmonize(seed)),
-                warm = TonalPalette.from(seeds.warm.harmonize(seed)),
-                coffee = TonalPalette.from(seeds.coffee.harmonize(seed)),
-                matcha = TonalPalette.from(seeds.matcha.harmonize(seed)),
-                iced = TonalPalette.from(seeds.iced.harmonize(seed)),
-                tea = TonalPalette.from(seeds.tea.harmonize(seed)),
-                chocolate = TonalPalette.from(seeds.chocolate.harmonize(seed)),
-            )
-    }
-}
+)
 
 /**
  * Fold the scheme and the extra palettes into the flat record the app reads.

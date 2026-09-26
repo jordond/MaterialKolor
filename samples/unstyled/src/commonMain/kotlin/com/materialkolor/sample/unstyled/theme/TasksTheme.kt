@@ -13,7 +13,7 @@ import com.composeunstyled.theme.ThemeComposableV2
 import com.composeunstyled.theme.ThemeToken
 import com.composeunstyled.theme.buildThemeV2
 import com.materialkolor.unstyled.MaterialKolorTokens
-import com.materialkolor.unstyled.rememberDynamicColors
+import com.materialkolor.unstyled.rememberDynamicLightDarkColors
 
 private const val COLOR_TRANSITION_MILLIS = 300
 
@@ -42,10 +42,11 @@ private fun tasksTheme(seed: () -> Color): ThemeComposableV2 =
         defaultTextStyle = TasksType.Body
         defaultIndication = StateLayer
 
-        properties[MaterialKolorTokens.colors] = rememberDynamicColors(seedColor = seed(), isDark = false)
+        val (light, dark) = rememberDynamicLightDarkColors(seedColor = seed())
+        properties[MaterialKolorTokens.colors] = light
 
         colorScheme(ColorScheme.Dark) {
-            properties[MaterialKolorTokens.colors] = rememberDynamicColors(seedColor = seed(), isDark = true)
+            properties[MaterialKolorTokens.colors] = dark
         }
     }
 

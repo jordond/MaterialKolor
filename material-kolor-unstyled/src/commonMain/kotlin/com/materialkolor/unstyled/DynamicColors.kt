@@ -11,29 +11,12 @@ import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.ktx.rememberDynamicScheme
 
 /**
- * Generates a scheme from [seedColor] and remembers every [MaterialKolorTokens] token paired with
+ * Generates one scheme from [seedColor] and remembers every [MaterialKolorTokens] token paired with
  * its color.
  *
- * The result is a value for a theme property, so your theme decides where it goes. Put the light
- * colors in the base values and the dark colors in the [com.composeunstyled.theme.ColorScheme.Dark]
- * block, next to anything else that scheme changes.
- *
- * ```kotlin
- * val AppTheme = buildThemeV2 {
- *     // Set this property to enable color transitions.
- *     colorSchemeTransitionSpec = tween(300)
- *
- *     properties[MaterialKolorTokens.colors] = rememberDynamicColors(seedColor = seed, isDark = false)
- *
- *     colorScheme(ColorScheme.Dark) {
- *         properties[MaterialKolorTokens.colors] = rememberDynamicColors(seedColor = seed, isDark = true)
- *     }
- * }
- * ```
- *
- * Base values are the fallback for every color scheme that does not set the property, so the light
- * colors also cover [com.composeunstyled.theme.ColorScheme.Light] and any scheme of your own that
- * leaves colors alone. A custom scheme gets its own colors the same way.
+ * Use this for one color scheme at a time, such as a custom scheme or a theme built with
+ * `buildTheme`. For light and dark together, [rememberDynamicLightDarkColors] writes every argument
+ * once.
  *
  * ```kotlin
  * colorScheme(Sepia) {
@@ -89,4 +72,92 @@ public fun rememberDynamicColors(
     )
 
     return remember(scheme) { scheme.toThemeValues() }
+}
+
+/**
+ * Generates a light and a dark scheme from [seedColor] and remembers the token values of each.
+ *
+ * The result is a value for a theme property, so your theme decides where it goes. Put the light
+ * colors in the base values and the dark colors in the [com.composeunstyled.theme.ColorScheme.Dark]
+ * block, next to anything else that scheme changes.
+ *
+ * ```kotlin
+ * val AppTheme = buildThemeV2 {
+ *     // Set this property to enable color transitions.
+ *     colorSchemeTransitionSpec = tween(300)
+ *
+ *     val (light, dark) = rememberDynamicLightDarkColors(seedColor = seed)
+ *     properties[MaterialKolorTokens.colors] = light
+ *
+ *     colorScheme(ColorScheme.Dark) {
+ *         properties[MaterialKolorTokens.colors] = dark
+ *     }
+ * }
+ * ```
+ *
+ * Base values are the fallback for every color scheme that does not set the property, so the light
+ * colors also cover [com.composeunstyled.theme.ColorScheme.Light] and any scheme of your own that
+ * leaves colors alone.
+ *
+ * The parameters are the ones [rememberDynamicScheme] takes, minus `isDark` which the two schemes
+ * own.
+ *
+ * @param[seedColor] The color to base the schemes on.
+ * @param[primary] The primary color of the schemes.
+ * @param[secondary] The secondary color of the schemes.
+ * @param[tertiary] The tertiary color of the schemes.
+ * @param[neutral] The neutral color of the schemes.
+ * @param[neutralVariant] The neutral variant color of the schemes.
+ * @param[error] The error color of the schemes.
+ * @param[style] The style of the schemes.
+ * @param[contrastLevel] The contrast level of the schemes.
+ * @param[specVersion] The version of the color specification to use.
+ * @param[platform] The platform to use for the schemes.
+ * @return The remembered token values, light first and dark second.
+ */
+@Composable
+public fun rememberDynamicLightDarkColors(
+    seedColor: Color,
+    primary: Color? = null,
+    secondary: Color? = null,
+    tertiary: Color? = null,
+    neutral: Color? = null,
+    neutralVariant: Color? = null,
+    error: Color? = null,
+    style: PaletteStyle = PaletteStyle.TonalSpot,
+    contrastLevel: Double = Contrast.Default.value,
+    specVersion: ColorSpec.SpecVersion = ColorSpec.SpecVersion.Default,
+    platform: DynamicScheme.Platform = DynamicScheme.Platform.Default,
+): Pair<Map<ThemeToken<Color>, Color>, Map<ThemeToken<Color>, Color>> {
+    val light = rememberDynamicScheme(
+        seedColor = seedColor,
+        isDark = false,
+        primary = primary,
+        secondary = secondary,
+        tertiary = tertiary,
+        neutral = neutral,
+        neutralVariant = neutralVariant,
+        error = error,
+        style = style,
+        contrastLevel = contrastLevel,
+        specVersion = specVersion,
+        platform = platform,
+    )
+
+    val dark = rememberDynamicScheme(
+        seedColor = seedColor,
+        isDark = true,
+        primary = primary,
+        secondary = secondary,
+        tertiary = tertiary,
+        neutral = neutral,
+        neutralVariant = neutralVariant,
+        error = error,
+        style = style,
+        contrastLevel = contrastLevel,
+        specVersion = specVersion,
+        platform = platform,
+    )
+
+    return remember(light, dark) { light.toThemeValues() to dark.toThemeValues() }
 }

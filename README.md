@@ -363,10 +363,8 @@ Run it with `./gradlew :samples:custom-theme:run`.
 
 ## Compose Unstyled
 
-`material-kolor-unstyled` adapts a MaterialKolor scheme to
-[Compose Unstyled](https://composeunstyled.com) theming. It only produces color values, and your
-theme decides where they go. The theme's color schemes, text style, indication and every other
-property stay yours.
+`material-kolor-unstyled` adapts a MaterialKolor scheme
+to[Compose Unstyled](https://composeunstyled.com) theming.
 
 ```kotlin
 import com.composeunstyled.theme.ColorScheme
@@ -374,7 +372,7 @@ import com.composeunstyled.theme.Theme
 import com.composeunstyled.theme.buildThemeV2
 import com.materialkolor.PaletteStyle
 import com.materialkolor.unstyled.MaterialKolorTokens
-import com.materialkolor.unstyled.rememberDynamicColors
+import com.materialkolor.unstyled.rememberDynamicLightDarkColors
 
 object ThemeSettings {
     var seedColor by mutableStateOf(Color(0xFF6750A4))
@@ -382,18 +380,15 @@ object ThemeSettings {
 
 val AppTheme = buildThemeV2 {
     colorSchemeTransitionSpec = tween(300)
-    properties[MaterialKolorTokens.colors] = rememberDynamicColors(
+
+    val (light, dark) = rememberDynamicLightDarkColors(
         seedColor = ThemeSettings.seedColor,
-        isDark = false,
-        style = PaletteStyle.Vibrant,
+        style = PaletteStyle.Vibrant
     )
+    properties[MaterialKolorTokens.colors] = light
 
     colorScheme(ColorScheme.Dark) {
-        properties[MaterialKolorTokens.colors] = rememberDynamicColors(
-            seedColor = ThemeSettings.seedColor,
-            isDark = true,
-            style = PaletteStyle.Vibrant,
-        )
+        properties[MaterialKolorTokens.colors] = dark
     }
 }
 
@@ -412,8 +407,9 @@ fun App() {
 ```
 
 The builder lambda is composable, so it reads `ThemeSettings.seedColor` on every recomposition and
-the theme regenerates when the button sets a new one. `rememberDynamicColors` takes the same
-parameters as `rememberDynamicScheme` and remembers the token map it returns.
+the theme regenerates when the button sets a new one. `rememberDynamicLightDarkColors` builds the
+light and dark token maps from one set of arguments and remembers both as a pair. It takes the same
+parameters as `rememberDynamicScheme`, minus `isDark`.
 
 Light goes in the base values and dark goes in the `ColorScheme.Dark` block. Unstyled lays the
 active scheme's overrides over the base values, so `AppTheme { }` follows the system,
@@ -423,13 +419,14 @@ next to the colors.
 
 ```kotlin
 colorScheme(ColorScheme.Dark) {
-    properties[MaterialKolorTokens.colors] = rememberDynamicColors(ThemeSettings.seedColor, isDark = true)
+    properties[MaterialKolorTokens.colors] = dark
     properties[AppShadows] = darkShadows
     defaultContentColor = Color(0xFFE6E0E9)
 }
 ```
 
-A scheme of your own works the same way.
+A scheme of your own needs one set of colors. `rememberDynamicColors` takes `isDark` and gives a
+single map.
 
 ```kotlin
 val Sepia = ColorScheme("sepia")
@@ -438,7 +435,8 @@ val AppTheme = buildThemeV2 {
     // The base values and the dark block, as above.
 
     colorScheme(Sepia) {
-        properties[MaterialKolorTokens.colors] = rememberDynamicColors(Color(0xFF704214), isDark = false)
+        properties[MaterialKolorTokens.colors] =
+            rememberDynamicColors(Color(0xFF704214), isDark = false)
     }
 }
 ```
@@ -527,15 +525,15 @@ on the way into a scheme, so `TonalSpot` gives a calmer accent than the seed you
 The seven shades are anchored to the lightness of Microsoft's own Windows blue family, rounded to
 the nearest five:
 
-| Shade | Windows blue | its tone | tone used here |
-|---|---|---|---|
-| `dark3` | `#001968` | 13.8 | 15 |
-| `dark2` | `#003D92` | 27.9 | 30 |
-| `dark1` | `#005EB7` | 40.3 | 40 |
-| `base` | `#0078D4` | 49.7 | 50 |
-| `light1` | `#0093F9` | 59.6 | 60 |
-| `light2` | `#60CCFE` | 77.8 | 80 |
-| `light3` | `#98ECFE` | 88.8 | 90 |
+| Shade    | Windows blue | its tone | tone used here |
+|----------|--------------|----------|----------------|
+| `dark3`  | `#001968`    | 13.8     | 15             |
+| `dark2`  | `#003D92`    | 27.9     | 30             |
+| `dark1`  | `#005EB7`    | 40.3     | 40             |
+| `base`   | `#0078D4`    | 49.7     | 50             |
+| `light1` | `#0093F9`    | 59.6     | 60             |
+| `light2` | `#60CCFE`    | 77.8     | 80             |
+| `light3` | `#98ECFE`    | 88.8     | 90             |
 
 Microsoft's ramp shifts hue by 64 degrees from its darkest shade to its lightest, and a tonal
 palette holds hue steady, so this matches the lightness of that ramp rather than reproducing it.
@@ -572,7 +570,8 @@ A seed with little chroma gives a Fluent theme with little chroma. A grey seed p
 greys, which is the ramp working rather than a fault.
 
 [`samples/fluent`](samples/fluent) builds the [Tasks sample](#samples) on Fluent components. Run it
-with `./gradlew :samples:fluent:run` to switch seeds, flip light and dark, and see the generated ramp
+with `./gradlew :samples:fluent:run` to switch seeds, flip light and dark, and see the generated
+ramp
 beside the single blue Fluent falls back to on its own.
 
 Platforms: JVM, Android, iOS, JS and Wasm. No macOS native target, Java 17 bytecode from Fluent,
@@ -724,12 +723,12 @@ The [samples](samples) are one small app, Tasks, built four times. A to-do list 
 and a light and dark switch on top. The behaviour, the copy and the data live in one shared module,
 so the four differ only in their UI stack and in how they turn a seed into a theme.
 
-| Sample | UI | Theme from | Run it |
-|---|---|---|---|
+| Sample                                 | UI                 | Theme from                        | Run it                                |
+|----------------------------------------|--------------------|-----------------------------------|---------------------------------------|
 | [`custom-theme`](samples/custom-theme) | Compose Foundation | `material-kolor-core` tonal ramps | `./gradlew :samples:custom-theme:run` |
-| [`fluent`](samples/fluent) | Compose Fluent | `material-kolor-fluent` | `./gradlew :samples:fluent:run` |
-| [`material3`](samples/material3) | Compose Material 3 | `material-kolor-material3` | `./gradlew :samples:material3:run` |
-| [`unstyled`](samples/unstyled) | Compose Unstyled | `material-kolor-unstyled` | `./gradlew :samples:unstyled:run` |
+| [`fluent`](samples/fluent)             | Compose Fluent     | `material-kolor-fluent`           | `./gradlew :samples:fluent:run`       |
+| [`material3`](samples/material3)       | Compose Material 3 | `material-kolor-material3`        | `./gradlew :samples:material3:run`    |
+| [`unstyled`](samples/unstyled)         | Compose Unstyled   | `material-kolor-unstyled`         | `./gradlew :samples:unstyled:run`     |
 
 [`samples/README.md`](samples/README.md) has the full spec.
 

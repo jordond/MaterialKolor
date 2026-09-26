@@ -18,10 +18,12 @@ import com.composeunstyled.theme.ThemeToken
 import com.composeunstyled.theme.buildTheme
 import com.composeunstyled.theme.buildThemeV2
 import com.materialkolor.MaterialKolors
+import com.materialkolor.PaletteStyle
 import com.materialkolor.ktx.DynamicScheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -231,6 +233,50 @@ class DynamicColorsTest {
 
             waitForIdle()
             assertEquals(kolors(seed, isDark = true).primary(), primary)
+        }
+
+    @Test
+    fun rememberDynamicLightDarkColors_matchesTheSingleModeValues() =
+        runComposeUiTest {
+            var pair: Pair<Map<ThemeToken<Color>, Color>, Map<ThemeToken<Color>, Color>>? = null
+            var light: Map<ThemeToken<Color>, Color>? = null
+            var dark: Map<ThemeToken<Color>, Color>? = null
+
+            setContent {
+                pair = rememberDynamicLightDarkColors(seedColor = seed, style = PaletteStyle.Vibrant)
+                light = rememberDynamicColors(seedColor = seed, isDark = false, style = PaletteStyle.Vibrant)
+                dark = rememberDynamicColors(seedColor = seed, isDark = true, style = PaletteStyle.Vibrant)
+            }
+
+            waitForIdle()
+            assertEquals(light, assertNotNull(pair).first)
+            assertEquals(dark, assertNotNull(pair).second)
+        }
+
+    @Test
+    fun rememberDynamicLightDarkColors_fillsTheBaseValuesAndTheDarkBlock() =
+        runComposeUiTest {
+            val theme = buildThemeV2 {
+                val (light, dark) = rememberDynamicLightDarkColors(seedColor = seed)
+                properties[MaterialKolorTokens.colors] = light
+
+                colorScheme(ColorScheme.Dark) {
+                    properties[MaterialKolorTokens.colors] = dark
+                }
+            }
+            val primary = mutableMapOf<ColorScheme, Color>()
+
+            setContent {
+                for (scheme in listOf(ColorScheme.Light, ColorScheme.Dark)) {
+                    theme(scheme) {
+                        primary[scheme] = Theme[MaterialKolorTokens.colors][MaterialKolorTokens.primary]
+                    }
+                }
+            }
+
+            waitForIdle()
+            assertEquals(kolors(seed, isDark = false).primary(), primary[ColorScheme.Light])
+            assertEquals(kolors(seed, isDark = true).primary(), primary[ColorScheme.Dark])
         }
 
     private fun lightAndDarkTheme(seedColor: () -> Color): ThemeComposableV2 =

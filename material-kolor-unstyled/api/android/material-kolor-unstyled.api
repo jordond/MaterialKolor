@@ -1,5 +1,6 @@
 public final class com/materialkolor/unstyled/DynamicColorsKt {
 	public static final fun rememberDynamicColors-k1ZVges (JZLandroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lcom/materialkolor/PaletteStyle;DLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/dynamiccolor/DynamicScheme$Platform;Landroidx/compose/runtime/Composer;III)Ljava/util/Map;
+	public static final fun rememberDynamicLightDarkColors-GLMMIyM (JLandroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lcom/materialkolor/PaletteStyle;DLcom/materialkolor/dynamiccolor/ColorSpec$SpecVersion;Lcom/materialkolor/dynamiccolor/DynamicScheme$Platform;Landroidx/compose/runtime/Composer;III)Lkotlin/Pair;
 }
 
 public final class com/materialkolor/unstyled/MaterialKolorTokens {
