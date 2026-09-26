@@ -31,7 +31,7 @@ internal const val LIBRARY_CHIP_ROW_TAG: String = "top-bar-library-chips"
  *
  * The row scrolls sideways when the names run past the edge, and the chip with focus scrolls into
  * view. The arrow keys only move focus and Space or Enter picks, as on the segmented row, so walking
- * past a library does not re-skin the app at every step. It tells [LocalSwitcherForm] the libraries
+ * past a library does not re-theme the previews at every step. It tells [LocalSwitcherForm] the libraries
  * show as their own controls, the way the registry finds them.
  *
  * @param[selected] The library the document is on.

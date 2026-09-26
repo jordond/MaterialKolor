@@ -19,131 +19,8 @@ import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
- * The Unstyled skin's inputs, plain and square with hairline edges, the way Compose Unstyled's own
- * demos draw them.
- */
-internal object UnstyledInputStyles {
-    val switch: SwitchStyle
-        @Composable @ReadOnlyComposable
-        get() = LocalBuilderTokens.current.let { tokens ->
-            SwitchStyle(
-                trackWidth = 36.dp,
-                trackHeight = 20.dp,
-                thumbSize = 14.dp,
-                trackShape = RoundedCornerShape(4.dp),
-                thumbShape = RoundedCornerShape(2.dp),
-                outlineWidth = 1.dp,
-                trackOn = tokens.accent,
-                trackOff = tokens.panel,
-                outlineOff = tokens.borderStrong,
-                thumbOn = tokens.onAccent,
-                thumbOff = tokens.borderStrong,
-                labelGap = tokens.spacing.medium,
-                focus = tokens.focus,
-                focusShape = RoundedCornerShape(tokens.radius.small),
-            )
-        }
-
-    val checkbox: CheckboxStyle
-        @Composable @ReadOnlyComposable
-        get() = LocalBuilderTokens.current.let { tokens ->
-            CheckboxStyle(
-                boxSize = 18.dp,
-                checkSize = 14.dp,
-                boxShape = RoundedCornerShape(2.dp),
-                outlineWidth = 1.dp,
-                outline = tokens.borderStrong,
-                checkedFill = tokens.accent,
-                checkInk = tokens.onAccent,
-                labelGap = tokens.spacing.small,
-                focus = tokens.focus,
-                focusShape = RoundedCornerShape(tokens.radius.small),
-            )
-        }
-
-    val slider: SliderStyle
-        @Composable @ReadOnlyComposable
-        get() = LocalBuilderTokens.current.let { tokens ->
-            SliderStyle(
-                trackHeight = 4.dp,
-                trackShape = RoundedCornerShape(2.dp),
-                activeTrack = tokens.accent,
-                inactiveTrack = tokens.border,
-                thumbSize = 16.dp,
-                thumbShape = RoundedCornerShape(4.dp),
-                thumb = tokens.accent,
-                thumbOutline = tokens.panel,
-                thumbOutlineWidth = 2.dp,
-                stopSize = 4.dp,
-                stop = tokens.textMuted,
-                focus = tokens.focus,
-            )
-        }
-
-    val tabs: TabsStyle
-        @Composable @ReadOnlyComposable
-        get() = LocalBuilderTokens.current.let { tokens ->
-            TabsStyle(
-                container = Color.Transparent,
-                containerShape = RoundedCornerShape(0.dp),
-                containerPadding = 0.dp,
-                tabShape = RoundedCornerShape(0.dp),
-                tabPadding = PaddingValues(horizontal = tokens.spacing.medium, vertical = tokens.spacing.small),
-                gap = tokens.spacing.extraSmall,
-                selectedContainer = Color.Transparent,
-                selectedInk = tokens.textStrong,
-                ink = tokens.textMuted,
-                indicator = tokens.accent,
-                indicatorHeight = 2.dp,
-                indicatorWidth = null,
-                focus = tokens.focus,
-            )
-        }
-
-    val disclosure: DisclosureStyle
-        @Composable @ReadOnlyComposable
-        get() = LocalBuilderTokens.current.let { tokens ->
-            DisclosureStyle(
-                container = tokens.panel,
-                shape = RoundedCornerShape(4.dp),
-                outline = tokens.border,
-                outlineWidth = 1.dp,
-                headerPadding = PaddingValues(horizontal = tokens.spacing.medium, vertical = tokens.spacing.small),
-                contentPadding = PaddingValues(
-                    start = tokens.spacing.medium,
-                    end = tokens.spacing.medium,
-                    bottom = tokens.spacing.medium,
-                ),
-                focus = tokens.focus,
-            )
-        }
-
-    val field: FieldStyle
-        @Composable @ReadOnlyComposable
-        get() = LocalBuilderTokens.current.let { tokens ->
-            FieldStyle(
-                shape = RoundedCornerShape(4.dp),
-                container = tokens.panel,
-                outline = tokens.borderStrong,
-                outlineWidth = 1.dp,
-                active = tokens.accent,
-                error = tokens.danger,
-                activeWidth = 2.dp,
-                activeAsUnderline = false,
-                padding = PaddingValues(horizontal = tokens.spacing.medium, vertical = tokens.spacing.small),
-                gap = tokens.spacing.extraSmall,
-                cursor = tokens.accent,
-            )
-        }
-
-    val hero: FieldStyle
-        @Composable @ReadOnlyComposable
-        get() = heroFieldStyle(LocalBuilderTokens.current, underline = 2.dp, shape = RoundedCornerShape(0.dp))
-}
-
-/**
  * The Custom skin's inputs, the builder's own look. Pills, a heavier outline and the accent filling
- * whatever is on, all over the same headless layer as Unstyled.
+ * whatever is on, all over the headless layer.
  */
 internal object CustomInputStyles {
     val switch: SwitchStyle
@@ -302,8 +179,8 @@ internal class FieldStyle(
 /**
  * The poster's seed headline, which reads as a heading until it has focus and then shows a line
  * under it in the skin's shape. The line marks one side only, so keyboard focus also rings the
- * headline in the focus colour, the way Fluent's field does. It reads the surrounding
- * tokens, so on the poster it is drawn in the seed and the ring takes the poster's ink.
+ * headline in the focus colour. It reads the surrounding tokens, so on the poster it is drawn in the
+ * seed and the ring takes the poster's ink.
  */
 internal fun heroFieldStyle(
     tokens: BuilderTokens,

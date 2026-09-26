@@ -17,11 +17,11 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.audit.ColorRef
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.PreviewResult
 import com.materialkolor.builder.preview.split.SplitState
@@ -58,16 +58,17 @@ private val NoActions: InspectActions =
 @OptIn(ExperimentalTestApi::class)
 class InspectOverlayTest {
     @Test
-    fun pressOnTheCard_underTheUnstyledSkin_neverReachesThePreviewUnderIt() = pressOnTheCardStaysOnIt(Library.Unstyled)
+    fun pressOnTheCard_underTheCustomSkin_neverReachesThePreviewUnderIt() = pressOnTheCardStaysOnIt(SkinLibrary.Custom)
 
     @Test
-    fun pressOnTheCard_underTheFluentSkin_neverReachesThePreviewUnderIt() = pressOnTheCardStaysOnIt(Library.Fluent)
+    fun pressOnTheCard_underTheMaterialSkin_neverReachesThePreviewUnderIt() =
+        pressOnTheCardStaysOnIt(SkinLibrary.Material3)
 
     /**
      * Pin the card in the [library] skin to a small element with a clickable one beside it, where the
      * card lands, then click the card over the clickable one. It never hears of the click.
      */
-    private fun pressOnTheCardStaysOnIt(library: Library) =
+    private fun pressOnTheCardStaysOnIt(library: SkinLibrary) =
         runComposeUiTest {
             var clicks = 0
             setContent {

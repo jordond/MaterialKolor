@@ -32,13 +32,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -120,7 +120,7 @@ internal class RingCapture(
 
     /**
      * The same capture with ring pixels looked for only within [reach] of the focused node. A tooltip
-     * that opens with focus can use the focus colour, as Fluent's does, and this leaves it out.
+     * that opens with focus can use the focus colour, and this leaves it out.
      */
     fun nearFocused(reach: Dp): RingCapture =
         RingCapture(rings, before, after, focused, density, focused.inflate(reach.value * density))
@@ -210,7 +210,7 @@ internal fun ComposeUiTest.tabOntoRing(
                     val own = ringColors?.invoke()
                     rings = when {
                         own != null -> own
-                        skin.library == Library.Material3 -> listOf(focus, layered)
+                        skin.library == SkinLibrary.Material3 -> listOf(focus, layered)
                         else -> listOf(focus)
                     }
                     Column {

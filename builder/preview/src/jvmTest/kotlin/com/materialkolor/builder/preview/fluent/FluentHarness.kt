@@ -18,17 +18,12 @@ import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.preview.Chrome
+import com.materialkolor.builder.preview.ShellChrome
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.trips.TripsDestination
-
-/**
- * The Fluent skin, the one that shows the Fluent Trips app.
- */
-internal val FluentSkin: Skin = Skin(Library.Fluent, expressive = false)
 
 /**
  * The frame the dock shows each device in, the kit's screen widths at the height of a first screen.
@@ -76,7 +71,7 @@ internal val ScrollbarArrow: SemanticsMatcher =
         SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription)
 
 /**
- * The Trips app in a Fluent pane of [spec], under the Fluent chrome, with motion frozen.
+ * The Trips app in a Fluent pane of [spec], under the shell chrome, with motion frozen.
  */
 @Composable
 internal fun FluentHarness(
@@ -86,7 +81,7 @@ internal fun FluentHarness(
     modifier: Modifier,
 ) {
     CompositionLocalProvider(LocalMotionFrozen provides true) {
-        Chrome(FluentSkin) {
+        Chrome(ShellChrome) {
             PreviewPane(spec, modifier) { FluentAppEntry(spec, state, width) }
         }
     }

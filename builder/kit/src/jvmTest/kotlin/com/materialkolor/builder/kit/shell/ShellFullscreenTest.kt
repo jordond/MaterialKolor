@@ -14,10 +14,10 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.PosterMode
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
@@ -28,7 +28,7 @@ import kotlin.test.Test
 
 private const val FullscreenExitTag = "shell-fullscreen-exit"
 private const val FullscreenHeight = 900
-private val FullscreenSkin = Skin(Library.Material3, expressive = false)
+private val FullscreenSkin = Skin(SkinLibrary.Material3, expressive = false)
 
 @OptIn(ExperimentalTestApi::class)
 class ShellFullscreenTest {

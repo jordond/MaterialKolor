@@ -8,13 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentBadge
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.BadgeStyle
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
-import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.headless.actionSurface
 import com.materialkolor.builder.kit.skin.material.MaterialBadge
 
@@ -71,10 +69,8 @@ public fun BuilderBadge(
     // blank label draws nothing rather than failing the frame.
     if (label.isBlank()) return
     when (LocalSkin.current.library) {
-        Library.Material3 -> MaterialBadge(label, modifier, status, icon)
-        Library.Unstyled -> HeadlessBadge(label, UnstyledActionStyles.badge, modifier, status, icon)
-        Library.Fluent -> FluentBadge(label, modifier, status, icon)
-        Library.Custom -> HeadlessBadge(label, CustomActionStyles.badge, modifier, status, icon)
+        SkinLibrary.Material3 -> MaterialBadge(label, modifier, status, icon)
+        SkinLibrary.Custom -> HeadlessBadge(label, CustomActionStyles.badge, modifier, status, icon)
     }
 }
 

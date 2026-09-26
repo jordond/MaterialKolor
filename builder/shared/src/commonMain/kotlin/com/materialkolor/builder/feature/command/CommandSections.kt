@@ -273,7 +273,7 @@ internal fun libraryAndStyleCommands(
             shortcut = LIBRARY_KEYS[index],
             selected = choice == current,
         ) {
-            // The new skin reveals from the switcher, as a press on it would.
+            // The new previews reveal from the switcher, as a press on it would.
             if (choice != current) {
                 dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin = list.switcherOrigin()))
             }

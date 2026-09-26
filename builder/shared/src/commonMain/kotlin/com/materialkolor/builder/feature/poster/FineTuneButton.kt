@@ -17,7 +17,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.capability.EffectiveSpec
 import com.materialkolor.builder.domain.model.KeyColor
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
@@ -36,7 +35,6 @@ import com.materialkolor.builder.kit.control.BuilderPressable
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.icon.IconId
-import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.pluralStringResource
@@ -47,9 +45,8 @@ import org.jetbrains.compose.resources.stringResource
  * title that sums up what the sheet holds, the key colors and pins set, the spec and the extra
  * colors.
  *
- * It is drawn as an outline in the poster's ink with no fill, the way board E draws it. Material's
- * is a pill and the other skins keep the corner their controls have. It reads out as its title and
- * that line. The sheet it opens hands focus back to it through [trigger] once it closes.
+ * It is drawn as a pill outlined in the poster's ink with no fill, the way board E draws it. It reads
+ * out as its title and that line. The sheet it opens hands focus back to it through [trigger] once it closes.
  *
  * @param[trigger] The poster's Fine-tune trigger, or null where nothing hands focus back.
  */
@@ -66,11 +63,7 @@ internal fun FineTuneButton(
     val summary = fineTuneSummary(context.document)
     val name = stringResource(Res.string.finetune_button, title, summary)
     // b-527
-    val shape = if (LocalSkin.current.library == Library.Material3) {
-        RoundedCornerShape(percent = PILL_PERCENT)
-    } else {
-        RoundedCornerShape(tokens.radius.small)
-    }
+    val shape = RoundedCornerShape(percent = PILL_PERCENT)
     BuilderPressable(
         onClick = { dispatcher.dispatch(WorkspaceAction.OpenFineTune()) },
         label = name,

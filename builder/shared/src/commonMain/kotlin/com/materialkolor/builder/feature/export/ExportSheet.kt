@@ -82,7 +82,7 @@ private enum class CopyKind {
  * the code instead. Narrow, everything is one scrolling column, with the names and the options
  * folded into a disclosure over the file tabs and the code. Copy file sits at the end of the path
  * over the code, and in the footer on the narrow layout, where the path bar has no room for it.
- * Switching the library is the same edit the top bar makes, so the app re-skins behind the sheet.
+ * Switching the library is the same edit the top bar makes, so the previews re-theme behind the sheet.
  *
  * Every copy, download and share starts inside the click, with the platform call as its first
  * suspension, and the text and the zip are ready before the click. A copy that worked

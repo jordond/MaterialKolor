@@ -4,7 +4,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import com.materialkolor.builder.domain.color.Argb
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.motion.BuilderMotion
@@ -18,7 +17,8 @@ import kotlin.test.Test
  * Every skin the builder can use, Material3 once per flavour.
  */
 private val Skins: List<Skin> =
-    Library.entries.map { library -> Skin(library, expressive = false) } + Skin(Library.Material3, expressive = true)
+    SkinLibrary.entries.map { library -> Skin(library, expressive = false) } +
+        Skin(SkinLibrary.Material3, expressive = true)
 
 @OptIn(ExperimentalTestApi::class)
 class SkinMotionTest {
@@ -29,7 +29,12 @@ class SkinMotionTest {
             setContent {
                 val result = remember { ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4))) }
                 for (expressive in listOf(false, true)) {
-                    BuilderTheme(Skin(Library.Material3, expressive), result, isDark = false, reducedMotion = false) {
+                    BuilderTheme(
+                        Skin(SkinLibrary.Material3, expressive),
+                        result,
+                        isDark = false,
+                        reducedMotion = false,
+                    ) {
                         seen[expressive] = LocalBuilderMotion.current
                     }
                 }

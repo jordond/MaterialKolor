@@ -36,7 +36,6 @@ import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ColorInput
 import com.materialkolor.builder.domain.color.ParseResult
 import com.materialkolor.builder.domain.edit.EditPhase
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.control.ControlSkins
@@ -45,6 +44,7 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.hct.Hct
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContain
@@ -115,7 +115,7 @@ private class PickerCompositions {
 private fun ComposeUiTest.pickerTrackValue(name: String): Float =
     onNode(pickerTrack(name)).fetchSemanticsNode().config[SemanticsProperties.ProgressBarRangeInfo].current
 
-private val PickerUnstyled: Skin = Skin(Library.Unstyled, expressive = false)
+private val PickerSkin: Skin = Skin(SkinLibrary.Custom, expressive = false)
 
 /**
  * The value a picker under test was handed last, and every phase it reported.
@@ -134,14 +134,14 @@ private fun pickerTrackText(name: String): SemanticsMatcher =
     hasText(name) and SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)
 
 /**
- * Shows a picker at [start], unstyled unless [skin] says otherwise, that is handed back every color it reports.
+ * Shows a picker at [start], in Custom unless [skin] says otherwise, that is handed back every color it reports.
  */
 @OptIn(ExperimentalTestApi::class)
 private fun ComposeUiTest.pickerShow(
     start: Argb = PickerSeed,
     direction: LayoutDirection = LayoutDirection.Ltr,
     foldsState: Boolean = false,
-    skin: Skin = PickerUnstyled,
+    skin: Skin = PickerSkin,
 ): PickerReports {
     val reports = PickerReports(start)
     setContent {
@@ -353,7 +353,7 @@ class HctPickerTest {
             var shown by mutableStateOf(true)
             val phases = mutableListOf<EditPhase>()
             setContent {
-                PickerHarness(PickerUnstyled) {
+                PickerHarness(PickerSkin) {
                     if (shown) {
                         HctPicker(
                             value = PickerSeed,
@@ -407,7 +407,7 @@ class HctPickerTest {
             var value by mutableStateOf(PickerSeed)
             val phases = mutableListOf<EditPhase>()
             setContent {
-                PickerHarness(Skin(Library.Unstyled, expressive = false)) {
+                PickerHarness(Skin(SkinLibrary.Custom, expressive = false)) {
                     HctPicker(
                         value = value,
                         onChange = { argb, phase ->
@@ -434,7 +434,7 @@ class HctPickerTest {
             var value by mutableStateOf(PickerSeed)
             val phases = mutableListOf<EditPhase>()
             setContent {
-                PickerHarness(Skin(Library.Unstyled, expressive = false)) {
+                PickerHarness(Skin(SkinLibrary.Custom, expressive = false)) {
                     HctPicker(
                         value = value,
                         onChange = { argb, phase ->

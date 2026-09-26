@@ -7,12 +7,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessDropdown
-import com.materialkolor.builder.kit.headless.overlayLibrary
-import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
+import com.materialkolor.builder.kit.skin.LocalSkin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
-import com.materialkolor.builder.kit.skin.headless.unstyledOverlayStyle
 import com.materialkolor.builder.kit.skin.material.materialPopoverStyle
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
@@ -52,11 +50,9 @@ public fun BuilderPopover(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
-    val style = when (overlayLibrary()) {
-        Library.Material3 -> materialPopoverStyle()
-        Library.Unstyled -> unstyledOverlayStyle(tokens)
-        Library.Fluent -> fluentOverlayStyle(tokens)
-        Library.Custom -> customOverlayStyle(tokens)
+    val style = when (LocalSkin.current.library) {
+        SkinLibrary.Material3 -> materialPopoverStyle()
+        SkinLibrary.Custom -> customOverlayStyle(tokens)
     }
     val trigger = remember { FocusRequester() }
     Box(modifier.focusRequester(trigger)) {

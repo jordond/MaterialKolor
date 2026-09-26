@@ -25,6 +25,7 @@ import com.materialkolor.builder.kit.control.shouldRingEverySide
 import com.materialkolor.builder.kit.control.shouldShowRing
 import com.materialkolor.builder.kit.control.tabOntoRing
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -59,7 +60,7 @@ class MaterialSegmentedRingTest {
             for (chosen in Chosen) {
                 withClue("web keyboard $keyboard, $chosen chosen") {
                     runComposeUiTest {
-                        val capture = tabOntoRing(Skin(Library.Material3, expressive = true)) {
+                        val capture = tabOntoRing(Skin(SkinLibrary.Material3, expressive = true)) {
                             WebKeyboard(on = keyboard) { LibraryRow(chosen) }
                         }
                         onNode(isFocused()).fetchSemanticsNode().optionText() shouldBe chosen
@@ -78,7 +79,7 @@ class MaterialSegmentedRingTest {
         for (chosen in Chosen) {
             withClue("$chosen chosen") {
                 runComposeUiTest {
-                    tabOntoRing(Skin(Library.Material3, expressive = true)) {
+                    tabOntoRing(Skin(SkinLibrary.Material3, expressive = true)) {
                         WebKeyboard(on = true) { LibraryRow(chosen) }
                     }
                     onNode(isFocused()).fetchSemanticsNode().optionText() shouldBe chosen

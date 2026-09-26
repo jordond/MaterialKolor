@@ -17,7 +17,6 @@ import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.history.History
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportPrefs
 import com.materialkolor.builder.domain.persist.ExportTarget
@@ -32,6 +31,7 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.shell.PosterSurface
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.stateholder.dispatcher.Dispatcher
 import dev.stateholder.dispatcher.rememberDispatcher
 
@@ -157,7 +157,7 @@ internal fun ComposeUiTest.showSection(
             fineTune = harness.fineTune,
         )
         BuilderTheme(
-            skin = Skin(library = Library.Material3, expressive = false),
+            skin = Skin(library = SkinLibrary.Material3, expressive = false),
             result = result,
             isDark = false,
             reducedMotion = true,

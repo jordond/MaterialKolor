@@ -14,14 +14,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentToggleButton
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
 import com.materialkolor.builder.kit.skin.headless.SelectableStyle
-import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.headless.actionSurface
 import com.materialkolor.builder.kit.skin.headless.controlPress
 import com.materialkolor.builder.kit.skin.headless.controlRing
@@ -60,25 +58,10 @@ public fun BuilderToggleButton(
     val spoken = if (contentDescription == null) null else stateName(name, ControlState.Checked(checked), enabled)
     val named = if (spoken == null) modifier else modifier.semantics { this.contentDescription = spoken }
     when (LocalSkin.current.library) {
-        Library.Material3 -> {
+        SkinLibrary.Material3 -> {
             MaterialToggleButton(checked, onCheckedChange, label, named, icon, enabled, name)
         }
-        Library.Unstyled -> {
-            HeadlessToggleButton(
-                checked,
-                onCheckedChange,
-                label,
-                UnstyledActionStyles.toggleButton,
-                named,
-                icon,
-                enabled,
-                name,
-            )
-        }
-        Library.Fluent -> {
-            FluentToggleButton(checked, onCheckedChange, label, named, icon, enabled, name)
-        }
-        Library.Custom -> {
+        SkinLibrary.Custom -> {
             HeadlessToggleButton(
                 checked,
                 onCheckedChange,

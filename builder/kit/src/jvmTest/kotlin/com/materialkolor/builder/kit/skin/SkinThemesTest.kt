@@ -28,12 +28,10 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.composeunstyled.LocalTextStyle
 import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.model.CustomSlot
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.ThemeDocument
@@ -46,7 +44,6 @@ import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.InkPair
 import com.materialkolor.builder.kit.control.shortfalls
 import com.materialkolor.builder.kit.icon.BuilderIcons
-import com.materialkolor.builder.kit.icon.FluentIcons
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.icon.LocalBuilderIcons
 import com.materialkolor.builder.kit.icon.LucideIcons
@@ -80,23 +77,15 @@ private val Document = ThemeDocument(
 class SkinThemesTest {
     @Test
     fun material3_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = false), MaterialIcons, 20.dp) }
+        runComposeUiTest { checkSheets(Skin(SkinLibrary.Material3, expressive = false), MaterialIcons, 20.dp) }
 
     @Test
     fun material3Expressive_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = true), MaterialIcons, 20.dp) }
-
-    @Test
-    fun unstyled_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(Library.Unstyled, expressive = false), LucideIcons, 16.dp) }
+        runComposeUiTest { checkSheets(Skin(SkinLibrary.Material3, expressive = true), MaterialIcons, 20.dp) }
 
     @Test
     fun custom_bothModes_renderTheSheetOnFlooredChrome() =
-        runComposeUiTest { checkSheets(Skin(Library.Custom, expressive = false), LucideIcons, 18.dp) }
-
-    @Test
-    fun fluent_bothModes_renderTheSheetOnFlooredChromeInFluentColours() =
-        runComposeUiTest { checkSheets(Skin(Library.Fluent, expressive = false), FluentIcons, 16.dp) }
+        runComposeUiTest { checkSheets(Skin(SkinLibrary.Custom, expressive = false), LucideIcons, 18.dp) }
 
     @Test
     fun custom_pinnedDocument_drawsTheChromeSlotsNotTheDocumentSlots() =
@@ -106,7 +95,12 @@ class SkinThemesTest {
             var pinned: Color? = null
             setContent {
                 val result = remember { ThemeResolver().resolve(Document) }
-                BuilderTheme(Skin(Library.Custom, expressive = false), result, isDark = false, reducedMotion = false) {
+                BuilderTheme(
+                    Skin(SkinLibrary.Custom, expressive = false),
+                    result,
+                    isDark = false,
+                    reducedMotion = false,
+                ) {
                     seen = LocalBuilderIdentity.current[CustomSlot.Primary]
                     expected = result.chromeCustomSlots[CustomSlot.Primary, false].toColor()
                     pinned = result.customSlots[CustomSlot.Primary, false].toColor()
@@ -118,14 +112,19 @@ class SkinThemesTest {
         }
 
     @Test
-    fun material3AndUnstyled_libraryText_wearsTheBrandFace() =
+    fun material3_libraryText_isSetInTheBrandFace() =
         runComposeUiTest {
             val seen = mutableMapOf<String, FontFamily?>()
             var brand: FontFamily? = null
             setContent {
                 val result = remember { ThemeResolver().resolve(Document) }
                 for (expressive in listOf(false, true)) {
-                    BuilderTheme(Skin(Library.Material3, expressive), result, isDark = false, reducedMotion = false) {
+                    BuilderTheme(
+                        Skin(SkinLibrary.Material3, expressive),
+                        result,
+                        isDark = false,
+                        reducedMotion = false,
+                    ) {
                         brand = LocalBuilderType.current.body.fontFamily
                         val typography = MaterialTheme.typography
                         seen["m3 expressive=$expressive bodyLarge"] = typography.bodyLarge.fontFamily
@@ -133,20 +132,12 @@ class SkinThemesTest {
                         seen["m3 expressive=$expressive titleMedium"] = typography.titleMedium.fontFamily
                     }
                 }
-                BuilderTheme(
-                    Skin(Library.Unstyled, expressive = false),
-                    result,
-                    isDark = false,
-                    reducedMotion = false,
-                ) {
-                    seen["unstyled text style"] = LocalTextStyle.current.fontFamily
-                }
             }
 
             waitForIdle()
             val face = assertNotNull(brand)
             face shouldNotBe FontFamily.Default
-            seen.size shouldBe 7
+            seen.size shouldBe 6
             seen.filterValues { family -> family != face } shouldBe emptyMap()
         }
 }

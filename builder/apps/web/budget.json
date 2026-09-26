@@ -28,8 +28,7 @@
     ],
     "exclude": [
       "composeResources/**/files/OFL-*.txt",
-      "composeResources/**/drawable/preset_*.webp",
-      "composeResources/**/font/Selawik_*"
+      "composeResources/**/drawable/preset_*.webp"
     ],
     "engines": {
       "wasm": {

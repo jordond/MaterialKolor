@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
@@ -30,12 +31,13 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.LightSpec
+import com.materialkolor.builder.preview.ShellChrome
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.PreviewPane
 import com.materialkolor.builder.preview.inspect.PreviewRoles
+import com.materialkolor.builder.preview.on
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.trips.OfflineMapsSwitch
 import com.materialkolor.builder.preview.trips.PackingItem
@@ -228,7 +230,7 @@ private fun String.isBannedInTrips(): Boolean {
 }
 
 /**
- * The Trips app in an Unstyled pane of [spec], under the Unstyled chrome, with motion frozen.
+ * The Trips app in an Unstyled pane of [spec]'s document, under the shell chrome, with motion frozen.
  */
 @Composable
 private fun TripsHarness(
@@ -238,8 +240,9 @@ private fun TripsHarness(
     modifier: Modifier,
 ) {
     CompositionLocalProvider(LocalMotionFrozen provides true) {
-        Chrome(Skin(Library.Unstyled, expressive = false)) {
-            PreviewPane(spec, modifier) { UnstyledAppEntry(spec, state, width) }
+        Chrome(ShellChrome) {
+            val unstyled = remember(spec) { spec.on(Library.Unstyled) }
+            PreviewPane(unstyled, modifier) { UnstyledAppEntry(unstyled, state, width) }
         }
     }
 }

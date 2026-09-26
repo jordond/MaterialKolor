@@ -5,12 +5,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.composeunstyled.UnstyledHorizontalSeparator
 import com.composeunstyled.UnstyledVerticalSeparator
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentDivider
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
 import com.materialkolor.builder.kit.skin.headless.DividerStyle
-import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.material.MaterialDivider
 
 /**
@@ -27,10 +25,8 @@ public fun BuilderDivider(
     orientation: Orientation = Orientation.Horizontal,
 ) {
     when (LocalSkin.current.library) {
-        Library.Material3 -> MaterialDivider(modifier, orientation)
-        Library.Unstyled -> HeadlessDivider(UnstyledActionStyles.divider, modifier, orientation)
-        Library.Fluent -> FluentDivider(modifier, orientation)
-        Library.Custom -> HeadlessDivider(CustomActionStyles.divider, modifier, orientation)
+        SkinLibrary.Material3 -> MaterialDivider(modifier, orientation)
+        SkinLibrary.Custom -> HeadlessDivider(CustomActionStyles.divider, modifier, orientation)
     }
 }
 

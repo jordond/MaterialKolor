@@ -20,12 +20,6 @@ public enum class ShippedFont(
      * The monospace face the code and the hex values are set in.
      */
     JetBrainsMono("files/OFL-JetBrainsMono.txt"),
-
-    /**
-     * The face Fluent's own components are set in. It ships as a renamed subset, Builder Fluent
-     * Sans, since the license reserves the name Selawik.
-     */
-    Selawik("files/OFL-Selawik.txt"),
 }
 
 /**

@@ -16,12 +16,10 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentCard
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.CardStyle
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
-import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.headless.actionSurface
 import com.materialkolor.builder.kit.skin.headless.controlPress
 import com.materialkolor.builder.kit.skin.headless.controlRing
@@ -47,10 +45,8 @@ public fun BuilderCard(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     when (LocalSkin.current.library) {
-        Library.Material3 -> MaterialCard(modifier, onClick, enabled, content)
-        Library.Unstyled -> HeadlessCard(UnstyledActionStyles.card, modifier, onClick, enabled, content)
-        Library.Fluent -> FluentCard(modifier, onClick, enabled, content)
-        Library.Custom -> HeadlessCard(CustomActionStyles.card, modifier, onClick, enabled, content)
+        SkinLibrary.Material3 -> MaterialCard(modifier, onClick, enabled, content)
+        SkinLibrary.Custom -> HeadlessCard(CustomActionStyles.card, modifier, onClick, enabled, content)
     }
 }
 

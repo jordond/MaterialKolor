@@ -23,7 +23,7 @@ import kotlin.math.floor
 
 // The warm-up behind SkinTransition.warmUp. Skia compiles a GPU program the first time it meets a new
 // mix of shape, paint and clip, and on the web each compile holds the frame while the GPU process
-// works. The first switch to Fluent met about forty at once. The host draws the same mixes here a
+// works. A first library switch can meet dozens at once. The host draws the same mixes here a
 // step at a time, under a cover of the live frame, in idle time before anyone switches.
 
 /**

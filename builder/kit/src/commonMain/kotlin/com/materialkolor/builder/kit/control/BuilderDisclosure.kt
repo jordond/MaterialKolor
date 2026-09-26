@@ -6,13 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.DisclosureStyle
 import com.materialkolor.builder.kit.headless.HeadlessDisclosure
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentDisclosure
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.CustomInputStyles
-import com.materialkolor.builder.kit.skin.headless.UnstyledInputStyles
 import com.materialkolor.builder.kit.skin.material.MaterialDisclosure
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
@@ -29,7 +27,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * @param[enabled] Whether it takes input.
  * @param[flush] Sit flush in the column around it, the way the poster's fine tune rows do. The title
  * starts at the column's edge under a hairline, the row draws no box open or closed, and what opens
- * starts a gap below it. Fluent keeps its expander, since its card is how Fluent says this.
+ * starts a gap below it.
  * @param[content] What opens.
  */
 @Composable
@@ -43,8 +41,7 @@ public fun BuilderDisclosure(
     flush: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val library = LocalSkin.current.library
-    if (flush && library != Library.Fluent) {
+    if (flush) {
         HeadlessDisclosure(
             expanded = expanded,
             onExpandedChange = onExpandedChange,
@@ -57,26 +54,11 @@ public fun BuilderDisclosure(
         )
         return
     }
-    when (library) {
-        Library.Material3 -> {
+    when (LocalSkin.current.library) {
+        SkinLibrary.Material3 -> {
             MaterialDisclosure(expanded, onExpandedChange, title, modifier, summary, enabled, content)
         }
-        Library.Unstyled -> {
-            HeadlessDisclosure(
-                expanded = expanded,
-                onExpandedChange = onExpandedChange,
-                title = title,
-                style = UnstyledInputStyles.disclosure,
-                modifier = modifier,
-                summary = summary,
-                enabled = enabled,
-                content = content,
-            )
-        }
-        Library.Fluent -> {
-            FluentDisclosure(expanded, onExpandedChange, title, modifier, summary, enabled, content)
-        }
-        Library.Custom -> {
+        SkinLibrary.Custom -> {
             HeadlessDisclosure(
                 expanded = expanded,
                 onExpandedChange = onExpandedChange,

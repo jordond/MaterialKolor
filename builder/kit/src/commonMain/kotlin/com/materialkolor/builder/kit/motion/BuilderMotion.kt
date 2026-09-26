@@ -10,9 +10,9 @@ import androidx.compose.runtime.Immutable
 /**
  * How long each kind of change takes, in milliseconds.
  *
- * The three base steps are the scale the Unstyled and Custom skins move on. Material3 and Fluent keep
- * their own curves but still report their timings here, so a test or a screenshot run can reason
- * about any skin the same way.
+ * The three base steps are the scale the Custom skin moves on. Material3 keeps its own curves but
+ * still reports its timings here, so a test or a screenshot run can reason about either skin the
+ * same way.
  *
  * @property[quick] A colour, an opacity or anything else that only fades.
  * @property[standard] The default spatial move, a chip sliding or a row reordering.
@@ -137,10 +137,10 @@ public interface BuilderMotion {
 }
 
 /**
- * The tween set the Unstyled and Custom skins use.
+ * The tween set the Custom skin uses.
  *
- * Material3 builds its own from `MotionScheme` and Fluent from `FluentDuration`, both of them
- * reporting the same [durations] so the rest of the builder does not have to care.
+ * Material3 builds its own from `MotionScheme`, reporting the same [durations] so the rest of the
+ * builder does not have to care.
  */
 public fun tweenBuilderMotion(durations: BuilderDurations = BuilderDurations()): BuilderMotion =
     TweenBuilderMotion(durations)

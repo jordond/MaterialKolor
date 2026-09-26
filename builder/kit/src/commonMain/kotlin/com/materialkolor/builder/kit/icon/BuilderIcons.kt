@@ -8,8 +8,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 /**
  * One icon set, the glyph a skin draws for each [IconId].
  *
- * Material3 draws the rounded Material icons, Fluent the Fluent System Icons, and Unstyled and
- * Custom draw Lucide.
+ * Material3 draws the rounded Material icons and Custom draws Lucide.
  */
 @Immutable
 public interface BuilderIcons {

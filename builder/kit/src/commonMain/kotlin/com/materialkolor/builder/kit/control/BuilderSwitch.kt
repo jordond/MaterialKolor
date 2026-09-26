@@ -2,12 +2,10 @@ package com.materialkolor.builder.kit.control
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessSwitch
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentSwitch
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.CustomInputStyles
-import com.materialkolor.builder.kit.skin.headless.UnstyledInputStyles
 import com.materialkolor.builder.kit.skin.material.MaterialSwitch
 
 /**
@@ -31,16 +29,10 @@ public fun BuilderSwitch(
     enabled: Boolean = true,
 ) {
     when (LocalSkin.current.library) {
-        Library.Material3 -> {
+        SkinLibrary.Material3 -> {
             MaterialSwitch(checked, onCheckedChange, label, modifier, enabled)
         }
-        Library.Unstyled -> {
-            HeadlessSwitch(checked, onCheckedChange, label, UnstyledInputStyles.switch, modifier, enabled)
-        }
-        Library.Fluent -> {
-            FluentSwitch(checked, onCheckedChange, label, modifier, enabled)
-        }
-        Library.Custom -> {
+        SkinLibrary.Custom -> {
             HeadlessSwitch(checked, onCheckedChange, label, CustomInputStyles.switch, modifier, enabled)
         }
     }

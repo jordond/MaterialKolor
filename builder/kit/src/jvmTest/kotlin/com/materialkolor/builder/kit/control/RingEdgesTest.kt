@@ -11,16 +11,15 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.poster.PosterColors
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.shell.PosterSurface
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
 import com.materialkolor.builder.kit.skin.headless.FocusRingOffset
 import com.materialkolor.builder.kit.skin.headless.SegmentedStyle
-import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
 import io.kotest.matchers.floats.plusOrMinus
@@ -183,29 +182,25 @@ class RingEdgesTest {
      * option's does.
      */
     @Test
-    fun segmented_endOption_headlessSkins_ringsFurtherOffTheRoundedEndOnly() {
+    fun segmented_endOption_custom_ringsFurtherOffTheRoundedEndOnly() {
         val options = listOf("Hex", "RGB", "HSL")
-        for (library in listOf(Library.Unstyled, Library.Custom)) {
-            withClue(library.name) {
-                val skin = Skin(library, expressive = false)
-                var extra = 0f
-                val middle = segmentRing(skin, options, focused = "RGB") { style ->
-                    extra = style.endRingOffset.value - FocusRingOffset.value
-                }
-                val first = segmentRing(skin, options, focused = "Hex") { _ -> }
-                val last = segmentRing(skin, options, focused = "HSL") { _ -> }
-                for ((name, end) in listOf("first" to first, "last" to last)) {
-                    withClue(name) {
-                        end.reach().top shouldBe (middle.reach().top plusOrMinus 1f)
-                        end.reach().bottom shouldBe (middle.reach().bottom plusOrMinus 1f)
-                    }
-                }
-                first.reach().left shouldBe (middle.reach().left + extra plusOrMinus 1f)
-                first.reach().right shouldBe (middle.reach().right plusOrMinus 1f)
-                last.reach().right shouldBe (middle.reach().right + extra plusOrMinus 1f)
-                last.reach().left shouldBe (middle.reach().left plusOrMinus 1f)
+        val skin = Skin(SkinLibrary.Custom, expressive = false)
+        var extra = 0f
+        val middle = segmentRing(skin, options, focused = "RGB") { style ->
+            extra = style.endRingOffset.value - FocusRingOffset.value
+        }
+        val first = segmentRing(skin, options, focused = "Hex") { _ -> }
+        val last = segmentRing(skin, options, focused = "HSL") { _ -> }
+        for ((name, end) in listOf("first" to first, "last" to last)) {
+            withClue(name) {
+                end.reach().top shouldBe (middle.reach().top plusOrMinus 1f)
+                end.reach().bottom shouldBe (middle.reach().bottom plusOrMinus 1f)
             }
         }
+        first.reach().left shouldBe (middle.reach().left + extra plusOrMinus 1f)
+        first.reach().right shouldBe (middle.reach().right plusOrMinus 1f)
+        last.reach().right shouldBe (middle.reach().right + extra plusOrMinus 1f)
+        last.reach().left shouldBe (middle.reach().left plusOrMinus 1f)
     }
 }
 
@@ -223,8 +218,7 @@ private fun segmentRing(
     var capture: RingCapture? = null
     runComposeUiTest {
         capture = tabOntoRing(skin) {
-            val styles = if (skin.library == Library.Custom) CustomActionStyles else UnstyledActionStyles
-            style(styles.segmented)
+            style(CustomActionStyles.segmented)
             BuilderSegmented(
                 options = options,
                 selected = focused,

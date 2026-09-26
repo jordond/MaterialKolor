@@ -23,7 +23,6 @@ import com.materialkolor.builder.core.platform.TimingMarks
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.capability.forTarget
 import com.materialkolor.builder.domain.color.Argb
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.engine.resolve.ThemeResolver
@@ -38,6 +37,7 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.transition.SkinTransition
 import com.materialkolor.builder.kit.transition.SkinTransitionHost
@@ -117,7 +117,7 @@ internal fun rememberThemeResult(
  * A library switch changes the preview and the colors, never the controls around them, since a
  * whole new set of controls on every switch was too jarring.
  */
-internal val ShellSkin: Skin = Skin(library = Library.Material3, expressive = true)
+internal val ShellSkin: Skin = Skin(library = SkinLibrary.Material3, expressive = true)
 
 /**
  * Themes the workspace in [ShellSkin] with the colors of the open project.

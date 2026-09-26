@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.control.BuilderToastHost
 import com.materialkolor.builder.kit.control.BuilderToastHostState
 import com.materialkolor.builder.kit.control.overlayStyle
@@ -20,11 +19,7 @@ import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.PosterMode
 import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentDockRegion
-import com.materialkolor.builder.kit.skin.fluent.FluentPaletteFrame
-import com.materialkolor.builder.kit.skin.fluent.FluentPanelRegion
-import com.materialkolor.builder.kit.skin.fluent.FluentTopBarRegion
-import com.materialkolor.builder.kit.skin.fluent.FluentWindowRegion
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.HeadlessDockRegion
 import com.materialkolor.builder.kit.skin.headless.HeadlessPaletteFrame
 import com.materialkolor.builder.kit.skin.headless.HeadlessPanelRegion
@@ -54,7 +49,7 @@ public enum class PanelSide {
 }
 
 /**
- * The top bar, 64 dp tall in every window class. Material3 uses its `TopAppBar`, the other skins a
+ * The top bar, 64 dp tall in every window class. Material3 uses its `TopAppBar`, Custom a
  * plain header row on the workspace ground.
  *
  * @param[modifier] Applied to the bar.
@@ -66,9 +61,8 @@ public fun TopBarRegion(
     content: @Composable RowScope.() -> Unit,
 ) {
     when (LocalSkin.current.library) {
-        Library.Material3 -> MaterialTopBarRegion(modifier, content)
-        Library.Unstyled, Library.Custom -> HeadlessTopBarRegion(modifier, content)
-        Library.Fluent -> FluentTopBarRegion(modifier, content)
+        SkinLibrary.Material3 -> MaterialTopBarRegion(modifier, content)
+        SkinLibrary.Custom -> HeadlessTopBarRegion(modifier, content)
     }
 }
 
@@ -81,7 +75,7 @@ public val TopBarControlMaxHeight: Dp
 
 /**
  * The dock, a compact toolbar centred under the preview. Material3 uses its
- * `HorizontalFloatingToolbar`, the other skins a toolbar row in their own overlay style.
+ * `HorizontalFloatingToolbar`, Custom a toolbar row in its own overlay style.
  *
  * @param[modifier] Applied to the dock.
  * @param[content] The dock's tools, laid in a row.
@@ -93,9 +87,8 @@ public fun DockRegion(
 ) {
     val library = LocalSkin.current.library
     when (library) {
-        Library.Material3 -> MaterialDockRegion(modifier, content)
-        Library.Unstyled, Library.Custom -> HeadlessDockRegion(overlayStyle(library), modifier, content)
-        Library.Fluent -> FluentDockRegion(modifier, content)
+        SkinLibrary.Material3 -> MaterialDockRegion(modifier, content)
+        SkinLibrary.Custom -> HeadlessDockRegion(overlayStyle(library), modifier, content)
     }
 }
 
@@ -114,9 +107,8 @@ public fun PreviewWindowRegion(
 ) {
     val library = LocalSkin.current.library
     when (library) {
-        Library.Material3 -> MaterialWindowRegion(modifier, content)
-        Library.Unstyled, Library.Custom -> HeadlessWindowRegion(overlayStyle(library), modifier, content)
-        Library.Fluent -> FluentWindowRegion(modifier, content)
+        SkinLibrary.Material3 -> MaterialWindowRegion(modifier, content)
+        SkinLibrary.Custom -> HeadlessWindowRegion(overlayStyle(library), modifier, content)
     }
 }
 
@@ -136,9 +128,8 @@ public fun PanelRegion(
 ) {
     val library = LocalSkin.current.library
     when (library) {
-        Library.Material3 -> MaterialPanelRegion(side, modifier, content)
-        Library.Unstyled, Library.Custom -> HeadlessPanelRegion(overlayStyle(library), side, modifier, content)
-        Library.Fluent -> FluentPanelRegion(side, modifier, content)
+        SkinLibrary.Material3 -> MaterialPanelRegion(side, modifier, content)
+        SkinLibrary.Custom -> HeadlessPanelRegion(overlayStyle(library), side, modifier, content)
     }
 }
 
@@ -182,7 +173,7 @@ public fun ToastRegion(
 /**
  * The command palette's frame. A centred dialog on Medium and Expanded, up to 560 dp wide on
  * Medium and 640 dp on Expanded, and a full width one on a phone. Material3 uses its dialog
- * container, the other skins their dialog style. The modal plumbing around it, the scrim and the
+ * container, Custom its dialog style. The modal plumbing around it, the scrim and the
  * focus trap, is the caller's.
  *
  * @param[modifier] Applied to the frame.
@@ -201,8 +192,7 @@ public fun PaletteFrame(
         WindowClass.Expanded -> modifier.widthIn(min = OverlayMetrics.dialogMinWidth, max = widest)
     }
     when (library) {
-        Library.Material3 -> MaterialPaletteFrame(sized, content)
-        Library.Unstyled, Library.Custom -> HeadlessPaletteFrame(overlayStyle(library), sized, content)
-        Library.Fluent -> FluentPaletteFrame(sized, content)
+        SkinLibrary.Material3 -> MaterialPaletteFrame(sized, content)
+        SkinLibrary.Custom -> HeadlessPaletteFrame(overlayStyle(library), sized, content)
     }
 }

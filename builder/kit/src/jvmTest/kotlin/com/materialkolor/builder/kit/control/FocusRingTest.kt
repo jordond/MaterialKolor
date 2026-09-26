@@ -16,12 +16,12 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
 import io.kotest.matchers.floats.shouldBeGreaterThan
@@ -111,7 +111,7 @@ class FocusRingTest {
 
     @Test
     fun tabs_material3OnAFarApartSeed_ringsUnderTheFocusLayer() {
-        for ((name, skin) in ControlSkins.filter { (_, skin) -> skin.library == Library.Material3 }) {
+        for ((name, skin) in ControlSkins.filter { (_, skin) -> skin.library == SkinLibrary.Material3 }) {
             withClue(name) {
                 runComposeUiTest {
                     val tabs = listOf("Light", "Dark", "Contrast")
@@ -180,12 +180,11 @@ class FocusRingTest {
      * A field's own focus outline counts as its ring when it stands 3 to 1 from what it covered and
      * from what lies beside it. Material3 draws it in primary and Custom in its accent, 2 dp over a
      * 1 dp resting edge. Where it covers that edge it stands less, so only its 3 to 1 pixels count,
-     * and those run along every side. Fluent underlines a focused field instead, which marks one side
-     * only, so it rings the box as well and has a test of its own.
+     * and those run along every side.
      */
     @Test
     fun field_ownFocusOutline_ringsOnEverySide() {
-        for ((name, skin) in ControlSkins.filter { (_, skin) -> skin.library in OutlinedFieldLibraries }) {
+        for ((name, skin) in ControlSkins) {
             withClue(name) {
                 runComposeUiTest {
                     val capture = tabOntoRing(skin, ringColors = { listOf(fieldFocusColor(skin)) }) {
@@ -203,41 +202,11 @@ class FocusRingTest {
             }
         }
     }
-
-    /**
-     * Fluent's underline marks the bottom side only, so its field draws the focus ring round the box
-     * beside it, in the focus colour like every other Fluent control.
-     */
-    @Test
-    fun field_fluent_ringsBesideItsUnderlineAllTheWayRound() {
-        for ((name, skin) in ControlSkins.filter { (_, skin) -> skin.library == Library.Fluent }) {
-            withClue(name) {
-                runComposeUiTest {
-                    val capture = tabOntoRing(skin) {
-                        BuilderTextField(
-                            value = "Ocean",
-                            onCommit = {},
-                            label = "Project name",
-                            modifier = Modifier.width(280.dp),
-                        )
-                    }
-                    capture.shouldShowRing()
-                    capture.shouldRingEverySide(around = capture.ringBounds)
-                    capture.shouldRingAllTheWayRound()
-                }
-            }
-        }
-    }
 }
-
-/**
- * The libraries whose fields draw a focus outline all the way round.
- */
-private val OutlinedFieldLibraries: Set<Library> = setOf(Library.Material3, Library.Custom)
 
 /**
  * The color a field in [skin] draws its focus outline in.
  */
 @Composable
 private fun fieldFocusColor(skin: Skin): Color =
-    if (skin.library == Library.Material3) MaterialTheme.colorScheme.primary else LocalBuilderTokens.current.accent
+    if (skin.library == SkinLibrary.Material3) MaterialTheme.colorScheme.primary else LocalBuilderTokens.current.accent

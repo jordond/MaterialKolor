@@ -2,13 +2,11 @@ package com.materialkolor.builder.kit.control
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessMenu
-import com.materialkolor.builder.kit.headless.overlayLibrary
 import com.materialkolor.builder.kit.icon.IconId
-import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
+import com.materialkolor.builder.kit.skin.LocalSkin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
-import com.materialkolor.builder.kit.skin.headless.unstyledOverlayStyle
 import com.materialkolor.builder.kit.skin.material.MaterialMenu
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
@@ -39,7 +37,7 @@ public class BuilderMenuItem(
  * Esc and a click outside close it, focus starts on the first row, and each row reads as a button,
  * or as an option that is selected or not when its item says so. On the web, where every row reads
  * as a button, the menu item word travels in its name, "Duplicate, menu item". Material3
- * draws its own `DropdownMenu`, the other skins the headless dropdown.
+ * draws its own `DropdownMenu`, Custom the headless dropdown.
  *
  * @param[expanded] Whether the menu is open.
  * @param[onDismissRequest] Called when the menu asks to close, including after a row is chosen.
@@ -56,17 +54,15 @@ public fun BuilderMenu(
     anchor: @Composable () -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
-    when (overlayLibrary()) {
-        Library.Material3 -> MaterialMenu(expanded, onDismissRequest, items, modifier, anchor)
-        Library.Unstyled -> HeadlessMenu(
+    when (LocalSkin.current.library) {
+        SkinLibrary.Material3 -> MaterialMenu(expanded, onDismissRequest, items, modifier, anchor)
+        SkinLibrary.Custom -> HeadlessMenu(
             expanded,
             onDismissRequest,
             items,
-            unstyledOverlayStyle(tokens),
+            customOverlayStyle(tokens),
             modifier,
             anchor,
         )
-        Library.Fluent -> HeadlessMenu(expanded, onDismissRequest, items, fluentOverlayStyle(tokens), modifier, anchor)
-        Library.Custom -> HeadlessMenu(expanded, onDismissRequest, items, customOverlayStyle(tokens), modifier, anchor)
     }
 }

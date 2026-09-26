@@ -19,11 +19,11 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.LocalOverlayHost
 import com.materialkolor.builder.kit.headless.OverlayHostState
 import com.materialkolor.builder.kit.headless.OverlayKind
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
@@ -102,7 +102,7 @@ class TooltipScrollTest {
                 runComposeUiTest {
                     var host: OverlayHostState? = null
                     setContent {
-                        HostOverlays(Skin(Library.Custom, expressive = false), inTree) {
+                        HostOverlays(Skin(SkinLibrary.Custom, expressive = false), inTree) {
                             host = LocalOverlayHost.current
                             Column {
                                 Spacer(Modifier.height(80.dp))

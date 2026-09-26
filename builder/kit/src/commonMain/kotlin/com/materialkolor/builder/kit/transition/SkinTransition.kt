@@ -45,11 +45,6 @@ import kotlin.time.Duration.Companion.milliseconds
 private val CaptureTimeout = 100.milliseconds
 
 /**
- * The longest a reveal holds the old frame while the app waits on a skin font.
- */
-private val FontWaitTimeout = 300.milliseconds
-
-/**
  * How long a warm-up step waits for the host to draw it before the warm-up gives up.
  */
 private val WarmUpTimeout = 2000.milliseconds
@@ -184,13 +179,10 @@ public class SkinTransition internal constructor(
      *
      * @param[style] A circle out of the library switcher, or a crossfade for every other discrete
      * change.
-     * @param[awaitBeforeReveal] Runs before the capture, for up to 300 ms. The app uses it to wait on
-     * the font of a skin it has not shown yet, so the new frame does not arrive in a fallback face.
      * @param[change] The edit. It runs once, synchronously, whatever path the reveal takes.
      */
     public suspend fun reveal(
         style: RevealStyle,
-        awaitBeforeReveal: suspend () -> Unit = {},
         change: () -> Unit,
     ) {
         val animation = switching.withLock {
@@ -202,7 +194,6 @@ public class SkinTransition internal constructor(
                 return
             }
 
-            finishesWithin(FontWaitTimeout, awaitBeforeReveal)
             if (!capture()) {
                 change()
                 return

@@ -18,13 +18,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.control.BuilderToastHostState
 import com.materialkolor.builder.kit.control.ToastDuration
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.PosterMode
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.assertions.withClue
 import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.comparables.shouldBeLessThanOrEqualTo
@@ -84,7 +84,7 @@ private fun toastTest(
             LocalOverlaysInTree provides inTree,
             LocalLayoutDirection provides direction,
         ) {
-            ShellHarness(Skin(Library.Material3, expressive = false)) {
+            ShellHarness(Skin(SkinLibrary.Material3, expressive = false)) {
                 mode = LocalLayout.current.posterMode
                 WorkspaceShell(
                     posterColors = ShellPosterColors,

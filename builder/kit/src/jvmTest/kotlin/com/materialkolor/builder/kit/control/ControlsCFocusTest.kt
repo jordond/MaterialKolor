@@ -34,8 +34,8 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.withKeyDown
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -115,7 +115,7 @@ class ControlsCFocusTest {
     fun select_downAndAltDown_openWithFocusOnTheChosenOption() =
         forEachSkin { _, skin ->
             // Material3 draws its own exposed dropdown, which keeps its own keys.
-            if (skin.library == Library.Material3) return@forEachSkin
+            if (skin.library == SkinLibrary.Material3) return@forEachSkin
             var style by mutableStateOf("Vibrant")
             setContent {
                 ControlsHarness(skin) {

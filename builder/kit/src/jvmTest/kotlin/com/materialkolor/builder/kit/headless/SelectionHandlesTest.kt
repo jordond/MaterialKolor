@@ -32,13 +32,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.control.BuilderHexField
 import com.materialkolor.builder.kit.control.BuilderSelect
 import com.materialkolor.builder.kit.control.BuilderTextField
 import com.materialkolor.builder.kit.control.HostOverlays
 import com.materialkolor.builder.kit.control.forEachSkin
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.widget.CodeView
 import com.materialkolor.builder.kit.widget.SelectableText
 import com.materialkolor.builder.kit.widget.widgetGoldenColorFile
@@ -109,7 +109,7 @@ class SelectionHandlesTest {
     @Test
     fun materialSelect_inWindows_putsUpTheHandles() =
         forEachSkin { _, skin ->
-            if (skin.library != Library.Material3) return@forEachSkin
+            if (skin.library != SkinLibrary.Material3) return@forEachSkin
             setContent { Host(skin, inTree = false) { Select() } }
             longPressAndSlideOff()
             onAllNodes(isSelectionHandle()).fetchSemanticsNodes().size shouldBeGreaterThan 0

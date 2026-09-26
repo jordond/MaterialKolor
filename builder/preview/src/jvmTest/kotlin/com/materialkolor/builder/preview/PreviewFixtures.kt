@@ -12,13 +12,32 @@ import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.preview.split.PaneSpec
+
+/**
+ * A library a pane can draw in, and whether Material 3 uses its Expressive flavour.
+ */
+internal data class PaneLibrary(
+    val library: Library,
+    val expressive: Boolean = false,
+)
 
 /**
  * Every library a pane can use, Material 3 once per flavour.
  */
-internal val PaneSkins: List<Skin> =
-    Library.entries.map { library -> Skin(library, expressive = false) } + Skin(Library.Material3, expressive = true)
+internal val PaneLibraries: List<PaneLibrary> =
+    Library.entries.map { library -> PaneLibrary(library) } + PaneLibrary(Library.Material3, expressive = true)
+
+/**
+ * This pane drawn in [pane], from the same document otherwise.
+ */
+internal fun PaneSpec.on(pane: PaneLibrary): PaneSpec = on(pane.library, pane.expressive)
+
+/**
+ * The chrome the builder draws around every pane, Material 3 Expressive whatever the pane's library.
+ */
+internal val ShellChrome: Skin = Skin(SkinLibrary.Material3, expressive = true)
 
 /**
  * A blue document for the preview, far from the chrome's red.
@@ -63,7 +82,7 @@ internal val DesktopLayout: LayoutInfo = LayoutInfo(1280.dp, 800.dp)
  */
 @Composable
 internal fun Chrome(
-    skin: Skin = Skin(Library.Material3, expressive = false),
+    skin: Skin = Skin(SkinLibrary.Material3, expressive = false),
     layout: LayoutInfo = DesktopLayout,
     content: @Composable () -> Unit,
 ) {

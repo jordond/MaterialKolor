@@ -22,6 +22,7 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import com.materialkolor.builder.ShellSkin
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.dsl.Language
 import com.materialkolor.builder.codegen.dsl.Token
@@ -40,7 +41,6 @@ import com.materialkolor.builder.kit.a11y.Announcer
 import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
 import dev.stateholder.dispatcher.rememberDispatcher
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.CoroutineScope
@@ -366,7 +366,7 @@ class ExportSheetTest {
         val result = ThemeResolver().resolve(document)
         setContent {
             BuilderTheme(
-                skin = Skin(library = document.library, expressive = document.expressive),
+                skin = ShellSkin,
                 result = result,
                 isDark = false,
                 reducedMotion = true,

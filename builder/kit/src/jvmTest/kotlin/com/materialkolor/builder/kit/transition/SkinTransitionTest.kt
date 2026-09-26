@@ -35,7 +35,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -295,21 +294,6 @@ class SkinTransitionTest {
         }
 
     @Test
-    fun reveal_whileTheFontWaitHangs_capturesAfterThreeHundredMillis() =
-        runComposeUiTest {
-            val harness = showHost()
-
-            reveal(harness, to = New, awaitBeforeReveal = { awaitCancellation() })
-            mainClock.advanceTimeBy(250)
-            harness.transition.pendingCapture shouldBe null
-            harness.color shouldBe Old
-
-            mainClock.advanceTimeBy(100)
-            harness.color shouldBe New
-            harness.transition.snapshot.size shouldNotBe IntSize.Zero
-        }
-
-    @Test
     fun warmUp_drawsTheSampleUnderTheLiveFrame_thenLetsItGo() =
         runComposeUiTest {
             val harness = showHost()
@@ -416,11 +400,10 @@ private fun ComposeUiTest.reveal(
     harness: Harness,
     to: Color,
     style: RevealStyle = RevealStyle.Circle(Offset.Zero),
-    awaitBeforeReveal: suspend () -> Unit = {},
 ): Job {
     val job = runOnUiThread {
         harness.scope.launch {
-            harness.transition.reveal(style = style, awaitBeforeReveal = awaitBeforeReveal) {
+            harness.transition.reveal(style = style) {
                 harness.changedWhileDrawing = harness.drawing
                 harness.color = to
             }

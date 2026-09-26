@@ -29,11 +29,11 @@ import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.control.BottomSheetDetent
 import com.materialkolor.builder.kit.control.BottomSheetState
 import com.materialkolor.builder.kit.control.rememberBottomSheetState
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.CoroutineScope
@@ -60,7 +60,7 @@ class ShellFocusTest {
             withClue("$width dp") {
                 runSkikoComposeUiTest(size = Size(width.toFloat(), 900f)) {
                     setContent {
-                        ShellHarness(Skin(Library.Material3, expressive = false)) {
+                        ShellHarness(Skin(SkinLibrary.Material3, expressive = false)) {
                             WorkspaceShell(
                                 posterColors = ShellPosterColors,
                                 posterCollapsed = collapsed,
@@ -95,7 +95,7 @@ class ShellFocusTest {
                     lateinit var sheet: BottomSheetState
                     lateinit var scope: CoroutineScope
                     setContent {
-                        ShellHarness(Skin(Library.Material3, expressive = false), coarsePointer = coarse) {
+                        ShellHarness(Skin(SkinLibrary.Material3, expressive = false), coarsePointer = coarse) {
                             sheet = rememberBottomSheetState()
                             scope = rememberCoroutineScope()
                             WorkspaceShell(
@@ -202,8 +202,8 @@ class ShellFocusTest {
 
     @Test
     fun tab_compactHeadlessDockUnderTheSheetAtHalf_skipsTheDockAndHandsItsFocusOn() {
-        // The headless and Fluent docks stand 56 dp tall, so at 844 dp the sheet at Half covers them.
-        val headless = ShellSkins.filter { (_, skin) -> skin.library != Library.Material3 }
+        // The headless dock stands 56 dp tall, so at 844 dp the sheet at Half covers it.
+        val headless = ShellSkins.filter { (_, skin) -> skin.library != SkinLibrary.Material3 }
         for ((name, skin) in headless) {
             withClue(name) {
                 runSkikoComposeUiTest(size = Size(390f, 844f)) {

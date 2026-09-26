@@ -2,12 +2,10 @@ package com.materialkolor.builder.kit.control
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessCheckbox
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentCheckbox
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.CustomInputStyles
-import com.materialkolor.builder.kit.skin.headless.UnstyledInputStyles
 import com.materialkolor.builder.kit.skin.material.MaterialCheckbox
 
 /**
@@ -31,16 +29,10 @@ public fun BuilderCheckbox(
     enabled: Boolean = true,
 ) {
     when (LocalSkin.current.library) {
-        Library.Material3 -> {
+        SkinLibrary.Material3 -> {
             MaterialCheckbox(checked, onCheckedChange, label, modifier, enabled)
         }
-        Library.Unstyled -> {
-            HeadlessCheckbox(checked, onCheckedChange, label, UnstyledInputStyles.checkbox, modifier, enabled)
-        }
-        Library.Fluent -> {
-            FluentCheckbox(checked, onCheckedChange, label, modifier, enabled)
-        }
-        Library.Custom -> {
+        SkinLibrary.Custom -> {
             HeadlessCheckbox(checked, onCheckedChange, label, CustomInputStyles.checkbox, modifier, enabled)
         }
     }

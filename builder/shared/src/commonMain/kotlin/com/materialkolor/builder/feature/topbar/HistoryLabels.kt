@@ -7,7 +7,6 @@ import com.materialkolor.builder.domain.edit.ChangeLabel
 import com.materialkolor.builder.domain.history.HistoryEntry
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.feature.workspace.skinOf
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.topbar_change_add_accent
 import com.materialkolor.builder.generated.resources.topbar_change_amoled
@@ -34,7 +33,6 @@ import com.materialkolor.builder.generated.resources.topbar_redo_change
 import com.materialkolor.builder.generated.resources.topbar_undo_change
 import com.materialkolor.builder.generated.resources.workspace_redo
 import com.materialkolor.builder.generated.resources.workspace_undo
-import com.materialkolor.builder.kit.skin.Skin
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -87,7 +85,7 @@ internal fun stepText(entry: HistoryEntry): String {
 @Composable
 private fun changeText(
     label: ChangeLabel,
-    library: Skin?,
+    library: LibraryLanding?,
 ): String {
     val (kind, shown) = kindText(label.kind)
     val text = stringResource(kind)
@@ -120,13 +118,22 @@ private enum class Detail {
 }
 
 /**
+ * The library and Expressive flag a step lands on, named the way the switcher names them.
+ */
+private data class LibraryLanding(
+    val library: Library,
+    val expressive: Boolean,
+)
+
+/**
  * The library and flag an undo takes back. The step landed on [document], so its flag is the one
  * the step set. Null when [document] is on another library than [detail] names.
  */
 private fun undoneLanding(
     detail: String,
     document: ThemeDocument,
-): Skin? = skinOf(document).takeIf { landing -> landing.library.name == detail }
+): LibraryLanding? =
+    LibraryLanding(document.library, document.expressive).takeIf { landing -> landing.library.name == detail }
 
 /**
  * The library and flag a redo brings back. The step starts from [document] and never lands where
@@ -137,11 +144,11 @@ private fun undoneLanding(
 private fun redoneLanding(
     detail: String,
     document: ThemeDocument,
-): Skin? {
+): LibraryLanding? {
     val library = Library.entries.firstOrNull { library -> library.name == detail } ?: return null
     return when {
-        library != Library.Material3 -> Skin(library, expressive = false)
-        document.library == Library.Material3 -> Skin(library, expressive = !document.expressive)
+        library != Library.Material3 -> LibraryLanding(library, expressive = false)
+        document.library == Library.Material3 -> LibraryLanding(library, expressive = !document.expressive)
         else -> null
     }
 }

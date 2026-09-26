@@ -17,7 +17,6 @@ import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.text.TextLayoutResult
 import com.materialkolor.builder.core.session.BootNotice
 import com.materialkolor.builder.core.session.SessionTestBase
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakeClipboard
@@ -26,6 +25,7 @@ import com.materialkolor.builder.fakes.FakeFileSaver
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.floats.shouldBeLessThanOrEqual
@@ -244,7 +244,7 @@ class ShareDialogTest : SessionTestBase() {
     ) {
         setContent {
             BuilderTheme(
-                skin = Skin(library = Library.Material3, expressive = false),
+                skin = Skin(library = SkinLibrary.Material3, expressive = false),
                 result = ThemeResolver().resolve(ThemeDocument.Default),
                 isDark = false,
                 reducedMotion = true,

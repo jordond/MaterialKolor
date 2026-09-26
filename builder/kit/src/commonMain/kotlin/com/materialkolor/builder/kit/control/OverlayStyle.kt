@@ -1,11 +1,9 @@
 package com.materialkolor.builder.kit.control
 
 import androidx.compose.runtime.Composable
-import com.materialkolor.builder.domain.model.Library
-import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
-import com.materialkolor.builder.kit.skin.headless.unstyledOverlayStyle
 import com.materialkolor.builder.kit.skin.material.materialOverlayStyle
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
@@ -16,10 +14,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * skin's package and the skins build on the headless styles.
  */
 @Composable
-internal fun overlayStyle(library: Library): OverlayStyle =
+internal fun overlayStyle(library: SkinLibrary): OverlayStyle =
     when (library) {
-        Library.Material3 -> materialOverlayStyle()
-        Library.Unstyled -> unstyledOverlayStyle(LocalBuilderTokens.current)
-        Library.Fluent -> fluentOverlayStyle(LocalBuilderTokens.current)
-        Library.Custom -> customOverlayStyle(LocalBuilderTokens.current)
+        SkinLibrary.Material3 -> materialOverlayStyle()
+        SkinLibrary.Custom -> customOverlayStyle(LocalBuilderTokens.current)
     }

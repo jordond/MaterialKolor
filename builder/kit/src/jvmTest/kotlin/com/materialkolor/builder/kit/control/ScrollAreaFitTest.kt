@@ -19,8 +19,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -32,7 +32,7 @@ class ScrollAreaFitTest {
     fun fitContent_standsAsTallAsWhatItHolds_whileTheDefaultTakesAllItMay() =
         runComposeUiTest {
             setContent {
-                ControlsHarness(Skin(Library.Material3, expressive = false)) {
+                ControlsHarness(Skin(SkinLibrary.Material3, expressive = false)) {
                     Column {
                         BuilderScrollArea(Modifier.testTag("fills").heightIn(max = 300.dp)) {
                             Box(Modifier.height(40.dp))
@@ -53,7 +53,7 @@ class ScrollAreaFitTest {
     fun scrollbar_drawsAThumbOnlyWhileTheContentOverflows() =
         runComposeUiTest {
             setContent {
-                ControlsHarness(Skin(Library.Material3, expressive = false)) {
+                ControlsHarness(Skin(SkinLibrary.Material3, expressive = false)) {
                     Column {
                         ThumbProbe("fits", content = 40.dp)
                         ThumbProbe("overflows", content = 600.dp)

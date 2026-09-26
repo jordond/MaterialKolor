@@ -158,7 +158,7 @@ internal data class ProgressSweep(
 )
 
 /**
- * The sweep every skin runs, Material3 included, so a skin switch keeps the pace.
+ * The sweep every skin runs, Material3 included, so a bar keeps the same pace in both.
  */
 internal val ActionSweep: ProgressSweep = ProgressSweep(periodMillis = 1400, fraction = 0.4f)
 
@@ -227,12 +227,6 @@ internal data class ActionMetrics(
 )
 
 /**
- * The Unstyled skin's actions, flat with small corners, with an outline wherever there is no fill.
- */
-internal val UnstyledActionStyles: ActionStyles
-    @Composable get() = rememberActionStyles(::unstyledActionStyles)
-
-/**
  * The Custom skin's actions, pill shaped and a little roomier, with raised fills instead of outlines.
  */
 internal val CustomActionStyles: ActionStyles
@@ -245,30 +239,6 @@ internal val CustomActionStyles: ActionStyles
 internal fun rememberActionStyles(build: (BuilderTokens) -> ActionStyles): ActionStyles {
     val tokens = LocalBuilderTokens.current
     return remember(tokens, build) { build(tokens) }
-}
-
-private fun unstyledActionStyles(tokens: BuilderTokens): ActionStyles {
-    val corner = RoundedCornerShape(tokens.radius.small)
-    return actionStyles(
-        tokens = tokens,
-        metrics = ActionMetrics(
-            controlShape = corner,
-            iconButtonShape = corner,
-            chipShape = corner,
-            cardShape = RoundedCornerShape(tokens.radius.medium),
-            rowShape = corner,
-            badgeShape = corner,
-            barShape = RoundedCornerShape(percent = 50),
-            controlHeight = 32.dp,
-            chipHeight = 28.dp,
-            badgeHeight = 20.dp,
-            barHeight = 4.dp,
-            horizontalPadding = tokens.spacing.medium,
-            borderWidth = 1.dp,
-            filledSecondary = false,
-            borderedSecondary = true,
-        ),
-    )
 }
 
 private fun customActionStyles(tokens: BuilderTokens): ActionStyles {

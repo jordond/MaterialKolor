@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.DropdownPositionProvider
 import com.materialkolor.builder.kit.headless.HeadlessDropdown
 import com.materialkolor.builder.kit.headless.LocalOverlayHost
@@ -63,6 +62,7 @@ import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.shell.PosterSurface
 import com.materialkolor.builder.kit.shell.ShellPosterColors
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.throwables.shouldThrow
@@ -154,7 +154,7 @@ class OverlaysInTreeTest {
     fun menu_eachWay_opensOnTheFirstRowAndChoosingOneCloses() =
         hostEachWay { skin, inTree ->
             // Material3 in windows keeps its own DropdownMenu, which leaves focus on the popup itself.
-            val firstRowFocused = inTree || skin.library != Library.Material3
+            val firstRowFocused = inTree || skin.library != SkinLibrary.Material3
             var open by mutableStateOf(true)
             var chosen: String? = null
             setContent {
@@ -479,7 +479,7 @@ class OverlaysInTreeTest {
         runComposeUiTest {
             val failure = shouldThrow<IllegalStateException> {
                 setContent {
-                    HostOverlays(Skin(Library.Unstyled, expressive = false), inTree = true) {
+                    HostOverlays(Skin(SkinLibrary.Custom, expressive = false), inTree = true) {
                         CompositionLocalProvider(LocalOverlayHost provides null) {
                             BuilderDialog(true, {}, "Rename") { BuilderText("Sunset") }
                         }

@@ -17,6 +17,7 @@ import com.materialkolor.builder.kit.a11y.KitTestApi
 import com.materialkolor.builder.kit.a11y.ProvideWebFoldsForTest
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.Chrome
+import com.materialkolor.builder.preview.ShellChrome
 import com.materialkolor.builder.preview.canvas.ComponentsTab
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.GALLERY_CARD
@@ -115,7 +116,7 @@ internal fun DemoAppState.gallerySnapshot(): List<Any> {
 }
 
 /**
- * The Fluent gallery in a Fluent pane of [spec], under the Fluent chrome, with motion frozen. With
+ * The Fluent gallery in a Fluent pane of [spec], under the shell chrome, with motion frozen. With
  * [webFolds] the kit's fold modifiers fold state into names as they do on the web.
  */
 @OptIn(KitTestApi::class)
@@ -131,7 +132,7 @@ internal fun GalleryHarness(
         { where: String -> if (where.startsWith(GALLERY_CARD)) titles += where.removePrefix(GALLERY_CARD) }
     }
     CompositionLocalProvider(LocalMotionFrozen provides true, LocalCompositionProbe provides probe) {
-        Chrome(FluentSkin) {
+        Chrome(ShellChrome) {
             if (webFolds) {
                 ProvideWebFoldsForTest { PreviewPane(spec, modifier) { ComponentsTab(spec, state) } }
             } else {

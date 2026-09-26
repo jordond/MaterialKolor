@@ -3,14 +3,12 @@ package com.materialkolor.builder.kit.control
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessSlider
 import com.materialkolor.builder.kit.headless.SliderRules
 import com.materialkolor.builder.kit.headless.sliderValueDescription
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentSlider
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.CustomInputStyles
-import com.materialkolor.builder.kit.skin.headless.UnstyledInputStyles
 import com.materialkolor.builder.kit.skin.material.MaterialSlider
 
 /**
@@ -55,7 +53,7 @@ public fun BuilderSlider(
 ) {
     val rules = remember(valueRange, step, stops, snapDistance) { SliderRules(valueRange, step, stops, snapDistance) }
     when (LocalSkin.current.library) {
-        Library.Material3 -> {
+        SkinLibrary.Material3 -> {
             MaterialSlider(
                 value,
                 onValueChange,
@@ -67,23 +65,7 @@ public fun BuilderSlider(
                 enabled,
             )
         }
-        Library.Unstyled -> {
-            HeadlessSlider(
-                value = value,
-                onValueChange = onValueChange,
-                onValueChangeFinished = onValueChangeFinished,
-                rules = rules,
-                label = label,
-                stateDescription = stateDescription,
-                style = UnstyledInputStyles.slider,
-                modifier = modifier,
-                enabled = enabled,
-            )
-        }
-        Library.Fluent -> {
-            FluentSlider(value, onValueChange, onValueChangeFinished, rules, label, stateDescription, modifier, enabled)
-        }
-        Library.Custom -> {
+        SkinLibrary.Custom -> {
             HeadlessSlider(
                 value = value,
                 onValueChange = onValueChange,

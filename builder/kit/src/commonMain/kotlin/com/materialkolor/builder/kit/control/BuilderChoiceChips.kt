@@ -8,15 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessRadioFlow
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentChoiceChips
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
 import com.materialkolor.builder.kit.skin.headless.SelectableStyle
-import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.headless.actionSurface
 import com.materialkolor.builder.kit.skin.headless.controlPress
 import com.materialkolor.builder.kit.skin.headless.controlRing
@@ -62,7 +60,7 @@ public fun <T> BuilderChoiceChips(
     optionLabel: (T) -> String,
 ) {
     when (LocalSkin.current.library) {
-        Library.Material3 -> {
+        SkinLibrary.Material3 -> {
             MaterialChoiceChips(
                 options,
                 selected,
@@ -75,34 +73,7 @@ public fun <T> BuilderChoiceChips(
                 optionLabel,
             )
         }
-        Library.Unstyled -> {
-            HeadlessChoiceChips(
-                options,
-                selected,
-                onSelect,
-                label,
-                UnstyledActionStyles.chip,
-                modifier,
-                enabled,
-                optionIcon,
-                selectOnFocus,
-                optionLabel,
-            )
-        }
-        Library.Fluent -> {
-            FluentChoiceChips(
-                options,
-                selected,
-                onSelect,
-                label,
-                modifier,
-                enabled,
-                optionIcon,
-                selectOnFocus,
-                optionLabel,
-            )
-        }
-        Library.Custom -> {
+        SkinLibrary.Custom -> {
             HeadlessChoiceChips(
                 options,
                 selected,

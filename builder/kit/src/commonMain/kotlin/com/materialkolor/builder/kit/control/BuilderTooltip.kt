@@ -2,12 +2,10 @@ package com.materialkolor.builder.kit.control
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessTooltip
-import com.materialkolor.builder.kit.headless.overlayLibrary
-import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
+import com.materialkolor.builder.kit.skin.LocalSkin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
-import com.materialkolor.builder.kit.skin.headless.unstyledOverlayStyle
 import com.materialkolor.builder.kit.skin.material.MaterialTooltip
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
@@ -17,9 +15,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * focus ring, and a press on [content] closes the label until the pointer moves off.
  *
  * A tooltip repeats what an icon means. It never holds the only copy of something, so an icon
- * button under it still needs its own content description. Material3 draws its plain tooltip, the
- * other skins the headless one. A tooltip open across a skin switch closes with the old skin's
- * tooltip before the new one takes over, so the desktop scene never loses a popup mid-layout.
+ * button under it still needs its own content description. Material3 draws its plain tooltip and
+ * Custom the headless one.
  *
  * @param[text] The label.
  * @param[modifier] Applied to the box around [content].
@@ -32,10 +29,8 @@ public fun BuilderTooltip(
     content: @Composable () -> Unit,
 ) {
     val tokens = LocalBuilderTokens.current
-    when (overlayLibrary()) {
-        Library.Material3 -> MaterialTooltip(text, modifier, content)
-        Library.Unstyled -> HeadlessTooltip(text, unstyledOverlayStyle(tokens), modifier, content)
-        Library.Fluent -> HeadlessTooltip(text, fluentOverlayStyle(tokens), modifier, content)
-        Library.Custom -> HeadlessTooltip(text, customOverlayStyle(tokens), modifier, content)
+    when (LocalSkin.current.library) {
+        SkinLibrary.Material3 -> MaterialTooltip(text, modifier, content)
+        SkinLibrary.Custom -> HeadlessTooltip(text, customOverlayStyle(tokens), modifier, content)
     }
 }
