@@ -43,9 +43,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
@@ -54,6 +60,7 @@ import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BadgeStatus
 import com.materialkolor.builder.kit.control.BuilderIcon
@@ -329,70 +336,6 @@ internal fun MaterialToggleButton(
             MaterialLabel(label, icon)
         }
     }
-}
-
-@Composable
-internal fun MaterialFilterChip(
-    selected: Boolean,
-    onSelectedChange: (Boolean) -> Unit,
-    label: String,
-    modifier: Modifier,
-    icon: IconId?,
-    enabled: Boolean,
-    connectedStart: Boolean = false,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val glyph = if (selected) IconId.Check else icon
-    val shape = if (connectedStart) connectedStartShape() else FilterChipDefaults.shape
-    // Carrying on from an outlined field, it takes the field's outline, on or off.
-    val border = if (connectedStart) {
-        val outline = OutlinedTextFieldDefaults.colors().unfocusedIndicatorColor
-        FilterChipDefaults.filterChipBorder(
-            enabled = enabled,
-            selected = selected,
-            borderColor = outline,
-            selectedBorderColor = outline,
-            borderWidth = OutlinedTextFieldDefaults.UnfocusedBorderThickness,
-            selectedBorderWidth = OutlinedTextFieldDefaults.UnfocusedBorderThickness,
-        )
-    } else {
-        FilterChipDefaults.filterChipBorder(enabled = enabled, selected = selected)
-    }
-    MaterialTarget {
-        FilterChip(
-            selected = selected,
-            onClick = { onSelectedChange(!selected) },
-            label = {
-                BuilderText(
-                    label,
-                    style = BuilderTextStyle.Label,
-                    color = LocalContentColor.current,
-                    maxLines = 1,
-                )
-            },
-            modifier = modifier
-                .semantics { toggleableState = ToggleableState(selected) }
-                .foldState(label, ControlState.Selected(selected), enabled)
-                .materialFeedback(interactionSource, shape),
-            enabled = enabled,
-            shape = shape,
-            border = border,
-            leadingIcon = glyph?.let { id ->
-                { BuilderIcon(id, contentDescription = null, tint = LocalContentColor.current) }
-            },
-            interactionSource = interactionSource,
-        )
-    }
-}
-
-/**
- * A filter chip's shape with its start corners down to the theme's extra small radius, the inner
- * radius of a group it carries on.
- */
-@Composable
-private fun connectedStartShape(): Shape {
-    val shapes = MaterialTheme.shapes
-    return shapes.small.copy(topStart = shapes.extraSmall.topStart, bottomStart = shapes.extraSmall.bottomStart)
 }
 
 @Composable

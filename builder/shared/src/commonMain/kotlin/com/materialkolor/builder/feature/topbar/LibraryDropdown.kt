@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.topbar_expressive
+import com.materialkolor.builder.kit.control.ControlFrameBottom
 import com.materialkolor.builder.kit.control.ControlFrameTop
 import com.materialkolor.builder.kit.token.BuilderType
 import com.materialkolor.builder.kit.token.LocalBuilderType
@@ -181,7 +182,8 @@ private fun SubcomposeMeasureScope.naturalWidth(
 /**
  * Draws what it holds scaled down from its top start corner, just enough to stand no taller than
  * [max], and takes up only the scaled size. Something that fits already is left as it is. Presses
- * and the menu anchored to it follow the scale, and so does the [ControlFrameTop] it reports.
+ * and the menu anchored to it follow the scale, and so do the [ControlFrameTop] and
+ * [ControlFrameBottom] it reports.
  *
  * It keeps Material's outlined dropdown, whose label floats over its top edge, whole inside the top
  * bar, where the field and its label together stand taller than the bar.
@@ -194,12 +196,10 @@ internal fun Modifier.shrinkToHeight(max: Dp): Modifier =
             return@layout layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
         }
         val scale = limit.toFloat() / placeable.height
-        val frameTop = placeable[ControlFrameTop]
-        val lines: Map<AlignmentLine, Int> = if (frameTop == AlignmentLine.Unspecified) {
-            emptyMap()
-        } else {
-            mapOf(ControlFrameTop to (frameTop * scale).roundToInt())
-        }
+        val lines = listOf<AlignmentLine>(ControlFrameTop, ControlFrameBottom)
+            .associateWith { line -> placeable[line] }
+            .filterValues { position -> position != AlignmentLine.Unspecified }
+            .mapValues { (_, position) -> (position * scale).roundToInt() }
         layout((placeable.width * scale).roundToInt(), limit, lines) {
             placeable.placeRelativeWithLayer(0, 0) {
                 scaleX = scale

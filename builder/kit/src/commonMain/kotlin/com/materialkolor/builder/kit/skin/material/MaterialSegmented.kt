@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -66,6 +68,7 @@ import com.materialkolor.builder.kit.control.FoldedRole
 import com.materialkolor.builder.kit.control.HeadlessSegmented
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.control.foldState
+import com.materialkolor.builder.kit.control.reportControlFrame
 import com.materialkolor.builder.kit.control.roleLessName
 import com.materialkolor.builder.kit.headless.RadioGroupFocus
 import com.materialkolor.builder.kit.headless.radioGroupOption
@@ -105,6 +108,7 @@ internal fun <T> MaterialSegmented(
     selectOnFocus: Boolean,
     optionLabel: (T) -> String,
     compact: Boolean = false,
+    connectedEnd: Boolean = false,
 ) {
     val selectedIndex = options.indexOf(selected)
     val focus = rememberRadioGroupFocus(options.size, selectedIndex)
@@ -122,6 +126,7 @@ internal fun <T> MaterialSegmented(
             optionLabel = optionLabel,
             focus = focus,
             compact = compact,
+            connectedEnd = connectedEnd,
         )
         return
     }
@@ -150,7 +155,8 @@ internal fun <T> MaterialSegmented(
             options.forEachIndexed { index, value ->
                 key(index) {
                     val interactionSource = remember { MutableInteractionSource() }
-                    val shape = SegmentedButtonDefaults.itemShape(index, options.size)
+                    val itemShape = SegmentedButtonDefaults.itemShape(index, options.size)
+                    val shape = if (connectedEnd && index == options.lastIndex) joinedEnd(itemShape) else itemShape
                     val glyph = optionIcon(value)
                     val isSelected = index == selectedIndex
                     val usable = enabled && optionEnabled(value)
@@ -233,6 +239,7 @@ private fun <T> ExpressiveSegmented(
     optionLabel: (T) -> String,
     focus: RadioGroupFocus,
     compact: Boolean = false,
+    connectedEnd: Boolean = false,
 ) {
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val folds = LocalFoldsStateIntoName.current
@@ -257,7 +264,7 @@ private fun <T> ExpressiveSegmented(
             options.forEachIndexed { index, value ->
                 key(index) {
                     val interactionSource = remember { MutableInteractionSource() }
-                    val shapes = connectedShapes(index, options.size)
+                    val shapes = connectedShapes(index, options.size, connectedEnd)
                     val isSelected = index == selectedIndex
                     val usable = enabled && optionEnabled(value)
                     val name = optionLabel(value)
@@ -290,6 +297,7 @@ private fun <T> ExpressiveSegmented(
                                     enabled = usable,
                                     role = FoldedRole.Radio,
                                 ).controlTouchTarget(touchTarget)
+                                .reportControlFrame()
                                 .onGloballyPositioned { coordinates -> ringed.place(ring.row, coordinates) }
                                 .controlPress(interactionSource),
                             enabled = usable,
@@ -368,29 +376,6 @@ private fun materialTrackStyle(): SegmentedStyle {
         ),
         endRingOffset = tokens.spacing.extraSmall,
     )
-}
-
-/**
- * The connected shapes for the option at [index] of [count], by where it sits in the row. Checked
- * keeps the resting shape, round on the row's outer ends and the group's small radius inside, where
- * Material would morph it into a full pill. Picking then changes the fill and the content, never
- * the row's silhouette.
- */
-@Composable
-private fun connectedShapes(
-    index: Int,
-    count: Int,
-): ToggleButtonShapes {
-    if (count == 1) {
-        val full = ButtonGroupDefaults.connectedButtonCheckedShape
-        return ToggleButtonShapes(shape = full, pressedShape = full, checkedShape = full)
-    }
-    val shapes = when {
-        index == 0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-        index == count - 1 -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-    }
-    return ToggleButtonShapes(shape = shapes.shape, pressedShape = shapes.pressedShape, checkedShape = shapes.shape)
 }
 
 /**

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.runtime.Composable
@@ -69,6 +71,9 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
  * has, the skin's pill, a shape the others lack rather than a colour.
  * Material's own segmented button keeps room for a check whether it shows one or not, so here
  * Material draws the row as a track with the chosen option filled.
+ * @param[connectedEnd] Whether a control carries on from the row's end edge, as one group. The
+ * row's end corners go square or down to the skin's small radius to meet it. Only the library
+ * switcher sets it, while the Expressive chip is joined to it.
  * @param[optionLabel] The label of an option.
  */
 @Composable
@@ -83,6 +88,7 @@ public fun <T> BuilderSegmented(
     optionIcon: (T) -> IconId? = { null },
     selectOnFocus: Boolean = true,
     compact: Boolean = false,
+    connectedEnd: Boolean = false,
     optionLabel: (T) -> String,
 ) {
     when (LocalSkin.current.library) {
@@ -99,15 +105,22 @@ public fun <T> BuilderSegmented(
                 selectOnFocus,
                 optionLabel,
                 compact,
+                connectedEnd,
             )
         }
         SkinLibrary.Custom -> {
+            val style = CustomActionStyles.segmented
+            val frame = style.shape
             HeadlessSegmented(
                 options,
                 selected,
                 onSelect,
                 label,
-                CustomActionStyles.segmented,
+                if (connectedEnd && frame is CornerBasedShape) {
+                    style.copy(shape = frame.copy(topEnd = CornerSize(0), bottomEnd = CornerSize(0)))
+                } else {
+                    style
+                },
                 modifier,
                 enabled,
                 optionEnabled,

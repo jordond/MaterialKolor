@@ -152,6 +152,7 @@ internal fun LibrarySwitcher(
                 label = label,
                 modifier = tracked,
                 selectOnFocus = false,
+                connectedEnd = expressiveShown,
                 optionLabel = { choice -> names.getValue(choice) },
             )
         } else {
