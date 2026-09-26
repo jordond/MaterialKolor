@@ -31,6 +31,18 @@ interface PlatformServices {
     val images: ImageInput
     val pastes: PasteInput
     val environment: Environment
+    val linkCards: LinkCardSource
+}
+
+/**
+ * The cards a share link shows in a chat app, fetched so the share dialog can show one too.
+ */
+interface LinkCardSource {
+    /**
+     * The PNG at [url], or null for anything else. There is no network, the answer has a status that
+     * is not OK or a type that is not `image/png`, or the fetch threw.
+     */
+    suspend fun fetch(url: String): ByteArray?
 }
 
 /**

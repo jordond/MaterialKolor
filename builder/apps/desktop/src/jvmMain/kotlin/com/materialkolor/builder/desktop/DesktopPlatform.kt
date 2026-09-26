@@ -8,6 +8,7 @@ import com.materialkolor.builder.core.platform.FileSaver
 import com.materialkolor.builder.core.platform.ImageHandle
 import com.materialkolor.builder.core.platform.ImageInput
 import com.materialkolor.builder.core.platform.InMemoryStoreFactory
+import com.materialkolor.builder.core.platform.LinkCardSource
 import com.materialkolor.builder.core.platform.OutgoingFile
 import com.materialkolor.builder.core.platform.Paste
 import com.materialkolor.builder.core.platform.PasteInput
@@ -27,7 +28,7 @@ import java.util.UUID
  * The desktop window's services.
  *
  * Desktop is a development target, so stores live in memory for the session and the clipboard,
- * files and images report that they are not available yet.
+ * files and images report that they are not available yet. It has no network, so no link card loads.
  */
 internal object DesktopPlatform : PlatformServices {
     override val router: Router = DesktopRouter
@@ -37,6 +38,7 @@ internal object DesktopPlatform : PlatformServices {
     override val images: ImageInput = DesktopImageInput
     override val pastes: PasteInput = DesktopPasteInput
     override val environment: Environment = DesktopEnvironment
+    override val linkCards: LinkCardSource = DesktopLinkCards
 }
 
 /**
@@ -86,6 +88,13 @@ private object DesktopImageInput : ImageInput {
     override suspend fun pick(): ImageHandle? = null
 
     override suspend fun decode(handle: ImageHandle): DecodedImage? = null
+}
+
+/**
+ * Desktop is a development target without network, so there is never a card to show.
+ */
+private object DesktopLinkCards : LinkCardSource {
+    override suspend fun fetch(url: String): ByteArray? = null
 }
 
 private object DesktopPasteInput : PasteInput {

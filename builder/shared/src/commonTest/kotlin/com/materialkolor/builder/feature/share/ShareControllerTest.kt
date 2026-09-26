@@ -15,6 +15,7 @@ import com.materialkolor.builder.domain.validate.MAX_ACCENTS
 import com.materialkolor.builder.fakes.FakeClipboard
 import com.materialkolor.builder.fakes.FakeEnvironment
 import com.materialkolor.builder.fakes.FakeFileSaver
+import com.materialkolor.builder.fakes.FakeLinkCardSource
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
@@ -39,6 +40,7 @@ class ShareControllerTest : SessionTestBase() {
     private val harness = ViewModelHarness()
     private val clipboard = FakeClipboard()
     private val files = FakeFileSaver()
+    private val linkCards = FakeLinkCardSource()
 
     @BeforeTest
     fun setUp() {
@@ -210,8 +212,49 @@ class ShareControllerTest : SessionTestBase() {
             harness.clearAndJoin()
         }
 
+    @Test
+    fun rename_aSavedProject_savesTheTrimmedName() =
+        runTest {
+            val (session, _) = session()
+            val id = booted(session)
+            val controller = controller(session)
+
+            controller.rename("  Harbour  ") shouldBe true
+
+            projects.index.first().projects.single { meta -> meta.id == id }.name shouldBe "Harbour"
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun transient_aThemeFromALink_isTrueAndCannotBeRenamed() =
+        runTest {
+            val (session, _) = session()
+            booted(session)
+            val controller = controller(session)
+            controller.transient.value shouldBe false
+
+            controller.openShared(ShareCodec.encode(OCEAN, "Harbour")).shouldBeNull()
+
+            controller.transient.value shouldBe true
+            controller.rename("Lighthouse") shouldBe false
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun card_whenTheSourceHasNoPng_isNull() =
+        runTest {
+            val (session, _) = session()
+            val controller = controller(session)
+            linkCards.bytes = "<!doctype html>".encodeToByteArray()
+
+            controller.card("https://materialkolor.com/og/abc.png").shouldBeNull()
+
+            linkCards.urls shouldBe listOf("https://materialkolor.com/og/abc.png")
+            harness.clearAndJoin()
+        }
+
     private fun controller(
         session: ProjectSession,
         environment: FakeEnvironment = FakeEnvironment(),
-    ): ShareController = harness.own(ShareController(session, clipboard, files, environment))
+    ): ShareController = harness.own(ShareController(session, clipboard, files, environment, linkCards))
 }
