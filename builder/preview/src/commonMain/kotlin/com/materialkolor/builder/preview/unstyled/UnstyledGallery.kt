@@ -92,26 +92,26 @@ private enum class GalleryDestination(
 private enum class GalleryBadge(
     val label: String,
     val component: UnstyledGalleryComponent,
-    val container: DashboardToken,
-    val content: DashboardToken,
+    val container: UnstyledToken,
+    val content: UnstyledToken,
 ) {
     New(
         label = "New",
         component = UnstyledGalleryComponent.Badge,
-        container = DashboardToken.PrimaryContainer,
-        content = DashboardToken.OnPrimaryContainer,
+        container = UnstyledToken.PrimaryContainer,
+        content = UnstyledToken.OnPrimaryContainer,
     ),
     Beta(
         label = "Beta",
         component = UnstyledGalleryComponent.TertiaryBadge,
-        container = DashboardToken.TertiaryContainer,
-        content = DashboardToken.OnTertiaryContainer,
+        container = UnstyledToken.TertiaryContainer,
+        content = UnstyledToken.OnTertiaryContainer,
     ),
     Failed(
         label = "Failed",
         component = UnstyledGalleryComponent.ErrorBadge,
-        container = DashboardToken.ErrorContainer,
-        content = DashboardToken.OnErrorContainer,
+        container = UnstyledToken.ErrorContainer,
+        content = UnstyledToken.OnErrorContainer,
     ),
 }
 
@@ -128,18 +128,18 @@ internal fun SampleCards() {
                 .previewRoles(enabled, UnstyledGalleryComponent.SampleCard)
                 .galleryFocusRing(interactions, offset = true)
                 .clip(ControlShape)
-                .background(if (enabled) DashboardToken.SurfaceContainerHigh.color else disabledContainer),
+                .background(if (enabled) UnstyledToken.SurfaceContainerHigh.color else disabledContainer),
             interactionSource = interactions,
             contentAlignment = Alignment.TopStart,
         ) {
-            val strong = tint(DashboardToken.OnSurface, enabled)
+            val strong = tint(UnstyledToken.OnSurface, enabled)
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 UnstyledIcon(Lucide.Folder, null, Modifier.size(IconSize), tint = strong)
                 Text(if (enabled) "Harbour" else "Ember", style = LabelStyle, color = strong)
                 Text(
                     text = if (enabled) "Edited today" else "Archived",
                     style = SmallStyle,
-                    color = tint(DashboardToken.OnSurfaceVariant, enabled),
+                    color = tint(UnstyledToken.OnSurfaceVariant, enabled),
                 )
             }
         }
@@ -181,7 +181,7 @@ private fun GalleryDisclosure(
             .fillMaxWidth()
             .previewRoles(enabled, UnstyledGalleryComponent.Disclosure)
             .clip(ControlShape)
-            .background(if (enabled) DashboardToken.SurfaceContainer.color else disabledContainer),
+            .background(if (enabled) UnstyledToken.SurfaceContainer.color else disabledContainer),
     ) {
         Column {
             DisclosureButton(
@@ -199,13 +199,13 @@ private fun GalleryDisclosure(
                         text = title,
                         modifier = Modifier.weight(1f),
                         style = LabelStyle,
-                        color = tint(DashboardToken.OnSurface, enabled),
+                        color = tint(UnstyledToken.OnSurface, enabled),
                     )
                     UnstyledIcon(
                         imageVector = Lucide.ChevronDown,
                         contentDescription = null,
                         modifier = Modifier.size(IconSize).rotate(if (expanded) 180f else 0f),
-                        tint = tint(DashboardToken.OnSurfaceVariant, enabled),
+                        tint = tint(UnstyledToken.OnSurfaceVariant, enabled),
                     )
                 }
             }
@@ -217,7 +217,7 @@ private fun GalleryDisclosure(
                     text = detail,
                     modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
                     style = BodyStyle,
-                    color = DashboardToken.OnSurfaceVariant.color,
+                    color = UnstyledToken.OnSurfaceVariant.color,
                 )
             }
         }
@@ -226,8 +226,8 @@ private fun GalleryDisclosure(
 
 @Composable
 internal fun Separators() {
-    val line = DashboardToken.OutlineVariant.color
-    val text = DashboardToken.OnSurface.color
+    val line = UnstyledToken.OutlineVariant.color
+    val text = UnstyledToken.OnSurface.color
     GalleryColumn {
         Row(Modifier.height(20.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Inbox", style = BodyStyle, color = text)
@@ -237,7 +237,7 @@ internal fun Separators() {
             Text("Drafts", style = BodyStyle, color = text)
         }
         UnstyledHorizontalSeparator(line, Modifier.previewRoles(UnstyledGalleryComponent.Separator))
-        Text("Three conversations", style = SmallStyle, color = DashboardToken.OnSurfaceVariant.color)
+        Text("Three conversations", style = SmallStyle, color = UnstyledToken.OnSurfaceVariant.color)
     }
 }
 
@@ -264,12 +264,12 @@ private fun ScrollArea(
             .height(ScrollAreaHeight)
             .previewRoles(UnstyledGalleryComponent.ScrollArea)
             .clip(ControlShape)
-            .background(DashboardToken.SurfaceContainerLowest.color)
-            .border(1.dp, DashboardToken.OutlineVariant.color, ControlShape)
+            .background(UnstyledToken.SurfaceContainerLowest.color)
+            .border(1.dp, UnstyledToken.OutlineVariant.color, ControlShape)
             .padding(4.dp),
     ) {
-        val muted = DashboardToken.OnSurfaceVariant.color
-        val strong = DashboardToken.OnSurface.color
+        val muted = UnstyledToken.OnSurfaceVariant.color
+        val strong = UnstyledToken.OnSurface.color
         LazyColumn(state = list, modifier = Modifier.weight(1f)) {
             items(FileCount, key = { index -> index }) { index ->
                 Row(
@@ -291,7 +291,7 @@ private fun ScrollArea(
                 modifier = Modifier
                     .previewRoles(enabled, UnstyledGalleryComponent.ScrollbarThumb)
                     .clip(PillShape)
-                    .background(if (enabled) DashboardToken.Outline.color else disabledContainer),
+                    .background(if (enabled) UnstyledToken.Outline.color else disabledContainer),
                 enabled = enabled,
             )
         }
@@ -311,7 +311,7 @@ internal fun GalleryTabs(state: DemoAppState) {
                 modifier = Modifier
                     .previewRoles(UnstyledGalleryComponent.TabList)
                     .clip(ControlShape)
-                    .background(DashboardToken.SurfaceContainerHigh.color)
+                    .background(UnstyledToken.SurfaceContainerHigh.color)
                     .padding(4.dp),
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -325,11 +325,11 @@ internal fun GalleryTabs(state: DemoAppState) {
                         } else {
                             UnstyledGalleryComponent.Tab
                         }
-                        val container = if (selected) DashboardToken.SurfaceContainerLowest.color else Color.Transparent
+                        val container = if (selected) UnstyledToken.SurfaceContainerLowest.color else Color.Transparent
                         val content = when {
                             !enabled -> disabledContent
-                            selected -> DashboardToken.OnSurface.color
-                            else -> DashboardToken.OnSurfaceVariant.color
+                            selected -> UnstyledToken.OnSurface.color
+                            else -> UnstyledToken.OnSurfaceVariant.color
                         }
                         Tab(
                             key = index,
@@ -354,7 +354,7 @@ internal fun GalleryTabs(state: DemoAppState) {
                 }
             }
             TabPanel(key = picked) {
-                Text(TabPanels[picked], style = BodyStyle, color = DashboardToken.OnSurfaceVariant.color)
+                Text(TabPanels[picked], style = BodyStyle, color = UnstyledToken.OnSurfaceVariant.color)
             }
         }
     }
@@ -388,8 +388,8 @@ private fun NavigationItem(
     val component = if (selected) UnstyledGalleryComponent.SelectedNavItem else UnstyledGalleryComponent.NavItem
     val content = when {
         !enabled -> disabledContent
-        selected -> DashboardToken.OnSecondaryContainer.color
-        else -> DashboardToken.OnSurfaceVariant.color
+        selected -> UnstyledToken.OnSecondaryContainer.color
+        else -> UnstyledToken.OnSurfaceVariant.color
     }
     UnstyledButton(
         onClick = onClick,
@@ -403,7 +403,7 @@ private fun NavigationItem(
             .foldedSelectedName(destination.label, selected, enabled)
             .galleryFocusRing(interactions)
             .clip(ControlShape)
-            .background(if (selected) DashboardToken.SecondaryContainer.color else Color.Transparent),
+            .background(if (selected) UnstyledToken.SecondaryContainer.color else Color.Transparent),
         interactionSource = interactions,
         contentAlignment = Alignment.CenterStart,
     ) {
@@ -420,7 +420,7 @@ internal fun GalleryProgress() {
     val roleWord = progressRoleWord
     GalleryColumn {
         for ((label, done) in listOf("Uploading" to 0.4f, "Exporting" to 0.75f)) {
-            Text("$label, ${(done * 100).toInt()}%", style = SmallStyle, color = DashboardToken.OnSurfaceVariant.color)
+            Text("$label, ${(done * 100).toInt()}%", style = SmallStyle, color = UnstyledToken.OnSurfaceVariant.color)
             UnstyledProgress(
                 progress = done,
                 modifier = Modifier
@@ -429,9 +429,9 @@ internal fun GalleryProgress() {
                     .previewRoles(UnstyledGalleryComponent.Progress)
                     .semantics { valueNodeName(label, "${(done * 100).toInt()}%", folds, roleWord) }
                     .clip(PillShape)
-                    .background(DashboardToken.SurfaceContainerHighest.color),
+                    .background(UnstyledToken.SurfaceContainerHighest.color),
             ) {
-                Indicator(Modifier.clip(PillShape).background(DashboardToken.Primary.color))
+                Indicator(Modifier.clip(PillShape).background(UnstyledToken.Primary.color))
             }
         }
     }
@@ -446,8 +446,8 @@ internal fun InPlaceTooltip() {
     Row(horizontalArrangement = Arrangement.spacedBy(SectionGap), verticalAlignment = Alignment.Top) {
         GalleryIconButton(Lucide.Copy, "Copy link", enabled = true)
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Link", style = LabelStyle, color = DashboardToken.OnSurface.color)
-            DashboardTooltip("Copied to the clipboard")
+            Text("Link", style = LabelStyle, color = UnstyledToken.OnSurface.color)
+            UnstyledTooltip("Copied to the clipboard")
         }
     }
 }

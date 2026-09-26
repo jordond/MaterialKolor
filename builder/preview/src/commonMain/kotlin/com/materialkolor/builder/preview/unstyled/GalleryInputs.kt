@@ -102,13 +102,13 @@ private fun GalleryTextField(
 ) {
     val interactions = remember { MutableInteractionSource() }
     val focused by interactions.collectIsFocusedAsState()
-    val primary = DashboardToken.Primary.color
+    val primary = UnstyledToken.Primary.color
     val accent = when {
         !enabled -> disabledContent
         focused -> primary
-        else -> DashboardToken.OnSurfaceVariant.color
+        else -> UnstyledToken.OnSurfaceVariant.color
     }
-    val container = if (enabled) DashboardToken.SurfaceContainerHighest.color else disabledContainer
+    val container = if (enabled) UnstyledToken.SurfaceContainerHighest.color else disabledContainer
     val selection = TextSelectionColors(handleColor = primary, backgroundColor = primary.copy(alpha = SelectionAlpha))
     CompositionLocalProvider(LocalTextSelectionColors provides selection) {
         BasicTextField(
@@ -116,7 +116,7 @@ private fun GalleryTextField(
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth().previewRoles(enabled, UnstyledGalleryComponent.TextField),
             enabled = enabled,
-            textStyle = BodyStyle.copy(color = tint(DashboardToken.OnSurface, enabled)),
+            textStyle = BodyStyle.copy(color = tint(UnstyledToken.OnSurface, enabled)),
             cursorBrush = SolidColor(primary),
             interactionSource = interactions,
             singleLine = true,
@@ -126,7 +126,7 @@ private fun GalleryTextField(
                         Text(label, style = SmallStyle, color = accent)
                         Box {
                             if (value.isEmpty()) {
-                                val hint = tint(DashboardToken.OnSurfaceVariant, enabled)
+                                val hint = tint(UnstyledToken.OnSurfaceVariant, enabled)
                                 Text(placeholder, style = BodyStyle, color = hint)
                             }
                             InnerTextWithoutHandles(innerTextField)
@@ -147,8 +147,8 @@ internal fun Sliders(state: DemoAppState) {
     GalleryColumn {
         for (enabled in EnabledThenDisabled) {
             val interactions = remember { MutableInteractionSource() }
-            val active = tint(DashboardToken.Primary, enabled)
-            val rest = if (enabled) DashboardToken.SurfaceContainerHighest.color else disabledContainer
+            val active = tint(UnstyledToken.Primary, enabled)
+            val rest = if (enabled) UnstyledToken.SurfaceContainerHighest.color else disabledContainer
             UnstyledSlider(
                 value = stop.toFloat(),
                 onValueChange = { value ->
@@ -178,7 +178,7 @@ internal fun Sliders(state: DemoAppState) {
                     Box(
                         Modifier
                             .size(ThumbSize)
-                            .focusRing(interactions, 2.dp, DashboardToken.Primary.color, CircleShape, offset = 2.dp)
+                            .focusRing(interactions, 2.dp, UnstyledToken.Primary.color, CircleShape, offset = 2.dp)
                             .clip(CircleShape)
                             .background(active),
                     )
@@ -213,12 +213,12 @@ private fun GalleryCheckbox(
     val component = if (checked) UnstyledGalleryComponent.CheckedCheckbox else UnstyledGalleryComponent.Checkbox
     val box = when {
         !checked -> Color.Transparent
-        enabled -> DashboardToken.Primary.color
+        enabled -> UnstyledToken.Primary.color
         else -> disabledContainer
     }
     val edge = when {
         checked -> Modifier
-        enabled -> Modifier.border(2.dp, DashboardToken.Outline.color, BoxShape)
+        enabled -> Modifier.border(2.dp, UnstyledToken.Outline.color, BoxShape)
         else -> Modifier.border(2.dp, disabledContent, BoxShape)
     }
     UnstyledCheckbox(
@@ -241,11 +241,11 @@ private fun GalleryCheckbox(
                 contentAlignment = Alignment.Center,
             ) {
                 CheckedIndicator {
-                    val mark = tint(DashboardToken.OnPrimary, enabled)
+                    val mark = tint(UnstyledToken.OnPrimary, enabled)
                     UnstyledIcon(Lucide.Check, contentDescription = null, modifier = Modifier.size(14.dp), tint = mark)
                 }
             }
-            Text(label, style = BodyStyle, color = tint(DashboardToken.OnSurface, enabled))
+            Text(label, style = BodyStyle, color = tint(UnstyledToken.OnSurface, enabled))
         }
     }
 }
@@ -273,8 +273,8 @@ private fun GallerySwitch(
     val component = if (on) UnstyledGalleryComponent.CheckedSwitch else UnstyledGalleryComponent.Switch
     val (track, thumb) = when {
         !enabled -> disabledContainer to disabledContent
-        on -> DashboardToken.Primary.color to DashboardToken.OnPrimary.color
-        else -> DashboardToken.SurfaceContainerHighest.color to DashboardToken.Outline.color
+        on -> UnstyledToken.Primary.color to UnstyledToken.OnPrimary.color
+        else -> UnstyledToken.SurfaceContainerHighest.color to UnstyledToken.Outline.color
     }
     val edge = if (on) Modifier else Modifier.border(1.dp, thumb, PillShape)
     Row(
@@ -292,7 +292,7 @@ private fun GallerySwitch(
             .galleryFocusRing(interactions, offset = true),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, Modifier.weight(1f), style = BodyStyle, color = tint(DashboardToken.OnSurface, enabled))
+        Text(label, Modifier.weight(1f), style = BodyStyle, color = tint(UnstyledToken.OnSurface, enabled))
         UnstyledSwitch(
             checked = on,
             onCheckedChange = null,
@@ -333,8 +333,8 @@ internal fun RadioButtons(state: DemoAppState) {
                 }
                 val ring = when {
                     !enabled -> disabledContent
-                    selected -> DashboardToken.Primary.color
-                    else -> DashboardToken.Outline.color
+                    selected -> UnstyledToken.Primary.color
+                    else -> UnstyledToken.Outline.color
                 }
                 RadioButton(
                     value = index,
@@ -357,7 +357,7 @@ internal fun RadioButtons(state: DemoAppState) {
                                 Box(Modifier.size(10.dp).clip(CircleShape).background(ring))
                             }
                         }
-                        Text(plan, style = BodyStyle, color = tint(DashboardToken.OnSurface, enabled))
+                        Text(plan, style = BodyStyle, color = tint(UnstyledToken.OnSurface, enabled))
                     }
                 }
             }

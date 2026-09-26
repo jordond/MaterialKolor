@@ -344,8 +344,8 @@ class UnstyledGalleryTest {
             onNode(named("Favourite") and isEnabled(), useUnmergedTree = true).performClick()
             waitForIdle()
             onNodeWithTag(INSPECT_CARD_TAG).assertExists()
-            onNode(OnCard and hasText(DashboardToken.Outline.token.name)).assertExists()
-            onNode(OnCard and hasText(DashboardToken.OnSurfaceVariant.token.name)).assertExists()
+            onNode(OnCard and hasText(UnstyledToken.Outline.token.name)).assertExists()
+            onNode(OnCard and hasText(UnstyledToken.OnSurfaceVariant.token.name)).assertExists()
             state.gallerySnapshot() shouldBe before
 
             // Press the card where a control of the gallery lies under it.

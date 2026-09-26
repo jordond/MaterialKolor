@@ -134,17 +134,17 @@ private fun SelectField(
             .expandActions(open, onToggle)
             .galleryFocusRing(interactions)
             .clip(ControlShape)
-            .border(1.dp, if (enabled) DashboardToken.Outline.color else disabledContainer, ControlShape),
+            .border(1.dp, if (enabled) UnstyledToken.Outline.color else disabledContainer, ControlShape),
         role = SemanticsRole.DropdownList,
         interactionSource = interactions,
         contentAlignment = Alignment.CenterStart,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(label, style = SmallStyle, color = tint(DashboardToken.OnSurfaceVariant, enabled), maxLines = 1)
-                Text(value, style = BodyStyle, color = tint(DashboardToken.OnSurface, enabled), maxLines = 1)
+                Text(label, style = SmallStyle, color = tint(UnstyledToken.OnSurfaceVariant, enabled), maxLines = 1)
+                Text(value, style = BodyStyle, color = tint(UnstyledToken.OnSurface, enabled), maxLines = 1)
             }
-            val chevron = tint(DashboardToken.OnSurface, enabled)
+            val chevron = tint(UnstyledToken.OnSurface, enabled)
             UnstyledIcon(Lucide.ChevronDown, null, Modifier.size(IconSize), tint = chevron)
         }
     }
@@ -171,7 +171,7 @@ internal fun InPlaceMenu(state: DemoAppState) {
                 for (action in MenuAction.entries) {
                     if (action == MenuAction.Delete) {
                         UnstyledHorizontalSeparator(
-                            color = DashboardToken.OutlineVariant.color,
+                            color = UnstyledToken.OutlineVariant.color,
                             modifier = Modifier
                                 .padding(vertical = 4.dp)
                                 .previewRoles(UnstyledGalleryComponent.Separator),
@@ -220,8 +220,8 @@ private fun InPlacePanel(
             .fillMaxWidth()
             .previewRoles(UnstyledGalleryComponent.Menu)
             .clip(CardShape)
-            .background(DashboardToken.SurfaceContainerHighest.color)
-            .border(1.dp, DashboardToken.OutlineVariant.color, CardShape)
+            .background(UnstyledToken.SurfaceContainerHighest.color)
+            .border(1.dp, UnstyledToken.OutlineVariant.color, CardShape)
             .padding(4.dp)
             .then(modifier),
     ) { content() }
@@ -251,9 +251,9 @@ private fun PanelRow(
     }
     val content = when {
         !enabled -> disabledContent
-        selected -> DashboardToken.OnSecondaryContainer.color
-        danger -> DashboardToken.Error.color
-        else -> DashboardToken.OnSurface.color
+        selected -> UnstyledToken.OnSecondaryContainer.color
+        danger -> UnstyledToken.Error.color
+        else -> UnstyledToken.OnSurface.color
     }
     UnstyledButton(
         onClick = onClick,
@@ -266,7 +266,7 @@ private fun PanelRow(
             .then(name)
             .galleryFocusRing(interactions)
             .clip(ControlShape)
-            .background(if (selected) DashboardToken.SecondaryContainer.color else Color.Transparent),
+            .background(if (selected) UnstyledToken.SecondaryContainer.color else Color.Transparent),
         interactionSource = interactions,
         contentAlignment = Alignment.CenterStart,
     ) {
