@@ -13,6 +13,7 @@ import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
+import com.materialkolor.builder.kit.control.ControlFrameBottom
 import com.materialkolor.builder.kit.control.ControlFrameTop
 
 /**
@@ -21,9 +22,9 @@ import com.materialkolor.builder.kit.control.ControlFrameTop
  *
  * The chip keeps its whole width and the switcher takes what is left, so a Medium bar short of room
  * narrows the dropdown rather than cutting the chip's name. The chip stands as tall as the
- * switcher's frame, from the [ControlFrameTop] the switcher reports down to its bottom edge, so it
- * lines up with an outlined dropdown whose label floats above the outline as well as with the
- * segmented row.
+ * switcher's frame, from the [ControlFrameTop] to the [ControlFrameBottom] the switcher reports, so
+ * it lines up with an outlined dropdown whose label floats above the outline as well as with a
+ * segmented row whose buttons stand inside a larger touch target.
  */
 @Composable
 internal fun SwitcherGroup(
@@ -49,7 +50,9 @@ private object SwitcherGroupPolicy : MeasurePolicy {
         }
         val switcher = measurables.first().measure(switcherRoom)
         val frameTop = switcher[ControlFrameTop].takeUnless { top -> top == AlignmentLine.Unspecified } ?: 0
-        val frameHeight = (switcher.height - frameTop).coerceAtLeast(0)
+        val frameBottom = switcher[ControlFrameBottom].takeUnless { bottom -> bottom == AlignmentLine.Unspecified }
+            ?: switcher.height
+        val frameHeight = (frameBottom - frameTop).coerceAtLeast(0)
         val joined = chip?.measure(
             Constraints(minWidth = 0, maxWidth = chipWidth, minHeight = frameHeight, maxHeight = frameHeight),
         )
