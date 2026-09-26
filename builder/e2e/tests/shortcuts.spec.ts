@@ -130,7 +130,7 @@ test('after a number key switches the library, Space and V work with no click', 
   const visionRow = page.locator(A11Y).getByText('Deuteranopia', { exact: true });
   await expect(visionRow).toHaveCount(0);
 
-  await page.keyboard.press('3');
+  await page.keyboard.press('2');
   // The top bar's Undo names the switch once it has landed, and the page moves into the new skin then.
   // The keys reach the page again once the canvas holds focus with that label still in place.
   await expect.poll(() => switchLanded(page), { timeout: 10_000 }).toBe(true);

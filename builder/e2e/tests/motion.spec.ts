@@ -51,7 +51,7 @@ test.describe('frozen motion', () => {
     );
     await openWorkspace(page, '/?motion=frozen');
     await expect(page).toHaveScreenshot('material3.png', { maxDiffPixelRatio: 0.02 });
-    for (const [key, name] of [['3', 'unstyled'], ['4', 'fluent'], ['5', 'custom']]) {
+    for (const [key, name] of [['2', 'unstyled'], ['3', 'fluent'], ['4', 'custom']]) {
       await focusCanvas(page);
       await page.keyboard.press(key);
       await expect(button(page, /^Undo library change/)).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
@@ -67,13 +67,13 @@ interface Frames {
   split: string[];
 }
 
-/** Presses 3 for Unstyled and reads the frames the page drew from just before until it is still again. */
+/** Presses 2 for Unstyled and reads the frames the page drew from just before until it is still again. */
 async function switchLibrary(page: Page): Promise<Frames> {
   await openWorkspace(page);
   await focusCanvas(page);
   await page.evaluate(() => (window as unknown as { mkCopy: { start: () => void } }).mkCopy.start());
 
-  await page.keyboard.press('3');
+  await page.keyboard.press('2');
   await expect(button(page, /^Undo library change/)).toHaveCount(1, { timeout: LAND_TIMEOUT_MS });
   await expect.poll(() => stillFor(page), { timeout: LAND_TIMEOUT_MS }).toBeGreaterThan(STILL_MS);
 

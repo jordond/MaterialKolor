@@ -12,7 +12,7 @@ import {
 } from '../fixtures/workspace';
 
 // The shell in the Fluent skin, whose tabs, segmented rows, switches, checkboxes and disclosures are
-// Fluent's own components. The number keys switch the library, 4 to Fluent and 1 back to Material 3,
+// Fluent's own components. The number keys switch the library, 3 to Fluent and 1 back to Material 3,
 // and the page keeps running with no error. On the web the mirror loses a tab's role and state, so the
 // Fluent tab carries both in its name the way every skin's tab does.
 
@@ -28,14 +28,14 @@ test.beforeEach(async ({ context }) => {
   await wantHooks(context);
 });
 
-test('4 switches the shell to Fluent and 1 back, with no page error and the tab name folded', async ({ page }) => {
+test('3 switches the shell to Fluent and 1 back, with no page error and the tab name folded', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await openBuilder(page);
   await pressBareCanvas(page);
   const undo = page.locator(A11Y).getByRole('button', { name: UNDO_SWITCH });
 
-  await page.keyboard.press('4');
+  await page.keyboard.press('3');
   await expect(undo).toHaveCount(1, { timeout: 10_000 });
   await page.waitForTimeout(SETTLE_MS);
   await expect(page.locator(SELECTED_TAB).first()).toBeAttached({ timeout: 10_000 });
@@ -49,10 +49,13 @@ test('4 switches the shell to Fluent and 1 back, with no page error and the tab 
   expect(errors).toEqual([]);
 });
 
-// Switch library. 3, 4 and 2 move the library to Unstyled, Fluent and Expressive, and 2
-// on TonalSpot 2021 suggests the Expressive style on the 2025 spec, which Apply sets as one undo.
+// Switch library. 2, 3 and 1 move the library to Unstyled, Fluent and back to M3, and Shift+E then
+// turns Expressive on. On TonalSpot 2021 that suggests the Expressive style on the 2025 spec, which
+// Apply sets as one undo.
 
-test('3, 4 and 2 switch the library, and Apply takes the Expressive suggestion as one undo', async ({ page }) => {
+test('2, 3 and 1 switch the library, Shift+E turns Expressive on, and Apply takes the suggestion as one undo', async ({
+  page,
+}) => {
   await openWorkspace(page);
   const undo = page.locator('#cmp_a11y_root').getByRole('button', { name: /^Undo library change to / });
   // Read without waiting, since there is no such Undo before the first switch.
@@ -62,15 +65,16 @@ test('3, 4 and 2 switch the library, and Apply takes the Expressive suggestion a
     );
   // The web folds the dialog's role into its title, `Use the Expressive style?, dialog`.
   const suggestion = onPage(page, /^Use the Expressive style\?/);
-  await pressKeyUntil(page, '3', () => undoNames('Unstyled'));
-  await pressKeyUntil(page, '4', () => undoNames('Fluent'));
-  // The 2 opens the suggestion with the switch, and the suggestion is modal, so the mirror hides the
+  await pressKeyUntil(page, '2', () => undoNames('Unstyled'));
+  await pressKeyUntil(page, '3', () => undoNames('Fluent'));
+  await pressKeyUntil(page, '1', () => undoNames('M3'));
+  // Shift+E opens the suggestion with the switch, and the suggestion is modal, so the mirror hides the
   // top bar's Undo and the tab row the canvas is focused by until it closes. The suggestion showing
-  // is what says the 2 landed, and each try waits for it as long as a switch may take to land, so
+  // is what says Shift+E landed, and each try waits for it as long as a switch may take to land, so
   // no try goes looking for the tab row once the suggestion is up.
   for (let tries = 0; tries < 3 && (await suggestion.count()) === 0; tries += 1) {
     await focusCanvas(page);
-    await page.keyboard.press('2');
+    await page.keyboard.press('Shift+E');
     await suggestion.first().waitFor({ state: 'attached', timeout: LAND_TIMEOUT_MS }).catch(() => undefined);
   }
 
