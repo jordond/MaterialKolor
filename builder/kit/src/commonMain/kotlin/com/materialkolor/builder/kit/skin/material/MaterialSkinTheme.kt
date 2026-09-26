@@ -19,6 +19,7 @@ import com.materialkolor.builder.kit.skin.ProvideSkinLocals
 import com.materialkolor.builder.kit.skin.StatusColors
 import com.materialkolor.builder.kit.skin.builderCodePalette
 import com.materialkolor.builder.kit.token.BuilderTokens
+import com.materialkolor.builder.kit.token.CodePalette
 import com.materialkolor.builder.kit.token.brandFontFamily
 import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.material3.toColorScheme
@@ -71,15 +72,23 @@ private fun MaterialSkinLocals(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val motionScheme = MaterialTheme.motionScheme
-    val tokens = remember(colorScheme, isDark) { colorScheme.builderTokens(StatusColors.of(isDark)) }
+    val tokens = remember(colorScheme, isDark) { colorScheme.builderTokens(isDark) }
     val motion = remember(motionScheme, reducedMotion) {
         if (reducedMotion) reducedBuilderMotion() else MaterialBuilderMotion(motionScheme)
     }
     ProvideSkinLocals(tokens, motion, MaterialIcons, content)
 }
 
-private fun ColorScheme.builderTokens(status: StatusColors): BuilderTokens =
-    BuilderTokens(
+/**
+ * The builder tokens read back out of a Material scheme.
+ *
+ * The code sits on a dark ground in both modes. In light mode that is the inverse surface, so its
+ * inks come from the inverse and fixed dim roles and the dark status inks. In dark mode it is the
+ * lowest surface container and the inks are the scheme's own.
+ */
+internal fun ColorScheme.builderTokens(isDark: Boolean): BuilderTokens {
+    val status = StatusColors.of(isDark)
+    return BuilderTokens(
         canvas = surfaceContainer,
         panel = surfaceContainerLow,
         panelRaised = surfaceContainerHigh,
@@ -90,21 +99,36 @@ private fun ColorScheme.builderTokens(status: StatusColors): BuilderTokens =
         accent = primary,
         onAccent = onPrimary,
         focus = secondary,
-        codeBackground = surfaceContainerHighest,
-        codePalette = builderCodePalette(
-            plain = onSurface,
-            muted = onSurfaceVariant,
-            primary = primary,
-            secondary = secondary,
-            tertiary = tertiary,
-            status = status,
-        ),
+        codeBackground = if (isDark) surfaceContainerLowest else inverseSurface,
+        codePalette = codePalette(isDark),
         success = status.success,
         warning = status.warning,
         danger = error,
         scrim = scrim.copy(alpha = MaterialScrimAlpha),
         iconSize = 20.dp,
     )
+}
+
+private fun ColorScheme.codePalette(isDark: Boolean): CodePalette =
+    if (isDark) {
+        builderCodePalette(
+            plain = onSurface,
+            muted = onSurfaceVariant,
+            primary = primary,
+            secondary = secondary,
+            tertiary = tertiary,
+            status = StatusColors.of(isDark = true),
+        )
+    } else {
+        builderCodePalette(
+            plain = inverseOnSurface,
+            muted = outlineVariant,
+            primary = primaryFixedDim,
+            secondary = secondaryFixedDim,
+            tertiary = tertiaryFixedDim,
+            status = StatusColors.of(isDark = true),
+        )
+    }
 
 /**
  * Material's own scrim opacity.

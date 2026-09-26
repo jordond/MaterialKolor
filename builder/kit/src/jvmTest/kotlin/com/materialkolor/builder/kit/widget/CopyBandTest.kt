@@ -9,14 +9,18 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
+import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.codegen.dsl.Token
@@ -63,6 +67,11 @@ private val CodeViewSize: Dp = 320.dp
  * Enough presses of the right arrow to scroll [LongLine] to its end.
  */
 private const val SidewaysPresses = 80
+
+/**
+ * The copy button's name.
+ */
+private const val CopyName = "Copy"
 
 /**
  * The copy band never covers what it sits beside. A swatch keeps the band's room free of its lines,
@@ -133,5 +142,19 @@ class CopyBandTest {
                 text.positionInRoot.y shouldBeLessThan band.bottom
                 end shouldBeLessThanOrEqual band.left
             }
+        }
+
+    @Test
+    fun codeView_withoutOnCopy_drawsNoCopyBand() =
+        runComposeUiTest {
+            val lines = listOf(listOf(Token(TokenKind.Plain, LongLine)))
+            setContent {
+                WidgetHarness(WidgetSkins.first().second) {
+                    CodeView(lines, onCopy = null, Modifier.size(CodeViewSize, 160.dp))
+                }
+            }
+            onAllNodesWithTag(CopyBandTag, useUnmergedTree = true).assertCountEquals(0)
+            onAllNodes(hasContentDescription(CopyName) or hasText(CopyName), useUnmergedTree = true)
+                .assertCountEquals(0)
         }
 }

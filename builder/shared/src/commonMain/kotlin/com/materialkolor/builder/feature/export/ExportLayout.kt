@@ -16,6 +16,9 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.export_checked
 import com.materialkolor.builder.generated.resources.export_checked_any
+import com.materialkolor.builder.generated.resources.export_files
+import com.materialkolor.builder.generated.resources.export_files_lines
+import com.materialkolor.builder.generated.resources.export_lines
 import com.materialkolor.builder.generated.resources.export_subtitle
 import com.materialkolor.builder.generated.resources.export_subtitle_unnamed
 import com.materialkolor.builder.kit.control.BuilderIcon
@@ -23,6 +26,7 @@ import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -41,12 +45,61 @@ internal fun exportSubtitle(state: ExportModel.State): String {
 }
 
 /**
- * The note that every export is compile checked, with the copy and download buttons after it. They
- * share a row where the sheet is wide enough, and the buttons move under the note where it is not.
+ * How the export sheet lays its body out, picked from the body's own width, since the sheet takes
+ * the whole screen at every size.
+ */
+internal enum class BodyLayout {
+    /**
+     * The options in a column beside the files, which show as a tree beside the code.
+     */
+    Wide,
+
+    /**
+     * The options in a column beside the files, which show as tabs over the code.
+     */
+    Medium,
+
+    /**
+     * One scrolling column, the options folded into a disclosure over the file tabs and the code.
+     */
+    Narrow,
+
+    ;
+
+    /**
+     * How wide the options column is, or null where the options fold into the column.
+     */
+    val optionsWidth: Dp?
+        get() = when (this) {
+            Wide -> 344.dp
+            Medium -> 320.dp
+            Narrow -> null
+        }
+
+    companion object {
+        /**
+         * The layout for a body [width] wide.
+         */
+        fun of(width: Dp): BodyLayout =
+            when {
+                width >= 1100.dp -> Wide
+                width >= 720.dp -> Medium
+                else -> Narrow
+            }
+    }
+}
+
+/**
+ * The note that every export is compile checked and how many files and lines it holds, with the
+ * copy and download buttons after it. They share a row where the sheet is wide enough, and the
+ * buttons move under the note where it is not.
+ *
+ * @param[ready] The export, whose files and lines the note counts, or null for no count.
  */
 @Composable
 internal fun ExportFooter(
     materialKolorVersion: String?,
+    ready: ExportOutcome.Ready?,
     buttons: @Composable () -> Unit,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
@@ -57,14 +110,21 @@ internal fun ExportFooter(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             BuilderIcon(id = IconId.Check, contentDescription = null, emphasis = Emphasis.Secondary)
-            BuilderText(
-                text = if (materialKolorVersion == null) {
-                    stringResource(Res.string.export_checked_any)
-                } else {
-                    stringResource(Res.string.export_checked, materialKolorVersion)
-                },
-                emphasis = Emphasis.Secondary,
-            )
+            // The count follows the note, or goes under it where the two do not fit a line.
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(spacing.small),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
+                BuilderText(
+                    text = if (materialKolorVersion == null) {
+                        stringResource(Res.string.export_checked_any)
+                    } else {
+                        stringResource(Res.string.export_checked, materialKolorVersion)
+                    },
+                    emphasis = Emphasis.Secondary,
+                )
+                if (ready != null) BuilderText(text = filesAndLines(ready), emphasis = Emphasis.Subtle)
+            }
         }
     }
     BoxWithConstraints(Modifier.fillMaxWidth()) {
@@ -86,6 +146,38 @@ internal fun ExportFooter(
                 ) { buttons() }
             }
         }
+    }
+}
+
+/**
+ * How many files and lines [ready] holds, "5 files, 94 lines".
+ */
+@Composable
+private fun filesAndLines(ready: ExportOutcome.Ready): String {
+    val files = ready.files.size
+    val lines = ready.files.sumOf { file -> file.lines.size }
+    return stringResource(
+        Res.string.export_files_lines,
+        pluralStringResource(Res.plurals.export_files, files, files),
+        pluralStringResource(Res.plurals.export_lines, lines, lines),
+    )
+}
+
+/**
+ * One line that needs attention, with its icon.
+ */
+@Composable
+internal fun Notice(
+    text: String,
+    icon: IconId,
+    emphasis: Emphasis = Emphasis.Secondary,
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.small),
+        verticalAlignment = Alignment.Top,
+    ) {
+        BuilderIcon(id = icon, contentDescription = null, emphasis = emphasis)
+        BuilderText(text = text, emphasis = emphasis)
     }
 }
 

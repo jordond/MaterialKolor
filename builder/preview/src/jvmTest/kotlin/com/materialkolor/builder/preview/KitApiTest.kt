@@ -19,6 +19,7 @@ class KitApiTest {
         val palette = CodePalette(
             colors = TokenKind.entries.associateWith { Color.Red },
             plain = Color.Black,
+            muted = Color.Gray, // B-537
         )
 
         palette[TokenKind.Keyword] shouldBe Color.Red

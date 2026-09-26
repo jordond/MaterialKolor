@@ -1,39 +1,24 @@
 package com.materialkolor.builder.feature.export
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.codegen.validate.ReservedNameClash
-import com.materialkolor.builder.codegen.validate.ReservedNames
 import com.materialkolor.builder.domain.capability.Capabilities
 import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.capability.ControlState
-import com.materialkolor.builder.domain.capability.forTarget
-import com.materialkolor.builder.domain.edit.DocumentChange
-import com.materialkolor.builder.domain.edit.EditPhase
-import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.domain.persist.FrozenVariants
-import com.materialkolor.builder.domain.validate.validatePackageName
-import com.materialkolor.builder.domain.validate.validateThemeName
+import com.materialkolor.builder.feature.topbar.ExpressiveSwitch
+import com.materialkolor.builder.feature.topbar.LibraryChoice
+import com.materialkolor.builder.feature.topbar.RevealOrigin
+import com.materialkolor.builder.feature.topbar.expressiveChange
+import com.materialkolor.builder.feature.topbar.libraryName
+import com.materialkolor.builder.feature.topbar.trackRevealOrigin
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.export_animate
@@ -41,56 +26,51 @@ import com.materialkolor.builder.generated.resources.export_duration
 import com.materialkolor.builder.generated.resources.export_duration_ms
 import com.materialkolor.builder.generated.resources.export_dynamic_color
 import com.materialkolor.builder.generated.resources.export_dynamic_color_note
-import com.materialkolor.builder.generated.resources.export_package
-import com.materialkolor.builder.generated.resources.export_package_hint
-import com.materialkolor.builder.generated.resources.export_package_invalid
+import com.materialkolor.builder.generated.resources.export_expressive_2021
+import com.materialkolor.builder.generated.resources.export_expressive_caption
+import com.materialkolor.builder.generated.resources.export_library_custom_caption
+import com.materialkolor.builder.generated.resources.export_library_custom_frozen_note
+import com.materialkolor.builder.generated.resources.export_library_custom_note
+import com.materialkolor.builder.generated.resources.export_library_fluent_caption
+import com.materialkolor.builder.generated.resources.export_library_fluent_note
+import com.materialkolor.builder.generated.resources.export_library_m3_caption
+import com.materialkolor.builder.generated.resources.export_library_unstyled_caption
+import com.materialkolor.builder.generated.resources.export_library_unstyled_note
+import com.materialkolor.builder.generated.resources.export_mode_dynamic
+import com.materialkolor.builder.generated.resources.export_mode_dynamic_note
+import com.materialkolor.builder.generated.resources.export_mode_dynamic_short
+import com.materialkolor.builder.generated.resources.export_mode_frozen
+import com.materialkolor.builder.generated.resources.export_mode_frozen_note
+import com.materialkolor.builder.generated.resources.export_mode_frozen_short
+import com.materialkolor.builder.generated.resources.export_options_summary
 import com.materialkolor.builder.generated.resources.export_project
 import com.materialkolor.builder.generated.resources.export_project_android
 import com.materialkolor.builder.generated.resources.export_project_multiplatform
-import com.materialkolor.builder.generated.resources.export_theme_name
-import com.materialkolor.builder.generated.resources.export_theme_name_invalid
-import com.materialkolor.builder.generated.resources.export_theme_name_taken
+import com.materialkolor.builder.generated.resources.export_section_colors
+import com.materialkolor.builder.generated.resources.export_section_library
+import com.materialkolor.builder.generated.resources.export_section_project
 import com.materialkolor.builder.generated.resources.export_variants
 import com.materialkolor.builder.generated.resources.export_variants_all
 import com.materialkolor.builder.generated.resources.export_variants_standard
 import com.materialkolor.builder.generated.resources.export_version_catalog
+import com.materialkolor.builder.generated.resources.export_version_catalog_caption
+import com.materialkolor.builder.kit.control.BuilderChoiceChips
+import com.materialkolor.builder.kit.control.BuilderChoiceGroup
 import com.materialkolor.builder.kit.control.BuilderSegmented
-import com.materialkolor.builder.kit.control.BuilderSelect
 import com.materialkolor.builder.kit.control.BuilderSwitch
 import com.materialkolor.builder.kit.control.BuilderText
-import com.materialkolor.builder.kit.control.BuilderTextField
+import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
  * The animation lengths offered, in milliseconds. A length stored from elsewhere joins them.
  */
 private val DURATIONS_MS = listOf(150, 300, 500, 1000)
-
-/**
- * What is wrong with the package and theme name drafts right now, for the sheet to hold the export
- * back on. A draft that is fine is in the export already, so only a wrong one is kept.
- */
-@Stable
-internal class DraftProblems {
-    /**
-     * What is wrong with the package draft, or null when nothing is.
-     */
-    var packageName: ExportProblem? by mutableStateOf(null)
-
-    /**
-     * What is wrong with the theme name draft, or null when nothing is.
-     */
-    var themeName: ExportProblem? by mutableStateOf(null)
-
-    /**
-     * Every problem a draft has, the package first.
-     */
-    val all: List<ExportProblem>
-        get() = listOfNotNull(packageName, themeName)
-}
 
 /**
  * Whether an export writes a multiplatform project or an Android one.
@@ -101,18 +81,16 @@ private enum class ProjectKind {
 }
 
 /**
- * The export options, each shown only where the target and the mode use it.
+ * The export options in three labelled sections, each option shown only where the target and the
+ * colors picked use it.
  *
- * Contrast levels only matter to a frozen export, which writes every color out, and color animation
- * only to a dynamic one. The wallpaper colors branch is for an Android only Material 3 theme. The
- * package and the theme name go out as they are typed, so the export is always built from what the
- * fields show. A draft that is not valid stays in its field, says what is wrong under it and lands
- * in [drafts], which holds the export back. The theme name goes to the document, so it
- * travels with the project and its share link, while every other option stays in this browser under
- * the target.
+ * Library picks the target, the same edit the top bar makes, so the app re-skins behind the sheet.
+ * Colors picks live or fixed colors, with color animation under a live export and the contrast
+ * levels under a fixed one, since only a fixed export writes every color out. Project holds the
+ * project's shape, and the wallpaper colors branch for an Android only Material 3 theme. Every
+ * option but the library stays in this browser under the target.
  *
  * @param[capabilities] How each control shows up for the document's target.
- * @param[drafts] Where the package and theme name fields say what is wrong with their drafts.
  */
 @Composable
 internal fun ExportOptionsForm(
@@ -120,257 +98,191 @@ internal fun ExportOptionsForm(
     capabilities: Capabilities,
     dispatcher: Dispatcher<ExportAction>,
     workspace: Dispatcher<WorkspaceAction>,
-    drafts: DraftProblems,
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
-    val prefs = state.prefs
-    // The two names side by side and the switches sharing rows, so the options fit a 900 dp sheet
-    // with the code under them.
-    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-        NamePair(
-            first = { fieldModifier ->
-                // Each target keeps its own package, so a switch starts the field over on the new one's.
-                key(state.target) {
-                    PackageField(
-                        packageName = prefs.packageName,
-                        onChange = { name -> dispatcher.dispatch(ExportAction.SetPackageName(name)) },
-                        onProblem = { problem -> drafts.packageName = problem },
-                        modifier = fieldModifier,
-                    )
-                }
-            },
-            second = { fieldModifier ->
-                ThemeNameField(
-                    state = state,
-                    workspace = workspace,
-                    onProblem = { problem -> drafts.themeName = problem },
-                    modifier = fieldModifier,
-                )
-            },
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
+        OptionsSection(Res.string.export_section_library) { LibraryOptions(state, workspace) }
+        OptionsSection(Res.string.export_section_colors) { ColorOptions(state, capabilities, dispatcher) }
+        val project = capabilities[Control.KmpOrAndroid].shown ||
+            capabilities[Control.VersionCatalog].shown ||
+            state.wallpaperShown
+        if (project) {
+            OptionsSection(Res.string.export_section_project) { ProjectOptions(state, capabilities, dispatcher) }
+        }
+    }
+}
+
+/**
+ * One section of the options under its label.
+ */
+@Composable
+private fun OptionsSection(
+    label: StringResource,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.medium)) {
+        BuilderText(
+            text = stringResource(label),
+            style = BuilderTextStyle.SectionLabel,
+            emphasis = Emphasis.Secondary,
         )
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(spacing.extraLarge),
-            verticalArrangement = Arrangement.spacedBy(spacing.small),
-            itemVerticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (capabilities[Control.KmpOrAndroid].shown) {
-                val names = mapOf(
-                    ProjectKind.Multiplatform to stringResource(Res.string.export_project_multiplatform),
-                    ProjectKind.AndroidOnly to stringResource(Res.string.export_project_android),
-                )
-                BuilderSegmented(
-                    options = ProjectKind.entries,
-                    selected = if (prefs.multiplatform) ProjectKind.Multiplatform else ProjectKind.AndroidOnly,
-                    onSelect = { kind ->
-                        dispatcher.dispatch(ExportAction.SetMultiplatform(kind == ProjectKind.Multiplatform))
-                    },
-                    label = stringResource(Res.string.export_project),
-                    enabled = capabilities[Control.KmpOrAndroid].usable,
-                    optionLabel = { kind -> names.getValue(kind) },
-                )
-            }
-            if (capabilities[Control.VersionCatalog].shown) {
-                BuilderSwitch(
-                    checked = prefs.versionCatalog,
-                    onCheckedChange = { on -> dispatcher.dispatch(ExportAction.SetVersionCatalog(on)) },
-                    label = stringResource(Res.string.export_version_catalog),
-                    enabled = capabilities[Control.VersionCatalog].usable,
-                )
-            }
-        }
-        val animation = prefs.mode == ExportMode.Dynamic && capabilities[Control.ColorAnimation].shown
-        val variants = prefs.mode == ExportMode.Frozen && capabilities[Control.FrozenExport].shown
-        val wallpaper = state.target in MATERIAL3_TARGETS && !prefs.multiplatform
-        if (animation || variants || wallpaper) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(spacing.extraLarge),
-                verticalArrangement = Arrangement.spacedBy(spacing.small),
-                itemVerticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (animation) AnimationOptions(state, capabilities[Control.ColorAnimation].usable, dispatcher)
-                if (variants) {
-                    val names = mapOf(
-                        FrozenVariants.StandardOnly to stringResource(Res.string.export_variants_standard),
-                        FrozenVariants.AllContrasts to stringResource(Res.string.export_variants_all),
-                    )
-                    BuilderSegmented(
-                        options = FrozenVariants.entries,
-                        selected = prefs.frozenVariants,
-                        onSelect = { chosen -> dispatcher.dispatch(ExportAction.SetFrozenVariants(chosen)) },
-                        label = stringResource(Res.string.export_variants),
-                        enabled = capabilities[Control.FrozenExport].usable,
-                        optionLabel = { chosen -> names.getValue(chosen) },
-                    )
-                }
-                if (wallpaper) {
-                    BuilderSwitch(
-                        checked = prefs.androidDynamicColor,
-                        onCheckedChange = { on -> dispatcher.dispatch(ExportAction.SetAndroidDynamicColor(on)) },
-                        label = stringResource(Res.string.export_dynamic_color),
-                    )
-                }
-            }
-        }
-        if (wallpaper) {
-            BuilderText(text = stringResource(Res.string.export_dynamic_color_note), emphasis = Emphasis.Secondary)
-        }
+        content()
     }
 }
 
 /**
- * Two fields side by side, each half the width, or one over the other where the form is narrower
- * than [NAME_PAIR_MIN_WIDTH]. Each slot is handed the modifier that sizes it.
+ * The four libraries as cards two a row, then the Expressive switch on Material 3 or a note on
+ * where the others run.
+ *
+ * The arrows only move the focus and Enter or Space picks, as on the top bar's switcher, since each
+ * pick re-skins the app. The reveal grows from the press that picked, or from the middle of the
+ * cards after a key.
  */
 @Composable
-private fun NamePair(
-    first: @Composable (Modifier) -> Unit,
-    second: @Composable (Modifier) -> Unit,
-) {
-    val spacing = LocalBuilderTokens.current.spacing
-    BoxWithConstraints(Modifier.fillMaxWidth()) {
-        if (maxWidth >= NAME_PAIR_MIN_WIDTH) {
-            Row(horizontalArrangement = Arrangement.spacedBy(spacing.medium)) {
-                first(Modifier.weight(1f))
-                second(Modifier.weight(1f))
-            }
-        } else {
-            Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-                first(Modifier.fillMaxWidth())
-                second(Modifier.fillMaxWidth())
-            }
-        }
-    }
-}
-
-/**
- * The narrowest the form gets while the package and the theme name still share a row.
- */
-private val NAME_PAIR_MIN_WIDTH = 480.dp
-
-@Composable
-private fun PackageField(
-    packageName: String,
-    onChange: (String) -> Unit,
-    onProblem: (ExportProblem?) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val invalid = stringResource(Res.string.export_package_invalid)
-    LiveField(
-        value = packageName,
-        onChange = onChange,
-        onProblem = onProblem,
-        label = stringResource(Res.string.export_package),
-        problemOf = { draft -> if (validatePackageName(draft).isEmpty()) null else ExportProblem.PackageName(draft) },
-        errorOf = { invalid },
-        supportingText = stringResource(Res.string.export_package_hint),
-        modifier = modifier,
-    )
-}
-
-/**
- * The theme name, checked against Kotlin and against the names the target's export already uses.
- */
-@Composable
-private fun ThemeNameField(
+private fun LibraryOptions(
     state: ExportModel.State,
     workspace: Dispatcher<WorkspaceAction>,
-    onProblem: (ExportProblem?) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
-    val invalid = stringResource(Res.string.export_theme_name_invalid)
-    val taken = stringResource(Res.string.export_theme_name_taken)
-    val targeted = state.document.forTarget(state.target)
-    LiveField(
-        value = state.document.themeName,
-        onChange = { name ->
-            workspace.dispatch(WorkspaceAction.Edit(DocumentChange.SetThemeName(name), EditPhase.Discrete))
-        },
-        onProblem = onProblem,
-        label = stringResource(Res.string.export_theme_name),
-        problemOf = { draft ->
-            when {
-                validateThemeName(draft).isNotEmpty() -> ExportProblem.ThemeName(draft)
-                targeted.takesReservedName(draft) -> ExportProblem.NameTaken(draft)
-                else -> null
+    val selected = LibraryChoice.of(state.document)
+    val origin = remember { RevealOrigin() }
+    val pick = { choice: LibraryChoice ->
+        if (choice != selected) workspace.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin.take()))
+    }
+    BuilderChoiceGroup(
+        options = LibraryChoice.entries,
+        selected = selected,
+        onSelect = pick,
+        label = stringResource(Res.string.export_section_library),
+        modifier = Modifier.trackRevealOrigin(origin),
+        selectOnFocus = false,
+        columns = 2,
+    ) { choice, isSelected, optionModifier ->
+        OptionCard(
+            title = libraryName(choice),
+            caption = stringResource(libraryCaption(choice)),
+            selected = isSelected,
+            onClick = { pick(choice) },
+            modifier = optionModifier,
+            cellGap = true,
+        )
+    }
+    when (selected) {
+        LibraryChoice.M3 -> {
+            Column {
+                ExpressiveSwitch(
+                    checked = state.document.expressive,
+                    onCheckedChange = { on, from ->
+                        workspace.dispatch(WorkspaceAction.EditWithReveal(expressiveChange(on), from))
+                    },
+                )
+                BuilderText(text = stringResource(Res.string.export_expressive_caption), emphasis = Emphasis.Secondary)
             }
-        },
-        errorOf = { problem -> if (problem is ExportProblem.NameTaken) taken else invalid },
-        modifier = modifier,
-    )
+            if (state.expressiveOn2021) {
+                Notice(text = stringResource(Res.string.export_expressive_2021), icon = IconId.Warning)
+            }
+        }
+        else -> {
+            BuilderText(text = stringResource(libraryNote(selected, state.prefs.mode)), emphasis = Emphasis.Secondary)
+        }
+    }
 }
 
 /**
- * A text field that hands over every valid draft as it is typed. A draft [problemOf] finds fault
- * with stays in the field and goes to [onProblem], and Esc puts the committed text back and clears
- * it. Theme name edits that close together fold into one undo step, so typing is not an undo step
- * per key.
- *
- * While drafts are going out the field keeps the text it started from as its committed value, so
- * the drafts coming back as [value] never move the cursor or undo a newer keystroke. Enter settles
- * it on the text typed. Only once the field is left on a valid draft does it follow [value] again,
- * since an echo can come back late, after Esc or after typing back to the start, and a stale
- * [value] that happens to match the field says nothing about the echoes still on their way.
- *
- * A problem only lasts as long as the draft behind it. A new [value] that arrives while nothing is
- * going out replaces the draft, and the field leaving composition takes its draft along, so both
- * clear it. Otherwise a collapsed Options would hold the export back under a notice the field no
- * longer shows.
+ * What a library card says under the library's name.
+ */
+private fun libraryCaption(choice: LibraryChoice): StringResource =
+    when (choice) {
+        LibraryChoice.M3 -> Res.string.export_library_m3_caption
+        LibraryChoice.Unstyled -> Res.string.export_library_unstyled_caption
+        LibraryChoice.Fluent -> Res.string.export_library_fluent_caption
+        LibraryChoice.Custom -> Res.string.export_library_custom_caption
+    }
+
+/**
+ * The note under the cards for a library other than Material 3, on where it runs and what it needs.
+ */
+private fun libraryNote(
+    choice: LibraryChoice,
+    mode: ExportMode,
+): StringResource =
+    when {
+        choice == LibraryChoice.Unstyled -> Res.string.export_library_unstyled_note
+        choice == LibraryChoice.Fluent -> Res.string.export_library_fluent_note
+        mode == ExportMode.Frozen -> Res.string.export_library_custom_frozen_note
+        else -> Res.string.export_library_custom_note
+    }
+
+/**
+ * What a color card calls [mode].
+ */
+private fun modeTitle(mode: ExportMode): StringResource =
+    when (mode) {
+        ExportMode.Dynamic -> Res.string.export_mode_dynamic
+        ExportMode.Frozen -> Res.string.export_mode_frozen
+    }
+
+/**
+ * The line under a color card's title.
+ */
+private fun modeNote(mode: ExportMode): StringResource =
+    when (mode) {
+        ExportMode.Dynamic -> Res.string.export_mode_dynamic_note
+        ExportMode.Frozen -> Res.string.export_mode_frozen_note
+    }
+
+/**
+ * What the folded options' summary calls [mode].
+ */
+private fun modeShort(mode: ExportMode): StringResource =
+    when (mode) {
+        ExportMode.Dynamic -> Res.string.export_mode_dynamic_short
+        ExportMode.Frozen -> Res.string.export_mode_frozen_short
+    }
+
+/**
+ * Live or fixed colors as two cards, then what goes with the one picked.
  */
 @Composable
-private fun LiveField(
-    value: String,
-    onChange: (String) -> Unit,
-    onProblem: (ExportProblem?) -> Unit,
-    label: String,
-    problemOf: (String) -> ExportProblem?,
-    errorOf: (ExportProblem) -> String,
-    supportingText: String? = null,
-    modifier: Modifier = Modifier,
+private fun ColorOptions(
+    state: ExportModel.State,
+    capabilities: Capabilities,
+    dispatcher: Dispatcher<ExportAction>,
 ) {
-    // The committed text the field keeps while its drafts are out, or null while it follows value.
-    var held by remember { mutableStateOf<String?>(null) }
-    var focused by remember { mutableStateOf(false) }
-    var draftInvalid by remember { mutableStateOf(false) }
-    var lastValue by remember { mutableStateOf(value) }
-    val currentOnProblem by rememberUpdatedState(onProblem)
-    DisposableEffect(Unit) {
-        onDispose { currentOnProblem(null) }
+    val prefs = state.prefs
+    BuilderChoiceGroup(
+        options = ExportMode.entries,
+        selected = prefs.mode,
+        onSelect = { mode -> dispatcher.dispatch(ExportAction.SetMode(mode)) },
+        label = stringResource(Res.string.export_section_colors),
+        columns = 1,
+    ) { mode, isSelected, optionModifier ->
+        OptionCard(
+            title = stringResource(modeTitle(mode)),
+            caption = stringResource(modeNote(mode)),
+            selected = isSelected,
+            onClick = { dispatcher.dispatch(ExportAction.SetMode(mode)) },
+            modifier = optionModifier,
+        )
     }
-    SideEffect {
-        // Nothing is going out, so this value is not a draft coming back and the field shows it now.
-        if (held == null && value != lastValue) onProblem(null)
-        lastValue = value
-        // Left on a valid draft, the field has sent everything it holds, so it follows value again.
-        if (held != null && !focused && !draftInvalid) held = null
+    val animation = capabilities[Control.ColorAnimation]
+    val variants = capabilities[Control.FrozenExport]
+    if (prefs.mode == ExportMode.Dynamic && animation.shown) AnimationOptions(state, animation.usable, dispatcher)
+    if (prefs.mode == ExportMode.Frozen && variants.shown) {
+        val names = mapOf(
+            FrozenVariants.StandardOnly to stringResource(Res.string.export_variants_standard),
+            FrozenVariants.AllContrasts to stringResource(Res.string.export_variants_all),
+        )
+        BuilderSegmented(
+            options = FrozenVariants.entries,
+            selected = prefs.frozenVariants,
+            onSelect = { chosen -> dispatcher.dispatch(ExportAction.SetFrozenVariants(chosen)) },
+            label = stringResource(Res.string.export_variants),
+            enabled = variants.usable,
+            optionLabel = { chosen -> names.getValue(chosen) },
+        )
     }
-    BuilderTextField(
-        value = held ?: value,
-        // The drafts went out as they were typed, so a commit only has to settle on the last one.
-        onCommit = { text ->
-            if (held == null) onChange(text) else held = text
-        },
-        label = label,
-        modifier = modifier.fillMaxWidth().onFocusChanged { state -> focused = state.hasFocus },
-        error = { draft -> problemOf(draft)?.let(errorOf) },
-        supportingText = supportingText,
-        onDraftChange = { draft ->
-            val problem = problemOf(draft)
-            onProblem(problem)
-            draftInvalid = problem != null
-            if (problem == null) {
-                held = held ?: value
-                onChange(draft)
-            }
-        },
-    )
 }
-
-/**
- * Whether the export of this document would clash with a name it already uses, were the theme called [name].
- */
-private fun ThemeDocument.takesReservedName(name: String): Boolean =
-    ReservedNames.clashes(copy(themeName = name)).any { clash -> clash is ReservedNameClash.ThemeName }
 
 /**
  * Color animation, and how long it runs once it is on.
@@ -392,15 +304,87 @@ private fun AnimationOptions(
 
     val durations = (DURATIONS_MS + prefs.animationDurationMs).distinct().sorted()
     val names = durations.associateWith { ms -> stringResource(Res.string.export_duration_ms, ms) }
-    BuilderSelect(
-        label = stringResource(Res.string.export_duration),
+    BuilderChoiceChips(
         options = durations,
         selected = prefs.animationDurationMs,
         onSelect = { ms -> dispatcher.dispatch(ExportAction.SetAnimationDuration(ms)) },
+        label = stringResource(Res.string.export_duration),
         enabled = enabled,
         optionLabel = { ms -> names.getValue(ms) },
     )
 }
+
+/**
+ * The project's shape, the version catalog and, for an Android only Material 3 theme, the
+ * wallpaper colors.
+ */
+@Composable
+private fun ProjectOptions(
+    state: ExportModel.State,
+    capabilities: Capabilities,
+    dispatcher: Dispatcher<ExportAction>,
+) {
+    val prefs = state.prefs
+    val kind = capabilities[Control.KmpOrAndroid]
+    if (kind.shown) {
+        val names = mapOf(
+            ProjectKind.Multiplatform to stringResource(Res.string.export_project_multiplatform),
+            ProjectKind.AndroidOnly to stringResource(Res.string.export_project_android),
+        )
+        BuilderSegmented(
+            options = ProjectKind.entries,
+            selected = if (prefs.multiplatform) ProjectKind.Multiplatform else ProjectKind.AndroidOnly,
+            onSelect = { chosen ->
+                dispatcher.dispatch(ExportAction.SetMultiplatform(chosen == ProjectKind.Multiplatform))
+            },
+            label = stringResource(Res.string.export_project),
+            enabled = kind.usable,
+            optionLabel = { chosen -> names.getValue(chosen) },
+        )
+    }
+    val catalog = capabilities[Control.VersionCatalog]
+    if (catalog.shown) {
+        Column {
+            BuilderSwitch(
+                checked = prefs.versionCatalog,
+                onCheckedChange = { on -> dispatcher.dispatch(ExportAction.SetVersionCatalog(on)) },
+                label = stringResource(Res.string.export_version_catalog),
+                enabled = catalog.usable,
+            )
+            BuilderText(text = stringResource(Res.string.export_version_catalog_caption), emphasis = Emphasis.Secondary)
+        }
+    }
+    if (state.wallpaperShown) {
+        Column {
+            BuilderSwitch(
+                checked = prefs.androidDynamicColor,
+                onCheckedChange = { on -> dispatcher.dispatch(ExportAction.SetAndroidDynamicColor(on)) },
+                label = stringResource(Res.string.export_dynamic_color),
+            )
+            BuilderText(text = stringResource(Res.string.export_dynamic_color_note), emphasis = Emphasis.Secondary)
+        }
+    }
+}
+
+/**
+ * What the folded options say is picked, the library, the colors and the project, "M3, Live,
+ * Multiplatform".
+ */
+@Composable
+internal fun optionsSummary(state: ExportModel.State): String {
+    val library = libraryName(state.document.library, state.document.expressive)
+    val mode = stringResource(modeShort(state.prefs.mode))
+    val project = stringResource(
+        if (state.prefs.multiplatform) Res.string.export_project_multiplatform else Res.string.export_project_android,
+    )
+    return stringResource(Res.string.export_options_summary, library, mode, project)
+}
+
+/**
+ * Whether the wallpaper colors branch applies, which it does to an Android only Material 3 theme.
+ */
+private val ExportModel.State.wallpaperShown: Boolean
+    get() = target in MATERIAL3_TARGETS && !prefs.multiplatform
 
 /**
  * The targets a Material 3 theme is written for, the only ones with the wallpaper colors branch.

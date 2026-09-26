@@ -72,11 +72,14 @@ public data class BuilderTokens(
  * be a visible break rather than a quiet downgrade.
  *
  * @property[plain] The colour used for [TokenKind.Plain].
+ * @property[muted] The quiet colour for what sits on the code ground beside the code, such as the
+ * line numbers.
  */
 @Immutable
 public class CodePalette(
     colors: Map<TokenKind, Color>,
     public val plain: Color,
+    public val muted: Color,
 ) {
     private val colors: Map<TokenKind, Color> = colors.toMap()
 
@@ -91,12 +94,12 @@ public class CodePalette(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is CodePalette) return false
-        return plain == other.plain && colors == other.colors
+        return plain == other.plain && muted == other.muted && colors == other.colors
     }
 
-    override fun hashCode(): Int = 31 * plain.hashCode() + colors.hashCode()
+    override fun hashCode(): Int = 31 * (31 * plain.hashCode() + muted.hashCode()) + colors.hashCode()
 
-    override fun toString(): String = "CodePalette(plain=$plain, colors=$colors)"
+    override fun toString(): String = "CodePalette(plain=$plain, muted=$muted, colors=$colors)"
 }
 
 /**

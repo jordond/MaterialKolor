@@ -50,6 +50,11 @@ import kotlin.test.Test
 
 private const val WIDTH = 1280
 private const val HEIGHT = 800
+
+/**
+ * A width under 720 dp, where the sheet folds its options.
+ */
+private const val NARROW_WIDTH = 600
 private const val FILE_TEXT = "val theme = 1"
 private const val ALL_TEXT = "every file joined"
 private val ZIP = OutgoingFile(name = "AppTheme.zip", bytes = byteArrayOf(1, 2, 3), mime = ZIP_MIME)
@@ -121,10 +126,15 @@ class ExportSheetTest {
             exportButtons().forEach { button -> button.assertIsEnabled() }
         }
 
+    /**
+     * Only the narrow sheet folds the fields into Options, which starts closed.
+     */
     @Test
     fun invalidPackageDraft_collapsingOptions_letsTheExportThrough() =
-        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+        runDesktopComposeUiTest(width = NARROW_WIDTH, height = HEIGHT) {
             showSheet(FakeFileSaver(), coarsePointer = false)
+            onNodeWithText("Options").performClick()
+            waitForIdle()
             onNodeWithText("Package name").performTextReplacement("Not A Package")
             waitForIdle()
             exportButtons().forEach { button -> button.assertIsNotEnabled() }
@@ -330,7 +340,7 @@ class ExportSheetTest {
         listOf("Copy file", "Copy all", "Download zip").map { label -> onNodeWithText(label) }
 
     /**
-     * Shows the sheet on the default document. A target switch from its header moves the document.
+     * Shows the sheet on the default document. A pick among its library cards moves the document.
      * With [echoes] each package sent waits there to come back as the saved package until a test
      * runs it, and without it nothing comes back.
      */

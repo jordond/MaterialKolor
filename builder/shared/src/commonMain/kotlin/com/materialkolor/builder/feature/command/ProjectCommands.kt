@@ -134,7 +134,7 @@ internal fun exportCommands(
             id = "export.mode.${mode.name}",
             category = CommandCategory.Export,
             label = stringResource(Res.string.command_choice, modeLabel, name),
-            site = ControlSite.InPanel(Panel.Export, name),
+            site = ControlSite.InPanel(Panel.Export, name, opener = options), // b-538 folded into Options on a phone
             control = if (mode == ExportMode.Frozen) caps[Control.FrozenExport] else null,
             selected = prefs.mode == mode,
         ) { export.handle(ExportAction.SetMode(mode)) }

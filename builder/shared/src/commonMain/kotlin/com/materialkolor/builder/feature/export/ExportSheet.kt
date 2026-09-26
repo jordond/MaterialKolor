@@ -3,12 +3,12 @@ package com.materialkolor.builder.feature.export
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -20,19 +20,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.core.platform.Clipboard
 import com.materialkolor.builder.core.platform.FileSaver
 import com.materialkolor.builder.domain.capability.Capabilities
-import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.feature.command.Shortcut
 import com.materialkolor.builder.feature.command.rememberPanelShortcuts
-import com.materialkolor.builder.feature.topbar.LibrarySwitcher
-import com.materialkolor.builder.feature.topbar.expressiveChange
 import com.materialkolor.builder.feature.workspace.ManualCopyDialog
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
@@ -40,40 +36,25 @@ import com.materialkolor.builder.generated.resources.export_blocked_extra_colors
 import com.materialkolor.builder.generated.resources.export_blocked_package
 import com.materialkolor.builder.generated.resources.export_blocked_taken
 import com.materialkolor.builder.generated.resources.export_blocked_theme_name
-import com.materialkolor.builder.generated.resources.export_checked
-import com.materialkolor.builder.generated.resources.export_checked_any
 import com.materialkolor.builder.generated.resources.export_copied
 import com.materialkolor.builder.generated.resources.export_copy_all
 import com.materialkolor.builder.generated.resources.export_copy_file
 import com.materialkolor.builder.generated.resources.export_download
-import com.materialkolor.builder.generated.resources.export_expressive_2021
-import com.materialkolor.builder.generated.resources.export_mode
-import com.materialkolor.builder.generated.resources.export_mode_dynamic
-import com.materialkolor.builder.generated.resources.export_mode_frozen
 import com.materialkolor.builder.generated.resources.export_options
-import com.materialkolor.builder.generated.resources.export_options_summary
 import com.materialkolor.builder.generated.resources.export_save_failed
 import com.materialkolor.builder.generated.resources.export_share
 import com.materialkolor.builder.generated.resources.export_share_failed
-import com.materialkolor.builder.generated.resources.export_subtitle
-import com.materialkolor.builder.generated.resources.export_subtitle_unnamed
 import com.materialkolor.builder.generated.resources.export_title
 import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.control.BuilderDisclosure
-import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderScrollArea
-import com.materialkolor.builder.kit.control.BuilderSegmented
 import com.materialkolor.builder.kit.control.BuilderSheet
-import com.materialkolor.builder.kit.control.BuilderTabs
-import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.SheetPresentation
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
-import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
-import com.materialkolor.builder.kit.widget.CodeView
 import dev.stateholder.dispatcher.Dispatcher
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.getString
@@ -93,12 +74,15 @@ private enum class CopyKind {
 }
 
 /**
- * The export sheet. The target, the mode and the options on top, the files under them, and
- * Copy file, Copy all and Download zip at the bottom.
+ * The export sheet, over the whole screen at every size. The package and the theme name on top,
+ * the options beside the files, and Copy all and Download zip at the bottom.
  *
- * It is an end panel at 60% of the window from 840 dp up, which takes in Expanded, and the full
- * screen below that, as [SheetPresentation.of] decides. Switching the target is the same edit the
- * top bar makes, so the app re-skins behind the sheet.
+ * The body picks its layout from its own width, as [BodyLayout] has it. Wide, the options sit in a
+ * column beside the workbench, the tree of files beside the code. Medium, the files are tabs over
+ * the code instead. Narrow, everything is one scrolling column, with the names and the options
+ * folded into a disclosure over the file tabs and the code. Copy file sits at the end of the path
+ * over the code, and in the footer on the narrow layout, where the path bar has no room for it.
+ * Switching the library is the same edit the top bar makes, so the app re-skins behind the sheet.
  *
  * Every copy, download and share starts inside the click, with the platform call as its first
  * suspension, and the text and the zip are ready before the click. A copy that worked
@@ -169,32 +153,40 @@ internal fun ExportSheet(
         }
     }
 
+    val copyFile: @Composable (picked: GeneratedFile?, tonal: Boolean) -> Unit = { picked, tonal ->
+        CopyButton(
+            copied = sheet.copied == CopyKind.File,
+            label = stringResource(Res.string.export_copy_file),
+            enabled = picked != null,
+            tonal = tonal,
+            onClick = { if (picked != null) copy(CopyKind.File, picked.text) },
+        )
+    }
+
     BuilderSheet(
         visible = visible,
         onDismissRequest = { workspace.dispatch(WorkspaceAction.ClosePanel) },
         title = stringResource(Res.string.export_title),
-        presentation = SheetPresentation.of(LocalLayout.current),
+        presentation = SheetPresentation.FullScreen,
         modifier = modifier.then(keys.modifier),
         returnFocusTo = returnFocusTo,
         subtitle = exportSubtitle(state),
         footer = {
             val export = sheetExport(state, outcomeOf, sheet.drafts)
-            val picked = export.picked
             val ready = export.ready
-            ExportFooter(materialKolorVersion) {
-                CopyButton(
-                    copied = sheet.copied == CopyKind.File,
-                    label = stringResource(Res.string.export_copy_file),
-                    enabled = picked != null,
-                    onClick = { if (picked != null) copy(CopyKind.File, picked.text) },
-                )
-                CopyButton(
-                    copied = sheet.copied == CopyKind.All,
-                    label = stringResource(Res.string.export_copy_all),
-                    enabled = ready != null,
-                    onClick = { if (ready != null) copy(CopyKind.All, ready.allText) },
-                )
-                ZipButton(ready, files, dispatcher, workspace)
+            // The footer spans the body's width, so it reads the body's layout from its own.
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val narrow = BodyLayout.of(maxWidth) == BodyLayout.Narrow
+                ExportFooter(materialKolorVersion, ready) {
+                    if (narrow) copyFile(export.picked, false)
+                    CopyButton(
+                        copied = sheet.copied == CopyKind.All,
+                        label = stringResource(Res.string.export_copy_all),
+                        enabled = ready != null,
+                        onClick = { if (ready != null) copy(CopyKind.All, ready.allText) },
+                    )
+                    ZipButton(ready, files, dispatcher, workspace)
+                }
             }
         },
     ) {
@@ -219,22 +211,26 @@ internal fun ExportSheet(
                 }
             }
         }
-        // The whole body scrolls as one, and the code takes the height the rest leaves, so nothing is
-        // cut off mid row where the sheet runs short. Its fields and buttons take focus themselves, so
-        // the area is no stop of its own, and its scrollbar sits in the sheet's padding.
+        val parts = BodyParts(
+            names = { ExportNames(state, dispatcher, workspace, sheet.drafts) },
+            notices = {
+                export.problems.forEach { problem ->
+                    Notice(text = problemText(problem), icon = IconId.Error, emphasis = Emphasis.Danger)
+                }
+            },
+            options = { optionsModifier ->
+                ExportOptionsForm(state, capabilities, dispatcher, workspace, optionsModifier)
+            },
+            onSelect = { path -> dispatcher.dispatch(ExportAction.SelectFile(path)) },
+        )
         BoxWithConstraints(Modifier.fillMaxSize()) {
-            val viewport = constraints.maxHeight
-            BuilderScrollArea(Modifier.fillMaxSize(), tabStop = false, scrollbarInGutter = true) {
-                FillLastColumn(viewport = viewport, fillLast = picked != null) {
-                    ExportHeader(state, capabilities, dispatcher, workspace, sheet.drafts)
-                    export.problems.forEach { problem ->
-                        Notice(text = problemText(problem), icon = IconId.Error, emphasis = Emphasis.Danger)
-                    }
-                    if (ready != null) {
-                        ExportFiles(ready, state.selectedPath, dispatcher, onCopy = { text ->
-                            copy(CopyKind.File, text)
-                        })
-                    }
+            val layout = BodyLayout.of(maxWidth)
+            val optionsWidth = layout.optionsWidth
+            if (optionsWidth == null) {
+                NarrowBody(export, parts, optionsSummary(state), viewport = constraints.maxHeight)
+            } else {
+                SplitBody(export, parts, tree = layout == BodyLayout.Wide, optionsWidth) {
+                    copyFile(picked, true)
                 }
             }
         }
@@ -245,6 +241,111 @@ internal fun ExportSheet(
             onDismissRequest = { sheet.manualOpen = false },
             saveLabel = stringResource(zipLabel),
         )
+    }
+}
+
+/**
+ * The parts every layout of the body places, each in its own spot.
+ *
+ * @property[names] The package and theme name strip.
+ * @property[notices] One notice per problem holding the export back.
+ * @property[options] The options, given the modifier that places them.
+ * @property[onSelect] Called with the path of the file picked.
+ */
+private class BodyParts(
+    val names: @Composable () -> Unit,
+    val notices: @Composable () -> Unit,
+    val options: @Composable (Modifier) -> Unit,
+    val onSelect: (String) -> Unit,
+)
+
+/**
+ * The wide and medium body. The names and the notices across the top, then the options in a column
+ * that scrolls on its own beside the workbench, which takes the rest of the width and height. With
+ * [tree] the files are a tree on the workbench, and without it tabs over it.
+ *
+ * @param[copyFile] The Copy file button for the path bar.
+ */
+@Composable
+private fun SplitBody(
+    export: SheetExport,
+    parts: BodyParts,
+    tree: Boolean,
+    optionsWidth: Dp,
+    copyFile: @Composable () -> Unit,
+) {
+    val spacing = LocalBuilderTokens.current.spacing
+    val ready = export.ready
+    val picked = export.picked
+    // The body keeps a focus ring's room along its edges, where the sheet would clip it.
+    Column(
+        modifier = Modifier.fillMaxSize().padding(spacing.extraSmall),
+        verticalArrangement = Arrangement.spacedBy(spacing.large),
+    ) {
+        parts.names()
+        parts.notices()
+        Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
+            // Its fields and buttons take focus themselves, so the column is no stop of its own.
+            BuilderScrollArea(Modifier.width(optionsWidth).fillMaxHeight(), tabStop = false) {
+                parts.options(
+                    Modifier.padding(start = spacing.extraSmall, end = spacing.large, top = spacing.extraSmall),
+                )
+            }
+            Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+                if (!tree && ready != null && picked != null) ExportFileTabs(ready, picked, parts.onSelect)
+                ExportWorkbench(
+                    ready = ready,
+                    picked = picked,
+                    tree = tree,
+                    onSelect = parts.onSelect,
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    copyFile = copyFile,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The narrow body, one column that scrolls as one. The notices, then the names and the options
+ * folded into a disclosure, closed on open, whose summary says what is picked. Then the file tabs
+ * and the code, the code taking the height the rest leaves, so nothing is cut off mid row where the
+ * sheet runs short. Its fields and buttons take focus themselves, so the area is no stop of its
+ * own, and its scrollbar sits in the sheet's padding.
+ *
+ * @param[summary] What the closed disclosure says is picked, "M3, Live, Multiplatform".
+ * @param[viewport] The height the scroll shows, in pixels.
+ */
+@Composable
+private fun NarrowBody(
+    export: SheetExport,
+    parts: BodyParts,
+    summary: String,
+    viewport: Int,
+) {
+    val spacing = LocalBuilderTokens.current.spacing
+    val ready = export.ready
+    val picked = export.picked
+    var optionsOpen by rememberSaveable { mutableStateOf(false) }
+    BuilderScrollArea(Modifier.fillMaxSize(), tabStop = false, scrollbarInGutter = true) {
+        FillLastColumn(viewport = viewport, fillLast = picked != null) {
+            parts.notices()
+            BuilderDisclosure(
+                expanded = optionsOpen,
+                onExpandedChange = { open -> optionsOpen = open },
+                title = stringResource(Res.string.export_options),
+                summary = summary,
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
+                    parts.names()
+                    parts.options(Modifier)
+                }
+            }
+            if (ready != null && picked != null) {
+                ExportFileTabs(ready, picked, parts.onSelect)
+                ExportWorkbench(ready = ready, picked = picked, tree = false, onSelect = parts.onSelect)
+            }
+        }
     }
 }
 
@@ -287,87 +388,9 @@ private class SheetCopies {
 }
 
 /**
- * The target, the mode, the Expressive warning and the options.
- */
-@Composable
-private fun ExportHeader(
-    state: ExportModel.State,
-    capabilities: Capabilities,
-    dispatcher: Dispatcher<ExportAction>,
-    workspace: Dispatcher<WorkspaceAction>,
-    drafts: DraftProblems,
-) {
-    val spacing = LocalBuilderTokens.current.spacing
-    val modes = mapOf(
-        ExportMode.Dynamic to stringResource(Res.string.export_mode_dynamic),
-        ExportMode.Frozen to stringResource(Res.string.export_mode_frozen),
-    )
-    val wide = LocalLayout.current.windowClass == WindowClass.Expanded
-    var optionsOpen by rememberSaveable { mutableStateOf(wide) }
-    Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(spacing.medium),
-            verticalArrangement = Arrangement.spacedBy(spacing.small),
-        ) {
-            LibrarySwitcher(
-                document = state.document,
-                onSwitch = { choice, origin ->
-                    workspace.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin))
-                },
-                onExpressiveChange = { on, origin ->
-                    workspace.dispatch(WorkspaceAction.EditWithReveal(expressiveChange(on), origin))
-                },
-            )
-            BuilderSegmented(
-                options = ExportMode.entries,
-                selected = state.prefs.mode,
-                onSelect = { mode -> dispatcher.dispatch(ExportAction.SetMode(mode)) },
-                label = stringResource(Res.string.export_mode),
-                optionLabel = { mode -> modes.getValue(mode) },
-            )
-        }
-        if (state.expressiveOn2021) {
-            Notice(text = stringResource(Res.string.export_expressive_2021), icon = IconId.Warning)
-        }
-        BuilderDisclosure(
-            expanded = optionsOpen,
-            onExpandedChange = { open -> optionsOpen = open },
-            title = stringResource(Res.string.export_options),
-            summary = stringResource(Res.string.export_options_summary, state.prefs.packageName),
-        ) {
-            ExportOptionsForm(state, capabilities, dispatcher, workspace, drafts)
-        }
-    }
-}
-
-/**
- * The file tabs and the code of the file picked, the code last so it can take the height left.
- */
-@Composable
-private fun ExportFiles(
-    export: ExportOutcome.Ready,
-    selectedPath: String?,
-    dispatcher: Dispatcher<ExportAction>,
-    onCopy: (String) -> Unit,
-) {
-    val file = export.fileAt(selectedPath) ?: return
-    BuilderTabs(
-        tabs = export.files.map { each -> each.path },
-        selected = file.path,
-        onSelect = { path -> dispatcher.dispatch(ExportAction.SelectFile(path)) },
-        label = { path -> path.fileName() },
-        modifier = Modifier.fillMaxWidth(),
-    )
-    CodeView(
-        lines = file.lines,
-        onCopy = { onCopy(file.text) },
-        label = file.path.fileName(),
-        modifier = Modifier.fillMaxWidth(),
-    )
-}
-
-/**
  * A copy button that shows Copied, with a check, while [copied].
+ *
+ * @param[tonal] Whether it carries its own fill, as it must on the code ground.
  */
 @Composable
 private fun CopyButton(
@@ -375,12 +398,14 @@ private fun CopyButton(
     label: String,
     enabled: Boolean,
     onClick: () -> Unit,
+    tonal: Boolean = false,
 ) {
     BuilderButton(
         onClick = onClick,
         label = if (copied) stringResource(Res.string.export_copied) else label,
         icon = if (copied) IconId.Check else IconId.Copy,
         enabled = enabled,
+        tonal = tonal,
     )
 }
 
@@ -430,24 +455,6 @@ private fun zipShares(
     return coarse && shareable
 }
 
-/**
- * One line that needs attention, with its icon.
- */
-@Composable
-private fun Notice(
-    text: String,
-    icon: IconId,
-    emphasis: Emphasis = Emphasis.Secondary,
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.small),
-        verticalAlignment = Alignment.Top,
-    ) {
-        BuilderIcon(id = icon, contentDescription = null, emphasis = emphasis)
-        BuilderText(text = text, emphasis = emphasis)
-    }
-}
-
 @Composable
 private fun problemText(problem: ExportProblem): String =
     when (problem) {
@@ -462,8 +469,3 @@ private fun problemText(problem: ExportProblem): String =
  */
 private fun ExportOutcome.Ready.fileAt(path: String?): GeneratedFile? =
     files.firstOrNull { file -> file.path == path } ?: files.firstOrNull()
-
-/**
- * The last part of a path, the name a tab shows.
- */
-private fun String.fileName(): String = substringAfterLast('/')

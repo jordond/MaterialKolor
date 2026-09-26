@@ -209,4 +209,5 @@ internal fun builderCodePalette(
             TokenKind.TomlKey to secondary,
         ),
         plain = plain,
+        muted = muted,
     )

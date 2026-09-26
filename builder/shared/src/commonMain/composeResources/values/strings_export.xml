@@ -7,16 +7,44 @@
     <!-- The same line for a project with no name. The arguments are the theme's name and the seed. -->
     <string name="export_subtitle_unnamed">%1$s from %2$s</string>
 
-    <!-- The Dynamic or Frozen choice in the sheet's header. -->
+    <!-- The Dynamic or Frozen choice, as the command palette names it. -->
     <string name="export_mode">Mode</string>
-    <string name="export_mode_dynamic">Dynamic</string>
-    <string name="export_mode_frozen">Frozen hex</string>
+    <!-- The two color cards, each a title and a line under it. -->
+    <string name="export_mode_dynamic">Live from the seed</string>
+    <string name="export_mode_dynamic_note">MaterialKolor builds the scheme from the seed when the app runs.</string>
+    <string name="export_mode_frozen">Fixed hex values</string>
+    <string name="export_mode_frozen_note">Every color is written out, so the app needs no MaterialKolor.</string>
+    <!-- The short names of the two, for the options summary on a phone. -->
+    <string name="export_mode_dynamic_short">Live</string>
+    <string name="export_mode_frozen_short">Fixed</string>
 
-    <!-- The disclosure that holds the export options. The argument is the package name. -->
+    <!-- The disclosure that holds the export options on a phone. The arguments are the library, the colors and the project, "M3, Live, Multiplatform". -->
     <string name="export_options">Options</string>
-    <string name="export_options_summary">Package %1$s</string>
+    <string name="export_options_summary">%1$s, %2$s, %3$s</string>
+
+    <!-- The labels over the three groups of options. -->
+    <string name="export_section_library">Library</string>
+    <string name="export_section_colors">Colors</string>
+    <string name="export_section_project">Project</string>
+
+    <!-- The line under each library's name. -->
+    <string name="export_library_m3_caption">Compose Material 3</string>
+    <string name="export_library_unstyled_caption">Compose Unstyled</string>
+    <string name="export_library_fluent_caption">Compose Fluent</string>
+    <string name="export_library_custom_caption">Your own color slots</string>
+    <string name="export_expressive_caption">Calls DynamicMaterialExpressiveTheme</string>
+    <!-- The note under the libraries on the platforms each one runs on. -->
+    <string name="export_library_unstyled_note">Compose Unstyled needs JVM 17 and Android minSdk 23, and has no macOS native target.</string>
+    <string name="export_library_fluent_note">Compose Fluent needs JVM 17 and has no macOS native target.</string>
+    <string name="export_library_custom_note">Plain Compose that only needs MaterialKolor core.</string>
+    <string name="export_library_custom_frozen_note">Plain Compose that needs nothing extra.</string>
+
+    <!-- What the file tree is called, read out for its files. -->
+    <string name="export_tree">Files in the zip</string>
+
+    <!-- The note under the package and theme name fields. -->
+    <string name="export_names_note">The theme name travels with the share link. The package stays in this browser.</string>
     <string name="export_package">Package name</string>
-    <string name="export_package_hint">Only kept in this browser, never in the share link</string>
     <string name="export_package_invalid">Use lowercase words separated by dots, like com.example.theme</string>
     <string name="export_theme_name">Theme name</string>
     <string name="export_theme_name_invalid">Use a Kotlin name that is not a keyword, like AppTheme</string>
@@ -25,6 +53,7 @@
     <string name="export_project_multiplatform">Multiplatform</string>
     <string name="export_project_android">Android only</string>
     <string name="export_version_catalog">Use a version catalog</string>
+    <string name="export_version_catalog_caption">Adds gradle/libs.versions.toml</string>
     <string name="export_animate">Animate color changes</string>
     <string name="export_duration">Animation length</string>
     <!-- One animation length in the list. The argument is a number of milliseconds. -->
@@ -55,4 +84,15 @@
     <string name="export_checked">Every export is compile-checked against MaterialKolor %1$s</string>
     <string name="export_checked_any">Every export is compile-checked against MaterialKolor</string>
     <string name="export_share_failed">Could not share the zip</string>
+    <!-- The count beside the note. The arguments are how many files and how many lines the export has. -->
+    <plurals name="export_files">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d files</item>
+    </plurals>
+    <plurals name="export_lines">
+        <item quantity="one">%1$d line</item>
+        <item quantity="other">%1$d lines</item>
+    </plurals>
+    <!-- The two counts together, "5 files, 94 lines". -->
+    <string name="export_files_lines">%1$s, %2$s</string>
 </resources>

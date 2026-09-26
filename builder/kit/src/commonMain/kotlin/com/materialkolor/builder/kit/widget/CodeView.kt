@@ -24,7 +24,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.selection.DisableSelection
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -40,6 +43,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
@@ -65,6 +69,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.codegen.dsl.Token
 import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
@@ -115,29 +120,39 @@ private sealed interface CodePart {
  * shows the focus ring outside its frame while it has focus. There the arrows, Page Up and Page Down
  * scroll it without a pointer, and the copy keys copy what is selected.
  *
- * The copy button sits in the top corner on a band of the panel, so its focus ring never lands on
- * the code ground ([CopyButton]). The lines run on past their end by the band's width, so scrolling
- * sideways to the end brings the last of every line out from under it. Selecting text takes a part
- * of the file, the button takes all of it, byte for byte. On the web a finger does not select, since
- * the selection's handles would take the page's accessibility mirror over, so there the button is
- * how a finger copies. A mouse still selects. On a touch screen with a keyboard a key brings
- * selection back and the code area keeps its focus. No key selects on its own, so a keyboard copies
- * all of it with the button.
+ * The code sits on the skin's code ground, which can be darker than the panel around it, so the
+ * line numbers, the text selection and the rest of what is drawn on it take the code palette's
+ * colours rather than the panel's.
+ *
+ * With [onCopy] given, the copy button sits in the top corner on a band of the panel, so its focus
+ * ring never lands on the code ground ([CopyButton]). The lines run on past their end by the band's
+ * width, so scrolling sideways to the end brings the last of every line out from under it.
+ * Selecting text takes a part of the file, the button takes all of it, byte for byte. On the web a
+ * finger does not select, since the selection's handles would take the page's accessibility mirror
+ * over, so there the button is how a finger copies. A mouse still selects. On a touch screen with a
+ * keyboard a key brings selection back and the code area keeps its focus. No key selects on its
+ * own, so a keyboard copies all of it with the button. Without [onCopy] there is no band and the
+ * lines end where they end, for a caller that puts its own copy action beside the code.
  *
  * On the web the list of lines goes by [label], since the page reads it as a list and a list with
  * no name is announced as nothing but a list.
  *
  * @param[lines] The file as lines of tokens, as in `GeneratedFile.lines`.
- * @param[onCopy] Called when the copy button is pressed. The caller does the copying.
+ * @param[onCopy] Called when the copy button is pressed. The caller does the copying. Null draws no
+ * copy button.
  * @param[modifier] Applied to the viewer.
  * @param[label] What the code is, such as the file's name, read out as the name of its lines.
+ * @param[framed] Whether the code sits in its own rounded, bordered frame. Turn it off where the
+ * caller already draws the code ground around it, so no box shows inside another. The code ground
+ * and the focus ring stay either way.
  */
 @Composable
 public fun CodeView(
     lines: List<List<Token>>,
-    onCopy: () -> Unit,
+    onCopy: (() -> Unit)?,
     modifier: Modifier = Modifier,
     label: String = stringResource(Res.string.code_view_name),
+    framed: Boolean = true,
 ) {
     val listName = if (LocalFoldsStateIntoName.current) Modifier.semantics { contentDescription = label } else Modifier
     val tokens = LocalBuilderTokens.current
@@ -159,7 +174,7 @@ public fun CodeView(
     val gutterWidth = charWidth * lines.size.toString().length
     // The lines run on past their end by the copy band and the gap either side of it, so scrolled
     // all the way over the end of every line clears the band.
-    val copyReserve = copyBandSide(LocalLayout.current) + tokens.spacing.small * 2
+    val copyReserve = if (onCopy != null) copyBandSide(LocalLayout.current) + tokens.spacing.small * 2 else 0.dp
     val codeWidth = remember(lines, charWidth, swatchSize, gap) {
         val widest = lines.maxOfOrNull { line ->
             val chars = line.sumOf { token -> token.text.length }
@@ -168,15 +183,19 @@ public fun CodeView(
         }
         widest ?: charWidth
     }
-    val shape = RoundedCornerShape(tokens.radius.medium)
+    val shape = if (framed) RoundedCornerShape(tokens.radius.medium) else RectangleShape
     val look = remember(style, tokens, gutterWidth, swatchSize) {
         CodeLineLook(
-            gutter = style.merge(color = tokens.textMuted, textAlign = TextAlign.End),
+            gutter = style.merge(color = tokens.codePalette.muted, textAlign = TextAlign.End),
             code = style.merge(color = tokens.codePalette.plain),
             gutterWidth = gutterWidth,
             swatchSize = swatchSize,
             swatchShape = RoundedCornerShape(tokens.radius.small / 2),
         )
+    }
+    val selection = remember(tokens.codePalette) {
+        val ink = tokens.codePalette[TokenKind.Keyword]
+        TextSelectionColors(handleColor = ink, backgroundColor = ink.copy(alpha = SelectionAlpha))
     }
     val listState = rememberLazyListState()
     val sideways = rememberScrollState()
@@ -188,46 +207,58 @@ public fun CodeView(
             .controlRing(codeFocus.interactions, shape)
             .clip(shape)
             .background(tokens.codeBackground)
-            .border(tokens.outlineWidth, tokens.border, shape),
+            .then(if (framed) Modifier.border(tokens.outlineWidth, tokens.border, shape) else Modifier),
     ) {
-        // The selection is its own focus target and asks for focus when a drag starts, so it is the
-        // one stop. The scroll keys and the focus flag go on its modifier, ahead of that target.
-        TouchlessSelectionContainer(
-            modifier = Modifier
-                .fillMaxSize()
-                .testTag(CodeScrollTag)
-                .semantics {
-                    focused = codeFocus.focused
-                    requestFocus { codeFocus.requester.requestFocus(FocusDirection.Enter) }
-                }.focusRequester(codeFocus.requester)
-                .onFocusChanged { state -> codeFocus.update(state.isFocused) }
-                .onKeyEvent { event -> scope.scrollOnKey(event, listState, sideways) },
-        ) {
-            Box(
+        // The highlight takes the code's own ink, since the panel's accent can sink into a dark
+        // code ground.
+        CompositionLocalProvider(LocalTextSelectionColors provides selection) {
+            // The selection is its own focus target and asks for focus when a drag starts, so it is
+            // the one stop. The scroll keys and the focus flag go on its modifier, ahead of that
+            // target.
+            TouchlessSelectionContainer(
                 modifier = Modifier
                     .fillMaxSize()
-                    .horizontalScroll(sideways),
+                    .testTag(CodeScrollTag)
+                    .semantics {
+                        focused = codeFocus.focused
+                        requestFocus { codeFocus.requester.requestFocus(FocusDirection.Enter) }
+                    }.focusRequester(codeFocus.requester)
+                    .onFocusChanged { state -> codeFocus.update(state.isFocused) }
+                    .onKeyEvent { event -> scope.scrollOnKey(event, listState, sideways) },
             ) {
-                LazyColumn(
-                    modifier = listName
-                        .width(gutterWidth + tokens.spacing.medium * 2 + codeWidth + copyReserve)
-                        .fillMaxHeight(),
-                    state = listState,
-                    contentPadding = PaddingValues(vertical = tokens.spacing.medium),
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .horizontalScroll(sideways),
                 ) {
-                    itemsIndexed(parts) { index, line ->
-                        CodeLine(index + 1, line, look)
+                    LazyColumn(
+                        modifier = listName
+                            .width(gutterWidth + tokens.spacing.medium * 2 + codeWidth + copyReserve)
+                            .fillMaxHeight(),
+                        state = listState,
+                        contentPadding = PaddingValues(vertical = tokens.spacing.medium),
+                    ) {
+                        itemsIndexed(parts) { index, line ->
+                            CodeLine(index + 1, line, look)
+                        }
                     }
                 }
             }
         }
-        CopyButton(
-            label = copyLabel,
-            onCopy = onCopy,
-            modifier = Modifier.align(Alignment.TopEnd).padding(tokens.spacing.small),
-        )
+        if (onCopy != null) {
+            CopyButton(
+                label = copyLabel,
+                onCopy = onCopy,
+                modifier = Modifier.align(Alignment.TopEnd).padding(tokens.spacing.small),
+            )
+        }
     }
 }
+
+/**
+ * How strongly selected code is washed with the code's ink, Material's own selection alpha.
+ */
+private const val SelectionAlpha = 0.4f
 
 /**
  * The focus of the code area, which the selection's own focus target holds. That target sends no
