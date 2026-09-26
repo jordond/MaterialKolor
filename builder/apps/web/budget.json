@@ -13,7 +13,7 @@
   ],
   "roles": [
     { "name": "skiko", "files": "assets/skiko.*.wasm", "maxBytes": 3500000 },
-    { "name": "app wasm", "files": "assets/MaterialKolor-builder-web.*.wasm", "maxBytes": 3000000 },
+    { "name": "app wasm", "files": "assets/MaterialKolor-builder-apps-web.*.wasm", "maxBytes": 3000000 },
     { "name": "glue", "files": "assets/builder.*.js", "maxBytes": 500000 },
     { "name": "js glue", "files": "assets/builder-js.*.js", "maxBytes": 3000000 },
     { "name": "initial fonts", "files": "composeResources/com.materialkolor.**/font/*", "totalBytes": 500000 },
@@ -33,7 +33,7 @@
     ],
     "engines": {
       "wasm": {
-        "files": ["assets/builder.*.js", "assets/skiko.*.wasm", "assets/MaterialKolor-builder-web.*.wasm"],
+        "files": ["assets/builder.*.js", "assets/skiko.*.wasm", "assets/MaterialKolor-builder-apps-web.*.wasm"],
         "maxBytes": 8000000
       },
       "js": {

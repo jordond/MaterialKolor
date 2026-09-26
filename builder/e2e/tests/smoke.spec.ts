@@ -29,7 +29,7 @@ for (const route of ['/', '/t/AdllOwAAAAAT']) {
     // boot.js is the one script at the root. It is not hashed, so the host serves it no-cache.
     const outside = loaded.filter((pathname) => /\.(js|wasm)$/.test(pathname) && !pathname.startsWith('/assets/'));
     expect(outside).toEqual(['/boot.js']);
-    for (const asset of [/^builder\.[0-9a-f]{16}\.js$/, /^skiko\.[0-9a-f]{16}\.wasm$/, /^MaterialKolor-builder-web\.[0-9a-f]{16}\.wasm$/]) {
+    for (const asset of [/^builder\.[0-9a-f]{16}\.js$/, /^skiko\.[0-9a-f]{16}\.wasm$/, /^MaterialKolor-builder-apps-web\.[0-9a-f]{16}\.wasm$/]) {
       expect(loaded.some((pathname) => pathname.startsWith('/assets/') && asset.test(pathname.slice('/assets/'.length)))).toBe(true);
     }
     expect(errors.filter((error) => !UPSTREAM_ERRORS.some((known) => known.test(error)))).toEqual([]);
@@ -129,7 +129,7 @@ function collectResponses(page: Page): { url: string; status: number }[] {
  * the engine's own, read the way `check-budget.mjs` reads it.
  */
 function firstVisitFiles(engine: 'wasm' | 'js'): (file: string) => boolean {
-  const budget = JSON.parse(readFileSync(path.resolve(__dirname, '../../web/budget.json'), 'utf8'));
+  const budget = JSON.parse(readFileSync(path.resolve(__dirname, '../../apps/web/budget.json'), 'utf8'));
   const skipped = (budget.skip as string[]).map(globToRegExp);
   const counted = [...budget.firstVisit.files, ...budget.firstVisit.engines[engine].files].map(globToRegExp);
   const lazy = (budget.firstVisit.exclude as string[]).map(globToRegExp);

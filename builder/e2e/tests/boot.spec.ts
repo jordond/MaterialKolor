@@ -73,7 +73,7 @@ test.describe('served by the Worker', () => {
     await page.waitForLoadState('networkidle');
     const own = responses.filter((entry) => new URL(entry.url).origin === origin);
     expect(own.filter((entry) => entry.status !== 200 && entry.status !== 304)).toEqual([]);
-    expect(own.some((entry) => /\/assets\/MaterialKolor-builder-web\.[0-9a-f]{16}\.wasm$/.test(entry.url))).toBe(true);
+    expect(own.some((entry) => /\/assets\/MaterialKolor-builder-apps-web\.[0-9a-f]{16}\.wasm$/.test(entry.url))).toBe(true);
     expect(await page.evaluate(() => (window as unknown as { mkViolations: string[] }).mkViolations)).toEqual([]);
 
     const card = await page.request.get(`${origin}/og/${code}.png`);
