@@ -292,7 +292,7 @@ test.describe('head', () => {
     ['link[rel="canonical"]', 'href', `${origin}/`],
     ['meta[name="color-scheme"]', 'content', 'light dark'],
     ['meta[name="theme-color"][media="(prefers-color-scheme: light)"]', 'content', '#fff8f6'],
-    ['meta[name="theme-color"][media="(prefers-color-scheme: dark)"]', 'content', '#1a110f'],
+    ['meta[name="theme-color"][media="(prefers-color-scheme: dark)"]', 'content', '#130d0a'],
     ['meta[property="og:type"]', 'content', 'website'],
     ['meta[property="og:site_name"]', 'content', 'MaterialKolor'],
     ['meta[property="og:title"]', 'content', 'MaterialKolor Builder'],

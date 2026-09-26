@@ -8,7 +8,7 @@
   // What the default document writes to mk:splash, and its seed, for a first visit. The shell spec
   // holds the two colors to what the app writes.
   const DEFAULT_LIGHT = 0xfff8f6;
-  const DEFAULT_DARK = 0x1a110f;
+  const DEFAULT_DARK = 0x130d0a;
   const DEFAULT_SEED = 0xd9653b;
 
   // The keys whose browser action, save page, open file and search, the builder takes over with Cmd
