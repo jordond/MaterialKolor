@@ -79,8 +79,8 @@ public fun BuilderTextField(
 }
 
 /**
- * Draws [draft] in the surrounding skin. The large field is the poster's seed headline, which every
- * skin draws as headless text with its own underline.
+ * Draws [draft] in the surrounding skin. The large field is the poster's seed headline, which only
+ * the shell draws, so it is always headless text with Material's underline.
  *
  * On the web the field node is named [label], with the disabled note while it is disabled.
  * Material's field is otherwise nameless there, since its editable text overwrites the label, and
@@ -113,10 +113,7 @@ internal fun SkinField(
     }
     val library = LocalSkin.current.library
     if (large) {
-        val hero = when (library) {
-            SkinLibrary.Material3 -> materialHeroFieldStyle()
-            SkinLibrary.Custom -> CustomInputStyles.hero
-        }
+        val hero = materialHeroFieldStyle()
         HeadlessField(
             draft.value,
             onValueChange,

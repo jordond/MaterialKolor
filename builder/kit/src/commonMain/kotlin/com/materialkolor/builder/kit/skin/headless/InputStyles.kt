@@ -135,10 +135,6 @@ internal object CustomInputStyles {
                 cursor = tokens.accent,
             )
         }
-
-    val hero: FieldStyle
-        @Composable @ReadOnlyComposable
-        get() = heroFieldStyle(LocalBuilderTokens.current, underline = 3.dp, shape = RoundedCornerShape(2.dp))
 }
 
 /**
