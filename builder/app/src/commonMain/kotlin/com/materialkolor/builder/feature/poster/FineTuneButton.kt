@@ -11,6 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.capability.EffectiveSpec
 import com.materialkolor.builder.domain.model.KeyColor
@@ -73,7 +76,10 @@ internal fun FineTuneButton(
         label = name,
         modifier = modifier
             .fillMaxWidth()
-            .then(triggerFocus(trigger)),
+            .then(triggerFocus(trigger))
+            // The pressable keeps its content out of the tree, so the button carries the words it
+            // shows itself, the way a card button does.
+            .semantics { this[SemanticsProperties.Text] = listOf(AnnotatedString(title), AnnotatedString(summary)) },
         shape = shape,
     ) {
         Row(

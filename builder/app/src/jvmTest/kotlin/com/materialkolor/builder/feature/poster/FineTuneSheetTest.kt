@@ -51,8 +51,7 @@ class FineTuneSheetTest {
             )
             showSection(PosterHarness(document)) { context, dispatcher -> FineTuneButton(context, dispatcher) }
 
-            onNodeWithContentDescription("Fine-tune, 1 key color set, 1 pinned role · 2025 spec · 1 extra color")
-                .assertExists()
+            onNodeWithText("1 key color set, 1 pinned role · 2025 spec · 1 extra color").assertExists()
         }
 
     @Test
@@ -61,7 +60,7 @@ class FineTuneSheetTest {
             val document = Plain.copy(style = Style.Rainbow, spec = SpecVersion.Spec2025)
             showSection(PosterHarness(document)) { context, dispatcher -> FineTuneButton(context, dispatcher) }
 
-            onNodeWithContentDescription("Fine-tune, Colors from seed · 2021 spec").assertExists()
+            onNodeWithText("Colors from seed · 2021 spec").assertExists()
         }
 
     @Test
@@ -70,7 +69,7 @@ class FineTuneSheetTest {
             val harness = PosterHarness(Plain)
             showSection(harness) { context, dispatcher -> FineTuneButton(context, dispatcher) }
 
-            onNodeWithContentDescription("Fine-tune", substring = true).performClick()
+            onNodeWithText("Fine-tune").performClick()
             waitForIdle()
 
             harness.actions shouldBe listOf(WorkspaceAction.OpenFineTune())
