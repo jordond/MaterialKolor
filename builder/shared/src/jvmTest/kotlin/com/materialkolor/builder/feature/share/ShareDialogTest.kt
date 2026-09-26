@@ -11,8 +11,10 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
@@ -192,6 +194,11 @@ class ShareDialogTest : SessionTestBase() {
             showDialog(link = LONG_LINK)
 
             val link = onNode(hasText(LONG_LINK))
+            // The body scrolls, and the link sits under the well and the details.
+            onAllNodes(hasScrollAction()).onFirst().performSemanticsAction(SemanticsActions.ScrollBy) { scroll ->
+                scroll(0f, Float.MAX_VALUE)
+            }
+            waitForIdle()
             link.assertIsDisplayed()
             val layouts = mutableListOf<TextLayoutResult>()
             link.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action -> action(layouts) }
