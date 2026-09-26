@@ -27,7 +27,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
-import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.model.Accent
 import com.materialkolor.builder.domain.model.AccentPart
@@ -37,15 +36,14 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.domain.persist.ProjectViewState
 import com.materialkolor.builder.engine.resolve.RampSet
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
-import com.materialkolor.builder.feature.workspace.WorkspaceModel
-import com.materialkolor.builder.feature.workspace.capabilitiesOf
+import com.materialkolor.builder.feature.workspace.withView
+import com.materialkolor.builder.feature.workspace.workspaceStateOf
 import com.materialkolor.builder.kit.a11y.Announcer
 import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import dev.stateholder.dispatcher.Dispatcher
@@ -244,24 +242,19 @@ class PalettesTabTest {
             val result = resolvedFor(material)
             val view = ProjectViewState(tab = PreviewTab.Roles, mode = PreviewMode.Light)
             var state by mutableStateOf(
-                WorkspaceModel.State(
+                workspaceStateOf(
                     document = material,
-                    capabilities = capabilitiesOf(material),
-                    history = HistoryState(),
                     view = view,
-                    preferences = Preferences(),
                     projectGeneration = 4,
                 ),
             )
             // The two actions the model handles for this, handled the way it does.
             val dispatcher = Dispatcher<WorkspaceAction> { action ->
                 state = when (action) {
-                    is WorkspaceAction.ShowOnRamp -> state.copy(
-                        view = state.view.copy(tab = PreviewTab.Palettes),
+                    is WorkspaceAction.ShowOnRamp -> state.withView(state.view.copy(tab = PreviewTab.Palettes)).copy(
                         rampHighlight = RampHighlight(action.target, state.projectGeneration),
                     )
-                    is WorkspaceAction.SetPreviewTab -> state.copy(
-                        view = state.view.copy(tab = action.tab),
+                    is WorkspaceAction.SetPreviewTab -> state.withView(state.view.copy(tab = action.tab)).copy(
                         rampHighlight = null,
                     )
                     else -> state

@@ -17,6 +17,7 @@ import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.domain.persist.ProjectViewState
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
+import com.materialkolor.builder.feature.workspace.withView
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.floats.plusOrMinus
@@ -114,7 +115,7 @@ class CanvasAreaTest {
             range.maxValue() shouldBeGreaterThan 0f
             (desktop.size.width + range.maxValue()) shouldBe (shown plusOrMinus 2f)
 
-            host.state = host.state.copy(view = host.state.view.copy(deviceWidth = DeviceWidth.Tablet))
+            host.state = host.state.withView(host.state.view.copy(deviceWidth = DeviceWidth.Tablet))
             waitForIdle()
             val tablet = onNodeWithTag(DEVICE_SCREEN_TAG).fetchSemanticsNode()
             tablet.config[SemanticsProperties.HorizontalScrollAxisRange].maxValue() shouldBe 0f

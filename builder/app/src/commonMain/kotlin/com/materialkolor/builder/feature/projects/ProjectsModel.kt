@@ -62,8 +62,9 @@ internal class ProjectsModel(
     private var persistAsked = false
 
     init {
-        session.project.mergeState { state, project -> state.copy(open = project) }
-        session.conflict.mergeState { state, conflict -> state.copy(conflict = conflict != null) }
+        session.state.mergeState { state, open ->
+            state.copy(open = open.project, conflict = open.conflict != null)
+        }
         viewModelScope.launch {
             projects.index.collect { index ->
                 val listed = index.projects.sortedByDescending { meta -> meta.updatedAt }

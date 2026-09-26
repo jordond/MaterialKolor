@@ -20,11 +20,9 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.materialkolor.builder.LocalThemeResult
-import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.domain.persist.ProjectViewState
 import com.materialkolor.builder.engine.resolve.ThemeResolver
@@ -32,7 +30,8 @@ import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.feature.workspace.WorkspaceScreen
-import com.materialkolor.builder.feature.workspace.capabilitiesOf
+import com.materialkolor.builder.feature.workspace.withView
+import com.materialkolor.builder.feature.workspace.workspaceStateOf
 import com.materialkolor.builder.kit.control.rememberBuilderToastHostState
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
@@ -84,10 +83,10 @@ internal class CanvasHost(
         action: WorkspaceAction,
     ): WorkspaceModel.State =
         when (action) {
-            is WorkspaceAction.SetPreviewTab -> state.copy(view = state.view.copy(tab = action.tab))
-            is WorkspaceAction.SetPreviewMode -> state.copy(view = state.view.copy(mode = action.mode))
-            is WorkspaceAction.SetSplitFraction -> state.copy(view = state.view.copy(splitFraction = action.fraction))
-            is WorkspaceAction.SetDeviceWidth -> state.copy(view = state.view.copy(deviceWidth = action.width))
+            is WorkspaceAction.SetPreviewTab -> state.withView(state.view.copy(tab = action.tab))
+            is WorkspaceAction.SetPreviewMode -> state.withView(state.view.copy(mode = action.mode))
+            is WorkspaceAction.SetSplitFraction -> state.withView(state.view.copy(splitFraction = action.fraction))
+            is WorkspaceAction.SetDeviceWidth -> state.withView(state.view.copy(deviceWidth = action.width))
             is WorkspaceAction.SetVision -> state.copy(vision = action.vision)
             is WorkspaceAction.SetInspect -> state.copy(inspect = action.on)
             WorkspaceAction.ToggleFullscreen -> state.copy(fullscreen = !state.fullscreen)
@@ -98,13 +97,7 @@ internal class CanvasHost(
 
 private fun workspaceState(view: ProjectViewState): WorkspaceModel.State {
     val document = ThemeDocument.Default.copy(library = Library.Material3, expressive = false)
-    return WorkspaceModel.State(
-        document = document,
-        capabilities = capabilitiesOf(document),
-        history = HistoryState(),
-        view = view,
-        preferences = Preferences(),
-    )
+    return workspaceStateOf(document = document, view = view)
 }
 
 /**

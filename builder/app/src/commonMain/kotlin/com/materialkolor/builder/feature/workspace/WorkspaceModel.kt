@@ -10,6 +10,7 @@ import com.materialkolor.builder.core.platform.Router
 import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.core.session.ProjectSession
 import com.materialkolor.builder.core.session.SaveStatus
+import com.materialkolor.builder.core.session.SessionState
 import com.materialkolor.builder.core.session.Timeline
 import com.materialkolor.builder.di.AppScope
 import com.materialkolor.builder.domain.capability.Capabilities
@@ -51,7 +52,7 @@ import kotlin.random.Random
  * The capabilities always come from the document they sit next to. An edit made here updates both
  * before it returns, so a control the new target cannot use is disabled in the frame the target
  * changes, whatever dispatcher the model runs on. Changes from elsewhere, another tab or a boot,
- * arrive through the session's flows.
+ * arrive through the session's state.
  *
  * Opening a panel adds one history entry to the address bar, so Back closes it.
  */
@@ -68,27 +69,18 @@ internal class WorkspaceModel(
     private val resolver: ThemeResolver,
 ) : StateViewModel<WorkspaceModel.State>(
         State(
-            document = session.shown.value.document,
-            capabilities = capabilitiesOf(session.shown.value.document),
-            history = session.history.value,
-            view = session.viewState.value,
+            session = session.state.value,
+            capabilities = capabilitiesOf(session.state.value.document),
             preferences = preferences.preferences.value,
-            saveStatus = session.saveStatus.value,
-            projectGeneration = session.shown.value.generation,
         ),
     ) {
     init {
-        // The session publishes the document and its project's number as one value, so no state here
-        // ever pairs one project's document with another project's number, whatever order things run in.
-        session.shown.mergeState { state, shown ->
-            state.withDocument(shown.document).withGeneration(shown.generation).withTimeline()
-        }
-        session.history.mergeState { state, history -> state.copy(history = history).withTimeline() }
-        session.viewState.mergeState { state, view -> state.copy(view = view) }
+        // The session publishes the open project as one value, so no state here ever pairs one
+        // project's document with another project's number or view, whatever order things run in.
+        session.state.mergeState { state, open -> state.following(open) }
         preferences.preferences.mergeState { state, prefs -> state.copy(preferences = prefs) }
         router.overlayPops.mergeState { state, _ -> state.copy(panel = null, pickerTarget = null, timeline = null) }
         session.projectName.mergeState { state, name -> state.copy(projectName = name) }
-        session.saveStatus.mergeState { state, status -> state.copy(saveStatus = status) }
     }
 
     /**
@@ -319,17 +311,25 @@ internal class WorkspaceModel(
      * Read the session back into the state at once, so nothing waits on a collector.
      */
     private fun syncSession(expressiveSuggestion: Boolean) {
-        val shown = session.shown.value
-        val history = session.history.value
-        updateState { state ->
-            state
-                .withDocument(shown.document)
-                .withGeneration(shown.generation)
-                .copy(
-                    history = history,
-                    expressiveSuggestion = expressiveSuggestion,
-                ).withTimeline()
-        }
+        val open = session.state.value
+        updateState { state -> state.following(open).copy(expressiveSuggestion = expressiveSuggestion) }
+    }
+
+    /**
+     * This state holding the session's [open] value. The capabilities are worked out again only when
+     * the document changed, and the Fine-tune sheet shuts when another project shows. The steps are
+     * built again only when the document, the project or the history moved, so a change of view or
+     * save status leaves them be.
+     */
+    private fun State.following(open: SessionState): State {
+        if (open == this.session) return this
+        val next = copy(
+            session = open,
+            capabilities = if (open.document == document) capabilities else capabilitiesOf(open.document),
+            fineTune = fineTune.takeIf { open.generation == projectGeneration }, // b-521
+        )
+        val moved = open.document != document || open.generation != projectGeneration || open.history != history
+        return if (moved) next.withTimeline() else next
     }
 
     /**
@@ -338,15 +338,15 @@ internal class WorkspaceModel(
      */
     private fun State.withTimeline(): State =
         when {
-            panel == Panel.History -> copy(timeline = session.timeline())
+            panel == Panel.History -> copy(timeline = this@WorkspaceModel.session.timeline())
             timeline != null -> copy(timeline = null)
             else -> this
         }
 
     private fun updateView(block: (ProjectViewState) -> ProjectViewState) {
         session.updateView(block)
-        val view = session.viewState.value
-        updateState { state -> state.copy(view = view) }
+        val open = session.state.value
+        updateState { state -> state.following(open) }
     }
 
     private fun updatePreferences(block: (Preferences) -> Preferences) {
@@ -354,11 +354,10 @@ internal class WorkspaceModel(
     }
 
     /**
-     * @property[document] The document as stored, with every setting kept. Anything that resolves
-     * or exports reads it through `forTarget` first.
-     * @property[capabilities] How each control shows up for [document]'s target, style and spec.
-     * @property[history] What undo and redo would do.
-     * @property[view] How the preview is set up, saved with the project.
+     * @property[session] The session's value for the open project, held whole so the document, its
+     * project number, history, view and save status always come from the same moment.
+     * @property[capabilities] How each control shows up for [document]'s target, style and spec,
+     * worked out again whenever the document changes.
      * @property[preferences] What this browser remembers across projects.
      * @property[panel] The panel that is open, or null.
      * @property[pickerTarget] What the open picker edits, or null when it is closed.
@@ -366,11 +365,6 @@ internal class WorkspaceModel(
      * @property[inspect] Whether the inspect overlay is on.
      * @property[fullscreen] Whether the poster and the top bar are hidden.
      * @property[projectName] The open project's name, empty until the session has opened one.
-     * @property[saveStatus] Whether the open project's latest changes are saved.
-     * @property[projectGeneration] Counts the projects this tab has shown, one more each time another
-     * opens. It changes in the same state as the document the new project brings, so anything that
-     * belongs to one project can tell a new project from an edit. Both come from the session's one
-     * `shown` value, so the pair holds whatever order the collectors run in.
      * @property[expressiveSuggestion] Whether the top bar offers the Expressive style on the 2025
      * spec after a switch to Expressive.
      * @property[rampHighlight] What the Palettes tab picks out after Show on ramp, with the project
@@ -390,10 +384,8 @@ internal class WorkspaceModel(
      */
     @Immutable
     data class State(
-        val document: ThemeDocument,
+        val session: SessionState,
         val capabilities: Capabilities,
-        val history: HistoryState,
-        val view: ProjectViewState,
         val preferences: Preferences,
         val panel: Panel? = null,
         val pickerTarget: PickerTarget? = null,
@@ -401,8 +393,6 @@ internal class WorkspaceModel(
         val inspect: Boolean = false,
         val fullscreen: Boolean = false,
         val projectName: String = "",
-        val saveStatus: SaveStatus = SaveStatus.Idle,
-        val projectGeneration: Int = 0,
         val expressiveSuggestion: Boolean = false,
         val rampHighlight: RampHighlight? = null,
         val sessionDismissedHints: Set<String> = emptySet(),
@@ -412,6 +402,40 @@ internal class WorkspaceModel(
         val timeline: Timeline? = null,
         val fineTune: FineTuneSection? = null,
     ) {
+        /**
+         * The document as stored, with every setting kept. Anything that resolves or exports reads
+         * it through `forTarget` first.
+         */
+        val document: ThemeDocument
+            get() = session.document
+
+        /**
+         * What undo and redo would do.
+         */
+        val history: HistoryState
+            get() = session.history
+
+        /**
+         * How the preview is set up, saved with the project.
+         */
+        val view: ProjectViewState
+            get() = session.view
+
+        /**
+         * Whether the open project's latest changes are saved.
+         */
+        val saveStatus: SaveStatus
+            get() = session.saveStatus
+
+        /**
+         * Counts the projects this tab has shown, one more each time another opens. It changes in
+         * the same state as the document the new project brings, so anything that belongs to one
+         * project can tell a new project from an edit. Both come from the session's one value, so
+         * the pair holds whatever order the collectors run in.
+         */
+        val projectGeneration: Int
+            get() = session.generation
+
         /**
          * What [document] exports to.
          */
@@ -424,20 +448,6 @@ internal class WorkspaceModel(
          */
         fun posterCollapsed(mode: PosterMode): Boolean =
             if (mode == PosterMode.Rail72) !posterOverCanvas else preferences.posterCollapsed
-
-        /**
-         * This state showing [document], its capabilities worked out in the same step.
-         */
-        fun withDocument(document: ThemeDocument): State =
-            if (document == this.document) this else copy(document = document, capabilities = capabilitiesOf(document))
-
-        /**
-         * This state counting [generation] projects, with the Fine-tune sheet shut when that is
-         * another project than the one shown.
-         */
-        fun withGeneration(generation: Int): State =
-            // b-521
-            if (generation == projectGeneration) this else copy(projectGeneration = generation, fineTune = null)
     }
 
     /**
