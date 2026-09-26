@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -26,7 +24,15 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.IntrinsicMeasurable
+import androidx.compose.ui.layout.IntrinsicMeasureScope
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.node.LayoutModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.feature.poster.Eyebrow
@@ -46,11 +52,17 @@ import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
 
 /**
  * The width over the height of a link card, as the Worker draws it.
  */
 private const val CARD_ASPECT = 1200f / 630f
+
+/**
+ * The shortest the card shrinks to when the well is short of height.
+ */
+private val CardFloor: Dp = 120.dp
 
 /**
  * How much of the old card shows through while the new one is on its way.
@@ -74,6 +86,9 @@ private const val WELL_TINT = 0.06f
  * The Link preview well, the card chats and posts show for the link, sunk into the dialog, with
  * its caption under it.
  *
+ * The card fills the well's width while the height allows. Given less height it shrinks at its own
+ * shape, centred over the caption, down to [CardFloor] tall.
+ *
  * @param[card] Where the card is.
  */
 @Composable
@@ -89,7 +104,7 @@ internal fun ShareWell(
         verticalArrangement = Arrangement.spacedBy(tokens.spacing.medium),
     ) {
         Eyebrow(stringResource(Res.string.share_card_heading))
-        CardBox(card, Modifier.fillMaxWidth().aspectRatio(CARD_ASPECT))
+        CardBox(card, Modifier.weight(1f, fill = false).align(Alignment.CenterHorizontally).cardFit())
         BuilderText(text = stringResource(Res.string.share_card_caption), emphasis = Emphasis.Secondary)
     }
 }
@@ -214,3 +229,59 @@ private fun Modifier.dashedOutline(
             style = Stroke(width = stroke, pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash, dash))),
         )
     }
+
+/**
+ * Sizes the card at [CARD_ASPECT], as wide as it may be unless the height it may take is shorter,
+ * and never shorter than [CardFloor] while the width allows. Asked how short it can be it says
+ * [CardFloor], so a body can tell how little height the well needs.
+ */
+private fun Modifier.cardFit(): Modifier = this then CardFitElement
+
+private data object CardFitElement : ModifierNodeElement<CardFitNode>() {
+    override fun create(): CardFitNode = CardFitNode()
+
+    override fun update(node: CardFitNode) = Unit
+}
+
+private class CardFitNode :
+    Modifier.Node(),
+    LayoutModifierNode {
+    override fun MeasureScope.measure(
+        measurable: Measurable,
+        constraints: Constraints,
+    ): MeasureResult {
+        val byWidth = if (constraints.hasBoundedWidth) heightFor(constraints.maxWidth) else Constraints.Infinity
+        val fit = minOf(byWidth, constraints.maxHeight)
+        val floor = minOf(CardFloor.roundToPx(), byWidth)
+        val height = if (fit == Constraints.Infinity) floor else maxOf(fit, floor)
+        val width = (height * CARD_ASPECT).roundToInt()
+        val placeable = measurable.measure(Constraints.fixed(width, height))
+        return layout(width, height) { placeable.place(0, 0) }
+    }
+
+    override fun IntrinsicMeasureScope.minIntrinsicHeight(
+        measurable: IntrinsicMeasurable,
+        width: Int,
+    ): Int = minOf(CardFloor.roundToPx(), heightFor(width))
+
+    override fun IntrinsicMeasureScope.maxIntrinsicHeight(
+        measurable: IntrinsicMeasurable,
+        width: Int,
+    ): Int = heightFor(width)
+
+    override fun IntrinsicMeasureScope.minIntrinsicWidth(
+        measurable: IntrinsicMeasurable,
+        height: Int,
+    ): Int = (CardFloor.roundToPx() * CARD_ASPECT).roundToInt()
+
+    override fun IntrinsicMeasureScope.maxIntrinsicWidth(
+        measurable: IntrinsicMeasurable,
+        height: Int,
+    ): Int {
+        val tallest = if (height == Constraints.Infinity) CardFloor.roundToPx() else height
+        return (tallest * CARD_ASPECT).roundToInt()
+    }
+
+    private fun heightFor(width: Int): Int =
+        if (width == Constraints.Infinity) width else (width / CARD_ASPECT).roundToInt()
+}

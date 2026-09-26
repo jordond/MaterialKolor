@@ -1,17 +1,16 @@
 package com.materialkolor.builder.kit.control
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.constrainHeight
 import com.materialkolor.builder.kit.generated.resources.Res
 import com.materialkolor.builder.kit.generated.resources.close
 import com.materialkolor.builder.kit.icon.IconId
@@ -86,6 +85,10 @@ internal class DialogFrame(
  * The top of a dialog, the title drawn by [title] and, when [frame] asks for it, the close button at
  * the end. The title takes the room the button leaves, and the button reaches into the panel's
  * padding so its glyph lines up with the edge of the body. It draws nothing when neither shows.
+ *
+ * The row is as tall as the title, so the body starts at the same place with or without the button.
+ * The button sits centred on the title and the rest of its target reaches into the panel's padding
+ * above and below, where it still takes clicks. With the title hidden the row is as tall as the glyph.
  */
 @Composable
 internal fun DialogTitleRow(
@@ -98,32 +101,48 @@ internal fun DialogTitleRow(
         return
     }
     val iconSize = LocalBuilderTokens.current.iconSize
-    Row(
+    Layout(
+        content = {
+            if (frame.titleShown) title(Modifier.layoutId(TITLE_SLOT))
+            BuilderIconButton(
+                onClick = onDismissRequest,
+                icon = IconId.Close,
+                contentDescription = stringResource(Res.string.close),
+                modifier = Modifier.layoutId(CLOSE_SLOT),
+                emphasis = Emphasis.Subtle,
+            )
+        },
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (frame.titleShown) title(Modifier.weight(1f))
-        BuilderIconButton(
-            onClick = onDismissRequest,
-            icon = IconId.Close,
-            contentDescription = stringResource(Res.string.close),
-            modifier = Modifier.glyphToEnd(iconSize),
-            emphasis = Emphasis.Subtle,
-        )
+    ) { measurables, constraints ->
+        val loose = constraints.copy(minWidth = 0, minHeight = 0)
+        val button = measurables.first { measurable -> measurable.layoutId == CLOSE_SLOT }.measure(loose)
+        val glyph = iconSize.roundToPx()
+        // The room around the glyph at the end, which reaches past the row's end.
+        val reach = ((button.width - glyph) / 2).coerceAtLeast(0)
+        val buttonWidth = button.width - reach
+        val bounded = constraints.hasBoundedWidth
+        val titleMax = if (bounded) (constraints.maxWidth - buttonWidth).coerceAtLeast(0) else loose.maxWidth
+        val titlePlaceable = measurables
+            .firstOrNull { measurable -> measurable.layoutId == TITLE_SLOT }
+            ?.measure(loose.copy(maxWidth = titleMax))
+        val width = if (bounded) constraints.maxWidth else (titlePlaceable?.width ?: 0) + buttonWidth
+        val height = constraints.constrainHeight(titlePlaceable?.height ?: glyph)
+        layout(width, height) {
+            titlePlaceable?.placeRelative(0, 0)
+            button.placeRelative(width - buttonWidth, (height - button.height) / 2)
+        }
     }
 }
 
 /**
- * Lets a button whose [iconSize] glyph sits in its middle reach past the end of its row by the room
- * around the glyph, so the glyph's edge meets the row's end.
+ * The title's slot in [DialogTitleRow].
  */
-private fun Modifier.glyphToEnd(iconSize: Dp): Modifier =
-    layout { measurable, constraints ->
-        val placeable = measurable.measure(constraints)
-        val reach = ((placeable.width - iconSize.roundToPx()) / 2).coerceAtLeast(0)
-        layout(placeable.width - reach, placeable.height) { placeable.placeRelative(0, 0) }
-    }
+private const val TITLE_SLOT = "title"
+
+/**
+ * The close button's slot in [DialogTitleRow].
+ */
+private const val CLOSE_SLOT = "close"
 
 /**
  * The parts of a dialog over the headless modal that focus can start on, the [body] and the row of

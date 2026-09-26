@@ -2,6 +2,7 @@ package com.materialkolor.builder.feature.share
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
@@ -36,6 +37,7 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.floats.shouldBeLessThanOrEqual
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
@@ -58,6 +60,16 @@ private const val LONG_LINK =
 private const val PHONE_WIDTH = 360
 
 private const val PHONE_HEIGHT = 780
+
+/**
+ * A short window, wide enough for the well beside the details at [SPLIT_WIDTH] and not at
+ * [STACKED_WIDTH].
+ */
+private const val SHORT_HEIGHT = 560
+
+private const val SPLIT_WIDTH = 1024
+
+private const val STACKED_WIDTH = 700
 
 @OptIn(ExperimentalTestApi::class)
 class ShareDialogTest : SessionTestBase() {
@@ -209,6 +221,45 @@ class ShareDialogTest : SessionTestBase() {
             waitForIdle()
             copied shouldBe listOf(LONG_LINK)
         }
+
+    // A short window shrinks the card rather than scrolling Copy link, or the text a failed copy
+    // shows, out of view, beside the details and over them alike.
+    @Test
+    fun actions_onAShortWindow_stayInsideItAndTheCardShrinks() {
+        for ((width, split) in listOf(SPLIT_WIDTH to true, STACKED_WIDTH to false)) {
+            withClue(if (split) "split" else "one column") {
+                runDesktopComposeUiTest(width = width, height = SHORT_HEIGHT) {
+                    showDialog(copyOutcome = ShareOutcome.CopyFailed, card = CardState.Shown(ImageBitmap(1200, 630)))
+                    val cardNode = onNode(hasContentDescription("Link preview card"))
+                    val copy = onNode(hasText("Copy link") and hasClickAction())
+
+                    fun assertInside() {
+                        copy.assertIsDisplayed()
+                        copy.fetchSemanticsNode().boundsInWindow.bottom shouldBeLessThanOrEqual SHORT_HEIGHT.toFloat()
+                        cardNode.assertIsDisplayed()
+                        cardNode.fetchSemanticsNode().boundsInWindow.height shouldBeGreaterThan 0f
+                    }
+                    assertInside()
+                    val card = cardNode.fetchSemanticsNode().boundsInWindow
+                    val button = copy.fetchSemanticsNode().boundsInWindow
+                    if (split) {
+                        button.left shouldBeGreaterThan card.right
+                    } else {
+                        button.top shouldBeGreaterThan
+                            card.bottom
+                    }
+
+                    copy.performClick()
+                    waitForIdle()
+
+                    assertInside()
+                    val manual = onNode(hasText("copy it yourself", substring = true))
+                    manual.assertIsDisplayed()
+                    manual.fetchSemanticsNode().boundsInWindow.bottom shouldBeLessThanOrEqual SHORT_HEIGHT.toFloat()
+                }
+            }
+        }
+    }
 
     @Test
     fun dialog_asItOpens_focusesCopyLink() =
