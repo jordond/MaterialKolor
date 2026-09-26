@@ -52,8 +52,6 @@ import com.materialkolor.builder.feature.workspace.workspaceStateOf
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.stateholder.dispatcher.Dispatcher
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
@@ -309,7 +307,7 @@ class FirstRunHintTest {
         val document = holder.state.document
         setContent {
             BuilderTheme(
-                skin = Skin(library = SkinLibrary.Material3, expressive = false),
+                expressive = false,
                 result = ThemeResolver().resolve(document),
                 isDark = false,
                 reducedMotion = reducedMotion,
@@ -328,7 +326,7 @@ class FirstRunHintTest {
         val document = ThemeDocument.Default
         setContent {
             BuilderTheme(
-                skin = Skin(library = SkinLibrary.Material3, expressive = false),
+                expressive = false,
                 result = ThemeResolver().resolve(document),
                 isDark = false,
                 reducedMotion = reducedMotion,

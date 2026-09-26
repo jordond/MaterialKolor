@@ -91,11 +91,6 @@ internal object ShellMetrics {
      * The room a floating dock takes, Material's floating toolbar height.
      */
     val dockHeight: Dp = 64.dp
-
-    /**
-     * The command palette's widest on Expanded, where the other dialogs stop at 560 dp.
-     */
-    val paletteWideWidth: Dp = 640.dp
 }
 
 /**

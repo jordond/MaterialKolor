@@ -19,8 +19,6 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 
 internal const val ShellPosterTag = "shell-poster"
 internal const val ShellCanvasTag = "shell-canvas"
@@ -39,19 +37,20 @@ internal const val ShellPosterLabel = "Seed and theme controls"
 internal val ShellPosterColors: PosterColors = PosterColors.of(Argb(0xD9653B))
 
 /**
- * Every skin the shell is drawn in, named for the screenshot files.
+ * Both flavours the shell is drawn in, standard and Expressive, each named for a failure clue.
  */
-internal val ShellSkins: List<Pair<String, Skin>> = listOf(
-    "material3" to Skin(SkinLibrary.Material3, expressive = false),
-    "expressive" to Skin(SkinLibrary.Material3, expressive = true),
+internal val ShellFlavours: List<Pair<String, Boolean>> = listOf(
+    "material3" to false,
+    "expressive" to true,
 )
 
 /**
- * A skin over a resolved document, a measured layout for a mouse or a finger, and frozen motion.
+ * The builder's theme over a resolved document, a measured layout for a mouse or a finger, and
+ * frozen motion.
  */
 @Composable
 internal fun ShellHarness(
-    skin: Skin,
+    expressive: Boolean = false,
     reducedMotion: Boolean = false,
     coarsePointer: Boolean = false,
     isDark: Boolean = false,
@@ -59,7 +58,7 @@ internal fun ShellHarness(
 ) {
     val result = remember { ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4))) }
     CompositionLocalProvider(LocalMotionFrozen provides true) {
-        BuilderTheme(skin, result, isDark = isDark, reducedMotion = reducedMotion) {
+        BuilderTheme(expressive, result, isDark = isDark, reducedMotion = reducedMotion) {
             ProvideBuilderLayout(coarsePointer, Modifier.fillMaxSize().testTag(ShellRootTag)) { content() }
         }
     }

@@ -31,8 +31,6 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BottomSheetDetent
 import com.materialkolor.builder.kit.control.BottomSheetState
 import com.materialkolor.builder.kit.control.rememberBottomSheetState
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.CoroutineScope
@@ -59,7 +57,7 @@ class ShellFocusTest {
             withClue("$width dp") {
                 runSkikoComposeUiTest(size = Size(width.toFloat(), 900f)) {
                     setContent {
-                        ShellHarness(Skin(SkinLibrary.Material3, expressive = false)) {
+                        ShellHarness {
                             WorkspaceShell(
                                 posterColors = ShellPosterColors,
                                 posterCollapsed = collapsed,
@@ -94,7 +92,7 @@ class ShellFocusTest {
                     lateinit var sheet: BottomSheetState
                     lateinit var scope: CoroutineScope
                     setContent {
-                        ShellHarness(Skin(SkinLibrary.Material3, expressive = false), coarsePointer = coarse) {
+                        ShellHarness(coarsePointer = coarse) {
                             sheet = rememberBottomSheetState()
                             scope = rememberCoroutineScope()
                             WorkspaceShell(
@@ -132,11 +130,11 @@ class ShellFocusTest {
 
     @Test
     fun clickAndFocusRequest_canvasFieldAtHalf_getInWhileTabStillSkipsTheCanvas() {
-        for ((name, skin) in ShellSkins) {
+        for ((name, expressive) in ShellFlavours) {
             withClue(name) {
                 runSkikoComposeUiTest(size = Size(412f, 900f)) {
                     setContent {
-                        ShellHarness(skin) {
+                        ShellHarness(expressive) {
                             ShellUnderSheet(
                                 sheet = rememberBottomSheetState(BottomSheetDetent.Half),
                                 canvas = { ShellField(ShellCanvasTag) },
@@ -171,14 +169,14 @@ class ShellFocusTest {
             Triple(ShellTopBarTag, BottomSheetDetent.Half, false),
             Triple(ShellTopBarTag, BottomSheetDetent.Full, true),
         )
-        for ((name, skin) in ShellSkins) {
+        for ((name, expressive) in ShellFlavours) {
             for ((start, detent, covered) in moves) {
                 withClue("$name, $start to $detent") {
                     runSkikoComposeUiTest(size = Size(412f, 900f)) {
                         lateinit var sheet: BottomSheetState
                         lateinit var scope: CoroutineScope
                         setContent {
-                            ShellHarness(skin) {
+                            ShellHarness(expressive) {
                                 sheet = rememberBottomSheetState()
                                 scope = rememberCoroutineScope()
                                 ShellUnderSheet(sheet)

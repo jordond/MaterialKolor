@@ -23,10 +23,7 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.stateholder.dispatcher.rememberDispatcher
-import io.kotest.assertions.withClue
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.comparables.shouldBeLessThanOrEqualTo
 import io.kotest.matchers.shouldBe
@@ -43,11 +40,6 @@ private const val PHONE_HEIGHT = 360
  */
 private const val ROOMY_HEIGHT = 1200
 
-/**
- * The builder's dialogs, which are always Material's.
- */
-private val Libraries = listOf(SkinLibrary.Material3)
-
 @OptIn(ExperimentalTestApi::class)
 class DialogRoomTest {
     // Taller than wide, so the picture would take all the height it could.
@@ -55,29 +47,23 @@ class DialogRoomTest {
 
     @Test
     fun eyedropper_onAPhoneOnItsSide_keepsCancelWholeAndOnScreen() {
-        Libraries.forEach { library ->
-            assertButtonFits(library, "Cancel") { Eyedropper() }
-            runDesktopComposeUiTest(width = PHONE_WIDTH, height = PHONE_HEIGHT) {
-                showDialog(library) { Eyedropper() }
-                withClue(library) {
-                    onNodeWithTag(EYEDROPPER_PICTURE_TAG).getUnclippedBoundsInRoot().height shouldBeGreaterThan 0.dp
-                }
-            }
+        assertButtonFits("Cancel") { Eyedropper() }
+        runDesktopComposeUiTest(width = PHONE_WIDTH, height = PHONE_HEIGHT) {
+            showDialog { Eyedropper() }
+            onNodeWithTag(EYEDROPPER_PICTURE_TAG).getUnclippedBoundsInRoot().height shouldBeGreaterThan 0.dp
         }
     }
 
     @Test
     fun presets_onAPhoneOnItsSide_keepCloseWholeAndOnScreen() {
-        Libraries.forEach { library ->
-            assertButtonFits(library, "Close") {
-                PresetPicker(
-                    visible = true,
-                    document = ThemeDocument.Default,
-                    isDark = false,
-                    onChoose = { },
-                    onDismissRequest = { },
-                )
-            }
+        assertButtonFits("Close") {
+            PresetPicker(
+                visible = true,
+                document = ThemeDocument.Default,
+                isDark = false,
+                onChoose = { },
+                onDismissRequest = { },
+            )
         }
     }
 
@@ -92,47 +78,40 @@ class DialogRoomTest {
      * roomy window, and sits inside the window.
      */
     private fun assertButtonFits(
-        library: SkinLibrary,
         label: String,
         dialog: @Composable () -> Unit,
     ) {
-        val roomy = buttonBounds(library, ROOMY_HEIGHT, label, dialog)
-        val phone = buttonBounds(library, PHONE_HEIGHT, label, dialog)
-        withClue(library) {
-            phone.height shouldBe roomy.height
-            phone.bottom shouldBeLessThanOrEqualTo PHONE_HEIGHT.dp
-        }
+        val roomy = buttonBounds(ROOMY_HEIGHT, label, dialog)
+        val phone = buttonBounds(PHONE_HEIGHT, label, dialog)
+        phone.height shouldBe roomy.height
+        phone.bottom shouldBeLessThanOrEqualTo PHONE_HEIGHT.dp
     }
 
     /**
      * Where the button named [label] sits in [dialog], in a window [height] tall.
      */
     private fun buttonBounds(
-        library: SkinLibrary,
         height: Int,
         label: String,
         dialog: @Composable () -> Unit,
     ): DpRect {
         var bounds = DpRect(0.dp, 0.dp, 0.dp, 0.dp)
         runDesktopComposeUiTest(width = PHONE_WIDTH, height = height) {
-            showDialog(library, dialog)
+            showDialog(dialog)
             bounds = onNodeWithText(label).assertIsDisplayed().getUnclippedBoundsInRoot()
         }
         return bounds
     }
 
     /**
-     * Shows [dialog] in [library]'s skin on a touch screen that fills the window.
+     * Shows [dialog] in the builder's skin on a touch screen that fills the window.
      */
-    private fun ComposeUiTest.showDialog(
-        library: SkinLibrary,
-        dialog: @Composable () -> Unit,
-    ) {
+    private fun ComposeUiTest.showDialog(dialog: @Composable () -> Unit) {
         val resolver = ThemeResolver()
         val result = resolver.resolve(ThemeDocument.Default)
         setContent {
             BuilderTheme(
-                skin = Skin(library = library, expressive = false),
+                expressive = false,
                 result = result,
                 isDark = false,
                 reducedMotion = true,

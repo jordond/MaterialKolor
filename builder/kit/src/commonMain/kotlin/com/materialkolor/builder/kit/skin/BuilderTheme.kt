@@ -31,19 +31,18 @@ import com.materialkolor.palettes.TonalPalette
 /**
  * Themes [content] with the Material 3 skin, coloured from [result].
  *
- * The builder's chrome is always Material 3, so only [Skin.expressive] of [skin] counts, and the
- * skin it provides as [LocalSkin] is Material 3 whatever library [skin] names. A Custom preview pane
- * takes its own skin from `CustomPaneTheme`. The theme draws from the chrome schemes of [result],
- * which floor contrast at the standard level and leave pins and AMOLED out, so the builder stays
- * readable whatever the document does. Nothing here generates anything. It provides [LocalSkin],
- * the builder's type, its tokens, its motion and its icons.
+ * The builder's chrome is always Material 3, standard or Expressive. A Custom preview pane takes its
+ * own skin from `CustomPaneTheme`. The theme draws from the chrome schemes of [result], which floor
+ * contrast at the standard level and leave pins and AMOLED out, so the builder stays readable
+ * whatever the document does. Nothing here generates anything. It provides [LocalSkin], the
+ * builder's type, its tokens, its motion and its icons.
  *
- * The builder keeps one skin for its whole life, so [skin] is not expected to change. A library
- * switch only re-themes the preview panes.
+ * The builder keeps one flavour for its whole life, so [expressive] is not expected to change. A
+ * library switch only re-themes the preview panes.
  *
  * It also tracks whether focus moves by keyboard, so a click leaves no focus ring behind.
  *
- * @param[skin] The flavour to use, standard or Expressive.
+ * @param[expressive] Whether the chrome uses Material 3 Expressive rather than the standard theme.
  * @param[result] The resolved document, read on the UI thread only like every result.
  * @param[isDark] Which mode of the chrome to draw.
  * @param[reducedMotion] Swap every skin's motion for the reduced set.
@@ -51,7 +50,7 @@ import com.materialkolor.palettes.TonalPalette
  */
 @Composable
 public fun BuilderTheme(
-    skin: Skin,
+    expressive: Boolean,
     result: ThemeResult,
     isDark: Boolean,
     reducedMotion: Boolean,
@@ -62,7 +61,7 @@ public fun BuilderTheme(
         content()
     }
     val focusVisibility = remember { FocusVisibility() }
-    val chromeSkin = remember(skin.expressive) { Skin(SkinLibrary.Material3, skin.expressive) }
+    val chromeSkin = remember(expressive) { Skin(SkinLibrary.Material3, expressive) }
     CompositionLocalProvider(
         LocalSkin provides chromeSkin,
         LocalBuilderType provides rememberBuilderType(),
@@ -71,7 +70,7 @@ public fun BuilderTheme(
     ) {
         Box(Modifier.trackFocusVisibility(focusVisibility), propagateMinConstraints = true) {
             OverlayHost {
-                MaterialSkinTheme(result.chrome(isDark), skin.expressive, reducedMotion, builder)
+                MaterialSkinTheme(result.chrome(isDark), expressive, reducedMotion, builder)
             }
         }
     }

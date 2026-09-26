@@ -56,18 +56,6 @@ public class ThemeResult internal constructor(
     public val customSlots: CustomSlotColors by lazy { CustomSlotColors.from(document, light, dark, roles) }
 
     /**
-     * Every slot of the Custom target cut from the [chrome] schemes, for the builder's own Custom skin.
-     *
-     * Pins, AMOLED and custom tones stay out, the same as they stay out of [chrome], so nothing a
-     * document does to its own slots can make the builder hard to read.
-     */
-    public val chromeCustomSlots: CustomSlotColors by lazy {
-        val plain = document.copy(amoled = false, pins = emptyMap(), customTones = emptyMap())
-        val chromeRoles = RoleTables.from(chromeLight, chromeDark, plain)
-        CustomSlotColors.from(plain, chromeLight, chromeDark, chromeRoles)
-    }
-
-    /**
      * The colors of the seed poster.
      */
     public val poster: PosterColors by lazy { PosterColors.of(document.seed) }

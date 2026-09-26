@@ -185,7 +185,7 @@ class ControlStateNameTest {
                 BuilderSegmented(listOf("Grid", "List"), "Grid", {}, "Layout") { it }
                 BuilderSelect("Scheme style", listOf("Tonal spot", "Vibrant"), "Tonal spot", {})
             }
-            BuilderBottomSheet(rememberBottomSheetState(), label = "Poster") { BuilderText("#6750A4") }
+            TestBottomSheet(rememberBottomSheetState(), label = "Poster") { BuilderText("#6750A4") }
         }
     }
 

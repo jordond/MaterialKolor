@@ -16,8 +16,6 @@ import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.PosterMode
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
@@ -28,7 +26,6 @@ import kotlin.test.Test
 
 private const val FullscreenExitTag = "shell-fullscreen-exit"
 private const val FullscreenHeight = 900
-private val FullscreenSkin = Skin(SkinLibrary.Material3, expressive = false)
 
 @OptIn(ExperimentalTestApi::class)
 class ShellFullscreenTest {
@@ -40,7 +37,7 @@ class ShellFullscreenTest {
                 runSkikoComposeUiTest(size = Size(width.toFloat(), FullscreenHeight.toFloat())) {
                     var mode: PosterMode? = null
                     setContent {
-                        ShellHarness(FullscreenSkin) {
+                        ShellHarness {
                             mode = LocalLayout.current.posterMode
                             FullscreenShell(fullscreen = true)
                         }
@@ -78,7 +75,7 @@ class ShellFullscreenTest {
             var fullscreen by mutableStateOf(false)
             val canvases = mutableListOf<Any>()
             setContent {
-                ShellHarness(FullscreenSkin) {
+                ShellHarness {
                     FullscreenShell(fullscreen = fullscreen, onCanvas = { token -> canvases += token })
                 }
             }

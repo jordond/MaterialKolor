@@ -42,8 +42,6 @@ import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.kotest.assertions.withClue
@@ -431,7 +429,7 @@ private fun Themed(content: @Composable () -> Unit) {
     val document = ThemeDocument.Default
     val result = remember { ThemeResolver().resolve(document) }
     BuilderTheme(
-        skin = Skin(library = SkinLibrary.Material3, expressive = false),
+        expressive = false,
         result = result,
         isDark = false,
         reducedMotion = true,

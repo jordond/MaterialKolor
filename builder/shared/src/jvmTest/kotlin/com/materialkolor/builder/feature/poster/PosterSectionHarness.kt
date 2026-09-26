@@ -30,8 +30,6 @@ import com.materialkolor.builder.feature.workspace.capabilitiesOf
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.shell.PosterSurface
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.stateholder.dispatcher.Dispatcher
 import dev.stateholder.dispatcher.rememberDispatcher
 
@@ -157,7 +155,7 @@ internal fun ComposeUiTest.showSection(
             fineTune = harness.fineTune,
         )
         BuilderTheme(
-            skin = Skin(library = SkinLibrary.Material3, expressive = false),
+            expressive = false,
             result = result,
             isDark = false,
             reducedMotion = true,

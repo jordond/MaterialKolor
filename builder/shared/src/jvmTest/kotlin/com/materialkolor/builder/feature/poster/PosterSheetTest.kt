@@ -10,7 +10,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import com.materialkolor.builder.LocalThemeResult
-import com.materialkolor.builder.ShellSkin
+import com.materialkolor.builder.ShellExpressive
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
@@ -132,7 +132,7 @@ class PosterSheetTest {
             val dispatcher = rememberDispatcher<WorkspaceAction> {}
             val sheetState = rememberBottomSheetState()
             sheet = sheetState
-            BuilderTheme(skin = ShellSkin, result = result, isDark = false, reducedMotion = true) {
+            BuilderTheme(expressive = ShellExpressive, result = result, isDark = false, reducedMotion = true) {
                 ProvideBuilderLayout(coarsePointer = true, modifier = Modifier.fillMaxSize()) {
                     CompositionLocalProvider(
                         LocalThemeResult provides result,

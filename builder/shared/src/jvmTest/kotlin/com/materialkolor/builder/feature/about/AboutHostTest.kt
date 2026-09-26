@@ -45,8 +45,6 @@ import com.materialkolor.builder.kit.a11y.ProvideWebKeyboardForTest
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.ShippedFont
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
@@ -119,7 +117,7 @@ class AboutHostTest {
             val document = ThemeDocument.Default
             setContent {
                 BuilderTheme(
-                    skin = Skin(library = SkinLibrary.Material3, expressive = false),
+                    expressive = false,
                     result = ThemeResolver().resolve(document),
                     isDark = false,
                     reducedMotion = true,

@@ -10,8 +10,6 @@ import com.materialkolor.builder.engine.poster.PosterColors
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.shell.PosterSurface
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.hct.Hct
 import com.materialkolor.ktx.contrastRatio
@@ -33,38 +31,32 @@ class PosterInkTest {
      * [PosterColors]. Muted text takes the ink too, so both have to read on every seed.
      */
     @Test
-    fun posterText_hundredSeedsInEverySkin_holdsBodyTextContrastOnTheSeed() =
+    fun posterText_hundredSeeds_holdsBodyTextContrastOnTheSeed() =
         runComposeUiTest {
             val seeds = hundredSeeds()
             val result = ThemeResolver().resolve(ThemeDocument.Default)
-            val inks = mutableListOf<Triple<Argb, SkinLibrary, List<Pair<String, Color>>>>()
+            val inks = mutableListOf<Pair<Argb, List<Pair<String, Color>>>>()
             setContent {
-                SkinLibrary.entries.forEach { library ->
-                    BuilderTheme(
-                        skin = Skin(library = library, expressive = false),
-                        result = result,
-                        isDark = false,
-                        reducedMotion = true,
-                    ) {
-                        seeds.forEach { seed ->
-                            PosterSurface(PosterColors.of(seed)) {
-                                val tokens = LocalBuilderTokens.current
-                                inks += Triple(
-                                    seed,
-                                    library,
-                                    listOf("text" to tokens.textStrong, "muted" to tokens.textMuted),
-                                )
-                            }
+                BuilderTheme(
+                    expressive = false,
+                    result = result,
+                    isDark = false,
+                    reducedMotion = true,
+                ) {
+                    seeds.forEach { seed ->
+                        PosterSurface(PosterColors.of(seed)) {
+                            val tokens = LocalBuilderTokens.current
+                            inks += seed to listOf("text" to tokens.textStrong, "muted" to tokens.textMuted)
                         }
                     }
                 }
             }
             waitForIdle()
 
-            inks.map { (seed, library) -> seed to library }.toSet().size shouldBe seeds.size * SkinLibrary.entries.size
-            inks.forEach { (seed, library, roles) ->
+            inks.map { (seed) -> seed }.toSet().size shouldBe seeds.size
+            inks.forEach { (seed, roles) ->
                 roles.forEach { (role, ink) ->
-                    withClue("$role ink $ink on seed $seed in $library") {
+                    withClue("$role ink $ink on seed $seed") {
                         ink.contrastRatio(seed.toColor()) shouldBeGreaterThanOrEqual TEXT_RATIO
                     }
                 }
