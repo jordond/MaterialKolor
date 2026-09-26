@@ -7,7 +7,7 @@ import com.materialkolor.builder.core.session.ProjectSession
 import com.materialkolor.builder.core.session.SessionTestBase
 import com.materialkolor.builder.domain.color.ColorNames
 import com.materialkolor.builder.domain.link.ShareCodec
-import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.model.DEFAULT_SEED
 import com.materialkolor.builder.domain.persist.StorageKeys
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
@@ -277,7 +277,8 @@ class ProjectsModelTest : SessionTestBase() {
             val id = session.project.value
                 .shouldBeInstanceOf<ProjectRef.Persisted>()
                 .id
-            projects.load(id).shouldNotBeNull().name shouldBe ColorNames.nameOf(ThemeDocument.Default.seed)
+            session.document.value shouldBe firstNewDocument(ColorNames.nameOf(DEFAULT_SEED))
+            projects.load(id).shouldNotBeNull().name shouldBe ColorNames.nameOf(session.document.value.seed)
             model.state.value.openId shouldBe id
             harness.clearAndJoin()
         }
