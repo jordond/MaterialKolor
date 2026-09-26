@@ -40,6 +40,7 @@ internal object GoldenHashes {
         "material3-dynamic-animated" to 0x14FC2328L,
         "material3-dynamic-cmf" to 0x1586783BL,
         "material3-dynamic-default" to 0xC106C8E3L,
+        "material3-dynamic-first-theme" to 0x2C3D753FL,
         "material3-dynamic-high-contrast" to 0x4B8AF1FFL,
         "material3-dynamic-pins" to 0xFC40E256L,
         "material3-dynamic-primary-override" to 0x6AAEEF2DL,

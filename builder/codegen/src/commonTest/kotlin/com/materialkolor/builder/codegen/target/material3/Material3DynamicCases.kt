@@ -42,6 +42,7 @@ internal object Material3DynamicCases {
 
     private val plain: List<Fixture> = listOf(
         Fixtures.Default,
+        Fixtures.FirstTheme,
         Fixtures.PrimaryOverride,
         Fixtures.AllOverrides,
         Fixtures.Cmf,

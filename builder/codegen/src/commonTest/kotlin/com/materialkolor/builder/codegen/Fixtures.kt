@@ -85,6 +85,12 @@ internal object Fixtures {
 
     val Default: Fixture = fixture("default", Base)
 
+    /**
+     * The builder's first theme as it really starts, on the newest spec, which the browser tests
+     * download and compare.
+     */
+    val FirstTheme: Fixture = fixture("first-theme", ThemeDocument.Default)
+
     val PrimaryOverride: Fixture = fixture(
         name = "primary-override",
         document = Base.copy(keyColors = KeyColors(primary = argb(0xFF6750A4))),

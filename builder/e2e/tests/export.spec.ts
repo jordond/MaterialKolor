@@ -24,8 +24,8 @@ import {
 /** The Export sheet's title in the mirror, the dialog fold. */
 const EXPORT_DIALOG = /^Export code, dialog/;
 
-/** The codegen's golden for the default seed on Material 3, Dynamic, the builder's first theme. */
-const GOLDEN = path.resolve(__dirname, '../../codegen/src/jvmTest/resources/golden/material3-dynamic-default');
+/** The codegen's golden for the builder's first theme, on Material 3, Dynamic. */
+const GOLDEN = path.resolve(__dirname, '../../codegen/src/jvmTest/resources/golden/material3-dynamic-first-theme');
 
 /** The files of [GOLDEN], by their path under it. */
 const GOLDEN_FILES = ['src/commonMain/kotlin/com/example/theme/Color.kt', 'src/commonMain/kotlin/com/example/theme/Theme.kt'];

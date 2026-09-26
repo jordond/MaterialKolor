@@ -50,12 +50,16 @@ test('3 switches the library to Fluent and 1 back, with no page error and the sh
 
 // Switch library. 2, 3 and 1 move the library to Unstyled, Fluent and back to M3, and Shift+E then
 // turns Expressive on. On TonalSpot 2021 that suggests the Expressive style on the 2025 spec, which
-// Apply sets as one undo.
+// Apply sets as one undo. A new theme starts on 2026, which runs as 2025 and suggests nothing, so
+// this opens a v1 link, which keeps its 2021 spec.
+
+/** A v1 link to the default seed on TonalSpot, with no color_spec, so it opens on 2021. */
+const LEGACY_2021 = '/?color_seed=FFD9653B';
 
 test('2, 3 and 1 switch the library, Shift+E turns Expressive on, and Apply takes the suggestion as one undo', async ({
   page,
 }) => {
-  await openWorkspace(page);
+  await openWorkspace(page, LEGACY_2021);
   const undo = page.locator('#cmp_a11y_root').getByRole('button', { name: /^Undo library change to / });
   // Read without waiting, since there is no such Undo before the first switch.
   const undoNames = async (name: string) =>
