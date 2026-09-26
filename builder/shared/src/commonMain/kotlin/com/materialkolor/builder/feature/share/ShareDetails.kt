@@ -268,7 +268,10 @@ private fun extrasText(document: ThemeDocument): String {
 private fun LinkBox(link: String) {
     val tokens = LocalBuilderTokens.current
     val shape = RoundedCornerShape(tokens.radius.small)
-    val lineHeight = with(LocalDensity.current) { LocalBuilderType.current.code.lineHeight.toDp() }
+    val lineHeight = with(LocalDensity.current) {
+        LocalBuilderType.current.code.lineHeight
+            .toDp()
+    }
     val padding = tokens.spacing.medium
     Column(verticalArrangement = Arrangement.spacedBy(tokens.spacing.small)) {
         BuilderText(text = stringResource(Res.string.share_link_label), style = BuilderTextStyle.Label)
@@ -315,7 +318,10 @@ internal fun ShareButtons(
         )
         return
     }
-    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.small)) {
+    Row(
+        modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.small),
+    ) {
         BuilderButton(
             onClick = onCopy,
             label = copyLabel,
