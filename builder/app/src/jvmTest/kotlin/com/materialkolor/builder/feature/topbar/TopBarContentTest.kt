@@ -49,8 +49,8 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 private const val EXPRESSIVE_MESSAGE = "Expressive themes usually use the Expressive style on the 2025 spec"
-private const val UNDO_EXPRESSIVE = "Undo library change to Expressive"
-private const val REDO_EXPRESSIVE = "Redo library change to Expressive"
+private const val UNDO_EXPRESSIVE = "Undo library change to M3 Expressive"
+private const val REDO_EXPRESSIVE = "Redo library change to M3 Expressive"
 
 /**
  * A desktop window wide enough for the segmented switcher in every skin, beside the full actions.
@@ -93,7 +93,7 @@ class TopBarContentTest {
         }
 
     @Test
-    fun librarySwitcher_pickingExpressive_landsThroughTheRevealAsOneUndoEntry() =
+    fun expressiveSwitch_turningItOn_landsThroughTheRevealAsOneUndoEntry() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val graph = showRoot()
             mainClock.autoAdvance = false
@@ -123,7 +123,7 @@ class TopBarContentTest {
         }
 
     @Test
-    fun expressiveSuggestion_afterASwitchFromThe2021Spec_changesNothingWithoutAClick() =
+    fun expressiveSuggestion_afterAFlipOnThe2021Spec_changesNothingWithoutAClick() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val graph = showRoot()
 
@@ -144,17 +144,17 @@ class TopBarContentTest {
         }
 
     @Test
-    fun expressiveSuggestion_afterASwitchFromFluent_showsOnlyOnceTheMaterialSkinIsIn() =
+    fun expressiveSuggestion_afterAFlipFromPlainM3_showsOnlyOnceTheExpressiveSkinIsIn() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val graph = showRoot()
             runOnIdle {
-                val fluent = graph.session.document.value.copy(
-                    library = Library.Fluent,
+                val plain = graph.session.document.value.copy(
+                    library = Library.Material3,
                     expressive = false,
                     style = Style.Rainbow,
                     spec = SpecVersion.Spec2025,
                 )
-                graph.session.edit(DocumentChange.Replace(fluent), EditPhase.Discrete)
+                graph.session.edit(DocumentChange.Replace(plain), EditPhase.Discrete)
             }
             waitForIdle()
             mainClock.autoAdvance = false
@@ -163,7 +163,7 @@ class TopBarContentTest {
             mainClock.advanceTimeBy(0)
             var frames = 0
             while (!graph.session.document.value.expressive && frames < REVEAL_FRAMES) {
-                // Still Fluent, so the suggestion must not have opened in the skin being left.
+                // Still plain M3, so the suggestion must not have opened in the skin being left.
                 onAllNodesWithText(EXPRESSIVE_MESSAGE).fetchSemanticsNodes().isEmpty() shouldBe true
                 mainClock.advanceTimeByFrame()
                 frames++

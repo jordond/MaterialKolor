@@ -37,13 +37,34 @@ class ExpressiveSuggestionTest {
     }
 
     @Test
-    fun libraryChoice_change_setsLibraryAndFlagTogether() {
-        LibraryChoice.Expressive.change shouldBe DocumentChange.SetLibrary(Library.Material3, expressive = true)
+    fun libraryChoice_change_landsWithExpressiveOff() {
         val expressive = ThemeDocument.Default.copy(library = Library.Material3, expressive = true)
-        LibraryChoice.of(expressive) shouldBe LibraryChoice.Expressive
+        LibraryChoice.of(expressive) shouldBe LibraryChoice.M3
         LibraryChoice.entries.forEach { choice ->
-            LibraryChoice.of(choice.change.apply(ThemeDocument.Default)) shouldBe choice
+            val landed = choice.change.apply(expressive)
+            LibraryChoice.of(landed) shouldBe choice
+            landed.expressive shouldBe false
         }
+    }
+
+    @Test
+    fun expressiveChange_setsMaterial3AndTheFlag() {
+        expressiveChange(on = true) shouldBe DocumentChange.SetLibrary(Library.Material3, expressive = true)
+        expressiveChange(on = true).apply(ThemeDocument.Default).onExpressive shouldBe true
+        expressiveChange(on = false).apply(ThemeDocument.Default).onExpressive shouldBe false
+    }
+
+    @Test
+    fun raisesExpressiveSuggestion_onlyWhenTheSwitchGoesOn() {
+        val plain = ThemeDocument.Default.copy(library = Library.Material3, style = Style.Rainbow)
+        val on = expressiveChange(on = true)
+
+        raisesExpressiveSuggestion(on, plain, on.apply(plain)) shouldBe true
+        val off = expressiveChange(on = false)
+        val expressive = on.apply(plain)
+        raisesExpressiveSuggestion(off, expressive, off.apply(expressive)) shouldBe false
+        val fluent = LibraryChoice.Fluent.change
+        raisesExpressiveSuggestion(fluent, plain, fluent.apply(plain)) shouldBe false
     }
 
     private fun on(

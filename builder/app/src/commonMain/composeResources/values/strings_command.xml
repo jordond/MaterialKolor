@@ -17,7 +17,7 @@
 
     <!-- A command that picks one option of a setting, the setting then the option, such as "Mode, Frozen hex". -->
     <string name="command_choice">%1$s, %2$s</string>
-    <!-- Switches the library. The argument is its name in the switcher, such as "Expressive". -->
+    <!-- Switches the library. The argument is its name in the switcher, such as "Fluent". -->
     <string name="command_use_library">Switch to %1$s</string>
     <!-- Picks a palette style. The argument is its name, such as "Tonal spot". -->
     <string name="command_use_style">Use style %1$s</string>
@@ -63,10 +63,11 @@
     <string name="command_key_hue_lock">Toggle the hue lock</string>
     <string name="command_key_style_lock">Toggle the style lock</string>
     <string name="command_key_library_1">Library M3</string>
-    <string name="command_key_library_2">Library Expressive</string>
-    <string name="command_key_library_3">Library Unstyled</string>
-    <string name="command_key_library_4">Library Fluent</string>
-    <string name="command_key_library_5">Library Custom</string>
+    <string name="command_key_library_2">Library Unstyled</string>
+    <string name="command_key_library_3">Library Fluent</string>
+    <string name="command_key_library_4">Library Custom</string>
+    <!-- Flips the Expressive switch, which only M3 has. -->
+    <string name="command_key_expressive">Turn Expressive on or off, on M3</string>
     <string name="command_key_copy_seed">Copy the seed hex, or the open file in export</string>
     <string name="command_key_undo">Undo the theme, or the text inside a field</string>
     <string name="command_key_redo">Redo the theme, or the text inside a field</string>

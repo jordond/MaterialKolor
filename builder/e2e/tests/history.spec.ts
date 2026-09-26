@@ -18,8 +18,8 @@ test.beforeEach(async ({ context }) => {
 
 test('a row travels to its step, and the next edit drops the undone steps', async ({ page }) => {
   await openWorkspace(page);
-  await pressKeyUntil(page, '3', () => undoNames(page, 'Unstyled'));
-  await pressKeyUntil(page, '4', () => undoNames(page, 'Fluent'));
+  await pressKeyUntil(page, '2', () => undoNames(page, 'Unstyled'));
+  await pressKeyUntil(page, '3', () => undoNames(page, 'Fluent'));
   await pressKeyUntil(page, '1', () => undoNames(page, 'M3'));
 
   await openHistory(page);

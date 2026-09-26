@@ -32,6 +32,7 @@ import com.materialkolor.builder.domain.persist.ExportMode
 import com.materialkolor.builder.feature.command.Shortcut
 import com.materialkolor.builder.feature.command.rememberPanelShortcuts
 import com.materialkolor.builder.feature.topbar.LibrarySwitcher
+import com.materialkolor.builder.feature.topbar.expressiveChange
 import com.materialkolor.builder.feature.workspace.ManualCopyDialog
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
@@ -312,6 +313,9 @@ private fun ExportHeader(
                 document = state.document,
                 onSwitch = { choice, origin ->
                     workspace.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin))
+                },
+                onExpressiveChange = { on, origin ->
+                    workspace.dispatch(WorkspaceAction.EditWithReveal(expressiveChange(on), origin))
                 },
             )
             BuilderSegmented(

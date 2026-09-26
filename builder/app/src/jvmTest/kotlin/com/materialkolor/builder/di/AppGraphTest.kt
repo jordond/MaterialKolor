@@ -77,7 +77,8 @@ class AppGraphTest {
             }
 
             waitUntil { platform.environment.splashHidden }
-            onNodeWithContentDescription("Undo").assertExists()
+            // More options stays in the bar at every width, where Undo may have moved into it.
+            onNodeWithContentDescription("More options").assertExists()
             platform.router.calls shouldBe listOf(RouterCall.ReplaceHome)
             platform.environment.themeColors.isNotEmpty() shouldBe true
         }

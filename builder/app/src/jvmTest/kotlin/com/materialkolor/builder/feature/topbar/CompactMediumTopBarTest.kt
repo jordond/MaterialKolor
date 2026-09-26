@@ -66,7 +66,6 @@ private const val PICK_TIMEOUT_MS = 5_000L
 /** What the switcher calls each library, as `strings_topbar.xml` has them. */
 private val NAMES = mapOf(
     LibraryChoice.M3 to "M3",
-    LibraryChoice.Expressive to "Expressive",
     LibraryChoice.Unstyled to "Unstyled",
     LibraryChoice.Fluent to "Fluent",
     LibraryChoice.Custom to "Custom",
@@ -205,7 +204,7 @@ class CompactMediumTopBarTest {
         runDesktopComposeUiTest(width = 720, height = HEIGHT) {
             val graph = showRoot(folds = false)
             val start = LibraryChoice.of(graph.session.document.value)
-            (start == LibraryChoice.M3 || start == LibraryChoice.Expressive) shouldBe true
+            start shouldBe LibraryChoice.M3
             val target = LibraryChoice.Fluent
 
             trigger().performClick()
@@ -231,15 +230,20 @@ class CompactMediumTopBarTest {
             file.length() shouldBeGreaterThan 0L
         }
 
-    /** Boots the builder [width] wide and checks the top bar and the chips in each library's skin. */
+    /**
+     * Boots the builder [width] wide and checks the top bar and the chips in each library's skin,
+     * and in Material 3's with the Expressive switch on.
+     */
     private fun checkEverySkin(width: Int) =
         runDesktopComposeUiTest(width = width, height = HEIGHT) {
             val graph = showRoot(folds = false)
             val layout = LayoutInfo(width.dp, HEIGHT.dp)
-            val misfits = LibraryChoice.entries.flatMap { choice ->
-                runOnIdle { graph.session.edit(choice.change, EditPhase.Discrete) }
+            val skins = LibraryChoice.entries.map { choice -> choice.name to choice.change } +
+                ("Expressive" to expressiveChange(on = true))
+            val misfits = skins.flatMap { (name, change) ->
+                runOnIdle { graph.session.edit(change, EditPhase.Discrete) }
                 waitForIdle()
-                misfits(width, layout).map { misfit -> "$width dp, ${choice.name}: $misfit" }
+                misfits(width, layout).map { misfit -> "$width dp, $name: $misfit" }
             }
 
             misfits.joinToString("\n") shouldBe ""
