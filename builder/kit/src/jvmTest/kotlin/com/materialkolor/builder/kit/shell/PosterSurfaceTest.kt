@@ -11,12 +11,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import com.materialkolor.builder.domain.color.Argb
-import com.materialkolor.builder.domain.model.CustomSlot
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.poster.PosterColors
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
-import com.materialkolor.builder.kit.skin.custom.LocalBuilderIdentity
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.hct.Hct
 import com.materialkolor.ktx.contrastRatio
@@ -65,7 +61,7 @@ class PosterSurfaceTest {
                     setContent {
                         ShellHarness(skin) {
                             val poster = remember(seed) { PosterColors.of(seed) }
-                            PosterSurface(poster) { inks = shellInks(skin, poster) }
+                            PosterSurface(poster) { inks = shellInks(poster) }
                         }
                     }
 
@@ -98,7 +94,7 @@ class PosterSurfaceTest {
                         ShellHarness(skin) {
                             PosterSurface(ShellPosterColors) {
                                 grounds =
-                                    shellInks(skin, ShellPosterColors).map { pair -> pair.ground }
+                                    shellInks(ShellPosterColors).map { pair -> pair.ground }
                             }
                         }
                     }
@@ -150,40 +146,22 @@ private fun Counted(count: CompositionCount) {
 }
 
 /**
- * Every ink on ground pair [skin] draws on the poster, from its own theme as well as the builder tokens.
+ * Every ink on ground pair the shell's skin draws on the poster, from its own theme as well as the
+ * builder tokens.
  */
 @Composable
-private fun shellInks(
-    skin: Skin,
-    poster: PosterColors,
-): List<ShellInk> {
+private fun shellInks(poster: PosterColors): List<ShellInk> {
     val seed = poster.seed.toColor()
     val tokens = LocalBuilderTokens.current
-    val shared = listOf(
+    val scheme = MaterialTheme.colorScheme
+    return listOf(
         ShellInk("tokens text on seed", tokens.textStrong, seed),
         ShellInk("tokens text on panel", tokens.textStrong, tokens.panel),
         ShellInk("tokens text on canvas", tokens.textStrong, tokens.canvas),
         ShellInk("tokens muted text on panel", tokens.textMuted, tokens.panel),
+        ShellInk("onSurface on surface", scheme.onSurface, scheme.surface),
+        ShellInk("primary on surface", scheme.primary, scheme.surface),
+        ShellInk("content colour on surface", LocalContentColor.current, scheme.surface),
+        ShellInk("onSurfaceVariant on surface", scheme.onSurfaceVariant, scheme.surface),
     )
-    val own = when (skin.library) {
-        SkinLibrary.Material3 -> {
-            val scheme = MaterialTheme.colorScheme
-            listOf(
-                ShellInk("onSurface on surface", scheme.onSurface, scheme.surface),
-                ShellInk("primary on surface", scheme.primary, scheme.surface),
-                ShellInk("content colour on surface", LocalContentColor.current, scheme.surface),
-                ShellInk("onSurfaceVariant on surface", scheme.onSurfaceVariant, scheme.surface),
-            )
-        }
-        SkinLibrary.Custom -> {
-            val identity = LocalBuilderIdentity.current
-            val surface = identity[CustomSlot.Surface]
-            listOf(
-                ShellInk("TextStrong on Surface", identity[CustomSlot.TextStrong], surface),
-                ShellInk("OnSurface on Surface", identity[CustomSlot.OnSurface], surface),
-                ShellInk("TextMuted on Surface", identity[CustomSlot.TextMuted], surface),
-            )
-        }
-    }
-    return shared + own
 }

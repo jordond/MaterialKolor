@@ -26,8 +26,8 @@ public enum class TabsVariant {
     Standard,
 
     /**
-     * The canvas tabs. Pills in every skin, each drawn in the skin's colours and shapes, and
-     * starting at the row's own start edge.
+     * The canvas tabs, Material pills starting at the row's own start edge. Only the shell's
+     * canvas uses them.
      */
     Canvas,
 }
@@ -60,10 +60,7 @@ public fun <T> BuilderTabs(
     require(selected in tabs) { "The selected tab $selected is not one of $tabs" }
     val skin = LocalSkin.current
     if (variant == TabsVariant.Canvas) {
-        val style = when (skin.library) {
-            SkinLibrary.Material3 -> if (skin.expressive) expressiveCanvasTabs() else materialCanvasTabs()
-            SkinLibrary.Custom -> customCanvasTabs()
-        }
+        val style = if (skin.expressive) expressiveCanvasTabs() else materialCanvasTabs()
         HeadlessTabs(tabs, selected, onSelect, label, style, modifier)
         return
     }
@@ -117,30 +114,6 @@ private fun expressiveCanvasTabs(): TabsStyle {
         selectedContainer = colors.primaryContainer,
         selectedInk = colors.onPrimaryContainer,
         ink = colors.onSurfaceVariant,
-        indicator = Color.Transparent,
-        indicatorHeight = 0.dp,
-        indicatorWidth = null,
-        focus = tokens.focus,
-    )
-}
-
-/**
- * Custom's canvas tabs, bare labels with the chosen one in a pill of the strongest ink.
- */
-@Composable
-@ReadOnlyComposable
-private fun customCanvasTabs(): TabsStyle {
-    val tokens = LocalBuilderTokens.current
-    return TabsStyle(
-        container = Color.Transparent,
-        containerShape = CircleShape,
-        containerPadding = 0.dp,
-        tabShape = CircleShape,
-        tabPadding = PaddingValues(horizontal = tokens.spacing.large, vertical = tokens.spacing.small),
-        gap = tokens.spacing.extraSmall,
-        selectedContainer = tokens.textStrong,
-        selectedInk = tokens.canvas,
-        ink = tokens.textStrong,
         indicator = Color.Transparent,
         indicatorHeight = 0.dp,
         indicatorWidth = null,

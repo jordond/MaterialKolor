@@ -61,7 +61,7 @@ private class SeenStyles(
     val slider: SliderStyle?,
     val tabs: TabsStyle?,
     val field: FieldStyle?,
-    val hero: FieldStyle,
+    val hero: FieldStyle?,
 )
 
 @OptIn(ExperimentalTestApi::class)
@@ -104,7 +104,7 @@ private fun seenStyles(): SeenStyles {
                 slider = CustomInputStyles.slider,
                 tabs = CustomInputStyles.tabs,
                 field = CustomInputStyles.field,
-                hero = CustomInputStyles.hero,
+                hero = null,
             )
         }
     }
@@ -120,8 +120,10 @@ private fun SeenStyles.inkPairs(): List<InkPair> {
     fun Color.onPanel(): Color = compositeOver(panel)
     return buildList {
         add(InkPair("focus on panel", tokens.focus, panel, 3.0))
-        add(InkPair("hero text on panel", hero.active, panel, 4.5))
-        add(InkPair("hero error on panel", hero.error, panel, 4.5))
+        hero?.let { style ->
+            add(InkPair("hero text on panel", style.active, panel, 4.5))
+            add(InkPair("hero error on panel", style.error, panel, 4.5))
+        }
         switch?.let { style ->
             add(InkPair("switch edge off", style.outlineOff, panel, 3.0))
             add(InkPair("switch thumb off", style.thumbOff, style.trackOff.onPanel(), 3.0))

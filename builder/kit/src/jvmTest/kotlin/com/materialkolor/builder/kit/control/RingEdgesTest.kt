@@ -43,10 +43,12 @@ class RingEdgesTest {
      * ink as well and sits over the edge of the text, so the ring is judged outside the box.
      */
     @Test
-    fun heroField_onALightAndADarkPoster_everySkin_ringsAllTheWayRound() {
+    fun heroField_onALightAndADarkPoster_materialSkins_ringsAllTheWayRound() {
         for (seed in PosterSeeds) {
             withClue(seed.toHex()) {
                 forEachSkin { _, skin ->
+                    // The poster, and so the hero, only ever stands in the shell's Material skin.
+                    if (skin.library != SkinLibrary.Material3) return@forEachSkin
                     val poster = PosterColors.of(seed)
                     val capture = tabOntoRing(skin, ringColors = { listOf(poster.ink.toColor()) }) {
                         PosterSurface(poster) {

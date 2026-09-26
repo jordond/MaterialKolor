@@ -22,12 +22,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.shell.PanelSide
 import com.materialkolor.builder.kit.shell.ShellMetrics
-import com.materialkolor.builder.kit.skin.headless.innerEdgeShape
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
@@ -159,3 +159,16 @@ internal fun MaterialPaletteFrame(
         )
     }
 }
+
+/**
+ * A shape rounded by [radius] only on the edge that faces the canvas, the end edge of a panel on
+ * the start side and the other way round.
+ */
+private fun innerEdgeShape(
+    side: PanelSide,
+    radius: Dp,
+): Shape =
+    when (side) {
+        PanelSide.Start -> RoundedCornerShape(topEnd = radius, bottomEnd = radius)
+        PanelSide.End -> RoundedCornerShape(topStart = radius, bottomStart = radius)
+    }

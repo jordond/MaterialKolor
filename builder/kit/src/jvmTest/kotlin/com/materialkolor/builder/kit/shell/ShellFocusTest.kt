@@ -27,7 +27,6 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runSkikoComposeUiTest
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.control.BottomSheetDetent
 import com.materialkolor.builder.kit.control.BottomSheetState
@@ -199,38 +198,6 @@ class ShellFocusTest {
             }
         }
     }
-
-    @Test
-    fun tab_compactHeadlessDockUnderTheSheetAtHalf_skipsTheDockAndHandsItsFocusOn() {
-        // The headless dock stands 56 dp tall, so at 844 dp the sheet at Half covers it.
-        val headless = ShellSkins.filter { (_, skin) -> skin.library != SkinLibrary.Material3 }
-        for ((name, skin) in headless) {
-            withClue(name) {
-                runSkikoComposeUiTest(size = Size(390f, 844f)) {
-                    lateinit var sheet: BottomSheetState
-                    lateinit var scope: CoroutineScope
-                    setContent {
-                        ShellHarness(skin) {
-                            sheet = rememberBottomSheetState()
-                            scope = rememberCoroutineScope()
-                            ShellUnderSheet(sheet, dock = { ShellStop(ShellDockTag, size = 48.dp) })
-                        }
-                    }
-                    waitForIdle()
-                    shellTabFrom(ShellPosterTag) shouldBe
-                        listOf(ShellPosterTag, ShellCanvasTag, ShellDockTag, ShellTopBarTag)
-
-                    onNodeWithTag(ShellDockTag, useUnmergedTree = true).requestFocus()
-                    waitForIdle()
-                    scope.launch { sheet.snapTo(BottomSheetDetent.Half) }
-                    waitForIdle()
-                    onNode(isFocused()).assert(hasContentDescription(ShellPosterLabel))
-
-                    shellTabFrom(ShellPosterTag) shouldBe listOf(ShellPosterTag, ShellTopBarTag)
-                }
-            }
-        }
-    }
 }
 
 /**
@@ -280,14 +247,11 @@ private fun ComposeUiTest.shellTabFrom(start: String): List<String> {
 }
 
 /**
- * A focus stop [size] square filling a slot's corner.
+ * A focus stop 40 dp square filling a slot's corner.
  */
 @Composable
-private fun ShellStop(
-    tag: String,
-    size: Dp = 40.dp,
-) {
-    Box(Modifier.size(size).testTag(tag).focusable())
+private fun ShellStop(tag: String) {
+    Box(Modifier.size(40.dp).testTag(tag).focusable())
 }
 
 /**
