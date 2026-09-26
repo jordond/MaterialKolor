@@ -364,15 +364,17 @@ Run it with `./gradlew :samples:custom-theme:run`.
 ## Compose Unstyled
 
 `material-kolor-unstyled` adapts a MaterialKolor scheme to
-[Compose Unstyled](https://composeunstyled.com) theming. Your app keeps `buildThemeV2`, its text
-style, its indication and its selection colors. The adapter only writes color tokens.
+[Compose Unstyled](https://composeunstyled.com) theming. It only produces color values, and your
+theme decides where they go. The theme's color schemes, text style, indication and every other
+property stay yours.
 
 ```kotlin
+import com.composeunstyled.theme.ColorScheme
 import com.composeunstyled.theme.Theme
 import com.composeunstyled.theme.buildThemeV2
 import com.materialkolor.PaletteStyle
 import com.materialkolor.unstyled.MaterialKolorTokens
-import com.materialkolor.unstyled.dynamicColorSchemes
+import com.materialkolor.unstyled.rememberDynamicColors
 
 object ThemeSettings {
     var seedColor by mutableStateOf(Color(0xFF6750A4))
@@ -380,7 +382,19 @@ object ThemeSettings {
 
 val AppTheme = buildThemeV2 {
     colorSchemeTransitionSpec = tween(300)
-    dynamicColorSchemes(seedColor = ThemeSettings.seedColor, style = PaletteStyle.Vibrant)
+    properties[MaterialKolorTokens.colors] = rememberDynamicColors(
+        seedColor = ThemeSettings.seedColor,
+        isDark = false,
+        style = PaletteStyle.Vibrant,
+    )
+
+    colorScheme(ColorScheme.Dark) {
+        properties[MaterialKolorTokens.colors] = rememberDynamicColors(
+            seedColor = ThemeSettings.seedColor,
+            isDark = true,
+            style = PaletteStyle.Vibrant,
+        )
+    }
 }
 
 @Composable
@@ -398,36 +412,39 @@ fun App() {
 ```
 
 The builder lambda is composable, so it reads `ThemeSettings.seedColor` on every recomposition and
-the theme regenerates when the button sets a new one. Light is the base, dark is the
-`ColorScheme.Dark` override, so `AppTheme { }` follows the system and
-`AppTheme(colorScheme = ColorScheme.Dark) { }` pins one.
+the theme regenerates when the button sets a new one. `rememberDynamicColors` takes the same
+parameters as `rememberDynamicScheme` and remembers the token map it returns.
 
-`dynamicColorSchemes` owns the `ColorScheme.Dark` override. Unstyled keeps one override per color
-scheme and each `colorScheme(ColorScheme.Dark) { }` replaces the one before it, so a dark block of
-your own in the same theme would either drop the dark tokens or be dropped by them. Put dark-only
-settings in the trailing `dark` block instead. It runs inside the same override, after the tokens.
+Light goes in the base values and dark goes in the `ColorScheme.Dark` block. Unstyled lays the
+active scheme's overrides over the base values, so `AppTheme { }` follows the system,
+`AppTheme(colorScheme = ColorScheme.Dark) { }` pins one, and a scheme that never sets the colors
+falls back to the light ones. The dark block is yours, so anything else dark mode changes goes
+next to the colors.
 
 ```kotlin
-val AppTheme = buildThemeV2 {
-    defaultContentColor = Color(0xFF1D1B20)
-    dynamicColorSchemes(seedColor = ThemeSettings.seedColor) {
-        defaultContentColor = Color(0xFFE6E0E9)
-    }
+colorScheme(ColorScheme.Dark) {
+    properties[MaterialKolorTokens.colors] = rememberDynamicColors(ThemeSettings.seedColor, isDark = true)
+    properties[AppShadows] = darkShadows
+    defaultContentColor = Color(0xFFE6E0E9)
 }
 ```
 
-For a scheme of your own, write the override yourself and call `dynamicColors` inside it.
+A scheme of your own works the same way.
 
 ```kotlin
 val Sepia = ColorScheme("sepia")
 
 val AppTheme = buildThemeV2 {
-    dynamicColorSchemes(seedColor = ThemeSettings.seedColor)
+    // The base values and the dark block, as above.
+
     colorScheme(Sepia) {
-        dynamicColors(rememberDynamicScheme(seedColor = Color(0xFF704214), isDark = false))
+        properties[MaterialKolorTokens.colors] = rememberDynamicColors(Color(0xFF704214), isDark = false)
     }
 }
 ```
+
+When the theme already has a `DynamicScheme`, for example one kept in application state,
+`scheme.toThemeValues()` gives the same map.
 
 Set `defaultIndication` on the builder. Left unset, Unstyled falls back to an indication that
 foundation's `clickable` rejects, and the first plain `clickable` throws. Setting it only reaches
@@ -440,7 +457,7 @@ The adapter never animates. Set `colorSchemeTransitionSpec` on the builder, as a
 animates every color token whenever it changes, whether the seed moved or the scheme flipped
 between light and dark.
 
-If your app owns its own token vocabulary, build the values with the DSL instead.
+If your app owns its own token vocabulary, map the `MaterialKolors` roles onto it.
 
 ```kotlin
 val appColors = ThemeProperty<Color>("app.colors")
@@ -448,27 +465,24 @@ val accent = ThemeToken<Color>("accent")
 val onAccent = ThemeToken<Color>("on_accent")
 val canvas = ThemeToken<Color>("canvas")
 
+fun MaterialKolors.toAppColors(): Map<ThemeToken<Color>, Color> =
+    mapOf(
+        accent to primary(),
+        onAccent to onPrimary(),
+        canvas to surfaceContainerLow(),
+    )
+
 val AppTheme = buildThemeV2 {
     val light = rememberDynamicScheme(ThemeSettings.seedColor, isDark = false)
     val dark = rememberDynamicScheme(ThemeSettings.seedColor, isDark = true)
 
-    properties[appColors] = light.themeValues {
-        accent to primary()
-        onAccent to onPrimary()
-        canvas to surfaceContainerLow()
-    }
+    properties[appColors] = remember(light) { MaterialKolors(light).toAppColors() }
+
     colorScheme(ColorScheme.Dark) {
-        properties[appColors] = dark.themeValues {
-            accent to primary()
-            onAccent to onPrimary()
-            canvas to surfaceContainerLow()
-        }
+        properties[appColors] = remember(dark) { MaterialKolors(dark).toAppColors() }
     }
 }
 ```
-
-Every `MaterialKolors` role is available inside the block, and `dynamicColors(scheme)` writes the
-whole role set for a scheme you built yourself.
 
 The adapter publishes android, jvm, js, wasmJs, iosArm64 and iosSimulatorArm64, because Compose
 Unstyled has no macOS native target. Android minSdk 23 and Java 17 bytecode both come from Unstyled.
