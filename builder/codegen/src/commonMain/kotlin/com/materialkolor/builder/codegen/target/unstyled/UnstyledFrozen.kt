@@ -116,18 +116,10 @@ private fun colorFile(input: ExportInput): GeneratedFile {
 }
 
 private fun themeFile(input: ExportInput): GeneratedFile {
-    val others = input.resolved.contrastVariants.filter { variant -> variant != ContrastVariant.Standard }
     val colors = ref("properties").index(token(COLORS_PROPERTY))
 
     return kotlinFile(path = input.sourcePath("Theme.kt"), packageName = input.prefs.packageName) {
         header(Header.lines(input, ExportMode.Frozen))
-        if (others.isNotEmpty()) {
-            comment(
-                "The ${others.joinToString(" and ") { variant -> variant.namePrefix }} maps in Color.kt " +
-                    "can be swapped in for ${colorsName(ContrastVariant.Standard, FrozenMode.Light)} and " +
-                    "${colorsName(ContrastVariant.Standard, FrozenMode.Dark)}.",
-            )
-        }
         property(
             name = input.document.themeName,
             value = call(Symbols.BuildThemeV2) {

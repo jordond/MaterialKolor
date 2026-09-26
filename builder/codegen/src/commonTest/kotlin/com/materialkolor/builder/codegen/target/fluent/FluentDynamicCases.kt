@@ -9,7 +9,6 @@ import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.target.lintFailures
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Style
-import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportPrefs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -90,7 +89,6 @@ class FluentDynamicTest {
 
         assertTrue("val colors = rememberFluentColors(" in theme, theme)
         assertFalse("rememberDynamicScheme" in theme, theme)
-        assertFalse(SWAP_TO_MODULE_NOTE in theme, theme)
         assertTrue("FluentTheme(\n        colors = colors,\n        content = content,\n    )" in theme, theme)
     }
 
@@ -98,7 +96,6 @@ class FluentDynamicTest {
     fun fluentDynamic_inline_mapsTheShadesFromCore() {
         val theme = theme(Fixtures.Default.fluentInline())
 
-        assertTrue("// $SWAP_TO_MODULE_NOTE" in theme, theme)
         assertTrue("val scheme = rememberDynamicScheme(" in theme, theme)
         assertTrue("shades = scheme.primaryPalette.toShades()," in theme, theme)
         assertTrue("private fun TonalPalette.toShades(): Shades {" in theme, theme)
@@ -117,18 +114,6 @@ class FluentDynamicTest {
         assertTrue(wrapped in module, module)
         assertFalse("animateFluentColors" in inline, inline)
         assertFalse("tween" in inline, inline)
-    }
-
-    @Test
-    fun fluentDynamic_inlineAnimate_saysTheModuleAnimates() {
-        val animated = theme(Fixtures.Animated.fluentInline())
-        val still = theme(Fixtures.Default.fluentInline())
-        val module = theme(Fixtures.Animated.fluent().input)
-
-        assertTrue("// $SWAP_TO_MODULE_ANIMATED_NOTE\n" in animated, animated)
-        assertFalse("// $SWAP_TO_MODULE_NOTE\n" in animated, animated)
-        assertTrue("// $SWAP_TO_MODULE_NOTE\n" in still, still)
-        assertFalse(SWAP_TO_MODULE_ANIMATED_NOTE in module, module)
     }
 
     @Test
@@ -167,7 +152,7 @@ class FluentDynamicTest {
 
     @Test
     fun fluentDynamic_otherLibrary_isRefused() {
-        val unstyled = Fixtures.input(document = ThemeDocument.Default.copy(library = Library.Unstyled))
+        val unstyled = Fixtures.input(document = Fixtures.Base.copy(library = Library.Unstyled))
 
         assertFailsWith<IllegalArgumentException> { FluentDynamic.files(unstyled) }
     }

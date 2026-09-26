@@ -1,5 +1,3 @@
-# Merge these into the version catalog of your own project.
-
 [versions]
 composeFluent = "v0.1.0"
 

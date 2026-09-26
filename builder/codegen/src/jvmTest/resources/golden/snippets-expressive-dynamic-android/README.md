@@ -17,10 +17,9 @@ Merge `gradle/libs.versions.toml` into the version catalog of your project, then
 ```kotlin
 dependencies {
     implementation(libs.materialKolor.material3)
+    implementation(libs.androidx.compose.material3)
 }
 ```
-
-These files also need a Compose Material 3 version that has `MaterialExpressiveTheme` and `MotionScheme`.
 
 ## Open it again
 

@@ -4,6 +4,7 @@ import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.dsl.Language
 import com.materialkolor.builder.codegen.dsl.Token
 import com.materialkolor.builder.codegen.dsl.TokenKind
+import com.materialkolor.builder.codegen.text.Header
 import com.materialkolor.builder.codegen.validate.ReservedNames
 import com.materialkolor.builder.codegen.zip.Crc32
 import com.materialkolor.builder.domain.model.Accent
@@ -31,9 +32,7 @@ class CodegenTest {
                         )
                         val case = "$target $mode multiplatform=$multiplatform catalog=$versionCatalog"
                         val sourceDir = if (multiplatform) "src/commonMain/kotlin" else "src/main/kotlin"
-                        val needsDependencies = mode == ExportMode.Dynamic ||
-                            target == ExportTarget.Unstyled ||
-                            target == ExportTarget.Fluent
+                        val needsDependencies = mode == ExportMode.Dynamic || target != ExportTarget.Custom
                         val expected = buildList {
                             themeFileNames(target, mode).forEach { name -> add("$sourceDir/com/example/theme/$name") }
                             if (needsDependencies && versionCatalog) add("gradle/libs.versions.toml")
@@ -83,6 +82,13 @@ class CodegenTest {
                                     val module = materialKolorModule(target, versions)
                                     add("com.materialkolor:material-kolor-$module:${versions.materialKolor}")
                                 }
+                                if (target == ExportTarget.Material3 || target == ExportTarget.Material3Expressive) {
+                                    if (multiplatform) {
+                                        add("org.jetbrains.compose.material3:material3:${versions.composeMaterial3}")
+                                    } else {
+                                        add("androidx.compose.material3:material3:${versions.androidxMaterial3}")
+                                    }
+                                }
                                 if (target == ExportTarget.Unstyled) {
                                     add("com.composables:composeunstyled-theming:${versions.composeUnstyled}")
                                 }
@@ -101,38 +107,43 @@ class CodegenTest {
     }
 
     @Test
-    fun generate_frozenWithoutSnippets_readmeNamesWhatTheFilesLeanOn() {
-        val expected = mapOf(
-            ExportTarget.Material3 to "need Compose Material 3, which a Material 3 app already has",
-            ExportTarget.Material3Expressive to "`MaterialExpressiveTheme` and `MotionScheme`",
-            ExportTarget.Custom to "need nothing beyond Compose",
-        )
+    fun generate_customFrozen_readmeSaysThereIsNothingToAdd() {
+        val files = generate(Fixtures.input(documentFor(ExportTarget.Custom), ExportPrefs(mode = ExportMode.Frozen)))
 
-        expected.forEach { (target, phrase) ->
-            val files = generate(Fixtures.input(documentFor(target), ExportPrefs(mode = ExportMode.Frozen)))
-
-            val readme = files.single { it.path == "README.md" }.text
-            assertTrue(phrase in readme, "$target\n$readme")
-        }
+        val readme = files.single { it.path == "README.md" }.text
+        assertTrue("need nothing beyond Compose" in readme, readme)
     }
 
     @Test
-    fun generate_dynamic_readmeNamesComposeMaterial3WhereTheFilesImportIt() {
-        val expected = mapOf(
-            ExportTarget.Material3 to "also need Compose Material 3, which a Material 3 app already has.",
-            ExportTarget.Material3Expressive to
-                "also need a Compose Material 3 version that has `MaterialExpressiveTheme` and `MotionScheme`.",
-        )
+    fun generate_everyTargetModeLayoutAndCatalog_commentsNothingButTheHeader() {
+        val bindings = listOf(Fixtures.Versions, Fixtures.Versions.copy(fluentModuleAvailable = false))
+        bindings.forEach { versions ->
+            ExportTarget.entries.forEach { target ->
+                ExportMode.entries.forEach { mode ->
+                    listOf(true, false).forEach { multiplatform ->
+                        listOf(true, false).forEach { versionCatalog ->
+                            val prefs = ExportPrefs(
+                                multiplatform = multiplatform,
+                                versionCatalog = versionCatalog,
+                                mode = mode,
+                            )
+                            val input = Fixtures.input(documentFor(target), prefs, versions)
+                            val header = ExportMode.entries.flatMap { any -> Header.lines(input, any) }.toSet()
 
-        ExportTarget.entries.forEach { target ->
-            val files = generate(Fixtures.input(documentFor(target), ExportPrefs(mode = ExportMode.Dynamic)))
+                            val comments = generate(input)
+                                .flatMap { file -> file.lines.flatten() }
+                                .filter { token -> token.kind == TokenKind.Comment }
+                                .map { token ->
+                                    token.text
+                                        .removePrefix("//")
+                                        .removePrefix("#")
+                                        .trim()
+                                }.filterNot { text -> text in header }
 
-            val readme = files.single { it.path == "README.md" }.text
-            val phrase = expected[target]
-            if (phrase == null) {
-                assertTrue("Compose Material 3" !in readme, "$target\n$readme")
-            } else {
-                assertTrue(phrase in readme, "$target\n$readme")
+                            assertEquals(emptyList(), comments, "$target $mode $multiplatform $versionCatalog")
+                        }
+                    }
+                }
             }
         }
     }
@@ -154,7 +165,7 @@ class CodegenTest {
 
     @Test
     fun generate_reservedThemeName_failsNamingIt() {
-        val input = Fixtures.input(ThemeDocument.Default.copy(themeName = "MaterialTheme"))
+        val input = Fixtures.input(Fixtures.Base.copy(themeName = "MaterialTheme"))
 
         val error = assertFailsWith<IllegalArgumentException> { generate(input) }
 
@@ -165,7 +176,7 @@ class CodegenTest {
     fun generate_accentTheTargetDrops_isNotHeldToItsReservedNames() {
         val reserved = ReservedNames.of(ExportTarget.Fluent).first { name -> name.first().isUpperCase() }
         val document = documentFor(ExportTarget.Fluent).copy(
-            accents = listOf(Accent(name = reserved, seed = ThemeDocument.Default.seed)),
+            accents = listOf(Accent(name = reserved, seed = Fixtures.Base.seed)),
         )
 
         val files = generate(Fixtures.input(document))
@@ -215,7 +226,7 @@ class CodegenTest {
             ExportTarget.Custom -> Library.Custom
         }
 
-        return ThemeDocument.Default.copy(library = library, expressive = target == ExportTarget.Material3Expressive)
+        return Fixtures.Base.copy(library = library, expressive = target == ExportTarget.Material3Expressive)
     }
 
     /**

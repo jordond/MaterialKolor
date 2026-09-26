@@ -29,7 +29,7 @@ import kotlin.test.assertTrue
  * the JVM goldens were written with.
  */
 internal object CustomFrozenCases {
-    private val CustomDocument: ThemeDocument = ThemeDocument.Default.copy(library = Library.Custom)
+    private val CustomDocument: ThemeDocument = Fixtures.Base.copy(library = Library.Custom)
 
     val Default: Fixture = Fixtures.Default.with(document = CustomDocument, prefs = frozenPrefs())
 
@@ -125,7 +125,7 @@ class CustomFrozenTest {
 
     @Test
     fun customFrozen_otherLibrary_isRefused() {
-        val material3 = Fixtures.input(document = ThemeDocument.Default, prefs = frozenPrefs())
+        val material3 = Fixtures.input(document = Fixtures.Base, prefs = frozenPrefs())
 
         assertFailsWith<IllegalArgumentException> { CustomFrozen.files(material3) }
     }

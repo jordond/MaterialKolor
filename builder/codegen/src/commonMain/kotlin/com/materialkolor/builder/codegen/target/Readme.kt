@@ -5,7 +5,6 @@ import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.dsl.Language
 import com.materialkolor.builder.codegen.dsl.plainToken
 import com.materialkolor.builder.domain.persist.ExportMode
-import com.materialkolor.builder.domain.persist.ExportTarget
 
 /**
  * Where the readme sits in the export.
@@ -63,7 +62,7 @@ internal object Readme {
             add("## Add the dependencies")
             add("")
             if (build == null) {
-                add(nothingToAdd(input))
+                add("These files need nothing beyond Compose, so there is nothing to add.")
             } else {
                 val addLines = "these lines to the build file of the same module. They are also in `${build.path}`."
                 if (catalog == null) {
@@ -75,10 +74,6 @@ internal object Readme {
                 add("```kotlin")
                 addAll(build.text.lines().filterNot { line -> line.startsWith("//") || line.isEmpty() })
                 add("```")
-                composeMaterial3(input.target)?.let { need ->
-                    add("")
-                    add("These files also need $need.")
-                }
                 Snippets.platformNote(input.target)?.let { note ->
                     add("")
                     add(note)
@@ -96,40 +91,4 @@ internal object Readme {
             lines = text.map { line -> if (line.isEmpty()) emptyList() else listOf(plainToken(line)) },
         )
     }
-
-    /**
-     * What the files lean on when the export writes no snippet, which only a frozen Material 3,
-     * Expressive or Custom export does.
-     */
-    private fun nothingToAdd(input: ExportInput): String =
-        when (input.target) {
-            ExportTarget.Material3 -> {
-                "These files need ${composeMaterial3(input.target)}, so there is nothing to add."
-            }
-            ExportTarget.Material3Expressive -> {
-                "These files need ${composeMaterial3(input.target)}. Beyond that there is nothing to add."
-            }
-            ExportTarget.Unstyled, ExportTarget.Fluent, ExportTarget.Custom -> {
-                "These files need nothing beyond Compose, so there is nothing to add."
-            }
-        }
-
-    /**
-     * The Compose Material 3 the Material 3 and Expressive files import `androidx.compose.material3`
-     * from, in both modes. It is a separate artifact from Compose itself, and
-     * `material-kolor-material3` does not hand it on at compile time, so a dynamic export names it
-     * next to its dependency lines the way a frozen one names it in place of them.
-     */
-    private fun composeMaterial3(target: ExportTarget): String? =
-        when (target) {
-            ExportTarget.Material3 -> {
-                "Compose Material 3, which a Material 3 app already has"
-            }
-            ExportTarget.Material3Expressive -> {
-                "a Compose Material 3 version that has `MaterialExpressiveTheme` and `MotionScheme`"
-            }
-            ExportTarget.Unstyled, ExportTarget.Fluent, ExportTarget.Custom -> {
-                null
-            }
-        }
 }

@@ -1,5 +1,3 @@
-# Merge these into the version catalog of your own project.
-
 [versions]
 materialKolor = "6.0.0"
 composeFluent = "v0.1.0"

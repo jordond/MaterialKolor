@@ -51,10 +51,12 @@ internal class Dependency(
  * The dependency snippets that go with an export.
  *
  * A dynamic export needs the MaterialKolor module for its target. A frozen export needs no
- * MaterialKolor at all, so Material 3, Expressive and Custom get no snippet. In either mode an
- * Unstyled export needs the Compose Unstyled theming library, which `material-kolor-unstyled` leaves
- * to the app on JVM and Android, and a Fluent export needs Compose Fluent. Every MaterialKolor module
- * is named at the one pinned version.
+ * MaterialKolor at all, so Custom gets no snippet. In either mode a Material 3 or Expressive export
+ * needs Compose Material 3, which `material-kolor-material3` does not hand on, from Compose
+ * Multiplatform in a multiplatform build and from Jetpack Compose in an Android one. An Unstyled
+ * export needs the Compose Unstyled theming library, which `material-kolor-unstyled` leaves to the
+ * app on JVM and Android, and a Fluent export needs Compose Fluent. Every MaterialKolor module is
+ * named at the one pinned version. The snippets carry no comments.
  */
 internal object Snippets {
     /**
@@ -78,7 +80,7 @@ internal object Snippets {
             ExportMode.Dynamic -> {
                 when (input.target) {
                     ExportTarget.Material3, ExportTarget.Material3Expressive -> {
-                        listOf(materialKolor("material3", input))
+                        listOf(materialKolor("material3", input), material3(input))
                     }
                     ExportTarget.Unstyled -> {
                         listOf(materialKolor("unstyled", input), unstyledTheming(input))
@@ -96,7 +98,8 @@ internal object Snippets {
             }
             ExportMode.Frozen -> {
                 when (input.target) {
-                    ExportTarget.Material3, ExportTarget.Material3Expressive, ExportTarget.Custom -> emptyList()
+                    ExportTarget.Material3, ExportTarget.Material3Expressive -> listOf(material3(input))
+                    ExportTarget.Custom -> emptyList()
                     ExportTarget.Unstyled -> listOf(unstyledTheming(input))
                     ExportTarget.Fluent -> listOf(fluent(input))
                 }
@@ -133,6 +136,27 @@ internal object Snippets {
             version = input.versions.materialKolor,
         )
 
+    /**
+     * Compose Material 3, from Compose Multiplatform in a multiplatform build and from Jetpack
+     * Compose in an Android one.
+     */
+    private fun material3(input: ExportInput): Dependency =
+        if (input.prefs.multiplatform) {
+            Dependency(
+                alias = "compose-material3",
+                module = "org.jetbrains.compose.material3:material3",
+                versionKey = "composeMaterial3",
+                version = input.versions.composeMaterial3,
+            )
+        } else {
+            Dependency(
+                alias = "androidx-compose-material3",
+                module = "androidx.compose.material3:material3",
+                versionKey = "androidxMaterial3",
+                version = input.versions.androidxMaterial3,
+            )
+        }
+
     private fun fluent(input: ExportInput): Dependency =
         Dependency(
             alias = "composeFluent",
@@ -151,7 +175,6 @@ internal object Snippets {
 
     private fun catalogFile(dependencies: List<Dependency>): GeneratedFile =
         tomlFile(CATALOG_PATH) {
-            comment("Merge these into the version catalog of your own project.")
             table("versions") {
                 dependencies.distinctBy { it.versionKey }.forEach { dependency ->
                     key(dependency.versionKey, dependency.version)
@@ -172,8 +195,6 @@ internal object Snippets {
         dependencies: List<Dependency>,
     ): GeneratedFile =
         gradleFile(BUILD_SNIPPET_PATH) {
-            comment("Add these to the build file of the module that holds your theme.")
-            platformNote(input.target)?.let { note -> comment(note) }
             if (input.prefs.multiplatform) {
                 block("kotlin") {
                     block("sourceSets") {

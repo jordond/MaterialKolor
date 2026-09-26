@@ -19,12 +19,11 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.materialKolor.material3)
+            implementation(libs.compose.material3)
         }
     }
 }
 ```
-
-These files also need Compose Material 3, which a Material 3 app already has.
 
 ## Open it again
 

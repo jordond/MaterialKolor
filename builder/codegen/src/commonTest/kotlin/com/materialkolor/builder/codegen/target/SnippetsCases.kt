@@ -20,21 +20,21 @@ import kotlin.test.assertEquals
  * of their own target. They live in common code so the wasm tests hold them to the same hashes.
  */
 internal object SnippetsCases {
-    private val Unstyled: ThemeDocument = ThemeDocument.Default.copy(library = Library.Unstyled)
-    private val Fluent: ThemeDocument = ThemeDocument.Default.copy(library = Library.Fluent)
-    private val Custom: ThemeDocument = ThemeDocument.Default.copy(library = Library.Custom)
-    private val Expressive: ThemeDocument = ThemeDocument.Default.copy(expressive = true)
+    private val Unstyled: ThemeDocument = Fixtures.Base.copy(library = Library.Unstyled)
+    private val Fluent: ThemeDocument = Fixtures.Base.copy(library = Library.Fluent)
+    private val Custom: ThemeDocument = Fixtures.Base.copy(library = Library.Custom)
+    private val Expressive: ThemeDocument = Fixtures.Base.copy(expressive = true)
 
     private val Frozen: ExportPrefs = ExportPrefs(mode = ExportMode.Frozen)
     private val Android: ExportPrefs = ExportPrefs(multiplatform = false)
 
     val all: Map<String, ExportInput> = mapOf(
-        "snippets-material3-dynamic-default" to Fixtures.input(ThemeDocument.Default),
+        "snippets-material3-dynamic-default" to Fixtures.input(Fixtures.Base),
         "snippets-material3-dynamic-android-no-catalog" to Fixtures.input(
-            document = ThemeDocument.Default,
+            document = Fixtures.Base,
             prefs = ExportPrefs(multiplatform = false, versionCatalog = false),
         ),
-        "snippets-material3-frozen-default" to Fixtures.input(ThemeDocument.Default, Frozen),
+        "snippets-material3-frozen-default" to Fixtures.input(Fixtures.Base, Frozen),
         "snippets-expressive-dynamic-android" to Fixtures.input(Expressive, Android),
         "snippets-unstyled-dynamic-default" to Fixtures.input(Unstyled),
         "snippets-unstyled-frozen-no-catalog" to Fixtures.input(Unstyled, Frozen.copy(versionCatalog = false)),

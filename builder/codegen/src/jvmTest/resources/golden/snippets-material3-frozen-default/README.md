@@ -12,7 +12,17 @@ The `src` folder is laid out like a module, so copy it into the module that hold
 
 ## Add the dependencies
 
-These files need Compose Material 3, which a Material 3 app already has, so there is nothing to add.
+Merge `gradle/libs.versions.toml` into the version catalog of your project, then add these lines to the build file of the same module. They are also in `snippets/build.gradle.kts`.
+
+```kotlin
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.compose.material3)
+        }
+    }
+}
+```
 
 ## Open it again
 

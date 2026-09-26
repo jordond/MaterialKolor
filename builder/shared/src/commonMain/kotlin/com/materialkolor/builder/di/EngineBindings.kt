@@ -34,6 +34,8 @@ internal object EngineBindings {
             materialKolor = BuildKonfig.MATERIAL_KOLOR_VERSION,
             fluent = BuildKonfig.FLUENT_VERSION,
             composeUnstyled = BuildKonfig.COMPOSE_UNSTYLED_VERSION,
+            composeMaterial3 = BuildKonfig.COMPOSE_MATERIAL3_VERSION,
+            androidxMaterial3 = BuildKonfig.ANDROIDX_MATERIAL3_VERSION,
             fluentModuleAvailable = BuildKonfig.FLUENT_MODULE,
         )
 }

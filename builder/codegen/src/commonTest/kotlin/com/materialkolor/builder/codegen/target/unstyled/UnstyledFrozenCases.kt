@@ -29,7 +29,7 @@ import kotlin.test.assertTrue
  * the JVM goldens were written with.
  */
 internal object UnstyledFrozenCases {
-    private val UnstyledDocument: ThemeDocument = ThemeDocument.Default.copy(library = Library.Unstyled)
+    private val UnstyledDocument: ThemeDocument = Fixtures.Base.copy(library = Library.Unstyled)
 
     val AccentsPinsAmoled: Fixture = Fixtures.Pins.with(
         document = Fixtures.Pins.input.document.copy(
@@ -136,7 +136,7 @@ class UnstyledFrozenTest {
     }
 
     @Test
-    fun unstyledFrozen_theme_setsTheStandardPairAndPointsAtTheOtherVariants() {
+    fun unstyledFrozen_theme_setsTheStandardPair() {
         val default = UnstyledFrozenCases.files("unstyled-frozen-default").text("Theme.kt")
         val allContrasts = UnstyledFrozenCases.files("unstyled-frozen-all-contrasts").text("Theme.kt")
 
@@ -152,15 +152,13 @@ class UnstyledFrozenTest {
             """.trimIndent()
 
         assertTrue(expected in default, default)
-        assertTrue("maps in Color.kt" !in default, default)
-        assertTrue("// The mediumContrast and highContrast maps in Color.kt" in allContrasts, allContrasts)
         assertTrue(expected in allContrasts, allContrasts)
     }
 
     @Test
     fun unstyledFrozen_animate_changesNothing() {
         val animated = Fixtures.Default.with(
-            document = ThemeDocument.Default.copy(library = Library.Unstyled),
+            document = Fixtures.Base.copy(library = Library.Unstyled),
             prefs = frozenPrefs().copy(animate = true),
         )
 
@@ -172,7 +170,7 @@ class UnstyledFrozenTest {
 
     @Test
     fun unstyledFrozen_otherLibrary_isRefused() {
-        val material3 = Fixtures.input(document = ThemeDocument.Default, prefs = frozenPrefs())
+        val material3 = Fixtures.input(document = Fixtures.Base, prefs = frozenPrefs())
 
         assertFailsWith<IllegalArgumentException> { UnstyledFrozen.files(material3) }
     }

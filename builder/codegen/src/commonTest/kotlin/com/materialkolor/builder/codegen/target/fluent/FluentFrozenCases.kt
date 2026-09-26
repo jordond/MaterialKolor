@@ -28,7 +28,7 @@ import kotlin.test.assertTrue
  * the JVM goldens were written with.
  */
 internal object FluentFrozenCases {
-    private val FluentDocument: ThemeDocument = ThemeDocument.Default.copy(library = Library.Fluent)
+    private val FluentDocument: ThemeDocument = Fixtures.Base.copy(library = Library.Fluent)
 
     val all: Map<String, ExportInput> = mapOf(
         "fluent-frozen-default" to Fixtures.input(FluentDocument, frozenPrefs()),
@@ -106,7 +106,7 @@ class FluentFrozenTest {
 
     @Test
     fun fluentFrozen_otherLibrary_isRefused() {
-        val material3 = Fixtures.input(document = ThemeDocument.Default, prefs = frozenPrefs())
+        val material3 = Fixtures.input(document = Fixtures.Base, prefs = frozenPrefs())
 
         assertFailsWith<IllegalArgumentException> { FluentFrozen.files(material3) }
     }

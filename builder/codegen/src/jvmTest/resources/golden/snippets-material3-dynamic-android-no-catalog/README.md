@@ -17,10 +17,9 @@ Add these lines to the build file of the same module. They are also in `snippets
 ```kotlin
 dependencies {
     implementation("com.materialkolor:material-kolor-material3:6.0.0")
+    implementation("androidx.compose.material3:material3:1.5.0-alpha28")
 }
 ```
-
-These files also need Compose Material 3, which a Material 3 app already has.
 
 ## Open it again
 

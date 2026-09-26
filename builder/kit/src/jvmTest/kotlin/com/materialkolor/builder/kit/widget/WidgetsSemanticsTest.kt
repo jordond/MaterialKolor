@@ -138,6 +138,8 @@ internal fun widgetGoldenColorFile(): GeneratedFile {
             materialKolor = "6.0.0",
             fluent = "0.1.0",
             composeUnstyled = "1.0.0",
+            composeMaterial3 = "1.12.0-alpha03",
+            androidxMaterial3 = "1.5.0-alpha28",
         ),
         shareUrl = "https://materialkolor.com/?seed=6750A4",
     )

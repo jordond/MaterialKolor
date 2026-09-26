@@ -6,7 +6,6 @@ package com.example.theme
 import com.composeunstyled.theme.ColorScheme
 import com.composeunstyled.theme.buildThemeV2
 
-// The mediumContrast and highContrast maps in Color.kt can be swapped in for lightColors and darkColors.
 val AppTheme = buildThemeV2 {
     properties[ThemeTokens.colors] = lightColors
 

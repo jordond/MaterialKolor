@@ -8,7 +8,6 @@ import com.materialkolor.builder.codegen.GoldenHashes
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.target.lintFailures
 import com.materialkolor.builder.domain.model.Library
-import com.materialkolor.builder.domain.model.ThemeDocument
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -180,7 +179,7 @@ class UnstyledDynamicTest {
 
     @Test
     fun unstyledDynamic_otherLibrary_isRefused() {
-        val fluent = Fixtures.input(document = ThemeDocument.Default.copy(library = Library.Fluent))
+        val fluent = Fixtures.input(document = Fixtures.Base.copy(library = Library.Fluent))
 
         assertFailsWith<IllegalArgumentException> { UnstyledDynamic.files(fluent) }
     }

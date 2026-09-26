@@ -76,8 +76,6 @@ private fun themeColorsFile(input: ExportInput): GeneratedFile {
     val resolved = input.resolved
     val accents = resolved.accents
     val variants = resolved.contrastVariants
-    val standardPair = "${themeColorsName(ContrastVariant.Standard, FrozenMode.Light)} and " +
-        themeColorsName(ContrastVariant.Standard, FrozenMode.Dark)
 
     return kotlinFile(path = input.sourcePath("ThemeColors.kt"), packageName = input.prefs.packageName) {
         header(Header.lines(input, ExportMode.Frozen))
@@ -91,12 +89,6 @@ private fun themeColorsFile(input: ExportInput): GeneratedFile {
             accents.forEach { accent -> property(accent.propertyName, type(COLOR_FAMILY)) }
         }
         variants.forEach { variant ->
-            if (variant == variants.firstOrNull { other -> other != ContrastVariant.Standard }) {
-                comment(
-                    "The colors below are the other contrast variants, to swap in for $standardPair " +
-                        "in ${input.document.themeName}.",
-                )
-            }
             val slots = resolved.customSlots.getValue(variant)
             FrozenMode.entries.forEach { mode ->
                 property(themeColorsName(variant, mode), themeColorsValue(slots.colorsIn(mode), accents, mode))

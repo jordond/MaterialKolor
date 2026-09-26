@@ -114,18 +114,10 @@ private fun colorFile(input: ExportInput): GeneratedFile {
 
 private fun themeFile(input: ExportInput): GeneratedFile {
     val variants = input.resolved.contrastVariants
-    val standardPair = "${schemeName(ContrastVariant.Standard, FrozenMode.Light)} and " +
-        schemeName(ContrastVariant.Standard, FrozenMode.Dark)
 
     return kotlinFile(path = input.sourcePath("Theme.kt"), packageName = input.prefs.packageName) {
         header(Header.lines(input, ExportMode.Frozen))
         variants.forEach { variant ->
-            if (variant == variants.firstOrNull { other -> other != ContrastVariant.Standard }) {
-                comment(
-                    "The schemes below are the other contrast variants, to swap in for $standardPair " +
-                        "in ${input.document.themeName}.",
-                )
-            }
             FrozenMode.entries.forEach { mode -> property(schemeName(variant, mode), schemeCall(variant, mode)) }
         }
         themeFunction(input, dynamicColor = input.writesAndroidDynamicColor) { themeBody(input) }

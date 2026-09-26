@@ -62,6 +62,8 @@ internal object Fixtures {
         materialKolor = "6.0.0",
         fluent = "v0.1.0",
         composeUnstyled = "2.10.0",
+        composeMaterial3 = "1.12.0-alpha03",
+        androidxMaterial3 = "1.5.0-alpha28",
     )
 
     // Declared ahead of the fixtures, which read them while the object is still being built.
@@ -75,16 +77,22 @@ internal object Fixtures {
         Role.SurfaceContainer,
     )
 
-    val Default: Fixture = fixture("default", ThemeDocument.Default)
+    /**
+     * The builder's default theme on the library's own 2021 spec, so the default fixture matches
+     * every library default and writes nothing past the seed.
+     */
+    val Base: ThemeDocument = ThemeDocument.Default.copy(spec = SpecVersion.Spec2021)
+
+    val Default: Fixture = fixture("default", Base)
 
     val PrimaryOverride: Fixture = fixture(
         name = "primary-override",
-        document = ThemeDocument.Default.copy(keyColors = KeyColors(primary = argb(0xFF6750A4))),
+        document = Base.copy(keyColors = KeyColors(primary = argb(0xFF6750A4))),
     )
 
     val AllOverrides: Fixture = fixture(
         name = "all-overrides",
-        document = ThemeDocument.Default.copy(
+        document = Base.copy(
             keyColors = KeyColors(
                 primary = argb(0xFF6750A4),
                 secondary = argb(0xFF625B71),
@@ -98,7 +106,7 @@ internal object Fixtures {
 
     val Cmf: Fixture = fixture(
         name = "cmf",
-        document = ThemeDocument.Default.copy(
+        document = Base.copy(
             style = Style.Cmf,
             cmfTertiarySeed = argb(0xFF2E7D32),
             spec = SpecVersion.Spec2026,
@@ -107,27 +115,27 @@ internal object Fixtures {
 
     val ReducedContrast: Fixture = fixture(
         name = "reduced-contrast",
-        document = ThemeDocument.Default.copy(contrast = ContrastLevel.Reduced),
+        document = Base.copy(contrast = ContrastLevel.Reduced),
     )
 
     val HighContrast: Fixture = fixture(
         name = "high-contrast",
-        document = ThemeDocument.Default.copy(contrast = ContrastLevel.High),
+        document = Base.copy(contrast = ContrastLevel.High),
     )
 
     val Amoled: Fixture = fixture(
         name = "amoled",
-        document = ThemeDocument.Default.copy(amoled = true),
+        document = Base.copy(amoled = true),
     )
 
     val Watch2025: Fixture = fixture(
         name = "watch-2025",
-        document = ThemeDocument.Default.copy(platform = SchemePlatform.Watch, spec = SpecVersion.Spec2025),
+        document = Base.copy(platform = SchemePlatform.Watch, spec = SpecVersion.Spec2025),
     )
 
     val ThreeAccents: Fixture = fixture(
         name = "three-accents",
-        document = ThemeDocument.Default.copy(
+        document = Base.copy(
             accents = listOf(
                 Accent(name = "Brand", seed = argb(0xFF1E88E5)),
                 Accent(name = "Success", seed = argb(0xFF43A047), harmonize = false),
@@ -144,7 +152,7 @@ internal object Fixtures {
 
     val Pins: Fixture = fixture(
         name = "pins",
-        document = ThemeDocument.Default.copy(
+        document = Base.copy(
             pins = mapOf(
                 Role.Primary to RolePin(light = argb(0xFF8B1A10), dark = argb(0xFFFFB4A8)),
                 Role.Surface to RolePin(light = argb(0xFFFFFBFF)),
@@ -155,25 +163,25 @@ internal object Fixtures {
 
     val AndroidOnly: Fixture = fixture(
         name = "android-only",
-        document = ThemeDocument.Default,
+        document = Base,
         prefs = ExportPrefs(multiplatform = false),
     )
 
     val NoCatalog: Fixture = fixture(
         name = "no-catalog",
-        document = ThemeDocument.Default,
+        document = Base,
         prefs = ExportPrefs(versionCatalog = false),
     )
 
     val Animated: Fixture = fixture(
         name = "animated",
-        document = ThemeDocument.Default,
+        document = Base,
         prefs = ExportPrefs(animate = true, animationDurationMs = 500),
     )
 
     val ExpressiveOnTonalSpot2021: Fixture = fixture(
         name = "expressive-tonal-spot-2021",
-        document = ThemeDocument.Default.copy(expressive = true),
+        document = Base.copy(expressive = true),
     )
 
     val all: List<Fixture> = listOf(

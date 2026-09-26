@@ -299,6 +299,8 @@ class ExportParityTest {
             materialKolor = "6.0.0",
             fluent = "v0.1.0",
             composeUnstyled = "2.10.0",
+            composeMaterial3 = "1.12.0-alpha03",
+            androidxMaterial3 = "1.5.0-alpha28",
         )
 
         /**

@@ -111,7 +111,6 @@ val darkScheme = darkColorScheme(
     onTertiaryFixedVariant = onTertiaryFixedVariantDark,
 )
 
-// The schemes below are the other contrast variants, to swap in for lightScheme and darkScheme in AppTheme.
 val mediumContrastLightColorScheme = lightColorScheme(
     primary = primaryLightMediumContrast,
     onPrimary = onPrimaryLightMediumContrast,

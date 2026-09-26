@@ -46,7 +46,14 @@ private const val PROJECT = "Ocean study"
 private const val RENAMED = "Harbor study"
 private const val STAGING = "https://staging.materialkolor.com"
 private val VERSIONS =
-    ExportVersions(builder = "2.0.0", materialKolor = "6.0.0", fluent = "v0.1.0", composeUnstyled = "1.0.0")
+    ExportVersions(
+        builder = "2.0.0",
+        materialKolor = "6.0.0",
+        fluent = "v0.1.0",
+        composeUnstyled = "1.0.0",
+        composeMaterial3 = "1.12.0-alpha03",
+        androidxMaterial3 = "1.5.0-alpha28",
+    )
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ExportModelTest : SessionTestBase() {

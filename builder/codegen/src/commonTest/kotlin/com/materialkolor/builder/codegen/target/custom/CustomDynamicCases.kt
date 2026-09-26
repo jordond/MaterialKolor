@@ -17,7 +17,6 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.model.RolePin
 import com.materialkolor.builder.domain.model.SlotResolution
-import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.model.TonalRamp
 import com.materialkolor.builder.domain.persist.ExportTarget
 import kotlin.test.Test
@@ -43,7 +42,7 @@ internal object CustomDynamicCases {
      * and a tone on a role slot, which the export ignores.
      */
     val CustomTones: Fixture = Fixtures.Default.with(
-        document = ThemeDocument.Default.copy(
+        document = Fixtures.Base.copy(
             library = Library.Custom,
             customTones = mapOf(
                 CustomSlot.PrimaryPressed to CustomTone(light = 36),
@@ -254,7 +253,7 @@ class CustomDynamicTest {
 
     @Test
     fun customDynamic_otherLibrary_isRefused() {
-        val material3 = Fixtures.input(document = ThemeDocument.Default)
+        val material3 = Fixtures.input(document = Fixtures.Base)
 
         assertFailsWith<IllegalArgumentException> { CustomDynamic.files(material3) }
     }

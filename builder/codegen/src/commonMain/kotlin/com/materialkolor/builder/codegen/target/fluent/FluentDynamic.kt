@@ -54,17 +54,6 @@ public object FluentDynamic {
     }
 }
 
-/**
- * The line the inline form adds to its header.
- */
-internal const val SWAP_TO_MODULE_NOTE: String = "Swap to material-kolor-fluent when it is available."
-
-/**
- * The same line when the theme animates, which only the module can do.
- */
-internal const val SWAP_TO_MODULE_ANIMATED_NOTE: String =
-    "Swap to material-kolor-fluent when it is available, and the colors animate once it is."
-
 private const val COLORS = "colors"
 private const val TARGET_COLORS = "targetColors"
 private const val SCHEME = "scheme"
@@ -86,13 +75,9 @@ private val ShadeTones: List<Pair<String, Int>> =
 
 private fun themeFile(input: ExportInput): GeneratedFile {
     val binding = input.versions.fluentBinding
-    val header = when (binding) {
-        FluentBinding.Module -> Header.lines(input, ExportMode.Dynamic)
-        FluentBinding.Inline -> Header.lines(input, ExportMode.Dynamic) + swapNote(input.prefs.animate)
-    }
 
     return kotlinFile(path = input.sourcePath("Theme.kt"), packageName = input.prefs.packageName) {
-        header(header)
+        header(Header.lines(input, ExportMode.Dynamic))
         themeFunction(input) {
             when (binding) {
                 FluentBinding.Module -> moduleColors(input)
@@ -107,11 +92,6 @@ private fun themeFile(input: ExportInput): GeneratedFile {
         if (binding == FluentBinding.Inline) toShades()
     }
 }
-
-/**
- * The inline form's header note, which says the colors animate once the module is in when they would.
- */
-private fun swapNote(animate: Boolean): String = if (animate) SWAP_TO_MODULE_ANIMATED_NOTE else SWAP_TO_MODULE_NOTE
 
 /**
  * `rememberFluentColors(...)`, passed through `animateFluentColors` when the theme animates.

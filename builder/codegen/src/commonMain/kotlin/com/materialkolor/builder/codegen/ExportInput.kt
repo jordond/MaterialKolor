@@ -66,6 +66,10 @@ public data class ExportInput(
  * @property[materialKolor] The MaterialKolor version the generated code is written against.
  * @property[fluent] The Compose Fluent version a Fluent export depends on.
  * @property[composeUnstyled] The Compose Unstyled version an Unstyled export depends on.
+ * @property[composeMaterial3] The Compose Multiplatform Material 3 version a multiplatform Material 3
+ * or Expressive export depends on.
+ * @property[androidxMaterial3] The Jetpack Compose Material 3 version an Android Material 3 or
+ * Expressive export depends on.
  * @property[fluentModuleAvailable] Whether `material-kolor-fluent` is published at [materialKolor].
  * When it is not, a Fluent export builds its shades inline from core.
  */
@@ -74,6 +78,8 @@ public data class ExportVersions(
     public val materialKolor: String,
     public val fluent: String,
     public val composeUnstyled: String,
+    public val composeMaterial3: String,
+    public val androidxMaterial3: String,
     public val fluentModuleAvailable: Boolean = true,
 ) {
     /**

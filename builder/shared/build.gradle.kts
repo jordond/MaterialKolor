@@ -24,6 +24,8 @@ buildkonfig {
         buildConfigField(STRING, "MATERIAL_KOLOR_VERSION", libs.versions.materialKolorExport.get(), const = true)
         buildConfigField(STRING, "FLUENT_VERSION", libs.versions.fluent.get(), const = true)
         buildConfigField(STRING, "COMPOSE_UNSTYLED_VERSION", libs.versions.composeUnstyled.get(), const = true)
+        buildConfigField(STRING, "COMPOSE_MATERIAL3_VERSION", libs.versions.compose.material3.get(), const = true)
+        buildConfigField(STRING, "ANDROIDX_MATERIAL3_VERSION", libs.versions.androidx.material3.get(), const = true)
         buildConfigField(BOOLEAN, "FLUENT_MODULE", "true", const = true)
     }
 }

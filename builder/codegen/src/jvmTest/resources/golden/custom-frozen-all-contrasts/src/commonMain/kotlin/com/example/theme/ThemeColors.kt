@@ -112,7 +112,6 @@ val darkThemeColors = ThemeColors(
     shadow = Color(0xFF94442B),
 )
 
-// The colors below are the other contrast variants, to swap in for lightThemeColors and darkThemeColors in AppTheme.
 val mediumContrastLightThemeColors = ThemeColors(
     primary = Color(0xFF706099),
     onPrimary = Color(0xFF9197E6),

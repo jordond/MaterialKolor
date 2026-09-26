@@ -34,7 +34,7 @@ import kotlin.test.assertTrue
  */
 internal object Material3FrozenCases {
     private val ExpressiveDocument: ThemeDocument =
-        ThemeDocument.Default.copy(expressive = true, style = Style.Expressive, spec = SpecVersion.Spec2025)
+        Fixtures.Base.copy(expressive = true, style = Style.Expressive, spec = SpecVersion.Spec2025)
 
     val AccentsPinsAmoled: Fixture = Fixtures.Pins.with(
         document = Fixtures.Pins.input.document.copy(
@@ -220,7 +220,7 @@ class Material3FrozenTest {
     @Test
     fun material3Frozen_otherLibrary_isRefused() {
         val fluent = Fixtures.input(
-            document = ThemeDocument.Default.copy(library = Library.Fluent),
+            document = Fixtures.Base.copy(library = Library.Fluent),
             prefs = frozenPrefs(),
         )
 
