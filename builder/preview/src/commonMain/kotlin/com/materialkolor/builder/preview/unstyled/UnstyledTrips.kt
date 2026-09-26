@@ -220,7 +220,12 @@ private fun RailItem(
         interactionSource = interactions,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            UnstyledIcon(destination.icon, contentDescription = null, modifier = Modifier.size(IconSize), tint = content)
+            UnstyledIcon(
+                destination.icon,
+                contentDescription = null,
+                modifier = Modifier.size(IconSize),
+                tint = content,
+            )
             Text(destination.label, style = SmallStyle, color = content, maxLines = 1)
         }
     }
@@ -375,7 +380,14 @@ private fun FilterChip(
         horizontalArrangement = Arrangement.spacedBy(TripsLayout.Gap),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (selected) UnstyledIcon(Lucide.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = content)
+        if (selected) {
+            UnstyledIcon(
+                Lucide.Check,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = content,
+            )
+        }
         Text(label, style = LabelStyle, color = content)
     }
 }

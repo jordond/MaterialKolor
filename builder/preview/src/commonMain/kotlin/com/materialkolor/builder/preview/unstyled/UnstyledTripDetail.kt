@@ -43,6 +43,7 @@ import com.composables.icons.lucide.Pencil
 import com.composables.icons.lucide.Share2
 import com.composeunstyled.CheckedIndicator
 import com.composeunstyled.Indicator
+import com.composeunstyled.SwitchThumb
 import com.composeunstyled.Text
 import com.composeunstyled.UnstyledButton
 import com.composeunstyled.UnstyledCheckbox
@@ -50,7 +51,6 @@ import com.composeunstyled.UnstyledHorizontalSeparator
 import com.composeunstyled.UnstyledIcon
 import com.composeunstyled.UnstyledProgress
 import com.composeunstyled.UnstyledSwitch
-import com.composeunstyled.SwitchThumb
 import com.materialkolor.builder.kit.control.foldedSwitchName
 import com.materialkolor.builder.kit.control.foldedToggleName
 import com.materialkolor.builder.kit.headless.InnerTextWithoutHandles
@@ -160,7 +160,10 @@ private fun LinkButton(
         contentPadding = PaddingValues(horizontal = 12.dp),
         interactionSource = interactions,
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(TripsLayout.Gap), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(TripsLayout.Gap),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             UnstyledIcon(icon, contentDescription = null, modifier = Modifier.size(IconSize), tint = content)
             Text(label, style = LabelStyle, color = content, maxLines = 1)
         }
@@ -218,7 +221,12 @@ private fun MapsNeedSignal(state: DemoAppState) {
             .previewRoles(UnstyledComponent.Alert)
             .clip(ControlShape)
             .background(UnstyledToken.ErrorContainer.color)
-            .padding(start = TripsLayout.SectionGap, end = TripsLayout.Gap, top = TripsLayout.Gap, bottom = TripsLayout.Gap),
+            .padding(
+                start = TripsLayout.SectionGap,
+                end = TripsLayout.Gap,
+                top = TripsLayout.Gap,
+                bottom = TripsLayout.Gap,
+            ),
         horizontalArrangement = Arrangement.spacedBy(TripsLayout.PaneGap),
         verticalAlignment = Alignment.CenterVertically,
     ) {
