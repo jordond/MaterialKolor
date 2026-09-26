@@ -27,6 +27,8 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.domain.persist.ProjectMeta
+import com.materialkolor.builder.domain.validate.ProjectNameProblem
+import com.materialkolor.builder.domain.validate.projectNameProblem
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.projects_copy_name
@@ -35,6 +37,7 @@ import com.materialkolor.builder.generated.resources.projects_duplicate
 import com.materialkolor.builder.generated.resources.projects_more
 import com.materialkolor.builder.generated.resources.projects_name
 import com.materialkolor.builder.generated.resources.projects_name_empty
+import com.materialkolor.builder.generated.resources.projects_name_long
 import com.materialkolor.builder.generated.resources.projects_rename
 import com.materialkolor.builder.generated.resources.projects_target_custom
 import com.materialkolor.builder.generated.resources.projects_target_expressive
@@ -149,6 +152,7 @@ private fun RenameField(
     val focus = remember { FocusRequester() }
     var focused by remember { mutableStateOf(false) }
     val emptyMessage = stringResource(Res.string.projects_name_empty)
+    val longMessage = stringResource(Res.string.projects_name_long)
     BuilderTextField(
         value = meta.name,
         onCommit = { name ->
@@ -171,7 +175,13 @@ private fun RenameField(
                 if (focused && !state.hasFocus) onRenamingChange(false)
                 focused = state.hasFocus
             },
-        error = { draft -> if (draft.isBlank()) emptyMessage else null },
+        error = { draft ->
+            when (projectNameProblem(draft)) {
+                ProjectNameProblem.Blank -> emptyMessage
+                ProjectNameProblem.TooLong -> longMessage
+                null -> null
+            }
+        },
     )
     LaunchedEffect(focus) { focus.requestFocus() }
 }
@@ -240,8 +250,11 @@ internal fun ageText(age: ProjectAge): String =
         is ProjectAge.Years -> pluralStringResource(Res.plurals.projects_updated_years, age.count, age.count)
     }
 
+/**
+ * The short name of [target], as the drawer's badge and the share dialog show it.
+ */
 @Composable
-private fun targetLabel(target: ExportTarget): String =
+internal fun targetLabel(target: ExportTarget): String =
     when (target) {
         ExportTarget.Material3 -> stringResource(Res.string.projects_target_m3)
         ExportTarget.Material3Expressive -> stringResource(Res.string.projects_target_expressive)

@@ -1,12 +1,18 @@
 package com.materialkolor.builder.feature.share
 
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.materialkolor.builder.core.platform.Clipboard
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.FileSaver
+import com.materialkolor.builder.core.platform.LinkCardSource
 import com.materialkolor.builder.core.session.BootNotice
+import com.materialkolor.builder.core.session.ProjectRef
 import com.materialkolor.builder.core.session.ProjectSession
+import com.materialkolor.builder.core.session.derived
 import com.materialkolor.builder.di.AppScope
+import com.materialkolor.builder.domain.link.shareCardLink
 import com.materialkolor.builder.domain.link.shareLink
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.generated.resources.Res
@@ -16,7 +22,11 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.getString
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Share links, out and in.
@@ -39,6 +49,7 @@ internal class ShareController(
     private val clipboard: Clipboard,
     private val files: FileSaver,
     private val environment: Environment,
+    private val linkCards: LinkCardSource,
 ) : ViewModel() {
     /**
      * Whether a share goes to the share sheet here rather than the clipboard.
@@ -53,6 +64,41 @@ internal class ShareController(
         document: ThemeDocument,
         projectName: String,
     ): String? = shareLink(document, projectName, environment.siteOrigin)
+
+    /**
+     * The link to the card for [document] called [projectName], or null when there is no link.
+     */
+    fun cardLink(
+        document: ThemeDocument,
+        projectName: String,
+    ): String? = shareCardLink(document, projectName, environment.siteOrigin)
+
+    /**
+     * The card at [url], or null when it did not come within [CARD_TIMEOUT] or is not an image.
+     */
+    suspend fun card(url: String): ImageBitmap? =
+        withTimeoutOrNull(CARD_TIMEOUT) { linkCards.fetch(url) }?.let(::decodeCard)
+
+    /**
+     * Whether the open project came from a link and is not saved yet.
+     */
+    val transient: StateFlow<Boolean> = session.state.derived { state -> state.project is ProjectRef.Transient }
+
+    /**
+     * Save the open project from a link to the drawer. A saved project stays as it is.
+     */
+    fun saveToProjects() {
+        viewModelScope.launch { session.saveTransient().join() }
+    }
+
+    /**
+     * Rename the open project to [name], trimmed. True when a saved project took the new name, false
+     * for a project from a link or a rename that did not land.
+     */
+    suspend fun rename(name: String): Boolean {
+        val project = session.state.value.project as? ProjectRef.Persisted ?: return false
+        return session.rename(project.id, name.trim()) == null
+    }
 
     /**
      * Put [url] on the clipboard. Copied only when the clipboard really took it.
@@ -82,6 +128,11 @@ internal class ShareController(
      */
     suspend fun openShared(code: String): BootNotice? = session.openShared(code)
 }
+
+/**
+ * How long a card has to come before the dialog gives up on it.
+ */
+private val CARD_TIMEOUT = 10.seconds
 
 /**
  * How a copy or a share went.

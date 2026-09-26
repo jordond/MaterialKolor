@@ -19,6 +19,7 @@
     <!-- The inline rename field, and what it says about an empty name. -->
     <string name="projects_name">Project name</string>
     <string name="projects_name_empty">A project needs a name</string>
+    <string name="projects_name_long">That name is too long</string>
     <!-- The name a duplicate gets. The argument is the name of the project it copies. -->
     <string name="projects_copy_name">%1$s copy</string>
     <!-- The toast after a delete, with its undo. The argument is the project's name. -->
