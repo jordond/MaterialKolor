@@ -32,6 +32,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.VerticalDivider
@@ -338,9 +339,25 @@ internal fun MaterialFilterChip(
     modifier: Modifier,
     icon: IconId?,
     enabled: Boolean,
+    connectedStart: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val glyph = if (selected) IconId.Check else icon
+    val shape = if (connectedStart) connectedStartShape() else FilterChipDefaults.shape
+    // Carrying on from an outlined field, it takes the field's outline, on or off.
+    val border = if (connectedStart) {
+        val outline = OutlinedTextFieldDefaults.colors().unfocusedIndicatorColor
+        FilterChipDefaults.filterChipBorder(
+            enabled = enabled,
+            selected = selected,
+            borderColor = outline,
+            selectedBorderColor = outline,
+            borderWidth = OutlinedTextFieldDefaults.UnfocusedBorderThickness,
+            selectedBorderWidth = OutlinedTextFieldDefaults.UnfocusedBorderThickness,
+        )
+    } else {
+        FilterChipDefaults.filterChipBorder(enabled = enabled, selected = selected)
+    }
     MaterialTarget {
         FilterChip(
             selected = selected,
@@ -356,14 +373,26 @@ internal fun MaterialFilterChip(
             modifier = modifier
                 .semantics { toggleableState = ToggleableState(selected) }
                 .foldState(label, ControlState.Selected(selected), enabled)
-                .materialFeedback(interactionSource, FilterChipDefaults.shape),
+                .materialFeedback(interactionSource, shape),
             enabled = enabled,
+            shape = shape,
+            border = border,
             leadingIcon = glyph?.let { id ->
                 { BuilderIcon(id, contentDescription = null, tint = LocalContentColor.current) }
             },
             interactionSource = interactionSource,
         )
     }
+}
+
+/**
+ * A filter chip's shape with its start corners down to the theme's extra small radius, the inner
+ * radius of a group it carries on.
+ */
+@Composable
+private fun connectedStartShape(): Shape {
+    val shapes = MaterialTheme.shapes
+    return shapes.small.copy(topStart = shapes.extraSmall.topStart, bottomStart = shapes.extraSmall.bottomStart)
 }
 
 @Composable

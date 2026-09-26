@@ -8,6 +8,8 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -94,12 +96,12 @@ class TopBarContentTest {
         }
 
     @Test
-    fun expressiveSwitch_turningItOn_landsThroughTheRevealAsOneUndoEntry() =
+    fun expressiveChip_turningItOn_landsThroughTheRevealAsOneUndoEntry() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val graph = showRoot()
             mainClock.autoAdvance = false
 
-            onNodeWithText("Expressive").performClick()
+            onNodeWithText("Expressive").assertIsOff().performClick()
             mainClock.advanceTimeBy(0)
             // A plain edit would have landed inside the click. The reveal holds it until it has drawn the old frame.
             graph.session.document.value.expressive shouldBe false
@@ -112,6 +114,7 @@ class TopBarContentTest {
 
             mainClock.autoAdvance = true
             waitForIdle()
+            onNodeWithText("Expressive").assertIsOn()
             graph.session.history.value.undoLabel shouldBe ChangeLabel(ChangeKind.Library, detail = "Material3")
             onNodeWithContentDescription(UNDO_EXPRESSIVE).performClick()
             waitForIdle()
@@ -160,7 +163,7 @@ class TopBarContentTest {
             waitForIdle()
             mainClock.autoAdvance = false
 
-            onNodeWithText("Expressive").performClick()
+            onNodeWithText("Expressive").assertIsOff().performClick()
             mainClock.advanceTimeBy(0)
             var frames = 0
             while (!graph.session.document.value.expressive && frames < REVEAL_FRAMES) {

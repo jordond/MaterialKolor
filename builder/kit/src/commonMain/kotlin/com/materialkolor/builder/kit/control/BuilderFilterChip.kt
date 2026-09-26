@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -42,6 +44,9 @@ import com.materialkolor.builder.kit.skin.material.MaterialFilterChip
  * @param[modifier] Applied to the chip.
  * @param[icon] A glyph before the label while the chip is off.
  * @param[enabled] Whether the chip can be switched.
+ * @param[connectedStart] Whether the chip carries on from a control on its start side, as one group.
+ * Its start corners go square or down to the skin's small radius, and Material draws it in the
+ * outline of an outlined field whether it is on or off. Its end corners stay as they are.
  */
 @Composable
 public fun BuilderFilterChip(
@@ -51,13 +56,21 @@ public fun BuilderFilterChip(
     modifier: Modifier = Modifier,
     icon: IconId? = null,
     enabled: Boolean = true,
+    connectedStart: Boolean = false,
 ) {
     when (LocalSkin.current.library) {
         SkinLibrary.Material3 -> {
-            MaterialFilterChip(selected, onSelectedChange, label, modifier, icon, enabled)
+            MaterialFilterChip(selected, onSelectedChange, label, modifier, icon, enabled, connectedStart)
         }
         SkinLibrary.Custom -> {
-            HeadlessFilterChip(selected, onSelectedChange, label, CustomActionStyles.chip, modifier, icon, enabled)
+            val style = CustomActionStyles.chip
+            val shape = style.shape
+            val joined = if (connectedStart && shape is CornerBasedShape) {
+                style.copy(shape = shape.copy(topStart = CornerSize(0), bottomStart = CornerSize(0)))
+            } else {
+                style
+            }
+            HeadlessFilterChip(selected, onSelectedChange, label, joined, modifier, icon, enabled)
         }
     }
 }

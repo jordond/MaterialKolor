@@ -27,7 +27,7 @@ internal const val LIBRARY_CHIP_ROW_TAG: String = "top-bar-library-chips"
 
 /**
  * The library switcher on a phone, a row of chips under the top bar, one per library, with the
- * Expressive switch after them while Material 3 is picked.
+ * Expressive chip after them while Material 3 is picked.
  *
  * The row scrolls sideways when the names run past the edge, and the chip with focus scrolls into
  * view. The arrow keys only move focus and Space or Enter picks, as on the segmented row, so walking
@@ -35,11 +35,11 @@ internal const val LIBRARY_CHIP_ROW_TAG: String = "top-bar-library-chips"
  * show as their own controls, the way the registry finds them.
  *
  * @param[selected] The library the document is on.
- * @param[expressive] Whether the Expressive switch is on.
+ * @param[expressive] Whether the Expressive chip is on.
  * @param[onSwitch] Gets the new choice and where the reveal grows from.
- * @param[onExpressiveChange] Gets the Expressive switch's new state and where the reveal grows from.
+ * @param[onExpressiveChange] Gets the Expressive chip's new state and where the reveal grows from.
  * @param[switcherModifier] Applied to the chips' group, where focus and the pulse go.
- * @param[expressiveModifier] Applied to the Expressive switch.
+ * @param[expressiveModifier] Applied to the Expressive chip.
  */
 @Composable
 internal fun LibraryChipRow(
@@ -78,7 +78,7 @@ internal fun LibraryChipRow(
                 optionLabel = { choice -> names.getValue(choice) },
             )
             if (selected == LibraryChoice.M3) {
-                ExpressiveSwitch(
+                ExpressiveChip(
                     checked = expressive,
                     onCheckedChange = onExpressiveChange,
                     modifier = expressiveModifier,

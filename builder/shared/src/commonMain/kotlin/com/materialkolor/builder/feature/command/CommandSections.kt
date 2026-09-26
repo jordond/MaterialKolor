@@ -279,7 +279,7 @@ internal fun libraryAndStyleCommands(
             }
         }
     }
-    // The Expressive switch only shows on Material 3, and so does its command.
+    // The Expressive chip only shows on Material 3, and so does its command.
     if (current == LibraryChoice.M3) {
         val expressive = stringResource(Res.string.topbar_expressive)
         val on = state.document.expressive

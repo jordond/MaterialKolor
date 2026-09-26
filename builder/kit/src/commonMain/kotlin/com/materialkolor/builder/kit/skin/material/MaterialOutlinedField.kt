@@ -19,12 +19,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
+import com.materialkolor.builder.kit.control.ControlFrameTop
 import com.materialkolor.builder.kit.headless.InnerTextWithoutHandles
 
 /**
@@ -65,6 +68,7 @@ internal fun MaterialOutlinedField(
             onValueChange = onValueChange,
             modifier = modifier
                 .semantics(mergeDescendants = true) {}
+                .frameTop(labelHalf)
                 .padding(top = labelHalf)
                 .defaultMinSize(
                     minWidth = OutlinedTextFieldDefaults.MinWidth,
@@ -96,3 +100,14 @@ internal fun MaterialOutlinedField(
         )
     }
 }
+
+/**
+ * Reports [top], the room left above the outline for the label, as the field's [ControlFrameTop].
+ */
+private fun Modifier.frameTop(top: Dp): Modifier =
+    layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        layout(placeable.width, placeable.height, mapOf(ControlFrameTop to top.roundToPx())) {
+            placeable.place(0, 0)
+        }
+    }

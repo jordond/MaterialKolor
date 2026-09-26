@@ -79,7 +79,7 @@ internal fun stepText(entry: HistoryEntry): String {
 /**
  * The change [label] describes, with the value it landed on when there is a name for it. A
  * library reads as the switcher names it, [library] when that is known, with M3 Expressive for
- * Material 3 with the Expressive switch on. A seed keeps its hex and a rename its name. Every other
+ * Material 3 with the Expressive chip on. A seed keeps its hex and a rename its name. Every other
  * detail is a raw key or names where the change went, a role or a slot, so it is left out.
  */
 @Composable
@@ -112,7 +112,7 @@ private enum class Detail {
     AsIs,
 
     /**
-     * Shown as the library switcher and the Expressive switch name it.
+     * Shown as the library switcher and the Expressive chip name it.
      */
     LibraryName,
 }
@@ -138,7 +138,7 @@ private fun undoneLanding(
 /**
  * The library and flag a redo brings back. The step starts from [document] and never lands where
  * it started, so a redo onto Material 3 from Material 3 flips the expressive flag. A step onto
- * Material 3 from another library may come from before the Expressive switch, when it could land
+ * Material 3 from another library may come from before Expressive was a flag, when it could land
  * on either, so it names nothing. Every other library lands with the flag off.
  */
 private fun redoneLanding(

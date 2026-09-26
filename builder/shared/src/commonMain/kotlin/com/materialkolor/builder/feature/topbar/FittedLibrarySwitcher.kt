@@ -93,10 +93,10 @@ internal val LocalSwitcherForm: ProvidableCompositionLocal<SwitcherFormState?> =
  * costs the switcher nothing. The form it shows goes to [LocalSwitcherForm] for the command registry.
  *
  * @param[selected] The library the document is on.
- * @param[expressive] Whether the Expressive switch is on.
+ * @param[expressive] Whether the Expressive chip is on.
  * @param[modifier] Applied to the room the switcher gets, which it fills.
  * @param[switcherModifier] Applied to the switcher itself, in whichever form it shows.
- * @param[expressiveModifier] Applied to the Expressive switch.
+ * @param[expressiveModifier] Applied to the Expressive chip.
  * @param[onRefit] Called once the switcher has changed form, after the old form has gone, so focus
  *   it held can move to the new one.
  * @param[onFit] Told, each time the switcher measures in a wide window, how wide the segmented row
@@ -164,7 +164,7 @@ internal fun FittedLibrarySwitcher(
 /**
  * How wide the segmented row is at its own width, measured for the height [constraints] allow. The
  * row measured here is never placed and says nothing to assistive technology, so only the one that
- * shows can be reached. It counts the Expressive switch whichever library is picked, so turning
+ * shows can be reached. It counts the Expressive chip whichever library is picked, so turning
  * Material 3 on or off never changes the room the bar gives the switcher.
  */
 private fun SubcomposeMeasureScope.segmentedWidth(
@@ -192,7 +192,7 @@ private fun SubcomposeMeasureScope.segmentedWidth(
 
 /**
  * Everything the segmented row's width hangs on, the room it gets, the choice it marks, the type it
- * draws in and the names it and the Expressive switch show.
+ * draws in and the names it and the Expressive chip show.
  */
 private data class FitKey(
     val constraints: Constraints,

@@ -232,7 +232,7 @@ class CompactMediumTopBarTest {
 
     /**
      * Boots the builder [width] wide and checks the top bar and the chips in each library's skin,
-     * and in Material 3's with the Expressive switch on.
+     * and in Material 3's with the Expressive chip on.
      */
     private fun checkEverySkin(width: Int) =
         runDesktopComposeUiTest(width = width, height = HEIGHT) {

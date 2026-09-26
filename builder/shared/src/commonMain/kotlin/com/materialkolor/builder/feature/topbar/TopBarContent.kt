@@ -58,7 +58,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The top bar, the library switcher on the start edge and the project's actions on the end edge.
- * While Material 3 is picked the Expressive switch follows the switcher, in every form.
+ * While Material 3 is picked the Expressive chip joins the switcher's end, in every form.
  *
  * On a wide window it holds the switcher, the command palette, undo, redo, History, Share, Export
  * code and the overflow menu. The actions always get their full width, and the switcher takes what
@@ -74,11 +74,11 @@ import org.jetbrains.compose.resources.stringResource
  * History has moved there. It stays open while someone jumps between steps and hands focus
  * back to whatever opened it, the page itself when the H key did.
  *
- * A library switch, or a flip of the Expressive switch, goes through the reveal from the control that
+ * A library switch, or a flip of the Expressive chip, goes through the reveal from the control that
  * made it as one undo entry. The bar keeps its own skin across a switch. [focus] comes from the
  * workspace, which hands Share and Export focus back when their panels close, and puts focus back on
  * the switcher when a switch leaves it nowhere. The Expressive suggestion is the model's, raised with
- * the flip it follows, and hands focus back to the Expressive switch.
+ * the flip it follows, and hands focus back to the Expressive chip.
  */
 @Composable
 internal fun TopBarContent(

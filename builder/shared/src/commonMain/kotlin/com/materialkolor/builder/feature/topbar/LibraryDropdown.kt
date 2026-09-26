@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.SubcomposeMeasureScope
 import androidx.compose.ui.layout.layout
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.topbar_expressive
+import com.materialkolor.builder.kit.control.ControlFrameTop
 import com.materialkolor.builder.kit.token.BuilderType
 import com.materialkolor.builder.kit.token.LocalBuilderType
 import org.jetbrains.compose.resources.stringResource
@@ -90,7 +92,7 @@ internal class MediumBarFit {
 
 /**
  * The library switcher on a Medium window, a dropdown whose trigger shows the library's name whole,
- * with the Expressive switch after it while Material 3 is picked.
+ * with the Expressive chip joined to its end while Material 3 is picked.
  *
  * It measures every library's trigger off screen and out of the accessibility tree, and asks [fit]
  * for room for the widest, so a switch never moves the bar's buttons. Which one is widest is only
@@ -98,11 +100,11 @@ internal class MediumBarFit {
  * command registry. A pick reaches [onSwitch] at once.
  *
  * @param[selected] The library the document is on.
- * @param[expressive] Whether the Expressive switch is on.
+ * @param[expressive] Whether the Expressive chip is on.
  * @param[fit] Which top bar buttons have made room for it.
  * @param[modifier] Applied to the room the dropdown gets, which it fills.
  * @param[switcherModifier] Applied to the dropdown itself.
- * @param[expressiveModifier] Applied to the Expressive switch.
+ * @param[expressiveModifier] Applied to the Expressive chip.
  */
 @Composable
 internal fun LibraryDropdown(
@@ -154,7 +156,7 @@ internal fun LibraryDropdown(
 /**
  * How wide the trigger for [choice] is when nothing holds it in, composed in [slot] off screen and
  * out of the accessibility tree, so only the trigger that shows can be reached. It counts the
- * Expressive switch for every library, so turning Material 3 on or off never moves the bar's buttons.
+ * Expressive chip for every library, so turning Material 3 on or off never moves the bar's buttons.
  */
 private fun SubcomposeMeasureScope.naturalWidth(
     slot: TriggerSlot,
@@ -179,7 +181,7 @@ private fun SubcomposeMeasureScope.naturalWidth(
 /**
  * Draws what it holds scaled down from its top start corner, just enough to stand no taller than
  * [max], and takes up only the scaled size. Something that fits already is left as it is. Presses
- * and the menu anchored to it follow the scale.
+ * and the menu anchored to it follow the scale, and so does the [ControlFrameTop] it reports.
  *
  * It keeps Material's outlined dropdown, whose label floats over its top edge, whole inside the top
  * bar, where the field and its label together stand taller than the bar.
@@ -192,7 +194,13 @@ internal fun Modifier.shrinkToHeight(max: Dp): Modifier =
             return@layout layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
         }
         val scale = limit.toFloat() / placeable.height
-        layout((placeable.width * scale).roundToInt(), limit) {
+        val frameTop = placeable[ControlFrameTop]
+        val lines: Map<AlignmentLine, Int> = if (frameTop == AlignmentLine.Unspecified) {
+            emptyMap()
+        } else {
+            mapOf(ControlFrameTop to (frameTop * scale).roundToInt())
+        }
+        layout((placeable.width * scale).roundToInt(), limit, lines) {
             placeable.placeRelativeWithLayer(0, 0) {
                 scaleX = scale
                 scaleY = scale
