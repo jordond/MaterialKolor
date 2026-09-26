@@ -33,13 +33,12 @@ import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.Preferences
-import com.materialkolor.builder.domain.persist.ProjectViewState
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
-import com.materialkolor.builder.feature.workspace.capabilitiesOf
 import com.materialkolor.builder.feature.workspace.skinOf
+import com.materialkolor.builder.feature.workspace.workspaceStateOf
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
@@ -266,13 +265,7 @@ class TopBarContentTest {
         document: ThemeDocument,
         history: HistoryState,
     ): WorkspaceModel.State =
-        WorkspaceModel.State(
-            document = document,
-            capabilities = capabilitiesOf(document),
-            history = history,
-            view = ProjectViewState(),
-            preferences = Preferences(),
-        )
+        workspaceStateOf(document = document, history = history)
 
     private class TestOwner : ViewModelStoreOwner {
         override val viewModelStore: ViewModelStore = ViewModelStore()

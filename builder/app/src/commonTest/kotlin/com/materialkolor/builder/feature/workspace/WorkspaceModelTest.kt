@@ -18,6 +18,7 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.PreviewMode
+import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakeClipboard
 import com.materialkolor.builder.fakes.FakeRouter
@@ -25,6 +26,7 @@ import com.materialkolor.builder.fakes.RouterCall
 import com.materialkolor.builder.feature.picker.PickerTarget
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -305,6 +307,26 @@ class WorkspaceModelTest : SessionTestBase() {
 
             workspace.state.value.panel shouldBe null
             workspace.state.value.timeline shouldBe null
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun setPreviewTab_movesOnlyTheView_andKeepsTheCapabilitiesAndTheTimeline() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val workspace = workspaceModel(session, preferences)
+            workspace.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+            workspace.openPanel(Panel.History)
+            val before = workspace.state.value
+            val timeline = before.timeline.shouldNotBeNull()
+
+            workspace.setPreviewTab(PreviewTab.Palettes)
+
+            val after = workspace.state.value
+            after.view.tab shouldBe PreviewTab.Palettes
+            after.capabilities shouldBeSameInstanceAs before.capabilities
+            after.timeline shouldBeSameInstanceAs timeline
             harness.clearAndJoin()
         }
 

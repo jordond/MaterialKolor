@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.LocalThemeResult
 import com.materialkolor.builder.core.platform.StoreError
-import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ColorNames
@@ -44,14 +43,13 @@ import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Preferences
-import com.materialkolor.builder.domain.persist.ProjectViewState
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.feature.picker.PickerTarget
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.ShuffleLock
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
-import com.materialkolor.builder.feature.workspace.capabilitiesOf
+import com.materialkolor.builder.feature.workspace.workspaceStateOf
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.shell.PosterSurface
 import com.materialkolor.builder.kit.shell.WorkspaceShell
@@ -537,11 +535,8 @@ class PosterPanelTest {
         projectName: String,
         saveStatus: SaveStatus,
     ): WorkspaceModel.State =
-        WorkspaceModel.State(
+        workspaceStateOf(
             document = document,
-            capabilities = capabilitiesOf(document),
-            history = HistoryState(),
-            view = ProjectViewState(),
             preferences = preferences,
             projectName = projectName,
             saveStatus = saveStatus,

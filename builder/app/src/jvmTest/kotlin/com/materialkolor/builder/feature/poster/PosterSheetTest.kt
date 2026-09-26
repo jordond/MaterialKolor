@@ -10,15 +10,11 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import com.materialkolor.builder.LocalThemeResult
-import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.domain.persist.Preferences
-import com.materialkolor.builder.domain.persist.ProjectViewState
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
-import com.materialkolor.builder.feature.workspace.WorkspaceModel
-import com.materialkolor.builder.feature.workspace.capabilitiesOf
 import com.materialkolor.builder.feature.workspace.skinOf
+import com.materialkolor.builder.feature.workspace.workspaceStateOf
 import com.materialkolor.builder.kit.control.BottomSheetDetent
 import com.materialkolor.builder.kit.control.BottomSheetState
 import com.materialkolor.builder.kit.control.rememberBottomSheetState
@@ -129,13 +125,7 @@ class PosterSheetTest {
     private fun ComposeUiTest.showSheet(): Pair<BottomSheetState, () -> PosterSheetView> {
         val document = ThemeDocument.Default
         val result = ThemeResolver().resolve(document)
-        val state = WorkspaceModel.State(
-            document = document,
-            capabilities = capabilitiesOf(document),
-            history = HistoryState(),
-            view = ProjectViewState(),
-            preferences = Preferences(),
-        )
+        val state = workspaceStateOf(document = document)
         var sheet: BottomSheetState? = null
         var view: PosterSheetView? = null
         setContent {

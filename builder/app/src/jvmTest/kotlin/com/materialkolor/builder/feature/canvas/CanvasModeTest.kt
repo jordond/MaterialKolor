@@ -24,6 +24,7 @@ import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.ProjectViewState
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
+import com.materialkolor.builder.feature.workspace.withView
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.kotest.assertions.withClue
@@ -129,7 +130,7 @@ class CanvasModeTest {
                     setContent { Canvas(host, frozen = false) }
                     waitForIdle()
 
-                    host.state = host.state.copy(view = second)
+                    host.state = host.state.withView(second)
                     settle()
                     if (second.mode != PreviewMode.Split) {
                         onNodeWithText("Split").performClick()
