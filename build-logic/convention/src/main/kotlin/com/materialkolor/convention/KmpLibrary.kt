@@ -51,15 +51,6 @@ internal fun Project.configureKmpLibrary(settings: MaterialKolorLibraryExtension
 
             withHostTest {}
 
-            val consumerRules = layout.projectDirectory.file("consumer-rules.pro")
-            if (consumerRules.asFile.exists()) {
-                @Suppress("UnstableApiUsage")
-                optimization {
-                    consumerKeepRules.publish = true
-                    consumerKeepRules.file(consumerRules.asFile.name)
-                }
-            }
-
             compilerOptions {
                 jvmTarget.set(settings.jvmTarget)
             }

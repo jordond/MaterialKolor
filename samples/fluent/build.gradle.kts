@@ -16,8 +16,6 @@ kotlin {
         compileSdk = libs.versions.sdk.compile.get().toInt()
         minSdk = libs.versions.sdk.min.library.get().toInt()
 
-        withHostTest {}
-
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
@@ -39,18 +37,13 @@ kotlin {
 
             implementation(project(":material-kolor-fluent"))
             implementation(libs.fluent)
-        }
-
-        commonTest.dependencies {
-            implementation(kotlin("test"))
+            // Fluent v0.1.0 brings haze 1.6.6, which was built for Compose 1.8 and calls a ShaderBrush method
+            // that Compose 1.12 changed. Haze 1.7.3 is built for Compose 1.12 and keeps the API Fluent uses.
+            implementation(libs.haze)
+            implementation(project(":samples:shared"))
         }
 
         jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-        }
-
-        jvmTest.dependencies {
-            implementation(libs.compose.ui.test)
             implementation(compose.desktop.currentOs)
         }
     }
@@ -59,5 +52,9 @@ kotlin {
 compose.desktop {
     application {
         mainClass = "com.materialkolor.sample.fluent.MainKt"
+
+        buildTypes.release.proguard {
+            configurationFiles.from(project.file("proguard-rules.pro"))
+        }
     }
 }

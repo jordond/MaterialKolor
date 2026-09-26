@@ -6,31 +6,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import java.awt.image.BufferedImage
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
-import kotlin.time.TimeSource
 
 @OptIn(ExperimentalTestApi::class)
 class ImageBitmapDesktopTest {
     private val fallback = Color(0xff123456)
 
     @Test
-    fun cameraSizedPhotoIsSeededInMilliseconds() {
-        // Warm the quantizer up so the measurement below times the work, not the class loading.
-        gradientBitmap(width = 64, height = 64).themeColor(fallback = fallback)
+    fun cameraSizedPhotoIsSampledInsteadOfReadInFull() {
+        val image = PixelCountingBitmap(gradientBitmap(width = 4000, height = 3000))
 
-        val image = gradientBitmap(width = 4000, height = 3000)
-        val started = TimeSource.Monotonic.markNow()
         val seed = image.themeColor(fallback = fallback)
-        val elapsed = started.elapsedNow()
 
         assertNotEquals(fallback, seed)
         assertTrue(
-            elapsed.inWholeMilliseconds < 500,
-            "seeding a 4000 by 3000 photo took $elapsed, it should sample instead of reading every pixel",
+            image.pixelsRead < image.width * image.height / 20,
+            "seeding a 4000 by 3000 photo read ${image.pixelsRead} pixels, it should sample instead of reading every pixel",
         )
     }
 
@@ -70,5 +65,25 @@ class ImageBitmapDesktopTest {
         }
 
         return buffered.toComposeImageBitmap()
+    }
+
+    private class PixelCountingBitmap(
+        private val delegate: ImageBitmap,
+    ) : ImageBitmap by delegate {
+        var pixelsRead = 0L
+            private set
+
+        override fun readPixels(
+            buffer: IntArray,
+            startX: Int,
+            startY: Int,
+            width: Int,
+            height: Int,
+            bufferOffset: Int,
+            stride: Int,
+        ) {
+            pixelsRead += width.toLong() * height
+            delegate.readPixels(buffer, startX, startY, width, height, bufferOffset, stride)
+        }
     }
 }

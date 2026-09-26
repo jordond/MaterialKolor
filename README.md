@@ -44,6 +44,7 @@ The KDoc is published at [docs.materialkolor.com](https://docs.materialkolor.com
     - [Color Temperature](#color-temperature)
 - [Generating from an Image](#generating-from-an-image)
     - [Palette module](#palette-module)
+- [Samples](#samples)
 - [License](#license)
     - [Changes from original source](#changes-from-original-source)
 
@@ -261,6 +262,9 @@ fun MyTheme(
 }
 ```
 
+[`samples/material3`](samples/material3) builds the [Tasks sample](#samples) on Material 3
+components themed by `DynamicMaterialTheme`. Run it with `./gradlew :samples:material3:run`.
+
 ### DynamicMaterialExpressiveTheme
 
 For more vibrant and playful themes, use `DynamicMaterialExpressiveTheme`. This composable is
@@ -354,24 +358,25 @@ fun AppTheme(seed: Color, isDark: Boolean, content: @Composable () -> Unit) {
 }
 ```
 
-[`samples/custom-theme`](samples/custom-theme) is a working version of that. Seven accent families
-instead of three, pressed and raised states, three surface steps, a border ramp and five decorative
-category colors, all from one seed plus eight accent seeds.
+[`samples/custom-theme`](samples/custom-theme) is a working version of that, styled as a risograph
+print. A paper stock, a key ink and three spot inks, each a ramp built from its own seed and pulled
+towards yours, next to the primary and error roles. It builds the [Tasks sample](#samples) on
+Compose Foundation alone, and its Palette tab shows every ramp and the tone the theme prints at.
 
 Run it with `./gradlew :samples:custom-theme:run`.
 
 ## Compose Unstyled
 
-`material-kolor-unstyled` adapts a MaterialKolor scheme to
-[Compose Unstyled](https://composeunstyled.com) theming. Your app keeps `buildThemeV2`, its text
-style, its indication and its selection colors. The adapter only writes color tokens.
+`material-kolor-unstyled` adapts a MaterialKolor scheme
+to[Compose Unstyled](https://composeunstyled.com) theming.
 
 ```kotlin
+import com.composeunstyled.theme.ColorScheme
 import com.composeunstyled.theme.Theme
 import com.composeunstyled.theme.buildThemeV2
 import com.materialkolor.PaletteStyle
 import com.materialkolor.unstyled.MaterialKolorTokens
-import com.materialkolor.unstyled.dynamicColorSchemes
+import com.materialkolor.unstyled.rememberDynamicLightDarkColors
 
 object ThemeSettings {
     var seedColor by mutableStateOf(Color(0xFF6750A4))
@@ -379,7 +384,16 @@ object ThemeSettings {
 
 val AppTheme = buildThemeV2 {
     colorSchemeTransitionSpec = tween(300)
-    dynamicColorSchemes(seedColor = ThemeSettings.seedColor, style = PaletteStyle.Vibrant)
+
+    val (light, dark) = rememberDynamicLightDarkColors(
+        seedColor = ThemeSettings.seedColor,
+        style = PaletteStyle.Vibrant
+    )
+    properties[MaterialKolorTokens.colors] = light
+
+    colorScheme(ColorScheme.Dark) {
+        properties[MaterialKolorTokens.colors] = dark
+    }
 }
 
 @Composable
@@ -397,15 +411,55 @@ fun App() {
 ```
 
 The builder lambda is composable, so it reads `ThemeSettings.seedColor` on every recomposition and
-the theme regenerates when the button sets a new one. Light is the base, dark is the
-`ColorScheme.Dark` override, so `AppTheme { }` follows the system and
-`AppTheme(colorScheme = ColorScheme.Dark) { }` pins one.
+the theme regenerates when the button sets a new one. `rememberDynamicLightDarkColors` builds the
+light and dark token maps from one set of arguments and remembers both as a pair. It takes the same
+parameters as `rememberDynamicScheme`, minus `isDark`.
+
+Light goes in the base values and dark goes in the `ColorScheme.Dark` block. Unstyled lays the
+active scheme's overrides over the base values, so `AppTheme { }` follows the system,
+`AppTheme(colorScheme = ColorScheme.Dark) { }` pins one, and a scheme that never sets the colors
+falls back to the light ones. The dark block is yours, so anything else dark mode changes goes
+next to the colors.
+
+```kotlin
+colorScheme(ColorScheme.Dark) {
+    properties[MaterialKolorTokens.colors] = dark
+    properties[AppShadows] = darkShadows
+    defaultContentColor = Color(0xFFE6E0E9)
+}
+```
+
+A scheme of your own needs one set of colors. `rememberDynamicColors` takes `isDark` and gives a
+single map.
+
+```kotlin
+val Sepia = ColorScheme("sepia")
+
+val AppTheme = buildThemeV2 {
+    // The base values and the dark block, as above.
+
+    colorScheme(Sepia) {
+        properties[MaterialKolorTokens.colors] =
+            rememberDynamicColors(Color(0xFF704214), isDark = false)
+    }
+}
+```
+
+When the theme already has a `DynamicScheme`, for example one kept in application state,
+`scheme.toThemeValues()` gives the same map.
+
+Set `defaultIndication` on the builder. Left unset, Unstyled falls back to an indication that
+foundation's `clickable` rejects, and the first plain `clickable` throws. Setting it only reaches
+`LocalIndication`, though. `UnstyledButton`, `UnstyledCheckbox`, `UnstyledSwitch`, the radio group
+and the tab group all default their `indication` parameter to `null`, so pass
+`LocalIndication.current` to each of them, or wrap them in your own components that do. The
+[`samples/unstyled`](samples/unstyled) components show one way.
 
 The adapter never animates. Set `colorSchemeTransitionSpec` on the builder, as above, and Unstyled
 animates every color token whenever it changes, whether the seed moved or the scheme flipped
 between light and dark.
 
-If your app owns its own token vocabulary, build the values with the DSL instead.
+If your app owns its own token vocabulary, map the `MaterialKolors` roles onto it.
 
 ```kotlin
 val appColors = ThemeProperty<Color>("app.colors")
@@ -413,31 +467,31 @@ val accent = ThemeToken<Color>("accent")
 val onAccent = ThemeToken<Color>("on_accent")
 val canvas = ThemeToken<Color>("canvas")
 
+fun MaterialKolors.toAppColors(): Map<ThemeToken<Color>, Color> =
+    mapOf(
+        accent to primary(),
+        onAccent to onPrimary(),
+        canvas to surfaceContainerLow(),
+    )
+
 val AppTheme = buildThemeV2 {
     val light = rememberDynamicScheme(ThemeSettings.seedColor, isDark = false)
     val dark = rememberDynamicScheme(ThemeSettings.seedColor, isDark = true)
 
-    properties[appColors] = light.themeValues {
-        accent to primary()
-        onAccent to onPrimary()
-        canvas to surfaceContainerLow()
-    }
+    properties[appColors] = remember(light) { MaterialKolors(light).toAppColors() }
+
     colorScheme(ColorScheme.Dark) {
-        properties[appColors] = dark.themeValues {
-            accent to primary()
-            onAccent to onPrimary()
-            canvas to surfaceContainerLow()
-        }
+        properties[appColors] = remember(dark) { MaterialKolors(dark).toAppColors() }
     }
 }
 ```
 
-Every `MaterialKolors` role is available inside the block, and `dynamicColors(scheme)` writes the
-whole role set for a scheme you built yourself.
-
 The adapter publishes android, jvm, js, wasmJs, iosArm64 and iosSimulatorArm64, because Compose
 Unstyled has no macOS native target. Android minSdk 23 and Java 17 bytecode both come from Unstyled.
 Core keeps its own floor.
+
+[`samples/unstyled`](samples/unstyled) builds the [Tasks sample](#samples) on Compose Unstyled with
+this adapter. Run it with `./gradlew :samples:unstyled:run`.
 
 ## Compose Fluent
 
@@ -475,15 +529,15 @@ on the way into a scheme, so `TonalSpot` gives a calmer accent than the seed you
 The seven shades are anchored to the lightness of Microsoft's own Windows blue family, rounded to
 the nearest five:
 
-| Shade | Windows blue | its tone | tone used here |
-|---|---|---|---|
-| `dark3` | `#001968` | 13.8 | 15 |
-| `dark2` | `#003D92` | 27.9 | 30 |
-| `dark1` | `#005EB7` | 40.3 | 40 |
-| `base` | `#0078D4` | 49.7 | 50 |
-| `light1` | `#0093F9` | 59.6 | 60 |
-| `light2` | `#60CCFE` | 77.8 | 80 |
-| `light3` | `#98ECFE` | 88.8 | 90 |
+| Shade    | Windows blue | its tone | tone used here |
+|----------|--------------|----------|----------------|
+| `dark3`  | `#001968`    | 13.8     | 15             |
+| `dark2`  | `#003D92`    | 27.9     | 30             |
+| `dark1`  | `#005EB7`    | 40.3     | 40             |
+| `base`   | `#0078D4`    | 49.7     | 50             |
+| `light1` | `#0093F9`    | 59.6     | 60             |
+| `light2` | `#60CCFE`    | 77.8     | 80             |
+| `light3` | `#98ECFE`    | 88.8     | 90             |
 
 Microsoft's ramp shifts hue by 64 degrees from its darkest shade to its lightest, and a tonal
 palette holds hue steady, so this matches the lightness of that ramp rather than reproducing it.
@@ -519,9 +573,10 @@ to go and are left alone.
 A seed with little chroma gives a Fluent theme with little chroma. A grey seed produces seven
 greys, which is the ramp working rather than a fault.
 
-`samples/fluent` is a worked example. Run it with `./gradlew :samples:fluent:run` to switch seeds,
-flip light and dark, and see the generated ramp beside the single blue Fluent falls back to on its
-own.
+[`samples/fluent`](samples/fluent) builds the [Tasks sample](#samples) on Fluent components. Run it
+with `./gradlew :samples:fluent:run` to switch seeds, flip light and dark, and see the generated
+ramp
+beside the single blue Fluent falls back to on its own.
 
 Platforms: JVM, Android, iOS, JS and Wasm. No macOS native target, Java 17 bytecode from Fluent,
 and the Android floor is core's own 21.
@@ -665,6 +720,21 @@ fun DynamicTheme(image: ImageBitmap, content: @Composable () -> Unit) {
 `Palette.seedColorOrNull()` are there for when you want to score a palette you generated yourself,
 and `rememberPainterThemeColor()` starts from a `Painter`. For base64 strings, network URLs and
 files, add the matching kmpalette extension artifact and pass its loader.
+
+## Samples
+
+The [samples](samples) are one small app, Tasks, built four times. A to-do list with a seed picker
+and a light and dark switch on top. The behaviour, the copy and the data live in one shared module,
+so the four differ only in their UI stack and in how they turn a seed into a theme.
+
+| Sample                                 | UI                 | Theme from                        | Run it                                |
+|----------------------------------------|--------------------|-----------------------------------|---------------------------------------|
+| [`custom-theme`](samples/custom-theme) | Compose Foundation | `material-kolor-core` tonal ramps | `./gradlew :samples:custom-theme:run` |
+| [`fluent`](samples/fluent)             | Compose Fluent     | `material-kolor-fluent`           | `./gradlew :samples:fluent:run`       |
+| [`material3`](samples/material3)       | Compose Material 3 | `material-kolor-material3`        | `./gradlew :samples:material3:run`    |
+| [`unstyled`](samples/unstyled)         | Compose Unstyled   | `material-kolor-unstyled`         | `./gradlew :samples:unstyled:run`     |
+
+[`samples/README.md`](samples/README.md) has the full spec.
 
 ## License
 

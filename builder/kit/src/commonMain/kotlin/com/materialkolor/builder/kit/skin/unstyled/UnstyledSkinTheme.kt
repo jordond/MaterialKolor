@@ -31,7 +31,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.token.brandFontFamily
 import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.unstyled.MaterialKolorTokens
-import com.materialkolor.unstyled.dynamicColors
+import com.materialkolor.unstyled.toThemeValues
 import kotlinx.coroutines.launch
 
 /**
@@ -61,7 +61,7 @@ internal fun UnstyledSkinTheme(
     val brand = brandFontFamily()
     val theme = remember(scheme, brand) {
         buildThemeV2 {
-            dynamicColors(scheme)
+            properties[MaterialKolorTokens.colors] = scheme.toThemeValues()
             defaultTextStyle = TextStyle.Default.copy(fontFamily = brand)
             defaultIndication = UnstyledIndication
         }

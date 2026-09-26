@@ -13,11 +13,19 @@ import com.materialkolor.MaterialKolors
  * [MaterialKolors.primary] returns for the scheme the theme was built from.
  *
  * Nothing here is required. An application that prefers its own vocabulary declares its own
- * property and tokens and fills them with [themeValues].
+ * property and tokens and maps the roles onto them.
+ *
+ * ```kotlin
+ * properties[appColors] = remember(scheme) {
+ *     with(MaterialKolors(scheme)) {
+ *         mapOf(accent to primary(), onAccent to onPrimary())
+ *     }
+ * }
+ * ```
  */
 public object MaterialKolorTokens {
     /**
-     * The property the adapter writes the scheme into.
+     * The property that holds the role colors, filled with [rememberDynamicColors] or [toThemeValues].
      */
     public val colors: ThemeProperty<Color> = ThemeProperty("materialkolor.colors")
 

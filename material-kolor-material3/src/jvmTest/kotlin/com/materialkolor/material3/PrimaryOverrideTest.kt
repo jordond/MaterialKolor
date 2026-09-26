@@ -5,7 +5,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.DynamicScheme
 import com.materialkolor.ktx.DynamicScheme

@@ -15,7 +15,7 @@ import com.materialkolor.sample.customtheme.ui.SampleApp
 public fun main() {
     application {
         val state = rememberWindowState(
-            size = DpSize(720.dp, 900.dp),
+            size = DpSize(960.dp, 760.dp),
             position = WindowPosition(Alignment.Center),
         )
 

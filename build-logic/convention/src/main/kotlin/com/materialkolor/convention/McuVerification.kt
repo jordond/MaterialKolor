@@ -29,9 +29,6 @@ internal fun Project.registerMcuVerificationTasks() {
         description = "Run the transformer, parity and JVM library tests."
         dependsOn(":mcu-source-transformer:test", ":mcu-source-transformer:testAlternateParser", ":mcu-upstream:test")
         dependsOn(":material-color-utilities:verifyMcuParserAgreement")
-
-        // The samples are not published, so the module loop below never reaches them.
-        dependsOn(":samples:custom-theme:jvmTest")
         for (module in mcuLibraryModules) {
             dependsOn(":${module.name}:jvmTest")
         }

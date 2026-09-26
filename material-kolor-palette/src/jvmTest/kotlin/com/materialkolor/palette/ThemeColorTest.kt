@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import com.kmpalette.loader.ImageBitmapLoader
 import com.kmpalette.rememberPaletteState
 import com.materialkolor.dynamiccolor.DynamicScheme
@@ -61,7 +61,7 @@ class ThemeColorTest {
             assertCloseTo(Color.Red, assertNotNull(latest))
 
             input = green
-            waitUntil { latest?.let { color -> color.green > color.red } == true }
+            waitUntil { latest.let { color -> color.green > color.red } }
             assertCloseTo(Color.Green, assertNotNull(latest))
         }
 

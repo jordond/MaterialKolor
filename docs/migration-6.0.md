@@ -386,8 +386,8 @@ color for any tone you pick, and `rememberTonalPalette` builds extra ramps from 
 scheme has no room for.
 
 The README has a [Tonal Ramps](../README.md#tonal-ramps) section, and `samples/custom-theme` is a
-worked example with seven accent families, interaction states and surface and border ramps generated
-from a single seed.
+worked example that builds a paper stock and a set of spot inks from a single seed plus four ink
+seeds.
 
 If the theme you are arriving with is Compose Fluent rather than your own, `material-kolor-fluent`
 is new in 6.0 and does the conversion for you. See [Compose Fluent](../README.md#compose-fluent).

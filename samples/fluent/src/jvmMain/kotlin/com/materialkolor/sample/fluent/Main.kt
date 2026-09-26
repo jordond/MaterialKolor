@@ -15,7 +15,7 @@ import com.materialkolor.sample.fluent.ui.FluentSampleApp
 public fun main() {
     application {
         val state = rememberWindowState(
-            size = DpSize(760.dp, 640.dp),
+            size = DpSize(960.dp, 760.dp),
             position = WindowPosition(Alignment.Center),
         )
 

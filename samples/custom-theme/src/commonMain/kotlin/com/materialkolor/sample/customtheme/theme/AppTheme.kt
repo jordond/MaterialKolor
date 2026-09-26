@@ -11,18 +11,12 @@ import androidx.compose.ui.graphics.Color
 import com.materialkolor.ktx.rememberDynamicScheme
 import com.materialkolor.ktx.rememberTonalPalette
 
-/**
- * Which theme the app shows, with [System] deferring to the platform.
- */
 public enum class AppThemeMode {
     Light,
     Dark,
     System,
     ;
 
-    /**
-     * Resolve this mode against the platform setting.
-     */
     @Composable
     @ReadOnlyComposable
     public fun isDark(): Boolean =
@@ -33,20 +27,12 @@ public enum class AppThemeMode {
         }
 }
 
-/**
- * The theme colors for the current subtree.
- */
 public val LocalAppColors: ProvidableCompositionLocal<AppColors> =
     staticCompositionLocalOf { error("No AppColors provided, wrap the content in AppTheme.") }
 
-/**
- * Generate the theme from [seed] and hand it to [content].
- *
- * @param[seed] The color the whole theme is generated from.
- * @param[mode] Which theme to show.
- * @param[seeds] The accent seeds the theme owns on top of [seed].
- * @param[content] The themed content.
- */
+public val LocalAppPalettes: ProvidableCompositionLocal<AppPalettes> =
+    staticCompositionLocalOf { error("No AppPalettes provided, wrap the content in AppTheme.") }
+
 @Composable
 public fun AppTheme(
     seed: Color,
@@ -54,35 +40,40 @@ public fun AppTheme(
     seeds: AppThemeSeeds = AppThemeSeeds.Default,
     content: @Composable () -> Unit,
 ) {
-    val colors = rememberAppColors(seed = seed, isDark = mode.isDark(), seeds = seeds)
-    CompositionLocalProvider(LocalAppColors provides colors, content = content)
+    val palettes = rememberAppPalettes(seed = seed, isDark = mode.isDark(), seeds = seeds)
+    val target = remember(palettes) { palettes.toColors() }
+    val colors = animateAppColors(target)
+
+    CompositionLocalProvider(
+        LocalAppPalettes provides palettes,
+        LocalAppColors provides colors,
+        content = content,
+    )
 }
 
-/**
- * Generate and remember the theme colors.
- *
- * @param[seed] The color the whole theme is generated from.
- * @param[isDark] Whether to build the dark theme or the light one.
- * @param[seeds] The accent seeds the theme owns on top of [seed].
- * @return The remembered theme colors.
- */
+@Composable
+public fun rememberAppPalettes(
+    seed: Color,
+    isDark: Boolean,
+    seeds: AppThemeSeeds = AppThemeSeeds.Default,
+): AppPalettes {
+    val scheme = rememberDynamicScheme(seedColor = seed, isDark = isDark)
+    val stock = rememberTonalPalette(seed = seeds.stock, harmonizeWith = seed)
+    val pink = rememberTonalPalette(seed = seeds.pink, harmonizeWith = seed)
+    val blue = rememberTonalPalette(seed = seeds.blue, harmonizeWith = seed)
+    val yellow = rememberTonalPalette(seed = seeds.yellow, harmonizeWith = seed)
+
+    return remember(scheme, stock, pink, blue, yellow) {
+        AppPalettes(scheme = scheme, stock = stock, pink = pink, blue = blue, yellow = yellow)
+    }
+}
+
 @Composable
 public fun rememberAppColors(
     seed: Color,
     isDark: Boolean,
     seeds: AppThemeSeeds = AppThemeSeeds.Default,
 ): AppColors {
-    val scheme = rememberDynamicScheme(seedColor = seed, isDark = isDark)
-    val palettes = AppPalettes(
-        love = rememberTonalPalette(seed = seeds.love, harmonizeWith = seed),
-        cold = rememberTonalPalette(seed = seeds.cold, harmonizeWith = seed),
-        warm = rememberTonalPalette(seed = seeds.warm, harmonizeWith = seed),
-        coffee = rememberTonalPalette(seed = seeds.coffee, harmonizeWith = seed),
-        matcha = rememberTonalPalette(seed = seeds.matcha, harmonizeWith = seed),
-        iced = rememberTonalPalette(seed = seeds.iced, harmonizeWith = seed),
-        tea = rememberTonalPalette(seed = seeds.tea, harmonizeWith = seed),
-        chocolate = rememberTonalPalette(seed = seeds.chocolate, harmonizeWith = seed),
-    )
-
-    return remember(scheme, palettes) { palettes.toColors(scheme) }
+    val palettes = rememberAppPalettes(seed = seed, isDark = isDark, seeds = seeds)
+    return remember(palettes) { palettes.toColors() }
 }

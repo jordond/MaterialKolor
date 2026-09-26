@@ -45,8 +45,12 @@ include(
 )
 
 include(
+    ":samples:shared",
     ":samples:custom-theme",
     ":samples:fluent",
+    ":samples:material3",
+    ":samples:unstyled",
+    ":samples:screenshots",
 )
 
 include(
