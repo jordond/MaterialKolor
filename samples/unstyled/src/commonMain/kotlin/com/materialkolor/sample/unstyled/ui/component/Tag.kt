@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
@@ -17,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.composeunstyled.ProvideContentColor
@@ -24,22 +26,28 @@ import com.composeunstyled.RadioButton
 import com.composeunstyled.Text
 import com.composeunstyled.UnstyledRadioGroup
 import com.materialkolor.sample.unstyled.theme.ControlHeight
-import com.materialkolor.sample.unstyled.theme.Shapes
+import com.materialkolor.sample.unstyled.theme.ShadowTokens
+import com.materialkolor.sample.unstyled.theme.ShapeTokens
 import com.materialkolor.sample.unstyled.theme.Spacing
 import com.materialkolor.sample.unstyled.theme.TasksType
 import com.materialkolor.sample.unstyled.theme.color
+import com.materialkolor.sample.unstyled.theme.shadow
+import com.materialkolor.sample.unstyled.theme.shape
 import com.materialkolor.unstyled.MaterialKolorTokens
 
+// Clears the point and the hole of the tag shape.
+private val TagPadding = PaddingValues(start = 20.dp, end = Spacing.Medium)
+
 @Immutable
-internal data class ChipColors(
+internal data class TagColors(
     val container: Color,
     val content: Color,
 )
 
 @Composable
-internal fun Chip(
+internal fun Tag(
     label: String,
-    colors: ChipColors,
+    colors: TagColors,
     modifier: Modifier = Modifier,
 ) {
     Text(
@@ -48,32 +56,36 @@ internal fun Chip(
         color = colors.content,
         maxLines = 1,
         modifier = modifier
-            .clip(Shapes.Pill)
-            .background(colors.container)
-            .padding(horizontal = Spacing.Small, vertical = Spacing.XSmall),
+            .background(colors.container, ShapeTokens.tag.shape)
+            .padding(TagPadding)
+            .padding(vertical = Spacing.XSmall),
     )
 }
 
 @Composable
-internal fun <T> ChoiceChips(
+internal fun <T> TagPicker(
     choices: List<Choice<T>>,
     selected: T,
     onSelect: (T) -> Unit,
-    colors: @Composable (T) -> ChipColors,
+    colors: @Composable (T) -> TagColors,
     modifier: Modifier = Modifier,
 ) {
+    val tag = ShapeTokens.tag.shape
+    val resting = ShadowTokens.resting.shadow
+
     UnstyledRadioGroup(value = selected, onValueChange = onSelect, modifier = modifier) {
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.Tight)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.Small)) {
             for (choice in choices) {
                 val isSelected = choice.value == selected
                 val picked = colors(choice.value)
                 val interactionSource = remember { MutableInteractionSource() }
                 val container by animateColorAsState(
                     targetValue = if (isSelected) picked.container else Color.Transparent,
-                    label = "chip",
+                    label = "tag",
                 )
                 val outline = if (isSelected) Color.Transparent else MaterialKolorTokens.outlineVariant.color
                 val content = if (isSelected) picked.content else MaterialKolorTokens.onSurfaceVariant.color
+                val lift = if (isSelected) Modifier.dropShadow(shape = tag, shadow = resting) else Modifier
 
                 ProvideContentColor(content) {
                     RadioButton(
@@ -82,17 +94,18 @@ internal fun <T> ChoiceChips(
                         indication = LocalIndication.current,
                         modifier = Modifier
                             .pressScale(interactionSource)
-                            .controlFocusRing(interactionSource, Shapes.Control)
-                            .clip(Shapes.Control)
+                            .controlFocusRing(interactionSource, tag)
+                            .then(lift)
+                            .clip(tag)
                             .background(container)
-                            .border(width = 1.dp, color = outline, shape = Shapes.Control)
+                            .border(width = 1.dp, color = outline, shape = tag)
                             .height(ControlHeight),
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxHeight()
-                                .padding(horizontal = Spacing.Medium),
+                                .padding(TagPadding),
                         ) {
                             Text(text = choice.label, style = TasksType.Label, maxLines = 1)
                         }

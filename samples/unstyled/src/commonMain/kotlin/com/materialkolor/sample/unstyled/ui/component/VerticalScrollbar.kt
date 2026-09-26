@@ -18,9 +18,10 @@ import androidx.compose.ui.unit.dp
 import com.composeunstyled.Thumb
 import com.composeunstyled.UnstyledVerticalScrollbar
 import com.composeunstyled.rememberScrollbarState
-import com.materialkolor.sample.unstyled.theme.Shapes
+import com.materialkolor.sample.unstyled.theme.ShapeTokens
 import com.materialkolor.sample.unstyled.theme.Spacing
 import com.materialkolor.sample.unstyled.theme.color
+import com.materialkolor.sample.unstyled.theme.shape
 import com.materialkolor.unstyled.MaterialKolorTokens
 
 private const val THUMB_ALPHA = 0.32f
@@ -55,7 +56,7 @@ internal fun VerticalScrollbar(
             Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 3.dp)
-                .clip(Shapes.Pill)
+                .clip(ShapeTokens.pill.shape)
                 .background(MaterialKolorTokens.onSurfaceVariant.color.copy(alpha = alpha)),
         )
     }

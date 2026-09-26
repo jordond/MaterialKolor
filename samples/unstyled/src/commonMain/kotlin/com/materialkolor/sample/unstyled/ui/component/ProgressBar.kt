@@ -12,9 +12,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.composeunstyled.Indicator
 import com.composeunstyled.UnstyledProgress
-import com.materialkolor.sample.unstyled.theme.Shapes
-import com.materialkolor.sample.unstyled.theme.color
-import com.materialkolor.unstyled.MaterialKolorTokens
+import com.materialkolor.sample.unstyled.theme.GradientTokens
+import com.materialkolor.sample.unstyled.theme.ShapeTokens
+import com.materialkolor.sample.unstyled.theme.brush
+import com.materialkolor.sample.unstyled.theme.shape
 
 private const val PROGRESS_MILLIS = 300
 
@@ -23,6 +24,7 @@ internal fun ProgressBar(
     progress: Float,
     modifier: Modifier = Modifier,
 ) {
+    val pill = ShapeTokens.pill.shape
     val shown by animateFloatAsState(
         targetValue = progress,
         animationSpec = tween(durationMillis = PROGRESS_MILLIS),
@@ -33,14 +35,13 @@ internal fun ProgressBar(
         progress = shown,
         modifier = modifier
             .fillMaxWidth()
-            .height(8.dp)
-            .clip(Shapes.Pill)
-            .background(MaterialKolorTokens.surfaceContainerHighest.color),
+            .height(12.dp)
+            .sunken(pill),
     ) {
         Indicator(
             Modifier
-                .clip(Shapes.Pill)
-                .background(MaterialKolorTokens.primary.color),
+                .clip(pill)
+                .background(GradientTokens.accent.brush),
         )
     }
 }

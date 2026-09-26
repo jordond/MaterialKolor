@@ -5,7 +5,7 @@ import com.materialkolor.sample.shared.model.TaskTag
 import com.materialkolor.sample.unstyled.theme.accent
 import com.materialkolor.sample.unstyled.theme.color
 import com.materialkolor.sample.unstyled.theme.onAccent
-import com.materialkolor.sample.unstyled.ui.component.ChipColors
+import com.materialkolor.sample.unstyled.ui.component.TagColors
 
 @Composable
-internal fun TaskTag.chipColors(): ChipColors = ChipColors(container = accent.color, content = onAccent.color)
+internal fun TaskTag.colors(): TagColors = TagColors(container = accent.color, content = onAccent.color)

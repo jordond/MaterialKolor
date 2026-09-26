@@ -17,12 +17,6 @@ import com.materialkolor.unstyled.rememberDynamicLightDarkColors
 
 private const val COLOR_TRANSITION_MILLIS = 300
 
-/**
- * Themes [content] with the colors `material-kolor-unstyled` generates from [seed].
- *
- * The Unstyled theme is built once. Its builder is composable and reads the seed every time it runs, so a new seed
- * regenerates the light and dark schemes and the transition spec animates every token to its new color.
- */
 @Composable
 internal fun TasksTheme(
     seed: Color,
@@ -44,9 +38,14 @@ private fun tasksTheme(seed: () -> Color): ThemeComposableV2 =
 
         val (light, dark) = rememberDynamicLightDarkColors(seedColor = seed())
         properties[MaterialKolorTokens.colors] = light
+        properties[ShapeTokens.shapes] = TasksShapes
+        properties[ShadowTokens.shadows] = LightShadows
+        properties[GradientTokens.gradients] = LightGradients
 
         colorScheme(ColorScheme.Dark) {
             properties[MaterialKolorTokens.colors] = dark
+            properties[ShadowTokens.shadows] = DarkShadows
+            properties[GradientTokens.gradients] = DarkGradients
         }
     }
 

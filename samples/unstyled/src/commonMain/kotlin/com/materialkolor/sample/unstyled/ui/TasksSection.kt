@@ -12,8 +12,8 @@ import com.materialkolor.sample.shared.state.SampleState
 import com.materialkolor.sample.shared.ui.SampleCopy
 import com.materialkolor.sample.unstyled.theme.Spacing
 import com.materialkolor.sample.unstyled.theme.TasksType
+import com.materialkolor.sample.unstyled.ui.component.AccentTabs
 import com.materialkolor.sample.unstyled.ui.component.Choice
-import com.materialkolor.sample.unstyled.ui.component.PillTabs
 import com.materialkolor.sample.unstyled.ui.component.ProgressBar
 
 @Composable
@@ -41,7 +41,7 @@ internal fun TasksSection(
         )
 
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.Medium)) {
-            PillTabs(
+            AccentTabs(
                 choices = TaskFilter.entries.map { filter ->
                     Choice(
                         value = filter,

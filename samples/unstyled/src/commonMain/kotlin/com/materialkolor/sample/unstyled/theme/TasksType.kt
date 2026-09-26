@@ -2,10 +2,16 @@ package com.materialkolor.sample.unstyled.theme
 
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 
 internal object TasksType {
-    val Title: TextStyle = TextStyle(fontSize = 28.sp, lineHeight = 36.sp, fontWeight = FontWeight.SemiBold)
+    val Title: TextStyle = TextStyle(
+        fontSize = 40.sp,
+        lineHeight = 44.sp,
+        fontWeight = FontWeight.Black,
+        letterSpacing = (-0.02).em,
+    )
     val Heading: TextStyle = TextStyle(fontSize = 18.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold)
     val Emphasis: TextStyle = TextStyle(fontSize = 15.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold)
     val Body: TextStyle = TextStyle(fontSize = 15.sp, lineHeight = 22.sp)

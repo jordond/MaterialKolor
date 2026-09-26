@@ -15,29 +15,34 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.composeunstyled.DialogPanel
 import com.composeunstyled.Scrim
 import com.composeunstyled.Text
 import com.composeunstyled.UnstyledDialog
-import com.materialkolor.sample.unstyled.theme.Shapes
+import com.composeunstyled.UnstyledIcon
+import com.materialkolor.sample.unstyled.theme.ShadowTokens
+import com.materialkolor.sample.unstyled.theme.ShapeTokens
 import com.materialkolor.sample.unstyled.theme.Spacing
 import com.materialkolor.sample.unstyled.theme.TasksType
 import com.materialkolor.sample.unstyled.theme.color
+import com.materialkolor.sample.unstyled.theme.shadow
+import com.materialkolor.sample.unstyled.theme.shape
 import com.materialkolor.unstyled.MaterialKolorTokens
 
-private const val SCRIM_ALPHA = 0.32f
-private const val PANEL_ENTER_SCALE = 0.94f
+private const val SCRIM_ALPHA = 0.4f
+private const val PANEL_ENTER_SCALE = 0.9f
 
 @Composable
 internal fun ConfirmDialog(
     visible: Boolean,
+    icon: ImageVector,
     title: String,
     body: String,
     onDismiss: () -> Unit,
@@ -45,7 +50,6 @@ internal fun ConfirmDialog(
     actions: @Composable RowScope.() -> Unit,
 ) {
     val scrim = MaterialKolorTokens.scrim.color
-    val shadow = MaterialKolorTokens.shadow.color
     UnstyledDialog(
         visible = visible,
         onDismissRequest = onDismiss,
@@ -65,12 +69,26 @@ internal fun ConfirmDialog(
                 modifier = modifier
                     .widthIn(max = 400.dp)
                     .fillMaxWidth()
-                    .shadow(elevation = 24.dp, shape = Shapes.Card, ambientColor = shadow, spotColor = shadow)
-                    .clip(Shapes.Card)
-                    .background(MaterialKolorTokens.surfaceContainerHigh.color)
+                    .raised(shape = ShapeTokens.dialog.shape, shadow = ShadowTokens.lifted.shadow)
                     .padding(Spacing.XLarge),
             ) {
-                Column {
+                Column(Modifier.fillMaxWidth()) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(MaterialKolorTokens.errorContainer.color, ShapeTokens.pill.shape),
+                    ) {
+                        UnstyledIcon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(22.dp),
+                            tint = MaterialKolorTokens.onErrorContainer.color,
+                        )
+                    }
+
+                    Spacer(Modifier.height(Spacing.Large))
+
                     Text(text = title, style = TasksType.Heading)
 
                     Spacer(Modifier.height(Spacing.Small))

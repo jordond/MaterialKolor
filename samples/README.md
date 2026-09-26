@@ -7,7 +7,7 @@ Every sample is the same small app, **Tasks**, built four times on four differen
 | [`custom-theme`](custom-theme) | Compose Foundation and hand-rolled components | `material-kolor-core` tonal ramps into an app-owned `AppColors` | `./gradlew :samples:custom-theme:run` |
 | [`fluent`](fluent) | [Compose Fluent](https://github.com/compose-fluent/compose-fluent-ui) | `material-kolor-fluent` | `./gradlew :samples:fluent:run` |
 | [`material3`](material3) | [Compose Material 3](https://developer.android.com/jetpack/compose/designsystems/material3) | `material-kolor-material3` | `./gradlew :samples:material3:run` |
-| [`unstyled`](unstyled) | [Compose Unstyled](https://composeunstyled.com) | `material-kolor-unstyled` | `./gradlew :samples:unstyled:run` |
+| [`unstyled`](unstyled) | [Compose Unstyled](https://composeunstyled.com) | `material-kolor-unstyled` colors next to app-owned shapes, shadows and gradients | `./gradlew :samples:unstyled:run` |
 
 | `custom-theme` | `fluent` |
 |---|---|

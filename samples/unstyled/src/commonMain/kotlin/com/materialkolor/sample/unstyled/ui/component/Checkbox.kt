@@ -22,11 +22,14 @@ import com.composables.icons.lucide.Lucide
 import com.composeunstyled.CheckedIndicator
 import com.composeunstyled.UnstyledCheckbox
 import com.composeunstyled.UnstyledIcon
-import com.materialkolor.sample.unstyled.theme.Shapes
+import com.materialkolor.sample.unstyled.theme.GradientTokens
+import com.materialkolor.sample.unstyled.theme.ShapeTokens
+import com.materialkolor.sample.unstyled.theme.brush
 import com.materialkolor.sample.unstyled.theme.color
+import com.materialkolor.sample.unstyled.theme.shape
 import com.materialkolor.unstyled.MaterialKolorTokens
 
-private const val CHECK_ENTER_SCALE = 0.6f
+private const val CHECK_ENTER_SCALE = 0.4f
 
 @Composable
 internal fun Checkbox(
@@ -35,41 +38,44 @@ internal fun Checkbox(
     modifier: Modifier = Modifier,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val round = ShapeTokens.pill.shape
+
     UnstyledCheckbox(
         checked = checked,
         onCheckedChange = onCheckedChange,
         interactionSource = interactionSource,
         indication = LocalIndication.current,
         modifier = modifier
-            .size(36.dp)
-            .controlFocusRing(interactionSource, Shapes.Round, offset = 0.dp)
-            .clip(Shapes.Round),
+            .size(40.dp)
+            .controlFocusRing(interactionSource, round, offset = 0.dp)
+            .clip(round),
     ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Box(
                 modifier = Modifier
-                    .size(20.dp)
-                    .clip(Shapes.Small)
-                    .border(width = 2.dp, color = MaterialKolorTokens.outline.color, shape = Shapes.Small),
+                    .size(24.dp)
+                    .sunken(round)
+                    .border(width = 1.5.dp, color = MaterialKolorTokens.outline.color, shape = round),
+            )
+
+            CheckedIndicator(
+                modifier = Modifier.size(24.dp),
+                enter = fadeIn() + scaleIn(initialScale = CHECK_ENTER_SCALE),
+                exit = fadeOut() + scaleOut(targetScale = CHECK_ENTER_SCALE),
             ) {
-                CheckedIndicator(
-                    modifier = Modifier.fillMaxSize(),
-                    enter = fadeIn() + scaleIn(initialScale = CHECK_ENTER_SCALE),
-                    exit = fadeOut() + scaleOut(targetScale = CHECK_ENTER_SCALE),
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(round)
+                        .background(GradientTokens.accent.brush),
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialKolorTokens.primary.color),
-                    ) {
-                        UnstyledIcon(
-                            imageVector = Lucide.Check,
-                            contentDescription = null,
-                            modifier = Modifier.size(14.dp),
-                            tint = MaterialKolorTokens.onPrimary.color,
-                        )
-                    }
+                    UnstyledIcon(
+                        imageVector = Lucide.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialKolorTokens.onPrimary.color,
+                    )
                 }
             }
         }

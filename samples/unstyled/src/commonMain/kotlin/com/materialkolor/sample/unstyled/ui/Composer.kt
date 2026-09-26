@@ -3,6 +3,7 @@ package com.materialkolor.sample.unstyled.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
@@ -18,8 +19,9 @@ import com.materialkolor.sample.shared.model.canAddTask
 import com.materialkolor.sample.shared.ui.SampleCopy
 import com.materialkolor.sample.unstyled.theme.Spacing
 import com.materialkolor.sample.unstyled.ui.component.Button
+import com.materialkolor.sample.unstyled.ui.component.Card
 import com.materialkolor.sample.unstyled.ui.component.Choice
-import com.materialkolor.sample.unstyled.ui.component.ChoiceChips
+import com.materialkolor.sample.unstyled.ui.component.TagPicker
 import com.materialkolor.sample.unstyled.ui.component.TextField
 
 private val TagChoices: List<Choice<TaskTag>> = TaskTag.entries.map { tag ->
@@ -45,32 +47,36 @@ internal fun Composer(
         focusRequester.requestFocus()
     }
 
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(Spacing.Medium),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        TextField(
-            state = input,
-            placeholder = SampleCopy.inputPlaceholder,
-            onSubmit = add,
+    Card(modifier = modifier.fillMaxWidth()) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(Spacing.Medium),
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .focusRequester(focusRequester)
-                .weight(1f),
-        )
+                .fillMaxWidth()
+                .padding(Spacing.Small),
+        ) {
+            TextField(
+                state = input,
+                placeholder = SampleCopy.inputPlaceholder,
+                onSubmit = add,
+                modifier = Modifier
+                    .focusRequester(focusRequester)
+                    .weight(1f),
+            )
 
-        ChoiceChips(
-            choices = TagChoices,
-            selected = composerTag,
-            onSelect = onTagChange,
-            colors = { tag -> tag.chipColors() },
-        )
+            TagPicker(
+                choices = TagChoices,
+                selected = composerTag,
+                onSelect = onTagChange,
+                colors = { tag -> tag.colors() },
+            )
 
-        Button(
-            label = SampleCopy.add,
-            onClick = add,
-            icon = Lucide.Plus,
-            enabled = canAdd,
-        )
+            Button(
+                label = SampleCopy.add,
+                onClick = add,
+                icon = Lucide.Plus,
+                enabled = canAdd,
+            )
+        }
     }
 }

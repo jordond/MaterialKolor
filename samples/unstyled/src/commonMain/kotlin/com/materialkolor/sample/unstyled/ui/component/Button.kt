@@ -14,7 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.composeunstyled.LocalContentColor
@@ -23,15 +26,20 @@ import com.composeunstyled.Text
 import com.composeunstyled.UnstyledButton
 import com.composeunstyled.UnstyledIcon
 import com.materialkolor.sample.unstyled.theme.ControlHeight
+import com.materialkolor.sample.unstyled.theme.GradientTokens
 import com.materialkolor.sample.unstyled.theme.IconSize
-import com.materialkolor.sample.unstyled.theme.Shapes
+import com.materialkolor.sample.unstyled.theme.ShadowTokens
+import com.materialkolor.sample.unstyled.theme.ShapeTokens
 import com.materialkolor.sample.unstyled.theme.Spacing
 import com.materialkolor.sample.unstyled.theme.TasksType
+import com.materialkolor.sample.unstyled.theme.brush
 import com.materialkolor.sample.unstyled.theme.color
+import com.materialkolor.sample.unstyled.theme.shadow
+import com.materialkolor.sample.unstyled.theme.shape
 import com.materialkolor.unstyled.MaterialKolorTokens
 
 internal enum class ButtonStyle {
-    Filled,
+    Accent,
     Quiet,
     Danger,
 }
@@ -41,36 +49,43 @@ internal fun Button(
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    style: ButtonStyle = ButtonStyle.Filled,
+    style: ButtonStyle = ButtonStyle.Accent,
     icon: ImageVector? = null,
     enabled: Boolean = true,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val container = when (style) {
-        ButtonStyle.Filled -> MaterialKolorTokens.primary.color
-        ButtonStyle.Quiet -> Color.Transparent
-        ButtonStyle.Danger -> MaterialKolorTokens.error.color
+    val shape = ShapeTokens.control.shape
+    val fill: Brush = when (style) {
+        ButtonStyle.Accent -> GradientTokens.accent.brush
+        ButtonStyle.Quiet -> SolidColor(Color.Transparent)
+        ButtonStyle.Danger -> SolidColor(MaterialKolorTokens.error.color)
     }
     val content = when (style) {
-        ButtonStyle.Filled -> MaterialKolorTokens.onPrimary.color
+        ButtonStyle.Accent -> MaterialKolorTokens.onPrimary.color
         ButtonStyle.Quiet -> MaterialKolorTokens.primary.color
         ButtonStyle.Danger -> MaterialKolorTokens.onError.color
+    }
+    val glow = if (style == ButtonStyle.Accent && enabled) {
+        Modifier.dropShadow(shape = shape, shadow = ShadowTokens.accent.shadow)
+    } else {
+        Modifier
     }
 
     ProvideContentColor(content) {
         UnstyledButton(
             onClick = onClick,
             enabled = enabled,
-            contentPadding = PaddingValues(horizontal = Spacing.Large),
+            contentPadding = PaddingValues(horizontal = Spacing.Large + Spacing.XSmall),
             indication = LocalIndication.current,
             interactionSource = interactionSource,
             modifier = modifier
                 .heightIn(min = ControlHeight)
                 .pressScale(interactionSource)
                 .alpha(enabledAlpha(enabled))
-                .controlFocusRing(interactionSource, Shapes.Control)
-                .clip(Shapes.Control)
-                .background(container),
+                .controlFocusRing(interactionSource, shape)
+                .then(glow)
+                .clip(shape)
+                .background(fill),
         ) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.Small),
@@ -98,6 +113,7 @@ internal fun IconButton(
     modifier: Modifier = Modifier,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val shape = ShapeTokens.pill.shape
 
     ProvideContentColor(MaterialKolorTokens.onSurfaceVariant.color) {
         UnstyledButton(
@@ -107,8 +123,8 @@ internal fun IconButton(
             modifier = modifier
                 .size(36.dp)
                 .pressScale(interactionSource)
-                .controlFocusRing(interactionSource, Shapes.Round)
-                .clip(Shapes.Round),
+                .controlFocusRing(interactionSource, shape)
+                .clip(shape),
         ) {
             UnstyledIcon(
                 imageVector = icon,
