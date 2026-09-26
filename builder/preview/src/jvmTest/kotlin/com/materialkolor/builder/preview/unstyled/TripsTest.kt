@@ -28,6 +28,9 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.audit.ColorRef
 import com.materialkolor.builder.domain.model.Role
+import com.materialkolor.builder.preview.on
+import com.materialkolor.builder.domain.model.Library
+import androidx.compose.runtime.remember
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.preview.Chrome
@@ -227,7 +230,7 @@ private fun String.isBannedInTrips(): Boolean {
 }
 
 /**
- * The Trips app in an Unstyled pane of [spec], under the shell chrome, with motion frozen.
+ * The Trips app in an Unstyled pane of [spec]'s document, under the shell chrome, with motion frozen.
  */
 @Composable
 private fun TripsHarness(
@@ -238,7 +241,8 @@ private fun TripsHarness(
 ) {
     CompositionLocalProvider(LocalMotionFrozen provides true) {
         Chrome(ShellChrome) {
-            PreviewPane(spec, modifier) { UnstyledAppEntry(spec, state, width) }
+            val unstyled = remember(spec) { spec.on(Library.Unstyled) }
+            PreviewPane(unstyled, modifier) { UnstyledAppEntry(unstyled, state, width) }
         }
     }
 }
