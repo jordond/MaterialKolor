@@ -44,9 +44,9 @@ private const val PHONE_HEIGHT = 360
 private const val ROOMY_HEIGHT = 1200
 
 /**
- * The Material dialog, and the headless one Custom draws and Material draws in the page on the web.
+ * The builder's dialogs, which are always Material's.
  */
-private val Libraries = listOf(SkinLibrary.Material3, SkinLibrary.Custom)
+private val Libraries = listOf(SkinLibrary.Material3)
 
 @OptIn(ExperimentalTestApi::class)
 class DialogRoomTest {

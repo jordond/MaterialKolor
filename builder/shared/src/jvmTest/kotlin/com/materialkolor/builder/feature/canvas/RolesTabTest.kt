@@ -127,7 +127,6 @@ class RolesTabTest {
                 .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription))
         }
 
-    // Custom light, whose focus ring reads on the panel but not on the canvas.
     @Test
     fun columns_sitOnThePanelSurface() =
         runDesktopComposeUiTest(width = TABS_WIDE, height = TABS_HEIGHT) {
@@ -136,7 +135,7 @@ class RolesTabTest {
             var canvas = Color.Unspecified
             var focus = Color.Unspecified
             setContent {
-                DataTabTheme(result, Skin(SkinLibrary.Custom, expressive = false)) {
+                DataTabTheme(result) {
                     panel = LocalBuilderTokens.current.panel
                     canvas = LocalBuilderTokens.current.canvas
                     focus = LocalBuilderTokens.current.focus

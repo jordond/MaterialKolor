@@ -58,9 +58,6 @@ private val NoActions: InspectActions =
 @OptIn(ExperimentalTestApi::class)
 class InspectOverlayTest {
     @Test
-    fun pressOnTheCard_underTheCustomSkin_neverReachesThePreviewUnderIt() = pressOnTheCardStaysOnIt(SkinLibrary.Custom)
-
-    @Test
     fun pressOnTheCard_underTheMaterialSkin_neverReachesThePreviewUnderIt() =
         pressOnTheCardStaysOnIt(SkinLibrary.Material3)
 

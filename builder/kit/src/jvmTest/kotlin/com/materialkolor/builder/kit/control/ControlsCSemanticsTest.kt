@@ -256,7 +256,7 @@ class ControlsCSemanticsTest {
     fun toastHost_shortToast_goesAfterItsTimeout() =
         runComposeUiTest {
             val toasts = BuilderToastHostState()
-            setContent { ControlsHarness(Skin(SkinLibrary.Custom, expressive = false)) { BuilderToastHost(toasts) } }
+            setContent { ControlsHarness(Skin(SkinLibrary.Material3, expressive = false)) { BuilderToastHost(toasts) } }
             waitForIdle()
             mainClock.autoAdvance = false
             toasts.show("Saved")
