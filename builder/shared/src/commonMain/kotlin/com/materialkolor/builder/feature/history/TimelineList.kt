@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.core.session.Timeline
 import com.materialkolor.builder.domain.capability.forTarget
 import com.materialkolor.builder.domain.history.HistoryEntry
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.engine.resolve.SchemeInputs
@@ -50,7 +49,6 @@ import com.materialkolor.builder.kit.control.BuilderBadge
 import com.materialkolor.builder.kit.control.BuilderListRow
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.Emphasis
-import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.widget.SchemeChip
 import com.materialkolor.builder.kit.widget.SchemeChipSkeleton
@@ -68,10 +66,7 @@ import org.jetbrains.compose.resources.stringResource
  * preview changes behind it, and each jump is read out through the announcer.
  *
  * The page never hears a key pressed in here, so the list takes Undo and Redo itself and moves
- * focus to the row the history lands on, and H closes it. A jump across a library switch moves the
- * workspace into the new skin and drops focus, and nothing on the page claims it while a panel is
- * open, so the list hands focus back to the current row, in the frame its rows move, when it held
- * focus before the jump.
+ * focus to the row the history lands on, and H closes it.
  *
  * Swatches read a light scheme from the resolver's scheme cache and never resolve a whole theme,
  * so the eight themes kept for undo stay put. Each paints a skeleton first, and a long history
@@ -276,8 +271,8 @@ private class SwatchColors(
 }
 
 /**
- * Whether the list holds focus, and whether it did when the last jump or key ran, which a skin
- * switch needs after it has dropped focus. Plain fields, since nothing draws from them.
+ * Whether the list holds focus, and whether the next row the history lands on takes it. Plain
+ * fields, since nothing draws from them.
  */
 private class ListFocus {
     /**
@@ -286,35 +281,21 @@ private class ListFocus {
     var inList: Boolean = false
 
     /**
-     * Whether focus was in the list when the last jump or key ran.
-     */
-    var heldAtLastAction: Boolean = false
-        private set
-
-    /**
      * Whether the row the history lands on next takes focus, after Undo or Redo pressed here.
      */
     var followCursor: Boolean = false
 
     fun noteJump() {
-        heldAtLastAction = inList
         followCursor = false
     }
 
     fun noteKey() {
-        heldAtLastAction = inList
         followCursor = inList
     }
 }
 
 /**
- * Puts focus on [currentRow] after Undo or Redo pressed in the list moved [cursor], and after a
- * library switch dropped it while the list held it.
- *
- * The switch lands with the skin, a frame or two after the jump, and redraws every row in the new
- * skin. The row that held focus goes with its old skin and leaves focus nowhere, where no key
- * reaches the list, not even Esc. So focus goes back in the same composition that swaps the rows,
- * before the frame ends, and a key pressed at any point of the switch still lands in the list.
+ * Puts focus on [currentRow] after Undo or Redo pressed in the list moved [cursor].
  */
 @Composable
 private fun FocusFollowsTheHistory(
@@ -328,21 +309,7 @@ private fun FocusFollowsTheHistory(
         // A row this list does not show yet has no node to take focus, and that is fine.
         runCatching { currentRow.requestFocus() }
     }
-    val library = LocalSkin.current.library
-    val lastLibrary = remember { LibraryHolder(library) }
-    SideEffect {
-        if (lastLibrary.library == library) return@SideEffect
-        lastLibrary.library = library
-        if (focus.heldAtLastAction && !focus.inList) runCatching { currentRow.requestFocus() }
-    }
 }
-
-/**
- * The library the list last drew in. Plain, since only the effect above reads it.
- */
-private class LibraryHolder(
-    var library: Library,
-)
 
 /**
  * The narrowest the list gets, so a short history does not squeeze its rows.

@@ -39,7 +39,6 @@ import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.color.ColorNames
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Preferences
@@ -55,6 +54,7 @@ import com.materialkolor.builder.kit.shell.PosterSurface
 import com.materialkolor.builder.kit.shell.WorkspaceShell
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.stateholder.dispatcher.rememberDispatcher
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -386,7 +386,7 @@ class PosterPanelTest {
         runComposeUiTest {
             // The headless tooltip, which opens on hover alone.
             val locked = Preferences(styleLock = true, seedLock = true)
-            showPoster(preferences = locked, rail = true, library = Library.Custom)
+            showPoster(preferences = locked, rail = true, library = SkinLibrary.Custom)
 
             onNodeWithContentDescription("Shuffle").assertIsNotEnabled()
             onNodeWithContentDescription("Shuffle").performMouseInput { enter(center) }
@@ -450,7 +450,7 @@ class PosterPanelTest {
         projectName: String = "",
         saveStatus: () -> SaveStatus = { SaveStatus.Idle },
         rail: Boolean = false,
-        library: Library = Library.Material3,
+        library: SkinLibrary = SkinLibrary.Material3,
         coarsePointer: Boolean = false,
         shell: Boolean = false,
     ) {

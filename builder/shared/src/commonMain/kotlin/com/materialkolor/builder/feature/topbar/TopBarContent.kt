@@ -316,7 +316,7 @@ private fun HistoryPopover(
 }
 
 /**
- * [content] as movable content, so wherever the skin's top bar draws it next it moves there with all
+ * [content] as movable content, so wherever the top bar draws it next it moves there with all
  * it holds rather than starting over. An open History list stays open that way, and on the desktop,
  * where its popover is a window of its own, no window closes while a skin switch measures the page,
  * which crashes the scene. It always draws the latest [content].

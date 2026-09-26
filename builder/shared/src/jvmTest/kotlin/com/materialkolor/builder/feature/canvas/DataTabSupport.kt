@@ -6,7 +6,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import com.materialkolor.builder.LocalThemeResult
 import com.materialkolor.builder.domain.capability.forTarget
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.engine.resolve.ThemeResolver
@@ -16,6 +15,7 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.stateholder.dispatcher.Dispatcher
 
 /**
@@ -53,7 +53,7 @@ internal class TabActions {
 @Composable
 internal fun DataTabTheme(
     result: ThemeResult,
-    skin: Skin = Skin(Library.Material3, expressive = false),
+    skin: Skin = Skin(SkinLibrary.Material3, expressive = false),
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(

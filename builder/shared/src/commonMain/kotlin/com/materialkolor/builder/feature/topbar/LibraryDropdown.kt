@@ -1,15 +1,12 @@
 package com.materialkolor.builder.feature.topbar
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.TransformOrigin
@@ -21,12 +18,8 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.topbar_expressive
-import com.materialkolor.builder.kit.headless.menusOpenAsWindows
-import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.BuilderType
 import com.materialkolor.builder.kit.token.LocalBuilderType
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
@@ -101,9 +94,8 @@ internal class MediumBarFit {
  *
  * It measures every library's trigger off screen and out of the accessibility tree, and asks [fit]
  * for room for the widest, so a switch never moves the bar's buttons. Which one is widest is only
- * worked out again when the skin, the type or the names change. The form goes to [LocalSwitcherForm]
- * for the command registry. A pick reaches [onSwitch] at once where the menu opens in the page, and
- * once the menu has left where it opens as a window of its own.
+ * worked out again when the type or the names change. The form goes to [LocalSwitcherForm] for the
+ * command registry. A pick reaches [onSwitch] at once.
  *
  * @param[selected] The library the document is on.
  * @param[expressive] Whether the Expressive switch is on.
@@ -123,7 +115,6 @@ internal fun LibraryDropdown(
     switcherModifier: Modifier = Modifier,
     expressiveModifier: Modifier = Modifier,
 ) {
-    val skin = LocalSkin.current
     val type = LocalBuilderType.current
     val labels = LibraryChoice.entries.map { choice -> libraryName(choice) } +
         stringResource(Res.string.topbar_expressive)
@@ -131,27 +122,9 @@ internal fun LibraryDropdown(
     val shownMoved = fit.moved
     val widest = remember { WidestTrigger() }
     if (report != null) SideEffect { report.segmented = false }
-    // Where the menu is a window of its own, on the desktop, the pick waits for it to finish leaving,
-    // since a skin switch that closes the window while the bar is being measured crashes the scene.
-    // In the page, on the web, the pick switches at once.
-    val scope = rememberCoroutineScope()
-    val switch by rememberUpdatedState(onSwitch)
-    val windows = menusOpenAsWindows
-    val pick: (LibraryChoice, Offset) -> Unit = remember(scope, windows) {
-        { choice, origin ->
-            if (windows) {
-                scope.launch {
-                    awaitMenuExit()
-                    switch(choice, origin)
-                }
-            } else {
-                switch(choice, origin)
-            }
-        }
-    }
     SubcomposeLayout(modifier) { constraints ->
         val loose = constraints.copy(minWidth = 0, minHeight = 0)
-        val key = TriggerKey(skin, type, labels, density, fontScale)
+        val key = TriggerKey(type, labels, density, fontScale)
         val widestChoice = widest.of(key) {
             LibraryChoice.entries.maxBy { choice -> naturalWidth(TriggerSlot.Probe(choice), choice) }
         }
@@ -162,7 +135,7 @@ internal fun LibraryDropdown(
             LibrarySwitcher(
                 selected = selected,
                 expressive = expressive,
-                onSwitch = pick,
+                onSwitch = onSwitch,
                 onExpressiveChange = onExpressiveChange,
                 switcherModifier = switcherModifier,
                 expressiveModifier = expressiveModifier,
@@ -229,29 +202,14 @@ internal fun Modifier.shrinkToHeight(max: Dp): Modifier =
     }
 
 /**
- * How long a menu window takes to leave, in frame time, with room to spare for Material's springs.
- */
-private const val MENU_EXIT_NANOS: Long = 250_000_000L
-
-/**
- * Waits out [MENU_EXIT_NANOS] of frames, so the menu a pick came from is gone.
- */
-private suspend fun awaitMenuExit() {
-    val start = withFrameNanos { frame -> frame }
-    var now = start
-    while (now - start < MENU_EXIT_NANOS) now = withFrameNanos { frame -> frame }
-}
-
-/**
  * The room a trigger is measured in to find its own width, far more than any window gives it.
  */
 private const val PROBE_MAX_WIDTH: Int = 32_767
 
 /**
- * Everything the widest trigger hangs on, the skin and type it draws in and the names it shows.
+ * Everything the widest trigger hangs on, the type it draws in and the names it shows.
  */
 private data class TriggerKey(
-    val skin: Skin,
     val type: BuilderType,
     val labels: List<String>,
     val density: Float,

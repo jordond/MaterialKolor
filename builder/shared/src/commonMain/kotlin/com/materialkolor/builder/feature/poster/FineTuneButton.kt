@@ -17,7 +17,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.capability.EffectiveSpec
 import com.materialkolor.builder.domain.model.KeyColor
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
@@ -36,7 +35,6 @@ import com.materialkolor.builder.kit.control.BuilderPressable
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.icon.IconId
-import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.pluralStringResource
@@ -66,11 +64,7 @@ internal fun FineTuneButton(
     val summary = fineTuneSummary(context.document)
     val name = stringResource(Res.string.finetune_button, title, summary)
     // b-527
-    val shape = if (LocalSkin.current.library == Library.Material3) {
-        RoundedCornerShape(percent = PILL_PERCENT)
-    } else {
-        RoundedCornerShape(tokens.radius.small)
-    }
+    val shape = RoundedCornerShape(percent = PILL_PERCENT)
     BuilderPressable(
         onClick = { dispatcher.dispatch(WorkspaceAction.OpenFineTune()) },
         label = name,

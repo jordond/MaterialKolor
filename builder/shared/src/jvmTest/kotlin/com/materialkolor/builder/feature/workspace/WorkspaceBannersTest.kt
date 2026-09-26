@@ -30,7 +30,6 @@ import com.materialkolor.builder.core.session.ProjectRef
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.link.RoutePath
 import com.materialkolor.builder.domain.link.ShareCodec
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.MotionOverride
@@ -44,6 +43,7 @@ import com.materialkolor.builder.kit.control.BuilderButton
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.kotest.assertions.withClue
@@ -431,7 +431,7 @@ private fun Themed(content: @Composable () -> Unit) {
     val document = ThemeDocument.Default
     val result = remember { ThemeResolver().resolve(document) }
     BuilderTheme(
-        skin = Skin(library = Library.Material3, expressive = false),
+        skin = Skin(library = SkinLibrary.Material3, expressive = false),
         result = result,
         isDark = false,
         reducedMotion = true,

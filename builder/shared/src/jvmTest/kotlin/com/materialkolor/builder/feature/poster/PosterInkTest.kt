@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import com.materialkolor.builder.domain.color.Argb
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.poster.PosterColors
@@ -12,6 +11,7 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.shell.PosterSurface
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.hct.Hct
 import com.materialkolor.ktx.contrastRatio
@@ -37,9 +37,9 @@ class PosterInkTest {
         runComposeUiTest {
             val seeds = hundredSeeds()
             val result = ThemeResolver().resolve(ThemeDocument.Default)
-            val inks = mutableListOf<Triple<Argb, Library, List<Pair<String, Color>>>>()
+            val inks = mutableListOf<Triple<Argb, SkinLibrary, List<Pair<String, Color>>>>()
             setContent {
-                Library.entries.forEach { library ->
+                SkinLibrary.entries.forEach { library ->
                     BuilderTheme(
                         skin = Skin(library = library, expressive = false),
                         result = result,
@@ -61,7 +61,7 @@ class PosterInkTest {
             }
             waitForIdle()
 
-            inks.map { (seed, library) -> seed to library }.toSet().size shouldBe seeds.size * Library.entries.size
+            inks.map { (seed, library) -> seed to library }.toSet().size shouldBe seeds.size * SkinLibrary.entries.size
             inks.forEach { (seed, library, roles) ->
                 roles.forEach { (role, ink) ->
                     withClue("$role ink $ink on seed $seed in $library") {

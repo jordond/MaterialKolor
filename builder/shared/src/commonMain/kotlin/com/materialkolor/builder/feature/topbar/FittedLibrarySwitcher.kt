@@ -22,8 +22,6 @@ import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.topbar_expressive
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.WindowClass
-import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.BuilderType
 import com.materialkolor.builder.kit.token.LocalBuilderType
 import org.jetbrains.compose.resources.stringResource
@@ -63,7 +61,7 @@ internal class SwitcherFormState {
 
     /**
      * The middle of the switcher where it was last placed, in root coordinates, or null before it has
-     * been. A library key reveals the new skin from here. A plain field, since only a
+     * been. A library key reveals the new previews from here. A plain field, since only a
      * shortcut reads it and nothing draws from it.
      */
     var origin: Offset? = null
@@ -117,7 +115,6 @@ internal fun FittedLibrarySwitcher(
     onFit: (needed: Int, room: Int) -> Unit = { _, _ -> },
 ) {
     val wide = LocalLayout.current.windowClass == WindowClass.Expanded
-    val skin = LocalSkin.current
     val type = LocalBuilderType.current
     val labels = LibraryChoice.entries.map { choice -> libraryName(choice) } +
         stringResource(Res.string.topbar_expressive)
@@ -126,7 +123,7 @@ internal fun FittedLibrarySwitcher(
     val fit = remember { SwitcherFit() }
     SubcomposeLayout(modifier) { constraints ->
         val loose = constraints.copy(minWidth = 0, minHeight = 0)
-        val key = FitKey(loose, selected, skin, type, labels, density, fontScale)
+        val key = FitKey(loose, selected, type, labels, density, fontScale)
         val needed = if (wide) {
             fit.width(key) {
                 probe?.invoke()
@@ -186,8 +183,7 @@ private fun SubcomposeMeasureScope.segmentedWidth(
         )
     }
     val natural = probe.maxOfOrNull { measurable ->
-        // A row that shares its width out evenly, as Fluent's does, needs its widest option's room for
-        // every option. Its intrinsic width counts that, and a measure with no end to the room does not.
+        // A row that shares its width out evenly needs its widest option's room for every option. Its intrinsic width counts that, and a measure with no end to the room does not.
         val shared = measurable.maxIntrinsicWidth(constraints.maxHeight)
         maxOf(shared, measurable.measure(constraints.copy(maxWidth = Constraints.Infinity)).width)
     } ?: 0
@@ -195,13 +191,12 @@ private fun SubcomposeMeasureScope.segmentedWidth(
 }
 
 /**
- * Everything the segmented row's width hangs on, the room it gets, the choice it marks, the skin
- * and type it draws in and the names it and the Expressive switch show.
+ * Everything the segmented row's width hangs on, the room it gets, the choice it marks, the type it
+ * draws in and the names it and the Expressive switch show.
  */
 private data class FitKey(
     val constraints: Constraints,
     val selected: LibraryChoice,
-    val skin: Skin,
     val type: BuilderType,
     val labels: List<String>,
     val density: Float,

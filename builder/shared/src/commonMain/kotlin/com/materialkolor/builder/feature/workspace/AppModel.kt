@@ -16,7 +16,6 @@ import com.materialkolor.builder.domain.link.Route
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.MotionOverride
-import com.materialkolor.builder.kit.skin.Skin
 import dev.stateholder.extensions.viewmodel.StateViewModel
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -30,8 +29,8 @@ import kotlinx.coroutines.launch
  * that opens the first project.
  *
  * The chrome's appearance comes from the preferences and the system, never from the preview mode,
- * and nothing here writes the preview mode. The skin is not held here. The root derives it from the
- * same collected document it resolves the theme from, so there is one skin source.
+ * and nothing here writes the preview mode. The chrome's colors are not held here. The root resolves
+ * them from the same collected document as the previews, so there is one source.
  *
  * It also keeps what the banners above the workspace say for the whole session. Why the address did
  * not open what it asked for, until it is dismissed. A full storage, from the save that failed
@@ -215,8 +214,3 @@ private fun pathOf(route: Route): String =
 
 private const val HOME_PATH = "/"
 private const val THEME_PATH_PREFIX = "/t/"
-
-/**
- * The skin [document] is edited in, its own library and flavor.
- */
-internal fun skinOf(document: ThemeDocument): Skin = Skin(library = document.library, expressive = document.expressive)

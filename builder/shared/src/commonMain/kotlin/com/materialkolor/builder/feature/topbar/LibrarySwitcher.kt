@@ -97,7 +97,7 @@ internal fun suggestsExpressiveStyle(document: ThemeDocument): Boolean =
  * [onExpressiveChange] gets the switch's new state and where its reveal grows from the same way.
  *
  * The arrow keys on the segmented row only move focus and Space or Enter picks, so walking past a
- * library does not re-skin the app at every step.
+ * library does not re-theme the previews at every step.
  */
 @Composable
 internal fun LibrarySwitcher(
@@ -183,8 +183,8 @@ internal fun LibrarySwitcher(
 }
 
 /**
- * The switch that turns Material 3's Expressive flavor on and off, which re-skins the app like a
- * library switch does.
+ * The switch that turns Material 3's Expressive flavor on and off, which re-themes the previews like
+ * a library switch does.
  *
  * @param[onCheckedChange] Gets the new state and where the reveal grows from, the press that
  *   flipped it or the middle of the switch after a key.

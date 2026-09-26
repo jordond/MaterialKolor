@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.height
 import com.materialkolor.builder.LocalThemeResolver
 import com.materialkolor.builder.LocalThemeResult
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
@@ -25,6 +24,7 @@ import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.stateholder.dispatcher.rememberDispatcher
 import io.kotest.assertions.withClue
 import io.kotest.matchers.comparables.shouldBeGreaterThan
@@ -44,10 +44,9 @@ private const val PHONE_HEIGHT = 360
 private const val ROOMY_HEIGHT = 1200
 
 /**
- * The Material dialog, and the headless one the other skins share and Material draws in the page
- * on the web.
+ * The Material dialog, and the headless one Custom draws and Material draws in the page on the web.
  */
-private val Libraries = listOf(Library.Material3, Library.Unstyled)
+private val Libraries = listOf(SkinLibrary.Material3, SkinLibrary.Custom)
 
 @OptIn(ExperimentalTestApi::class)
 class DialogRoomTest {
@@ -93,7 +92,7 @@ class DialogRoomTest {
      * roomy window, and sits inside the window.
      */
     private fun assertButtonFits(
-        library: Library,
+        library: SkinLibrary,
         label: String,
         dialog: @Composable () -> Unit,
     ) {
@@ -109,7 +108,7 @@ class DialogRoomTest {
      * Where the button named [label] sits in [dialog], in a window [height] tall.
      */
     private fun buttonBounds(
-        library: Library,
+        library: SkinLibrary,
         height: Int,
         label: String,
         dialog: @Composable () -> Unit,
@@ -126,7 +125,7 @@ class DialogRoomTest {
      * Shows [dialog] in [library]'s skin on a touch screen that fills the window.
      */
     private fun ComposeUiTest.showDialog(
-        library: Library,
+        library: SkinLibrary,
         dialog: @Composable () -> Unit,
     ) {
         val resolver = ThemeResolver()

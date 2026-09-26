@@ -1,5 +1,6 @@
 package com.materialkolor.builder.feature.topbar
 
+import com.materialkolor.builder.ShellSkin
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -37,11 +38,11 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
-import com.materialkolor.builder.feature.workspace.skinOf
 import com.materialkolor.builder.feature.workspace.workspaceStateOf
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import dev.stateholder.dispatcher.rememberDispatcher
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
@@ -75,7 +76,7 @@ class TopBarContentTest {
             setContent {
                 val dispatcher = rememberDispatcher<WorkspaceAction> {}
                 BuilderTheme(
-                    skin = Skin(library = Library.Custom, expressive = false),
+                    skin = Skin(library = SkinLibrary.Custom, expressive = false),
                     result = ThemeResolver().resolve(document),
                     isDark = false,
                     reducedMotion = false,
@@ -168,12 +169,14 @@ class TopBarContentTest {
                 mainClock.advanceTimeByFrame()
                 frames++
             }
-            skinOf(graph.session.document.value) shouldBe Skin(library = Library.Material3, expressive = true)
+            graph.session.document.value.library shouldBe Library.Material3
+            graph.session.document.value.expressive shouldBe true
             mainClock.autoAdvance = true
             waitForIdle()
 
             onNodeWithText(EXPRESSIVE_MESSAGE).assertExists()
-            skinOf(graph.session.document.value) shouldBe Skin(library = Library.Material3, expressive = true)
+            graph.session.document.value.library shouldBe Library.Material3
+            graph.session.document.value.expressive shouldBe true
             graph.session.document.value.style shouldBe Style.Rainbow
         }
 
@@ -223,7 +226,7 @@ class TopBarContentTest {
             setContent {
                 val dispatcher = rememberDispatcher<WorkspaceAction> {}
                 BuilderTheme(
-                    skin = skinOf(document),
+                    skin = ShellSkin,
                     result = ThemeResolver().resolve(document),
                     isDark = false,
                     reducedMotion = true,

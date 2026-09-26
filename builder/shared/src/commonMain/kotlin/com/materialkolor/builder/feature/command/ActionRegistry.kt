@@ -172,7 +172,7 @@ internal sealed interface ControlSite {
  * @property[librarySegmented] Whether the top bar shows the libraries as a segmented row rather than
  * in its dropdown, the form the switcher measured last.
  * @property[switcherOrigin] The middle of the library switcher in root coordinates, read when a
- * library command runs so the new skin reveals from it, or null before the switcher has shown.
+ * library command runs so the new previews reveal from it, or null before the switcher has shown.
  */
 internal class CommandList(
     private val reasons: Map<Reason, String>,

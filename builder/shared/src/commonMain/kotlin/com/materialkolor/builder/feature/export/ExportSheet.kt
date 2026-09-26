@@ -98,7 +98,7 @@ private enum class CopyKind {
  *
  * It is an end panel at 60% of the window from 840 dp up, which takes in Expanded, and the full
  * screen below that, as [SheetPresentation.of] decides. Switching the target is the same edit the
- * top bar makes, so the app re-skins behind the sheet.
+ * top bar makes, so the previews re-theme behind the sheet.
  *
  * Every copy, download and share starts inside the click, with the platform call as its first
  * suspension, and the text and the zip are ready before the click. A copy that worked

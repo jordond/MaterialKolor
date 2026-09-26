@@ -1,5 +1,6 @@
 package com.materialkolor.builder.feature.topbar
 
+import com.materialkolor.builder.ShellSkin
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
@@ -42,7 +43,6 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.command.InWorkspace
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
-import com.materialkolor.builder.feature.workspace.skinOf
 import com.materialkolor.builder.feature.workspace.workspaceStateOf
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
@@ -330,7 +330,7 @@ class TopBarFitTest {
         setContent {
             val dispatcher = rememberDispatcher<WorkspaceAction> {}
             BuilderTheme(
-                skin = skinOf(document),
+                skin = ShellSkin,
                 result = ThemeResolver().resolve(document),
                 isDark = false,
                 reducedMotion = true,

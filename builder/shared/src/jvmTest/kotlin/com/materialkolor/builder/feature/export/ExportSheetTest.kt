@@ -1,5 +1,6 @@
 package com.materialkolor.builder.feature.export
 
+import com.materialkolor.builder.ShellSkin
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -40,7 +41,6 @@ import com.materialkolor.builder.kit.a11y.Announcer
 import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
-import com.materialkolor.builder.kit.skin.Skin
 import dev.stateholder.dispatcher.rememberDispatcher
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.CoroutineScope
@@ -356,7 +356,7 @@ class ExportSheetTest {
         val result = ThemeResolver().resolve(document)
         setContent {
             BuilderTheme(
-                skin = Skin(library = document.library, expressive = document.expressive),
+                skin = ShellSkin,
                 result = result,
                 isDark = false,
                 reducedMotion = true,

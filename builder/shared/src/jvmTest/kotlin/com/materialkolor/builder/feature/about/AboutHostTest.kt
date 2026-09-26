@@ -32,7 +32,6 @@ import com.materialkolor.builder.BuildKonfig
 import com.materialkolor.builder.BuilderRoot
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.link.shareLink
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.MotionOverride
 import com.materialkolor.builder.engine.resolve.ThemeResolver
@@ -47,6 +46,7 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.ShippedFont
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
@@ -119,7 +119,7 @@ class AboutHostTest {
             val document = ThemeDocument.Default
             setContent {
                 BuilderTheme(
-                    skin = Skin(library = Library.Material3, expressive = false),
+                    skin = Skin(library = SkinLibrary.Material3, expressive = false),
                     result = ThemeResolver().resolve(document),
                     isDark = false,
                     reducedMotion = true,
