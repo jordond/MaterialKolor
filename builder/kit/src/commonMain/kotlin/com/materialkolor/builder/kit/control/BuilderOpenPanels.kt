@@ -2,14 +2,8 @@ package com.materialkolor.builder.kit.control
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.materialkolor.builder.kit.headless.HeadlessMenuPanel
-import com.materialkolor.builder.kit.headless.HeadlessSelectPanel
-import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.SkinLibrary
-import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
 import com.materialkolor.builder.kit.skin.material.MaterialMenuPanel
 import com.materialkolor.builder.kit.skin.material.MaterialSelectPanel
-import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
  * A [BuilderMenu] as it looks open, drawn where it stands, for a gallery that shows the menu
@@ -27,11 +21,7 @@ public fun BuilderMenuPanel(
     items: List<BuilderMenuItem>,
     modifier: Modifier = Modifier,
 ) {
-    val tokens = LocalBuilderTokens.current
-    when (LocalSkin.current.library) {
-        SkinLibrary.Material3 -> MaterialMenuPanel(items, modifier)
-        SkinLibrary.Custom -> HeadlessMenuPanel(items, customOverlayStyle(tokens), modifier)
-    }
+    MaterialMenuPanel(items, modifier)
 }
 
 /**
@@ -60,17 +50,5 @@ public fun <T> BuilderSelectPanel(
     optionLabel: (T) -> String = { option -> option.toString() },
 ) {
     require(selected in options) { "The selected option $selected is not one of the options" }
-    val tokens = LocalBuilderTokens.current
-    when (LocalSkin.current.library) {
-        SkinLibrary.Material3 -> MaterialSelectPanel(label, options, selected, onSelect, optionLabel, modifier)
-        SkinLibrary.Custom -> HeadlessSelectPanel(
-            label,
-            options,
-            selected,
-            onSelect,
-            optionLabel,
-            customOverlayStyle(tokens),
-            modifier,
-        )
-    }
+    MaterialSelectPanel(label, options, selected, onSelect, optionLabel, modifier)
 }

@@ -174,9 +174,8 @@ public fun rememberBuilderToastHostState(): BuilderToastHostState = remember { B
  * the page, so each toast is read out once through [LocalAnnouncer] instead, a modal open or not. A
  * toast goes by itself after its duration, and its action closes it. The countdown waits while the
  * pointer rests on a toast or focus is inside it, and picks up with the time it had left (WCAG
- * 2.2.1), so a keyboard user on Undo never loses the toast under them. Material3 draws each toast
- * as a `Snackbar` and Custom as a headless toast. Where overlays
- * render in the page the stack is drawn in the overlay host's top slot over the space it is given,
+ * 2.2.1), so a keyboard user on Undo never loses the toast under them. Each toast is Material's
+ * `Snackbar`. Where overlays render in the page the stack is drawn in the overlay host's top slot over the space it is given,
  * so a toast raised from inside a dialog or a sheet shows over its veil rather than under it, and
  * its action joins the dialog's Tab cycle. When a toast goes with focus on its action, focus goes
  * back into the dialog.
@@ -191,7 +190,6 @@ public fun BuilderToastHost(
     modifier: Modifier = Modifier,
 ) {
     val tokens = LocalBuilderTokens.current
-    val library = LocalSkin.current.library
     val announces = LocalFoldsStateIntoName.current
     if (announces) {
         val announcer = LocalAnnouncer.current
@@ -211,7 +209,7 @@ public fun BuilderToastHost(
             ) {
                 for (toast in state.toasts) {
                     key(toast.id) {
-                        ToastEntry(toast, state, library)
+                        ToastEntry(toast, state)
                     }
                 }
             }
@@ -223,9 +221,7 @@ public fun BuilderToastHost(
 private fun ToastEntry(
     toast: BuilderToast,
     state: BuilderToastHostState,
-    library: SkinLibrary,
 ) {
-    val tokens = LocalBuilderTokens.current
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     var focused by remember { mutableStateOf(false) }
@@ -252,68 +248,7 @@ private fun ToastEntry(
         val holds = Modifier
             .hoverable(interaction)
             .onFocusChanged { focus -> focused = focus.hasFocus }
-        when (library) {
-            SkinLibrary.Material3 -> MaterialToast(toast, onAction, holds)
-            SkinLibrary.Custom -> HeadlessToast(toast, onAction, customOverlayStyle(tokens), holds)
-        }
-    }
-}
-
-@Composable
-private fun HeadlessToast(
-    toast: BuilderToast,
-    onAction: () -> Unit,
-    style: OverlayStyle,
-    modifier: Modifier,
-) {
-    val tokens = LocalBuilderTokens.current
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .shadow(style.shadow, style.popoverShape)
-            .clip(style.popoverShape)
-            .background(style.toast)
-            .then(if (style.toastBorder != null) Modifier.border(style.toastBorder, style.popoverShape) else Modifier)
-            .padding(start = tokens.spacing.large, end = tokens.spacing.small)
-            .heightIn(min = LocalLayout.current.primaryTouchTarget),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(tokens.spacing.medium),
-    ) {
-        BuilderText(
-            text = toast.message,
-            modifier = Modifier.weight(1f).padding(vertical = tokens.spacing.small),
-            style = BuilderTextStyle.Body,
-            color = style.toastContent,
-        )
-        val label = toast.actionLabel
-        if (label != null) ToastAction(label, onAction, style)
-    }
-}
-
-/**
- * The one action of a toast, a text button in the toast's own ink.
- */
-@Composable
-private fun ToastAction(
-    label: String,
-    onClick: () -> Unit,
-    style: OverlayStyle,
-) {
-    val tokens = LocalBuilderTokens.current
-    val interaction = remember { MutableInteractionSource() }
-    Box(
-        modifier = Modifier
-            .heightIn(min = LocalLayout.current.minTouchTarget)
-            .overlayFeedback(
-                interactionSource = interaction,
-                style = style,
-                highlight = style.toastContent.copy(alpha = OverlayMetrics.toastActionHighlightAlpha),
-                focus = style.toastContent,
-            ).clickable(interaction, null, role = Role.Button, onClick = onClick)
-            .padding(horizontal = tokens.spacing.medium),
-        contentAlignment = Alignment.Center,
-    ) {
-        BuilderText(label, style = BuilderTextStyle.Label, color = style.toastContent)
+        MaterialToast(toast, onAction, holds)
     }
 }
 

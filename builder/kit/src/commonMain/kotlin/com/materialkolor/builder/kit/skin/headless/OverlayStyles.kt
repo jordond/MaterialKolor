@@ -63,9 +63,6 @@ import com.materialkolor.builder.kit.token.BuilderTokens
  * @property[tooltip] The ground of a tooltip.
  * @property[tooltipContent] Ink on [tooltip].
  * @property[tooltipBorder] The outline of a tooltip, or null for none.
- * @property[toast] The ground of a toast.
- * @property[toastContent] Ink on [toast].
- * @property[toastBorder] The outline of a toast, or null for none.
  * @property[thumb] A scrollbar thumb, and the grab handle of a sheet.
  * @property[panelTitle] The type of a panel's title, or null for the builder's own title type.
  */
@@ -91,9 +88,6 @@ internal class OverlayStyle(
     val tooltip: Color,
     val tooltipContent: Color,
     val tooltipBorder: BorderStroke?,
-    val toast: Color,
-    val toastContent: Color,
-    val toastBorder: BorderStroke?,
     val thumb: Color,
     val panelTitle: TextStyle? = null,
 )
@@ -120,11 +114,6 @@ internal object OverlayMetrics {
      * The widest the toast stack gets.
      */
     val toastMaxWidth: Dp = 560.dp
-
-    /**
-     * How strongly a toast's action takes the toast's own ink while hovered or focused.
-     */
-    val toastActionHighlightAlpha: Float = 0.12f
 
     /**
      * How much of a bottom sheet shows at peek.
@@ -212,9 +201,6 @@ internal fun customOverlayStyle(tokens: BuilderTokens): OverlayStyle =
         tooltip = tokens.textStrong,
         tooltipContent = tokens.panel,
         tooltipBorder = null,
-        toast = tokens.textStrong,
-        toastContent = tokens.panel,
-        toastBorder = null,
         thumb = tokens.textMuted,
     )
 

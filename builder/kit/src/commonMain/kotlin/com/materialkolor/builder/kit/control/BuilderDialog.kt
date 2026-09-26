@@ -35,9 +35,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * The title is the dialog's name. While it is open, focus starts inside it and Tab cannot leave
  * it, even with no actions to focus. Esc and a click on the veil call
  * [onDismissRequest], and once it has gone focus goes back to [returnFocusTo]. It scales up
- * from 0.96 with a fade, or only fades under reduced motion. Material3 draws its `AlertDialog`, and
- * Custom the headless dialog. Where overlays render in the page Material3 draws its own
- * dialog container over the headless modal instead.
+ * from 0.96 with a fade, or only fades under reduced motion. It is Material's `AlertDialog`, or
+ * where overlays render in the page Material's own dialog container over the headless modal.
  *
  * @param[visible] Whether the dialog is open.
  * @param[onDismissRequest] Called when the dialog asks to close.
@@ -66,71 +65,7 @@ public fun BuilderDialog(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val frame = DialogFrame(titleShown, actions)
-    val tokens = LocalBuilderTokens.current
-    when (LocalSkin.current.library) {
-        SkinLibrary.Material3 -> {
-            MaterialDialog(visible, onDismissRequest, title, returnFocusTo, modifier, frame, content)
-        }
-        SkinLibrary.Custom -> {
-            HeadlessDialog(
-                visible,
-                onDismissRequest,
-                title,
-                customOverlayStyle(tokens),
-                returnFocusTo,
-                modifier,
-                frame,
-                content,
-            )
-        }
-    }
-}
-
-/**
- * The headless dialog in [style].
- */
-@Composable
-private fun HeadlessDialog(
-    visible: Boolean,
-    onDismissRequest: () -> Unit,
-    title: String,
-    style: OverlayStyle,
-    returnFocusTo: FocusRequester?,
-    modifier: Modifier,
-    frame: DialogFrame,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    val tokens = LocalBuilderTokens.current
-    HeadlessModal(visible, onDismissRequest, style.scrim, Alignment.Center, returnFocusTo) {
-        Column(
-            modifier = modifier
-                .animateEnterExit(enter = popoverEnter(), exit = popoverExit())
-                .padding(tokens.spacing.large)
-                .widthIn(min = OverlayMetrics.dialogMinWidth, max = OverlayMetrics.dialogMaxWidth)
-                .shadow(style.shadow, style.dialogShape)
-                .clip(style.dialogShape)
-                .background(style.surface)
-                .then(if (style.border != null) Modifier.border(style.border, style.dialogShape) else Modifier)
-                .modalPane(title)
-                .keepTaps()
-                .padding(tokens.spacing.extraLarge),
-            verticalArrangement = Arrangement.spacedBy(tokens.spacing.large),
-        ) {
-            if (frame.titleShown) {
-                BuilderText(title, Modifier.modalTitle(), style = BuilderTextStyle.Title, color = style.content)
-            }
-            Column(Modifier.weight(1f, fill = false), content = content)
-            val actions = frame.actions
-            if (actions != null) {
-                Row(
-                    modifier = Modifier.align(Alignment.End),
-                    horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
-                    verticalAlignment = Alignment.CenterVertically,
-                    content = actions,
-                )
-            }
-        }
-    }
+    MaterialDialog(visible, onDismissRequest, title, returnFocusTo, modifier, frame, content)
 }
 
 /**

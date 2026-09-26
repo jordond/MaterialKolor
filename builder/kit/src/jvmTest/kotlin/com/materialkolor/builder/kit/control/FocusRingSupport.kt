@@ -38,6 +38,7 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinTestTheme
 import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
@@ -200,7 +201,7 @@ internal fun ComposeUiTest.tabOntoRing(
     setContent {
         val result = remember(document) { ThemeResolver().resolve(document) }
         CompositionLocalProvider(LocalMotionFrozen provides true, LocalDensity provides Density(density)) {
-            BuilderTheme(skin, result, isDark = false, reducedMotion = false) {
+            SkinTestTheme(skin, result, isDark = false, reducedMotion = false) {
                 ProvideBuilderLayout(modifier = Modifier.fillMaxSize()) {
                     val tokens = LocalBuilderTokens.current
                     val focus = tokens.focus

@@ -25,6 +25,7 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinTestTheme
 import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
@@ -59,7 +60,7 @@ internal fun ControlsHarness(
 ) {
     val result = remember { ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4))) }
     CompositionLocalProvider(LocalMotionFrozen provides true) {
-        BuilderTheme(skin, result, isDark, reducedMotion = false) {
+        SkinTestTheme(skin, result, isDark, reducedMotion = false) {
             ProvideBuilderLayout(modifier = Modifier.fillMaxSize()) { content() }
         }
     }
@@ -135,7 +136,7 @@ internal fun SkinnedPanel(
 ) {
     val result = remember { ThemeResolver().resolve(Document) }
     CompositionLocalProvider(LocalMotionFrozen provides true, LocalLayout provides Desktop) {
-        BuilderTheme(variant.skin, result, isDark, reducedMotion = false) {
+        SkinTestTheme(variant.skin, result, isDark, reducedMotion = false) {
             Box(Modifier.background(LocalBuilderTokens.current.panel).padding(16.dp)) {
                 content()
             }

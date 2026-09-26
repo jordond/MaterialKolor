@@ -54,6 +54,7 @@ import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinTestTheme
 import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.PanelEdge
@@ -160,7 +161,7 @@ class ControlsCSemanticsTest {
             setContent {
                 val result = remember { ThemeResolver().resolve(ThemeDocument(seed = Argb(0x6750A4))) }
                 for (reduced in listOf(false, true)) {
-                    BuilderTheme(Skin(SkinLibrary.Custom, expressive = false), result, false, reducedMotion = reduced) {
+                    SkinTestTheme(Skin(SkinLibrary.Custom, expressive = false), result, false, reducedMotion = reduced) {
                         val motion = LocalBuilderMotion.current
                         onlyFades["popover reduced=$reduced"] = popoverEnter() == fadeIn(motion.popover())
                         onlyFades["panel reduced=$reduced"] = panelEnter(PanelEdge.End) == fadeIn(motion.panelEnter())

@@ -186,7 +186,7 @@ private fun ComposeUiTest.checkSheets(
     setContent {
         val result = remember { ThemeResolver().resolve(Document) }
         CompositionLocalProvider(LocalMotionFrozen provides true) {
-            BuilderTheme(skin, result, isDark, reducedMotion = false) {
+            SkinTestTheme(skin, result, isDark, reducedMotion = false) {
                 seen = Seen(
                     skin = LocalSkin.current,
                     tokens = LocalBuilderTokens.current,
