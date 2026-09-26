@@ -210,7 +210,7 @@ internal fun CanvasTabBody(
  * The preview window, standing the canvas's inset in from the sides and the bottom of [modifier]'s
  * room and taking the height left. It is as wide as [width]'s screen scaled to fit, down to 0.6, or
  * the whole room when the screen is wider than that or [width] is null. It is centred, and the
- * canvas shows round it.
+ * canvas shows round it. A hairline in the chrome's outline marks its edge for every library.
  *
  * A band on the canvas right above the window names each half while Split shows, so the names
  * never cover the app. The band keeps its height in Light and Dark too, so the window stays put
@@ -224,7 +224,8 @@ private fun PreviewWindow(
     modifier: Modifier,
     content: @Composable () -> Unit,
 ) {
-    val spacing = LocalBuilderTokens.current.spacing
+    val tokens = LocalBuilderTokens.current
+    val spacing = tokens.spacing
     val inset = canvasInset(LocalLayout.current.windowClass == WindowClass.Compact)
     Box(modifier.fillMaxSize().padding(start = inset, end = inset, bottom = inset, top = spacing.small)) {
         Column(Modifier.windowWidth(width), verticalArrangement = Arrangement.spacedBy(spacing.small)) {
@@ -234,7 +235,12 @@ private fun PreviewWindow(
                 start = specs.light.label,
                 end = specs.dark.label,
             )
-            PreviewWindowRegion(Modifier.fillMaxWidth().weight(1f)) { content() }
+            // b-538 A hairline in the chrome's own outline over the window's edge, past the panes'
+            // vision filter, so a near-white light pane still stands off the canvas round it.
+            val edge = RoundedCornerShape(tokens.radius.large)
+            PreviewWindowRegion(
+                Modifier.fillMaxWidth().weight(1f).border(tokens.outlineWidth, tokens.border, edge),
+            ) { content() }
         }
     }
 }
