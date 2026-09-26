@@ -167,18 +167,21 @@ private const val HeroMinScale: Float = 0.4f
 /**
  * [value] with only what a hex color is written with, one leading `#` and at most [HexDigitCap] hex
  * digits. Every other character is dropped, and so is any digit past the cap, so a paste keeps the
- * hex it holds. The cursor and selection stay by the characters they were next to. Text that needs
- * no change comes back as it was, composition and all.
+ * hex it holds. A leading `0x`, as Kotlin writes a color, goes too, so `0x6750A4` keeps `6750A4`.
+ * The cursor and selection stay by the characters they were next to. Text that needs no change comes
+ * back as it was, composition and all.
  */
 internal fun hexOnly(value: TextFieldValue): TextFieldValue {
     val text = value.text
     val kept = StringBuilder(text.length)
     // Where each index of the text lands in the kept text, for the cursor and selection.
     val landing = IntArray(text.length + 1)
+    val prefix = if (text.startsWith("0x", ignoreCase = true)) 2 else 0
     var digits = 0
     text.forEachIndexed { index, char ->
         landing[index] = kept.length
         val keep = when {
+            index < prefix -> false
             char == '#' -> kept.isEmpty()
             char.isHexDigit() -> digits < HexDigitCap
             else -> false

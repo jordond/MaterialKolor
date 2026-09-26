@@ -293,6 +293,7 @@ class ControlsBFieldTest {
             editableText(Field) shouldBe "#80ff00ff"
 
             hexOnly(TextFieldValue("#67z50A4", TextRange(4))) shouldBe TextFieldValue("#6750A4", TextRange(3))
+            hexOnly(TextFieldValue("0xFF6750A4", TextRange(10))) shouldBe TextFieldValue("FF6750A4", TextRange(8))
         }
 
     @Test
