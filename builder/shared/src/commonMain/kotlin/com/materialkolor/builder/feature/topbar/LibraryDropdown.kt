@@ -90,7 +90,7 @@ internal class MediumBarFit {
 
 /**
  * The library switcher on a Medium window, a dropdown whose trigger shows the library's name whole,
- * with the Expressive switch after it while Material 3 is picked.
+ * with the Expressive chip joined to its end while Material 3 is picked.
  *
  * It measures every library's trigger off screen and out of the accessibility tree, and asks [fit]
  * for room for the widest, so a switch never moves the bar's buttons. Which one is widest is only
@@ -98,11 +98,11 @@ internal class MediumBarFit {
  * command registry. A pick reaches [onSwitch] at once.
  *
  * @param[selected] The library the document is on.
- * @param[expressive] Whether the Expressive switch is on.
+ * @param[expressive] Whether the Expressive chip is on.
  * @param[fit] Which top bar buttons have made room for it.
  * @param[modifier] Applied to the room the dropdown gets, which it fills.
  * @param[switcherModifier] Applied to the dropdown itself.
- * @param[expressiveModifier] Applied to the Expressive switch.
+ * @param[expressiveModifier] Applied to the Expressive chip.
  */
 @Composable
 internal fun LibraryDropdown(
@@ -154,7 +154,7 @@ internal fun LibraryDropdown(
 /**
  * How wide the trigger for [choice] is when nothing holds it in, composed in [slot] off screen and
  * out of the accessibility tree, so only the trigger that shows can be reached. It counts the
- * Expressive switch for every library, so turning Material 3 on or off never moves the bar's buttons.
+ * Expressive chip for every library, so turning Material 3 on or off never moves the bar's buttons.
  */
 private fun SubcomposeMeasureScope.naturalWidth(
     slot: TriggerSlot,
