@@ -29,7 +29,8 @@ class SessionRulesTest {
 
     @Test
     fun editOutcome_discreteChangeThatChangesNothing_isUnchanged() {
-        editOutcome(EditPhase.Discrete, before = FOREST, after = FOREST, committed = OCEAN) shouldBe EditOutcome.Unchanged
+        editOutcome(EditPhase.Discrete, before = FOREST, after = FOREST, committed = OCEAN) shouldBe
+            EditOutcome.Unchanged
     }
 
     @Test

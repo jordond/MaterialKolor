@@ -230,9 +230,14 @@ internal class ProjectSession(
         steps.record(before, after, change, phase, time)
         showStep(after)
         when (editOutcome(phase, before, after, committed)) {
-            EditOutcome.ReleasedOntoCommitted -> lastEditAt = committedEditAt
-            EditOutcome.Unchanged -> Unit
-            EditOutcome.Drag -> lastEditAt = time
+            EditOutcome.ReleasedOntoCommitted -> {
+                lastEditAt = committedEditAt
+            }
+            // A discrete change that left the document as it was is not an edit.
+            EditOutcome.Unchanged -> {}
+            EditOutcome.Drag -> {
+                lastEditAt = time
+            }
             EditOutcome.Commit -> {
                 lastEditAt = time
                 commit(after)
@@ -311,7 +316,11 @@ internal class ProjectSession(
             DecodeResult.Corrupt -> return BootNotice.InvalidLink
         }
         flushAll()
-        val local = BootResolver.matching(link.document, projects.listedRecords(), preferredId = current.value.facts.value.id)
+        val local = BootResolver.matching(
+            link.document,
+            projects.listedRecords(),
+            preferredId = current.value.facts.value.id,
+        )
         if (local != null && open(local.id)) return null
         showShared(BootStart.Shared(code, link.document, link.projectName))
         return null
@@ -456,7 +465,8 @@ internal class ProjectSession(
         }
     }
 
-    private fun historyState(): HistoryState = HistoryState(steps.canUndo, steps.canRedo, steps.undoLabel, steps.redoLabel)
+    private fun historyState(): HistoryState =
+        HistoryState(steps.canUndo, steps.canRedo, steps.undoLabel, steps.redoLabel)
 
     private suspend fun show(
         open: OpenProject,
@@ -546,7 +556,7 @@ internal class ProjectSession(
             now = now(),
         )
         when (outcome) {
-            IncomingSave.Ignore -> Unit
+            IncomingSave.Ignore -> {}
             IncomingSave.Matches -> {
                 open.facts.update { facts -> facts.copy(name = incoming.name, held = incoming) }
                 _state.update { state -> state.copy(conflict = null) }
@@ -555,7 +565,9 @@ internal class ProjectSession(
                 open.facts.update { facts -> facts.copy(name = incoming.name) }
                 _state.update { state -> state.copy(conflict = Conflict(incoming)) }
             }
-            IncomingSave.Adopt -> adopt(open, incoming)
+            IncomingSave.Adopt -> {
+                adopt(open, incoming)
+            }
         }
     }
 
