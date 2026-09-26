@@ -10,6 +10,9 @@ import com.materialkolor.builder.domain.model.Style
  * falls back to 2021, and Cmf only exists in 2026. This mirrors the fallback the color engine does
  * on its own, so the control can show the spec the scheme is really built with.
  *
+ * 2026 can be asked for on every style, since the engine falls back from it the same way. It runs
+ * as 2025 on a style with a 2025 form and as 2021 on the rest.
+ *
  * The document keeps the spec it asked for regardless. Moving to a 2021 only style and back again
  * brings a requested 2025 back.
  */
@@ -41,12 +44,21 @@ public object EffectiveSpec {
         }
 
     /**
-     * The specs [style] has a form in, the ones the control lets someone pick.
+     * The specs the control lets someone pick for [style].
      *
-     * The control shows all three specs for every style and turns off the ones missing here. A 2021
-     * only style offers just 2021, and Cmf offers just 2026.
+     * The control shows all three specs for every style and turns off the ones missing here. Every
+     * style offers 2026 on top of the specs it has a form in, because the engine falls back from
+     * 2026 on its own. So a 2021 only style offers 2021 and 2026, and Cmf offers just 2026.
      */
-    public fun offered(style: Style): Set<SpecVersion> =
+    public fun offered(style: Style): Set<SpecVersion> = forms(style) + SpecVersion.Spec2026
+
+    /**
+     * The specs [style] has a form in, the ones a scheme for it can really be built with.
+     *
+     * A 2021 only style has just 2021, a style with a 2025 form has 2021 and 2025, and Cmf has just
+     * 2026.
+     */
+    public fun forms(style: Style): Set<SpecVersion> =
         when (availability(style)) {
             Availability.Classic -> setOf(SpecVersion.Spec2021)
             Availability.Revised -> setOf(SpecVersion.Spec2021, SpecVersion.Spec2025)

@@ -10,6 +10,7 @@ import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.SchemePlatform
 import com.materialkolor.builder.domain.model.SpecVersion
+import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.extras_platform_label
@@ -18,11 +19,11 @@ import com.materialkolor.builder.generated.resources.extras_platform_watch
 import com.materialkolor.builder.generated.resources.extras_spec_2021
 import com.materialkolor.builder.generated.resources.extras_spec_2025
 import com.materialkolor.builder.generated.resources.extras_spec_2026
-import com.materialkolor.builder.generated.resources.extras_spec_2026_cmf
 import com.materialkolor.builder.generated.resources.extras_spec_classic_only
 import com.materialkolor.builder.generated.resources.extras_spec_cmf_only
 import com.materialkolor.builder.generated.resources.extras_spec_comes_back
 import com.materialkolor.builder.generated.resources.extras_spec_label
+import com.materialkolor.builder.generated.resources.extras_spec_runs_as
 import com.materialkolor.builder.kit.control.BuilderSegmented
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
@@ -35,12 +36,13 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The spec and the platform.
  *
- * The choice shows all three specs with the one the scheme is really built with chosen, and turns
- * off the specs the style has no form in with a line saying why. A style with a 2025 form offers
- * 2021 and 2025, a 2021 only style offers just 2021, and Cmf offers just 2026. Changing the style
- * never touches the spec the document asked for, so a 2025 asked for under a 2021 only style comes
- * back with the next style that has it, and the control says as much while it waits. The platform
- * only shows where the effective spec has one.
+ * The choice shows all three specs with the one the document asked for chosen, and turns off the
+ * specs the style cannot take with a line saying why. 2026 is offered on every style, a style with a
+ * 2025 form also offers 2021 and 2025, a 2021 only style also offers 2021, and Cmf offers just 2026.
+ * When the chosen spec falls back to another one on this style, a short line names the spec it runs
+ * as. Changing the style never touches the spec the document asked for, so a 2025 asked for under a
+ * 2021 only style comes back with the next style that has it, and the control says as much while it
+ * waits. The platform only shows where the effective spec has one.
  */
 @Composable
 internal fun SpecPlatformControl(
@@ -64,7 +66,10 @@ internal fun SpecPlatformControl(
 }
 
 /**
- * The spec choice for the document's style, with the specs it has no form in turned off.
+ * The spec choice for the document's style, with the specs it cannot take turned off.
+ *
+ * The chosen spec is the one the document asked for while the style offers it, and the one the
+ * style really runs otherwise.
  */
 @Composable
 private fun SpecChoice(
@@ -76,15 +81,16 @@ private fun SpecChoice(
     val document = context.document
     val offered = EffectiveSpec.offered(document.style)
     val effective = EffectiveSpec.of(document.style, document.spec)
+    val picked = document.spec.takeIf { spec -> spec in offered } ?: effective
     val label = stringResource(Res.string.extras_spec_label)
     val names = SpecVersion.entries.associateWith { spec -> stringResource(specName(spec)) }
     Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         InfoLabel(label = label, topic = InfoTopic.Spec)
         BuilderSegmented(
             options = SpecVersion.entries,
-            selected = effective,
+            selected = picked,
             onSelect = { spec ->
-                if (spec != effective) {
+                if (spec != picked) {
                     dispatcher.dispatch(WorkspaceAction.Edit(DocumentChange.SetSpec(spec), EditPhase.Discrete))
                 }
             },
@@ -93,26 +99,42 @@ private fun SpecChoice(
             optionEnabled = { spec -> spec in offered },
             optionLabel = { spec -> names.getValue(spec) },
         )
-        OffSpecLines(offered = offered, asked2025 = document.spec == SpecVersion.Spec2025)
+        SpecNoteLines(
+            style = document.style,
+            picked = picked,
+            effective = effective,
+            asked2025 = document.spec == SpecVersion.Spec2025,
+        )
     }
 }
 
 /**
- * Why the specs missing from [offered] are off. Under a 2021 only style it also says, while the
- * document asks for 2025, that 2025 comes back with the next style that has it.
+ * The line under the spec choice. When [picked] falls back on [style] it names the [effective] spec
+ * it runs as. Otherwise it says why a 2021 only style or Cmf turns specs off, and under a 2021 only
+ * style it also says, while the document asks for 2025, that 2025 comes back with the next style
+ * that has it. A style that runs the picked spec as is needs no line.
  */
 @Composable
-private fun OffSpecLines(
-    offered: Set<SpecVersion>,
+private fun SpecNoteLines(
+    style: Style,
+    picked: SpecVersion,
+    effective: SpecVersion,
     asked2025: Boolean,
 ) {
-    val classicOnly = offered.singleOrNull() == SpecVersion.Spec2021
-    val reason = when {
-        classicOnly -> Res.string.extras_spec_classic_only
-        SpecVersion.Spec2026 in offered -> Res.string.extras_spec_cmf_only
-        else -> Res.string.extras_spec_2026_cmf
+    val forms = EffectiveSpec.forms(style)
+    val classicOnly = forms.singleOrNull() == SpecVersion.Spec2021
+    when {
+        picked != effective -> {
+            val note = stringResource(Res.string.extras_spec_runs_as, stringResource(specName(effective)))
+            BuilderText(text = note, emphasis = Emphasis.Secondary)
+        }
+        classicOnly -> {
+            BuilderText(text = stringResource(Res.string.extras_spec_classic_only), emphasis = Emphasis.Secondary)
+        }
+        forms.singleOrNull() == SpecVersion.Spec2026 -> {
+            BuilderText(text = stringResource(Res.string.extras_spec_cmf_only), emphasis = Emphasis.Secondary)
+        }
     }
-    BuilderText(text = stringResource(reason), emphasis = Emphasis.Secondary)
     if (classicOnly && asked2025) {
         BuilderText(text = stringResource(Res.string.extras_spec_comes_back), emphasis = Emphasis.Secondary)
     }

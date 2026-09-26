@@ -13,7 +13,7 @@
     <!-- The short explanation an info button opens. -->
     <string name="glossary_seed">The one color every palette grows from. Change it and the whole theme follows.</string>
     <string name="glossary_style">How the palettes are drawn from the seed, from calm and muted to loud and playful.</string>
-    <string name="glossary_spec">Which version of the Material color rules builds the scheme. The 2025 spec is the one Expressive themes use, and the 2026 spec is only for Cmf.</string>
+    <string name="glossary_spec">Which version of the Material color rules builds the scheme. The 2025 spec is the one Expressive themes use, and the 2026 spec adds Cmf. A style runs a spec it has no form in as the nearest one it has.</string>
     <string name="glossary_contrast">How far apart text and its background sit. A higher level makes every pair easier to read.</string>
     <string name="glossary_key_colors">The color each palette is built from. They come from the seed until you set one yourself.</string>
     <string name="glossary_pins">A pin holds one role at a color of your own, whatever the seed does.</string>

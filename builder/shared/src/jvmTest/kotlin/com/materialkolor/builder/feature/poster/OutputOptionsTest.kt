@@ -38,7 +38,9 @@ private const val COMES_BACK = "Your 2025 spec comes back as soon as you pick a 
 
 private const val CMF_ONLY = "This style only exists in the 2026 spec."
 
-private const val CMF_SPEC = "The 2026 spec is only for Cmf."
+private const val RUNS_AS_2025 = "Runs as 2025 on this style."
+
+private const val RUNS_AS_2021 = "Runs as 2021 on this style."
 
 private const val AMOLED = "AMOLED dark mode"
 
@@ -49,15 +51,16 @@ private const val LIGHT_TONE = "primaryPressed light tone"
 @OptIn(ExperimentalTestApi::class)
 class OutputOptionsTest {
     @Test
-    fun spec_revisedStyle_startsOn2025WithTheCmfSpecOffAndSetsTheSpecAsOneEntry() =
+    fun spec_revisedStyle_startsOn2026RunningAs2025AndSetsTheSpecAsOneEntry() =
         runComposeUiTest {
             val harness = PosterHarness(Plain)
             showSection(harness) { context, dispatcher -> SpecPlatformControl(context, dispatcher) }
 
-            onNodeWithText("2025").assertIsSelected()
+            onNodeWithText("2026").assertIsSelected()
+            onNodeWithText("2026").assertIsEnabled()
             onNodeWithText("2021").assertIsEnabled()
-            onNodeWithText("2026").assertIsNotEnabled()
-            onNodeWithText(CMF_SPEC).assertExists()
+            onNodeWithText("2025").assertIsEnabled()
+            onNodeWithText(RUNS_AS_2025).assertExists()
             onNodeWithText(CLASSIC_ONLY).assertDoesNotExist()
 
             onNodeWithText("2021").performClick()
@@ -67,6 +70,7 @@ class OutputOptionsTest {
                 WorkspaceAction.Edit(DocumentChange.SetSpec(SpecVersion.Spec2021), EditPhase.Discrete),
             )
             onNodeWithText("2021").assertIsSelected()
+            onNodeWithText(RUNS_AS_2025).assertDoesNotExist()
             harness.undoEntries() shouldBe 1
         }
 
@@ -78,7 +82,7 @@ class OutputOptionsTest {
 
             onNodeWithText("2021").assertIsSelected()
             onNodeWithText("2025").assertIsNotEnabled()
-            onNodeWithText("2026").assertIsNotEnabled()
+            onNodeWithText("2026").assertIsEnabled()
             onNodeWithText(CLASSIC_ONLY).assertExists()
             onNodeWithText(COMES_BACK).assertExists()
 
@@ -93,13 +97,15 @@ class OutputOptionsTest {
         }
 
     @Test
-    fun spec_classicStyleOnTheDefault_saysWhyWithoutPromisingAnything() =
+    fun spec_classicStyleOnTheDefault_keeps2026AndSaysItRunsAs2021() =
         runComposeUiTest {
             showSection(PosterHarness(Plain.copy(style = Style.Fidelity))) { context, dispatcher ->
                 SpecPlatformControl(context, dispatcher)
             }
 
-            onNodeWithText(CLASSIC_ONLY).assertExists()
+            onNodeWithText("2026").assertIsSelected()
+            onNodeWithText("2025").assertIsNotEnabled()
+            onNodeWithText(RUNS_AS_2021).assertExists()
             onNodeWithText(COMES_BACK).assertDoesNotExist()
         }
 
