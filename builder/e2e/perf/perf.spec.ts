@@ -133,8 +133,8 @@ test('a broadband visit, then seed changes, drags, a library switch and a photo'
   });
 
   await measure(['switch-reveal-fps'], async () => {
-    // The first switch to Fluent also loads its face and builds its skin, so it is timed on its own
-    // and the reveal is timed on the second.
+    // The first switch to Fluent also builds its preview panes, so it is timed on its own and the
+    // reveal is timed on the second.
     const first = await switchLibrary(page, '4');
     await switchLibrary(page, '1');
     const frames = await switchLibrary(page, '4');

@@ -31,11 +31,8 @@
     <string name="about_credits">Made by Jordon de Hoog and everyone who has worked on MaterialKolor. The color science is Google’s Material Color Utilities.</string>
     <string name="about_font_bricolage">Bricolage Grotesque</string>
     <string name="about_font_jetbrains_mono">JetBrains Mono</string>
-    <string name="about_font_selawik">Selawik</string>
     <!-- What each font is licensed under, shown under its name. -->
     <string name="about_font_license">SIL Open Font License 1.1</string>
-    <!-- Shown under Selawik in place of the license name alone, with the license's name. The license reserves the name, so the subset ships under another. -->
-    <string name="about_font_selawik_renamed">%1$s. Shipped as a renamed subset, Builder Fluent Sans, since the license reserves the name Selawik.</string>
     <!-- Shown in place of a font's license text when it could not be read, with the license's name. -->
     <string name="about_font_license_failed">Could not load the license text of the %1$s.</string>
     <string-array name="about_libraries">
