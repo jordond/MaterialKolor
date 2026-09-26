@@ -22,14 +22,14 @@
     <string name="keycolors_name_error">Error</string>
     <string name="keycolors_name_neutral">Neutral</string>
     <string name="keycolors_name_neutral_variant">Neutral variant</string>
-    <!-- Under a key color's name while it still comes from the seed. -->
-    <string name="keycolors_from_seed">From seed</string>
     <!-- Opens the picker on a key color. The argument is the key color's name. -->
     <string name="keycolors_pick">Pick %1$s</string>
     <!-- Hands a key color back to the seed. The argument is the key color's name. -->
     <string name="keycolors_clear">Clear %1$s</string>
     <!-- A key color's hex, which turns into a field when pressed. The arguments are the key color's name and its hex. -->
     <string name="keycolors_edit">Edit %1$s, %2$s</string>
+    <!-- The same while the key color still comes from the seed. -->
+    <string name="keycolors_edit_from_seed">Edit %1$s, %2$s, from seed</string>
     <!-- Under a primary key color set by hand. -->
     <string name="keycolors_primary_only">This moves only the primary palette. The seed still drives the rest.</string>
     <!-- The same line for Fluent, which takes no palette but the primary. -->

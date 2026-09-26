@@ -38,7 +38,7 @@ import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.keycolors_clear
 import com.materialkolor.builder.generated.resources.keycolors_edit
-import com.materialkolor.builder.generated.resources.keycolors_from_seed
+import com.materialkolor.builder.generated.resources.keycolors_edit_from_seed
 import com.materialkolor.builder.generated.resources.keycolors_label
 import com.materialkolor.builder.generated.resources.keycolors_name_error
 import com.materialkolor.builder.generated.resources.keycolors_name_neutral
@@ -109,7 +109,7 @@ internal fun KeyColorRows(
 /**
  * One key color as one slim row, its swatch, its name, its hex and Pick, the way board E draws it.
  * The hex shows the color set by hand, or the key color the scheme derived from the seed while
- * there is none, with a quiet "From seed" under the name. Clicking the hex, or tabbing onto it,
+ * there is none, which the hex reads out as from seed. Clicking the hex, or tabbing onto it,
  * turns it into a field, and a paste or a typed color sets it as one undo entry. The field turns
  * back into text once focus leaves it. A color set by hand gets the button that hands the palette
  * back to the seed beside Pick. Clear hands a keyboard user's focus to Pick as it goes.
@@ -155,14 +155,16 @@ internal fun KeyColorRow(
                     modifier = Modifier.weight(1f),
                 )
             } else {
-                Column(Modifier.weight(1f)) {
-                    BuilderText(text = name, style = BuilderTextStyle.Label, maxLines = 1)
-                    if (stored == null) {
-                        val fromSeed = stringResource(Res.string.keycolors_from_seed)
-                        BuilderText(text = fromSeed, emphasis = Emphasis.Secondary)
-                    }
-                }
-                KeyColorHex(color = shown, name = name, enabled = enabled, onEdit = { editing = true })
+                // b-527 The name alone at the board's size. Whether the color comes from the seed is
+                // read out with the hex, and the Clear button shows the ones set by hand.
+                BuilderText(text = name, modifier = Modifier.weight(1f), maxLines = 1)
+                KeyColorHex(
+                    color = shown,
+                    name = name,
+                    fromSeed = stored == null,
+                    enabled = enabled,
+                    onEdit = { editing = true },
+                )
             }
             BuilderIconButton(
                 onClick = {
@@ -194,19 +196,21 @@ internal fun KeyColorRow(
 
 /**
  * A key color's hex as mono text, which turns into the field once clicked or focused. It reads out
- * as Edit with the key color's name and its hex.
+ * as Edit with the key color's name and its hex, and says so when the color comes from the seed.
  */
 @Composable
 private fun KeyColorHex(
     color: Argb,
     name: String,
+    fromSeed: Boolean,
     enabled: Boolean,
     onEdit: () -> Unit,
 ) {
     val hex = color.toHex()
+    val label = if (fromSeed) Res.string.keycolors_edit_from_seed else Res.string.keycolors_edit
     BuilderPressable(
         onClick = onEdit,
-        label = stringResource(Res.string.keycolors_edit, name, hex),
+        label = stringResource(label, name, hex),
         modifier = Modifier.onFocusChanged { focus -> if (focus.isFocused) onEdit() },
         enabled = enabled,
     ) {
