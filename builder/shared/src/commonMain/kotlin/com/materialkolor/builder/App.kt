@@ -41,6 +41,7 @@ import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.builder.kit.transition.SkinTransition
 import com.materialkolor.builder.kit.transition.SkinTransitionHost
+import com.materialkolor.builder.kit.transition.SnapshotMode
 import com.materialkolor.builder.kit.transition.rememberSkinTransition
 import dev.stateholder.extensions.collectAsState
 import dev.zacsweers.metro.createGraphFactory
@@ -163,7 +164,7 @@ internal fun BuilderRoot(
         BuilderTheme(skin = ShellSkin, result = result, isDark = state.isDark, reducedMotion = state.reducedMotion) {
             ThemeColorEffect(environment)
             ProvideBuilderLayout(coarsePointer = state.coarsePointer, modifier = Modifier.fillMaxSize()) {
-                val transition = rememberSkinTransition()
+                val transition = rememberSkinTransition(SnapshotMode.Bitmap)
                 if (awaitIdle != null) RevealWarmUpEffect(transition, firstFrame, awaitIdle)
                 SkinTransitionHost(transition = transition, modifier = Modifier.fillMaxSize()) {
                     val shown = workspace.value
