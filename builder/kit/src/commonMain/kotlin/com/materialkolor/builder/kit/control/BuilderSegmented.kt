@@ -61,6 +61,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderType
  * @param[label] What the choice is about, read out for the group.
  * @param[modifier] Applied to the group.
  * @param[enabled] Whether the choice can change.
+ * @param[optionEnabled] Whether one option can be picked while the choice is enabled. An option it
+ * turns down shows as disabled in place, and the arrow keys step over it.
  * @param[optionIcon] A glyph for an option, or null for a label alone.
  * @param[selectOnFocus] Whether the arrow keys choose as they move, or only move the focus.
  * @param[compact] Fit a row that fills a narrow width, such as the poster's contrast levels. The
@@ -79,6 +81,7 @@ public fun <T> BuilderSegmented(
     label: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    optionEnabled: (T) -> Boolean = { true },
     optionIcon: (T) -> IconId? = { null },
     selectOnFocus: Boolean = true,
     compact: Boolean = false,
@@ -93,6 +96,7 @@ public fun <T> BuilderSegmented(
                 label,
                 modifier,
                 enabled,
+                optionEnabled,
                 optionIcon,
                 selectOnFocus,
                 optionLabel,
@@ -108,6 +112,7 @@ public fun <T> BuilderSegmented(
                 UnstyledActionStyles.segmented,
                 modifier,
                 enabled,
+                optionEnabled,
                 optionIcon,
                 selectOnFocus,
                 optionLabel,
@@ -122,6 +127,7 @@ public fun <T> BuilderSegmented(
                 label,
                 modifier,
                 enabled,
+                optionEnabled,
                 optionIcon,
                 selectOnFocus,
                 optionLabel,
@@ -137,6 +143,7 @@ public fun <T> BuilderSegmented(
                 CustomActionStyles.segmented,
                 modifier,
                 enabled,
+                optionEnabled,
                 optionIcon,
                 selectOnFocus,
                 optionLabel,
@@ -158,6 +165,7 @@ internal fun <T> HeadlessSegmented(
     style: SegmentedStyle,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    optionEnabled: (T) -> Boolean = { true },
     optionIcon: (T) -> IconId? = { null },
     selectOnFocus: Boolean = true,
     optionLabel: (T) -> String,
@@ -176,13 +184,17 @@ internal fun <T> HeadlessSegmented(
             .actionSurface(style.colors, style.shape, style.borderWidth)
             .padding(style.inset),
         enabled = enabled,
+        optionEnabled = optionEnabled,
         selectOnFocus = selectOnFocus,
     ) { value, isSelected, interactionSource ->
         val colors = option.colors(isSelected)
+        val usable = enabled && optionEnabled(value)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .foldState(optionLabel(value), ControlState.Selected(isSelected), enabled, role = FoldedRole.Radio)
+                // The group already fades as a whole while it is off, so only a lone option fades here.
+                .alpha(enabledAlpha(!enabled || usable))
+                .foldState(optionLabel(value), ControlState.Selected(isSelected), usable, role = FoldedRole.Radio)
                 .controlTouchTarget(target)
                 .controlPress(interactionSource)
                 .controlRing(interactionSource, segmentRingShape(options, value, style))

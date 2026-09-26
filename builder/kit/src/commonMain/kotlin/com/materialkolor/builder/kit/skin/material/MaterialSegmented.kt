@@ -100,6 +100,7 @@ internal fun <T> MaterialSegmented(
     label: String,
     modifier: Modifier,
     enabled: Boolean,
+    optionEnabled: (T) -> Boolean,
     optionIcon: (T) -> IconId?,
     selectOnFocus: Boolean,
     optionLabel: (T) -> String,
@@ -115,6 +116,7 @@ internal fun <T> MaterialSegmented(
             label = label,
             modifier = modifier,
             enabled = enabled,
+            optionEnabled = optionEnabled,
             optionIcon = optionIcon,
             selectOnFocus = selectOnFocus,
             optionLabel = optionLabel,
@@ -132,6 +134,7 @@ internal fun <T> MaterialSegmented(
             style = materialTrackStyle(),
             modifier = modifier,
             enabled = enabled,
+            optionEnabled = optionEnabled,
             optionIcon = optionIcon,
             selectOnFocus = selectOnFocus,
             optionLabel = optionLabel,
@@ -150,21 +153,29 @@ internal fun <T> MaterialSegmented(
                     val shape = SegmentedButtonDefaults.itemShape(index, options.size)
                     val glyph = optionIcon(value)
                     val isSelected = index == selectedIndex
+                    val usable = enabled && optionEnabled(value)
                     InWritingOrder(keep = writingOrder) {
                         SegmentedButton(
                             selected = isSelected,
                             onClick = { onSelect(value) },
                             shape = shape,
                             modifier = Modifier
-                                .radioGroupOption(focus, index, selectedIndex, rtl, selectOnFocus) { target ->
+                                .radioGroupOption(
+                                    focus = focus,
+                                    index = index,
+                                    selectedIndex = selectedIndex,
+                                    rtl = rtl,
+                                    selectOnFocus = selectOnFocus,
+                                    allowed = { stop -> optionEnabled(options[stop]) },
+                                ) { target ->
                                     onSelect(options[target])
                                 }.foldState(
                                     name = optionLabel(value),
                                     state = ControlState.Selected(isSelected),
-                                    enabled = enabled,
+                                    enabled = usable,
                                     role = FoldedRole.Radio,
                                 ).materialFeedback(interactionSource, shape),
-                            enabled = enabled,
+                            enabled = usable,
                             interactionSource = interactionSource,
                             icon = {
                                 SegmentedButtonDefaults.Icon(
@@ -215,6 +226,7 @@ private fun <T> ExpressiveSegmented(
     label: String,
     modifier: Modifier,
     enabled: Boolean,
+    optionEnabled: (T) -> Boolean,
     optionIcon: (T) -> IconId?,
     selectOnFocus: Boolean,
     optionLabel: (T) -> String,
@@ -246,6 +258,7 @@ private fun <T> ExpressiveSegmented(
                     val interactionSource = remember { MutableInteractionSource() }
                     val shapes = connectedShapes(index, options.size)
                     val isSelected = index == selectedIndex
+                    val usable = enabled && optionEnabled(value)
                     val name = optionLabel(value)
                     val ringed = ring.rememberOption(
                         index = index,
@@ -258,7 +271,14 @@ private fun <T> ExpressiveSegmented(
                             onCheckedChange = { onSelect(value) },
                             modifier = Modifier
                                 .weight(1f)
-                                .radioGroupOption(focus, index, selectedIndex, rtl, selectOnFocus) { target ->
+                                .radioGroupOption(
+                                    focus = focus,
+                                    index = index,
+                                    selectedIndex = selectedIndex,
+                                    rtl = rtl,
+                                    selectOnFocus = selectOnFocus,
+                                    allowed = { stop -> optionEnabled(options[stop]) },
+                                ) { target ->
                                     onSelect(options[target])
                                 }.semantics {
                                     role = Role.RadioButton
@@ -266,12 +286,12 @@ private fun <T> ExpressiveSegmented(
                                 }.foldState(
                                     name = name,
                                     state = ControlState.Selected(isSelected),
-                                    enabled = enabled,
+                                    enabled = usable,
                                     role = FoldedRole.Radio,
                                 ).controlTouchTarget(touchTarget)
                                 .onGloballyPositioned { coordinates -> ringed.place(ring.row, coordinates) }
                                 .controlPress(interactionSource),
-                            enabled = enabled,
+                            enabled = usable,
                             shapes = shapes,
                             contentPadding = if (compact) {
                                 CompactPadding

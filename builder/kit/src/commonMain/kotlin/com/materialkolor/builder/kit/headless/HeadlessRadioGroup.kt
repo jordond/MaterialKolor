@@ -52,6 +52,8 @@ import com.materialkolor.builder.kit.control.roleLessName
  * @param[label] What the group is for, read out when focus enters it.
  * @param[modifier] Applied to the group.
  * @param[enabled] Whether any option can be picked.
+ * @param[optionEnabled] Whether one option can be picked while the group is enabled. The arrow
+ * keys, Home and End step over an option it turns down.
  * @param[arrangement] How the options sit along the row.
  * @param[selectOnFocus] Whether the arrow keys choose as they move, or only move the focus.
  * @param[option] Draws one option. The interaction source is the option's own, for press and focus
@@ -65,6 +67,7 @@ internal fun <T> HeadlessRadioGroup(
     label: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    optionEnabled: (T) -> Boolean = { true },
     arrangement: Arrangement.Horizontal = Arrangement.Start,
     selectOnFocus: Boolean = true,
     option: @Composable (value: T, isSelected: Boolean, interactionSource: MutableInteractionSource) -> Unit,
@@ -76,6 +79,7 @@ internal fun <T> HeadlessRadioGroup(
         label = label,
         modifier = modifier.width(IntrinsicSize.Min),
         enabled = enabled,
+        optionEnabled = optionEnabled,
         selectOnFocus = selectOnFocus,
         option = option,
     ) { eachOption ->
@@ -114,6 +118,7 @@ internal fun <T> HeadlessRadioFlow(
         label = label,
         modifier = modifier,
         enabled = enabled,
+        optionEnabled = { true },
         selectOnFocus = selectOnFocus,
         option = option,
     ) { eachOption ->
@@ -139,6 +144,7 @@ private fun <T> RadioGroupFrame(
     label: String,
     modifier: Modifier,
     enabled: Boolean,
+    optionEnabled: (T) -> Boolean,
     selectOnFocus: Boolean,
     option: @Composable (value: T, isSelected: Boolean, interactionSource: MutableInteractionSource) -> Unit,
     layout: @Composable (eachOption: @Composable (Modifier) -> Unit) -> Unit,
@@ -160,10 +166,17 @@ private fun <T> RadioGroupFrame(
                     UnstyledRadioButton(
                         value = value,
                         modifier = placement
-                            .radioGroupOption(focus, index, selectedIndex, rtl, selectOnFocus) { target ->
+                            .radioGroupOption(
+                                focus = focus,
+                                index = index,
+                                selectedIndex = selectedIndex,
+                                rtl = rtl,
+                                selectOnFocus = selectOnFocus,
+                                allowed = { stop -> optionEnabled(options[stop]) },
+                            ) { target ->
                                 onSelect(options[target])
                             }.semantics { this.selected = isSelected },
-                        enabled = enabled,
+                        enabled = enabled && optionEnabled(value),
                         interactionSource = interactionSource,
                     ) {
                         option(value, isSelected, interactionSource)
@@ -237,6 +250,7 @@ internal fun rememberRadioGroupFocus(
  * up and down always go back and forth, and Home and End jump to either end. With [selectOnFocus] a
  * key hands [onMove] the index of the option it moved to, and the focus follows once that option is
  * chosen. Without it a key moves only the focus, and the option's own Enter and Space choose it.
+ * A key steps over any option [allowed] turns down.
  */
 internal fun Modifier.radioGroupOption(
     focus: RadioGroupFocus,
@@ -244,6 +258,7 @@ internal fun Modifier.radioGroupOption(
     selectedIndex: Int,
     rtl: Boolean,
     selectOnFocus: Boolean = true,
+    allowed: (Int) -> Boolean = { true },
     onMove: (Int) -> Unit,
 ): Modifier {
     val count = focus.requesters.size
@@ -255,7 +270,7 @@ internal fun Modifier.radioGroupOption(
         }.onFocusChanged { state ->
             if (!state.isFocused && focus.focusedIndex == index) focus.focusedIndex = RadioGroupFocus.NoRequest
         }.onKeyEvent { event ->
-            val target = rovingTarget(event.key, index, count, rtl, upDown = true, homeEnd = true)
+            val target = rovingTarget(event.key, index, count, rtl, upDown = true, homeEnd = true, allowed = allowed)
                 ?: return@onKeyEvent false
             if (event.type == KeyEventType.KeyDown && target != index) {
                 if (selectOnFocus) {

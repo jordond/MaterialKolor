@@ -66,6 +66,7 @@ internal fun <T> FluentSegmented(
     label: String,
     modifier: Modifier,
     enabled: Boolean,
+    optionEnabled: (T) -> Boolean,
     optionIcon: (T) -> IconId?,
     selectOnFocus: Boolean,
     optionLabel: (T) -> String,
@@ -91,25 +92,33 @@ internal fun <T> FluentSegmented(
             key(index) {
                 val interactionSource = remember { MutableInteractionSource() }
                 val isSelected = index == selectedIndex
+                val usable = enabled && optionEnabled(value)
                 val name = optionLabel(value)
                 SegmentedButton(
                     checked = isSelected,
                     onCheckedChanged = { onSelect(value) },
                     // Fluent's own pair, a standard button for the chosen option and a subtle one for the rest.
                     colors = fluentButtonColors(if (isSelected) Emphasis.Secondary else Emphasis.Subtle),
-                    indicator = { FluentIndicator(visible = isSelected, enabled = enabled) },
+                    indicator = { FluentIndicator(visible = isSelected, enabled = usable) },
                     modifier = Modifier
                         .weight(1f)
-                        .radioGroupOption(focus, index, selectedIndex, rtl, selectOnFocus) { next ->
+                        .radioGroupOption(
+                            focus = focus,
+                            index = index,
+                            selectedIndex = selectedIndex,
+                            rtl = rtl,
+                            selectOnFocus = selectOnFocus,
+                            allowed = { stop -> optionEnabled(options[stop]) },
+                        ) { next ->
                             onSelect(options[next])
                         }.semantics {
                             role = Role.RadioButton
                             this.selected = isSelected
-                        }.foldState(name, ControlState.Selected(isSelected), enabled, role = FoldedRole.Radio)
+                        }.foldState(name, ControlState.Selected(isSelected), usable, role = FoldedRole.Radio)
                         .controlTouchTarget(target)
                         .controlPress(interactionSource)
                         .controlRing(interactionSource, shape),
-                    enabled = enabled,
+                    enabled = usable,
                     position = segmentPosition(index, options.size),
                     interactionSource = interactionSource,
                     icon = optionGlyph(isSelected, compact) { optionIcon(value) }?.let { glyph ->
