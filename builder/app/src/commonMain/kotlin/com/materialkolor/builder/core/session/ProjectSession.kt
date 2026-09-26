@@ -3,7 +3,6 @@ package com.materialkolor.builder.core.session
 import com.materialkolor.builder.core.data.Creation
 import com.materialkolor.builder.core.data.PreferencesRepository
 import com.materialkolor.builder.core.data.ProjectRepository
-import com.materialkolor.builder.core.platform.BootSplash
 import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.StoreError
 import com.materialkolor.builder.domain.color.ColorNames
@@ -45,10 +44,10 @@ import kotlin.coroutines.EmptyCoroutineContext
  * Everything it publishes lives in one [SessionState], so showing another project swaps the
  * document, its ref, view, history, conflict and save status in one write. Models read [state], or
  * one of [document], [shown], [history], [project], [viewState], [conflict] and [saveStatus] seen
- * through it, and nothing else holds document state. The rules for when an edit saves and what
- * another tab's save does are in [editOutcome] and [incomingSave]. Every change goes through
- * [edit], [undo], [redo] or [jumpTo]. Every rename goes through [rename], so the record the session holds
- * never writes an old name back. The History list reads the steps from [timeline] when it needs them.
+ * through it, and nothing else holds document state. Every change goes through [edit], [undo],
+ * [redo] or [jumpTo], and [EditTracker] keeps the steps and decides which edits save. Every rename
+ * goes through [rename], so the record the session holds never writes an old name back. The History
+ * list reads the steps from [timeline] when it needs them.
  *
  * Committed edits are saved [AUTOSAVE_DELAY_MILLIS] after the last one, so a drag saves once after
  * it is released, and [SessionWrites] puts them into storage. [flush] writes whatever is waiting
@@ -57,19 +56,12 @@ import kotlin.coroutines.EmptyCoroutineContext
  * name or [sharedThemeName]. Each project keeps its own waiting save, so one that did not land
  * survives opening another project and goes out again on the next flush.
  *
- * When another tab saves the open project, its document comes in as an undo step, so Undo brings
- * this tab's back. If this tab edited in the last [CONFLICT_WINDOW_MILLIS] a [Conflict] comes up
- * instead, and this tab's saves wait until [resolveConflict] settles it. A newer save from the other
- * tab while the conflict is up takes the conflict's place and is never taken in silently.
- *
- * A conflict never loses anyone's work. When this tab has to save with a conflict up, on
- * [flush] or before it opens another project, it keeps its own document. The other tab gets that
- * save as an ordinary change from another tab, a conflict there if it edited lately or an undo step
- * otherwise, so its work can still be brought back.
+ * When another tab saves the open project, [OtherTabs] takes its document in as an undo step or
+ * raises a [Conflict], and this tab's saves wait until [resolveConflict] settles it. [SplashKeeper]
+ * keeps the next boot's splash in step with the document and the chrome's appearance.
  *
  * [colorsOf] resolves a theme, so it only ever runs on the caller's thread, the UI thread, and the
- * colors go along with the save it schedules. Changes from other tabs are applied on the thread
- * that opened the project for the same reason. The app scope only writes.
+ * colors go along with the save it schedules. The app scope only writes.
  *
  * Deleting the open project is up to the drawer, which opens another project first. A save that
  * lands after a delete is dropped by the repository, and the session does not notice.
@@ -96,14 +88,7 @@ internal class ProjectSession(
         OpenProject(id = null, name = "", held = null, EmptyCoroutineContext, scope.coroutineContext[Job]),
     )
     private val writeLock = Mutex()
-    private var steps = History()
-    private var lastEditAt: Long? = null
-
-    // The document last handed to autosave, or the one the project opened with, and when the edit
-    // that made it happened. Only the UI thread reads or writes them.
-    private var committed = ThemeDocument.Default
-    private var committedEditAt: Long? = null
-
+    private val tracker = EditTracker(now)
     private val _state = MutableStateFlow(SessionState.initial())
 
     private val writes = SessionWrites(
@@ -119,21 +104,19 @@ internal class ProjectSession(
     private val autosave = Autosave(scope, keyOf = { save -> save.project }, write = writes::write)
     private val viewAutosave = Autosave(scope, keyOf = { pending -> pending.project }, write = writes::writeView)
 
-    // The splash last written, so a change of appearance can write it again. The UI thread writes it
-    // and the app scope reads it, and on the web both are the one thread.
-    private var splash: BootSplash? = null
-
-    init {
-        // A reload right after the appearance changes paints the new one, with no edit in between.
-        scope.launch {
-            preferences.preferences.collect { prefs ->
-                val last = splash
-                if (last != null && last.appearance != prefs.appearance) {
-                    writeSplash(last.copy(appearance = prefs.appearance))
-                }
-            }
-        }
-    }
+    private val splash = SplashKeeper(preferences, environment, scope)
+    private val otherTabs = OtherTabs(
+        projects = projects,
+        tabId = environment.tabId,
+        scope = scope,
+        now = now,
+        tracker = tracker,
+        state = _state,
+        setConflict = { conflict -> _state.update { state -> state.copy(conflict = conflict) } },
+        showing = { current.value },
+        showTheirs = { document -> showStep(document, clearConflict = true) },
+        commit = ::commit,
+    )
 
     /**
      * Everything the session publishes about the open project, as one value.
@@ -226,37 +209,23 @@ internal class ProjectSession(
     ) {
         val before = _state.value.document
         val after = change.apply(before)
-        val time = now()
-        steps.record(before, after, change, phase, time)
+        val save = tracker.edit(change, phase, before, after)
         showStep(after)
-        when (editOutcome(phase, before, after, committed)) {
-            EditOutcome.ReleasedOntoCommitted -> {
-                lastEditAt = committedEditAt
-            }
-            // A discrete change that left the document as it was is not an edit.
-            EditOutcome.Unchanged -> {}
-            EditOutcome.Drag -> {
-                lastEditAt = time
-            }
-            EditOutcome.Commit -> {
-                lastEditAt = time
-                commit(after)
-            }
-        }
+        if (save) commit(after)
     }
 
     /**
      * Step back once. Nothing happens when there is nothing to undo.
      */
     fun undo() {
-        moveTo(steps.undo() ?: return)
+        moveTo(tracker.undo() ?: return)
     }
 
     /**
      * Step forward once. Nothing happens when there is nothing to redo.
      */
     fun redo() {
-        moveTo(steps.redo() ?: return)
+        moveTo(tracker.redo() ?: return)
     }
 
     /**
@@ -265,22 +234,13 @@ internal class ProjectSession(
      * a list that another tab's change just moved can be stale, and nor does the one the history is at.
      */
     fun jumpTo(cursor: Int) {
-        if (cursor !in 0..steps.size) return
-        moveTo(steps.jumpTo(cursor) ?: return)
+        moveTo(tracker.jumpTo(cursor) ?: return)
     }
 
     /**
      * The steps as they stand now, built when asked and never published on each frame of a drag.
      */
-    fun timeline(): Timeline {
-        val entries = steps.entries
-        return Timeline(
-            cursor = steps.cursor,
-            now = now(),
-            start = entries.firstOrNull()?.before ?: _state.value.document,
-            steps = entries,
-        )
-    }
+    fun timeline(): Timeline = tracker.timeline(_state.value.document)
 
     /**
      * Save what is waiting, keeping this tab's document over an open conflict, then open the project
@@ -386,16 +346,7 @@ internal class ProjectSession(
      * tab's as an undo step when it is false.
      */
     fun resolveConflict(keepMine: Boolean) {
-        val conflict = _state.value.conflict ?: return
-        val open = current.value
-        if (keepMine) {
-            val mine = _state.updateAndGet { state -> state.copy(conflict = null) }.document
-            open.facts.update { facts -> facts.copy(held = conflict.theirs) }
-            commit(mine)
-        } else {
-            // Adopting clears the conflict in the same write as the document it brings.
-            adopt(open, conflict.theirs)
-        }
+        otherTabs.resolve(keepMine)
     }
 
     /**
@@ -417,7 +368,6 @@ internal class ProjectSession(
     }
 
     private fun moveTo(document: ThemeDocument) {
-        lastEditAt = now()
         showStep(document)
         commit(document)
     }
@@ -426,25 +376,11 @@ internal class ProjectSession(
      * Write the splash colors of [document] and schedule its save.
      */
     private fun commit(document: ThemeDocument) {
-        committed = document
-        committedEditAt = lastEditAt
+        val history = tracker.commit(document)
         val colors = colorsOf(document)
-        writeSplash(colors)
+        splash.write(colors)
         val sequence = writes.nextSave()
-        autosave.schedule(PendingSave(current.value, sequence, document, HistoryRecord(steps.persisted()), colors))
-    }
-
-    /**
-     * Keep [colors] for the next boot's splash, with the seed and the chrome's appearance.
-     */
-    private fun writeSplash(colors: SessionColors) {
-        val appearance = preferences.preferences.value.appearance
-        writeSplash(BootSplash(colors.splashLight, colors.splashDark, colors.splashSeed, appearance))
-    }
-
-    private fun writeSplash(next: BootSplash) {
-        splash = next
-        environment.writeSplash(next)
+        autosave.schedule(PendingSave(current.value, sequence, document, history, colors))
     }
 
     /**
@@ -455,7 +391,7 @@ internal class ProjectSession(
         document: ThemeDocument,
         clearConflict: Boolean = false,
     ) {
-        val history = historyState()
+        val history = tracker.historyState
         _state.update { state ->
             state.copy(
                 document = document,
@@ -464,9 +400,6 @@ internal class ProjectSession(
             )
         }
     }
-
-    private fun historyState(): HistoryState =
-        HistoryState(steps.canUndo, steps.canRedo, steps.undoLabel, steps.redoLabel)
 
     private suspend fun show(
         open: OpenProject,
@@ -478,24 +411,21 @@ internal class ProjectSession(
     ) {
         current.value.job.cancel()
         current.value = open
-        this.steps = steps
-        lastEditAt = null
-        committed = document
-        committedEditAt = null
+        tracker.reset(steps, document)
         // One write, so no reader sees the new document with the old project's ref, view or conflict.
         _state.value = SessionState(
             project = ref,
             document = document,
             generation = _state.value.generation + 1,
-            history = historyState(),
+            history = tracker.historyState,
             view = view,
             conflict = null,
             saveStatus = SaveStatus.Idle,
         )
-        writeSplash(colors)
+        splash.write(colors)
         val id = open.facts.value.id
         environment.writeTabProject(id)
-        id?.let { watching -> watch(open, watching) }
+        id?.let { watching -> otherTabs.watch(open, watching) }
     }
 
     private suspend fun showShared(shared: BootStart.Shared) {
@@ -531,61 +461,6 @@ internal class ProjectSession(
         }
     }
 
-    private fun watch(
-        open: OpenProject,
-        id: String,
-    ) {
-        scope.launch(open.job + open.context) {
-            projects.changes(id).collect { incoming -> onSavedElsewhere(open, incoming) }
-        }
-    }
-
-    private fun onSavedElsewhere(
-        open: OpenProject,
-        incoming: ProjectRecord,
-    ) {
-        if (current.value !== open) return
-        val shown = _state.value
-        val outcome = incomingSave(
-            held = open.facts.value.held,
-            incoming = incoming,
-            tabId = environment.tabId,
-            document = shown.document,
-            conflicted = shown.conflict != null,
-            lastEditAt = lastEditAt,
-            now = now(),
-        )
-        when (outcome) {
-            IncomingSave.Ignore -> {}
-            IncomingSave.Matches -> {
-                open.facts.update { facts -> facts.copy(name = incoming.name, held = incoming) }
-                _state.update { state -> state.copy(conflict = null) }
-            }
-            IncomingSave.RaiseConflict -> {
-                open.facts.update { facts -> facts.copy(name = incoming.name) }
-                _state.update { state -> state.copy(conflict = Conflict(incoming)) }
-            }
-            IncomingSave.Adopt -> {
-                adopt(open, incoming)
-            }
-        }
-    }
-
-    /**
-     * Take the other tab's [theirs] as an undo step, so Undo brings this tab's document back. It only
-     * runs with no conflict up or while settling one, so the conflict goes away with the document.
-     */
-    private fun adopt(
-        open: OpenProject,
-        theirs: ProjectRecord,
-    ) {
-        val mine = _state.value.document
-        open.facts.update { facts -> facts.copy(name = theirs.name, held = theirs) }
-        steps.record(mine, theirs.document, DocumentChange.Replace(theirs.document), EditPhase.Discrete, now())
-        showStep(theirs.document, clearConflict = true)
-        commit(theirs.document)
-    }
-
     /**
      * Take the id a project from a link got on its first save. While it is still showing, it becomes
      * the tab's project and other tabs' saves to it are watched.
@@ -597,7 +472,7 @@ internal class ProjectSession(
         if (current.value === open) {
             _state.update { state -> state.copy(project = ProjectRef.Persisted(id)) }
             environment.writeTabProject(id)
-            watch(open, id)
+            otherTabs.watch(open, id)
         }
         rememberLastProject(id)
     }
