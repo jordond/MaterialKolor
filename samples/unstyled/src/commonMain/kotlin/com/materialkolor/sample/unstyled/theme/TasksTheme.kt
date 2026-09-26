@@ -13,7 +13,7 @@ import com.composeunstyled.theme.ThemeComposableV2
 import com.composeunstyled.theme.ThemeToken
 import com.composeunstyled.theme.buildThemeV2
 import com.materialkolor.unstyled.MaterialKolorTokens
-import com.materialkolor.unstyled.dynamicColorSchemes
+import com.materialkolor.unstyled.rememberDynamicColors
 
 private const val COLOR_TRANSITION_MILLIS = 300
 
@@ -39,9 +39,14 @@ internal fun TasksTheme(
 private fun tasksTheme(seed: () -> Color): ThemeComposableV2 =
     buildThemeV2 {
         colorSchemeTransitionSpec = tween(durationMillis = COLOR_TRANSITION_MILLIS)
-        dynamicColorSchemes(seedColor = seed())
         defaultTextStyle = TasksType.Body
         defaultIndication = StateLayer
+
+        properties[MaterialKolorTokens.colors] = rememberDynamicColors(seedColor = seed(), isDark = false)
+
+        colorScheme(ColorScheme.Dark) {
+            properties[MaterialKolorTokens.colors] = rememberDynamicColors(seedColor = seed(), isDark = true)
+        }
     }
 
 internal val ThemeToken<Color>.color: Color

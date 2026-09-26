@@ -8,13 +8,14 @@ import com.materialkolor.dynamiccolor.DynamicScheme
 /**
  * Every [MaterialKolorTokens] token paired with the color this scheme gives it.
  *
+ * Use this when the theme already has a scheme, for example one pinned in application state. For a
+ * scheme generated from a seed inside the theme, [rememberDynamicColors] also remembers the result.
+ *
  * ```kotlin
  * val AppTheme = buildThemeV2 {
  *     properties[MaterialKolorTokens.colors] = scheme.toThemeValues()
  * }
  * ```
- *
- * [dynamicColors] does the same in one call.
  */
 public fun DynamicScheme.toThemeValues(): Map<ThemeToken<Color>, Color> = MaterialKolors(this).toThemeValues()
 
@@ -22,7 +23,7 @@ public fun DynamicScheme.toThemeValues(): Map<ThemeToken<Color>, Color> = Materi
  * Every [MaterialKolorTokens] token paired with the color these roles give it.
  *
  * ```kotlin
- * val kolors = MaterialKolors(scheme)
+ * val kolors = MaterialKolors(scheme, isAmoled = true)
  * properties[MaterialKolorTokens.colors] = kolors.toThemeValues()
  * ```
  */
@@ -92,40 +93,3 @@ public fun MaterialKolors.toThemeValues(): Map<ThemeToken<Color>, Color> =
         MaterialKolorTokens.textSecondaryAndTertiaryInverseDisabled to textSecondaryAndTertiaryInverseDisabled(),
         MaterialKolorTokens.textHintInverse to textHintInverse(),
     )
-
-/**
- * Builds the values for an application-owned vocabulary from this scheme.
- *
- * Inside [build] the [MaterialKolors] roles are plain functions and `to` records a token, so a
- * design system maps its own tokens onto the scheme without learning the MaterialKolor ones.
- *
- * ```kotlin
- * val values = scheme.themeValues {
- *     AppTokens.accent to primary()
- *     AppTokens.onAccent to onPrimary()
- *     AppTokens.card to surfaceContainer()
- * }
- * ```
- *
- * Assigning the same token twice keeps the last color.
- */
-public fun DynamicScheme.themeValues(build: ThemeValuesScope.() -> Unit): Map<ThemeToken<Color>, Color> =
-    MaterialKolors(this).themeValues(build)
-
-/**
- * Builds the values for an application-owned vocabulary from these roles.
- *
- * ```kotlin
- * val values = MaterialKolors(scheme).themeValues {
- *     AppTokens.accent to primary()
- *     AppTokens.onAccent to onPrimary()
- * }
- * ```
- *
- * @see DynamicScheme.themeValues
- */
-public fun MaterialKolors.themeValues(build: ThemeValuesScope.() -> Unit): Map<ThemeToken<Color>, Color> {
-    val scope = ThemeValuesScope(this)
-    scope.build()
-    return scope.recorded()
-}
