@@ -8,12 +8,14 @@ import com.materialkolor.builder.core.session.SaveStatus
 import com.materialkolor.builder.core.session.SessionTestBase
 import com.materialkolor.builder.domain.capability.Control
 import com.materialkolor.builder.domain.capability.ControlState
+import com.materialkolor.builder.domain.color.ColorNames
 import com.materialkolor.builder.domain.color.ContrastLevel
 import com.materialkolor.builder.domain.edit.ChangeKind
 import com.materialkolor.builder.domain.edit.ChangeLabel
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.link.ShareCodec
+import com.materialkolor.builder.domain.model.DEFAULT_SEED
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.ThemeDocument
@@ -427,7 +429,7 @@ class WorkspaceModelTest : SessionTestBase() {
             workspace.state.value.projectGeneration shouldBe start
             val edited = session.document.value
 
-            shows(start + 1, { ThemeDocument.Default }) { session.newProject(copyCurrent = false) }
+            shows(start + 1, { firstNewDocument("Renamed") }) { session.newProject(copyCurrent = false) }
             shows(start + 2, { edited }) { session.open(first) }
             val shared = ThemeDocument.Default.copy(themeName = "SharedTheme")
             shows(start + 3, { shared }) { session.openShared(ShareCodec.encode(shared)) }
@@ -486,7 +488,7 @@ class WorkspaceModelTest : SessionTestBase() {
 
         seen shouldBe listOf(
             start to edited,
-            start + 1 to ThemeDocument.Default,
+            start + 1 to firstNewDocument(ColorNames.nameOf(DEFAULT_SEED)),
             start + 2 to edited,
             start + 3 to shared,
         )

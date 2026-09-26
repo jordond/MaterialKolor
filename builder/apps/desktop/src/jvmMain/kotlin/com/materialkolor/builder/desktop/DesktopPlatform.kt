@@ -16,6 +16,7 @@ import com.materialkolor.builder.core.platform.Router
 import com.materialkolor.builder.core.platform.StoreFactory
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.Route
+import com.materialkolor.builder.domain.persist.DeviceWidth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -95,6 +96,7 @@ private object DesktopEnvironment : Environment {
     override val prefersDark: StateFlow<Boolean> = MutableStateFlow(false)
     override val reducedMotion: StateFlow<Boolean> = MutableStateFlow(false)
     override val coarsePointer: StateFlow<Boolean> = MutableStateFlow(false)
+    override val defaultDeviceWidth: DeviceWidth = DeviceWidth.Desktop
     override val eyeDropperAvailable: Boolean = false
     override val tabId: String = UUID.randomUUID().toString()
 

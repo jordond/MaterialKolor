@@ -13,6 +13,7 @@ import com.materialkolor.builder.domain.link.DecodeResult
 import com.materialkolor.builder.domain.link.Route
 import com.materialkolor.builder.domain.link.ShareCodec
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.model.starterSeed
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.domain.persist.HistoryRecord
 import com.materialkolor.builder.domain.persist.ProjectRecord
@@ -27,6 +28,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
@@ -37,6 +39,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.random.Random
 
 /**
  * The one owner of the open project, its document and its undo history.
@@ -74,6 +77,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  * @param[scope] The app scope, where saves run.
  * @param[now] The time in epoch milliseconds, for merging undo steps, the time each step keeps and the
  * conflict window.
+ * @param[random] Picks the seed a new project starts from.
  */
 internal class ProjectSession(
     private val projects: ProjectRepository,
@@ -83,6 +87,7 @@ internal class ProjectSession(
     private val sharedThemeName: suspend () -> String,
     private val scope: CoroutineScope,
     private val now: () -> Long,
+    private val random: Random = Random,
 ) {
     private val current = MutableStateFlow(
         OpenProject(id = null, name = "", held = null, EmptyCoroutineContext, scope.coroutineContext[Job]),
@@ -184,9 +189,9 @@ internal class ProjectSession(
         val lastProjectId = preferences.current().lastProjectId
         val plan = BootResolver.resolve(route, tabProjectId, lastProjectId, projects.savedProjects(route))
         when (val start = plan.start) {
-            is BootStart.Reopen -> if (!open(start.id)) startNew(ThemeDocument.Default, ProjectViewState())
+            is BootStart.Reopen -> if (!open(start.id)) startNew(ThemeDocument.Default, newView())
             is BootStart.Shared -> showShared(start)
-            BootStart.New -> startNew(ThemeDocument.Default, ProjectViewState())
+            BootStart.New -> startNew(ThemeDocument.Default, newView())
         }
         plan.previewMode?.let { mode -> updateView { view -> view.copy(mode = mode) } }
         plan.packageName?.let { name ->
@@ -288,14 +293,18 @@ internal class ProjectSession(
 
     /**
      * Save what is waiting, keeping this tab's document over an open conflict, then start a project
-     * from the defaults or, with [copyCurrent], from this one.
+     * from a [starterSeed] whose name no project has yet or, with [copyCurrent], from this one. Only
+     * the first project on a fresh install starts from [ThemeDocument.Default], at boot.
      */
     suspend fun newProject(copyCurrent: Boolean) {
         val shown = _state.value
-        val document = if (copyCurrent) shown.document else ThemeDocument.Default
-        val view = if (copyCurrent) shown.view else ProjectViewState()
         flushAll()
-        startNew(document, view)
+        if (copyCurrent) return startNew(shown.document, shown.view)
+        val taken = projects.index
+            .first()
+            .projects
+            .mapTo(mutableSetOf()) { meta -> meta.name }
+        startNew(ThemeDocument.Default.copy(seed = starterSeed(taken, random)), newView())
     }
 
     /**
@@ -431,8 +440,14 @@ internal class ProjectSession(
     private suspend fun showShared(shared: BootStart.Shared) {
         val name = shared.projectName?.takeIf { name -> name.isNotBlank() } ?: sharedThemeName()
         val open = openHere(id = null, name, held = null)
-        show(open, ProjectRef.Transient(shared.code), shared.document, History(), ProjectViewState())
+        show(open, ProjectRef.Transient(shared.code), shared.document, History(), newView())
     }
+
+    /**
+     * How a new project, or a theme opened from a link, frames its preview, at the width that suits
+     * this device.
+     */
+    private fun newView(): ProjectViewState = ProjectViewState(deviceWidth = environment.defaultDeviceWidth)
 
     /**
      * Create a project from [document], or show it unsaved when storage will not take it.

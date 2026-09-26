@@ -6,6 +6,7 @@ import com.materialkolor.builder.core.platform.InMemoryStoreFactory
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.Route
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.domain.model.starterSeed
 import com.materialkolor.builder.domain.persist.ProjectRecord
 import com.materialkolor.builder.domain.persist.StorageKeys
 import com.materialkolor.builder.fakes.FakeEnvironment
@@ -15,6 +16,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
+import kotlin.random.Random
 
 /**
  * The storage, the environment and the helpers every [ProjectSession] test shares.
@@ -36,6 +38,7 @@ abstract class SessionTestBase {
             sharedThemeName = { SHARED_THEME },
             scope = backgroundScope,
             now = { testScheduler.currentTime },
+            random = Random(RANDOM_SEED),
         )
         return session to preferences
     }
@@ -73,6 +76,13 @@ abstract class SessionTestBase {
         return theirs
     }
 
+    /**
+     * The document the first blank new project of a [session] starts from, when the projects saved
+     * by then are called [taken].
+     */
+    internal fun firstNewDocument(vararg taken: String): ThemeDocument =
+        ThemeDocument.Default.copy(seed = starterSeed(taken.toSet(), Random(RANDOM_SEED)))
+
     private fun colorsOf(document: ThemeDocument): SessionColors =
         SessionColors(
             List(4) { document.seed },
@@ -84,6 +94,7 @@ abstract class SessionTestBase {
     internal companion object {
         const val TAB = "this-tab"
         const val SHARED_THEME = "Shared theme"
+        const val RANDOM_SEED = 0
         val OCEAN = ThemeDocument(seed = Argb(0xFF1565C0.toInt()))
         val FOREST = ThemeDocument(seed = Argb(0xFF2E7D32.toInt()))
         val MEADOW = ThemeDocument(seed = Argb(0xFF7CB342.toInt()))

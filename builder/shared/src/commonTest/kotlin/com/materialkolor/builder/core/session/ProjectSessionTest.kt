@@ -10,10 +10,12 @@ import com.materialkolor.builder.domain.link.Route
 import com.materialkolor.builder.domain.link.ShareCodec
 import com.materialkolor.builder.domain.model.DEFAULT_SEED
 import com.materialkolor.builder.domain.model.Library
+import com.materialkolor.builder.domain.model.STARTER_SEEDS
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Appearance
+import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.ExportTarget
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
@@ -52,6 +54,33 @@ class ProjectSessionTest : SessionTestBase() {
             session.document.value shouldBe ThemeDocument.Default
             session.viewState.value.mode shouldBe PreviewMode.Split
             preferences.current().lastProjectId shouldBe ref.id
+        }
+
+    @Test
+    fun newProject_blank_takesAFreeStarterNameAndThePlatformWidth() =
+        runTest {
+            environment.defaultDeviceWidth = DeviceWidth.Desktop
+            val (session) = session()
+            val first = booted(session)
+            session.document.value shouldBe ThemeDocument.Default
+            session.viewState.value.deviceWidth shouldBe DeviceWidth.Desktop
+
+            repeat(STARTER_SEEDS.size) { session.newProject(copyCurrent = false) }
+
+            val names = projects.index
+                .first()
+                .projects
+                .map { meta -> meta.name }
+            names.size shouldBe STARTER_SEEDS.size + 1
+            names.toSet() shouldBe (STARTER_SEEDS + DEFAULT_SEED).map(ColorNames::nameOf).toSet()
+            val id = session.project.value
+                .shouldBeInstanceOf<ProjectRef.Persisted>()
+                .id
+            projects.load(id).shouldNotBeNull().name shouldBe ColorNames.nameOf(session.document.value.seed)
+            projects.viewState(id).deviceWidth shouldBe DeviceWidth.Desktop
+            environment.defaultDeviceWidth = DeviceWidth.Phone
+            session.open(first)
+            session.viewState.value.deviceWidth shouldBe DeviceWidth.Desktop
         }
 
     @Test

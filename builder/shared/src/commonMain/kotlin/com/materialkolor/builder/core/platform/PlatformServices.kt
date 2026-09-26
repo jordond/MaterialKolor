@@ -5,6 +5,7 @@ import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.link.Route
 import com.materialkolor.builder.domain.link.SITE_ORIGIN
 import com.materialkolor.builder.domain.persist.Appearance
+import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.domain.persist.QuarantineReason
 import com.materialkolor.builder.domain.persist.RecordCodec
 import com.materialkolor.builder.domain.persist.StorageKey
@@ -343,6 +344,13 @@ interface Environment {
      * Whether the main pointer is a finger rather than a mouse.
      */
     val coarsePointer: StateFlow<Boolean>
+
+    /**
+     * The kind of device this is, so a new project frames its preview at the width the user holds.
+     * The web tells a phone, a tablet and a computer apart by the user agent and the screen, and the
+     * desktop build is always [DeviceWidth.Desktop]. A saved project keeps the width it was saved with.
+     */
+    val defaultDeviceWidth: DeviceWidth
 
     /**
      * Whether [pickScreenColor] can do anything here.
