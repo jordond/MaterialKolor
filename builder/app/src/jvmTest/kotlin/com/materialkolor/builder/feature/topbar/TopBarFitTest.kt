@@ -31,7 +31,6 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.materialkolor.builder.BuilderRoot
-import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.di.AppGraph
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.DocumentChange
@@ -39,15 +38,12 @@ import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SeedSource
 import com.materialkolor.builder.domain.model.ThemeDocument
-import com.materialkolor.builder.domain.persist.Preferences
-import com.materialkolor.builder.domain.persist.ProjectViewState
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.command.InWorkspace
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
-import com.materialkolor.builder.feature.workspace.WorkspaceModel
-import com.materialkolor.builder.feature.workspace.capabilitiesOf
 import com.materialkolor.builder.feature.workspace.skinOf
+import com.materialkolor.builder.feature.workspace.workspaceStateOf
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
@@ -330,13 +326,7 @@ class TopBarFitTest {
     private fun ComposeUiTest.showBar(barWidth: Dp): MutableState<Dp> {
         val width = mutableStateOf(barWidth)
         val document = ThemeDocument.Default
-        val state = WorkspaceModel.State(
-            document = document,
-            capabilities = capabilitiesOf(document),
-            history = HistoryState(),
-            view = ProjectViewState(),
-            preferences = Preferences(),
-        )
+        val state = workspaceStateOf(document = document)
         setContent {
             val dispatcher = rememberDispatcher<WorkspaceAction> {}
             BuilderTheme(

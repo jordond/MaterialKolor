@@ -2,13 +2,18 @@ package com.materialkolor.builder.feature.workspace
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import androidx.lifecycle.viewModelScope
+import com.materialkolor.builder.domain.edit.DocumentChange
+import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.feature.command.CommandHarness
 import com.materialkolor.builder.kit.layout.PosterMode
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.launch
 import kotlin.test.Test
 
 private const val WIDTH = 1280
 private const val HEIGHT = 800
+private const val WAIT_MILLIS = 5_000L
 
 /**
  * The Fine-tune sheet is session state on the workspace, which nothing saves. Collapsing the poster,
@@ -70,10 +75,19 @@ class FineTuneSessionTest {
     fun anotherProject_shutsTheSheet_andTheSameOneKeepsItOpen() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             with(harness) { show() }
-            val open = harness.workspace.state.value
-                .copy(fineTune = FineTuneSection.KeyColors)
+            val start = harness.workspace.state.value.projectGeneration
 
-            open.withGeneration(open.projectGeneration).fineTune shouldBe FineTuneSection.KeyColors
-            open.withGeneration(open.projectGeneration + 1).fineTune shouldBe null
+            runOnUiThread {
+                harness.workspace.openFineTune(FineTuneSection.KeyColors)
+                harness.workspace.edit(DocumentChange.SetThemeName("EditedTheme"), EditPhase.Discrete)
+            }
+            harness.workspace.state.value.projectGeneration shouldBe start
+            harness.workspace.state.value.fineTune shouldBe FineTuneSection.KeyColors
+
+            runOnUiThread {
+                harness.workspace.viewModelScope.launch { harness.graph.session.newProject(copyCurrent = false) }
+            }
+            waitUntil(timeoutMillis = WAIT_MILLIS) { harness.workspace.state.value.projectGeneration != start }
+            harness.workspace.state.value.fineTune shouldBe null
         }
 }
