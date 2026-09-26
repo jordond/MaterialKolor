@@ -289,6 +289,7 @@ private fun StyleChipRow(
             onChoose = { origin -> if (style != selected) onChoose(style, origin) },
             modifier = optionModifier,
             cell = cell ?: Modifier,
+            named = !scrolling,
         )
     }
 }
@@ -321,6 +322,10 @@ private fun Modifier.sideBleed(bleed: Dp): Modifier =
  * One chip, drawn from the scheme [style] makes of the document's seed in the mode the preview
  * shows, as [shelf] has it now, with the style's name under it. A chip that would move the theme to
  * another spec names that spec, [tag], under its name, and its tooltip lists every spec it runs in.
+ *
+ * @param[named] Whether the name and the spec show under the chip. The phone sheet's peek draws the
+ * chips alone, the way the phone board does, so the contrast levels fit under them. The chip still
+ * reads out its name, and its tooltip names the specs.
  */
 @Composable
 private fun StyleChip(
@@ -331,6 +336,7 @@ private fun StyleChip(
     onChoose: (origin: Offset) -> Unit,
     modifier: Modifier = Modifier,
     cell: Modifier = Modifier,
+    named: Boolean = true,
 ) {
     val colors = shelf[style]
     val bounds = remember { ChipBounds() }
@@ -353,6 +359,8 @@ private fun StyleChip(
                 .onGloballyPositioned { coordinates -> bounds.rect = coordinates.boundsInRoot() },
             tooltip = stringResource(Res.string.style_chip_tooltip, shown, hint, stringResource(specSupport(style))),
         )
+        // b-527
+        if (!named) return@Column
         SchemeChipName(name = shown, modifier = Modifier.fillMaxWidth())
         if (tag != null) {
             BuilderBadge(
