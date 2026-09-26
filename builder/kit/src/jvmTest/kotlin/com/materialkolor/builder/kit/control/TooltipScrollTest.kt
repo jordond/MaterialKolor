@@ -96,31 +96,27 @@ class TooltipScrollTest {
         }
 
     @Test
-    fun hover_showsTheLabelOnlyAfterARest() {
-        for (inTree in listOf(false, true)) {
-            withClue(if (inTree) "in tree" else "in windows") {
-                runComposeUiTest {
-                    var host: OverlayHostState? = null
-                    setContent {
-                        HostOverlays(Skin(SkinLibrary.Custom, expressive = false), inTree) {
-                            host = LocalOverlayHost.current
-                            Column {
-                                Spacer(Modifier.height(80.dp))
-                                BuilderTooltip(Label) { Box(Modifier.testTag(AnchorTag).size(40.dp)) }
-                            }
-                        }
+    fun hover_inThePage_showsTheLabelOnlyAfterARest() =
+        runComposeUiTest {
+            // In the page Material draws the headless tooltip, which waits for the pointer to rest.
+            var host: OverlayHostState? = null
+            setContent {
+                HostOverlays(Skin(SkinLibrary.Material3, expressive = false), inTree = true) {
+                    host = LocalOverlayHost.current
+                    Column {
+                        Spacer(Modifier.height(80.dp))
+                        BuilderTooltip(Label) { Box(Modifier.testTag(AnchorTag).size(40.dp)) }
                     }
-                    waitForIdle()
-                    mainClock.autoAdvance = false
-                    onNodeWithTag(AnchorTag, useUnmergedTree = true).performMouseInput { moveTo(center) }
-                    mainClock.advanceTimeBy(OverlayMetrics.tooltipDelayMillis / 2)
-                    labelShown(host) shouldBe false
-                    mainClock.advanceTimeBy(OverlayMetrics.tooltipDelayMillis)
-                    labelShown(host) shouldBe true
                 }
             }
+            waitForIdle()
+            mainClock.autoAdvance = false
+            onNodeWithTag(AnchorTag, useUnmergedTree = true).performMouseInput { moveTo(center) }
+            mainClock.advanceTimeBy(OverlayMetrics.tooltipDelayMillis / 2)
+            labelShown(host) shouldBe false
+            mainClock.advanceTimeBy(OverlayMetrics.tooltipDelayMillis)
+            labelShown(host) shouldBe true
         }
-    }
 }
 
 private fun OverlayHostState.labelShown(): Boolean =

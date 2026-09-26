@@ -33,7 +33,6 @@ import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.SkinLibrary
-import com.materialkolor.builder.kit.skin.custom.LocalBuilderIdentity
 import com.materialkolor.builder.preview.Chrome
 import com.materialkolor.builder.preview.LightSpec
 import com.materialkolor.builder.preview.PaneLibraries
@@ -72,7 +71,7 @@ class PreviewPaneTest {
                     val chrome = chromeFor(pane)
                     setContent {
                         Chrome(chrome) {
-                            seen.chromePrimary = chromePrimaryOf(chrome)
+                            seen.chromePrimary = MaterialTheme.colorScheme.primary
                             PreviewPane(spec) {
                                 seen.panePrimary = panePrimaryOf(pane.library)
                                 seen.materialContent = MaterialContentColor.current
@@ -249,25 +248,10 @@ class PreviewPaneTest {
 }
 
 /**
- * The chrome a test draws [pane] under, Custom for a Custom pane and Material 3 in the pane's flavour
- * for the rest, the two skins the builder's chrome has.
+ * The chrome a test draws [pane] under, Material 3 in the pane's flavour, since the builder's chrome
+ * is always Material 3.
  */
-private fun chromeFor(pane: PaneLibrary): Skin =
-    if (pane.library == Library.Custom) {
-        Skin(SkinLibrary.Custom, expressive = false)
-    } else {
-        Skin(SkinLibrary.Material3, pane.expressive)
-    }
-
-/**
- * The primary color the chrome in [skin] hands out.
- */
-@Composable
-private fun chromePrimaryOf(skin: Skin): Color =
-    when (skin.library) {
-        SkinLibrary.Material3 -> MaterialTheme.colorScheme.primary
-        SkinLibrary.Custom -> LocalBuilderIdentity.current[CustomSlot.Primary]
-    }
+private fun chromeFor(pane: PaneLibrary): Skin = Skin(SkinLibrary.Material3, pane.expressive)
 
 /**
  * The primary color a pane in [library] hands out.

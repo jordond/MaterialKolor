@@ -384,9 +384,8 @@ class PosterPanelTest {
     @Test
     fun posterRail_everythingLocked_shuffleIsOffAndItsTooltipSaysWhy() =
         runComposeUiTest {
-            // The headless tooltip, which opens on hover alone.
             val locked = Preferences(styleLock = true, seedLock = true)
-            showPoster(preferences = locked, rail = true, library = SkinLibrary.Custom)
+            showPoster(preferences = locked, rail = true)
 
             onNodeWithContentDescription("Shuffle").assertIsNotEnabled()
             onNodeWithContentDescription("Shuffle").performMouseInput { enter(center) }
@@ -450,7 +449,6 @@ class PosterPanelTest {
         projectName: String = "",
         saveStatus: () -> SaveStatus = { SaveStatus.Idle },
         rail: Boolean = false,
-        library: SkinLibrary = SkinLibrary.Material3,
         coarsePointer: Boolean = false,
         shell: Boolean = false,
     ) {
@@ -466,7 +464,7 @@ class PosterPanelTest {
             val result = remember(shown) { resolver.resolve(shown) }
             val state = workspaceState(shown, preferences, projectName, saveStatus())
             BuilderTheme(
-                skin = Skin(library = library, expressive = false),
+                skin = Skin(library = SkinLibrary.Material3, expressive = false),
                 result = result,
                 isDark = false,
                 reducedMotion = true,

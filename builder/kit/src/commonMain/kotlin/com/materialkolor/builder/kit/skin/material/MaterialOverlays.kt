@@ -123,9 +123,6 @@ internal fun materialOverlayStyle(
         tooltip = colors.inverseSurface,
         tooltipContent = colors.inverseOnSurface,
         tooltipBorder = null,
-        toast = colors.inverseSurface,
-        toastContent = colors.inverseOnSurface,
-        toastBorder = null,
         thumb = colors.outline,
         panelTitle = MaterialTheme.typography.headlineSmall,
     )

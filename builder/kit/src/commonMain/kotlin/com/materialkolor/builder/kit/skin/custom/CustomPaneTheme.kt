@@ -27,8 +27,7 @@ private val PaneSkin = Skin(SkinLibrary.Custom, expressive = false)
  * the pane too. A press outside the pane does not close it, and its Tab trap stops at the pane's
  * edge, so Tab can leave it for the chrome around the pane.
  *
- * This is for preview panes and never for the chrome. The chrome takes its Custom skin from
- * `BuilderTheme`, whose slots leave pins and AMOLED out so the builder stays readable.
+ * This is for preview panes and never for the chrome, which is always Material 3.
  *
  * @param[slots] The pane's Custom slots in both modes.
  * @param[isDark] Which mode of [slots] to draw.

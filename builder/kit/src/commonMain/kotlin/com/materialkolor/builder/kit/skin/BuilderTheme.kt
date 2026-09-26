@@ -7,7 +7,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.builder.codegen.dsl.TokenKind
-import com.materialkolor.builder.engine.resolve.CustomSlotColors
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.kit.a11y.FocusVisibility
 import com.materialkolor.builder.kit.a11y.LocalFocusVisibility
@@ -21,7 +20,6 @@ import com.materialkolor.builder.kit.motion.LocalBuilderMotion
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.motion.reducedBuilderMotion
 import com.materialkolor.builder.kit.motion.tweenBuilderMotion
-import com.materialkolor.builder.kit.skin.custom.CustomSkinTheme
 import com.materialkolor.builder.kit.skin.material.MaterialSkinTheme
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.CodePalette
@@ -31,19 +29,21 @@ import com.materialkolor.builder.kit.token.rememberBuilderType
 import com.materialkolor.palettes.TonalPalette
 
 /**
- * Themes [content] with [skin], coloured from [result].
+ * Themes [content] with the Material 3 skin, coloured from [result].
  *
- * Every skin draws from the chrome schemes of [result], which floor contrast at the standard level
- * and leave pins and AMOLED out, so the builder stays readable whatever the document does. No
- * skin generates anything. Each one provides [LocalSkin], the builder's type, its tokens, its
- * motion and its icons.
+ * The builder's chrome is always Material 3, so only [Skin.expressive] of [skin] counts, and the
+ * skin it provides as [LocalSkin] is Material 3 whatever library [skin] names. A Custom preview pane
+ * takes its own skin from `CustomPaneTheme`. The theme draws from the chrome schemes of [result],
+ * which floor contrast at the standard level and leave pins and AMOLED out, so the builder stays
+ * readable whatever the document does. Nothing here generates anything. It provides [LocalSkin],
+ * the builder's type, its tokens, its motion and its icons.
  *
  * The builder keeps one skin for its whole life, so [skin] is not expected to change. A library
  * switch only re-themes the preview panes.
  *
  * It also tracks whether focus moves by keyboard, so a click leaves no focus ring behind.
  *
- * @param[skin] The library and flavour to use.
+ * @param[skin] The flavour to use, standard or Expressive.
  * @param[result] The resolved document, read on the UI thread only like every result.
  * @param[isDark] Which mode of the chrome to draw.
  * @param[reducedMotion] Swap every skin's motion for the reduced set.
@@ -62,40 +62,19 @@ public fun BuilderTheme(
         content()
     }
     val focusVisibility = remember { FocusVisibility() }
+    val chromeSkin = remember(skin.expressive) { Skin(SkinLibrary.Material3, skin.expressive) }
     CompositionLocalProvider(
-        LocalSkin provides skin,
+        LocalSkin provides chromeSkin,
         LocalBuilderType provides rememberBuilderType(),
         LocalReducedMotion provides reducedMotion,
         LocalFocusVisibility provides focusVisibility,
     ) {
         Box(Modifier.trackFocusVisibility(focusVisibility), propagateMinConstraints = true) {
             OverlayHost {
-                when (skin.library) {
-                    SkinLibrary.Material3 -> {
-                        MaterialSkinTheme(result.chrome(isDark), skin.expressive, reducedMotion, builder)
-                    }
-                    SkinLibrary.Custom -> {
-                        CustomSkinTheme(rememberChromeSlots(result), isDark, reducedMotion, builder)
-                    }
-                }
+                MaterialSkinTheme(result.chrome(isDark), skin.expressive, reducedMotion, builder)
             }
         }
     }
-}
-
-/**
- * The chrome's Custom slots, kept for as long as the chrome schemes stay.
- *
- * Every theme result works its chrome slots out again the first time they are read, but they come
- * from the chrome schemes alone, since pins, AMOLED and custom tones stay out of them. So a drag that
- * leaves the chrome alone, such as an accent, a custom tone or contrast below the standard level,
- * reads every chrome role once rather than once a frame.
- */
-@Composable
-internal fun rememberChromeSlots(result: ThemeResult): CustomSlotColors {
-    val light = result.chrome(isDark = false)
-    val dark = result.chrome(isDark = true)
-    return remember(light, dark) { result.chromeCustomSlots }
 }
 
 /**

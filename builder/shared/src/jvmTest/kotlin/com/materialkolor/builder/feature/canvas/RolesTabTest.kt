@@ -34,8 +34,6 @@ import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.color.HctReadout
 import com.materialkolor.builder.engine.resolve.ThemeResult
-import com.materialkolor.builder.kit.skin.Skin
-import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.ktx.contrastRatio
 import io.kotest.matchers.comparables.shouldBeGreaterThan
@@ -127,7 +125,6 @@ class RolesTabTest {
                 .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription))
         }
 
-    // Custom light, whose focus ring reads on the panel but not on the canvas.
     @Test
     fun columns_sitOnThePanelSurface() =
         runDesktopComposeUiTest(width = TABS_WIDE, height = TABS_HEIGHT) {
@@ -136,7 +133,7 @@ class RolesTabTest {
             var canvas = Color.Unspecified
             var focus = Color.Unspecified
             setContent {
-                DataTabTheme(result, Skin(SkinLibrary.Custom, expressive = false)) {
+                DataTabTheme(result) {
                     panel = LocalBuilderTokens.current.panel
                     canvas = LocalBuilderTokens.current.canvas
                     focus = LocalBuilderTokens.current.focus

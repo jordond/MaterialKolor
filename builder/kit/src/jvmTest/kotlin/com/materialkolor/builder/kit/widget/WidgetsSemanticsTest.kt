@@ -75,8 +75,8 @@ import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinTestTheme
 import io.kotest.assertions.withClue
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeGreaterThan
@@ -117,7 +117,7 @@ internal fun WidgetHarness(
 ) {
     val result = remember { ThemeResolver().resolve(WidgetDocument) }
     CompositionLocalProvider(LocalMotionFrozen provides true) {
-        BuilderTheme(skin, result, isDark, reducedMotion = false) {
+        SkinTestTheme(skin, result, isDark, reducedMotion = false) {
             ProvideBuilderLayout(coarsePointer, Modifier.fillMaxSize()) { content() }
         }
     }

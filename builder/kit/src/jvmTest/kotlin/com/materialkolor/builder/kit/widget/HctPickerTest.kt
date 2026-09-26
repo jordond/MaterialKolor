@@ -42,9 +42,9 @@ import com.materialkolor.builder.kit.control.ControlSkins
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
-import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
 import com.materialkolor.builder.kit.skin.SkinLibrary
+import com.materialkolor.builder.kit.skin.SkinTestTheme
 import com.materialkolor.hct.Hct
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContain
@@ -92,7 +92,7 @@ internal fun PickerHarness(
 ) {
     val result = remember { ThemeResolver().resolve(ThemeDocument(seed = PickerSeed)) }
     CompositionLocalProvider(LocalMotionFrozen provides true) {
-        BuilderTheme(skin, result, isDark, reducedMotion = false) {
+        SkinTestTheme(skin, result, isDark, reducedMotion = false) {
             ProvideBuilderLayout(modifier = Modifier.fillMaxSize()) { content() }
         }
     }
