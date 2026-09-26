@@ -250,7 +250,8 @@ public enum class DeviceWidth {
     Phone,
 
     /**
-     * A tablet, what a project opens with.
+     * A tablet, what a stored project without a width falls back to. A new project opens at the
+     * width the platform reports for the device.
      */
     @SerialName("Tablet")
     Tablet,
