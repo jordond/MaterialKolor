@@ -67,6 +67,9 @@ private val ChipGlyphSize: Dp = 16.dp
  */
 private val DashLength: Dp = 6.dp
 
+// The well's ground, the text color laid thinly over the dialog, so it sits a step deeper in light and dark.
+private const val WELL_TINT = 0.06f
+
 /**
  * The Link preview well, the card chats and posts show for the link, sunk into the dialog, with
  * its caption under it.
@@ -81,7 +84,7 @@ internal fun ShareWell(
     val tokens = LocalBuilderTokens.current
     Column(
         modifier = modifier
-            .background(tokens.codeBackground, RoundedCornerShape(tokens.radius.medium))
+            .background(tokens.textStrong.copy(alpha = WELL_TINT), RoundedCornerShape(tokens.radius.medium))
             .padding(tokens.spacing.large),
         verticalArrangement = Arrangement.spacedBy(tokens.spacing.medium),
     ) {
