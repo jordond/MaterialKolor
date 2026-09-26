@@ -117,7 +117,7 @@ class ControlsBFieldTest {
             }
 
             onNodeWithTag(Field).requestFocus()
-            onNodeWithTag(Field).performTextReplacement("red")
+            onNodeWithTag(Field).performTextReplacement("f00")
             onNodeWithTag(Field).performKeyInput { pressKey(Key.Enter) }
             commits shouldBe listOf(Argb(0xFF0000) to emptySet())
             editableText(Field) shouldBe "#FF0000"
@@ -200,11 +200,11 @@ class ControlsBFieldTest {
 
             onNodeWithTag(Field).requestFocus()
             mainClock.autoAdvance = false
-            onNodeWithTag(Field).performTextReplacement("red")
+            onNodeWithTag(Field).performTextReplacement("f00")
             mainClock.advanceTimeByFrame()
             mainClock.advanceTimeBy(CommitDelayMillis + 100)
             commits shouldBe listOf(Argb(0xFF0000))
-            editableText(Field) shouldBe "red"
+            editableText(Field) shouldBe "f00"
 
             handInFromOutside { seed = Argb(0x00FF00) }
             editableText(Field) shouldBe "#00FF00"
@@ -226,7 +226,7 @@ class ControlsBFieldTest {
 
             onNodeWithTag(Field).requestFocus()
             mainClock.autoAdvance = false
-            onNodeWithTag(Field).performTextReplacement("red")
+            onNodeWithTag(Field).performTextReplacement("f00")
             mainClock.advanceTimeByFrame()
             mainClock.advanceTimeBy(CommitDelayMillis / 2)
             handInFromOutside { seed = Argb(0x00FF00) }
@@ -269,13 +269,30 @@ class ControlsBFieldTest {
 
             onNodeWithTag(Field).requestFocus()
             mainClock.autoAdvance = false
-            onNodeWithTag(Field).performTextReplacement("nope")
+            onNodeWithTag(Field).performTextReplacement("#12")
             mainClock.advanceTimeByFrame()
             onNodeWithTag(Field).performKeyInput { pressKey(Key.Escape) }
             mainClock.advanceTimeByFrame()
             editableText(Field) shouldBe "#6750A4"
             mainClock.advanceTimeBy(CommitDelayMillis * 2)
             commits.shouldBeEmpty()
+        }
+
+    @Test
+    fun hexField_typedOrPasted_keepsOneLeadingHashAndEightHexDigits() =
+        runComposeUiTest {
+            val commits = mutableListOf<Argb>()
+            setSkinnedContent(SkinVariant.Expressive) {
+                InputHexField(Argb(0x6750A4), { argb, _ -> commits += argb }, "Seed", Modifier.testTag(Field))
+            }
+
+            onNodeWithTag(Field).requestFocus()
+            onNodeWithTag(Field).performTextReplacement(" #67 50-a4 #zz")
+            editableText(Field) shouldBe "#6750a4"
+            onNodeWithTag(Field).performTextReplacement("#80ff00ff99")
+            editableText(Field) shouldBe "#80ff00ff"
+
+            hexOnly(TextFieldValue("#67z50A4", TextRange(4))) shouldBe TextFieldValue("#6750A4", TextRange(3))
         }
 
     @Test

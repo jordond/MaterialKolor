@@ -214,8 +214,9 @@ internal fun <T> MaterialSegmented(
  *
  * Each option still reads as a radio button with the radio group's roving focus over it, where the
  * toggle button on its own would read as a checkbox. The chosen option has the check as well as
- * the fill and the rounder shape, so the choice never rests on colour alone. The row draws the
- * focused option's ring over every option ([RowRing]).
+ * the fill, so the choice never rests on colour alone. It keeps its connected shape, so a chosen
+ * middle option stays joined to its neighbours instead of turning into a loose pill between them.
+ * The row draws the focused option's ring over every option ([RowRing]).
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -263,7 +264,7 @@ private fun <T> ExpressiveSegmented(
                     val ringed = ring.rememberOption(
                         index = index,
                         shows = interactionSource.collectIsFocusVisibleAsState(),
-                        shape = rememberUpdatedState(if (isSelected) shapes.checkedShape else shapes.shape),
+                        shape = rememberUpdatedState(shapes.shape),
                     )
                     InWritingOrder(keep = writingOrder) {
                         ToggleButton(
@@ -370,20 +371,26 @@ private fun materialTrackStyle(): SegmentedStyle {
 }
 
 /**
- * The connected shapes for the option at [index] of [count], by where it sits in the row.
+ * The connected shapes for the option at [index] of [count], by where it sits in the row. Checked
+ * keeps the resting shape, round on the row's outer ends and the group's small radius inside, where
+ * Material would morph it into a full pill. Picking then changes the fill and the content, never
+ * the row's silhouette.
  */
 @Composable
 private fun connectedShapes(
     index: Int,
     count: Int,
 ): ToggleButtonShapes {
-    val full = ButtonGroupDefaults.connectedButtonCheckedShape
-    return when {
-        count == 1 -> ToggleButtonShapes(shape = full, pressedShape = full, checkedShape = full)
+    if (count == 1) {
+        val full = ButtonGroupDefaults.connectedButtonCheckedShape
+        return ToggleButtonShapes(shape = full, pressedShape = full, checkedShape = full)
+    }
+    val shapes = when {
         index == 0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
         index == count - 1 -> ButtonGroupDefaults.connectedTrailingButtonShapes()
         else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
     }
+    return ToggleButtonShapes(shape = shapes.shape, pressedShape = shapes.pressedShape, checkedShape = shapes.shape)
 }
 
 /**
