@@ -41,6 +41,7 @@ private fun tasksTheme(seed: () -> Color): ThemeComposableV2 =
         colorSchemeTransitionSpec = tween(durationMillis = COLOR_TRANSITION_MILLIS)
         defaultTextStyle = TasksType.Body
         defaultIndication = StateLayer
+
         properties[MaterialKolorTokens.colors] = rememberDynamicColors(seedColor = seed(), isDark = false)
 
         colorScheme(ColorScheme.Dark) {
