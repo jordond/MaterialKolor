@@ -2,7 +2,7 @@
  * The path data below is copied from the Material Icons Rounded set, as shipped in the
  * androidx.compose.material:material-icons-core 1.7.6 and material-icons-extended 1.7.6 sources.
  * Share, Check, Close, Search, Lock, Info, Add, Delete and Warning come from the core set, every
- * other glyph from the extended set.
+ * other glyph from the extended set. The glyphs in MaterialStateGlyphs.kt come from the same sources.
  *
  * Copyright 2024 The Android Open Source Project
  *
@@ -29,10 +29,12 @@ import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.unit.dp
 
 /**
- * The Material3 set, the Rounded Material Icons drawn from path data kept in this file.
+ * The Material3 set, the Rounded Material Icons drawn from path data kept in this file and in
+ * MaterialStateGlyphs.kt.
  *
- * The data is hand copied so kit does not pull in the whole extended icon pack for 44 glyphs. Each
- * glyph is built the first time it is asked for and kept after that, on the UI thread only.
+ * The data is hand copied so kit does not pull in the whole extended icon pack for a few dozen
+ * glyphs. Each glyph is built the first time it is asked for and kept after that, on the UI thread
+ * only.
  */
 internal object MaterialIcons : BuilderIcons {
     private val vectors = arrayOfNulls<ImageVector>(IconId.entries.size)
@@ -44,7 +46,7 @@ internal object MaterialIcons : BuilderIcons {
 /**
  * A glyph on the 24 by 24 Material grid, one or more filled paths in SVG path syntax.
  */
-private class MaterialGlyph(
+internal class MaterialGlyph(
     vararg val paths: String,
     val autoMirror: Boolean = false,
     val evenOdd: Boolean = false,
@@ -72,7 +74,7 @@ private fun MaterialGlyph.toVector(id: IconId): ImageVector {
 /**
  * Joins the pieces of one path, split only so each line stays readable.
  */
-private fun path(vararg parts: String): String = parts.joinToString(separator = "")
+internal fun path(vararg parts: String): String = parts.joinToString(separator = "")
 
 private fun glyph(id: IconId): MaterialGlyph =
     when (id) {
@@ -242,6 +244,7 @@ private fun glyph(id: IconId): MaterialGlyph =
                 "h2v2Z",
             ),
         )
+        IconId.InfoOutline -> infoOutlineGlyph()
         // Rounded.ExpandMore
         IconId.ChevronDown -> MaterialGlyph(
             path(
@@ -493,6 +496,7 @@ private fun glyph(id: IconId): MaterialGlyph =
                 "c0 -0.55 0.45 -1 1 -1h0c0.55 0 1 -0.45 1 -1v-2C22 10.45 21.55 10 21 10L21 10Z",
             ),
         )
+        IconId.Progress -> progressGlyph()
         // Rounded.Tune
         IconId.Sliders -> MaterialGlyph(
             path(

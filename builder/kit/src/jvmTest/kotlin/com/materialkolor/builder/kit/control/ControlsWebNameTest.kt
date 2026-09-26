@@ -127,6 +127,22 @@ class ControlsWebNameTest {
         }
 
     @Test
+    fun toggleButtons_longerName_everySkin_readItWithTheStateAndNoRoleWord() =
+        forEachSkin { _, skin ->
+            showFolded(skin) {
+                BuilderToggleButton(
+                    checked = true,
+                    onCheckedChange = {},
+                    label = "Keep",
+                    modifier = Modifier.testTag("keep"),
+                    contentDescription = "Keep the style when shuffling",
+                )
+            }
+
+            onNodeWithTag("keep").assert(hasContentDescriptionExactly("Keep the style when shuffling, checked"))
+        }
+
+    @Test
     fun menuRows_flagOn_everySkin_foldTheirRoleWordDisabledAndChecked() =
         forEachSkin { _, skin ->
             showFolded(skin) {

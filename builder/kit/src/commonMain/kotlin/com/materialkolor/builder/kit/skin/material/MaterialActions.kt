@@ -19,6 +19,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -73,6 +74,7 @@ import com.materialkolor.builder.kit.control.foldState
 import com.materialkolor.builder.kit.control.iconButtonSemantics
 import com.materialkolor.builder.kit.control.listRowInput
 import com.materialkolor.builder.kit.control.listRowState
+import com.materialkolor.builder.kit.control.takesTonalFill
 import com.materialkolor.builder.kit.control.trailingLabel
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -176,6 +178,7 @@ internal fun MaterialButton(
     hint: String? = null,
     trailingIcon: IconId? = null,
     size: ButtonSize = ButtonSize.Regular,
+    tonal: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val compact = size == ButtonSize.Compact
@@ -186,6 +189,17 @@ internal fun MaterialButton(
         .then(if (compact) Modifier.height(CompactButtonHeight) else Modifier)
     val content: @Composable RowScope.() -> Unit = { MaterialLabel(label, icon, hint, trailingIcon, size) }
     MaterialTarget {
+        if (takesTonalFill(emphasis, tonal)) {
+            FilledTonalButton(
+                onClick,
+                decorated,
+                enabled,
+                contentPadding = if (compact) CompactPadding else ButtonDefaults.ContentPadding,
+                interactionSource = interactionSource,
+                content = content,
+            )
+            return@MaterialTarget
+        }
         when (emphasis) {
             Emphasis.Primary -> {
                 val padding = when {
@@ -298,6 +312,7 @@ internal fun MaterialToggleButton(
     modifier: Modifier,
     icon: IconId?,
     enabled: Boolean,
+    name: String = label,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     MaterialTarget {
@@ -305,7 +320,7 @@ internal fun MaterialToggleButton(
             checked = checked,
             onCheckedChange = onCheckedChange,
             modifier = modifier
-                .foldState(label, ControlState.Checked(checked), enabled)
+                .foldState(name, ControlState.Checked(checked), enabled)
                 .materialFeedback(interactionSource, ButtonDefaults.shape),
             enabled = enabled,
             interactionSource = interactionSource,

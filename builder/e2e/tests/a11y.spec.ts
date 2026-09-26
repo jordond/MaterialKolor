@@ -57,7 +57,7 @@ test('the poster names its sections and their controls', async ({ page }) => {
   await expect(label(page, 'Palette style')).toHaveCount(1);
   await expect(button(page, /^TonalSpot, .+, radio, selected$/)).toHaveCount(1);
   await expect(button(page, /, radio, not selected$/).first()).toBeAttached();
-  await expect(button(page, /^Keep the style when shuffling, checkbox, (checked|not checked)$/)).toHaveCount(1);
+  await expect(button(page, /^Keep the style when shuffling, (checked|not checked)$/)).toHaveCount(1);
   // Contrast, one choice of the four named levels
   await expect(label(page, 'Contrast level')).toHaveCount(1);
   await expect(button(page, 'Standard, radio, selected')).toHaveCount(1);

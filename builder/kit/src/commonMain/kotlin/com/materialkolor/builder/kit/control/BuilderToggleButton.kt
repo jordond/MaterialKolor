@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -31,7 +33,7 @@ import com.materialkolor.builder.kit.skin.material.MaterialToggleButton
  * A labelled button that stays on or off, such as Inspect in the dock.
  *
  * It reads out as a checkbox with its on or off state, which is how every skin's own toggle button
- * announces itself.
+ * announces itself. On the web the state travels in its name, as in "Inspect, checked".
  *
  * @param[checked] Whether it is on.
  * @param[onCheckedChange] Called with the state the user asked for.
@@ -40,6 +42,8 @@ import com.materialkolor.builder.kit.skin.material.MaterialToggleButton
  * @param[icon] A glyph before the label. The skins with no toggle button of their own show a check
  * in its place while the button is on.
  * @param[enabled] Whether it can be switched.
+ * @param[contentDescription] A longer name to read out in place of [label], for a short label that
+ * needs the line before it to make sense. Its state follows it the way it follows the label.
  */
 @Composable
 public fun BuilderToggleButton(
@@ -49,10 +53,15 @@ public fun BuilderToggleButton(
     modifier: Modifier = Modifier,
     icon: IconId? = null,
     enabled: Boolean = true,
+    contentDescription: String? = null,
 ) {
+    val name = contentDescription ?: label
+    // The skins fold the name only on the web, so a longer name is set here for everywhere else.
+    val spoken = if (contentDescription == null) null else stateName(name, ControlState.Checked(checked), enabled)
+    val named = if (spoken == null) modifier else modifier.semantics { this.contentDescription = spoken }
     when (LocalSkin.current.library) {
         Library.Material3 -> {
-            MaterialToggleButton(checked, onCheckedChange, label, modifier, icon, enabled)
+            MaterialToggleButton(checked, onCheckedChange, label, named, icon, enabled, name)
         }
         Library.Unstyled -> {
             HeadlessToggleButton(
@@ -60,13 +69,14 @@ public fun BuilderToggleButton(
                 onCheckedChange,
                 label,
                 UnstyledActionStyles.toggleButton,
-                modifier,
+                named,
                 icon,
                 enabled,
+                name,
             )
         }
         Library.Fluent -> {
-            FluentToggleButton(checked, onCheckedChange, label, modifier, icon, enabled)
+            FluentToggleButton(checked, onCheckedChange, label, named, icon, enabled, name)
         }
         Library.Custom -> {
             HeadlessToggleButton(
@@ -74,9 +84,10 @@ public fun BuilderToggleButton(
                 onCheckedChange,
                 label,
                 CustomActionStyles.toggleButton,
-                modifier,
+                named,
                 icon,
                 enabled,
+                name,
             )
         }
     }
@@ -84,7 +95,8 @@ public fun BuilderToggleButton(
 
 /**
  * A toggle button drawn from [style], filled while it is on. It shows a check in place of its icon
- * while it is on, so on and off never differ by fill alone.
+ * while it is on, so on and off never differ by fill alone. It reads out as [name], the label
+ * unless a longer name was given.
  */
 @Composable
 internal fun HeadlessToggleButton(
@@ -95,6 +107,7 @@ internal fun HeadlessToggleButton(
     modifier: Modifier = Modifier,
     icon: IconId? = null,
     enabled: Boolean = true,
+    name: String = label,
 ) {
     val colors = style.colors(checked)
     val interactionSource = remember { MutableInteractionSource() }
@@ -107,7 +120,7 @@ internal fun HeadlessToggleButton(
                 enabled = enabled,
                 role = Role.Checkbox,
                 onValueChange = onCheckedChange,
-            ).foldState(label, ControlState.Checked(checked), enabled)
+            ).foldState(name, ControlState.Checked(checked), enabled)
             .controlTouchTarget(LocalLayout.current.primaryTouchTarget)
             .controlPress(interactionSource)
             .alpha(enabledAlpha(enabled))

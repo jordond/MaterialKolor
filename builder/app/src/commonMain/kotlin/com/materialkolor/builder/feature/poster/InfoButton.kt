@@ -1,12 +1,10 @@
 package com.materialkolor.builder.feature.poster
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,9 +13,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
@@ -39,11 +34,13 @@ import com.materialkolor.builder.generated.resources.glossary_style
 import com.materialkolor.builder.generated.resources.glossary_style_question
 import com.materialkolor.builder.generated.resources.glossary_targets
 import com.materialkolor.builder.generated.resources.glossary_targets_question
+import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderPressable
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.BuilderTooltip
 import com.materialkolor.builder.kit.control.foldedExpandedName
+import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -177,30 +174,15 @@ internal fun InfoButton(
             modifier = Modifier.foldedExpandedName(question, expanded),
             shape = CircleShape,
         ) {
-            InfoGlyph(Modifier.padding(InfoGlyphRoom).size(InfoGlyphSize))
+            // b-526 The skin's own outlined info glyph, in the ink.
+            BuilderIcon(
+                id = IconId.InfoOutline,
+                contentDescription = null,
+                modifier = Modifier.padding(InfoGlyphRoom),
+                tint = LocalBuilderTokens.current.textStrong,
+                size = InfoGlyphSize,
+            )
         }
-    }
-}
-
-/**
- * An info glyph drawn as an outline in the ink, a ring with the letter i in it.
- */
-@Composable
-private fun InfoGlyph(modifier: Modifier = Modifier) {
-    val ink = LocalBuilderTokens.current.textStrong
-    Canvas(modifier) {
-        val unit = size.minDimension / GLYPH_GRID
-        val stroke = GLYPH_STROKE * unit
-        val middle = center.x
-        drawCircle(color = ink, radius = GLYPH_RING * unit, style = Stroke(width = stroke))
-        drawLine(
-            color = ink,
-            start = Offset(middle, GLYPH_STEM_TOP * unit),
-            end = Offset(middle, GLYPH_STEM_BOTTOM * unit),
-            strokeWidth = stroke,
-            cap = StrokeCap.Round,
-        )
-        drawCircle(color = ink, radius = stroke * GLYPH_DOT, center = Offset(middle, GLYPH_DOT_Y * unit))
     }
 }
 
@@ -213,15 +195,6 @@ private val InfoGlyphSize = 16.dp
  * The room around the glyph inside its press target, which the focus ring follows.
  */
 private val InfoGlyphRoom = 4.dp
-
-// The glyph is laid out on a 24 unit grid, the way icon sets draw theirs.
-private const val GLYPH_GRID = 24f
-private const val GLYPH_STROKE = 2f
-private const val GLYPH_RING = 10f
-private const val GLYPH_STEM_TOP = 11f
-private const val GLYPH_STEM_BOTTOM = 16f
-private const val GLYPH_DOT_Y = 7.75f
-private const val GLYPH_DOT = 0.65f
 
 /**
  * [topic]'s short explanation.

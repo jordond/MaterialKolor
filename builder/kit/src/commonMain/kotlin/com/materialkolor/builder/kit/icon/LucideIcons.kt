@@ -23,6 +23,7 @@ import com.composables.icons.lucide.History
 import com.composables.icons.lucide.Image
 import com.composables.icons.lucide.Info
 import com.composables.icons.lucide.Keyboard
+import com.composables.icons.lucide.LoaderCircle
 import com.composables.icons.lucide.Lock
 import com.composables.icons.lucide.LockOpen
 import com.composables.icons.lucide.Lucide
@@ -73,6 +74,7 @@ internal object LucideIcons : BuilderIcons {
             IconId.Unlock -> Lucide.LockOpen
             IconId.Pin -> Lucide.Pin
             IconId.Info -> Lucide.Info
+            IconId.InfoOutline -> Lucide.Info
             IconId.ChevronDown -> Lucide.ChevronDown
             IconId.ChevronLeft -> Lucide.ChevronLeft
             IconId.ChevronRight -> Lucide.ChevronRight
@@ -100,5 +102,6 @@ internal object LucideIcons : BuilderIcons {
             IconId.History -> Lucide.History
             IconId.Code -> Lucide.Braces
             IconId.Sliders -> Lucide.SlidersHorizontal
+            IconId.Progress -> Lucide.LoaderCircle
         }
 }

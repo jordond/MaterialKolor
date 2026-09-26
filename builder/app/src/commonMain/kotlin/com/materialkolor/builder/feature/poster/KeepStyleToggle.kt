@@ -8,7 +8,6 @@ import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.style_keep
 import com.materialkolor.builder.generated.resources.style_keep_spoken
 import com.materialkolor.builder.kit.control.BuilderToggleButton
-import com.materialkolor.builder.kit.control.foldedToggleName
 import com.materialkolor.builder.kit.icon.IconId
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.stringResource
@@ -32,7 +31,9 @@ internal fun KeepStyleToggle(
         checked = kept,
         onCheckedChange = { on -> dispatcher.dispatch(WorkspaceAction.SetLock(ShuffleLock.Style, on)) },
         label = stringResource(Res.string.style_keep),
-        modifier = modifier.foldedToggleName(stringResource(Res.string.style_keep_spoken), kept),
+        modifier = modifier,
         icon = IconId.Lock,
+        // b-526 The kit carries the longer name, so the web reads it as it reads the kit's own toggles.
+        contentDescription = stringResource(Res.string.style_keep_spoken),
     )
 }

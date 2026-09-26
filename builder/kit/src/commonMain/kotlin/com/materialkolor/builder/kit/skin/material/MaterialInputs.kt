@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -177,6 +178,9 @@ internal fun MaterialCheckbox(
  * The Material3 slider, with the builder's keys and snapping laid over it. Material draws no named
  * stops, so they only show through the snap. Material shows focus only by narrowing the thumb, so
  * the thumb gets the focus ring as well.
+ *
+ * The inactive track takes the outline rather than Material's secondary container. On the poster
+ * and its inverse the containers sit close to the page, and the outline is held at 3 to 1 on it.
  */
 @Composable
 internal fun MaterialSlider(
@@ -192,6 +196,7 @@ internal fun MaterialSlider(
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val press = remember { SliderKeyPress() }
     val interactions = remember { MutableInteractionSource() }
+    val colors = SliderDefaults.colors(inactiveTrackColor = MaterialTheme.colorScheme.outline)
     Slider(
         value = value,
         onValueChange = { raw -> onValueChange(rules.snap(raw)) },
@@ -209,11 +214,13 @@ internal fun MaterialSlider(
             ),
         enabled = enabled,
         onValueChangeFinished = onValueChangeFinished,
+        colors = colors,
         interactionSource = interactions,
         thumb = {
             SliderDefaults.Thumb(
                 interactionSource = interactions,
                 modifier = Modifier.controlRing(interactions, CircleShape),
+                colors = colors,
                 enabled = enabled,
             )
         },
