@@ -2,7 +2,6 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "materialkolor-builder",
   "main": "src/index.ts",
-  // Held at the date the test pool's workerd supports, so wrangler dev and vitest agree.
   "compatibility_date": "2026-08-15",
   "assets": {
     // `./gradlew :builder:web:assembleSite` writes it.
@@ -12,21 +11,14 @@
     // Only link previews run code, everything else is served straight from the site.
     "run_worker_first": ["/t/*", "/og/*"]
   },
-  // The glyph atlas the theme card draws its text with, imported as bytes. Wrangler has the same
-  // rule built in, and fallthrough false marks this one final so it stops warning about the shadow.
   "rules": [{ "type": "Data", "globs": ["**/*.bin"], "fallthrough": false }],
   // Production, which builder.yml deploys from a builder/<version> tag.
   "routes": [{ "pattern": "materialkolor.com", "custom_domain": true }],
-  // The account comes from CLOUDFLARE_ACCOUNT_ID in CI, so it is never named here.
   "env": {
-    // The Worker `materialkolor-builder-staging`, which builder.yml deploys from a staging site build.
     "staging": {
       "routes": [{ "pattern": "staging.materialkolor.com", "custom_domain": true }],
-      // Only the custom domain serves the deployed version. Every pull request uploads a version of
-      // its own, and its preview URL on workers.dev is what the pull request links to.
       "workers_dev": false,
       "preview_urls": true,
-      // Vars are not inherited, so production has none. Worker responses skip `_headers`, see headers.ts.
       "vars": { "ROBOTS_TAG": "noindex" }
     }
   }

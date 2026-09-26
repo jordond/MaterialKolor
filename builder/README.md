@@ -38,19 +38,6 @@ code.
 ./gradlew :builder:web:jsBrowserDevelopmentRun
 ```
 
-## Web engines
-
-The site ships two builds of the same app and `boot.js` picks one per visit. Browsers with WasmGC
-run the Kotlin/Wasm build. Browsers with WebAssembly and WebGL 2 but no WasmGC run the Kotlin/JS
-build, which draws with the same skiko wasm. That covers Safari 15.2 to 18.1 and Chrome, Edge and
-Firefox from before WasmGC, back to Chrome 95 and Firefox 100. A browser without WebGL 2, or
-without WebAssembly and the legacy exception handling skiko needs, gets the unsupported page. So
-does a browser with WebAssembly turned off. The JS engine shows no notice, and the error details
-name the engine that ran.
-
-Add `?engine=js` to any address to run the JS build where wasm would run. It lasts for that visit
-only. The JS dev server serves only the JS glue, so the page it opens needs `?engine=js` to boot.
-
 ## MaterialKolor source
 
 By default, the builder depends on the MaterialKolor modules in this repo, so a library change shows
