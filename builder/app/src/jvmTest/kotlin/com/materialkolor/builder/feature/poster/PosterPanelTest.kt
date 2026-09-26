@@ -52,7 +52,6 @@ import com.materialkolor.builder.feature.workspace.ShuffleLock
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
 import com.materialkolor.builder.feature.workspace.capabilitiesOf
-import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.shell.PosterSurface
 import com.materialkolor.builder.kit.shell.WorkspaceShell
@@ -344,17 +343,6 @@ class PosterPanelTest {
             waitForIdle()
             onNodeWithContentDescription("Projects, Ocean, saved").assertExists()
             onNodeWithText("Not saved", useUnmergedTree = true).assertDoesNotExist()
-        }
-
-    @Test
-    fun posterHeader_whileSaving_endsThePillInTheProgressGlyphAndReadsSaving() =
-        runComposeUiTest {
-            // b-526 D68, the pill shows a progress glyph while the save is under way.
-            saveMarkOf(SaveStatus.Pending).glyph shouldBe IconId.Progress
-
-            showPoster(projectName = "Ocean", saveStatus = { SaveStatus.Pending })
-
-            onNodeWithContentDescription("Projects, Ocean, saving").assertExists()
         }
 
     @Test

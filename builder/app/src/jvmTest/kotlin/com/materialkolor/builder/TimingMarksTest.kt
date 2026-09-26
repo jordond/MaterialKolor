@@ -16,6 +16,7 @@ import com.materialkolor.builder.feature.canvas.TestOwner
 import com.materialkolor.builder.feature.image.QuadrantColors
 import com.materialkolor.builder.feature.image.decodedOf
 import com.materialkolor.builder.feature.workspace.WorkspaceModel
+import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
@@ -96,6 +97,8 @@ class TimingMarksTest {
             CompositionLocalProvider(
                 LocalViewModelStoreOwner provides owner,
                 LocalMetroViewModelFactory provides graph.metroViewModelFactory,
+                // b-526 The saving glyph turns on the frame clock, which would hold waitForIdle through the save.
+                LocalMotionFrozen provides true,
             ) {
                 workspace = metroViewModel()
                 BuilderRoot(graph, workspaceModel = workspace)
