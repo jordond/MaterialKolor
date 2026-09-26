@@ -8,7 +8,7 @@ import com.materialkolor.builder.preview.inspect.previewRoles
 /**
  * The parts the Unstyled gallery draws, each with the roles it reads.
  *
- * Compose Unstyled ships no colors, so like [UnstyledComponent] on the dashboard every part is the
+ * Compose Unstyled ships no colors, so like [UnstyledComponent] in the Trips app every part is the
  * gallery's own styling on an Unstyled primitive, the container first and then what is drawn on it.
  * A disabled part paints faded [Role.OnSurface] whatever it is, and declares [Disabled].
  *

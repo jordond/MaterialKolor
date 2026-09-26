@@ -88,7 +88,7 @@ internal object GalleryKeys {
  * The Unstyled components gallery.
  *
  * Every card holds Compose Unstyled primitives the gallery styles itself from the pane's
- * `MaterialKolorTokens`, the way the dashboard does, so each part names the tokens it paints for
+ * `MaterialKolorTokens`, the way the Trips app does, so each part names the tokens it paints for
  * Inspect. Each control shows up enabled and disabled, apart from the few that hold nothing to
  * press. Nothing opens a popup, a window or a portal, since on the web the first one takes the
  * accessibility mirror over for good. The menu, the select's list and the tooltips show in place.
@@ -115,7 +115,7 @@ internal fun UnstyledGalleryEntry(
                 gap = SectionGap,
                 modifier = Modifier
                     .previewRoles(UnstyledGalleryComponent.Gallery)
-                    .background(DashboardToken.Surface.color)
+                    .background(UnstyledToken.Surface.color)
                     .gallerySwallowRightPresses(),
                 header = { group -> UnstyledGroupHeader(group) },
                 card = { card, cardModifier -> UnstyledCardFrame(card, state, cardModifier) },
@@ -157,7 +157,7 @@ private fun UnstyledGroupHeader(group: GalleryGroup) {
         text = group.name,
         modifier = Modifier.padding(top = Gap).semantics { heading() },
         style = TitleStyle,
-        color = DashboardToken.OnSurface.color,
+        color = UnstyledToken.OnSurface.color,
     )
 }
 
@@ -174,12 +174,12 @@ private fun UnstyledCardFrame(
     Column(
         modifier = modifier
             .previewRoles(UnstyledGalleryComponent.Card)
-            .background(DashboardToken.SurfaceContainerLow.color, CardShape)
-            .border(1.dp, DashboardToken.OutlineVariant.color, CardShape)
+            .background(UnstyledToken.SurfaceContainerLow.color, CardShape)
+            .border(1.dp, UnstyledToken.OutlineVariant.color, CardShape)
             .padding(SectionGap),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(card.title, style = HeadingStyle, color = DashboardToken.OnSurface.color)
+        Text(card.title, style = HeadingStyle, color = UnstyledToken.OnSurface.color)
         card.content(state)
     }
 }
@@ -193,20 +193,20 @@ internal val EnabledThenDisabled: List<Boolean> = listOf(true, false)
  * What a disabled part draws its content in, faded OnSurface.
  */
 internal val disabledContent: Color
-    @Composable get() = DashboardToken.OnSurface.color.copy(alpha = DisabledContentAlpha)
+    @Composable get() = UnstyledToken.OnSurface.color.copy(alpha = DisabledContentAlpha)
 
 /**
  * What a disabled part fills or outlines its container with, a fainter OnSurface.
  */
 internal val disabledContainer: Color
-    @Composable get() = DashboardToken.OnSurface.color.copy(alpha = DisabledContainerAlpha)
+    @Composable get() = UnstyledToken.OnSurface.color.copy(alpha = DisabledContainerAlpha)
 
 /**
  * The color of [token] while [enabled], and the disabled content color otherwise.
  */
 @Composable
 internal fun tint(
-    token: DashboardToken,
+    token: UnstyledToken,
     enabled: Boolean,
 ): Color = if (enabled) token.color else disabledContent
 
@@ -221,7 +221,7 @@ internal fun Modifier.galleryFocusRing(
     focusRing(
         interactionSource = interactions,
         width = GalleryFocusRingWidth,
-        color = DashboardToken.Primary.color,
+        color = UnstyledToken.Primary.color,
         shape = ControlShape,
         offset = if (offset) 2.dp else 0.dp,
     )
@@ -284,18 +284,18 @@ internal fun GalleryButton(
     val container = when {
         outlined -> Color.Transparent
         !enabled -> disabledContainer
-        style == GalleryButtonStyle.Filled -> DashboardToken.Primary.color
-        else -> DashboardToken.SecondaryContainer.color
+        style == GalleryButtonStyle.Filled -> UnstyledToken.Primary.color
+        else -> UnstyledToken.SecondaryContainer.color
     }
     val content = when {
         !enabled -> disabledContent
-        style == GalleryButtonStyle.Filled -> DashboardToken.OnPrimary.color
-        style == GalleryButtonStyle.Tonal -> DashboardToken.OnSecondaryContainer.color
-        else -> DashboardToken.Primary.color
+        style == GalleryButtonStyle.Filled -> UnstyledToken.OnPrimary.color
+        style == GalleryButtonStyle.Tonal -> UnstyledToken.OnSecondaryContainer.color
+        else -> UnstyledToken.Primary.color
     }
     val outline = when {
         !outlined -> Modifier
-        enabled -> Modifier.border(1.dp, DashboardToken.Outline.color, ControlShape)
+        enabled -> Modifier.border(1.dp, UnstyledToken.Outline.color, ControlShape)
         else -> Modifier.border(1.dp, disabledContainer, ControlShape)
     }
     UnstyledButton(
@@ -349,12 +349,12 @@ internal fun GalleryIconButton(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(IconSize),
-                tint = tint(DashboardToken.OnSurfaceVariant, enabled),
+                tint = tint(UnstyledToken.OnSurfaceVariant, enabled),
             )
         }
         if (enabled && visibility.shown) {
             val below = Overhang.BelowStart
-            DashboardTooltip(label, Modifier.align(below.alignment).overhang(below, GalleryTooltipGap))
+            UnstyledTooltip(label, Modifier.align(below.alignment).overhang(below, GalleryTooltipGap))
         }
     }
 }
@@ -407,13 +407,13 @@ private fun GalleryToggleButton(
     val checked = state.isOn(key)
     val container = when {
         !checked -> Color.Transparent
-        enabled -> DashboardToken.TertiaryContainer.color
+        enabled -> UnstyledToken.TertiaryContainer.color
         else -> disabledContainer
     }
     val content = when {
         !enabled -> disabledContent
-        checked -> DashboardToken.OnTertiaryContainer.color
-        else -> DashboardToken.OnSurfaceVariant.color
+        checked -> UnstyledToken.OnTertiaryContainer.color
+        else -> UnstyledToken.OnSurfaceVariant.color
     }
     val component = if (checked) UnstyledGalleryComponent.CheckedToggleButton else UnstyledGalleryComponent.ToggleButton
     Box(
@@ -431,7 +431,7 @@ private fun GalleryToggleButton(
             .galleryFocusRing(interactions)
             .clip(ControlShape)
             .background(container)
-            .border(1.dp, if (enabled) DashboardToken.Outline.color else disabledContainer, ControlShape),
+            .border(1.dp, if (enabled) UnstyledToken.Outline.color else disabledContainer, ControlShape),
         contentAlignment = Alignment.Center,
     ) {
         UnstyledIcon(icon, contentDescription = null, modifier = Modifier.size(IconSize), tint = content)

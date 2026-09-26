@@ -7,7 +7,7 @@ import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.split.PaneSpec
 
 /**
- * The Unstyled sample app, the web dashboard with its token side panel.
+ * The Unstyled sample app, the Trips travel app drawn with Compose Unstyled primitives.
  *
  * The app lays itself out for [deviceWidth] and fills whatever size it is given. Scaling the frame
  * to fit the pane, down to 0.6, and scrolling past that belong to the canvas, not the app.
@@ -24,5 +24,5 @@ internal fun UnstyledAppEntry(
     deviceWidth: DeviceWidth,
     modifier: Modifier = Modifier,
 ) {
-    DashboardApp(state, deviceWidth, modifier)
+    UnstyledTripsApp(state, deviceWidth, modifier)
 }

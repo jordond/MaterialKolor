@@ -11,15 +11,16 @@ import com.materialkolor.builder.preview.inspect.previewRoles
 import com.materialkolor.unstyled.MaterialKolorTokens
 
 /**
- * The MaterialKolor tokens the dashboard paints with, each with the role the pane writes into it.
+ * The MaterialKolor tokens the Trips app and the gallery paint with, each with the role the pane
+ * writes into it.
  *
- * Every color on the dashboard is read through [color], so this list is exactly what the token
- * side panel shows. Each token is named after its role, which is also the name Inspect gives it.
+ * Every color is read through [color], and each token is named after its role, which is also the
+ * name Inspect gives it.
  *
  * @property[token] The token, read from the `MaterialKolorTokens.colors` property of the theme.
  * @property[role] The role behind it, the way the contrast audit names it.
  */
-internal enum class DashboardToken(
+internal enum class UnstyledToken(
     val token: ThemeToken<Color>,
     val role: Role,
 ) {
@@ -55,16 +56,17 @@ internal enum class DashboardToken(
 /**
  * The color the pane's Unstyled theme holds for this token.
  */
-internal val DashboardToken.color: Color
+internal val UnstyledToken.color: Color
     @Composable get() = Theme[MaterialKolorTokens.colors][token]
 
 /**
- * The parts the dashboard draws, each with the roles it reads.
+ * The parts the Trips app draws, each with the roles it reads.
  *
- * Compose Unstyled ships no colors, so every part here is the dashboard's own styling on an
- * Unstyled primitive, the container first and then what is drawn on it. A part whose colors
- * come from its data, a metric icon or a status mark, declares them through the [Role] overload
- * of [previewRoles] instead.
+ * Compose Unstyled ships no colors, so every part here is the app's own styling on an Unstyled
+ * primitive, the container first and then what is drawn on it. The buttons, the switch, the
+ * checkboxes, the progress bar, the field and the separator look the way the gallery draws them,
+ * so they declare the gallery's [UnstyledGalleryComponent] instead. A part whose colors come from
+ * its data, a trip's thumbnail, declares them through the [Role] overload of [previewRoles].
  *
  * @property[refs] The roles, named the way the contrast audit names them.
  */
@@ -72,32 +74,27 @@ internal enum class UnstyledComponent(
     vararg roles: Role,
 ) {
     App(Role.Surface, Role.OnSurface),
-    TopBar(Role.Surface, Role.OnSurface, Role.OutlineVariant),
-    Sidebar(Role.SurfaceContainerLow, Role.OnSurface, Role.OutlineVariant),
-    Brand(Role.Primary, Role.OnPrimary),
-    NavItem(Role.SurfaceContainerLow, Role.OnSurfaceVariant),
+    Rail(Role.Surface, Role.OutlineVariant),
+    NavItem(Role.Surface, Role.OnSurfaceVariant),
     SelectedNavItem(Role.SecondaryContainer, Role.OnSecondaryContainer),
-    ToggledIconButton(Role.SecondaryContainer, Role.OnSecondaryContainer),
-    FilledButton(Role.Primary, Role.OnPrimary),
-    OutlinedButton(Role.Outline, Role.OnSurface),
+    NewTripButton(Role.Primary, Role.OnPrimary),
+    NotificationBadge(Role.Error, Role.OnError),
+    Search(Role.SurfaceContainerHigh, Role.OnSurfaceVariant),
+    FilterChip(Role.Outline, Role.OnSurfaceVariant),
+    SelectedFilterChip(Role.SecondaryContainer, Role.OnSecondaryContainer),
+    TripRow(Role.Surface, Role.OnSurface, Role.OnSurfaceVariant),
+    SelectedTripRow(Role.SecondaryContainer, Role.OnSecondaryContainer),
+    TripPane(Role.SurfaceContainerLow, Role.OnSurface, Role.OnSurfaceVariant),
+    Scene(Role.PrimaryContainer, Role.TertiaryContainer, Role.Secondary, Role.Primary, Role.OnPrimaryContainer),
+    LinkButton(Role.Primary),
+    DayLabel(Role.Primary),
+    Stop(Role.SurfaceContainerHighest, Role.OnSurfaceVariant),
+    Alert(Role.ErrorContainer, Role.OnErrorContainer),
     AlertButton(Role.Error, Role.OnError),
-    TabList(Role.SurfaceContainerHigh, Role.OnSurfaceVariant),
-    Tab(Role.SurfaceContainerHigh, Role.OnSurfaceVariant),
-    SelectedTab(Role.SurfaceContainerLowest, Role.OnSurface),
-    Alert(Role.ErrorContainer, Role.OnErrorContainer, Role.Error),
-    MetricCard(Role.SurfaceContainer, Role.OnSurface, Role.OnSurfaceVariant),
-    Progress(Role.SurfaceContainerHighest, Role.Primary),
-    ChartCard(Role.SurfaceContainerLow, Role.OnSurface, Role.OnSurfaceVariant),
-    Chart(Role.Primary, Role.Secondary, Role.OutlineVariant),
-    TableHeader(Role.SurfaceContainerHigh, Role.OnSurfaceVariant),
-    TableRow(Role.SurfaceContainerLowest, Role.OnSurface, Role.OnSurfaceVariant, Role.OutlineVariant),
-    OutlinedMark(Role.Outline, Role.OnSurfaceVariant),
-    Menu(Role.SurfaceContainerHighest, Role.OnSurface, Role.OutlineVariant),
-    MenuItem(Role.SurfaceContainerHighest, Role.OnSurface),
-    SelectedMenuItem(Role.SecondaryContainer, Role.OnSecondaryContainer),
+    OfflineMapsCard(Role.SurfaceContainerLowest, Role.OnSurface, Role.OnSurfaceVariant, Role.OutlineVariant),
+    PackingCard(Role.SurfaceContainer, Role.OnSurface, Role.OnSurfaceVariant, Role.OutlineVariant),
+    NoteCard(Role.SurfaceContainerLowest, Role.OutlineVariant),
     Tooltip(Role.InverseSurface, Role.InverseOnSurface),
-    Drawer(Role.SurfaceContainerLow, Role.OnSurface, Role.OnSurfaceVariant, Role.OutlineVariant),
-    Scrim(Role.Scrim),
     ;
 
     val refs: List<ColorRef> = roles.map { role -> ColorRef.OfRole(role) }
