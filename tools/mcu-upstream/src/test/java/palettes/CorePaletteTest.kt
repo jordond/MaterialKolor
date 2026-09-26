@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package palettes
 
 import kotlin.test.Test

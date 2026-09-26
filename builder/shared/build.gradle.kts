@@ -158,7 +158,7 @@ kotlin {
             implementation(npm("jszip", "3.10.1"))
         }
 
-        val nonBrowserMain by creating {
+        create("nonBrowserMain") {
             dependsOn(commonMain.get())
             androidMain.get().dependsOn(this)
             iosMain.get().dependsOn(this)
@@ -168,7 +168,7 @@ kotlin {
             }
         }
 
-        val mobileMain by creating {
+        create("mobileMain") {
             dependsOn(commonMain.get())
             androidMain.get().dependsOn(this)
             iosMain.get().dependsOn(this)
