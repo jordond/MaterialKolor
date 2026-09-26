@@ -4,16 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.FieldDraft
 import com.materialkolor.builder.kit.headless.HeadlessField
 import com.materialkolor.builder.kit.headless.fieldCommits
 import com.materialkolor.builder.kit.headless.rememberFieldDraft
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentField
-import com.materialkolor.builder.kit.skin.fluent.FluentInputStyles
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.CustomInputStyles
-import com.materialkolor.builder.kit.skin.headless.UnstyledInputStyles
 import com.materialkolor.builder.kit.skin.material.MaterialField
 import com.materialkolor.builder.kit.skin.material.materialHeroFieldStyle
 import com.materialkolor.builder.kit.token.LocalBuilderType
@@ -117,10 +114,8 @@ internal fun SkinField(
     val library = LocalSkin.current.library
     if (large) {
         val hero = when (library) {
-            Library.Material3 -> materialHeroFieldStyle()
-            Library.Unstyled -> UnstyledInputStyles.hero
-            Library.Fluent -> FluentInputStyles.hero
-            Library.Custom -> CustomInputStyles.hero
+            SkinLibrary.Material3 -> materialHeroFieldStyle()
+            SkinLibrary.Custom -> CustomInputStyles.hero
         }
         HeadlessField(
             draft.value,
@@ -138,29 +133,10 @@ internal fun SkinField(
         return
     }
     when (library) {
-        Library.Material3 -> {
+        SkinLibrary.Material3 -> {
             MaterialField(draft.value, onValueChange, label, message, isError, textStyle, enabled, onCommit, field)
         }
-        Library.Unstyled -> {
-            val style = UnstyledInputStyles.field
-            HeadlessField(
-                draft.value,
-                onValueChange,
-                label,
-                message,
-                isError,
-                textStyle,
-                false,
-                enabled,
-                onCommit,
-                style,
-                field,
-            )
-        }
-        Library.Fluent -> {
-            FluentField(draft.value, onValueChange, label, message, isError, textStyle, enabled, onCommit, field)
-        }
-        Library.Custom -> {
+        SkinLibrary.Custom -> {
             val style = CustomInputStyles.field
             HeadlessField(
                 draft.value,

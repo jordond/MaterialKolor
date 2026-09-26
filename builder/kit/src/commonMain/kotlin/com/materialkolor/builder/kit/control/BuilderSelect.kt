@@ -2,12 +2,10 @@ package com.materialkolor.builder.kit.control
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessSelect
-import com.materialkolor.builder.kit.headless.overlayLibrary
-import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
+import com.materialkolor.builder.kit.skin.LocalSkin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
-import com.materialkolor.builder.kit.skin.headless.unstyledOverlayStyle
 import com.materialkolor.builder.kit.skin.material.MaterialSelect
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
@@ -18,7 +16,7 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * radio button that knows whether it is selected. On the web the field reads as a button named
  * "Style, pop-up button, Tonal spot" and each option as "Vibrant, option, not selected". The
  * chosen option also carries a check, so the choice never rests on colour alone. The field fills
- * the width it is given. Material3 draws its exposed dropdown, the other skins the headless select.
+ * the width it is given. Material3 draws its exposed dropdown, Custom the headless select.
  *
  * @param[label] What is being chosen.
  * @param[options] Every choice, in the order the list shows them.
@@ -40,29 +38,9 @@ public fun <T> BuilderSelect(
 ) {
     require(selected in options) { "The selected option $selected is not one of the options" }
     val tokens = LocalBuilderTokens.current
-    when (overlayLibrary()) {
-        Library.Material3 -> MaterialSelect(label, options, selected, onSelect, optionLabel, enabled, modifier)
-        Library.Unstyled -> HeadlessSelect(
-            label,
-            options,
-            selected,
-            onSelect,
-            optionLabel,
-            enabled,
-            unstyledOverlayStyle(tokens),
-            modifier,
-        )
-        Library.Fluent -> HeadlessSelect(
-            label,
-            options,
-            selected,
-            onSelect,
-            optionLabel,
-            enabled,
-            fluentOverlayStyle(tokens),
-            modifier,
-        )
-        Library.Custom -> HeadlessSelect(
+    when (LocalSkin.current.library) {
+        SkinLibrary.Material3 -> MaterialSelect(label, options, selected, onSelect, optionLabel, enabled, modifier)
+        SkinLibrary.Custom -> HeadlessSelect(
             label,
             options,
             selected,

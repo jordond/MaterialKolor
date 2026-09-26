@@ -12,14 +12,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentIconButton
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.ButtonStyle
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
-import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.headless.actionSurface
 import com.materialkolor.builder.kit.skin.headless.controlPress
 import com.materialkolor.builder.kit.skin.headless.controlRing
@@ -51,25 +49,10 @@ public fun BuilderIconButton(
     expanded: Boolean? = null,
 ) {
     when (LocalSkin.current.library) {
-        Library.Material3 -> {
+        SkinLibrary.Material3 -> {
             MaterialIconButton(onClick, icon, contentDescription, modifier, emphasis, enabled, expanded)
         }
-        Library.Unstyled -> {
-            HeadlessIconButton(
-                onClick,
-                icon,
-                contentDescription,
-                UnstyledActionStyles.button,
-                modifier,
-                emphasis,
-                enabled,
-                expanded,
-            )
-        }
-        Library.Fluent -> {
-            FluentIconButton(onClick, icon, contentDescription, modifier, emphasis, enabled, expanded)
-        }
-        Library.Custom -> {
+        SkinLibrary.Custom -> {
             HeadlessIconButton(
                 onClick,
                 icon,

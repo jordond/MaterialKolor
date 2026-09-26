@@ -27,8 +27,8 @@ import com.materialkolor.builder.kit.shell.ShellMetrics
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
- * The header row Unstyled and Custom put at the top of the workspace, on the workspace ground. Its
- * first control stands just off the start edge, next to the poster.
+ * The header row Custom puts at the top of the workspace, on the workspace ground. Its first control
+ * stands just off the start edge, next to the poster.
  */
 @Composable
 internal fun HeadlessTopBarRegion(

@@ -23,14 +23,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentButton
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.ButtonStyle
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
-import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.headless.actionSurface
 import com.materialkolor.builder.kit.skin.headless.controlPress
 import com.materialkolor.builder.kit.skin.headless.controlRing
@@ -75,7 +73,7 @@ public fun BuilderButton(
     tonal: Boolean = false,
 ) {
     when (LocalSkin.current.library) {
-        Library.Material3 -> MaterialButton(
+        SkinLibrary.Material3 -> MaterialButton(
             onClick,
             label,
             modifier,
@@ -87,32 +85,7 @@ public fun BuilderButton(
             size,
             tonal,
         )
-        Library.Unstyled -> HeadlessButton(
-            onClick,
-            label,
-            UnstyledActionStyles.button,
-            modifier,
-            emphasis,
-            icon,
-            enabled,
-            hint,
-            trailingIcon,
-            size,
-            tonal,
-        )
-        Library.Fluent -> FluentButton(
-            onClick,
-            label,
-            modifier,
-            emphasis,
-            icon,
-            enabled,
-            hint,
-            trailingIcon,
-            size,
-            tonal,
-        )
-        Library.Custom -> HeadlessButton(
+        SkinLibrary.Custom -> HeadlessButton(
             onClick,
             label,
             CustomActionStyles.button,
@@ -145,8 +118,7 @@ public enum class ButtonSize {
 }
 
 /**
- * How tall a compact button draws in Material and the headless skins. Fluent keeps its own
- * 32 dp control height, which is already about as short.
+ * How tall a compact button draws in Material and Custom.
  */
 internal val CompactButtonHeight: Dp = 34.dp
 

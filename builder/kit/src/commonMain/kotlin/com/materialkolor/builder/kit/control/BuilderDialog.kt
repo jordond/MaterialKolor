@@ -15,19 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessModal
 import com.materialkolor.builder.kit.headless.keepTaps
 import com.materialkolor.builder.kit.headless.modalPane
 import com.materialkolor.builder.kit.headless.modalTitle
-import com.materialkolor.builder.kit.headless.overlayLibrary
-import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
+import com.materialkolor.builder.kit.skin.LocalSkin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.popoverEnter
 import com.materialkolor.builder.kit.skin.headless.popoverExit
-import com.materialkolor.builder.kit.skin.headless.unstyledOverlayStyle
 import com.materialkolor.builder.kit.skin.material.MaterialDialog
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
@@ -37,8 +35,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
  * The title is the dialog's name. While it is open, focus starts inside it and Tab cannot leave
  * it, even with no actions to focus. Esc and a click on the veil call
  * [onDismissRequest], and once it has gone focus goes back to [returnFocusTo]. It scales up
- * from 0.96 with a fade, or only fades under reduced motion. Material3 draws its `AlertDialog`, the
- * other skins the headless dialog. Where overlays render in the page Material3 draws its own
+ * from 0.96 with a fade, or only fades under reduced motion. Material3 draws its `AlertDialog`, and
+ * Custom the headless dialog. Where overlays render in the page Material3 draws its own
  * dialog container over the headless modal instead.
  *
  * @param[visible] Whether the dialog is open.
@@ -69,35 +67,11 @@ public fun BuilderDialog(
 ) {
     val frame = DialogFrame(titleShown, actions)
     val tokens = LocalBuilderTokens.current
-    when (overlayLibrary()) {
-        Library.Material3 -> {
+    when (LocalSkin.current.library) {
+        SkinLibrary.Material3 -> {
             MaterialDialog(visible, onDismissRequest, title, returnFocusTo, modifier, frame, content)
         }
-        Library.Unstyled -> {
-            HeadlessDialog(
-                visible,
-                onDismissRequest,
-                title,
-                unstyledOverlayStyle(tokens),
-                returnFocusTo,
-                modifier,
-                frame,
-                content,
-            )
-        }
-        Library.Fluent -> {
-            HeadlessDialog(
-                visible,
-                onDismissRequest,
-                title,
-                fluentOverlayStyle(tokens),
-                returnFocusTo,
-                modifier,
-                frame,
-                content,
-            )
-        }
-        Library.Custom -> {
+        SkinLibrary.Custom -> {
             HeadlessDialog(
                 visible,
                 onDismissRequest,

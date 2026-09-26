@@ -1,18 +1,12 @@
 package com.materialkolor.builder.kit.skin
 
-import androidx.compose.foundation.ComposeFoundationFlags
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.builder.codegen.dsl.TokenKind
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.engine.resolve.CustomSlotColors
 import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.kit.a11y.FocusVisibility
@@ -28,9 +22,7 @@ import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.motion.reducedBuilderMotion
 import com.materialkolor.builder.kit.motion.tweenBuilderMotion
 import com.materialkolor.builder.kit.skin.custom.CustomSkinTheme
-import com.materialkolor.builder.kit.skin.fluent.FluentSkinTheme
 import com.materialkolor.builder.kit.skin.material.MaterialSkinTheme
-import com.materialkolor.builder.kit.skin.unstyled.UnstyledSkinTheme
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.CodePalette
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
@@ -46,10 +38,8 @@ import com.materialkolor.palettes.TonalPalette
  * skin generates anything. Each one provides [LocalSkin], the builder's type, its tokens, its
  * motion and its icons.
  *
- * [content] moves from one skin to the next rather than starting over, so everything it remembers,
- * an open dialog or menu included, and the overlay host it draws into survive a skin switch. Focus
- * in the page does not. The move takes the focused node out and puts it back, so after a switch
- * nothing in the page has focus until someone moves it again.
+ * The builder keeps one skin for its whole life, so [skin] is not expected to change. A library
+ * switch only re-themes the preview panes.
  *
  * It also tracks whether focus moves by keyboard, so a click leaves no focus ring behind.
  *
@@ -67,13 +57,9 @@ public fun BuilderTheme(
     reducedMotion: Boolean,
     content: @Composable () -> Unit,
 ) {
-    remember { textFieldMinSizeOptimizationOff }
-    val current by rememberUpdatedState(content)
-    val builder = remember {
-        movableContentOf {
-            PageTextToolbarLocals()
-            current()
-        }
+    val builder: @Composable () -> Unit = {
+        PageTextToolbarLocals()
+        content()
     }
     val focusVisibility = remember { FocusVisibility() }
     CompositionLocalProvider(
@@ -85,16 +71,10 @@ public fun BuilderTheme(
         Box(Modifier.trackFocusVisibility(focusVisibility), propagateMinConstraints = true) {
             OverlayHost {
                 when (skin.library) {
-                    Library.Material3 -> {
+                    SkinLibrary.Material3 -> {
                         MaterialSkinTheme(result.chrome(isDark), skin.expressive, reducedMotion, builder)
                     }
-                    Library.Unstyled -> {
-                        UnstyledSkinTheme(result.chrome(isDark), isDark, reducedMotion, builder)
-                    }
-                    Library.Fluent -> {
-                        FluentSkinTheme(result.chrome(isDark), isDark, reducedMotion, builder)
-                    }
-                    Library.Custom -> {
+                    SkinLibrary.Custom -> {
                         CustomSkinTheme(rememberChromeSlots(result), isDark, reducedMotion, builder)
                     }
                 }
@@ -117,16 +97,6 @@ internal fun rememberChromeSlots(result: ThemeResult): CustomSlotColors {
     val dark = result.chrome(isDark = true)
     return remember(light, dark) { result.chromeCustomSlots }
 }
-
-/**
- * Turns the text field min-size optimisation off, once and before any builder content composes. In
- * CMP 1.12.1 a skin switch that moves [BuilderTheme]'s content in the same frame it re-styles a text
- * field in a lazy list crashes the scene, since the field's size node reads a composition local
- * while detached. Drop it when CMP fixes it.
- */
-@OptIn(ExperimentalFoundationApi::class)
-private val textFieldMinSizeOptimizationOff: Unit =
-    run { ComposeFoundationFlags.isBasicTextFieldMinSizeOptimizationEnabled = false }
 
 /**
  * Hands a skin's tokens, motion and icons to [content].

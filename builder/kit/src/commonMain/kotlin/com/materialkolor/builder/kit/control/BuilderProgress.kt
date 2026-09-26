@@ -18,20 +18,18 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.LayoutDirection
 import com.composeunstyled.Indicator
 import com.composeunstyled.UnstyledProgress
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.generated.resources.Res
 import com.materialkolor.builder.kit.generated.resources.progress_percent
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.motion.rememberLoopPhase
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentProgress
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
 import com.materialkolor.builder.kit.skin.headless.ProgressStyle
 import com.materialkolor.builder.kit.skin.headless.ProgressSweep
-import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.material.MaterialProgress
-import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * A bar that shows how far along some work is, or only that it is running.
@@ -52,10 +50,8 @@ public fun BuilderProgress(
 ) {
     val amount = progress?.let { value -> if (value.isNaN()) 0f else value.coerceIn(0f, 1f) }
     when (LocalSkin.current.library) {
-        Library.Material3 -> MaterialProgress(label, modifier, amount)
-        Library.Unstyled -> HeadlessProgress(label, UnstyledActionStyles.progress, modifier, amount)
-        Library.Fluent -> FluentProgress(label, modifier, amount)
-        Library.Custom -> HeadlessProgress(label, CustomActionStyles.progress, modifier, amount)
+        SkinLibrary.Material3 -> MaterialProgress(label, modifier, amount)
+        SkinLibrary.Custom -> HeadlessProgress(label, CustomActionStyles.progress, modifier, amount)
     }
 }
 

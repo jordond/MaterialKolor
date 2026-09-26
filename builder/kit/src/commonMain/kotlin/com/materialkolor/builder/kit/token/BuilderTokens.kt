@@ -12,8 +12,7 @@ import com.materialkolor.builder.codegen.dsl.TokenKind
  * The neutral layer every builder widget reads.
  *
  * Each skin fills this from its own theme, so one widget implementation looks at home in all of
- * them. Material3 fills it from a `ColorScheme`, Unstyled from its token table, Fluent from
- * `Colors`, and Custom from the builder's own identity record.
+ * them. Material3 fills it from a `ColorScheme` and Custom from the builder's own identity record.
  *
  * @property[canvas] The workspace behind the panels.
  * @property[panel] A panel or card sitting on the canvas.

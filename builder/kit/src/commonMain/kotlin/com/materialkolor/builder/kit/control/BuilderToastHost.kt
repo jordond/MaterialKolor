@@ -37,19 +37,17 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.a11y.Announcer
 import com.materialkolor.builder.kit.a11y.LocalAnnouncer
 import com.materialkolor.builder.kit.headless.OverlayTopSlot
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentToast
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
 import com.materialkolor.builder.kit.skin.headless.overlayFeedback
 import com.materialkolor.builder.kit.skin.headless.popoverEnter
-import com.materialkolor.builder.kit.skin.headless.unstyledOverlayStyle
 import com.materialkolor.builder.kit.skin.material.MaterialToast
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import kotlinx.coroutines.delay
@@ -177,7 +175,7 @@ public fun rememberBuilderToastHostState(): BuilderToastHostState = remember { B
  * toast goes by itself after its duration, and its action closes it. The countdown waits while the
  * pointer rests on a toast or focus is inside it, and picks up with the time it had left (WCAG
  * 2.2.1), so a keyboard user on Undo never loses the toast under them. Material3 draws each toast
- * as a `Snackbar`, Fluent as an `InfoBar` and the other skins as a headless toast. Where overlays
+ * as a `Snackbar` and Custom as a headless toast. Where overlays
  * render in the page the stack is drawn in the overlay host's top slot over the space it is given,
  * so a toast raised from inside a dialog or a sheet shows over its veil rather than under it, and
  * its action joins the dialog's Tab cycle. When a toast goes with focus on its action, focus goes
@@ -225,7 +223,7 @@ public fun BuilderToastHost(
 private fun ToastEntry(
     toast: BuilderToast,
     state: BuilderToastHostState,
-    library: Library,
+    library: SkinLibrary,
 ) {
     val tokens = LocalBuilderTokens.current
     val interaction = remember { MutableInteractionSource() }
@@ -255,10 +253,8 @@ private fun ToastEntry(
             .hoverable(interaction)
             .onFocusChanged { focus -> focused = focus.hasFocus }
         when (library) {
-            Library.Material3 -> MaterialToast(toast, onAction, holds)
-            Library.Unstyled -> HeadlessToast(toast, onAction, unstyledOverlayStyle(tokens), holds)
-            Library.Fluent -> FluentToast(toast.message, toast.actionLabel, onAction, holds)
-            Library.Custom -> HeadlessToast(toast, onAction, customOverlayStyle(tokens), holds)
+            SkinLibrary.Material3 -> MaterialToast(toast, onAction, holds)
+            SkinLibrary.Custom -> HeadlessToast(toast, onAction, customOverlayStyle(tokens), holds)
         }
     }
 }

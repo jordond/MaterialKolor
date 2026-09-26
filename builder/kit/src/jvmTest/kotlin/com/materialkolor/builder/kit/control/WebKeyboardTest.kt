@@ -24,10 +24,10 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.a11y.LocalWebKeyboard
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactly
 import kotlin.test.Test
@@ -122,7 +122,7 @@ class WebKeyboardTest {
         for (expressive in listOf(false, true)) {
             withClue("expressive $expressive") {
                 runComposeUiTest {
-                    showOnWeb(Skin(Library.Material3, expressive), folds = false, keyboard = true) {
+                    showOnWeb(Skin(SkinLibrary.Material3, expressive), folds = false, keyboard = true) {
                         BuilderSegmented(
                             options = listOf("Light", "Split", "Dark"),
                             selected = "Split",

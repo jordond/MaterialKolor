@@ -22,12 +22,12 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.control.BuilderProgress
 import com.materialkolor.builder.kit.control.ControlsHarness
 import com.materialkolor.builder.kit.control.forEachSkin
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.floats.shouldBeGreaterThan
@@ -57,7 +57,7 @@ class MaterialProgressTest {
         runComposeUiTest {
             mainClock.autoAdvance = false
             setContent {
-                ControlsHarness(Skin(Library.Material3, expressive = true)) {
+                ControlsHarness(Skin(SkinLibrary.Material3, expressive = true)) {
                     CompositionLocalProvider(LocalMotionFrozen provides false) {
                         BuilderProgress("Exporting", Modifier.testTag(BarTag))
                     }
@@ -89,7 +89,7 @@ class MaterialProgressTest {
                 runComposeUiTest {
                     var amount by mutableStateOf(0.6f)
                     setContent {
-                        ControlsHarness(Skin(Library.Material3, expressive)) {
+                        ControlsHarness(Skin(SkinLibrary.Material3, expressive)) {
                             BuilderProgress("Exporting", Modifier.testTag(BarTag), amount)
                         }
                     }

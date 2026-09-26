@@ -9,16 +9,13 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessTabs
 import com.materialkolor.builder.kit.headless.TabsStyle
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentTabs
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.CustomInputStyles
-import com.materialkolor.builder.kit.skin.headless.UnstyledInputStyles
 import com.materialkolor.builder.kit.skin.material.MaterialTabs
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
-import io.github.composefluent.FluentTheme
 
 /**
  * How a row of [BuilderTabs] looks.
@@ -30,8 +27,8 @@ public enum class TabsVariant {
     Standard,
 
     /**
-     * The canvas tabs. Pills in every skin but Unstyled, which keeps its underline, each
-     * drawn in the skin's colours and shapes, and starting at the row's own start edge.
+     * The canvas tabs. Pills in every skin, each drawn in the skin's colours and shapes, and
+     * starting at the row's own start edge.
      */
     Canvas,
 }
@@ -65,19 +62,15 @@ public fun <T> BuilderTabs(
     val skin = LocalSkin.current
     if (variant == TabsVariant.Canvas) {
         val style = when (skin.library) {
-            Library.Material3 -> if (skin.expressive) expressiveCanvasTabs() else materialCanvasTabs()
-            Library.Unstyled -> unstyledCanvasTabs()
-            Library.Fluent -> fluentCanvasTabs()
-            Library.Custom -> customCanvasTabs()
+            SkinLibrary.Material3 -> if (skin.expressive) expressiveCanvasTabs() else materialCanvasTabs()
+            SkinLibrary.Custom -> customCanvasTabs()
         }
         HeadlessTabs(tabs, selected, onSelect, label, style, modifier)
         return
     }
     when (skin.library) {
-        Library.Material3 -> MaterialTabs(tabs, selected, onSelect, label, modifier)
-        Library.Unstyled -> HeadlessTabs(tabs, selected, onSelect, label, UnstyledInputStyles.tabs, modifier)
-        Library.Fluent -> FluentTabs(tabs, selected, onSelect, label, modifier)
-        Library.Custom -> HeadlessTabs(tabs, selected, onSelect, label, CustomInputStyles.tabs, modifier)
+        SkinLibrary.Material3 -> MaterialTabs(tabs, selected, onSelect, label, modifier)
+        SkinLibrary.Custom -> HeadlessTabs(tabs, selected, onSelect, label, CustomInputStyles.tabs, modifier)
     }
 }
 
@@ -125,54 +118,6 @@ private fun expressiveCanvasTabs(): TabsStyle {
         selectedContainer = colors.primaryContainer,
         selectedInk = colors.onPrimaryContainer,
         ink = colors.onSurfaceVariant,
-        indicator = Color.Transparent,
-        indicatorHeight = 0.dp,
-        indicatorWidth = null,
-        focus = tokens.focus,
-    )
-}
-
-/**
- * Unstyled's canvas tabs, its plain underline, the first label close to the row's start edge.
- */
-@Composable
-@ReadOnlyComposable
-private fun unstyledCanvasTabs(): TabsStyle {
-    val tokens = LocalBuilderTokens.current
-    return TabsStyle(
-        container = Color.Transparent,
-        containerShape = RoundedCornerShape(0.dp),
-        containerPadding = 0.dp,
-        tabShape = RoundedCornerShape(0.dp),
-        tabPadding = PaddingValues(horizontal = tokens.spacing.extraSmall, vertical = tokens.spacing.small),
-        gap = tokens.spacing.large,
-        selectedContainer = Color.Transparent,
-        selectedInk = tokens.textStrong,
-        ink = tokens.textMuted,
-        indicator = tokens.accent,
-        indicatorHeight = 2.dp,
-        indicatorWidth = null,
-        focus = tokens.focus,
-    )
-}
-
-/**
- * Fluent's canvas tabs, a subtle well holding the tabs with the chosen one on the layer fill, in Fluent's control corners.
- */
-@Composable
-private fun fluentCanvasTabs(): TabsStyle {
-    val tokens = LocalBuilderTokens.current
-    val shape = FluentTheme.shapes.control
-    return TabsStyle(
-        container = tokens.panelRaised,
-        containerShape = shape,
-        containerPadding = tokens.spacing.extraSmall / 2,
-        tabShape = shape,
-        tabPadding = PaddingValues(horizontal = tokens.spacing.medium, vertical = tokens.spacing.extraSmall),
-        gap = tokens.spacing.extraSmall / 2,
-        selectedContainer = tokens.panel,
-        selectedInk = tokens.textStrong,
-        ink = tokens.textMuted,
         indicator = Color.Transparent,
         indicatorHeight = 0.dp,
         indicatorWidth = null,

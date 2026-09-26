@@ -11,9 +11,9 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.text.AnnotatedString
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.control.LocalFoldsStateIntoName
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -29,7 +29,7 @@ class ShellWebNameTest {
                 withClue("$width dp, collapsed $collapsed, folds $folds") {
                     runSkikoComposeUiTest(size = Size(width.toFloat(), 900f)) {
                         setContent {
-                            ShellHarness(Skin(Library.Material3, expressive = false)) {
+                            ShellHarness(Skin(SkinLibrary.Material3, expressive = false)) {
                                 CompositionLocalProvider(LocalFoldsStateIntoName provides folds) {
                                     WorkspaceShell(
                                         posterColors = ShellPosterColors,

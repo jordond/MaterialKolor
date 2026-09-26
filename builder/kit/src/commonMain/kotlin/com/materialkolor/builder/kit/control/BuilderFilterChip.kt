@@ -15,14 +15,12 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentFilterChip
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
 import com.materialkolor.builder.kit.skin.headless.SelectableStyle
-import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.headless.actionSurface
 import com.materialkolor.builder.kit.skin.headless.controlPress
 import com.materialkolor.builder.kit.skin.headless.controlRing
@@ -55,16 +53,10 @@ public fun BuilderFilterChip(
     enabled: Boolean = true,
 ) {
     when (LocalSkin.current.library) {
-        Library.Material3 -> {
+        SkinLibrary.Material3 -> {
             MaterialFilterChip(selected, onSelectedChange, label, modifier, icon, enabled)
         }
-        Library.Unstyled -> {
-            HeadlessFilterChip(selected, onSelectedChange, label, UnstyledActionStyles.chip, modifier, icon, enabled)
-        }
-        Library.Fluent -> {
-            FluentFilterChip(selected, onSelectedChange, label, modifier, icon, enabled)
-        }
-        Library.Custom -> {
+        SkinLibrary.Custom -> {
             HeadlessFilterChip(selected, onSelectedChange, label, CustomActionStyles.chip, modifier, icon, enabled)
         }
     }

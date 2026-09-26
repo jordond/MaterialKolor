@@ -19,15 +19,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.icon.IconId
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.FluentListRow
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.CustomActionStyles
 import com.materialkolor.builder.kit.skin.headless.ListRowStyle
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
-import com.materialkolor.builder.kit.skin.headless.UnstyledActionStyles
 import com.materialkolor.builder.kit.skin.headless.actionSurface
 import com.materialkolor.builder.kit.skin.headless.controlPress
 import com.materialkolor.builder.kit.skin.headless.controlRing
@@ -72,20 +70,14 @@ public fun BuilderListRow(
 ) {
     val row = ListRowContent(headline, supporting, icon, leading, onClick, selected, enabled, trailing, dense)
     when (LocalSkin.current.library) {
-        Library.Material3 -> {
+        SkinLibrary.Material3 -> {
             if (dense) {
                 HeadlessListRow(row, materialDenseRowStyle(), modifier)
             } else {
                 MaterialListRow(row, modifier)
             }
         }
-        Library.Unstyled -> {
-            HeadlessListRow(row, UnstyledActionStyles.listRow, modifier)
-        }
-        Library.Fluent -> {
-            FluentListRow(row, modifier)
-        }
-        Library.Custom -> {
+        SkinLibrary.Custom -> {
             HeadlessListRow(row, CustomActionStyles.listRow, modifier)
         }
     }

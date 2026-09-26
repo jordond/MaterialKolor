@@ -10,8 +10,8 @@ import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.assertions.withClue
 import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.shouldBe
@@ -25,7 +25,7 @@ class TooltipPlacementTest {
             withClue(if (inTree) "in tree" else "in windows") {
                 runComposeUiTest {
                     setContent {
-                        HostOverlays(Skin(Library.Material3, expressive = false), inTree) {
+                        HostOverlays(Skin(SkinLibrary.Material3, expressive = false), inTree) {
                             Box(Modifier.testTag("frame").size(200.dp)) {
                                 BuilderTooltip("Copy", Modifier.align(Alignment.BottomEnd)) {
                                     Box(Modifier.testTag("anchor").size(40.dp))

@@ -61,6 +61,7 @@ import com.materialkolor.builder.kit.control.tabOntoRing
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.motion.LocalTabVisible
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -74,8 +75,8 @@ import kotlin.test.Test
  * The Material3 skin in both of its flavours, the flat one first.
  */
 private val Flavours: List<Skin> = listOf(
-    Skin(Library.Material3, expressive = false),
-    Skin(Library.Material3, expressive = true),
+    Skin(SkinLibrary.Material3, expressive = false),
+    Skin(SkinLibrary.Material3, expressive = true),
 )
 
 /**
@@ -210,7 +211,7 @@ class MaterialExpressiveChromeTest {
         for (chosen in Modes) {
             withClue(chosen) {
                 runComposeUiTest {
-                    val capture = tabOntoRing(Skin(Library.Material3, expressive = true)) {
+                    val capture = tabOntoRing(Skin(SkinLibrary.Material3, expressive = true)) {
                         BuilderSegmented(
                             options = Modes,
                             selected = chosen,
@@ -276,7 +277,7 @@ class MaterialExpressiveChromeTest {
                 runComposeUiTest {
                     mainClock.autoAdvance = false
                     setContent {
-                        ControlsHarness(Skin(Library.Material3, expressive = true)) {
+                        ControlsHarness(Skin(SkinLibrary.Material3, expressive = true)) {
                             CompositionLocalProvider(
                                 LocalMotionFrozen provides frozen,
                                 LocalTabVisible provides visible,

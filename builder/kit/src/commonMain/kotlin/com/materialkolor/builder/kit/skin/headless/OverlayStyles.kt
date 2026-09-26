@@ -104,17 +104,6 @@ internal class OverlayStyle(
 internal const val ScrimAlpha: Float = 0.6f
 
 /**
- * How strongly Unstyled's ink veils a row under the pointer, in its menus and on any plain
- * clickable through its indication.
- */
-internal const val UnstyledHighlightAlpha: Float = 0.06f
-
-/**
- * How strongly Unstyled's ink veils a selected row, and a plain clickable while it is pressed.
- */
-internal const val UnstyledSelectedAlpha: Float = 0.1f
-
-/**
  * The sizes every skin gives its overlays alike.
  *
  * Every skin gives each one the same value, so none of them became a builder token. A size that
@@ -196,39 +185,6 @@ internal object OverlayMetrics {
      */
     val thumbThickness: Dp = 6.dp
     val thumbInset: Dp = 2.dp
-}
-
-/**
- * Unstyled keeps to hairlines and small corners, and floats nothing.
- */
-internal fun unstyledOverlayStyle(tokens: BuilderTokens): OverlayStyle {
-    val hairline = BorderStroke(tokens.outlineWidth, tokens.border)
-    return OverlayStyle(
-        surface = tokens.panel,
-        content = tokens.textStrong,
-        muted = tokens.textMuted,
-        border = hairline,
-        popoverShape = RoundedCornerShape(tokens.radius.small),
-        dialogShape = RoundedCornerShape(tokens.radius.small),
-        panelRadius = 0.dp,
-        drawerRadius = tokens.radius.small,
-        divider = tokens.border,
-        shadow = 0.dp,
-        scrim = tokens.scrim,
-        itemShape = RoundedCornerShape(tokens.radius.small),
-        highlight = tokens.textStrong.copy(alpha = UnstyledHighlightAlpha),
-        selected = tokens.textStrong.copy(alpha = UnstyledSelectedAlpha),
-        focus = tokens.focus,
-        field = tokens.panel,
-        fieldBorder = BorderStroke(tokens.outlineWidth, tokens.borderStrong),
-        tooltip = tokens.textStrong,
-        tooltipContent = tokens.panel,
-        tooltipBorder = null,
-        toast = tokens.panelRaised,
-        toastContent = tokens.textStrong,
-        toastBorder = hairline,
-        thumb = tokens.borderStrong,
-    )
 }
 
 /**

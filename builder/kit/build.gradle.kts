@@ -21,16 +21,12 @@ kotlin {
             api(project(":builder:codegen"))
 
             implementation(materialKolor("material3"))
-            implementation(materialKolor("unstyled"))
-            implementation(materialKolor("fluent"))
 
             implementation(libs.compose.foundation)
             implementation(libs.compose.resources)
             implementation(libs.compose.material3)
             implementation(libs.composeUnstyled)
-            implementation(libs.composeUnstyled.theming)
             implementation(libs.lucide)
-            implementation(libs.fluent)
         }
 
         jvmTest.dependencies {

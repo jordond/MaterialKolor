@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.window.PopupPositionProvider
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.skin.LocalSkin
 import kotlinx.coroutines.flow.drop
 
@@ -283,25 +282,6 @@ internal fun inTreeOverlayHost(): OverlayHostState? {
 @Composable
 internal fun currentOverlayHost(): OverlayHostState? =
     if (LocalOverlaysInTree.current) LocalOverlayHost.current else null
-
-/**
- * The library a control that may hold a popup or dialog window draws itself in.
- *
- * `BuilderTheme` carries its content across a skin switch, so a `BoxWithConstraints` in it composes
- * its content again while it is being measured. A window closed there crashes the desktop scene,
- * which is still laying the window out. So where overlays open windows the library
- * follows the skin one composition late, and the old window closes in a composition of its own.
- * On desktop that means the control draws one frame in the old library after a switch. In the page
- * the library follows the skin at once.
- */
-@Composable
-internal fun overlayLibrary(): Library {
-    val library = LocalSkin.current.library
-    if (LocalOverlaysInTree.current) return library
-    val settled = remember { mutableStateOf(library) }
-    SideEffect { settled.value = library }
-    return settled.value
-}
 
 /**
  * Hosts the overlays over [content] when they render in the page.

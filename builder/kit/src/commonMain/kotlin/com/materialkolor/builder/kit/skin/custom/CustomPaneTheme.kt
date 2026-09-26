@@ -2,17 +2,17 @@ package com.materialkolor.builder.kit.skin.custom
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.engine.resolve.CustomSlotColors
 import com.materialkolor.builder.kit.headless.OverlayHost
 import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.skin.LocalSkin
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 
 /**
  * The skin a Custom pane uses, which has no Expressive flavour.
  */
-private val PaneSkin = Skin(Library.Custom, expressive = false)
+private val PaneSkin = Skin(SkinLibrary.Custom, expressive = false)
 
 /**
  * The Custom skin for a preview pane, drawn from the pane's own slots instead of the chrome's.

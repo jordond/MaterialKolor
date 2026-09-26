@@ -13,7 +13,6 @@ import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.DpRect
 import com.materialkolor.builder.domain.color.Argb
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.poster.PosterColors
 import com.materialkolor.builder.engine.resolve.ThemeResolver
@@ -21,6 +20,7 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 
 internal const val ShellPosterTag = "shell-poster"
 internal const val ShellCanvasTag = "shell-canvas"
@@ -42,11 +42,9 @@ internal val ShellPosterColors: PosterColors = PosterColors.of(Argb(0xD9653B))
  * Every skin the shell is drawn in, named for the screenshot files.
  */
 internal val ShellSkins: List<Pair<String, Skin>> = listOf(
-    "material3" to Skin(Library.Material3, expressive = false),
-    "expressive" to Skin(Library.Material3, expressive = true),
-    "unstyled" to Skin(Library.Unstyled, expressive = false),
-    "custom" to Skin(Library.Custom, expressive = false),
-    "fluent" to Skin(Library.Fluent, expressive = false),
+    "material3" to Skin(SkinLibrary.Material3, expressive = false),
+    "expressive" to Skin(SkinLibrary.Material3, expressive = true),
+    "custom" to Skin(SkinLibrary.Custom, expressive = false),
 )
 
 /**

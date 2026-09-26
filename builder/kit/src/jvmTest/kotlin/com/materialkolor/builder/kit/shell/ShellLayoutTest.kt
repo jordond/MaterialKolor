@@ -31,13 +31,13 @@ import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.height
 import androidx.compose.ui.unit.width
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.engine.mapping.toColor
 import com.materialkolor.builder.kit.layout.CanvasContentCap
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.PosterMode
 import com.materialkolor.builder.kit.layout.WideBreakpoint
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
@@ -53,7 +53,7 @@ private const val ShellPaletteTag = "shell-palette"
 private val ShellMargin = 12.dp
 private val ShellDockLift = 16.dp
 private val ShellTopBar = 64.dp
-private val ShellSkin = Skin(Library.Material3, expressive = false)
+private val ShellSkin = Skin(SkinLibrary.Material3, expressive = false)
 
 /**
  * One window size and the poster treatment the shell gives it.

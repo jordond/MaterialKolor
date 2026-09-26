@@ -16,7 +16,6 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
@@ -26,6 +25,7 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.assertions.withClue
 
@@ -33,11 +33,9 @@ import io.kotest.assertions.withClue
  * Every skin the controls dispatch to, each named so a failure says which one.
  */
 internal val ControlSkins: List<Pair<String, Skin>> = listOf(
-    "material3" to Skin(Library.Material3, expressive = false),
-    "expressive" to Skin(Library.Material3, expressive = true),
-    "unstyled" to Skin(Library.Unstyled, expressive = false),
-    "custom" to Skin(Library.Custom, expressive = false),
-    "fluent" to Skin(Library.Fluent, expressive = false),
+    "material3" to Skin(SkinLibrary.Material3, expressive = false),
+    "expressive" to Skin(SkinLibrary.Material3, expressive = true),
+    "custom" to Skin(SkinLibrary.Custom, expressive = false),
 )
 
 /**
@@ -100,11 +98,9 @@ internal fun hostEachWay(block: suspend ComposeUiTest.(skin: Skin, inTree: Boole
 internal enum class SkinVariant(
     val skin: Skin,
 ) {
-    Material3(Skin(Library.Material3, expressive = false)),
-    Expressive(Skin(Library.Material3, expressive = true)),
-    Unstyled(Skin(Library.Unstyled, expressive = false)),
-    Custom(Skin(Library.Custom, expressive = false)),
-    Fluent(Skin(Library.Fluent, expressive = false)),
+    Material3(Skin(SkinLibrary.Material3, expressive = false)),
+    Expressive(Skin(SkinLibrary.Material3, expressive = true)),
+    Custom(Skin(SkinLibrary.Custom, expressive = false)),
 }
 
 private val Document = ThemeDocument(seed = Argb(0x6750A4))

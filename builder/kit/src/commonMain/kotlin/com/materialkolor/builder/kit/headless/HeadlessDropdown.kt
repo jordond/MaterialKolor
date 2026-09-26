@@ -80,8 +80,7 @@ import kotlin.math.max
 
 /**
  * Whether a menu or a select opened here comes up in a window of its own, as it does on the desktop,
- * rather than in the page the way the web draws it. A pick that changes the skin waits for such
- * a window to close first, and anywhere else it can act at once.
+ * rather than in the page the way the web draws it.
  */
 public val menusOpenAsWindows: Boolean
     @Composable

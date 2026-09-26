@@ -2,13 +2,11 @@ package com.materialkolor.builder.kit.control
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.kit.headless.HeadlessMenuPanel
 import com.materialkolor.builder.kit.headless.HeadlessSelectPanel
 import com.materialkolor.builder.kit.skin.LocalSkin
-import com.materialkolor.builder.kit.skin.fluent.fluentOverlayStyle
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.skin.headless.customOverlayStyle
-import com.materialkolor.builder.kit.skin.headless.unstyledOverlayStyle
 import com.materialkolor.builder.kit.skin.material.MaterialMenuPanel
 import com.materialkolor.builder.kit.skin.material.MaterialSelectPanel
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
@@ -31,10 +29,8 @@ public fun BuilderMenuPanel(
 ) {
     val tokens = LocalBuilderTokens.current
     when (LocalSkin.current.library) {
-        Library.Material3 -> MaterialMenuPanel(items, modifier)
-        Library.Unstyled -> HeadlessMenuPanel(items, unstyledOverlayStyle(tokens), modifier)
-        Library.Fluent -> HeadlessMenuPanel(items, fluentOverlayStyle(tokens), modifier)
-        Library.Custom -> HeadlessMenuPanel(items, customOverlayStyle(tokens), modifier)
+        SkinLibrary.Material3 -> MaterialMenuPanel(items, modifier)
+        SkinLibrary.Custom -> HeadlessMenuPanel(items, customOverlayStyle(tokens), modifier)
     }
 }
 
@@ -66,26 +62,8 @@ public fun <T> BuilderSelectPanel(
     require(selected in options) { "The selected option $selected is not one of the options" }
     val tokens = LocalBuilderTokens.current
     when (LocalSkin.current.library) {
-        Library.Material3 -> MaterialSelectPanel(label, options, selected, onSelect, optionLabel, modifier)
-        Library.Unstyled -> HeadlessSelectPanel(
-            label,
-            options,
-            selected,
-            onSelect,
-            optionLabel,
-            unstyledOverlayStyle(tokens),
-            modifier,
-        )
-        Library.Fluent -> HeadlessSelectPanel(
-            label,
-            options,
-            selected,
-            onSelect,
-            optionLabel,
-            fluentOverlayStyle(tokens),
-            modifier,
-        )
-        Library.Custom -> HeadlessSelectPanel(
+        SkinLibrary.Material3 -> MaterialSelectPanel(label, options, selected, onSelect, optionLabel, modifier)
+        SkinLibrary.Custom -> HeadlessSelectPanel(
             label,
             options,
             selected,

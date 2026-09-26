@@ -22,7 +22,7 @@ public val LocalBuilderMotion: ProvidableCompositionLocal<BuilderMotion> = stati
  * True when animation has to be deterministic.
  *
  * Screenshot runs and unit tests set it, and so does `?motion=frozen` when the browser says it is
- * driving itself. Under it a skin switch applies with no capture and no reveal, and
+ * driving itself. Under it a library switch applies with no capture and no reveal, and
  * [rememberLoopPhase] holds still.
  */
 public val LocalMotionFrozen: ProvidableCompositionLocal<Boolean> = staticCompositionLocalOf { false }

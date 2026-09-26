@@ -24,7 +24,6 @@ import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
-import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.kit.icon.IconId
@@ -33,6 +32,7 @@ import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.motion.LocalMotionFrozen
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import com.materialkolor.builder.kit.skin.Skin
+import com.materialkolor.builder.kit.skin.SkinLibrary
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -50,23 +50,15 @@ private val CompactLayout = LayoutInfo.of(widthDp = 400.dp, heightDp = 800.dp)
 class ControlsAContrastTest {
     @Test
     fun material3_bothModes_renderEveryControlEnabledAndDisabled() =
-        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = false)) }
+        runComposeUiTest { checkSheets(Skin(SkinLibrary.Material3, expressive = false)) }
 
     @Test
     fun material3Expressive_bothModes_renderEveryControlEnabledAndDisabled() =
-        runComposeUiTest { checkSheets(Skin(Library.Material3, expressive = true)) }
-
-    @Test
-    fun unstyled_bothModes_renderEveryControlEnabledAndDisabled() =
-        runComposeUiTest { checkSheets(Skin(Library.Unstyled, expressive = false)) }
+        runComposeUiTest { checkSheets(Skin(SkinLibrary.Material3, expressive = true)) }
 
     @Test
     fun custom_bothModes_renderEveryControlEnabledAndDisabled() =
-        runComposeUiTest { checkSheets(Skin(Library.Custom, expressive = false)) }
-
-    @Test
-    fun fluentPlaceholder_bothModes_renderEveryControlEnabledAndDisabled() =
-        runComposeUiTest { checkSheets(Skin(Library.Fluent, expressive = false)) }
+        runComposeUiTest { checkSheets(Skin(SkinLibrary.Custom, expressive = false)) }
 }
 
 /**
