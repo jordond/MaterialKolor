@@ -5,9 +5,6 @@ import com.materialkolor.builder.core.data.ProjectRepository
 import com.materialkolor.builder.core.platform.StoreError
 import com.materialkolor.builder.domain.persist.ProjectRecord
 import com.materialkolor.builder.domain.persist.ProjectViewState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -16,8 +13,8 @@ import kotlinx.coroutines.withContext
 /**
  * The write path of [ProjectSession], where its autosaves go into storage.
  *
- * It keeps the [status] the session publishes, and only the newest save of the project showing
- * reports into it. The first save of a project opened from a link gives it an id here. What that
+ * It sets the save status the session publishes through [setStatus], and only the newest save of
+ * the project showing reports into it. The first save of a project opened from a link gives it an id here. What that
  * changes about the open project, its ref, the tab's project and the watch on other tabs, is up to
  * the session through [materialized].
  *
@@ -27,6 +24,7 @@ import kotlinx.coroutines.withContext
  * @param[conflicted] Whether a conflict with another tab's save is up.
  * @param[viewState] How the preview of the project showing is set up.
  * @param[materialized] Called once a project from a link has its id, before its history is saved.
+ * @param[setStatus] Publishes whether the open project is saved.
  */
 internal class SessionWrites(
     private val projects: ProjectRepository,
@@ -36,24 +34,18 @@ internal class SessionWrites(
     private val conflicted: () -> Boolean,
     private val viewState: () -> ProjectViewState,
     private val materialized: suspend (open: OpenProject, id: String) -> Unit,
+    private val setStatus: (SaveStatus) -> Unit,
 ) {
-    private val _status = MutableStateFlow<SaveStatus>(SaveStatus.Idle)
-
     /**
      * The number of the newest save handed to autosave. Only the UI thread reads or writes it.
      */
     private var newestSave = 0L
 
     /**
-     * Whether the open project is saved. A failure comes after the repository pruned and tried again.
-     */
-    val status: StateFlow<SaveStatus> = _status.asStateFlow()
-
-    /**
      * Mark a new save as waiting and hand back its number. Call it on the UI thread.
      */
     fun nextSave(): Long {
-        _status.value = SaveStatus.Pending
+        setStatus(SaveStatus.Pending)
         return ++newestSave
     }
 
@@ -61,7 +53,7 @@ internal class SessionWrites(
      * Show [status] straight away, when another project shows or a new one could not be saved.
      */
     fun resetStatus(status: SaveStatus) {
-        _status.value = status
+        setStatus(status)
     }
 
     /**
@@ -76,7 +68,7 @@ internal class SessionWrites(
 
     suspend fun writeView(pending: PendingView): Boolean {
         // A transient project has nowhere to keep its view yet. Its first save writes it.
-        val id = pending.project.id.value ?: return true
+        val id = pending.project.facts.value.id ?: return true
         return projects.saveViewState(id, pending.state) == null
     }
 
@@ -89,11 +81,11 @@ internal class SessionWrites(
         error: StoreError?,
     ) {
         if (showing() !== save.project || save.sequence != newestSave) return
-        _status.value = if (error != null) SaveStatus.Failed(error) else SaveStatus.Idle
+        setStatus(if (error != null) SaveStatus.Failed(error) else SaveStatus.Idle)
     }
 
     private suspend fun persist(save: PendingSave): StoreError? {
-        val id = save.project.id.value ?: return materialize(save)
+        val id = save.project.facts.value.id ?: return materialize(save)
         saveRecord(id, save)?.let { error -> return error }
         return saveHistory(id, save)
     }
@@ -103,13 +95,12 @@ internal class SessionWrites(
      */
     private suspend fun materialize(save: PendingSave): StoreError? {
         val open = save.project
-        val creation = projects.create(open.name.value, save.document, save.colors.previewColors)
+        val creation = projects.create(open.facts.value.name, save.document, save.colors.previewColors)
         val record = when (creation) {
             is Creation.Created -> creation.record
             is Creation.Failed -> return creation.error
         }
-        open.id.value = record.id
-        open.held.value = record
+        open.facts.update { facts -> facts.copy(id = record.id, held = record) }
         val view = if (showing() === open) viewState() else ProjectViewState()
         if (view != ProjectViewState()) projects.saveViewState(record.id, view)
         materialized(open, record.id)
@@ -121,15 +112,16 @@ internal class SessionWrites(
         save: PendingSave,
     ): StoreError? {
         val open = save.project
-        val name = open.name.value
-        val held = open.held.value
+        val facts = open.facts.value
+        val name = facts.name
+        val held = facts.held
         if (held != null && held.document == save.document && held.name == name) return null
         val record = held?.copy(name = name, document = save.document)
             ?: ProjectRecord(id, name, save.document, revision = 0, writerTab = tabId)
         val error = projects.save(record, save.colors.previewColors)
         if (error == null) {
             val saved = record.copy(revision = record.revision + 1)
-            open.held.update { latest -> if (latest === held) saved else latest }
+            open.facts.update { latest -> if (latest.held === held) latest.copy(held = saved) else latest }
         }
         return error
     }
@@ -139,9 +131,9 @@ internal class SessionWrites(
         save: PendingSave,
     ): StoreError? {
         val open = save.project
-        if (open.savedHistory.value == save.history) return null
+        if (open.facts.value.savedHistory == save.history) return null
         val error = projects.saveHistory(id, save.history)
-        if (error == null) open.savedHistory.value = save.history
+        if (error == null) open.facts.update { facts -> facts.copy(savedHistory = save.history) }
         return error
     }
 }

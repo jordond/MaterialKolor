@@ -24,30 +24,31 @@ internal class OpenProject(
     parent: Job?,
 ) {
     /**
-     * The project's id, null until a transient project is first saved.
+     * What this tab knows of the project, read with `facts.value` and changed with `facts.update`, so
+     * the fields that move together move in one write.
      */
-    val id = MutableStateFlow(id)
-
-    /**
-     * The name the next save writes.
-     */
-    val name = MutableStateFlow(name)
-
-    /**
-     * The record as this tab last saved or read it, null before the first save.
-     */
-    val held = MutableStateFlow(held)
-
-    /**
-     * The history as it was last saved, so one that did not change is not written again.
-     */
-    val savedHistory = MutableStateFlow<HistoryRecord?>(null)
+    val facts = MutableStateFlow(ProjectFacts(id, name, held, savedHistory = null))
 
     /**
      * Watches other tabs while the project is showing.
      */
     val job = SupervisorJob(parent)
 }
+
+/**
+ * What an [OpenProject] knows of itself.
+ *
+ * @property[id] The project's id, null until a transient project is first saved.
+ * @property[name] The name the next save writes.
+ * @property[held] The record as this tab last saved or read it, null before the first save.
+ * @property[savedHistory] The history as it was last saved, so one that did not change is not written again.
+ */
+internal data class ProjectFacts(
+    val id: String?,
+    val name: String,
+    val held: ProjectRecord?,
+    val savedHistory: HistoryRecord?,
+)
 
 /**
  * A save of [project] waiting for autosave.

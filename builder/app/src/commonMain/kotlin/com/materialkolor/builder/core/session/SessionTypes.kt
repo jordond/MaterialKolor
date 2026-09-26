@@ -36,13 +36,13 @@ internal sealed interface ProjectRef {
 }
 
 /**
- * The document showing and the number of the project it belongs to, published as one value so no
- * reader ever pairs one project's document with another project's number.
+ * The document showing and the number of the project it belongs to. Both are read from the one
+ * [SessionState] the session publishes, so they always belong to the same project.
  *
  * @property[document] The theme being edited.
  * @property[generation] Counts the projects this tab has shown. It moves by one each time `open`,
- * `openShared` or `newProject` shows another, in the same value as the document that project brings.
- * Saving a project opened from a link keeps its number, since it is still the same project.
+ * `openShared` or `newProject` shows another. Saving a project opened from a link keeps its number,
+ * since it is still the same project.
  */
 internal data class ShownDocument(
     val document: ThemeDocument,

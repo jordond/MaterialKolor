@@ -10,6 +10,7 @@ import com.materialkolor.builder.core.platform.Router
 import com.materialkolor.builder.core.session.HistoryState
 import com.materialkolor.builder.core.session.ProjectSession
 import com.materialkolor.builder.core.session.SaveStatus
+import com.materialkolor.builder.core.session.SessionState
 import com.materialkolor.builder.core.session.Timeline
 import com.materialkolor.builder.di.AppScope
 import com.materialkolor.builder.domain.capability.Capabilities
@@ -51,7 +52,7 @@ import kotlin.random.Random
  * The capabilities always come from the document they sit next to. An edit made here updates both
  * before it returns, so a control the new target cannot use is disabled in the frame the target
  * changes, whatever dispatcher the model runs on. Changes from elsewhere, another tab or a boot,
- * arrive through the session's flows.
+ * arrive through the session's state.
  *
  * Opening a panel adds one history entry to the address bar, so Back closes it.
  */
@@ -68,27 +69,22 @@ internal class WorkspaceModel(
     private val resolver: ThemeResolver,
 ) : StateViewModel<WorkspaceModel.State>(
         State(
-            document = session.shown.value.document,
-            capabilities = capabilitiesOf(session.shown.value.document),
-            history = session.history.value,
-            view = session.viewState.value,
+            document = session.state.value.document,
+            capabilities = capabilitiesOf(session.state.value.document),
+            history = session.state.value.history,
+            view = session.state.value.view,
             preferences = preferences.preferences.value,
-            saveStatus = session.saveStatus.value,
-            projectGeneration = session.shown.value.generation,
+            saveStatus = session.state.value.saveStatus,
+            projectGeneration = session.state.value.generation,
         ),
     ) {
     init {
-        // The session publishes the document and its project's number as one value, so no state here
-        // ever pairs one project's document with another project's number, whatever order things run in.
-        session.shown.mergeState { state, shown ->
-            state.withDocument(shown.document).withGeneration(shown.generation).withTimeline()
-        }
-        session.history.mergeState { state, history -> state.copy(history = history).withTimeline() }
-        session.viewState.mergeState { state, view -> state.copy(view = view) }
+        // The session publishes the open project as one value, so no state here ever pairs one
+        // project's document with another project's number or view, whatever order things run in.
+        session.state.mergeState { state, open -> state.following(open) }
         preferences.preferences.mergeState { state, prefs -> state.copy(preferences = prefs) }
         router.overlayPops.mergeState { state, _ -> state.copy(panel = null, pickerTarget = null, timeline = null) }
         session.projectName.mergeState { state, name -> state.copy(projectName = name) }
-        session.saveStatus.mergeState { state, status -> state.copy(saveStatus = status) }
     }
 
     /**
@@ -319,17 +315,28 @@ internal class WorkspaceModel(
      * Read the session back into the state at once, so nothing waits on a collector.
      */
     private fun syncSession(expressiveSuggestion: Boolean) {
-        val shown = session.shown.value
-        val history = session.history.value
+        val open = session.state.value
         updateState { state ->
             state
-                .withDocument(shown.document)
-                .withGeneration(shown.generation)
+                .withDocument(open.document)
+                .withGeneration(open.generation)
                 .copy(
-                    history = history,
+                    history = open.history,
                     expressiveSuggestion = expressiveSuggestion,
                 ).withTimeline()
         }
+    }
+
+    /**
+     * This state following the session's [open] project. The steps are built again only when the
+     * document, the project or the history moved, so a change of view or save status leaves them be.
+     */
+    private fun State.following(open: SessionState): State {
+        val moved = open.document != document || open.generation != projectGeneration || open.history != history
+        val next = withDocument(open.document)
+            .withGeneration(open.generation)
+            .copy(history = open.history, view = open.view, saveStatus = open.saveStatus)
+        return if (moved) next.withTimeline() else next
     }
 
     /**
@@ -345,7 +352,7 @@ internal class WorkspaceModel(
 
     private fun updateView(block: (ProjectViewState) -> ProjectViewState) {
         session.updateView(block)
-        val view = session.viewState.value
+        val view = session.state.value.view
         updateState { state -> state.copy(view = view) }
     }
 
@@ -370,7 +377,7 @@ internal class WorkspaceModel(
      * @property[projectGeneration] Counts the projects this tab has shown, one more each time another
      * opens. It changes in the same state as the document the new project brings, so anything that
      * belongs to one project can tell a new project from an edit. Both come from the session's one
-     * `shown` value, so the pair holds whatever order the collectors run in.
+     * state, so the pair holds whatever order the collectors run in.
      * @property[expressiveSuggestion] Whether the top bar offers the Expressive style on the 2025
      * spec after a switch to Expressive.
      * @property[rampHighlight] What the Palettes tab picks out after Show on ramp, with the project
