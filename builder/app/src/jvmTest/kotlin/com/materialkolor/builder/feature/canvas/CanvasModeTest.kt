@@ -106,7 +106,7 @@ class CanvasModeTest {
             setContent { Canvas(host) }
             waitForIdle()
 
-            host.state = host.state.copy(view = host.state.view.copy(splitFraction = 0.8f))
+            host.state = host.state.withView(host.state.view.copy(splitFraction = 0.8f))
             waitForIdle()
 
             handleFraction() shouldBe (0.8f plusOrMinus 0.001f)
@@ -223,9 +223,9 @@ class CanvasModeTest {
             onNode(SplitHandle).performSemanticsAction(SemanticsActions.SetProgress) { move -> move(0.25f) }
             mainClock.advanceTimeByFrame()
             // Leaving Split keeps the save waiting, and the handle stays put for the save from elsewhere.
-            host.state = host.state.copy(view = host.state.view.copy(mode = PreviewMode.Dark))
+            host.state = host.state.withView(host.state.view.copy(mode = PreviewMode.Dark))
             mainClock.advanceTimeByFrame()
-            host.state = host.state.copy(view = host.state.view.copy(splitFraction = 0.8f))
+            host.state = host.state.withView(host.state.view.copy(splitFraction = 0.8f))
             mainClock.advanceTimeBy(HANDLE_SETTLE_MILLIS * 2)
 
             host.savedFractions shouldBe emptyList()
