@@ -128,7 +128,7 @@ class LibrarySymbolsTest {
     private fun importedNames(): Set<String> {
         val roots = listOf("material-kolor-core", "material-kolor-material3", "material-kolor-unstyled")
             .plus(listOf("material-kolor-fluent", "material-kolor-palette", "samples"))
-            .plus(listOf("builder/app", "builder/kit", "builder/preview"))
+            .plus(listOf("builder/shared", "builder/kit", "builder/preview"))
             .map { File(root, it) }
 
         val sources = roots.flatMap { dir ->

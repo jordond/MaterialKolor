@@ -1,7 +1,6 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.compose.ComposeExtension
-import org.jetbrains.compose.desktop.DesktopExtension
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode
 
@@ -9,7 +8,6 @@ plugins {
     id("materialkolor.builder.compose")
     alias(libs.plugins.metro)
     alias(libs.plugins.buildKonfig)
-    alias(libs.plugins.compose.hot.reload)
     alias(libs.plugins.kotlinx.serialization)
 }
 
@@ -31,14 +29,14 @@ buildkonfig {
 }
 
 kotlin {
-    // Everything here is internal apart from the entry point, the platform interfaces the web module
-    // implements and the in-memory stores it borrows, so the explicit API mode the builder convention
+    // Everything here is internal apart from the entry point, the platform interfaces the apps
+    // implement and the in-memory stores they borrow, so the explicit API mode the builder convention
     // turns on is off again. ArchitectureTest keeps the rest internal instead.
     explicitApi = ExplicitApiMode.Disabled
 
     // Compose UI tests on wasm only get the Skiko runtime when webpack bundles them, and that only
     // happens for a target with an executable (CMP-4906). Nothing ships from it, the site is built
-    // by `:builder:web`.
+    // by `:builder:apps:web`.
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         binaries.executable()
@@ -46,7 +44,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // The platform interfaces name domain types and flows, and `:builder:web` implements them.
+            // The platform interfaces name domain types and flows, and the apps implement them.
             api(project(":builder:domain"))
             api(libs.kotlinx.coroutines.core)
             api(libs.compose.ui)
@@ -66,16 +64,8 @@ kotlin {
             implementation(libs.stateHolder.dispatcher.compose)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.viewmodel.compose)
-            implementation(libs.kstore)
             implementation(libs.kermit)
             implementation(libs.kotlinx.collections)
-        }
-
-        jvmMain.dependencies {
-            implementation(composeExtension.dependencies.desktop.currentOs)
-            implementation(libs.kotlinx.coroutines.swing)
-            implementation(libs.kstore.file)
-            implementation(libs.filekit.dialogs)
         }
 
         commonMain.dependencies {
@@ -87,6 +77,8 @@ kotlin {
         }
 
         jvmTest.dependencies {
+            implementation(composeExtension.dependencies.desktop.currentOs)
+            implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.compose.ui.test)
         }
@@ -96,10 +88,6 @@ kotlin {
             implementation(libs.compose.ui.test)
         }
     }
-}
-
-composeExtension.extensions.getByType<DesktopExtension>().application {
-    mainClass = "com.materialkolor.builder.desktop.MainKt"
 }
 
 // The session's strings are the first in this module. `Res` stays internal like the rest.
@@ -115,24 +103,16 @@ tasks.named<Test>("jvmTest") {
         .files(
             fileTree(rootDir.resolve("builder")) {
                 // The modules ArchitectureTest's BUILDER_MODULES lists.
-                listOf("domain", "codegen", "engine", "kit", "preview", "app", "web").forEach { module ->
-                    include("$module/src/*/kotlin/**/*.kt")
-                }
+                listOf("domain", "codegen", "engine", "kit", "preview", "shared", "apps/web", "apps/desktop")
+                    .forEach { module -> include("$module/src/*/kotlin/**/*.kt") }
             },
         ).withPathSensitivity(PathSensitivity.RELATIVE)
         .withPropertyName("builderSources")
 }
 
-// stateholder 3.1.0 ships Java 21 bytecode, so the JVM tests and the desktop `run` task start on a
-// 21 launcher while the module still compiles for 17.
+// stateholder 3.1.0 ships Java 21 bytecode, so the JVM tests start on a 21 launcher while the module
+// still compiles for 17.
 val java21Launcher = javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(21)) }
 tasks.withType<Test>().configureEach {
     javaLauncher.set(java21Launcher)
-}
-// Compose registers `run` after evaluation and points it at the JDK Gradle runs on. This swaps in the
-// 21 launcher when the task is configured, so only a build that runs the desktop app looks it up.
-afterEvaluate {
-    tasks.named<JavaExec>("run") {
-        executable(java21Launcher.get().executablePath.asFile.absolutePath)
-    }
 }

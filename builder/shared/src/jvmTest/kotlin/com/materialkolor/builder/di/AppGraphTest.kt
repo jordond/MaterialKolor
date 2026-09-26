@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.materialkolor.builder.BuilderApp
-import com.materialkolor.builder.desktop.DesktopPlatform
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.fakes.RouterCall
 import com.materialkolor.builder.feature.workspace.AppModel
@@ -26,22 +25,23 @@ import kotlin.test.Test
 class AppGraphTest {
     @Test
     fun themeResolver_readTwice_isOneInstance() {
-        val graph = createGraphFactory<AppGraph.Factory>().create(DesktopPlatform)
+        val graph = createGraphFactory<AppGraph.Factory>().create(FakePlatform())
 
         graph.themeResolver shouldBeSameInstanceAs graph.themeResolver
     }
 
     @Test
     fun environment_fromTheIncludedPlatform_isThePlatformsOwn() {
-        val graph = createGraphFactory<AppGraph.Factory>().create(DesktopPlatform)
+        val platform = FakePlatform()
+        val graph = createGraphFactory<AppGraph.Factory>().create(platform)
 
-        graph.environment shouldBeSameInstanceAs DesktopPlatform.environment
+        graph.environment shouldBeSameInstanceAs platform.environment
     }
 
     @Test
     fun metroViewModel_acrossRecompositions_keepsOneModel() =
         runComposeUiTest {
-            val graph = createGraphFactory<AppGraph.Factory>().create(DesktopPlatform)
+            val graph = createGraphFactory<AppGraph.Factory>().create(FakePlatform())
             val owner = TestOwner()
             val tick = mutableIntStateOf(0)
             val seen = mutableListOf<AppModel>()

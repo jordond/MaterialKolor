@@ -13,7 +13,7 @@ import kotlin.test.Test
  * Gradle already keeps UI libraries out of the modules that do not declare them. This catches what
  * slips through anyway, a scheme built outside the engine, browser interop outside the web shell,
  * `Dispatchers.IO`, an animation that would keep running while the tab sleeps, or a public
- * declaration in the app or the web shell.
+ * declaration in shared or an app.
  */
 class ArchitectureTest {
     @Test
@@ -51,9 +51,9 @@ class ArchitectureTest {
     }
 
     @Test
-    fun scan_uiLibraryImportInApp_reportsEachImport() {
+    fun scan_uiLibraryImportInShared_reportsEachImport() {
         val file = planted(
-            "app/src/commonMain",
+            "shared/src/commonMain",
             """
             import androidx.compose.material3.Text
             import com.composeunstyled.Button
@@ -65,9 +65,9 @@ class ArchitectureTest {
     }
 
     @Test
-    fun scan_fullyQualifiedUiLibraryUseInApp_reportsEachUse() {
+    fun scan_fullyQualifiedUiLibraryUseInShared_reportsEachUse() {
         val file = planted(
-            "app/src/commonMain",
+            "shared/src/commonMain",
             """
             private val scheme = androidx.compose.material3.MaterialTheme.colorScheme
             com.composeunstyled.Text("Hi")
@@ -103,7 +103,7 @@ class ArchitectureTest {
     @Test
     fun scan_browserInteropOutsideWeb_reportsEachUse() {
         val file = planted(
-            "app/src/wasmJsMain",
+            "shared/src/wasmJsMain",
             """
             private val now: Double = js("Date.now()")
             @JsFun("() => 1") private external fun one(): Int
@@ -117,7 +117,7 @@ class ArchitectureTest {
     @Test
     fun scan_browserInteropInWeb_passes() {
         val file = planted(
-            "web/src/wasmJsMain",
+            "apps/web/src/wasmJsMain",
             """
             import kotlinx.browser.window
             private val now: Double = js("Date.now()")
@@ -129,7 +129,7 @@ class ArchitectureTest {
 
     @Test
     fun scan_dispatchersIoEvenInWeb_isReported() {
-        val file = planted("web/src/wasmJsMain", "withContext(Dispatchers.IO) { load() }")
+        val file = planted("apps/web/src/wasmJsMain", "withContext(Dispatchers.IO) { load() }")
 
         scan(listOf(file)).map { violation -> violation.rule } shouldBe listOf(ArchitectureRule.DispatchersIo)
     }
@@ -160,7 +160,7 @@ class ArchitectureTest {
     @Test
     fun scan_patternOnlyInComments_passes() {
         val file = planted(
-            "app/src/commonMain",
+            "shared/src/commonMain",
             """
             // Never call DynamicScheme( here, the engine owns it.
             /**
@@ -175,7 +175,7 @@ class ArchitectureTest {
     @Test
     fun scan_patternInATrailingComment_passes() {
         val file = planted(
-            "app/src/commonMain",
+            "shared/src/commonMain",
             """
             private val roles = resolver.resolve(document) // never DynamicScheme( here
             private val theme = Theme() // not androidx.compose.material3.MaterialTheme either
@@ -188,15 +188,15 @@ class ArchitectureTest {
 
     @Test
     fun scan_codeAfterAUrl_isStillScanned() {
-        val file = planted("app/src/commonMain", "private val s = load(\"https://a.b\", DynamicScheme(seed))")
+        val file = planted("shared/src/commonMain", "private val s = load(\"https://a.b\", DynamicScheme(seed))")
 
         scan(listOf(file)).map { violation -> violation.rule } shouldBe listOf(ArchitectureRule.SchemeGeneration)
     }
 
     @Test
-    fun scan_publicTopLevelDeclarationInAppOrWeb_reportsEach() {
-        val app = planted(
-            "app/src/commonMain",
+    fun scan_publicTopLevelDeclarationInSharedOrAnApp_reportsEach() {
+        val shared = planted(
+            "shared/src/commonMain",
             """
             class Leaked
             data class Record(val a: Int)
@@ -206,22 +206,22 @@ class ArchitectureTest {
             """,
         )
         val web = planted(
-            "web/src/wasmJsMain",
+            "apps/web/src/wasmJsMain",
             """
             public object Stated
             typealias Alias = Int
             """,
         )
 
-        val rules = scan(listOf(app, web)).map { violation -> violation.rule }
+        val rules = scan(listOf(shared, web)).map { violation -> violation.rule }
 
         rules shouldBe List(7) { ArchitectureRule.PublicDeclaration }
     }
 
     @Test
-    fun scan_entryPointsAndHiddenDeclarationsInAppOrWeb_pass() {
-        val app = planted(
-            "app/src/commonMain",
+    fun scan_entryPointsAndHiddenDeclarationsInSharedOrAnApp_pass() {
+        val shared = planted(
+            "shared/src/commonMain",
             """
             @Composable
             fun BuilderApp(platform: PlatformServices) {}
@@ -235,9 +235,9 @@ class ArchitectureTest {
             internal data class Record(val a: Int)
             """,
         )
-        val web = planted("web/src/wasmJsMain", "fun main() {}\nprivate object Hidden")
+        val web = planted("apps/web/src/wasmJsMain", "fun main() {}\nprivate object Hidden")
 
-        scan(listOf(app, web)).shouldBeEmpty()
+        scan(listOf(shared, web)).shouldBeEmpty()
     }
 
     @Test
@@ -248,16 +248,19 @@ class ArchitectureTest {
     }
 
     @Test
-    fun scan_publicDeclarationOutsideAppAndWebOrInATest_passes() {
+    fun scan_publicDeclarationOutsideSharedAndTheAppsOrInATest_passes() {
         val kit = planted("kit/src/commonMain", "public class Skin")
-        val test = planted("app/src/jvmTest", "class AppGraphTest")
+        val test = planted("shared/src/jvmTest", "class AppGraphTest")
 
         scan(listOf(kit, test)).shouldBeEmpty()
     }
 
     @Test
     fun scan_violation_pointsAtItsLine() {
-        val file = planted("app/src/commonMain", "private val a = 1\nprivate val b = dynamicColorScheme(seed, false)")
+        val file = planted(
+            "shared/src/commonMain",
+            "private val a = 1\nprivate val b = dynamicColorScheme(seed, false)",
+        )
 
         val violations = scan(listOf(file))
 
@@ -306,7 +309,7 @@ internal enum class ArchitectureRule(
      */
     BrowserInterop(
         pattern = Regex("""(?<![\w.])js\(|@JsFun\b|\bkotlinx\.browser\b"""),
-        appliesTo = { file -> file.module != "web" },
+        appliesTo = { file -> file.module != "apps/web" },
     ),
 
     /**
@@ -326,9 +329,9 @@ internal enum class ArchitectureRule(
     ),
 
     /**
-     * The app and the web shell keep every top level declaration `internal` or `private`, apart from
-     * the entry points, the in-memory stores web borrows and the platform contract web implements.
-     * Explicit API mode is off in both modules, so this is what holds the line. It reads
+     * Shared and the apps keep every top level declaration `internal` or `private`, apart from the
+     * entry points, the in-memory stores the apps borrow and the platform contract they implement.
+     * Explicit API mode is off in all of them, so this is what holds the line. It reads
      * declarations that start at the first column, which is where ktlint leaves every top level one.
      */
     PublicDeclaration(
@@ -353,9 +356,10 @@ internal data class SourceFile(
     val text: String,
 ) {
     /**
-     * The builder module the file belongs to, `kit` for example.
+     * The builder module the file belongs to, as its directory under `builder`, `kit` or `apps/web`
+     * for example.
      */
-    val module: String = path.removePrefix("builder/").substringBefore('/')
+    val module: String = path.removePrefix("builder/").substringBefore("/src/")
 
     /**
      * The source set the file belongs to, `commonMain` for example.
@@ -427,11 +431,12 @@ private fun planted(
     code: String,
 ): SourceFile = SourceFile(path = "builder/$sourceRoot/kotlin/Planted.kt", text = code.trimIndent())
 
-private val BUILDER_MODULES = listOf("domain", "codegen", "engine", "kit", "preview", "app", "web")
+private val BUILDER_MODULES =
+    listOf("domain", "codegen", "engine", "kit", "preview", "shared", "apps/web", "apps/desktop")
 
 private val UI_LIBRARY_EXEMPT_MODULES = setOf("kit", "preview", "codegen")
 
-private val INTERNAL_ONLY_MODULES = setOf("app", "web")
+private val INTERNAL_ONLY_MODULES = setOf("shared", "apps/web", "apps/desktop")
 
 private val TRAILING_COMMENT = Regex("""(?<!:)//.*""")
 
@@ -439,4 +444,4 @@ private const val LOOP_PHASE_PATH =
     "builder/kit/src/commonMain/kotlin/com/materialkolor/builder/kit/motion/LoopPhase.kt"
 
 private const val PLATFORM_CONTRACT_PATH =
-    "builder/app/src/commonMain/kotlin/com/materialkolor/builder/core/platform/PlatformServices.kt"
+    "builder/shared/src/commonMain/kotlin/com/materialkolor/builder/core/platform/PlatformServices.kt"

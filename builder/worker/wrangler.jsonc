@@ -4,8 +4,8 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-08-15",
   "assets": {
-    // `./gradlew :builder:web:assembleSite` writes it.
-    "directory": "../web/build/site",
+    // `./gradlew :builder:apps:web:assembleSite` writes it.
+    "directory": "../apps/web/build/site",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
     // Only link previews run code, everything else is served straight from the site.

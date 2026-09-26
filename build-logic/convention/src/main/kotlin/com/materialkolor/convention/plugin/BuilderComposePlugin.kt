@@ -7,10 +7,10 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 /**
- * The Compose half of the builder, engine through to the app.
+ * The Compose half of the builder, engine through to shared.
  *
- * The app and the web module turn [org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension.explicitApi]
- * back off in their own build files.
+ * Shared turns [org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension.explicitApi] back off in
+ * its own build file.
  */
 class BuilderComposePlugin : Plugin<Project> {
     override fun apply(target: Project) {

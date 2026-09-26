@@ -10,7 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value=":builder:app:run" />
+          <option value=":builder:apps:desktop:run" />
         </list>
       </option>
       <option name="vmOptions" />

@@ -13,8 +13,9 @@ code.
 | `:builder:engine`       | Generates the color schemes with `material-kolor-core`, and picks seeds from images.  |
 | `:builder:kit`          | The design system: components, icons and the skins for each UI library.               |
 | `:builder:preview`      | The sample screens a theme is previewed on.                                           |
-| `:builder:app`          | Features, state and the platform interfaces, plus the desktop entry point.            |
-| `:builder:web`          | The wasm and JS entry point, browser interop and the site assembly.                   |
+| `:builder:shared`       | Features, state and the platform interfaces every app implements.                     |
+| `:builder:apps:web`     | The wasm and JS entry point, browser interop and the site assembly.                   |
+| `:builder:apps:desktop` | The desktop entry point, for development.                                             |
 | `builder/worker`        | The Cloudflare Worker that serves the site and draws link previews for `/t/` links.   |
 | `builder/e2e`           | Playwright tests and the perf run, against the assembled site.                        |
 | `builder/codegen-check` | A standalone Gradle build that compiles every exported golden.                        |
@@ -23,19 +24,19 @@ code.
 
 ```bash
 # Desktop
-./gradlew :builder:app:run
+./gradlew :builder:apps:desktop:run
 
 # Desktop with Compose Hot Reload
-./gradlew :builder:app:hotRunJvm
+./gradlew :builder:apps:desktop:hotRunJvm
 
 # Web, with the webpack dev server
-./gradlew :builder:web:wasmJsBrowserDevelopmentRun
+./gradlew :builder:apps:web:wasmJsBrowserDevelopmentRun
 
 # Web, the optimized build on the webpack dev server
-./gradlew :builder:web:wasmJsBrowserProductionRun
+./gradlew :builder:apps:web:wasmJsBrowserProductionRun
 
 # Web on the JS engine, then open the page with ?engine=js
-./gradlew :builder:web:jsBrowserDevelopmentRun
+./gradlew :builder:apps:web:jsBrowserDevelopmentRun
 ```
 
 ## MaterialKolor source
@@ -50,7 +51,7 @@ so the builder draws each theme with the same library the exported code compiles
 To run the site the way it ships, assemble it and serve it through the Worker:
 
 ```bash
-./gradlew :builder:web:assembleSite
+./gradlew :builder:apps:web:assembleSite
 cd builder/worker && npm ci && npm run dev
 ```
 

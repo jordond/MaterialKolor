@@ -7,7 +7,7 @@ import { servePerfSite, type PerfSite } from './serve-compressed';
 // The perf run against the budgets in `budgets.json`.
 // It only reports. Each number lands in `report/perf-report.json` and `report/summary.md` with its
 // budget, and a number it cannot take is null with the reason. Nothing here fails over a slow number,
-// only over a run that could not start. `first-visit-bytes` is gated by checkBudget in builder/web.
+// only over a run that could not start. `first-visit-bytes` is gated by checkBudget in builder/apps/web.
 //
 // Timings come from the page's own clock. The app leaves `mk:` marks through `Environment.mark`, a
 // wrapper around `requestAnimationFrame` times the work Compose does in each frame, and the Event

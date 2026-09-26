@@ -11,9 +11,10 @@ import com.materialkolor.builder.domain.persist.StorageKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
-// These are the only public types in the app besides `BuilderApp` and `InMemoryStoreFactory`,
-// because `:builder:web` and the desktop entry implement them. Everything that uses them lives
-// behind the graph. ArchitectureTest keeps everything else in app and web internal or private.
+// These are the only public types in shared besides `BuilderApp` and `InMemoryStoreFactory`,
+// because `:builder:apps:web` and `:builder:apps:desktop` implement them. Everything that uses them
+// lives behind the graph. ArchitectureTest keeps everything else in shared and the apps internal or
+// private.
 
 /**
  * Everything the builder needs from the platform it runs on.

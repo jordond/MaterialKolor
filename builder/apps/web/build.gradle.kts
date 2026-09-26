@@ -39,7 +39,7 @@ kotlin {
 
     sourceSets {
         webMain.dependencies {
-            implementation(project(":builder:app"))
+            implementation(project(":builder:shared"))
 
             implementation(libs.compose.runtime)
             implementation(libs.compose.ui)

@@ -4,7 +4,7 @@
 # GET rather than a HEAD, since the edge only compresses a response that has a body, and each one
 # retries, since the first request to a new custom domain can fail while its certificate is issued.
 #
-# Run it after `./gradlew :builder:web:assembleSite` built the site that was deployed:
+# Run it after `./gradlew :builder:apps:web:assembleSite` built the site that was deployed:
 #   builder/worker/scripts/check-deploy.sh https://staging.materialkolor.com staging
 #   builder/worker/scripts/check-deploy.sh https://materialkolor.com production
 set -euo pipefail
@@ -12,7 +12,7 @@ shopt -s nullglob
 
 origin=${1:?usage: check-deploy.sh <origin> <staging|production>}
 environment=${2:?usage: check-deploy.sh <origin> <staging|production>}
-site="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../web/build/site" && pwd)"
+site="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../apps/web/build/site" && pwd)"
 
 case "$environment" in
   staging) worker=materialkolor-builder-staging ;;
@@ -35,7 +35,7 @@ unreachable() {
 
 wasms=("$site"/assets/*.wasm)
 if [ ${#wasms[@]} -eq 0 ]; then
-  echo "::error title=No site::$site/assets has no wasm. Run ./gradlew :builder:web:assembleSite first."
+  echo "::error title=No site::$site/assets has no wasm. Run ./gradlew :builder:apps:web:assembleSite first."
   exit 1
 fi
 

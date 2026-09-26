@@ -24,7 +24,7 @@ import java.io.File
 import javax.inject.Inject
 
 /**
- * Turns the production wasm and JS distributions of `:builder:web` into the site the host serves.
+ * Turns the production wasm and JS distributions of `:builder:apps:web` into the site the host serves.
  *
  * Webpack already names the glue and wasm files by content. `assembleSite` moves them under
  * `/assets/`, where one `_headers` rule marks them immutable, and keeps `index.html`, `boot.js` and

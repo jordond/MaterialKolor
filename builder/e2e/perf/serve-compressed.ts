@@ -38,7 +38,7 @@ export interface PerfSite {
 
 /**
  * Serve the built site in [root] on a free local port. Every compressible file is brotli compressed
- * up front at the quality `builder/web/budget.json` measures with, so no request waits on it.
+ * up front at the quality `builder/apps/web/budget.json` measures with, so no request waits on it.
  */
 export async function servePerfSite(root: string): Promise<PerfSite> {
   const base = path.resolve(root);

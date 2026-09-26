@@ -4,8 +4,8 @@
 set -eu
 
 here=$(cd "$(dirname "$0")" && pwd)
-fonts="$here/../../kit/src/commonMain/composeResources/font"
-out="$here/../src/wasmJsMain/resources/og-default.png"
+fonts="$here/../../../kit/src/commonMain/composeResources/font"
+out="$here/../src/webMain/resources/og-default.png"
 conf=$(mktemp)
 trap 'rm -f "$conf"' EXIT
 

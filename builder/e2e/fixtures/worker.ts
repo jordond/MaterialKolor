@@ -5,7 +5,7 @@ import path from 'node:path';
 
 // The Worker in front of the site, run by `wrangler dev` for the specs that need what only it
 // serves, the per-theme link meta of `/t/<code>`. Everything else runs on the global setup's server.
-// It serves the site `wrangler.jsonc` names, `builder/web/build/site`.
+// It serves the site `wrangler.jsonc` names, `builder/apps/web/build/site`.
 
 const WORKER = path.resolve(__dirname, '../../worker');
 

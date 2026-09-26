@@ -69,7 +69,7 @@ internal fun Project.configureBuilderModule(runtime: BuilderWebRuntime) {
 /**
  * Fails a builder test task that runs far past its normal time instead of letting it hang.
  *
- * The slowest suite, app's jvmTest, takes about 80 seconds, so five minutes means a test that
+ * The slowest suite, shared's jvmTest, takes about 80 seconds, so five minutes means a test that
  * never goes idle, not a slow machine. Pass `-Pbuilder.testTimeoutMinutes=<n>` to change it.
  * It targets every test task, so the node and Karma runs of the web targets are covered as well
  * as jvmTest.

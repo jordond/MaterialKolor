@@ -8,9 +8,9 @@ import { serveSite } from './serve';
  * `MK_E2E_SITE` points at another build, relative to this folder or absolute.
  */
 export default async function globalSetup(): Promise<() => Promise<void>> {
-  const root = path.resolve(__dirname, process.env.MK_E2E_SITE ?? '../web/build/site');
+  const root = path.resolve(__dirname, process.env.MK_E2E_SITE ?? '../apps/web/build/site');
   if (!existsSync(path.join(root, 'index.html'))) {
-    throw new Error(`No built site at ${root}. Run ./gradlew :builder:web:assembleSite first.`);
+    throw new Error(`No built site at ${root}. Run ./gradlew :builder:apps:web:assembleSite first.`);
   }
 
   const site = await serveSite(root);

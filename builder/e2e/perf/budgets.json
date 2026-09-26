@@ -1,5 +1,5 @@
 {
-  "$comment": "The builder's perf budgets. The perf run reports against them and fails nothing. first-visit-bytes is gated by checkBudget in builder/web instead. A budget has a max or a min, in its unit.",
+  "$comment": "The builder's perf budgets. The perf run reports against them and fails nothing. first-visit-bytes is gated by checkBudget in builder/apps/web instead. A budget has a max or a min, in its unit.",
   "network": { "downloadMbps": 9, "rttMs": 60 },
   "budgets": [
     { "id": "first-visit-bytes", "what": "First visit bytes on the wire before the first frame", "unit": "bytes", "max": 4200000 },
