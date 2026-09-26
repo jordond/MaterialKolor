@@ -71,7 +71,9 @@ internal class EditTracker(
                 false
             }
             // A discrete change that left the document as it was is not an edit.
-            EditOutcome.Unchanged -> false
+            EditOutcome.Unchanged -> {
+                false
+            }
             EditOutcome.Drag -> {
                 lastEditAt = time
                 false
