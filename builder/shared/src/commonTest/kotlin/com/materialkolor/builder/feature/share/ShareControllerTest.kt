@@ -221,7 +221,11 @@ class ShareControllerTest : SessionTestBase() {
 
             controller.rename("  Harbour  ") shouldBe true
 
-            projects.index.first().projects.single { meta -> meta.id == id }.name shouldBe "Harbour"
+            projects.index
+                .first()
+                .projects
+                .single { meta -> meta.id == id }
+                .name shouldBe "Harbour"
             harness.clearAndJoin()
         }
 

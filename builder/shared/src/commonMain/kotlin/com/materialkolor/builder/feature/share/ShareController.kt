@@ -76,7 +76,8 @@ internal class ShareController(
     /**
      * The card at [url], or null when it did not come within [CARD_TIMEOUT] or is not an image.
      */
-    suspend fun card(url: String): ImageBitmap? = withTimeoutOrNull(CARD_TIMEOUT) { linkCards.fetch(url) }?.let(::decodeCard)
+    suspend fun card(url: String): ImageBitmap? =
+        withTimeoutOrNull(CARD_TIMEOUT) { linkCards.fetch(url) }?.let(::decodeCard)
 
     /**
      * Whether the open project came from a link and is not saved yet.

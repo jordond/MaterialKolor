@@ -200,7 +200,8 @@ class ShareDialogTest : SessionTestBase() {
     fun copyClick_writesTheClipboardBeforeTheClickReturns() =
         runTest {
             val clipboard = FakeClipboard()
-            val controller = ShareController(session().first, clipboard, FakeFileSaver(), FakeEnvironment(), FakeLinkCardSource())
+            val controller =
+                ShareController(session().first, clipboard, FakeFileSaver(), FakeEnvironment(), FakeLinkCardSource())
             val outcomes = mutableListOf<ShareOutcome>()
 
             idleScope().launchSend(LINK, controller::copy) { outcome -> outcomes += outcome }
