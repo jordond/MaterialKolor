@@ -51,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.ArrowUpDown
 import com.composables.icons.lucide.Bookmark
 import com.composables.icons.lucide.Calendar
@@ -67,6 +68,11 @@ import com.materialkolor.builder.preview.canvas.choice
 import com.materialkolor.builder.preview.canvas.choose
 import kotlin.math.roundToInt
 import androidx.compose.ui.semantics.Role as SemanticsRole
+
+// Material 3 has no spacing tokens, so the gallery keeps its measures here, after the direction D board.
+internal val Gap = 8.dp
+internal val PaneGap = 12.dp
+internal val SectionGap = 16.dp
 
 // The samples of the Actions, Inputs and Selection cards of MaterialCards in GalleryEntry.kt, which
 // keeps the rest with GalleryFeedback.kt. Everything a sample remembers lives in DemoAppState under

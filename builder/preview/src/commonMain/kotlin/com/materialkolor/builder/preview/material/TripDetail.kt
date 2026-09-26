@@ -33,12 +33,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.Calendar
 import com.composables.icons.lucide.CloudOff
 import com.composables.icons.lucide.Lucide
@@ -46,15 +43,12 @@ import com.composables.icons.lucide.MapPin
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.preview.canvas.DemoAppState
 import com.materialkolor.builder.preview.canvas.tabMovesFocus
+import com.materialkolor.builder.preview.trips.OfflineMapsSwitch
+import com.materialkolor.builder.preview.trips.PackingItem
+import com.materialkolor.builder.preview.trips.Trip
+import com.materialkolor.builder.preview.trips.TripsLayout
+import com.materialkolor.builder.preview.trips.drawTripScene
 import androidx.compose.ui.semantics.Role as SemanticsRole
-
-private val SceneHeight = 184.dp
-private val StopSize = 36.dp
-
-/**
- * How far the trip's text sits in from the scene and the buttons.
- */
-private val TextInset = 4.dp
 
 /**
  * The open trip, scene first and the notes last.
@@ -66,9 +60,12 @@ internal fun TripDetail(
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
-    Column(modifier.padding(SectionGap), verticalArrangement = Arrangement.spacedBy(SectionGap)) {
-        TripScene(Modifier.fillMaxWidth().height(SceneHeight))
-        Column(Modifier.padding(horizontal = TextInset)) {
+    Column(
+        modifier.padding(TripsLayout.SectionGap),
+        verticalArrangement = Arrangement.spacedBy(TripsLayout.SectionGap),
+    ) {
+        TripScene(Modifier.fillMaxWidth().height(TripsLayout.SceneHeight))
+        Column(Modifier.padding(horizontal = TripsLayout.TextInset)) {
             Text(trip.name, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
             Text(trip.summary, color = colors.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
         }
@@ -101,39 +98,16 @@ private fun TripScene(modifier: Modifier = Modifier) {
                 Role.OnPrimaryContainer,
             ),
     ) {
-        val scaleX = size.width / SceneSize.width
-        val scaleY = size.height / SceneSize.height
-        drawRect(sky)
-        drawCircle(sun, radius = SceneSunRadius * scaleY, center = Offset(SceneSun.x * scaleX, SceneSun.y * scaleY))
-        SceneRidges.forEachIndexed {
-            index,
-            ridge,
-            ->
-            drawPath(ridgePath(ridge, scaleX, scaleY, size.height), ridges[index])
-        }
+        drawTripScene(sky, sun, ridges)
     }
-}
-
-/**
- * The ridge [points] scaled to the canvas, closed along its [bottom] edge.
- */
-private fun ridgePath(
-    points: FloatArray,
-    scaleX: Float,
-    scaleY: Float,
-    bottom: Float,
-): Path {
-    val path = Path()
-    path.moveTo(0f, bottom)
-    for (index in points.indices step 2) path.lineTo(points[index] * scaleX, points[index + 1] * scaleY)
-    path.lineTo(points[points.size - 2] * scaleX, bottom)
-    path.close()
-    return path
 }
 
 @Composable
 private fun TripActions() {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(Gap), verticalArrangement = Arrangement.spacedBy(Gap)) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(TripsLayout.Gap),
+        verticalArrangement = Arrangement.spacedBy(TripsLayout.Gap),
+    ) {
         Button(onClick = {}, modifier = Modifier.previewRoles(MaterialComponent.FilledButton)) { Text("Check in") }
         FilledTonalButton(onClick = {}, modifier = Modifier.previewRoles(MaterialComponent.TonalButton)) {
             Text("Share plan")
@@ -169,17 +143,23 @@ private fun TripActions() {
 private fun DayPlan(trip: Trip) {
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
-    Column(Modifier.padding(horizontal = TextInset), verticalArrangement = Arrangement.spacedBy(Gap)) {
+    Column(
+        Modifier.padding(horizontal = TripsLayout.TextInset),
+        verticalArrangement = Arrangement.spacedBy(TripsLayout.Gap),
+    ) {
         if (trip.plan.isEmpty()) {
             Text("Nothing planned yet", color = colors.onSurfaceVariant, style = type.bodyMedium)
         } else {
             Text("Day 1 · Friday", Modifier.previewRoles(Role.Primary), color = colors.primary, style = type.labelLarge)
         }
         trip.plan.forEachIndexed { index, stop ->
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PaneGap)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(TripsLayout.PaneGap),
+            ) {
                 Box(
                     modifier = Modifier
-                        .size(StopSize)
+                        .size(TripsLayout.StopSize)
                         .clip(CircleShape)
                         .background(colors.surfaceContainerHighest)
                         .previewRoles(Role.SurfaceContainerHighest, Role.OnSurfaceVariant),
@@ -211,8 +191,8 @@ private fun MapsNeedSignal(state: DemoAppState) {
         contentColor = colors.onErrorContainer,
     ) {
         Row(
-            modifier = Modifier.padding(start = SectionGap, end = Gap),
-            horizontalArrangement = Arrangement.spacedBy(PaneGap),
+            modifier = Modifier.padding(start = TripsLayout.SectionGap, end = TripsLayout.Gap),
+            horizontalArrangement = Arrangement.spacedBy(TripsLayout.PaneGap),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(Lucide.CloudOff, contentDescription = null)
@@ -241,7 +221,7 @@ private fun PackingCard(state: DemoAppState) {
         modifier = Modifier.fillMaxWidth().previewRoles(Role.SurfaceContainer, Role.OnSurface),
         colors = CardDefaults.cardColors(containerColor = colors.surfaceContainer),
     ) {
-        Column(Modifier.padding(SectionGap), verticalArrangement = Arrangement.spacedBy(Gap)) {
+        Column(Modifier.padding(TripsLayout.SectionGap), verticalArrangement = Arrangement.spacedBy(TripsLayout.Gap)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Packing", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
                 Text(
@@ -263,7 +243,7 @@ private fun PackingCard(state: DemoAppState) {
                         .toggleable(value = checked, role = SemanticsRole.Checkbox) { ticked ->
                             state.setChecked(item.key, ticked)
                         }.previewRoles(MaterialComponent.Checkbox),
-                    horizontalArrangement = Arrangement.spacedBy(Gap),
+                    horizontalArrangement = Arrangement.spacedBy(TripsLayout.Gap),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Checkbox(checked = checked, onCheckedChange = null)
@@ -288,7 +268,7 @@ private fun NoteCard(state: DemoAppState) {
             onValueChange = { text -> state.text = text },
             label = "Note for the group",
             modifier = Modifier
-                .padding(SectionGap)
+                .padding(TripsLayout.SectionGap)
                 .fillMaxWidth()
                 .tabMovesFocus(LocalFocusManager.current)
                 .previewRoles(MaterialComponent.OutlinedTextField),

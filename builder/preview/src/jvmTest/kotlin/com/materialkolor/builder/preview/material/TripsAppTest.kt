@@ -45,6 +45,10 @@ import com.materialkolor.builder.preview.inspect.PreviewRoles
 import com.materialkolor.builder.preview.split.PaneSpec
 import com.materialkolor.builder.preview.split.SplitPreview
 import com.materialkolor.builder.preview.split.SplitState
+import com.materialkolor.builder.preview.trips.OfflineMapsSwitch
+import com.materialkolor.builder.preview.trips.PackingItem
+import com.materialkolor.builder.preview.trips.TripFilter
+import com.materialkolor.builder.preview.trips.Trips
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain

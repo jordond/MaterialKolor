@@ -1,4 +1,4 @@
-package com.materialkolor.builder.preview.material
+package com.materialkolor.builder.preview.trips
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size

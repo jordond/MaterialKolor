@@ -29,9 +29,9 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.withKeyDown
-import com.materialkolor.builder.preview.material.PackingItem
 import com.materialkolor.builder.preview.material.TripDetail
-import com.materialkolor.builder.preview.material.Trips
+import com.materialkolor.builder.preview.trips.PackingItem
+import com.materialkolor.builder.preview.trips.Trips
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 

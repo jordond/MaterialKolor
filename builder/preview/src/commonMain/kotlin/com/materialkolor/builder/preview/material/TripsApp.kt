@@ -55,31 +55,20 @@ import com.composables.icons.lucide.Search
 import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.domain.persist.DeviceWidth
 import com.materialkolor.builder.preview.canvas.DemoAppState
+import com.materialkolor.builder.preview.trips.OfflineMapsSwitch
+import com.materialkolor.builder.preview.trips.Trip
+import com.materialkolor.builder.preview.trips.TripFilter
+import com.materialkolor.builder.preview.trips.TripTint
+import com.materialkolor.builder.preview.trips.Trips
+import com.materialkolor.builder.preview.trips.TripsDestination
+import com.materialkolor.builder.preview.trips.TripsLayout
+import com.materialkolor.builder.preview.trips.openTrip
 import androidx.compose.ui.semantics.Role as SemanticsRole
 
-// Material 3 has no spacing tokens, so the app keeps its measures here, after the direction D board.
-// The first four are shared with the open trip in TripDetail.kt.
-internal val Gap = 8.dp
-internal val PaneGap = 12.dp
-internal val SectionGap = 16.dp
+// The measures live in TripsLayout, shared by every library's Trips. The shapes are Material's own.
 internal val RowShape = RoundedCornerShape(18.dp)
-private val FabClearance = 88.dp
-private val ThumbSize = 52.dp
-private val SearchHeight = 48.dp
 private val PaneShape = RoundedCornerShape(24.dp)
 private val ThumbShape = RoundedCornerShape(14.dp)
-private val TabletListWidth = 340.dp
-private val DesktopListWidth = 360.dp
-
-/**
- * The space between the rail and the trip list.
- */
-private val RailGap = 4.dp
-
-/**
- * Half the space between two trip rows.
- */
-private val RowGap = 2.dp
 
 /**
  * The Trips travel app, the Material 3 sample app of the App tab.
@@ -105,11 +94,8 @@ internal fun TripsApp(
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier.fillMaxSize().previewRoles(Role.Surface, Role.OnSurface)) {
-        when (deviceWidth) {
-            DeviceWidth.Phone -> TripsPhone(state)
-            DeviceWidth.Tablet -> TripsPanes(state, TabletListWidth)
-            DeviceWidth.Desktop -> TripsPanes(state, DesktopListWidth)
-        }
+        val listWidth = TripsLayout.listWidth(deviceWidth)
+        if (listWidth == null) TripsPhone(state) else TripsPanes(state, listWidth)
     }
 }
 
@@ -122,14 +108,19 @@ private fun TripsPhone(state: DemoAppState) {
         LazyColumn(
             state = state.rememberListState("trips.phone"),
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = PaneGap, top = PaneGap, end = PaneGap, bottom = FabClearance),
+            contentPadding = PaddingValues(
+                start = TripsLayout.PaneGap,
+                top = TripsLayout.PaneGap,
+                end = TripsLayout.PaneGap,
+                bottom = TripsLayout.FabClearance,
+            ),
         ) {
             tripList(state, filter, open)
             item(key = "detail") {
-                TripDetail(Trips[open], state, Modifier.padding(top = SectionGap).tripPane(pane))
+                TripDetail(Trips[open], state, Modifier.padding(top = TripsLayout.SectionGap).tripPane(pane))
             }
         }
-        NewTripButton(Modifier.align(Alignment.BottomEnd).padding(SectionGap))
+        NewTripButton(Modifier.align(Alignment.BottomEnd).padding(TripsLayout.SectionGap))
     }
 }
 
@@ -145,7 +136,12 @@ private fun TripsPanes(
         LazyColumn(
             state = state.rememberListState("trips.list"),
             modifier = Modifier.width(listWidth).fillMaxHeight(),
-            contentPadding = PaddingValues(start = RailGap, top = SectionGap, end = PaneGap, bottom = SectionGap),
+            contentPadding = PaddingValues(
+                start = TripsLayout.RailGap,
+                top = TripsLayout.SectionGap,
+                end = TripsLayout.PaneGap,
+                bottom = TripsLayout.SectionGap,
+            ),
         ) {
             tripList(state, filter, open)
         }
@@ -154,18 +150,13 @@ private fun TripsPanes(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .padding(top = PaneGap, end = PaneGap, bottom = PaneGap)
+                .padding(top = TripsLayout.PaneGap, end = TripsLayout.PaneGap, bottom = TripsLayout.PaneGap)
                 .tripPane(MaterialTheme.colorScheme.surfaceContainerLow),
         ) {
             item(key = "detail") { TripDetail(Trips[open], state) }
         }
     }
 }
-
-/**
- * Where the open trip sits in [Trips], clamped so a stale index still opens one.
- */
-private fun openTrip(state: DemoAppState): Int = state.selectedItem.coerceIn(Trips.indices)
 
 /**
  * The rounded low container the open trip sits on.
@@ -177,7 +168,7 @@ private fun Modifier.tripPane(color: Color): Modifier =
 private fun TripsRail() {
     NavigationRail(
         modifier = Modifier.fillMaxHeight().previewRoles(MaterialComponent.NavigationRail),
-        header = { NewTripButton(Modifier.padding(vertical = PaneGap)) },
+        header = { NewTripButton(Modifier.padding(vertical = TripsLayout.PaneGap)) },
         windowInsets = WindowInsets(0),
     ) {
         for (destination in TripsDestination.entries) {
@@ -217,7 +208,7 @@ private fun LazyListScope.tripList(
         item(key = "empty") {
             Text(
                 text = "No ${filter.label.lowercase()} trips yet",
-                modifier = Modifier.padding(PaneGap),
+                modifier = Modifier.padding(TripsLayout.PaneGap),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -230,7 +221,7 @@ private fun LazyListScope.tripList(
 
 @Composable
 private fun TripsHeader() {
-    Row(Modifier.fillMaxWidth().padding(start = PaneGap), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().padding(start = TripsLayout.PaneGap), verticalAlignment = Alignment.CenterVertically) {
         Text("Trips", Modifier.weight(1f), style = MaterialTheme.typography.headlineSmall)
         IconButton(onClick = {}, modifier = Modifier.previewRoles(MaterialComponent.IconButton)) {
             BadgedBox(badge = { Badge(Modifier.previewRoles(MaterialComponent.Badge)) { Text("2") } }) {
@@ -245,14 +236,14 @@ private fun TripsSearch() {
     val colors = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
-            .padding(vertical = Gap)
+            .padding(vertical = TripsLayout.Gap)
             .fillMaxWidth()
-            .height(SearchHeight)
+            .height(TripsLayout.SearchHeight)
             .clip(CircleShape)
             .background(colors.surfaceContainerHigh)
             .previewRoles(Role.SurfaceContainerHigh, Role.OnSurfaceVariant)
-            .padding(horizontal = SectionGap),
-        horizontalArrangement = Arrangement.spacedBy(PaneGap),
+            .padding(horizontal = TripsLayout.SectionGap),
+        horizontalArrangement = Arrangement.spacedBy(TripsLayout.PaneGap),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(Lucide.Search, contentDescription = null, tint = colors.onSurfaceVariant)
@@ -266,8 +257,8 @@ private fun TripFilters(
     onPick: (TripFilter) -> Unit,
 ) {
     Row(
-        modifier = Modifier.padding(bottom = Gap).selectableGroup(),
-        horizontalArrangement = Arrangement.spacedBy(Gap),
+        modifier = Modifier.padding(bottom = TripsLayout.Gap).selectableGroup(),
+        horizontalArrangement = Arrangement.spacedBy(TripsLayout.Gap),
     ) {
         for (filter in TripFilter.entries) {
             val selected = filter == current
@@ -308,7 +299,7 @@ private fun TripRow(
     ListItem(
         headlineContent = { Text(trip.name, fontWeight = FontWeight.SemiBold) },
         modifier = Modifier
-            .padding(vertical = RowGap)
+            .padding(vertical = TripsLayout.RowGap)
             .clip(RowShape)
             .selectable(selected = selected, onClick = onClick)
             .then(roles),
@@ -334,7 +325,7 @@ private fun TripThumb(trip: Trip) {
     }
     Box(
         modifier = Modifier
-            .size(ThumbSize)
+            .size(TripsLayout.ThumbSize)
             .clip(ThumbShape)
             .background(container)
             .previewRoles(trip.tint.container, trip.tint.content),
@@ -352,7 +343,7 @@ private fun OfflineMaps(state: DemoAppState) {
     val on = state.isOn(OfflineMapsSwitch)
     Card(
         modifier = Modifier
-            .padding(top = Gap)
+            .padding(top = TripsLayout.Gap)
             .fillMaxWidth()
             .previewRoles(Role.SurfaceContainerLowest, Role.OnSurface),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
@@ -363,7 +354,7 @@ private fun OfflineMaps(state: DemoAppState) {
                 .toggleable(value = on, role = SemanticsRole.Switch) { checked ->
                     state.setOn(OfflineMapsSwitch, checked)
                 }.previewRoles(MaterialComponent.Switch)
-                .padding(horizontal = SectionGap, vertical = PaneGap),
+                .padding(horizontal = TripsLayout.SectionGap, vertical = TripsLayout.PaneGap),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
