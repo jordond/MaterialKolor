@@ -30,7 +30,7 @@ public fun AppTab(
 ) {
     val skin = LocalSkin.current
     when (skin.library) {
-        Library.Material3 -> MaterialAppEntry(spec, state, deviceWidth, skin.expressive, modifier)
+        Library.Material3 -> MaterialAppEntry(spec, state, deviceWidth, modifier)
         Library.Unstyled -> UnstyledAppEntry(spec, state, deviceWidth, modifier)
         Library.Fluent -> FluentAppEntry(spec, state, deviceWidth, modifier)
         Library.Custom -> CustomAppEntry(spec, state, deviceWidth, modifier)

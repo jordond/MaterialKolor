@@ -178,7 +178,7 @@ class TripsAppTest {
                 CompositionLocalProvider(LocalMotionFrozen provides true) {
                     Chrome {
                         SplitPreview(LightSpec, DarkSpec, split, Modifier.size(840.dp, 760.dp)) { spec ->
-                            MaterialAppEntry(spec, state, DeviceWidth.Tablet, expressive = false)
+                            MaterialAppEntry(spec, state, DeviceWidth.Tablet)
                         }
                     }
                 }
@@ -247,7 +247,7 @@ private fun TripsHarness(
 ) {
     CompositionLocalProvider(LocalMotionFrozen provides true) {
         Chrome {
-            PreviewPane(spec, modifier) { MaterialAppEntry(spec, state, width, expressive = false) }
+            PreviewPane(spec, modifier) { MaterialAppEntry(spec, state, width) }
         }
     }
 }

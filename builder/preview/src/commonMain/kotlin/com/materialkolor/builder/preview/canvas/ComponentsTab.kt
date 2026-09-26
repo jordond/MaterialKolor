@@ -60,7 +60,7 @@ public fun ComponentsTab(
 ) {
     val skin = LocalSkin.current
     when (skin.library) {
-        Library.Material3 -> MaterialGalleryEntry(spec, state, skin.expressive, modifier)
+        Library.Material3 -> MaterialGalleryEntry(spec, state, modifier)
         Library.Unstyled -> UnstyledGalleryEntry(spec, state, modifier)
         Library.Fluent -> FluentGalleryEntry(spec, state, modifier)
         Library.Custom -> CustomGalleryEntry(spec, state, modifier)
