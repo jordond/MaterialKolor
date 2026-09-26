@@ -7,9 +7,9 @@
     <string name="topbar_library_unstyled">Unstyled</string>
     <string name="topbar_library_fluent">Fluent</string>
     <string name="topbar_library_custom">Custom</string>
-    <!-- The switch after the library switcher that turns M3's Expressive flavor on, shown only while M3 is picked. -->
+    <!-- The chip joined to the library switcher that turns M3's Expressive flavor on, shown only while M3 is picked. The export sheet's switch uses it too. -->
     <string name="topbar_expressive">Expressive</string>
-    <!-- What undo, redo and History call M3 with the Expressive switch on. -->
+    <!-- What undo, redo and History call M3 with the Expressive chip on. -->
     <string name="topbar_library_m3_expressive">M3 Expressive</string>
 
     <!-- The button that opens the command palette. -->
@@ -34,7 +34,7 @@
     <string name="topbar_about">About</string>
     <string name="topbar_github">GitHub</string>
 
-    <!-- The suggestion after the Expressive switch goes on while the style or spec is not the usual one. -->
+    <!-- The suggestion after the Expressive chip goes on while the style or spec is not the usual one. -->
     <string name="topbar_expressive_title">Use the Expressive style?</string>
     <string name="topbar_expressive_message">Expressive themes usually use the Expressive style on the 2025 spec</string>
     <string name="topbar_expressive_apply">Apply</string>

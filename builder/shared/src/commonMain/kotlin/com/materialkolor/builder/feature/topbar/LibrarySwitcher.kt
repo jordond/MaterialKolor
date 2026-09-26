@@ -2,13 +2,10 @@ package com.materialkolor.builder.feature.topbar
 
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -35,7 +32,6 @@ import com.materialkolor.builder.kit.control.BuilderSelect
 import com.materialkolor.builder.kit.control.BuilderSwitch
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.WindowClass
-import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -92,7 +88,7 @@ internal fun suggestsExpressiveStyle(document: ThemeDocument): Boolean =
 /**
  * The library switcher. A segmented row when [segmented] holds, which by default it does on wide
  * windows, and a dropdown otherwise. While Material 3 is picked the Expressive chip joins its end
- * edge, the two drawn as one group.
+ * edge with no gap, the two drawn as one group ([SwitcherGroup]).
  *
  * [onSwitch] gets the new choice and where the reveal should grow from, the press that picked it
  * or the middle of the switcher after a keyboard pick. Picking the current choice does nothing.
@@ -146,15 +142,8 @@ internal fun LibrarySwitcher(
     val onSelect = { choice: LibraryChoice ->
         if (choice != selected) onSwitch(choice, origin.take())
     }
-    // The chip sits close against the switcher, so the two read as one group.
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.extraSmall),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        // The chip keeps its whole width and the library control takes what is left, so a Medium
-        // bar short of room narrows the dropdown rather than cutting the chip's name.
-        val tracked = Modifier.weight(1f, fill = false).then(switcherModifier.trackRevealOrigin(origin))
+    SwitcherGroup(modifier) {
+        val tracked = switcherModifier.trackRevealOrigin(origin)
         if (segmented) {
             BuilderSegmented(
                 options = LibraryChoice.entries,
@@ -180,6 +169,7 @@ internal fun LibrarySwitcher(
                 checked = expressive,
                 onCheckedChange = onExpressiveChange,
                 modifier = expressiveModifier,
+                connected = true,
             )
         }
     }
@@ -191,12 +181,14 @@ internal fun LibrarySwitcher(
  *
  * @param[onCheckedChange] Gets the new state and where the reveal grows from, the press that
  *   flipped it or the middle of the chip after a key.
+ * @param[connected] Whether it is joined to the switcher's end, its start edge squared to meet it.
  */
 @Composable
 internal fun ExpressiveChip(
     checked: Boolean,
     onCheckedChange: (on: Boolean, origin: Offset) -> Unit,
     modifier: Modifier = Modifier,
+    connected: Boolean = false,
 ) {
     val origin = remember { RevealOrigin() }
     BuilderFilterChip(
@@ -204,6 +196,7 @@ internal fun ExpressiveChip(
         onSelectedChange = { on -> onCheckedChange(on, origin.take()) },
         label = stringResource(Res.string.topbar_expressive),
         modifier = modifier.trackRevealOrigin(origin),
+        connectedStart = connected,
     )
 }
 

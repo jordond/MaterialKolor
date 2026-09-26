@@ -19,7 +19,7 @@ import com.materialkolor.builder.kit.control.Emphasis
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Offers the Expressive style on the 2025 spec after the Expressive switch went on and left the
+ * Offers the Expressive style on the 2025 spec after the Expressive chip went on and left the
  * document on something else.
  *
  * Nothing changes until someone presses Apply. Keep mine, Esc and a click on the veil all leave
@@ -28,7 +28,7 @@ import org.jetbrains.compose.resources.stringResource
  * @param[visible] Whether the suggestion is up.
  * @param[onApply] Called for Apply. The caller makes [expressiveStyleChange] and closes it.
  * @param[onKeepMine] Called for Keep mine and for any other way of closing it.
- * @param[returnFocusTo] The Expressive switch, where focus goes once it closes.
+ * @param[returnFocusTo] The Expressive chip, where focus goes once it closes.
  */
 @Composable
 internal fun ExpressiveSuggestion(

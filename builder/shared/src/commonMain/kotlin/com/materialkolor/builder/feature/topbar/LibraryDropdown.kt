@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.SubcomposeMeasureScope
 import androidx.compose.ui.layout.layout
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.topbar_expressive
+import com.materialkolor.builder.kit.control.ControlFrameTop
 import com.materialkolor.builder.kit.token.BuilderType
 import com.materialkolor.builder.kit.token.LocalBuilderType
 import org.jetbrains.compose.resources.stringResource
@@ -179,7 +181,7 @@ private fun SubcomposeMeasureScope.naturalWidth(
 /**
  * Draws what it holds scaled down from its top start corner, just enough to stand no taller than
  * [max], and takes up only the scaled size. Something that fits already is left as it is. Presses
- * and the menu anchored to it follow the scale.
+ * and the menu anchored to it follow the scale, and so does the [ControlFrameTop] it reports.
  *
  * It keeps Material's outlined dropdown, whose label floats over its top edge, whole inside the top
  * bar, where the field and its label together stand taller than the bar.
@@ -192,7 +194,13 @@ internal fun Modifier.shrinkToHeight(max: Dp): Modifier =
             return@layout layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
         }
         val scale = limit.toFloat() / placeable.height
-        layout((placeable.width * scale).roundToInt(), limit) {
+        val frameTop = placeable[ControlFrameTop]
+        val lines: Map<AlignmentLine, Int> = if (frameTop == AlignmentLine.Unspecified) {
+            emptyMap()
+        } else {
+            mapOf(ControlFrameTop to (frameTop * scale).roundToInt())
+        }
+        layout((placeable.width * scale).roundToInt(), limit, lines) {
             placeable.placeRelativeWithLayer(0, 0) {
                 scaleX = scale
                 scaleY = scale

@@ -66,7 +66,7 @@
     <string name="command_key_library_2">Library Unstyled</string>
     <string name="command_key_library_3">Library Fluent</string>
     <string name="command_key_library_4">Library Custom</string>
-    <!-- Flips the Expressive switch, which only M3 has. -->
+    <!-- Flips the Expressive chip, which only M3 has. -->
     <string name="command_key_expressive">Turn Expressive on or off, on M3</string>
     <string name="command_key_copy_seed">Copy the seed hex, or the open file in export</string>
     <string name="command_key_undo">Undo the theme, or the text inside a field</string>
