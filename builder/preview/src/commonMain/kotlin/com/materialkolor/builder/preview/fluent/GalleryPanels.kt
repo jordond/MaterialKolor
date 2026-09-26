@@ -125,7 +125,7 @@ internal fun Expanders(state: DemoAppState) {
 }
 
 /**
- * An expander built from Fluent's expander parts, the way the Settings app builds its groups.
+ * An expander built from Fluent's expander parts.
  *
  * Its header is Fluent's clickable card, so it carries its colors and the web's expanded fold
  * itself, which the one piece `Expander` keeps out of reach. The rows under it open with the skin's

@@ -13,16 +13,17 @@ import com.materialkolor.builder.domain.model.Role
 import com.materialkolor.builder.preview.inspect.previewRoles
 import io.github.composefluent.Shades
 
-// The colors the Fluent screens declare and the names Inspect gives them, shared by the Settings
-// app and the gallery.
+// The colors the Fluent screens declare and the names Inspect gives them, shared by the Trips app
+// and the gallery.
 //
 // Fluent paints its accent fill, `fillAccent.default`, in Dark1 in light mode and Light2 in dark
 // mode. Those are tones 40 and 80 of the primary ramp, the tones primary takes, so the contrast
 // audit names that fill Role.Primary and rates Fluent's two on-accent text colors over it and
 // nothing else. An element painted with the accent fill therefore declares an on-accent text
 // color first and Role.Primary second, never the shade itself. Declared as a shade, the pair would
-// match no row of the audit and its Inspect card would show no contrast badge. Only the shade
-// legend declares shades, one per swatch.
+// match no row of the audit and its Inspect card would show no contrast badge. Only what paints a
+// shade with no on-accent ink over it declares the shade itself, the shade legend's swatches and
+// Trips' scene, tinted thumbnail and accent text.
 
 /**
  * The accent fill and the on-accent ink on it, the one Fluent pair the contrast audit rates.
@@ -48,14 +49,28 @@ internal fun Modifier.fluentAccentRoles(text: FluentText = FluentText.OnAccentPr
 internal fun Modifier.fluentNeutralRoles(): Modifier = previewRoles()
 
 /**
- * Declare one swatch of the shade legend, the only place a Fluent shade is declared as itself.
+ * Declare a control that paints the accent fill while [accentFill], a picked item or a switch that
+ * is on, and only Fluent's fixed greys otherwise.
  */
-internal fun Modifier.fluentShadeRoles(shade: FluentShade): Modifier = previewRoles(ColorRef.OfFluentShade(shade))
+internal fun Modifier.fluentFillRoles(accentFill: Boolean): Modifier =
+    if (accentFill) fluentAccentRoles() else fluentNeutralRoles()
+
+/**
+ * Declare an element painted with the accent [shades] themselves, a swatch of the shade legend or a
+ * part of Trips with no on-accent ink over it.
+ */
+internal fun Modifier.fluentShadeRoles(vararg shades: FluentShade): Modifier =
+    previewRoles(*shades.map { shade -> ColorRef.OfFluentShade(shade) }.toTypedArray())
 
 /**
  * The shade the accent fill takes in the mode [isDark] picks.
  */
 internal fun fillAccentShade(isDark: Boolean): FluentShade = if (isDark) FluentShade.Light2 else FluentShade.Dark1
+
+/**
+ * The shade Fluent's accent text and links take in the mode [isDark] picks.
+ */
+internal fun accentTextShade(isDark: Boolean): FluentShade = if (isDark) FluentShade.Light3 else FluentShade.Dark2
 
 /**
  * The Fluent shade [this] paints in the mode [isDark] picks, or null when it names no shade.

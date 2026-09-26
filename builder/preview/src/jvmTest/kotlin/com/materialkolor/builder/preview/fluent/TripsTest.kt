@@ -11,26 +11,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.SemanticsActions
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollToKeyAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.isOn
+import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.isToggleable
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
@@ -51,9 +52,12 @@ import com.materialkolor.builder.preview.inspect.OnCard
 import com.materialkolor.builder.preview.inspect.PreviewRoles
 import com.materialkolor.builder.preview.inspect.firstRated
 import com.materialkolor.builder.preview.split.SplitState
+import com.materialkolor.builder.preview.trips.OfflineMapsSwitch
+import com.materialkolor.builder.preview.trips.PackingItem
+import com.materialkolor.builder.preview.trips.TripFilter
+import com.materialkolor.builder.preview.trips.TripsDestination
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
@@ -65,18 +69,19 @@ import kotlin.test.Test
 private const val FluentSourceDir = "src/commonMain/kotlin/com/materialkolor/builder/preview/fluent"
 
 /**
- * The files of the Settings app, which the gallery's sources are not.
+ * The files of Fluent's Trips, which the gallery's sources are not.
  */
-private val SettingsSources: Set<String> =
-    setOf("SettingsApp.kt", "SettingsData.kt", "ShadeMapping.kt", "FluentRoles.kt", "AppEntry.kt")
+private val TripsSources: Set<String> =
+    setOf("TripsApp.kt", "TripDetail.kt", "TripsShades.kt", "FluentRoles.kt", "AppEntry.kt")
 
 /**
- * What the Settings app's sources never name, anything that opens outside the layout or an endless clock.
+ * What Trips' sources never name, anything that opens outside the layout or an endless clock.
  */
-private val SettingsBannedWords: List<String> = listOf(
+private val TripsBannedWords: List<String> = listOf(
     "androidx.compose.ui.window",
     "Popup",
     "Dialog",
+    "Tooltip",
     // Only the theme, never the one that adds a host and a backdrop round the screen.
     "FluentTheme(",
     // Stems, so the architecture scan does not read this list as an endless animation.
@@ -85,32 +90,43 @@ private val SettingsBannedWords: List<String> = listOf(
 )
 
 /**
- * What the web mirror hears from one control of each kind, with the app as it first shows on a tablet.
+ * What Trips may take from the kit, its motion, the fold modifiers and `InnerTextWithoutHandles`.
  */
-private val SettingsWebNames: List<String> = listOf(
-    "Transparency effects, switch, on",
-    "Show badges on taskbar apps, switch, on",
-    "Accent color, collapsed",
-    "Taskbar behaviors, collapsed",
-    "Personalization, selected",
-    "Home, not selected",
-    "Accent shades, checkbox, not checked",
+private val TripsKitImports: List<String> = listOf(
+    "com.materialkolor.builder.kit.motion.",
+    "com.materialkolor.builder.kit.control.folded",
+    "com.materialkolor.builder.kit.headless.InnerTextWithoutHandles",
 )
 
 /**
- * The switch of a setting that starts on.
+ * A progress bar or ring called without a value, the endless kind.
  */
-private val TransparencySwitch: SemanticsMatcher =
-    isToggleable() and hasContentDescription(FluentSetting.Transparency.title)
+private val EndlessProgress = Regex("""\bProgress(Bar|Ring)\((?!\s*progress\b)""")
 
 /**
- * The header of the accent color group.
+ * What the web mirror hears from one control of each kind, with the app as it first shows on a tablet.
  */
-private val AccentGroupHeader: SemanticsMatcher =
-    hasClickAction() and hasContentDescription(FluentGroup.AccentColor.title)
+private val TripsWebNames: List<String> = listOf(
+    "Offline maps, switch, off",
+    "Lisbon, Portugal, selected",
+    "Kyoto, Japan, not selected",
+    "Trips, selected",
+    "Explore, not selected",
+    "Passports, checkbox, not checked",
+)
+
+/**
+ * The offline maps switch.
+ */
+private val OfflineSwitch: SemanticsMatcher = isToggleable() and hasContentDescription("Offline maps")
+
+/**
+ * A trip's row in the list, named for the trip.
+ */
+private fun tripRow(name: String): SemanticsMatcher = hasClickAction() and hasContentDescription(name)
 
 @OptIn(ExperimentalTestApi::class)
-class SettingsAppTest {
+class TripsTest {
     @Test
     fun controls_everyDeviceWidth_declareTheirOwnRoles() {
         for ((width, frame) in FluentFrames) {
@@ -119,7 +135,7 @@ class SettingsAppTest {
                     setContent {
                         FluentHarness(
                             spec = FluentLightSpec,
-                            state = everythingOpen(),
+                            state = DemoAppState(),
                             width = width,
                             // Tall enough that every lazy item composes, wider than the window on desktop.
                             modifier = Modifier
@@ -128,17 +144,16 @@ class SettingsAppTest {
                         )
                     }
 
-                    onNode(hasContentDescription(FluentSetting.Flashing.title), useUnmergedTree = true).assertExists()
+                    onNode(hasText("Turn on"), useUnmergedTree = true).assertExists()
                     // Unmerged, since a merged node also carries the roles its children declared. The
-                    // navigation layer of compose-fluent 0.1.0 keeps its click action. It wraps the nav
-                    // items, so nothing outside it can clear its semantics and keep theirs. The app
-                    // keeps it out of focus, which the Tab test below checks.
+                    // navigation layer of compose-fluent 0.1.0 keeps its click action. It wraps the
+                    // destinations, so nothing outside it can clear its semantics and keep theirs.
                     val controls = onAllNodes(hasClickAction() or hasSetTextAction(), useUnmergedTree = true)
                         .fetchSemanticsNodes()
                         .filterNot { node -> (NavigationShield or ScrollbarArrow or UnderAnOverlay).matches(node) }
                     controls.shouldNotBeEmpty()
                     controls
-                        .filter { node -> PreviewRoles !in node.config }
+                        .filterNot { node -> node.declaresItsRoles() }
                         .map { node -> "${node.boundsInRoot} ${node.config}" }
                         .shouldBeEmpty()
                 }
@@ -147,20 +162,16 @@ class SettingsAppTest {
     }
 
     @Test
-    fun shades_everyDeviceWidthFirstScreen_showTheAccentFillAndAllSevenWithTheLegend() {
+    fun shades_everyDeviceWidthFirstScreen_showTheAccentFillAndTheShadesTripsPaints() {
         for ((width, frame) in FluentFrames) {
             for (spec in listOf(FluentLightSpec, FluentDarkSpec)) {
                 withClue("$width ${spec.label}") {
                     runDesktopComposeUiTest(frame.width, frame.height) {
-                        val state = DemoAppState()
-                        setContent { FluentHarness(spec, state, width, Modifier.fillMaxSize()) }
+                        setContent { FluentHarness(spec, DemoAppState(), width, Modifier.fillMaxSize()) }
 
-                        // The real controls paint the accent fill, and no other shade is theirs to declare.
-                        shadesOnScreen(spec.isDark) shouldBe setOf(fillAccentShade(spec.isDark))
-
-                        state.setOn(FluentShadesSwitch, true)
-                        waitForIdle()
-                        shadesOnScreen(spec.isDark) shouldBe FluentShade.entries.toSet()
+                        val shades = TripsShades(spec.isDark)
+                        val painted = setOf(shades.accentFill, shades.tint, shades.accentText) + shades.scene
+                        shadesOnScreen(spec.isDark) shouldBe painted
                     }
                 }
             }
@@ -168,18 +179,12 @@ class SettingsAppTest {
     }
 
     @Test
-    fun accentControls_switchOnAndGroupHeader_resolveToARowOfTheAudit() =
+    fun accentControls_switchOnAndOpenTrip_resolveToARowOfTheAudit() =
         runComposeUiTest {
-            setContent {
-                FluentHarness(
-                    FluentLightSpec,
-                    DemoAppState(),
-                    DeviceWidth.Desktop,
-                    Modifier.size(1280.dp, 800.dp),
-                )
-            }
+            val state = DemoAppState().apply { setOn(OfflineMapsSwitch, true) }
+            setContent { FluentHarness(FluentLightSpec, state, DeviceWidth.Desktop, Modifier.size(1280.dp, 800.dp)) }
 
-            for (control in listOf(TransparencySwitch and isOn(), AccentGroupHeader)) {
+            for (control in listOf(OfflineSwitch and isOn(), tripRow("Lisbon, Portugal"))) {
                 val refs = onNode(control, useUnmergedTree = true).fetchSemanticsNode().config[PreviewRoles]
                 refs shouldBe FluentAccentRefs
                 for (isDark in listOf(false, true)) {
@@ -203,13 +208,16 @@ class SettingsAppTest {
                     for (mode in listOf(FluentLightSpec, FluentDarkSpec)) {
                         spec = mode
                         waitForIdle()
-                        val title = onNodeWithText(FluentStartPage.label).fetchSemanticsNode().boundsInRoot
-                        val pages = onAllNodes(hasContentDescription(FluentPage.Home.label), useUnmergedTree = true)
-                            .fetchSemanticsNodes()
+                        // The row's own words sit under its layer, so the text is the open trip's title.
+                        val title = onNodeWithText("Lisbon, Portugal").fetchSemanticsNode().boundsInRoot
+                        val row = onNode(tripRow("Lisbon, Portugal")).fetchSemanticsNode().boundsInRoot
+                        val rail = onAllNodes(hasContentDescription(TripsDestination.Explore.label))
                         if (width == DeviceWidth.Phone) {
-                            pages.shouldBeEmpty()
+                            title.top shouldBeGreaterThan row.bottom
+                            rail.assertCountEquals(0)
                         } else {
-                            title.left shouldBeGreaterThan pages.single().boundsInRoot.right
+                            title.left shouldBeGreaterThan row.right
+                            rail.assertCountEquals(1)
                         }
                     }
                 }
@@ -218,76 +226,44 @@ class SettingsAppTest {
     }
 
     @Test
-    fun tab_backThroughTheTabletRailAndThePhoneMenu_stopsOnEveryPageButNeverTheLibraryLayer() {
-        for (width in listOf(DeviceWidth.Tablet, DeviceWidth.Phone)) {
-            withClue(width) {
-                runComposeUiTest {
-                    val frame = FluentFrames.getValue(width)
-                    val state = DemoAppState().apply { setOn(FluentMenuSwitch, true) }
-                    lateinit var focus: FocusManager
-                    setContent {
-                        focus = LocalFocusManager.current
-                        FluentHarness(FluentLightSpec, state, width, Modifier.size(frame.width.dp, frame.height.dp))
-                    }
-                    waitForIdle()
-
-                    // The rail and the menu come last, so going back from the end reaches them first.
-                    val stops = List(FluentPage.entries.size + 4) {
-                        runOnIdle { focus.moveFocus(FocusDirection.Previous) }
-                        waitForIdle()
-                        onAllNodes(isFocused(), useUnmergedTree = true).fetchSemanticsNodes().single()
-                    }
-
-                    val shields = stops.filter { node -> NavigationShield.matches(node) }
-                    shields.map { node -> "${node.config}" }.shouldBeEmpty()
-                    stops
-                        .mapNotNull { node -> node.config.getOrNull(SemanticsProperties.ContentDescription) }
-                        .flatten() shouldContainAll FluentPage.entries.map { page -> page.label }
-                }
-            }
-        }
-    }
-
-    @Test
-    fun phoneMenu_openPickAndClose_changeTheSharedState() =
+    fun controls_clicked_openTheTripFilterTheListTickTheChecklistAndTurnMapsOn() =
         runComposeUiTest {
             val state = DemoAppState()
-            setContent { FluentHarness(FluentLightSpec, state, DeviceWidth.Phone, Modifier.size(412.dp, 900.dp)) }
+            setContent { FluentHarness(FluentLightSpec, state, DeviceWidth.Tablet, Modifier.size(840.dp, 760.dp)) }
 
-            onNode(hasClickAction() and hasContentDescription(FluentCopy.Menu)).performClick()
+            onNode(tripRow("Kyoto, Japan")).performClick()
             waitForIdle()
-            state.isOn(FluentMenuSwitch) shouldBe true
+            state.selectedItem shouldBe 1
+            onNodeWithText("Kyoto, Japan").assertExists()
+            onNodeWithText("Nothing planned yet").assertExists()
 
-            onNode(hasClickAction() and hasContentDescription(FluentPage.Apps.label)).performClick()
+            onNode(hasClickAction() and hasContentDescription(TripFilter.Shared.label)).performClick()
             waitForIdle()
-            state.fluentPage() shouldBe FluentPage.Apps
-            state.isOn(FluentMenuSwitch) shouldBe false
-            onNodeWithText(FluentPage.Apps.label).assertExists()
-        }
+            state.tabIndex shouldBe TripFilter.Shared.ordinal
+            onAllNodes(tripRow("Kyoto, Japan")).assertCountEquals(0)
+            onAllNodes(tripRow("Lisbon, Portugal")).assertCountEquals(1)
 
-    @Test
-    fun settings_switchAndGroup_flipTheSharedState() =
-        runComposeUiTest {
-            val state = DemoAppState()
-            setContent { FluentHarness(FluentLightSpec, state, DeviceWidth.Tablet, Modifier.size(840.dp, 900.dp)) }
-            state.isOn(FluentSetting.Transparency) shouldBe true
+            onNode(hasClickAction() and hasContentDescription(TripFilter.Past.label)).performClick()
+            waitForIdle()
+            onNodeWithText("No past trips yet").assertExists()
 
-            onNode(TransparencySwitch).performClick()
+            onNode(isToggleable() and hasContentDescription(PackingItem.Passports.label))
+                .performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
-            state.isOn(FluentSetting.Transparency) shouldBe false
+            state.isChecked(PackingItem.Passports.key) shouldBe true
+            onNodeWithText("1 of 3").assertExists()
 
-            onNode(AccentGroupHeader).performClick()
+            onNode(hasClickAction() and hasText("Turn on")).performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
-            state.isOn(FluentGroup.AccentColor.key) shouldBe true
-            onNode(isToggleable() and hasContentDescription(FluentSetting.AccentOnStart.title)).performClick()
-            waitForIdle()
-            state.isOn(FluentSetting.AccentOnStart) shouldBe true
+            state.isOn(OfflineMapsSwitch) shouldBe true
+            onAllNodesWithText("Turn on").assertCountEquals(0)
+            onNode(OfflineSwitch and isOn()).assertExists()
         }
 
     @Test
     fun inspect_clickOnASwitch_pinsItsColorsAndNeverReachesTheApp() =
-        runComposeUiTest {
-            val state = DemoAppState()
+        runDesktopComposeUiTest(412, 900) {
+            val state = DemoAppState().apply { setOn(OfflineMapsSwitch, true) }
             setContent {
                 CompositionLocalProvider(LocalMotionFrozen provides true) {
                     Inspecting(shown = PreviewMode.Light, split = remember { SplitState() }, skin = FluentSkin) {
@@ -298,14 +274,17 @@ class SettingsAppTest {
                 }
             }
             waitForIdle()
-            val before = state.fluentSnapshot()
+            // The inspector keeps the pane short, so the list scrolls the switch into view first.
+            onNode(hasScrollToKeyAction()).performScrollToKey("offline")
+            waitForIdle()
+            val before = state.tripsSnapshot()
 
-            onNode(TransparencySwitch).performClick()
+            onNode(OfflineSwitch).performClick()
             waitForIdle()
             onNodeWithTag(INSPECT_CARD_TAG).assertExists()
             onNode(OnCard and hasText("onAccentPrimary", substring = true)).assertExists()
             onNode(OnCard and hasText("primary", substring = true)).assertExists()
-            state.fluentSnapshot() shouldBe before
+            state.tripsSnapshot() shouldBe before
         }
 
     @OptIn(KitTestApi::class)
@@ -317,7 +296,7 @@ class SettingsAppTest {
                 CompositionLocalProvider(LocalMotionFrozen provides true) {
                     Chrome(FluentSkin) {
                         ProvideWebFoldsForTest {
-                            PreviewPane(FluentLightSpec, Modifier.size(840.dp, 900.dp)) {
+                            PreviewPane(FluentLightSpec, Modifier.size(840.dp, 1400.dp)) {
                                 FluentAppEntry(FluentLightSpec, state, DeviceWidth.Tablet)
                             }
                         }
@@ -326,39 +305,52 @@ class SettingsAppTest {
             }
             waitForIdle()
 
-            for (name in SettingsWebNames) withClue(name) { onNode(hasContentDescription(name)).assertExists() }
+            for (name in TripsWebNames) withClue(name) { onNode(hasContentDescription(name)).assertExists() }
 
-            onNode(hasContentDescription("Accent color, collapsed")).performSemanticsAction(SemanticsActions.OnClick)
-            onNode(hasContentDescription("Transparency effects, switch, on"))
-                .performSemanticsAction(SemanticsActions.OnClick)
+            onNode(hasContentDescription("Offline maps, switch, off")).performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
-            for (name in listOf(
-                "Accent color, expanded",
-                "Show accent color on Start and taskbar, switch, off",
-                "Transparency effects, switch, off",
-            )) {
-                withClue(name) { onNode(hasContentDescription(name)).assertExists() }
+            onNode(hasContentDescription("Offline maps, switch, on")).assertExists()
+        }
+
+    @Test
+    fun rail_everyDestinationHoveredOnATablet_opensNoTooltip() =
+        runDesktopComposeUiTest(840, 900) {
+            setContent { FluentHarness(FluentLightSpec, DemoAppState(), DeviceWidth.Tablet, Modifier.fillMaxSize()) }
+            waitForIdle()
+
+            for (destination in TripsDestination.entries) {
+                withClue(destination) {
+                    onNode(hasClickAction() and hasContentDescription(destination.label)).performMouseInput {
+                        moveTo(center)
+                    }
+                    waitForIdle()
+                    onAllNodes(isRoot()).assertCountEquals(1)
+                }
             }
         }
 
     @Test
-    fun settingsSources_openNothingOutsideTheLayoutAndNeverLoop() {
+    fun tripsSources_openNothingOutsideTheLayoutAndNeverLoop() {
         val sources = File(FluentSourceDir)
             .listFiles()
             .orEmpty()
-            .filter { file -> file.name in SettingsSources }
-        sources.size shouldBe SettingsSources.size
+            .filter { file -> file.name in TripsSources }
+        sources.size shouldBe TripsSources.size
         for (source in sources) {
             withClue(source.name) {
                 val text = source.readText()
-                SettingsBannedWords.filter { word -> word in text }.shouldBeEmpty()
+                TripsBannedWords.filter { word -> word in text }.shouldBeEmpty()
+                EndlessProgress
+                    .findAll(text)
+                    .map { match -> match.value }
+                    .toList()
+                    .shouldBeEmpty()
                 text
                     .lines()
                     .map { line -> line.trim() }
                     .filter { line -> line.startsWith("import com.materialkolor.builder.kit.") }
                     .map { line -> line.removePrefix("import ") }
-                    .filterNot { imported -> imported.startsWith("com.materialkolor.builder.kit.motion.") }
-                    .filterNot { imported -> imported.startsWith("com.materialkolor.builder.kit.control.folded") }
+                    .filterNot { imported -> TripsKitImports.any { allowed -> imported.startsWith(allowed) } }
                     .shouldBeEmpty()
             }
         }
@@ -379,3 +371,27 @@ private fun ComposeUiTest.shadesOnScreen(isDark: Boolean): Set<FluentShade> {
         .mapNotNull { ref: ColorRef -> ref.paintedShade(isDark) }
         .toSet()
 }
+
+/**
+ * How far a control's clickable may sit inside the part that declares its colors, in pixels.
+ */
+private const val DeclaredPartSlack = 4f
+
+/**
+ * Whether the node declares its colors, itself or through the part of the same control that its
+ * modifier reaches. A Fluent button keeps its clickable on a row inside that part, which has the
+ * row's bounds, where a card or a pane round the control is larger.
+ */
+private fun SemanticsNode.declaresItsRoles(): Boolean {
+    val holder = generateSequence(this) { node -> node.parent }.firstOrNull { node -> PreviewRoles in node.config }
+    return holder != null &&
+        holder.boundsInRoot.width - boundsInRoot.width <= DeclaredPartSlack &&
+        holder.boundsInRoot.height - boundsInRoot.height <= DeclaredPartSlack
+}
+
+/**
+ * Everything Trips keeps in [DemoAppState], to tell whether anything changed.
+ */
+private fun DemoAppState.tripsSnapshot(): List<Any> =
+    listOf(selectedItem, tabIndex, text, isOn(OfflineMapsSwitch)) +
+        PackingItem.entries.map { item -> isChecked(item.key) }
