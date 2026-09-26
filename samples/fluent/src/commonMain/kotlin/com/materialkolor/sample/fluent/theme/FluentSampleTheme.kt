@@ -44,7 +44,9 @@ internal fun FluentSampleTheme(
     }
 
     FluentTheme(colors = colors) {
-        CompositionLocalProvider(LocalSampleColors provides sampleColors, content = content)
+        DefaultTextContextMenu {
+            CompositionLocalProvider(LocalSampleColors provides sampleColors, content = content)
+        }
     }
 }
 
