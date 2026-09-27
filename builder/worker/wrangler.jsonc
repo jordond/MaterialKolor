@@ -11,9 +11,9 @@
     // Only link previews and the API run code, everything else is served straight from the site.
     "run_worker_first": ["/t/*", "/og/*", "/api/*"]
   },
-  // The cache behind /api/versions. Create the namespace with `wrangler kv namespace create VERSIONS`,
-  // then uncomment this with its id. Until then the Worker keeps the answer in the Cache API.
-  // "kv_namespaces": [{ "binding": "VERSIONS", "id": "<production namespace id>" }],
+  // The cache behind /api/versions, the `materialkolor-builder-versions` namespace. Staging shares it,
+  // since the answer is the same public Maven data on both. Without it the Worker uses the Cache API.
+  "kv_namespaces": [{ "binding": "VERSIONS", "id": "d235a08a5a35422db4e6103d387cfa3d" }],
   "rules": [{ "type": "Data", "globs": ["**/*.bin"], "fallthrough": false }],
   // Production, which builder.yml deploys from a builder/<version> tag.
   "routes": [{ "pattern": "materialkolor.com", "custom_domain": true }],
@@ -22,9 +22,9 @@
       "routes": [{ "pattern": "staging.materialkolor.com", "custom_domain": true }],
       "workers_dev": false,
       "preview_urls": true,
-      "vars": { "ROBOTS_TAG": "noindex" }
-      // Its own namespace, from `wrangler kv namespace create VERSIONS --env staging`.
-      // "kv_namespaces": [{ "binding": "VERSIONS", "id": "<staging namespace id>" }]
+      "vars": { "ROBOTS_TAG": "noindex" },
+      // Bindings are not inherited by an env, so staging names the same namespace again.
+      "kv_namespaces": [{ "binding": "VERSIONS", "id": "d235a08a5a35422db4e6103d387cfa3d" }]
     }
   }
 }
