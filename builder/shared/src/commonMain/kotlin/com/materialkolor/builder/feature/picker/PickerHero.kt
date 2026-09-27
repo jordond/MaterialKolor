@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -89,11 +90,13 @@ internal fun PickerHero(
     val padding = if (compact) {
         PaddingValues(spacing.large)
     } else {
+        // The eyebrow's row is as tall as Pick from screen, so the band's foot is kept thin to leave
+        // the hex and the name their full lines.
         PaddingValues(
             start = spacing.extraLarge,
             top = spacing.extraLarge,
             end = spacing.large,
-            bottom = spacing.extraLarge,
+            bottom = spacing.extraSmall,
         )
     }
     Row(modifier.fillMaxWidth().height(metrics.height)) {
@@ -106,7 +109,7 @@ internal fun PickerHero(
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().heightIn(min = EyedropperSize),
                 horizontalArrangement = Arrangement.spacedBy(spacing.medium),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -224,6 +227,7 @@ private fun WasButton(
  *
  * @property[height] The band's height.
  * @property[hexSize] The hex's type size.
+ * @property[hexLine] The hex's line, a touch under its size since the hex has no descenders.
  * @property[wasWidth] How wide Was is.
  * @property[compact] Whether this is the phone's band, which sets the small type a step smaller.
  */
@@ -231,12 +235,13 @@ private fun WasButton(
 private data class HeroMetrics(
     val height: Dp,
     val hexSize: TextUnit,
+    val hexLine: TextUnit,
     val wasWidth: Dp,
     val compact: Boolean,
 )
 
-private val WideHero = HeroMetrics(height = 184.dp, hexSize = 80.sp, wasWidth = 136.dp, compact = false)
-private val CompactHero = HeroMetrics(height = 172.dp, hexSize = 52.sp, wasWidth = 92.dp, compact = true)
+private val WideHero = HeroMetrics(height = 184.dp, hexSize = 80.sp, hexLine = 76.sp, wasWidth = 136.dp, compact = false)
+private val CompactHero = HeroMetrics(height = 172.dp, hexSize = 52.sp, hexLine = 52.sp, wasWidth = 92.dp, compact = true)
 
 /**
  * The band's type, over the builder's own faces.
@@ -263,7 +268,7 @@ private data class HeroStyles(
                 hex = type.posterHero.merge(
                     TextStyle(
                         fontSize = metrics.hexSize,
-                        lineHeight = metrics.hexSize,
+                        lineHeight = metrics.hexLine,
                         letterSpacing = if (compact) (-2).sp else (-3).sp,
                     ),
                 ),

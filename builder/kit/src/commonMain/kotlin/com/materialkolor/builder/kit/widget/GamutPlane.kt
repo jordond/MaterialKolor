@@ -359,7 +359,10 @@ private fun CacheDrawScope.planeDrawing(
         edge = Path()
         past = Path().apply { moveTo(farX, 0f) }
         for (tone in ToneTop downTo 0) {
-            val point = Offset(xOf(picture.edges[tone]), size.height * (1f - tone / ToneTop.toFloat()))
+            // White and black carry no chroma. The search still finds a little at tone 100, which
+            // bent the edge back on itself under the plane's top corner.
+            val chroma = if (tone == ToneTop || tone == 0) 0.0 else picture.edges[tone]
+            val point = Offset(xOf(chroma), size.height * (1f - tone / ToneTop.toFloat()))
             if (tone == ToneTop) edge.moveTo(point.x, point.y) else edge.lineTo(point.x, point.y)
             past.lineTo(point.x, point.y)
         }
