@@ -2,16 +2,27 @@ package com.materialkolor.builder.feature.share
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.text.TextLayoutResult
@@ -22,11 +33,16 @@ import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakeClipboard
 import com.materialkolor.builder.fakes.FakeEnvironment
 import com.materialkolor.builder.fakes.FakeFileSaver
+import com.materialkolor.builder.fakes.FakeLinkCardSource
 import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.floats.plusOrMinus
+import io.kotest.matchers.floats.shouldBeGreaterThan
+import io.kotest.matchers.floats.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.floats.shouldBeLessThanOrEqual
+import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -48,10 +64,22 @@ private const val PHONE_WIDTH = 360
 
 private const val PHONE_HEIGHT = 780
 
+/**
+ * A short window, wide enough for the well beside the details at [SPLIT_WIDTH] and not at
+ * [STACKED_WIDTH].
+ */
+private const val SHORT_HEIGHT = 560
+
+private const val SPLIT_WIDTH = 1024
+
+private const val STACKED_WIDTH = 700
+
 @OptIn(ExperimentalTestApi::class)
 class ShareDialogTest : SessionTestBase() {
     private val done = mutableListOf<ShareOutcome>()
     private val copied = mutableListOf<String>()
+    private val drafts = mutableListOf<String>()
+    private val renamed = mutableListOf<String>()
 
     @Test
     fun copy_thatLands_isReportedAsCopied() =
@@ -171,21 +199,25 @@ class ShareDialogTest : SessionTestBase() {
             onAllNodes(hasText("Copy link")).assertCountEquals(0)
         }
 
-    // One line in a field of its own that scrolls inside, with Copy link beside it, so a long link
-    // never runs past the dialog's padding. A finger still copies it all with Copy link.
+    // On a phone the whole link wraps in its box inside the screen, and Copy link along the bottom
+    // still copies it all.
     @Test
-    fun link_onAPhone_staysOnOneLineInsideItsField() =
+    fun link_onAPhone_wrapsInsideTheScreen() =
         runDesktopComposeUiTest(width = PHONE_WIDTH, height = PHONE_HEIGHT) {
             showDialog(link = LONG_LINK)
 
             val link = onNode(hasText(LONG_LINK))
+            // The body scrolls, and the link sits under the well and the details.
+            onAllNodes(hasScrollAction()).onFirst().performSemanticsAction(SemanticsActions.ScrollBy) { scroll ->
+                scroll(0f, Float.MAX_VALUE)
+            }
+            waitForIdle()
             link.assertIsDisplayed()
             val layouts = mutableListOf<TextLayoutResult>()
             link.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action -> action(layouts) }
-            layouts.single().lineCount shouldBe 1
-            val field = link.fetchSemanticsNode().boundsInRoot
+            layouts.single().lineCount shouldBeGreaterThan 1
+            link.fetchSemanticsNode().boundsInRoot.right shouldBeLessThanOrEqual PHONE_WIDTH.toFloat()
             val copy = onNode(hasText("Copy link")).fetchSemanticsNode().boundsInRoot
-            field.right shouldBeLessThanOrEqual copy.left
             copy.right shouldBeLessThanOrEqual PHONE_WIDTH.toFloat()
             onNode(hasContentDescription("Share link")).assertExists()
             onNode(hasText("Copy link")).performClick()
@@ -193,11 +225,115 @@ class ShareDialogTest : SessionTestBase() {
             copied shouldBe listOf(LONG_LINK)
         }
 
+    // A short window shrinks the card rather than scrolling Copy link, or the text a failed copy
+    // shows, out of view, beside the details and over them alike.
+    @Test
+    fun actions_onAShortWindow_stayInsideItAndTheCardShrinks() {
+        for ((width, split) in listOf(SPLIT_WIDTH to true, STACKED_WIDTH to false)) {
+            withClue(if (split) "split" else "one column") {
+                runDesktopComposeUiTest(width = width, height = SHORT_HEIGHT) {
+                    showDialog(copyOutcome = ShareOutcome.CopyFailed, card = CardState.Shown(ImageBitmap(1200, 630)))
+                    val cardNode = onNode(hasContentDescription("Link preview card"))
+                    val copy = onNode(hasText("Copy link") and hasClickAction())
+
+                    fun assertInside() {
+                        copy.assertIsDisplayed()
+                        copy.fetchSemanticsNode().boundsInWindow.bottom shouldBeLessThanOrEqual SHORT_HEIGHT.toFloat()
+                        cardNode.assertIsDisplayed()
+                        cardNode.fetchSemanticsNode().boundsInWindow.height shouldBeGreaterThan 0f
+                    }
+                    assertInside()
+                    val card = cardNode.fetchSemanticsNode().boundsInWindow
+                    val button = copy.fetchSemanticsNode().boundsInWindow
+                    // The details keep the actions' width, with the scrollbar out past both.
+                    val field = onNode(hasSetTextAction()).fetchSemanticsNode().boundsInWindow
+                    field.right shouldBe (button.right plusOrMinus 1f)
+                    if (split) {
+                        button.left shouldBeGreaterThan card.right
+                    } else {
+                        button.top shouldBeGreaterThan
+                            card.bottom
+                    }
+
+                    copy.performClick()
+                    waitForIdle()
+
+                    assertInside()
+                    val manual = onNode(hasText("copy it yourself", substring = true))
+                    manual.assertIsDisplayed()
+                    manual.fetchSemanticsNode().boundsInWindow.bottom shouldBeLessThanOrEqual SHORT_HEIGHT.toFloat()
+                }
+            }
+        }
+    }
+
+    // A failed card shrunk toward its floor keeps both of its lines inside its outline.
+    @Test
+    fun card_thatFailed_onAShortWindow_keepsItsWordsInsideItsBox() =
+        runDesktopComposeUiTest(width = STACKED_WIDTH, height = SHORT_HEIGHT) {
+            showDialog(card = CardState.Failed)
+            val box = onNodeWithTag(FailedCardTag).fetchSemanticsNode().boundsInWindow
+
+            for (line in listOf("The preview card didn’t load", "The link still works.")) {
+                withClue(line) {
+                    val bounds = onNodeWithText(line).assertIsDisplayed().fetchSemanticsNode().boundsInWindow
+                    bounds.top shouldBeGreaterThanOrEqual box.top
+                    bounds.bottom shouldBeLessThanOrEqual box.bottom
+                }
+            }
+        }
+
+    @Test
+    fun dialog_asItOpens_focusesCopyLink() =
+        runComposeUiTest {
+            showDialog()
+
+            onNode(hasText("Copy link") and hasClickAction()).assertIsFocused()
+        }
+
+    @Test
+    fun card_thatFailed_saysSoAndThatTheLinkStillWorks() =
+        runComposeUiTest {
+            showDialog(card = CardState.Failed)
+
+            onNodeWithText("The preview card didn’t load").assertExists()
+            onNodeWithText("The link still works.").assertExists()
+        }
+
+    @Test
+    fun name_committedInTheField_reachesTheRename() =
+        runComposeUiTest {
+            showDialog()
+
+            val field = onNode(hasSetTextAction())
+            field.performTextReplacement("Lighthouse")
+            field.performKeyInput { pressKey(Key.Enter) }
+            waitForIdle()
+
+            drafts.last() shouldBe "Lighthouse"
+            renamed shouldBe listOf("Lighthouse")
+        }
+
+    @Test
+    fun name_blank_saysAProjectNeedsANameAndNeverRenames() =
+        runComposeUiTest {
+            showDialog()
+
+            val field = onNode(hasSetTextAction())
+            field.performTextReplacement("  ")
+            field.performKeyInput { pressKey(Key.Enter) }
+            waitForIdle()
+
+            onNodeWithText("A project needs a name").assertExists()
+            renamed.shouldBeEmpty()
+        }
+
     @Test
     fun copyClick_writesTheClipboardBeforeTheClickReturns() =
         runTest {
             val clipboard = FakeClipboard()
-            val controller = ShareController(session().first, clipboard, FakeFileSaver(), FakeEnvironment())
+            val controller =
+                ShareController(session().first, clipboard, FakeFileSaver(), FakeEnvironment(), FakeLinkCardSource())
             val outcomes = mutableListOf<ShareOutcome>()
 
             idleScope().launchSend(LINK, controller::copy) { outcome -> outcomes += outcome }
@@ -211,7 +347,7 @@ class ShareDialogTest : SessionTestBase() {
         runTest {
             val clipboard = FakeClipboard()
             val files = FakeFileSaver(canShareLink = true)
-            val controller = ShareController(session().first, clipboard, files, FakeEnvironment())
+            val controller = ShareController(session().first, clipboard, files, FakeEnvironment(), FakeLinkCardSource())
 
             idleScope().launchSend(LINK, call = { url -> controller.share(url, "Harbour") }, onOutcome = {})
 
@@ -239,6 +375,9 @@ class ShareDialogTest : SessionTestBase() {
         link: String? = LINK,
         shareOutcome: ShareOutcome = ShareOutcome.Shared,
         coarsePointer: Boolean = false,
+        card: CardState = CardState.Failed,
+        projectName: String = "Harbour",
+        transient: Boolean = false,
     ) {
         setContent {
             BuilderTheme(
@@ -259,6 +398,16 @@ class ShareDialogTest : SessionTestBase() {
                         share = { shareOutcome },
                         onDone = { outcome -> done += outcome },
                         onDismissRequest = {},
+                        document = ThemeDocument.Default,
+                        card = card,
+                        name = ShareName(
+                            value = projectName,
+                            transient = transient,
+                            notSaved = false,
+                            onDraftChange = { draft -> drafts += draft },
+                            onCommit = { name -> renamed += name },
+                            onSaveToProjects = {},
+                        ),
                     )
                 }
             }

@@ -27,10 +27,30 @@ public fun shareLink(
     document: ThemeDocument,
     projectName: String,
     origin: String = SITE_ORIGIN,
+): String? = fittedCode(document, projectName)?.let { code -> "$origin/t/$code" }
+
+/**
+ * The link to the card for [document] called [projectName], the PNG a chat app shows under the
+ * link [shareLink] gives. It is served from [origin], so a card made on staging comes from staging.
+ *
+ * It carries the same code as [shareLink], so it is null exactly when that link is.
+ */
+public fun shareCardLink(
+    document: ThemeDocument,
+    projectName: String,
+    origin: String = SITE_ORIGIN,
+): String? = fittedCode(document, projectName)?.let { code -> "$origin/og/$code.png" }
+
+/**
+ * The code a link to [document] carries. It is the document's own code, or failing that the code
+ * of what its target sees, or null when neither fits.
+ */
+private fun fittedCode(
+    document: ThemeDocument,
+    projectName: String,
 ): String? {
     val target = ExportTarget.of(document.library, document.expressive)
-    val code = codeOrNull(document, projectName) ?: codeOrNull(document.forTarget(target), projectName)
-    return code?.let { fitted -> "$origin/t/$fitted" }
+    return codeOrNull(document, projectName) ?: codeOrNull(document.forTarget(target), projectName)
 }
 
 /**

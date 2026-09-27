@@ -87,6 +87,34 @@ public fun validateProjectName(projectName: String): List<ValidationError> {
 }
 
 /**
+ * What stops [name] from being a project's name once it is trimmed, or null when nothing does.
+ * A name has to hold something other than spaces and fit in [MAX_PROJECT_NAME_BYTES] UTF-8 bytes.
+ */
+public fun projectNameProblem(name: String): ProjectNameProblem? {
+    val trimmed = name.trim()
+    return when {
+        trimmed.isEmpty() -> ProjectNameProblem.Blank
+        trimmed.utf8Size() > MAX_PROJECT_NAME_BYTES -> ProjectNameProblem.TooLong
+        else -> null
+    }
+}
+
+/**
+ * Why a name cannot be a project's name, as [projectNameProblem] tells it.
+ */
+public enum class ProjectNameProblem {
+    /**
+     * The name is empty or only spaces.
+     */
+    Blank,
+
+    /**
+     * The name is longer than [MAX_PROJECT_NAME_BYTES] UTF-8 bytes.
+     */
+    TooLong,
+}
+
+/**
  * Whether this is something Kotlin accepts as a name without backticks.
  *
  * It starts with a letter or an underscore and goes on with letters, digits and underscores. A name

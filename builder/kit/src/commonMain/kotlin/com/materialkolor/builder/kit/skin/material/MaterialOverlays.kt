@@ -1,21 +1,11 @@
 package com.materialkolor.builder.kit.skin.material
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.PlainTooltip
@@ -30,52 +20,31 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderMenuItem
 import com.materialkolor.builder.kit.control.BuilderToast
-import com.materialkolor.builder.kit.control.DialogFrame
 import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.foldMenuRow
 import com.materialkolor.builder.kit.headless.HeadlessDropdown
-import com.materialkolor.builder.kit.headless.HeadlessModal
 import com.materialkolor.builder.kit.headless.HeadlessTooltip
 import com.materialkolor.builder.kit.headless.LocalOverlaysInTree
-import com.materialkolor.builder.kit.headless.ReturnFocusWhenGone
-import com.materialkolor.builder.kit.headless.keepTaps
-import com.materialkolor.builder.kit.headless.modalPane
-import com.materialkolor.builder.kit.headless.modalTitle
 import com.materialkolor.builder.kit.icon.IconId
-import com.materialkolor.builder.kit.motion.LocalReducedMotion
 import com.materialkolor.builder.kit.skin.headless.ActionColors
 import com.materialkolor.builder.kit.skin.headless.ListRowStyle
 import com.materialkolor.builder.kit.skin.headless.OverlayMetrics
 import com.materialkolor.builder.kit.skin.headless.OverlayStyle
-import com.materialkolor.builder.kit.skin.headless.popoverEnter
-import com.materialkolor.builder.kit.skin.headless.popoverExit
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 
 /**
@@ -186,122 +155,6 @@ private fun tonal(
 ): Color {
     val colors = MaterialTheme.colorScheme
     return if (color == colors.surface) colors.surfaceColorAtElevation(elevation) else color
-}
-
-/**
- * Material's `AlertDialog`. Its window keeps focus inside, focus starts on the first action unless
- * something inside has already taken it, a field that asks for it as it opens, and Esc closes it
- * even where the platform does not turn Esc into back.
- *
- * `AlertDialog` always opens a window of its own, so where overlays render in the page it
- * gives way to [MaterialPageDialog].
- */
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-internal fun MaterialDialog(
-    visible: Boolean,
-    onDismissRequest: () -> Unit,
-    title: String,
-    returnFocusTo: FocusRequester?,
-    modifier: Modifier,
-    frame: DialogFrame,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    if (LocalOverlaysInTree.current) {
-        MaterialPageDialog(visible, onDismissRequest, title, returnFocusTo, modifier, frame, content)
-        return
-    }
-    ReturnFocusWhenGone(visible, returnFocusTo)
-    if (!visible) return
-    val firstAction = remember { FocusRequester() }
-    val focusInside = remember { mutableStateOf(false) }
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        confirmButton = {
-            Row(
-                modifier = Modifier.focusRequester(firstAction),
-                horizontalArrangement = Arrangement.spacedBy(LocalBuilderTokens.current.spacing.small),
-                content = frame.actions ?: {},
-            )
-        },
-        modifier = modifier
-            .modalPane(title)
-            .onFocusChanged { state -> focusInside.value = state.hasFocus }
-            .onKeyEvent { event ->
-                val escape = event.type == KeyEventType.KeyDown && event.key == Key.Escape
-                if (escape) onDismissRequest()
-                escape
-            },
-        title = if (frame.titleShown) {
-            { Text(title, Modifier.modalTitle()) }
-        } else {
-            null
-        },
-        text = { Column(content = content) },
-        properties = DialogProperties(animateTransition = !LocalReducedMotion.current),
-    )
-    LaunchedEffect(Unit) { if (!focusInside.value) firstAction.requestFocus() }
-}
-
-/**
- * Material's dialog container over the headless modal, for where overlays render in the page.
- *
- * It takes the container colour, shape and tonal elevation of `AlertDialogDefaults` and Material's
- * headline for the title, and moves with the kit's motion. The headless modal holds focus inside,
- * starting on the first action, or on the panel when there is none.
- */
-@Composable
-private fun MaterialPageDialog(
-    visible: Boolean,
-    onDismissRequest: () -> Unit,
-    title: String,
-    returnFocusTo: FocusRequester?,
-    modifier: Modifier,
-    frame: DialogFrame,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    val tokens = LocalBuilderTokens.current
-    val typography = MaterialTheme.typography
-    HeadlessModal(visible, onDismissRequest, tokens.scrim, Alignment.Center, returnFocusTo) {
-        Surface(
-            modifier = modifier
-                .animateEnterExit(enter = popoverEnter(), exit = popoverExit())
-                .padding(tokens.spacing.large)
-                .widthIn(min = OverlayMetrics.dialogMinWidth, max = OverlayMetrics.dialogMaxWidth)
-                .modalPane(title)
-                .keepTaps(),
-            shape = AlertDialogDefaults.shape,
-            color = AlertDialogDefaults.containerColor,
-            tonalElevation = AlertDialogDefaults.TonalElevation,
-        ) {
-            Column(
-                modifier = Modifier.padding(tokens.spacing.extraLarge),
-                verticalArrangement = Arrangement.spacedBy(tokens.spacing.large),
-            ) {
-                if (frame.titleShown) {
-                    Text(
-                        text = title,
-                        modifier = Modifier.modalTitle(),
-                        color = AlertDialogDefaults.titleContentColor,
-                        style = typography.headlineSmall,
-                    )
-                }
-                CompositionLocalProvider(
-                    LocalContentColor provides AlertDialogDefaults.textContentColor,
-                    LocalTextStyle provides typography.bodyMedium,
-                ) { Column(Modifier.weight(1f, fill = false), content = content) }
-                val actions = frame.actions
-                if (actions != null) {
-                    Row(
-                        modifier = Modifier.align(Alignment.End),
-                        horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
-                        verticalAlignment = Alignment.CenterVertically,
-                        content = actions,
-                    )
-                }
-            }
-        }
-    }
 }
 
 /**

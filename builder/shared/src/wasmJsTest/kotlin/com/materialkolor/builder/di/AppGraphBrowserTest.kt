@@ -14,6 +14,7 @@ import com.materialkolor.builder.core.platform.FileSaver
 import com.materialkolor.builder.core.platform.ImageHandle
 import com.materialkolor.builder.core.platform.ImageInput
 import com.materialkolor.builder.core.platform.InMemoryStoreFactory
+import com.materialkolor.builder.core.platform.LinkCardSource
 import com.materialkolor.builder.core.platform.OutgoingFile
 import com.materialkolor.builder.core.platform.Paste
 import com.materialkolor.builder.core.platform.PasteInput
@@ -78,6 +79,11 @@ private object TestPlatform : PlatformServices {
     override val images: ImageInput = TestImageInput
     override val pastes: PasteInput = TestPasteInput
     override val environment: Environment = TestEnvironment
+    override val linkCards: LinkCardSource = TestLinkCards
+}
+
+private object TestLinkCards : LinkCardSource {
+    override suspend fun fetch(url: String): ByteArray? = null
 }
 
 private object TestRouter : Router {

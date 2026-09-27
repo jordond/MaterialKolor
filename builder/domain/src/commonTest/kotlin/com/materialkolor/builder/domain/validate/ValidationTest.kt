@@ -168,6 +168,23 @@ class ValidationTest {
     }
 
     @Test
+    fun projectNameProblem_emptyOrSpaces_isBlank() {
+        assertEquals(ProjectNameProblem.Blank, projectNameProblem(""))
+        assertEquals(ProjectNameProblem.Blank, projectNameProblem("   "))
+    }
+
+    @Test
+    fun projectNameProblem_at48Bytes_isNull() {
+        assertEquals(null, projectNameProblem("é".repeat(24)))
+        assertEquals(null, projectNameProblem("  " + "é".repeat(24) + "  "))
+    }
+
+    @Test
+    fun projectNameProblem_past48Bytes_isTooLong() {
+        assertEquals(ProjectNameProblem.TooLong, projectNameProblem("é".repeat(24) + "p"))
+    }
+
+    @Test
     fun validateDocument_default_passes() {
         assertEquals(emptyList(), validateDocument(ThemeDocument.Default))
     }

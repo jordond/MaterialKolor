@@ -50,6 +50,30 @@ class ShareLinkTest {
         assertEquals("https://staging.materialkolor.com/t/" + ShareCodec.encode(document, "Harbour"), link)
     }
 
+    @Test
+    fun shareCardLink_carriesTheSameCodeAsShareLink() {
+        val origin = "https://staging.materialkolor.com"
+        val documents =
+            listOf(
+                ThemeDocument(seed = SEED, accents = accents(MAX_ACCENTS)),
+                ThemeDocument(seed = SEED, library = Library.Fluent, accents = accents(MAX_ACCENTS + 1)),
+            )
+
+        documents.forEach { document ->
+            val code = requireNotNull(shareLink(document, "Harbour", origin)).removePrefix("$origin/t/")
+
+            assertEquals("$origin/og/$code.png", shareCardLink(document, "Harbour", origin))
+        }
+    }
+
+    @Test
+    fun shareCardLink_noShareLink_isNull() {
+        val document = ThemeDocument(seed = SEED, library = Library.Material3, accents = accents(MAX_ACCENTS + 1))
+
+        assertNull(shareLink(document, "Harbour"))
+        assertNull(shareCardLink(document, "Harbour"))
+    }
+
     private fun decode(link: String?): DecodeResult {
         val url = requireNotNull(link) { "Expected a link" }
         return ShareCodec.decode(url.removePrefix(SHARE_URL_PREFIX))
