@@ -62,6 +62,9 @@ internal fun PickerFormat(
             selected = format,
             onSelect = { chosen -> format = chosen },
             label = stringResource(Res.string.picker_format),
+            modifier = Modifier.fillMaxWidth(),
+            // The picker's column is narrow, and a check beside OKLCH leaves no room for the labels.
+            compact = true,
         ) { entry -> names.getValue(entry) }
         FormatField(picker, format)
     }

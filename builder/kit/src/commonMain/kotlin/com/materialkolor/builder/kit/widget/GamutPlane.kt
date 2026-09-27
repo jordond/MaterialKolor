@@ -358,8 +358,9 @@ private fun CacheDrawScope.planeDrawing(
         val farX = if (isRtl) 0f else size.width
         edge = Path()
         past = Path().apply { moveTo(farX, 0f) }
+        val drawn = smoothEdge(picture.edges)
         for (tone in ToneTop downTo 0) {
-            val point = Offset(xOf(picture.edges[tone]), size.height * (1f - tone / ToneTop.toFloat()))
+            val point = Offset(xOf(drawn[tone]), size.height * (1f - tone / ToneTop.toFloat()))
             if (tone == ToneTop) edge.moveTo(point.x, point.y) else edge.lineTo(point.x, point.y)
             past.lineTo(point.x, point.y)
         }
@@ -380,6 +381,24 @@ private fun CacheDrawScope.planeDrawing(
         rim = Stroke(stroke * 1.5f),
         outerRim = Stroke(stroke),
     )
+}
+
+/**
+ * The edge as drawn, [edges] with the search's slack taken out near white and black.
+ *
+ * The sRGB edge only climbs from black to its widest tone and only falls from there to white. Near
+ * white the search's slack can find more chroma at one tone than at the tone under it, and drawn
+ * as found the edge doubled back on itself under the plane's top corner. So each tone past the
+ * widest keeps no more than its neighbour nearer the widest, and white and black keep none.
+ */
+internal fun smoothEdge(edges: DoubleArray): DoubleArray {
+    val drawn = edges.copyOf()
+    val widest = edges.indices.maxBy { tone -> edges[tone] }
+    for (tone in widest + 1..ToneTop) drawn[tone] = min(drawn[tone], drawn[tone - 1])
+    for (tone in widest - 1 downTo 0) drawn[tone] = min(drawn[tone], drawn[tone + 1])
+    drawn[0] = 0.0
+    drawn[ToneTop] = 0.0
+    return drawn
 }
 
 /**
