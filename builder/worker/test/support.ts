@@ -95,7 +95,7 @@ function varint(value: number): number[] {
 }
 
 /** The code the builder writes for the default theme, and some the builder would never read. */
-export const DEFAULT_CODE = 'AdllOwAAAAAT';
+export const DEFAULT_CODE = 'AdllOyAAAADd';
 export const BAD_CODES: readonly [string, string][] = [
   ['corrupt', 'AdllOwAAAAAU'],
   ['truncated', 'AdllOwAAAA'],
