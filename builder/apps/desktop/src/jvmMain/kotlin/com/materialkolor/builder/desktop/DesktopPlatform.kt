@@ -8,6 +8,7 @@ import com.materialkolor.builder.core.platform.FileSaver
 import com.materialkolor.builder.core.platform.ImageHandle
 import com.materialkolor.builder.core.platform.ImageInput
 import com.materialkolor.builder.core.platform.InMemoryStoreFactory
+import com.materialkolor.builder.core.platform.LibraryVersionSource
 import com.materialkolor.builder.core.platform.LinkCardSource
 import com.materialkolor.builder.core.platform.OutgoingFile
 import com.materialkolor.builder.core.platform.Paste
@@ -28,7 +29,8 @@ import java.util.UUID
  * The desktop window's services.
  *
  * Desktop is a development target, so stores live in memory for the session and the clipboard,
- * files and images report that they are not available yet. It has no network, so no link card loads.
+ * files and images report that they are not available yet. It has no network, so no link card loads
+ * and an export names the versions the build was made with.
  */
 internal object DesktopPlatform : PlatformServices {
     override val router: Router = DesktopRouter
@@ -39,6 +41,7 @@ internal object DesktopPlatform : PlatformServices {
     override val pastes: PasteInput = DesktopPasteInput
     override val environment: Environment = DesktopEnvironment
     override val linkCards: LinkCardSource = DesktopLinkCards
+    override val libraryVersions: LibraryVersionSource = DesktopLibraryVersions
 }
 
 /**
@@ -95,6 +98,13 @@ private object DesktopImageInput : ImageInput {
  */
 private object DesktopLinkCards : LinkCardSource {
     override suspend fun fetch(url: String): ByteArray? = null
+}
+
+/**
+ * Desktop has no site to ask, so an export keeps the versions the build was made with.
+ */
+private object DesktopLibraryVersions : LibraryVersionSource {
+    override suspend fun fetch(): String? = null
 }
 
 private object DesktopPasteInput : PasteInput {

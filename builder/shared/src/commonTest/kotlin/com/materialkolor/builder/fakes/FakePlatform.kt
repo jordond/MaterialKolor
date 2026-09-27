@@ -1,6 +1,7 @@
 package com.materialkolor.builder.fakes
 
 import com.materialkolor.builder.core.platform.InMemoryStoreFactory
+import com.materialkolor.builder.core.platform.LibraryVersionSource
 import com.materialkolor.builder.core.platform.LinkCardSource
 import com.materialkolor.builder.core.platform.PlatformServices
 
@@ -16,6 +17,7 @@ internal class FakePlatform(
     override val pastes: FakePasteInput = FakePasteInput(),
     override val environment: FakeEnvironment = FakeEnvironment(),
     override val linkCards: FakeLinkCardSource = FakeLinkCardSource(),
+    override val libraryVersions: FakeLibraryVersionSource = FakeLibraryVersionSource(),
 ) : PlatformServices
 
 /**
@@ -35,5 +37,23 @@ internal class FakeLinkCardSource : LinkCardSource {
     override suspend fun fetch(url: String): ByteArray? {
         urls += url
         return bytes
+    }
+}
+
+/**
+ * A [LibraryVersionSource] that answers with [json] and counts how often it was asked.
+ */
+internal class FakeLibraryVersionSource(
+    var json: String? = null,
+) : LibraryVersionSource {
+    /**
+     * How many times [fetch] ran.
+     */
+    var fetches: Int = 0
+        private set
+
+    override suspend fun fetch(): String? {
+        fetches++
+        return json
     }
 }

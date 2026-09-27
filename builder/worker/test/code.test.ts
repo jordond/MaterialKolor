@@ -31,7 +31,8 @@ describe('share vectors', () => {
 
   it('start with the default theme', () => {
     expect(vector('default').code).toBe(DEFAULT_CODE);
-    expect(codeOf([VERSION, 0xd9, 0x65, 0x3b, 0, 0, 0, 0])).toBe(DEFAULT_CODE);
+    // New themes ask for the newest spec, the 0x20 in the flags.
+    expect(codeOf([VERSION, 0xd9, 0x65, 0x3b, 0x20, 0, 0, 0])).toBe(DEFAULT_CODE);
   });
 });
 

@@ -32,6 +32,7 @@ interface PlatformServices {
     val pastes: PasteInput
     val environment: Environment
     val linkCards: LinkCardSource
+    val libraryVersions: LibraryVersionSource
 }
 
 /**
@@ -43,6 +44,18 @@ interface LinkCardSource {
      * is not OK or a type that is not `image/png`, or the fetch threw.
      */
     suspend fun fetch(url: String): ByteArray?
+}
+
+/**
+ * The versions each library an export depends on has published, so an export names current ones
+ * rather than the ones this build was made with.
+ */
+interface LibraryVersionSource {
+    /**
+     * The JSON the site serves at `/api/versions`, or null when there is none. There is no network,
+     * the answer is not OK or not JSON, or the fetch threw.
+     */
+    suspend fun fetch(): String?
 }
 
 /**
