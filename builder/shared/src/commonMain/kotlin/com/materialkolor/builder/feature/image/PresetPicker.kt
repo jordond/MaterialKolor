@@ -1,74 +1,71 @@
 package com.materialkolor.builder.feature.image
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.constrainWidth
+import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.engine.resolve.SchemeInputs
-import com.materialkolor.builder.feature.poster.ContrastStop
 import com.materialkolor.builder.feature.poster.PosterContext
 import com.materialkolor.builder.feature.poster.PosterIconButton
 import com.materialkolor.builder.feature.poster.rememberThemeResolver
-import com.materialkolor.builder.feature.poster.styleName
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.image_menu_presets
 import com.materialkolor.builder.generated.resources.image_menu_upload
-import com.materialkolor.builder.generated.resources.image_presets_close
 import com.materialkolor.builder.generated.resources.image_presets_images
 import com.materialkolor.builder.generated.resources.image_presets_images_line
+import com.materialkolor.builder.generated.resources.image_presets_line
 import com.materialkolor.builder.generated.resources.image_presets_starters
 import com.materialkolor.builder.generated.resources.image_presets_starters_line
 import com.materialkolor.builder.generated.resources.image_presets_title
-import com.materialkolor.builder.generated.resources.image_starter_card
-import com.materialkolor.builder.generated.resources.image_starter_card_contrast
 import com.materialkolor.builder.generated.resources.poster_image
 import com.materialkolor.builder.kit.control.BuilderButton
-import com.materialkolor.builder.kit.control.BuilderCard
 import com.materialkolor.builder.kit.control.BuilderDialog
 import com.materialkolor.builder.kit.control.BuilderMenu
 import com.materialkolor.builder.kit.control.BuilderMenuItem
 import com.materialkolor.builder.kit.control.BuilderScrollArea
+import com.materialkolor.builder.kit.control.BuilderSheet
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.control.Emphasis
+import com.materialkolor.builder.kit.control.SheetPresentation
 import com.materialkolor.builder.kit.icon.IconId
+import com.materialkolor.builder.kit.layout.LocalLayout
+import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
-import com.materialkolor.builder.kit.widget.SchemeChip
-import com.materialkolor.builder.kit.widget.SchemeChipFootprint
-import com.materialkolor.builder.kit.widget.SchemeChipSkeleton
 import dev.stateholder.dispatcher.Dispatcher
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Tags a starter's scheme chip once it has resolved, for tests to count them.
+ * The widest the picker's dialog grows, room for five pictures and four starters a row.
  */
-internal const val STARTER_CHIP_TAG: String = "image-starter-chip"
+private val PickerMaxWidth: Dp = 760.dp
 
 /**
- * Tags a starter's skeleton while its scheme resolves.
+ * The body width under which the starters drop to two a row and each group's line goes under its
+ * heading.
  */
-internal const val STARTER_SKELETON_TAG: String = "image-starter-skeleton"
+private val WideBody: Dp = 600.dp
 
 /**
  * The Image button, which opens a menu of the two ways to seed from a picture.
@@ -142,11 +139,15 @@ internal fun ImageMenuButton(
  * A picture sets only the seed, to its strongest color, and the row under the seed actions then
  * offers its other colors. A starter sets the seed, the style and the contrast. Neither touches the
  * target, the overrides, the pins or the accents. Each starter's card shows the scheme it makes of
- * [document], resolved one per frame once the picker opens.
+ * [document], resolved one per frame once the picker opens, and the card [document] still stands on
+ * reads as selected.
+ *
+ * It is a dialog closed from the button beside its title, and on a phone a sheet over the whole
+ * screen. The cards are the only Tab stops in its body.
  *
  * @param[visible] Whether the picker is open, while the workspace's panel is `Panel.Presets`.
  * @param[document] The theme a starter's scheme is drawn from, with the starter's seed, style and
- * contrast in place of its own.
+ * contrast in place of its own. It also says which card is current.
  * @param[isDark] Whether the starters' schemes are drawn dark.
  * @param[onChoose] Called with the preset a card chooses. The picker stays open until told otherwise.
  * @param[returnFocusTo] The button that opened the picker, which gets the focus back once it closes.
@@ -161,40 +162,71 @@ internal fun PresetPicker(
     modifier: Modifier = Modifier,
     returnFocusTo: FocusRequester? = null,
 ) {
-    val spacing = LocalBuilderTokens.current.spacing
+    val title = stringResource(Res.string.image_presets_title)
+    val line = stringResource(Res.string.image_presets_line)
+    if (LocalLayout.current.windowClass == WindowClass.Compact) {
+        BuilderSheet(
+            visible = visible,
+            onDismissRequest = onDismissRequest,
+            title = title,
+            presentation = SheetPresentation.FullScreen,
+            modifier = modifier,
+            returnFocusTo = returnFocusTo,
+            subtitle = line,
+        ) {
+            PresetBody(document, isDark, onChoose, compact = true, modifier = Modifier.weight(1f))
+        }
+        return
+    }
     BuilderDialog(
         visible = visible,
         onDismissRequest = onDismissRequest,
-        title = stringResource(Res.string.image_presets_title),
+        title = title,
         modifier = modifier,
         returnFocusTo = returnFocusTo,
-        actions = {
-            BuilderButton(
-                onClick = onDismissRequest,
-                label = stringResource(Res.string.image_presets_close),
-                emphasis = Emphasis.Subtle,
-            )
-        },
+        closeButton = true,
+        maxWidth = PickerMaxWidth,
     ) {
-        // The cards take the focus themselves, so the list needs no Tab stop of its own. It scrolls
-        // in the height the title and the buttons leave, so the buttons stay on screen.
-        BuilderScrollArea(Modifier.leaveRoomBelow(dialogButtonRoom()), tabStop = false) {
-            Column(verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
+        BuilderText(text = line, emphasis = Emphasis.Secondary)
+        PresetBody(document, isDark, onChoose, compact = false)
+    }
+}
+
+/**
+ * The two groups, in a scroll area of their own. The cards take the focus themselves, so the area
+ * needs no Tab stop.
+ *
+ * It reaches [SelectedRingRoom] past each side and pads its groups back in by as much, so the ring
+ * round a selected card at the edge is never cut off and the groups still line up with the title.
+ *
+ * @param[compact] Whether it fills a phone's sheet, where the pictures scroll sideways in one row.
+ */
+@Composable
+private fun PresetBody(
+    document: ThemeDocument,
+    isDark: Boolean,
+    onChoose: (Preset) -> Unit,
+    compact: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = LocalBuilderTokens.current.spacing
+    BuilderScrollArea(modifier.bleedSideways(SelectedRingRoom), tabStop = false) {
+        BoxWithConstraints(Modifier.padding(SelectedRingRoom)) {
+            val wide = !compact && maxWidth >= WideBody
+            Column(verticalArrangement = Arrangement.spacedBy(spacing.section)) {
                 PresetGroup(
                     title = stringResource(Res.string.image_presets_images),
                     line = stringResource(Res.string.image_presets_images_line),
+                    inline = wide,
                 ) {
-                    Presets.images.forEach { preset ->
-                        PresetCard(stringResource(preset.name), onClick = { onChoose(preset) }) {
-                            PresetPicture(preset)
-                        }
-                    }
+                    Pictures(document, compact, onChoose)
                 }
                 PresetGroup(
                     title = stringResource(Res.string.image_presets_starters),
                     line = stringResource(Res.string.image_presets_starters_line),
+                    inline = wide,
                 ) {
-                    StarterCards(document, isDark, onChoose)
+                    Starters(document, isDark, columns = if (wide) 4 else 2, compact, onChoose)
                 }
             }
         }
@@ -203,71 +235,83 @@ internal fun PresetPicker(
 
 /**
  * A heading, a line on what choosing from it does, and the cards.
+ *
+ * @param[inline] Whether the line sits beside the heading on its baseline, where there is room,
+ * rather than under it.
  */
 @Composable
 private fun PresetGroup(
     title: String,
     line: String,
+    inline: Boolean,
     cards: @Composable () -> Unit,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
-    Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-        BuilderText(text = title, style = BuilderTextStyle.SectionLabel)
-        BuilderText(text = line, emphasis = Emphasis.Secondary)
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(spacing.small),
-            verticalArrangement = Arrangement.spacedBy(spacing.small),
-        ) {
-            cards()
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+        if (inline) {
+            Row(horizontalArrangement = Arrangement.spacedBy(spacing.medium)) {
+                BuilderText(text = title, modifier = Modifier.alignByBaseline(), style = BuilderTextStyle.SectionLabel)
+                BuilderText(
+                    text = line,
+                    modifier = Modifier.weight(1f).alignByBaseline(),
+                    emphasis = Emphasis.Secondary,
+                )
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
+                BuilderText(text = title, style = BuilderTextStyle.SectionLabel)
+                BuilderText(text = line, emphasis = Emphasis.Secondary)
+            }
         }
+        cards()
     }
 }
 
 /**
- * One preset as a card, its picture over its [name]. The card reads as a button named by what it says.
+ * The pictures, five a row, or on a phone one row that scrolls sideways. A tile the focus lands on
+ * scrolls into view by itself, as anything focusable in a scrolling row does.
  */
 @Composable
-private fun PresetCard(
-    name: String,
-    onClick: () -> Unit,
-    picture: @Composable () -> Unit,
+private fun Pictures(
+    document: ThemeDocument,
+    compact: Boolean,
+    onChoose: (Preset) -> Unit,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
-    BuilderCard(onClick = onClick) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(spacing.extraSmall),
+    val tile: @Composable (Preset.Image) -> Unit = { preset ->
+        PictureTile(
+            preset = preset,
+            selected = preset.isCurrent(document),
+            compact = compact,
+            onClick = { onChoose(preset) },
+        )
+    }
+    if (compact) {
+        Row(
+            modifier = Modifier
+                .bleedSideways(SelectedRingRoom)
+                .horizontalScroll(rememberScrollState())
+                .padding(SelectedRingRoom),
+            horizontalArrangement = Arrangement.spacedBy(spacing.medium),
         ) {
-            picture()
-            BuilderText(text = name, style = BuilderTextStyle.Label)
+            Presets.images.forEach { preset -> tile(preset) }
         }
+    } else {
+        PresetGrid(Presets.images, columns = Presets.images.size, cell = tile)
     }
 }
 
 /**
- * The preset's picture in the room a chip takes.
+ * A card for each starter, with the scheme the starter makes of [document]. The schemes resolve one
+ * per frame, each card a skeleton until its turn, so opening the picker never costs eight in one
+ * frame.
  */
 @Composable
-private fun PresetPicture(preset: Preset.Image) {
-    val radius = LocalBuilderTokens.current.radius
-    Image(
-        painter = painterResource(preset.drawable),
-        // The card already reads out the name.
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.size(SchemeChipFootprint).clip(RoundedCornerShape(radius.small)),
-    )
-}
-
-/**
- * A card for each starter, with the scheme the starter makes of [document] drawn as a chip. The
- * schemes resolve one per frame, each a skeleton until its turn, so opening the picker never costs
- * eight in one frame.
- */
-@Composable
-private fun StarterCards(
+private fun Starters(
     document: ThemeDocument,
     isDark: Boolean,
+    columns: Int,
+    compact: Boolean,
     onChoose: (Preset) -> Unit,
 ) {
     val starters = Presets.starters
@@ -278,56 +322,50 @@ private fun StarterCards(
         }
     }
     val colors = rememberCandidateColors(starters, inputs, isDark, resolver)
-    starters.forEachIndexed { index, starter ->
-        val name = starterName(starter)
-        PresetCard(name, onClick = { onChoose(starter) }) {
-            StarterChip(colors.getOrNull(index), name, onClick = { onChoose(starter) })
+    PresetGrid(starters, columns) { starter ->
+        StarterSwatch(
+            starter = starter,
+            colors = colors.getOrNull(starters.indexOf(starter)),
+            selected = starter.isCurrent(document),
+            compact = compact,
+            onClick = { onChoose(starter) },
+        )
+    }
+}
+
+/**
+ * [items] in rows of [columns] even cells, so a short last row keeps the width of the rest.
+ */
+@Composable
+private fun <T> PresetGrid(
+    items: List<T>,
+    columns: Int,
+    cell: @Composable (item: T) -> Unit,
+) {
+    val spacing = LocalBuilderTokens.current.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+        items.chunked(columns).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(spacing.medium)) {
+                row.forEach { item -> Box(Modifier.weight(1f)) { cell(item) } }
+                repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+            }
         }
     }
 }
 
 /**
- * The starter's name and style, and its contrast too when that is not Standard, such as "Ink,
- * TonalSpot, Medium contrast".
+ * Lays the content out [extra] wider on each side than it is offered and centres it over its own
+ * room, so what it pads back in lines up with its neighbours while what reaches past still draws.
  */
-@Composable
-private fun starterName(starter: Preset.Starter): String {
-    val name = stringResource(starter.name)
-    val style = stringResource(styleName(starter.style))
-    val contrast = ContrastStop.of(starter.contrast).takeIf { stop -> stop != ContrastStop.Standard }
-    return if (contrast == null) {
-        stringResource(Res.string.image_starter_card, name, style)
-    } else {
-        stringResource(Res.string.image_starter_card_contrast, name, style, stringResource(contrast.label))
+private fun Modifier.bleedSideways(extra: Dp): Modifier =
+    layout { measurable, constraints ->
+        val px = extra.roundToPx()
+        val wider = if (constraints.hasBoundedWidth) {
+            constraints.copy(minWidth = constraints.minWidth + px * 2, maxWidth = constraints.maxWidth + px * 2)
+        } else {
+            constraints
+        }
+        val placeable = measurable.measure(wider)
+        val width = constraints.constrainWidth(placeable.width - px * 2)
+        layout(width, placeable.height) { placeable.place(-px, 0) }
     }
-}
-
-/**
- * The starter's scheme as a chip in the room a chip takes, or a skeleton until [colors] resolve.
- *
- * The card around it is the button and already reads out its [name], so the chip takes no focus
- * and reads as nothing. A press on it chooses the starter all the same.
- */
-@Composable
-private fun StarterChip(
-    colors: CandidateColors?,
-    name: String,
-    onClick: () -> Unit,
-) {
-    if (colors == null) {
-        SchemeChipSkeleton(Modifier.testTag(STARTER_SKELETON_TAG))
-        return
-    }
-    SchemeChip(
-        primary = colors.primary,
-        secondaryContainer = colors.secondaryContainer,
-        tertiaryContainer = colors.tertiaryContainer,
-        selected = false,
-        onClick = onClick,
-        label = name,
-        modifier = Modifier
-            .testTag(STARTER_CHIP_TAG)
-            .focusProperties { canFocus = false }
-            .clearAndSetSemantics { },
-    )
-}

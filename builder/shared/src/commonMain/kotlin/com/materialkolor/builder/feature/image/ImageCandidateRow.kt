@@ -277,6 +277,7 @@ internal fun rememberCandidateColors(
             val scheme = resolver.scheme(inputs[index], isDark)
             colors[index] = CandidateColors(
                 primary = Color(scheme.primary),
+                onPrimary = Color(scheme.onPrimary),
                 secondaryContainer = Color(scheme.secondaryContainer),
                 tertiaryContainer = Color(scheme.tertiaryContainer),
             )
@@ -302,10 +303,11 @@ private fun Thumbnail(bitmap: ImageBitmap) {
 }
 
 /**
- * The three colors a candidate chip is drawn in.
+ * The colors a candidate chip is drawn in, with [onPrimary] for a starter card's name on its primary.
  */
 internal class CandidateColors(
     val primary: Color,
+    val onPrimary: Color,
     val secondaryContainer: Color,
     val tertiaryContainer: Color,
 )

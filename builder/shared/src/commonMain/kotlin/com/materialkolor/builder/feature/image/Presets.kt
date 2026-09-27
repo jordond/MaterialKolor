@@ -9,11 +9,11 @@ import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.engine.image.SeedExtractor
 import com.materialkolor.builder.generated.resources.Res
-import com.materialkolor.builder.generated.resources.image_preset_1
-import com.materialkolor.builder.generated.resources.image_preset_2
-import com.materialkolor.builder.generated.resources.image_preset_3
-import com.materialkolor.builder.generated.resources.image_preset_4
-import com.materialkolor.builder.generated.resources.image_preset_5
+import com.materialkolor.builder.generated.resources.image_preset_beads
+import com.materialkolor.builder.generated.resources.image_preset_bubble
+import com.materialkolor.builder.generated.resources.image_preset_coral
+import com.materialkolor.builder.generated.resources.image_preset_frost
+import com.materialkolor.builder.generated.resources.image_preset_kelp
 import com.materialkolor.builder.generated.resources.image_starter_baseline
 import com.materialkolor.builder.generated.resources.image_starter_blossom
 import com.materialkolor.builder.generated.resources.image_starter_forest
@@ -59,6 +59,11 @@ internal sealed interface Preset {
     fun change(document: ThemeDocument): DocumentChange
 
     /**
+     * Whether [document] still stands where choosing it left it, so the picker shows it as current.
+     */
+    fun isCurrent(document: ThemeDocument): Boolean
+
+    /**
      * One of the old builder's pictures at 256 px, with the colors pulled from it worked out ahead of
      * time, so choosing it costs no extraction. It sets only the seed, to the best of [candidates],
      * and the row under the seed actions offers the rest.
@@ -84,6 +89,12 @@ internal sealed interface Preset {
 
         override fun change(document: ThemeDocument): DocumentChange =
             DocumentChange.SetSeed(seed, SeedSource.Preset(id))
+
+        /**
+         * A picture stays current while the seed comes from it, even once a chip under the seed picked
+         * another of its colors.
+         */
+        override fun isCurrent(document: ThemeDocument): Boolean = document.seedSource == SeedSource.Preset(id)
     }
 
     /**
@@ -102,44 +113,52 @@ internal sealed interface Preset {
             DocumentChange.Replace(
                 document.copy(seed = seed, seedSource = SeedSource.Preset(id), style = style, contrast = contrast),
             )
+
+        /**
+         * A starter stays current only while the seed comes from it and the style and the contrast are
+         * still its own.
+         */
+        override fun isCurrent(document: ThemeDocument): Boolean =
+            document.seedSource == SeedSource.Preset(id) && document.style == style && document.contrast == contrast
     }
 }
 
 /**
  * Every preset, the pictures first and then the starters.
  *
- * The pictures keep the ids the old builder's links carried, so an old link still finds its picture.
+ * The pictures keep the ids the old builder's links carried, so an old link still finds its picture,
+ * and take names for what they show, Kelp, Frost, Bubble, Coral and Beads.
  * The starters are a first pass the owner may rename or swap out later, under new ids when they do.
  */
 internal object Presets {
     val all: List<Preset> = listOf(
         Preset.Image(
             id = "res-0",
-            name = Res.string.image_preset_1,
+            name = Res.string.image_preset_kelp,
             drawable = Res.drawable.preset_1,
             candidates = argbs(0xFF589008),
         ),
         Preset.Image(
             id = "res-1",
-            name = Res.string.image_preset_2,
+            name = Res.string.image_preset_frost,
             drawable = Res.drawable.preset_2,
             candidates = argbs(0xFFE0E8E8, 0xFFA0A890, 0xFFA09870, 0xFFC0C0C8),
         ),
         Preset.Image(
             id = "res-2",
-            name = Res.string.image_preset_3,
+            name = Res.string.image_preset_bubble,
             drawable = Res.drawable.preset_3,
             candidates = argbs(0xFFF0B0D0, 0xFF28A8E0, 0xFFA090E8, 0xFFD8C098, 0xFFA8C0B8),
         ),
         Preset.Image(
             id = "res-3",
-            name = Res.string.image_preset_4,
+            name = Res.string.image_preset_coral,
             drawable = Res.drawable.preset_4,
             candidates = argbs(0xFFA83810, 0xFFB07070),
         ),
         Preset.Image(
             id = "res-4",
-            name = Res.string.image_preset_5,
+            name = Res.string.image_preset_beads,
             drawable = Res.drawable.preset_5,
             candidates = argbs(0xFF4858E0, 0xFF102840, 0xFF081818, 0xFF082018, 0xFF182018),
         ),

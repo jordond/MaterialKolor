@@ -25,23 +25,25 @@
     <string name="image_menu_upload">Upload image</string>
     <string name="image_menu_presets">Presets and starters</string>
 
-    <!-- The preset picker. The title and the two groups in it. -->
+    <!-- The preset picker. The title, the line under it and the two groups in it. -->
     <string name="image_presets_title">Presets and starters</string>
-    <string name="image_presets_images">Images</string>
-    <string name="image_presets_images_line">An image sets the seed to its strongest color, and the image row in the poster offers the rest as chips.</string>
+    <string name="image_presets_line">Pick one to start from. Undo brings back what you had.</string>
+    <string name="image_presets_images">Pictures</string>
+    <string name="image_presets_images_line">Sets the seed to the picture’s main color. The others show up under the seed to try.</string>
     <string name="image_presets_starters">Starters</string>
-    <string name="image_presets_starters_line">A starter sets the seed, the style and the contrast. Everything else stays as it is.</string>
-    <string name="image_presets_close">Close</string>
+    <string name="image_presets_starters_line">Sets the seed, the style and the contrast. Nothing else changes.</string>
+    <!-- One picture card. The argument is the picture's name. -->
+    <string name="image_preset_card">%1$s picture</string>
     <!-- One starter card. The arguments are its name and its style. -->
     <string name="image_starter_card">%1$s, %2$s</string>
     <!-- One starter card whose contrast is not Standard. The arguments are its name, its style and its contrast. -->
     <string name="image_starter_card_contrast">%1$s, %2$s, %3$s contrast</string>
-    <!-- The old builder never named its pictures. -->
-    <string name="image_preset_1">Image 1</string>
-    <string name="image_preset_2">Image 2</string>
-    <string name="image_preset_3">Image 3</string>
-    <string name="image_preset_4">Image 4</string>
-    <string name="image_preset_5">Image 5</string>
+    <!-- The pictures, named for what they show, in the order of their ids res-0 to res-4. -->
+    <string name="image_preset_kelp">Kelp</string>
+    <string name="image_preset_frost">Frost</string>
+    <string name="image_preset_bubble">Bubble</string>
+    <string name="image_preset_coral">Coral</string>
+    <string name="image_preset_beads">Beads</string>
     <string name="image_starter_baseline">Baseline</string>
     <string name="image_starter_ocean">Ocean</string>
     <string name="image_starter_forest">Forest</string>

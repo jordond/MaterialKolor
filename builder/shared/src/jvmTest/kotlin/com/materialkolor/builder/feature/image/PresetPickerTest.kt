@@ -2,8 +2,11 @@ package com.materialkolor.builder.feature.image
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -24,6 +27,7 @@ import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.feature.poster.PosterHarness
 import com.materialkolor.builder.feature.poster.showSection
+import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import io.kotest.matchers.shouldBe
@@ -32,6 +36,7 @@ import kotlin.test.Test
 
 private const val PRESETS = "Presets and starters"
 private const val EYEDROPPER = "Pick a color from the image"
+private const val CLOSE = "Close"
 
 @OptIn(ExperimentalTestApi::class)
 class PresetPickerTest {
@@ -55,7 +60,7 @@ class PresetPickerTest {
             showButton(harness)
             val preset = Presets.images[2]
 
-            choose("Image 3")
+            choose("Bubble picture")
 
             val change = harness.actions
                 .filterIsInstance<WorkspaceAction.EditWithReveal>()
@@ -175,11 +180,57 @@ class PresetPickerTest {
 
             openPresets()
 
-            onAllNodesWithTag(STARTER_CHIP_TAG, useUnmergedTree = true).assertCountEquals(Presets.starters.size)
+            onAllNodesWithTag(STARTER_CARD_TAG, useUnmergedTree = true).assertCountEquals(Presets.starters.size)
             onAllNodesWithTag(STARTER_SKELETON_TAG, useUnmergedTree = true).assertCountEquals(0)
             Presets.starters.size shouldBe 8
-            onNodeWithText("Ink, TonalSpot, Medium contrast").assertExists()
-            onNodeWithText("Baseline, TonalSpot").assertExists()
+            onNodeWithContentDescription("Ink, TonalSpot, Medium contrast").assertExists()
+            onNodeWithContentDescription("Baseline, TonalSpot").assertExists()
+        }
+
+    @Test
+    fun presets_closeBesideTheTitle_closesThem_handingTheFocusBackToImage() =
+        runComposeUiTest {
+            val harness = PosterHarness(busy)
+            showButton(harness)
+
+            openPresets()
+            onNodeWithContentDescription(CLOSE).performClick()
+            waitForIdle()
+
+            harness.openPanel shouldBe null
+            onNodeWithText(PRESETS).assertDoesNotExist()
+            onNodeWithText("Image").assertIsFocused()
+            harness.document shouldBe busy
+        }
+
+    @Test
+    fun chosenPicture_readsAsSelected_onReopen() =
+        runComposeUiTest {
+            val harness = PosterHarness(busy)
+            showButton(harness)
+
+            choose("Frost picture")
+            openPresets()
+
+            onNodeWithContentDescription("Frost picture").assertIsSelected()
+            onNodeWithContentDescription("Kelp picture").assert(!isSelected())
+        }
+
+    @Test
+    fun chosenStarter_stopsReadingAsSelected_onceTheStyleChanges() =
+        runComposeUiTest {
+            val harness = PosterHarness(busy)
+            showButton(harness)
+            val ink = "Ink, TonalSpot, Medium contrast"
+
+            choose(ink)
+            openPresets()
+            onNodeWithContentDescription(ink).assertIsSelected()
+
+            runOnUiThread { harness.dispatch(WorkspaceAction.Edit(DocumentChange.SetStyle(Style.Vibrant), EditPhase.Discrete)) }
+            waitForIdle()
+
+            onNodeWithContentDescription(ink).assert(!isSelected())
         }
 
     private fun ComposeUiTest.openPresets() {
@@ -197,7 +248,7 @@ class PresetPickerTest {
      */
     private fun ComposeUiTest.choose(name: String) {
         openPresets()
-        onNodeWithText(name).performScrollTo().performClick()
+        onNodeWithContentDescription(name).performScrollTo().performClick()
         waitForIdle()
     }
 }
