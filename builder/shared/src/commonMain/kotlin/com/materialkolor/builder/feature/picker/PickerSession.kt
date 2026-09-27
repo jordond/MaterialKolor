@@ -18,9 +18,9 @@ import com.materialkolor.builder.feature.workspace.WorkspaceAction
  * drag, so the preview repaints on each and the history folds them all into one step. Done sends
  * the last color once more as a release, which closes that step. Cancel sends back the value the
  * target stored when the session opened, "no override" and the seed's source included, and the
- * step it closes ends where it began, so nothing is left behind. Back, another panel and a swap to
- * another target put the value back the same way, while a switch to another project drops the
- * session, since that document is gone.
+ * step it closes ends where it began, so nothing is left behind. Was sends the same and leaves the
+ * picker open, see [goBack]. Back, another panel and a swap to another target put the value back
+ * the same way, while a switch to another project drops the session, since that document is gone.
  *
  * It only works out what to send. The caller dispatches the actions it hands back, in order.
  */
@@ -78,6 +78,24 @@ internal class PickerSession {
         session.last = argb
         session.fromScreen = fromScreen
         return WorkspaceAction.Edit(session.changeTo(argb, fromScreen), EditPhase.Dragging)
+    }
+
+    /**
+     * Goes back to the value the target stored when the session opened, "no override" and the seed's
+     * source included, and keeps the picker open. Null with no session open or nothing sent yet.
+     *
+     * It lands as the release that closes the session's step, the same edit Cancel sends, so the
+     * step ends where it began and leaves no entry. A drag would fold only into a step its change
+     * merges with, and a seed that came from an image or a preset merges with none, so going back
+     * to one as a drag would leave a second step. The session then stands as it did at open, so
+     * Done files nothing, Cancel has nothing to put back, and the next pick starts a new step.
+     */
+    fun goBack(): WorkspaceAction.Edit? {
+        val session = open ?: return null
+        val restore = session.restore() ?: return null
+        session.last = null
+        session.fromScreen = false
+        return restore
     }
 
     /**

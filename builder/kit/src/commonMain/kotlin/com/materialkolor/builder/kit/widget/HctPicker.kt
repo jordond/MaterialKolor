@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.EditPhase
+import com.materialkolor.builder.kit.control.BuilderScrollArea
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import com.materialkolor.hct.Hct
 import org.jetbrains.compose.resources.stringResource
@@ -234,8 +235,9 @@ internal class PickerState(
  * color, so a drag leaves it alone and only the parts below it recompose or redraw.
  *
  * From [TwoPaneWidth] of width it lays out in two panes, the plane over the hue track on the start
- * side and the rest on the end side. Narrower, it is one column in that order. Either way the plane
- * shrinks first when the height runs short, down to [PlaneMinHeight], before anything overflows.
+ * side and the rest on the end side. Narrower, it is one column in that order. Under a bounded
+ * height the plane shrinks first when the height runs short, down to [PlaneMinHeight], and only a
+ * height too short for even that scrolls the body. Unbounded, the plane stays at its largest.
  */
 @Composable
 private fun PickerBody(
@@ -244,40 +246,66 @@ private fun PickerBody(
     onBodyComposed: (() -> Unit)?,
 ) {
     onBodyComposed?.invoke()
+    BoxWithConstraints(modifier) {
+        val twoPanes = maxWidth >= TwoPaneWidth
+        if (!constraints.hasBoundedHeight) {
+            PickerParts(picker, twoPanes, room = null)
+            return@BoxWithConstraints
+        }
+        val room = constraints.maxHeight
+        // Every part takes focus of its own, so the area stays out of the Tab order.
+        BuilderScrollArea(tabStop = false, fitContent = true, scrollbarInGutter = true) {
+            PickerParts(picker, twoPanes, room)
+        }
+    }
+}
+
+/**
+ * The picker's parts in one column or two panes, the plane sized to fit [room] pixels of height,
+ * or at its largest when [room] is null.
+ */
+@Composable
+private fun PickerParts(
+    picker: PickerState,
+    twoPanes: Boolean,
+    room: Int?,
+) {
     val spacing = LocalBuilderTokens.current.spacing
     val hueLabel = stringResource(HctChannel.Hue.nameResource())
-    BoxWithConstraints(modifier) {
-        if (maxWidth >= TwoPaneWidth) {
-            Row(horizontalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
-                PlaneColumn(Modifier.width(PlaneMaxWidth)) {
-                    GamutPlane(picker)
-                    GamutTrack(picker, HctChannel.Hue, hueLabel)
-                }
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
-                    ChannelTiles(picker)
-                    ToneStops(picker)
-                    PickerFormat(picker)
-                }
-            }
-        } else {
-            PlaneColumn(Modifier.fillMaxWidth()) {
+    if (twoPanes) {
+        Row(horizontalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
+            PlaneColumn(room, Modifier.width(PlaneMaxWidth)) {
                 GamutPlane(picker)
                 GamutTrack(picker, HctChannel.Hue, hueLabel)
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
                 ChannelTiles(picker)
                 ToneStops(picker)
                 PickerFormat(picker)
             }
+        }
+    } else {
+        PlaneColumn(room, Modifier.fillMaxWidth()) {
+            GamutPlane(picker)
+            GamutTrack(picker, HctChannel.Hue, hueLabel)
+            ChannelTiles(picker)
+            ToneStops(picker)
+            PickerFormat(picker)
         }
     }
 }
 
 /**
  * A column whose first child is the plane. The rest take the column's width at their own heights,
- * and the plane takes what height is left, between [PlaneMinHeight] and [PlaneMaxHeight], with its
- * width following at the plane's ratio and centred.
+ * and the plane takes what of [room] they leave, between [PlaneMinHeight] and [PlaneMaxHeight], with
+ * its width following at the plane's ratio and centred. With [room] null it takes its largest.
+ *
+ * The column is as tall as the plane and the rest together, even past [room], so a room too short
+ * for the smallest plane makes the body taller than its scroll area rather than clipping it.
  */
 @Composable
 private fun PlaneColumn(
+    room: Int?,
     modifier: Modifier,
     content: @Composable () -> Unit,
 ) {
@@ -290,7 +318,7 @@ private fun PlaneColumn(
         val restHeight = rest.sumOf { placeable -> placeable.height } + gapPx * rest.size
         val widest = minOf(width, PlaneMaxWidth.roundToPx())
         val tallest = minOf(PlaneMaxHeight.roundToPx(), (widest / PlaneRatio).roundToInt())
-        val left = if (constraints.hasBoundedHeight) constraints.maxHeight - restHeight else tallest
+        val left = if (room != null) room - restHeight else tallest
         val planeHeight = left.coerceIn(minOf(PlaneMinHeight.roundToPx(), tallest), tallest)
         val planeWidth = if (planeHeight == tallest) widest else minOf(widest, (planeHeight * PlaneRatio).roundToInt())
         val plane = measurables.first().measure(Constraints.fixed(planeWidth, planeHeight))

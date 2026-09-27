@@ -7,8 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import com.materialkolor.builder.LocalThemeResult
 import com.materialkolor.builder.domain.audit.ColorRef
+import com.materialkolor.builder.domain.color.Argb
 import com.materialkolor.builder.domain.edit.PinMode
 import com.materialkolor.builder.domain.model.ThemeDocument
+import com.materialkolor.builder.engine.resolve.ThemeResult
 import com.materialkolor.builder.feature.poster.keyColorName
 import com.materialkolor.builder.feature.poster.readoutName
 import com.materialkolor.builder.feature.workspace.Panel
@@ -53,16 +55,20 @@ internal fun PickerHost(
     SideEffect {
         session.sync(open, state.document, state.projectGeneration, state.capabilities).forEach(dispatcher::dispatch)
     }
-    // The dialog keeps the last target's title and color while it fades out.
+    // The dialog keeps the last target's title, color and Was while it fades out.
+    val result = LocalThemeResult.current
     val kept = remember { KeptTarget() }
-    if (open != null) kept.target = open
+    kept.follow(open, state.document, result)
     val target = kept.target ?: return
     val environment = model.environment
     ColorPickerDialog(
         visible = open != null,
         title = titleOf(target, state.document),
-        value = target.shownIn(state.document, LocalThemeResult.current),
+        value = target.shownIn(state.document, result),
+        was = kept.was,
+        wasFromSeed = kept.wasFromSeed,
         onPick = { argb, fromScreen -> session.pick(argb, fromScreen)?.let(dispatcher::dispatch) },
+        onGoBack = { session.goBack()?.let(dispatcher::dispatch) },
         onDone = { session.done().forEach(dispatcher::dispatch) },
         onCancel = { session.cancel().forEach(dispatcher::dispatch) },
         modifier = modifier,
@@ -72,10 +78,42 @@ internal fun PickerHost(
 }
 
 /**
- * The target the picker showed last, held past its close.
+ * The target the picker showed last and what Was showed for it, held past its close.
  */
 private class KeptTarget {
     var target: PickerTarget? = null
+        private set
+
+    /**
+     * The color [target] showed as the picker opened on it.
+     */
+    var was: Argb = Argb(0)
+        private set
+
+    /**
+     * Whether [was] came from the seed, [target] storing no color of its own at open.
+     */
+    var wasFromSeed: Boolean = false
+        private set
+
+    private var showing: Boolean = false
+
+    /**
+     * Takes [open], the picker's target now or null once it closes, and notes what it shows in
+     * [document] when the picker opens on it.
+     */
+    fun follow(
+        open: PickerTarget?,
+        document: ThemeDocument,
+        result: ThemeResult,
+    ) {
+        if (open != null && (!showing || open != target)) {
+            target = open
+            was = open.shownIn(document, result)
+            wasFromSeed = open.storedIn(document) == null
+        }
+        showing = open != null
+    }
 }
 
 /**
