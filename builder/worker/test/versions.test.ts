@@ -95,10 +95,10 @@ describe('/api/versions', () => {
     const origin = 'https://no-kv.materialkolor.test';
     const first = new FakeMaven();
     const context = createExecutionContext();
-    await libraryVersions(request(origin), env, context, first.fetch);
+    await libraryVersions(request(origin), withoutKv(), context, first.fetch);
     await waitOnExecutionContext(context);
     const second = new FakeMaven();
-    const response = await libraryVersions(request(origin), env, createExecutionContext(), second.fetch);
+    const response = await libraryVersions(request(origin), withoutKv(), createExecutionContext(), second.fetch);
     expect(first.asked).toHaveLength(Object.keys(LIBRARY_METADATA).length);
     expect(second.asked).toEqual([]);
     expect(((await response.json()) as Record<string, unknown>).fluent).toEqual([
@@ -132,6 +132,11 @@ function request(origin: string = ORIGIN, path = '/api/versions'): Request<unkno
 
 function withKv(kv: FakeKv): Env {
   return { ...env, VERSIONS: kv as unknown as KVNamespace } as Env;
+}
+
+/** Bindings with no KV, the way a deploy without the namespace runs, whatever wrangler.jsonc binds. */
+function withoutKv(): Env {
+  return { ...env, VERSIONS: undefined } as Env;
 }
 
 /** Bindings whose KV throws on any use, so a path that reaches it fails the test. */
