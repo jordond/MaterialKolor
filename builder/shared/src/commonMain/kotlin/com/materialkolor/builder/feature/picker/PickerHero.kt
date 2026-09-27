@@ -89,11 +89,20 @@ internal fun PickerHero(
     val padding = if (compact) {
         PaddingValues(spacing.large)
     } else {
-        PaddingValues(start = spacing.extraLarge, top = spacing.extraLarge, end = spacing.large, bottom = spacing.extraLarge)
+        PaddingValues(
+            start = spacing.extraLarge,
+            top = spacing.extraLarge,
+            end = spacing.large,
+            bottom = spacing.extraLarge,
+        )
     }
     Row(modifier.fillMaxWidth().height(metrics.height)) {
         Column(
-            modifier = Modifier.weight(1f).fillMaxHeight().background(fill).padding(padding),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .background(fill)
+                .padding(padding),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Row(
@@ -200,7 +209,13 @@ private fun WasButton(
                 }
             }
         }
-        Box(Modifier.align(Alignment.CenterStart).width(HairlineWidth).fillMaxHeight().background(line))
+        Box(
+            Modifier
+                .align(Alignment.CenterStart)
+                .width(HairlineWidth)
+                .fillMaxHeight()
+                .background(line),
+        )
     }
 }
 
