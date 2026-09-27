@@ -2,11 +2,14 @@ package com.materialkolor.builder.feature.picker
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
@@ -41,7 +44,7 @@ class ColorPickerDialogTest {
             onNodeWithText("Pick").performClick()
             waitForIdle()
 
-            onNodeWithText("Seed color").assertExists()
+            onNode(SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "Seed color")).assertExists()
             onNodeWithText("Done").assertExists()
         }
 
@@ -53,7 +56,7 @@ class ColorPickerDialogTest {
             onNodeWithText("Pick").performClick()
             waitForIdle()
 
-            onNodeWithText("Pick from screen").assertDoesNotExist()
+            onNodeWithContentDescription("Pick from screen").assertDoesNotExist()
         }
 
     @Test
@@ -65,7 +68,7 @@ class ColorPickerDialogTest {
 
             onNodeWithText("Pick").performClick()
             waitForIdle()
-            onNodeWithText("Pick from screen").performClick()
+            onNodeWithContentDescription("Pick from screen").performClick()
             waitForIdle()
             onNodeWithText("Done").performClick()
             waitForIdle()
@@ -84,7 +87,7 @@ class ColorPickerDialogTest {
 
             onNodeWithText("Pick").performClick()
             waitForIdle()
-            onNodeWithText("Pick from screen").performClick()
+            onNodeWithContentDescription("Pick from screen").performClick()
             waitForIdle()
 
             platform.environment.screenPicks shouldBe 1
@@ -103,9 +106,35 @@ class ColorPickerDialogTest {
             // No frame and no task runs after the click, so only a pick started inside it counts.
             mainClock.autoAdvance = false
 
-            onNodeWithText("Pick from screen").performClick()
+            onNodeWithContentDescription("Pick from screen").performClick()
 
             platform.environment.screenPicks shouldBe 1
+        }
+
+    @Test
+    fun was_afterAPick_putsTheSeedBackAndKeepsThePickerOpen() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            platform.environment.eyeDropperAvailable = true
+            platform.environment.screenColor = Screen
+            val graph = showRoot()
+            val before = graph.session.document.value
+            val history = graph.session.history.value
+
+            onNodeWithText("Pick").performClick()
+            waitForIdle()
+            onNodeWithContentDescription("Pick from screen").performClick()
+            waitForIdle()
+            graph.session.document.value.seed shouldBe Screen
+            onNodeWithContentDescription("Go back to ${before.seed.toHex()}").performClick()
+            waitForIdle()
+
+            graph.session.document.value shouldBe before
+            graph.session.history.value shouldBe history
+            onNodeWithText("Done").assertExists()
+            onNodeWithText("Done").performClick()
+            waitForIdle()
+            graph.session.document.value shouldBe before
+            graph.session.history.value shouldBe history
         }
 
     @Test
@@ -119,7 +148,7 @@ class ColorPickerDialogTest {
 
             onNodeWithText("Pick").performClick()
             waitForIdle()
-            onNodeWithText("Pick from screen").performClick()
+            onNodeWithContentDescription("Pick from screen").performClick()
             waitForIdle()
             graph.session.document.value.seed shouldBe Screen
             onAllNodes(isFocused()).onLast().performKeyInput { pressKey(Key.Escape) }

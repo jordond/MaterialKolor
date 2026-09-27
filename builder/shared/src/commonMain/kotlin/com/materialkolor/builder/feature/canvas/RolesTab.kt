@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
@@ -54,6 +53,7 @@ import com.materialkolor.builder.generated.resources.tabs_group_surface
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextStyle
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.kit.token.readableInk
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -63,11 +63,6 @@ import org.jetbrains.compose.resources.stringResource
  * onSecondaryContainer and its hex and tone readout on one line at the default text size.
  */
 private val SwatchMinWidth: Dp = 152.dp
-
-/**
- * The tone at and above which a swatch with no on-pair is inked black rather than white.
- */
-private const val BLACK_INK_TONE = 50.0
 
 /**
  * The Roles tab, every color role of [result] with the tone and contrast it resolved to.
@@ -169,7 +164,7 @@ private fun roleSwatch(
     val ink = when {
         onPair != null -> result.roles[onPair, isDark].argb.toColor()
         under != null -> result.roles[under, isDark].argb.toColor()
-        else -> inkFor(entry.tone)
+        else -> readableInk(entry.argb.toColor())
     }
     val pin = result.document.pins[role]
     return RoleSwatch(
@@ -200,7 +195,7 @@ private fun keyColorSwatch(
     return RoleSwatch(
         name = palette.swatchName,
         argb = argb,
-        ink = inkFor(tone),
+        ink = readableInk(argb.toColor()),
         tone = tone,
         contrast = null,
         target = RampTarget.OfKeyColor(palette, isDark),
@@ -247,11 +242,6 @@ private fun ThemeResult.ratio(
  */
 internal val KeyColor.swatchName: String
     get() = name.replaceFirstChar { char -> char.lowercaseChar() } + "PaletteKeyColor"
-
-/**
- * Black on a light color, white on a dark one.
- */
-private fun inkFor(tone: Double): Color = if (tone >= BLACK_INK_TONE) Color.Black else Color.White
 
 /**
  * The part an accent part is paired with, the fill for an on color and the on color for a fill.

@@ -1,6 +1,7 @@
 package com.materialkolor.builder.kit.widget
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -17,12 +18,16 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHeightIsEqualTo
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.pressKey
@@ -328,6 +333,29 @@ class HctPickerTest {
 
             phases shouldContain EditPhase.Dragging
             phases shouldNotContain EditPhase.Released
+        }
+
+    @Test
+    fun body_heightTooShortForTheSmallestPlane_scrollsInsteadOfClipping() =
+        runComposeUiTest {
+            setContent {
+                PickerHarness(PickerSkin) {
+                    HctPicker(
+                        value = PickerSeed,
+                        onChange = { _, _ -> },
+                        modifier = Modifier.width(PickerWidth).height(320.dp),
+                    )
+                }
+            }
+            waitForIdle()
+            val format = onNode(hasSetTextAction() and hasContentDescription("Color"))
+
+            onNode(pickerTrack(PickerPlane)).assertHeightIsEqualTo(200.dp)
+            format.assertIsNotDisplayed()
+            format.performScrollTo()
+            waitForIdle()
+
+            format.assertIsDisplayed()
         }
 
     @Test
