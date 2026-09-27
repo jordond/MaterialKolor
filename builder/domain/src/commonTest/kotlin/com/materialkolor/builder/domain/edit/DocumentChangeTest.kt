@@ -64,6 +64,22 @@ class DocumentChangeTest {
             DocumentChange.SetLibrary(Library.Fluent, expressive = true) to { document ->
                 document.copy(library = Library.Fluent, expressive = true)
             },
+            DocumentChange.SetLibrary(
+                Library.Material3,
+                expressive = true,
+                style = Style.Expressive,
+                spec = SpecVersion.Spec2025,
+            ) to { document ->
+                document.copy(
+                    library = Library.Material3,
+                    expressive = true,
+                    style = Style.Expressive,
+                    spec = SpecVersion.Spec2025,
+                )
+            },
+            DocumentChange.SetLibrary(Library.Fluent, expressive = false, style = Style.TonalSpot) to { document ->
+                document.copy(library = Library.Fluent, expressive = false, style = Style.TonalSpot)
+            },
             DocumentChange.SetMotionScheme(MotionSchemeChoice.Standard) to { document ->
                 document.copy(motionScheme = MotionSchemeChoice.Standard)
             },

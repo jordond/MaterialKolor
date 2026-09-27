@@ -86,7 +86,8 @@ import com.materialkolor.builder.kit.token.LocalBuilderTokens
 /**
  * Material's single choice segmented row, with the radio group's roving focus and arrow keys laid
  * over it, since Material's row moves neither. The expressive flavour draws a row of connected toggle
- * buttons instead ([ExpressiveSegmented]).
+ * buttons instead ([ExpressiveSegmented]), which alone reads [equalWidths]. Material's classic row
+ * always shares its width evenly.
  *
  * Material raises the chosen button over its neighbours, and the web mirror reads the page in that
  * order, so the chosen option would come last. On the web each button sits in a box of its own,
@@ -105,7 +106,7 @@ internal fun <T> MaterialSegmented(
     selectOnFocus: Boolean,
     optionLabel: (T) -> String,
     compact: Boolean = false,
-    connectedEnd: Boolean = false,
+    equalWidths: Boolean = true,
 ) {
     val selectedIndex = options.indexOf(selected)
     val focus = rememberRadioGroupFocus(options.size, selectedIndex)
@@ -123,7 +124,7 @@ internal fun <T> MaterialSegmented(
             optionLabel = optionLabel,
             focus = focus,
             compact = compact,
-            connectedEnd = connectedEnd,
+            equalWidths = equalWidths,
         )
         return
     }
@@ -152,12 +153,11 @@ internal fun <T> MaterialSegmented(
             options.forEachIndexed { index, value ->
                 key(index) {
                     val interactionSource = remember { MutableInteractionSource() }
-                    val itemShape = SegmentedButtonDefaults.itemShape(index, options.size)
-                    val shape = if (connectedEnd && index == options.lastIndex) joinedEnd(itemShape) else itemShape
+                    val shape = SegmentedButtonDefaults.itemShape(index, options.size)
                     val glyph = optionIcon(value)
                     val isSelected = index == selectedIndex
                     val usable = enabled && optionEnabled(value)
-                    InWritingOrder(keep = writingOrder) {
+                    InWritingOrder(keep = writingOrder, weighted = true) {
                         SegmentedButton(
                             selected = isSelected,
                             onClick = { onSelect(value) },
@@ -219,7 +219,8 @@ internal fun <T> MaterialSegmented(
  * toggle button on its own would read as a checkbox. The chosen option has the check as well as
  * the fill, so the choice never rests on colour alone. It keeps its connected shape, so a chosen
  * middle option stays joined to its neighbours instead of turning into a loose pill between them.
- * The row draws the focused option's ring over every option ([RowRing]).
+ * The row draws the focused option's ring over every option ([RowRing]). With [equalWidths] off each
+ * option is as wide as its own label.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -236,7 +237,7 @@ private fun <T> ExpressiveSegmented(
     optionLabel: (T) -> String,
     focus: RadioGroupFocus,
     compact: Boolean = false,
-    connectedEnd: Boolean = false,
+    equalWidths: Boolean = true,
 ) {
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val folds = LocalFoldsStateIntoName.current
@@ -261,7 +262,7 @@ private fun <T> ExpressiveSegmented(
             options.forEachIndexed { index, value ->
                 key(index) {
                     val interactionSource = remember { MutableInteractionSource() }
-                    val shapes = connectedShapes(index, options.size, connectedEnd)
+                    val shapes = connectedShapes(index, options.size)
                     val isSelected = index == selectedIndex
                     val usable = enabled && optionEnabled(value)
                     val name = optionLabel(value)
@@ -270,12 +271,11 @@ private fun <T> ExpressiveSegmented(
                         shows = interactionSource.collectIsFocusVisibleAsState(),
                         shape = rememberUpdatedState(shapes.shape),
                     )
-                    InWritingOrder(keep = writingOrder) {
+                    InWritingOrder(keep = writingOrder, weighted = equalWidths) {
                         ToggleButton(
                             checked = isSelected,
                             onCheckedChange = { onSelect(value) },
-                            modifier = Modifier
-                                .weight(1f)
+                            modifier = (if (equalWidths) Modifier.weight(1f) else Modifier)
                                 .radioGroupOption(
                                     focus = focus,
                                     index = index,
@@ -482,17 +482,21 @@ private fun CornerRadius.grow(amount: Float): CornerRadius =
 
 /**
  * Where [keep] is set, holds one button in a box of its own that takes the button's share of the
- * row. Material places the chosen button above the others, and siblings are read in that order, so
- * a box per button leaves only one child to each and the boxes in the order they are written.
+ * row, an even share while [weighted] holds and the button's own width otherwise. Material places
+ * the chosen button above the others, and siblings are read in that order, so a box per button
+ * leaves only one child to each and the boxes in the order they are written.
  */
 @Composable
 private fun <S : RowScope> S.InWritingOrder(
     keep: Boolean,
+    weighted: Boolean,
     button: @Composable S.() -> Unit,
 ) {
     if (!keep) {
         button()
         return
     }
-    Box(Modifier.weight(1f), propagateMinConstraints = true) { this@InWritingOrder.button() }
+    Box(if (weighted) Modifier.weight(1f) else Modifier, propagateMinConstraints = true) {
+        this@InWritingOrder.button()
+    }
 }

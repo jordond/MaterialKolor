@@ -58,7 +58,6 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The top bar, the library switcher on the start edge and the project's actions on the end edge.
- * While Material 3 is picked the Expressive chip joins the switcher's end, in every form.
  *
  * On a wide window it holds the switcher, the command palette, undo, redo, History, Share, Export
  * code and the overflow menu. The actions always get their full width, and the switcher takes what
@@ -74,11 +73,10 @@ import org.jetbrains.compose.resources.stringResource
  * History has moved there. It stays open while someone jumps between steps and hands focus
  * back to whatever opened it, the page itself when the H key did.
  *
- * A library switch, or a flip of the Expressive chip, goes through the reveal from the control that
- * made it as one undo entry. The bar keeps its own skin across a switch. [focus] comes from the
- * workspace, which hands Share and Export focus back when their panels close, and puts focus back on
- * the switcher when a switch leaves it nowhere. The Expressive suggestion is the model's, raised with
- * the flip it follows, and hands focus back to the Expressive chip.
+ * A library switch goes through the reveal from the control that made it as one undo entry, the
+ * style it moves onto or off M3 Expressive included. The bar keeps its own skin across a switch.
+ * [focus] comes from the workspace, which hands Share and Export focus back when their panels close,
+ * and puts focus back on the switcher when a switch leaves it nowhere.
  */
 @Composable
 internal fun TopBarContent(
@@ -117,12 +115,7 @@ internal fun TopBarContent(
         .switcherPulse(state, dispatcher)
         .reportSwitcherOrigin(report)
     val onSwitch = { choice: LibraryChoice, origin: Offset ->
-        dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin))
-    }
-    val expressive = state.document.expressive
-    val expressiveModifier = Modifier.topBarFocus(focus, TopBarControl.Expressive)
-    val onExpressiveChange = { on: Boolean, origin: Offset ->
-        dispatcher.dispatch(WorkspaceAction.EditWithReveal(expressiveChange(on), origin))
+        dispatcher.dispatch(WorkspaceAction.PickLibrary(choice, origin))
     }
     // The list hangs from More once History has moved into it, with More kept in one place either way.
     val moreButton = rememberMovable {
@@ -212,11 +205,8 @@ internal fun TopBarContent(
             CompactTopBar(state.projectName, state.document.seed, Modifier.testTag(TOP_BAR_TAG)) { actions() }
             LibraryChipRow(
                 selected = selected,
-                expressive = expressive,
                 onSwitch = onSwitch,
-                onExpressiveChange = onExpressiveChange,
                 switcherModifier = switcherModifier,
-                expressiveModifier = expressiveModifier,
             )
         }
     } else {
@@ -226,24 +216,18 @@ internal fun TopBarContent(
             if (windowClass == WindowClass.Medium) {
                 LibraryDropdown(
                     selected = selected,
-                    expressive = expressive,
                     onSwitch = onSwitch,
-                    onExpressiveChange = onExpressiveChange,
                     fit = fit,
                     modifier = Modifier.weight(1f),
                     switcherModifier = switcherModifier,
-                    expressiveModifier = expressiveModifier,
                 )
             } else {
                 val shownCompact = wideFit.compact
                 FittedLibrarySwitcher(
                     selected = selected,
-                    expressive = expressive,
                     modifier = Modifier.weight(1f),
                     switcherModifier = switcherModifier,
-                    expressiveModifier = expressiveModifier,
                     onSwitch = onSwitch,
-                    onExpressiveChange = onExpressiveChange,
                     onRefit = { focus.restoreAfterRefit(TopBarControl.Library) },
                     onFit = { needed, room -> wideFit.refit(needed, room, shownCompact) },
                 )
@@ -279,16 +263,6 @@ internal fun TopBarContent(
             actions()
         }
     }
-
-    ExpressiveSuggestion(
-        visible = state.expressiveSuggestion,
-        returnFocusTo = focus.requester(TopBarControl.Expressive),
-        onKeepMine = { dispatcher.dispatch(WorkspaceAction.DismissExpressiveSuggestion) },
-        onApply = {
-            dispatcher.dispatch(WorkspaceAction.DismissExpressiveSuggestion)
-            dispatcher.dispatch(WorkspaceAction.EditWithReveal(expressiveStyleChange(state.document), origin = null))
-        },
-    )
 }
 
 /**

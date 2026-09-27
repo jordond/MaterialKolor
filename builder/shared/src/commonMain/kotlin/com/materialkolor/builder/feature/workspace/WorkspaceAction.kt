@@ -13,6 +13,7 @@ import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.feature.canvas.RampTarget
 import com.materialkolor.builder.feature.canvas.VisionSimulation
 import com.materialkolor.builder.feature.picker.PickerTarget
+import com.materialkolor.builder.feature.topbar.LibraryChoice
 import com.materialkolor.builder.kit.control.ToastDuration
 
 /**
@@ -36,6 +37,15 @@ internal sealed interface WorkspaceAction {
      */
     data class EditWithReveal(
         val change: DocumentChange,
+        val origin: Offset?,
+    ) : WorkspaceAction
+
+    /**
+     * Move to [choice] behind a reveal as one discrete edit, carrying the style onto or off M3
+     * Expressive. The edit is worked out when the reveal lands, from the document and history then.
+     */
+    data class PickLibrary(
+        val choice: LibraryChoice,
         val origin: Offset?,
     ) : WorkspaceAction
 
@@ -213,11 +223,6 @@ internal sealed interface WorkspaceAction {
     data class DismissHint(
         val id: String,
     ) : WorkspaceAction
-
-    /**
-     * Put the Expressive suggestion away. It changes nothing on its own.
-     */
-    data object DismissExpressiveSuggestion : WorkspaceAction
 
     /**
      * Show the Palettes tab with the ramp [target] sits on picked out.

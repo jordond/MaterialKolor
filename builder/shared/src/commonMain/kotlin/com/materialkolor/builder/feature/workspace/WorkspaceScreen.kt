@@ -106,6 +106,9 @@ internal fun WorkspaceScreen(
             is WorkspaceAction.EditWithReveal -> {
                 reveal(action.origin) { model.edit(action.change, EditPhase.Discrete) }
             }
+            is WorkspaceAction.PickLibrary -> {
+                reveal(action.origin) { model.pickLibrary(action.choice) }
+            }
             WorkspaceAction.Undo -> {
                 model.undo()
             }
@@ -195,9 +198,6 @@ internal fun WorkspaceScreen(
             }
             is WorkspaceAction.DismissHint -> {
                 model.dismissHint(action.id)
-            }
-            WorkspaceAction.DismissExpressiveSuggestion -> {
-                model.dismissExpressiveSuggestion()
             }
             is WorkspaceAction.ShowOnRamp -> {
                 model.showOnRamp(action.target)

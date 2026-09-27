@@ -18,13 +18,10 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
-import com.materialkolor.builder.generated.resources.Res
-import com.materialkolor.builder.generated.resources.topbar_expressive
 import com.materialkolor.builder.kit.layout.LocalLayout
 import com.materialkolor.builder.kit.layout.WindowClass
 import com.materialkolor.builder.kit.token.BuilderType
 import com.materialkolor.builder.kit.token.LocalBuilderType
-import org.jetbrains.compose.resources.stringResource
 
 /**
  * The top bar as a whole, for tests that check how its controls sit.
@@ -92,11 +89,9 @@ internal val LocalSwitcherForm: ProvidableCompositionLocal<SwitcherFormState?> =
  * measured again when something that sets its width changes, so an edit that keeps the library
  * costs the switcher nothing. The form it shows goes to [LocalSwitcherForm] for the command registry.
  *
- * @param[selected] The library the document is on.
- * @param[expressive] Whether the Expressive chip is on.
+ * @param[selected] The choice the document is on.
  * @param[modifier] Applied to the room the switcher gets, which it fills.
  * @param[switcherModifier] Applied to the switcher itself, in whichever form it shows.
- * @param[expressiveModifier] Applied to the Expressive chip.
  * @param[onRefit] Called once the switcher has changed form, after the old form has gone, so focus
  *   it held can move to the new one.
  * @param[onFit] Told, each time the switcher measures in a wide window, how wide the segmented row
@@ -105,19 +100,15 @@ internal val LocalSwitcherForm: ProvidableCompositionLocal<SwitcherFormState?> =
 @Composable
 internal fun FittedLibrarySwitcher(
     selected: LibraryChoice,
-    expressive: Boolean,
     onSwitch: (choice: LibraryChoice, origin: Offset) -> Unit,
-    onExpressiveChange: (on: Boolean, origin: Offset) -> Unit,
     modifier: Modifier = Modifier,
     switcherModifier: Modifier = Modifier,
-    expressiveModifier: Modifier = Modifier,
     onRefit: () -> Unit = {},
     onFit: (needed: Int, room: Int) -> Unit = { _, _ -> },
 ) {
     val wide = LocalLayout.current.windowClass == WindowClass.Expanded
     val type = LocalBuilderType.current
-    val labels = LibraryChoice.entries.map { choice -> libraryName(choice) } +
-        stringResource(Res.string.topbar_expressive)
+    val labels = LibraryChoice.entries.map { choice -> libraryName(choice) }
     val probe = LocalSwitcherFitProbe.current
     val report = LocalSwitcherForm.current
     val fit = remember { SwitcherFit() }
@@ -144,11 +135,8 @@ internal fun FittedLibrarySwitcher(
             if (report != null) SideEffect { report.segmented = segmented }
             LibrarySwitcher(
                 selected = selected,
-                expressive = expressive,
                 onSwitch = onSwitch,
-                onExpressiveChange = onExpressiveChange,
-                switcherModifier = switcherModifier,
-                expressiveModifier = expressiveModifier,
+                modifier = switcherModifier,
                 segmented = segmented,
             )
         }.map { measurable -> measurable.measure(loose) }
@@ -164,8 +152,7 @@ internal fun FittedLibrarySwitcher(
 /**
  * How wide the segmented row is at its own width, measured for the height [constraints] allow. The
  * row measured here is never placed and says nothing to assistive technology, so only the one that
- * shows can be reached. It counts the Expressive chip whichever library is picked, so turning
- * Material 3 on or off never changes the room the bar gives the switcher.
+ * shows can be reached.
  */
 private fun SubcomposeMeasureScope.segmentedWidth(
     selected: LibraryChoice,
@@ -174,13 +161,9 @@ private fun SubcomposeMeasureScope.segmentedWidth(
     val probe = subcompose(SwitcherForm.Probe) {
         LibrarySwitcher(
             selected = selected,
-            expressive = false,
             onSwitch = { _, _ -> },
-            onExpressiveChange = { _, _ -> },
             modifier = Modifier.clearAndSetSemantics {},
             segmented = true,
-            expressiveShown = true,
-            probe = true,
         )
     }
     val natural = probe.maxOfOrNull { measurable ->
@@ -193,7 +176,7 @@ private fun SubcomposeMeasureScope.segmentedWidth(
 
 /**
  * Everything the segmented row's width hangs on, the room it gets, the choice it marks, the type it
- * draws in and the names it and the Expressive chip show.
+ * draws in and the names it shows.
  */
 private data class FitKey(
     val constraints: Constraints,

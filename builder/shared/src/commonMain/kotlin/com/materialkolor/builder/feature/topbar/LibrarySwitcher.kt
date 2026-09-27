@@ -13,10 +13,8 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import com.materialkolor.builder.domain.capability.EffectiveSpec
 import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.model.Library
-import com.materialkolor.builder.domain.model.SpecVersion
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.topbar_expressive
@@ -26,7 +24,6 @@ import com.materialkolor.builder.generated.resources.topbar_library_fluent
 import com.materialkolor.builder.generated.resources.topbar_library_m3
 import com.materialkolor.builder.generated.resources.topbar_library_m3_expressive
 import com.materialkolor.builder.generated.resources.topbar_library_unstyled
-import com.materialkolor.builder.kit.control.BuilderFilterChip
 import com.materialkolor.builder.kit.control.BuilderSegmented
 import com.materialkolor.builder.kit.control.BuilderSelect
 import com.materialkolor.builder.kit.control.BuilderSwitch
@@ -35,64 +32,56 @@ import com.materialkolor.builder.kit.layout.WindowClass
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The four libraries the switcher offers. Expressive is not one of them but a flag on Material 3,
- * which the Expressive chip on the switcher's end turns on and off.
+ * The five choices the switcher offers. M3 Expressive is Material 3 with the Expressive flag on, a
+ * choice of its own here while the document keeps it as a flag.
+ *
+ * @property[library] The library the choice exports for.
+ * @property[expressive] Whether the choice carries Material 3's expressive shapes and type.
  */
 internal enum class LibraryChoice(
     val library: Library,
+    val expressive: Boolean = false,
 ) {
     M3(Library.Material3),
+    M3Expressive(Library.Material3, expressive = true),
     Unstyled(Library.Unstyled),
     Fluent(Library.Fluent),
     Custom(Library.Custom),
     ;
 
     /**
-     * The one edit that moves a document to this choice, with the Expressive flag off. M3 lands on
-     * plain Material 3, and the Expressive chip takes it from there.
+     * The edit that moves a document to this choice and touches nothing else. A pick from the
+     * switcher goes through [libraryPick], which carries the style along onto and off M3 Expressive.
      */
     val change: DocumentChange
-        get() = DocumentChange.SetLibrary(library, expressive = false)
+        get() = DocumentChange.SetLibrary(library, expressive)
 
     companion object {
         /**
          * The choice [document] is on.
          */
-        fun of(document: ThemeDocument): LibraryChoice = of(document.library)
+        fun of(document: ThemeDocument): LibraryChoice = of(document.library, document.expressive)
 
         /**
-         * The choice for [library].
+         * The choice for [library], M3 Expressive for Material 3 with [expressive] on. Only Material 3
+         * reads the flag.
          */
-        fun of(library: Library): LibraryChoice = entries.first { choice -> choice.library == library }
+        fun of(
+            library: Library,
+            expressive: Boolean = false,
+        ): LibraryChoice {
+            val flag = expressive && library == Library.Material3
+            return entries.first { choice -> choice.library == library && choice.expressive == flag }
+        }
     }
 }
 
 /**
- * Whether [document] is on Material 3 with Expressive on.
- */
-internal val ThemeDocument.onExpressive: Boolean
-    get() = library == Library.Material3 && expressive
-
-/**
- * The one edit the Expressive chip and switch make, Material 3 with the flag set to [on].
- */
-internal fun expressiveChange(on: Boolean): DocumentChange = DocumentChange.SetLibrary(Library.Material3, on)
-
-/**
- * Whether a switch to Expressive should suggest the Expressive style on the 2025 spec, which holds
- * when the style has no 2025 form or the spec is 2021.
- */
-internal fun suggestsExpressiveStyle(document: ThemeDocument): Boolean =
-    EffectiveSpec.of(style = document.style, requested = document.spec) != SpecVersion.Spec2025
-
-/**
  * The library switcher. A segmented row when [segmented] holds, which by default it does on wide
- * windows, and a dropdown otherwise. While Material 3 is picked the Expressive chip joins its end
- * edge with no gap, the two drawn as one group ([SwitcherGroup]).
+ * windows, and a dropdown otherwise.
  *
  * [onSwitch] gets the new choice and where the reveal should grow from, the press that picked it
  * or the middle of the switcher after a keyboard pick. Picking the current choice does nothing.
- * [onExpressiveChange] gets the chip's new state and where its reveal grows from the same way.
  *
  * The arrow keys on the segmented row only move focus and Space or Enter picks, so walking past a
  * library does not re-theme the previews at every step.
@@ -101,15 +90,12 @@ internal fun suggestsExpressiveStyle(document: ThemeDocument): Boolean =
 internal fun LibrarySwitcher(
     document: ThemeDocument,
     onSwitch: (choice: LibraryChoice, origin: Offset) -> Unit,
-    onExpressiveChange: (on: Boolean, origin: Offset) -> Unit,
     modifier: Modifier = Modifier,
     segmented: Boolean = LocalLayout.current.windowClass == WindowClass.Expanded,
 ) {
     LibrarySwitcher(
         selected = LibraryChoice.of(document),
-        expressive = document.expressive,
         onSwitch = onSwitch,
-        onExpressiveChange = onExpressiveChange,
         modifier = modifier,
         segmented = segmented,
     )
@@ -117,27 +103,13 @@ internal fun LibrarySwitcher(
 
 /**
  * The library switcher on [selected], for callers that hold the choice rather than the document.
- *
- * @param[expressive] Whether the Expressive chip is on.
- * @param[switcherModifier] Applied to the library control itself, in whichever form it shows.
- * @param[expressiveModifier] Applied to the Expressive chip.
- * @param[expressiveShown] Whether the Expressive chip shows, by default only on Material 3. The
- *   off screen measures pass true, so the switcher keeps its room whichever library is picked.
- * @param[probe] Whether this is one of the off screen measures, which are never placed and only
- *   ask for a width. See [SwitcherGroup] for why those skip the frame lines.
  */
 @Composable
 internal fun LibrarySwitcher(
     selected: LibraryChoice,
-    expressive: Boolean,
     onSwitch: (choice: LibraryChoice, origin: Offset) -> Unit,
-    onExpressiveChange: (on: Boolean, origin: Offset) -> Unit,
     modifier: Modifier = Modifier,
-    switcherModifier: Modifier = Modifier,
-    expressiveModifier: Modifier = Modifier,
     segmented: Boolean = LocalLayout.current.windowClass == WindowClass.Expanded,
-    expressiveShown: Boolean = selected == LibraryChoice.M3,
-    probe: Boolean = false,
 ) {
     val origin = remember { RevealOrigin() }
     val label = stringResource(Res.string.topbar_library)
@@ -145,68 +117,34 @@ internal fun LibrarySwitcher(
     val onSelect = { choice: LibraryChoice ->
         if (choice != selected) onSwitch(choice, origin.take())
     }
-    SwitcherGroup(modifier, probe = probe) {
-        val tracked = switcherModifier.trackRevealOrigin(origin)
-        if (segmented) {
-            BuilderSegmented(
-                options = LibraryChoice.entries,
-                selected = selected,
-                onSelect = onSelect,
-                label = label,
-                modifier = tracked,
-                selectOnFocus = false,
-                connectedEnd = expressiveShown,
-                optionLabel = { choice -> names.getValue(choice) },
-            )
-        } else {
-            BuilderSelect(
-                label = label,
-                options = LibraryChoice.entries,
-                selected = selected,
-                onSelect = onSelect,
-                modifier = tracked,
-                optionLabel = { choice -> names.getValue(choice) },
-            )
-        }
-        if (expressiveShown) {
-            ExpressiveChip(
-                checked = expressive,
-                onCheckedChange = onExpressiveChange,
-                modifier = expressiveModifier,
-                connected = true,
-            )
-        }
+    val tracked = modifier.trackRevealOrigin(origin)
+    if (segmented) {
+        BuilderSegmented(
+            options = LibraryChoice.entries,
+            selected = selected,
+            onSelect = onSelect,
+            label = label,
+            modifier = tracked,
+            selectOnFocus = false,
+            // Each name keeps its own width, so M3 Expressive does not widen the four short ones.
+            equalWidths = false,
+            optionLabel = { choice -> names.getValue(choice) },
+        )
+    } else {
+        BuilderSelect(
+            label = label,
+            options = LibraryChoice.entries,
+            selected = selected,
+            onSelect = onSelect,
+            modifier = tracked,
+            optionLabel = { choice -> names.getValue(choice) },
+        )
     }
 }
 
 /**
- * The chip on the library switcher's end that turns Material 3's Expressive flavor on and off,
- * showing a check while it is on. It re-themes the previews like a library switch does.
- *
- * @param[onCheckedChange] Gets the new state and where the reveal grows from, the press that
- *   flipped it or the middle of the chip after a key.
- * @param[connected] Whether it is joined to the switcher's end, its start edge squared to meet it.
- */
-@Composable
-internal fun ExpressiveChip(
-    checked: Boolean,
-    onCheckedChange: (on: Boolean, origin: Offset) -> Unit,
-    modifier: Modifier = Modifier,
-    connected: Boolean = false,
-) {
-    val origin = remember { RevealOrigin() }
-    BuilderFilterChip(
-        selected = checked,
-        onSelectedChange = { on -> onCheckedChange(on, origin.take()) },
-        label = stringResource(Res.string.topbar_expressive),
-        modifier = modifier.trackRevealOrigin(origin),
-        connectedStart = connected,
-    )
-}
-
-/**
- * The switch that turns Material 3's Expressive flavor on and off, for the export sheet, which
- * re-themes the previews like a library switch does.
+ * The switch under the export sheet's Material 3 card that moves between M3 and M3 Expressive,
+ * which re-themes the previews like a library switch does.
  *
  * @param[onCheckedChange] Gets the new state and where the reveal grows from, the press that
  *   flipped it or the middle of the switch after a key.
@@ -239,6 +177,7 @@ internal fun libraryName(choice: LibraryChoice): String =
     stringResource(
         when (choice) {
             LibraryChoice.M3 -> Res.string.topbar_library_m3
+            LibraryChoice.M3Expressive -> Res.string.topbar_library_m3_expressive
             LibraryChoice.Unstyled -> Res.string.topbar_library_unstyled
             LibraryChoice.Fluent -> Res.string.topbar_library_fluent
             LibraryChoice.Custom -> Res.string.topbar_library_custom
@@ -253,12 +192,7 @@ internal fun libraryName(choice: LibraryChoice): String =
 internal fun libraryName(
     library: Library,
     expressive: Boolean,
-): String =
-    if (library == Library.Material3 && expressive) {
-        stringResource(Res.string.topbar_library_m3_expressive)
-    } else {
-        libraryName(LibraryChoice.of(library))
-    }
+): String = libraryName(LibraryChoice.of(library, expressive))
 
 /**
  * Where the last press on the switcher landed. Plain fields, since only a pick reads them and

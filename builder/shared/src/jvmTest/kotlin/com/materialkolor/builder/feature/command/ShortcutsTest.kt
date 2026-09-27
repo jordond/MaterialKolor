@@ -36,7 +36,6 @@ import com.materialkolor.builder.domain.persist.PreviewMode
 import com.materialkolor.builder.domain.persist.PreviewTab
 import com.materialkolor.builder.feature.canvas.DEVICE_SCREEN_TAG
 import com.materialkolor.builder.feature.topbar.LibraryChoice
-import com.materialkolor.builder.feature.topbar.onExpressive
 import com.materialkolor.builder.feature.workspace.Panel
 import com.materialkolor.builder.feature.workspace.ShuffleLock
 import io.kotest.matchers.shouldBe
@@ -69,9 +68,10 @@ class ShortcutsTest {
             boot()
             val start = harness.graph.session.document.value
             val keysToChoices = listOf(
-                Key.Two to LibraryChoice.Unstyled,
-                Key.Three to LibraryChoice.Fluent,
-                Key.Four to LibraryChoice.Custom,
+                Key.Two to LibraryChoice.M3Expressive,
+                Key.Three to LibraryChoice.Unstyled,
+                Key.Four to LibraryChoice.Fluent,
+                Key.Five to LibraryChoice.Custom,
             )
             keysToChoices.forEach { (key, choice) ->
                 keys { pressKey(key) }
@@ -85,19 +85,17 @@ class ShortcutsTest {
         }
 
     @Test
-    fun shiftE_flipsTheExpressiveSwitchAsOneUndoEntryAndLeavesExportShut() =
+    fun shiftE_doesNothing() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             boot()
             val start = harness.graph.session.document.value
 
             keys { withKeyDown(Key.ShiftLeft) { pressKey(Key.E) } }
-            waitUntil { harness.graph.session.document.value.onExpressive }
-            harness.workspace.state.value.panel shouldBe null
-
-            runOnUiThread { harness.workspace.undo() }
             waitForIdle()
+
             harness.graph.session.document.value shouldBe start
             harness.graph.session.history.value.canUndo shouldBe false
+            harness.workspace.state.value.panel shouldBe null
         }
 
     @Test
@@ -398,6 +396,7 @@ private val SINGLE_KEYS = listOf(
     Key.Two,
     Key.Three,
     Key.Four,
+    Key.Five,
     Key.D,
     Key.LeftBracket,
     Key.RightBracket,

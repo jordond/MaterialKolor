@@ -118,6 +118,19 @@ class TimelineTest {
         }
 
     @Test
+    fun timeline_m3ExpressivePick_isNamedAsALibraryChange() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            boot()
+            runOnUiThread { harness.workspace.pickLibrary(LibraryChoice.M3Expressive) }
+            waitUntil { harness.workspace.state.value.document.style == Style.Expressive }
+            waitForIdle()
+
+            keys { pressKey(Key.H) }
+
+            focusedRow().assertIsSelected().assert(hasText("Library change to M3 Expressive"))
+        }
+
+    @Test
     fun timeline_popupJumpOntoFluent_staysOpenWithFocusOnTheCurrentStep() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             popupJumpOntoFluent(historyInBar = true)

@@ -43,6 +43,9 @@ class ChangeLabelTest {
             DocumentChange.SetPin(Role.Outline, PinMode.Dark, red) to ("change_pin" to "Outline"),
             DocumentChange.ClearPins to ("change_clear_pins" to null),
             DocumentChange.SetLibrary(Library.Fluent, expressive = false) to ("change_library" to "Fluent"),
+            // A pick that carries the style along is still named as a library change.
+            DocumentChange.SetLibrary(Library.Material3, true, Style.Expressive, SpecVersion.Spec2025) to
+                ("change_library" to "Material3"),
             DocumentChange.SetMotionScheme(MotionSchemeChoice.Standard) to ("change_motion_scheme" to "Standard"),
             DocumentChange.SetThemeName("PlumTheme") to ("change_theme_name" to "PlumTheme"),
             DocumentChange.SetCustomTone(CustomSlot.FocusRing, CustomTone(dark = 70)) to

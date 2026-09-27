@@ -17,13 +17,10 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
-import com.materialkolor.builder.generated.resources.Res
-import com.materialkolor.builder.generated.resources.topbar_expressive
 import com.materialkolor.builder.kit.control.ControlFrameBottom
 import com.materialkolor.builder.kit.control.ControlFrameTop
 import com.materialkolor.builder.kit.token.BuilderType
 import com.materialkolor.builder.kit.token.LocalBuilderType
-import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 /**
@@ -92,35 +89,28 @@ internal class MediumBarFit {
 }
 
 /**
- * The library switcher on a Medium window, a dropdown whose trigger shows the library's name whole,
- * with the Expressive chip joined to its end while Material 3 is picked.
+ * The library switcher on a Medium window, a dropdown whose trigger shows the library's name whole.
  *
  * It measures every library's trigger off screen and out of the accessibility tree, and asks [fit]
  * for room for the widest, so a switch never moves the bar's buttons. Which one is widest is only
  * worked out again when the type or the names change. The form goes to [LocalSwitcherForm] for the
  * command registry. A pick reaches [onSwitch] at once.
  *
- * @param[selected] The library the document is on.
- * @param[expressive] Whether the Expressive chip is on.
+ * @param[selected] The choice the document is on.
  * @param[fit] Which top bar buttons have made room for it.
  * @param[modifier] Applied to the room the dropdown gets, which it fills.
  * @param[switcherModifier] Applied to the dropdown itself.
- * @param[expressiveModifier] Applied to the Expressive chip.
  */
 @Composable
 internal fun LibraryDropdown(
     selected: LibraryChoice,
-    expressive: Boolean,
     onSwitch: (choice: LibraryChoice, origin: Offset) -> Unit,
-    onExpressiveChange: (on: Boolean, origin: Offset) -> Unit,
     fit: MediumBarFit,
     modifier: Modifier = Modifier,
     switcherModifier: Modifier = Modifier,
-    expressiveModifier: Modifier = Modifier,
 ) {
     val type = LocalBuilderType.current
-    val labels = LibraryChoice.entries.map { choice -> libraryName(choice) } +
-        stringResource(Res.string.topbar_expressive)
+    val labels = LibraryChoice.entries.map { choice -> libraryName(choice) }
     val report = LocalSwitcherForm.current
     val shownMoved = fit.moved
     val widest = remember { WidestTrigger() }
@@ -137,11 +127,8 @@ internal fun LibraryDropdown(
         val shown = subcompose(TriggerSlot.Shown) {
             LibrarySwitcher(
                 selected = selected,
-                expressive = expressive,
                 onSwitch = onSwitch,
-                onExpressiveChange = onExpressiveChange,
-                switcherModifier = switcherModifier,
-                expressiveModifier = expressiveModifier,
+                modifier = switcherModifier,
                 segmented = false,
             )
         }.map { measurable -> measurable.measure(loose) }
@@ -156,8 +143,7 @@ internal fun LibraryDropdown(
 
 /**
  * How wide the trigger for [choice] is when nothing holds it in, composed in [slot] off screen and
- * out of the accessibility tree, so only the trigger that shows can be reached. It counts the
- * Expressive chip for every library, so turning Material 3 on or off never moves the bar's buttons.
+ * out of the accessibility tree, so only the trigger that shows can be reached.
  */
 private fun SubcomposeMeasureScope.naturalWidth(
     slot: TriggerSlot,
@@ -166,13 +152,9 @@ private fun SubcomposeMeasureScope.naturalWidth(
     val probe = subcompose(slot) {
         LibrarySwitcher(
             selected = choice,
-            expressive = false,
             onSwitch = { _, _ -> },
-            onExpressiveChange = { _, _ -> },
             modifier = Modifier.clearAndSetSemantics {},
             segmented = false,
-            expressiveShown = true,
-            probe = true,
         )
     }
     // Bounded, since a row gives a weighted label no room at all when its own room has no end.

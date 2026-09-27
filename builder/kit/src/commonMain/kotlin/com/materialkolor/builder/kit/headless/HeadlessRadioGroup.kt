@@ -42,7 +42,7 @@ import com.materialkolor.builder.kit.control.roleLessName
  * together, the way a native radio group behaves, and wrap at either end. With [selectOnFocus] off
  * they move only the focus, and Enter or Space chooses the focused option. Every option gets the
  * same width, the width of the widest one, unless [modifier] stretches the group, and then the
- * options share the stretched width evenly.
+ * options share the stretched width evenly. With [equalWidths] off each option keeps its own width.
  *
  * The group's name goes in as text on the web, where the group has no role.
  *
@@ -56,6 +56,7 @@ import com.materialkolor.builder.kit.control.roleLessName
  * keys, Home and End step over an option it turns down.
  * @param[arrangement] How the options sit along the row.
  * @param[selectOnFocus] Whether the arrow keys choose as they move, or only move the focus.
+ * @param[equalWidths] Whether the options share the row's width evenly.
  * @param[option] Draws one option. The interaction source is the option's own, for press and focus
  * feedback.
  */
@@ -70,6 +71,7 @@ internal fun <T> HeadlessRadioGroup(
     optionEnabled: (T) -> Boolean = { true },
     arrangement: Arrangement.Horizontal = Arrangement.Start,
     selectOnFocus: Boolean = true,
+    equalWidths: Boolean = true,
     option: @Composable (value: T, isSelected: Boolean, interactionSource: MutableInteractionSource) -> Unit,
 ) {
     RadioGroupFrame(
@@ -88,7 +90,7 @@ internal fun <T> HeadlessRadioGroup(
             horizontalArrangement = arrangement,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            eachOption(Modifier.weight(1f))
+            eachOption(if (equalWidths) Modifier.weight(1f) else Modifier)
         }
     }
 }
