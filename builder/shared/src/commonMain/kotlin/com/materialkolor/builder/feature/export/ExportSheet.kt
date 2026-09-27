@@ -74,15 +74,17 @@ private enum class CopyKind {
 }
 
 /**
- * The export sheet, over the whole screen at every size. The package and the theme name on top,
- * the options beside the files, and Copy all and Download zip at the bottom.
+ * The export sheet, over the whole screen at every size. A header that reads "Export AppTheme",
+ * with the theme name and the package set in it as fields, the options beside the files, and Copy
+ * all and Download zip at the bottom.
  *
- * The body picks its layout from its own width, as [BodyLayout] has it. Wide, the options sit in a
+ * The sheet picks its layout from its width, as [BodyLayout] has it. Wide, the options sit in a
  * column beside the workbench, the tree of files beside the code. Medium, the files are tabs over
- * the code instead. Narrow, everything is one scrolling column, with the names and the options
- * folded into a disclosure over the file tabs and the code. Copy file sits at the end of the path
- * over the code, and in the footer on the narrow layout, where the path bar has no room for it.
- * Switching the library is the same edit the top bar makes, so the previews re-theme behind the sheet.
+ * the code instead. Narrow, the header only names the theme, and everything else is one scrolling
+ * column, with the names and the options folded into a disclosure over the file tabs and the code.
+ * Copy file sits at the end of the path over the code, and in the footer on the narrow layout,
+ * where the path bar has no room for it. Switching the library is the same edit the top bar makes,
+ * so the previews re-theme behind the sheet.
  *
  * Every copy, download and share starts inside the click, with the platform call as its first
  * suspension, and the text and the zip are ready before the click. A copy that worked
@@ -107,6 +109,7 @@ private enum class CopyKind {
  * @param[dispatcher] Takes the option changes.
  * @param[workspace] Takes the target switch, the theme name, closing and toasts.
  * @param[returnFocusTo] The button that opened the sheet, which gets focus back once it closes.
+ * @param[glyph] The colours of the scheme glyph in the header, or null for no glyph.
  */
 @Composable
 internal fun ExportSheet(
@@ -121,6 +124,7 @@ internal fun ExportSheet(
     modifier: Modifier = Modifier,
     returnFocusTo: FocusRequester? = null,
     materialKolorVersion: String? = null,
+    glyph: SchemeGlyph? = null,
 ) {
     val keys = rememberPanelShortcuts()
     // The footer and the body share what the copies did, so it lives here. Each opening starts it
@@ -153,15 +157,27 @@ internal fun ExportSheet(
         }
     }
 
-    val copyFile: @Composable (picked: GeneratedFile?, tonal: Boolean) -> Unit = { picked, tonal ->
-        CopyButton(
-            copied = sheet.copied == CopyKind.File,
-            label = stringResource(Res.string.export_copy_file),
-            enabled = picked != null,
-            tonal = tonal,
-            onClick = { if (picked != null) copy(CopyKind.File, picked.text) },
-        )
+    // The keys only show where there is a keyboard to press them on.
+    val keysShown = !LocalLayout.current.coarsePointer
+    val copyFileLabel = stringResource(Res.string.export_copy_file)
+    val copiedLabel = stringResource(Res.string.export_copied)
+    val copyFile: @Composable (picked: GeneratedFile?, onCode: Boolean) -> Unit = { picked, onCode ->
+        val copied = sheet.copied == CopyKind.File
+        val onClick = { if (picked != null) copy(CopyKind.File, picked.text) }
+        if (onCode) {
+            CodeCopyButton(
+                label = if (copied) copiedLabel else copyFileLabel,
+                copied = copied,
+                enabled = picked != null,
+                hint = if (keysShown) Shortcut.CopySeed.text(apple = false) else null,
+                onClick = onClick,
+            )
+        } else {
+            CopyButton(copied = copied, label = copyFileLabel, enabled = picked != null, onClick = onClick)
+        }
     }
+    val layout = BodyLayout.ofSheet(LocalLayout.current.widthDp)
+    val narrow = layout == BodyLayout.Narrow
 
     BuilderSheet(
         visible = visible,
@@ -170,23 +186,23 @@ internal fun ExportSheet(
         presentation = SheetPresentation.FullScreen,
         modifier = modifier.then(keys.modifier),
         returnFocusTo = returnFocusTo,
-        subtitle = exportSubtitle(state),
+        header = {
+            ExportHeader(state, glyph, dispatcher, workspace, sheet.drafts, compact = narrow)
+        },
         footer = {
             val export = sheetExport(state, outcomeOf, sheet.drafts)
             val ready = export.ready
-            // The footer spans the body's width, so it reads the body's layout from its own.
-            BoxWithConstraints(Modifier.fillMaxWidth()) {
-                val narrow = BodyLayout.of(maxWidth) == BodyLayout.Narrow
-                ExportFooter(materialKolorVersion, ready) {
-                    if (narrow) copyFile(export.picked, false)
-                    CopyButton(
-                        copied = sheet.copied == CopyKind.All,
-                        label = stringResource(Res.string.export_copy_all),
-                        enabled = ready != null,
-                        onClick = { if (ready != null) copy(CopyKind.All, ready.allText) },
-                    )
-                    ZipButton(ready, files, dispatcher, workspace)
-                }
+            ExportFooter(materialKolorVersion, ready) {
+                if (narrow) copyFile(export.picked, false)
+                CopyButton(
+                    copied = sheet.copied == CopyKind.All,
+                    label = stringResource(Res.string.export_copy_all),
+                    enabled = ready != null,
+                    tonal = true,
+                    hint = if (keysShown) Shortcut.CopyAll.text(apple = false) else null,
+                    onClick = { if (ready != null) copy(CopyKind.All, ready.allText) },
+                )
+                ZipButton(ready, files, dispatcher, workspace)
             }
         },
     ) {
@@ -224,7 +240,6 @@ internal fun ExportSheet(
             onSelect = { path -> dispatcher.dispatch(ExportAction.SelectFile(path)) },
         )
         BoxWithConstraints(Modifier.fillMaxSize()) {
-            val layout = BodyLayout.of(maxWidth)
             val optionsWidth = layout.optionsWidth
             if (optionsWidth == null) {
                 NarrowBody(export, parts, optionsSummary(state), viewport = constraints.maxHeight)
@@ -247,7 +262,8 @@ internal fun ExportSheet(
 /**
  * The parts every layout of the body places, each in its own spot.
  *
- * @property[names] The package and theme name strip.
+ * @property[names] The package and theme name fields, which only the narrow body shows, since the
+ * header holds them everywhere else.
  * @property[notices] One notice per problem holding the export back.
  * @property[options] The options, given the modifier that places them.
  * @property[onSelect] Called with the path of the file picked.
@@ -260,9 +276,9 @@ private class BodyParts(
 )
 
 /**
- * The wide and medium body. The names and the notices across the top, then the options in a column
- * that scrolls on its own beside the workbench, which takes the rest of the width and height. With
- * [tree] the files are a tree on the workbench, and without it tabs over it.
+ * The wide and medium body. The notices across the top, then the options in a column that scrolls
+ * on its own beside the workbench, which takes the rest of the width and height. With [tree] the
+ * files are a tree on the workbench, and without it tabs over it.
  *
  * @param[copyFile] The Copy file button for the path bar.
  */
@@ -282,13 +298,17 @@ private fun SplitBody(
         modifier = Modifier.fillMaxSize().padding(spacing.extraSmall),
         verticalArrangement = Arrangement.spacedBy(spacing.large),
     ) {
-        parts.names()
         parts.notices()
-        Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(spacing.extraLarge)) {
+        Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(spacing.large)) {
             // Its fields and buttons take focus themselves, so the column is no stop of its own.
             BuilderScrollArea(Modifier.width(optionsWidth).fillMaxHeight(), tabStop = false) {
                 parts.options(
-                    Modifier.padding(start = spacing.extraSmall, end = spacing.large, top = spacing.extraSmall),
+                    Modifier.padding(
+                        start = spacing.extraSmall,
+                        end = spacing.medium,
+                        top = spacing.extraSmall,
+                        bottom = spacing.large,
+                    ),
                 )
             }
             Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(spacing.small)) {
@@ -390,7 +410,8 @@ private class SheetCopies {
 /**
  * A copy button that shows Copied, with a check, while [copied].
  *
- * @param[tonal] Whether it carries its own fill, as it must on the code ground.
+ * @param[tonal] Whether it carries its own fill.
+ * @param[hint] The key that does the same, drawn as a keycap, or null for none.
  */
 @Composable
 private fun CopyButton(
@@ -399,12 +420,14 @@ private fun CopyButton(
     enabled: Boolean,
     onClick: () -> Unit,
     tonal: Boolean = false,
+    hint: String? = null,
 ) {
     BuilderButton(
         onClick = onClick,
         label = if (copied) stringResource(Res.string.export_copied) else label,
         icon = if (copied) IconId.Check else IconId.Copy,
         enabled = enabled,
+        hint = hint,
         tonal = tonal,
     )
 }

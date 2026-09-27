@@ -15,6 +15,10 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -76,7 +80,7 @@ class ExportSheetTest {
 
             onNodeWithText("Copy it yourself").assertExists()
             onNodeWithText(ALL_TEXT).assertExists()
-            onNodeWithText("Copied").assertDoesNotExist()
+            action("Copied").assertDoesNotExist()
             clipboard.texts shouldBe emptyList()
             exported shouldBe emptyList()
             announced shouldBe emptyList()
@@ -87,7 +91,7 @@ class ExportSheetTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             showSheet(FakeFileSaver(), coarsePointer = false)
 
-            onNodeWithText("Copy file").performClick()
+            action("Copy file").performClick()
             waitForIdle()
             onNodeWithText("Copy all").performClick()
             waitForIdle()
@@ -100,12 +104,12 @@ class ExportSheetTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             showSheet(FakeFileSaver(), coarsePointer = false)
 
-            onNodeWithText("Package name").performTextReplacement("Not A Package")
+            nameField("Package name").performTextReplacement("Not A Package")
             waitForIdle()
 
             exportButtons().forEach { button -> button.assertIsNotEnabled() }
             onAllNodesWithText("Not A Package is not a package name", substring = true).assertCountEquals(1)
-            onNodeWithText("Package name").performKeyInput { pressKey(Key.Escape) }
+            nameField("Package name").performKeyInput { pressKey(Key.Escape) }
             waitForIdle()
             exportButtons().forEach { button -> button.assertIsEnabled() }
             onAllNodesWithText("is not a package name", substring = true).assertCountEquals(0)
@@ -116,12 +120,12 @@ class ExportSheetTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             showSheet(FakeFileSaver(), coarsePointer = false)
 
-            onNodeWithText("Theme name").performTextReplacement("1 bad")
+            nameField("Theme name").performTextReplacement("1 bad")
             waitForIdle()
 
             exportButtons().forEach { button -> button.assertIsNotEnabled() }
             onAllNodesWithText("1 bad cannot be a theme name", substring = true).assertCountEquals(1)
-            onNodeWithText("Theme name").performKeyInput { pressKey(Key.Escape) }
+            nameField("Theme name").performKeyInput { pressKey(Key.Escape) }
             waitForIdle()
             exportButtons().forEach { button -> button.assertIsEnabled() }
         }
@@ -135,14 +139,14 @@ class ExportSheetTest {
             showSheet(FakeFileSaver(), coarsePointer = false)
             onNodeWithText("Options").performClick()
             waitForIdle()
-            onNodeWithText("Package name").performTextReplacement("Not A Package")
+            nameField("Package name").performTextReplacement("Not A Package")
             waitForIdle()
             exportButtons().forEach { button -> button.assertIsNotEnabled() }
 
             onNodeWithText("Options").performClick()
             waitForIdle()
 
-            onNodeWithText("Package name").assertDoesNotExist()
+            nameField("Package name").assertDoesNotExist()
             exportButtons().forEach { button -> button.assertIsEnabled() }
             onAllNodesWithText("is not a package name", substring = true).assertCountEquals(0)
         }
@@ -156,14 +160,14 @@ class ExportSheetTest {
                 coarsePointer = false,
                 preferences = Preferences(exportPrefs = mapOf(ExportTarget.Fluent to fluent)),
             )
-            onNodeWithText("Package name").performTextReplacement("Not A Package")
+            nameField("Package name").performTextReplacement("Not A Package")
             waitForIdle()
             exportButtons().forEach { button -> button.assertIsNotEnabled() }
 
             onNodeWithText("Fluent").performClick()
             waitForIdle()
 
-            onNodeWithText("Package name").assertTextContains("com.fluent.theme")
+            nameField("Package name").assertTextContains("com.fluent.theme")
             exportButtons().forEach { button -> button.assertIsEnabled() }
             onAllNodesWithText("is not a package name", substring = true).assertCountEquals(0)
         }
@@ -175,9 +179,9 @@ class ExportSheetTest {
             showSheet(FakeFileSaver(), coarsePointer = false, echoes = echoes)
             val start = packageText()
 
-            onNodeWithText("Package name").performTextReplacement("com.typed")
+            nameField("Package name").performTextReplacement("com.typed")
             waitForIdle()
-            onNodeWithText("Package name").performKeyInput { pressKey(Key.Escape) }
+            nameField("Package name").performKeyInput { pressKey(Key.Escape) }
             waitForIdle()
             packageText() shouldBe start
 
@@ -202,11 +206,11 @@ class ExportSheetTest {
                 preferences = Preferences(exportPrefs = mapOf(ExportTarget.Fluent to fluent)),
                 echoes = echoes,
             )
-            onNodeWithText("Package name").performTextReplacement("com.typed")
+            nameField("Package name").performTextReplacement("com.typed")
             waitForIdle()
             runOnIdle { echoes.forEach { echo -> echo() } }
             waitForIdle()
-            onNodeWithText("Package name").performTextReplacement("Not A Package")
+            nameField("Package name").performTextReplacement("Not A Package")
             waitForIdle()
             exportButtons().forEach { button -> button.assertIsNotEnabled() }
 
@@ -223,7 +227,7 @@ class ExportSheetTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             showSheet(FakeFileSaver(), coarsePointer = false)
 
-            onNodeWithText("Package name").performTextReplacement("com.typed")
+            nameField("Package name").performTextReplacement("com.typed")
             waitForIdle()
 
             exported shouldBe listOf(ExportAction.SetPackageName("com.typed"))
@@ -236,16 +240,16 @@ class ExportSheetTest {
             showSheet(FakeFileSaver(), coarsePointer = false)
             mainClock.autoAdvance = false
 
-            onNodeWithText("Copy file").performClick()
+            action("Copy file").performClick()
             mainClock.advanceTimeByFrame()
 
-            onNodeWithText("Copied").assertExists()
+            action("Copied").assertExists()
             clipboard.text shouldBe "$FILE_TEXT\n"
             exported shouldBe listOf(ExportAction.Exported)
             mainClock.advanceTimeBy(COPIED_MILLIS)
             mainClock.advanceTimeByFrame()
-            onNodeWithText("Copied").assertDoesNotExist()
-            onNodeWithText("Copy file").assertExists()
+            action("Copied").assertDoesNotExist()
+            action("Copy file").assertExists()
         }
 
     @Test
@@ -334,10 +338,23 @@ class ExportSheetTest {
     private fun idleScope(): CoroutineScope = CoroutineScope(StandardTestDispatcher())
 
     private fun ComposeUiTest.packageText(): String =
-        onNodeWithText("Package name").fetchSemanticsNode().config[SemanticsProperties.EditableText].text
+        nameField("Package name").fetchSemanticsNode().config[SemanticsProperties.EditableText].text
 
     private fun ComposeUiTest.exportButtons(): List<SemanticsNodeInteraction> =
-        listOf("Copy file", "Copy all", "Download zip").map { label -> onNodeWithText(label) }
+        listOf("Copy file", "Copy all", "Download zip").map { label -> action(label) }
+
+    /**
+     * The name field called [name]. The header sets it inline, named by its description, and the
+     * narrow sheet's Options shows it boxed under its label.
+     */
+    private fun ComposeUiTest.nameField(name: String): SemanticsNodeInteraction =
+        onNode(hasSetTextAction() and (hasText(name) or hasContentDescription(name)))
+
+    /**
+     * The button called [name], labelled by its text or, drawn on the code ground, by its description.
+     */
+    private fun ComposeUiTest.action(name: String): SemanticsNodeInteraction =
+        onNode(hasClickAction() and (hasText(name) or hasContentDescription(name)))
 
     /**
      * Shows the sheet on the default document. A pick among its library cards moves the document.

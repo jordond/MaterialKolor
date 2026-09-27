@@ -207,12 +207,14 @@ internal fun ExpressiveChip(
  *
  * @param[onCheckedChange] Gets the new state and where the reveal grows from, the press that
  *   flipped it or the middle of the switch after a key.
+ * @param[caption] A quieter line under the label, or null for none.
  */
 @Composable
 internal fun ExpressiveSwitch(
     checked: Boolean,
     onCheckedChange: (on: Boolean, origin: Offset) -> Unit,
     modifier: Modifier = Modifier,
+    caption: String? = null,
 ) {
     val origin = remember { RevealOrigin() }
     BuilderSwitch(
@@ -222,6 +224,7 @@ internal fun ExpressiveSwitch(
         // Its own width, even in a row with no end such as the phone's scrolling chips, where the
         // switch's label would otherwise get no room.
         modifier = modifier.width(IntrinsicSize.Max).trackRevealOrigin(origin),
+        caption = caption,
     )
 }
 

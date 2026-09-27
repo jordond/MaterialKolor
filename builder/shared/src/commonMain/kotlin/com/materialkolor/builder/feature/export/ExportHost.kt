@@ -45,5 +45,6 @@ internal fun ExportHost(
         modifier = modifier,
         returnFocusTo = returnFocusTo,
         materialKolorVersion = model.materialKolorVersion,
+        glyph = model.glyph(export.document),
     )
 }

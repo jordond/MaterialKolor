@@ -23,26 +23,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.materialkolor.builder.codegen.dsl.GeneratedFile
 import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.generated.resources.Res
 import com.materialkolor.builder.generated.resources.export_tree
 import com.materialkolor.builder.kit.control.BuilderChoiceGroup
 import com.materialkolor.builder.kit.control.BuilderIcon
+import com.materialkolor.builder.kit.control.BuilderPressable
 import com.materialkolor.builder.kit.control.BuilderScrollArea
 import com.materialkolor.builder.kit.control.BuilderTabs
 import com.materialkolor.builder.kit.control.BuilderText
@@ -63,7 +62,8 @@ private val TreeWidth = 264.dp
 /**
  * The files on the code ground, the tree of them as the zip lays them out beside a path bar over
  * the code of the file picked. The ground is the skin's code ground in both modes, so everything on
- * it takes the code palette's colours.
+ * it takes the code palette's colours. The tree sits on a lighter band of it, so the files read apart
+ * from the code.
  *
  * Without [tree] the files are the caller's tabs above it, and the ground holds the path bar and the
  * code alone. While nothing can be exported the ground stays, with no path and no code.
@@ -84,9 +84,18 @@ internal fun ExportWorkbench(
     copyFile: (@Composable () -> Unit)? = null,
 ) {
     val tokens = LocalBuilderTokens.current
-    Row(modifier.background(tokens.codeBackground, RoundedCornerShape(tokens.radius.large))) {
+    val shape = RoundedCornerShape(tokens.radius.large)
+    Row(modifier.clip(shape).background(tokens.codeBackground)) {
         if (tree && ready != null && picked != null) {
-            FileTree(ready, picked.path, onSelect, Modifier.width(TreeWidth).fillMaxHeight())
+            FileTree(
+                ready = ready,
+                selectedPath = picked.path,
+                onSelect = onSelect,
+                modifier = Modifier
+                    .width(TreeWidth)
+                    .fillMaxHeight()
+                    .background(tokens.codePalette.plain.copy(alpha = TREE_BAND_ALPHA)),
+            )
             Box(Modifier.width(tokens.outlineWidth).fillMaxHeight().background(ruleColor()))
         }
         Column(Modifier.weight(1f).fillMaxHeight()) {
@@ -144,6 +153,11 @@ private fun ruleColor(): Color {
 private const val RULE_ALPHA = 0.3f
 
 /**
+ * How strongly the tree's band is washed with the code's ink, a step up from the ground.
+ */
+private const val TREE_BAND_ALPHA = 0.04f
+
+/**
  * The zip's name over its folders and files. The files are one choice with a single Tab stop, each
  * a tab, "Color.kt, tab, selected", and the arrows move between them. A folder's name sits over the
  * first file in it, outside the file's own focus.
@@ -166,7 +180,7 @@ private fun FileTree(
             horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            BuilderIcon(id = IconId.Folder, contentDescription = null, tint = palette.muted, size = treeIconSize())
+            BuilderIcon(id = IconId.Archive, contentDescription = null, tint = palette.muted, size = treeIconSize())
             BuilderText(
                 text = ready.zip.name,
                 style = BuilderTextStyle.Code,
@@ -253,7 +267,7 @@ private fun FolderLabel(folder: TreeRow.Folder) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BuilderIcon(
-            id = IconId.Folder,
+            id = IconId.FolderOutline,
             contentDescription = null,
             tint = tokens.codePalette.muted,
             size = treeIconSize(),
@@ -264,7 +278,7 @@ private fun FolderLabel(folder: TreeRow.Folder) {
 
 /**
  * One file of the tree, its name and its line count. The one picked takes a wash of the code's
- * keyword ink and a bar along its start edge, so it never rests on the wash alone.
+ * keyword ink and sets its name in bold, so it never rests on the wash alone.
  */
 @Composable
 private fun FileRow(
@@ -279,7 +293,6 @@ private fun FileRow(
     val shape = RoundedCornerShape(tokens.radius.small)
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
-    val bar = tokens.highlightWidth
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -293,24 +306,26 @@ private fun FileRow(
                 onClick = onClick,
             ).foldedTabName(file.name, selected)
             .clip(shape)
-            .background(if (selected) ink.copy(alpha = SELECTED_TINT_ALPHA) else Color.Transparent)
-            .drawBehind {
-                if (!selected) return@drawBehind
-                val width = bar.toPx()
-                val x = if (layoutDirection == LayoutDirection.Rtl) size.width - width else 0f
-                drawRect(ink, topLeft = Offset(x, 0f), size = Size(width, size.height))
-            }.heightIn(min = LocalLayout.current.primaryTouchTarget)
+            .background(if (selected) ink.copy(alpha = PICKED_FILE_ALPHA) else Color.Transparent)
+            .heightIn(min = maxOf(FileRowHeight, LocalLayout.current.primaryTouchTarget))
             .padding(start = indentOf(file.depth), end = tokens.spacing.small),
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // The row reads as its tab name alone, so the name and the count drawn here stay out of it.
-        BuilderIcon(id = IconId.Code, contentDescription = null, tint = palette.muted, size = treeIconSize())
-        BuilderText(
+        BuilderIcon(
+            id = IconId.File,
+            contentDescription = null,
+            tint = if (selected) palette.plain else palette.muted,
+            size = treeIconSize(),
+        )
+        BasicText(
             text = file.name,
             modifier = Modifier.weight(1f).clearAndSetSemantics {},
-            style = BuilderTextStyle.Code,
-            color = palette.plain,
+            style = LocalBuilderType.current.code.merge(
+                color = palette.plain,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -318,15 +333,27 @@ private fun FileRow(
             text = file.lines.toString(),
             modifier = Modifier.clearAndSetSemantics {},
             style = BuilderTextStyle.Code,
-            color = palette.muted,
+            color = if (selected) palette.plain else palette.muted,
             maxLines = 1,
         )
     }
 }
 
 /**
- * The picked file's path, its folder quiet and its name in full ink, cut from the start when short
- * of room so the name always shows, then [copyFile].
+ * How strongly the picked file is washed with the code's keyword ink, enough to stand off the
+ * tree's band in both modes.
+ */
+private const val PICKED_FILE_ALPHA = 0.22f
+
+/**
+ * The height of a file's row where the pointer allows a shorter one.
+ */
+private val FileRowHeight: Dp = 34.dp
+
+/**
+ * The picked file's path, its folder quiet and its name in full ink and bold, cut from the start
+ * when short of room so the name always shows, then [copyFile]. The bar is tall enough that the
+ * button keeps clear of the ground's rounded corner.
  */
 @Composable
 private fun PathBar(
@@ -340,8 +367,8 @@ private fun PathBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = LocalLayout.current.primaryTouchTarget + tokens.spacing.medium)
-            .padding(start = tokens.spacing.large, end = tokens.spacing.medium),
+            .heightIn(min = maxOf(PathBarHeight, LocalLayout.current.primaryTouchTarget + tokens.spacing.medium))
+            .padding(start = tokens.spacing.large, end = tokens.spacing.small),
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -356,7 +383,9 @@ private fun PathBar(
             BasicText(
                 text = buildAnnotatedString {
                     withStyle(SpanStyle(color = palette.muted)) { append(shown.take(quiet)) }
-                    withStyle(SpanStyle(color = palette.plain)) { append(shown.drop(quiet)) }
+                    withStyle(SpanStyle(color = palette.plain, fontWeight = FontWeight.SemiBold)) {
+                        append(shown.drop(quiet))
+                    }
                 },
                 style = style,
                 maxLines = 1,
@@ -381,6 +410,86 @@ private fun startCut(
     }
 
 private const val ELLIPSIS = "…"
+
+/**
+ * How tall the path bar is where the pointer allows, room for Copy file with a margin round it.
+ */
+private val PathBarHeight: Dp = 52.dp
+
+/**
+ * Copy file on the code ground, a pill in the code's own inks so it reads on the dark ground in
+ * both modes, with the key that does the same as a keycap after its label.
+ *
+ * @param[label] What it does, "Copy file", or "Copied" for a moment after it worked.
+ * @param[copied] Whether the copy just worked, which swaps the glyph for a check.
+ * @param[hint] The key that does the same, or null where there is no keyboard to press it on.
+ */
+@Composable
+internal fun CodeCopyButton(
+    label: String,
+    copied: Boolean,
+    enabled: Boolean,
+    hint: String?,
+    onClick: () -> Unit,
+) {
+    val tokens = LocalBuilderTokens.current
+    val palette = tokens.codePalette
+    val pill = RoundedCornerShape(percent = 50)
+    BuilderPressable(onClick = onClick, label = label, enabled = enabled, shape = pill) {
+        Row(
+            modifier = Modifier
+                .background(palette.plain.copy(alpha = COPY_FILL_ALPHA), pill)
+                .heightIn(min = CopyHeight)
+                .padding(
+                    start = tokens.spacing.medium,
+                    end = if (hint ==
+                        null
+                    ) {
+                        tokens.spacing.large
+                    } else {
+                        tokens.spacing.small
+                    },
+                ),
+            horizontalArrangement = Arrangement.spacedBy(tokens.spacing.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            BuilderIcon(
+                id = if (copied) IconId.Check else IconId.Copy,
+                contentDescription = null,
+                tint = palette.plain,
+                size = CopyIconSize,
+            )
+            BasicText(
+                text = label,
+                style = LocalBuilderType.current.label.merge(color = palette.plain, fontWeight = FontWeight.Bold),
+                maxLines = 1,
+            )
+            if (hint != null) {
+                BasicText(
+                    text = hint,
+                    modifier = Modifier
+                        .background(tokens.codeBackground, RoundedCornerShape(tokens.radius.small / 2))
+                        .padding(horizontal = tokens.spacing.small - KeycapTrim, vertical = KeycapTrim),
+                    style = LocalBuilderType.current.value.merge(color = palette.muted, fontSize = KeycapSize),
+                    maxLines = 1,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * How strongly Copy file's pill is washed with the code's ink.
+ */
+private const val COPY_FILL_ALPHA = 0.1f
+
+/**
+ * Copy file's pill, its glyph and its keycap.
+ */
+private val CopyHeight: Dp = 36.dp
+private val CopyIconSize: Dp = 16.dp
+private val KeycapSize = 11.sp
+private val KeycapTrim: Dp = 2.dp
 
 /**
  * The last part of a path, the name a tab shows.

@@ -96,7 +96,7 @@ test('the first run, from a typed seed to a copied Theme.kt, retires the hint fo
 
   await pressKeyFor(page, 'e', labelled(page, 'Theme.kt, tab, '));
   await pressFor(page, labelled(page, 'Theme.kt, tab, not selected'), labelled(page, 'Theme.kt, tab, selected'));
-  await pressFor(page, button(page, 'Copy file'), onPage(page, 'Copied'));
+  await pressFor(page, button(page, 'Copy file'), button(page, 'Copied'));
   if (browserName === 'chromium') {
     expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('package com.example.theme');
   }

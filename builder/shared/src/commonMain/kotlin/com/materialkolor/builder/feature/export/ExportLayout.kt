@@ -19,8 +19,6 @@ import com.materialkolor.builder.generated.resources.export_checked_any
 import com.materialkolor.builder.generated.resources.export_files
 import com.materialkolor.builder.generated.resources.export_files_lines
 import com.materialkolor.builder.generated.resources.export_lines
-import com.materialkolor.builder.generated.resources.export_subtitle
-import com.materialkolor.builder.generated.resources.export_subtitle_unnamed
 import com.materialkolor.builder.kit.control.BuilderIcon
 import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.Emphasis
@@ -30,23 +28,9 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The theme's name, the project it belongs to and its seed, "AppTheme from Burnt Ember #D9653B".
- */
-@Composable
-internal fun exportSubtitle(state: ExportModel.State): String {
-    val themeName = state.document.themeName
-    val seed = state.document.seed.toHex()
-    val project = state.projectName
-    return if (project.isBlank()) {
-        stringResource(Res.string.export_subtitle_unnamed, themeName, seed)
-    } else {
-        stringResource(Res.string.export_subtitle, themeName, project, seed)
-    }
-}
-
-/**
- * How the export sheet lays its body out, picked from the body's own width, since the sheet takes
- * the whole screen at every size.
+ * How the export sheet lays itself out, picked from the body's width, since the sheet takes the
+ * whole screen at every size. The header, the body and the footer all go by the one layout, so the
+ * name fields show in exactly one of the header and the folded options.
  */
 internal enum class BodyLayout {
     /**
@@ -71,7 +55,7 @@ internal enum class BodyLayout {
      */
     val optionsWidth: Dp?
         get() = when (this) {
-            Wide -> 344.dp
+            Wide -> 332.dp
             Medium -> 320.dp
             Narrow -> null
         }
@@ -86,6 +70,17 @@ internal enum class BodyLayout {
                 width >= 720.dp -> Medium
                 else -> Narrow
             }
+
+        /**
+         * The layout for a sheet over a window [windowWidth] wide, whose body is that less the
+         * sheet's padding either side.
+         */
+        fun ofSheet(windowWidth: Dp): BodyLayout = of(windowWidth - SheetPadding * 2)
+
+        /**
+         * The room the sheet keeps at either side of its body, the kit's panel padding.
+         */
+        private val SheetPadding: Dp = 24.dp
     }
 }
 
@@ -109,7 +104,7 @@ internal fun ExportFooter(
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            BuilderIcon(id = IconId.Check, contentDescription = null, emphasis = Emphasis.Secondary)
+            BuilderIcon(id = IconId.Verified, contentDescription = null, emphasis = Emphasis.Secondary)
             // The count follows the note, or goes under it where the two do not fit a line.
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(spacing.small),
@@ -121,9 +116,16 @@ internal fun ExportFooter(
                     } else {
                         stringResource(Res.string.export_checked, materialKolorVersion)
                     },
-                    emphasis = Emphasis.Secondary,
                 )
-                if (ready != null) BuilderText(text = filesAndLines(ready), emphasis = Emphasis.Subtle)
+                if (ready != null) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(spacing.small),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Dot()
+                        BuilderText(text = filesAndLines(ready), emphasis = Emphasis.Secondary)
+                    }
+                }
             }
         }
     }
