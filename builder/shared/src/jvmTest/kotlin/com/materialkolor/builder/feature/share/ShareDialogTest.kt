@@ -38,6 +38,7 @@ import com.materialkolor.builder.kit.layout.ProvideBuilderLayout
 import com.materialkolor.builder.kit.skin.BuilderTheme
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.floats.shouldBeGreaterThan
 import io.kotest.matchers.floats.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.floats.shouldBeLessThanOrEqual
@@ -244,6 +245,9 @@ class ShareDialogTest : SessionTestBase() {
                     assertInside()
                     val card = cardNode.fetchSemanticsNode().boundsInWindow
                     val button = copy.fetchSemanticsNode().boundsInWindow
+                    // The details keep the actions' width, with the scrollbar out past both.
+                    val field = onNode(hasSetTextAction()).fetchSemanticsNode().boundsInWindow
+                    field.right shouldBe (button.right plusOrMinus 1f)
                     if (split) {
                         button.left shouldBeGreaterThan card.right
                     } else {

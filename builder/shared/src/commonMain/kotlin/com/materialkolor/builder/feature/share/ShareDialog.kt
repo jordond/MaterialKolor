@@ -155,7 +155,6 @@ internal fun ShareDialog(
                     card = card,
                     name = name,
                     modifier = Modifier.weight(1f),
-                    scrollbarInGutter = true,
                 )
             }
         }
@@ -195,9 +194,8 @@ internal fun ShareDialog(
  * The actions always show in full, at the foot of the details or of the body. The details come
  * next and keep their height while it fits, then the card shrinks to fit what is left, and only
  * once the card is as small as it goes do the details scroll between it and the actions. Side by
- * side the well only has to fit the body's height.
- *
- * @param[scrollbarInGutter] Whether the details' scrollbar hangs in the room past the body's end.
+ * side the well only has to fit the body's height. The details' scrollbar hangs in the room past
+ * the body's end, so the details keep the same width as the actions under them.
  */
 @Composable
 private fun ShareBody(
@@ -207,7 +205,6 @@ private fun ShareBody(
     card: CardState,
     name: ShareName,
     modifier: Modifier = Modifier,
-    scrollbarInGutter: Boolean = false,
     actions: (@Composable () -> Unit)? = null,
 ) {
     val gap = LocalBuilderTokens.current.spacing.extraLarge
@@ -216,7 +213,7 @@ private fun ShareBody(
             modifier = detailsModifier,
             tabStop = false,
             fitContent = true,
-            scrollbarInGutter = scrollbarInGutter,
+            scrollbarInGutter = true,
         ) { ShareDetails(link = link, document = document, name = name) }
     }
     if (split) {
