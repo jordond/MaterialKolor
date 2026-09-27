@@ -41,7 +41,8 @@ class LibraryPickTest {
     fun libraryPick_enteringOnTheExpressiveStyle_movesOnlyTheLibrary() {
         val document = plain.copy(library = Library.Unstyled, style = Style.Expressive)
 
-        pick(LibraryChoice.M3Expressive, document) shouldBe document.copy(library = Library.Material3, expressive = true)
+        pick(LibraryChoice.M3Expressive, document) shouldBe
+            document.copy(library = Library.Material3, expressive = true)
     }
 
     @Test
