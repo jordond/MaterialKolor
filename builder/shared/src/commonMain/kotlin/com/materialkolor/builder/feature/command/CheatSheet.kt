@@ -29,7 +29,6 @@ import com.materialkolor.builder.generated.resources.command_key_device_width
 import com.materialkolor.builder.generated.resources.command_key_esc
 import com.materialkolor.builder.generated.resources.command_key_escape
 import com.materialkolor.builder.generated.resources.command_key_export
-import com.materialkolor.builder.generated.resources.command_key_expressive
 import com.materialkolor.builder.generated.resources.command_key_fullscreen
 import com.materialkolor.builder.generated.resources.command_key_grayscale
 import com.materialkolor.builder.generated.resources.command_key_history
@@ -39,6 +38,7 @@ import com.materialkolor.builder.generated.resources.command_key_library_1
 import com.materialkolor.builder.generated.resources.command_key_library_2
 import com.materialkolor.builder.generated.resources.command_key_library_3
 import com.materialkolor.builder.generated.resources.command_key_library_4
+import com.materialkolor.builder.generated.resources.command_key_library_5
 import com.materialkolor.builder.generated.resources.command_key_new_project
 import com.materialkolor.builder.generated.resources.command_key_next_tab
 import com.materialkolor.builder.generated.resources.command_key_palette
@@ -188,7 +188,7 @@ internal fun shortcutLabel(shortcut: Shortcut): StringResource =
         Shortcut.Library2 -> Res.string.command_key_library_2
         Shortcut.Library3 -> Res.string.command_key_library_3
         Shortcut.Library4 -> Res.string.command_key_library_4
-        Shortcut.Expressive -> Res.string.command_key_expressive
+        Shortcut.Library5 -> Res.string.command_key_library_5
         Shortcut.PreviewMode -> Res.string.command_key_preview_mode
         Shortcut.Appearance -> Res.string.command_key_appearance
         Shortcut.PreviousTab -> Res.string.command_key_previous_tab

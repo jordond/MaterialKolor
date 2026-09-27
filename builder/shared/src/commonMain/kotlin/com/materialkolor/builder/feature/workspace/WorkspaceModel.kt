@@ -35,7 +35,8 @@ import com.materialkolor.builder.feature.canvas.RampHighlight
 import com.materialkolor.builder.feature.canvas.RampTarget
 import com.materialkolor.builder.feature.canvas.VisionSimulation
 import com.materialkolor.builder.feature.picker.PickerTarget
-import com.materialkolor.builder.feature.topbar.raisesExpressiveSuggestion
+import com.materialkolor.builder.feature.topbar.LibraryChoice
+import com.materialkolor.builder.feature.topbar.libraryPick
 import com.materialkolor.builder.kit.layout.PosterMode
 import dev.stateholder.extensions.viewmodel.StateViewModel
 import dev.zacsweers.metro.ContributesIntoMap
@@ -85,25 +86,25 @@ internal class WorkspaceModel(
 
     /**
      * Make [change] to the document.
-     *
-     * A switch onto Expressive that leaves the style or the spec where Expressive themes rarely sit
-     * raises the Expressive suggestion in the same update as the document. Behind a reveal that is
-     * when the change lands, never the press before it, whatever sent the switch. Any other edit that
-     * moves the document puts it away.
      */
     fun edit(
         change: DocumentChange,
         phase: EditPhase,
     ) {
-        val before = session.document.value
         session.edit(change, phase)
-        val after = session.document.value
-        val suggesting = if (after == before) {
-            state.value.expressiveSuggestion
-        } else {
-            raisesExpressiveSuggestion(change, before, after)
-        }
-        syncSession(suggesting)
+        syncSession()
+    }
+
+    /**
+     * Move the document to [choice] as one discrete edit, with the style following M3 Expressive
+     * the way [libraryPick] says. It reads the steps an undo would walk back, so after an undo the
+     * pick sees the history as it now stands. Picking the choice the document is on does nothing.
+     */
+    fun pickLibrary(choice: LibraryChoice) {
+        val document = session.document.value
+        if (LibraryChoice.of(document) == choice) return
+        val timeline = session.timeline()
+        edit(libraryPick(choice, document, timeline.steps.take(timeline.cursor)), EditPhase.Discrete)
     }
 
     /**
@@ -111,7 +112,7 @@ internal class WorkspaceModel(
      */
     fun undo() {
         session.undo()
-        syncSession(expressiveSuggestion = false)
+        syncSession()
     }
 
     /**
@@ -119,22 +120,15 @@ internal class WorkspaceModel(
      */
     fun redo() {
         session.redo()
-        syncSession(expressiveSuggestion = false)
+        syncSession()
     }
 
     /**
-     * Move straight to the step [cursor] of the history, and put the Expressive suggestion away as Undo does.
+     * Move straight to the step [cursor] of the history.
      */
     fun jumpTo(cursor: Int) {
         session.jumpTo(cursor)
-        syncSession(expressiveSuggestion = false)
-    }
-
-    /**
-     * Put the Expressive suggestion away, after Apply or Keep mine.
-     */
-    fun dismissExpressiveSuggestion() {
-        updateState { state -> state.copy(expressiveSuggestion = false) }
+        syncSession()
     }
 
     /**
@@ -310,9 +304,9 @@ internal class WorkspaceModel(
     /**
      * Read the session back into the state at once, so nothing waits on a collector.
      */
-    private fun syncSession(expressiveSuggestion: Boolean) {
+    private fun syncSession() {
         val open = session.state.value
-        updateState { state -> state.following(open).copy(expressiveSuggestion = expressiveSuggestion) }
+        updateState { state -> state.following(open) }
     }
 
     /**
@@ -365,8 +359,6 @@ internal class WorkspaceModel(
      * @property[inspect] Whether the inspect overlay is on.
      * @property[fullscreen] Whether the poster and the top bar are hidden.
      * @property[projectName] The open project's name, empty until the session has opened one.
-     * @property[expressiveSuggestion] Whether the top bar offers the Expressive style on the 2025
-     * spec after a switch to Expressive.
      * @property[rampHighlight] What the Palettes tab picks out after Show on ramp, with the project
      * it was picked in, or null. A tab switch clears it and nothing saves it.
      * @property[sessionDismissedHints] The hints closed in this tab, kept beside the stored ones so
@@ -393,7 +385,6 @@ internal class WorkspaceModel(
         val inspect: Boolean = false,
         val fullscreen: Boolean = false,
         val projectName: String = "",
-        val expressiveSuggestion: Boolean = false,
         val rampHighlight: RampHighlight? = null,
         val sessionDismissedHints: Set<String> = emptySet(),
         val visionMenuOpen: Boolean = false,

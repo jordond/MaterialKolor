@@ -143,7 +143,7 @@ internal enum class Shortcut(
     Library2(ShortcutGroup.Theme, listOf(Chord(physical(Key.Two, "2")))),
     Library3(ShortcutGroup.Theme, listOf(Chord(physical(Key.Three, "3")))),
     Library4(ShortcutGroup.Theme, listOf(Chord(physical(Key.Four, "4")))),
-    Expressive(ShortcutGroup.Theme, listOf(Chord(physical(Key.E, "E"), shift = true))),
+    Library5(ShortcutGroup.Theme, listOf(Chord(physical(Key.Five, "5")))),
     PreviewMode(ShortcutGroup.Preview, listOf(Chord(physical(Key.D, "D")))),
     Appearance(ShortcutGroup.Preview, listOf(Chord(physical(Key.D, "D"), shift = true))),
     PreviousTab(ShortcutGroup.Preview, listOf(Chord(ChordKey.Typed('[', Key.LeftBracket)))),

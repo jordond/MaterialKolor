@@ -26,30 +26,23 @@ import org.jetbrains.compose.resources.stringResource
 internal const val LIBRARY_CHIP_ROW_TAG: String = "top-bar-library-chips"
 
 /**
- * The library switcher on a phone, a row of chips under the top bar, one per library, with the
- * Expressive chip after them while Material 3 is picked.
+ * The library switcher on a phone, a row of chips under the top bar, one per choice.
  *
  * The row scrolls sideways when the names run past the edge, and the chip with focus scrolls into
  * view. The arrow keys only move focus and Space or Enter picks, as on the segmented row, so walking
  * past a library does not re-theme the previews at every step. It tells [LocalSwitcherForm] the libraries
  * show as their own controls, the way the registry finds them.
  *
- * @param[selected] The library the document is on.
- * @param[expressive] Whether the Expressive chip is on.
+ * @param[selected] The choice the document is on.
  * @param[onSwitch] Gets the new choice and where the reveal grows from.
- * @param[onExpressiveChange] Gets the Expressive chip's new state and where the reveal grows from.
  * @param[switcherModifier] Applied to the chips' group, where focus and the pulse go.
- * @param[expressiveModifier] Applied to the Expressive chip.
  */
 @Composable
 internal fun LibraryChipRow(
     selected: LibraryChoice,
-    expressive: Boolean,
     onSwitch: (choice: LibraryChoice, origin: Offset) -> Unit,
-    onExpressiveChange: (on: Boolean, origin: Offset) -> Unit,
     modifier: Modifier = Modifier,
     switcherModifier: Modifier = Modifier,
-    expressiveModifier: Modifier = Modifier,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
     val names = LibraryChoice.entries.associateWith { choice -> libraryName(choice) }
@@ -77,13 +70,6 @@ internal fun LibraryChipRow(
                 selectOnFocus = false,
                 optionLabel = { choice -> names.getValue(choice) },
             )
-            if (selected == LibraryChoice.M3) {
-                ExpressiveChip(
-                    checked = expressive,
-                    onCheckedChange = onExpressiveChange,
-                    modifier = expressiveModifier,
-                )
-            }
         }
     }
 }

@@ -14,7 +14,6 @@ import com.materialkolor.builder.feature.poster.styleName
 import com.materialkolor.builder.feature.poster.styleTooltip
 import com.materialkolor.builder.feature.topbar.LibraryChoice
 import com.materialkolor.builder.feature.topbar.TopBarControl
-import com.materialkolor.builder.feature.topbar.expressiveChange
 import com.materialkolor.builder.feature.topbar.redoText
 import com.materialkolor.builder.feature.topbar.undoText
 import com.materialkolor.builder.feature.workspace.Panel
@@ -50,13 +49,13 @@ import com.materialkolor.builder.generated.resources.style_chip
 import com.materialkolor.builder.generated.resources.style_keep_spoken
 import com.materialkolor.builder.generated.resources.topbar_about
 import com.materialkolor.builder.generated.resources.topbar_commands
-import com.materialkolor.builder.generated.resources.topbar_expressive
 import com.materialkolor.builder.generated.resources.topbar_github
 import com.materialkolor.builder.generated.resources.topbar_help
 import com.materialkolor.builder.generated.resources.topbar_library
 import com.materialkolor.builder.generated.resources.topbar_library_custom
 import com.materialkolor.builder.generated.resources.topbar_library_fluent
 import com.materialkolor.builder.generated.resources.topbar_library_m3
+import com.materialkolor.builder.generated.resources.topbar_library_m3_expressive
 import com.materialkolor.builder.generated.resources.topbar_library_unstyled
 import com.materialkolor.builder.generated.resources.topbar_more
 import com.materialkolor.builder.generated.resources.topbar_shortcuts
@@ -275,23 +274,8 @@ internal fun libraryAndStyleCommands(
         ) {
             // The new previews reveal from the switcher, as a press on it would.
             if (choice != current) {
-                dispatcher.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin = list.switcherOrigin()))
+                dispatcher.dispatch(WorkspaceAction.PickLibrary(choice, origin = list.switcherOrigin()))
             }
-        }
-    }
-    // The Expressive chip only shows on Material 3, and so does its command.
-    if (current == LibraryChoice.M3) {
-        val expressive = stringResource(Res.string.topbar_expressive)
-        val on = state.document.expressive
-        list.add(
-            id = "library.expressive",
-            category = CommandCategory.Library,
-            label = expressive,
-            site = ControlSite.Direct(Region.TopBar, expressive),
-            shortcut = Shortcut.Expressive,
-            selected = on,
-        ) {
-            dispatcher.dispatch(WorkspaceAction.EditWithReveal(expressiveChange(!on), origin = list.switcherOrigin()))
         }
     }
     val styleState = state.capabilities[Control.Style]
@@ -319,11 +303,13 @@ private val LIBRARY_KEYS = listOf(
     Shortcut.Library2,
     Shortcut.Library3,
     Shortcut.Library4,
+    Shortcut.Library5,
 )
 
 private fun libraryName(choice: LibraryChoice): StringResource =
     when (choice) {
         LibraryChoice.M3 -> Res.string.topbar_library_m3
+        LibraryChoice.M3Expressive -> Res.string.topbar_library_m3_expressive
         LibraryChoice.Unstyled -> Res.string.topbar_library_unstyled
         LibraryChoice.Fluent -> Res.string.topbar_library_fluent
         LibraryChoice.Custom -> Res.string.topbar_library_custom

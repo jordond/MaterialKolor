@@ -21,7 +21,6 @@ import com.materialkolor.builder.domain.persist.FrozenVariants
 import com.materialkolor.builder.feature.topbar.ExpressiveSwitch
 import com.materialkolor.builder.feature.topbar.LibraryChoice
 import com.materialkolor.builder.feature.topbar.RevealOrigin
-import com.materialkolor.builder.feature.topbar.expressiveChange
 import com.materialkolor.builder.feature.topbar.libraryName
 import com.materialkolor.builder.feature.topbar.trackRevealOrigin
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
@@ -149,13 +148,15 @@ private fun LibraryOptions(
     state: ExportModel.State,
     workspace: Dispatcher<WorkspaceAction>,
 ) {
-    val selected = LibraryChoice.of(state.document)
+    // b-545 M3 Expressive shares the Material 3 card, its switch under the card picks between the two.
+    val current = LibraryChoice.of(state.document)
+    val selected = if (current == LibraryChoice.M3Expressive) LibraryChoice.M3 else current
     val origin = remember { RevealOrigin() }
     val pick = { choice: LibraryChoice ->
-        if (choice != selected) workspace.dispatch(WorkspaceAction.EditWithReveal(choice.change, origin.take()))
+        if (choice != selected) workspace.dispatch(WorkspaceAction.PickLibrary(choice, origin.take()))
     }
     BuilderChoiceGroup(
-        options = LibraryChoice.entries,
+        options = LibraryCards,
         selected = selected,
         onSelect = pick,
         label = stringResource(Res.string.export_section_library),
@@ -176,9 +177,10 @@ private fun LibraryOptions(
         LibraryChoice.M3 -> {
             TintedRow {
                 ExpressiveSwitch(
-                    checked = state.document.expressive,
+                    checked = current == LibraryChoice.M3Expressive,
                     onCheckedChange = { on, from ->
-                        workspace.dispatch(WorkspaceAction.EditWithReveal(expressiveChange(on), from))
+                        val choice = if (on) LibraryChoice.M3Expressive else LibraryChoice.M3
+                        workspace.dispatch(WorkspaceAction.PickLibrary(choice, from))
                     },
                     modifier = Modifier.fillMaxWidth(),
                     caption = stringResource(Res.string.export_expressive_caption),
@@ -198,6 +200,11 @@ private fun LibraryOptions(
         }
     }
 }
+
+/**
+ * The library cards, one per library, with M3 Expressive under the Material 3 card's switch.
+ */
+private val LibraryCards: List<LibraryChoice> = LibraryChoice.entries - LibraryChoice.M3Expressive
 
 /**
  * A row set on the panel's canvas tint, for what goes with the library picked.
@@ -230,7 +237,7 @@ private fun libraryCardName(choice: LibraryChoice): String =
  */
 private fun libraryCaption(choice: LibraryChoice): StringResource =
     when (choice) {
-        LibraryChoice.M3 -> Res.string.export_library_m3_caption
+        LibraryChoice.M3, LibraryChoice.M3Expressive -> Res.string.export_library_m3_caption
         LibraryChoice.Unstyled -> Res.string.export_library_unstyled_caption
         LibraryChoice.Fluent -> Res.string.export_library_fluent_caption
         LibraryChoice.Custom -> Res.string.export_library_custom_caption

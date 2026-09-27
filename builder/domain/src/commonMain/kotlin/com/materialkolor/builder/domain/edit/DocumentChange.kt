@@ -25,7 +25,7 @@ import com.materialkolor.builder.domain.model.ThemeDocument
  * without anyone knowing which control it came from.
  *
  * A change only ever touches the fields it names. Picking a style leaves the spec where it was,
- * picking a spec leaves the style alone, and switching Expressive on or off moves neither.
+ * picking a spec leaves the style alone, and a library pick moves them only when it names them.
  */
 public sealed interface DocumentChange {
     /**
@@ -372,14 +372,19 @@ public sealed interface DocumentChange {
 
     /**
      * Picks the module the export is written against, and whether it carries the expressive
-     * shapes and type. Neither moves the style or the spec.
+     * shapes and type. It moves the style and the spec only when it names them, so a move onto or
+     * off M3 Expressive can carry its style in the same undo step.
      *
      * @property[library] The module to export for.
      * @property[expressive] Whether the export carries the expressive shapes and type.
+     * @property[style] The style the pick lands on, or null to keep the document's.
+     * @property[spec] The spec the pick lands on, or null to keep the document's.
      */
     public data class SetLibrary(
         public val library: Library,
         public val expressive: Boolean,
+        public val style: Style? = null,
+        public val spec: SpecVersion? = null,
     ) : DocumentChange {
         override val coalesceKey: String
             get() = "library"
@@ -388,7 +393,12 @@ public sealed interface DocumentChange {
             get() = ChangeLabel(ChangeKind.Library, detail = library.name)
 
         override fun apply(document: ThemeDocument): ThemeDocument =
-            document.copy(library = library, expressive = expressive)
+            document.copy(
+                library = library,
+                expressive = expressive,
+                style = style ?: document.style,
+                spec = spec ?: document.spec,
+            )
     }
 
     /**
