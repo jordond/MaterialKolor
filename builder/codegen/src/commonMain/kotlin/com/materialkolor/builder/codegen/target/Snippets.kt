@@ -145,14 +145,14 @@ internal object Snippets {
             Dependency(
                 alias = "compose-material3",
                 module = "org.jetbrains.compose.material3:material3",
-                versionKey = "composeMaterial3",
+                versionKey = "compose-material3",
                 version = input.versions.composeMaterial3,
             )
         } else {
             Dependency(
                 alias = "androidx-compose-material3",
                 module = "androidx.compose.material3:material3",
-                versionKey = "androidxMaterial3",
+                versionKey = "compose-material3",
                 version = input.versions.androidxMaterial3,
             )
         }

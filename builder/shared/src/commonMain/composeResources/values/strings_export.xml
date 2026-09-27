@@ -52,7 +52,6 @@
     <string name="export_tree">Files in the zip</string>
 
     <!-- The note under the package and theme name fields. -->
-    <string name="export_names_note">The theme name travels with the share link. The package stays in this browser.</string>
     <string name="export_package">Package name</string>
     <string name="export_package_invalid">Use lowercase words separated by dots, like com.example.theme</string>
     <string name="export_theme_name">Theme name</string>

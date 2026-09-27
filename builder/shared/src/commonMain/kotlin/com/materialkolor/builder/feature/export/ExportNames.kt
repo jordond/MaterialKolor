@@ -30,16 +30,13 @@ import com.materialkolor.builder.domain.validate.validatePackageName
 import com.materialkolor.builder.domain.validate.validateThemeName
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.generated.resources.Res
-import com.materialkolor.builder.generated.resources.export_names_note
 import com.materialkolor.builder.generated.resources.export_package
 import com.materialkolor.builder.generated.resources.export_package_invalid
 import com.materialkolor.builder.generated.resources.export_theme_name
 import com.materialkolor.builder.generated.resources.export_theme_name_invalid
 import com.materialkolor.builder.generated.resources.export_theme_name_taken
 import com.materialkolor.builder.kit.control.BuilderInlineField
-import com.materialkolor.builder.kit.control.BuilderText
 import com.materialkolor.builder.kit.control.BuilderTextField
-import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
 import dev.stateholder.dispatcher.Dispatcher
 import org.jetbrains.compose.resources.stringResource
@@ -87,8 +84,7 @@ internal sealed interface FieldLook {
 }
 
 /**
- * The package and the theme name side by side, with one note under both on where each is kept, for
- * the Options a phone folds them into. Wider sheets set them inline in the header instead.
+ * The package and the theme name side by side, for the Options a phone folds them into. Wider sheets set them inline in the header instead.
  *
  * Both go out as they are typed, so the export is always built from what the fields show. A draft
  * that is not valid stays in its field, says what is wrong under it and lands in [drafts], which
@@ -105,14 +101,11 @@ internal fun ExportNames(
     drafts: DraftProblems,
     modifier: Modifier = Modifier,
 ) {
-    val spacing = LocalBuilderTokens.current.spacing
-    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.small)) {
-        NamePair(
-            first = { fieldModifier -> PackageField(state, dispatcher, drafts, FieldLook.Boxed, fieldModifier) },
-            second = { fieldModifier -> ThemeNameField(state, workspace, drafts, FieldLook.Boxed, fieldModifier) },
-        )
-        BuilderText(text = stringResource(Res.string.export_names_note), emphasis = Emphasis.Secondary)
-    }
+    NamePair(
+        first = { fieldModifier -> PackageField(state, dispatcher, drafts, FieldLook.Boxed, fieldModifier) },
+        second = { fieldModifier -> ThemeNameField(state, workspace, drafts, FieldLook.Boxed, fieldModifier) },
+        modifier = modifier,
+    )
 }
 
 /**
@@ -123,9 +116,10 @@ internal fun ExportNames(
 private fun NamePair(
     first: @Composable (Modifier) -> Unit,
     second: @Composable (Modifier) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val spacing = LocalBuilderTokens.current.spacing
-    BoxWithConstraints(Modifier.fillMaxWidth()) {
+    BoxWithConstraints(modifier.fillMaxWidth()) {
         if (maxWidth >= NAME_PAIR_MIN_WIDTH) {
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.medium)) {
                 first(Modifier.weight(1f))

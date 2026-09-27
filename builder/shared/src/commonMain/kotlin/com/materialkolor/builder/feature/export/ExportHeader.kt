@@ -34,7 +34,6 @@ import com.materialkolor.builder.generated.resources.export_from
 import com.materialkolor.builder.generated.resources.export_from_unnamed
 import com.materialkolor.builder.generated.resources.export_heading
 import com.materialkolor.builder.generated.resources.export_heading_named
-import com.materialkolor.builder.generated.resources.export_names_note
 import com.materialkolor.builder.generated.resources.export_package_prefix
 import com.materialkolor.builder.generated.resources.export_style_spec
 import com.materialkolor.builder.generated.resources.finetune_summary_spec
@@ -61,8 +60,7 @@ internal class SchemeGlyph(
  * The sheet's header, the scheme glyph beside what is exported and where it comes from.
  *
  * Wide enough, it reads as a sentence to edit. "Export" and the theme name field make the heading,
- * the package field sits on the line under it with the seed, the style and the spec, and a note
- * under both says where each name is kept. [compact], on a phone, the heading is "Export AppTheme"
+ * the package field sits on the line under it with the seed, the style and the spec. [compact], on a phone, the heading is "Export AppTheme"
  * with where it comes from under it, and the two fields fold into Options instead.
  *
  * The sheet's title names it to assistive tech, so "Export" stays out of the semantics.
@@ -102,8 +100,7 @@ internal fun RowScope.ExportHeader(
 }
 
 /**
- * "Export" and the theme name field, the package field and where the theme comes from, and the
- * note on where each name is kept.
+ * "Export" and the theme name field, then the package field and where the theme comes from.
  */
 @Composable
 private fun WideHeading(
@@ -163,11 +160,6 @@ private fun WideHeading(
             Dot()
             BuilderText(text = styleAndSpec(state), emphasis = Emphasis.Secondary)
         }
-        BuilderText(
-            text = stringResource(Res.string.export_names_note),
-            style = BuilderTextStyle.Label,
-            emphasis = Emphasis.Secondary,
-        )
     }
 }
 
