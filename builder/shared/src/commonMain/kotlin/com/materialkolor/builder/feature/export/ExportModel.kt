@@ -18,6 +18,7 @@ import com.materialkolor.builder.core.platform.Environment
 import com.materialkolor.builder.core.platform.FileSaver
 import com.materialkolor.builder.core.platform.OutgoingFile
 import com.materialkolor.builder.core.session.ProjectSession
+import com.materialkolor.builder.core.versions.bakedExportVersions
 import com.materialkolor.builder.di.AppScope
 import com.materialkolor.builder.domain.capability.EffectiveSpec
 import com.materialkolor.builder.domain.capability.forTarget
@@ -59,8 +60,8 @@ internal const val ZIP_MIME = "application/zip"
  * The files come from [outcome], worked out on the thread that asks, which has to be the UI thread
  * since the resolver belongs to it. They are kept until the document, the project name, the options
  * or the versions change, so a sheet that recomposes, or opens again on the same theme, generates
- * nothing. The versions are the build's until the live ones arrive, and each outcome reads the ones
- * current at the time.
+ * nothing. The versions are the build's until the live ones arrive, and the state carries them, so
+ * an open sheet names the live ones as soon as they land.
  *
  * Every header and the README link back with the link Share gives, [shareLink], which carries the
  * project name. The package name stays out of it.
@@ -79,21 +80,27 @@ internal class ExportModel(
     session: ProjectSession,
     private val preferences: PreferencesRepository,
     private val resolver: ThemeResolver,
-    private val versions: StateFlow<ExportVersions>,
+    private val bakedVersions: ExportVersions,
+    versions: StateFlow<ExportVersions>,
     private val generator: ExportGenerator,
     val clipboard: Clipboard,
     val files: FileSaver,
     private val environment: Environment,
 ) : StateViewModel<ExportModel.State>(
-        State(document = session.document.value, preferences = preferences.preferences.value),
+        State(
+            document = session.document.value,
+            preferences = preferences.preferences.value,
+            versions = versions.value,
+        ),
     ) {
     private val exports = ExportResolver(themes = resolver)
 
     /**
-     * The MaterialKolor version every export is built and checked against.
+     * The MaterialKolor version every export is checked against, the one this build was made with.
+     * An export may name a newer one once the live versions arrive.
      */
     val materialKolorVersion: String
-        get() = versions.value.materialKolor
+        get() = bakedVersions.materialKolor
     private var memo: Memo? = null
     private var glyphMemo: Pair<ThemeDocument, SchemeGlyph>? = null
 
@@ -101,6 +108,7 @@ internal class ExportModel(
         session.document.mergeState { state, document -> state.copy(document = document) }
         session.projectName.mergeState { state, name -> state.copy(projectName = name) }
         preferences.preferences.mergeState { state, prefs -> state.copy(preferences = prefs) }
+        versions.mergeState { state, live -> state.copy(versions = live) }
     }
 
     fun handle(action: ExportAction) {
@@ -145,11 +153,10 @@ internal class ExportModel(
      * generating again. Call it on the UI thread.
      */
     fun outcome(state: State = this.state.value): ExportOutcome {
-        val current = versions.value
-        val key = Memo.Key(state.document, state.projectName, state.prefs, current)
+        val key = Memo.Key(state.document, state.projectName, state.prefs, state.versions)
         memo?.takeIf { held -> held.key == key }?.let { held -> return held.outcome }
 
-        val outcome = exportOf(state.document, state.projectName, state.prefs, current)
+        val outcome = exportOf(state.document, state.projectName, state.prefs, state.versions)
         memo = Memo(key, outcome)
         return outcome
     }
@@ -233,6 +240,7 @@ internal class ExportModel(
      * session has opened one.
      * @property[preferences] What this browser remembers, the export options of every target among it.
      * @property[selectedPath] The file the code view shows, or null for the first one.
+     * @property[versions] The versions an export names, the build's until the live ones arrive.
      */
     @Immutable
     data class State(
@@ -240,6 +248,7 @@ internal class ExportModel(
         val preferences: Preferences,
         val projectName: String = "",
         val selectedPath: String? = null,
+        val versions: ExportVersions = bakedExportVersions(),
     ) {
         /**
          * What [document] exports to.

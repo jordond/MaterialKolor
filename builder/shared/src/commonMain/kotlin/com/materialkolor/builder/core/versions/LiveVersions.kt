@@ -1,5 +1,6 @@
 package com.materialkolor.builder.core.versions
 
+import com.materialkolor.builder.BuildKonfig
 import com.materialkolor.builder.codegen.ExportVersions
 import com.materialkolor.builder.core.platform.LibraryVersionSource
 import kotlinx.coroutines.CancellationException
@@ -87,3 +88,17 @@ private fun publishedVersions(json: String): Map<String, List<String>>? {
             versions?.let { list -> key to list }
         }.toMap()
 }
+
+/**
+ * The versions the build config names, baked in from the version catalog.
+ */
+internal fun bakedExportVersions(): ExportVersions =
+    ExportVersions(
+        builder = BuildKonfig.BUILDER_VERSION,
+        materialKolor = BuildKonfig.MATERIAL_KOLOR_VERSION,
+        fluent = BuildKonfig.FLUENT_VERSION,
+        composeUnstyled = BuildKonfig.COMPOSE_UNSTYLED_VERSION,
+        composeMaterial3 = BuildKonfig.COMPOSE_MATERIAL3_VERSION,
+        androidxMaterial3 = BuildKonfig.ANDROIDX_MATERIAL3_VERSION,
+        fluentModuleAvailable = BuildKonfig.FLUENT_MODULE,
+    )

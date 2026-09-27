@@ -155,7 +155,7 @@ class ExportModelTest : SessionTestBase() {
         }
 
     @Test
-    fun outcome_afterTheLiveVersionsArrive_namesThemAndGeneratesAgain() =
+    fun outcome_liveVersionsLandWhileOpen_stateCarriesThemAndTheExportNamesThem() =
         runTest {
             val (session, preferences) = session()
             booted(session)
@@ -164,12 +164,28 @@ class ExportModelTest : SessionTestBase() {
 
             val baked = model.outcome().shouldBeInstanceOf<ExportOutcome.Ready>()
             versions.value = VERSIONS.copy(materialKolor = "6.3.1")
+            runCurrent()
             val live = model.outcome().shouldBeInstanceOf<ExportOutcome.Ready>()
 
+            model.state.value.versions shouldBe versions.value
             generated shouldBe 2
             baked.allText shouldNotContain "6.3.1"
             live.allText shouldContain "6.3.1"
-            model.materialKolorVersion shouldBe "6.3.1"
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun materialKolorVersion_afterTheLiveVersionsArrive_staysTheBakedFloor() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val versions = MutableStateFlow(VERSIONS)
+            val model = exportModel(session, preferences, versions = versions)
+
+            versions.value = VERSIONS.copy(materialKolor = "6.3.1")
+            runCurrent()
+
+            model.materialKolorVersion shouldBe VERSIONS.materialKolor
             harness.clearAndJoin()
         }
 
@@ -331,6 +347,7 @@ class ExportModelTest : SessionTestBase() {
                 session = session,
                 preferences = preferences,
                 resolver = ThemeResolver(),
+                bakedVersions = VERSIONS,
                 versions = versions,
                 generator = counting,
                 clipboard = FakeClipboard(),
