@@ -63,6 +63,11 @@ public enum class SheetPresentation {
  * a field in it. It sits beside the close button, which it keeps at its top, over a hairline the way
  * the footer sits under one. [title] still names the sheet to assistive technology, so what the
  * header shows of it can stay out of the semantics. Null draws the title and [subtitle].
+ * @param[hero] A band across the top in place of the whole header, title, [subtitle], [header] and
+ * close button alike, such as the colour a picker is picking. It reaches the sheet's edges and is
+ * clipped to its shape, so it brings its own room inside. [title] still names the sheet to assistive
+ * technology, and Esc and the veil still close it, so a sheet with a hero wants a way out in its
+ * [footer] or in the hero itself. Null draws the header.
  * @param[content] The sheet's body, between the header and the footer.
  */
 @Composable
@@ -77,6 +82,7 @@ public fun BuilderSheet(
     subtitle: String? = null,
     footer: (@Composable () -> Unit)? = null,
     header: (@Composable RowScope.() -> Unit)? = null,
+    hero: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     HeadlessDrawer(
@@ -96,6 +102,7 @@ public fun BuilderSheet(
         subtitle = subtitle,
         footer = footer,
         header = header,
+        hero = hero,
         content = content,
     )
 }

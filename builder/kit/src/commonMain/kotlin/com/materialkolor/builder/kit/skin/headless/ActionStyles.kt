@@ -17,6 +17,7 @@ import com.materialkolor.builder.kit.control.Emphasis
 import com.materialkolor.builder.kit.control.takesTonalFill
 import com.materialkolor.builder.kit.token.BuilderTokens
 import com.materialkolor.builder.kit.token.LocalBuilderTokens
+import com.materialkolor.builder.kit.token.readableInk
 
 /**
  * The fill, ink and outline of one state of an action.
@@ -31,6 +32,21 @@ internal data class ActionColors(
     val content: Color,
     val border: Color,
 )
+
+/**
+ * A primary button filled with [fill], a colour of the user's own rather than the skin's. Its label
+ * and glyphs take [readableInk] and its outline the same ink at [FillHairlineAlpha], so a fill close
+ * to the panel behind it still shows where the button ends.
+ */
+internal fun filledActionColors(fill: Color): ActionColors {
+    val ink = readableInk(fill)
+    return ActionColors(container = fill, content = ink, border = ink.copy(alpha = FillHairlineAlpha))
+}
+
+/**
+ * How strongly a filled button's outline takes its ink.
+ */
+internal const val FillHairlineAlpha: Float = 0.28f
 
 /**
  * How a button and an icon button look, one set of colours per [Emphasis].
