@@ -79,10 +79,11 @@ private fun publishedVersions(json: String): Map<String, List<String>>? {
         return null
     }
     if (root !is JsonObject) return null
-    return root.mapNotNull { (key, value) ->
-        val versions = (value as? JsonArray)?.map { entry ->
-            (entry as? JsonPrimitive)?.takeIf { primitive -> primitive.isString }?.content ?: return@mapNotNull null
-        }
-        versions?.let { list -> key to list }
-    }.toMap()
+    return root
+        .mapNotNull { (key, value) ->
+            val versions = (value as? JsonArray)?.map { entry ->
+                (entry as? JsonPrimitive)?.takeIf { primitive -> primitive.isString }?.content ?: return@mapNotNull null
+            }
+            versions?.let { list -> key to list }
+        }.toMap()
 }
