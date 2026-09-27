@@ -13,6 +13,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.generated.resources.Res
@@ -47,6 +48,13 @@ internal enum class LibraryChoice(
     Fluent(Library.Fluent),
     Custom(Library.Custom),
     ;
+
+    /**
+     * The edit that moves a document to this choice and touches nothing else. A pick from the
+     * switcher goes through [libraryPick], which carries the style along onto and off M3 Expressive.
+     */
+    val change: DocumentChange
+        get() = DocumentChange.SetLibrary(library, expressive)
 
     companion object {
         /**

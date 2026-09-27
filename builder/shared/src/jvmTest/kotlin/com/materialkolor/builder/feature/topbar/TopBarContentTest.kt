@@ -8,10 +8,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotSelected
-import androidx.compose.ui.test.assertIsOff
-import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -49,6 +46,9 @@ import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
+private const val M3_EXPRESSIVE = "M3 Expressive"
+
+// The text the Expressive suggestion dialog showed before M3 Expressive took the style along itself.
 private const val EXPRESSIVE_MESSAGE = "Expressive themes usually use the Expressive style on the 2025 spec"
 private const val UNDO_EXPRESSIVE = "Undo library change to M3 Expressive"
 private const val REDO_EXPRESSIVE = "Redo library change to M3 Expressive"
@@ -94,112 +94,70 @@ class TopBarContentTest {
         }
 
     @Test
-    fun expressiveChip_turningItOn_landsThroughTheRevealAsOneUndoEntry() =
+    fun m3Expressive_picked_landsThroughTheRevealWithItsStyleAsOneUndoEntry() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val graph = showRoot()
+            val start = graph.session.document.value
             mainClock.autoAdvance = false
 
-            onNodeWithText("Expressive").assertIsOff().performClick()
+            onNodeWithText(M3_EXPRESSIVE).assertIsNotSelected().performClick()
             mainClock.advanceTimeBy(0)
             // A plain edit would have landed inside the click. The reveal holds it until it has drawn the old frame.
-            graph.session.document.value.expressive shouldBe false
+            graph.session.document.value shouldBe start
             var frames = 0
             while (!graph.session.document.value.expressive && frames < REVEAL_FRAMES) {
                 mainClock.advanceTimeByFrame()
                 frames++
             }
             graph.session.document.value.expressive shouldBe true
+            graph.session.document.value.style shouldBe Style.Expressive
 
             mainClock.autoAdvance = true
             waitForIdle()
-            onNodeWithText("Expressive").assertIsOn()
+            onNodeWithText(M3_EXPRESSIVE).assertIsSelected()
             graph.session.history.value.undoLabel shouldBe ChangeLabel(ChangeKind.Library, detail = "Material3")
             onNodeWithContentDescription(UNDO_EXPRESSIVE).performClick()
             waitForIdle()
 
-            graph.session.document.value.expressive shouldBe false
+            graph.session.document.value shouldBe start
             graph.session.history.value.canUndo shouldBe false
             onNodeWithText("M3").assertIsSelected()
             onNodeWithContentDescription(REDO_EXPRESSIVE).assertExists()
         }
 
     @Test
-    fun expressiveSuggestion_afterAFlipOnThe2021Spec_changesNothingWithoutAClick() =
+    fun m3Expressive_onThe2021Spec_movesStyleAndSpecWithNoDialog() =
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val graph = showRoot()
             moveOntoThe2021Spec(graph)
 
-            onNodeWithText("Expressive").performClick()
-            waitForIdle()
-            onNodeWithText(EXPRESSIVE_MESSAGE).assertExists()
-            mainClock.advanceTimeBy(10_000)
-
-            onNodeWithText(EXPRESSIVE_MESSAGE).assertExists()
-            graph.session.document.value.style shouldBe Style.TonalSpot
-            graph.session.document.value.spec shouldBe SpecVersion.Spec2021
-            onNodeWithText("Keep mine").performClick()
+            onNodeWithText(M3_EXPRESSIVE).performClick()
             waitForIdle()
 
-            onNodeWithText(EXPRESSIVE_MESSAGE).assertDoesNotExist()
-            graph.session.document.value.style shouldBe Style.TonalSpot
-            graph.session.history.value.undoLabel shouldBe ChangeLabel(ChangeKind.Library, detail = "Material3")
-        }
-
-    @Test
-    fun expressiveSuggestion_afterAFlipFromPlainM3_showsOnlyOnceTheExpressiveSkinIsIn() =
-        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            val graph = showRoot()
-            runOnIdle {
-                val plain = graph.session.document.value.copy(
-                    library = Library.Material3,
-                    expressive = false,
-                    style = Style.Rainbow,
-                    spec = SpecVersion.Spec2025,
-                )
-                graph.session.edit(DocumentChange.Replace(plain), EditPhase.Discrete)
-            }
-            waitForIdle()
-            mainClock.autoAdvance = false
-
-            onNodeWithText("Expressive").assertIsOff().performClick()
-            mainClock.advanceTimeBy(0)
-            var frames = 0
-            while (!graph.session.document.value.expressive && frames < REVEAL_FRAMES) {
-                // Still plain M3, so the suggestion must not have opened in the skin being left.
-                onAllNodesWithText(EXPRESSIVE_MESSAGE).fetchSemanticsNodes().isEmpty() shouldBe true
-                mainClock.advanceTimeByFrame()
-                frames++
-            }
-            graph.session.document.value.library shouldBe Library.Material3
             graph.session.document.value.expressive shouldBe true
-            mainClock.autoAdvance = true
-            waitForIdle()
-
-            onNodeWithText(EXPRESSIVE_MESSAGE).assertExists()
-            graph.session.document.value.library shouldBe Library.Material3
-            graph.session.document.value.expressive shouldBe true
-            graph.session.document.value.style shouldBe Style.Rainbow
-        }
-
-    @Test
-    fun expressiveSuggestion_apply_movesStyleAndSpecAsOneUndoEntry() =
-        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
-            val graph = showRoot()
-            moveOntoThe2021Spec(graph)
-
-            onNodeWithText("Expressive").performClick()
-            waitForIdle()
-            onNodeWithText("Apply").performClick()
-            waitForIdle()
-
-            onNodeWithText(EXPRESSIVE_MESSAGE).assertDoesNotExist()
             graph.session.document.value.style shouldBe Style.Expressive
             graph.session.document.value.spec shouldBe SpecVersion.Spec2025
-            onNodeWithContentDescription("Undo theme change").performClick()
+            onNodeWithText(EXPRESSIVE_MESSAGE).assertDoesNotExist()
+            onNodeWithText("Keep mine").assertDoesNotExist()
+        }
+
+    @Test
+    fun m3_afterM3Expressive_putsBackTheStyleAndSpecAsOneUndoEntry() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            val graph = showRoot()
+            moveOntoThe2021Spec(graph)
+            val start = graph.session.document.value
+            onNodeWithText(M3_EXPRESSIVE).performClick()
             waitForIdle()
-            graph.session.document.value.style shouldBe Style.TonalSpot
-            graph.session.document.value.spec shouldBe SpecVersion.Spec2021
-            graph.session.document.value.expressive shouldBe true
+            val entered = graph.session.document.value
+
+            onNodeWithText("M3").performClick()
+            waitForIdle()
+
+            graph.session.document.value shouldBe start
+            onNodeWithContentDescription("Undo library change to M3").performClick()
+            waitForIdle()
+            graph.session.document.value shouldBe entered
         }
 
     @Test
@@ -267,7 +225,7 @@ class TopBarContentTest {
     }
 
     /**
-     * Moves the theme onto the 2021 spec, where turning Expressive on raises the suggestion.
+     * Moves the theme onto the 2021 spec, which a pick of M3 Expressive moves to 2025.
      */
     private fun ComposeUiTest.moveOntoThe2021Spec(graph: AppGraph) {
         runOnIdle {

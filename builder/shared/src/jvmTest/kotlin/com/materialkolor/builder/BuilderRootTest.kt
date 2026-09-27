@@ -29,6 +29,7 @@ import com.materialkolor.builder.domain.edit.DocumentChange
 import com.materialkolor.builder.domain.edit.EditPhase
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SpecVersion
+import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.fakes.FakePlatform
 import com.materialkolor.builder.feature.canvas.TestOwner
@@ -108,7 +109,7 @@ class BuilderRootTest {
             val graph = showRoot()
             val start = graph.session.document.value
 
-            onNodeWithText("M3").requestFocus()
+            onNodeWithText("M3 Expressive").requestFocus()
             onNode(isFocused()).performKeyInput { pressKey(Key.DirectionRight) }
             waitForIdle()
             graph.session.document.value shouldBe start
@@ -125,21 +126,20 @@ class BuilderRootTest {
         }
 
     @Test
-    fun expressiveSwitch_enterFlipsItAsOneUndoEntryAndGetsFocusBackFromTheSuggestion() =
+    fun m3Expressive_enterPicksItWithTheStyleAsOneUndoEntryAndKeepsFocus() =
         runDesktopComposeUiTest(width = 1600, height = HEIGHT) {
             val graph = showRoot()
-            // The suggestion only comes up on the 2021 spec, so the theme moves there first.
+            // On the 2021 spec the pick moves the spec to 2025 as well.
             runOnUiThread { workspace.edit(DocumentChange.SetSpec(SpecVersion.Spec2021), EditPhase.Discrete) }
             waitForIdle()
             val start = graph.session.document.value
-            val expressive = hasText("Expressive") and hasAnyAncestor(hasTestTag(TOP_BAR_TAG))
+            val expressive = hasText("M3 Expressive") and hasAnyAncestor(hasTestTag(TOP_BAR_TAG))
 
             onNode(expressive).requestFocus()
             onNode(isFocused()).performKeyInput { pressKey(Key.Enter) }
             waitForIdle()
-            graph.session.document.value.expressive shouldBe true
-            onNodeWithText("Keep mine").performClick()
-            waitForIdle()
+            graph.session.document.value shouldBe
+                start.copy(expressive = true, style = Style.Expressive, spec = SpecVersion.Spec2025)
             onNode(expressive).assertIsFocused()
 
             runOnUiThread { workspace.undo() }

@@ -14,11 +14,14 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -32,6 +35,7 @@ import com.materialkolor.builder.codegen.dsl.Language
 import com.materialkolor.builder.codegen.dsl.Token
 import com.materialkolor.builder.codegen.dsl.TokenKind
 import com.materialkolor.builder.core.platform.OutgoingFile
+import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.ExportPrefs
 import com.materialkolor.builder.domain.persist.ExportTarget
@@ -39,6 +43,8 @@ import com.materialkolor.builder.domain.persist.Preferences
 import com.materialkolor.builder.engine.resolve.ThemeResolver
 import com.materialkolor.builder.fakes.FakeClipboard
 import com.materialkolor.builder.fakes.FakeFileSaver
+import com.materialkolor.builder.feature.topbar.LibraryChoice
+import com.materialkolor.builder.feature.topbar.libraryPick
 import com.materialkolor.builder.feature.workspace.WorkspaceAction
 import com.materialkolor.builder.feature.workspace.capabilitiesOf
 import com.materialkolor.builder.kit.a11y.Announcer
@@ -68,6 +74,27 @@ class ExportSheetTest {
     private val clipboard = FakeClipboard()
     private val exported = mutableListOf<ExportAction>()
     private val announced = mutableListOf<String>()
+    private val picked = mutableListOf<LibraryChoice>()
+    private var shown: ThemeDocument = ThemeDocument.Default
+
+    @Test
+    fun expressiveSwitch_picksM3ExpressiveAndBackWithTheStyleAsTheSwitcherDoes() =
+        runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
+            showSheet(files = FakeFileSaver(), coarsePointer = false)
+            val start = shown
+            val switch = onNode(hasText("Expressive") and isToggleable())
+
+            switch.assertIsOff().performClick()
+            waitForIdle()
+            switch.assertIsOn()
+            shown.style shouldBe Style.Expressive
+            switch.performClick()
+            waitForIdle()
+
+            switch.assertIsOff()
+            picked shouldBe listOf(LibraryChoice.M3Expressive, LibraryChoice.M3)
+            shown shouldBe start
+        }
 
     @Test
     fun copyAll_whenTheClipboardRefuses_opensTheManualDialogAndNeverSaysCopied() =
@@ -413,6 +440,13 @@ class ExportSheetTest {
                                 if (action is WorkspaceAction.EditWithReveal) {
                                     state = state.copy(document = action.change.apply(state.document))
                                 }
+                                // With no history, leaving M3 Expressive falls back to Tonal spot.
+                                if (action is WorkspaceAction.PickLibrary) {
+                                    picked += action.choice
+                                    val change = libraryPick(action.choice, state.document, steps = emptyList())
+                                    state = state.copy(document = change.apply(state.document))
+                                }
+                                shown = state.document
                             },
                         )
                     }

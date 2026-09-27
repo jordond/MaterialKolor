@@ -18,6 +18,7 @@ import com.materialkolor.builder.domain.link.ShareCodec
 import com.materialkolor.builder.domain.model.DEFAULT_SEED
 import com.materialkolor.builder.domain.model.Library
 import com.materialkolor.builder.domain.model.SpecVersion
+import com.materialkolor.builder.domain.model.Style
 import com.materialkolor.builder.domain.model.ThemeDocument
 import com.materialkolor.builder.domain.persist.Appearance
 import com.materialkolor.builder.domain.persist.PreviewMode
@@ -27,6 +28,7 @@ import com.materialkolor.builder.fakes.FakeClipboard
 import com.materialkolor.builder.fakes.FakeRouter
 import com.materialkolor.builder.fakes.RouterCall
 import com.materialkolor.builder.feature.picker.PickerTarget
+import com.materialkolor.builder.feature.topbar.LibraryChoice
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -137,43 +139,85 @@ class WorkspaceModelTest : SessionTestBase() {
         }
 
     @Test
-    fun edit_switchOntoExpressive_raisesTheSuggestionWithTheDocumentAndUndoPutsItAway() =
+    fun pickLibrary_ontoM3Expressive_movesLibraryStyleAndSpecAsOneUndoStep() =
         runTest {
             val (session, preferences) = session()
             booted(session)
             val workspace = workspaceModel(session, preferences)
-            workspace.edit(DocumentChange.Replace(fluentOn2021(workspace)), EditPhase.Discrete)
-            workspace.state.value.expressiveSuggestion shouldBe false
+            val start = fluentOn2021(workspace)
+            workspace.edit(DocumentChange.Replace(start), EditPhase.Discrete)
 
-            workspace.edit(DocumentChange.SetLibrary(Library.Material3, expressive = true), EditPhase.Discrete)
-            val raised = workspace.state.value
-            raised.expressiveSuggestion shouldBe true
-            raised.document.library shouldBe Library.Material3
-            raised.document.expressive shouldBe true
+            workspace.pickLibrary(LibraryChoice.M3Expressive)
+            val entered = workspace.state.value
+            entered.document shouldBe
+                start.copy(
+                    library = Library.Material3,
+                    expressive = true,
+                    style = Style.Expressive,
+                    spec = SpecVersion.Spec2025,
+                )
+            entered.history.undoLabel shouldBe ChangeLabel(ChangeKind.Library, detail = "Material3")
             workspace.undo()
-            workspace.state.value.expressiveSuggestion shouldBe false
-            workspace.redo()
 
-            workspace.state.value.expressiveSuggestion shouldBe false
-            workspace.state.value.document.expressive shouldBe true
+            workspace.state.value.document shouldBe start
+            workspace.redo()
+            workspace.state.value.document shouldBe entered.document
             harness.clearAndJoin()
         }
 
     @Test
-    fun dismissExpressiveSuggestion_afterASwitch_putsItAwayAndChangesNothing() =
+    fun pickLibrary_leavingM3Expressive_restoresTheStyleAndSpecItEnteredFrom() =
         runTest {
             val (session, preferences) = session()
             booted(session)
             val workspace = workspaceModel(session, preferences)
-            workspace.edit(DocumentChange.SetSpec(SpecVersion.Spec2021), EditPhase.Discrete)
-            workspace.edit(DocumentChange.SetLibrary(Library.Material3, expressive = true), EditPhase.Discrete)
+            val start = fluentOn2021(workspace).copy(style = Style.Vibrant)
+            workspace.edit(DocumentChange.Replace(start), EditPhase.Discrete)
+            workspace.pickLibrary(LibraryChoice.M3Expressive)
+            workspace.edit(DocumentChange.SetAmoled(true), EditPhase.Discrete)
+
+            workspace.pickLibrary(LibraryChoice.Unstyled)
+
+            val left = workspace.state.value.document
+            left.library shouldBe Library.Unstyled
+            left.expressive shouldBe false
+            left.style shouldBe Style.Vibrant
+            left.spec shouldBe SpecVersion.Spec2021
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun pickLibrary_leavingAgainAfterUndoingALeave_restoresTheSameStyle() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val workspace = workspaceModel(session, preferences)
+            workspace.edit(DocumentChange.SetStyle(Style.Content), EditPhase.Discrete)
+            workspace.pickLibrary(LibraryChoice.M3Expressive)
+            workspace.pickLibrary(LibraryChoice.M3)
+            workspace.state.value.document.style shouldBe Style.Content
+            workspace.undo()
+            workspace.state.value.document.style shouldBe Style.Expressive
+
+            workspace.pickLibrary(LibraryChoice.Custom)
+
+            workspace.state.value.document.style shouldBe Style.Content
+            workspace.state.value.document.library shouldBe Library.Custom
+            harness.clearAndJoin()
+        }
+
+    @Test
+    fun pickLibrary_theChoiceTheDocumentIsOn_changesNothing() =
+        runTest {
+            val (session, preferences) = session()
+            booted(session)
+            val workspace = workspaceModel(session, preferences)
             val document = workspace.state.value.document
-            workspace.state.value.expressiveSuggestion shouldBe true
 
-            workspace.dismissExpressiveSuggestion()
+            workspace.pickLibrary(LibraryChoice.of(document))
 
-            workspace.state.value.expressiveSuggestion shouldBe false
             workspace.state.value.document shouldBe document
+            workspace.state.value.history.canUndo shouldBe false
             harness.clearAndJoin()
         }
 
@@ -268,21 +312,20 @@ class WorkspaceModelTest : SessionTestBase() {
         }
 
     @Test
-    fun jumpTo_movesTheCursorAndPutsTheSuggestionAway() =
+    fun jumpTo_movesTheCursor() =
         runTest {
             val (session, preferences) = session()
             booted(session)
             val workspace = workspaceModel(session, preferences)
             workspace.edit(DocumentChange.Replace(fluentOn2021(workspace)), EditPhase.Discrete)
-            workspace.edit(DocumentChange.SetLibrary(Library.Material3, expressive = true), EditPhase.Discrete)
-            workspace.state.value.expressiveSuggestion shouldBe true
+            workspace.pickLibrary(LibraryChoice.M3Expressive)
             workspace.openPanel(Panel.History)
 
             workspace.jumpTo(1)
 
             val state = workspace.state.value
             state.document.library shouldBe Library.Fluent
-            state.expressiveSuggestion shouldBe false
+            state.document.spec shouldBe SpecVersion.Spec2021
             state.history.canRedo shouldBe true
             state.panel shouldBe Panel.History
             val timeline = state.timeline.shouldNotBeNull()
@@ -496,8 +539,8 @@ class WorkspaceModelTest : SessionTestBase() {
     }
 
     /**
-     * The workspace's theme on Fluent and the 2021 spec, so a switch back onto Expressive raises the
-     * suggestion.
+     * The workspace's theme on Fluent and the 2021 spec, so a pick of M3 Expressive moves both the
+     * style and the spec.
      */
     private fun fluentOn2021(workspace: WorkspaceModel): ThemeDocument =
         workspace.state.value.document

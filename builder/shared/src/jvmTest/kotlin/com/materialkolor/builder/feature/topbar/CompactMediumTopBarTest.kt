@@ -66,6 +66,7 @@ private const val PICK_TIMEOUT_MS = 5_000L
 /** What the switcher calls each library, as `strings_topbar.xml` has them. */
 private val NAMES = mapOf(
     LibraryChoice.M3 to "M3",
+    LibraryChoice.M3Expressive to "M3 Expressive",
     LibraryChoice.Unstyled to "Unstyled",
     LibraryChoice.Fluent to "Fluent",
     LibraryChoice.Custom to "Custom",
@@ -231,15 +232,14 @@ class CompactMediumTopBarTest {
         }
 
     /**
-     * Boots the builder [width] wide and checks the top bar and the chips in each library's skin,
-     * and in Material 3's with the Expressive chip on.
+     * Boots the builder [width] wide and checks the top bar and the chips in each choice's skin, M3
+     * Expressive included.
      */
     private fun checkEverySkin(width: Int) =
         runDesktopComposeUiTest(width = width, height = HEIGHT) {
             val graph = showRoot(folds = false)
             val layout = LayoutInfo(width.dp, HEIGHT.dp)
-            val skins = LibraryChoice.entries.map { choice -> choice.name to choice.change } +
-                ("Expressive" to expressiveChange(on = true))
+            val skins = LibraryChoice.entries.map { choice -> choice.name to choice.change }
             val misfits = skins.flatMap { (name, change) ->
                 runOnIdle { graph.session.edit(change, EditPhase.Discrete) }
                 waitForIdle()

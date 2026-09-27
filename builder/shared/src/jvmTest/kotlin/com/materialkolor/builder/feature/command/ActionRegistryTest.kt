@@ -255,7 +255,7 @@ private val EXPECTED_IDS = listOf(
     "copySeed",
     "addImage",
     "library.M3",
-    "library.expressive",
+    "library.M3Expressive",
     "library.Unstyled",
     "library.Fluent",
     "library.Custom",

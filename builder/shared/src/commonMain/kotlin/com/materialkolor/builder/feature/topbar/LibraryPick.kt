@@ -47,7 +47,7 @@ internal fun libraryPick(
             )
         }
         else -> {
-            DocumentChange.SetLibrary(choice.library, choice.expressive)
+            choice.change
         }
     }
 }
