@@ -15,11 +15,14 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.materialkolor.builder.kit.layout.LayoutInfo
 import com.materialkolor.builder.kit.layout.LocalLayout
@@ -75,6 +78,34 @@ class BuilderPressableTest {
                     presses shouldBe 1
                 }
             }
+        }
+    }
+
+    @Test
+    fun pressable_selectedOrNot_foldOn_saysSelectedInItsNameOnlyWhenSelected() {
+        var selected by mutableStateOf(true)
+        runComposeUiTest {
+            setContent {
+                ControlsHarness(ControlSkins.first().second) {
+                    CompositionLocalProvider(LocalFoldsStateIntoName provides true) {
+                        BuilderPressable(
+                            onClick = {},
+                            label = PressableLabel,
+                            modifier = Modifier.testTag(PressableTag),
+                            selected = selected,
+                        ) { Box(Modifier.size(46.dp)) }
+                    }
+                }
+            }
+            onNodeWithTag(PressableTag)
+                .assert(hasContentDescriptionExactly("$PressableLabel, selected"))
+                .assertIsSelected()
+
+            selected = false
+            waitForIdle()
+            onNodeWithTag(PressableTag)
+                .assert(hasContentDescriptionExactly(PressableLabel))
+                .assert(!isSelected())
         }
     }
 
